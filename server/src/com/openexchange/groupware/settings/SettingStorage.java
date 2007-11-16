@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.settings;
 
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * This class defines the interface to the storage for user specific settings.
@@ -84,7 +84,7 @@ public abstract class SettingStorage {
      * @param session Session.
      * @return an instance implementing this storage interface.
      */
-    public static SettingStorage getInstance(final SessionObject session) {
+    public static SettingStorage getInstance(final Session session) {
         try {
             return new RdbSettingStorage(session);
         } catch (SettingException e) {

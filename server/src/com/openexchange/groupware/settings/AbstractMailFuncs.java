@@ -54,7 +54,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * This class contains the shared, same functions for all mail bit settings.
@@ -71,7 +71,7 @@ public abstract class AbstractMailFuncs implements SharedValue {
     /**
      * {@inheritDoc}
      */
-    public void getValue(final SessionObject session,
+    public void getValue(final Session session,
         final Setting setting) {
 		final UserConfiguration userConf = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
 				session.getUserId(), session.getContext());
@@ -98,7 +98,7 @@ public abstract class AbstractMailFuncs implements SharedValue {
     /**
 	 * {@inheritDoc}
 	 */
-	public void writeValue(final SessionObject session, final Setting setting) throws SettingException {
+	public void writeValue(final Session session, final Setting setting) throws SettingException {
 		final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
 				session.getContext());
 		setValue(settings, (String) setting.getSingleValue());

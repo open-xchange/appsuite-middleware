@@ -51,19 +51,21 @@
 
 package com.openexchange.webdav.xml;
 
+import java.util.ArrayList;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.webdav.xml.fields.ContactFields;
-import java.util.ArrayList;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * ContactParser
@@ -75,7 +77,7 @@ public class ContactParser extends CommonParser {
 	
 	private static final Log LOG = LogFactory.getLog(ContactParser.class);
 	
-	public ContactParser(SessionObject sessionObj) {
+	public ContactParser(Session sessionObj) {
 		this.sessionObj = sessionObj;
 	}
 	

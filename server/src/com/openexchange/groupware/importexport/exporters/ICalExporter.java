@@ -81,7 +81,7 @@ import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -174,7 +174,7 @@ public class ICalExporter implements Exporter {
 	
 	private static final ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(ICalExporter.class);
 	
-	public boolean canExport(final SessionObject sessObj, final Format format, final String folder, final Map<String, String[]> optionalParams) throws ImportExportException {
+	public boolean canExport(final Session sessObj, final Format format, final String folder, final Map<String, String[]> optionalParams) throws ImportExportException {
 		if(! format.equals(Format.ICAL)){
 			return false;
 		}
@@ -216,7 +216,7 @@ public class ICalExporter implements Exporter {
 		return false;
 	}
 	
-	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
+	public SizedInputStream exportData(final Session sessObj, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
 		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		try {
 			final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
@@ -268,7 +268,7 @@ public class ICalExporter implements Exporter {
 				Format.ICAL);
 	}
 	
-	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
+	public SizedInputStream exportData(final Session sessObj, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws ImportExportException {
 		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		try {
 			final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");

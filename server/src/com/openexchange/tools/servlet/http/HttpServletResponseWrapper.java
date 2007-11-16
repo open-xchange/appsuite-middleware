@@ -72,7 +72,7 @@ import javax.servlet.http.HttpSession;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.server.Version;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.ajp13.AJPv13Config;
 import com.openexchange.tools.ajp13.AJPv13RequestHandler;
 import com.openexchange.tools.servlet.ServletResponseWrapper;
@@ -244,7 +244,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		/*
 		 * Retrieve groupware session, if user is logged in
 		 */
-		final SessionObject groupwareSession = (SessionObject) request.getAttribute(SessionServlet.SESSION_KEY);
+		final Session groupwareSession = (Session) request.getAttribute(SessionServlet.SESSION_KEY);
 		/*
 		 * Check for HTTP session: First look for JSESSIONID cookie, if none
 		 * found check if HTTP session was created.

@@ -87,7 +87,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPool;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.tools.versit.Property;
@@ -218,7 +218,7 @@ public final class vcard extends PermissionServlet {
 		String user_agent = null;
 		String principal = null;
 		
-		final SessionObject sessionObj = getSession(req);
+		final Session sessionObj = getSession(req);
 		
 		final Context context = sessionObj.getContext();
 		
@@ -390,7 +390,7 @@ public final class vcard extends PermissionServlet {
 		String user_agent = null;
 		String principal = null;
 		
-		final SessionObject sessionObj = getSession(req);
+		final Session sessionObj = getSession(req);
 		
 		final Context context = sessionObj.getContext();
 		
@@ -725,7 +725,7 @@ public final class vcard extends PermissionServlet {
 	}
 	
 	@Override
-	protected boolean hasModulePermission(final SessionObject sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj) {
 		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
 		return (uc.hasVCard() && uc.hasContact());
 	}

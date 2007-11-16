@@ -51,21 +51,18 @@
 
 package com.openexchange.webdav;
 
-import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.webdav.xml.fields.DataFields;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLDecoder;
+import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
@@ -75,15 +72,18 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.webdav.OXServlet;
 import com.openexchange.webdav.xml.XmlServlet;
-import java.net.URLDecoder;
-import java.util.Date;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * attachments
@@ -129,7 +129,7 @@ public final class attachments extends OXServlet {
 		
 		final XMLOutputter xo = new XMLOutputter();
 		
-		SessionObject sessionObj = null;
+		Session sessionObj = null;
 		
 		try {
 			sessionObj = getSession(req);
@@ -257,7 +257,7 @@ public final class attachments extends OXServlet {
 		
 		OutputStream os = null;
 		
-		SessionObject sessionObj = null;
+		Session sessionObj = null;
 		
 		
 		try {
@@ -334,7 +334,7 @@ public final class attachments extends OXServlet {
 		log("DELETE");
 		
 
-		SessionObject sessionObj = null;
+		Session sessionObj = null;
 		
 		try {
 			sessionObj = getSession(req);

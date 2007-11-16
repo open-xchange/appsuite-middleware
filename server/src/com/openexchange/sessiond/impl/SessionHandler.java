@@ -70,6 +70,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.server.ServerTimer;
+import com.openexchange.sessiond.Session;
 
 /**
  * SessionHandler
@@ -150,7 +151,7 @@ public class SessionHandler extends TimerTask {
         randomList.removeLast();
     }
 
-    protected static SessionObject addSession(final String loginName, final String password, final String client_ip,
+    protected static Session addSession(final String loginName, final String password, final String client_ip,
             final String host) throws LoginException, InvalidCredentialsException, UserNotFoundException, UserNotActivatedException,
             PasswordExpiredException, MaxSessionLimitException, SessiondException, ContextException {
         final String sessionId = sessionIdGenerator.createSessionId(loginName, client_ip);
@@ -355,7 +356,7 @@ public class SessionHandler extends TimerTask {
         return null;
     }
 
-    protected static SessionObject getSessionByRandomToken(final String randomToken) {
+    protected static Session getSessionByRandomToken(final String randomToken) {
         Map<String, String> random = null;
 
         for (int a = 0; a < numberOfSessionContainers; a++) {
@@ -406,7 +407,7 @@ public class SessionHandler extends TimerTask {
         return null;
     }
 
-    protected static Iterator getSessions() {
+    protected static Iterator<String> getSessions() {
         return new SessionIterator();
     }
 
@@ -456,7 +457,8 @@ public class SessionHandler extends TimerTask {
         return true;
     }
 
-    public void run() {
+    @Override
+	public void run() {
         try {
             cleanUp();
         } catch (Exception e) {
@@ -464,26 +466,25 @@ public class SessionHandler extends TimerTask {
         }
     }
 
-    protected static class SessionIterator implements Iterator {
-        Map sessions;
+    protected static class SessionIterator implements Iterator<String> {
 
-        boolean hasnext;
+        private boolean hasnext;
 
-        Iterator it;
+        private Iterator<String> it;
 
-        int pos;
+        private int pos;
 
         public SessionIterator() {
-            it = ((Map) sessionList.get(pos)).keySet().iterator();
+            it = sessionList.get(pos).keySet().iterator();
             pos++;
         }
 
-        public Object next() {
+        public String next() {
             if (it != null) {
                 return it.next();
             }
             if (!hasnext && pos < numberOfSessionContainers) {
-                it = ((Map) sessionList.get(pos)).keySet().iterator();
+                it = sessionList.get(pos).keySet().iterator();
             }
 
             return null;

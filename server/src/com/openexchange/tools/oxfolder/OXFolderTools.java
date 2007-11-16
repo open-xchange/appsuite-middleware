@@ -69,7 +69,6 @@ import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
@@ -84,7 +83,7 @@ import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -1688,7 +1687,7 @@ public class OXFolderTools {
 	 * Determines if session's user is allowed to delete all objects located in
 	 * given folder
 	 */
-	public static boolean canDeleteAllObjectsInFolder(final FolderObject fo, final SessionObject session,
+	public static boolean canDeleteAllObjectsInFolder(final FolderObject fo, final Session session,
 			final Connection readCon) throws OXException {
 		final int userId = session.getUserId();
 		final Context ctx = session.getContext();

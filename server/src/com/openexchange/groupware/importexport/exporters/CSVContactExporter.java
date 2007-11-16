@@ -88,7 +88,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 /**
@@ -226,7 +226,7 @@ public class CSVContactExporter implements Exporter {
 	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVContactExporter.class);
 	private static final Log LOG = LogFactory.getLog(CSVContactExporter.class);
 	
-	public boolean canExport(final SessionObject sessObj, final Format format, final String folder, final Map <String, String[]> optionalParams)  throws ImportExportException {
+	public boolean canExport(final Session sessObj, final Format format, final String folder, final Map <String, String[]> optionalParams)  throws ImportExportException {
 		if( !format.equals(Format.CSV) ){
 			return false;
 		}
@@ -253,7 +253,7 @@ public class CSVContactExporter implements Exporter {
 	}
 
 	
-	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, 
+	public SizedInputStream exportData(final Session sessObj, final Format format, final String folder, 
 			final int[] fieldsToBeExported, final Map <String, String[]> optionalParams) throws ImportExportException {
 		if(! canExport(sessObj, format, folder, optionalParams)){
 			EXCEPTIONS.create(0, folder, format);
@@ -301,7 +301,7 @@ public class CSVContactExporter implements Exporter {
 	}
 
 	
-	public SizedInputStream exportData(final SessionObject sessObj, final Format format, final String folder, 
+	public SizedInputStream exportData(final Session sessObj, final Format format, final String folder, 
 			final int objectId,	final int[] fieldsToBeExported, final Map <String, String[]> optionalParams) throws ImportExportException {
 		if(! canExport(sessObj, format, folder, optionalParams)){
 			EXCEPTIONS.create(0, folder, format);

@@ -49,6 +49,8 @@
 
 package com.openexchange.sessiond.impl;
 
+import com.openexchange.sessiond.Session;
+
 public interface SessionHolder {
-	public SessionObject getSessionObject();
+	public Session getSessionObject();
 }

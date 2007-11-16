@@ -51,17 +51,19 @@
 
 package com.openexchange.webdav.xml;
 
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.webdav.xml.fields.FolderFields;
 import java.util.ArrayList;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+
+import com.openexchange.api.OXConflictException;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.OCLPermission;
+import com.openexchange.sessiond.Session;
+import com.openexchange.webdav.xml.fields.FolderFields;
 
 /**
  * FolderParser
@@ -73,7 +75,7 @@ public class FolderParser extends FolderChildParser {
 	
 	private static final Log LOG = LogFactory.getLog(FolderParser.class);
 	
-	public FolderParser(SessionObject sessionObj) {
+	public FolderParser(Session sessionObj) {
 		this.sessionObj = sessionObj;
 	}
 	

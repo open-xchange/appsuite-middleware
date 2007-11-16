@@ -51,13 +51,17 @@
 
 package com.openexchange.webdav.xml;
 
-import com.openexchange.api.OXObjectNotFoundException;
 import java.io.OutputStream;
 import java.util.Date;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
 
+import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.CalendarObject;
@@ -66,13 +70,10 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.webdav.xml.fields.CalendarFields;
 import com.openexchange.webdav.xml.fields.TaskFields;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * CalendarWriter
@@ -127,7 +128,7 @@ public class TaskWriter extends CalendarWriter {
 		
 	}
 	
-	public TaskWriter(final SessionObject sessionObj) {
+	public TaskWriter(final Session sessionObj) {
 		this.sessionObj = sessionObj;
 	}
 	

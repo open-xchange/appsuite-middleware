@@ -76,8 +76,8 @@ import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.OCLPermission;
+import com.openexchange.sessiond.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
-import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
@@ -466,7 +466,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			initDefaultAcl(folder);
 			initDefaultFields(folder);
 			
-			final SessionObject session = sessionHolder.getSessionObject();
+			final Session session = sessionHolder.getSessionObject();
 			final Context ctx = session.getContext();
 			
 			Connection writeCon = null;
@@ -497,7 +497,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			folder.setLastModified(new Date());
 			folder.setModifiedBy(sessionHolder.getSessionObject().getUserId()); // Java train of death
 			initParent(folder);
-			final SessionObject session = sessionHolder.getSessionObject();
+			final Session session = sessionHolder.getSessionObject();
 			final Context ctx = session.getContext();
 			
 			Connection writeCon = null;
@@ -607,7 +607,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			if(folder==null) {
 				loadFolder();
 			}
-			final SessionObject session = sessionHolder.getSessionObject();
+			final Session session = sessionHolder.getSessionObject();
 			final User user = UserStorage.getUser(session.getUserId(), session.getContext());
 			final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
 			final Context ctx = session.getContext();

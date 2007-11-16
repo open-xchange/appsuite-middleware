@@ -75,7 +75,7 @@ import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.webdav.xml.AppointmentParser;
 import com.openexchange.webdav.xml.AppointmentWriter;
 import com.openexchange.webdav.xml.DataParser;
@@ -94,7 +94,7 @@ public final class calendar extends XmlServlet {
 	protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser) throws Exception {
 		final OutputStream os = resp.getOutputStream();
 		
-		final SessionObject sessionObj = getSession(req);
+		final Session sessionObj = getSession(req);
 		
 		final XMLOutputter xo = new XMLOutputter();
 		
@@ -212,24 +212,24 @@ public final class calendar extends XmlServlet {
 	}
 	
 	@Override
-	protected void startWriter(final SessionObject sessionObj, final int objectId, final int folderId, final OutputStream os) throws Exception {
+	protected void startWriter(final Session sessionObj, final int objectId, final int folderId, final OutputStream os) throws Exception {
 		final AppointmentWriter appointmentwriter = new AppointmentWriter(sessionObj);
 		appointmentwriter.startWriter(objectId, folderId, os);
 	}
 	
 	@Override
-	protected void startWriter(final SessionObject sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final Date lastsync, final OutputStream os) throws Exception {
+	protected void startWriter(final Session sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final Date lastsync, final OutputStream os) throws Exception {
 		startWriter(sessionObj, folderId, bModified, bDelete, false, lastsync, os);
 	}
 	
 	@Override
-	protected void startWriter(final SessionObject sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
+	protected void startWriter(final Session sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
 		final AppointmentWriter appointmentwriter = new AppointmentWriter(sessionObj);
 		appointmentwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
 	}
 	
 	@Override
-	protected boolean hasModulePermission(final SessionObject sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj) {
 		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
 		return (uc.hasWebDAVXML() && uc.hasCalendar());
 	}

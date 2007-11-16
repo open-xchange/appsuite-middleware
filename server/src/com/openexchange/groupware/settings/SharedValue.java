@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.settings;
 
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.sessiond.Session;
 
 /**
  * Interface for settings that are shared between GUI and server.
@@ -61,7 +62,7 @@ public interface SharedValue {
      * @param setting the value should be set in this setting object.
      * @throws SettingException if an error occurs.
      */
-    void getValue(SessionObject session, Setting setting)
+    void getValue(Session session, Setting setting)
         throws SettingException;
 
     /**
@@ -69,7 +70,7 @@ public interface SharedValue {
      * @return <code>true</code> if this setting is available due to
      * {@link UserConfiguration}.
      */
-    boolean isAvailable(SessionObject session);
+    boolean isAvailable(Session session);
 
     /**
      * @return <code>true</code> if the setting can be written by the GUI.
@@ -83,6 +84,6 @@ public interface SharedValue {
      * @throws SettingException if the setting can't be written or an error
      * occurs while writing the value.
      */
-    void writeValue(SessionObject session, Setting setting)
+    void writeValue(Session session, Setting setting)
         throws SettingException;
 }

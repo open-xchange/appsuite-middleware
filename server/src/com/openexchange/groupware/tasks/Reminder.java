@@ -57,7 +57,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.groupware.Types;
@@ -66,7 +65,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderException;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
-import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.Collections;
 
 /**

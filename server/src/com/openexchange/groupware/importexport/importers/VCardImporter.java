@@ -84,7 +84,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
@@ -138,7 +138,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 	
 	private static ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(VCardImporter.class);
 	
-	public boolean canImport(final SessionObject sessObj, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
+	public boolean canImport(final Session sessObj, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
 		if (!format.equals(Format.VCARD)) {
 			return false;
 		}
@@ -190,7 +190,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 		return false;
 	}
 	
-	public List<ImportResult> importData(final SessionObject sessObj, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
+	public List<ImportResult> importData(final Session sessObj, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
 		
 		int contactFolderId = -1;
 		

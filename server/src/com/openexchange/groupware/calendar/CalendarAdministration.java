@@ -68,7 +68,7 @@ import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  *  CalendarAdministration
@@ -376,7 +376,7 @@ public class CalendarAdministration implements DeleteListener {
         u1.append(" = ?");
     }
     
-    private final void eventHandling(int object_id, Context context, SessionObject so, int type, Connection readcon) throws SQLException, DeleteFailedException {
+    private final void eventHandling(int object_id, Context context, Session so, int type, Connection readcon) throws SQLException, DeleteFailedException {
         CalendarOperation co = new CalendarOperation();
         CalendarSql csql = new CalendarSql(so);
         CalendarSqlImp cimp = csql.getCalendarSqlImplementation();

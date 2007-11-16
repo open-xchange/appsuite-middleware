@@ -52,37 +52,38 @@
 package com.openexchange.webdav;
 
 
-import com.openexchange.groupware.ldap.Group;
-import com.openexchange.groupware.ldap.GroupStorage;
-import com.openexchange.groupware.ldap.Resource;
-import com.openexchange.groupware.ldap.ResourceStorage;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.server.DBPool;
-import com.openexchange.webdav.xml.DataWriter;
-import com.openexchange.webdav.xml.XmlServlet;
-import com.openexchange.webdav.xml.fields.DataFields;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
+
+import com.openexchange.groupware.ldap.Group;
+import com.openexchange.groupware.ldap.GroupStorage;
+import com.openexchange.groupware.ldap.Resource;
+import com.openexchange.groupware.ldap.ResourceStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.server.DBPool;
 import com.openexchange.server.Version;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
+import com.openexchange.webdav.xml.DataWriter;
 import com.openexchange.webdav.xml.GroupUserWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Timestamp;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.webdav.xml.XmlServlet;
+import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * groupuser
@@ -118,7 +119,7 @@ public final class groupuser extends PermissionServlet {
 		
 		final XMLOutputter xo = new XMLOutputter();
 		
-		SessionObject sessionObj = null;
+		Session sessionObj = null;
 		
 		OutputStream os = null;
 		
@@ -212,7 +213,7 @@ public final class groupuser extends PermissionServlet {
 		}
 	}
 	
-	private void writeElementGroups(final SessionObject sessionObj, final String s_groups, final Date lastsync, final OutputStream os, final XMLOutputter xo) throws Exception {
+	private void writeElementGroups(final Session sessionObj, final String s_groups, final Date lastsync, final OutputStream os, final XMLOutputter xo) throws Exception {
 		os.write(("<ox:groups>").getBytes());
 		
 		final GroupStorage groupstorage = GroupStorage.getInstance(sessionObj.getContext());
@@ -301,7 +302,7 @@ public final class groupuser extends PermissionServlet {
 		DataWriter.addElement("memberuid", member, e_members);
 	}
 	
-	private void writeElementResources(final SessionObject sessionObj, final String s_resources, final Date lastsync, final OutputStream os, final XMLOutputter xo) throws Exception {
+	private void writeElementResources(final Session sessionObj, final String s_resources, final Date lastsync, final OutputStream os, final XMLOutputter xo) throws Exception {
 		os.write(("<ox:resources>").getBytes());
 		
 		final ResourceStorage resourcestorage = ResourceStorage.getInstance(sessionObj.getContext());
@@ -395,7 +396,7 @@ public final class groupuser extends PermissionServlet {
 	}
 	
 	@Override
-	protected boolean hasModulePermission(final SessionObject sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj) {
 		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
 				sessionObj.getContext()).hasWebDAVXML();
 	}

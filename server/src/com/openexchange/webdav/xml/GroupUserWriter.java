@@ -51,6 +51,14 @@
 
 package com.openexchange.webdav.xml;
 
+import java.io.OutputStream;
+import java.util.Date;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jdom.Element;
+import org.jdom.output.XMLOutputter;
+
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.container.CommonObject;
@@ -60,16 +68,10 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.webdav.xml.fields.ContactFields;
 import com.openexchange.webdav.xml.fields.DataFields;
-import java.io.OutputStream;
-import java.util.Date;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.Element;
-import org.jdom.output.XMLOutputter;
 
 /**
  * AppointmentWriter
@@ -194,7 +196,7 @@ public class GroupUserWriter extends ContactWriter {
 	
 	private static final Log LOG = LogFactory.getLog(GroupUserWriter.class);
 	
-	public GroupUserWriter(SessionObject sessionObj, Element parent) throws Exception {
+	public GroupUserWriter(Session sessionObj, Element parent) throws Exception {
 		super(sessionObj);
 		this.parent = parent;
 		

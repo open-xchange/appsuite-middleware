@@ -51,6 +51,21 @@
 
 package com.openexchange.webdav;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -59,22 +74,10 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.sessiond.impl.SessiondConnector;
 import com.openexchange.tools.iterator.SearchIterator;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -202,7 +205,7 @@ public class freebusy extends HttpServlet {
 			final Context context = new ContextImpl(contextId);
 			final UserStorage userStorage = UserStorage.getInstance(context);
 			final User user = userStorage.searchUser(mailPrefix + '@' + mailSuffix);
-			final SessionObject sessionObj = SessionObjectWrapper.createSessionObject(user.getId(), context, "freebusysessionobject");
+			final Session sessionObj = SessionObjectWrapper.createSessionObject(user.getId(), context, "freebusysessionobject");
 			
 			final AppointmentSQLInterface appointmentInterface = new CalendarSql(sessionObj);
 			it = appointmentInterface.getFreeBusyInformation(user.getId(), Participant.USER, start, end);

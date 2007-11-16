@@ -50,10 +50,10 @@
 package com.openexchange.groupware.settings.tree;
 
 import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.SharedValue;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * Contains initialization for the modules configuration tree setting webmail.
@@ -76,18 +76,18 @@ public abstract class AbstractModules extends AbstractNode {
             /**
              * {@inheritDoc}
              */
-            public void getValue(final SessionObject session,
+            public void getValue(final Session session,
                 final Setting setting) throws SettingException {
                 setting.setSingleValue(getModule(session));
             }
             /**
              * {@inheritDoc}
              */
-            public boolean isAvailable(final SessionObject session) {
+            public boolean isAvailable(final Session session) {
                 return true;
             }
         };
     }
 
-    protected abstract boolean getModule(final SessionObject session);
+    protected abstract boolean getModule(final Session session);
 }

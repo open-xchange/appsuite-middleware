@@ -92,10 +92,9 @@ import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPool;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-//import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -201,7 +200,7 @@ public final class ical extends PermissionServlet {
 		int calendarfolder_id = 0;
 		int taskfolder_id = 0;
 		
-		final SessionObject sessionObj = getSession(req);
+		final Session sessionObj = getSession(req);
 		
 		final Context context = sessionObj.getContext();
 		
@@ -456,7 +455,7 @@ public final class ical extends PermissionServlet {
 		
 		String content_type = null;
 		
-		final SessionObject sessionObj = getSession(req);
+		final Session sessionObj = getSession(req);
 		
 		final Context context = sessionObj.getContext();
 		
@@ -901,7 +900,7 @@ public final class ical extends PermissionServlet {
 	}
 	
 	@Override
-	protected boolean hasModulePermission(final SessionObject sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj) {
 		final UserConfiguration uc =  UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
 		return (uc.hasICal() && uc.hasCalendar() && uc.hasTask());
 	}

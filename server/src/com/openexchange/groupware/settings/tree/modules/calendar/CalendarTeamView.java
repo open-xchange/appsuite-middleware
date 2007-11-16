@@ -54,7 +54,7 @@ import com.openexchange.groupware.settings.tree.AbstractModules;
 import com.openexchange.groupware.settings.tree.Modules;
 import com.openexchange.groupware.settings.tree.modules.Calendar;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * Contains initialization for the modules configuration tree setting
@@ -90,7 +90,7 @@ public class CalendarTeamView extends AbstractModules {
      * {@inheritDoc}
      */
     @Override
-    protected boolean getModule(final SessionObject session) {
+    protected boolean getModule(final Session session) {
 		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
 				session.getContext()).hasTeamView();
 	}

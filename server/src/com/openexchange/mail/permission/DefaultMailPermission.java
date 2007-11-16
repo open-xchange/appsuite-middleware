@@ -50,7 +50,7 @@
 package com.openexchange.mail.permission;
 
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * {@link DefaultMailPermission}
@@ -65,7 +65,7 @@ public final class DefaultMailPermission extends MailPermission {
 	/**
 	 * Default constructor
 	 */
-	public DefaultMailPermission(final SessionObject session) {
+	public DefaultMailPermission(final Session session) {
 		super(session);
 		setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 				OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);

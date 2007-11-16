@@ -54,8 +54,8 @@ import com.openexchange.groupware.FolderLock;
 import com.openexchange.groupware.FolderLockManager;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.sessiond.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
-import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.webdav.protocol.WebdavLock;
 
 public class FolderLockHelper extends LockHelper {
@@ -87,7 +87,7 @@ public class FolderLockHelper extends LockHelper {
 	
 	@Override
 	protected int saveLock(WebdavLock lock) throws OXException {
-		SessionObject session = sessionHolder.getSessionObject();
+		Session session = sessionHolder.getSessionObject();
 		return lockManager.lock(id, 
 				(lock.getTimeout() == WebdavLock.NEVER) ? LockManager.INFINITE : lock.getTimeout(), //FIXME
 				lock.getScope().equals(WebdavLock.Scope.EXCLUSIVE_LITERAL) ? LockManager.Scope.EXCLUSIVE : LockManager.Scope.SHARED,

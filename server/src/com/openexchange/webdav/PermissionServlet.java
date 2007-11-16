@@ -50,12 +50,13 @@
 package com.openexchange.webdav;
 
 import java.io.IOException;
+
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.webdav.OXServlet;
-import javax.servlet.ServletException;
 
 public abstract class PermissionServlet extends OXServlet {
 
@@ -69,7 +70,7 @@ public abstract class PermissionServlet extends OXServlet {
         if (!super.doAuth(req, resp)) {
             return;
         }
-		final SessionObject sessionObj = getSession(req);
+		final Session sessionObj = getSession(req);
 		if (sessionObj != null && !hasModulePermission(sessionObj)) {
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
 			return;
@@ -77,5 +78,5 @@ public abstract class PermissionServlet extends OXServlet {
         super.service(req, resp);
 	}
 	
-	protected abstract boolean hasModulePermission(SessionObject sessionObj);
+	protected abstract boolean hasModulePermission(Session sessionObj);
 }

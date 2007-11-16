@@ -51,16 +51,24 @@
 
 package com.openexchange.webdav.xml;
 
-import com.openexchange.webdav.xml.fields.CalendarFields;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
+import org.kxml2.io.KXmlParser;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -69,17 +77,11 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.server.Version;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.webdav.PermissionServlet;
+import com.openexchange.webdav.xml.fields.CalendarFields;
 import com.openexchange.webdav.xml.fields.CommonFields;
 import com.openexchange.webdav.xml.fields.DataFields;
-import java.io.OutputStream;
-import java.util.Date;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.kxml2.io.KXmlParser;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * XmlHandler
@@ -216,7 +218,7 @@ public abstract class XmlServlet extends PermissionServlet {
 		boolean bList = false;
 		
 		try {
-			final SessionObject sessionObj = getSession(req);
+			final Session sessionObj = getSession(req);
 			
 			input_doc = getJDOMDocument(req);
 			os = resp.getOutputStream();
@@ -499,11 +501,11 @@ public abstract class XmlServlet extends PermissionServlet {
 	
 	protected abstract void parsePropChilds(HttpServletRequest req, HttpServletResponse resp, XmlPullParser parser) throws Exception;
 	
-	protected abstract void startWriter(SessionObject sessionObj, int objectId, int folderId, OutputStream os) throws Exception;
+	protected abstract void startWriter(Session sessionObj, int objectId, int folderId, OutputStream os) throws Exception;
 	
-	protected abstract void startWriter(SessionObject sessionObj, int folderId, boolean bModified, boolean bDelete, Date lastsync, OutputStream os) throws Exception;
+	protected abstract void startWriter(Session sessionObj, int folderId, boolean bModified, boolean bDelete, Date lastsync, OutputStream os) throws Exception;
 
-	protected abstract void startWriter(SessionObject sessionObj, int folderId, boolean bModified, boolean bDelete, boolean bList, Date lastsync, OutputStream os) throws Exception;
+	protected abstract void startWriter(Session sessionObj, int folderId, boolean bModified, boolean bDelete, boolean bList, Date lastsync, OutputStream os) throws Exception;
 }
 
 

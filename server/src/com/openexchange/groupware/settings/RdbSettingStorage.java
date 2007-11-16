@@ -62,7 +62,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.settings.SettingException.Code;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * This class implements the storage for settings using a relational database.
@@ -102,7 +102,7 @@ public class RdbSettingStorage extends SettingStorage {
     /**
      * Reference to the context.
      */
-    private final transient SessionObject session;
+    private final transient Session session;
 
     /**
      * Context.
@@ -114,7 +114,7 @@ public class RdbSettingStorage extends SettingStorage {
      * @param session Session.
      * @throws SettingException if the initialization of the setting tree fails.
      */
-    RdbSettingStorage(final SessionObject session) throws SettingException {
+    RdbSettingStorage(final Session session) throws SettingException {
         super();
         this.session = session;
         this.ctx = session.getContext();

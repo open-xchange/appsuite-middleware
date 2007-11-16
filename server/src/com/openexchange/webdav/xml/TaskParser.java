@@ -51,16 +51,16 @@
 
 package com.openexchange.webdav.xml;
 
-import com.openexchange.api.OXConflictException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
+import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.webdav.xml.fields.TaskFields;
-import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * TaskParser
@@ -72,7 +72,7 @@ public class TaskParser extends CalendarParser {
 	
 	private static final Log LOG = LogFactory.getLog(TaskParser.class);
 	
-	public TaskParser(SessionObject sessionObj) {
+	public TaskParser(Session sessionObj) {
 		this.sessionObj = sessionObj;
 	}
 	

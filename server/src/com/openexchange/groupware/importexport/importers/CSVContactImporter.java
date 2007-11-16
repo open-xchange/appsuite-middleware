@@ -86,7 +86,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * Importer for OX own CSV file format - this format is able to represent a 
@@ -127,7 +127,7 @@ public class CSVContactImporter extends AbstractImporter implements Importer {
 
 	private static ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVContactImporter.class);
 	
-	public boolean canImport(final SessionObject sessObj, final Format format, final List<String> folders,
+	public boolean canImport(final Session sessObj, final Format format, final List<String> folders,
 			final Map<String, String[]> optionalParams) throws ImportExportException {
 
 		if(! format.equals(getResponsibleFor()) ){
@@ -188,7 +188,7 @@ public class CSVContactImporter extends AbstractImporter implements Importer {
 	}
 
 
-	public List<ImportResult> importData(final SessionObject sessObj, final Format format,
+	public List<ImportResult> importData(final Session sessObj, final Format format,
 			final InputStream is, final List<String> folders,
 			final Map<String, String[]> optionalParams) throws ImportExportException {
 		if(! canImport(sessObj, format, folders, optionalParams)){

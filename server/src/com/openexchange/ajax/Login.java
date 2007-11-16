@@ -63,12 +63,12 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.sessiond.Session;
 import com.openexchange.sessiond.exception.SessionException;
 import com.openexchange.sessiond.impl.InvalidCredentialsException;
 import com.openexchange.sessiond.impl.LoginException;
 import com.openexchange.sessiond.impl.MaxSessionLimitException;
 import com.openexchange.sessiond.impl.PasswordExpiredException;
-import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessiondConnector;
 import com.openexchange.sessiond.impl.SessiondException;
 import com.openexchange.sessiond.impl.UserNotActivatedException;
@@ -136,7 +136,7 @@ public class Login extends AJAXServlet {
 				return;
 			}
 			final SessiondConnector sessiondConnector = SessiondConnector.getInstance();
-			SessionObject sessionObj = null;
+			Session sessionObj = null;
             final Response response = new Response();
 			try {
 				sessionObj = sessiondConnector.addSession(name, password, req.getRemoteAddr());
@@ -254,7 +254,7 @@ public class Login extends AJAXServlet {
 				return;
 			}
 			final SessiondConnector sessiondConnector = SessiondConnector.getInstance();
-			final SessionObject sessionObj = sessiondConnector.getSessionByRandomToken(randomToken);
+			final Session sessionObj = sessiondConnector.getSessionByRandomToken(randomToken);
             if (null == sessionObj) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             } else {
@@ -276,7 +276,7 @@ public class Login extends AJAXServlet {
 					if (cookieName.startsWith(cookiePrefix)) {
 						final String session = cookie.getValue();
 						if (sessiondConnector.refreshSession(session)) {
-							final SessionObject sessionObj = sessiondConnector
+							final Session sessionObj = sessiondConnector
                                 .getSession(session);
                             SessionServlet.checkIP(sessionObj.getLocalIp(), req
                                 .getRemoteAddr());
@@ -337,7 +337,7 @@ public class Login extends AJAXServlet {
     }
 
     protected void writeCookie(final HttpServletResponse resp,
-        final SessionObject sessionObj) {
+        final Session sessionObj) {
         final Cookie cookie = new Cookie(cookiePrefix + sessionObj.getSecret(),
             sessionObj.getSessionID());
         cookie.setPath("/");
@@ -357,7 +357,7 @@ public class Login extends AJAXServlet {
 		}
 	}
 
-    private JSONObject writeLogin(final SessionObject sessionObj)
+    private JSONObject writeLogin(final Session sessionObj)
         throws JSONException {
         final JSONObject retval = new JSONObject();
         retval.put(PARAMETER_SESSION, sessionObj.getSecret());

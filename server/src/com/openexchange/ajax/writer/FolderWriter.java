@@ -70,7 +70,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
@@ -106,7 +106,7 @@ public final class FolderWriter extends DataWriter {
 				SQLException;
 	}
 
-	public FolderWriter(final JSONWriter jw, final SessionObject session) {
+	public FolderWriter(final JSONWriter jw, final Session session) {
 		super();
 		this.jsonwriter = jw;
 		this.userObj = UserStorage.getUser(session.getUserId(), session.getContext());

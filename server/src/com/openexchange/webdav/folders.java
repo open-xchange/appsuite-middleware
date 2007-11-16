@@ -51,6 +51,18 @@
 
 package com.openexchange.webdav;
 
+import java.io.OutputStream;
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jdom.output.XMLOutputter;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
@@ -60,21 +72,12 @@ import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.webdav.xml.DataParser;
-import com.openexchange.webdav.xml.XmlServlet;
-import java.io.OutputStream;
-import java.util.Date;
 import com.openexchange.webdav.xml.FolderParser;
 import com.openexchange.webdav.xml.FolderWriter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.output.XMLOutputter;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
+import com.openexchange.webdav.xml.XmlServlet;
 
 /**
  * folders
@@ -90,7 +93,7 @@ public final class folders extends XmlServlet {
 	protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser) throws Exception {
 		final OutputStream os = resp.getOutputStream();
 		
-		final SessionObject sessionObj = getSession(req);
+		final Session sessionObj = getSession(req);
 		
 		final XMLOutputter xo = new XMLOutputter();
 		
@@ -180,24 +183,24 @@ public final class folders extends XmlServlet {
 	}
 	
 	@Override
-	protected void startWriter(final SessionObject sessionObj, final int objectId, final int folderId, final OutputStream os) throws Exception {
+	protected void startWriter(final Session sessionObj, final int objectId, final int folderId, final OutputStream os) throws Exception {
 		final FolderWriter folderwriter = new FolderWriter(sessionObj);
 		folderwriter.startWriter(objectId, os);
 	}
 
 	@Override
-	protected void startWriter(final SessionObject sessionObj, final int folderId, final boolean modified, final boolean deleted, final Date lastsync, final OutputStream os) throws Exception {
+	protected void startWriter(final Session sessionObj, final int folderId, final boolean modified, final boolean deleted, final Date lastsync, final OutputStream os) throws Exception {
 		startWriter(sessionObj, folderId, modified, deleted, false, lastsync, os);
 	}
 	
 	@Override
-	protected void startWriter(final SessionObject sessionObj, final int folderId, final boolean modified, final boolean deleted, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
+	protected void startWriter(final Session sessionObj, final int folderId, final boolean modified, final boolean deleted, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
 		final FolderWriter folderwriter = new FolderWriter(sessionObj);
 		folderwriter.startWriter(modified, deleted, bList, lastsync, os);
 	}
 	
 	@Override
-	protected boolean hasModulePermission(final SessionObject sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj) {
 		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()).hasWebDAVXML();
 	}
 }

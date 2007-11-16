@@ -51,16 +51,18 @@
 
 package com.openexchange.webdav.xml;
 
-import com.openexchange.groupware.container.DataObject;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.webdav.xml.fields.DataFields;
 import java.io.OutputStream;
 import java.util.Date;
+
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
+
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.sessiond.Session;
+import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * DataParser
@@ -78,7 +80,7 @@ public class DataWriter {
 	
 	public static final Namespace namespace = Namespace.getNamespace(XmlServlet.PREFIX, XmlServlet.NAMESPACE);
 	
-	protected SessionObject sessionObj = null;
+	protected Session sessionObj = null;
 	
 	private User userObj = null;
 	

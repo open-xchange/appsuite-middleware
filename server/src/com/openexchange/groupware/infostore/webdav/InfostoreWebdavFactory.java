@@ -69,8 +69,8 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.FolderLockManager;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.PathResolver;
 import com.openexchange.groupware.infostore.Resolved;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
@@ -80,8 +80,8 @@ import com.openexchange.groupware.tx.DBProviderUser;
 import com.openexchange.groupware.tx.Service;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.sessiond.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
-import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.webdav.loader.BulkLoader;
@@ -283,7 +283,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 	private OXWebdavResource tryLoad(final String url, final OXWebdavResource def) throws OXException, WebdavException {
 		final State s = state.get();
 		final Context ctx = sessionHolder.getSessionObject().getContext();
-		final SessionObject session = sessionHolder.getSessionObject();
+		final Session session = sessionHolder.getSessionObject();
 		try {
 			final Resolved resolved = resolver.resolve(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, url, session
 					.getContext(), UserStorage.getUser(session.getUserId(), session.getContext()), UserConfigurationStorage.getInstance()
@@ -445,7 +445,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 			return new ArrayList<OXWebdavResource>();
 		}
 		final State s = state.get();
-		final SessionObject session = sessionHolder.getSessionObject();
+		final Session session = sessionHolder.getSessionObject();
 		final SearchIterator<?> iter = database.getDocuments(
 				folderId,
 				session.getContext(),

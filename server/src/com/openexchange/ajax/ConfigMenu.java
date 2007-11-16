@@ -74,7 +74,7 @@ import com.openexchange.groupware.settings.ConfigTree;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.SettingStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.servlet.OXJSONException;
 
 /**
@@ -111,7 +111,7 @@ public class ConfigMenu extends SessionServlet {
         if (path.endsWith("/")) {
             path = path.substring(0, path.length() - 1);
         }
-        final SessionObject sessionObj = getSessionObject(req);
+        final Session sessionObj = getSessionObject(req);
 
         final SettingStorage stor = SettingStorage.getInstance(sessionObj);
         Setting setting;
@@ -182,7 +182,7 @@ public class ConfigMenu extends SessionServlet {
      */
     protected void doPut(final HttpServletRequest req,
         final HttpServletResponse resp) throws ServletException, IOException {
-        final SessionObject session = getSessionObject(req);
+        final Session session = getSessionObject(req);
         final InputStream input = req.getInputStream();
         final ByteArrayOutputStream baos = new ByteArrayOutputStream(
             input.available());

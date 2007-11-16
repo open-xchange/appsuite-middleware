@@ -85,7 +85,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterface;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
@@ -171,7 +171,7 @@ public class Multiple extends SessionServlet {
 	}
 
 	protected static final void parseActionElement(final JSONArray respArr, final JSONArray jsonArray, final int pos,
-			final SessionObject sessionObj, final HttpServletRequest req) throws JSONException, AjaxException,
+			final Session sessionObj, final HttpServletRequest req) throws JSONException, AjaxException,
 			OXException {
 		final JSONObject jsonObj = jsonArray.getJSONObject(pos);
 
@@ -213,7 +213,7 @@ public class Multiple extends SessionServlet {
 	}
 
 	protected static final void doAction(final String module, final String action, final JSONObject jsonObj,
-			final SessionObject sessionObj, final HttpServletRequest req, final OXJSONWriter jsonWriter)
+			final Session sessionObj, final HttpServletRequest req, final OXJSONWriter jsonWriter)
 			throws AjaxException {
 		try {
 			if (module.equals(MODULE_CALENDAR)) {

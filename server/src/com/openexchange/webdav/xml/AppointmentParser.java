@@ -51,15 +51,17 @@
 
 package com.openexchange.webdav.xml;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.webdav.xml.fields.AppointmentFields;
 import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.sessiond.Session;
+import com.openexchange.webdav.xml.fields.AppointmentFields;
 
 /**
  * AppointmentParser
@@ -71,7 +73,7 @@ public class AppointmentParser extends CalendarParser {
 	
 	private static final Log LOG = LogFactory.getLog(AppointmentParser.class);
 	
-	public AppointmentParser(SessionObject sessionObj) {
+	public AppointmentParser(Session sessionObj) {
 		this.sessionObj = sessionObj;	
 	}
 	

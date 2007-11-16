@@ -50,6 +50,7 @@
 package com.openexchange.sessiond.impl;
 
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.encoding.Base64;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -133,7 +134,7 @@ public class SessiondConnector {
 	 * @throws SessiondException
 	 * @throws ContextException 
 	 */
-	public SessionObject addSession(final String username, final String password, final String client_ip) throws LoginException, InvalidCredentialsException, UserNotFoundException, UserNotActivatedException, PasswordExpiredException, MaxSessionLimitException, SessiondException, ContextException {
+	public Session addSession(final String username, final String password, final String client_ip) throws LoginException, InvalidCredentialsException, UserNotFoundException, UserNotActivatedException, PasswordExpiredException, MaxSessionLimitException, SessiondException, ContextException {
 		return SessionHandler.addSession(username, password, client_ip, null);
 	}
 	
@@ -154,7 +155,7 @@ public class SessiondConnector {
 	 * @throws SessiondException
 	 * @throws ContextException 
 	 */
-	public SessionObject addSession(final String username, final String password, final String sessionid, final String client_ip, final String host, final String data) throws LoginException, InvalidCredentialsException, UserNotFoundException, UserNotActivatedException, PasswordExpiredException, MaxSessionLimitException, SessiondException, ContextException {
+	public Session addSession(final String username, final String password, final String sessionid, final String client_ip, final String host, final String data) throws LoginException, InvalidCredentialsException, UserNotFoundException, UserNotActivatedException, PasswordExpiredException, MaxSessionLimitException, SessiondException, ContextException {
 		if (config.isTcpClientSocketEnabled()) {
 			// TCP Connection enabled
 			
@@ -254,7 +255,7 @@ public class SessiondConnector {
 	 * @param randomToken - The random token of the session
 	 * @return SessionObject - The Session Object that match with the given random token
 	 */
-	public SessionObject getSessionByRandomToken(final String randomToken) {
+	public Session getSessionByRandomToken(final String randomToken) {
 		return SessionHandler.getSessionByRandomToken(randomToken);
 	}
 	
@@ -263,7 +264,7 @@ public class SessiondConnector {
 	 * @param sessionid - The sessionid of the session
 	 * @return SessionObject - The Session Object that match with the given sessionid. This method refresh the session too.
 	 */
-	public SessionObject getSession(final String sessionid) {
+	public Session getSession(final String sessionid) {
 		return getSession(sessionid, true);
 	}
 	
@@ -273,7 +274,7 @@ public class SessiondConnector {
 	 * @param refresh - The refresh parameter. Set to true if the session is refresh by the access or false if not.
 	 * @return SessionObject - The Session Object that match with the given sessionid
 	 */
-	public SessionObject getSession(final String sessionid, final boolean refresh) {
+	public Session getSession(final String sessionid, final boolean refresh) {
 		if (config.isTcpClientSocketEnabled()) {
 			try {
 				// TCP Connection enabled
@@ -323,13 +324,12 @@ public class SessiondConnector {
 	 * Return an iterator with all open sessions
 	 * @return Iterator - An iterator with all open sessions
 	 */
-	public Iterator getSessions() {
+	public Iterator<String> getSessions() {
 		if (config.isTcpClientSocketEnabled()) {
 			LOG.warn("NOT IMPLEMENTED YET!");
 			return null;
-		} else {
-			return SessionHandler.getSessions();
 		}
+		return SessionHandler.getSessions();
 	}
 	
 	private void initSockets() throws Exception {

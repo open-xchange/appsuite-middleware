@@ -99,7 +99,7 @@ import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.UploadServletException;
 
@@ -556,7 +556,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 * @param session
 	 * @return user's timezone
 	 */
-	protected static TimeZone getUserTimeZone(final SessionObject session) {
+	protected static TimeZone getUserTimeZone(final Session session) {
 		return TimeZone.getTimeZone(UserStorage.getUser(session.getUserId(), session.getContext()).getTimeZone());
 	}
 
@@ -568,7 +568,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 * @param session
 	 * @return a <code>long</code> value with added time zone offset
 	 */
-	protected static long sendTime(final Date d, final SessionObject session) {
+	protected static long sendTime(final Date d, final Session session) {
 		return d.getTime() + getUserTimeZone(session).getOffset(d.getTime());
 	}
 
@@ -582,7 +582,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 * @return a <code>java.util.Date</code> instance with subtracted time
 	 *         zone offset
 	 */
-	protected static Date parseTime(final long time, final SessionObject session) {
+	protected static Date parseTime(final long time, final Session session) {
 		return new Date(time - getUserTimeZone(session).getOffset(time));
 	}
 

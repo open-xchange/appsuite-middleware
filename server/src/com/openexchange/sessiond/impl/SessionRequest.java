@@ -51,18 +51,17 @@
 
 package com.openexchange.sessiond.impl;
 
-import com.openexchange.tools.encoding.Base64;
-
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Iterator;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.sessiond.Session;
+import com.openexchange.tools.encoding.Base64;
 
 /**
  * SessionRequest
@@ -178,7 +177,7 @@ public class SessionRequest implements Runnable {
 			} else if (action.startsWith(GETAUTH)) {
 				actionGetAuth(data, os);
 			} else if (action.startsWith(GETSESSIONS)) {
-				actionGetSessions(data, os);
+				//actionGetSessions(data, os);
 			} else {
 				LOG.warn("Unknown command:" + action);
 				sendResponse(os, ERROR_UNKNOWN_COMMAND.getBytes());
@@ -210,7 +209,7 @@ public class SessionRequest implements Runnable {
 				final String password = sAuthData[1];
 				final String localIp = sAuthData[3];
 				final String host = sAuthData[4];
-				final SessionObject sessionObj = SessionHandler.addSession(uid, password, localIp, host);
+				final Session sessionObj = SessionHandler.addSession(uid, password, localIp, host);
 				sendResponse(os, ("OK: " + sessionObj.getSessionID()).getBytes());
 			} else {
 				sendResponse(os, ERROR_INVALID_AUTH_DATA.getBytes());
@@ -259,51 +258,7 @@ public class SessionRequest implements Runnable {
 			sendResponse(os, "ERROR: No Session found".getBytes());
 		}
 	}
-	
-	protected void actionGetSessions(final String[] data, final OutputStream os) {
-		try {
-			final String authData = new String(Base64.decode(data[1]), "UTF-8");
-			
-			long l_cr = 0;
-			long l_lt = 0;
-			long l_ts = 0;
-			
-			final String[] sAuthData = authData.split("\1");
-			final String uid = sAuthData[0];
-			final String password = sAuthData[1];
 
-			if (uid.equals(config.getSessionAuthUser())) {
-				SessionObject sessionobject = null;
-				final SessiondConnector sc = SessiondConnector.getInstance();
-				sessionobject = sc.addSession(uid, password, "localhost");
-				
-				String tmp_sessionid = null;
-				
-				final long current = System.currentTimeMillis();
-				final Iterator it = SessionHandler.getSessions();
-				
-				while (it.hasNext()) {
-					sessionobject = (SessionObject)it.next();
-					tmp_sessionid = sessionobject.getSessionID();
-					
-					l_cr = sessionobject.getCreationtime().getTime();
-					l_ts = sessionobject.getTimestamp().getTime();
-					l_lt = sessionobject.getLifetime();
-					
-					if ((l_ts + l_lt) < current) {
-						it.remove();
-					} else {
-						final String response = Base64.encode((sessionobject.getUsername() + "\1" + sessionobject.getLanguage() + "\1" + sessionobject.getLocalIp() + "\1" + l_cr + "\1" + l_lt).getBytes("UTF-8"));
-						
-						os.write((tmp_sessionid + ' ' + response + "\n\1\n").getBytes());
-						os.flush();
-					}
-				}
-			}
-		} catch (Exception exc) {
-			LOG.error("actionGetSessions" , exc);
-		}
-	}
 }
 
 

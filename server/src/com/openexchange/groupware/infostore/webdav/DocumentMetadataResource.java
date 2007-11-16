@@ -61,21 +61,26 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.ConflictException;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.GetSwitch;
 import com.openexchange.groupware.infostore.database.impl.SetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.sessiond.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
-import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
@@ -83,11 +88,6 @@ import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.impl.AbstractResource;
-import com.openexchange.groupware.Component;
-import com.openexchange.groupware.infostore.Classes;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
 
 @OXExceptionSource(
@@ -231,7 +231,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	}
 
 	public InputStream getBody() throws WebdavException {
-		final SessionObject session = sessionHolder.getSessionObject();
+		final Session session = sessionHolder.getSessionObject();
 		try {
 			return database.getDocument(id, InfostoreFacade.CURRENT_VERSION, session.getContext(), UserStorage.getUser(
 					session.getUserId(), session.getContext()), UserConfigurationStorage.getInstance()
@@ -505,7 +505,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		loadedMetadata = true;
 		final Set<Metadata> toLoad = new HashSet<Metadata>(Metadata.VALUES);
 		toLoad.removeAll(setMetadata);
-		final SessionObject session = sessionHolder.getSessionObject();
+		final Session session = sessionHolder.getSessionObject();
 		
 		try {
 			final DocumentMetadata metadata = database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session
@@ -550,7 +550,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			}
 		} else {
 			// UPDATE
-			final SessionObject session = sessionHolder.getSessionObject();
+			final Session session = sessionHolder.getSessionObject();
 			try {
 				loadMetadata();
 				if(guessSize) {
@@ -583,7 +583,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		} catch (final ClassCastException x) {
 			throw new WebdavException(getUrl(), HttpServletResponse.SC_CONFLICT);
 		}
-		final SessionObject session = sessionHolder.getSessionObject();
+		final Session session = sessionHolder.getSessionObject();
 		metadata.setFolderId(parent.getId());
 		if(!exists && !existsInDB) {
 			metadata.setVersion(InfostoreFacade.NEW);
@@ -646,7 +646,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			msg="Could not delete DocumentMetadata %d. Please try again."
 	)
 	private void deleteMetadata() throws OXException, IllegalAccessException {
-		final SessionObject session = sessionHolder.getSessionObject();
+		final Session session = sessionHolder.getSessionObject();
 		final int[] nd = database.removeDocument(new int[]{ id }, Long.MAX_VALUE,session); 
 		if(nd.length>0) {
 			database.rollback();

@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.calendar;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
@@ -57,11 +60,9 @@ import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.StringCollection;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * CalendarAttachments
@@ -84,7 +85,7 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
     
     public void checkMayAttach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
         try {
-            SessionObject so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, CalendarCommonCollection.getUniqueCalendarSessionName());
+            Session so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, CalendarCommonCollection.getUniqueCalendarSessionName());
             if (!CalendarCommonCollection.getWritePermission(objectId, folderId, so)) {
                 throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSIONS_TO_ATTACH_DETACH);
             }
@@ -104,7 +105,7 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
     
     public void checkMayReadAttachments(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
         try {
-            SessionObject so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, CalendarCommonCollection.getUniqueCalendarSessionName());
+            Session so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, CalendarCommonCollection.getUniqueCalendarSessionName());
             if (!CalendarCommonCollection.getReadPermission(objectId, folderId, so)) {
                 throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSIONS_TO_READ);
             }

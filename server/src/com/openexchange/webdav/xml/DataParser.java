@@ -51,15 +51,17 @@
 
 package com.openexchange.webdav.xml;
 
-import com.openexchange.groupware.container.DataObject;
-import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.webdav.xml.fields.DataFields;
 import java.io.IOException;
 import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.sessiond.Session;
+import com.openexchange.webdav.xml.fields.DataFields;
 
 /**
  * DataParser
@@ -75,7 +77,7 @@ public class DataParser {
 	
 	public static final int CONFIRM = 3;
 
-	protected SessionObject sessionObj;
+	protected Session sessionObj;
 	
 	protected String client_id;
 	

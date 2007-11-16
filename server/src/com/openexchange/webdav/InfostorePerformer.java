@@ -65,7 +65,6 @@ import org.springframework.core.io.FileSystemResource;
 
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.FolderLockManagerImpl;
-import com.openexchange.groupware.importexport.ImporterExporter;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
@@ -73,8 +72,8 @@ import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.tx.AlwaysWriteConnectionProvider;
 import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.sessiond.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
-import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.webdav.action.AbstractAction;
 import com.openexchange.webdav.action.OXWebdavMaxUploadSizeAction;
 import com.openexchange.webdav.action.OXWebdavPutAction;
@@ -96,7 +95,6 @@ import com.openexchange.webdav.action.WebdavMoveAction;
 import com.openexchange.webdav.action.WebdavOptionsAction;
 import com.openexchange.webdav.action.WebdavPropfindAction;
 import com.openexchange.webdav.action.WebdavProppatchAction;
-import com.openexchange.webdav.action.WebdavPutAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavRequestCycleAction;
 import com.openexchange.webdav.action.WebdavResponse;
@@ -139,7 +137,7 @@ public class InfostorePerformer implements SessionHolder {
 	
 	private Map<Action, WebdavAction> actions = new EnumMap<Action, WebdavAction>(Action.class);
 	
-	private ThreadLocal<SessionObject> session = new ThreadLocal<SessionObject>();
+	private ThreadLocal<Session> session = new ThreadLocal<Session>();
 	
 	private InfostorePerformer(){
 		
@@ -253,11 +251,11 @@ public class InfostorePerformer implements SessionHolder {
 		return lifeCycle;
 	}
 	
-	public SessionObject getSessionObject() {
+	public Session getSessionObject() {
 		return session.get();
 	}
 	
-	public final void doIt(HttpServletRequest req, HttpServletResponse resp, Action action, SessionObject sess) throws ServletException, IOException {
+	public final void doIt(HttpServletRequest req, HttpServletResponse resp, Action action, Session sess) throws ServletException, IOException {
 		try {
 			WebdavRequest webdavRequest = new ServletWebdavRequest(factory, req);
 			WebdavResponse webdavResponse = new ServletWebdavResponse(resp);

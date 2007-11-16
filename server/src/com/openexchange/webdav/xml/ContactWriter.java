@@ -51,6 +51,16 @@
 
 package com.openexchange.webdav.xml;
 
+import java.io.OutputStream;
+import java.util.Date;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jdom.Element;
+import org.jdom.output.XMLOutputter;
+
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ContactSQLInterface;
@@ -63,17 +73,10 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.LinkEntryObject;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.webdav.xml.fields.ContactFields;
-import java.io.OutputStream;
-import java.util.Date;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.Element;
-import org.jdom.output.XMLOutputter;
 
 /**
  * ContactWriter
@@ -208,7 +211,7 @@ public class ContactWriter extends CommonWriter {
 		
 	}
 	
-	public ContactWriter(SessionObject sessionObj) {
+	public ContactWriter(Session sessionObj) {
 		this.sessionObj = sessionObj;
 		contactsql = new RdbContactSQLInterface(sessionObj);
 	}

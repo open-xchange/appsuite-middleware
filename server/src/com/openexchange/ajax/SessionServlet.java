@@ -68,10 +68,10 @@ import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.sessiond.Session;
 import com.openexchange.sessiond.exception.Classes;
 import com.openexchange.sessiond.exception.SessionException;
 import com.openexchange.sessiond.exception.SessionExceptionFactory;
-import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessiondConnector;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -127,7 +127,7 @@ public abstract class SessionServlet extends AJAXServlet {
         try {
             final String cookieId = getCookieId(req);
             final String sessionId = getSessionId(req, cookieId);
-            final SessionObject session = getSession(sessionId);
+            final Session session = getSession(sessionId);
             checkIP(session.getLocalIp(), req.getRemoteAddr());
             rememberSession(req, session);
             final Context ctx = session.getContext();
@@ -264,9 +264,9 @@ public abstract class SessionServlet extends AJAXServlet {
         exceptionId = 3,
         msg = "Your session %s expired. Please start a new browser session."
     )
-    private static SessionObject getSession(final String sessionId)
+    private static Session getSession(final String sessionId)
         throws SessionException {
-        final SessionObject retval = SessiondConnector.getInstance()
+        final Session retval = SessiondConnector.getInstance()
             .getSession(sessionId);
         if (null == retval) {
             throw EXCEPTION.create(3, sessionId);
@@ -281,7 +281,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param session session to remember.
      */
     public static void rememberSession(final ServletRequest req,
-        final SessionObject session) {
+        final Session session) {
         req.setAttribute(SESSION_KEY, session);
     }
 
@@ -290,7 +290,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param req servlet request.
      * @return the remembered session.
      */
-    protected SessionObject getSessionObject(final ServletRequest req) {
-        return (SessionObject) req.getAttribute(SESSION_KEY);
+    protected Session getSessionObject(final ServletRequest req) {
+        return (Session) req.getAttribute(SESSION_KEY);
     }
 }

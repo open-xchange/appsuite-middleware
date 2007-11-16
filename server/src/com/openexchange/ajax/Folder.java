@@ -49,9 +49,9 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.mail.utils.StorageUtility.prepareMailFolderParam;
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.folderModule2String;
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
-import static com.openexchange.mail.utils.StorageUtility.prepareMailFolderParam;
 
 import java.io.IOException;
 import java.util.Date;
@@ -100,7 +100,7 @@ import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.json.writer.FolderWriter.MailFolderFieldWriter;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.FolderObjectIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -257,7 +257,7 @@ public class Folder extends SessionServlet {
 	/**
 	 * Performs the GET request to send back root folders
 	 */
-	public void actionGetRoot(final SessionObject sessionObj, final JSONWriter w, final JSONObject requestObj)
+	public void actionGetRoot(final Session sessionObj, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
 		Response.write(actionGetRoot(sessionObj, ParamContainer.getInstance(requestObj, Component.FOLDER)), w);
 	}
@@ -271,7 +271,7 @@ public class Folder extends SessionServlet {
 	/**
 	 * Performs the GET request to send back root folders
 	 */
-	private final Response actionGetRoot(final SessionObject sessionObj, final ParamContainer paramContainer)
+	private final Response actionGetRoot(final Session sessionObj, final ParamContainer paramContainer)
 			throws JSONException {
 		/*
 		 * Some variables
@@ -368,7 +368,7 @@ public class Folder extends SessionServlet {
 	 * @throws JSONException
 	 * @throws SearchIteratorException
 	 */
-	public void actionGetSubfolders(final SessionObject sessionObj, final JSONWriter w, final JSONObject requestObj)
+	public void actionGetSubfolders(final Session sessionObj, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
 		Response.write(actionGetSubfolders(sessionObj, ParamContainer.getInstance(requestObj, Component.FOLDER)), w);
 	}
@@ -383,7 +383,7 @@ public class Folder extends SessionServlet {
 		}
 	}
 
-	private final Response actionGetSubfolders(final SessionObject sessionObj, final ParamContainer paramContainer)
+	private final Response actionGetSubfolders(final Session sessionObj, final ParamContainer paramContainer)
 			throws JSONException {
 		/*
 		 * Some variables
@@ -917,7 +917,7 @@ public class Folder extends SessionServlet {
 	 * @throws JSONException
 	 * @throws SearchIteratorException
 	 */
-	public void actionGetPath(final SessionObject sessionObj, final JSONWriter w, final JSONObject requestObj)
+	public void actionGetPath(final Session sessionObj, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
 		Response.write(actionGetPath(sessionObj, ParamContainer.getInstance(requestObj, Component.FOLDER)), w);
 	}
@@ -933,7 +933,7 @@ public class Folder extends SessionServlet {
 		}
 	}
 
-	private final Response actionGetPath(final SessionObject sessionObj, final ParamContainer paramContainer)
+	private final Response actionGetPath(final Session sessionObj, final ParamContainer paramContainer)
 			throws JSONException {
 		/*
 		 * Some variables
@@ -1071,7 +1071,7 @@ public class Folder extends SessionServlet {
 	 * @throws JSONException
 	 * @throws SearchIteratorException
 	 */
-	public void actionGetUpdatedFolders(final SessionObject sessionObj, final JSONWriter w, final JSONObject requestObj)
+	public void actionGetUpdatedFolders(final Session sessionObj, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
 		Response
 				.write(actionGetUpdatedFolders(sessionObj, ParamContainer.getInstance(requestObj, Component.FOLDER)), w);
@@ -1089,7 +1089,7 @@ public class Folder extends SessionServlet {
 
 	private static final Date DATE_0 = new Date(0);
 
-	private final Response actionGetUpdatedFolders(final SessionObject sessionObj, final ParamContainer paramContainer)
+	private final Response actionGetUpdatedFolders(final Session sessionObj, final ParamContainer paramContainer)
 			throws JSONException {
 		/*
 		 * Some variables
@@ -1305,7 +1305,7 @@ public class Folder extends SessionServlet {
 		return response;
 	}
 
-	public void actionGetFolder(final SessionObject sessionObj, final JSONWriter w, final JSONObject requestObj)
+	public void actionGetFolder(final Session sessionObj, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
 		Response.write(actionGetFolder(sessionObj, ParamContainer.getInstance(requestObj, Component.FOLDER)), w);
 	}
@@ -1320,7 +1320,7 @@ public class Folder extends SessionServlet {
 		}
 	}
 
-	private final Response actionGetFolder(final SessionObject sessionObj, final ParamContainer paramContainer)
+	private final Response actionGetFolder(final Session sessionObj, final ParamContainer paramContainer)
 			throws JSONException {
 		/*
 		 * Some variables
@@ -1382,7 +1382,7 @@ public class Folder extends SessionServlet {
 		return response;
 	}
 
-	public void actionPutUpdateFolder(final SessionObject sessionObj, final JSONWriter w, final JSONObject requestObj)
+	public void actionPutUpdateFolder(final Session sessionObj, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
 		Response.write(actionPutUpdateFolder(sessionObj, requestObj.getString(Response.DATA), ParamContainer
 				.getInstance(requestObj, Component.FOLDER)), w);
@@ -1398,7 +1398,7 @@ public class Folder extends SessionServlet {
 		}
 	}
 
-	private final Response actionPutUpdateFolder(final SessionObject sessionObj, final String body,
+	private final Response actionPutUpdateFolder(final Session sessionObj, final String body,
 			final ParamContainer paramContainer) {
 		/*
 		 * Some variables
@@ -1462,7 +1462,7 @@ public class Folder extends SessionServlet {
 		return response;
 	}
 
-	public void actionPutInsertFolder(final SessionObject sessionObj, final JSONWriter w, final JSONObject requestObj)
+	public void actionPutInsertFolder(final Session sessionObj, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
 		Response.write(actionPutInsertFolder(sessionObj, requestObj.getString(Response.DATA), ParamContainer
 				.getInstance(requestObj, Component.FOLDER)), w);
@@ -1478,7 +1478,7 @@ public class Folder extends SessionServlet {
 		}
 	}
 
-	private final Response actionPutInsertFolder(final SessionObject sessionObj, final String body,
+	private final Response actionPutInsertFolder(final Session sessionObj, final String body,
 			final ParamContainer paramContainer) {
 		/*
 		 * Some variables
@@ -1536,7 +1536,7 @@ public class Folder extends SessionServlet {
 		return response;
 	}
 
-	public void actionPutDeleteFolder(final SessionObject sessionObj, final JSONWriter w, final JSONObject requestObj)
+	public void actionPutDeleteFolder(final Session sessionObj, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
 		Response.write(actionPutDeleteFolder(sessionObj, requestObj.getString(Response.DATA), ParamContainer
 				.getInstance(requestObj, Component.FOLDER)), w);
@@ -1552,7 +1552,7 @@ public class Folder extends SessionServlet {
 		}
 	}
 
-	private final Response actionPutDeleteFolder(final SessionObject sessionObj, final String body,
+	private final Response actionPutDeleteFolder(final Session sessionObj, final String body,
 			final ParamContainer paramContainer) throws JSONException {
 		/*
 		 * Some variables
@@ -1646,7 +1646,7 @@ public class Folder extends SessionServlet {
 		 * Some variables
 		 */
 		final OXJSONWriter jsonWriter = new OXJSONWriter();
-		final SessionObject sessionObj = getSessionObject(req);
+		final Session sessionObj = getSessionObject(req);
 		final long lastModified = 0;
 		String error = null;
 		/*

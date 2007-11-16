@@ -67,7 +67,7 @@ import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterface;
 import com.openexchange.mail.MailJSONField;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
 public final class MailRequest {
@@ -97,7 +97,7 @@ public final class MailRequest {
 
 	public static final Mail MAIL_SERVLET = new Mail();
 
-	private final SessionObject session;
+	private final Session session;
 
 	private final OXJSONWriter writer;
 
@@ -114,7 +114,7 @@ public final class MailRequest {
 	 *            the instance of <code>{@link OXJSONWriter}</code> to whom
 	 *            response data is written
 	 */
-	public MailRequest(final SessionObject session, final OXJSONWriter writer) {
+	public MailRequest(final Session session, final OXJSONWriter writer) {
 		super();
 		this.session = session;
 		this.writer = writer;
@@ -222,7 +222,7 @@ public final class MailRequest {
 	/**
 	 * Executes gathered actions and writes their response to the instance of
 	 * <code>{@link OXJSONWriter}</code> given through constructor
-	 * <code>{@link #MailRequest(SessionObject, OXJSONWriter)}</code>
+	 * <code>{@link #MailRequest(Session, OXJSONWriter)}</code>
 	 * 
 	 * @param mailInterface -
 	 *            the mail interface

@@ -63,7 +63,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.integration.SetupLink;
 import com.openexchange.groupware.integration.SetupLinkException;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * This class implements the servlet for authenticating the user at the
@@ -96,7 +96,7 @@ public class ConfigJump extends SessionServlet {
     @Override
     protected void doGet(final HttpServletRequest req,
         final HttpServletResponse resp) throws ServletException, IOException {
-        final SessionObject sessionObj = getSessionObject(req);
+        final Session sessionObj = getSessionObject(req);
         final Response response = new Response();
         try {
             final SetupLink setupLink = SetupLink.getInstance();

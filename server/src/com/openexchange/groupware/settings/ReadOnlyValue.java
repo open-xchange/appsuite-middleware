@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.settings;
 
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * This class contains shared functions for all setting that are read only.
@@ -73,7 +73,7 @@ public abstract class ReadOnlyValue implements SharedValue {
     /**
      * {@inheritDoc}
      */
-    public void writeValue(final SessionObject session,
+    public void writeValue(final Session session,
         final Setting setting) throws SettingException {
         throw new SettingException(SettingException.Code.NO_WRITE, setting
             .getName());

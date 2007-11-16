@@ -64,7 +64,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * {@link FolderParser} - Parses instances of {@link JSONObject} to instances of
@@ -95,7 +95,7 @@ public final class FolderParser {
 	 * @throws MailException
 	 *             If parsing fails
 	 */
-	public static void parse(final JSONObject jsonObj, final MailFolder mailFolder, final SessionObject session)
+	public static void parse(final JSONObject jsonObj, final MailFolder mailFolder, final Session session)
 			throws MailException {
 		try {
 			if (jsonObj.has(FolderFields.TITLE)) {

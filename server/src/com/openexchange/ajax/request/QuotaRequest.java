@@ -65,7 +65,7 @@ import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterface;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 
@@ -80,9 +80,9 @@ public class QuotaRequest extends CommonRequest {
 	
 	private AbstractOXException fsException;
 
-	private final SessionObject session;
+	private final Session session;
 
-	public QuotaRequest(final SessionObject sessionObj, final JSONWriter w) {
+	public QuotaRequest(final Session sessionObj, final JSONWriter w) {
 		super(w);
 		try {
 			this.qfs = (QuotaFileStorage) FileStorage.getInstance(FilestoreStorage.createURI(sessionObj.getContext()),sessionObj.getContext(),new DBPoolProvider());

@@ -51,6 +51,18 @@
 
 package com.openexchange.webdav;
 
+import java.io.OutputStream;
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jdom.output.XMLOutputter;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
@@ -63,20 +75,11 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.webdav.xml.DataParser;
 import com.openexchange.webdav.xml.TaskParser;
 import com.openexchange.webdav.xml.TaskWriter;
 import com.openexchange.webdav.xml.XmlServlet;
-import java.io.OutputStream;
-import java.util.Date;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.output.XMLOutputter;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * tasks
@@ -90,7 +93,7 @@ public final class tasks extends XmlServlet {
 	protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser) throws Exception {
 		final OutputStream os = resp.getOutputStream();
 		
-		final SessionObject sessionObj = getSession(req);
+		final Session sessionObj = getSession(req);
 		
 		final XMLOutputter xo = new XMLOutputter();
 		
@@ -190,22 +193,22 @@ public final class tasks extends XmlServlet {
 		}
 	}
 	
-	protected void startWriter(final SessionObject sessionObj, final int objectId, final int folderId, final OutputStream os) throws Exception {
+	protected void startWriter(final Session sessionObj, final int objectId, final int folderId, final OutputStream os) throws Exception {
 		final TaskWriter taskwriter = new TaskWriter(sessionObj);
 		taskwriter.startWriter(objectId, folderId, os);
 	}
 	
-	protected void startWriter(final SessionObject sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final Date lastsync, final OutputStream os) throws Exception {
+	protected void startWriter(final Session sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final Date lastsync, final OutputStream os) throws Exception {
 		startWriter(sessionObj, folderId, bModified, bDelete, false, lastsync, os);
 	}
 	
-	protected void startWriter(final SessionObject sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
+	protected void startWriter(final Session sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
 		final TaskWriter taskwriter = new TaskWriter(sessionObj);
 		taskwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
 	}
 	
 	@Override
-	protected boolean hasModulePermission(final SessionObject sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj) {
 		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
 		return (uc.hasWebDAVXML() && uc.hasTask());
 	}

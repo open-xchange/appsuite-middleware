@@ -49,16 +49,19 @@
 
 package com.openexchange.groupware.importexport.exporters;
 
-import com.openexchange.api2.ContactSQLInterface;
-import com.openexchange.api2.RdbContactSQLInterface;
-import com.openexchange.groupware.importexport.SizedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.sql.SQLException;
+import java.util.Date;
+import java.util.Map;
 
+import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
@@ -66,23 +69,19 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.Exporter;
 import com.openexchange.groupware.importexport.Format;
+import com.openexchange.groupware.importexport.SizedInputStream;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.Date;
-import java.util.Map;
-import java.util.TimeZone;
 
 @OXExceptionSource(
 classId=ImportExportExceptionClasses.VCARDEXPORTER,
@@ -215,7 +214,7 @@ category={
 		ContactObject.DEFAULT_ADDRESS
 	};
 	
-	public boolean canExport(final SessionObject sessObj, final Format format, final String folder, final Map<String, String[]> optionalParams) throws ImportExportException {
+	public boolean canExport(final Session sessObj, final Format format, final String folder, final Map<String, String[]> optionalParams) throws ImportExportException {
 		if (!format.equals(Format.VCARD)) {
 			return false;
 		}
@@ -252,7 +251,7 @@ category={
 		return false;
 	}
 	
-	public SizedInputStream exportData(SessionObject sessObj, Format format, String folder, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
+	public SizedInputStream exportData(Session sessObj, Format format, String folder, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		try {
 			if (fieldsToBeExported == null) {
@@ -284,7 +283,7 @@ category={
 				Format.VCARD);
 	}
 	
-	public SizedInputStream exportData(SessionObject sessObj, Format format, String folder, int objectId, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
+	public SizedInputStream exportData(Session sessObj, Format format, String folder, int objectId, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		try {
 			final VersitDefinition contactDef = Versit.getDefinition("text/vcard");

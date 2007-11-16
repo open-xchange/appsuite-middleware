@@ -60,8 +60,8 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.sessiond.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
-import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavProperty;
 
@@ -139,7 +139,7 @@ public class PropertyHelper {
 		if(loadedAllProps) {
 			return;
 		}
-		final SessionObject session = sessionHolder.getSessionObject();
+		final Session session = sessionHolder.getSessionObject();
 		try {
 			final List<WebdavProperty> list = propertyStore.loadProperties(id, Arrays.asList(new WebdavProperty(namespace,name)), session.getContext());
 			if(list.isEmpty()) {
@@ -158,7 +158,7 @@ public class PropertyHelper {
 			return;
 		}
 		loadedAllProps = true;
-		final SessionObject session = sessionHolder.getSessionObject();
+		final Session session = sessionHolder.getSessionObject();
 		try {
 			final List<WebdavProperty> list = propertyStore.loadAllProperties(id, session.getContext());
 			for(final WebdavProperty prop : list) {
@@ -174,7 +174,7 @@ public class PropertyHelper {
 			return;
 		}
 		changed = false;
-		final SessionObject session = sessionHolder.getSessionObject();
+		final Session session = sessionHolder.getSessionObject();
 		propertyStore.saveProperties(id, new ArrayList<WebdavProperty>(changedProps), session.getContext());
 		changedProps.clear();
 		propertyStore.removeProperties(id, new ArrayList<WebdavProperty>(removedProperties), session.getContext());
@@ -182,7 +182,7 @@ public class PropertyHelper {
 	}
 	
 	public void deleteProperties() throws OXException {
-		final SessionObject session = sessionHolder.getSessionObject();
+		final Session session = sessionHolder.getSessionObject();
 		propertyStore.removeAll(id, session.getContext());
 	}
 	

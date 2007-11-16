@@ -51,23 +51,26 @@
 
 package com.openexchange.webdav.xml;
 
+import java.io.OutputStream;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jdom.Element;
+import org.jdom.output.XMLOutputter;
+
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
-import java.io.OutputStream;
-import java.util.Date;
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.jdom.Element;
-import org.jdom.output.XMLOutputter;
 
 /**
  * FolderWriter
@@ -93,7 +96,7 @@ public class FolderWriter extends FolderChildWriter {
 		this.userId = userId;
 	}
 	
-	public FolderWriter(final SessionObject sessionObj) {
+	public FolderWriter(final Session sessionObj) {
 		this.sessionObj = sessionObj;
 		userId = sessionObj.getUserId();
 	}

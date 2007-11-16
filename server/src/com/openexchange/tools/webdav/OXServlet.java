@@ -62,11 +62,11 @@ import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.sessiond.Session;
 import com.openexchange.sessiond.impl.InvalidCredentialsException;
 import com.openexchange.sessiond.impl.LoginException;
 import com.openexchange.sessiond.impl.MaxSessionLimitException;
 import com.openexchange.sessiond.impl.PasswordExpiredException;
-import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessiondConnector;
 import com.openexchange.sessiond.impl.SessiondException;
 import com.openexchange.sessiond.impl.UserNotActivatedException;
@@ -139,7 +139,7 @@ public abstract class OXServlet extends WebDavServlet {
     protected boolean doAuth(final HttpServletRequest req,
         final HttpServletResponse resp) throws IOException {
         final String sessionId = getSessionId(req);
-        SessionObject session = null;
+        Session session = null;
         if (null != sessionId) {
             session = getSession(sessionId);
         }
@@ -313,10 +313,10 @@ public abstract class OXServlet extends WebDavServlet {
      * @return the initilized session or <code>null</code>.
      * @throws LoginException if an error occurs while creating the session.
      */
-    private SessionObject addSession(final String login, final String pass,
+    private Session addSession(final String login, final String pass,
         final String ipAddress) throws LoginException {
         final SessiondConnector connector = SessiondConnector.getInstance();
-        SessionObject session = null;
+        Session session = null;
         try {
             session = connector.addSession(login, pass, ipAddress);
         } catch (InvalidCredentialsException e) {
@@ -348,7 +348,7 @@ public abstract class OXServlet extends WebDavServlet {
      * @return the session object or <code>null</code> if the session doesn't
      * exist.
      */
-    private SessionObject getSession(final String sessionId) {
+    private Session getSession(final String sessionId) {
         final SessiondConnector connector = SessiondConnector.getInstance();
         return connector.getSession(sessionId);
     }
@@ -357,8 +357,8 @@ public abstract class OXServlet extends WebDavServlet {
      * @param req Request.
      * @return the session object.
      */
-    protected SessionObject getSession(final HttpServletRequest req) {
-        final SessionObject session = (SessionObject) req
+    protected Session getSession(final HttpServletRequest req) {
+        final Session session = (Session) req
             .getAttribute(SESSION);
         if (null == session) {
             LOG.error("Somebody gets a null session.");

@@ -56,7 +56,7 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.SettingSetup;
 import com.openexchange.groupware.settings.SharedValue;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.Session;
 
 /**
  * 
@@ -92,10 +92,10 @@ public final class MaxUploadIdleTimeout extends AbstractNode {
      */
     public SharedValue getSharedValue() {
         return new ReadOnlyValue() {
-            public boolean isAvailable(final SessionObject session) {
+            public boolean isAvailable(final Session session) {
                 return true;
             }
-            public void getValue(final SessionObject session,
+            public void getValue(final Session session,
                 final Setting setting) throws SettingException {
                 try {
                     setting.setSingleValue(ServerConfig.getInteger(ServerConfig
