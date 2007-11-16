@@ -1,3 +1,7 @@
+* 2007-11-16 - thorben.betten@open-xchange.com
+
+ - Bugfix #10234: Using proper SQL to locate duplicate folders on update
+
 * 2007-11-14 - thorben.betten@open-xchange.com
 
  - Bugfix #10167: Fixed imap-based sort
