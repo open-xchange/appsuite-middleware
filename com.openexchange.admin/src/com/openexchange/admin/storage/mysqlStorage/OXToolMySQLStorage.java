@@ -73,7 +73,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.ContextImpl;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.update.exception.UpdateException;
 
