@@ -68,10 +68,9 @@ import com.openexchange.charset.CollectionCharsetProvider;
  */
 public final class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(Activator.class);
-
 	private CollectionCharsetProvider collectionCharsetProvider;
+
+	private CharsetProvider backupCharsetProvider;
 
 	private BundleContext context;
 
@@ -126,6 +125,10 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 		final Field extendedProviderField = java.nio.charset.Charset.class.getDeclaredField("extendedProvider");
 		extendedProviderField.setAccessible(true);
 		/*
+		 * Backup old charset provider
+		 */
+		backupCharsetProvider = (CharsetProvider) extendedProviderField.get(null);
+		/*
 		 * Add previous charset provider
 		 */
 		collectionCharsetProvider = new CollectionCharsetProvider((CharsetProvider) extendedProviderField.get(null));
@@ -142,36 +145,19 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 	 *             If field "extendedProvider" does not exist
 	 * @throws IllegalAccessException
 	 *             If field "extendedProvider" is not accessible
-	 * @throws InstantiationException
-	 *             If original instance could not be instantiated
 	 */
-	private void restoreCharsetExtendedProvider() throws NoSuchFieldException, IllegalAccessException,
-			InstantiationException {
+	private void restoreCharsetExtendedProvider() throws NoSuchFieldException, IllegalAccessException {
 		/*
 		 * Restore java.nio.charset.Charset class
 		 */
 		final Field extendedProviderField = java.nio.charset.Charset.class.getDeclaredField("extendedProvider");
 		extendedProviderField.setAccessible(true);
 		/*
-		 * Instantiate previous charset provider
+		 * Assign previously remembered charset provider
 		 */
-		CharsetProvider extendedProvider = null;
-		try {
-			final Class<? extends CharsetProvider> epc = Class.forName("sun.nio.cs.ext.ExtendedCharsets").asSubclass(
-					CharsetProvider.class);
-			extendedProvider = epc.newInstance();
-		} catch (final ClassNotFoundException x) {
-			/*
-			 * Cannot occur: extended charsets not available (charsets.jar not
-			 * present)
-			 */
-			LOG.error("Extended charsets not available (charsets.jar not present)", x);
-			return;
-		}
-		/*
-		 * Restore field
-		 */
-		extendedProviderField.set(null, extendedProvider);
+		extendedProviderField.set(null, backupCharsetProvider);
+		backupCharsetProvider = null;
+		collectionCharsetProvider = null;
 	}
 
 	/*
@@ -184,6 +170,10 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 		if (service instanceof CharsetProvider) {
 			collectionCharsetProvider.removeCharsetProvider((CharsetProvider) service);
 		}
+		/*
+		 * XXX: Necessary to unget service???
+		 */
+		context.ungetService(reference);
 	}
 
 	/*
