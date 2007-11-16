@@ -66,7 +66,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXResourceSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.groupware.IDGenerator;
-import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 

@@ -68,7 +68,7 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXGroupSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.groupware.IDGenerator;
-import com.openexchange.groupware.contexts.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;

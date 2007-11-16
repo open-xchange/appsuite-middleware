@@ -53,7 +53,7 @@ import com.openexchange.admin.tools.PropertyHandler;
 import java.sql.Connection;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.ContextImpl;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 

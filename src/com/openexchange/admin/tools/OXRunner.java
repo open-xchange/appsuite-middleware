@@ -63,8 +63,8 @@ import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.DatabaseInit;
 import com.openexchange.event.EventInit;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.contexts.ContextException;
-import com.openexchange.groupware.contexts.ContextStorage;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.server.DBPoolingException;
 
 /**
@@ -92,11 +92,11 @@ public class OXRunner {
         }
         try {
             Configuration.load();
-        } catch (IOException e) {
-            fatal(e);
+        } catch (ConfigurationException e1) {
+            fatal(e1);
         }
         try {
-            DatabaseInit.init();
+            DatabaseInit.getInstance().start();
             ContextStorage.init();
             /*
              * Force cache initialization
