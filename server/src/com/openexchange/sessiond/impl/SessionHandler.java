@@ -182,9 +182,9 @@ public class SessionHandler extends TimerTask {
         User u = null;
 
         try {
-            final UserStorage us = UserStorage.getInstance(context);
-            userId = us.getUserId(username);
-            u = us.getUser(userId);
+            final UserStorage us = UserStorage.getInstance();
+            userId = us.getUserId(username, context);
+            u = us.getUser(userId, context);
         } catch (LdapException ex) {
             switch (ex.getDetail()) {
                 case ERROR:

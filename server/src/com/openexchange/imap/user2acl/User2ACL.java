@@ -56,7 +56,6 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.config.MailConfig.LoginType;
 
@@ -297,38 +296,20 @@ public abstract class User2ACL {
 	public abstract String getACLName(int userId, Context ctx, User2ACLArgs user2AclArgs) throws AbstractOXException;
 
 	/**
-	 * Determines the entity name of the user whose ID matches given
-	 * <code>userId</code> that is used in IMAP server's ACL list.
-	 * 
-	 * @param userId -
-	 *            the user ID
-	 * @param userStorage -
-	 *            associated user storage implementation
-	 * @param user2AclArgs -
-	 *            the arguments container
-	 * @return the IMAP login of the user whose ID matches given
-	 *         <code>userId</code>
-	 * @throws AbstractOXException -
-	 *             if user could not be found
-	 */
-	public abstract String getACLName(final int userId, final UserStorage userStorage, User2ACLArgs user2AclArgs)
-			throws AbstractOXException;
-
-	/**
 	 * Determines the user ID whose either ACL entity name or user name matches
 	 * given <code>pattern</code>.
 	 * 
 	 * @param pattern -
 	 *            the pattern for either IMAP login or user name
-	 * @param userStorage -
-	 *            the associated user storage implementation
+	 * @param ctx -
+	 *            the context
 	 * @param user2AclArgs -
 	 *            the arguments container
 	 * @return the user ID whose IMAP login matches given <code>pattern</code>
 	 * @throws AbstractOXException -
 	 *             if user search fails
 	 */
-	public abstract int getUserID(final String pattern, final UserStorage userStorage, User2ACLArgs user2AclArgs)
+	public abstract int getUserID(final String pattern, Context ctx, User2ACLArgs user2AclArgs)
 			throws AbstractOXException;
 
 }

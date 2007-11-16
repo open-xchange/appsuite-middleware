@@ -186,12 +186,11 @@ public final class ConfigTree {
         public void writeValue(final Session session,
             final Setting setting) throws SettingException {
             try {
-                final UserStorage storage = UserStorage
-                    .getInstance(session.getContext());
-                final User oldUser = storage.getUser(session.getUserId());
+                final UserStorage storage = UserStorage.getInstance();
+                final User oldUser = storage.getUser(session.getUserId(), session.getContext());
                 final UserImpl user = new UserImpl(oldUser);
                 setValue(user, (String) setting.getSingleValue());
-                storage.updateUser(user);
+                storage.updateUser(user, session.getContext());
             } catch (LdapException e) {
                 throw new SettingException(e);
             }

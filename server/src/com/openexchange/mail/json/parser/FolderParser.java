@@ -117,7 +117,7 @@ public final class FolderParser {
 				final int arrayLength = jsonArr.length();
 				if (arrayLength > 0) {
 					final List<MailPermission> iPerms = new ArrayList<MailPermission>(arrayLength);
-					final UserStorage us = UserStorage.getInstance(session.getContext());
+					final UserStorage us = UserStorage.getInstance();
 					for (int i = 0; i < arrayLength; i++) {
 						final JSONObject elem = jsonArr.getJSONObject(i);
 						if (!elem.has(FolderFields.ENTITY)) {
@@ -128,7 +128,7 @@ public final class FolderParser {
 							entity = elem.getInt(FolderFields.ENTITY);
 						} catch (final JSONException e) {
 							final String entityStr = elem.getString(FolderFields.ENTITY);
-							entity = us.getUserId(entityStr);
+							entity = us.getUserId(entityStr, session.getContext());
 						}
 						final MailPermission mailPerm = MailPermission.getInstance(session);
 						mailPerm.setEntity(entity);

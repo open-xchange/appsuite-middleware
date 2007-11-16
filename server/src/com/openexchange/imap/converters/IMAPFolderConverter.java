@@ -57,7 +57,6 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserException;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.ACLPermission;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.cache.RightsCache;
@@ -352,11 +351,10 @@ public final class IMAPFolderConverter {
 		} else {
 			try {
 				final ACL[] acls = imapFolder.getACL();
-				final UserStorage userStorage = UserStorage.getInstance(session.getContext());
 				final User2ACLArgs args = new MyUser2ACLArgs(session.getUserId(), imapFolder.getFullName(), imapFolder
 						.getSeparator());
 				for (int j = 0; j < acls.length; j++) {
-					final ACLPermission aclPerm = new ACLPermission(session, userStorage);
+					final ACLPermission aclPerm = new ACLPermission(session);
 					try {
 						aclPerm.parseACL(acls[j], args);
 						mailFolder.addPermission(aclPerm);

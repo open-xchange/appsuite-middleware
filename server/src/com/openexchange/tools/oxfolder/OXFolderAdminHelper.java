@@ -631,7 +631,7 @@ public final class OXFolderAdminHelper {
 		try {
 			final int defaultInfostoreId = OXFolderSQL.getUserDefaultFolder(userId, FolderObject.INFOSTORE, readCon,
 					ctx);
-			OXFolderSQL.updateName(defaultInfostoreId, UserStorage.getInstance(ctx).getUser(userId).getDisplayName(),
+			OXFolderSQL.updateName(defaultInfostoreId, UserStorage.getInstance().getUser(userId, ctx).getDisplayName(),
 					contextAdminID, userId, writeCon, ctx);
 			/*
 			 * Reload cache entry

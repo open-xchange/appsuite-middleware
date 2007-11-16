@@ -391,8 +391,8 @@ public final class TaskLogic {
             case Participant.GROUP:
                 final GroupParticipant group = (GroupParticipant) participant;
                 try {
-                    final int[] member = GroupStorage.getInstance(ctx).getGroup(
-                        group.getIdentifier()).getMember();
+                    final int[] member = GroupStorage.getInstance().getGroup(
+                        group.getIdentifier(), ctx).getMember();
                     for (int userId : member) {
                         final TaskParticipant tParticipant =
                             new InternalParticipant(new UserParticipant(userId),

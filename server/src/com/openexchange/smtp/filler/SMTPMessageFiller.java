@@ -794,8 +794,8 @@ public final class SMTPMessageFiller {
 			/*
 			 * Get context's admin contact object
 			 */
-			final ContactObject c = new RdbContactSQLInterface(session).getObjectById(UserStorage.getInstance(
-					session.getContext()).getUser(session.getContext().getMailadmin()).getContactId(),
+			final ContactObject c = new RdbContactSQLInterface(session).getObjectById(UserStorage.getInstance()
+					.getUser(session.getContext().getMailadmin(), session.getContext()).getContactId(),
 					FolderObject.SYSTEM_LDAP_FOLDER_ID);
 			if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
 				smtpMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, c.getCompany());
@@ -810,7 +810,8 @@ public final class SMTPMessageFiller {
 			/*
 			 * Set ENVELOPE-FROM in SMTP message to user's primary email address
 			 */
-			smtpMessage.setEnvelopeFrom(UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail());
+			smtpMessage
+					.setEnvelopeFrom(UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail());
 		}
 	}
 

@@ -110,7 +110,7 @@ public class ResourceRequest {
 		final JSONArray jsonArray = DataParser.checkJSONArray(jsonObj, "data");
 		
 		UserStorage userStorage = null;
-		final ResourceStorage resourceStorage = ResourceStorage.getInstance(sessionObj.getContext());
+		final ResourceStorage resourceStorage = ResourceStorage.getInstance();
 		
 		for (int a = 0; a < jsonArray.length(); a++) {
 			JSONObject jData = jsonArray.getJSONObject(a);
@@ -118,17 +118,17 @@ public class ResourceRequest {
 			com.openexchange.groupware.ldap.Resource r = null;
 			
 			try {
-				r = resourceStorage.getResource(id);
+				r = resourceStorage.getResource(id, sessionObj.getContext());
 			} catch (LdapException exc) {
 				LOG.debug("resource not found try to find id in user table", exc);
 			}
 			
 			if (r == null) {
 				if (userStorage == null) {
-					userStorage = UserStorage.getInstance(sessionObj.getContext());
+					userStorage = UserStorage.getInstance();
 				}
 				
-				final User u = userStorage.getUser(id);
+				final User u = userStorage.getUser(id, sessionObj.getContext());
 				
 				r = new com.openexchange.groupware.ldap.Resource();
 				r.setIdentifier(u.getId());
@@ -154,9 +154,9 @@ public class ResourceRequest {
 	public JSONObject actionGet(JSONObject jsonObj) throws LdapException, OXMandatoryFieldException, JSONException, OXJSONException, AjaxException {
 		timestamp = new Date(0);
 		
-		final ResourceStorage resourceStorage = ResourceStorage.getInstance(sessionObj.getContext());
+		final ResourceStorage resourceStorage = ResourceStorage.getInstance();
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
-		final com.openexchange.groupware.ldap.Resource r = resourceStorage.getResource(id);
+		final com.openexchange.groupware.ldap.Resource r = resourceStorage.getResource(id, sessionObj.getContext());
 		
 		final ResourceWriter resourceWriter = new ResourceWriter();
 		final JSONObject jsonResourceObj = new JSONObject();
@@ -177,23 +177,25 @@ public class ResourceRequest {
 		try {
 			final JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
 			String searchpattern = null;
-			
+
 			if (jData.has("pattern")) {
 				searchpattern = jData.getString("pattern");
 			}
-			
-			final ResourceStorage resourceStorage = ResourceStorage.getInstance(sessionObj.getContext());
-			final com.openexchange.groupware.ldap.Resource[] resources = resourceStorage.searchResources(searchpattern);
-			
+
+			final ResourceStorage resourceStorage = ResourceStorage.getInstance();
+			final com.openexchange.groupware.ldap.Resource[] resources = resourceStorage.searchResources(searchpattern,
+					sessionObj.getContext());
+
 			final ResourceWriter resourceWriter = new ResourceWriter();
-			
+
 			for (int a = 0; a < resources.length; a++) {
 				final JSONObject jsonResourceObj = new JSONObject();
-				resourceWriter.writeParameter(ParticipantsFields.DISPLAY_NAME, resources[a].getDisplayName(), jsonResourceObj);
+				resourceWriter.writeParameter(ParticipantsFields.DISPLAY_NAME, resources[a].getDisplayName(),
+						jsonResourceObj);
 				resourceWriter.writeParameter(ParticipantsFields.ID, resources[a].getIdentifier(), jsonResourceObj);
 				jsonResponseArray.put(jsonResourceObj);
 			}
-			
+
 			return jsonResponseArray;
 		} finally {
 			if (it != null) {

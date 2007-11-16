@@ -216,17 +216,17 @@ public final class groupuser extends PermissionServlet {
 	private void writeElementGroups(final Session sessionObj, final String s_groups, final Date lastsync, final OutputStream os, final XMLOutputter xo) throws Exception {
 		os.write(("<ox:groups>").getBytes());
 		
-		final GroupStorage groupstorage = GroupStorage.getInstance(sessionObj.getContext());
+		final GroupStorage groupstorage = GroupStorage.getInstance();
 		Group[] group = null;
 		
 		if (lastsync == null) {
 			if (s_groups == null || s_groups.equals("*")) {
-				group = groupstorage.getGroups();
+				group = groupstorage.getGroups(sessionObj.getContext());
 			} else {
-				group = groupstorage.searchGroups(s_groups);
+				group = groupstorage.searchGroups(s_groups, sessionObj.getContext());
 			}
 		} else {
-			group = groupstorage.listModifiedGroups(lastsync);
+			group = groupstorage.listModifiedGroups(lastsync, sessionObj.getContext());
 		}
 		
 		for (int a = 0; a < group.length; a++) {
@@ -305,13 +305,13 @@ public final class groupuser extends PermissionServlet {
 	private void writeElementResources(final Session sessionObj, final String s_resources, final Date lastsync, final OutputStream os, final XMLOutputter xo) throws Exception {
 		os.write(("<ox:resources>").getBytes());
 		
-		final ResourceStorage resourcestorage = ResourceStorage.getInstance(sessionObj.getContext());
+		final ResourceStorage resourcestorage = ResourceStorage.getInstance();
 		Resource[] resource = null;
 		
 		if (lastsync == null) {
-			resource = resourcestorage.searchResources(s_resources);
+			resource = resourcestorage.searchResources(s_resources, sessionObj.getContext());
 		} else {
-			resource = resourcestorage.listModified(lastsync);
+			resource = resourcestorage.listModified(lastsync, sessionObj.getContext());
 		}
 		
 		for (int a = 0; a < resource.length; a++) {

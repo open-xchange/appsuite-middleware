@@ -147,31 +147,30 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	// Override for testing
 	
 	protected User[] resolveUsers(final Context ctx, final int...ids) throws LdapException {
-		final UserStorage users = UserStorage.getInstance(ctx);
 		final User[] r = new User[ids.length];
 		int i = 0;
 		for(final int id : ids) {
-			r[i++] = users.getUser(id); // FIXME
+			r[i++] = UserStorage.getInstance().getUser(id, ctx); // FIXME
 		}
 		return r;
 	}
 	
 	protected Group[] resolveGroups(final Context ctx, final int...ids) throws LdapException {
-		final GroupStorage groups = GroupStorage.getInstance(ctx);
+		final GroupStorage groups = GroupStorage.getInstance();
 		final Group[] r = new Group[ids.length];
 		int i = 0;
 		for(final int id : ids) {
-			r[i++] = groups.getGroup(id);
+			r[i++] = groups.getGroup(id, ctx);
 		}
 		return r;
 	}
 	
 	protected Resource[] resolveResources(final Context ctx, final int...ids) throws LdapException {
-		final ResourceStorage resources = ResourceStorage.getInstance(ctx);
+		final ResourceStorage resources = ResourceStorage.getInstance();
 		final Resource[] r = new Resource[ids.length];
 		int i = 0;
 		for(final int id : ids) {
-			r[i++] = resources.getResource(id);
+			r[i++] = resources.getResource(id, ctx);
 		}
 		return r;
 	}

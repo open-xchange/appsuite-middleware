@@ -73,23 +73,17 @@ public class RdbGroupStorage extends GroupStorage {
         + DISPLAYNAME + ',' + LAST_MODIFIED + " FROM groups WHERE cid=?";
 
     /**
-     * Reference to the context.
-     */
-    private final transient Context context;
-
-    /**
      * Default constructor.
-     * @param context Context.
      */
-    public RdbGroupStorage(final Context context) {
+    public RdbGroupStorage() {
         super();
-        this.context = context;
     }
 
     /**
      * {@inheritDoc}
      */
-    public Group getGroup(final int gid) throws LdapException {
+    @Override
+	public Group getGroup(final int gid, final Context context) throws LdapException {
         Connection con;
         try {
             con = DBPool.pickup(context);
@@ -112,7 +106,7 @@ public class RdbGroupStorage extends GroupStorage {
                 group.setLastModified(new Date(result.getLong(pos++)));
             } else {
                 throw new LdapException(Component.GROUP, Code.GROUP_NOT_FOUND,
-                    gid, context.getContextId());
+                    Integer.valueOf(gid), Integer.valueOf(context.getContextId()));
             }
             group.setMember(selectMember(con, context, group.getIdentifier()));
         } catch (SQLException e) {
@@ -128,7 +122,8 @@ public class RdbGroupStorage extends GroupStorage {
     /**
      * {@inheritDoc}
      */
-    public Group[] listModifiedGroups(final Date modifiedSince)
+    @Override
+	public Group[] listModifiedGroups(final Date modifiedSince, final Context context)
         throws LdapException {
         Connection con = null;
         try {
@@ -169,7 +164,8 @@ public class RdbGroupStorage extends GroupStorage {
     /**
      * {@inheritDoc}
      */
-    public Group[] searchGroups(final String pattern) throws LdapException {
+    @Override
+	public Group[] searchGroups(final String pattern, final Context context) throws LdapException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
@@ -208,7 +204,8 @@ public class RdbGroupStorage extends GroupStorage {
     /**
      * {@inheritDoc}
      */
-    public Group[] getGroups() throws LdapException {
+    @Override
+	public Group[] getGroups(final Context context) throws LdapException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
@@ -257,14 +254,14 @@ public class RdbGroupStorage extends GroupStorage {
             stmt.setInt(2, groupId);
             result = stmt.executeQuery();
             while (result.next()) {
-                tmp.add(result.getInt(1));
+                tmp.add(Integer.valueOf(result.getInt(1)));
             }
         } finally {
             closeSQLStuff(result, stmt);
         }
         int[] member = new int[tmp.size()];
         for (int i = 0; i < member.length; i++) {
-            member[i] = tmp.get(i);
+            member[i] = tmp.get(i).intValue();
         }
         return member;
     }

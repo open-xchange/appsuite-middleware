@@ -154,7 +154,7 @@ public class AppointmentRequest {
 	public AppointmentRequest(Session sessionObj) {
 		this.sessionObj = sessionObj;
 		try {
-			user = UserStorage.getInstance(sessionObj.getContext()).getUser(sessionObj.getUserId());
+			user = UserStorage.getInstance().getUser(sessionObj.getUserId(), sessionObj.getContext());
 		} catch (LdapException e) {
 			/*
 			 * Cannot occur

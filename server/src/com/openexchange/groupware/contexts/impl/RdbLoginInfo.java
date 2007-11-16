@@ -81,15 +81,15 @@ public class RdbLoginInfo extends LoginInfo {
                     .INVALID_CREDENTIALS);
             }
             final Context ctx = ctxStor.getContext(ctxId);
-            final UserStorage userStor = UserStorage.getInstance(ctx);
+            final UserStorage userStor = UserStorage.getInstance();
             final int userId;
             try {
-                userId = userStor.getUserId(splitted[1]);
+                userId = userStor.getUserId(splitted[1], ctx);
             } catch (LdapException e) {
                 throw new LoginException(LoginException.Code
                     .INVALID_CREDENTIALS, e);
             }
-            final User user = userStor.getUser(userId);
+            final User user = userStor.getUser(userId, ctx);
             if (!userStor.authenticate(user, password)) {
                 throw new LoginException(LoginException.Code
                     .INVALID_CREDENTIALS);

@@ -83,31 +83,18 @@ public final class CyrusUser2ACL extends User2ACL {
 	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.imap.user2acl.User2ACL#getACLName(int,
-	 *      com.openexchange.groupware.contexts.Context,
+	 *      com.openexchange.groupware.ldap.UserStorage,
 	 *      com.openexchange.imap.user2acl.User2ACLArgs)
 	 */
 	@Override
 	public String getACLName(final int userId, final Context ctx, final User2ACLArgs user2AclArgs)
 			throws AbstractOXException {
-		return getACLName(userId, UserStorage.getInstance(ctx), user2AclArgs);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.user2acl.User2ACL#getACLName(int,
-	 *      com.openexchange.groupware.ldap.UserStorage,
-	 *      com.openexchange.imap.user2acl.User2ACLArgs)
-	 */
-	@Override
-	public String getACLName(final int userId, final UserStorage userStorage, final User2ACLArgs user2AclArgs)
-			throws AbstractOXException {
 		if (userId == OCLPermission.ALL_GROUPS_AND_USERS) {
 			return AUTH_ID_ANYONE;
 		} else if (CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
-			return userStorage.getUser(userId).getImapLogin();
+			return UserStorage.getInstance().getUser(userId, ctx).getImapLogin();
 		}
-		return userStorage.getUser(userId).getLoginInfo();
+		return UserStorage.getInstance().getUser(userId, ctx).getLoginInfo();
 	}
 
 	/*
@@ -118,7 +105,7 @@ public final class CyrusUser2ACL extends User2ACL {
 	 *      com.openexchange.imap.user2acl.User2ACLArgs)
 	 */
 	@Override
-	public int getUserID(final String pattern, final UserStorage userStorage, final User2ACLArgs user2AclArgs)
+	public int getUserID(final String pattern, final Context ctx, final User2ACLArgs user2AclArgs)
 			throws AbstractOXException {
 		if (AUTH_ID_ANYONE.equalsIgnoreCase(pattern)) {
 			return OCLPermission.ALL_GROUPS_AND_USERS;
@@ -126,12 +113,12 @@ public final class CyrusUser2ACL extends User2ACL {
 			/*
 			 * Find user name by user's imap login
 			 */
-			return userStorage.resolveIMAPLogin(pattern);
+			return UserStorage.getInstance().resolveIMAPLogin(pattern, ctx);
 		}
 		/*
 		 * Find by name
 		 */
-		return userStorage.getUserId(pattern);
+		return UserStorage.getInstance().getUserId(pattern, ctx);
 	}
 
 }

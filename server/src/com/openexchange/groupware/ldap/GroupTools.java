@@ -83,10 +83,10 @@ public final class GroupTools {
             throw new UserException(UserException.Code.NOT_CLONEABLE, e,
                 Group.class.getName());
         }
-        final UserStorage ustor = UserStorage.getInstance(ctx);
-        retval.setMember(ustor.listAllUser());
+        final UserStorage ustor = UserStorage.getInstance();
+        retval.setMember(ustor.listAllUser(ctx));
         retval.setLastModified(new Date());
-        final User admin = ustor.getUser(ctx.getMailadmin());
+        final User admin = ustor.getUser(ctx.getMailadmin(), ctx);
         final StringHelper helper = new StringHelper(LocaleTools.getLocale(admin
             .getPreferredLanguage()));
         retval.setDisplayName(helper.getString(Groups.ZERO_DISPLAYNAME));

@@ -1530,7 +1530,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	public static String getUserName(final int userId, final Context ctx) {
 		final User u;
 		try {
-			u = UserStorage.getInstance(ctx).getUser(userId);
+			u = UserStorage.getInstance().getUser(userId, ctx);
 		} catch (final LdapException e) {
 			return String.valueOf(userId);
 		}

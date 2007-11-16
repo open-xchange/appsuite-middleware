@@ -203,8 +203,7 @@ public class freebusy extends HttpServlet {
 		
 		try {
 			final Context context = new ContextImpl(contextId);
-			final UserStorage userStorage = UserStorage.getInstance(context);
-			final User user = userStorage.searchUser(mailPrefix + '@' + mailSuffix);
+			final User user = UserStorage.getInstance().searchUser(mailPrefix + '@' + mailSuffix, context);
 			final Session sessionObj = SessionObjectWrapper.createSessionObject(user.getId(), context, "freebusysessionobject");
 			
 			final AppointmentSQLInterface appointmentInterface = new CalendarSql(sessionObj);

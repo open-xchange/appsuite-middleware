@@ -62,12 +62,13 @@ import com.openexchange.server.OCLPermission;
 
 /**
  * <p>
- * {@link CourierUser2ACL} - Handles the ACL entities used by Courier IMAP server. The
- * current supported identifers are: <i>owner</i> & <i>anyone</i>. Missing
- * handling for identifiers: <i>anonymous</i> (This is a synonym from <i>anyone</i>),
- * <i>user=loginid</i> (Rights or negative rights for IMAP account "loginid"),
- * <i>group=name</i> (Rights or negative rights for account group "name") &
- * <i>administrators</i> (This is an alias for <i>group=administrators</i>).
+ * {@link CourierUser2ACL} - Handles the ACL entities used by Courier IMAP
+ * server. The current supported identifers are: <i>owner</i> & <i>anyone</i>.
+ * Missing handling for identifiers: <i>anonymous</i> (This is a synonym from
+ * <i>anyone</i>), <i>user=loginid</i> (Rights or negative rights for IMAP
+ * account "loginid"), <i>group=name</i> (Rights or negative rights for account
+ * group "name") & <i>administrators</i> (This is an alias for
+ * <i>group=administrators</i>).
  * <p>
  * The complete implementation should be able to handle an ACL like this one:
  * <i>owner aceilrstwx anyone lr user=john w -user=mary r administrators
@@ -104,12 +105,6 @@ public class CourierUser2ACL extends User2ACL {
 	@Override
 	public String getACLName(final int userId, final Context ctx, final User2ACLArgs user2AclArgs)
 			throws AbstractOXException {
-		return getACLName(userId, UserStorage.getInstance(ctx), user2AclArgs);
-	}
-
-	@Override
-	public String getACLName(final int userId, final UserStorage userStorage, final User2ACLArgs user2AclArgs)
-			throws AbstractOXException {
 		if (userId == OCLPermission.ALL_GROUPS_AND_USERS) {
 			return ALIAS_ANYONE;
 		}
@@ -126,30 +121,30 @@ public class CourierUser2ACL extends User2ACL {
 				 */
 				return ALIAS_OWNER;
 			}
-			return getACLNameInternal(userId, userStorage);
+			return getACLNameInternal(userId, ctx);
 		}
 		/*
 		 * A shared folder
 		 */
-		final int sharedOwnerID = getUserIDInternal(sharedOwner, userStorage);
+		final int sharedOwnerID = getUserIDInternal(sharedOwner, ctx);
 		if (sharedOwnerID == userId) {
 			/*
 			 * Owner is equal to given user
 			 */
 			return ALIAS_OWNER;
 		}
-		return getACLNameInternal(userId, userStorage);
+		return getACLNameInternal(userId, ctx);
 	}
 
-	private final String getACLNameInternal(final int userId, final UserStorage userStorage) throws AbstractOXException {
+	private final String getACLNameInternal(final int userId, final Context ctx) throws AbstractOXException {
 		if (CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
-			return userStorage.getUser(userId).getImapLogin();
+			return UserStorage.getInstance().getUser(userId, ctx).getImapLogin();
 		}
-		return userStorage.getUser(userId).getLoginInfo();
+		return UserStorage.getInstance().getUser(userId, ctx).getLoginInfo();
 	}
 
 	@Override
-	public int getUserID(final String pattern, final UserStorage userStorage, final User2ACLArgs user2AclArgs)
+	public int getUserID(final String pattern, final Context ctx, final User2ACLArgs user2AclArgs)
 			throws AbstractOXException {
 		if (ALIAS_ANYONE.equalsIgnoreCase(pattern)) {
 			return OCLPermission.ALL_GROUPS_AND_USERS;
@@ -167,7 +162,7 @@ public class CourierUser2ACL extends User2ACL {
 				 */
 				return sessionUser;
 			}
-			return getUserIDInternal(pattern, userStorage);
+			return getUserIDInternal(pattern, ctx);
 		}
 		/*
 		 * A shared folder
@@ -176,21 +171,21 @@ public class CourierUser2ACL extends User2ACL {
 			/*
 			 * Map alias "owner" to shared folder owner
 			 */
-			return getUserIDInternal(sharedOwner, userStorage);
+			return getUserIDInternal(sharedOwner, ctx);
 		}
-		return getUserIDInternal(pattern, userStorage);
+		return getUserIDInternal(pattern, ctx);
 	}
 
-	private final int getUserIDInternal(final String pattern, final UserStorage userStorage) throws AbstractOXException {
+	private final int getUserIDInternal(final String pattern, final Context ctx) throws AbstractOXException {
 		if (CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
 			/*
 			 * Find user name by user's imap login
 			 */
-			return userStorage.resolveIMAPLogin(pattern);
+			return UserStorage.getInstance().resolveIMAPLogin(pattern, ctx);
 		}
 		/*
 		 * Find by name
 		 */
-		return userStorage.getUserId(pattern);
+		return UserStorage.getInstance().getUserId(pattern, ctx);
 	}
 }

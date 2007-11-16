@@ -52,6 +52,7 @@
 package com.openexchange.groupware.ldap;
 
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.openexchange.groupware.contexts.Context;
 
@@ -85,11 +86,12 @@ public abstract class GroupStorage {
      * Attribute name containing the last modification timestamp.
      */
     public static final String LAST_MODIFIED;
-
-    /**
-     * Proxy attribute for the class implementing this interface.
-     */
-    private static Class<? extends GroupStorage> implementingClass;
+    
+    private static final AtomicBoolean initialized = new AtomicBoolean();
+    
+    private static GroupStorage instance;
+    
+    private static GroupStorage instanceWithZero;
 
     /**
      * Private constructor to prevent instantiation.
@@ -101,10 +103,11 @@ public abstract class GroupStorage {
     /**
      * Reads a group from the persistent storage.
      * @param gid Unique identifier of the group.
+     * @param The context.
      * @return The group data object.
      * @throws LdapException if an error occurs.
      */
-    public abstract Group getGroup(final int gid) throws LdapException;
+    public abstract Group getGroup(int gid, Context context) throws LdapException;
 
     /**
      * This method implements a universal search for groups. You have to define
@@ -115,27 +118,30 @@ public abstract class GroupStorage {
      * the values auf the requested attributes in the same order.
      * @param pattern this pattern will be searched in the displayName of the
      * group.
+     * @param The context.
      * @return an array of groups that match the search pattern.
      * @throws LdapException if an error occurs while searching for groups.
      */
-    public abstract Group[] searchGroups(String pattern) throws LdapException;
+    public abstract Group[] searchGroups(String pattern, Context context) throws LdapException;
 
     /**
      * This method returns groups that have been modified since the given
      * timestamp.
      * @param modifiedSince timestamp after that the groups have been modified.
+     * @param The context.
      * @return an array of groups.
      * @throws LdapException if an error occurs.
      */
-    public abstract Group[] listModifiedGroups(Date modifiedSince)
+    public abstract Group[] listModifiedGroups(Date modifiedSince, Context context)
         throws LdapException;
 
     /**
      * Returns the data objects of all groups.
+     * @param The context.
      * @return all groups.
      * @throws LdapException if an error occurs.
      */
-    public abstract Group[] getGroups() throws LdapException;
+    public abstract Group[] getGroups(Context context) throws LdapException;
 
     /**
      * Creates a new instance implementing the group storage interface.
@@ -143,9 +149,9 @@ public abstract class GroupStorage {
      * @return an instance implementing the group storage interface.
      * @throws LdapException if the instance can't be created.
      */
-    public static GroupStorage getInstance(final Context context)
+    public static GroupStorage getInstance()
         throws LdapException {
-        return getInstance(context, false);
+        return getInstance(false);
     }
 
     /**
@@ -157,26 +163,23 @@ public abstract class GroupStorage {
      * @return an instance implementing the group storage interface.
      * @throws LdapException if the instance can't be created.
      */
-    public static GroupStorage getInstance(final Context context,
-        final boolean group0) throws LdapException {
-        synchronized (GroupStorage.class) {
-            if (null == implementingClass) {
-                final String className = LdapUtility.findProperty(Names.
-                    GROUPSTORAGE_IMPL);
-                implementingClass = LdapUtility.getImplementation(className,
-                    GroupStorage.class);
-            }
-        }
-        final GroupStorage impl = LdapUtility.getInstance(implementingClass,
-            context);
-        final GroupStorage retval;
-        if (group0) {
-            retval = new GroupsWithGroupZero(context, impl);
-        } else {
-            retval = impl;
-        }
-        return retval;
-    }
+    public static GroupStorage getInstance(final boolean group0) throws LdapException {
+		if (!initialized.get()) {
+			synchronized (GroupStorage.class) {
+				if (!initialized.get()) {
+					final String className = LdapUtility.findProperty(Names.GROUPSTORAGE_IMPL);
+					instance = LdapUtility.getInstance(LdapUtility.getImplementation(className,
+							GroupStorage.class));
+					instanceWithZero = new GroupsWithGroupZero(instance);
+					initialized.set(true);
+				}
+			}
+		}
+		if (group0) {
+			return instanceWithZero;
+		}
+		return instance;
+	}
 
     static {
         try {

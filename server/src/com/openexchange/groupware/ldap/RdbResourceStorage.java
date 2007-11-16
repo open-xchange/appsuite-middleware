@@ -72,32 +72,26 @@ import com.openexchange.server.DBPool;
 public class RdbResourceStorage extends ResourceStorage {
 
     /**
-     * Reference to the context.
-     */
-    private final transient Context context;
-
-    /**
      * Default constructor.
      * @param context Context.
      */
-    public RdbResourceStorage(final Context context) {
+    public RdbResourceStorage() {
         super();
-        this.context = context;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ResourceGroup getGroup(final int groupId) throws LdapException {
-        final ResourceGroup[] groups = getGroups(new int[] { groupId });
+    public ResourceGroup getGroup(final int groupId, final Context context) throws LdapException {
+        final ResourceGroup[] groups = getGroups(new int[] { groupId }, context);
         if (null == groups || groups.length == 0) {
             throw new LdapException(Component.RESOURCE,
-                Code.RESOURCEGROUP_NOT_FOUND, groupId);
+                Code.RESOURCEGROUP_NOT_FOUND, Integer.valueOf(groupId));
         }
         if (groups.length > 1) {
             throw new LdapException(Component.RESOURCE,
-                Code.RESOURCEGROUP_CONFLICT, groupId);
+                Code.RESOURCEGROUP_CONFLICT, Integer.valueOf(groupId));
         }
         return groups[0];
     }
@@ -106,7 +100,7 @@ public class RdbResourceStorage extends ResourceStorage {
      * {@inheritDoc}
      */
     @Override
-    public ResourceGroup[] getGroups() throws LdapException {
+    public ResourceGroup[] getGroups(final Context context) throws LdapException {
         final Connection con;
         try {
             con = DBPool.pickup(context);
@@ -129,7 +123,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 group.setIdentifier(result.getString(pos++));
                 group.setDisplayName(result.getString(pos++));
                 group.setAvailable(result.getBoolean(pos++));
-                group.setMember(getMember(con, group.getId()));
+                group.setMember(getMember(con, group.getId(), context));
                 groups.add(group);
             }
         } catch (SQLException e) {
@@ -149,7 +143,7 @@ public class RdbResourceStorage extends ResourceStorage {
      * @return an array with the read resource groups.
      * @throws LdapException if an error occurs.
      */
-    private ResourceGroup[] getGroups(final int[] groupId)
+    private ResourceGroup[] getGroups(final int[] groupId, final Context context)
         throws LdapException {
         if (null == groupId || groupId.length == 0) {
             return new ResourceGroup[0];
@@ -185,7 +179,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 group.setIdentifier(result.getString(pos++));
                 group.setDisplayName(result.getString(pos++));
                 group.setAvailable(result.getBoolean(pos++));
-                group.setMember(getMember(con, group.getId()));
+                group.setMember(getMember(con, group.getId(), context));
                 groups.add(group);
             }
         } catch (SQLException e) {
@@ -206,7 +200,7 @@ public class RdbResourceStorage extends ResourceStorage {
      * of the resource group.
      * @throws SQLException if a database error occurs.
      */
-    private int[] getMember(final Connection con, final int groupId)
+    private int[] getMember(final Connection con, final int groupId, final Context context)
         throws SQLException {
         final String sql = "SELECT member FROM resource_group_member "
             + "WHERE cid=? AND id=?";
@@ -219,14 +213,14 @@ public class RdbResourceStorage extends ResourceStorage {
             stmt.setInt(2, groupId);
             result = stmt.executeQuery();
             while (result.next()) {
-                member.add(result.getInt(1));
+                member.add(Integer.valueOf(result.getInt(1)));
             }
         } finally {
             closeSQLStuff(result, stmt);
         }
         final int[] retval = new int[member.size()];
         for (int i = 0; i < member.size(); i++) {
-            retval[i] = member.get(i);
+            retval[i] = member.get(i).intValue();
         }
         return retval;
     }
@@ -235,15 +229,15 @@ public class RdbResourceStorage extends ResourceStorage {
      * {@inheritDoc}
      */
     @Override
-    public Resource getResource(final int resourceId) throws LdapException {
-        final Resource[] resources = getResources(new int[] { resourceId });
+    public Resource getResource(final int resourceId, final Context context) throws LdapException {
+        final Resource[] resources = getResources(new int[] { resourceId }, context);
         if (resources.length == 0) {
             throw new LdapException(Component.RESOURCE,
-                Code.RESOURCE_NOT_FOUND, resourceId);
+                Code.RESOURCE_NOT_FOUND, Integer.valueOf(resourceId));
         }
         if (resources.length > 1) {
             throw new LdapException(Component.RESOURCE, Code.RESOURCE_CONFLICT,
-                resourceId);
+                Integer.valueOf(resourceId));
         }
         return resources[0];
     }
@@ -254,7 +248,7 @@ public class RdbResourceStorage extends ResourceStorage {
      * @return an array with the read resources.
      * @throws LdapException if an error occurs.
      */
-    private Resource[] getResources(final int[] resourceId)
+    private Resource[] getResources(final int[] resourceId, final Context context)
         throws LdapException {
         if (null == resourceId || resourceId.length == 0) {
             return new Resource[0];
@@ -310,7 +304,7 @@ public class RdbResourceStorage extends ResourceStorage {
      * {@inheritDoc}
      */
     @Override
-    public ResourceGroup[] searchGroups(final String pattern)
+    public ResourceGroup[] searchGroups(final String pattern, final Context context)
         throws LdapException {
         final Connection con;
         try {
@@ -335,7 +329,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 group.setIdentifier(result.getString(pos++));
                 group.setDisplayName(result.getString(pos++));
                 group.setAvailable(result.getBoolean(pos++));
-                group.setMember(getMember(con, group.getId()));
+                group.setMember(getMember(con, group.getId(), context));
                 groups.add(group);
             }
         } catch (SQLException e) {
@@ -352,7 +346,7 @@ public class RdbResourceStorage extends ResourceStorage {
      * {@inheritDoc}
      */
     @Override
-    public Resource[] searchResources(final String pattern)
+    public Resource[] searchResources(final String pattern, final Context context)
         throws LdapException {
         Connection con = null;
         try {
@@ -397,7 +391,7 @@ public class RdbResourceStorage extends ResourceStorage {
      * {@inheritDoc}
      */
     @Override
-    public Resource[] listModified(final Date modifiedSince)
+    public Resource[] listModified(final Date modifiedSince, final Context context)
         throws LdapException {
         Connection con = null;
         try {

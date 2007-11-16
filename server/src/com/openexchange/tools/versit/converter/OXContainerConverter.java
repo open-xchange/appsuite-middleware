@@ -1133,8 +1133,7 @@ public class OXContainerConverter {
 	 */
 	public boolean isInternalUser(final String mail) {
 		try {
-			final UserStorage us = UserStorage.getInstance(session.getContext());
-			final User uo = us.searchUser(mail);
+			final User uo = UserStorage.getInstance().searchUser(mail, session.getContext());
 			return uo != null;
 		} catch (final LdapException e){
 			return false;
@@ -1150,8 +1149,7 @@ public class OXContainerConverter {
 	 * you have to live with the LdapException.
 	 */
 	public User getInternalUser(final String mail) throws LdapException {
-		final UserStorage us = UserStorage.getInstance(session.getContext());
-		return us.searchUser(mail);
+		return UserStorage.getInstance().searchUser(mail, session.getContext());
 	}
 
 	private static void RecurrenceProperty(final CalendarObject calContainerObj, final Property property,
@@ -1884,8 +1882,7 @@ public class OXContainerConverter {
 
 	private void addAddress(final VersitObject object, final String name, final int userId) throws ConverterException {
 		try {
-			final UserStorage us = UserStorage.getInstance(session.getContext());
-			final User userObj = us.getUser(userId);
+			final User userObj = UserStorage.getInstance().getUser(userId, session.getContext());
 			if (userObj == null) {
 				return;
 			}

@@ -52,6 +52,7 @@
 package com.openexchange.groupware.ldap;
 
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.openexchange.groupware.contexts.Context;
 
@@ -63,11 +64,9 @@ import com.openexchange.groupware.contexts.Context;
  */
 public abstract class ResourceStorage {
 
-    /**
-     * Proxy attribute for the class implementing this interface.
-     */
-    private static Class<? extends ResourceStorage> implementingClass;
-
+    private static final AtomicBoolean initialized = new AtomicBoolean();
+    
+    private static ResourceStorage instance;
     /**
      * Default constructor.
      */
@@ -81,64 +80,72 @@ public abstract class ResourceStorage {
      * @return an instance implementing the resources interface.
      * @throws LdapException if the instance can't be created.
      */
-    public static ResourceStorage getInstance(final Context context)
-        throws LdapException {
-        synchronized (ResourceStorage.class) {
-            if (null == implementingClass) {
-                final String className = LdapUtility.findProperty(
-                    Names.RESOURCESTORAGE_IMPL);
-                implementingClass = LdapUtility.getImplementation(className,
-                    ResourceStorage.class);
-            }
-        }
-        return LdapUtility.getInstance(implementingClass, context);
-    }
+    public static ResourceStorage getInstance() throws LdapException {
+		if (!initialized.get()) {
+			synchronized (ResourceStorage.class) {
+				if (!initialized.get()) {
+					final String className = LdapUtility.findProperty(Names.RESOURCESTORAGE_IMPL);
+					instance = LdapUtility.getInstance(LdapUtility.getImplementation(className, ResourceStorage.class));
+					initialized.set(true);
+				}
+			}
+		}
+		return instance;
+	}
 
     /**
-     * Reads the data of resource group from the underlying persistent data
-     * storage.
-     * @param groupId Identifier of the resource group.
-     * @return a resource group object.
-     * @throws LdapException if an error occurs while reading from the
-     * persistent storage or the resource group doesn't exist.
-     */
-    public abstract ResourceGroup getGroup(int groupId) throws LdapException;
+	 * Reads the data of resource group from the underlying persistent data
+	 * storage.
+	 * 
+	 * @param groupId
+	 *            Identifier of the resource group.
+	 * @param context
+	 *            The context.
+	 * @return a resource group object.
+	 * @throws LdapException
+	 *             if an error occurs while reading from the persistent storage
+	 *             or the resource group doesn't exist.
+	 */
+    public abstract ResourceGroup getGroup(int groupId, Context context) throws LdapException;
 
-    public abstract ResourceGroup[] getGroups() throws LdapException;
+    public abstract ResourceGroup[] getGroups(Context context) throws LdapException;
 
     /**
      * Reads a resource from the underlying persistant storage and returns it in
      * a data object.
      * @param resourceId The unique identifier of the resource to return.
+     * @param context The context.
      * @return The data object of the resource.
      * @throws LdapException if the resource can't be found or an exception
      * appears while reading it.
      */
-    public abstract Resource getResource(int resourceId)
+    public abstract Resource getResource(int resourceId, Context context)
         throws LdapException;
 
     /**
      * Searches all groups whose identifier matches the given pattern.
      * @param pattern The identifier of all returned groups will match this
      * pattern.
+     * @param context The context.
      * @return a string array with resource group identifiers. If no identifiers
      * match an empty array will be returned.
      * @throws LdapException if an exception occurs while reading from the
      * underlying persistent storage.
      */
-    public abstract ResourceGroup[] searchGroups(String pattern)
+    public abstract ResourceGroup[] searchGroups(String pattern, Context context)
         throws LdapException;
 
     /**
      * Searches all resources that identifier matches the given pattern.
      * @param pattern The identifier of all returned resources will match this
      * pattern.
+     * @param context The context.
      * @return a string array with the resource identifiers. If no identifiers
      * match, an empty array will be returned.
      * @throws LdapException if an exception occurs while reading from the
      * underlying persistent storage.
      */
-    public abstract Resource[] searchResources(String pattern)
+    public abstract Resource[] searchResources(String pattern, Context context)
         throws LdapException;
 
     /**
@@ -146,9 +153,10 @@ public abstract class ResourceStorage {
      * timestamp.
      * @param modifiedSince timestamp after that the resources have been
      * modified.
+     * @param context The context.
      * @return an array of resources.
      * @throws LdapException if an error occurs.
      */
-    public abstract Resource[] listModified(Date modifiedSince)
+    public abstract Resource[] listModified(Date modifiedSince, Context context)
         throws LdapException;
 }

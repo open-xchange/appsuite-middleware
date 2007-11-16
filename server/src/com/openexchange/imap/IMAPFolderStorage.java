@@ -71,6 +71,7 @@ import javax.mail.MethodNotSupportedException;
 import javax.mail.ReadOnlyFolderException;
 
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RightsCache;
@@ -510,12 +511,12 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 						 */
 						final ACL[] removedACLs = getRemovedACLs(newACLs, initialACLs);
 						if (removedACLs.length > 0) {
-							final UserStorage userStorage = UserStorage.getInstance(session.getContext());
-							final User2ACL user2ACL = User2ACL.getInstance(UserStorage.getStorageUser(session.getUserId(),
-									session.getContext()));
+							final User2ACL user2ACL = User2ACL.getInstance(UserStorage.getStorageUser(session
+									.getUserId(), session.getContext()));
 							final User2ACLArgs user2ACLArgs = IMAPFolderConverter.getUser2AclArgs(session, createMe);
 							for (int i = 0; i < removedACLs.length; i++) {
-								if (isKnownEntity(removedACLs[i].getName(), user2ACL, userStorage, user2ACLArgs)) {
+								if (isKnownEntity(removedACLs[i].getName(), user2ACL, session.getContext(),
+										user2ACLArgs)) {
 									createMe.removeACL(removedACLs[i].getName());
 								}
 							}
@@ -703,12 +704,12 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 						 */
 						final ACL[] removedACLs = getRemovedACLs(newACLs, oldACLs);
 						if (removedACLs.length > 0) {
-							final UserStorage userStorage = UserStorage.getInstance(session.getContext());
-							final User2ACL user2ACL = User2ACL.getInstance(UserStorage.getStorageUser(session.getUserId(),
-									session.getContext()));
+							final User2ACL user2ACL = User2ACL.getInstance(UserStorage.getStorageUser(session
+									.getUserId(), session.getContext()));
 							final User2ACLArgs user2ACLArgs = IMAPFolderConverter.getUser2AclArgs(session, updateMe);
 							for (int i = 0; i < removedACLs.length; i++) {
-								if (isKnownEntity(removedACLs[i].getName(), user2ACL, userStorage, user2ACLArgs)) {
+								if (isKnownEntity(removedACLs[i].getName(), user2ACL, session.getContext(),
+										user2ACLArgs)) {
 									updateMe.removeACL(removedACLs[i].getName());
 								}
 							}
@@ -1000,10 +1001,9 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		/*
 		 * Ensure that owner still holds full rights
 		 */
-		final String ownerACLName = User2ACL
-				.getInstance(UserStorage.getStorageUser(session.getUserId(), session.getContext())).getACLName(
-						session.getUserId(), session.getContext(),
-						IMAPFolderConverter.getUser2AclArgs(session, defaultFolder));
+		final String ownerACLName = User2ACL.getInstance(
+				UserStorage.getStorageUser(session.getUserId(), session.getContext())).getACLName(session.getUserId(),
+				session.getContext(), IMAPFolderConverter.getUser2AclArgs(session, defaultFolder));
 		for (int i = 0; i < newACLs.length; i++) {
 			if (newACLs[i].getName().equals(ownerACLName) && newACLs[i].getRights().contains(FULL_RIGHTS)) {
 				return true;
@@ -1225,10 +1225,10 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		return retval.toArray(new ACL[retval.size()]);
 	}
 
-	private static final boolean isKnownEntity(final String entity, final User2ACL user2ACL,
-			final UserStorage userStorage, final User2ACLArgs user2ACLArgs) {
+	private static final boolean isKnownEntity(final String entity, final User2ACL user2ACL, final Context ctx,
+			final User2ACLArgs user2ACLArgs) {
 		try {
-			return user2ACL.getUserID(entity, userStorage, user2ACLArgs) != -1;
+			return user2ACL.getUserID(entity, ctx, user2ACLArgs) != -1;
 		} catch (final AbstractOXException e) {
 			return false;
 		}

@@ -50,6 +50,7 @@
 package com.openexchange.groupware.ldap;
 
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UnixCrypt;
@@ -158,11 +159,16 @@ public abstract class UserStorage {
      * Attribute name of userPassword.
      */
     public static final String USERPASSWORD;
-
+    
     /**
-     * Proxy attribute for the class implementing this interface.
+     * The instance
      */
-    private static Class< ? extends UserStorage> implementingClass;
+    private static UserStorage instance;
+    
+    /**
+     * Atomic boolean to keep track of initialization
+     */
+    private static final AtomicBoolean initialized = new AtomicBoolean();
 
     /**
      * Default constructor.
@@ -174,60 +180,67 @@ public abstract class UserStorage {
     /**
      * Searches for a user whose login matches the given uid.
      * @param loginInfo Login name of the user.
+     * @param context The context.
      * @return The unique identifier of the user.
      * @throws LdapException if an error occurs while searching the user or the
      * user doesn't exist.
      */
-    public abstract int getUserId(String loginInfo) throws LdapException;
+    public abstract int getUserId(String loginInfo, Context context) throws LdapException;
 
     /**
      * Reads the data from a user from the underlying persistent data storage.
      * @param uid User identifier.
      * @return a user object.
+     *  @param context The context.
      * @throws LdapException if an error occurs while reading from the
      * persistent storage or the user doesn't exist.
      */
-    public abstract User getUser(int uid) throws LdapException;
+    public abstract User getUser(int uid, Context context) throws LdapException;
 
     /**
      * This method updates some values of a user.
      * @param user user object with the updated values.
+     * @param context The context.
      * @throws LdapException  if an error occurs.
      */
-    public abstract void updateUser(User user) throws LdapException;
+    public abstract void updateUser(User user, Context context) throws LdapException;
 
     /**
      * Searches a user by its email address. This is used for converting iCal to
      * appointments.
      * @param email the email address of the user.
+     * @param context The context.
      * @return a User object if the user was found by its email address or
      * <code>null</code> if no user could be found.
      * @throws LdapException if an error occurs.
      */
-    public abstract User searchUser(String email) throws LdapException;
+    public abstract User searchUser(String email, Context context) throws LdapException;
 
     /**
      * Returns an array with all user identifier of the context.
+     * @param context The context.
      * @return an array with all user identifier of the context.
      * @throws UserException if generating this list fails.
      */
-    public abstract int[] listAllUser() throws UserException;
+    public abstract int[] listAllUser(Context context) throws UserException;
 
     /**
      * Searches for a user whose IMAP login name matches the given login name.
      * @param imapLogin the IMAP login name to search for
+     * @param context The context.
      * @return The unique identifier of the user.
      * @throws UserException if an error occurs during the search. 
      */
-    public abstract int resolveIMAPLogin(String imapLogin) throws UserException;
+    public abstract int resolveIMAPLogin(String imapLogin, Context context) throws UserException;
 
     /**
      * Searches users who where modified later than the given date.
      * @param modifiedSince Date after that the returned users are modified.
+     * @param context The context.
      * @return a string array with the uids of the matching user.
      * @throws LdapException if an error occurs during the search.
      */
-    public abstract int[] listModifiedUser(Date modifiedSince)
+    public abstract int[] listModifiedUser(Date modifiedSince, Context context)
         throws LdapException;
 
     public boolean authenticate(final User user, final String password)
@@ -244,27 +257,31 @@ public abstract class UserStorage {
 
     /**
      * Creates a new instance implementing the user storage interface.
-     * @param context Context.
      * @return an instance implementing the user storage interface.
      * @throws LdapException if the instance can't be created.
      */
-    public static UserStorage getInstance(final Context context)
-        throws LdapException {
-        final boolean caching = Boolean.parseBoolean(LdapUtility
-            .findProperty(Names.CACHING));
-        synchronized (UserStorage.class) {
-            if (null == implementingClass) {
-                if (caching) {
-                    implementingClass = CachingUserStorage.class;
-                } else {
-                    final String className = LdapUtility.findProperty(Names.
-                        USERSTORAGE_IMPL);
-                    implementingClass = LdapUtility.getImplementation(
-                        className, UserStorage.class);
+    public static UserStorage getInstance() throws LdapException {
+        if (!initialized.get()) {
+        	final boolean caching = Boolean.parseBoolean(LdapUtility
+                    .findProperty(Names.CACHING));
+        	synchronized (UserStorage.class) {
+                if (!initialized.get()) {
+                	final Class< ? extends UserStorage> implementingClass;
+                    if (caching) {
+                        implementingClass = CachingUserStorage.class;
+                    } else {
+                        final String className = LdapUtility.findProperty(Names.
+                            USERSTORAGE_IMPL);
+                        implementingClass = LdapUtility.getImplementation(
+                            className, UserStorage.class);
+                    }
+                    instance = LdapUtility.getInstance(implementingClass);
+                    initialized.set(true);
                 }
             }
+        	
         }
-        return LdapUtility.getInstance(implementingClass, context);
+        return instance;
     }
 
     /**
@@ -276,7 +293,7 @@ public abstract class UserStorage {
      */
     public static User getStorageUser(final int uid, final Context context) {
 		try {
-			return getInstance(context).getUser(uid);
+			return getInstance().getUser(uid, context);
 		} catch (final LdapException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 			return null;

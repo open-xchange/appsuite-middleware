@@ -900,8 +900,8 @@ public class CalendarOperation implements SearchIterator {
                 userparticipants = new Participants(cdao.getUsers());
             }
             if (p.getType() == Participant.GROUP) {
-                GroupStorage gs = GroupStorage.getInstance(cdao.getContext(), true);
-                Group g = gs.getGroup(p.getIdentifier());
+            	final GroupStorage gs = GroupStorage.getInstance(true);
+                Group g = gs.getGroup(p.getIdentifier(), cdao.getContext());
                 int m[] = g.getMember();
                 for (int b = 0; b < m.length; b++) {
                     final UserParticipant up = new UserParticipant(m[b]);

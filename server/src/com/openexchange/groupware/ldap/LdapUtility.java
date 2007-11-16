@@ -365,15 +365,11 @@ public final class LdapUtility {
      * @return an instance implementing the resources interface.
      * @throws LdapException if the instance can't be created.
      */
-    public static <T extends Object> T getInstance(
-        final Class< ? extends T> clazz,
-        final com.openexchange.groupware.contexts.Context context)
+    public static <T extends Object> T getInstance(final Class< ? extends T> clazz)
         throws LdapException {
         try {
-            final Constructor< ? extends T> cons = clazz.getConstructor(
-                new Class[] { com.openexchange.groupware.contexts.Context
-                    .class });
-            return cons.newInstance(new Object[] { context });
+            final Constructor< ? extends T> cons = clazz.getConstructor(new Class[0]);
+            return cons.newInstance(new Object[0]);
         } catch (SecurityException e) {
             throw new LdapException(Component.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());

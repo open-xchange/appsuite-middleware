@@ -204,7 +204,7 @@ public class GroupUserWriter extends ContactWriter {
 	}
 	
 	protected void init() throws Exception {
-		userStorage = UserStorage.getInstance(sessionObj.getContext());
+		userStorage = UserStorage.getInstance();
 	}
 	
 	public void startWriter(boolean modified, boolean deleted, Date lastsync, OutputStream os) throws Exception {
@@ -281,7 +281,7 @@ public class GroupUserWriter extends ContactWriter {
 		} else {
 			int userId = contactobject.getInternalUserId();
 			
-			User u = userStorage.getUser(userId);
+			User u = userStorage.getUser(userId, sessionObj.getContext());
 			
 			addElement("uid", userId, e);
             addElement(ContactFields.OBJECT_ID, contactobject.getObjectID(), e);

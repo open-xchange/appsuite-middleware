@@ -111,25 +111,19 @@ public class RdbUserStorage extends UserStorage {
      */
     private static final String SELECT_IMAPLOGIN = "SELECT " + IDENTIFIER
         + " FROM user WHERE cid=? AND imapLogin=?";
-    
-    /**
-     * Reference to the context.
-     */
-    private final transient Context context;
 
     /**
      * Default constructor.
-     * @param context Context.
      */
-    public RdbUserStorage(final Context context) {
+    public RdbUserStorage() {
         super();
-        this.context = context;
     }
 
     /**
      * {@inheritDoc}
      */
-    public int getUserId(final String uid) throws LdapException {
+    @Override
+	public int getUserId(final String uid, final Context context) throws LdapException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
@@ -148,11 +142,11 @@ public class RdbUserStorage extends UserStorage {
                 userId = result.getInt(1);
             } else {
                 throw new LdapException(Component.USER, Code.USER_NOT_FOUND,
-                    uid, context.getContextId());
+                    uid, Integer.valueOf(context.getContextId()));
             }
             if (result.next()) {
                 throw new LdapException(Component.USER, Code.USER_CONFLICT,
-                    uid, context.getContextId());
+                    uid, Integer.valueOf(context.getContextId()));
             }
         } catch (SQLException e) {
             throw new LdapException(Component.USER, Code.SQL_ERROR, e,
@@ -167,7 +161,8 @@ public class RdbUserStorage extends UserStorage {
     /**
      * {@inheritDoc}
      */
-    public User getUser(final int userId) throws LdapException {
+    @Override
+	public User getUser(final int userId, final Context context) throws LdapException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
@@ -203,7 +198,7 @@ public class RdbUserStorage extends UserStorage {
                 retval.setContactId(result.getInt(pos++));
             } else {
                 throw new LdapException(Component.USER,
-                    Code.USER_NOT_FOUND, userId, context.getContextId());
+                    Code.USER_NOT_FOUND, Integer.valueOf(userId), Integer.valueOf(context.getContextId()));
             }
         } catch (SQLException e) {
             throw new LdapException(Component.USER, Code.SQL_ERROR, e,
@@ -212,10 +207,10 @@ public class RdbUserStorage extends UserStorage {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
         }
-        loadLoginInfo(retval);
-        loadContact(retval);
-        loadGroups(retval);
-        loadAliases(retval);
+        loadLoginInfo(retval, context);
+        loadContact(retval, context);
+        loadGroups(retval, context);
+        loadAliases(retval, context);
         return retval;
     }
 
@@ -224,7 +219,7 @@ public class RdbUserStorage extends UserStorage {
      * @param user User object.
      * @throws LdapException if reading fails.
      */
-    private void loadLoginInfo(final UserImpl user) throws LdapException {
+    private void loadLoginInfo(final UserImpl user, final Context context) throws LdapException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
@@ -255,7 +250,7 @@ public class RdbUserStorage extends UserStorage {
      * @param user User object.
      * @throws LdapException if reading fails.
      */
-    private void loadContact(final UserImpl user) throws LdapException {
+    private void loadContact(final UserImpl user, final Context context) throws LdapException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
@@ -289,7 +284,7 @@ public class RdbUserStorage extends UserStorage {
      * @param user User object.
      * @throws LdapException if reading fails.
      */
-    private void loadGroups(final UserImpl user) throws LdapException {
+    private void loadGroups(final UserImpl user, final Context context) throws LdapException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
@@ -308,11 +303,11 @@ public class RdbUserStorage extends UserStorage {
             result = stmt.executeQuery();
             final List<Integer> tmp = new ArrayList<Integer>();
             while (result.next()) {
-                tmp.add(result.getInt(1));
+                tmp.add(Integer.valueOf(result.getInt(1)));
             }
             int[] groups = new int[tmp.size()];
             for (int i = 0; i < groups.length; i++) {
-                groups[i] = tmp.get(i);
+                groups[i] = tmp.get(i).intValue();
             }
             user.setGroups(groups);
         } catch (SQLException e) {
@@ -329,7 +324,7 @@ public class RdbUserStorage extends UserStorage {
      * @param user User object.
      * @throws LdapException if reading fails.
      */
-    private void loadAliases(final UserImpl user) throws LdapException {
+    private void loadAliases(final UserImpl user, final Context context) throws LdapException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
@@ -363,7 +358,7 @@ public class RdbUserStorage extends UserStorage {
      * {@inheritDoc}
      */
     @Override
-    public void updateUser(final User user) throws LdapException {
+    public void updateUser(final User user, final Context context) throws LdapException {
         Connection con = null;
         try {
             con = DBPool.pickupWriteable(context);
@@ -394,7 +389,7 @@ public class RdbUserStorage extends UserStorage {
      * {@inheritDoc}
      */
     @Override
-    public User searchUser(final String email) throws LdapException {
+    public User searchUser(final String email, final Context context) throws LdapException {
         String sql = "SELECT id FROM user WHERE cid=? AND mail=?";
         Connection con;
         try {
@@ -438,7 +433,7 @@ public class RdbUserStorage extends UserStorage {
                     throw new LdapException(Component.USER,
                         Code.NO_USER_BY_MAIL, email);
                 }
-                return getUser(userId);
+                return getUser(userId, context);
             } catch (SQLException e) {
                 throw new LdapException(Component.USER, Code.SQL_ERROR, e,
                     e.getMessage());
@@ -453,7 +448,8 @@ public class RdbUserStorage extends UserStorage {
     /**
      * {@inheritDoc}
      */
-    public int[] listModifiedUser(final Date modifiedSince)
+    @Override
+	public int[] listModifiedUser(final Date modifiedSince, final Context context)
         throws LdapException {
         Connection con = null;
         try {
@@ -475,11 +471,11 @@ public class RdbUserStorage extends UserStorage {
             result = stmt.executeQuery();
             final List<Integer> tmp = new ArrayList<Integer>();
             while (result.next()) {
-                tmp.add(result.getInt(1));
+                tmp.add(Integer.valueOf(result.getInt(1)));
             }
             users = new int[tmp.size()];
             for (int i = 0; i < users.length; i++) {
-                users[i] = tmp.get(i);
+                users[i] = tmp.get(i).intValue();
             }
         } catch (SQLException e) {
             throw new LdapException(Component.USER, Code.SQL_ERROR, e,
@@ -495,7 +491,7 @@ public class RdbUserStorage extends UserStorage {
      * {@inheritDoc}
      */
     @Override
-    public int[] listAllUser() throws UserException {
+    public int[] listAllUser(final Context context) throws UserException {
         final String sql = "SELECT " + IDENTIFIER + " FROM user "
             + "WHERE user.cid=?";
         Connection con = null;
@@ -513,11 +509,11 @@ public class RdbUserStorage extends UserStorage {
             result = stmt.executeQuery();
             final List<Integer> tmp = new ArrayList<Integer>();
             while (result.next()) {
-                tmp.add(result.getInt(1));
+                tmp.add(Integer.valueOf(result.getInt(1)));
             }
             users = new int[tmp.size()];
             for (int i = 0; i < users.length; i++) {
-                users[i] = tmp.get(i);
+                users[i] = tmp.get(i).intValue();
             }
         } catch (SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e, e
@@ -533,7 +529,7 @@ public class RdbUserStorage extends UserStorage {
      * {@inheritDoc}
      */
     @Override
-    public int resolveIMAPLogin(final String imapLogin) throws UserException {
+    public int resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
@@ -553,11 +549,11 @@ public class RdbUserStorage extends UserStorage {
                 user = result.getInt(1);
             } else {
                 throw new UserException(UserException.Code.USER_NOT_FOUND,
-                    imapLogin, cid);
+                    imapLogin, Integer.valueOf(cid));
             }
             if (result.next()) {
                 throw new UserException(UserException.Code.USER_CONFLICT,
-                    imapLogin, cid);
+                    imapLogin, Integer.valueOf(cid));
             }
         } catch (SQLException e) {
             throw new UserException(UserException.Code.SQL_ERROR, e, e

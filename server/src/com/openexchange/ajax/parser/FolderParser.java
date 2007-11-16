@@ -166,8 +166,7 @@ public class FolderParser {
 				} catch (JSONException e) {
 					try {
 						final String entityStr = elem.getString(FolderFields.ENTITY);
-						final UserStorage us = UserStorage.getInstance(userConfig.getContext());
-						entity = us.getUserId(entityStr);
+						entity = UserStorage.getInstance().getUserId(entityStr, userConfig.getContext());
 					} catch (LdapException e1) {
 						LOG.error(e.getMessage(), e);
 						throw new OXException(e1);

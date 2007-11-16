@@ -103,19 +103,20 @@ public class GroupRequest {
 		Date lastModified = null;
 		
 		final JSONArray jsonResponseArray = new JSONArray();
-		final GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
+		final GroupStorage groupStorage = GroupStorage.getInstance(true);
 		
 		for (int a = 0; a < jsonArray.length(); a++) {
 			final JSONObject jData = jsonArray.getJSONObject(a);
-			final com.openexchange.groupware.ldap.Group g = groupStorage.getGroup(DataParser.checkInt(jData, DataFields.ID));
-			
+			final com.openexchange.groupware.ldap.Group g = groupStorage.getGroup(DataParser.checkInt(jData,
+					DataFields.ID), sessionObj.getContext());
+
 			final GroupWriter groupWriter = new GroupWriter();
 			final JSONObject jsonGroupObj = new JSONObject();
 			groupWriter.writeGroup(g, jsonGroupObj);
 			jsonResponseArray.put(jsonGroupObj);
-			
+
 			lastModified = g.getLastModified();
-			
+
 			if (timestamp.getTime() < lastModified.getTime()) {
 				timestamp = lastModified;
 			}
@@ -129,8 +130,8 @@ public class GroupRequest {
 		
 		timestamp = new Date(0);
 		
-		final GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
-		final com.openexchange.groupware.ldap.Group g = groupStorage.getGroup(id);
+		final GroupStorage groupStorage = GroupStorage.getInstance(true);
+		final com.openexchange.groupware.ldap.Group g = groupStorage.getGroup(id, sessionObj.getContext());
 		
 		final GroupWriter groupWriter = new GroupWriter();
 		final JSONObject jsonGroupObj = new JSONObject();
@@ -156,13 +157,13 @@ public class GroupRequest {
 		final SearchIterator it = null;
 		
 		try {
-			final GroupStorage groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
+			final GroupStorage groupStorage = GroupStorage.getInstance(true);
 			com.openexchange.groupware.ldap.Group[] groups = null;
 			
 			if ("*".equals(searchpattern)) {
-				groups = groupStorage.getGroups();
+				groups = groupStorage.getGroups(sessionObj.getContext());
 			} else {
-				groups = groupStorage.searchGroups(searchpattern);
+				groups = groupStorage.searchGroups(searchpattern, sessionObj.getContext());
 			}
 			
 			final GroupWriter groupWriter = new GroupWriter();

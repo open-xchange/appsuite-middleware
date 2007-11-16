@@ -170,7 +170,7 @@ public class PushHandler implements AppointmentEvent, ContactEvent, TaskEvent, F
 		}
 		
 		try {
-			groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
+			groupStorage = GroupStorage.getInstance(true);
 			
 			folderSql = new RdbFolderSQLInterface(sessionObj);
 			final FolderObject folderObj = folderSql.getFolderById(folderId); 
@@ -180,7 +180,7 @@ public class PushHandler implements AppointmentEvent, ContactEvent, TaskEvent, F
 			for (int a = 0; a < oclp.length; a++) {
 				if (oclp[a].canReadOwnObjects() || oclp[a].canReadAllObjects()) {
 					if (oclp[a].isGroupPermission()) {
-						final Group g = groupStorage.getGroup(oclp[a].getEntity());
+						final Group g = groupStorage.getGroup(oclp[a].getEntity(), sessionObj.getContext());
 						addMembers(g, hs);
 					} else {
 						hs.add(Integer.valueOf(oclp[a].getEntity()));
@@ -198,14 +198,14 @@ public class PushHandler implements AppointmentEvent, ContactEvent, TaskEvent, F
 	
 	protected int[] getAffectedUsers4Folder(final FolderObject folderObj, final Session sessionObj, final Set<Integer> hs) {
 		try {
-			groupStorage = GroupStorage.getInstance(sessionObj.getContext(), true);
+			groupStorage = GroupStorage.getInstance(true);
 			
 			final OCLPermission[] oclp = folderObj.getPermissionsAsArray();
 			
 			for (int a = 0; a < oclp.length; a++) {
 				if (oclp[a].isFolderVisible()) {
 					if (oclp[a].isGroupPermission()) {
-						final Group g = groupStorage.getGroup(oclp[a].getEntity());
+						final Group g = groupStorage.getGroup(oclp[a].getEntity(), sessionObj.getContext());
 						addMembers(g, hs);
 					} else {
 						hs.add(Integer.valueOf(oclp[a].getEntity()));

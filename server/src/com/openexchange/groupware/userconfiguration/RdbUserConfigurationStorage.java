@@ -417,7 +417,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage implem
 			rs = stmt.executeQuery();
 			if (rs.next()) {
 				if (groups == null) {
-					groups = UserStorage.getInstance(ctx).getUser(userId).getGroups();
+					groups = UserStorage.getInstance().getUser(userId, ctx).getGroups();
 				}
 				return new UserConfiguration(rs.getInt(1), userId, groups, ctx);
 			}

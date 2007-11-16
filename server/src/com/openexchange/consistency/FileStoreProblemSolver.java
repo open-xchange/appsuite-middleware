@@ -50,8 +50,6 @@
 
 package com.openexchange.consistency;
 
-import java.io.IOException;
-import java.util.Iterator;
 import java.util.SortedSet;
 
 import org.apache.commons.logging.Log;
@@ -122,8 +120,7 @@ public class FileStoreProblemSolver extends ProblemSolver {
 	@Override
 	public void dummyEntries(final SortedSet<String> set, final Context ctx) {
 		try {
-			final UserStorage userstor = UserStorage.getInstance(ctx);
-			final User user = userstor.getUser(ctx.getMailadmin());
+			final User user = UserStorage.getInstance().getUser(ctx.getMailadmin(), ctx);
 			final DocumentMetadata document = new DocumentMetadataImpl();
 			document.setDescription(description);
 			document.setTitle(title);

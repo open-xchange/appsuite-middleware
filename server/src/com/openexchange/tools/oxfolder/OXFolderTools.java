@@ -1089,11 +1089,11 @@ public class OXFolderTools {
 				 * Shared: Create virtual folder named to folder owner
 				 */
 				if (userStore == null) {
-					userStore = UserStorage.getInstance(ctx);
+					userStore = UserStorage.getInstance();
 				}
 				String creatorDisplayName;
 				try {
-					creatorDisplayName = userStore.getUser(fo.getCreatedBy()).getDisplayName();
+					creatorDisplayName = userStore.getUser(fo.getCreatedBy(), ctx).getDisplayName();
 				} catch (LdapException e) {
 					if (fo.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
 						throw e;

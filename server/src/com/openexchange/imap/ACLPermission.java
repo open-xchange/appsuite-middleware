@@ -50,11 +50,9 @@
 package com.openexchange.imap;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.user2acl.User2ACL;
 import com.openexchange.imap.user2acl.User2ACLArgs;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.OCLPermission;
 import com.openexchange.sessiond.Session;
@@ -77,8 +75,6 @@ public final class ACLPermission extends MailPermission {
 
 	private transient ACL acl;
 
-	private UserStorage userStorage;
-
 	/**
 	 * Constructor
 	 * 
@@ -87,31 +83,6 @@ public final class ACLPermission extends MailPermission {
 	 */
 	public ACLPermission(final Session session) {
 		super(session);
-	}
-
-	/**
-	 * Constructor
-	 * 
-	 * @param sessionUser
-	 *            The session user
-	 * @param userStorage
-	 *            The user storage
-	 */
-	public ACLPermission(final Session session, final UserStorage userStorage) {
-		super(session);
-		this.userStorage = userStorage;
-	}
-
-	private UserStorage getUserStorage() throws MailException {
-		if (userStorage == null) {
-			try {
-				userStorage = UserStorage.getInstance(session.getContext());
-			} catch (final LdapException e) {
-				throw new MailException(e);
-			}
-		}
-
-		return userStorage;
 	}
 
 	/*
@@ -335,7 +306,7 @@ public final class ACLPermission extends MailPermission {
 			rights.add(RIGHTS_UNMAPPABLE);
 		}
 		return (acl = new ACL(User2ACL.getInstance(UserStorage.getStorageUser(session.getUserId(), session.getContext()))
-				.getACLName(getEntity(), getUserStorage(), user2aclArgs), rights));
+				.getACLName(getEntity(), session.getContext(), user2aclArgs), rights));
 	}
 
 	/**
@@ -348,7 +319,7 @@ public final class ACLPermission extends MailPermission {
 	 */
 	public void parseACL(final ACL acl, final User2ACLArgs user2aclArgs) throws AbstractOXException {
 		setEntity(User2ACL.getInstance(UserStorage.getStorageUser(session.getUserId(), session.getContext())).getUserID(
-				acl.getName(), getUserStorage(), user2aclArgs));
+				acl.getName(), session.getContext(), user2aclArgs));
 		parseRights(acl.getRights());
 		this.acl = acl;
 	}

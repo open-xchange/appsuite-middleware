@@ -583,11 +583,12 @@ public class Folder extends SessionServlet {
 					for (int i = 0; i < size; i++) {
 						final FolderObject sharedFolder = iter.next();
 						if (us == null) {
-							us = UserStorage.getInstance(sessionObj.getContext());
+							us = UserStorage.getInstance();
 						}
 						String creatorDisplayName;
 						try {
-							creatorDisplayName = us.getUser(sharedFolder.getCreatedBy()).getDisplayName();
+							creatorDisplayName = us.getUser(sharedFolder.getCreatedBy(), sessionObj.getContext())
+									.getDisplayName();
 						} catch (final LdapException e) {
 							if (sharedFolder.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
 								throw new AbstractOXException(e);

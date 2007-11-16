@@ -89,7 +89,7 @@ public class DelUserFolderDiscoverer extends DBService {
 	public List<FolderObject> discoverFolders(final int userId, final Context ctx) throws OXException {
 		final List<FolderObject> discovered = new ArrayList<FolderObject>();
 		try {
-			final User user = UserStorage.getInstance(ctx).getUser(userId);
+			final User user = UserStorage.getInstance().getUser(userId, ctx);
 			final UserConfiguration userConfig = RdbUserConfigurationStorage.loadUserConfiguration(userId, ctx);
 
 			final SearchIterator iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(userId, user

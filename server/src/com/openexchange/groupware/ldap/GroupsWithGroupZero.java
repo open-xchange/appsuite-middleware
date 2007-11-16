@@ -66,11 +66,6 @@ import com.openexchange.groupware.contexts.Context;
 public final class GroupsWithGroupZero extends GroupStorage {
 
     /**
-     * Context.
-     */
-    private final Context ctx;
-
-    /**
      * Underlying group storage handling groups except group with identifier 0.
      */
     private final GroupStorage delegate;
@@ -80,9 +75,8 @@ public final class GroupsWithGroupZero extends GroupStorage {
      * @param ctx Context.
      * @param delegate underlying group storage.
      */
-    GroupsWithGroupZero(final Context ctx, final GroupStorage delegate) {
+    GroupsWithGroupZero(final GroupStorage delegate) {
         super();
-        this.ctx = ctx;
         this.delegate = delegate;
     }
 
@@ -90,7 +84,7 @@ public final class GroupsWithGroupZero extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public Group getGroup(final int gid) throws LdapException {
+    public Group getGroup(final int gid, final Context ctx) throws LdapException {
         final Group retval;
         if (GroupTools.GROUP_ZERO.getIdentifier() == gid) {
             try {
@@ -99,7 +93,7 @@ public final class GroupsWithGroupZero extends GroupStorage {
                 throw new LdapException(e);
             }
         } else {
-            retval = delegate.getGroup(gid);
+            retval = delegate.getGroup(gid, ctx);
         }
         return retval;
     }
@@ -108,8 +102,8 @@ public final class GroupsWithGroupZero extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public Group[] getGroups() throws LdapException {
-        final Group[] groups = delegate.getGroups();
+    public Group[] getGroups(final Context ctx) throws LdapException {
+        final Group[] groups = delegate.getGroups(ctx);
         final Group[] retval = new Group[groups.length + 1];
         try {
             retval[0] = GroupTools.getGroupZero(ctx);
@@ -124,9 +118,9 @@ public final class GroupsWithGroupZero extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public Group[] listModifiedGroups(final Date modifiedSince)
+    public Group[] listModifiedGroups(final Date modifiedSince, final Context ctx)
         throws LdapException {
-        final Group[] groups = delegate.listModifiedGroups(modifiedSince);
+        final Group[] groups = delegate.listModifiedGroups(modifiedSince, ctx);
         final Group[] retval = new Group[groups.length + 1];
         try {
             retval[0] = GroupTools.getGroupZero(ctx);
@@ -141,7 +135,7 @@ public final class GroupsWithGroupZero extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public Group[] searchGroups(final String pattern) throws LdapException {
+    public Group[] searchGroups(final String pattern, final Context ctx) throws LdapException {
         final Pattern pat = Pattern.compile(pattern.replace("*", ".*"), Pattern
             .CASE_INSENSITIVE);
         final Group zero;
@@ -152,7 +146,7 @@ public final class GroupsWithGroupZero extends GroupStorage {
         }
         final Matcher match = pat.matcher(zero.getDisplayName());
         final List<Group> groups = new ArrayList<Group>();
-        groups.addAll(Arrays.asList(delegate.searchGroups(pattern)));
+        groups.addAll(Arrays.asList(delegate.searchGroups(pattern, ctx)));
         if (match.find()) {
             groups.add(zero);
         }
