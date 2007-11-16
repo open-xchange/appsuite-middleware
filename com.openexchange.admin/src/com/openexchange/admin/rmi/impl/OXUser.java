@@ -94,10 +94,10 @@ import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.CacheKey;
-import com.openexchange.groupware.UserConfigurationException;
-import com.openexchange.groupware.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.groupware.contexts.ContextImpl;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 /**
  * @author d7
