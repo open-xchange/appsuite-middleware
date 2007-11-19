@@ -10,6 +10,10 @@
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
 
+	<property name="version" value="${Bundle-Version}"/>
+	<property name="project.name" value="${Bundle-SymbolicName}"/>
+	<property name="composite.name" value="${project.name}_${version}" />
+
     <!-- Install Constants -->
     <property name="bundlesdir" value="${destdir}${prefix}/bundles"/>
 
@@ -48,6 +52,27 @@
                 <include name="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
             </fileset>
         </copy>
+    </target>
+
+	<!-- Dist -->
+	<!-- Cargo Culted from openexchange-common -->
+	<target name="dist" depends="clean">
+		<property name="dist-package" value="dist-package"/>
+    	<delete dir="${dist-package}"/>
+        <mkdir dir="${dist-package}/${composite.name}"/>
+        <copy todir="${dist-package}/${composite.name}">
+            <fileset dir=".">
+                <exclude name="**${dist-package}/**"/>
+                <exclude name="**debian/**"/>
+                <exclude name="**CVS/**"/>
+                <exclude name="Todo"/>
+            </fileset>
+        </copy>
+        <tar destfile="../${composite.name}.tar.gz"
+	        basedir="${dist-package}"
+    	    includes="${composite.name}/"
+         	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
+    	<delete dir="${dist-package}"/>
     </target>
 
     <target name="clean">
