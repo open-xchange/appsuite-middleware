@@ -75,7 +75,7 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.webdav.xml.DataParser;
 import com.openexchange.webdav.xml.TaskParser;
 import com.openexchange.webdav.xml.TaskWriter;

@@ -55,7 +55,7 @@ import org.json.JSONWriter;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 

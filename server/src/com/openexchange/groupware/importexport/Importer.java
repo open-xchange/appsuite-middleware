@@ -54,7 +54,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * This interface defines an importer, meaning a class able to

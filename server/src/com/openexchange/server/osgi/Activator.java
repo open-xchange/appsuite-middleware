@@ -49,7 +49,6 @@
 
 package com.openexchange.server.osgi;
 
-import com.openexchange.sessiond.impl.SessiondConnectorInterface;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,11 +58,12 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.server.Starter;
+import com.openexchange.sessiond.SessiondConnectorInterface;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
-import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * OSGi bundle activator for the server.

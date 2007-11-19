@@ -80,7 +80,7 @@ import com.openexchange.groupware.tx.DBProviderUser;
 import com.openexchange.groupware.tx.Service;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;

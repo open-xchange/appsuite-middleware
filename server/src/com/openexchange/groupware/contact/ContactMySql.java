@@ -70,7 +70,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.date.FormatDate;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;

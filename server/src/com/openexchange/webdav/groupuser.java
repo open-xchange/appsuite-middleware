@@ -79,7 +79,7 @@ import com.openexchange.groupware.ldap.ResourceStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.Version;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.webdav.xml.DataWriter;
 import com.openexchange.webdav.xml.GroupUserWriter;
 import com.openexchange.webdav.xml.XmlServlet;

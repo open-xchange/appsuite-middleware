@@ -85,7 +85,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterface;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;

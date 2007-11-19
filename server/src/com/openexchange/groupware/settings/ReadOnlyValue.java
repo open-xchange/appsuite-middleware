@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.settings;
 
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * This class contains shared functions for all setting that are read only.

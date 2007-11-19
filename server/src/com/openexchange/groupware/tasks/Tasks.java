@@ -53,7 +53,7 @@ import java.sql.Connection;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * Interface for accessing methods of the tasks module.

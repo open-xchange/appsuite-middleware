@@ -72,7 +72,7 @@ import com.openexchange.groupware.tasks.mapping.Status;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.Arrays;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;

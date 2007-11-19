@@ -122,7 +122,7 @@ import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.EffectivePermission;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.file.FileStorage;

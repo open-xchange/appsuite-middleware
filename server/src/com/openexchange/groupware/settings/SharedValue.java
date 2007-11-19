@@ -50,7 +50,7 @@
 package com.openexchange.groupware.settings;
 
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * Interface for settings that are shared between GUI and server.

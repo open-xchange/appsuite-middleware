@@ -61,7 +61,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**

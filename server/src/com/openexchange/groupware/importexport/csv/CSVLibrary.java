@@ -70,7 +70,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 /**
  * This is a library with little helpers needed when preparing
  * the parsing of a CSV file.

@@ -52,7 +52,7 @@
 package com.openexchange.event;
 
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * FolderEvent

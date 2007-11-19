@@ -76,7 +76,7 @@ import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.mail.Html2TextConverter;

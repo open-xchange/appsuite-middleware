@@ -60,7 +60,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavProperty;

@@ -65,7 +65,7 @@ import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtilityInit;
 import com.openexchange.mail.watcher.MailConnectionWatcher;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * {@link MailConnection}

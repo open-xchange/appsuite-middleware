@@ -87,7 +87,7 @@ import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 

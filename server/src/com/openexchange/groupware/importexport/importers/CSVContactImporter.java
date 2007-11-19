@@ -86,7 +86,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.DBPoolingException;
 import com.openexchange.server.EffectivePermission;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * Importer for OX own CSV file format - this format is able to represent a 

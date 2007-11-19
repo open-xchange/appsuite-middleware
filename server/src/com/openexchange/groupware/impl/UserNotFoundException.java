@@ -49,29 +49,29 @@
 
 
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.groupware.impl;
 
 /**
- *   UserNotActivatedException
+ *   UserNotFoundException
  * TODO Integrate into LoginException
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
- * @deprecated use LoginException.
+ * @deprecated use LoginExcepion.
  */
-public class UserNotActivatedException extends Exception
+public class UserNotFoundException extends Exception
 {
-	public UserNotActivatedException() {
+	public UserNotFoundException() {
 		super();
 	}
 	
-	public UserNotActivatedException(String message) {
+	public UserNotFoundException(String message) {
 		super(message);
 	}
 	
-	public UserNotActivatedException(String message, Exception exc) {
+	public UserNotFoundException(String message, Exception exc) {
 		super(message, exc);
 	}
 	
-	public UserNotActivatedException(Exception exc) {
+	public UserNotFoundException(Exception exc) {
 		super(exc);
 	}	
 }

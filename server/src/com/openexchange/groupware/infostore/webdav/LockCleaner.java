@@ -59,7 +59,7 @@ import com.openexchange.groupware.impl.FolderLockManager;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 public class LockCleaner implements FolderEvent, InfostoreEvent {
 

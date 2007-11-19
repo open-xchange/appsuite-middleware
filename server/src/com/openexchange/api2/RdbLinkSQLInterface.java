@@ -60,7 +60,7 @@ import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.links.Links;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * LinkSQLInterface

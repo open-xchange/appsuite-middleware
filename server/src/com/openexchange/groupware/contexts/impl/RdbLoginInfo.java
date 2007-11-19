@@ -50,11 +50,11 @@
 package com.openexchange.groupware.contexts.impl;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.impl.LoginException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.sessiond.impl.LoginException;
 
 /**
  * This implementation authenticates the user against the database.

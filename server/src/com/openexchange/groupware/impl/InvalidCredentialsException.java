@@ -49,52 +49,29 @@
 
 
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.groupware.impl;
 
 /**
- * SessionConfig
- * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ *   UserNotFoundException
+ * TODO Integrate into LoginException
+ * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @deprecated use LoginException.
  */
-
-public interface SessiondConfig {
+public class InvalidCredentialsException extends Exception
+{
+	public InvalidCredentialsException() {
+		super();
+	}
 	
-	public int getServerPort();
+	public InvalidCredentialsException(String message) {
+		super(message);
+	}
 	
-	public int getServerObjectStreamPort();
+	public InvalidCredentialsException(String message, Exception exc) {
+		super(message, exc);
+	}
 	
-	public boolean isServerSocketEnabled();
-
-	public boolean isServerObjectStreamSocketEnabled();
-	
-	public boolean isTcpClientSocketEnabled();
-	
-	public int getSessionContainerTimeout();
-	
-	public int getNumberOfSessionContainers();
-	
-	public int getMaxSessions();
-	
-	public String getServerBindAddress();
-	
-	public boolean isDoubleLoginPermitted();
-	
-	public String getSessionAuthUser();
-	
-	public boolean isSecureConnection();
-	
-	public int getLifeTime();
-	
-	public int getRandomTokenTimeout();
-	
-	public String getCAFile();
-	
-	public String getCertFile();
-	
-	public String getKeyFile();
+	public InvalidCredentialsException(Exception exc) {
+		super(exc);
+	}
 }
-
-
-
-
-

@@ -67,7 +67,7 @@ import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterface;
 import com.openexchange.mail.MailJSONField;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
 public final class MailRequest {

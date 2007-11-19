@@ -84,7 +84,7 @@ import com.openexchange.mail.parser.handlers.NonInlinePartHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.mail.ContentType;
 
 /**

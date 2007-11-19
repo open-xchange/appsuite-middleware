@@ -51,7 +51,7 @@ package com.openexchange.groupware.upload.impl;
 
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * UploadQuotaChecker

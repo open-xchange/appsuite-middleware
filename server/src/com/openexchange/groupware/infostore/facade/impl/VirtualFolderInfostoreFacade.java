@@ -69,7 +69,7 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.results.TimedResultImpl;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 @OXExceptionSource(

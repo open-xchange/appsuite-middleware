@@ -60,7 +60,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * ContactParser

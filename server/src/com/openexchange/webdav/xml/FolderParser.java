@@ -62,7 +62,7 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.webdav.xml.fields.FolderFields;
 
 /**

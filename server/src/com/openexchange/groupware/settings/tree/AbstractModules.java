@@ -53,7 +53,7 @@ import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.SharedValue;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * Contains initialization for the modules configuration tree setting webmail.

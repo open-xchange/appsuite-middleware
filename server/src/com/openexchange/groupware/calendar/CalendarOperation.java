@@ -75,7 +75,7 @@ import com.openexchange.groupware.ldap.GroupStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;

@@ -102,7 +102,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.servlet.UploadServletException;

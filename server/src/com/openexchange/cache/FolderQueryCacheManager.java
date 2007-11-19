@@ -62,7 +62,7 @@ import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 

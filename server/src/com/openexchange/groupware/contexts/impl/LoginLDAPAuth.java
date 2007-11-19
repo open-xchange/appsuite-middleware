@@ -71,8 +71,8 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
-import com.openexchange.sessiond.impl.LoginException;
-import com.openexchange.sessiond.impl.LoginException.Code;
+import com.openexchange.groupware.impl.LoginException;
+import com.openexchange.groupware.impl.LoginException.Code;
 
 /**
  * This class implements the login by using an LDAP for authentication.

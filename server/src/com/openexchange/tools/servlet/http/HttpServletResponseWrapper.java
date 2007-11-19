@@ -72,7 +72,7 @@ import javax.servlet.http.HttpSession;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.server.Version;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.ajp13.AJPv13Config;
 import com.openexchange.tools.ajp13.AJPv13RequestHandler;
 import com.openexchange.tools.servlet.ServletResponseWrapper;

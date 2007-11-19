@@ -67,7 +67,7 @@ import com.openexchange.cache.OXCachingException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.cache.eventhandler.MailConnectionEventHandler;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * {@link MailConnectionCache} - a very volatile cache for already established

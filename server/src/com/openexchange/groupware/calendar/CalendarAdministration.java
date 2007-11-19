@@ -68,7 +68,7 @@ import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  *  CalendarAdministration

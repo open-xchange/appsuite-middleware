@@ -62,7 +62,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.settings.SettingException.Code;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * This class implements the storage for settings using a relational database.

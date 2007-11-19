@@ -63,7 +63,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.integration.SetupLink;
 import com.openexchange.groupware.integration.SetupLinkException;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * This class implements the servlet for authenticating the user at the

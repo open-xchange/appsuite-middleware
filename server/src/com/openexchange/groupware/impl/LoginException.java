@@ -49,7 +49,7 @@
 
 
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.groupware.impl;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;

@@ -97,7 +97,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.LoggingLogic;
 
 public class ParticipantNotify implements AppointmentEvent, TaskEvent {

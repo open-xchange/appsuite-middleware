@@ -82,7 +82,7 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.smtp.SMTPException;
 import com.openexchange.tools.servlet.UnsynchronizedByteArrayOutputStream;
 

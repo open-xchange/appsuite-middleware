@@ -72,7 +72,7 @@ import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.webdav.xml.DataParser;
 import com.openexchange.webdav.xml.FolderParser;

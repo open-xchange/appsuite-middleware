@@ -60,7 +60,7 @@ import com.openexchange.groupware.attach.AttachmentListener;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.StringCollection;
 

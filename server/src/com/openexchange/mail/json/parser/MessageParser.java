@@ -79,7 +79,7 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * {@link MessageParser}

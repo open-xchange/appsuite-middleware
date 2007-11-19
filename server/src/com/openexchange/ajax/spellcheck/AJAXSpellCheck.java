@@ -67,7 +67,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.spellcheck.SpellCheckConfig;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.text.spelling.OXAspellCheck;
 import com.openexchange.tools.text.spelling.OXSpellCheckResult;
 

@@ -90,7 +90,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.ACL;

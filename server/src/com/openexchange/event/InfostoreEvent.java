@@ -50,7 +50,7 @@
 package com.openexchange.event;
 
 import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 public interface InfostoreEvent {
 

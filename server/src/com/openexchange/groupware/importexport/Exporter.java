@@ -52,7 +52,7 @@ package com.openexchange.groupware.importexport;
 import java.util.Map;
 
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * Defines a class able to export a certain type of OX folder as a certain format

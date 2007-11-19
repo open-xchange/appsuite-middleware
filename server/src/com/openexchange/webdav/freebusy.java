@@ -74,9 +74,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
-import com.openexchange.sessiond.impl.SessiondConnector;
 import com.openexchange.tools.iterator.SearchIterator;
 
 
@@ -190,8 +189,6 @@ public class freebusy extends HttpServlet {
 	}
 	
 	private void writeVCalendar(final int contextId, final Date start, final Date end, final String mailPrefix, final String mailSuffix, final String remoteHost, final PrintWriter printWriter) throws Exception {
-		/*final SessiondConnector sessiondConnector = */SessiondConnector.getInstance();
-		
 		SearchIterator it = null;
 		
 		printWriter.println("BEGIN:VCALENDAR");

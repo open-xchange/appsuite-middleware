@@ -67,7 +67,7 @@ import com.openexchange.api2.RdbLinkSQLInterface;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 

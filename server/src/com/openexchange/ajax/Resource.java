@@ -65,7 +65,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.ResourceRequest;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;

@@ -54,8 +54,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
-import com.openexchange.sessiond.impl.LoginException;
-import com.openexchange.sessiond.impl.LoginException.Code;
+import com.openexchange.groupware.impl.LoginException;
+import com.openexchange.groupware.impl.LoginException.Code;
 
 /**
  * This interface defines the methods for handling the login information. E.g.

@@ -60,7 +60,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.webdav.xml.fields.AppointmentFields;
 
 /**

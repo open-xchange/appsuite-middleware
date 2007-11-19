@@ -65,7 +65,7 @@ import com.openexchange.groupware.upload.ManagedUploadFile;
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SessionObject implements com.openexchange.sessiond.Session {
+public class SessionObject implements com.openexchange.session.Session {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SessionObject.class);

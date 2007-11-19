@@ -52,7 +52,7 @@
 package com.openexchange.event;
 
 import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * ContactEvent

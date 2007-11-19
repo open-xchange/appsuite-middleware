@@ -50,7 +50,7 @@
 package com.openexchange.api2;
 
 import com.openexchange.groupware.container.LinkObject;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * LinkSQLInterface

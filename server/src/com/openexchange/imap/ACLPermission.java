@@ -55,7 +55,7 @@ import com.openexchange.imap.user2acl.User2ACL;
 import com.openexchange.imap.user2acl.User2ACLArgs;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.Rights;
 

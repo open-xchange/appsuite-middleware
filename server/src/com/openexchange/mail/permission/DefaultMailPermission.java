@@ -50,7 +50,7 @@
 package com.openexchange.mail.permission;
 
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * {@link DefaultMailPermission}

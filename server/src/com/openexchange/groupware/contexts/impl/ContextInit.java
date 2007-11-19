@@ -50,9 +50,9 @@
 package com.openexchange.groupware.contexts.impl;
 
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.impl.LoginException;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.Starter;
-import com.openexchange.sessiond.impl.LoginException;
 
 /**
  * This class contains the initialization for contexts.

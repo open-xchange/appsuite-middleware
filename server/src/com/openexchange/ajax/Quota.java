@@ -62,7 +62,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.QuotaRequest;
 import com.openexchange.ajax.request.ServletRequestAdapter;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 public class Quota extends SessionServlet {
 

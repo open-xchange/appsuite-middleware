@@ -61,335 +61,429 @@ import org.apache.commons.logging.LogFactory;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.sessiond.Session;
-import com.openexchange.sessiond.impl.InvalidCredentialsException;
-import com.openexchange.sessiond.impl.LoginException;
-import com.openexchange.sessiond.impl.MaxSessionLimitException;
-import com.openexchange.sessiond.impl.PasswordExpiredException;
-import com.openexchange.sessiond.impl.SessiondConnector;
-import com.openexchange.sessiond.impl.SessiondException;
-import com.openexchange.sessiond.impl.UserNotActivatedException;
-import com.openexchange.sessiond.impl.UserNotFoundException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.contexts.impl.LoginInfo;
+import com.openexchange.groupware.impl.LoginException;
+import com.openexchange.groupware.impl.PasswordExpiredException;
+import com.openexchange.groupware.impl.UserNotActivatedException;
+import com.openexchange.groupware.impl.UserNotFoundException;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.server.osgi.SessiondService;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondConnectorInterface;
+import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.encoding.Base64;
 
 /**
  * This servlet can be used as super class for all OX webdav servlets.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein </a>
  */
 public abstract class OXServlet extends WebDavServlet {
 
-    /**
-     * Logger.
-     */
-    private static final transient Log LOG = LogFactory.getLog(OXServlet.class);
+	/**
+	 * Logger.
+	 */
+	private static final transient Log LOG = LogFactory.getLog(OXServlet.class);
 
-    /**
-     * Store the session object under this name in the request.
-     */
-    private static final String SESSION = OXServlet.class.getName() + "SESSION";
+	/**
+	 * Store the session object under this name in the request.
+	 */
+	private static final String SESSION = OXServlet.class.getName() + "SESSION";
 
-    /**
-     * Authentication identifier.
-     */
-    private static String authIdentifier = "OX WebDAV";
+	/**
+	 * Authentication identifier.
+	 */
+	private static String authIdentifier = "OX WebDAV";
 
-    /**
-     * Defines if this servlet uses the HTTP Authorization header to identify
-     * the user. Set it to false to deactivate the use of the HTTP Authorization
-     * header. Do the authorization with the extending class through the method
-     * initializeService() and don't forget to cleanup after your service with
-     * the methode cleanupService().
-     */
-    protected transient boolean httpAuth = true;
+	/**
+	 * Defines if this servlet uses the HTTP Authorization header to identify
+	 * the user. Set it to false to deactivate the use of the HTTP Authorization
+	 * header. Do the authorization with the extending class through the method
+	 * initializeService() and don't forget to cleanup after your service with
+	 * the methode cleanupService().
+	 */
+	protected transient boolean httpAuth = true;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void service(final HttpServletRequest req,
-        final HttpServletResponse resp) throws ServletException, IOException {
-        if (!"TRACE".equals(req.getMethod()) && httpAuth
-            && !doAuth(req, resp)) {
-            return;
-        }
-        try {
-            if (LOG.isTraceEnabled()) {
-				LOG.trace("Entering HTTP sub method. Session: " + getSession(req));
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void service(final HttpServletRequest req,
+			final HttpServletResponse resp) throws ServletException,
+			IOException {
+		if (!"TRACE".equals(req.getMethod()) && httpAuth && !doAuth(req, resp)) {
+			return;
+		}
+		try {
+			if (LOG.isTraceEnabled()) {
+				LOG.trace("Entering HTTP sub method. Session: "
+						+ getSession(req));
 			}
-            super.service(req, resp);
-        } catch (ServletException e) {
-            throw e;
-        } catch (IOException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ServletException(e.getMessage(), e);
-        }
-    }
+			super.service(req, resp);
+		} catch (ServletException e) {
+			throw e;
+		} catch (IOException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ServletException(e.getMessage(), e);
+		}
+	}
 
-    /**
-     * Does the whole authentication mechanism.
-     * @param req http servlet request.
-     * @param resp http servlet response.
-     * @return <code>true</code> if the authentication can be done correctly.
-     * @throws IOException if a communication problem occurs.
-     * @throws ServletException if adding a session fails.
-     */
-    protected boolean doAuth(final HttpServletRequest req,
-        final HttpServletResponse resp) throws IOException {
-        final String sessionId = getSessionId(req);
-        Session session = null;
-        if (null != sessionId) {
-            session = getSession(sessionId);
-        }
-        if (null == sessionId || null == session) {
-            if (LOG.isTraceEnabled()) {
+	/**
+	 * Does the whole authentication mechanism.
+	 * 
+	 * @param req
+	 *            http servlet request.
+	 * @param resp
+	 *            http servlet response.
+	 * @return <code>true</code> if the authentication can be done correctly.
+	 * @throws IOException
+	 *             if a communication problem occurs.
+	 * @throws ServletException
+	 *             if adding a session fails.
+	 */
+	protected boolean doAuth(final HttpServletRequest req,
+			final HttpServletResponse resp) throws IOException {
+		final String sessionId = getSessionId(req);
+		Session session = null;
+		if (null != sessionId) {
+			session = getSession(sessionId);
+		}
+		if (null == sessionId || null == session) {
+			if (LOG.isTraceEnabled()) {
 				LOG.trace("No sessionId cookie found.");
 			}
-            final String auth = req.getHeader(AUTH_HEADER);
-            if (!checkForBasicAuthorization(auth)) {
-            	if (LOG.isDebugEnabled()) {
-            		LOG.debug("Authentication header missing.");
-            	}
-                addUnauthorizedHeader(resp);
-                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                    "Authorization Required!");
-                return false;
-            }
-            if (LOG.isTraceEnabled()) {
+			final String auth = req.getHeader(AUTH_HEADER);
+			if (!checkForBasicAuthorization(auth)) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Authentication header missing.");
+				}
+				addUnauthorizedHeader(resp);
+				resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+						"Authorization Required!");
+				return false;
+			}
+			if (LOG.isTraceEnabled()) {
 				LOG.trace("Authorization header found.");
 			}
-            final String[] userpass = OXServlet.decodeAuthorization(auth);
-            final String login = userpass[0].toLowerCase();
-            final String pass = userpass[1];
-            if (!checkLogin(login, pass, req.getRemoteAddr())) {
-                addUnauthorizedHeader(resp);
-                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                    "Authorization Required!");
-                return false;
-            }
-            try {
-                session = addSession(login, pass, req.getRemoteAddr());
-            } catch (LoginException e) {
-                LOG.error(e.getMessage(), e);
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-                    e.getMessage());
-                return false;
-            }
-            if (null == session) {
-            	if (LOG.isDebugEnabled()) {
-            		LOG.debug("Cannot authenticate user.");
-            	}
-                addUnauthorizedHeader(resp);
-                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                    "Authorization Required!");
-                return false;
-            }
-            if (LOG.isTraceEnabled()) {
+			final String[] userpass = OXServlet.decodeAuthorization(auth);
+			final String login = userpass[0].toLowerCase();
+			final String pass = userpass[1];
+			if (!checkLogin(login, pass, req.getRemoteAddr())) {
+				addUnauthorizedHeader(resp);
+				resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+						"Authorization Required!");
+				return false;
+			}
+			try {
+				session = addSession(login, pass, req.getRemoteAddr());
+			} catch (AbstractOXException e) {
+				LOG.error(e.getMessage(), e);
+				resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e
+						.getMessage());
+				return false;
+			}
+			if (null == session) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Cannot authenticate user.");
+				}
+				addUnauthorizedHeader(resp);
+				resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+						"Authorization Required!");
+				return false;
+			}
+			if (LOG.isTraceEnabled()) {
 				LOG.trace("Session created.");
 			}
-            resp.addCookie(new Cookie("sessionid", session.getSessionID()));
-            if (null != sessionId) {
-                final Cookie cookie = new Cookie("sessionid", sessionId);
-                cookie.setMaxAge(0);
-                resp.addCookie(cookie);
-            }
-        } else {
-            final String address = req.getRemoteAddr();
-            if (null == address || !address.equals(session.getLocalIp())) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Wrong client IP address.");
-                }
-                addUnauthorizedHeader(resp);
-                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-                    "Authorization Required!");
-                return false;
-            }
-        }
-        req.setAttribute(SESSION, session);
-        return true;
-    }
-
-    /**
-     * This methods reads the session identifier from the cookies.
-     * TODO Fix handling if request contains old session identifier.
-     * @param req http request.
-     * @return the session identifier or <code>null</code> if it can't be found.
-     */
-    private static String getSessionId(final HttpServletRequest req) {
-        final Cookie[] cookies = req.getCookies();
-        String sessionId = null;
-        if (null != cookies) {
-            for (int i = 0; i < cookies.length; i++) {
-                if ("sessionid".equals(cookies[i].getName())) {
-                    sessionId = cookies[i].getValue();
-                    break;
-                }
-            }
-        }
-        return sessionId;
-    }
-
-    /**
-     * Checks if the client sends a correct basic authorization header.
-     * @param auth Authorization header.
-     * @return <code>true</code> if the client sent a correct authorization
-     * header.
-     */
-    private static boolean checkForBasicAuthorization(final String auth) {
-        if (null == auth) {
-            return false;
-        }
-        if (auth.length() <= BASIC_AUTH.length()) {
-            return false;
-        }
-        if (!auth.substring(0, BASIC_AUTH.length())
-            .equalsIgnoreCase(BASIC_AUTH)) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Decodes the base64 encoded authorization header. The leading basic will
-     * be removed if it is present.
-     * @param auth the base64 encoded value of the authorization header
-     * @return a string array with user and password
-     * @throws IOException if the base64 can't be decoded
-     */
-    protected static String[] decodeAuthorization(final String auth)
-        throws IOException {
-        if (!checkForBasicAuthorization(auth)) {
-            throw new IOException(
-                "Authorization header is missing the leading \"basic\"!");
-        }
-        final byte[] decoded = Base64.decode(auth.substring(6));
-        final String userpass = new String(decoded, "UTF-8").trim();
-        final int delimiter = userpass.indexOf(':');
-        String user = "";
-        String pass = "";
-        if (-1 != delimiter) {
-            user = userpass.substring(0, delimiter);
-            pass = userpass.substring(delimiter + 1);
-        }
-        return new String[] { user, pass };
-    }
-
-    /**
-     * Checks if the login contains only valid values.
-     * @param login login name of the user
-     * @param pass password of the user
-     * @param ipAddress Client IP.
-     * @return false if the login contains illegal values.
-     */
-    protected static boolean checkLogin(final String login,
-        final String pass, final String ipAddress) {
-        // made by stefan - !!!login without password bugfix - moped!!!
-        // check if the user wants to login without password.
-        // ldap bind doesn't fail with empty password. so check it here.
-        if (pass == null || StringCollection.isEmpty(pass)) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Adds the header to the response message for authorization. Only add this
-     * header if the authorization of the user failed.
-     * @param resp the response to that the header should be added.
-     */
-    protected static void addUnauthorizedHeader(
-        final HttpServletResponse resp) {
-        resp.setHeader("WWW-Authenticate", "Basic realm=\"" + authIdentifier
-            + "\"");
-    }
-
-    /**
-     * This method tries to create a session for the given user.
-     * @param login login name of the user.
-     * @param pass plain text password of the user.
-     * @param ipAddress client IP.
-     * @return the initilized session or <code>null</code>.
-     * @throws LoginException if an error occurs while creating the session.
-     */
-    private Session addSession(final String login, final String pass,
-        final String ipAddress) throws LoginException {
-        final SessiondConnector connector = SessiondConnector.getInstance();
-        Session session = null;
-        try {
-            session = connector.addSession(login, pass, ipAddress);
-        } catch (InvalidCredentialsException e) {
-            log(e.getMessage(), e);
-        } catch (UserNotFoundException e) {
-            log(e.getMessage(), e);
-        } catch (UserNotActivatedException e) {
-            log(e.getMessage(), e);
-        } catch (PasswordExpiredException e) {
-            log(e.getMessage(), e);
-        } catch (LoginException e) {
-            if (LoginException.Source.SYSTEM == e.getSource()) {
-                throw e;
-            }
-            log(e.getMessage(), e);
-        } catch (SessiondException e) {
-            throw new LoginException(LoginException.Code.DATABASE_DOWN, e);
-        } catch (MaxSessionLimitException e) {
-            throw new LoginException(LoginException.Code.DATABASE_DOWN, e);
-        } catch (ContextException e) {
-        	throw new LoginException(e);
+			resp.addCookie(new Cookie("sessionid", session.getSessionID()));
+			if (null != sessionId) {
+				final Cookie cookie = new Cookie("sessionid", sessionId);
+				cookie.setMaxAge(0);
+				resp.addCookie(cookie);
+			}
+		} else {
+			final String address = req.getRemoteAddr();
+			if (null == address || !address.equals(session.getLocalIp())) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Wrong client IP address.");
+				}
+				addUnauthorizedHeader(resp);
+				resp.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+						"Authorization Required!");
+				return false;
+			}
 		}
-        return session;
-    }
+		req.setAttribute(SESSION, session);
+		return true;
+	}
 
-    /**
-     * This method tries to get the session for the given session identifier.
-     * @param sessionId session identifier.
-     * @return the session object or <code>null</code> if the session doesn't
-     * exist.
-     */
-    private Session getSession(final String sessionId) {
-        final SessiondConnector connector = SessiondConnector.getInstance();
-        return connector.getSession(sessionId);
-    }
+	/**
+	 * This methods reads the session identifier from the cookies. TODO Fix
+	 * handling if request contains old session identifier.
+	 * 
+	 * @param req
+	 *            http request.
+	 * @return the session identifier or <code>null</code> if it can't be
+	 *         found.
+	 */
+	private static String getSessionId(final HttpServletRequest req) {
+		final Cookie[] cookies = req.getCookies();
+		String sessionId = null;
+		if (null != cookies) {
+			for (int i = 0; i < cookies.length; i++) {
+				if ("sessionid".equals(cookies[i].getName())) {
+					sessionId = cookies[i].getValue();
+					break;
+				}
+			}
+		}
+		return sessionId;
+	}
 
-    /**
-     * @param req Request.
-     * @return the session object.
-     */
-    protected Session getSession(final HttpServletRequest req) {
-        final Session session = (Session) req
-            .getAttribute(SESSION);
-        if (null == session) {
-            LOG.error("Somebody gets a null session.");
-        }
-        return session;
-    }
+	/**
+	 * Checks if the client sends a correct basic authorization header.
+	 * 
+	 * @param auth
+	 *            Authorization header.
+	 * @return <code>true</code> if the client sent a correct authorization
+	 *         header.
+	 */
+	private static boolean checkForBasicAuthorization(final String auth) {
+		if (null == auth) {
+			return false;
+		}
+		if (auth.length() <= BASIC_AUTH.length()) {
+			return false;
+		}
+		if (!auth.substring(0, BASIC_AUTH.length())
+				.equalsIgnoreCase(BASIC_AUTH)) {
+			return false;
+		}
+		return true;
+	}
 
-    /**
-     * Parses the xml request body and returns a JDOM document.
-     * @param req the HttpServletRequest that body should be parsed.
-     * @return a JDOM document of the parsed body.
-     * @throws JDOMException if JDOM gets an exception
-     * @throws IOException if an exception occurs while reading the body.
-     */
-    protected org.jdom.Document getJDOMDocument(final HttpServletRequest req)
-        throws JDOMException, IOException {
-        org.jdom.Document doc = null;
-        if (req.getContentLength() > 0) {
-            doc = new SAXBuilder().build(req.getInputStream());
-        }
-        return doc;
-    }
+	/**
+	 * Decodes the base64 encoded authorization header. The leading basic will
+	 * be removed if it is present.
+	 * 
+	 * @param auth
+	 *            the base64 encoded value of the authorization header
+	 * @return a string array with user and password
+	 * @throws IOException
+	 *             if the base64 can't be decoded
+	 */
+	protected static String[] decodeAuthorization(final String auth)
+			throws IOException {
+		if (!checkForBasicAuthorization(auth)) {
+			throw new IOException(
+					"Authorization header is missing the leading \"basic\"!");
+		}
+		final byte[] decoded = Base64.decode(auth.substring(6));
+		final String userpass = new String(decoded, "UTF-8").trim();
+		final int delimiter = userpass.indexOf(':');
+		String user = "";
+		String pass = "";
+		if (-1 != delimiter) {
+			user = userpass.substring(0, delimiter);
+			pass = userpass.substring(delimiter + 1);
+		}
+		return new String[] { user, pass };
+	}
 
-    /**
-     * Name of the header containing the authorization data.
-     */
-    private static final String AUTH_HEADER = "authorization";
+	/**
+	 * Checks if the login contains only valid values.
+	 * 
+	 * @param login
+	 *            login name of the user
+	 * @param pass
+	 *            password of the user
+	 * @param ipAddress
+	 *            Client IP.
+	 * @return false if the login contains illegal values.
+	 */
+	protected static boolean checkLogin(final String login, final String pass,
+			final String ipAddress) {
+		// made by stefan - !!!login without password bugfix - moped!!!
+		// check if the user wants to login without password.
+		// ldap bind doesn't fail with empty password. so check it here.
+		if (pass == null || StringCollection.isEmpty(pass)) {
+			return false;
+		}
+		return true;
+	}
 
-    /**
-     * Basic type for authorization.
-     */
-    private static final String BASIC_AUTH = "basic";
+	/**
+	 * Adds the header to the response message for authorization. Only add this
+	 * header if the authorization of the user failed.
+	 * 
+	 * @param resp
+	 *            the response to that the header should be added.
+	 */
+	protected static void addUnauthorizedHeader(final HttpServletResponse resp) {
+		resp.setHeader("WWW-Authenticate", "Basic realm=\"" + authIdentifier
+				+ "\"");
+	}
+
+	/**
+	 * This method tries to create a session for the given user.
+	 * 
+	 * @param login
+	 *            login name of the user.
+	 * @param pass
+	 *            plain text password of the user.
+	 * @param ipAddress
+	 *            client IP.
+	 * @return the initilized session or <code>null</code>.
+	 * @throws LoginException
+	 *             if an error occurs while creating the session.
+	 */
+	private Session addSession(final String login, final String pass,
+			final String ipAddress) throws AbstractOXException {
+		Session session = null;
+		try {
+			// move user auth from sessiond to login servlet
+			final LoginInfo li = LoginInfo.getInstance();
+			final String[] login_infos = li.handleLoginInfo(login, pass);
+
+			final String contextname = login_infos[0];
+			final String username = login_infos[1];
+
+			final ContextStorage contextStor = ContextStorage.getInstance();
+			final int contextId = contextStor.getContextId(contextname);
+			if (ContextStorage.NOT_FOUND == contextId) {
+				throw new ContextException(ContextException.Code.NO_MAPPING,
+						contextname);
+			}
+			final Context context = contextStor.getContext(contextId);
+			if (null == context) {
+				throw new ContextException(ContextException.Code.NOT_FOUND,
+						contextId);
+			}
+
+			int userId = -1;
+			User u = null;
+
+			try {
+				final UserStorage us = UserStorage.getInstance();
+				userId = us.getUserId(username, context);
+				u = us.getUser(userId, context);
+			} catch (LdapException ex) {
+				switch (ex.getDetail()) {
+				case ERROR:
+					throw new LoginException(LoginException.Code.UNKNOWN, ex);
+				case NOT_FOUND:
+					throw new UserNotFoundException("User not found.", ex);
+				}
+			}
+
+			// is user active
+			if (u.isMailEnabled()) {
+				if (u.getShadowLastChange() == 0) {
+					throw new PasswordExpiredException(
+							"user password is expired!");
+				}
+			} else {
+				throw new UserNotActivatedException("user is not activated!");
+			}
+
+			final SessiondConnectorInterface sessiondCon = SessiondService
+					.getService();
+			try {
+				final String sessionId = sessiondCon.addSession(userId, login,
+						pass, context, ipAddress);
+				session = sessiondCon.getSession(sessionId);
+			} finally {
+				SessiondService.releaseService();
+			}
+		} catch (LoginException e) {
+			if (LoginException.Source.USER == e.getSource()) {
+				LOG.debug(e.getMessage(), e);
+			} else {
+				LOG.error(e.getMessage(), e);
+			}
+		} catch (UserNotFoundException e) {
+			LOG.debug(e.getMessage(), e);
+		} catch (UserNotActivatedException e) {
+			LOG.debug(e.getMessage(), e);
+		} catch (PasswordExpiredException e) {
+			LOG.debug(e.getMessage(), e);
+		} catch (ContextException e) {
+			LOG.error("Error looking up context.", e);
+		} catch (Exception e) {
+			LOG.error("Error", e);
+		}
+		return session;
+	}
+
+	/**
+	 * This method tries to get the session for the given session identifier.
+	 * 
+	 * @param sessionId
+	 *            session identifier.
+	 * @return the session object or <code>null</code> if the session doesn't
+	 *         exist.
+	 */
+	private Session getSession(final String sessionId) {
+		final SessiondConnectorInterface sessiondCon;
+		try {
+			sessiondCon = SessiondService.getService();
+			return sessiondCon.getSession(sessionId);
+		} catch (SessiondException e) {
+			LOG.error(e);
+		} finally {
+			SessiondService.releaseService();
+		}
+		return null;
+	}
+
+	/**
+	 * @param req
+	 *            Request.
+	 * @return the session object.
+	 */
+	protected Session getSession(final HttpServletRequest req) {
+		final Session session = (Session) req.getAttribute(SESSION);
+		if (null == session) {
+			LOG.error("Somebody gets a null session.");
+		}
+		return session;
+	}
+
+	/**
+	 * Parses the xml request body and returns a JDOM document.
+	 * 
+	 * @param req
+	 *            the HttpServletRequest that body should be parsed.
+	 * @return a JDOM document of the parsed body.
+	 * @throws JDOMException
+	 *             if JDOM gets an exception
+	 * @throws IOException
+	 *             if an exception occurs while reading the body.
+	 */
+	protected org.jdom.Document getJDOMDocument(final HttpServletRequest req)
+			throws JDOMException, IOException {
+		org.jdom.Document doc = null;
+		if (req.getContentLength() > 0) {
+			doc = new SAXBuilder().build(req.getInputStream());
+		}
+		return doc;
+	}
+
+	/**
+	 * Name of the header containing the authorization data.
+	 */
+	private static final String AUTH_HEADER = "authorization";
+
+	/**
+	 * Basic type for authorization.
+	 */
+	private static final String BASIC_AUTH = "basic";
 
 }

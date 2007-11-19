@@ -150,10 +150,6 @@ public class Starter implements Initialization {
 	 */
 	com.openexchange.groupware.settings.ConfigTreeInit.getInstance(),
 	/**
-	 * Starting SessionD
-	 */
-	com.openexchange.sessiond.impl.SessiondInit.getInstance(),
-	/**
 	 * Responsible for starting and stopping the EventQueue
 	 */
 	new com.openexchange.event.EventInit(),

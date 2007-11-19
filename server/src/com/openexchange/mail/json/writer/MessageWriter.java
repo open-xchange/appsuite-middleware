@@ -75,7 +75,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * {@link MessageWriter} - Writes {@link MailMessage} instances as JSON strings

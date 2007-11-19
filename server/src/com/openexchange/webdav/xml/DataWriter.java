@@ -61,7 +61,7 @@ import org.jdom.output.XMLOutputter;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.webdav.xml.fields.DataFields;
 
 /**

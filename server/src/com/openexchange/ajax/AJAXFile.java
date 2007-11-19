@@ -92,7 +92,7 @@ import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
 import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.UploadServletException;

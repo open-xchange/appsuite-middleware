@@ -60,7 +60,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.openexchange.cache.CacheKey;
 import com.openexchange.mail.MailSessionParameterNames;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * {@link SessionMailCache} - Several cacheable data bound to a user session

@@ -55,7 +55,7 @@ import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * MailUploadQuotaChecker

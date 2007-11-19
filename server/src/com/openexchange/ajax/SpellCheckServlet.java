@@ -69,7 +69,7 @@ import com.openexchange.ajax.spellcheck.AJAXSpellCheck;
 import com.openexchange.ajax.spellcheck.AJAXUserDictionaryException;
 import com.openexchange.ajax.spellcheck.AJAXUserDictionaryException.DictionaryCode;
 import com.openexchange.api.OXConflictException;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * SpellCheckServlet

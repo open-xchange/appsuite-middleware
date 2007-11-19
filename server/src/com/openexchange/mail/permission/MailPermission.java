@@ -53,7 +53,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.server.OCLPermission;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * {@link MailPermission}

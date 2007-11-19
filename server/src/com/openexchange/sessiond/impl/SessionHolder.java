@@ -49,7 +49,7 @@
 
 package com.openexchange.sessiond.impl;
 
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 public interface SessionHolder {
 	public Session getSessionObject();

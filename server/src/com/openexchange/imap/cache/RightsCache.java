@@ -54,7 +54,7 @@ import javax.mail.MessagingException;
 import com.openexchange.cache.CacheKey;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.Rights;
 

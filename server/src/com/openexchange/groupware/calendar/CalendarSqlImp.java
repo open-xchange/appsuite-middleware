@@ -64,7 +64,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 
 /**

@@ -100,7 +100,7 @@ import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
 import com.openexchange.mail.transport.dataobjects.UploadFileMailPart;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.smtp.config.GlobalSMTPConfig;
 import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;

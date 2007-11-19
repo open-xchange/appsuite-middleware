@@ -63,7 +63,7 @@ import com.openexchange.mail.transport.dataobjects.InfostoreDocumentMailPart;
 import com.openexchange.mail.transport.dataobjects.ReferencedMailPart;
 import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
 import com.openexchange.mail.transport.dataobjects.UploadFileMailPart;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * {@link MailTransport}

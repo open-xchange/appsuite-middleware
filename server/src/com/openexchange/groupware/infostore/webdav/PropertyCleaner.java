@@ -59,7 +59,7 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.LoggingLogic;
 
 public class PropertyCleaner implements FolderEvent, InfostoreEvent {

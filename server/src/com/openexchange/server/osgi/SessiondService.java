@@ -49,11 +49,14 @@
 
 package com.openexchange.server.osgi;
 
-import com.openexchange.sessiond.impl.SessiondConnectorInterface;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
+import com.openexchange.sessiond.SessiondConnectorInterface;
+import com.openexchange.sessiond.exception.SessiondException;
 
 
 /**
@@ -94,12 +97,12 @@ public class SessiondService implements ServiceTrackerCustomizer {
         
     }
 
-    public static SessiondConnectorInterface getService() throws Exception{
+    public static SessiondConnectorInterface getService() throws SessiondException {
         if (sessiondConnectorInterface != null) {
             active.incrementAndGet();
             return sessiondConnectorInterface;
         } 
-        throw new Exception("service is null");
+        throw new SessiondException(SessiondException.Code.SESSIOND_EXCEPTION);
     }
     
     public static void releaseService() {

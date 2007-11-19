@@ -62,18 +62,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.sessiond.Session;
-import com.openexchange.sessiond.exception.SessionException;
-import com.openexchange.sessiond.impl.InvalidCredentialsException;
-import com.openexchange.sessiond.impl.LoginException;
-import com.openexchange.sessiond.impl.MaxSessionLimitException;
-import com.openexchange.sessiond.impl.PasswordExpiredException;
-import com.openexchange.sessiond.impl.SessiondConnector;
-import com.openexchange.sessiond.impl.SessiondException;
-import com.openexchange.sessiond.impl.UserNotActivatedException;
-import com.openexchange.sessiond.impl.UserNotFoundException;
-import com.openexchange.sessiond.impl.LoginException.Code;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.contexts.impl.LoginInfo;
+import com.openexchange.groupware.impl.LoginException;
+import com.openexchange.groupware.impl.PasswordExpiredException;
+import com.openexchange.groupware.impl.UserNotActivatedException;
+import com.openexchange.groupware.impl.UserNotFoundException;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.server.osgi.SessiondService;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondConnectorInterface;
+import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.tools.ajp13.AJPv13RequestHandler;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -135,11 +138,61 @@ public class Login extends AJAXServlet {
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
-			final SessiondConnector sessiondConnector = SessiondConnector.getInstance();
+			
 			Session sessionObj = null;
             final Response response = new Response();
 			try {
-				sessionObj = sessiondConnector.addSession(name, password, req.getRemoteAddr());
+				// move user auth from sessiond to login servlet
+		        final LoginInfo li = LoginInfo.getInstance();
+		        final String[] login_infos = li.handleLoginInfo(name, password);
+
+		        final String contextname = login_infos[0];
+		        final String username = login_infos[1];
+
+		        final ContextStorage contextStor = ContextStorage.getInstance();
+		        final int contextId = contextStor.getContextId(contextname);
+		        if (ContextStorage.NOT_FOUND == contextId) {
+		            throw new ContextException(ContextException.Code.NO_MAPPING,
+		                contextname);
+		        }
+		        final Context context = contextStor.getContext(contextId);
+		        if (null == context) {
+		            throw new ContextException(ContextException.Code.NOT_FOUND,
+		                contextId);
+		        }
+
+		        int userId = -1;
+		        User u = null;
+
+		        try {
+		            final UserStorage us = UserStorage.getInstance();
+		            userId = us.getUserId(username, context);
+		            u = us.getUser(userId, context);
+		        } catch (LdapException ex) {
+		            switch (ex.getDetail()) {
+		                case ERROR:
+		                	throw new LoginException(LoginException.Code.UNKNOWN, ex);
+		                case NOT_FOUND:
+		                    throw new UserNotFoundException("User not found.", ex);
+		            }
+		        }
+
+		        // is user active
+		        if (u.isMailEnabled()) {
+		            if (u.getShadowLastChange() == 0) {
+		                throw new PasswordExpiredException("user password is expired!");
+		            }
+		        } else {
+		            throw new UserNotActivatedException("user is not activated!");
+		        }
+				
+	            final SessiondConnectorInterface sessiondCon = SessiondService.getService();
+	            try {
+	                final String sessionId = sessiondCon.addSession(userId, name, password, context, req.getRemoteAddr());
+	                sessionObj = sessiondCon.getSession(sessionId);
+	            } finally {
+	                SessiondService.releaseService();
+	            }
             } catch (LoginException e) {
                 if (LoginException.Source.USER == e.getSource()) {
                     LOG.debug(e.getMessage(), e);
@@ -147,33 +200,23 @@ public class Login extends AJAXServlet {
                     LOG.error(e.getMessage(), e);
                 }
                 response.setException(e);
-			} catch (InvalidCredentialsException e) {
-				LOG.debug(ERROR_INVALID_CREDENTIALS, e);
-                response.setException(new LoginException(
-                    Code.INVALID_CREDENTIALS, e));
 			} catch (UserNotFoundException e) {
 				LOG.debug(ERROR_USER_NOT_FOUND, e);
                 response.setException(new LoginException(
-                    Code.INVALID_CREDENTIALS, e));
+                    LoginException.Code.INVALID_CREDENTIALS, e));
 			} catch (UserNotActivatedException e) {
 				LOG.debug(ERROR_USER_NOT_ACTIVE, e);
                 response.setException(new LoginException(
-                    Code.INVALID_CREDENTIALS, e));
+                    LoginException.Code.INVALID_CREDENTIALS, e));
 			} catch (PasswordExpiredException e) {
 				LOG.debug(ERROR_PASSWORD_EXPIRED, e);
                 response.setException(new LoginException(
-                    Code.INVALID_CREDENTIALS, e));
-			} catch (MaxSessionLimitException e) {
-                LOG.error("Session Limit exceeded.", e);
-                response.setException(new LoginException(LoginException.Code
-                    .DATABASE_DOWN, e));
-            } catch (SessiondException e) {
-                LOG.error("Error creating session.", e);
-                response.setException(new LoginException(LoginException.Code
-                    .DATABASE_DOWN, e));
+                    LoginException.Code.INVALID_CREDENTIALS, e));
             } catch (ContextException e) {
-            	 LOG.error("Error looking up context.", e);
-            	 response.setException(e);
+           	 LOG.error("Error looking up context.", e);
+           	 response.setException(e);
+            } catch (Exception e) {
+            	LOG.error("Error", e);
 			}
             SessionServlet.rememberSession(req, sessionObj);
             /*
@@ -238,8 +281,16 @@ public class Login extends AJAXServlet {
 				}
 			}
 			if (session != null) {			
-				final SessiondConnector sd = SessiondConnector.getInstance();
-				sd.removeSession(session);
+				SessiondConnectorInterface sessiondCon;
+				try {
+					sessiondCon = SessiondService.getService();
+					sessiondCon.removeSession(session);
+				} catch (SessiondException e) {
+					e.printStackTrace();
+				} finally {
+					SessiondService.releaseService();
+				}
+				
 			} else if (LOG.isDebugEnabled()) {
 				LOG.debug("no session cookie found in request!");
 			}
@@ -253,8 +304,16 @@ public class Login extends AJAXServlet {
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
-			final SessiondConnector sessiondConnector = SessiondConnector.getInstance();
-			final Session sessionObj = sessiondConnector.getSessionByRandomToken(randomToken);
+			SessiondConnectorInterface sessiondCon;
+			Session sessionObj = null;
+			try {
+				sessiondCon = SessiondService.getService();
+				sessionObj = sessiondCon.getSessionByRandomToken(randomToken);
+			} catch (SessiondException e) {
+				e.printStackTrace();
+			} finally {
+				SessiondService.releaseService();
+			}
             if (null == sessionObj) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             } else {
@@ -269,15 +328,13 @@ public class Login extends AJAXServlet {
                     throw new OXJSONException(OXJSONException.Code
                         .INVALID_COOKIE);
                 }
-				final SessiondConnector sessiondConnector = SessiondConnector
-				    .getInstance();
+				final SessiondConnectorInterface sessiondCon = SessiondService.getService();
 				for (Cookie cookie : cookies) {
 					final String cookieName = cookie.getName();
 					if (cookieName.startsWith(cookiePrefix)) {
 						final String session = cookie.getValue();
-						if (sessiondConnector.refreshSession(session)) {
-							final Session sessionObj = sessiondConnector
-                                .getSession(session);
+						if (sessiondCon.refreshSession(session)) {
+							final Session sessionObj = sessiondCon.getSession(session);
                             SessionServlet.checkIP(sessionObj.getLocalIp(), req
                                 .getRemoteAddr());
                             response.setData(writeLogin(sessionObj));
@@ -294,7 +351,7 @@ public class Login extends AJAXServlet {
                     throw new OXJSONException(OXJSONException.Code
                         .INVALID_COOKIE);
                 }
-            } catch (SessionException e) {
+            } catch (SessiondException e) {
                 LOG.debug(e.getMessage(), e);
                 response.setException(e);
             } catch (OXJSONException e) {

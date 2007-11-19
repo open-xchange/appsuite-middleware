@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.settings;
 
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * This class defines the interface to the storage for user specific settings.

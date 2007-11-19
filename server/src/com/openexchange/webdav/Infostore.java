@@ -57,7 +57,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 import com.openexchange.tools.webdav.OXServlet;
 import com.openexchange.webdav.InfostorePerformer.Action;
 
