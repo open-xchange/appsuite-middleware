@@ -285,13 +285,12 @@ public class AppointmentRequest {
 	public JSONArray actionUpdates(final JSONObject jsonObj) throws JSONException, SearchIteratorException, OXException, OXJSONException, AjaxException {
 		Date lastModified = null;
 		
-		timestamp = new Date(0);
-		
 		SearchIterator it = null;
 		
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 		final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-		timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
+		final Date requestedTimestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
+        timestamp = new Date(requestedTimestamp.getTime());
 		final Date startUTC = DataParser.parseDate(jsonObj, AJAXServlet.PARAMETER_START);
 		final Date endUTC = DataParser.parseDate(jsonObj, AJAXServlet.PARAMETER_END);
 		final Date start = DataParser.parseTime(jsonObj, AJAXServlet.PARAMETER_START, timeZone);
@@ -333,12 +332,12 @@ public class AppointmentRequest {
 		try {
 			if (!bIgnoreModified) {
 				if (showAppointmentInAllFolders) {
-					it = appointmentsql.getModifiedAppointmentsBetween(user.getId(), start, end, _appointmentFields, timestamp, 0, null);
+					it = appointmentsql.getModifiedAppointmentsBetween(sessionObj.getUserID(), start, end, _appointmentFields, requestedTimestamp, 0, null);
 				} else {
 					if (start != null && end != null) {
-						it = appointmentsql.getModifiedAppointmentsInFolder(folderId, start, end, _appointmentFields, timestamp);
+						it = appointmentsql.getModifiedAppointmentsInFolder(folderId, start, end, _appointmentFields, requestedTimestamp);
 					} else {
-						it = appointmentsql.getModifiedAppointmentsInFolder(folderId, _appointmentFields, timestamp);
+						it = appointmentsql.getModifiedAppointmentsInFolder(folderId, _appointmentFields, requestedTimestamp);
 					}
 				}
 				
@@ -396,7 +395,7 @@ public class AppointmentRequest {
 			}
 			
 			if (!bIgnoreDelete) {
-				it = appointmentsql.getDeletedAppointmentsInFolder(folderId, _appointmentFields, timestamp);
+				it = appointmentsql.getDeletedAppointmentsInFolder(folderId, _appointmentFields, requestedTimestamp);
 				while (it.hasNext()) {
 					final AppointmentObject appointmentObj = (AppointmentObject)it.next();
 					
@@ -409,7 +408,7 @@ public class AppointmentRequest {
 					}
 				}
 			}
-			
+            
 			return jsonResponseArray;
 		} catch (SQLException e) {
 			throw new OXException("SQLException occurred", e);
@@ -467,7 +466,7 @@ public class AppointmentRequest {
 			final int folderId = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_FOLDERID);
 			
 			objectIdMap.put(Integer.valueOf(objectId), Integer.valueOf(folderId));
-
+            
             // for backward compatibility supporting both recurrence position parameters            
             int tempRecurrencePosition = DataParser.parseInt(jObject, CalendarFields.RECURRENCE_POSITION);
             if (tempRecurrencePosition == 0) {
