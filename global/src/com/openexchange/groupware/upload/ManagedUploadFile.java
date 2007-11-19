@@ -52,7 +52,7 @@ package com.openexchange.groupware.upload;
 import java.io.File;
 import java.util.Map;
 
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
 
 /**
  * {@link ManagedUploadFile} - Represents an uploaded file whose lifecycle is

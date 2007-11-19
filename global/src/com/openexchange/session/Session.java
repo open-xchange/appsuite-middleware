@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.sessiond;
+package com.openexchange.session;
 
 import java.util.Date;
 
