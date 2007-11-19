@@ -10,15 +10,20 @@
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
 
+	<property name="version" value="${Bundle-Version}"/>
+	<property name="project.name" value="${Bundle-SymbolicName}"/>
+	<property name="composite.name" value="${project.name}_${version}" />
+
     <!-- Install Constants -->
     <property name="bundlesdir" value="${destdir}${prefix}/bundles"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
-
+	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
+		<pathelement location="${bundlesdir}/${commonsloggingjar}"/>
     </path>
 
     <!-- Compile -->
@@ -35,7 +40,7 @@
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/${Bundle-SymbolicName}_${Bundle-Version}.jar"
+        <jar jarfile="${tmp.dir}/${composite.name}.jar"
             manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
         </jar>
@@ -46,9 +51,30 @@
         <mkdir dir="${bundlesdir}"/>
         <copy todir="${bundlesdir}">
             <fileset dir="${tmp.dir}">
-                <include name="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
+                <include name="${composite.name}.jar"/>
             </fileset>
         </copy>
+    </target>
+
+	<!-- Dist -->
+	<!-- Cargo Culted from openexchange-common -->
+	<target name="dist" depends="clean">
+		<property name="dist-package" value="dist-package"/>
+    	<delete dir="${dist-package}"/>
+        <mkdir dir="${dist-package}/${composite.name}"/>
+        <copy todir="${dist-package}/${composite.name}">
+            <fileset dir=".">
+                <exclude name="**${dist-package}/**"/>
+                <exclude name="**debian/**"/>
+                <exclude name="**CVS/**"/>
+                <exclude name="Todo"/>
+            </fileset>
+        </copy>
+        <tar destfile="../${composite.name}.tar.gz"
+	        basedir="${dist-package}"
+    	    includes="${composite.name}/"
+         	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
+    	<delete dir="${dist-package}"/>
     </target>
 
     <target name="clean">
