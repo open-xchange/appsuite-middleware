@@ -61,39 +61,13 @@ import com.openexchange.groupware.upload.ManagedUploadFile;
  * 
  */
 public interface Session {
-
-	/**
-	 * Performs necessary actions before closing this session
-	 */
-	public void closingOperations();
-
+	
 	/**
 	 * Gets the context
 	 * 
 	 * @return The context
 	 */
 	public Context getContext();
-
-	/**
-	 * Gets creation time
-	 * 
-	 * @return The
-	 */
-	public Date getCreationtime();
-
-	/**
-	 * Gets the host
-	 * 
-	 * @return The host
-	 */
-	public String getHost();
-
-	/**
-	 * Gets the lifetime
-	 * 
-	 * @return The lifetime
-	 */
-	public long getLifetime();
 
 	/**
 	 * Gets the local IP address
@@ -125,7 +99,7 @@ public interface Session {
 	 * @return The password
 	 */
 	public String getPassword();
-
+	
 	/**
 	 * Gets the random token
 	 * 
@@ -146,13 +120,6 @@ public interface Session {
 	 * @return The session ID
 	 */
 	public String getSessionID();
-
-	/**
-	 * Gets timestamp
-	 * 
-	 * @return The
-	 */
-	public Date getTimestamp();
 
 	/**
 	 * Gets the uploaded file associated with given ID and set its last access
@@ -228,4 +195,6 @@ public interface Session {
 	 *         successfully touched; otherwise <code>false</code>
 	 */
 	public boolean touchUploadedFile(String id);
+	
+	public void removeRandomToken();
 }
