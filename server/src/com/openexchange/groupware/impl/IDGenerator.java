@@ -49,7 +49,7 @@
 
 
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.impl;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
@@ -65,6 +65,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.DBPool;
 import com.openexchange.server.DBPoolingException;

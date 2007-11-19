@@ -55,7 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.GroupwareInit;
+import com.openexchange.groupware.impl.GroupwareInit;
 
 /**
  * com.openexchange.server.Starter
@@ -104,7 +104,7 @@ public class Starter implements Initialization {
 	/**
 	 * Starts AJP server
 	 */
-	com.openexchange.groupware.BackendServicesInit.getInstance(),
+	com.openexchange.groupware.impl.BackendServicesInit.getInstance(),
 	/**
 	 * Starts HTTP serlvet manager
 	 */

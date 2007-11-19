@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.impl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.webdav.Lock;
 import com.openexchange.groupware.infostore.webdav.LockManagerImpl;

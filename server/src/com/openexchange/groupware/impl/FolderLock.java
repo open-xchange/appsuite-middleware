@@ -47,29 +47,19 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.impl;
 
-import com.openexchange.imap.OXMailException;
+import com.openexchange.groupware.infostore.webdav.Lock;
 
-/**
- * AccountExistenceException
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public class AccountExistenceException extends OXMailException {
+public class FolderLock extends Lock {
+	private int depth = 0;
 
-	private static final long serialVersionUID = -3399101518010026607L;
-
-	public AccountExistenceException() {
-		super(MailCode.ACCOUNT_DOES_NOT_EXIST);
+	public int getDepth() {
+		return depth;
 	}
 
-	public AccountExistenceException(Object... messageArgs) {
-		super(MailCode.ACCOUNT_DOES_NOT_EXIST, messageArgs);
+	public void setDepth(final int depth) {
+		this.depth = depth;
 	}
-
-	public AccountExistenceException(Exception cause, Object... messageArgs) {
-		super(MailCode.ACCOUNT_DOES_NOT_EXIST, cause, messageArgs);
-	}
-
+	
 }

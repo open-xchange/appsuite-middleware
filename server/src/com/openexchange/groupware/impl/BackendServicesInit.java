@@ -47,20 +47,72 @@
  *
  */
 
+package com.openexchange.groupware.impl;
 
-// Any annotation can only be set once at a certain place. So no multiple @InfostoreThrows annotations. *sighs*
-package com.openexchange.groupware;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.Initialization;
+import com.openexchange.tools.ajp13.AJPv13Config;
+import com.openexchange.tools.ajp13.AJPv13Server;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+/**
+ * BackendServicesInit
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class BackendServicesInit implements Initialization {
 
-import com.openexchange.groupware.AbstractOXException.Category;
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(BackendServicesInit.class);
 
-@Retention(RetentionPolicy.RUNTIME)
-public @interface OXThrowsMultiple {
-	Category[] category();
-	int[] exceptionId();
-	String[] msg();
-	String[] desc();
+	private static final BackendServicesInit instance = new BackendServicesInit();
+
+	private final AtomicBoolean started = new AtomicBoolean();
+
+	private BackendServicesInit() {
+		super();
+	}
+
+	/**
+	 * @return The singleton instance of {@link BackendServicesInit}
+	 */
+	public static BackendServicesInit getInstance() {
+		return instance;
+	}
+
+	/**
+	 * @deprecated
+	 * @throws AbstractOXException
+	 */
+	public static void initAJP() throws AbstractOXException {
+		getInstance().start();
+	}
+
+	public void start() throws AbstractOXException {
+		if (started.get()) {
+			LOG.error(this.getClass().getName() + " already started");
+			return;
+		}
+		AJPv13Config.getInstance().start();
+		AJPv13Server.startAJPServer();
+		started.set(true);
+		if (LOG.isInfoEnabled()) {
+			LOG.info("AJP server successfully started.");
+		}
+	}
+
+	public void stop() throws AbstractOXException {
+		if (!started.get()) {
+			LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
+			return;
+		}
+		AJPv13Server.stopAJPServer();
+		AJPv13Config.getInstance().stop();
+		started.set(false);
+		if (LOG.isInfoEnabled()) {
+			LOG.info("AJP server successfully stopped.");
+		}
+	}
+
 }

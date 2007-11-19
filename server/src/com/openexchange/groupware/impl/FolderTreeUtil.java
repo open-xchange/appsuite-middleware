@@ -47,19 +47,18 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.impl;
 
+import java.util.List;
 
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+public interface FolderTreeUtil {
 
-import com.openexchange.groupware.AbstractOXException.Category;
+	List<Integer> getPath(int folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
-@Retention(RetentionPolicy.RUNTIME)
-public @interface OXThrows {
-	Category category();
-	int exceptionId();
-	String msg();
-	String desc();
 }

@@ -47,18 +47,94 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.impl;
 
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.cache.FolderCacheManager;
+import com.openexchange.cache.FolderCacheNotEnabledException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
-public interface FolderTreeUtil {
+public class FolderTreeUtilImpl implements FolderTreeUtil {
 
-	List<Integer> getPath(int folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	private static Mode MODE;
+	
+	public FolderTreeUtilImpl(final DBProvider provider) {
+		MODE = new CACHE_MODE(provider);
+	}
+	
+	public List<Integer> getPath(final int folderid, final Context ctx, final User user,
+			final UserConfiguration userConfig) throws OXException {
+		final List<Integer> path = new ArrayList<Integer>();
+		try {
+			FolderObject folder = getFolder(folderid, ctx);
+			path.add(Integer.valueOf(folder.getObjectID()));
+			while(folder != null) {
+				if(folder.getParentFolderID() == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
+					path.add(Integer.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID));
+					folder = null;
+				} else {
+					folder = getFolder(folder.getParentFolderID(), ctx);
+					path.add(Integer.valueOf(folder.getObjectID()));
+				}
+			}
+		} catch (final Exception e) {
+			throw new OXException(e);
+		}
+		Collections.reverse(path);
+		return path;
+	}
+
+	private FolderObject getFolder(final int folderid, final Context ctx) throws Exception {
+		return MODE.getFolder(folderid, ctx);
+	}
+	
+	static interface Mode {
+		public FolderObject getFolder(int folderid, Context ctx) throws Exception;
+	}
+	
+	private static final class CACHE_MODE implements Mode {
+
+		private DBProvider provider;
+
+		public CACHE_MODE(final DBProvider provider) {
+			this.provider = provider;
+		}
+		
+		public FolderObject getFolder(final int folderid, final Context ctx)  throws Exception{
+			try {
+				FolderObject o =  FolderCacheManager.getInstance().getFolderObject(folderid, ctx);
+				if(o == null) {
+					Connection readCon = null;
+					try {
+						readCon = provider.getReadConnection(ctx);
+						o = FolderCacheManager.getInstance().loadFolderObject(folderid, ctx, readCon);
+					} finally {
+						provider.releaseReadConnection(ctx, readCon);
+					}
+				}
+				return o;
+			} catch (final FolderCacheNotEnabledException e) {
+				MODE = new NORMAL_MODE();
+				return MODE.getFolder(folderid, ctx);
+			}
+		}
+	}
+	
+	private static final class NORMAL_MODE implements Mode {
+
+		public FolderObject getFolder(final int folderid, final Context ctx) throws Exception {
+			return FolderObject.loadFolderObjectFromDB(folderid, ctx);
+		}
+		
+	}
 
 }

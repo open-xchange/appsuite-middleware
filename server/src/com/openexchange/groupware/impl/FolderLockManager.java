@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.impl;
 
 import java.util.List;
 import java.util.Map;

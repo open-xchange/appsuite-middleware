@@ -47,17 +47,29 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.impl;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
+import com.openexchange.imap.OXMailException;
 
+/**
+ * AccountExistenceException
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class AccountExistenceException extends OXMailException {
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface OXExceptionSource {
-	int classId();
-	Component component();
+	private static final long serialVersionUID = -3399101518010026607L;
+
+	public AccountExistenceException() {
+		super(MailCode.ACCOUNT_DOES_NOT_EXIST);
+	}
+
+	public AccountExistenceException(Object... messageArgs) {
+		super(MailCode.ACCOUNT_DOES_NOT_EXIST, messageArgs);
+	}
+
+	public AccountExistenceException(Exception cause, Object... messageArgs) {
+		super(MailCode.ACCOUNT_DOES_NOT_EXIST, cause, messageArgs);
+	}
+
 }

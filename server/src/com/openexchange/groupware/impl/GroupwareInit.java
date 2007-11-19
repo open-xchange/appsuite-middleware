@@ -47,10 +47,9 @@
  *
  */
 
-package com.openexchange.groupware;
+package com.openexchange.groupware.impl;
 
-import com.openexchange.event.EventInit;
-import com.openexchange.sessiond.impl.SessiondInit;
+import com.openexchange.groupware.AbstractOXException;
 
 /**
  * This class contains the initialization for the groupware server.
