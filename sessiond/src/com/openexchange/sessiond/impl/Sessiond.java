@@ -51,7 +51,8 @@
 
 package com.openexchange.sessiond.impl;
 
-import com.openexchange.sessiond.*;
+import com.openexchange.session.*;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

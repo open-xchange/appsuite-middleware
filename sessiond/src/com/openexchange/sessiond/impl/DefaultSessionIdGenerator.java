@@ -51,10 +51,12 @@
 
 package com.openexchange.sessiond.impl;
 
-import com.openexchange.sessiond.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
+
+import com.openexchange.sessiond.exception.SessiondException;
+
 
 /**
  * DefaultSessionIdGenerator
@@ -95,7 +97,7 @@ public class DefaultSessionIdGenerator extends SessionIdGenerator {
 			}
 			return md5.toString();
 		} catch (NoSuchAlgorithmException exc) {
-			throw new SessiondException(exc);
+			throw new SessiondException(SessiondException.Code.SESSIOND_EXCEPTION);
 		}
 	}
 }

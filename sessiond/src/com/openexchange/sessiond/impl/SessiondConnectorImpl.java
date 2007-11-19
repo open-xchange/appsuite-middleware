@@ -49,11 +49,13 @@
 
 package com.openexchange.sessiond.impl;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.Credentials;
-import com.openexchange.sessiond.Session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondConnectorInterface;
+import com.openexchange.sessiond.exception.SessiondException;
 
 /**
  * SessiondConnectorImpl
@@ -68,8 +70,8 @@ public class SessiondConnectorImpl implements SessiondConnectorInterface {
 		
 	}
 	
-    public String addSession(final int userId, final Credentials cred, final Context context, final String clientHost) throws SessiondException {
-        return SessionHandler.addSession(userId, cred, context, clientHost);
+    public String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost) throws SessiondException {
+        return SessionHandler.addSession(userId, loginName, password, context, clientHost);
     }
 
     public boolean refreshSession(final String sessionId) {

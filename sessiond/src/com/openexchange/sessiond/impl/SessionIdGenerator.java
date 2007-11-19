@@ -51,7 +51,8 @@
 
 package com.openexchange.sessiond.impl;
 
-import com.openexchange.sessiond.*;
+import com.openexchange.sessiond.exception.SessiondException;
+
 
 /**
  * SessionIdGenerator
@@ -79,7 +80,7 @@ public abstract class SessionIdGenerator {
         try {
             return (SessionIdGenerator) getImplementingClass().getConstructor().newInstance();
         } catch (Exception exc) {
-            throw new SessiondException(exc);
+        	throw new SessiondException(SessiondException.Code.SESSIOND_EXCEPTION);
         }
 	} 
 

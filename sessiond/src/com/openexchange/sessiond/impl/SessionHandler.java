@@ -49,10 +49,6 @@
 
 package com.openexchange.sessiond.impl;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.Credentials;
-import com.openexchange.server.ServerTimer;
-import com.openexchange.sessiond.*;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Date;
 import java.util.Hashtable;
@@ -64,6 +60,12 @@ import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServerTimer;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.exception.SessiondException;
+import com.openexchange.sessiond.exception.SessiondException.Code;
 
 
 /**
@@ -145,13 +147,12 @@ public class SessionHandler extends TimerTask {
         randomList.removeLast();
     }
     
-    protected static String addSession(final int userId,  final Credentials cred, final Context context, final String clientHost) throws SessiondException, MaxSessionLimitException {
-        final String loginName = cred.getValue(Credentials.LOGIN_NAME);
+    protected static String addSession(final int userId,  String loginName, String password, final Context context, final String clientHost) throws SessiondException {
         final String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
         final String secret = sessionIdGenerator.createSecretId(loginName, String.valueOf(System.currentTimeMillis()));
         final String randomToken = sessionIdGenerator.createRandomId();
         
-        final Session session = new SessionImpl(userId, cred, context, sessionId, secret, randomToken);
+        final Session session = new SessionImpl(userId, loginName, password, context, sessionId, secret, randomToken, clientHost);
         
         if (LOG.isDebugEnabled()) {
             LOG.debug("addSession <" + sessionId + '>');
@@ -167,7 +168,7 @@ public class SessionHandler extends TimerTask {
             randomMap = randomList.get(a);
             
             if (!noLimit && sessions.size() > maxSessions) {
-                throw new MaxSessionLimitException("max session limit reached");
+                throw new SessiondException(Code.MAX_SESSION_EXCEPTION);
             }
         }
         

@@ -51,28 +51,80 @@
 
 package com.openexchange.sessiond.impl;
 
-import com.openexchange.sessiond.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.config.Configuration;
 
 /**
- * TODO Integrate into LoginException
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
- * @deprecated use LoginException.
+ * AbstractConfigWrapper
+ *
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class MaxSessionLimitException extends SessiondException
-{
-	public MaxSessionLimitException() {
-		super();
+
+public abstract class AbstractConfigWrapper {
+	
+	private static final Log LOG = LogFactory.getLog(AbstractConfigWrapper.class);
+	
+	public static String parseProperty(final Configuration prop, final String name, final String value) {
+		final String tmp = prop.getProperty(name, "");
+		if (tmp.trim().length() > 0) {
+			return tmp;
+		}
+		return value;
 	}
 	
-	public MaxSessionLimitException(String message) {
-		super(message);
+	public static int parseProperty(final Configuration prop, final String name, final int value) {
+		final String tmp = prop.getProperty(name, "");
+		if (tmp.trim().length() > 0) {
+			try {
+				return Integer.parseInt(tmp);
+			} catch (NumberFormatException ex) {
+				LOG.warn("property no parsable: " + name + ':' + value);
+			}
+		}
+		return value;
 	}
 	
-	public MaxSessionLimitException(String message, Exception exc) {
-		super(message, exc);
+	public static boolean parseProperty(final Configuration prop, final String name, final boolean value) {
+		final String tmp = prop.getProperty(name, "");
+		if (tmp.trim().length() > 0) {
+			return Boolean.parseBoolean(tmp);
+		}
+		return value;
 	}
 	
-	public MaxSessionLimitException(Exception exc) {
-		super(exc);
-	}	
+	public static int[] parseProperty(final Configuration prop, final String name, final int[] value) {
+		final String tmp = prop.getProperty(name, "");
+		if (tmp.trim().length() > 0) {
+			final String s[] = tmp.split(",");
+			int ports[] = new int[s.length];
+			
+			for (int a = 0; a < ports.length; a++) {
+				try {
+					ports[a] = Integer.parseInt(s[a]);
+				} catch (NumberFormatException ex) {
+					LOG.warn("port in port range no parsable: " + s[a]);
+				}
+			}
+			
+			return ports;
+		}
+
+		return value;
+	}
+	
+	public static String[] parseProperty(final Configuration prop, final String name, final String[] value) {
+		final String tmp = prop.getProperty(name, "");
+		if (tmp.trim().length() > 0) {
+			return tmp.split(",");
+		}
+
+		return value;
+	}
 }
+
+
+
+
+

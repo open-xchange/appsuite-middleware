@@ -49,14 +49,15 @@
 
 package com.openexchange.sessiond.impl;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.Credentials;
-import com.openexchange.groupware.upload.ManagedUploadFile;
-import com.openexchange.sessiond.Session;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.upload.ManagedUploadFile;
+import com.openexchange.session.Session;
 
 /**
  * SessionImpl
@@ -65,9 +66,11 @@ import org.apache.commons.logging.LogFactory;
  */
 public class SessionImpl implements Session {
 	
+	protected String loginName;
+	
+	protected String password;
+	
     protected Context context;
-    
-    protected Credentials cred;
     
     protected int userId;
     
@@ -77,19 +80,23 @@ public class SessionImpl implements Session {
     
     protected String randomToken;
     
+    protected String localIp;
+    
 	private static final Log LOG = LogFactory.getLog(SessionImpl.class);
 	
 	private final transient Map<String, ManagedUploadFile> ajaxUploadFiles;
 
 	private final Map<String, Object> parameters;
 
-	public SessionImpl(int userId, Credentials cred, Context context, String sessionId, String secret, String randomToken) {
+	public SessionImpl(int userId, String loginName, String password, Context context, String sessionId, String secret, String randomToken, String localIp) {
         this.userId = userId;
-		this.cred = cred;
+		this.loginName = loginName;
+		this.password = password;
         this.context = context;
         this.sessionId = sessionId;
         this.secret = secret;
         this.randomToken = randomToken;
+        this.localIp = localIp;
         
 		parameters = new ConcurrentHashMap<String, Object>();
 		ajaxUploadFiles = new ConcurrentHashMap<String, ManagedUploadFile>();
@@ -97,10 +104,6 @@ public class SessionImpl implements Session {
 
     public Context getContext() {
         return context;
-    }
-
-    public Credentials getCredentials() {
-        return cred;
     }
 
     public Object getParameter(String name) {
@@ -174,9 +177,24 @@ public class SessionImpl implements Session {
     public void removeRandomToken() {
         randomToken = null;
     }
+
+	public String getLocalIp() {
+		return localIp;
+	}
+
+	public String getLoginName() {
+		return loginName;
+	}
+
+	public int getUserId() {
+		return userId;
+	}
+
+	public String getUserlogin() {
+		return loginName;
+	}
+	
+	public String getPassword() {
+		return password;
+	}
 }
-
-
-
-
-

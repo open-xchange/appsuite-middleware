@@ -47,11 +47,11 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.Credentials;
-import com.openexchange.sessiond.Session;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.exception.SessiondException;
 
 /**
  * SessiondConnectorInterface
@@ -61,7 +61,7 @@ import com.openexchange.sessiond.Session;
 
 public interface SessiondConnectorInterface {
 	
-    public String addSession(final int userId, final Credentials cred, final Context context, final String clientHost) throws SessiondException;
+    public String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost) throws SessiondException;
     
     public boolean refreshSession(final String sessionId);
     

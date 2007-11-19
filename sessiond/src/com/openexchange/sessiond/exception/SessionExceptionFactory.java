@@ -75,7 +75,7 @@ public class SessionExceptionFactory extends AbstractOXExceptionFactory {
     protected AbstractOXException buildException(final Component component,
         final Category category, final int number, final String message,
         final Throwable cause, final Object... msgArgs) {
-        return new SessionException(component, category, number, message, cause,
+        return new SessiondException(component, category, number, message, cause,
             msgArgs);
     }
 
@@ -94,9 +94,9 @@ public class SessionExceptionFactory extends AbstractOXExceptionFactory {
      * @param messageArgs arguments for the message.
      * @return a newly created exception.
      */
-    public SessionException create(final int identifier, final Throwable cause,
+    public SessiondException create(final int identifier, final Throwable cause,
         final Object... messageArgs) {
-        return (SessionException) super.createException(identifier, cause,
+        return (SessiondException) super.createException(identifier, cause,
             messageArgs);
     }
 
@@ -106,7 +106,7 @@ public class SessionExceptionFactory extends AbstractOXExceptionFactory {
      * @param messageArgs arguments for the message.
      * @return a newly created exception.
      */
-    public SessionException create(final int identifier,
+    public SessiondException create(final int identifier,
         final Object... messageArgs) {
         return create(identifier, null, messageArgs);
     }

@@ -49,8 +49,8 @@
 
 package com.openexchange.sessiond.osgi;
 
+import com.openexchange.sessiond.SessiondConnectorInterface;
 import com.openexchange.sessiond.impl.SessiondConnectorImpl;
-import com.openexchange.sessiond.impl.SessiondConnectorInterface;
 import com.openexchange.sessiond.impl.SessiondInit;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;

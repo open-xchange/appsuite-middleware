@@ -51,12 +51,13 @@ package com.openexchange.sessiond.exception;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
+import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
  * Exception if something not works as expected with the session.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class SessionException extends AbstractOXException {
+public class SessiondException extends AbstractOXException {
 
     /**
      * For Serialization.
@@ -67,23 +68,92 @@ public class SessionException extends AbstractOXException {
      * Initializes a new exception using the information provided by the cause.
      * @param cause the cause of the exception.
      */
-    public SessionException(final AbstractOXException cause) {
+    public SessiondException(final AbstractOXException cause) {
         super(cause);
     }
 
     /**
      * Constructor with all parameters.
-     * @param component Component.
-     * @param category Category.
-     * @param number detail number.
-     * @param message message of the exception.
+     * @param code code
+     */
+    public SessiondException(final Code code) {
+        super(Component.SESSION, code.getCategory(), code.getDetailNumber(), code.getMessage(), null);
+    }
+    
+    /**
+     * Constructor with all parameters.
+     * @param code code
      * @param cause the cause.
      * @param msgArgs arguments for the exception message.
      */
-    public SessionException(final Component component, final Category category,
-        final int number, final String message, final Throwable cause,
+    public SessiondException(Category category, String message, int detailNumber, Throwable cause) {
+        super(Component.SESSION, category, detailNumber, message, cause);
+    }
+    
+    /**
+     * Constructor with all parameters.
+     * @param code code
+     * @param cause the cause.
+     * @param msgArgs arguments for the exception message.
+     */
+    public SessiondException(final Code code, final Throwable cause,
         final Object[] msgArgs) {
-        super(component, category, number, message, cause);
+        super(Component.SESSION, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
         setMessageArgs(msgArgs);
     }
+    
+	public SessiondException(Component component, Category category,
+			int number, String message, Throwable cause, Object[] msgArgs) {
+        super(component, category, number, message, cause);
+        setMessageArgs(msgArgs);
+	}
+
+	public enum Code {
+		SESSIOND_EXCEPTION("Sessiond Exception", 1,
+            AbstractOXException.Category.CODE_ERROR),
+		MAX_SESSION_EXCEPTION(
+            "Max Session size reached", 2,
+            AbstractOXException.Category.CODE_ERROR);
+
+		/**
+		 * Message of the exception.
+		 */
+		private final String message;
+		
+		/**
+		 * Category of the exception.
+		 */
+		private final Category category;
+		
+		/**
+		 * Detail number of the exception.
+		 */
+		private final int detailNumber;
+
+		/**
+		 * Default constructor.
+		 * @param message message.
+		 * @param category category.
+		 * @param detailNumber detail number.
+		 */
+		private Code(final String message,
+				final int detailNumber,
+				final Category category)  {
+			this.message = message;
+			this.category = category;
+			this.detailNumber = detailNumber;
+		}
+
+		public Category getCategory() {
+			return category;
+		}
+
+		public int getDetailNumber() {
+			return detailNumber;
+		}
+
+		public String getMessage() {
+			return message;
+		}
+	}
 }
