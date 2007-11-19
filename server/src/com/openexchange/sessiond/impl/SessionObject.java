@@ -296,4 +296,7 @@ public class SessionObject implements com.openexchange.sessiond.Session {
 		return false;
 	}
 
+	public void removeRandomToken() {
+		randomToken = null;
+	}
 }
