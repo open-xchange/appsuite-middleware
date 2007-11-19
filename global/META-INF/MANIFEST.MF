@@ -5,6 +5,10 @@ Bundle-SymbolicName: com.openexchange.global
 Bundle-Version: 6.5.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Export-Package: com.openexchange.cache.dynamic,
+ com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.upload,
+ com.openexchange.server,
  com.openexchange.sessiond
+Import-Package: org.apache.commons.logging,
+ org.apache.commons.logging.impl
