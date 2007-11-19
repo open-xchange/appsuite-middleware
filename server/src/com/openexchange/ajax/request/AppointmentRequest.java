@@ -332,7 +332,7 @@ public class AppointmentRequest {
 		try {
 			if (!bIgnoreModified) {
 				if (showAppointmentInAllFolders) {
-					it = appointmentsql.getModifiedAppointmentsBetween(sessionObj.getUserID(), start, end, _appointmentFields, requestedTimestamp, 0, null);
+					it = appointmentsql.getModifiedAppointmentsBetween(sessionObj.getUserId(), start, end, _appointmentFields, requestedTimestamp, 0, null);
 				} else {
 					if (start != null && end != null) {
 						it = appointmentsql.getModifiedAppointmentsInFolder(folderId, start, end, _appointmentFields, requestedTimestamp);

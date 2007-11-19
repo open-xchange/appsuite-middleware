@@ -274,7 +274,7 @@ public class ReminderRequest {
 	 * appointment. The reminder object contains only the alarm attribute and
 	 * the recurrence position.
 	 */   
-    protected ReminderObject getLatestRecurringReminder(final int objectId, final int inFolder, final Session sessionObj, final Date endRange) throws OXException, SQLException {
+    protected ReminderObject getLatestRecurringReminder(final int objectId, final int inFolder, final Session sessionObj, final Date endRange, final Date oldReminderDate) throws OXException, SQLException {
         final CalendarSql calendarSql = new CalendarSql(sessionObj);
         final CalendarDataObject calendarDataObject = calendarSql.getObjectById(objectId, inFolder);
         final int alarm = calendarDataObject.getAlarm();
