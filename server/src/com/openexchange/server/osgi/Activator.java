@@ -49,6 +49,7 @@
 
 package com.openexchange.server.osgi;
 
+import com.openexchange.sessiond.impl.SessiondConnectorInterface;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +63,7 @@ import org.osgi.service.http.HttpService;
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.server.Starter;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
+import org.osgi.util.tracker.ServiceTracker;
 
 /**
  * OSGi bundle activator for the server.
@@ -85,6 +87,8 @@ public class Activator implements BundleActivator {
 	 */
 	private static final String BUNDLE_ID_ADMIN = "open_xchange_admin";
 
+    private ServiceTracker sessiondServiceTracker = null;
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -106,6 +110,11 @@ public class Activator implements BundleActivator {
 			 */
 			registrationList.add(context.registerService(CharsetProvider.class.getName(), charsetProvider, null));
 			registrationList.add(context.registerService(HttpService.class.getName(), httpService, null));
+            /*
+             * Create service tracker
+             */
+            SessiondService sessiondTracker = new SessiondService(context);
+            sessiondServiceTracker = new ServiceTracker(context, SessiondConnectorInterface.class.getName(), sessiondTracker);
 		} catch (final Exception e) {
 			// Try to stop what already has been started.
 			starter.stop();
@@ -118,6 +127,7 @@ public class Activator implements BundleActivator {
 	 */
 	public void stop(final BundleContext context) throws Exception {
 		try {
+            sessiondServiceTracker.close();
 			starter.stop();
 		} finally {
 			/*
