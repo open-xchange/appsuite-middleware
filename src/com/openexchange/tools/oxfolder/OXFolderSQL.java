@@ -263,6 +263,32 @@ public class OXFolderSQL {
 	 */
 	public static final int lookUpFolder(final int parent, final String folderName, final int module,
 			final Connection readConArg, final Context ctx) throws DBPoolingException, SQLException {
+		return lookUpFolderOnUpdate(-1, parent, folderName, module, readConArg, ctx);
+	}
+
+	/**
+	 * Checks for a duplicate folder in parental folder. A folder is treated as
+	 * a duplicate if name and module are equal.
+	 * 
+	 * @param folderId
+	 *            The ID of the folder whose is equal to given folder name (used
+	 *            on update). Set this parameter to <code>-1</code> to ignore.
+	 * @param parent
+	 *            The parent folder whose subfolders shall be looked up
+	 * @param folderName
+	 *            The folder name to look for
+	 * @param module
+	 *            The folder module
+	 * @param readConArg
+	 *            A readable connection (may be <code>null</code>)
+	 * @param ctx
+	 *            The context
+	 * @return The folder id or <tt>-1</tt> if none found
+	 * @throws DBPoolingException
+	 * @throws SQLException
+	 */
+	public static final int lookUpFolderOnUpdate(final int folderId, final int parent, final String folderName,
+			final int module, final Connection readConArg, final Context ctx) throws DBPoolingException, SQLException {
 		Connection readCon = readConArg;
 		boolean closeReadCon = false;
 		PreparedStatement stmt = null;
@@ -272,7 +298,8 @@ public class OXFolderSQL {
 				readCon = DBPool.pickup(ctx);
 				closeReadCon = true;
 			}
-			stmt = readCon.prepareStatement(SQL_LOOKUPFOLDER);
+			stmt = readCon.prepareStatement(folderId > 0 ? new StringBuilder(SQL_LOOKUPFOLDER).append(" AND fuid != ")
+					.append(folderId).toString() : SQL_LOOKUPFOLDER);
 			stmt.setInt(1, ctx.getContextId()); // cid
 			stmt.setInt(2, parent); // parent
 			stmt.setString(3, folderName); // fname
@@ -1479,7 +1506,8 @@ public class OXFolderSQL {
 				/*
 				 * Reassign
 				 */
-				reassignFolders(reassignFolders, entity, mailAdmin.intValue(), lastModified, folderTable, writeConArg, ctx);
+				reassignFolders(reassignFolders, entity, mailAdmin.intValue(), lastModified, folderTable, writeConArg,
+						ctx);
 			}
 			/*
 			 * Check column "changed_from"
@@ -1518,7 +1546,8 @@ public class OXFolderSQL {
 				/*
 				 * Reassign
 				 */
-				reassignFolders(reassignFolders, entity, mailAdmin.intValue(), lastModified, folderTable, writeConArg, ctx);
+				reassignFolders(reassignFolders, entity, mailAdmin.intValue(), lastModified, folderTable, writeConArg,
+						ctx);
 			}
 		} finally {
 			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
@@ -1615,7 +1644,7 @@ public class OXFolderSQL {
 	}
 
 	private static final String SQL_REASSIGN_FOLDERS = "UPDATE #FOLDER# SET created_from = ?, changed_from = ?, changing_date = ?, default_flag = 0 WHERE cid = ? AND fuid = ?";
-	
+
 	private static final String SQL_REASSIGN_FOLDERS_WITH_NAME = "UPDATE #FOLDER# SET created_from = ?, changed_from = ?, changing_date = ?, default_flag = 0, fname = ? WHERE cid = ? AND fuid = ?";
 
 	private static final void reassignFolders(final Set<Integer> reassignFolders, final int entity,
