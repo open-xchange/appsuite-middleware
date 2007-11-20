@@ -61,13 +61,13 @@ import com.openexchange.server.ServiceProxy;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class BundleServiceTracker<S> implements ServiceTrackerCustomizer {
+public class BundleServiceTracker<S> implements ServiceTrackerCustomizer {
 
-	private final BundleContext context;
+	protected final BundleContext context;
 
-	private final ServiceProxy<S> proxy;
+	protected final ServiceProxy<S> proxy;
 
-	private final Class<S> serviceClass;
+	protected final Class<S> serviceClass;
 
 	/**
 	 * Initializes a new bundle service
