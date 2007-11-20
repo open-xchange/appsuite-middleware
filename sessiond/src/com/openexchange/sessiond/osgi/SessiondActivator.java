@@ -49,18 +49,23 @@
 
 package com.openexchange.sessiond.osgi;
 
-import com.openexchange.sessiond.SessiondConnectorInterface;
-import com.openexchange.sessiond.impl.SessiondConnectorImpl;
-import com.openexchange.sessiond.impl.SessiondInit;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+
+import com.openexchange.sessiond.SessiondConnectorInterface;
+import com.openexchange.sessiond.impl.SessiondConnectorImpl;
+import com.openexchange.sessiond.impl.SessiondInit;
 
 /**
  * OSGi bundle activator for the server.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class SessiondActivator implements BundleActivator {
+	
+	private static transient final Log LOG = LogFactory.getLog(SessiondActivator.class);
     
     private SessiondConnectorInterface sessiondConInterface;
     
@@ -77,6 +82,7 @@ public class SessiondActivator implements BundleActivator {
             sessiondConInterface = new SessiondConnectorImpl();
             serviceRegister = context.registerService(SessiondConnectorInterface.class.getName(), sessiondConInterface, null);
         } catch (final Exception e) {
+        	LOG.error("SessiondActivator: start: ", e);
             // Try to stop what already has been started.
             sessiondInit.stop();
             throw e;
