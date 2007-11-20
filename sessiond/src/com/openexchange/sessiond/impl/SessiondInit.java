@@ -78,10 +78,8 @@ public class SessiondInit implements Initialization {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Parse Sessiond properties");
 		}
-		
-		// config = new SessiondConfigImpl(SystemConfig.getProperty("SESSIONDPROPERTIES"));
-        final String sessiondFile = "/home/offspring/Projekte/ox6-osgi/open-xchange-config/development/tmp/sessiond.properties";
-        config = new SessiondConfigImpl(sessiondFile);
+
+        config = new SessiondConfigImpl();
 
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Starting Sessiond");
