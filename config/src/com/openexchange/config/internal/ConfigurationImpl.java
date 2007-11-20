@@ -238,7 +238,13 @@ public final class ConfigurationImpl implements Configuration {
 	 */
 	public int getIntProperty(String name, int defaultValue) {
 		if (properties.containsKey(name)) {
-			return Integer.parseInt(properties.get(name));
+			try {
+				return Integer.parseInt(properties.get(name));
+			} catch (final NumberFormatException e) {
+				if (LOG.isTraceEnabled()) {
+					LOG.trace(e.getLocalizedMessage(), e);
+				}
+			}
 		}
 		return defaultValue;
 	}
