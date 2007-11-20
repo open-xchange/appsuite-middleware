@@ -81,7 +81,7 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.IDGenerator;
+import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.contact.Contacts;
@@ -89,7 +89,7 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 /**
