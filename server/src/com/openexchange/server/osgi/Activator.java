@@ -62,9 +62,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.Configuration;
-import com.openexchange.server.ServiceProxyListener;
 import com.openexchange.server.impl.ConfigurationService;
-import com.openexchange.server.impl.ServerStarterServiceListener;
 import com.openexchange.server.impl.SessiondService;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
@@ -119,11 +117,27 @@ public class Activator implements BundleActivator {
 				tracker.open();
 			}
 			/*
-			 * Start server when configuration service is available
+			 * Start server
 			 */
-			final ServiceProxyListener l = new ServerStarterServiceListener(starter, isAdminBundleInstalled(context));
-			ConfigurationService.getInstance().addServiceProxyListener(l);
-			SessiondService.getInstance().addServiceProxyListener(l);
+			if (isAdminBundleInstalled(context)) {
+				/*
+				 * Start up server to only fit admin needs
+				 */
+				starter.adminStart();
+			} else {
+				/*
+				 * Start up server the usual way
+				 */
+				starter.start();
+			}
+			/**
+			 * In future:
+			 * 
+			 * <pre>
+			 * final ServiceProxyListener l = new ServerStarterServiceListener(starter, isAdminBundleInstalled(context));
+			 * ConfigurationService.getInstance().addServiceProxyListener(l);
+			 * </pre>
+			 */
 			/*
 			 * Register server's services
 			 */

@@ -51,7 +51,6 @@ package com.openexchange.server.impl;
 
 import com.openexchange.config.Configuration;
 import com.openexchange.server.ServiceProxyListener;
-import com.openexchange.sessiond.SessiondConnectorInterface;
 
 /**
  * {@link ServerStarterServiceListener}
@@ -61,15 +60,9 @@ import com.openexchange.sessiond.SessiondConnectorInterface;
  */
 public final class ServerStarterServiceListener implements ServiceProxyListener {
 
-	private static final int CONF_STARTED = 1;
-	
-	private static final int SESSIOND_STARTED = 2;
-	
 	private final boolean adminStart;
 
 	private final Starter starter;
-	
-	private int state;
 
 	/**
 	 * Initializes a new instance of {@link ServerStarterServiceListener}
@@ -87,11 +80,6 @@ public final class ServerStarterServiceListener implements ServiceProxyListener 
 	 */
 	public void onServiceAvailable(final Object service) {
 		if (service instanceof Configuration) {
-			state |= CONF_STARTED;
-		} else if (service instanceof SessiondConnectorInterface) {
-			state |= SESSIOND_STARTED;
-		}
-		if ((state & CONF_STARTED) > 0 && (state & SESSIOND_STARTED) > 0) {
 			/*
 			 * Start server
 			 */
