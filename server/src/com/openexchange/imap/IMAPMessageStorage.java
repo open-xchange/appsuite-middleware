@@ -781,7 +781,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 				/*
 				 * Assume a proper APPENDUID response code
 				 */
-				return appendUID2Long(imapFolder.appendUIDMessages(msgs));
+				return appendUID2Long(appendUIDs);
 			}
 			/*
 			 * Missing APPENDUID
