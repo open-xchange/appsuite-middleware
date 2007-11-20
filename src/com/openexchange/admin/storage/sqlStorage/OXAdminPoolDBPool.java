@@ -54,8 +54,8 @@ import java.sql.Connection;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.server.DBPool;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
