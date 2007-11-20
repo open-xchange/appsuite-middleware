@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.sessiond.osgi;
+package com.openexchange.sessiond.impl;
 
 import com.openexchange.config.Configuration;
 import com.openexchange.server.ServiceProxy;
