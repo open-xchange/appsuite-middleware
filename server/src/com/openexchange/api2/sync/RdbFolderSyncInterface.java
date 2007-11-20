@@ -66,8 +66,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.server.DBPoolingException;
-import com.openexchange.server.EffectivePermission;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
@@ -84,14 +84,10 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
  */
 public class RdbFolderSyncInterface implements FolderSyncInterface {
 
-	private static final String STR_EMPTY = "";
-
 	/*
 	 * Members
 	 */
 	private final int userId;
-
-	private final int[] groups;
 
 	private final Context ctx;
 
@@ -112,7 +108,7 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
 		this.session = session;
 		user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
 		this.userId = user.getId();
-		this.groups = user.getGroups();
+		user.getGroups();
 		this.ctx = session.getContext();
 		this.oxfolderAccess = oxfolderAccess == null ? new OXFolderAccess(ctx) : oxfolderAccess;
 		userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),

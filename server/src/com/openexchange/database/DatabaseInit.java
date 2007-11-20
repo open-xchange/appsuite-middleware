@@ -52,8 +52,8 @@ package com.openexchange.database;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.server.DBPoolingException;
-import com.openexchange.server.Initialization;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.impl.Initialization;
 
 /**
  * This class contains the initialization for the database system.

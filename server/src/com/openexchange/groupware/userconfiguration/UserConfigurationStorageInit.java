@@ -57,7 +57,7 @@ import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCode;
-import com.openexchange.server.Initialization;
+import com.openexchange.server.impl.Initialization;
 
 /**
  * {@link UserConfigurationStorageInit}

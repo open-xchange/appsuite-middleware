@@ -47,44 +47,35 @@
  *
  */
 
-package com.openexchange.groupware.settings;
-
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.impl.Initialization;
+package com.openexchange.server.impl;
 
 /**
- * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * Version
+ * @author <a href="mailto:sebastian.kauss@open-xchange.de">Sebastian Kauss</a>
  */
-public final class ConfigTreeInit implements Initialization {
+public final class Version {
 
-    private static final ConfigTreeInit singleton = new ConfigTreeInit();
+    public static final String MAJOR = "@ox_major@";
+    public static final String MINOR = "@ox_minor@";
+    public static final String PATCH = "@ox_patch@";
+    public static final String CODENAME = "@ox_codename@";
+    public static final String NAME = "@ox_name@";
+    public static final String BUILDNUMBER = "@ox_buildnumber@";
+
+    public static final String VERSION_STRING = MAJOR + '.' + MINOR + '.'
+        + PATCH + '-' + BUILDNUMBER;
 
     /**
-     * Prevent instantiation.
+     * Prevent instanciation.
      */
-    private ConfigTreeInit() {
+    private Version() {
         super();
     }
 
     /**
-     * @return the singleton instance.
+     * @deprecated we do not have any sockets with SSL.
      */
-    public static final ConfigTreeInit getInstance() {
-        return singleton;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void start() throws SettingException {
-        ConfigTree.init();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void stop() {
-        ConfigTree.stop();
+    public static boolean isSSL() {
+        return false;
     }
 }

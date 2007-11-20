@@ -59,7 +59,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tx.ThreadLocalDBProvider;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException;
 
 public class InfostoreDelete implements DeleteListener {
 

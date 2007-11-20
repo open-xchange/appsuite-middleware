@@ -71,8 +71,9 @@ import com.openexchange.groupware.ldap.Group;
 import com.openexchange.groupware.ldap.GroupStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.server.OCLPermission;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+
 
 /**
  * PushHandler

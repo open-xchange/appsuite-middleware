@@ -72,9 +72,9 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.server.DBPool;
-import com.openexchange.server.DBPoolingException;
-import com.openexchange.server.OCLPermission;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 

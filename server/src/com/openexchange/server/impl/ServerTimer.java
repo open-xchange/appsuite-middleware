@@ -49,69 +49,25 @@
 
 
 
-package com.openexchange.server;
+package com.openexchange.server.impl;
 
-import com.openexchange.database.Database;
-
-import java.sql.Connection;
-
-import com.openexchange.groupware.contexts.Context;
+import java.util.Timer;
 
 /**
- * DBPool
- * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ * ServerTimer
+ * 
+ * 
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class DBPool  {
-    
-    public static final Connection pickup() throws DBPoolingException {
-        return Database.get(false);
-    }
-    
-    public static final Connection pickup(final Context context) throws DBPoolingException {
-        return Database.get(context, false);
-    }
-    
-    public static final Connection pickupWriteable() throws DBPoolingException {
-        return Database.get(true);
-    }
-    
-    public static final Connection pickupWriteable(final Context context) throws DBPoolingException {
-        return Database.get(context, true);
-    }
-    
-    public static final boolean push(final Connection con) throws DBPoolingException {
-        Database.back(false, con);
-        return true;
-    }
-    
-    public static final boolean push(final Context context, final Connection con) throws DBPoolingException {
-        Database.back(context, false, con);
-        return true;
-    }
-    
-    public static final boolean pushWrite(final Connection con) throws DBPoolingException {
-        Database.back(true, con);
-        return true;
-    }
-    
-    public static final boolean pushWrite(final Context context, final Connection con) throws DBPoolingException {
-        Database.back(context, true, con);
-        return true;
-    }
-    
-    public static final void closeReaderSilent(final Connection con) {
-        Database.back(false, con);
-    }
-    
-    public static final void closeReaderSilent(final Context context, final Connection con) {
-        Database.back(context, false, con);
-    }
-    
-    public static final void closeWriterSilent(final Connection con) {
-        Database.back(true, con);
-    }
-    
-    public static final void closeWriterSilent(final Context context, final Connection con) {
-        Database.back(context, true, con);
-    }
+
+public class ServerTimer {
+	
+	private static final String name = "OXTimer";
+	
+	private static Timer t = new Timer(name);
+
+	public static Timer getTimer() {
+		return t;
+	}
+
 }

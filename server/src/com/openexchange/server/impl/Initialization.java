@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.server;
+package com.openexchange.server.impl;
 
 import com.openexchange.groupware.AbstractOXException;
 

@@ -56,7 +56,7 @@ import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.openexchange.server.ServerTimer;
+import com.openexchange.server.impl.ServerTimer;
 
 /**
  * AJPv13Watcher

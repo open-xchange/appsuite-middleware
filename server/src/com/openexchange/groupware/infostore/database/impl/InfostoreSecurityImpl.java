@@ -71,7 +71,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.server.EffectivePermission;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.collections.OXCollections;
 import com.openexchange.tools.iterator.SearchIteratorException;

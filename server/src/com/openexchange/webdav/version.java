@@ -59,7 +59,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.openexchange.server.Version;
+import com.openexchange.server.impl.Version;
 
 /**
  * version

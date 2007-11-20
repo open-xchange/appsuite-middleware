@@ -56,8 +56,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.openexchange.server.DBPoolingException;
-import com.openexchange.server.DBPoolingException.Code;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException.Code;
 import com.openexchange.tools.Collections;
 
 /**

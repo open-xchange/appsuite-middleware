@@ -76,7 +76,7 @@ import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
-import com.openexchange.server.Version;
+import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.PermissionServlet;
 import com.openexchange.webdav.xml.fields.CalendarFields;

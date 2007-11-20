@@ -57,8 +57,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.pooling.PoolingException;
-import com.openexchange.server.DBPoolingException;
-import com.openexchange.server.DBPoolingException.Code;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException.Code;
 
 /**
  * Interface class for accessing the database system.

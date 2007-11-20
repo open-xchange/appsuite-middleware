@@ -63,8 +63,8 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.server.DBPool;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
 
 @OXExceptionSource(
     classId = Classes.RDB_FILESTORE_STORAGE,

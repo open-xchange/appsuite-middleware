@@ -72,9 +72,9 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.configuration.ConfigDB;
 import com.openexchange.configuration.ConfigDB.Property;
-import com.openexchange.server.DBPoolingException;
-import com.openexchange.server.ServerTimer;
-import com.openexchange.server.DBPoolingException.Code;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.impl.ServerTimer;
+import com.openexchange.server.impl.DBPoolingException.Code;
 
 /**
  * This class stores all connection pools. It also removes pools that are empty.

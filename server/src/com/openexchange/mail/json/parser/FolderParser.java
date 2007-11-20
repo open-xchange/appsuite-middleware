@@ -63,8 +63,9 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.MailPermission;
-import com.openexchange.server.OCLPermission;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
+
 
 /**
  * {@link FolderParser} - Parses instances of {@link JSONObject} to instances of

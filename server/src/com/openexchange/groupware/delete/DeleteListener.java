@@ -54,7 +54,7 @@ import java.sql.SQLException;
 import java.util.EventListener;
 
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * DeleteListener

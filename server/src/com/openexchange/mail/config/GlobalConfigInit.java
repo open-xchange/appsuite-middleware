@@ -57,7 +57,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.transport.MailTransport;
-import com.openexchange.server.Initialization;
+import com.openexchange.server.impl.Initialization;
 
 /**
  * {@link GlobalConfigInit}

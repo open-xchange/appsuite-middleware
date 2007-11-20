@@ -61,8 +61,8 @@ import java.util.List;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.TaskException.Code;
-import com.openexchange.server.DBPool;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.sql.DBUtils;

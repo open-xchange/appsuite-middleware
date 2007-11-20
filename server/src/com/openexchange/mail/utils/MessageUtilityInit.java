@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.mail.MailException;
-import com.openexchange.server.Initialization;
+import com.openexchange.server.impl.Initialization;
 
 /**
  * {@link MessageUtilityInit}

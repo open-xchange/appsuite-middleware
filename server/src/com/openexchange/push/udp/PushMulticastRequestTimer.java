@@ -51,7 +51,8 @@
 
 package com.openexchange.push.udp;
 
-import com.openexchange.server.ServerTimer;
+import com.openexchange.server.impl.ServerTimer;
+
 import java.io.StringWriter;
 import java.net.DatagramPacket;
 import java.net.InetAddress;

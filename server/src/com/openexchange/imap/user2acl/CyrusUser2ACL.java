@@ -54,7 +54,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.config.MailConfig.CredSrc;
-import com.openexchange.server.OCLPermission;
+import com.openexchange.server.impl.OCLPermission;
 
 /**
  * <p>

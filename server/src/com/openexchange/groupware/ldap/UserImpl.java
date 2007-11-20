@@ -52,7 +52,7 @@ package com.openexchange.groupware.ldap;
 import java.io.Serializable;
 import java.util.Locale;
 
-import com.openexchange.server.OCLPermission;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.LocaleTools;
 
 /**

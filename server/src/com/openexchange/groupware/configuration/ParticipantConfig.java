@@ -52,7 +52,7 @@ package com.openexchange.groupware.configuration;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.ConfigurationException.Code;
-import com.openexchange.server.Initialization;
+import com.openexchange.server.impl.Initialization;
 import com.openexchange.tools.conf.AbstractConfig;
 
 /**

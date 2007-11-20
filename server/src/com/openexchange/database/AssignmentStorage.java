@@ -70,8 +70,8 @@ import com.openexchange.cache.Configuration;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
-import com.openexchange.server.DBPoolingException;
-import com.openexchange.server.DBPoolingException.Code;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException.Code;
 
 /**
  * Reads assignments from the database, maybe stores them in a cache for faster

@@ -59,8 +59,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import com.openexchange.server.DBPoolingException;
-import com.openexchange.server.DBPoolingException.Code;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException.Code;
 
 /**
  * Reads a database connection from the config DB.

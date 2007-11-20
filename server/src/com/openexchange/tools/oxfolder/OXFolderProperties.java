@@ -59,8 +59,8 @@ import com.openexchange.cache.FolderQueryCacheManager;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.Initialization;
-import com.openexchange.server.OCLPermission;
+import com.openexchange.server.impl.Initialization;
+import com.openexchange.server.impl.OCLPermission;
 
 /**
  * <tt>OXFolderProperties</tt> contains both folder properties and folder

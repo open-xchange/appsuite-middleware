@@ -67,8 +67,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.DBPool;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * This class contains methods to generate unique identifier for all groupware

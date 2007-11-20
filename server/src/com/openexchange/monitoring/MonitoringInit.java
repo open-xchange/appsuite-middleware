@@ -56,7 +56,7 @@ import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.Initialization;
+import com.openexchange.server.impl.Initialization;
 
 /**
  * 

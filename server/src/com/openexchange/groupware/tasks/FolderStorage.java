@@ -56,8 +56,8 @@ import java.util.Set;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.TaskException.Code;
-import com.openexchange.server.DBPool;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * Interface to different SQL implementations for storing task folder mapping.

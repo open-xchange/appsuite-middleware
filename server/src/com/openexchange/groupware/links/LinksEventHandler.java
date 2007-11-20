@@ -68,8 +68,9 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.server.DBPool;
+import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
+
 
 /**
  Links

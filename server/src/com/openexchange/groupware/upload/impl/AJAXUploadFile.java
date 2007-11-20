@@ -60,7 +60,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.upload.ManagedUploadFile;
-import com.openexchange.server.ServerTimer;
+import com.openexchange.server.impl.ServerTimer;
 
 /**
  * AJAXUploadFile

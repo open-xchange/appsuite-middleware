@@ -71,8 +71,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCode;
 import com.openexchange.mail.usersetting.UserSettingMail.Signature;
-import com.openexchange.server.DBPool;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * CachingUserSettingMailStorage - this storage tries to use a cache for

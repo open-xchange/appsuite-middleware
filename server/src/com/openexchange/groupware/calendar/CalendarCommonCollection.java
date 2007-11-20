@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar;
 
-import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -80,14 +79,15 @@ import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.server.DBPool;
-import com.openexchange.server.DBPoolingException;
-import com.openexchange.server.EffectivePermission;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
  * CalendarCommonCollection

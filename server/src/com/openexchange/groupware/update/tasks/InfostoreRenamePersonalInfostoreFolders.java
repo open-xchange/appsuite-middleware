@@ -71,7 +71,7 @@ import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException;
 
 @OXExceptionSource(classId = Classes.UPDATE_TASK, component = Component.UPDATE)
 

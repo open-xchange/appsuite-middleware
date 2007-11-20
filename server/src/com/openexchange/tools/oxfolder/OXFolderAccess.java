@@ -73,9 +73,9 @@ import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.server.DBPoolingException;
-import com.openexchange.server.EffectivePermission;
-import com.openexchange.server.OCLPermission;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 

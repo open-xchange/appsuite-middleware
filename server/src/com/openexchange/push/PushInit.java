@@ -64,7 +64,7 @@ import com.openexchange.push.udp.PushMulticastRequestTimer;
 import com.openexchange.push.udp.PushMulticastSocket;
 import com.openexchange.push.udp.PushOutputQueue;
 import com.openexchange.push.udp.PushSocket;
-import com.openexchange.server.Initialization;
+import com.openexchange.server.impl.Initialization;
 
 /**
  * Initializes the event system.

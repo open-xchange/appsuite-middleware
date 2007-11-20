@@ -64,7 +64,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.event.InvalidStateException;
-import com.openexchange.server.ServerTimer;
+import com.openexchange.server.impl.ServerTimer;
 import com.openexchange.tools.StringCollection;
 
 /**

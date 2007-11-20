@@ -1,4 +1,4 @@
-package com.openexchange.server;/*
+package com.openexchange.server.impl;/*
  *
  *    OPEN-XCHANGE legal information
  *
@@ -58,9 +58,10 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.impl.GroupwareInit;
 
 /**
- * com.openexchange.server.Starter
+ * {@link Starter}
  * 
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Starter implements Initialization {
 
@@ -236,6 +237,7 @@ public class Starter implements Initialization {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("SYSTEM IS UP & RUNNING...");
 		}
+
 	}
 
 	/**

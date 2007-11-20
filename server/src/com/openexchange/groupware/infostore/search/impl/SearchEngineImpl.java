@@ -79,7 +79,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.server.EffectivePermission;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;

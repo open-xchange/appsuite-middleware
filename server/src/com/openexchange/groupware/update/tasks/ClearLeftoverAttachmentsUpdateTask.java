@@ -10,7 +10,7 @@ import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
 import com.openexchange.groupware.update.exception.SchemaException;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.LocalFileStorage;
 import org.apache.commons.logging.Log;

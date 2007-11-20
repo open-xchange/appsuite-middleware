@@ -72,7 +72,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Mapping.Mapper;
-import com.openexchange.server.DBPool;
+import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;

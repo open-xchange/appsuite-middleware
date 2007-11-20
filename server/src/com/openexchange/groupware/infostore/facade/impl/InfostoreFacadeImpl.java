@@ -121,7 +121,7 @@ import com.openexchange.groupware.tx.ReuseReadConProvider;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.server.EffectivePermission;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.collections.Injector;
 import com.openexchange.tools.exceptions.LoggingLogic;

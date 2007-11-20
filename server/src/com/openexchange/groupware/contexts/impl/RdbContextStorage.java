@@ -53,8 +53,8 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException.Code;
-import com.openexchange.server.DBPool;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

@@ -54,7 +54,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.openexchange.server.OCLPermission;
+import com.openexchange.server.impl.OCLPermission;
 
 /**
  * MailFolder - a data container object for a mail folder

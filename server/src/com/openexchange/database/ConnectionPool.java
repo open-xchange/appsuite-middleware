@@ -65,7 +65,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.pooling.PoolableLifecycle;
 import com.openexchange.pooling.PooledData;
 import com.openexchange.pooling.ReentrantLockPool;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * Extends the pool API especially for database connections.

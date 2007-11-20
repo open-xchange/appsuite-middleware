@@ -57,7 +57,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.update.exception.UpdateException;
-import com.openexchange.server.Starter;
+import com.openexchange.server.impl.Starter;
 
 /**
  * This class defines the methods for accessing the storage of contexts.

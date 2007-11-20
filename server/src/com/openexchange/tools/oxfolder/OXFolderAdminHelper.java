@@ -77,8 +77,8 @@ import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.StringHelper;
-import com.openexchange.server.DBPoolingException;
-import com.openexchange.server.OCLPermission;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.LocaleTools;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 

@@ -61,7 +61,9 @@ import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.charset.AliasCharsetProvider;
-import com.openexchange.server.Starter;
+import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.server.impl.Starter;
 import com.openexchange.sessiond.SessiondConnectorInterface;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
 
@@ -81,6 +83,8 @@ public class Activator implements BundleActivator {
 
 	private final List<ServiceRegistration> registrationList = new ArrayList<ServiceRegistration>();
 
+	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
+
 	/**
 	 * Bundle ID of admin.<br>
 	 * TODO: Maybe this should be read by config.ini
@@ -94,6 +98,22 @@ public class Activator implements BundleActivator {
 	 */
 	public void start(final BundleContext context) throws Exception {
 		try {
+			/*
+			 * Init service trackers
+			 */
+			final ServiceTracker serviceTracker = new ServiceTracker(context, Configuration.class.getName(),
+					ConfigurationService.initAndGetInstance(context));
+			ConfigurationService.getInstance().setServiceTracker(serviceTracker);
+			serviceTrackerList.add(serviceTracker);
+			/*
+			 * Open service trackers
+			 */
+			for (ServiceTracker tracker : serviceTrackerList) {
+				tracker.open();
+			}
+			/*
+			 * Start server
+			 */
 			if (isAdminBundleInstalled(context)) {
 				/*
 				 * Start up server to only fit admin needs
@@ -136,6 +156,14 @@ public class Activator implements BundleActivator {
 			for (ServiceRegistration registration : registrationList) {
 				registration.unregister();
 			}
+			registrationList.clear();
+			/*
+			 * Close service trackers
+			 */
+			for (ServiceTracker tracker : serviceTrackerList) {
+				tracker.close();
+			}
+			serviceTrackerList.clear();
 		}
 	}
 

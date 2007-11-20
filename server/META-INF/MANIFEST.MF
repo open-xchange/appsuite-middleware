@@ -7,10 +7,12 @@ Bundle-Activator: com.openexchange.server.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.mysql.jdbc;version="3.1.13",
  com.openexchange.cache.dynamic,
+ com.openexchange.config,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.upload,
  com.openexchange.server,
+ com.openexchange.server.osgiservice,
  com.openexchange.session,
  com.openexchange.sessiond,
  com.openexchange.sessiond.exception,

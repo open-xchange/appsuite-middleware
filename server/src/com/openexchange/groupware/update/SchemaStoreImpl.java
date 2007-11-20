@@ -70,7 +70,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.SchemaException;
 import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * Implements loading and storing the schema version information.

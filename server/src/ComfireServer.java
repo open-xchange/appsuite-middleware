@@ -48,7 +48,7 @@
  */
 
 
-import com.openexchange.server.Starter;
+import com.openexchange.server.impl.Starter;
 
 /**
  * ComfireServer

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.server;
+package com.openexchange.server.impl;
 
 import java.io.Serializable;
 import java.security.acl.Permission;

@@ -57,7 +57,8 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.server.ServerTimer;
+import com.openexchange.server.impl.ServerTimer;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

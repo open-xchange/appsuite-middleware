@@ -58,8 +58,8 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.DBPool;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.AbstractOXException.Category;
 

@@ -64,8 +64,8 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
-import com.openexchange.server.DBPoolingException;
-import com.openexchange.server.DBPoolingException.Code;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException.Code;
 
 /**
  * This class contains methods for handling the server name and identifier.

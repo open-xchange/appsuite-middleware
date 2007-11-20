@@ -54,7 +54,7 @@ import com.openexchange.mail.cache.MailCacheConfiguration;
 import com.openexchange.mail.config.GlobalConfigInit;
 import com.openexchange.mail.permission.MailPermissionInit;
 import com.openexchange.mail.transport.MailTransportInit;
-import com.openexchange.server.Initialization;
+import com.openexchange.server.impl.Initialization;
 
 /**
  * {@link MailInitialization}

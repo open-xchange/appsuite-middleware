@@ -64,7 +64,7 @@ import org.apache.jcs.engine.control.CompositeCacheManager;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.Initialization;
+import com.openexchange.server.impl.Initialization;
 
 /**
  * This class implements the configuration of the caching system.

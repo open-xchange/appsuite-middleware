@@ -62,7 +62,7 @@ import java.util.List;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
-import com.openexchange.server.DBPool;
+import com.openexchange.server.impl.DBPool;
 
 /**
  * This class implements the group storage using a relational database.

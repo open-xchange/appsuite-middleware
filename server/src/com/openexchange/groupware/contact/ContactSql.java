@@ -58,7 +58,7 @@ import java.sql.Statement;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
