@@ -56,7 +56,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -354,7 +353,7 @@ public class SessionHandler {
 		userList = new LinkedList<Map<String, String>>();
 		randomList = new LinkedList<Map<String, String>>();
 		sessionIdGenerator = null;
-		SessiondConfigInterface config = null;
+		config = null;
 		noLimit = false;
 		isInit = false;
 		numberOfSessionsInContainer = null;
