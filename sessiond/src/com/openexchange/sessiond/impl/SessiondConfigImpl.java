@@ -102,7 +102,7 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements
 
 	private static final Log LOG = LogFactory.getLog(SessiondConfigImpl.class);
 
-	public SessiondConfigImpl(String propfile) {
+	public SessiondConfigImpl() {
 		if (isInit) {
 			return;
 		}
