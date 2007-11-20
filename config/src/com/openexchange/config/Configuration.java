@@ -49,6 +49,8 @@
 
 package com.openexchange.config;
 
+import java.util.Iterator;
+
 /**
  * {@link Configuration}
  * 
@@ -122,4 +124,57 @@ public interface Configuration {
 	 *         given default value argument.
 	 */
 	public String getProperty(String name, String defaultValue, PropertyListener listener);
+
+	/**
+	 * Searches for the property with the specified name in this property list.
+	 * If the name is found in this property list, it is supposed to be a
+	 * boolean value. If conversion fails or name is not found, the default
+	 * value is returned.
+	 * <p>
+	 * The <code>boolean</code> returned represents the value
+	 * <code>true</code> if the property is not <code>null</code> and is
+	 * equal, ignoring case, to the string {@code "true"}.
+	 * 
+	 * @param name
+	 *            The property name.
+	 * @param defaultValue
+	 *            The default value
+	 * @return The boolean value in this property list with the specified key
+	 *         value or given default value argument.
+	 */
+	public boolean getBoolProperty(String name, boolean defaultValue);
+
+	/**
+	 * Searches for the property with the specified name in this property list.
+	 * If the name is found in this property list, it is supposed to be an
+	 * integer value. If conversion fails or name is not found, the default
+	 * value is returned.
+	 * <p>
+	 * Parses the property as a signed decimal integer. The characters in the
+	 * property must all be decimal digits, except that the first character may
+	 * be an ASCII minus sign <code>'-'</code> (<code>'&#92;u002D'</code>)
+	 * to indicate a negative value.
+	 * 
+	 * @param name
+	 *            The property name.
+	 * @param defaultValue
+	 *            The default value
+	 * @return The integer value in this property list with the specified key
+	 *         value or given default value argument.
+	 */
+	public int getIntProperty(String name, int defaultValue);
+
+	/**
+	 * Returns an iterator of all the keys in this property list.
+	 * 
+	 * @return The iterator of all the keys in this property list.
+	 */
+	public Iterator<String> propertyNames();
+
+	/**
+	 * Returns the number of properties in this property list.
+	 * 
+	 * @return The number of properties in this property list.
+	 */
+	public int size();
 }

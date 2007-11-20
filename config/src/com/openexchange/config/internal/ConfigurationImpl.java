@@ -143,8 +143,9 @@ public final class ConfigurationImpl implements Configuration {
 			final Iterator<Entry<Object, Object>> iter = tmp.entrySet().iterator();
 			for (int i = 0; i < size; i++) {
 				final Entry<Object, Object> e = iter.next();
-				properties.put(e.getKey().toString(), e.getValue().toString());
-				propertiesFiles.put(e.getKey().toString(), propFile.getPath());
+				final String propName = e.getKey().toString().trim();
+				properties.put(propName, e.getValue().toString().trim());
+				propertiesFiles.put(propName, propFile.getPath());
 			}
 		} catch (final FileNotFoundException e) {
 			LOG.error(e.getLocalizedMessage(), e);
@@ -216,4 +217,47 @@ public final class ConfigurationImpl implements Configuration {
 		return defaultValue;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.config.Configuration#getProperty(java.lang.String,
+	 *      boolean)
+	 */
+	public boolean getBoolProperty(String name, boolean defaultValue) {
+		if (properties.containsKey(name)) {
+			return Boolean.parseBoolean(properties.get(name));
+		}
+		return defaultValue;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.config.Configuration#getProperty(java.lang.String,
+	 *      int)
+	 */
+	public int getIntProperty(String name, int defaultValue) {
+		if (properties.containsKey(name)) {
+			return Integer.parseInt(properties.get(name));
+		}
+		return defaultValue;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.config.Configuration#propertyNames()
+	 */
+	public Iterator<String> propertyNames() {
+		return properties.keySet().iterator();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.config.Configuration#size()
+	 */
+	public int size() {
+		return properties.size();
+	}
 }
