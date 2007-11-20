@@ -62,7 +62,9 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.Configuration;
+import com.openexchange.server.ServiceProxy;
 import com.openexchange.server.impl.ConfigurationService;
+import com.openexchange.server.impl.SessiondService;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.sessiond.SessiondConnectorInterface;
@@ -105,6 +107,9 @@ public class Activator implements BundleActivator {
 			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
 					new BundleServiceTracker<Configuration>(context, ConfigurationService.getInstance(),
 							Configuration.class)));
+			serviceTrackerList.add(new ServiceTracker(context, SessiondConnectorInterface.class.getName(),
+					new BundleServiceTracker<SessiondConnectorInterface>(context, SessiondService.getInstance(),
+							SessiondConnectorInterface.class)));
 			/*
 			 * Open service trackers
 			 */
@@ -130,12 +135,6 @@ public class Activator implements BundleActivator {
 			 */
 			registrationList.add(context.registerService(CharsetProvider.class.getName(), charsetProvider, null));
 			registrationList.add(context.registerService(HttpService.class.getName(), httpService, null));
-			/*
-			 * Create service tracker
-			 */
-			SessiondService sessiondTracker = new SessiondService(context);
-			sessiondServiceTracker = new ServiceTracker(context, SessiondConnectorInterface.class.getName(),
-					sessiondTracker);
 		} catch (final Exception e) {
 			// Try to stop what already has been started.
 			starter.stop();

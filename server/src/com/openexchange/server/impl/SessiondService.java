@@ -47,55 +47,35 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.server.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.config.Configuration;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.Initialization;
-import com.openexchange.sessiond.osgi.ConfigurationService;
+import com.openexchange.server.ServiceProxy;
+import com.openexchange.sessiond.SessiondConnectorInterface;
 
 /**
- * SessiondInit
- *
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * {@link SessiondService}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public class SessiondInit implements Initialization {
-	
-	private static final Log LOG = LogFactory.getLog(SessiondInit.class);
-	
-	private SessiondConfigImpl config;
-	
-	private static SessiondInit singleton = new SessiondInit();
-	
-    public static SessiondInit getInstance() {
-        if(singleton != null)
-            return singleton;
-        return singleton = new SessiondInit();
-    }
-	
-	public void start() throws AbstractOXException {
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Parse Sessiond properties");
-		}
+public final class SessiondService extends ServiceProxy<SessiondConnectorInterface> {
 
-		final Configuration conf = ConfigurationService.getInstance()
-		.getService();
+	private static final SessiondService instance = new SessiondService();
 
-		if (conf != null) {
-			config = new SessiondConfigImpl(conf);
-		
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Starting Sessiond");
-			}
-			Sessiond.getInstance(config);
-		} 
+	/**
+	 * Gets the configuration service instance.
+	 * 
+	 * @return The configuration service instance.
+	 */
+	public static SessiondService getInstance() {
+		return instance;
 	}
 
-	public void stop() throws AbstractOXException {
-		Sessiond s = Sessiond.getInstance(config);
-		s.close();
+	/**
+	 * Default constructor
+	 */
+	private SessiondService() {
+		super();
 	}
+
 }

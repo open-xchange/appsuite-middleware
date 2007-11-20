@@ -68,7 +68,7 @@ import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.osgi.SessiondService;
+import com.openexchange.server.impl.SessiondService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondConnectorInterface;
 import com.openexchange.sessiond.exception.Classes;
@@ -128,12 +128,11 @@ public abstract class SessionServlet extends AJAXServlet {
 			rememberSession(req, session);
 			final Context ctx = session.getContext();
 			if (!ctx.isEnabled()) {
-				final SessiondConnectorInterface sessiondCon = SessiondService
-						.getService();
+				final SessiondConnectorInterface sessiondCon = SessiondService.getInstance().getService();
 				try {
 					sessiondCon.removeSession(sessionId);
 				} finally {
-					SessiondService.releaseService();
+					SessiondService.getInstance().ungetService();
 				}
 				throw EXCEPTION.create(4);
 			}
@@ -261,13 +260,12 @@ public abstract class SessionServlet extends AJAXServlet {
 	@OXThrows(category = Category.TRY_AGAIN, desc = "A session with the given identifier can not be found.", exceptionId = 3, msg = "Your session %s expired. Please start a new browser session.")
 	private static Session getSession(final String sessionId)
 			throws SessiondException {
-		final SessiondConnectorInterface sessiondCon = SessiondService
-				.getService();
+		final SessiondConnectorInterface sessiondCon = SessiondService.getInstance().getService();
 		Session retval = null;
 		try {
 			retval = sessiondCon.getSession(sessionId);
 		} finally {
-			SessiondService.releaseService();
+			SessiondService.getInstance().ungetService();
 		}
 		if (null == retval) {
 			throw EXCEPTION.create(3, sessionId);

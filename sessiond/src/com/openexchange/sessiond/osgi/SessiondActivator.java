@@ -49,55 +49,81 @@
 
 package com.openexchange.sessiond.osgi;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
 
+import sun.security.x509.IssuerAlternativeNameExtension;
+
+import com.openexchange.config.Configuration;
+import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.sessiond.SessiondConnectorInterface;
 import com.openexchange.sessiond.impl.SessiondConnectorImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 
 /**
  * OSGi bundle activator for the server.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class SessiondActivator implements BundleActivator {
-	
-	private static transient final Log LOG = LogFactory.getLog(SessiondActivator.class);
-    
-    private SessiondConnectorInterface sessiondConInterface;
-    
-    private ServiceRegistration serviceRegister = null;
-    
-    /**
-     * {@inheritDoc}
-     */
-    public void start(final BundleContext context) throws Exception {
-        final SessiondInit sessiondInit = SessiondInit.getInstance();
-        
-        try {
-            sessiondInit.start();
-            sessiondConInterface = new SessiondConnectorImpl();
-            serviceRegister = context.registerService(SessiondConnectorInterface.class.getName(), sessiondConInterface, null);
-        } catch (final Exception e) {
-        	LOG.error("SessiondActivator: start: ", e);
-            // Try to stop what already has been started.
-            sessiondInit.stop();
-            throw e;
-        }
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public void stop(final BundleContext context) throws Exception {
-        serviceRegister.unregister();
-        sessiondConInterface = null;
-        serviceRegister = null;
 
-        SessiondInit sessiondInit = SessiondInit.getInstance();
-        sessiondInit.stop();
-    }
+	private static transient final Log LOG = LogFactory.getLog(SessiondActivator.class);
+
+	private SessiondConnectorInterface sessiondConInterface;
+
+	private ServiceRegistration serviceRegister = null;
+
+	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void start(final BundleContext context) throws Exception {
+		final SessiondInit sessiondInit = SessiondInit.getInstance();
+
+		try {
+			/*
+			 * Init service trackers
+			 */
+			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
+					new SessiondBundleServiceTracker<Configuration>(context, ConfigurationService
+							.getInstance(), Configuration.class)));
+
+			sessiondInit.start();
+			serviceRegister = context.registerService(SessiondConnectorInterface.class.getName(),
+					sessiondConInterface, null);
+		} catch (final Exception e) {
+			LOG.error("SessiondActivator: start: ", e);
+			// Try to stop what already has been started.
+			sessiondInit.stop();
+			throw e;
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void stop(final BundleContext context) throws Exception {
+		serviceRegister.unregister();
+		sessiondConInterface = null;
+		serviceRegister = null;
+
+		/*
+		 * Close service trackers
+		 */
+		for (ServiceTracker tracker : serviceTrackerList) {
+			tracker.close();
+		}
+		serviceTrackerList.clear();
+
+		SessiondInit sessiondInit = SessiondInit.getInstance();
+		sessiondInit.stop();
+	}
 }

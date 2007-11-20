@@ -73,10 +73,9 @@ import com.openexchange.groupware.impl.UserNotFoundException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.server.osgi.SessiondService;
+import com.openexchange.server.impl.SessiondService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondConnectorInterface;
-import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.encoding.Base64;
 
@@ -394,13 +393,13 @@ public abstract class OXServlet extends WebDavServlet {
 			}
 
 			final SessiondConnectorInterface sessiondCon = SessiondService
-					.getService();
+					.getInstance().getService();
 			try {
 				final String sessionId = sessiondCon.addSession(userId, login,
 						pass, context, ipAddress);
 				session = sessiondCon.getSession(sessionId);
 			} finally {
-				SessiondService.releaseService();
+				SessiondService.getInstance().ungetService();
 			}
 		} catch (LoginException e) {
 			if (LoginException.Source.USER == e.getSource()) {
@@ -433,14 +432,11 @@ public abstract class OXServlet extends WebDavServlet {
 	private Session getSession(final String sessionId) {
 		final SessiondConnectorInterface sessiondCon;
 		try {
-			sessiondCon = SessiondService.getService();
+			sessiondCon = SessiondService.getInstance().getService();
 			return sessiondCon.getSession(sessionId);
-		} catch (SessiondException e) {
-			LOG.error(e);
 		} finally {
-			SessiondService.releaseService();
+			SessiondService.getInstance().ungetService();
 		}
-		return null;
 	}
 
 	/**

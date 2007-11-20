@@ -47,55 +47,45 @@
  *
  */
 
+
+
 package com.openexchange.sessiond.impl;
+
+import java.util.TimerTask;
+
+import com.openexchange.session.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.config.Configuration;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.Initialization;
-import com.openexchange.sessiond.osgi.ConfigurationService;
-
 /**
- * SessiondInit
- *
+ * Sessiond
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-public class SessiondInit implements Initialization {
-	
-	private static final Log LOG = LogFactory.getLog(SessiondInit.class);
-	
-	private SessiondConfigImpl config;
-	
-	private static SessiondInit singleton = new SessiondInit();
-	
-    public static SessiondInit getInstance() {
-        if(singleton != null)
-            return singleton;
-        return singleton = new SessiondInit();
-    }
-	
-	public void start() throws AbstractOXException {
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Parse Sessiond properties");
-		}
 
-		final Configuration conf = ConfigurationService.getInstance()
-		.getService();
-
-		if (conf != null) {
-			config = new SessiondConfigImpl(conf);
+public class SessiondTimer extends TimerTask{
+	
+	private static final Log LOG = LogFactory.getLog(SessiondTimer.class);
+	
+	public SessiondTimer() {
 		
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Starting Sessiond");
-			}
-			Sessiond.getInstance(config);
-		} 
 	}
+	
+    public void run() {
+        try {
+            SessionHandler.cleanUp();
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+} 
 
-	public void stop() throws AbstractOXException {
-		Sessiond s = Sessiond.getInstance(config);
-		s.close();
-	}
-}
+
+
+
+
+
+
+
+
+

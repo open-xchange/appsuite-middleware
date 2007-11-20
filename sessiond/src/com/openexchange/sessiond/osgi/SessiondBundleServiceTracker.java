@@ -47,65 +47,53 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.sessiond.osgi;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import com.openexchange.sessiond.SessiondConnectorInterface;
-import com.openexchange.sessiond.exception.SessiondException;
-
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.ServiceProxy;
+import com.openexchange.server.osgiservice.BundleServiceTracker;
+import com.openexchange.sessiond.impl.SessiondInit;
 
 /**
- * @author <a href="mailto:sebas@open-xchange.org">Marcus Klein</a>
+ * {@link SessiondBundleServiceTracker} - Provides access to a bundle service instance
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public class SessiondService implements ServiceTrackerCustomizer {
-    
-    private static SessiondConnectorInterface sessiondConnectorInterface = null;
-    
-    private static final AtomicInteger active = new AtomicInteger();
-    
-    private BundleContext context;
-    
-    public SessiondService(final BundleContext context) {
-        this.context = context;
-    }
-    
-    public Object addingService(ServiceReference serviceReference) {
-		final Object addedService = context.getService(serviceReference);
-		if (addedService instanceof SessiondConnectorInterface) {
-			sessiondConnectorInterface = (SessiondConnectorInterface)addedService;
+public class SessiondBundleServiceTracker<S> extends BundleServiceTracker<S> {
+	
+	private static final Log LOG = LogFactory.getLog(SessiondBundleServiceTracker.class);
+
+	/**
+	 * Initializes a new bundle service
+	 * 
+	 * @param context
+	 *            The bundle context
+	 */
+	public SessiondBundleServiceTracker(final BundleContext context, final ServiceProxy<S> proxy, final Class<S> serviceClass) {
+		super(context, proxy, serviceClass);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
+	 */
+	public Object addingService(final ServiceReference reference) {
+		final Object addedService = context.getService(reference);
+		if (serviceClass.isInstance(addedService)) {
+			try {
+				SessiondInit.getInstance().start();
+			} catch (AbstractOXException exc) {
+				LOG.error(exc);
+			}
 		}
-        return addedService;
-    }
-
-    public void modifiedService(ServiceReference serviceReference, Object object) {
-
-    }
-
-    public void removedService(ServiceReference serviceReference, Object object) {
-		if (object instanceof SessiondConnectorInterface) {
-            if (active.get() > 0) {
-                System.out.println("active services still exists");
-            }
-			sessiondConnectorInterface = null;
-		}
-        context.ungetService(serviceReference);
-        
-    }
-
-    public static SessiondConnectorInterface getService() throws SessiondException {
-        if (sessiondConnectorInterface != null) {
-            active.incrementAndGet();
-            return sessiondConnectorInterface;
-        } 
-        throw new SessiondException(SessiondException.Code.SESSIOND_EXCEPTION);
-    }
-    
-    public static void releaseService() {
-        active.decrementAndGet();
-    }
+		
+		return super.addingService(reference);
+	}
 }

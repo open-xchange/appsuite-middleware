@@ -53,7 +53,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.config.Configuration;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.sessiond.osgi.ConfigurationService;
 
 /**
  * SessionConfig
@@ -101,14 +101,16 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements
 	private static boolean isInit;
 
 	private static final Log LOG = LogFactory.getLog(SessiondConfigImpl.class);
+	
+	public SessiondConfigImpl(final Configuration conf) {
+		this(conf, false);
+	}
 
-	public SessiondConfigImpl() {
-		if (isInit) {
+	public SessiondConfigImpl(final Configuration conf, final boolean ignoreIsInit) {
+		if (!ignoreIsInit && isInit) {
 			return;
 		}
 
-		final Configuration conf = ConfigurationService.getInstance()
-				.getService();
 		try {
 			isServerSocketEnabled = parseProperty(conf,
 					"com.openexchange.sessiond.isServerSocketEnabled",

@@ -51,8 +51,6 @@
 
 package com.openexchange.sessiond.impl;
 
-import com.openexchange.session.*;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -70,8 +68,8 @@ public class Sessiond {
 	private SessionHandler sessionHandler;
 	
 	public Sessiond(SessiondConfigInterface config) {
-		sessionHandler = new SessionHandler(config);
-		sessionHandler.init();		
+		sessionHandler = new SessionHandler();
+		SessionHandler.init(config);		
 	}
 	
     public static Sessiond getInstance(SessiondConfigInterface config) {
@@ -80,14 +78,9 @@ public class Sessiond {
         return singleton = new Sessiond(config);
     }
     
-    public void close(){
-    	try{
-    		if (null != sessionHandler)
-    			sessionHandler.cancel();
-    	} catch (Exception e){
-    		LOG.error("Unable to close sessionHandler", e);
-    	}
-    }	
+    public void close() {
+    	SessionHandler.close();
+    }
 } 
 
 
