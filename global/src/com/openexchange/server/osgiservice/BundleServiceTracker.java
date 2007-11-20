@@ -49,36 +49,25 @@
 
 package com.openexchange.server.osgiservice;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import com.openexchange.server.ServiceProxy;
+
 /**
- * {@link BundleService} - Provides access to a bundle service instance
+ * {@link BundleServiceTracker} - Provides access to a bundle service instance
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class BundleService<S> implements ServiceTrackerCustomizer {
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(BundleService.class);
+public final class BundleServiceTracker<S> implements ServiceTrackerCustomizer {
 
 	private final BundleContext context;
 
-	private ServiceTracker serviceTracker;
+	private final ServiceProxy<S> proxy;
 
 	private final Class<S> serviceClass;
-
-	private final AtomicInteger active;
-
-	private final AtomicBoolean waiting;
-
-	private S service;
 
 	/**
 	 * Initializes a new bundle service
@@ -86,22 +75,11 @@ public abstract class BundleService<S> implements ServiceTrackerCustomizer {
 	 * @param context
 	 *            The bundle context
 	 */
-	protected BundleService(final BundleContext context, final Class<S> serviceClass) {
+	public BundleServiceTracker(final BundleContext context, final ServiceProxy<S> proxy, final Class<S> serviceClass) {
 		super();
 		this.context = context;
 		this.serviceClass = serviceClass;
-		active = new AtomicInteger();
-		waiting = new AtomicBoolean();
-	}
-
-	/**
-	 * Sets the service tracker
-	 * 
-	 * @param serviceTracker
-	 *            The service tracker
-	 */
-	public void setServiceTracker(final ServiceTracker serviceTracker) {
-		this.serviceTracker = serviceTracker;
+		this.proxy = proxy;
 	}
 
 	/*
@@ -112,8 +90,7 @@ public abstract class BundleService<S> implements ServiceTrackerCustomizer {
 	public Object addingService(final ServiceReference reference) {
 		final Object addedService = context.getService(reference);
 		if (serviceClass.isInstance(addedService)) {
-			service = serviceClass.cast(addedService);
-			addingServiceInternal(service);
+			proxy.setService(serviceClass.cast(addedService));
 		}
 		return addedService;
 	}
@@ -125,9 +102,6 @@ public abstract class BundleService<S> implements ServiceTrackerCustomizer {
 	 *      java.lang.Object)
 	 */
 	public void modifiedService(final ServiceReference reference, final Object service) {
-		if (serviceClass.isInstance(service)) {
-			modifiedServiceInternal(serviceClass.cast(service));
-		}
 	}
 
 	/*
@@ -138,22 +112,7 @@ public abstract class BundleService<S> implements ServiceTrackerCustomizer {
 	 */
 	public void removedService(final ServiceReference reference, final Object service) {
 		if (serviceClass.isInstance(service)) {
-			while (active.get() > 0) {
-				synchronized (active) {
-					try {
-						waiting.set(true);
-						try {
-							active.wait();
-						} finally {
-							waiting.set(false);
-						}
-					} catch (final InterruptedException e) {
-						LOG.error(e.getLocalizedMessage(), e);
-					}
-				}
-			}
-			removedServiceInternal(serviceClass.cast(service));
-			this.service = null;
+			proxy.removeService();
 		}
 		/*
 		 * Release service
@@ -161,84 +120,4 @@ public abstract class BundleService<S> implements ServiceTrackerCustomizer {
 		context.ungetService(reference);
 	}
 
-	/**
-	 * Gets the service or <code>null</code> if service is not active, yet<br>
-	 * <b>Note:</b> Don't forget to unget the service via
-	 * {@link #ungetService()}
-	 * 
-	 * <pre>
-	 * 
-	 * ...
-	 * final MyService myService = MyService.getInstance();
-	 * final Service s = myService.getService();
-	 * try {
-	 *     // Do something...
-	 * } finally {
-	 *     myService.ungetService();
-	 * }
-	 * ...
-	 * 
-	 * </pre>
-	 * 
-	 * @return The bundle service instance
-	 */
-	public S getService() {
-		if (null == service) {
-			if (null != serviceTracker) {
-				try {
-					serviceTracker.waitForService(10000);
-				} catch (final InterruptedException e) {
-					LOG.error(e.getLocalizedMessage(), e);
-				}
-				if (null != service) {
-					active.incrementAndGet();
-				}
-			}
-			return service;
-		}
-		active.incrementAndGet();
-		return service;
-	}
-
-	/**
-	 * Ungets the bundle service instance
-	 */
-	public void ungetService() {
-		active.decrementAndGet();
-		if (waiting.get()) {
-			synchronized (active) {
-				active.notifyAll();
-			}
-		}
-	}
-
-	/**
-	 * Invoked when
-	 * {@link ServiceTrackerCustomizer#addingService(ServiceReference)} is
-	 * triggered by corresponding service tracker
-	 * 
-	 * @param service
-	 *            The properly casted service instance
-	 */
-	protected abstract void addingServiceInternal(S service);
-
-	/**
-	 * Invoked when
-	 * {@link ServiceTrackerCustomizer#modifiedService(ServiceReference, Object)}
-	 * is triggered by corresponding service tracker
-	 * 
-	 * @param service
-	 *            The properly casted service instance
-	 */
-	protected abstract void modifiedServiceInternal(S service);
-
-	/**
-	 * Invoked when
-	 * {@link ServiceTrackerCustomizer#removedService(ServiceReference, Object)}
-	 * is triggered by corresponding service tracker
-	 * 
-	 * @param service
-	 *            The properly casted service instance
-	 */
-	protected abstract void removedServiceInternal(S service);
 }
