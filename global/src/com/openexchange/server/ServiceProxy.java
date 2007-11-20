@@ -49,6 +49,9 @@
 
 package com.openexchange.server;
 
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -63,6 +66,8 @@ public abstract class ServiceProxy<S> {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ServiceProxy.class);
 
+	private final Map<Class<? extends ServiceProxyListener>, ServiceProxyListener> listeners;
+
 	private final AtomicInteger countActive;
 
 	private final AtomicBoolean waiting;
@@ -70,12 +75,41 @@ public abstract class ServiceProxy<S> {
 	private S service;
 
 	/**
-	 * 
+	 * Default constructor
 	 */
-	public ServiceProxy() {
+	protected ServiceProxy() {
 		super();
 		countActive = new AtomicInteger();
 		waiting = new AtomicBoolean();
+		listeners = new ConcurrentHashMap<Class<? extends ServiceProxyListener>, ServiceProxyListener>();
+	}
+
+	/**
+	 * Add a service proxy listener
+	 * 
+	 * @param listener
+	 *            The listener
+	 * @throws Exception
+	 *             If listener cannot be added
+	 */
+	public final void addServiceProxyListener(final ServiceProxyListener listener) throws Exception {
+		if (listeners.containsKey(listener.getClass())) {
+			return;
+		}
+		listeners.put(listener.getClass(), listener);
+		if (null != service) {
+			listener.onServiceAvailable(service);
+		}
+	}
+
+	/**
+	 * Removes the listener with given class name
+	 * 
+	 * @param clazz
+	 *            Listener class
+	 */
+	public final void removeServiceProxyListener(final Class<? extends ServiceProxyListener> clazz) {
+		listeners.remove(clazz);
 	}
 
 	/**
@@ -83,17 +117,33 @@ public abstract class ServiceProxy<S> {
 	 * 
 	 * @param service
 	 *            The service
+	 * @throws Exception
+	 *             If service cannot be applied
 	 */
-	public void setService(final S service) {
+	public void setService(final S service) throws Exception {
 		if (null == this.service) {
 			this.service = service;
+			notifyListener(true);
+		}
+	}
+
+	private final void notifyListener(final boolean isAvailable) throws Exception {
+		for (final Iterator<ServiceProxyListener> iter = listeners.values().iterator(); iter.hasNext();) {
+			if (isAvailable) {
+				iter.next().onServiceAvailable(service);
+			} else {
+				iter.next().onServiceRelease();
+			}
 		}
 	}
 
 	/**
 	 * Removes the service from this service proxy
+	 * 
+	 * @throws Exception
+	 *             If service cannot be properly removed
 	 */
-	public void removeService() {
+	public void removeService() throws Exception {
 		if (null == service) {
 			return;
 		}
@@ -112,6 +162,7 @@ public abstract class ServiceProxy<S> {
 			}
 		}
 		this.service = null;
+		notifyListener(false);
 	}
 
 	/**

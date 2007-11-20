@@ -47,88 +47,27 @@
  *
  */
 
-package com.openexchange.server.osgiservice;
-
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
-import com.openexchange.server.ServiceProxy;
+package com.openexchange.server;
 
 /**
- * {@link BundleServiceTracker} - Provides access to a bundle service instance
+ * {@link ServiceProxyListener}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class BundleServiceTracker<S> implements ServiceTrackerCustomizer {
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(BundleServiceTracker.class);
-
-	protected final BundleContext context;
-
-	protected final ServiceProxy<S> proxy;
-
-	protected final Class<S> serviceClass;
+public interface ServiceProxyListener {
 
 	/**
-	 * Initializes a new bundle service
+	 * Invoked if service reference is applied to service proxy
 	 * 
-	 * @param context
-	 *            The bundle context
+	 * @param service
+	 *            The service reference
 	 */
-	public BundleServiceTracker(final BundleContext context, final ServiceProxy<S> proxy, final Class<S> serviceClass) {
-		super();
-		this.context = context;
-		this.serviceClass = serviceClass;
-		this.proxy = proxy;
-	}
+	public void onServiceAvailable(Object service) throws Exception;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
+	/**
+	 * Invoked if service reference is removed from service porxy
 	 */
-	public Object addingService(final ServiceReference reference) {
-		final Object addedService = context.getService(reference);
-		if (serviceClass.isInstance(addedService)) {
-			try {
-				proxy.setService(serviceClass.cast(addedService));
-			} catch (final Exception e) {
-				LOG.error(e.getLocalizedMessage(), e);
-			}
-		}
-		return addedService;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference,
-	 *      java.lang.Object)
-	 */
-	public void modifiedService(final ServiceReference reference, final Object service) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference,
-	 *      java.lang.Object)
-	 */
-	public void removedService(final ServiceReference reference, final Object service) {
-		if (serviceClass.isInstance(service)) {
-			try {
-				proxy.removeService();
-			} catch (final Exception e) {
-				LOG.error(e.getLocalizedMessage(), e);
-			}
-		}
-		/*
-		 * Release service
-		 */
-		context.ungetService(reference);
-	}
+	public void onServiceRelease() throws Exception;
 
 }
