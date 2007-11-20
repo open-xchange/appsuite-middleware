@@ -59,11 +59,12 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
-import sun.security.x509.IssuerAlternativeNameExtension;
-
 import com.openexchange.config.Configuration;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.ServiceProxyListener;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.sessiond.SessiondConnectorInterface;
+import com.openexchange.sessiond.impl.ConfigurationService;
 import com.openexchange.sessiond.impl.SessiondConnectorImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 
@@ -75,55 +76,83 @@ import com.openexchange.sessiond.impl.SessiondInit;
 public class SessiondActivator implements BundleActivator {
 
 	private static transient final Log LOG = LogFactory.getLog(SessiondActivator.class);
-
-	private SessiondConnectorInterface sessiondConInterface;
-
-	private ServiceRegistration serviceRegister = null;
-
+	
 	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void start(final BundleContext context) throws Exception {
-		final SessiondInit sessiondInit = SessiondInit.getInstance();
-
-		try {
-			/*
+    
+    private SessiondConnectorInterface sessiondConInterface;
+    
+    private ServiceRegistration serviceRegister = null;
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void start(final BundleContext context) throws Exception {
+        SessiondInit sessiondInit = null;
+        
+        try {
+        	/*
 			 * Init service trackers
 			 */
 			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
-					new SessiondBundleServiceTracker<Configuration>(context, ConfigurationService
-							.getInstance(), Configuration.class)));
+					new BundleServiceTracker<Configuration>(context, ConfigurationService.getInstance(),
+							Configuration.class)));
+			/*
+			 * Open service trackers
+			 */
+			for (ServiceTracker tracker : serviceTrackerList) {
+				tracker.open();
+			}
+			/*
+			 * Start sessiond when configuration service is available
+			 */
+			final ServiceProxyListener l = new ServiceProxyListener() {
+				
+				public void onServiceAvailable(final Object service) throws AbstractOXException {
+					if (service instanceof Configuration) {
+						try {
+							SessiondInit.getInstance().start();
+						} catch (final AbstractOXException e) {
+							SessiondInit.getInstance().stop();
+						}
+					}
+				}
 
-			sessiondInit.start();
-			serviceRegister = context.registerService(SessiondConnectorInterface.class.getName(),
-					sessiondConInterface, null);
-		} catch (final Exception e) {
-			LOG.error("SessiondActivator: start: ", e);
-			// Try to stop what already has been started.
-			sessiondInit.stop();
-			throw e;
-		}
-	}
+				public void onServiceRelease() {
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void stop(final BundleContext context) throws Exception {
-		serviceRegister.unregister();
-		sessiondConInterface = null;
-		serviceRegister = null;
+				}
+			};
+			ConfigurationService.getInstance().addServiceProxyListener(l);
+			
+        	//sessiondInit = SessiondInit.getInstance();
+            //sessiondInit.start();
+            sessiondConInterface = new SessiondConnectorImpl();
+            serviceRegister = context.registerService(SessiondConnectorInterface.class.getName(), sessiondConInterface, null);
+        } catch (final Throwable e) {
+        	LOG.error("SessiondActivator: start: ", e);
+            // Try to stop what already has been started.
+        	if (null != sessiondInit) {
+        		sessiondInit.stop();
+        	}
+            throw e instanceof Exception ? (Exception)e : new Exception(e);
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void stop(final BundleContext context) throws Exception {
+        serviceRegister.unregister();
+        sessiondConInterface = null;
+        serviceRegister = null;
 
-		/*
+        SessiondInit sessiondInit = SessiondInit.getInstance();
+        sessiondInit.stop();
+        /*
 		 * Close service trackers
 		 */
 		for (ServiceTracker tracker : serviceTrackerList) {
 			tracker.close();
 		}
 		serviceTrackerList.clear();
-
-		SessiondInit sessiondInit = SessiondInit.getInstance();
-		sessiondInit.stop();
-	}
+    }
 }

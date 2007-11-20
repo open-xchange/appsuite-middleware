@@ -62,8 +62,9 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.Configuration;
-import com.openexchange.server.ServiceProxy;
+import com.openexchange.server.ServiceProxyListener;
 import com.openexchange.server.impl.ConfigurationService;
+import com.openexchange.server.impl.ServerStarterServiceListener;
 import com.openexchange.server.impl.SessiondService;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
@@ -77,6 +78,9 @@ import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Activator implements BundleActivator {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(Activator.class);
 
 	private final Starter starter = new Starter();
 
@@ -93,8 +97,6 @@ public class Activator implements BundleActivator {
 	 * TODO: Maybe this should be read by config.ini
 	 */
 	private static final String BUNDLE_ID_ADMIN = "open_xchange_admin";
-
-	private ServiceTracker sessiondServiceTracker = null;
 
 	/**
 	 * {@inheritDoc}
@@ -117,28 +119,21 @@ public class Activator implements BundleActivator {
 				tracker.open();
 			}
 			/*
-			 * Start server
+			 * Start server when configuration service is available
 			 */
-			if (isAdminBundleInstalled(context)) {
-				/*
-				 * Start up server to only fit admin needs
-				 */
-				starter.adminStart();
-			} else {
-				/*
-				 * Start up server the usual way
-				 */
-				starter.start();
-			}
+			final ServiceProxyListener l = new ServerStarterServiceListener(starter, isAdminBundleInstalled(context));
+			ConfigurationService.getInstance().addServiceProxyListener(l);
+			SessiondService.getInstance().addServiceProxyListener(l);
 			/*
 			 * Register server's services
 			 */
 			registrationList.add(context.registerService(CharsetProvider.class.getName(), charsetProvider, null));
 			registrationList.add(context.registerService(HttpService.class.getName(), httpService, null));
-		} catch (final Exception e) {
+		} catch (final Throwable t) {
+			LOG.error("Server Activator: start: ", t);
 			// Try to stop what already has been started.
 			starter.stop();
-			throw e;
+			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
 	}
 
@@ -147,7 +142,6 @@ public class Activator implements BundleActivator {
 	 */
 	public void stop(final BundleContext context) throws Exception {
 		try {
-			sessiondServiceTracker.close();
 			starter.stop();
 		} finally {
 			/*

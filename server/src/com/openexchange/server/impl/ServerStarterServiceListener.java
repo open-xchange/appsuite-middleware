@@ -47,54 +47,75 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+package com.openexchange.server.impl;
 
 import com.openexchange.config.Configuration;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.Initialization;
+import com.openexchange.server.ServiceProxyListener;
+import com.openexchange.sessiond.SessiondConnectorInterface;
 
 /**
- * SessiondInit
- *
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * {@link ServerStarterServiceListener}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public class SessiondInit implements Initialization {
+public final class ServerStarterServiceListener implements ServiceProxyListener {
+
+	private static final int CONF_STARTED = 1;
 	
-	private static final Log LOG = LogFactory.getLog(SessiondInit.class);
+	private static final int SESSIOND_STARTED = 2;
 	
-	private SessiondConfigImpl config;
+	private final boolean adminStart;
+
+	private final Starter starter;
 	
-	private static SessiondInit singleton = new SessiondInit();
-	
-    public static SessiondInit getInstance() {
-        if(singleton != null)
-            return singleton;
-        return singleton = new SessiondInit();
-    }
-	
-	public void start() throws AbstractOXException {
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Parse Sessiond properties");
+	private int state;
+
+	/**
+	 * Initializes a new instance of {@link ServerStarterServiceListener}
+	 */
+	public ServerStarterServiceListener(final Starter starter, final boolean adminStart) {
+		super();
+		this.adminStart = adminStart;
+		this.starter = starter;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.ServiceProxyListener#onServiceAvailable(java.lang.Object)
+	 */
+	public void onServiceAvailable(final Object service) {
+		if (service instanceof Configuration) {
+			state |= CONF_STARTED;
+		} else if (service instanceof SessiondConnectorInterface) {
+			state |= SESSIOND_STARTED;
 		}
-
-		final Configuration conf = ConfigurationService.getInstance()
-		.getService();
-
-		if (conf != null) {
-			config = new SessiondConfigImpl(conf);
-		
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Starting Sessiond");
+		if ((state & CONF_STARTED) > 0 && (state & SESSIOND_STARTED) > 0) {
+			/*
+			 * Start server
+			 */
+			if (adminStart) {
+				/*
+				 * Start up server to only fit admin needs
+				 */
+				starter.adminStart();
+			} else {
+				/*
+				 * Start up server the usual way
+				 */
+				starter.start();
 			}
-			Sessiond.getInstance(config);
-		} 
+		}
 	}
 
-	public void stop() throws AbstractOXException {
-		Sessiond s = Sessiond.getInstance(config);
-		s.close();
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.ServiceProxyListener#onServiceRelease()
+	 */
+	public void onServiceRelease() {
+		starter.stop();
 	}
+
 }
