@@ -62,8 +62,9 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.Configuration;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.server.impl.ConfigurationService;
 import com.openexchange.server.impl.Starter;
+import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.sessiond.SessiondConnectorInterface;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
 
@@ -91,7 +92,7 @@ public class Activator implements BundleActivator {
 	 */
 	private static final String BUNDLE_ID_ADMIN = "open_xchange_admin";
 
-    private ServiceTracker sessiondServiceTracker = null;
+	private ServiceTracker sessiondServiceTracker = null;
 
 	/**
 	 * {@inheritDoc}
@@ -101,10 +102,9 @@ public class Activator implements BundleActivator {
 			/*
 			 * Init service trackers
 			 */
-			final ServiceTracker serviceTracker = new ServiceTracker(context, Configuration.class.getName(),
-					ConfigurationService.initAndGetInstance(context));
-			ConfigurationService.getInstance().setServiceTracker(serviceTracker);
-			serviceTrackerList.add(serviceTracker);
+			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
+					new BundleServiceTracker<Configuration>(context, ConfigurationService.getInstance(),
+							Configuration.class)));
 			/*
 			 * Open service trackers
 			 */
@@ -130,11 +130,12 @@ public class Activator implements BundleActivator {
 			 */
 			registrationList.add(context.registerService(CharsetProvider.class.getName(), charsetProvider, null));
 			registrationList.add(context.registerService(HttpService.class.getName(), httpService, null));
-            /*
-             * Create service tracker
-             */
-            SessiondService sessiondTracker = new SessiondService(context);
-            sessiondServiceTracker = new ServiceTracker(context, SessiondConnectorInterface.class.getName(), sessiondTracker);
+			/*
+			 * Create service tracker
+			 */
+			SessiondService sessiondTracker = new SessiondService(context);
+			sessiondServiceTracker = new ServiceTracker(context, SessiondConnectorInterface.class.getName(),
+					sessiondTracker);
 		} catch (final Exception e) {
 			// Try to stop what already has been started.
 			starter.stop();
@@ -147,7 +148,7 @@ public class Activator implements BundleActivator {
 	 */
 	public void stop(final BundleContext context) throws Exception {
 		try {
-            sessiondServiceTracker.close();
+			sessiondServiceTracker.close();
 			starter.stop();
 		} finally {
 			/*
