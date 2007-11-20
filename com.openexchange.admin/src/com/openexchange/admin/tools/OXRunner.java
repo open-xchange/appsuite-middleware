@@ -65,7 +65,7 @@ import com.openexchange.event.EventInit;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * 
@@ -81,18 +81,18 @@ public class OXRunner {
     public void init() {
         try {
             SystemConfig.init();
-        } catch (ConfigurationException e1) {
+        } catch (final ConfigurationException e1) {
             fatal(e1);
         }
         // ComfireConfig.loadProperties(System.getProperty("openexchange.propfile"));
         try {
             ConfigurationInit.init();
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             fatal(e);
         }
         try {
             Configuration.load();
-        } catch (ConfigurationException e1) {
+        } catch (final ConfigurationException e1) {
             fatal(e1);
         }
         try {
@@ -103,13 +103,13 @@ public class OXRunner {
              */
             FolderCacheManager.getInstance();
             EventInit.init();
-        } catch (DBPoolingException e) {
+        } catch (final DBPoolingException e) {
             fatal(e);
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             fatal(e);
-        } catch (FolderCacheNotEnabledException e) {
+        } catch (final FolderCacheNotEnabledException e) {
             fatal(e);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             fatal(e);
         }
     }
