@@ -379,6 +379,19 @@ public final class SMTPTransport extends MailTransport {
 				 */
 				checkMailConnection();
 				/*
+				 * Check for edit-draft operation
+				 */
+				final List<String> tempIds = new ArrayList<String>(5);
+				if (transportMail.getMsgref() != null) {
+					/*
+					 * Load referenced mail parts from original message
+					 */
+					final MailPath mailPath = new MailPath(transportMail.getMsgref());
+					final MailMessage referencedMail = mailConnection.getMessageStorage().getMessage(mailPath.getFolder(),mailPath.getUid());
+					loadReferencedParts((SMTPMailMessage) transportMail, tempIds, referencedMail);
+				}
+				
+				/*
 				 * Fill message
 				 */
 				final SMTPMessageFiller filler = new SMTPMessageFiller(session);
@@ -392,6 +405,9 @@ public final class SMTPTransport extends MailTransport {
 				final long uid = mailConnection.getMessageStorage().appendMessages(draftFullname,
 						new MailMessage[] { MIMEMessageConverter.convertMessage(smtpMessage) })[0];
 				filler.deleteReferencedUploadFiles();
+				for (String id : tempIds) {
+					session.removeUploadedFile(id);
+				}
 				/*
 				 * Check for draft-edit operation: Delete old version
 				 */

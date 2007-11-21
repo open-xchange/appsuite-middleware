@@ -161,18 +161,28 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 * @param mailPath
 	 *            The unique mail path
 	 * @param displayVersion
-	 *            <code>true</code> to create a version gfor display;
-	 *            otherwise <code>false</code>
+	 *            <code>true</code> to create a version for display; otherwise
+	 *            <code>false</code>
 	 * @param session
 	 *            The session
+	 * @throws MailException
+	 *             If a JSON error occurs
 	 */
-	public JSONMessageHandler(final MailPath mailPath, final boolean displayVersion, final Session session) {
+	public JSONMessageHandler(final MailPath mailPath, final boolean displayVersion, final Session session)
+			throws MailException {
 		super();
 		this.session = session;
 		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContext());
 		this.displayVersion = displayVersion;
 		this.mailPath = mailPath == MailPath.NULL ? "" : mailPath.toString();
 		jsonObject = new JSONObject();
+		if (!displayVersion) {
+			try {
+				jsonObject.put(MailJSONField.MSGREF.getKey(), mailPath.toString());
+			} catch (final JSONException e) {
+				throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+			}
+		}
 	}
 
 	private JSONArray getAttachmentsArr() throws JSONException {

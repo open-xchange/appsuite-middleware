@@ -60,6 +60,7 @@ import java.util.Map.Entry;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 
 import com.openexchange.mail.MailException;
@@ -408,7 +409,9 @@ public final class MailPartHandler implements MailMessageHandler {
 	 */
 	public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String id)
 			throws MailException {
-		return true;
+		return handleAttachment(part,
+				(!Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition()) && part.getFileName() == null),
+				baseContentType, part.getFileName(), id);
 	}
 
 	/*
@@ -447,6 +450,13 @@ public final class MailPartHandler implements MailMessageHandler {
 		return true;
 	}
 
+	/**
+	 * Gets the identified mail part or <code>null</code> if none found
+	 * matching given sequence ID
+	 * 
+	 * @return The identified mail part or <code>null</code> if none found
+	 *         matching given sequence ID
+	 */
 	public MailPart getMailPart() {
 		return mailPart;
 	}

@@ -1,3 +1,7 @@
+* 2007-11-21 - thorben.betten@open-xchange.com
+
+ - Bugfix #10033: Fixed 'edit-draft'
+
 * 2007-11-20 - thorben.betten@open-xchange.com
 
  - Bugfix #10201: No second duplicate of a sent mail is copied to default
