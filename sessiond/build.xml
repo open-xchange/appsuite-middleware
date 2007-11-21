@@ -11,6 +11,7 @@
     <property file="build.properties"/>
 
 	<property name="version" value="${Bundle-Version}"/>
+    <property name="package.name" value="open-xchange-sessiond"/>
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
@@ -62,8 +63,8 @@
     <target name="dist" depends="clean">
 		<property name="dist-package" value="dist-package"/>
     	<delete dir="${dist-package}"/>
-        <mkdir dir="${dist-package}/${ant.project.name}-${version}"/>
-        <copy todir="${dist-package}/${ant.project.name}-${version}">
+        <mkdir dir="${dist-package}/${package.name}-${version}"/>
+        <copy todir="${dist-package}/${package.name}-${version}">
             <fileset dir=".">
                 <exclude name="**${dist-package}/**"/>
                 <exclude name="**debian/**"/>
@@ -71,9 +72,9 @@
                 <exclude name="Todo"/>
             </fileset>
         </copy>
-        <tar destfile="../${ant.project.name}-${version}.tar.gz"
+        <tar destfile="../${package.name}-${version}.tar.gz"
 	        basedir="${dist-package}"
-    	    includes="${ant.project.name}-${version}/"
+    	    includes="${package.name}-${version}/"
          	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
     	<delete dir="${dist-package}"/>
     </target>
