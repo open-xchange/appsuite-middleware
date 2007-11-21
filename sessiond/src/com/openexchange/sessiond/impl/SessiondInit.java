@@ -49,6 +49,8 @@
 
 package com.openexchange.sessiond.impl;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -58,43 +60,62 @@ import com.openexchange.server.Initialization;
 
 /**
  * SessiondInit
- *
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 public class SessiondInit implements Initialization {
-	
+
 	private static final Log LOG = LogFactory.getLog(SessiondInit.class);
-	
+
 	private SessiondConfigImpl config;
-	
-	private static SessiondInit singleton = new SessiondInit();
-	
-    public static SessiondInit getInstance() {
-        if(singleton != null)
-            return singleton;
-        return singleton = new SessiondInit();
-    }
-	
+
+	private final AtomicBoolean started = new AtomicBoolean();
+
+	private static final SessiondInit singleton = new SessiondInit();
+
+	public static SessiondInit getInstance() {
+		return singleton;
+	}
+
 	public void start() throws AbstractOXException {
+		if (started.get()) {
+			LOG.error(SessiondInit.class.getName() + " started");
+			return;
+		}
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Parse Sessiond properties");
 		}
 
-		final Configuration conf = ConfigurationService.getInstance()
-		.getService();
+		final Configuration conf = ConfigurationService.getInstance().getService();
 
 		if (conf != null) {
 			config = new SessiondConfigImpl(conf);
-		
+
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Starting Sessiond");
 			}
 			Sessiond.getInstance(config);
-		} 
+		}
+		started.set(true);
 	}
 
 	public void stop() throws AbstractOXException {
+		if (!started.get()) {
+			LOG.error(SessiondInit.class.getName() + " has not been started");
+			return;
+		}
 		Sessiond s = Sessiond.getInstance(config);
 		s.close();
+		started.set(false);
+	}
+
+	/**
+	 * Checks if {@link SessiondInit} is started
+	 * 
+	 * @return <code>true</code> if {@link SessiondInit} is started; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isStarted() {
+		return started.get();
 	}
 }

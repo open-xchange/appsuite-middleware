@@ -110,8 +110,12 @@ public class SessiondActivator implements BundleActivator {
 				public void onServiceAvailable(final Object service) throws AbstractOXException {
 					if (service instanceof Configuration) {
 						try {
+							if (SessiondInit.getInstance().isStarted()) {
+								SessiondInit.getInstance().stop();
+							}
 							SessiondInit.getInstance().start();
 						} catch (final AbstractOXException e) {
+							LOG.error(e.getLocalizedMessage(), e);
 							SessiondInit.getInstance().stop();
 						}
 					}
