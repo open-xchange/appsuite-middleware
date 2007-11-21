@@ -56,7 +56,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.DateFormatSymbols;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
+import java.util.TimeZone;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -405,8 +412,8 @@ public final class MessageUtility {
 	 *            editable display
 	 * @return The formatted content
 	 */
-	public static String formatContentForDisplay(final String content, final boolean isHtml,
-			final Session session, final String mailPath, final boolean displayVersion) {
+	public static String formatContentForDisplay(final String content, final boolean isHtml, final Session session,
+			final String mailPath, final boolean displayVersion) {
 		final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
 				session.getContext());
 		String retval = content;
@@ -936,6 +943,59 @@ public final class MessageUtility {
 					LOG.error(e.getLocalizedMessage(), e);
 				}
 			}
+		}
+	}
+
+	private static final Lock LOCK_DATE_FORMAT = new ReentrantLock();
+
+	private static final SimpleDateFormat dateFormat;
+
+	static {
+		dateFormat = new SimpleDateFormat("dd'-'MMM'-'yyyy");
+		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+		final DateFormatSymbols dfs = dateFormat.getDateFormatSymbols();
+		final String[] shortMonths = new String[12];
+		shortMonths[Calendar.JANUARY] = "Jan";
+		shortMonths[Calendar.FEBRUARY] = "Feb";
+		shortMonths[Calendar.MARCH] = "Mar";
+		shortMonths[Calendar.APRIL] = "Apr";
+		shortMonths[Calendar.MAY] = "May";
+		shortMonths[Calendar.JUNE] = "Jun";
+		shortMonths[Calendar.JULY] = "Jul";
+		shortMonths[Calendar.AUGUST] = "Aug";
+		shortMonths[Calendar.SEPTEMBER] = "Sep";
+		shortMonths[Calendar.OCTOBER] = "Oct";
+		shortMonths[Calendar.NOVEMBER] = "Nov";
+		shortMonths[Calendar.DECEMBER] = "Dec";
+		dfs.setShortMonths(shortMonths);
+		dateFormat.setDateFormatSymbols(dfs);
+	}
+
+	/**
+	 * Formats given time argument to a date argument ready for being used in a
+	 * IMAP VERSION 4rev1 <code>SEARCH</code> command (as per RFC 3501). Note
+	 * that only day-related informations are allowed, other informations are
+	 * discarded.
+	 * <p>
+	 * Example:
+	 * 
+	 * <pre>
+	 * SEARCH SINCE 01-Jan-2001
+	 * </pre>
+	 * 
+	 * @param time
+	 *            The time argument
+	 * @return
+	 */
+	public static String formatDateForIMAPSearch(final long time) {
+		/*
+		 * Only exclusive access to date format instance
+		 */
+		LOCK_DATE_FORMAT.lock();
+		try {
+			return dateFormat.format(new Date(time));
+		} finally {
+			LOCK_DATE_FORMAT.unlock();
 		}
 	}
 }
