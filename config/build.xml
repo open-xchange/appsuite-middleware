@@ -1,0 +1,82 @@
+<project name="com.openexchange.config" default="install" basedir=".">
+
+    <!-- Customizable values -->
+    <property name="destdir" value=""/>
+    <property name="prefix" value="/opt/open-xchange"/>
+
+    <!-- Constants -->
+    <property name="tmp.dir" value="tmp"/>
+
+    <property file="META-INF/MANIFEST.MF"/>
+    <property file="build.properties"/>
+
+	<property name="version" value="${Bundle-Version}"/>
+
+    <!-- Install Constants -->
+    <property name="bundlesdir" value="${prefix}/bundles"/>
+
+    <!-- JAR names for classpath -->
+    <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
+    <property name="globaljar" value="com.openexchange.global_6.5.0.jar" />
+
+    <!-- Classpath -->
+    <path id="project.classpath">
+        <pathelement location="${bundlesdir}/${osgijar}"/>
+        <pathelement location="${bundlesdir}/${globaljar}"/>
+    </path>
+
+    <!-- Compile -->
+    <target name="prepare">
+        <mkdir dir="${output..}"/>
+        <mkdir dir="${tmp.dir}"/>
+    </target>
+
+    <target name="compile" depends="prepare">
+        <javac srcdir="${source..}" destdir="${output..}" debug="true"
+            encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+            <classpath refid="project.classpath" />
+        </javac>
+    </target>
+
+    <target name="jar" depends="prepare,compile">
+        <jar jarfile="${tmp.dir}/${Bundle-SymbolicName}_${Bundle-Version}.jar"
+            manifest="META-INF/MANIFEST.MF">
+            <fileset dir="${output..}"/>
+        </jar>
+    </target>
+
+    <!-- Install targets -->
+    <target name="install" depends="jar">
+        <mkdir dir="${destdir}/${bundlesdir}"/>
+        <copy todir="${destdir}/${bundlesdir}">
+            <fileset dir="${tmp.dir}">
+                <include name="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="dist" depends="clean">
+		<property name="dist-package" value="dist-package"/>
+    	<delete dir="${dist-package}"/>
+        <mkdir dir="${dist-package}/${ant.project.name}-${version}"/>
+        <copy todir="${dist-package}/${ant.project.name}-${version}">
+            <fileset dir=".">
+                <exclude name="**${dist-package}/**"/>
+                <exclude name="**debian/**"/>
+                <exclude name="**CVS/**"/>
+                <exclude name="Todo"/>
+            </fileset>
+        </copy>
+        <tar destfile="../${ant.project.name}-${version}.tar.gz"
+	        basedir="${dist-package}"
+    	    includes="${ant.project.name}-${version}/"
+         	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
+    	<delete dir="${dist-package}"/>
+    </target>
+
+    <target name="clean">
+        <delete dir="${tmp.dir}"/>
+        <delete dir="${output..}"/>
+    </target>
+
+</project>

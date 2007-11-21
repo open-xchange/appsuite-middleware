@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange SessionD
 Bundle-SymbolicName: com.openexchange.sessiond
-Bundle-Version: 6.5.0.0
+Bundle-Version: 6.5.0
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.openexchange.config,
  com.openexchange.groupware,
