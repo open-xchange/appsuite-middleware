@@ -90,22 +90,25 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 			+ "<h1>#STATUS_CODE# #STATUS_MSG#</h1>\r\n" + "<p>#STATUS_DESC#</p>\r\n" + "<hr>\r\n"
 			+ "<address>#DATE#,&nbsp;Open-Xchange v#VERSION#</address>\r\n" + "</body></html>";
 
-// private static final String ERROR_PAGE_TEMPLATE = "<!DOCTYPE HTML PUBLIC
-// \"-//W3C//DTD HTML 4.01//EN\""
-//			+ "\"http://www.w3.org/TR/html4/strict.dtd\">\n"
-//			+ "<html xmlns=\"http://www.w3.org/1999/xhtml\" language=\"#LANGUAGE#\" xml:lang=\"#LANGUAGE#\">\n"
-//			+ "<head>\n" + "\t<title>#STATUS_MSG#</title>\n"
-//			+ "\t<style type=\"text/css\"><!--/*--><![CDATA[/*><!--*/ " + "\n"
-//			+ "\t\tbody { color: #000000; background-color: #FFFFFF; }\n" + "\t\tp, address {margin-left: 3em;}"
-//			+ "\t\tspan {font-size: smaller;}" + "\t/*]]>*/--></style>\n" + "</head>\n\n" + "<body>\n"
-//			+ "<h1>#STATUS_MSG#</h1>\n" + "<p>\n#STATUS_DESC#\n</p>\n\n" + "<h2>Error #STATUS_CODE#</h2>\n"
-//			+ "<address>\n" + "<span>#DATE#<br />\n" + "\tOpen-Xchange</span>\n" + "</address>\n" + "</body>\n"
-//			+ "</html>";
-
-	private static final String HTTP_HEADER_DATE_FORMAT = "EEE',' dd MMMM yyyy hh:mm:ss z";
+	// private static final String ERROR_PAGE_TEMPLATE = "<!DOCTYPE HTML PUBLIC
+	// \"-//W3C//DTD HTML 4.01//EN\""
+	// + "\"http://www.w3.org/TR/html4/strict.dtd\">\n"
+	// + "<html xmlns=\"http://www.w3.org/1999/xhtml\" language=\"#LANGUAGE#\"
+	// xml:lang=\"#LANGUAGE#\">\n"
+	// + "<head>\n" + "\t<title>#STATUS_MSG#</title>\n"
+	// + "\t<style type=\"text/css\"><!--/*--><![CDATA[/*><!--*/ " + "\n"
+	// + "\t\tbody { color: #000000; background-color: #FFFFFF; }\n" + "\t\tp,
+	// address {margin-left: 3em;}"
+	// + "\t\tspan {font-size: smaller;}" + "\t/*]]>*/--></style>\n" +
+	// "</head>\n\n" + "<body>\n"
+	// + "<h1>#STATUS_MSG#</h1>\n" + "<p>\n#STATUS_DESC#\n</p>\n\n" + "<h2>Error
+	// #STATUS_CODE#</h2>\n"
+	// + "<address>\n" + "<span>#DATE#<br />\n" + "\tOpen-Xchange</span>\n" +
+	// "</address>\n" + "</body>\n"
+	// + "</html>";
 
 	private static final Map<Integer, String> statusMsgs;
-	
+
 	private static final Map<Integer, String> statusDesc;
 
 	private static final SimpleDateFormat headerDateFormat;
@@ -159,11 +162,14 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		 */
 		statusDesc = new HashMap<Integer, String>();
 		statusDesc.put(Integer.valueOf(404), "The requested URL %s was not found on this server.");
-		statusDesc.put(Integer.valueOf(503), "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
+		statusDesc
+				.put(
+						Integer.valueOf(503),
+						"The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
 		/*
 		 * Date Format
 		 */
-		headerDateFormat = new SimpleDateFormat(HTTP_HEADER_DATE_FORMAT);
+		headerDateFormat = new SimpleDateFormat("EEE',' dd MMMM yyyy hh:mm:ss z");
 		final DateFormatSymbols dfs = headerDateFormat.getDateFormatSymbols();
 		final String[] shortWeekdays = new String[8];
 		shortWeekdays[Calendar.SUNDAY] = "Sun";
@@ -471,7 +477,9 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 	 *      long)
 	 */
 	public void setDateHeader(final String name, final long l) {
-		setHeader(name, headerDateFormat.format(new Date(l)));
+		synchronized (headerDateFormat) {
+			setHeader(name, headerDateFormat.format(new Date(l)));
+		}
 	}
 
 	/*
