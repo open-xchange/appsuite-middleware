@@ -12,10 +12,10 @@
 
 	<property name="version" value="${Bundle-Version}"/>
 	<property name="project.name" value="${Bundle-SymbolicName}"/>
-	<property name="composite.name" value="${project.name}_${version}" />
+	<property name="composite.name" value="open-xchange-charset-${version}" />
 
     <!-- Install Constants -->
-    <property name="bundlesdir" value="${destdir}${prefix}/bundles"/>
+    <property name="bundlesdir" value="${prefix}/bundles"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
@@ -48,8 +48,8 @@
 
     <!-- Install -->
     <target name="install" depends="jar">
-        <mkdir dir="${bundlesdir}"/>
-        <copy todir="${bundlesdir}">
+        <mkdir dir="${destdir}/${bundlesdir}"/>
+        <copy todir="${destdir}/${bundlesdir}">
             <fileset dir="${tmp.dir}">
                 <include name="${composite.name}.jar"/>
             </fileset>
