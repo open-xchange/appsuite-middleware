@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Server
 Bundle-SymbolicName: com.openexchange.server
-Bundle-Version: 6.5.0.0
+Bundle-Version: 6.5.0
 Bundle-Activator: com.openexchange.server.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.mysql.jdbc;version="3.1.13",
@@ -84,7 +84,6 @@ Export-Package: com.openexchange.api2,
  com.openexchange.groupware.update.exception,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.mail.usersetting,
- com.openexchange.server,
  com.openexchange.server.impl,
  com.openexchange.tools,
  com.openexchange.tools.oxfolder,

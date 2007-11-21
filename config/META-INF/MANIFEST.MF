@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Config
 Bundle-SymbolicName: com.openexchange.config
-Bundle-Version: 6.5.0.0
+Bundle-Version: 6.5.0
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.openexchange.server.osgiservice,
  org.apache.commons.logging,
