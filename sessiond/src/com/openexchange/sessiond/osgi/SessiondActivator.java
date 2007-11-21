@@ -76,21 +76,21 @@ import com.openexchange.sessiond.impl.SessiondInit;
 public class SessiondActivator implements BundleActivator {
 
 	private static transient final Log LOG = LogFactory.getLog(SessiondActivator.class);
-	
+
 	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
-    
-    private SessiondConnectorInterface sessiondConInterface;
-    
-    private ServiceRegistration serviceRegister = null;
-    
-    /**
-     * {@inheritDoc}
-     */
-    public void start(final BundleContext context) throws Exception {
-        SessiondInit sessiondInit = null;
-        
-        try {
-        	/*
+
+	private SessiondConnectorInterface sessiondConInterface;
+
+	private ServiceRegistration serviceRegister = null;
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void start(final BundleContext context) throws Exception {
+		SessiondInit sessiondInit = null;
+
+		try {
+			/*
 			 * Init service trackers
 			 */
 			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
@@ -106,7 +106,7 @@ public class SessiondActivator implements BundleActivator {
 			 * Start sessiond when configuration service is available
 			 */
 			final ServiceProxyListener l = new ServiceProxyListener() {
-				
+
 				public void onServiceAvailable(final Object service) throws AbstractOXException {
 					if (service instanceof Configuration) {
 						try {
@@ -122,37 +122,44 @@ public class SessiondActivator implements BundleActivator {
 				}
 			};
 			ConfigurationService.getInstance().addServiceProxyListener(l);
-			
-        	//sessiondInit = SessiondInit.getInstance();
-            //sessiondInit.start();
-            sessiondConInterface = new SessiondConnectorImpl();
-            serviceRegister = context.registerService(SessiondConnectorInterface.class.getName(), sessiondConInterface, null);
-        } catch (final Throwable e) {
-        	LOG.error("SessiondActivator: start: ", e);
-            // Try to stop what already has been started.
-        	if (null != sessiondInit) {
-        		sessiondInit.stop();
-        	}
-            throw e instanceof Exception ? (Exception)e : new Exception(e);
-        }
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    public void stop(final BundleContext context) throws Exception {
-        serviceRegister.unregister();
-        sessiondConInterface = null;
-        serviceRegister = null;
 
-        SessiondInit sessiondInit = SessiondInit.getInstance();
-        sessiondInit.stop();
-        /*
-		 * Close service trackers
-		 */
-		for (ServiceTracker tracker : serviceTrackerList) {
-			tracker.close();
+			// sessiondInit = SessiondInit.getInstance();
+			// sessiondInit.start();
+			sessiondConInterface = new SessiondConnectorImpl();
+			serviceRegister = context.registerService(SessiondConnectorInterface.class.getName(), sessiondConInterface,
+					null);
+		} catch (final Throwable e) {
+			LOG.error("SessiondActivator: start: ", e);
+			// Try to stop what already has been started.
+			if (null != sessiondInit) {
+				sessiondInit.stop();
+			}
+			throw e instanceof Exception ? (Exception) e : new Exception(e);
 		}
-		serviceTrackerList.clear();
-    }
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void stop(final BundleContext context) throws Exception {
+		try {
+			serviceRegister.unregister();
+			sessiondConInterface = null;
+			serviceRegister = null;
+
+			SessiondInit sessiondInit = SessiondInit.getInstance();
+			sessiondInit.stop();
+			/*
+			 * Close service trackers
+			 */
+			for (ServiceTracker tracker : serviceTrackerList) {
+				tracker.close();
+			}
+			serviceTrackerList.clear();
+		} catch (final Throwable e) {
+			LOG.error("SessiondActivator: start: ", e);
+			throw e instanceof Exception ? (Exception) e : new Exception(e);
+		}
+	}
+
 }

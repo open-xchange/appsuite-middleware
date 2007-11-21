@@ -65,6 +65,9 @@ import com.openexchange.config.internal.ConfigurationImpl;
  */
 public final class ConfigActivator implements BundleActivator {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(ConfigActivator.class);
+
 	private Configuration configuration;
 
 	private ServiceRegistration registration;
@@ -85,9 +88,9 @@ public final class ConfigActivator implements BundleActivator {
 		try {
 			configuration = new ConfigurationImpl();
 			registration = context.registerService(Configuration.class.getName(), configuration, null);
-		} catch (final Exception e) {
-			e.printStackTrace();
-			throw e;
+		} catch (final Throwable t) {
+			LOG.error(t.getLocalizedMessage(), t);
+			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
 	}
 
@@ -100,11 +103,10 @@ public final class ConfigActivator implements BundleActivator {
 		try {
 			registration.unregister();
 			configuration = null;
-		} catch (final Exception e) {
-			e.printStackTrace();
-			throw e;
+		} catch (final Throwable t) {
+			LOG.error(t.getLocalizedMessage(), t);
+			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
-
 	}
 
 }

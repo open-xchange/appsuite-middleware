@@ -68,6 +68,9 @@ import com.openexchange.charset.CollectionCharsetProvider;
  */
 public final class Activator implements BundleActivator, ServiceTrackerCustomizer {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(Activator.class);
+
 	private CollectionCharsetProvider collectionCharsetProvider;
 
 	private CharsetProvider backupCharsetProvider;
@@ -170,9 +173,6 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 		if (service instanceof CharsetProvider) {
 			collectionCharsetProvider.removeCharsetProvider((CharsetProvider) service);
 		}
-		/*
-		 * XXX: Necessary to unget service???
-		 */
 		context.ungetService(reference);
 	}
 
@@ -190,9 +190,9 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 			this.context = context;
 			serviceTracker = new ServiceTracker(context, CharsetProvider.class.getName(), this);
 			serviceTracker.open();
-		} catch (final Exception e) {
-			e.printStackTrace();
-			throw e;
+		} catch (final Throwable t) {
+			LOG.error(t.getLocalizedMessage(), t);
+			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
 	}
 
@@ -208,9 +208,9 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 			 * Restore original
 			 */
 			restoreCharsetExtendedProvider();
-		} catch (final Exception e) {
-			e.printStackTrace();
-			throw e;
+		} catch (final Throwable t) {
+			LOG.error(t.getLocalizedMessage(), t);
+			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		} finally {
 			collectionCharsetProvider = null;
 			serviceTracker = null;

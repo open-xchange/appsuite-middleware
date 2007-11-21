@@ -156,30 +156,34 @@ public class Activator implements BundleActivator {
 	 */
 	public void stop(final BundleContext context) throws Exception {
 		try {
-			starter.stop();
-		} finally {
-			/*
-			 * Unregister server's services
-			 */
-			for (ServiceRegistration registration : registrationList) {
-				registration.unregister();
+			try {
+				starter.stop();
+			} finally {
+				/*
+				 * Unregister server's services
+				 */
+				for (ServiceRegistration registration : registrationList) {
+					registration.unregister();
+				}
+				registrationList.clear();
+				/*
+				 * Close service trackers
+				 */
+				for (ServiceTracker tracker : serviceTrackerList) {
+					tracker.close();
+				}
+				serviceTrackerList.clear();
 			}
-			registrationList.clear();
-			/*
-			 * Close service trackers
-			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
-				tracker.close();
-			}
-			serviceTrackerList.clear();
+		} catch (final Throwable t) {
+			LOG.error("Server Activator: stop: ", t);
+			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
 	}
 
 	/**
-	 * Determines if admin bundle is installed by iterating bundle context's
-	 * bundles whose status is set to {@link Bundle#INSTALLED} or
-	 * {@link Bundle#ACTIVE} and whose symbolic name equals
-	 * {@value #BUNDLE_ID_ADMIN}.
+	 * Determines if admin bundle is installed by iterating context's bundles
+	 * whose status is set to {@link Bundle#INSTALLED} or {@link Bundle#ACTIVE}
+	 * and whose symbolic name equals {@value #BUNDLE_ID_ADMIN}.
 	 * 
 	 * @param context
 	 *            The bundle context
