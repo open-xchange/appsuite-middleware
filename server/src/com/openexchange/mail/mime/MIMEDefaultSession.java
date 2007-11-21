@@ -67,9 +67,6 @@ import com.openexchange.mail.config.MailConfig;
  */
 public final class MIMEDefaultSession {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MIMEDefaultSession.class);
-
 	/**
 	 * No instance
 	 */
