@@ -61,15 +61,15 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.charset.CollectionCharsetProvider;
 
 /**
- * {@link Activator} - Activator for com.openexchange.charset bundle
+ * {@link CharsetActivator} - Activator for com.openexchange.charset bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class Activator implements BundleActivator, ServiceTrackerCustomizer {
+public final class CharsetActivator implements BundleActivator, ServiceTrackerCustomizer {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(Activator.class);
+			.getLog(CharsetActivator.class);
 
 	private CollectionCharsetProvider collectionCharsetProvider;
 
@@ -82,7 +82,7 @@ public final class Activator implements BundleActivator, ServiceTrackerCustomize
 	/**
 	 * Default constructor
 	 */
-	public Activator() {
+	public CharsetActivator() {
 		super();
 	}
 
