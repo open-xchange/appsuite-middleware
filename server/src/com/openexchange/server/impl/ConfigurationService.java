@@ -50,7 +50,7 @@
 package com.openexchange.server.impl;
 
 import com.openexchange.config.Configuration;
-import com.openexchange.server.ServiceProxy;
+import com.openexchange.server.ServiceHolder;
 
 /**
  * {@link ConfigurationService}
@@ -58,7 +58,7 @@ import com.openexchange.server.ServiceProxy;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ConfigurationService extends ServiceProxy<Configuration> {
+public final class ConfigurationService extends ServiceHolder<Configuration> {
 
 	private static final ConfigurationService instance = new ConfigurationService();
 

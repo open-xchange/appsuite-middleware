@@ -53,10 +53,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import com.openexchange.server.ServiceProxy;
+import com.openexchange.server.ServiceHolder;
 
 /**
- * {@link BundleServiceTracker} - Provides access to a bundle service instance
+ * {@link BundleServiceTracker} - Tracks a bundle service and fills or empties
+ * corresponding {@link ServiceHolder} instance
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -68,21 +69,27 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer {
 
 	protected final BundleContext context;
 
-	protected final ServiceProxy<S> proxy;
+	protected final ServiceHolder<S> serviceHolder;
 
 	protected final Class<S> serviceClass;
 
 	/**
-	 * Initializes a new bundle service
+	 * Initializes a new bundle service tracker
 	 * 
 	 * @param context
 	 *            The bundle context
+	 * @param serviceHolder
+	 *            The service holder
+	 * @param serviceClass
+	 *            The service's class (used for dynamic type comparison and
+	 *            casts)
 	 */
-	public BundleServiceTracker(final BundleContext context, final ServiceProxy<S> proxy, final Class<S> serviceClass) {
+	public BundleServiceTracker(final BundleContext context, final ServiceHolder<S> serviceHolder,
+			final Class<S> serviceClass) {
 		super();
 		this.context = context;
 		this.serviceClass = serviceClass;
-		this.proxy = proxy;
+		this.serviceHolder = serviceHolder;
 	}
 
 	/*
@@ -94,7 +101,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer {
 		final Object addedService = context.getService(reference);
 		if (serviceClass.isInstance(addedService)) {
 			try {
-				proxy.setService(serviceClass.cast(addedService));
+				serviceHolder.setService(serviceClass.cast(addedService));
 			} catch (final Exception e) {
 				LOG.error(e.getLocalizedMessage(), e);
 			}
@@ -120,7 +127,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer {
 	public void removedService(final ServiceReference reference, final Object service) {
 		if (serviceClass.isInstance(service)) {
 			try {
-				proxy.removeService();
+				serviceHolder.removeService();
 			} catch (final Exception e) {
 				LOG.error(e.getLocalizedMessage(), e);
 			}

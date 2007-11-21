@@ -56,17 +56,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * {@link ServiceProxy}
+ * {@link ServiceHolder}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class ServiceProxy<S> {
+public abstract class ServiceHolder<S> {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ServiceProxy.class);
+			.getLog(ServiceHolder.class);
 
-	private final Map<Class<? extends ServiceProxyListener>, ServiceProxyListener> listeners;
+	private final Map<Class<? extends ServiceHolderListener>, ServiceHolderListener> listeners;
 
 	private final AtomicInteger countActive;
 
@@ -77,22 +77,22 @@ public abstract class ServiceProxy<S> {
 	/**
 	 * Default constructor
 	 */
-	protected ServiceProxy() {
+	protected ServiceHolder() {
 		super();
 		countActive = new AtomicInteger();
 		waiting = new AtomicBoolean();
-		listeners = new ConcurrentHashMap<Class<? extends ServiceProxyListener>, ServiceProxyListener>();
+		listeners = new ConcurrentHashMap<Class<? extends ServiceHolderListener>, ServiceHolderListener>();
 	}
 
 	/**
-	 * Add a service proxy listener
+	 * Add a service holder listener
 	 * 
 	 * @param listener
 	 *            The listener
 	 * @throws Exception
 	 *             If listener cannot be added
 	 */
-	public final void addServiceProxyListener(final ServiceProxyListener listener) throws Exception {
+	public final void addServiceHolderListener(final ServiceHolderListener listener) throws Exception {
 		if (listeners.containsKey(listener.getClass())) {
 			return;
 		}
@@ -108,12 +108,12 @@ public abstract class ServiceProxy<S> {
 	 * @param clazz
 	 *            Listener class
 	 */
-	public final void removeServiceProxyListener(final Class<? extends ServiceProxyListener> clazz) {
+	public final void removeServiceHolderListener(final Class<? extends ServiceHolderListener> clazz) {
 		listeners.remove(clazz);
 	}
 
 	/**
-	 * Sets the service of this service proxy
+	 * Sets the service of this service holder
 	 * 
 	 * @param service
 	 *            The service
@@ -128,7 +128,7 @@ public abstract class ServiceProxy<S> {
 	}
 
 	private final void notifyListener(final boolean isAvailable) throws Exception {
-		for (final Iterator<ServiceProxyListener> iter = listeners.values().iterator(); iter.hasNext();) {
+		for (final Iterator<ServiceHolderListener> iter = listeners.values().iterator(); iter.hasNext();) {
 			if (isAvailable) {
 				iter.next().onServiceAvailable(service);
 			} else {
@@ -138,7 +138,7 @@ public abstract class ServiceProxy<S> {
 	}
 
 	/**
-	 * Removes the service from this service proxy
+	 * Removes the service from this service holder
 	 * 
 	 * @throws Exception
 	 *             If service cannot be properly removed

@@ -50,7 +50,7 @@
 package com.openexchange.server.impl;
 
 import com.openexchange.config.Configuration;
-import com.openexchange.server.ServiceProxyListener;
+import com.openexchange.server.ServiceHolderListener;
 
 /**
  * {@link ServerStarterServiceListener}
@@ -58,7 +58,7 @@ import com.openexchange.server.ServiceProxyListener;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ServerStarterServiceListener implements ServiceProxyListener {
+public final class ServerStarterServiceListener implements ServiceHolderListener {
 
 	private final boolean adminStart;
 

@@ -61,7 +61,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.config.Configuration;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.ServiceProxyListener;
+import com.openexchange.server.ServiceHolderListener;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.sessiond.SessiondConnectorInterface;
 import com.openexchange.sessiond.impl.ConfigurationService;
@@ -105,7 +105,7 @@ public class SessiondActivator implements BundleActivator {
 			/*
 			 * Start sessiond when configuration service is available
 			 */
-			final ServiceProxyListener l = new ServiceProxyListener() {
+			final ServiceHolderListener l = new ServiceHolderListener() {
 
 				public void onServiceAvailable(final Object service) throws AbstractOXException {
 					if (service instanceof Configuration) {
@@ -125,7 +125,7 @@ public class SessiondActivator implements BundleActivator {
 
 				}
 			};
-			ConfigurationService.getInstance().addServiceProxyListener(l);
+			ConfigurationService.getInstance().addServiceHolderListener(l);
 
 			// sessiondInit = SessiondInit.getInstance();
 			// sessiondInit.start();

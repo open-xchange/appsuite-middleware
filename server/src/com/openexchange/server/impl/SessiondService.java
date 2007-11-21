@@ -49,7 +49,7 @@
 
 package com.openexchange.server.impl;
 
-import com.openexchange.server.ServiceProxy;
+import com.openexchange.server.ServiceHolder;
 import com.openexchange.sessiond.SessiondConnectorInterface;
 
 /**
@@ -58,7 +58,7 @@ import com.openexchange.sessiond.SessiondConnectorInterface;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SessiondService extends ServiceProxy<SessiondConnectorInterface> {
+public final class SessiondService extends ServiceHolder<SessiondConnectorInterface> {
 
 	private static final SessiondService instance = new SessiondService();
 

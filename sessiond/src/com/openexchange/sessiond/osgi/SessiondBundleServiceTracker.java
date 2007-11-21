@@ -55,7 +55,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.ServiceProxy;
+import com.openexchange.server.ServiceHolder;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.sessiond.impl.SessiondInit;
 
@@ -75,7 +75,7 @@ public class SessiondBundleServiceTracker<S> extends BundleServiceTracker<S> {
 	 * @param context
 	 *            The bundle context
 	 */
-	public SessiondBundleServiceTracker(final BundleContext context, final ServiceProxy<S> proxy, final Class<S> serviceClass) {
+	public SessiondBundleServiceTracker(final BundleContext context, final ServiceHolder<S> proxy, final Class<S> serviceClass) {
 		super(context, proxy, serviceClass);
 	}
 

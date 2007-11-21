@@ -50,12 +50,12 @@
 package com.openexchange.server;
 
 /**
- * {@link ServiceProxyListener}
+ * {@link ServiceHolderListener}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public interface ServiceProxyListener {
+public interface ServiceHolderListener {
 
 	/**
 	 * Invoked if service reference is applied to service proxy
