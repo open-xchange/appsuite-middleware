@@ -984,16 +984,36 @@ public final class MessageUtility {
 	 * </pre>
 	 * 
 	 * @param time
-	 *            The time argument
+	 *            The time argument to format
 	 * @return
 	 */
 	public static String formatDateForIMAPSearch(final long time) {
+		return formatDateForIMAPSearch(new Date(time));
+	}
+
+	/**
+	 * Formats given date argument to a date argument ready for being used in a
+	 * IMAP VERSION 4rev1 <code>SEARCH</code> command (as per RFC 3501). Note
+	 * that only day-related informations are allowed, other informations are
+	 * discarded.
+	 * <p>
+	 * Example:
+	 * 
+	 * <pre>
+	 * SEARCH SINCE 01-Jan-2001
+	 * </pre>
+	 * 
+	 * @param date
+	 *            The date to format
+	 * @return
+	 */
+	public static String formatDateForIMAPSearch(final Date date) {
 		/*
 		 * Only exclusive access to date format instance
 		 */
 		LOCK_DATE_FORMAT.lock();
 		try {
-			return dateFormat.format(new Date(time));
+			return dateFormat.format(date);
 		} finally {
 			LOCK_DATE_FORMAT.unlock();
 		}
