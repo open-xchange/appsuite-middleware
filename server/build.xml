@@ -31,7 +31,10 @@
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${destdir}${prefix}/bundles"/>
-
+	<property name="project.name" value="${Bundle-SymbolicName}" />
+	<property name="version" value="${Bundle-Version}"/>
+	<property name="composite.name" value="${project.name}_${version}" />
+		
     <!-- Replacements -->
     <property name="lib.install.dir" value="${prefix}/lib"/>
     <property name="lib.install.copy.dir" location="${destdir}${lib.install.dir}"/>
@@ -43,7 +46,7 @@
 
     <!-- Replacements in Version.java.in -->
     <filterset id="version">
-        <filter token="replaceVersion" value="${Bundle-Version}" />
+        <filter token="replaceVersion" value="${version}" />
         <filter token="replaceBuildnumber" value="${buildnumber}" />
         <filter token="replaceCodename" value="${codename}" />
     </filterset>
@@ -95,7 +98,7 @@
     </path>
 
     <!-- JARs for running server -->
-    <property name="serverJar" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
+    <property name="serverJar" value="${composite.name}.jar"/>
     <fileset dir="${tmp.dir}" id="server-jars">
         <include name="${serverJar}"/>
         <!-- TODO -->
@@ -128,7 +131,7 @@
     </target>
 
     <target name="jar" depends="compile">
-        <jar jarfile="${tmp.dir}/${Bundle-SymbolicName}_${Bundle-Version}.jar"
+        <jar jarfile="${tmp.dir}/${composite.name}.jar"
             manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
         </jar>
@@ -213,6 +216,28 @@
         <delete dir="${output..}"/>
         <delete file="${source..}/com/openexchange/server/Version.java"/>
     </target>
+
+	<!-- Dist -->
+	<!-- Cargo Culted from openexchange-common -->
+	<target name="dist" depends="clean">
+		<property name="dist-package" value="dist-package"/>
+    	<delete dir="${dist-package}"/>
+        <mkdir dir="${dist-package}/${composite.name}"/>
+        <copy todir="${dist-package}/${composite.name}">
+            <fileset dir=".">
+                <exclude name="**${dist-package}/**"/>
+                <exclude name="**debian/**"/>
+                <exclude name="**CVS/**"/>
+                <exclude name="Todo"/>
+            </fileset>
+        </copy>
+        <tar destfile="../${composite.name}.tar.gz"
+	        basedir="${dist-package}"
+    	    includes="${composite.name}/"
+         	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
+    	<delete dir="${dist-package}"/>
+    </target>
+
 
     <!-- I18N Stuff -->
 
