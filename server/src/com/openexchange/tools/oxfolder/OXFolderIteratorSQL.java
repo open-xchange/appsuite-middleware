@@ -643,8 +643,8 @@ public final class OXFolderIteratorSQL {
 					creatorDisplayName = strHelper.getString(Groups.ZERO_DISPLAYNAME);
 				}
 				final FolderObject virtualOwnerFolder = FolderObject.createVirtualFolderObject(
-						"u:" + fo.getCreatedBy(), creatorDisplayName, FolderObject.SYSTEM_MODULE, true,
-						FolderObject.SYSTEM_TYPE);
+						FolderObject.SHARED_PREFIX + fo.getCreatedBy(), creatorDisplayName, FolderObject.SYSTEM_MODULE,
+						true, FolderObject.SYSTEM_TYPE);
 				folderList.add(virtualOwnerFolder);
 				/*
 				 * Set folder to system shared folder

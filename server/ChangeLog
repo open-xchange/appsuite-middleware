@@ -1,6 +1,7 @@
 * 2007-11-21 - thorben.betten@open-xchange.com
 
  - Bugfix #10033: Fixed 'edit-draft'
+ - Bugfix #10100: Fixed path request on virtual shared folders
 
 * 2007-11-20 - thorben.betten@open-xchange.com
 

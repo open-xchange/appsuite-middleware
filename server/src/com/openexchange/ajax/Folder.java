@@ -54,10 +54,12 @@ import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.folderModule2S
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
@@ -967,6 +969,33 @@ public class Folder extends SessionServlet {
 				final Iterator<FolderObject> iter = q.iterator();
 				for (int i = 0; i < size; i++) {
 					final FolderObject fo = iter.next();
+					if (fo.containsLastModified()) {
+						lastModified = fo.getLastModified().getTime() > lastModified ? fo.getLastModified().getTime()
+								: lastModified;
+					}
+					jsonWriter.array();
+					try {
+						for (final FolderFieldWriter ffw : writers) {
+							ffw.writeField(jsonWriter, fo, false);
+						}
+					} finally {
+						jsonWriter.endArray();
+					}
+				}
+			} else if (folderIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
+				final int userId = Integer.parseInt(folderIdentifier.substring(2));
+				final List<FolderObject> list = new ArrayList<FolderObject>(2);
+				final User user = UserStorage.getInstance().getUser(userId, sessionObj.getContext());
+				list.add(FolderObject.createVirtualSharedFolderObject(userId, user.getDisplayName()));
+				final FolderObject systemShared = new OXFolderAccess(sessionObj.getContext()).getFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID);
+				systemShared.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID, user.getLocale()));
+				list.add(systemShared);
+				/*
+				 * Pre-Select field writers
+				 */
+				final FolderFieldWriter[] writers = folderWriter.getFolderFieldWriter(columns);
+				for (int i = 0; i < 2; i++) {
+					final FolderObject fo = list.get(i);
 					if (fo.containsLastModified()) {
 						lastModified = fo.getLastModified().getTime() > lastModified ? fo.getLastModified().getTime()
 								: lastModified;
