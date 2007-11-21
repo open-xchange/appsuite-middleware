@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.cache;
+package com.openexchange.cache.impl;
 
 /*
  * Copyright 2001-2004 The Apache Software Foundation.

@@ -64,7 +64,8 @@ import java.util.List;
 import java.util.Locale;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.FolderCacheManager;
+import com.openexchange.cache.OXCachingException;
+import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
@@ -106,7 +107,7 @@ public class OXFolderTools {
 	private static final String STR_EMPTY = "";
 
 	/**
-	 * Determines folder type explicitely from underlying database storage. The
+	 * Determines folder type explicitly from underlying database storage. The
 	 * returned value is either <code>FolderObject.PRIVATE</code>,
 	 * <code>FolderObject.PUBLIC</code> or <code>FolderObject.SHARED</code>
 	 */
@@ -116,7 +117,7 @@ public class OXFolderTools {
 	}
 
 	/**
-	 * Determines folder type explicitely from underlying database storage. The
+	 * Determines folder type explicitly from underlying database storage. The
 	 * returned value is either <code>FolderObject.PRIVATE</code>,
 	 * <code>FolderObject.PUBLIC</code> or <code>FolderObject.SHARED</code>
 	 */
@@ -134,12 +135,14 @@ public class OXFolderTools {
 						.valueOf(folderId), Integer.valueOf(ctx.getContextId()));
 			}
 			return fo.getType(userId);
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.FOLDER_COULD_NOT_BE_LOADED, Integer.valueOf(folderId), Integer
 					.valueOf(ctx.getContextId()), e);
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.FOLDER_COULD_NOT_BE_LOADED, Integer.valueOf(folderId), Integer
 					.valueOf(ctx.getContextId()), e);
+		} catch (final OXCachingException e) {
+			throw new OXException(e);
 		}
 	}
 
@@ -172,7 +175,7 @@ public class OXFolderTools {
 		 * Look up in cache
 		 */
 		if (fromCache && FolderCacheManager.isEnabled()) {
-			final FolderObject folderObj = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, con);
+			final FolderObject folderObj = new OXFolderAccess(con, ctx).getFolderObject(folderId);
 			if (folderObj != null) {
 				try {
 					return folderObj.getEffectiveUserPermission(userId, userConfig);
@@ -441,12 +444,7 @@ public class OXFolderTools {
 	 */
 	public static boolean isFolderCalendar(final int folderId, final Context ctx, final Connection readCon)
 			throws OXException {
-		final FolderObject folderObj;
-		if (FolderCacheManager.isEnabled()) {
-			folderObj = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-		} else {
-			folderObj = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-		}
+		final FolderObject folderObj = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 		return (folderObj != null && folderObj.getModule() == FolderObject.CALENDAR);
 	}
 
@@ -455,12 +453,7 @@ public class OXFolderTools {
 	 */
 	public static boolean isFolderContact(final int folderId, final Context ctx, final Connection readCon)
 			throws OXException {
-		final FolderObject folderObj;
-		if (FolderCacheManager.isEnabled()) {
-			folderObj = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-		} else {
-			folderObj = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-		}
+		final FolderObject folderObj = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 		return (folderObj != null && folderObj.getModule() == FolderObject.CONTACT);
 	}
 
@@ -469,12 +462,7 @@ public class OXFolderTools {
 	 */
 	public static boolean isFolderTask(final int folderId, final Context ctx, final Connection readCon)
 			throws OXException {
-		final FolderObject folderObj;
-		if (FolderCacheManager.isEnabled()) {
-			folderObj = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-		} else {
-			folderObj = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-		}
+		final FolderObject folderObj = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 		return (folderObj != null && folderObj.getModule() == FolderObject.TASK);
 	}
 
@@ -483,12 +471,7 @@ public class OXFolderTools {
 	 */
 	public static boolean isFolderPrivate(final int folderId, final Context ctx, final Connection readCon)
 			throws OXException {
-		final FolderObject folderObj;
-		if (FolderCacheManager.isEnabled()) {
-			folderObj = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-		} else {
-			folderObj = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-		}
+		final FolderObject folderObj = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 		return (folderObj != null && folderObj.getType() == FolderObject.PRIVATE);
 	}
 
@@ -497,12 +480,7 @@ public class OXFolderTools {
 	 */
 	public static boolean isFolderPublic(final int folderId, final Context ctx, final Connection readCon)
 			throws OXException {
-		final FolderObject folderObj;
-		if (FolderCacheManager.isEnabled()) {
-			folderObj = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-		} else {
-			folderObj = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-		}
+		final FolderObject folderObj = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 		return (folderObj != null && folderObj.getType() == FolderObject.PUBLIC);
 	}
 
@@ -521,12 +499,7 @@ public class OXFolderTools {
 	 */
 	public static boolean isFolderShared(final int folderId, final int user, final Context ctx, final Connection readCon)
 			throws OXException {
-		final FolderObject folderObj;
-		if (FolderCacheManager.isEnabled()) {
-			folderObj = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-		} else {
-			folderObj = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-		}
+		final FolderObject folderObj = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 		return (folderObj != null && (folderObj.getType() == FolderObject.PRIVATE && folderObj.getCreator() != user));
 	}
 
@@ -542,12 +515,7 @@ public class OXFolderTools {
 	 */
 	public static int getFolderModule(final int folderId, final Context ctx, final Connection readCon)
 			throws OXException {
-		final FolderObject folderObj;
-		if (FolderCacheManager.isEnabled()) {
-			folderObj = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-		} else {
-			folderObj = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-		}
+		final FolderObject folderObj = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 		return folderObj.getModule();
 	}
 
@@ -563,12 +531,7 @@ public class OXFolderTools {
 	 */
 	public static int getFolderType(final int folderId, final int user, final Context ctx, final Connection readCon)
 			throws OXException {
-		final FolderObject folderObj;
-		if (FolderCacheManager.isEnabled()) {
-			folderObj = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-		} else {
-			folderObj = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-		}
+		final FolderObject folderObj = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 		return folderObj.isShared(user) ? FolderObject.SHARED : folderObj.getType();
 	}
 
@@ -578,12 +541,7 @@ public class OXFolderTools {
 	 * examine if folder is shared.
 	 */
 	public static int getFolderType(final int folderId, final Context ctx, final Connection readCon) throws OXException {
-		FolderObject folderObj;
-		if (FolderCacheManager.isEnabled()) {
-			folderObj = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-		} else {
-			folderObj = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-		}
+		final FolderObject folderObj = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 		return folderObj.getType();
 	}
 
@@ -592,12 +550,7 @@ public class OXFolderTools {
 	 */
 	public static int getFolderOwner(final int folderId, final Context ctx, final Connection readCon)
 			throws OXException {
-		FolderObject folderObj;
-		if (FolderCacheManager.isEnabled()) {
-			folderObj = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-		} else {
-			folderObj = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-		}
+		final FolderObject folderObj = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 		return folderObj.getCreator();
 	}
 
@@ -606,12 +559,7 @@ public class OXFolderTools {
 	 */
 	public static boolean getFolderDefaultFlag(final int folderId, final Context ctx, final Connection readCon)
 			throws OXException {
-		FolderObject folderObj;
-		if (FolderCacheManager.isEnabled()) {
-			folderObj = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-		} else {
-			folderObj = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-		}
+		final FolderObject folderObj = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 		return folderObj.isDefaultFolder();
 	}
 
@@ -620,12 +568,7 @@ public class OXFolderTools {
 	 */
 	public static String getFolderName(final int folderId, final Context ctx, final Connection readCon)
 			throws OXException {
-		FolderObject folderObj;
-		if (FolderCacheManager.isEnabled()) {
-			folderObj = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-		} else {
-			folderObj = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-		}
+		final FolderObject folderObj = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 		return folderObj.getFolderName();
 	}
 
@@ -634,12 +577,7 @@ public class OXFolderTools {
 	 */
 	public static int getFolderParent(final int folderId, final Context ctx, final Connection readCon)
 			throws OXException {
-		FolderObject folderObj;
-		if (FolderCacheManager.isEnabled()) {
-			folderObj = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-		} else {
-			folderObj = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-		}
+		final FolderObject folderObj = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 		return folderObj.getParentFolderID();
 	}
 
@@ -729,12 +667,7 @@ public class OXFolderTools {
 			/*
 			 * Check user's effective permission on subfolder's parent
 			 */
-			FolderObject parentFolder;
-			if (FolderCacheManager.isEnabled()) {
-				parentFolder = FolderCacheManager.getInstance().getFolderObject(parentFolderId, true, ctx, null);
-			} else {
-				parentFolder = FolderObject.loadFolderObjectFromDB(parentFolderId, ctx);
-			}
+			final FolderObject parentFolder = new OXFolderAccess(ctx).getFolderObject(parentFolderId);
 			final OCLPermission effectivePerm = parentFolder.getEffectiveUserPermission(userId, userConfig);
 			if (effectivePerm.getFolderPermission() < OCLPermission.READ_FOLDER) {
 				return SearchIteratorAdapter.createEmptyIterator();
@@ -1065,12 +998,7 @@ public class OXFolderTools {
 			return;
 		}
 		UserStorage userStore = userStoreArg;
-		FolderObject fo;
-		if (FolderCacheManager.isEnabled()) {
-			fo = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, null);
-		} else {
-			fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, null);
-		}
+		FolderObject fo = new OXFolderAccess(ctx).getFolderObject(folderId);
 		try {
 			if (!fo.getEffectiveUserPermission(userId, userConfig).isFolderVisible()) {
 				if (folderList.isEmpty()) {
@@ -1108,12 +1036,7 @@ public class OXFolderTools {
 				/*
 				 * Set folder to system shared folder
 				 */
-				if (FolderCacheManager.isEnabled()) {
-					fo = FolderCacheManager.getInstance().getFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID, true,
-							ctx, null);
-				} else {
-					fo = FolderObject.loadFolderObjectFromDB(FolderObject.SYSTEM_SHARED_FOLDER_ID, ctx, null);
-				}
+				fo = new OXFolderAccess(ctx).getFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID);
 				fo.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID, locale));
 				folderList.add(fo);
 				return;
@@ -1176,11 +1099,7 @@ public class OXFolderTools {
 			publicParent = false;
 			break;
 		case FolderObject.SYSTEM_LDAP_FOLDER_ID:
-			if (FolderCacheManager.isEnabled()) {
-				specialFolder = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, null);
-			} else {
-				specialFolder = FolderObject.loadFolderObjectFromDB(folderId, ctx, null);
-			}
+			specialFolder = new OXFolderAccess(ctx).getFolderObject(folderId);
 			specialFolder.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_LDAP_FOLDER_ID, locale));
 			publicParent = true;
 			break;
@@ -1217,12 +1136,7 @@ public class OXFolderTools {
 		/*
 		 * Parent
 		 */
-		final FolderObject parent;
-		if (FolderCacheManager.isEnabled()) {
-			parent = FolderCacheManager.getInstance().getFolderObject(parentId, true, ctx, null);
-		} else {
-			parent = FolderObject.loadFolderObjectFromDB(parentId, ctx, null);
-		}
+		final FolderObject parent = new OXFolderAccess(ctx).getFolderObject(parentId);
 		parent.setFolderName(FolderObject.getFolderString(parentId, locale));
 		folderList.add(parent);
 		return true;
@@ -1233,12 +1147,7 @@ public class OXFolderTools {
 		if (fo.getParentFolderID() == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
 			return false;
 		}
-		final FolderObject parent;
-		if (FolderCacheManager.isEnabled()) {
-			parent = FolderCacheManager.getInstance().getFolderObject(fo.getParentFolderID(), true, ctx, null);
-		} else {
-			parent = FolderObject.loadFolderObjectFromDB(fo.getParentFolderID(), ctx);
-		}
+		final FolderObject parent = new OXFolderAccess(ctx).getFolderObject(fo.getParentFolderID());
 		return !parent.getEffectiveUserPermission(userId, userConf).isFolderVisible();
 	}
 
@@ -1539,7 +1448,7 @@ public class OXFolderTools {
 	}
 
 	/**
-	 * Returns folder's parent id explicitely queried from underlying database
+	 * Returns folder's parent id explicitly queried from underlying database
 	 * storage.
 	 */
 	public static int getFolderParentIdFromDB(final int folderId, final Context ctx, final Connection readConArg)
@@ -1579,7 +1488,7 @@ public class OXFolderTools {
 	}
 
 	/**
-	 * Returns folder's name explicitely queried from underlying database
+	 * Returns folder's name explicitly queried from underlying database
 	 * storage.
 	 */
 	public static String getFolderNameFromDB(final int folderId, final Context ctx, final Connection readConArg)
@@ -1623,13 +1532,17 @@ public class OXFolderTools {
 	 */
 	public static Date getFolderLastModifed(final int folderId, final Context ctx) throws OXException {
 		if (FolderCacheManager.isEnabled()) {
-			return FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, null).getLastModified();
+			try {
+				return FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, null).getLastModified();
+			} catch (final OXCachingException e) {
+				throw new OXException(e);
+			}
 		}
 		return getFolderLastModifedFromDB(folderId, ctx);
 	}
 
 	/**
-	 * Returns folder's last modified timestamp explicitely queried from
+	 * Returns folder's last modified timestamp explicitly queried from
 	 * underlying database storage.
 	 */
 	public static Date getFolderLastModifedFromDB(final int folderId, final Context ctx) throws OXException {
@@ -1637,7 +1550,7 @@ public class OXFolderTools {
 	}
 
 	/**
-	 * Returns folder's last modified timestamp explicitely queried from
+	 * Returns folder's last modified timestamp explicitly queried from
 	 * underlying database storage.
 	 */
 	/**

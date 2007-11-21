@@ -59,7 +59,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.impl.Initialization;
+import com.openexchange.server.Initialization;
 
 /**
  * AJPv13Config

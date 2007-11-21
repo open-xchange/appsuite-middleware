@@ -55,7 +55,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.impl.Initialization;
+import com.openexchange.server.Initialization;
 
 /**
  * {@link MailConnectionInit}

@@ -51,7 +51,7 @@
 
 package com.openexchange.groupware.calendar;
 
-import com.openexchange.cache.Configuration;
+import com.openexchange.cache.impl.Configuration;
 import com.openexchange.configuration.ConfigurationInit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

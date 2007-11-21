@@ -70,7 +70,7 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.session.Session;
 import com.openexchange.tools.mail.ContentType;
-import com.openexchange.tools.servlet.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * MailObject

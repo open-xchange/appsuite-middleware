@@ -74,7 +74,7 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.FolderCacheManager;
+import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.event.EventClient;
 import com.openexchange.event.InvalidStateException;
 import com.openexchange.groupware.Component;
@@ -365,13 +365,8 @@ public class Contacts implements DeleteListener {
 			validateEmailAddress(co);
 			
 			final int fid = co.getParentFolderID();
-			 
-			FolderObject contactFolder;
-			if (FolderCacheManager.isEnabled()){
-				contactFolder = FolderCacheManager.getInstance().getFolderObject(fid, true, so.getContext(), readcon);
-			}else{
-				contactFolder = FolderObject.loadFolderObjectFromDB(fid, so.getContext(), readcon);
-			}
+			
+			final FolderObject contactFolder = new OXFolderAccess(readcon, so.getContext()).getFolderObject(fid);
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
 				throw EXCEPTIONS.createOXConflictException(3,  fid, so.getContext().getContextId(),user);
 				//throw new OXException("saveContactObject() called with a non-Contact-Folder! cid="+so.getContext().getContextId()+" fid="+fid+" uid="+user);
@@ -662,12 +657,7 @@ public class Contacts implements DeleteListener {
 			int folder_whereto = co.getParentFolderID();
 			int folder_comesfrom = fid;
 			
-			FolderObject contactFolder;
-			if (FolderCacheManager.isEnabled()){
-				contactFolder = FolderCacheManager.getInstance().getFolderObject(folder_comesfrom, true, ctx, readcon);
-			}else{
-				contactFolder = FolderObject.loadFolderObjectFromDB(folder_comesfrom, ctx, readcon);
-			}
+			final FolderObject contactFolder = new OXFolderAccess(readcon, ctx).getFolderObject(folder_comesfrom);
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
 				throw EXCEPTIONS.createOXConflictException(10, Integer.valueOf(folder_comesfrom), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 				//throw new OXConflictException("saveContactObject() called with a non-Contact-Folder! cid="+ctx.getContextId()+" fid="+co.getParentFolderID());
@@ -709,13 +699,8 @@ public class Contacts implements DeleteListener {
 				// Can create in destination?
 				if (!op.canCreateObjects()){
 					throw EXCEPTIONS.createOXPermissionException(12, Integer.valueOf(folder_whereto), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
-				}	
-				FolderObject source;
-				if (FolderCacheManager.isEnabled()){
-					source = FolderCacheManager.getInstance().getFolderObject(folder_whereto, true, ctx, readcon);
-				}else{
-					source = FolderObject.loadFolderObjectFromDB(folder_whereto, ctx, readcon);
 				}
+				final FolderObject source = new OXFolderAccess(readcon, ctx).getFolderObject(folder_whereto);
 				if (source.getModule() != FolderObject.CONTACT) {
 					throw EXCEPTIONS.createOXConflictException(13,Integer.valueOf(folder_whereto), Integer.valueOf(ctx.getContextId()), Integer.valueOf(user));
 					//throw new OXConflictException("saveContactObject() called with a non-Contact-Folder! cid="+ctx.getContextId()+" fid"+fid);
@@ -2069,12 +2054,7 @@ public class Contacts implements DeleteListener {
 
 	public static boolean performContactReadCheck(final int folderId, final int created_from, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readCon){
 		try{
-			FolderObject contactFolder;
-			if (FolderCacheManager.isEnabled()){
-				contactFolder = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-			}else{
-				contactFolder = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-			}
+			final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
 				return false;
 			}
@@ -2171,12 +2151,7 @@ public class Contacts implements DeleteListener {
 	
 	public static boolean performContactWriteCheck(final int folderId, final int created_from, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readCon){
 		try{
-			FolderObject contactFolder;
-			if (FolderCacheManager.isEnabled()){
-				contactFolder = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-			}else{
-				contactFolder = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-			}
+			final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
 				return false;
 			}
@@ -2312,12 +2287,7 @@ public class Contacts implements DeleteListener {
 			del = writecon.createStatement();
 					
 			try{
-				FolderObject contactFolder;
-				if (FolderCacheManager.isEnabled()){
-					contactFolder = FolderCacheManager.getInstance().getFolderObject(fid, true, so.getContext(), readcon);
-				}else{
-					contactFolder = FolderObject.loadFolderObjectFromDB(fid, so.getContext(), readcon);
-				}
+				final FolderObject contactFolder = new OXFolderAccess(readcon, so.getContext()).getFolderObject(fid);
 				if (contactFolder.getModule() != FolderObject.CONTACT) {
 					throw EXCEPTIONS.createOXConflictException(42, Integer.valueOf(fid), Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(so.getUserId()));
 					//throw new OXException("YOU TRY TO DELETE FROM A NON CONTACT FOLDER! cid="+so.getContext().getContextId()+" fid="+fid);

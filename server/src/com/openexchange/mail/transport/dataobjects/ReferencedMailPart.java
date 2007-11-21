@@ -84,7 +84,7 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.SMTPException;
-import com.openexchange.tools.servlet.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link ReferencedMailPart} - A {@link MailPart} implementation that points to

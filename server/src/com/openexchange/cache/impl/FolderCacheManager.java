@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.cache;
+package com.openexchange.cache.impl;
 
 import java.sql.Connection;
 import java.util.HashMap;
@@ -65,6 +65,9 @@ import org.apache.jcs.engine.control.event.ElementEvent;
 
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.OXException;
+import com.openexchange.cache.CacheKey;
+import com.openexchange.cache.ElementEventHandlerWrapper;
+import com.openexchange.cache.OXCachingException;
 import com.openexchange.cache.OXCachingException.Code;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -190,9 +193,12 @@ public class FolderCacheManager {
 	 * <code>FolderObject</code> instance. Thus any modifications made to the
 	 * referenced object will not affect cached version
 	 * </p>
+	 * 
+	 * @throws OXCachingException
+	 *             If a caching error occurs
 	 */
 	public FolderObject getFolderObject(final int objectId, final boolean fromCache, final Context ctx,
-			final Connection readConArg) throws OXException {
+			final Connection readConArg) throws OXException, OXCachingException {
 		final Lock ctxReadLock = getContextLock(ctx).readLock();
 		ctxReadLock.lock();
 		try {
@@ -270,9 +276,11 @@ public class FolderCacheManager {
 	 * 
 	 * @return matching <code>FolderObject</code> instance fetched from
 	 *         storage else <code>null</code>
+	 * @throws OXCachingException
+	 *             If a caching error occurs
 	 */
 	public FolderObject loadFolderObject(final int folderId, final Context ctx, final Connection readCon)
-			throws OXException {
+			throws OXException, OXCachingException {
 		final Lock ctxWriteLock = getContextLock(ctx).writeLock();
 		ctxWriteLock.lock();
 		try {
@@ -301,9 +309,11 @@ public class FolderCacheManager {
 	 * @return The object referencing the actually cached entry
 	 * @throws OXException
 	 *             If folder object could not be loaded
+	 * @throws OXCachingException
+	 *             If a caching error occurs
 	 */
 	private FolderObject loadFolderObjectInternal(final int folderId, final Context ctx, final Connection readCon)
-			throws OXException {
+			throws OXException, OXCachingException {
 		if (folderId <= 0) {
 			throw new OXFolderNotFoundException(folderId, ctx.getContextId());
 		}
@@ -351,8 +361,10 @@ public class FolderCacheManager {
 	 * @param ctx
 	 *            the context
 	 * @throws OXException
+	 * @throws OXCachingException
+	 *             If a caching error occurs
 	 */
-	public void putFolderObject(final FolderObject folderObj, final Context ctx) throws OXException {
+	public void putFolderObject(final FolderObject folderObj, final Context ctx) throws OXException, OXCachingException {
 		putFolderObject(folderObj, ctx, true, null);
 	}
 
@@ -379,9 +391,11 @@ public class FolderCacheManager {
 	 *            the element's attributes. Set to <code>null</code> to use
 	 *            the default attributes
 	 * @throws OXException
+	 * @throws OXCachingException
+	 *             If a caching error occurs
 	 */
 	public void putFolderObject(final FolderObject folderObj, final Context ctx, final boolean overwrite,
-			final IElementAttributes elemAttribs) throws OXException {
+			final IElementAttributes elemAttribs) throws OXException, OXCachingException {
 		try {
 			if (!folderObj.containsObjectID()) {
 				throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.ID, Integer.valueOf(-1),
@@ -453,9 +467,10 @@ public class FolderCacheManager {
 	 *            the key
 	 * @param ctx
 	 *            the context
-	 * @throws OXException
+	 * @throws OXCachingException
+	 *             If a caching error occurs
 	 */
-	public void removeFolderObject(final int key, final Context ctx) throws OXException {
+	public void removeFolderObject(final int key, final Context ctx) throws OXCachingException {
 		/*
 		 * Remove object in cache if exist
 		 */
@@ -500,9 +515,10 @@ public class FolderCacheManager {
 	 * Returns default element attributes for this cache
 	 * 
 	 * @return default element attributes for this cache
-	 * @throws OXException
+	 * @throws OXCachingException
+	 *             If a caching error occurs
 	 */
-	public IElementAttributes getDefaultFolderObjectAttributes() throws OXException {
+	public IElementAttributes getDefaultFolderObjectAttributes() throws OXCachingException {
 		try {
 			/*
 			 * Returns a copy NOT a reference

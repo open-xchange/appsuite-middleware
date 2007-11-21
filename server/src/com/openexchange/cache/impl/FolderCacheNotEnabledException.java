@@ -49,7 +49,7 @@
 
 
 
-package com.openexchange.cache;
+package com.openexchange.cache.impl;
 
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.tools.oxfolder.OXFolderException;

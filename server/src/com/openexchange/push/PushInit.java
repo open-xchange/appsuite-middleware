@@ -56,7 +56,6 @@ import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.ConfigurationException.Code;
 import com.openexchange.event.EventQueue;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.push.udp.PushConfigInterface;
 import com.openexchange.push.udp.PushConfigInterfaceImpl;
 import com.openexchange.push.udp.PushHandler;
@@ -64,7 +63,7 @@ import com.openexchange.push.udp.PushMulticastRequestTimer;
 import com.openexchange.push.udp.PushMulticastSocket;
 import com.openexchange.push.udp.PushOutputQueue;
 import com.openexchange.push.udp.PushSocket;
-import com.openexchange.server.impl.Initialization;
+import com.openexchange.server.Initialization;
 
 /**
  * Initializes the event system.

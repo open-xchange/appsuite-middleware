@@ -54,12 +54,12 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.openexchange.cache.FolderCacheManager;
-import com.openexchange.cache.FolderQueryCacheManager;
+import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.impl.Initialization;
+import com.openexchange.server.Initialization;
 import com.openexchange.server.impl.OCLPermission;
 
 /**

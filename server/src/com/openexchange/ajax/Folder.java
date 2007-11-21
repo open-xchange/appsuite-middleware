@@ -81,7 +81,7 @@ import com.openexchange.ajax.writer.FolderWriter.FolderFieldWriter;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbFolderSQLInterface;
-import com.openexchange.cache.FolderCacheManager;
+import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.AbstractOXException.Category;

@@ -65,8 +65,9 @@ import java.util.List;
 import java.util.Set;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.FolderCacheManager;
-import com.openexchange.cache.FolderCacheNotEnabledException;
+import com.openexchange.cache.OXCachingException;
+import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.container.ContactObject;
@@ -559,6 +560,8 @@ public final class OXFolderAdminHelper {
 							LOG.error("Folder could not be removed from cache", e);
 						} catch (final OXException e) {
 							LOG.error("Folder could not be removed from cache", e);
+						} catch (final OXCachingException e) {
+							LOG.error("Folder could not be removed from cache", e);
 						}
 					}
 				} while (!list.isEmpty());
@@ -624,6 +627,8 @@ public final class OXFolderAdminHelper {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
 		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(cid));
+		} catch (final OXCachingException e) {
+			throw new OXException(e);
 		}
 		/*
 		 * Update user's default infostore folder name
@@ -648,6 +653,8 @@ public final class OXFolderAdminHelper {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(cid));
 		} catch (final LdapException e) {
 			throw new OXFolderException(FolderCode.LDAP_ERROR, e, Integer.valueOf(cid));
+		} catch (final OXCachingException e) {
+			throw new OXException(e);
 		}
 	}
 
@@ -679,7 +686,6 @@ public final class OXFolderAdminHelper {
 	public void addUserToOXFolders(final int userId, final String displayName, final String language, final int cid,
 			final Connection writeCon) throws OXException {
 		try {
-			// final Context ctx = ContextStorage.getInstance().getContext(cid);
 			final Context ctx = new ContextImpl(cid);
 			final StringHelper strHelper = new StringHelper(LocaleTools.getLocale(language));
 			/*

@@ -56,8 +56,8 @@ import java.util.Map;
 import java.util.Set;
 
 import com.openexchange.tools.ajp13.AJPv13Exception.AJPCode;
-import com.openexchange.tools.servlet.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * 

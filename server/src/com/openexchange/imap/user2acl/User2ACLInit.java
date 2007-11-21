@@ -56,7 +56,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.user2acl.User2ACL.User2ACLException;
-import com.openexchange.server.impl.Initialization;
+import com.openexchange.server.Initialization;
 
 /**
  * {@link User2ACLInit}

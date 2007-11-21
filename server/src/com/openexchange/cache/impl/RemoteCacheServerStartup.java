@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.cache;
+package com.openexchange.cache.impl;
 
 import java.io.File;
 import java.io.FileInputStream;

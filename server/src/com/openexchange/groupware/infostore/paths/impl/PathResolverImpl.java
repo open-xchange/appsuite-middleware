@@ -60,8 +60,9 @@ import java.util.Map;
 
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.FolderCacheManager;
-import com.openexchange.cache.FolderCacheNotEnabledException;
+import com.openexchange.cache.OXCachingException;
+import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -348,6 +349,8 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 					try {
 						readCon = provider.getReadConnection(ctx);
 						o = FolderCacheManager.getInstance().loadFolderObject(folderid, ctx, readCon);
+					} catch (final OXCachingException e) {
+						throw new OXException(e);
 					} finally {
 						provider.releaseReadConnection(ctx, readCon);
 					}

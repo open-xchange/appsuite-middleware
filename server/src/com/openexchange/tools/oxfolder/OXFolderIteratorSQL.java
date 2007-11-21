@@ -68,7 +68,7 @@ import java.util.Queue;
 import java.util.Set;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.FolderCacheManager;
+import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
@@ -239,12 +239,7 @@ public final class OXFolderIteratorSQL {
 			/*
 			 * Check user's effective permission on subfolder's parent
 			 */
-			FolderObject parentFolder;
-			if (FolderCacheManager.isEnabled()) {
-				parentFolder = FolderCacheManager.getInstance().getFolderObject(parentFolderId, true, ctx, null);
-			} else {
-				parentFolder = FolderObject.loadFolderObjectFromDB(parentFolderId, ctx);
-			}
+			final FolderObject parentFolder = new OXFolderAccess(ctx).getFolderObject(parentFolderId);
 			final OCLPermission effectivePerm = parentFolder.getEffectiveUserPermission(userId, userConfig);
 			if (effectivePerm.getFolderPermission() < OCLPermission.READ_FOLDER) {
 				return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
@@ -611,16 +606,12 @@ public final class OXFolderIteratorSQL {
 	private static void fillAncestor(final List<FolderObject> folderList, final int folderId, final int userId,
 			final UserConfiguration userConfig, final Locale locale, final UserStorage userStoreArg, final Context ctx)
 			throws OXException {
-		if (checkForSpecialFolder(folderList, folderId, locale, ctx)) {
+		final OXFolderAccess access = new OXFolderAccess(ctx);
+		if (checkForSpecialFolder(folderList, folderId, locale, access)) {
 			return;
 		}
 		UserStorage userStore = userStoreArg;
-		FolderObject fo;
-		if (FolderCacheManager.isEnabled()) {
-			fo = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, null);
-		} else {
-			fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, null);
-		}
+		FolderObject fo = access.getFolderObject(folderId);
 		try {
 			if (!fo.getEffectiveUserPermission(userId, userConfig).isFolderVisible()) {
 				if (folderList.isEmpty()) {
@@ -658,16 +649,11 @@ public final class OXFolderIteratorSQL {
 				/*
 				 * Set folder to system shared folder
 				 */
-				if (FolderCacheManager.isEnabled()) {
-					fo = FolderCacheManager.getInstance().getFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID, true,
-							ctx, null);
-				} else {
-					fo = FolderObject.loadFolderObjectFromDB(FolderObject.SYSTEM_SHARED_FOLDER_ID, ctx, null);
-				}
+				fo = access.getFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID);
 				fo.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID, locale));
 				folderList.add(fo);
 				return;
-			} else if (fo.getType() == FolderObject.PUBLIC && hasNonVisibleParent(fo, userId, userConfig, ctx)) {
+			} else if (fo.getType() == FolderObject.PUBLIC && hasNonVisibleParent(fo, userId, userConfig, access)) {
 				/*
 				 * Insert current folder
 				 */
@@ -690,7 +676,7 @@ public final class OXFolderIteratorSQL {
 					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, STR_EMPTY, folderModule2String(fo
 							.getModule()), Integer.valueOf(ctx.getContextId()));
 				}
-				checkForSpecialFolder(folderList, virtualParent, locale, ctx);
+				checkForSpecialFolder(folderList, virtualParent, locale, access);
 				return;
 			}
 			/*
@@ -717,7 +703,7 @@ public final class OXFolderIteratorSQL {
 	}
 
 	private static boolean checkForSpecialFolder(final List<FolderObject> folderList, final int folderId,
-			final Locale locale, final Context ctx) throws OXException {
+			final Locale locale, final OXFolderAccess access) throws OXException {
 		final boolean publicParent;
 		final FolderObject specialFolder;
 		switch (folderId) {
@@ -728,11 +714,7 @@ public final class OXFolderIteratorSQL {
 			publicParent = false;
 			break;
 		case FolderObject.SYSTEM_LDAP_FOLDER_ID:
-			if (FolderCacheManager.isEnabled()) {
-				specialFolder = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, null);
-			} else {
-				specialFolder = FolderObject.loadFolderObjectFromDB(folderId, ctx, null);
-			}
+			specialFolder = access.getFolderObject(folderId);
 			specialFolder.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_LDAP_FOLDER_ID, locale));
 			publicParent = true;
 			break;
@@ -769,29 +751,20 @@ public final class OXFolderIteratorSQL {
 		/*
 		 * Parent
 		 */
-		final FolderObject parent;
-		if (FolderCacheManager.isEnabled()) {
-			parent = FolderCacheManager.getInstance().getFolderObject(parentId, true, ctx, null);
-		} else {
-			parent = FolderObject.loadFolderObjectFromDB(parentId, ctx, null);
-		}
+		final FolderObject parent = access.getFolderObject(parentId);
 		parent.setFolderName(FolderObject.getFolderString(parentId, locale));
 		folderList.add(parent);
 		return true;
 	}
 
 	private static boolean hasNonVisibleParent(final FolderObject fo, final int userId,
-			final UserConfiguration userConf, final Context ctx) throws OXException, DBPoolingException, SQLException {
+			final UserConfiguration userConf, final OXFolderAccess access) throws OXException, DBPoolingException,
+			SQLException {
 		if (fo.getParentFolderID() == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
 			return false;
 		}
-		final FolderObject parent;
-		if (FolderCacheManager.isEnabled()) {
-			parent = FolderCacheManager.getInstance().getFolderObject(fo.getParentFolderID(), true, ctx, null);
-		} else {
-			parent = FolderObject.loadFolderObjectFromDB(fo.getParentFolderID(), ctx);
-		}
-		return !parent.getEffectiveUserPermission(userId, userConf).isFolderVisible();
+		return !access.getFolderObject(fo.getParentFolderID()).getEffectiveUserPermission(userId, userConf)
+				.isFolderVisible();
 	}
 
 	/**

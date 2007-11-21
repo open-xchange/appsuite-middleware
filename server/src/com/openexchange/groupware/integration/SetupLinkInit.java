@@ -56,7 +56,7 @@ import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.integration.SetupLinkException.Code;
-import com.openexchange.server.impl.Initialization;
+import com.openexchange.server.Initialization;
 
 /**
  * 

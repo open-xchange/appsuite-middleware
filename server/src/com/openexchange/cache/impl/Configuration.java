@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.cache;
+package com.openexchange.cache.impl;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -64,7 +64,7 @@ import org.apache.jcs.engine.control.CompositeCacheManager;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.impl.Initialization;
+import com.openexchange.server.Initialization;
 
 /**
  * This class implements the configuration of the caching system.

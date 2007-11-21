@@ -60,7 +60,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -71,6 +70,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionClasses;
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 import com.openexchange.session.Session;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 /**
  * This is a library with little helpers needed when preparing
  * the parsing of a CSV file.
@@ -115,11 +115,7 @@ public class CSVLibrary {
 		final int folderId = getFolderId(folder);
 		FolderObject fo = null;
 		try {
-			if(FolderCacheManager.isEnabled()){
-				fo = FolderCacheManager.getInstance().getFolderObject(folderId, true, sessObj.getContext(), null);
-			} else {
-				fo = FolderObject.loadFolderObjectFromDB(folderId, sessObj.getContext());
-			}
+			fo = new OXFolderAccess(sessObj.getContext()).getFolderObject(folderId);
 		} catch (OXException e) {
 			throw EXCEPTIONS.create(0, folder);
 		}

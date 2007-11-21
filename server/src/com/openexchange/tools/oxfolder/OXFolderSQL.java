@@ -66,8 +66,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.FolderCacheManager;
-import com.openexchange.cache.FolderCacheNotEnabledException;
+import com.openexchange.cache.OXCachingException;
+import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -1176,9 +1177,11 @@ public class OXFolderSQL {
 					 */
 					try {
 						FolderCacheManager.getInstance().removeFolderObject(fuid, ctx);
-					} catch (FolderCacheNotEnabledException e) {
+					} catch (final FolderCacheNotEnabledException e) {
 						LOG.error(e.getMessage(), e);
-					} catch (OXException e) {
+					} catch (final OXException e) {
+						LOG.error(e.getMessage(), e);
+					} catch (final OXCachingException e) {
 						LOG.error(e.getMessage(), e);
 					}
 				}
@@ -1505,9 +1508,11 @@ public class OXFolderSQL {
 					 */
 					try {
 						FolderCacheManager.getInstance().removeFolderObject(fuid, ctx);
-					} catch (FolderCacheNotEnabledException e) {
+					} catch (final FolderCacheNotEnabledException e) {
 						LOG.error(e.getMessage(), e);
-					} catch (OXException e) {
+					} catch (final OXException e) {
+						LOG.error(e.getMessage(), e);
+					} catch (final OXCachingException e) {
 						LOG.error(e.getMessage(), e);
 					}
 				}
@@ -1549,9 +1554,11 @@ public class OXFolderSQL {
 					 */
 					try {
 						FolderCacheManager.getInstance().removeFolderObject(fuid, ctx);
-					} catch (FolderCacheNotEnabledException e) {
+					} catch (final FolderCacheNotEnabledException e) {
 						LOG.error(e.getMessage(), e);
-					} catch (OXException e) {
+					} catch (final OXException e) {
+						LOG.error(e.getMessage(), e);
+					} catch (final OXCachingException e) {
 						LOG.error(e.getMessage(), e);
 					}
 				}

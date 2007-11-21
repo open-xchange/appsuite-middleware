@@ -51,7 +51,7 @@ package com.openexchange.groupware.userconfiguration;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.impl.Initialization;
+import com.openexchange.server.Initialization;
 
 /**
  * UserConfigurationStorage

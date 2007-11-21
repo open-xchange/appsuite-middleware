@@ -67,7 +67,7 @@ import java.util.regex.Pattern;
 
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.impl.Initialization;
+import com.openexchange.server.Initialization;
 import com.openexchange.tools.servlet.OXServletException;
 
 /**

@@ -60,8 +60,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.FolderCacheManager;
-import com.openexchange.cache.FolderCacheNotEnabledException;
+import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
@@ -197,13 +196,7 @@ public final class Tools {
         }
         FolderObject folder = null;
         try {
-            if (FolderCacheManager.isEnabled()) {
-                folder = FolderCacheManager.getInstance().getFolderObject(
-                    folderId, true, ctx, con);
-            } else {
-                folder = FolderObject.loadFolderObjectFromDB(folderId, ctx,
-                    con);
-            }
+        	folder = new OXFolderAccess(con, ctx).getFolderObject(folderId);
         } catch (FolderCacheNotEnabledException e) {
             throw new TaskException(e);
         } catch (OXException e) {

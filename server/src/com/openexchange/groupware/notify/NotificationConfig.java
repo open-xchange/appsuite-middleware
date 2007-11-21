@@ -49,14 +49,15 @@
 
 package com.openexchange.groupware.notify;
 
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.ConfigurationException.Code;
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.configuration.SystemConfig.Property;
-import com.openexchange.server.impl.Initialization;
-import com.openexchange.tools.conf.AbstractConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.configuration.SystemConfig;
+import com.openexchange.configuration.ConfigurationException.Code;
+import com.openexchange.configuration.SystemConfig.Property;
+import com.openexchange.server.Initialization;
+import com.openexchange.tools.conf.AbstractConfig;
 
 /**
  * DEPENDS ON: SystemConfig

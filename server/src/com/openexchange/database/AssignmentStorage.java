@@ -66,7 +66,7 @@ import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 
 import com.openexchange.cache.CacheKey;
-import com.openexchange.cache.Configuration;
+import com.openexchange.cache.impl.Configuration;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;

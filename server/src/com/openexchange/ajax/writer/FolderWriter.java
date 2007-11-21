@@ -61,7 +61,8 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.FolderCacheManager;
+import com.openexchange.cache.OXCachingException;
+import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -336,6 +337,8 @@ public final class FolderWriter extends DataWriter {
 								throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE,
 										FolderFields.OWN_RIGHTS, Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx
 												.getContextId()));
+							} catch (final OXCachingException e) {
+								throw new OXException(e);
 							}
 						}
 						if (withKey) {
@@ -365,6 +368,8 @@ public final class FolderWriter extends DataWriter {
 								throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.PERMISSIONS);
 							} catch (final DBPoolingException e) {
 								throw new OXFolderException(FolderCode.MISSING_PARAMETER, FolderFields.PERMISSIONS);
+							} catch (final OXCachingException e) {
+								throw new OXException(e);
 							}
 						}
 						if (withKey) {

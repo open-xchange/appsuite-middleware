@@ -47,95 +47,75 @@
  *
  */
 
-package com.openexchange.cache;
+package com.openexchange.cache.impl;
 
 import java.io.Serializable;
 
-import com.openexchange.groupware.contexts.Context;
-
 /**
- * Cache key class. The key consists of the context and the
- * unique identifier of the user. This class relies on that objects implementing
- * Context define the {@link java.lang.Object#equals(java.lang.Object)} method
- * and the {@link java.lang.Object#hashCode()} method.
+ * QueryCacheKey
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CacheKey implements Serializable {
+public class QueryCacheKey implements Serializable {
 
-    /**
-     * For serialization.
-     */
-    private static final long serialVersionUID = -3144968305668671430L;
+	private static final long serialVersionUID = -8531547389903446885L;
 
-    /**
-     * Unique identifier of the context.
-     */
-    private final int contextId;
+	public static enum Module {
 
-    /**
-     * Object key of the cached object.
-     */
-    private final Serializable keyObj;
+		FOLDER(1);
 
-    /**
-     * Hash code of the context specific object.
-     */
-    private final int hash;
+		private int num;
 
-    /**
-     * Default constructor.
-     * @param context Context.
-     * @param objectId Unique identifer of the cached object.
-     */
-    public CacheKey(final Context context, final int objectId) {
-        this(context.getContextId(), Integer.valueOf(objectId));
-    }
+		private Module(final int num) {
+			this.num = num;
+		}
 
-    /**
-     * Constructor using context and any object.
-     * @param context Context.
-     * @param obj any object for identifying the cached object.
-     */
-    public CacheKey(final Context context, final Serializable obj) {
-        this(context.getContextId(), obj);
-    }
+		public int getNum() {
+			return num;
+		}
+	}
 
-    /**
-     * Constructor using any object.
-     * @param contextId unique identifier of the context.
-     * @param obj Any object for identifying the cached object.
-     */
-    public CacheKey(final int contextId, final Serializable obj) {
-        super();
-        this.contextId = contextId;
-        this.keyObj = obj;
-        hash = obj.hashCode() ^ contextId;
-    }
+	private final int cid;
 
-    /**
-     *  {@inheritDoc}
+	private final int userId;
+
+	private final Module module;
+
+	private final int queryNum;
+
+	private final int hash;
+	
+	/**
+     * Constructor
      */
-    @Override
+	public QueryCacheKey(final int cid, final int userId, final Module module, final int queryNum) {
+		super();
+		this.cid = cid;
+		this.userId = userId;
+		this.module = module;
+		this.queryNum = queryNum;
+		hash = queryNum ^ (module.getNum() ^ (userId ^ cid));
+	}
+
+	@Override
 	public boolean equals(final Object obj) {
-        if (!(obj instanceof CacheKey)) {
-            return false;
-        }
-        final CacheKey other = (CacheKey) obj;
-        return contextId == other.contextId && keyObj.equals(other.keyObj);
-    }
+		if (!(obj instanceof QueryCacheKey)) {
+			return false;
+		}
+		final QueryCacheKey other = (QueryCacheKey) obj;
+		return (this.cid == other.cid) && (this.userId == other.userId) && (this.module.num == other.module.num)
+				&& (this.queryNum == other.queryNum);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
+	@Override
 	public int hashCode() {
-        return hash;
-    }
+		return hash;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
+	@Override
 	public String toString() {
-        return "CacheKey context=" + contextId + " | key=" + keyObj.toString();
-    }
+		return new StringBuilder(50).append("QueryCacheKey context=").append(cid).append(" | userId=").append(userId)
+				.append(" | module=").append(module.num).append(" | queryNum=").append(queryNum).toString();
+	}
+
 }

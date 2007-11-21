@@ -64,7 +64,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.cache.FolderCacheManager;
 import com.openexchange.event.EventClient;
 import com.openexchange.event.InvalidStateException;
 import com.openexchange.groupware.Component;
@@ -199,12 +198,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		try {
 			readCon = DBPool.pickup(session.getContext());
 			
-			FolderObject contactFolder;
-			if (FolderCacheManager.isEnabled()){
-				contactFolder = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-			} else {
-				contactFolder = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-			}
+			final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
 				throw EXCEPTIONS.createOXConflictException(2,Integer.valueOf(folderId),Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 				//throw new OXException("getNumberOfContacts() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
@@ -300,12 +294,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		}
 		
 		try {
-			FolderObject contactFolder;
-			if (FolderCacheManager.isEnabled()){
-				contactFolder = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-			}else{
-				contactFolder = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-			}
+			final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
 				throw EXCEPTIONS.createOXConflictException(8,Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 				//throw new OXException("getContactsInFolder() called with a non-Contact-Folder!  (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
@@ -431,12 +420,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		
 		if (!(searchobject.isAllFolders() || searchobject.getEmailAutoComplete())){
 			try {
-				FolderObject contactFolder;
-				if (FolderCacheManager.isEnabled()){
-					contactFolder = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readcon);
-				}else{
-					contactFolder = FolderObject.loadFolderObjectFromDB(folderId, ctx);
-				}
+				final FolderObject contactFolder = new OXFolderAccess(readcon, ctx).getFolderObject(folderId);
 				if (contactFolder.getModule() != FolderObject.CONTACT) {
 					throw EXCEPTIONS.createOXConflictException(14,Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 					//throw new OXException("getContactsInFolder() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
@@ -568,12 +552,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		}
 				
 		try {
-			FolderObject contactFolder;
-			if (FolderCacheManager.isEnabled()){
-				contactFolder = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readcon);
-			}else{
-				contactFolder = FolderObject.loadFolderObjectFromDB(folderId, ctx, readcon);
-			}
+			final FolderObject contactFolder = new OXFolderAccess(readcon, ctx).getFolderObject(folderId);
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
 				throw EXCEPTIONS.createOXConflictException(21,Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 				//throw new OXException("getContactsInFolder() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
@@ -694,12 +673,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 
 			final int folderId = co.getParentFolderID();
 
-			FolderObject contactFolder;
-			if (FolderCacheManager.isEnabled()){
-				contactFolder = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-			}else{
-				contactFolder = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);	
-			}
+			final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
 				throw EXCEPTIONS.createOXConflictException(27,Integer.valueOf(fid), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 				//throw new OXException("getObjectById() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+')');
@@ -751,12 +725,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		}
 		
 		try {
-			FolderObject contactFolder;
-			if (FolderCacheManager.isEnabled()){
-				contactFolder = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-			}else{
-				contactFolder = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-			}
+			final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
 				throw EXCEPTIONS.createOXConflictException(31,Integer.valueOf(folderId), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 				//throw new OXException("getModifiedContactsInFolder() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
@@ -974,12 +943,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 				LOG.error("UNABLE TO PERFORM CONTACT DELETE LAST-MODIFY-TEST", np3);
 			}
 			*/
-			FolderObject contactFolder;
-			if (FolderCacheManager.isEnabled()){
-				contactFolder = FolderCacheManager.getInstance().getFolderObject(fid, true, ctx, readcon);
-			}else{
-				contactFolder = FolderObject.loadFolderObjectFromDB(fid, ctx);
-			}
+			final FolderObject contactFolder = new OXFolderAccess(readcon, ctx).getFolderObject(fid);
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
 				throw EXCEPTIONS.createOXConflictException(41,Integer.valueOf(fuid), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 				//throw new OXException("deleteContactObject called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+oid+')');

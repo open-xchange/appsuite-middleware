@@ -56,6 +56,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.impl.GroupwareInit;
+import com.openexchange.server.Initialization;
 
 /**
  * {@link Starter}
@@ -93,7 +94,7 @@ public class Starter implements Initialization {
 	/**
 	 * Sets the caching system JCS up.
 	 */
-	com.openexchange.cache.Configuration.getInstance(),
+	com.openexchange.cache.impl.Configuration.getInstance(),
 	/**
 	 * Starts the monitoring component.
 	 */
@@ -175,7 +176,7 @@ public class Starter implements Initialization {
 	/**
 	 * Sets the caching system JCS up.
 	 */
-	com.openexchange.cache.Configuration.getInstance(),
+	com.openexchange.cache.impl.Configuration.getInstance(),
 	/**
 	 * Connection pools for ConfigDB and database assignments for contexts.
 	 */

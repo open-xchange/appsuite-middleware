@@ -50,7 +50,8 @@
 package com.openexchange.configuration;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.impl.Initialization;
+import com.openexchange.server.Initialization;
+import com.openexchange.server.impl.Starter;
 
 /**
  * This class contains the initialization for configuratons.

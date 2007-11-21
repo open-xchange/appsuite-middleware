@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.cache;
+package com.openexchange.cache.impl;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -62,6 +62,8 @@ import org.apache.jcs.JCS;
 import org.apache.jcs.access.exception.CacheException;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.cache.CacheKey;
+import com.openexchange.cache.OXCachingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
@@ -193,17 +195,23 @@ public final class FolderQueryCacheManager {
 
 	/**
 	 * Puts a query result into cache
+	 * 
+	 * @throws OXCachingException
+	 *             If a caching error occurs
 	 */
 	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final Session session)
-			throws OXException {
+			throws OXCachingException {
 		putFolderQuery(queryNum, q, session.getUserId(), session.getContext().getContextId());
 	}
 
 	/**
 	 * Puts a query result into cache
+	 * 
+	 * @throws OXCachingException
+	 *             If a caching error occurs
 	 */
 	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final int userId, final int cid)
-			throws OXException {
+			throws OXCachingException {
 		putFolderQuery(queryNum, q, userId, cid, false);
 	}
 
@@ -212,9 +220,12 @@ public final class FolderQueryCacheManager {
 	 * already contains a query result belonging to given <code>queryNum</code>,
 	 * given result is going to appended to existing one. Otherwise existing
 	 * entries are replaced.
+	 * 
+	 * @throws OXCachingException
+	 *             If a caching error occurs
 	 */
 	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final Session session,
-			final boolean append) throws OXException {
+			final boolean append) throws OXCachingException {
 		putFolderQuery(queryNum, q, session.getUserId(), session.getContext().getContextId(), append);
 	}
 
@@ -223,10 +234,13 @@ public final class FolderQueryCacheManager {
 	 * already contains a query result belonging to given <code>queryNum</code>,
 	 * given result is going to appended to existing one. Otherwise existing
 	 * entries are replaced.
+	 * 
+	 * @throws OXCachingException
+	 *             If a caching error occurs
 	 */
 	@SuppressWarnings("unchecked")
 	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final int userId, final int cid,
-			final boolean append) throws OXException {
+			final boolean append) throws OXCachingException {
 		if (q == null) {
 			return;
 		}

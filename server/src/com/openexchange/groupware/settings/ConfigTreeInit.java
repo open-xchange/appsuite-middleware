@@ -49,8 +49,7 @@
 
 package com.openexchange.groupware.settings;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.impl.Initialization;
+import com.openexchange.server.Initialization;
 
 /**
  * 

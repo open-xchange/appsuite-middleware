@@ -138,9 +138,9 @@ import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
-import com.openexchange.tools.servlet.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * Mail - the servlet to handle mail requests

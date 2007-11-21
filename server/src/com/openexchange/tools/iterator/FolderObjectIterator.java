@@ -64,8 +64,9 @@ import java.util.Set;
 import org.apache.jcs.engine.behavior.IElementAttributes;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.FolderCacheManager;
-import com.openexchange.cache.FolderCacheNotEnabledException;
+import com.openexchange.cache.OXCachingException;
+import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.Component;
@@ -355,9 +356,11 @@ public class FolderObjectIterator implements SearchIterator {
 				} else {
 					FolderCacheManager.getInstance().putFolderObject(fo, ctx, false, null);
 				}
-			} catch (FolderCacheNotEnabledException e) {
+			} catch (final FolderCacheNotEnabledException e) {
 				LOG.error(e.getMessage(), e);
-			} catch (OXException e) {
+			} catch (final OXException e) {
+				LOG.error(e.getMessage(), e);
+			} catch (final OXCachingException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}

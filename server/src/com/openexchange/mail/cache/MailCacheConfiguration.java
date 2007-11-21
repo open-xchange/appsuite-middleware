@@ -62,7 +62,7 @@ import org.apache.jcs.engine.control.CompositeCacheManager;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.impl.Initialization;
+import com.openexchange.server.Initialization;
 
 /**
  * {@link MailCacheConfiguration} - Loads the configuration for mail caches

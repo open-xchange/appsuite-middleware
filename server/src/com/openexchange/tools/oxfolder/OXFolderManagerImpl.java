@@ -64,8 +64,9 @@ import java.util.Map;
 
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.FolderCacheManager;
-import com.openexchange.cache.FolderQueryCacheManager;
+import com.openexchange.cache.OXCachingException;
+import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.event.EventClient;
 import com.openexchange.event.InvalidStateException;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -192,13 +193,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 					.valueOf(ctx.getContextId()));
 		}
 		checkFolderStringData(folderObj);
-		final FolderObject parentFolder;
-		if (FolderCacheManager.isEnabled()) {
-			parentFolder = FolderCacheManager.getInstance().getFolderObject(folderObj.getParentFolderID(), true, ctx,
-					readCon);
-		} else {
-			parentFolder = FolderObject.loadFolderObjectFromDB(folderObj.getParentFolderID(), ctx, readCon);
-		}
+		final FolderObject parentFolder = getOXFolderAccess().getFolderObject(folderObj.getParentFolderID());
 		if (checkPermissions) {
 			/*
 			 * Check, if user holds right to create a subfolder in given parent
@@ -330,7 +325,6 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 				if (create) {
 					wc = DBPool.pickupWriteable(ctx);
 				}
-				// final FolderObject retval;
 				if (FolderCacheManager.isInitialized()) {
 					FolderCacheManager.getInstance().putFolderObject(parentFolder, ctx);
 					folderObj.fill(FolderCacheManager.getInstance().getFolderObject(fuid, false, ctx, wc));
@@ -357,6 +351,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			}
 		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+		} catch (final OXCachingException e) {
+			throw new OXException(e);
 		}
 	}
 
@@ -452,6 +448,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			}
 		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+		} catch (final OXCachingException e) {
+			throw new OXException(e);
 		}
 	}
 
@@ -649,16 +647,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		/*
 		 * Load source folder
 		 */
-		final FolderObject storageSrc;
-		try {
-			if (FolderCacheManager.isEnabled()) {
-				storageSrc = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-			} else {
-				storageSrc = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-			}
-		} catch (final OXFolderNotFoundException e) {
-			throw new OXFolderNotFoundException(folderId, ctx.getContextId());
-		}
+		final FolderObject storageSrc = getOXFolderAccess().getFolderObject(folderId);
 		/*
 		 * Folder is already in target folder
 		 */
@@ -675,16 +664,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		/*
 		 * For further checks we need to load destination folder
 		 */
-		final FolderObject storageDest;
-		try {
-			if (FolderCacheManager.isEnabled()) {
-				storageDest = FolderCacheManager.getInstance().getFolderObject(targetFolderId, true, ctx, readCon);
-			} else {
-				storageDest = FolderObject.loadFolderObjectFromDB(targetFolderId, ctx, readCon);
-			}
-		} catch (final OXFolderNotFoundException e) {
-			throw new OXFolderNotFoundException(targetFolderId, ctx.getContextId());
-		}
+		final FolderObject storageDest = getOXFolderAccess().getFolderObject(targetFolderId);
 		/*
 		 * Check for a duplicate folder in target folder
 		 */
@@ -801,6 +781,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 				}
 			} catch (final DBPoolingException e) {
 				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+			} catch (final OXCachingException e) {
+				throw new OXException(e);
 			}
 		}
 	}
@@ -1035,8 +1017,9 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+		} catch (final OXCachingException e) {
+			throw new OXException(e);
 		}
-
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1105,7 +1088,11 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
 		}
 		if (FolderCacheManager.isEnabled() && FolderCacheManager.isInitialized()) {
-			FolderCacheManager.getInstance().removeFolderObject(folderID, ctx);
+			try {
+				FolderCacheManager.getInstance().removeFolderObject(folderID, ctx);
+			} catch (final OXCachingException e) {
+				LOG.error(e.getLocalizedMessage(), e);
+			}
 		}
 	}
 
