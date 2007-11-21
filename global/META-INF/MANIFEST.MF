@@ -4,14 +4,19 @@ Bundle-Name: Open-Xchange Global
 Bundle-SymbolicName: com.openexchange.global
 Bundle-Version: 6.5.0
 Bundle-Vendor: Open-Xchange Inc.
-Export-Package: com.openexchange.cache.dynamic,
+Export-Package: com.openexchange.cache,
+ com.openexchange.cache.dynamic,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.upload,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
- com.openexchange.session
+ com.openexchange.session,
+ com.openexchange.tools.arrays,
+ com.openexchange.tools.stream
 Import-Package: org.apache.commons.logging,
  org.apache.commons.logging.impl,
+ org.apache.jcs.engine.control.event,
+ org.apache.jcs.engine.control.event.behavior,
  org.osgi.framework;version="1.3.0",
  org.osgi.util.tracker;version="1.3.3"
