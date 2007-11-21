@@ -55,27 +55,17 @@ package com.openexchange.server.impl;
  */
 public final class Version {
 
-    public static final String MAJOR = "@ox_major@";
-    public static final String MINOR = "@ox_minor@";
-    public static final String PATCH = "@ox_patch@";
-    public static final String CODENAME = "@ox_codename@";
-    public static final String NAME = "@ox_name@";
-    public static final String BUILDNUMBER = "@ox_buildnumber@";
+    public static final String VERSION = "@replaceVersion@";
+    public static final String CODENAME = "@replaceCodename@";
+    public static final String NAME = "Open-Xchange";
+    public static final String BUILDNUMBER = "@replaceBuildnumber@";
 
-    public static final String VERSION_STRING = MAJOR + '.' + MINOR + '.'
-        + PATCH + '-' + BUILDNUMBER;
+    public static final String VERSION_STRING = VERSION + '-' + BUILDNUMBER;
 
     /**
      * Prevent instanciation.
      */
     private Version() {
         super();
-    }
-
-    /**
-     * @deprecated we do not have any sockets with SSL.
-     */
-    public static boolean isSSL() {
-        return false;
     }
 }

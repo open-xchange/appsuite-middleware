@@ -466,8 +466,8 @@
     <!-- Replacing in templates -->
 
     <target name="patchVersionJava">
-        <copy file="${source..}/com/openexchange/server/Version.java.in"
-            tofile="${source..}/com/openexchange/server/Version.java"
+        <copy file="${source..}/com/openexchange/server/impl/Version.java.in"
+            tofile="${source..}/com/openexchange/server/impl/Version.java"
             overwrite="yes">
             <filterset refid="version"/>
         </copy>
