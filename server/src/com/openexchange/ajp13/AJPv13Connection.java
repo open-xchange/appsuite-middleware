@@ -49,7 +49,7 @@
 
 
 
-package com.openexchange.tools.ajp13;
+package com.openexchange.ajp13;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

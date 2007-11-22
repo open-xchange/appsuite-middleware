@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.ajp13;
+package com.openexchange.ajp13;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.openexchange.tools.ajp13.AJPv13Exception.AJPCode;
+import com.openexchange.ajp13.AJPv13Exception.AJPCode;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 

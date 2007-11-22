@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.ajp13.monitoring;
+package com.openexchange.ajp13.monitoring;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;

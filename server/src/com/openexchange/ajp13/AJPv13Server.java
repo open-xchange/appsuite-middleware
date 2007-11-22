@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.ajp13;
+package com.openexchange.ajp13;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,10 +56,10 @@ import java.net.Socket;
 import java.text.DecimalFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.openexchange.ajp13.AJPv13Exception.AJPCode;
+import com.openexchange.ajp13.monitoring.AJPv13ListenerMonitor;
+import com.openexchange.ajp13.monitoring.AJPv13ServerThreadsMonitor;
 import com.openexchange.monitoring.MonitoringInfo;
-import com.openexchange.tools.ajp13.AJPv13Exception.AJPCode;
-import com.openexchange.tools.ajp13.monitoring.AJPv13ListenerMonitor;
-import com.openexchange.tools.ajp13.monitoring.AJPv13ServerThreadsMonitor;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.ServletConfigWrapper;
 import com.openexchange.tools.servlet.ServletContextWrapper;

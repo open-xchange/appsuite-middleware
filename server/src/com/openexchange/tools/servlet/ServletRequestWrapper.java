@@ -67,11 +67,11 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
 
+import com.openexchange.ajp13.AJPv13Exception;
+import com.openexchange.ajp13.AJPv13Exception.AJPCode;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.mail.MailException;
-import com.openexchange.tools.ajp13.AJPv13Exception;
-import com.openexchange.tools.ajp13.AJPv13Exception.AJPCode;
 import com.openexchange.tools.mail.ContentType;
 
 /**

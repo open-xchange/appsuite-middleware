@@ -47,14 +47,14 @@
  *
  */
 
-package com.openexchange.tools.ajp13.monitoring;
+package com.openexchange.ajp13.monitoring;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.openexchange.tools.ajp13.AJPv13Exception;
-import com.openexchange.tools.ajp13.AJPv13Server;
+import com.openexchange.ajp13.AJPv13Exception;
+import com.openexchange.ajp13.AJPv13Server;
 
 
 

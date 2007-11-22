@@ -50,7 +50,7 @@
 /**
  * 
  */
-package com.openexchange.tools.ajp13;
+package com.openexchange.ajp13;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;

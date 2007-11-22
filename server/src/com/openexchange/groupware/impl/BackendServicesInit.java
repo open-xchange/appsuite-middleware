@@ -51,10 +51,10 @@ package com.openexchange.groupware.impl;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
-import com.openexchange.tools.ajp13.AJPv13Config;
-import com.openexchange.tools.ajp13.AJPv13Server;
 
 /**
  * BackendServicesInit

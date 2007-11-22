@@ -49,19 +49,91 @@
 
 
 
-package com.openexchange.tools.ajp13;
+package com.openexchange.ajp13;
 
 /**
+ * AJPv13ListenerThread
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
-public class AJPv13MaxPackgeSizeException extends AJPv13Exception {
+public class AJPv13ListenerThread extends Thread {
 
-	private static final long serialVersionUID = 6426776659588515820L;
+	private boolean dead;
 
-	public AJPv13MaxPackgeSizeException(int packageSize) {
-		super(AJPCode.MAX_PACKAGE_SIZE, Integer.valueOf(packageSize));
+	/**
+	 * AJPv13ListenerThread
+	 */
+	public AJPv13ListenerThread() {
+		super();
 	}
 
+	/**
+	 * Constructor using field <code>target</code>
+	 */
+	public AJPv13ListenerThread(final Runnable target) {
+		super(target);
+	}
+
+	/**
+	 * Constructor using fields <code>group</code> and <code>target</code>
+	 */
+	public AJPv13ListenerThread(final ThreadGroup group, final Runnable target) {
+		super(group, target);
+	}
+
+	/**
+	 * Constructor using field <code>name</code>
+	 */
+	public AJPv13ListenerThread(final String name) {
+		super(name);
+	}
+
+	/**
+	 * Constructor using fields <code>group</code> and <code>name</code>
+	 */
+	public AJPv13ListenerThread(final ThreadGroup group, final String name) {
+		super(group, name);
+	}
+
+	/**
+	 * Constructor using fields <code>target</code> and <code>name</code>
+	 */
+	public AJPv13ListenerThread(final Runnable target, final String name) {
+		super(target, name);
+	}
+
+	/**
+	 * Constructor using fields <code>group</code>, <code>target</code> and
+	 * <code>name</code>
+	 */
+	public AJPv13ListenerThread(final ThreadGroup group, final Runnable target, final String name) {
+		super(group, target, name);
+	}
+
+	/**
+	 * Constructor using fields <code>group</code>, <code>target</code>,
+	 * <code>name</code> and <code>stackSize</code>
+	 */
+	public AJPv13ListenerThread(final ThreadGroup group, final Runnable target, final String name, final long stackSize) {
+		super(group, target, name, stackSize);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Thread#interrupt()
+	 */
+	@Override
+	public void interrupt() {
+		dead = true;
+		super.interrupt();
+	}
+
+	public boolean isDead() {
+		return dead;
+	}
+
+	public void setDead(final boolean dead) {
+		this.dead = dead;
+	}
 }

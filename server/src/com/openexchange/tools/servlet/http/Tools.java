@@ -63,7 +63,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.openexchange.ajax.Login;
-import com.openexchange.tools.ajp13.AJPv13RequestHandler;
+import com.openexchange.ajp13.AJPv13RequestHandler;
 
 /**
  * Convenience methods for servlets.

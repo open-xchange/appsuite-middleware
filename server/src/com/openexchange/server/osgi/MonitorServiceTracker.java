@@ -55,10 +55,10 @@ import javax.management.MalformedObjectNameException;
 
 import org.osgi.framework.BundleContext;
 
+import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.monitoring.MonitorAgent;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
-import com.openexchange.tools.ajp13.AJPv13Server;
 
 /**
  * {@link MonitorServiceTracker}

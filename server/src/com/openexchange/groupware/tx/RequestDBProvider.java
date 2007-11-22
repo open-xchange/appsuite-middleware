@@ -59,12 +59,12 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.ajp13.AJPv13ListenerThread;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tx.Classes;
-import com.openexchange.tools.ajp13.AJPv13ListenerThread;
 
 import com.openexchange.groupware.AbstractOXException.Category;
 

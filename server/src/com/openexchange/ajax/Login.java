@@ -62,6 +62,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -77,7 +78,6 @@ import com.openexchange.server.services.SessiondService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondConnectorInterface;
 import com.openexchange.sessiond.exception.SessiondException;
-import com.openexchange.tools.ajp13.AJPv13RequestHandler;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
 

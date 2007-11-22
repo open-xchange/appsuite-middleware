@@ -57,9 +57,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.servlet.ServletInputStream;
 
-import com.openexchange.tools.ajp13.AJPv13Connection;
-import com.openexchange.tools.ajp13.AJPv13Exception;
-import com.openexchange.tools.ajp13.AJPv13Response;
+import com.openexchange.ajp13.AJPv13Connection;
+import com.openexchange.ajp13.AJPv13Exception;
+import com.openexchange.ajp13.AJPv13Response;
 
 /**
  * OXServletInputStream

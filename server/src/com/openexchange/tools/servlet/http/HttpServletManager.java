@@ -66,9 +66,9 @@ import javax.servlet.ServletException;
 import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServlet;
 
+import com.openexchange.ajp13.AJPv13Config;
+import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.tools.FIFOQueue;
-import com.openexchange.tools.ajp13.AJPv13Config;
-import com.openexchange.tools.ajp13.AJPv13Server;
 
 /**
  * HttpServletManager

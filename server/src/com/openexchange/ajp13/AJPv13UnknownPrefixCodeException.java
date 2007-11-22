@@ -47,19 +47,15 @@
  *
  */
 
-package com.openexchange.tools.ajp13;
+package com.openexchange.ajp13;
 
 
-public class AJPv13InvalidByteSequenceException extends AJPv13Exception {
+public class AJPv13UnknownPrefixCodeException extends AJPv13Exception {
 
-	private static final long serialVersionUID = 7742237204124391724L;
-	
-	public AJPv13InvalidByteSequenceException(final Object... messageArgs) {
-		super(AJPCode.INVALID_BYTE_SEQUENCE, messageArgs);
-	}
-	
-	public AJPv13InvalidByteSequenceException(final Exception cause, final Object... messageArgs) {
-		super(AJPCode.INVALID_BYTE_SEQUENCE, cause, messageArgs);
+	private static final long serialVersionUID = -11763074640120576L;
+
+	public AJPv13UnknownPrefixCodeException(int unknownPrefixCode) {
+		super(AJPCode.UNKNOWN_PREFIX_CODE, Integer.valueOf(unknownPrefixCode));
 	}
 
 }

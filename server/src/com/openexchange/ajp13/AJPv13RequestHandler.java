@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.ajp13;
+package com.openexchange.ajp13;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,8 +58,8 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
+import com.openexchange.ajp13.AJPv13Exception.AJPCode;
 import com.openexchange.monitoring.MonitoringInfo;
-import com.openexchange.tools.ajp13.AJPv13Exception.AJPCode;
 import com.openexchange.tools.servlet.http.HttpErrorServlet;
 import com.openexchange.tools.servlet.http.HttpServletManager;
 import com.openexchange.tools.servlet.http.HttpServletRequestWrapper;

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.ajp13;
+package com.openexchange.ajp13;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -62,9 +62,9 @@ import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
+import com.openexchange.ajp13.AJPv13Exception.AJPCode;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.tools.ajp13.AJPv13Exception.AJPCode;
 import com.openexchange.tools.codec.QuotedPrintable;
 import com.openexchange.tools.servlet.OXServletInputStream;
 import com.openexchange.tools.servlet.OXServletOutputStream;

@@ -47,26 +47,40 @@
  *
  */
 
-package com.openexchange.tools.ajp13.monitoring;
 
-import com.openexchange.monitoring.MonitorMBean;
 
-public interface AJPv13ListenerMonitorMBean extends MonitorMBean {
-	
-	int getNumWaiting();
-	
-	int getNumProcessing();
-	
-	int getNumRequests();
-	
-	long getMaxProcessingTime();
-	
-	long getMinProcessingTime();
-	
-	double getAvgProcessingTime();
-	
-	void resetMaxProcessingTime();
-	
-	void resetMinProcessingTime();
+package com.openexchange.ajp13;
 
+
+/**
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com>Thorben Betten</a>
+ *
+ */
+public class AJPv13SocketClosedException extends AJPv13Exception {
+
+    /**
+	 * Serial Version UID
+	 */
+	private static final long serialVersionUID = 3627750166902286241L;
+	
+	private boolean error = true;
+	
+	public AJPv13SocketClosedException(final AJPCode code, final boolean error) {
+		this(code, error, null, new Object[0]);
+	}
+	
+	public AJPv13SocketClosedException(final AJPCode code, final boolean error, final Exception cause) {
+		super(code, cause, new Object[0]);
+		this.error = error;
+	}
+	
+	public AJPv13SocketClosedException(final AJPCode code, final boolean error, final Exception cause, final Object... messageArgs) {
+		super(code, cause, messageArgs);
+		this.error = error;
+	}
+    
+    public final boolean isError() {
+    	return error;
+    }
 }

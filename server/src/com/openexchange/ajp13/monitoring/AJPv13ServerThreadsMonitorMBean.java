@@ -47,10 +47,10 @@
  *
  */
 
-package com.openexchange.tools.ajp13.monitoring;
+package com.openexchange.ajp13.monitoring;
 
+import com.openexchange.ajp13.AJPv13Exception;
 import com.openexchange.monitoring.MonitorMBean;
-import com.openexchange.tools.ajp13.AJPv13Exception;
 
 public interface AJPv13ServerThreadsMonitorMBean extends MonitorMBean {
 	

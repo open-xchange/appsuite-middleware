@@ -47,15 +47,52 @@
  *
  */
 
-package com.openexchange.tools.ajp13;
+package com.openexchange.ajp13;
 
+import java.io.IOException;
+import java.io.OutputStream;
 
-public class AJPv13UnknownPrefixCodeException extends AJPv13Exception {
+import javax.servlet.ServletException;
 
-	private static final long serialVersionUID = -11763074640120576L;
+/**
+ * AJPv13CPingRequest - Respond quickly with a CPong reply
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
+public final class AJPv13CPingRequest extends AJPv13Request {
 
-	public AJPv13UnknownPrefixCodeException(int unknownPrefixCode) {
-		super(AJPCode.UNKNOWN_PREFIX_CODE, Integer.valueOf(unknownPrefixCode));
+	private static final String STR_RECEIVED_CPING = "Received CPing";
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(AJPv13CPingRequest.class);
+
+	protected AJPv13CPingRequest(final byte[] payloadData) {
+		super(payloadData);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.tools.ajp13.AJPv13Request#processRequest(com.openexchange.tools.ajp13.AJPv13RequestHandler)
+	 */
+	@Override
+	public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
+		if (LOG.isInfoEnabled()) {
+			LOG.info(STR_RECEIVED_CPING);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.tools.ajp13.AJPv13Request#response(java.io.OutputStream,
+	 *      com.openexchange.tools.ajp13.AJPv13RequestHandler)
+	 */
+	@Override
+	public void response(final OutputStream out, final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception,
+			ServletException, IOException {
+		writeResponse(AJPv13Response.getCPongBytes(), out, true);
 	}
 
 }

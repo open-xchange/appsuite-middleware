@@ -55,8 +55,8 @@ import java.net.SocketException;
 
 import javax.servlet.ServletOutputStream;
 
-import com.openexchange.tools.ajp13.AJPv13Connection;
-import com.openexchange.tools.ajp13.AJPv13Response;
+import com.openexchange.ajp13.AJPv13Connection;
+import com.openexchange.ajp13.AJPv13Response;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**

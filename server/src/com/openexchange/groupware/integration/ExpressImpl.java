@@ -66,10 +66,10 @@ import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
 
+import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
-import com.openexchange.tools.ajp13.AJPv13RequestHandler;
 
 /**
  * Implements the config jump to the user admin interface for OXExpress.

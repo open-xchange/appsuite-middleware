@@ -58,9 +58,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import com.openexchange.tools.ajp13.AJPv13Exception;
-import com.openexchange.tools.ajp13.AJPv13RequestHandler;
-import com.openexchange.tools.ajp13.AJPv13Server;
+import com.openexchange.ajp13.AJPv13Exception;
+import com.openexchange.ajp13.AJPv13RequestHandler;
+import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.tools.servlet.ServletRequestWrapper;
 
 /**

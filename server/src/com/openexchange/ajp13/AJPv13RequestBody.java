@@ -47,16 +47,16 @@
  *
  */
 
-package com.openexchange.tools.ajp13;
+package com.openexchange.ajp13;
 
-import static com.openexchange.tools.ajp13.AJPv13ForwardRequest.parseQueryString;
+import static com.openexchange.ajp13.AJPv13ForwardRequest.parseQueryString;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.openexchange.ajp13.AJPv13Exception.AJPCode;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.tools.ajp13.AJPv13Exception.AJPCode;
 
 /**
  * 

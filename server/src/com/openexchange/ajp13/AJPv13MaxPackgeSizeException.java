@@ -49,38 +49,19 @@
 
 
 
-package com.openexchange.tools.ajp13;
-
+package com.openexchange.ajp13;
 
 /**
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com>Thorben Betten</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public class AJPv13SocketClosedException extends AJPv13Exception {
+public class AJPv13MaxPackgeSizeException extends AJPv13Exception {
 
-    /**
-	 * Serial Version UID
-	 */
-	private static final long serialVersionUID = 3627750166902286241L;
-	
-	private boolean error = true;
-	
-	public AJPv13SocketClosedException(final AJPCode code, final boolean error) {
-		this(code, error, null, new Object[0]);
+	private static final long serialVersionUID = 6426776659588515820L;
+
+	public AJPv13MaxPackgeSizeException(int packageSize) {
+		super(AJPCode.MAX_PACKAGE_SIZE, Integer.valueOf(packageSize));
 	}
-	
-	public AJPv13SocketClosedException(final AJPCode code, final boolean error, final Exception cause) {
-		super(code, cause, new Object[0]);
-		this.error = error;
-	}
-	
-	public AJPv13SocketClosedException(final AJPCode code, final boolean error, final Exception cause, final Object... messageArgs) {
-		super(code, cause, messageArgs);
-		this.error = error;
-	}
-    
-    public final boolean isError() {
-    	return error;
-    }
+
 }
