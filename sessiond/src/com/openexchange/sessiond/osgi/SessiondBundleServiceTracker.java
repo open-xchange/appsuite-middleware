@@ -52,31 +52,34 @@ package com.openexchange.sessiond.osgi;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.ServiceHolder;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
+import com.openexchange.sessiond.SessiondConnectorInterface;
 import com.openexchange.sessiond.impl.SessiondInit;
 
 /**
- * {@link SessiondBundleServiceTracker} - Provides access to a bundle service instance
+ * {@link SessiondBundleServiceTracker} - Provides access to a bundle service
+ * instance
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class SessiondBundleServiceTracker<S> extends BundleServiceTracker<S> {
-	
+public class SessiondBundleServiceTracker extends BundleServiceTracker<SessiondConnectorInterface> {
+
 	private static final Log LOG = LogFactory.getLog(SessiondBundleServiceTracker.class);
 
 	/**
-	 * Initializes a new bundle service
+	 * Initializes a new {@link SessiondBundleServiceTracker}
 	 * 
 	 * @param context
-	 *            The bundle context
+	 * @param serviceHolder
+	 * @param serviceClass
 	 */
-	public SessiondBundleServiceTracker(final BundleContext context, final ServiceHolder<S> proxy, final Class<S> serviceClass) {
-		super(context, proxy, serviceClass);
+	public SessiondBundleServiceTracker(final BundleContext context,
+			final ServiceHolder<SessiondConnectorInterface> serviceHolder) {
+		super(context, serviceHolder, SessiondConnectorInterface.class);
 	}
 
 	/*
@@ -84,16 +87,12 @@ public class SessiondBundleServiceTracker<S> extends BundleServiceTracker<S> {
 	 * 
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
 	 */
-	public Object addingService(final ServiceReference reference) {
-		final Object addedService = context.getService(reference);
-		if (serviceClass.isInstance(addedService)) {
-			try {
-				SessiondInit.getInstance().start();
-			} catch (AbstractOXException exc) {
-				LOG.error(exc);
-			}
+	@Override
+	protected void addingServiceInternal(final SessiondConnectorInterface service) {
+		try {
+			SessiondInit.getInstance().start();
+		} catch (final AbstractOXException exc) {
+			LOG.error(exc);
 		}
-		
-		return super.addingService(reference);
 	}
 }

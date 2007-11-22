@@ -78,6 +78,19 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer {
 	 * 
 	 * @param context
 	 *            The bundle context
+	 * @param serviceClass
+	 *            The service's class (used for dynamic type comparison and
+	 *            casts)
+	 */
+	public BundleServiceTracker(final BundleContext context, final Class<S> serviceClass) {
+		this(context, null, serviceClass);
+	}
+
+	/**
+	 * Initializes a new bundle service tracker
+	 * 
+	 * @param context
+	 *            The bundle context
 	 * @param serviceHolder
 	 *            The service holder
 	 * @param serviceClass
@@ -97,16 +110,30 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer {
 	 * 
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
 	 */
-	public Object addingService(final ServiceReference reference) {
+	public final Object addingService(final ServiceReference reference) {
 		final Object addedService = context.getService(reference);
 		if (serviceClass.isInstance(addedService)) {
 			try {
-				serviceHolder.setService(serviceClass.cast(addedService));
+				final S service = serviceClass.cast(addedService);
+				if (serviceHolder != null) {
+					serviceHolder.setService(service);
+				}
+				addingServiceInternal(service);
 			} catch (final Exception e) {
 				LOG.error(e.getLocalizedMessage(), e);
 			}
 		}
 		return addedService;
+	}
+
+	/**
+	 * Invoked when service is added
+	 * 
+	 * @param service
+	 *            The service
+	 */
+	protected void addingServiceInternal(final S service) {
+
 	}
 
 	/*
@@ -115,7 +142,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer {
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference,
 	 *      java.lang.Object)
 	 */
-	public void modifiedService(final ServiceReference reference, final Object service) {
+	public final void modifiedService(final ServiceReference reference, final Object service) {
 	}
 
 	/*
@@ -124,10 +151,13 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer {
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference,
 	 *      java.lang.Object)
 	 */
-	public void removedService(final ServiceReference reference, final Object service) {
+	public final void removedService(final ServiceReference reference, final Object service) {
 		if (serviceClass.isInstance(service)) {
 			try {
-				serviceHolder.removeService();
+				if (serviceHolder != null) {
+					serviceHolder.removeService();
+				}
+				removedServiceInternal();
 			} catch (final Exception e) {
 				LOG.error(e.getLocalizedMessage(), e);
 			}
@@ -136,6 +166,16 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer {
 		 * Release service
 		 */
 		context.ungetService(reference);
+	}
+
+	/**
+	 * Invoked when service is added
+	 * 
+	 * @param service
+	 *            The service
+	 */
+	protected void removedServiceInternal() {
+
 	}
 
 }
