@@ -92,13 +92,14 @@ public final class MonitorServiceTracker extends BundleServiceTracker<MonitorAge
 					AJPv13Server.ajpv13ServerThreadsMonitor);
 			monitorAgent.registerMBean(getObjectName(AJPv13Server.ajpv13ListenerMonitor.getClass().getName(), true),
 					AJPv13Server.ajpv13ListenerMonitor);
-			monitorAgent.registerMBean(getObjectName(MailInterfaceImpl.mailInterfaceMonitor.getClass().getName(), true),
+			monitorAgent.registerMBean(
+					getObjectName(MailInterfaceImpl.mailInterfaceMonitor.getClass().getName(), true),
 					MailInterfaceImpl.mailInterfaceMonitor);
-		} catch (MalformedObjectNameException e) {
+		} catch (final MalformedObjectNameException e) {
 			LOG.error(e.getLocalizedMessage(), e);
-		} catch (NullPointerException e) {
+		} catch (final NullPointerException e) {
 			LOG.error(e.getLocalizedMessage(), e);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		}
 	}
