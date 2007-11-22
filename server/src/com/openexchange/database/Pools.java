@@ -281,7 +281,7 @@ public final class Pools implements Runnable {
             final List<MBeanServer> servers = MBeanServerFactory
                 .findMBeanServer(null);
             if (servers.size() > 0) {
-                final MBeanServer server = (MBeanServer) servers.get(0);
+                final MBeanServer server = servers.get(0);
                 server.registerMBean(pool, objName);
             }
         } catch (MalformedObjectNameException e) {
