@@ -69,4 +69,8 @@ public interface ConnectionPoolMBean extends MonitorMBean {
      */
     int getNumWaiting();
 
+    /**
+     * @return the total number of database connections
+     */
+    int getNumberOfDBConnections();
 }

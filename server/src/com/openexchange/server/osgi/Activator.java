@@ -62,10 +62,11 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.Configuration;
-import com.openexchange.server.impl.ConfigurationService;
-import com.openexchange.server.impl.SessiondService;
+import com.openexchange.monitoring.MonitorAgent;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
+import com.openexchange.server.services.ConfigurationService;
+import com.openexchange.server.services.SessiondService;
 import com.openexchange.sessiond.SessiondConnectorInterface;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
 
@@ -110,6 +111,8 @@ public class Activator implements BundleActivator {
 			serviceTrackerList.add(new ServiceTracker(context, SessiondConnectorInterface.class.getName(),
 					new BundleServiceTracker<SessiondConnectorInterface>(context, SessiondService.getInstance(),
 							SessiondConnectorInterface.class)));
+			serviceTrackerList.add(new ServiceTracker(context, MonitorAgent.class.getName(), new MonitorServiceTracker(
+					context)));
 			/*
 			 * Open service trackers
 			 */

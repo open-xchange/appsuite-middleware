@@ -96,10 +96,6 @@ public class Starter implements Initialization {
 	 */
 	com.openexchange.cache.impl.Configuration.getInstance(),
 	/**
-	 * Starts the monitoring component.
-	 */
-	com.openexchange.monitoring.MonitoringInit.getInstance(),
-	/**
 	 * Connection pools for ConfigDB and database assignments for contexts.
 	 */
 	com.openexchange.database.DatabaseInit.getInstance(),

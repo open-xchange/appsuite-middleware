@@ -47,34 +47,34 @@
  *
  */
 
-package com.openexchange.server.impl;
+package com.openexchange.server.services;
 
+import com.openexchange.config.Configuration;
 import com.openexchange.server.ServiceHolder;
-import com.openexchange.sessiond.SessiondConnectorInterface;
 
 /**
- * {@link SessiondService}
+ * {@link ConfigurationService}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SessiondService extends ServiceHolder<SessiondConnectorInterface> {
+public final class ConfigurationService extends ServiceHolder<Configuration> {
 
-	private static final SessiondService instance = new SessiondService();
+	private static final ConfigurationService instance = new ConfigurationService();
 
 	/**
 	 * Gets the configuration service instance.
 	 * 
 	 * @return The configuration service instance.
 	 */
-	public static SessiondService getInstance() {
+	public static ConfigurationService getInstance() {
 		return instance;
 	}
 
 	/**
 	 * Default constructor
 	 */
-	private SessiondService() {
+	private ConfigurationService() {
 		super();
 	}
 

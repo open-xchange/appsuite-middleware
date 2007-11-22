@@ -56,10 +56,6 @@ import java.net.Socket;
 import java.text.DecimalFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-
-import com.openexchange.monitoring.MonitorAgent;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.ajp13.AJPv13Exception.AJPCode;
 import com.openexchange.tools.ajp13.monitoring.AJPv13ListenerMonitor;
@@ -105,30 +101,9 @@ public class AJPv13Server implements Runnable {
 
 	private static final DecimalFormat DF = new DecimalFormat("0000");
 
-	public static final AJPv13ServerThreadsMonitor ajpv13ServerThreadsMonitor;
+	public static final AJPv13ServerThreadsMonitor ajpv13ServerThreadsMonitor = new AJPv13ServerThreadsMonitor();
 
-	public static final AJPv13ListenerMonitor ajpv13ListenerMonitor;
-
-	static {
-		ajpv13ServerThreadsMonitor = new AJPv13ServerThreadsMonitor();
-		ajpv13ListenerMonitor = new AJPv13ListenerMonitor();
-		try {
-			/*
-			 * Register server threads monitor
-			 */
-			String[] sa = MonitorAgent.getDomainAndName(ajpv13ServerThreadsMonitor.getClass().getName(), true);
-			MonitorAgent.registerMBeanGlobal(new ObjectName(sa[0], "name", sa[1]), ajpv13ServerThreadsMonitor);
-			/*
-			 * Register listener monitor
-			 */
-			sa = MonitorAgent.getDomainAndName(ajpv13ListenerMonitor.getClass().getName(), true);
-			MonitorAgent.registerMBeanGlobal(new ObjectName(sa[0], "name", sa[1]), ajpv13ListenerMonitor);
-		} catch (final MalformedObjectNameException e) {
-			LOG.error(e.getMessage(), e);
-		} catch (final NullPointerException e) {
-			LOG.error(e.getMessage(), e);
-		}
-	}
+	public static final AJPv13ListenerMonitor ajpv13ListenerMonitor = new AJPv13ListenerMonitor();
 
 	public static void startAJPServer() throws AJPv13Exception {
 		/*
@@ -232,9 +207,11 @@ public class AJPv13Server implements Runnable {
 
 	private final void initializeThreadArray() {
 		threadArr = new Thread[AJPv13Config.getAJPServerThreadSize()];
+		final StringBuilder sb = new StringBuilder(32);
 		for (int i = 0; i < threadArr.length; i++) {
 			threadArr[i] = new Thread(this);
-			threadArr[i].setName(new StringBuilder(25).append("AJPServer-").append(DF.format((i + 1))).toString());
+			sb.setLength(0);
+			threadArr[i].setName(sb.append("AJPServer-").append(DF.format((i + 1))).toString());
 		}
 	}
 

@@ -49,9 +49,6 @@
 
 package com.openexchange.mail;
 
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-
 import com.openexchange.api2.MailInterfaceMonitor;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.groupware.container.CommonObject;
@@ -66,7 +63,6 @@ import com.openexchange.mail.dataobjects.TransportMailMessage;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.SendType;
 import com.openexchange.mail.utils.StorageUtility;
-import com.openexchange.monitoring.MonitorAgent;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -82,22 +78,7 @@ public final class MailInterfaceImpl extends MailInterface {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailInterfaceImpl.class);
 
-	public static final MailInterfaceMonitor mailInterfaceMonitor;
-
-	static {
-		mailInterfaceMonitor = new MailInterfaceMonitor();
-		try {
-			/*
-			 * Register monitor
-			 */
-			final String[] sa = MonitorAgent.getDomainAndName(mailInterfaceMonitor.getClass().getName(), true);
-			MonitorAgent.registerMBeanGlobal(new ObjectName(sa[0], "name", sa[1]), mailInterfaceMonitor);
-		} catch (final MalformedObjectNameException e) {
-			LOG.error(e.getMessage(), e);
-		} catch (final NullPointerException e) {
-			LOG.error(e.getMessage(), e);
-		}
-	}
+	public static final MailInterfaceMonitor mailInterfaceMonitor = new MailInterfaceMonitor();
 
 	/*
 	 * Fields

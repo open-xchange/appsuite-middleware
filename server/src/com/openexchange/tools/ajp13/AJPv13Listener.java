@@ -52,6 +52,7 @@ package com.openexchange.tools.ajp13;
 import java.io.IOException;
 import java.net.Socket;
 import java.text.DecimalFormat;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -59,6 +60,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.servlet.ServletException;
 
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 
@@ -95,9 +97,7 @@ public final class AJPv13Listener implements Runnable {
 
 	private final transient Condition resumeRunning = listenerLock.newCondition();
 
-	private static int numRunning;
-
-	private static final Lock COUNT_LOCK = new ReentrantLock();
+	private static final AtomicInteger numRunning = new AtomicInteger();
 
 	private static final DecimalFormat DF = new DecimalFormat("00000");
 
@@ -490,31 +490,46 @@ public final class AJPv13Listener implements Runnable {
 	}
 
 	/**
-	 * @return this listener's accepted client socket
+	 * @return This listener's accepted client socket
 	 */
 	public Socket getSocket() {
 		return client;
 	}
 
+	/**
+	 * @return <code>true</code> if this listener has been started; otherwise
+	 *         <code>false</code>
+	 */
 	public boolean isListenerStarted() {
 		return listenerStarted;
 	}
 
+	/**
+	 * @return <code>true</code> if this listener is pooled; otherwise
+	 *         <code>false</code>
+	 */
 	public boolean isPooled() {
 		return pooled;
 	}
 
+	/**
+	 * Increments/decrements the number of running AJP listeners
+	 * 
+	 * @param increment
+	 *            whether to increment or to decrement
+	 */
 	public static void changeNumberOfRunningAJPListeners(final boolean increment) {
-		COUNT_LOCK.lock();
-		try {
-			numRunning += increment ? 1 : -1;
-		} finally {
-			COUNT_LOCK.unlock();
-		}
+		MonitoringInfo.setNumberOfRunningAJPListeners(increment ? numRunning.incrementAndGet() : numRunning
+				.decrementAndGet());
 	}
 
+	/**
+	 * Gets the number of running AJP listeners
+	 * 
+	 * @return The number of running AJP listeners
+	 */
 	public static int getNumberOfRunningAJPListeners() {
-		return numRunning;
+		return numRunning.get();
 	}
 
 }

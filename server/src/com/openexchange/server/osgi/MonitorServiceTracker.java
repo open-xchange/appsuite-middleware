@@ -47,69 +47,59 @@
  *
  */
 
-package com.openexchange.monitoring;
+package com.openexchange.server.osgi;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import static com.openexchange.monitoring.MonitorUtility.getObjectName;
 
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.Initialization;
+import javax.management.MalformedObjectNameException;
+
+import org.osgi.framework.BundleContext;
+
+import com.openexchange.mail.MailInterfaceImpl;
+import com.openexchange.monitoring.MonitorAgent;
+import com.openexchange.server.osgiservice.BundleServiceTracker;
+import com.openexchange.tools.ajp13.AJPv13Server;
 
 /**
+ * {@link MonitorServiceTracker}
  * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public final class MonitoringInit implements Initialization {
+public final class MonitorServiceTracker extends BundleServiceTracker<MonitorAgent> {
 
-    private static final MonitoringInit singleton = new MonitoringInit();
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(MonitorServiceTracker.class);
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(MonitoringInit.class);
+	/**
+	 * Initializes a new {@link MonitorServiceTracker}
+	 * 
+	 * @param context
+	 *            The bundle context
+	 */
+	public MonitorServiceTracker(final BundleContext context) {
+		super(context, MonitorAgent.class);
+	}
 
-    /**
-     * Prevent instantiation.
-     */
-    private MonitoringInit() {
-        super();
-    }
-
-    /**
-     * @return the singleton instance.
-     */
-    public static MonitoringInit getInstance() {
-        return singleton;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void start() throws AbstractOXException {
-        final MonitorAgent agent = MonitorAgent.getInstance();
-        int jmxPort;
-        try {
-            jmxPort = ServerConfig.getInteger(Property.JMX_PORT);
-        } catch (final ConfigurationException e) {
-            LOG.error(e.getMessage(), e);
-            jmxPort = MonitorAgent.DEFAULT_PORT;
-        }
-        agent.setJmxPort(jmxPort);
-        agent.setJmxBindAddr(ServerConfig.getProperty(Property.JMX_BIND_ADDRESS));
-        agent.run();
-        if (LOG.isInfoEnabled()) {
-            LOG.info("JMX server successfully initialized.");
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void stop() throws AbstractOXException {
-        final MonitorAgent agent = MonitorAgent.getInstance();
-        agent.stop();
-    }
+	@Override
+	protected void addingServiceInternal(final MonitorAgent monitorAgent) {
+		try {
+			/*
+			 * Add all mbeans since monitoring service is now available
+			 */
+			monitorAgent.registerMBean(
+					getObjectName(AJPv13Server.ajpv13ServerThreadsMonitor.getClass().getName(), true),
+					AJPv13Server.ajpv13ServerThreadsMonitor);
+			monitorAgent.registerMBean(getObjectName(AJPv13Server.ajpv13ListenerMonitor.getClass().getName(), true),
+					AJPv13Server.ajpv13ListenerMonitor);
+			monitorAgent.registerMBean(getObjectName(MailInterfaceImpl.mailInterfaceMonitor.getClass().getName(), true),
+					MailInterfaceImpl.mailInterfaceMonitor);
+		} catch (MalformedObjectNameException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		} catch (NullPointerException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		} catch (Exception e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		}
+	}
 }
