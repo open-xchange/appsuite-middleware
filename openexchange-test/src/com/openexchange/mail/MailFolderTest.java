@@ -49,10 +49,10 @@
 
 package com.openexchange.mail;
 
-import com.openexchange.groupware.contexts.ContextImpl;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.sessiond.SessionObject;
-import com.openexchange.sessiond.SessionObjectWrapper;
+import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * {@link MailFolderTest}

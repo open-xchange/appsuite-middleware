@@ -5,7 +5,7 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.server.OCLPermission;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.webdav.xml.FolderTest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -50,7 +50,7 @@
 package com.openexchange.ajax.folder;
 
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.server.OCLPermission;
+import com.openexchange.server.impl.OCLPermission;
 
 /**
  * 

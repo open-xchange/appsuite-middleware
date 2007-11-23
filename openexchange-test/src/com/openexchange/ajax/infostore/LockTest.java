@@ -24,7 +24,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.server.OCLPermission;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.URLParameter;
 
 public class LockTest extends InfostoreAJAXTest {

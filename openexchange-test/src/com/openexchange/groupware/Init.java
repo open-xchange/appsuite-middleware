@@ -3,10 +3,11 @@ package com.openexchange.groupware;
 import com.openexchange.configuration.ConfigDB;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.DatabaseInit;
-import com.openexchange.groupware.contexts.ContextInit;
-import com.openexchange.server.Starter;
+import com.openexchange.groupware.contexts.impl.ContextInit;
+import com.openexchange.groupware.impl.GroupwareInit;
+import com.openexchange.server.impl.Starter;
 import com.openexchange.server.Initialization;
-import com.openexchange.sessiond.Sessiond;
+import com.openexchange.sessiond.impl.Sessiond;
 import com.openexchange.sessiond.SessiondConfigWrapper;
 import com.openexchange.sessiond.SessiondConnector;
 
@@ -196,7 +197,7 @@ public final class Init {
         /**
          * Starts the monitoring component.
          */
-        com.openexchange.monitoring.MonitoringInit.getInstance(),
+        com.openexchange.monitoring.internal.MonitoringInit.getInstance(),
         /**
          * Connection pools for ConfigDB and database assignments for contexts.
          * Needs configured JCS.

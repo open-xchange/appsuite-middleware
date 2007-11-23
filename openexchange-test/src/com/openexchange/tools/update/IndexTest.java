@@ -6,8 +6,8 @@ import java.util.List;
 
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.ContextStorage;
-import com.openexchange.server.DBPool;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.server.impl.DBPool;
 
 import junit.framework.TestCase;
 

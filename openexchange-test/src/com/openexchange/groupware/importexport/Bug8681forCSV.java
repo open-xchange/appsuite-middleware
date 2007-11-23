@@ -67,7 +67,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.importers.CSVContactImporter;
 import com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException;
 
 public class Bug8681forCSV extends AbstractContactTest {
 	

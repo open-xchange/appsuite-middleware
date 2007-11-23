@@ -3,12 +3,12 @@ package com.openexchange.groupware.update;
 import com.openexchange.database.Database;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.ContextStorage;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException;
 import junit.framework.TestCase;
 
 import java.sql.Connection;

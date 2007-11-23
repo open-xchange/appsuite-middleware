@@ -8,6 +8,9 @@ import junit.framework.TestCase;
 
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
+import com.openexchange.groupware.impl.LoginException;
+import com.openexchange.groupware.impl.PasswordExpiredException;
+import com.openexchange.sessiond.impl.SessionObject;
 
 public class SessiondTest extends TestCase {
 	

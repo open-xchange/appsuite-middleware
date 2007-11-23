@@ -75,7 +75,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException;
 
 
 public class ICalImportTest extends AbstractICalImportTest {

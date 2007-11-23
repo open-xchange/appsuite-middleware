@@ -8,6 +8,8 @@
 package com.openexchange.server;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.impl.DBPool;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -3,7 +3,8 @@ package com.openexchange.server;
 
 import com.openexchange.groupware.*;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.ContextImpl;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.server.impl.DBPool;
 
 import java.sql.Connection;
 import junit.framework.TestCase;

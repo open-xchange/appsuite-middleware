@@ -58,7 +58,7 @@ import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.server.OCLPermission;
+import com.openexchange.server.impl.OCLPermission;
 
 /**
  * 

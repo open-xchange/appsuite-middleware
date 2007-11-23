@@ -3,8 +3,8 @@ package com.openexchange.groupware.folder;
 import java.util.List;
 import java.util.Random;
 
-import com.openexchange.groupware.FolderTreeUtil;
-import com.openexchange.groupware.FolderTreeUtilImpl;
+import com.openexchange.groupware.impl.FolderTreeUtil;
+import com.openexchange.groupware.impl.FolderTreeUtilImpl;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tx.DBPoolProvider;
 

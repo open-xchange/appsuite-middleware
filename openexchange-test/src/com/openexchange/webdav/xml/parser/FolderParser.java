@@ -47,7 +47,7 @@ package com.openexchange.webdav.xml.parser;
 
 import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.server.OCLPermission;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.FolderFields;

@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import com.openexchange.groupware.FolderLock;
-import com.openexchange.groupware.FolderLockManager;
-import com.openexchange.groupware.FolderLockManagerImpl;
+import com.openexchange.groupware.impl.FolderLock;
+import com.openexchange.groupware.impl.FolderLockManager;
+import com.openexchange.groupware.impl.FolderLockManagerImpl;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.webdav.Lock;

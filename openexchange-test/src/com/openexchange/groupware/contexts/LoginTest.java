@@ -41,6 +41,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.contexts.impl.LoginInfo;
 
 import junit.framework.TestCase;
 

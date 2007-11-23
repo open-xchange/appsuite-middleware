@@ -63,7 +63,7 @@ import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException;
 
 public class Bug8654 extends AbstractICalImportTest {
 	

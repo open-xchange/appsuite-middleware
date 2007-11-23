@@ -9,10 +9,10 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.server.DBPoolingException;
-import com.openexchange.sessiond.SessionHolder;
-import com.openexchange.sessiond.SessionObject;
-import com.openexchange.sessiond.SessionObjectWrapper;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 public class DummySessionHolder implements SessionHolder{
 

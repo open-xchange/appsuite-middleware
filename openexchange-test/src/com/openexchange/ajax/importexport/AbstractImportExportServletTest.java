@@ -67,7 +67,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.CSVContactImportTest;
 import com.openexchange.groupware.importexport.Format;
-import com.openexchange.server.OCLPermission;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.webdav.xml.FolderTest;
 

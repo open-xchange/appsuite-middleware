@@ -2,11 +2,11 @@ package com.openexchange.webdav.protocol;
 
 
 import com.openexchange.configuration.SystemConfig;
-import com.openexchange.groupware.FolderLockManagerImpl;
+import com.openexchange.groupware.impl.FolderLockManagerImpl;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.ContextImpl;
-import com.openexchange.groupware.contexts.ContextStorage;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;

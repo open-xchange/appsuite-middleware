@@ -2,7 +2,7 @@ package com.openexchange.webdav.xml.task;
 
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.server.OCLPermission;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.TaskTest;
 import com.openexchange.webdav.xml.FolderTest;

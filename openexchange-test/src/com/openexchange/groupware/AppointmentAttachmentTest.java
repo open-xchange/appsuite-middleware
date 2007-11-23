@@ -7,7 +7,7 @@
 
 package com.openexchange.groupware;
 
-import com.openexchange.server.DBPool;
+import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 import java.sql.Connection;
 import junit.framework.TestCase;
@@ -16,8 +16,8 @@ import com.openexchange.event.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.sessiond.SessionObject;
-import com.openexchange.sessiond.SessionObjectWrapper;
+import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  *

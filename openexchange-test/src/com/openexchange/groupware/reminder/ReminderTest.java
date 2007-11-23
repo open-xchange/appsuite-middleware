@@ -2,11 +2,11 @@ package com.openexchange.groupware.reminder;
 
 
 import com.openexchange.api2.ReminderSQLInterface;
-import com.openexchange.groupware.IDGenerator;
+import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.Types;
-import com.openexchange.sessiond.SessionObject;
-import com.openexchange.sessiond.SessiondConnector;
+import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.impl.SessiondConnector;
 import com.openexchange.tools.iterator.SearchIterator;
 import java.util.Date;
 import java.util.Properties;
