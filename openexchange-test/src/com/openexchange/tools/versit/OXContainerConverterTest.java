@@ -60,6 +60,7 @@ import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
@@ -208,7 +209,8 @@ public class OXContainerConverterTest extends TestCase {
 
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance();
-		final int uid = uStorage.getUserId(Init.getAJAXProperty("user_participant1"), new ContextImpl(1));
-		return uStorage.getUser(uid);
+		final Context ctx = new ContextImpl(1);
+		final int uid = uStorage.getUserId(Init.getAJAXProperty("user_participant1"), ctx);
+		return uStorage.getUser(uid, ctx);
 	}
 }

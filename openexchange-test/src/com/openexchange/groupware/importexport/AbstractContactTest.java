@@ -527,7 +527,8 @@ public class AbstractContactTest {
 		Init.startServer();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance();
-		final int uid = uStorage.getUserId(Init.getAJAXProperty("user_participant1"), new ContextImpl(1));
-		return uStorage.getUser(uid);
+		final Context ctx = new ContextImpl(1);
+		final int uid = uStorage.getUserId(Init.getAJAXProperty("user_participant1"), ctx);
+		return uStorage.getUser(uid, ctx);
 	}
 }
