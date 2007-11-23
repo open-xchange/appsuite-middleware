@@ -33,7 +33,7 @@
     <property name="bundlesdir" value="${destdir}${prefix}/bundles"/>
 	<property name="project.name" value="${Bundle-SymbolicName}" />
 	<property name="version" value="${Bundle-Version}"/>
-	<property name="composite.name" value="${project.name}_${version}" />
+	<property name="composite.name" value="open-xchange-${version}" />
 		
     <!-- Replacements -->
     <property name="lib.install.dir" value="${prefix}/lib"/>
@@ -106,7 +106,7 @@
     </path>
 
     <!-- JARs for running server -->
-    <property name="serverJar" value="${composite.name}.jar"/>
+    <property name="serverJar" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
     <fileset dir="${tmp.dir}" id="server-jars">
         <include name="${serverJar}"/>
         <!-- TODO -->
@@ -139,7 +139,7 @@
     </target>
 
     <target name="jar" depends="compile">
-        <jar jarfile="${tmp.dir}/${composite.name}.jar"
+        <jar jarfile="${tmp.dir}/${serverJar}"
             manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
         </jar>
