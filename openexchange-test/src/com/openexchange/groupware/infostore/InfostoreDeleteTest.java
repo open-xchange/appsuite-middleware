@@ -28,7 +28,7 @@ public class InfostoreDeleteTest extends TestCase {
 	public void setUp() throws Exception {
 		Init.startServer();
 		Context ctx = ContextStorage.getInstance().getContext(1);
-		session = SessionObjectWrapper.createSessionObject(UserStorage.getInstance(ctx).getUserId("francisco"), ctx, "Blubb");
+		session = SessionObjectWrapper.createSessionObject(UserStorage.getInstance().getUserId("francisco", ctx), ctx, "Blubb");
 		database = new InfostoreFacadeImpl(provider);
 		database.setTransactional(true);
 		

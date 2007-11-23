@@ -34,7 +34,7 @@ public abstract class AbstractAttachmentActionTest extends AbstractActionTest {
 		provider = new DBPoolProvider();
 		queryCatalog = new AttachmentQueryCatalog();
 		ctx = ContextStorage.getInstance().getContext(1);
-		user = UserStorage.getInstance(ctx).getUser(UserStorage.getInstance(ctx).getUserId("francisco"));
+		user = UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId("francisco", ctx));
 		attachmentBase = new AttachmentBaseImpl(provider);
 		
 		initAttachments();

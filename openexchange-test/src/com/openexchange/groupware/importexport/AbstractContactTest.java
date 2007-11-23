@@ -429,8 +429,8 @@ public class AbstractContactTest {
 	public static void initialize() throws SQLException, AbstractOXException {
 		Init.startServer();
 		ContextStorage.init();
-		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
-	    userId = uStorage.getUserId( Init.getAJAXProperty("login") );
+		final UserStorage uStorage = UserStorage.getInstance();
+	    userId = uStorage.getUserId(Init.getAJAXProperty("login"), new ContextImpl(1));
 	    sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-tests");
 		userId = sessObj.getUserObject().getId();
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj, "csvContactTestFolder");
@@ -526,8 +526,8 @@ public class AbstractContactTest {
 	public static User getUserParticipant() throws AbstractOXException{
 		Init.startServer();
 		ContextStorage.init();
-		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
-		final int uid = uStorage.getUserId( Init.getAJAXProperty("user_participant1") );
+		final UserStorage uStorage = UserStorage.getInstance();
+		final int uid = uStorage.getUserId(Init.getAJAXProperty("user_participant1"), new ContextImpl(1));
 		return uStorage.getUser(uid);
 	}
 }

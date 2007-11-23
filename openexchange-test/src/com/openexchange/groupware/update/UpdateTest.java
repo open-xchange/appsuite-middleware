@@ -34,7 +34,7 @@ public class UpdateTest extends TestCase {
         schema = SchemaStore.getInstance(SchemaStoreImpl.class.getName()).getSchema(existing_ctx_id);
      
         user_id = ctx.getMailadmin();
-        user = UserStorage.getInstance(ctx).getUser(user_id);
+        user = UserStorage.getInstance().getUser(user_id, ctx);
     }
 
     public void tearDown() throws Exception {

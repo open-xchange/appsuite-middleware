@@ -79,8 +79,8 @@ public class AbstractVCardTest extends AbstractContactTest {
 	public static void initialize() throws SQLException, AbstractOXException {
 		Init.startServer();
 		ContextStorage.init();
-		final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
-	    userId = uStorage.getUserId( Init.getAJAXProperty("login") );
+		final UserStorage uStorage = UserStorage.getInstance();
+	    userId = uStorage.getUserId(Init.getAJAXProperty("login"), new ContextImpl(1));
 	    sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "vcard-tests");
 		userId = sessObj.getUserObject().getId();
 	}

@@ -96,8 +96,8 @@ public class CalendarDeleteTest extends TestCase {
     }      
     
     private int resolveUser(String user) throws Exception {
-        UserStorage uStorage = UserStorage.getInstance(context);
-        return uStorage.getUserId(user);
+        UserStorage uStorage = UserStorage.getInstance();
+        return uStorage.getUserId(user, context);
     }    
     
     protected void tearDown() throws Exception {

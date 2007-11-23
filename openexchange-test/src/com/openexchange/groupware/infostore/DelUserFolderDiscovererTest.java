@@ -51,11 +51,11 @@ public class DelUserFolderDiscovererTest extends TestCase{
 		String userNameA = Init.getAJAXProperty("login");
 		String userNameB = Init.getAJAXProperty("seconduser");
 		
-		userIdA = UserStorage.getInstance(ctx).getUserId(userNameA);
-		userIdB = UserStorage.getInstance(ctx).getUserId(userNameB);
+		userIdA = UserStorage.getInstance().getUserId(userNameA, ctx);
+		userIdB = UserStorage.getInstance().getUserId(userNameB, ctx);
 		
-		userA = UserStorage.getInstance(ctx).getUser(userIdA);
-		userB = UserStorage.getInstance(ctx).getUser(userIdB);
+		userA = UserStorage.getInstance().getUser(userIdA, ctx);
+		userB = UserStorage.getInstance().getUser(userIdB, ctx);
 		
 		userConfigA = RdbUserConfigurationStorage.loadUserConfiguration(userIdA, ctx);
 		userConfigB = RdbUserConfigurationStorage.loadUserConfiguration(userIdB, ctx);

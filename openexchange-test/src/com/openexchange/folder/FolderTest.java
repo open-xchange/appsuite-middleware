@@ -50,8 +50,8 @@ public class FolderTest extends TestCase {
 		try {
 			int pos = -1;
 			user = (pos = user.indexOf('@')) > -1 ? user.substring(0, pos) : user; 
-	        final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(CONTEXT_ID));
-	        return uStorage.getUserId(user);
+	        final UserStorage uStorage = UserStorage.getInstance();
+	        return uStorage.getUserId(user, new ContextImpl(CONTEXT_ID));
 		} catch (Throwable t) {
 			t.printStackTrace();
 			System.exit(1);

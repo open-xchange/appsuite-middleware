@@ -599,8 +599,8 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 
 		public User getUser() {
 			try {
-				UserStorage users = UserStorage.getInstance(getContext());
-				int id = users.getUserId("francisco");
+				UserStorage users = UserStorage.getInstance();
+				int id = users.getUserId("francisco", getContext());
 				return users.getUser(id);
 			} catch (Exception e) {
 				throw new RuntimeException(e);

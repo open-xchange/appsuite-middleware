@@ -39,7 +39,7 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 		provider = new DBPoolProvider();
 		queryCatalog = new InfostoreQueryCatalog();
 		ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
-		user = UserStorage.getInstance(ctx).getUser(UserStorage.getInstance(ctx).getUserId("francisco"));
+		user = UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId("francisco", ctx), ctx);
 		
 		initDocMeta();
 	}

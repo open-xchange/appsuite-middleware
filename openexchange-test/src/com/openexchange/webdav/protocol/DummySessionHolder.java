@@ -19,7 +19,7 @@ public class DummySessionHolder implements SessionHolder{
 	private SessionObject session = null;
 	
 	public DummySessionHolder(String username, Context ctx) throws LdapException, SQLException, DBPoolingException, OXException {
-		session =  SessionObjectWrapper.createSessionObject(UserStorage.getInstance(ctx).getUserId(username)  , ctx,"12345");
+		session =  SessionObjectWrapper.createSessionObject(UserStorage.getInstance().getUserId(username, ctx)  , ctx,"12345");
 	}
 	
 	public SessionObject getSessionObject() {

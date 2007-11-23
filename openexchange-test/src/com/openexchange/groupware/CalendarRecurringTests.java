@@ -71,8 +71,8 @@ public class CalendarRecurringTests extends TestCase {
     }
     
     private static int resolveUser(String u) throws Exception {
-        UserStorage uStorage = UserStorage.getInstance(getContext());
-        return uStorage.getUserId(u);
+        UserStorage uStorage = UserStorage.getInstance();
+        return uStorage.getUserId(u, getContext());
     }
     
     public static int getUserId() throws Exception {

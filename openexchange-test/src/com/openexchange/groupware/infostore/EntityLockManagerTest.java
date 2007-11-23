@@ -34,7 +34,7 @@ public class EntityLockManagerTest extends TestCase {
 	public void setUp() throws Exception {
         super.setUp();
 		Init.startServer();
-		user = UserStorage.getInstance(ctx).getUser(UserStorage.getInstance(ctx).getUserId(getUsername())); //FIXME
+		user = UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId(getUsername(), ctx), ctx); //FIXME
 		lockManager = new EntityLockManagerImpl(new DBPoolProvider(), "infostore_lock");
 		lockManager.startTransaction();
 		

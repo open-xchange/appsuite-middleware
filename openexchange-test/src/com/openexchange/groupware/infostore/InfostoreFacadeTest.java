@@ -60,8 +60,8 @@ public class InfostoreFacadeTest extends TestCase {
 		final ContextStorage ctxstor = ContextStorage.getInstance();
         final int contextId = ctxstor.getContextId("defaultcontext");
         ctx = ctxstor.getContext(contextId);
-		user = UserStorage.getInstance(ctx).getUser(UserStorage.getInstance(ctx).getUserId("thorben")); //FIXME
-		user2 = UserStorage.getInstance(ctx).getUser(UserStorage.getInstance(ctx).getUserId("francisco")); //FIXME
+		user = UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId("thorben", ctx), ctx); //FIXME
+		user2 = UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId("francisco", ctx), ctx); //FIXME
 		
 		
 		session = SessionObjectWrapper.createSessionObject(user.getId(), ctx, "blupp");

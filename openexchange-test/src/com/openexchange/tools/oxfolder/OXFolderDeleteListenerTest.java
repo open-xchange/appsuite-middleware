@@ -40,8 +40,8 @@ public class OXFolderDeleteListenerTest extends TestCase {
 		Init.startServer();
 		ContextStorage.init();
 		Context ctx = ContextStorage.getInstance().getContext(1);
-		userWhichWillBeDeletedId = UserStorage.getInstance(ctx).getUserId("francisco");
-		userWhichWillRemainId = UserStorage.getInstance(ctx).getUserId("thorben");
+		userWhichWillBeDeletedId = UserStorage.getInstance().getUserId("francisco", ctx);
+		userWhichWillRemainId = UserStorage.getInstance().getUserId("thorben", ctx);
 		contextAdminId = ctx.getMailadmin(); // TODO
 		
 		session = SessionObjectWrapper.createSessionObject(userWhichWillBeDeletedId, ctx, "Blubb");

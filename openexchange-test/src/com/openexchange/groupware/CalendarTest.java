@@ -88,8 +88,8 @@ public class CalendarTest extends TestCase {
     }        
     
     private static int resolveUser(String user) throws Exception {
-        UserStorage uStorage = UserStorage.getInstance(getContext());
-        return uStorage.getUserId(user);
+        UserStorage uStorage = UserStorage.getInstance();
+        return uStorage.getUserId(user, getContext());
     }
     
     public static void dontDelete() {

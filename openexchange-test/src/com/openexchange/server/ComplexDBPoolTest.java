@@ -40,8 +40,8 @@ public class ComplexDBPoolTest extends TestCase {
     }    
     
     private int resolveUser(String user) throws Exception {
-        UserStorage uStorage = UserStorage.getInstance(new ContextImpl(contextid));
-        userid = uStorage.getUserId(user);
+        UserStorage uStorage = UserStorage.getInstance();
+        userid = uStorage.getUserId(user, new ContextImpl(contextid));
         return userid;
     }
     

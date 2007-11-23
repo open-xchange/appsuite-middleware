@@ -37,7 +37,7 @@ public class FolderTestCase extends TestCase {
 	public void setUp() throws Exception {
 		Init.startServer();
 		
-		session = SessionObjectWrapper.createSessionObject(UserStorage.getInstance(ctx).getUserId(getUsername()), ctx, getClass().getName());
+		session = SessionObjectWrapper.createSessionObject(UserStorage.getInstance().getUserId(getUsername(), ctx), ctx, getClass().getName());
 		user = session.getUserObject();
 		userConfig = session.getUserConfiguration();
 	}

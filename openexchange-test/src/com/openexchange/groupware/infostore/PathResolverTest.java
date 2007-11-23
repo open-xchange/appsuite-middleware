@@ -58,7 +58,7 @@ public class PathResolverTest extends TestCase {
 		database.setTransactional(true);
 		ctx = getContext();
 		
-		session = SessionObjectWrapper.createSessionObject(UserStorage.getInstance(ctx).getUserId(getUsername()), ctx, "gnitzelgnatzel");
+		session = SessionObjectWrapper.createSessionObject(UserStorage.getInstance().getUserId(getUsername(), ctx), ctx, "gnitzelgnatzel");
 		user = session.getUserObject();
 		userConfig = session.getUserConfiguration();
 		
