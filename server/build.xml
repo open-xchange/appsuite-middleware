@@ -33,7 +33,7 @@
     <property name="bundlesdir" value="${destdir}${prefix}/bundles"/>
 	<property name="project.name" value="${Bundle-SymbolicName}" />
 	<property name="version" value="${Bundle-Version}"/>
-	<property name="composite.name" value="open-xchange-${version}" />
+	<property name="composite.name" value="open-xchange-server-${version}" />
 		
     <!-- Replacements -->
     <property name="lib.install.dir" value="${prefix}/lib"/>
