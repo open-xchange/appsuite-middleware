@@ -96,9 +96,9 @@ public class MailException extends AbstractOXException {
 		UNREADBALE_PART_CONTENT("A part's content could not be read from message %s in mail folder %s",
 				Category.INTERNAL_ERROR, 7),
 		/**
-		 * An I/O error occured %s
+		 * An I/O error occurred %s
 		 */
-		IO_ERROR("An I/O error occured %s", Category.CODE_ERROR, 8),
+		IO_ERROR("An I/O error occurred %s", Category.CODE_ERROR, 8),
 		/**
 		 * Invalid message path: %s
 		 */
