@@ -16,9 +16,7 @@
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
-	
-	
-	
+
     <!-- JAR names for classpath -->
     <property name="commonBundle" value="com.openexchange.common"/>
 	<property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
@@ -31,6 +29,8 @@
 		<pathelement location="${bundlesdir}/${osgijar}"/>
 		<pathelement location="${bundlesdir}/${commonBundle}/lib/${jcsjar}"/>
     </path>
+
+    <property name="globalJar" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
 
     <!-- Compile -->
     <target name="prepare">
@@ -46,7 +46,7 @@
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/${Bundle-SymbolicName}_${Bundle-Version}.jar"
+        <jar jarfile="${tmp.dir}/${globalJar}"
             manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
         </jar>
@@ -57,7 +57,7 @@
         <mkdir dir="${destdir}/${bundlesdir}"/>
         <copy todir="${destdir}/${bundlesdir}">
             <fileset dir="${tmp.dir}">
-                <include name="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
+                <include name="${globalJar}"/>
             </fileset>
         </copy>
     </target>
