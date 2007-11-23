@@ -52,6 +52,9 @@ package com.openexchange.groupware.ldap;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UnixCrypt;
 
@@ -62,8 +65,7 @@ import com.openexchange.groupware.ldap.UnixCrypt;
  */
 public abstract class UserStorage {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(UserStorage.class);
+	private static final Log LOG = LogFactory.getLog(UserStorage.class);
 
     /**
      * Attribute name of alias.
