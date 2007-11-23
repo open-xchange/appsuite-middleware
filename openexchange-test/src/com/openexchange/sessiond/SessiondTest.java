@@ -1,16 +1,17 @@
 package com.openexchange.sessiond;
 
 import java.io.FileInputStream;
-import java.util.Iterator;
 import java.util.Properties;
 
 import junit.framework.TestCase;
 
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
-import com.openexchange.groupware.impl.LoginException;
-import com.openexchange.groupware.impl.PasswordExpiredException;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.server.services.SessiondService;
+import com.openexchange.session.Session;
 
 public class SessiondTest extends TestCase {
 	
@@ -21,6 +22,8 @@ public class SessiondTest extends TestCase {
 	protected static String testUser2 = "test02";
 	
 	protected static String testUser3 = "test03";
+	
+	protected static String defaultContext = "defaultcontext";
 	
 	protected static String notExistingUser = "notexistinguser";
 	
@@ -61,6 +64,8 @@ public class SessiondTest extends TestCase {
 		testUser2 = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.testUser2", testUser2);
 		testUser3 = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.testUser3", testUser3);
 
+		defaultContext = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.defaultContext", defaultContext);
+		
 		notExistingUser = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.notExistingUser", notExistingUser);
 		notActiveUser = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.notActiveUser", notActiveUser);
 		passwordExpiredUser = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.passwordExpiredUser", passwordExpiredUser);
@@ -81,107 +86,43 @@ public class SessiondTest extends TestCase {
         super.tearDown();
     }
 
+    public void testDummy() {
+    	
+    }
+
     public void testAddSession() throws Exception {
-		SessiondConnector sc = SessiondConnector.getInstance();
-		sc.addSession(testUser1, password, "localhost");
+    	final int contextId = ContextStorage.getInstance().getContextId(defaultContext);
+    	final Context context = ContextStorage.getInstance().getContext(contextId);
+    	final int userId = UserStorage.getInstance().getUserId(testUser1, context);
+		final SessiondConnectorInterface sessiondCon = SessiondService.getInstance().getService();
+		sessiondCon.addSession(userId, testUser1, "secret", context, "localhost");
 	}
 	
 	public void testRefreshSession() throws Exception {
-		SessiondConnector sc = SessiondConnector.getInstance();
-		SessionObject sessionObj = sc.addSession(testUser1, password, "localhost");
-		sc.refreshSession(sessionObj.getSessionID());
+    	final int contextId = ContextStorage.getInstance().getContextId(defaultContext);
+    	final Context context = ContextStorage.getInstance().getContext(contextId);
+    	final int userId = UserStorage.getInstance().getUserId(testUser1, context);
+		final SessiondConnectorInterface sessiondCon = SessiondService.getInstance().getService();
+		final String sessionId = sessiondCon.addSession(userId, testUser1, "secret", context, "localhost");
+		sessiondCon.refreshSession(sessionId);
 	}
 	
 	public void testDeleteSession() throws Exception {
-		SessiondConnector sc = SessiondConnector.getInstance();
-		SessionObject sessionObj = sc.addSession(testUser1, password, "localhost");
-		sc.removeSession(sessionObj.getSessionID());
+    	final int contextId = ContextStorage.getInstance().getContextId(defaultContext);
+    	final Context context = ContextStorage.getInstance().getContext(contextId);
+    	final int userId = UserStorage.getInstance().getUserId(testUser1, context);
+		final SessiondConnectorInterface sessiondCon = SessiondService.getInstance().getService();
+		final String sessionId = sessiondCon.addSession(userId, testUser1, "secret", context, "localhost");
+		sessiondCon.removeSession(sessionId);
 	}
 	
 	public void testGetSession() throws Exception {
-		SessiondConnector sc = SessiondConnector.getInstance();
-		SessionObject sessionObj = sc.addSession(testUser1, password, "localhost");
-		SessionObject sessionObjectFromSessiond = sc.getSession(sessionObj.getSessionID());
-	}
-	
-	public void testGetSessions() throws Exception {
-		SessiondConnector sc = SessiondConnector.getInstance();
-		sc.addSession(testUser1, password, "localhost");
-		sc.addSession(testUser2, password, "localhost");
-		sc.addSession(testUser3, password, "localhost");
-		
-		int counter = 0;
-		
-		Iterator it = sc.getSessions();
-		while (it.hasNext()) {
-			it.next();
-			counter++;
-		}
-
-		assertTrue("min 3 exiting sessions!", counter >= 2);
-	}
-
-	public void testInvalidCredentials() throws Exception {
-		SessiondConnector sc = SessiondConnector.getInstance();
-		try {
-			sc.addSession(testUser1, invalidPassword, "localhost");
-		} catch (LoginException ex) {
-			if (ex.getDetailNumber() == LoginException.Code.INVALID_CREDENTIALS.getNumber()) {
-				return ;
-			}
-		}
-		
-		fail("Invalid Credentials Error expected!");
-	}
-
-	public void testUserNotFound() throws Exception {
-		SessiondConnector sc = SessiondConnector.getInstance();
-		try {
-			sc.addSession(notExistingUser, password, "localhost");
-		} catch (LoginException ex) {
-			if (ex.getDetailNumber() == LoginException.Code.INVALID_CREDENTIALS.getNumber()) {
-				return ;
-			}
-		}
-		
-		fail("User Not Found Error expected!");
-	}
-	
-	public void testSessionNotFound() throws Exception {
-		SessiondConnector sc = SessiondConnector.getInstance();
-		assertFalse("this sessionid should fail", sc.refreshSession("1"));
-	}
-	
-	public void testUserNotActivated() throws Exception {
-		SessiondConnector sc = SessiondConnector.getInstance();
-		try {
-			sc.addSession(notActiveUser, password, "localhost");
-		} catch (UserNotActivatedException ex) {
-			return;
-		}
-		fail("UserNotActivatedException expected!");
-	}
-	
-	public void testPasswordExpired() throws Exception {
-		SessiondConnector sc = SessiondConnector.getInstance();
-		try {
-			sc.addSession(passwordExpiredUser, password, "localhost");
-		} catch (PasswordExpiredException ex) {
-			return;
-		}
-		fail("PasswordExpiredException expected!!");
-	}
-	
-	public void testContextNotFound() throws Exception {
-		SessiondConnector sc = SessiondConnector.getInstance();
-		try {
-			sc.addSession(userWithoutContext, password, "localhost");
-		} catch (LoginException ex) {
-			if (ex.getDetailNumber() == LoginException.Code.INVALID_CREDENTIALS.getNumber()) {
-				return;
-			}
-		}
-		
-		fail("Context Not Found Error expected!");
+    	final int contextId = ContextStorage.getInstance().getContextId(defaultContext);
+    	final Context context = ContextStorage.getInstance().getContext(contextId);
+    	final int userId = UserStorage.getInstance().getUserId(testUser1, context);
+		final SessiondConnectorInterface sessiondCon = SessiondService.getInstance().getService();
+		final String sessionId = sessiondCon.addSession(userId, testUser1, "secret", context, "localhost");
+		sessiondCon.refreshSession(sessionId);
+		final Session session = sessiondCon.getSession(sessionId);
 	}
 }
