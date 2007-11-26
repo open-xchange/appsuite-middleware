@@ -49,7 +49,7 @@ public class OXFolderDeleteListenerTest extends TestCase {
 		oxfa = new OXFolderAccess(ctx);
 		oxma = new OXFolderManagerImpl(session);
 		
-		myInfostoreFolder = oxfa.getDefaultFolder(session.getUserObject().getId(), FolderObject.INFOSTORE).getObjectID();
+		myInfostoreFolder = oxfa.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE).getObjectID();
 	}
 	
 	public void tearDown() throws Exception {

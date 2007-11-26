@@ -113,7 +113,7 @@ public class CalendarDeleteTest extends TestCase {
         Connection writecon = DBPool.pickupWriteable(context);
         SessionObject so = SessionObjectWrapper.createSessionObject(deleteuserid, context.getContextId(), "deleteAllUserApps");
         
-        DeleteEvent delEvent = new DeleteEvent(this, so.getUserObject().getId(), DeleteEvent.TYPE_USER, so.getContext());
+        DeleteEvent delEvent = new DeleteEvent(this, so.getUserId(), DeleteEvent.TYPE_USER, so.getContext());
 
         CalendarAdministration ca = new CalendarAdministration();
         ca.deletePerformed(delEvent, readcon, writecon);

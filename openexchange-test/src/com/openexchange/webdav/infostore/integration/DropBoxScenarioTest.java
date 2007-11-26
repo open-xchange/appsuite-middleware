@@ -1,16 +1,5 @@
 package com.openexchange.webdav.infostore.integration;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
-import junit.framework.TestCase;
-
-import org.junit.Test;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -19,7 +8,7 @@ import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
@@ -27,6 +16,15 @@ import com.openexchange.webdav.protocol.DummySessionHolder;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavResource;
+import junit.framework.TestCase;
+import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 // Bug #9109
 public class DropBoxScenarioTest extends TestCase{
@@ -130,11 +128,11 @@ public class DropBoxScenarioTest extends TestCase{
 	}
 	
 	private void createDropBox() throws OXException, WebdavException{
-		SessionObject session = factory.getSessionHolder().getSessionObject();
+		Session session = factory.getSessionHolder().getSessionObject();
 		OXFolderManager mgr = new OXFolderManagerImpl(session);
 		OXFolderAccess acc = new OXFolderAccess(session.getContext());
 		
-		FolderObject fo = acc.getDefaultFolder(session.getUserObject().getId(), FolderObject.INFOSTORE);
+		FolderObject fo = acc.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE);
 		
 		FolderObject newFolder = new FolderObject();
 		newFolder.setFolderName("Drop Box");
@@ -146,7 +144,7 @@ public class DropBoxScenarioTest extends TestCase{
 		
 		// User is Admin and can read, write or delete everything
 		OCLPermission perm = new OCLPermission();
-		perm.setEntity(session.getUserObject().getId());
+		perm.setEntity(session.getUserId());
 		perm.setFolderAdmin(true);
 		perm.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
 		perm.setReadObjectPermission(OCLPermission.READ_ALL_OBJECTS);

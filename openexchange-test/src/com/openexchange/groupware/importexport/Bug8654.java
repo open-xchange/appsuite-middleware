@@ -49,21 +49,22 @@
 
 package com.openexchange.groupware.importexport;
 
-import static org.junit.Assert.*;
-
-import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
-
-import junit.framework.JUnit4TestAdapter;
-
-import org.junit.Test;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.impl.DBPoolingException;
+import junit.framework.JUnit4TestAdapter;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
 
 public class Bug8654 extends AbstractICalImportTest {
 	
@@ -72,7 +73,7 @@ public class Bug8654 extends AbstractICalImportTest {
 		return new JUnit4TestAdapter(Bug8654.class);
 	}
 	
-	@Test public void bug() throws DBPoolingException, UnsupportedEncodingException, SQLException, NumberFormatException, OXException{
+	@Test public void bug() throws DBPoolingException, UnsupportedEncodingException, SQLException, NumberFormatException, OXException, ContextException, LdapException {
 		final String ical = 
 			"BEGIN:VCALENDAR\n" +
 			"VERSION:2.0\n" +
@@ -109,8 +110,8 @@ public class Bug8654 extends AbstractICalImportTest {
 				"DESCRIPTION:Test\\, ob die Aufgaben auch ankommen.\n" +
 			"END:VTODO\n" +
 			"END:VCALENDAR";
-		
-		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8654", false);
+
+		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8654", ctx, false);
 		
 		final TasksSQLInterface tasks = new TasksSQLInterfaceImpl(sessObj);
 		Task task = tasks.getTaskById(Integer.valueOf( res.getObjectId()), Integer.valueOf(res.getFolder()) );

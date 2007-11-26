@@ -1,19 +1,13 @@
 package com.openexchange.groupware.folder;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
-import junit.framework.TestCase;
-
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
@@ -22,6 +16,12 @@ import com.openexchange.tools.oxfolder.OXFolderLogicException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
+import junit.framework.TestCase;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FolderTestCase extends TestCase {
 	
@@ -36,10 +36,13 @@ public class FolderTestCase extends TestCase {
 	
 	public void setUp() throws Exception {
 		Init.startServer();
-		
-		session = SessionObjectWrapper.createSessionObject(UserStorage.getInstance().getUserId(getUsername(), ctx), ctx, getClass().getName());
-		user = session.getUserObject();
-		userConfig = session.getUserConfiguration();
+
+        UserStorage userStorage = UserStorage.getInstance();
+        UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
+
+        session = SessionObjectWrapper.createSessionObject(userStorage.getUserId(getUsername(), ctx), ctx, getClass().getName());
+		user = userStorage.getUser(session.getUserId(), ctx);
+		userConfig = userConfigStorage.getUserConfiguration(session.getUserId(),ctx);
 	}
 	
 	private String getUsername() {

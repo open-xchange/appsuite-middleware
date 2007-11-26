@@ -46,6 +46,7 @@ import com.openexchange.i18n.StringTemplate;
 import com.openexchange.i18n.TemplateListResourceBundle;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.session.Session;
 
 public class ParticipantNotifyTest extends TestCase{
 	
@@ -353,7 +354,7 @@ public class ParticipantNotifyTest extends TestCase{
 		task.setStartDate(start);
 		task.setEndDate(end);
 		task.setTitle("TestSimple");
-		task.setCreatedBy(session.getUserObject().getId());
+		task.setCreatedBy(session.getUserId());
 		task.setNotification(true);
 		//task.setModifiedBy(session.getUserObject().getId());
 		
@@ -461,7 +462,7 @@ public class ParticipantNotifyTest extends TestCase{
 		session = new SessionObject("my_fake_sessionid");
 		
 		session.setContext(new ContextImpl(1));
-		session.setUserObject(new MockUserLookup().getUser(1)); 
+		session.setUserlogin("1");  // getUserId parses this string. 
 		//session.setUserConfiguration(new UserConfigurationFactory().getConfiguration(1));
 	}
 	
@@ -570,10 +571,11 @@ public class ParticipantNotifyTest extends TestCase{
 		}
 
 		@Override
-		protected void sendMessage(String messageTitle, String message, List<String> name, SessionObject session, CalendarObject obj, int folderId, State state, boolean suppressOXReminderHeader) {
+		protected void sendMessage(final String messageTitle, final String message, final List<String> name, final Session session, final CalendarObject obj, int folderId, final State state, final boolean suppressOXReminderHeader) {
 			messageCollector.add(new Message(messageTitle,message,name, folderId));
-		}		
-	}
+		}
+
+    }
 
 	private static final class TestLinkableState extends LinkableState {
 

@@ -65,6 +65,7 @@ import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.impl.DBPoolingException;
 
 public class Bug7732Test extends AbstractICalImportTest {
@@ -74,7 +75,7 @@ public class Bug7732Test extends AbstractICalImportTest {
 	}
 	
 	
-	@Test public void test7732() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException{
+	@Test public void test7732() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
 		int count = 10;
 		String ical = 
 			"BEGIN:VCALENDAR\n" +
@@ -99,7 +100,7 @@ public class Bug7732Test extends AbstractICalImportTest {
 				"END:VEVENT\n" +
 			"END:VCALENDAR";
 
-		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7732", false);
+		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7732", ctx, false);
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 		final AppointmentObject appointmentObj = appointmentSql.getObjectById(Integer.parseInt( res.getObjectId() ), folderId);
 		assertEquals(count + " occurences found?" , count , appointmentObj.getOccurrence());
@@ -119,7 +120,7 @@ public class Bug7732Test extends AbstractICalImportTest {
 			"UID:RExample01\n"+
 			"END:VEVENT\n"+
 			"END:VCALENDAR";
-		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7732-b", true);
+		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "7732-b", ctx, true);
 		assertTrue(res.hasError());
 		OXException x = res.getException();
 		x.printStackTrace();

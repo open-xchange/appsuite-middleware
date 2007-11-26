@@ -1,14 +1,7 @@
 package com.openexchange.groupware.infostore;
 
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.List;
-
-import junit.framework.TestCase;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -18,13 +11,19 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
+import junit.framework.TestCase;
+
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
 
 public class InfostoreFacadeTest extends TestCase {
 	
@@ -58,6 +57,8 @@ public class InfostoreFacadeTest extends TestCase {
 		ContextStorage.init();
 		
 		final ContextStorage ctxstor = ContextStorage.getInstance();
+        final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
+
         final int contextId = ctxstor.getContextId("defaultcontext");
         ctx = ctxstor.getContext(contextId);
 		user = UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId("thorben", ctx), ctx); //FIXME
@@ -67,8 +68,8 @@ public class InfostoreFacadeTest extends TestCase {
 		session = SessionObjectWrapper.createSessionObject(user.getId(), ctx, "blupp");
 		session2 = SessionObjectWrapper.createSessionObject(user2.getId(), ctx, "blupp2");
 		
-		userConfig = session.getUserConfiguration();
-		userConfig2 = session2.getUserConfiguration();
+		userConfig = userConfigStorage.getUserConfiguration(session.getUserId(), ctx);
+		userConfig2 =  userConfigStorage.getUserConfiguration(session2.getUserId(), ctx);;
 		
 		folderId = _getPrivateInfostoreFolder(ctx,user,session);
 		folderId2 = _getPrivateInfostoreFolder(ctx, user2, session2);

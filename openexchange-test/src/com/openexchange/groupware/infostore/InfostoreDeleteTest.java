@@ -1,9 +1,5 @@
 package com.openexchange.groupware.infostore;
 
-import java.sql.Connection;
-
-import junit.framework.TestCase;
-
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -14,9 +10,13 @@ import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import junit.framework.TestCase;
+
+import java.sql.Connection;
 
 public class InfostoreDeleteTest extends TestCase {
 	
@@ -24,16 +24,17 @@ public class InfostoreDeleteTest extends TestCase {
 	DBProvider provider = new DBPoolProvider();
 	InfostoreFacade database;
 	int myFolder = 0;
-	
-	public void setUp() throws Exception {
+    private Context ctx;
+
+    public void setUp() throws Exception {
 		Init.startServer();
-		Context ctx = ContextStorage.getInstance().getContext(1);
+		ctx = ContextStorage.getInstance().getContext(1);
 		session = SessionObjectWrapper.createSessionObject(UserStorage.getInstance().getUserId("francisco", ctx), ctx, "Blubb");
 		database = new InfostoreFacadeImpl(provider);
 		database.setTransactional(true);
 		
 		final OXFolderAccess oxfa = new OXFolderAccess(ctx);
-		myFolder = oxfa.getDefaultFolder(session.getUserObject().getId(), FolderObject.INFOSTORE).getObjectID();
+		myFolder = oxfa.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE).getObjectID();
 	}
 	
 	public void tearDown() throws Exception {
@@ -42,7 +43,7 @@ public class InfostoreDeleteTest extends TestCase {
 	
 	public void testDeleteUser() throws Exception {
 		DocumentMetadata metadata = createMetadata();
-		DeleteEvent delEvent = new DeleteEvent(this, session.getUserObject().getId(), DeleteEvent.TYPE_USER,session.getContext());
+		DeleteEvent delEvent = new DeleteEvent(this, session.getUserId(), DeleteEvent.TYPE_USER,session.getContext());
 		
 		Connection con = null;
 		try {
@@ -52,7 +53,10 @@ public class InfostoreDeleteTest extends TestCase {
 			if(con != null)
 				provider.releaseWriteConnection(session.getContext(), con);
 		}
-		assertFalse(database.exists(metadata.getId(), InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUserObject(), session.getUserConfiguration()));
+        UserStorage userStorage = UserStorage.getInstance();
+        UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
+        
+        assertFalse(database.exists(metadata.getId(), InfostoreFacade.CURRENT_VERSION, session.getContext(), userStorage.getUser(session.getUserId(), ctx), userConfigStorage.getUserConfiguration(session.getUserId(),ctx)));
 	
 	}
 

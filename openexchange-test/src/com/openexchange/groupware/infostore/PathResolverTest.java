@@ -1,14 +1,7 @@
 package com.openexchange.groupware.infostore;
 
-import java.io.ByteArrayInputStream;
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import junit.framework.TestCase;
-
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -20,14 +13,17 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.oxfolder.OXFolderLogicException;
-import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
-import com.openexchange.tools.oxfolder.OXFolderPermissionException;
+import com.openexchange.tools.oxfolder.*;
+import junit.framework.TestCase;
+
+import java.io.ByteArrayInputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class PathResolverTest extends TestCase {
 
@@ -57,10 +53,13 @@ public class PathResolverTest extends TestCase {
 		Init.startServer();
 		database.setTransactional(true);
 		ctx = getContext();
-		
-		session = SessionObjectWrapper.createSessionObject(UserStorage.getInstance().getUserId(getUsername(), ctx), ctx, "gnitzelgnatzel");
-		user = session.getUserObject();
-		userConfig = session.getUserConfiguration();
+
+        UserStorage userStorage = UserStorage.getInstance();
+        UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
+
+        session = SessionObjectWrapper.createSessionObject(userStorage.getUserId(getUsername(), ctx), ctx, "gnitzelgnatzel");
+		user = userStorage.getUser(session.getUserId(), ctx);
+		userConfig = userConfigStorage.getUserConfiguration(session.getUserId(), ctx);
 		
 		findRoot();
 		

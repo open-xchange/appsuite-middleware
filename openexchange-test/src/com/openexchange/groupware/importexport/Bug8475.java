@@ -67,6 +67,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.server.impl.DBPoolingException;
@@ -78,7 +79,7 @@ public class Bug8475 extends AbstractICalImportTest{
 		return new JUnit4TestAdapter(Bug8475.class);
 	}
 	
-	@Test public void testAttendeeNotFound() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException{
+	@Test public void testAttendeeNotFound() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
 		final String ical = 
 			"BEGIN:VCALENDAR\n" +
 			"VERSION:2.0\n" +
@@ -93,7 +94,7 @@ public class Bug8475 extends AbstractICalImportTest{
 			"DUE:20070618T080000Z\n" +
 			"END:VTODO\n" +
 			"END:VCALENDAR";
-		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", false);
+		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", ctx, false);
 		
 		final TasksSQLInterface tasks = new TasksSQLInterfaceImpl(sessObj);
 		Task task = tasks.getTaskById(Integer.valueOf( res.getObjectId()), Integer.valueOf(res.getFolder()) );
@@ -125,7 +126,7 @@ public class Bug8475 extends AbstractICalImportTest{
 			"DUE:20070618T080000Z\n" +
 			"END:VTODO\n" +
 			"END:VCALENDAR";
-		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", false);
+		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.TASK, "8475", ctx, false);
 		
 		final TasksSQLInterface tasks = new TasksSQLInterfaceImpl(sessObj);
 		Task task = tasks.getTaskById(Integer.valueOf( res.getObjectId()), Integer.valueOf(res.getFolder()) );

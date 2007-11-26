@@ -87,6 +87,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
@@ -131,9 +132,6 @@ public class AbstractContactTest {
 		public Credentials getCredentials() {
 			return delegateSessionObject.getCredentials();
 		}
-		public Map getDynamicMap() {
-			return delegateSessionObject.getDynamicMap();
-		}
 		public String getHost() {
 			return delegateSessionObject.getHost();
 		}
@@ -142,9 +140,6 @@ public class AbstractContactTest {
 		}
 		public long getLifetime() {
 			return delegateSessionObject.getLifetime();
-		}
-		public Locale getLocale() {
-			return delegateSessionObject.getLocale();
 		}
 		public String getLocalIp() {
 			return delegateSessionObject.getLocalIp();
@@ -179,12 +174,6 @@ public class AbstractContactTest {
 		public String getUsername() {
 			return delegateSessionObject.getUsername();
 		}
-		public User getUserObject() {
-			return delegateSessionObject.getUserObject();
-		}
-		public UserSettingMail getUserSettingMail() {
-			return delegateSessionObject.getUserSettingMail();
-		}
 		public int hashCode() {
 			return delegateSessionObject.hashCode();
 		}
@@ -196,9 +185,6 @@ public class AbstractContactTest {
 		}
 		public void setCredentials(Credentials cred) {
 			delegateSessionObject.setCredentials(cred);
-		}
-		public void setDynamicMap(Map hm) {
-			delegateSessionObject.setDynamicMap(hm);
 		}
 		public void setHost(String host) {
 			delegateSessionObject.setHost(host);
@@ -235,9 +221,6 @@ public class AbstractContactTest {
 		}
 		public void setUsername(String username) {
 			delegateSessionObject.setUsername(username);
-		}
-		public void setUserObject(User u) {
-			delegateSessionObject.setUserObject(u);
 		}
 		public String toString() {
 			return delegateSessionObject.toString();
@@ -367,8 +350,8 @@ public class AbstractContactTest {
 	public static Importer imp;
 	public Format defaultFormat;
 
-	public static int createTestFolder(int type, SessionObject sessObj, String folderTitle) throws DBPoolingException, SQLException  {
-		final User user = sessObj.getUserObject();
+	public static int createTestFolder(int type, SessionObject sessObj,Context ctx, String folderTitle) throws DBPoolingException, SQLException, LdapException {
+		final User user = UserStorage.getInstance().getUser(sessObj.getUserId(), ctx);
 		FolderObject fo = new FolderObject();
 		fo.setFolderName(folderTitle);
 		fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
@@ -430,10 +413,11 @@ public class AbstractContactTest {
 		Init.startServer();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance();
-	    userId = uStorage.getUserId(Init.getAJAXProperty("login"), new ContextImpl(1));
+        Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
+        userId = uStorage.getUserId(Init.getAJAXProperty("login"), ctx);
 	    sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-tests");
-		userId = sessObj.getUserObject().getId();
-		folderId = createTestFolder(FolderObject.CONTACT, sessObj, "csvContactTestFolder");
+		userId = sessObj.getUserId();
+		folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "csvContactTestFolder");
 	}
 	
 	@AfterClass
@@ -485,8 +469,8 @@ public class AbstractContactTest {
 	 * @throws ImportExportException
 	 * @throws UnsupportedEncodingException
 	 */
-	protected ImportResult performOneEntryCheck(String file, Format format, int folderObjectType, String foldername, boolean errorExpected) throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException{
-		return performMultipleEntryImport(file, format, folderObjectType, foldername, errorExpected).get(0);
+	protected ImportResult performOneEntryCheck(String file, Format format, int folderObjectType, String foldername,Context ctx, boolean errorExpected) throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException, LdapException {
+		return performMultipleEntryImport(file, format, folderObjectType, foldername, ctx, errorExpected).get(0);
 	}
 	
 	/**
@@ -503,8 +487,8 @@ public class AbstractContactTest {
 	 * @throws ImportExportException
 	 * @throws UnsupportedEncodingException
 	 */
-	protected List<ImportResult> performMultipleEntryImport(String file, Format format, int folderObjectType, String foldername, Boolean... expectedErrors) throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException{
-		folderId = createTestFolder(folderObjectType, sessObj, foldername);
+	protected List<ImportResult> performMultipleEntryImport(String file, Format format, int folderObjectType, String foldername, Context ctx, Boolean... expectedErrors) throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException, LdapException {
+		folderId = createTestFolder(folderObjectType, sessObj,ctx, foldername);
 
 		assertTrue("Can import?" ,  imp.canImport(sessObj, format, _folders(), null));
 

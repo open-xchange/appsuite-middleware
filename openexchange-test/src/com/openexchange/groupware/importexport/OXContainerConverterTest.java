@@ -116,7 +116,7 @@ public class OXContainerConverterTest extends TestCase {
 		app.setDayInMonth(1);
 		app.setMonth(3);
 		app.setInterval(1);
-		app.setCreatedBy(session.getUserObject().getId());
+		app.setCreatedBy(session.getUserId());
 		
 		VersitObject  ical = converter.convertAppointment(app);
 		

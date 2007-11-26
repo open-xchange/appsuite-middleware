@@ -65,6 +65,10 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.impl.DBPoolingException;
 
 public class Bug8653 extends AbstractICalImportTest {
@@ -74,7 +78,7 @@ public class Bug8653 extends AbstractICalImportTest {
 		return new JUnit4TestAdapter(Bug8653.class);
 	}
 	
-	@Test public void testImportIntoCorrectFolder() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, OXException{
+	@Test public void testImportIntoCorrectFolder() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, OXException, LdapException, ContextException {
 		final String ical =
 			"BEGIN:VCALENDAR\n" +
 			"BEGIN:VEVENT\n" +
@@ -89,15 +93,15 @@ public class Bug8653 extends AbstractICalImportTest {
 			"DTSTAMP:20070731T110038Z\n" +
 			"END:VEVENT\n" +
 			"END:VCALENDAR";
-		
-		ImportResult res = performOneEntryCheck( ical, Format.ICAL, FolderObject.CALENDAR, "8475", false);
+		Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext")) ;
+		ImportResult res = performOneEntryCheck( ical, Format.ICAL, FolderObject.CALENDAR, "8475", ctx, false);
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 		final int oid = Integer.valueOf( res.getObjectId() );
 		final AppointmentObject appointmentObj = appointmentSql.getObjectById(oid, folderId);
 		assertEquals("Title is correct?","testtermin-Überschrift",appointmentObj.getTitle());
 	}
 	
-	@Test public void testImportIntoWrongFolder() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, OXException{
+	@Test public void testImportIntoWrongFolder() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, OXException, ContextException, LdapException {
 		final String ical =
 			"BEGIN:VCALENDAR\n" +
 			"BEGIN:VEVENT\n" +
@@ -112,7 +116,7 @@ public class Bug8653 extends AbstractICalImportTest {
 			"DTSTAMP:20070731T110038Z\n" +
 			"END:VEVENT\n" +
 			"END:VCALENDAR";
-		
-		List<ImportResult> res = performMultipleEntryImport( ical, Format.ICAL, FolderObject.TASK, "8475");
+		Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext")) ;
+		List<ImportResult> res = performMultipleEntryImport( ical, Format.ICAL, FolderObject.TASK, "8475", ctx);
 	}
 }

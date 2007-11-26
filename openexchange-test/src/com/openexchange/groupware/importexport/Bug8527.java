@@ -66,6 +66,10 @@ import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.impl.DBPoolingException;
 
 public class Bug8527 extends AbstractICalImportTest {
@@ -75,7 +79,7 @@ public class Bug8527 extends AbstractICalImportTest {
 		return new JUnit4TestAdapter(Bug8527.class);
 	}
 	
-	@Test public void bugritMilleniumHandAndShrimp() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException{
+	@Test public void bugritMilleniumHandAndShrimp() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, ContextException, LdapException {
 		final String ical =
 				"BEGIN:VCALENDAR\n" +
 				"METHOD:REQUEST\n" +
@@ -138,8 +142,9 @@ public class Bug8527 extends AbstractICalImportTest {
 						"TRIGGER;RELATED=START:-PT00H15M00S\n" +
 					"END:VALARM\n" +
 				"END:VEVENT\n" +
-				"END:VCALENDAR"; 
-		ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "8475", false);
+				"END:VCALENDAR";
+        Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext")) ;
+        ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "8475",ctx, false);
 		
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
 		final int oid = Integer.valueOf( res.getObjectId() );

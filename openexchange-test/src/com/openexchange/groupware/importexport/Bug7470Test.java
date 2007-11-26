@@ -55,13 +55,13 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.CalendarSql;
-import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.importexport.importers.ICalImporter;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
@@ -80,8 +80,9 @@ import java.util.List;
 
 public class Bug7470Test extends AbstractContactTest {
 	public final Format format = Format.ICAL;
-	
-	//workaround for JUnit 3 runner
+    private static Context ctx;
+
+    //workaround for JUnit 3 runner
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(Bug7470Test.class);
 	}
@@ -93,9 +94,11 @@ public class Bug7470Test extends AbstractContactTest {
 		Init.startServer();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance();
-	    userId = uStorage.getUserId(Init.getAJAXProperty("login"), new ContextImpl(1));
+	    ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
+        userId = uStorage.getUserId(Init.getAJAXProperty("login"),ctx);
 	    sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-tests");
-		userId = sessObj.getUserObject().getId();
+
+        userId = sessObj.getUserId();
 		imp = new ICalImporter();
 	}
 
@@ -112,8 +115,8 @@ public class Bug7470Test extends AbstractContactTest {
 	/*
 	 * Imported appointment loses participants
 	 */
-	@Test public void test7470() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException{
-		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "ical7470Folder");
+	@Test public void test7470() throws DBPoolingException, SQLException, UnsupportedEncodingException, OXObjectNotFoundException, NumberFormatException, OXException, LdapException {
+		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, ctx, "ical7470Folder");
 		String email = "cbartkowiak@oxhemail.open-xchange.com";
 		String cn = "Camil Bartkowiak (cbartkowiak@oxhemail.open-xchange.com)";
 		String ical = 
