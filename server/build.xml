@@ -31,8 +31,8 @@
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
-	<property name="project.name" value="${Bundle-SymbolicName}" />
 	<property name="version" value="${Bundle-Version}"/>
+    <property name="bundle.name" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
 	<property name="composite.name" value="open-xchange-server-${version}" />
 		
     <!-- Replacements -->
@@ -107,9 +107,8 @@
     </path>
 
     <!-- JARs for running server -->
-    <property name="serverJar" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
     <fileset dir="${tmp.dir}" id="server-jars">
-        <include name="${serverJar}"/>
+        <include name="${bundle.name}"/>
         <!-- TODO -->
         <include name="ox_languages.jar"/>
     </fileset>
@@ -140,7 +139,7 @@
     </target>
 
     <target name="jar" depends="compile">
-        <jar jarfile="${tmp.dir}/${serverJar}"
+        <jar jarfile="${tmp.dir}/${bundle.name}"
             manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
         </jar>
