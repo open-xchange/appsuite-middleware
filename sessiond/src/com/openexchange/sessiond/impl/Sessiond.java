@@ -67,7 +67,13 @@ public class Sessiond {
 	
 	private SessionHandler sessionHandler;
 	
+	private SessiondConfigInterface config;
+	
 	public Sessiond(SessiondConfigInterface config) {
+		this.config = config;
+	}
+	
+	public void start() {
 		sessionHandler = new SessionHandler();
 		SessionHandler.init(config);		
 	}
