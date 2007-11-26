@@ -1,17 +1,33 @@
 package com.openexchange.ajax;
 
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.TimeZone;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ContactFields;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.DistributionListFields;
+import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.api2.OXException;
@@ -26,20 +42,6 @@ import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.TimeZone;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class ContactTest extends AbstractAJAXTest {
 	

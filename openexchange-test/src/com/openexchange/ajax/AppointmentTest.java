@@ -1,9 +1,7 @@
 package com.openexchange.ajax;
 
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.Executor;
-import com.openexchange.tools.StringCollection;
 import java.io.ByteArrayInputStream;
+import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -25,6 +23,8 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.ajax.writer.AppointmentWriter;
@@ -43,8 +43,8 @@ import com.openexchange.groupware.container.ResourceGroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.TestException;
+import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.URLParameter;
-import java.io.StringWriter;
 
 public class AppointmentTest extends AbstractAJAXTest {
 	

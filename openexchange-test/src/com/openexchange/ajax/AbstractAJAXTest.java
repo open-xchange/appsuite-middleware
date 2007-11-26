@@ -1,13 +1,17 @@
 package com.openexchange.ajax;
 
-import com.openexchange.configuration.ConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import junit.framework.TestCase;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,12 +28,8 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.groupware.Init;
-import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import junit.framework.TestCase;
 
 /**
  * This class implements inheritable methods for AJAX tests.
