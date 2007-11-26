@@ -1,5 +1,6 @@
 
 SYSTEMPROPERTIES=@systemproperties@
+PROPERTIESDIR=@propertiesdir@
 LOGGINGPROPERTIES=@loggingproperties@
 
 JAVA_XTRAOPTS="-Xms193M -Xmx512M -XX:+AggressiveHeap"

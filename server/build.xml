@@ -535,6 +535,7 @@
         <move tofile="${patch.conf.dir}/ox-scriptconf.sh" file="${patch.conf.dir}/ox-scriptconf.sh.in" overwrite="true"/>
         <replace file="${patch.conf.dir}/ox-scriptconf.sh">
             <replacefilter token="@systemproperties@" value="${conf.subst.patch}/system.properties"/>
+            <replacefilter token="@propertiesdir@" value="${conf.subst.patch}"/>
             <replacefilter token="@loggingproperties@" value= "${conf.subst.patch}/file-logging.properties"/>
         </replace>
     </target>
@@ -560,6 +561,7 @@
         <antcall target="patchGroupwareStart"/>
     </target>
 
+    <!-- TODO -->
     <target name="patchConsistencyStart">
         <move tofile="${patch.bin.dir}/checkconsistency" file="${patch.bin.dir}/checkconsistency.in" overwrite="true"/>
         <replace file="${patch.bin.dir}/checkconsistency">
@@ -595,100 +597,8 @@
             <replacefilter token="@oxscriptconf@"    value="${conf.subst.patch}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
             <replacefilter token="@consolelogfile@" value= "${log.install.dir}/open-xchange-console.log"/>
-            <replacefilter token="@mysqljdbcjar@"    value="${lib.subst.patch}/${mysqljdbcjar}"/>
-            <replacefilter token="@mailjar@"    value="${lib.subst.patch}/${mailjar}"/>
-            <replacefilter token="@activationjar@" value="${lib.subst.patch}/${activationjar}"/>
-            <replacefilter token="@jdomjar@"    value="${lib.subst.patch}/${jdomjar}"/>
-            <replacefilter token="@servletjar@"    value="${lib.subst.patch}/${servletjar}"/>
-            <replacefilter token="@jcsjar@"    value="${lib.subst.patch}/${jcsjar}"/>
-            <replacefilter token="@concurrentjar@"    value="${lib.subst.patch}/${concurrentjar}"/>
-            <replacefilter token="@commonsloggingjar@"    value="${lib.subst.patch}/${commonsloggingjar}"/>
-            <replacefilter token="@jsonjar@"    value="${lib.subst.patch}/${jsonjar}"/>
-            <replacefilter token="@commonsfileuploadjar@" value="${lib.subst.patch}/${commonsfileuploadjar}"/>
-            <replacefilter token="@commonsiojar@" value="${lib.subst.patch}/${commonsiojar}" />
-            <replacefilter token="@jakartawebdavjar@" value="${lib.subst.patch}/${jakartawebdavjar}" />
-            <replacefilter token="@commonshttpclientjar@" value="${lib.subst.patch}/${commonshttpclientjar}" />
-            <replacefilter token="@jbossclientjar@" value="${lib.subst.patch}/${jbossclientjar}" />
-            <replacefilter token="@oxadapterjar@" value="${lib.subst.patch}/${oxadapterjar}" />
-            <replacefilter token="@tnefjar@" value="${lib.subst.patch}/${tnefjar}"/>
-            <replacefilter token="@springcorejar@" value= "${lib.subst.patch}/${springcorejar}"/>
-            <replacefilter token="@springbeanjar@" value= "${lib.subst.patch}/${springbeanjar}"/>
-            <replacefilter token="@oxgroupwarelibdir@"    value="${lib.subst.patch}"/>
-	  		<replacefilter token="@libdirpath@"	value="${lib.subst.patch}"/>
             <replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}"/>
         </replace>
-    </target>
-
-    <!-- Setup -->
-
-    <target name="setup" depends="setServerName,patchConfigDBProperties"/>
-
-    <target name="setServerName">
-        <fail message="Server name not defined." unless="server.name"/>
-        <replaceregexp byline="true">
-            <regexp pattern="SERVER_NAME=.*"/>
-            <substitution expression="SERVER_NAME=${server.name}"/>
-            <fileset dir="${conf.install.copy.dir}">
-                <include name="system.properties"/>
-            </fileset>
-        </replaceregexp>
-        <!-- fail message="Not implemented."/ -->
-    </target>
-
-    <target name="patchConfigDBProperties">
-        <fail message="Database host not defined." unless="dbhost"/>
-        <fail message="ConfigDB schema not defined." unless="configdb"/>
-        <fail message="Database driver not defined." unless="dbdriver"/>
-        <fail message="Database user name not defined." unless="dbuser"/>
-        <fail message="Database password not defined." unless="dbpass"/>
-        <fileset dir="${conf.install.copy.dir}" id="configDBProperties">
-            <include name="configdb.properties"/>
-        </fileset>
-        <replaceregexp byline="true">
-            <regexp pattern="useSeparateWrite=.*"/>
-            <substitution expression="useSeparateWrite=false"/>
-            <fileset refid="configDBProperties"/>
-        </replaceregexp>
-        <replaceregexp byline="true">
-            <regexp pattern="readUrl=.*" />
-            <substitution expression="readUrl=jdbc:mysql://${dbhost}/${configdb}" />
-            <fileset refid="configDBProperties"/>
-        </replaceregexp>
-        <replaceregexp byline="true">
-            <regexp pattern="writeUrl=.*" />
-            <substitution expression="writeUrl=jdbc:mysql://${dbhost}/${configdb}" />
-            <fileset refid="configDBProperties"/>
-        </replaceregexp>
-        <replaceregexp byline="true">
-            <regexp pattern="readDriverClass=.*" />
-            <substitution expression="readDriverClass=${dbdriver}" />
-            <fileset refid="configDBProperties"/>
-        </replaceregexp>
-        <replaceregexp byline="true">
-            <regexp pattern="writeDriverClass=.*" />
-            <substitution expression="writeDriverClass=${dbdriver}" />
-            <fileset refid="configDBProperties"/>
-        </replaceregexp>
-        <replaceregexp byline="true">
-            <regexp pattern="readProperty.1=.*" />
-            <substitution expression="readProperty.1=user=${dbuser}" />
-            <fileset refid="configDBProperties"/>
-        </replaceregexp>
-        <replaceregexp byline="true">
-            <regexp pattern="writeProperty.1=.*" />
-            <substitution expression="writeProperty.1=user=${dbuser}" />
-            <fileset refid="configDBProperties"/>
-        </replaceregexp>
-        <replaceregexp byline="true">
-            <regexp pattern="readProperty.2=.*" />
-            <substitution expression="readProperty.2=password=${dbpass}" />
-            <fileset refid="configDBProperties"/>
-        </replaceregexp>
-        <replaceregexp byline="true">
-            <regexp pattern="writeProperty.2=.*" />
-            <substitution expression="writeProperty.2=password=${dbpass}" />
-            <fileset refid="configDBProperties"/>
-        </replaceregexp>
     </target>
 
 </project>
