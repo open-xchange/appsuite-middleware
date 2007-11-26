@@ -72,5 +72,7 @@ public interface SessiondConnectorInterface {
     public Session getSessionByRandomToken(final String randomToken);
     
     public int getNumberOfActiveSessions();
+    
+    public int[] getNumberOfSessionsInContainer();
 
 } 
