@@ -14,6 +14,9 @@ import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
@@ -22,8 +25,11 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
@@ -91,10 +97,9 @@ public class FolderTest extends TestCase {
         }
 		super.tearDown();
 	}
-	
+
 	public void testFolderInsertSuccess() {
-		final int userId = session.getUserObject().getId();
-		final int[] groups = session.getUserObject().getGroups();
+		final int userId = session.getUserId();
 		//final OXFolderAction oxfa = new OXFolderAction(session);
 		final OXFolderManager oxma = new OXFolderManagerImpl(session);
 		int fuid = -1;
@@ -151,8 +156,7 @@ public class FolderTest extends TestCase {
 	
 	public void testFolderInsertFail001() {
 		try {
-			final int userId = session.getUserObject().getId();
-			final int[] groups = session.getUserObject().getGroups();
+			final int userId = session.getUserId();
 			FolderObject fo = new FolderObject();
 			fo.setFolderName("NewCalendarTestFolder");
 			fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
@@ -187,8 +191,7 @@ public class FolderTest extends TestCase {
 	
 	public void testFolderInsertFail002() {
 		try {
-			final int userId = session.getUserObject().getId();
-			final int[] groups = session.getUserObject().getGroups();
+            final int userId = session.getUserId();
 			FolderObject fo = new FolderObject();
 			fo.setFolderName("NewCalendarTestFolder");
 			fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
@@ -235,8 +238,7 @@ public class FolderTest extends TestCase {
 	
 	public void testFolderInsertFail003() {
 		try {
-			final int userId = session.getUserObject().getId();
-			final int[] groups = session.getUserObject().getGroups();
+            final int userId = session.getUserId();
 			final FolderObject fo = new FolderObject();
 			fo.setFolderName("NewCalendarTestFolder");
 			fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
@@ -278,8 +280,7 @@ public class FolderTest extends TestCase {
 	
 	public void testFolderInsertFail004() {
 		try {
-			final int userId = session.getUserObject().getId();
-			final int[] groups = session.getUserObject().getGroups();
+            final int userId = session.getUserId();
 			final FolderObject fo = new FolderObject();
 			fo.setFolderName("NewCalendarTestFolder");
 			fo.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
@@ -321,8 +322,7 @@ public class FolderTest extends TestCase {
 	
 	public void testUpdateFolderSuccessRename() {
 		try {
-			final int userId = session.getUserObject().getId();
-			final int[] groups = session.getUserObject().getGroups();
+            final int userId = session.getUserId();
 			int fuid = -1;
 			OXFolderManager oxfa = null;
 			try {
@@ -379,8 +379,7 @@ public class FolderTest extends TestCase {
 	
 	public void testUpdateFolderSuccessMove() {
 		try {
-			final int userId = session.getUserObject().getId();
-			final int[] groups = session.getUserObject().getGroups();
+            final int userId = session.getUserId();
 			int fuid = -1;
 			OXFolderManager oxfa = null;
 			
@@ -440,8 +439,7 @@ public class FolderTest extends TestCase {
 	
 	public void testUpdateFolderSuccessRenameMove() {
 		try {
-			final int userId = session.getUserObject().getId();
-			final int[] groups = session.getUserObject().getGroups();
+            final int userId = session.getUserId();
 			int fuid = -1;
 			OXFolderManager oxfa = null;
 			
@@ -502,8 +500,7 @@ public class FolderTest extends TestCase {
 	
 	public void testUpdateFolderSuccessAll() {
 		try {
-			final int userId = session.getUserObject().getId();
-			final int[] groups = session.getUserObject().getGroups();
+            final int userId = session.getUserId();
 			int fuid = -1;
 			OXFolderManager oxfa = null;
 			
@@ -588,8 +585,7 @@ public class FolderTest extends TestCase {
 	
 	public void testDeleteFolder() {
 		try {
-			final int userId = session.getUserObject().getId();
-			final int[] groups = session.getUserObject().getGroups();
+            final int userId = session.getUserId();
 			int fuid = -1;
 			OXFolderManager oxfa = null;
 			try {
@@ -709,11 +705,16 @@ public class FolderTest extends TestCase {
 			fail(e.getMessage());
 		}
 	}
-	
+
+	public static final UserConfiguration getUserConfiguration(
+	    final Context ctx, final int userId) throws UserConfigurationException {
+	    UserConfigurationStorage stor = UserConfigurationStorage.getInstance();
+	    return stor.getUserConfiguration(userId, ctx);
+	}
+
 	public void testWithModifiedUserConfig001() {
 		try {
-			final int userId = session.getUserObject().getId();
-			final int[] groups = session.getUserObject().getGroups();
+            final int userId = session.getUserId();
 			int fuid = -1;
 			OXFolderManager oxfa = null;
 			try {
@@ -745,7 +746,7 @@ public class FolderTest extends TestCase {
 				/*
 				 * Deny creation or modifications of public folders
 				 */
-				session.getUserConfiguration().setFullPublicFolderAccess(false);
+				getUserConfiguration(session.getContext(), userId).setFullPublicFolderAccess(false);
 				/*
 				 * Try to edit a public folder
 				 */
@@ -760,7 +761,7 @@ public class FolderTest extends TestCase {
 				}
 				assertTrue(exc != null);
 			} finally {
-				session.getUserConfiguration().setFullPublicFolderAccess(true);
+			    getUserConfiguration(session.getContext(), userId).setFullPublicFolderAccess(true);
 				/*
 				 * Delete Test Folder...
 				 */
@@ -778,8 +779,7 @@ public class FolderTest extends TestCase {
 	
 	public void testWithModifiedUserConfig002() {
 		try {
-			final int userId = session.getUserObject().getId();
-			final int[] groups = session.getUserObject().getGroups();
+            final int userId = session.getUserId();
 			int fuid = -1;
 			OXFolderManager oxfa = null;
 			try {
@@ -804,7 +804,7 @@ public class FolderTest extends TestCase {
 				/*
 				 * Deny calendar module access
 				 */
-				session.getUserConfiguration().setCalendar(false);
+				getUserConfiguration(session.getContext(), userId).setCalendar(false);
 				/*
 				 * Try to edit a public folder
 				 */
@@ -819,7 +819,7 @@ public class FolderTest extends TestCase {
 				}
 				assertTrue(exc != null);
 			} finally {
-				session.getUserConfiguration().setCalendar(true);
+			    getUserConfiguration(session.getContext(), userId).setCalendar(true);
 				/*
 				 * Delete Test Folder...
 				 */
@@ -837,8 +837,7 @@ public class FolderTest extends TestCase {
 	
 	public void testFolderCleaning() {
 		try {
-			final int userId = session.getUserObject().getId();
-			final int[] groups = session.getUserObject().getGroups();
+            final int userId = session.getUserId();
 			int fuid = -1;
 			OXFolderManager oxfa = null;
 			try {
@@ -868,21 +867,18 @@ public class FolderTest extends TestCase {
 		        cdao.setContext(session.getContext());
 		        cdao.setIgnoreConflicts(true);
 		      
-		        UserParticipant up = new UserParticipant();
-		        up.setIdentifier(session.getUserObject().getId());
+		        UserParticipant up = new UserParticipant(session.getUserId());
 		        up.setAlarmMinutes(5);
 		        cdao.setUsers(new UserParticipant[] { up });
 		        
 		        
 		        Participants participants = new Participants();
-		        Participant p = new UserParticipant();
-		        p.setIdentifier(session.getUserObject().getId());
+		        Participant p = new UserParticipant(session.getUserId());
 		        participants.add(p);
 		 
 		        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
 		        
-		        Participant p2 = new UserParticipant();
-		        p2.setIdentifier(resolveUser(user2));
+		        Participant p2 = new UserParticipant(resolveUser(user2));
 		        participants.add(p2);        
 		        
 		        cdao.setParticipants(participants.getList());        
