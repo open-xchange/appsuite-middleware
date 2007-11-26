@@ -974,7 +974,7 @@ public class FolderTest extends TestCase {
 	
 	public void testGetSubfoldersWithRestrictedAccess() {
 		try {
-			session.getUserConfiguration().setCalendar(false);
+		    getUserConfiguration(session.getContext(), session.getUserId()).setCalendar(false);
 			FolderSQLInterface folderSQLInterface = new RdbFolderSQLInterface(session);
 			SearchIterator it = null;
 			try {
