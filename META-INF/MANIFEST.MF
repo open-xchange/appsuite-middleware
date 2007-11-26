@@ -7,6 +7,7 @@ Bundle-Activator: com.openexchange.admin.daemons.Activator
 Bundle-Localization: plugin
 Import-Package: com.openexchange.api2,
  com.openexchange.cache,
+ com.openexchange.cache.impl,
  com.openexchange.configuration,
  com.openexchange.database,
  com.openexchange.event,
