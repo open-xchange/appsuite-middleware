@@ -49,16 +49,13 @@
 
 package com.openexchange.ajax.contact.action;
 
-import com.openexchange.ajax.fields.CalendarFields;
-import com.openexchange.ajax.fields.DataFields;
 import java.util.Date;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AJAXRequest.Method;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
+import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**

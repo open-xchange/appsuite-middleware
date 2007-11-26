@@ -1,9 +1,10 @@
 package com.openexchange.ajax.contact;
 
-import com.openexchange.ajax.ContactTest;
-import com.openexchange.groupware.container.ContactObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.ajax.ContactTest;
+import com.openexchange.groupware.container.ContactObject;
 
 public class ListTest extends ContactTest {
 	

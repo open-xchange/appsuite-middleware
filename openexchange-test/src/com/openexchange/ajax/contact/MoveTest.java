@@ -1,13 +1,12 @@
 package com.openexchange.ajax.contact;
 
-import com.openexchange.ajax.ContactTest;
-import com.openexchange.groupware.configuration.AbstractConfigWrapper;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.groupware.container.FolderObject;
-import java.util.Date;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.ajax.ContactTest;
+import com.openexchange.groupware.configuration.AbstractConfigWrapper;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.FolderObject;
 
 public class MoveTest extends ContactTest {
 

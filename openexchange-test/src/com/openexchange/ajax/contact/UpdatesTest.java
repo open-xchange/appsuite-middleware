@@ -1,9 +1,11 @@
 package com.openexchange.ajax.contact;
 
-import com.openexchange.ajax.ContactTest;
 import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.ajax.ContactTest;
 
 public class UpdatesTest extends ContactTest {
 

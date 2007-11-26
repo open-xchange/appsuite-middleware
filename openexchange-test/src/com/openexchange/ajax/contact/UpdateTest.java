@@ -1,11 +1,12 @@
 package com.openexchange.ajax.contact;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class UpdateTest extends ContactTest {
 	

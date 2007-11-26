@@ -50,16 +50,11 @@
 package com.openexchange.ajax.contact;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.StringWriter;
 import java.util.TimeZone;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 
-import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -67,17 +62,11 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.task.actions.InsertRequest;
-import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.groupware.tasks.TaskException;
 import com.openexchange.tools.URLParameter;
 
 /**

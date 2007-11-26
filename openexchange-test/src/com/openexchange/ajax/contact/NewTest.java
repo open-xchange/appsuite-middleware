@@ -1,13 +1,15 @@
 package com.openexchange.ajax.contact;
 
+import java.io.ByteArrayInputStream;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.container.ContactObject;
-import java.io.ByteArrayInputStream;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class NewTest extends ContactTest {
 	

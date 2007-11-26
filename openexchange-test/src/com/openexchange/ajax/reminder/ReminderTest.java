@@ -1,11 +1,11 @@
 package com.openexchange.ajax.reminder;
 
 
-import com.openexchange.ajax.*;
-import com.openexchange.ajax.fields.ReminderFields;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
+import java.util.TimeZone;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.meterware.httpunit.GetMethodWebRequest;
@@ -13,13 +13,14 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.ReminderFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
-import java.util.TimeZone;
-import org.json.JSONArray;
 
 public class ReminderTest extends AbstractAJAXTest {
 	

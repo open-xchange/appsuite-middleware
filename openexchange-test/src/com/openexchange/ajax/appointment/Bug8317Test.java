@@ -1,14 +1,14 @@
 package com.openexchange.ajax.appointment;
 
+import java.util.Calendar;
+import java.util.Date;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.groupware.container.AppointmentObject;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class Bug8317Test extends AppointmentTest {
 	

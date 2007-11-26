@@ -1,7 +1,6 @@
 package com.openexchange.ajax.appointment;
 
 
-import com.openexchange.ajax.appointment.recurrence.RecurrenceTestSuite;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 

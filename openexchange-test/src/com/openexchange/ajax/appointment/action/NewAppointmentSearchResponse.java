@@ -49,13 +49,14 @@
 
 package com.openexchange.ajax.appointment.action;
 
-import com.openexchange.ajax.AppointmentTest;
 import java.util.TimeZone;
 
+import org.json.JSONArray;
+
+import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.container.AppointmentObject;
-import org.json.JSONArray;
 
 /**
  * 

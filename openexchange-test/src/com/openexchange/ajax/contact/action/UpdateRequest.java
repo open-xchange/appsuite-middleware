@@ -52,8 +52,6 @@ package com.openexchange.ajax.contact.action;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AJAXRequest.Method;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.groupware.container.ContactObject;
 

@@ -1,5 +1,9 @@
 package com.openexchange.ajax.reminder;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.config.ConfigTools;
@@ -7,9 +11,6 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.test.TestException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
 
 
 public class DeleteTest extends ReminderTest {

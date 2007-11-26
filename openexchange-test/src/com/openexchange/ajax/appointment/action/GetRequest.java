@@ -49,14 +49,13 @@
 
 package com.openexchange.ajax.appointment.action;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AJAXRequest.Method;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 

@@ -1,22 +1,14 @@
 package com.openexchange.groupware;
 
-import com.openexchange.configuration.ConfigDB;
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.database.DatabaseInit;
-import com.openexchange.groupware.contexts.impl.ContextInit;
-import com.openexchange.groupware.impl.GroupwareInit;
-import com.openexchange.server.impl.Starter;
-import com.openexchange.server.Initialization;
-import com.openexchange.sessiond.impl.Sessiond;
-import com.openexchange.sessiond.SessiondConfigWrapper;
-import com.openexchange.sessiond.SessiondConnector;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
+import com.openexchange.groupware.impl.GroupwareInit;
+import com.openexchange.server.Initialization;
 
 /**
  * This class contains methods for initialising tests.

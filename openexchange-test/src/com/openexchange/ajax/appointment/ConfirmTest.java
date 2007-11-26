@@ -1,13 +1,13 @@
 package com.openexchange.ajax.appointment;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class ConfirmTest extends AppointmentTest {
 

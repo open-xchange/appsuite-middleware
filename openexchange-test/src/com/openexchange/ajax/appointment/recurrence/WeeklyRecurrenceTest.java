@@ -1,11 +1,13 @@
 package com.openexchange.ajax.appointment.recurrence;
 
-import com.openexchange.groupware.container.AppointmentObject;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.groupware.container.AppointmentObject;
 
 public class WeeklyRecurrenceTest extends AbstractRecurrenceTest {
 	
