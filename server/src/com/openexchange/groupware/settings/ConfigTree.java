@@ -202,6 +202,7 @@ public final class ConfigTree {
 
     private static Class< ? extends SettingSetup>[] getClasses() {
         return (Class< ? extends SettingSetup>[]) new Class[] {
+            com.openexchange.groupware.settings.tree.CalendarNotification.class,
             com.openexchange.groupware.settings.tree.ContactId.class,
             com.openexchange.groupware.settings.tree.FastGUI.class,
             com.openexchange.groupware.settings.tree.GUI.class,
@@ -250,11 +251,6 @@ public final class ConfigTree {
         }
         tree = new Setting("", true);
         tree.setId(-1);
-
-        final Setting calNotification = new Setting("calendarnotification",
-            true);
-        calNotification.setId(-1);
-        tree.addElement(calNotification);
 
         final Setting reloadTimes = new Setting("reloadtimes", true);
         reloadTimes.setId(-1);
@@ -366,22 +362,6 @@ public final class ConfigTree {
         mail.addElement(spamButton);
 
         final Map<String, SharedValue> tmp = new HashMap<String, SharedValue>();
-        tmp.put(calNotification.getPath(), new AbstractMailFuncs() {
-            public boolean isAvailable(final Session session) {
-                final UserConfiguration config = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-						session.getUserId(), session.getContext());
-				return config.hasWebMail() && config.hasCalendar();
-            }
-            @Override
-            protected Object isSet(final UserSettingMail settings) {
-                return settings.isNotifyAppointments();
-            }
-            @Override
-            protected void setValue(final UserSettingMail settings,
-                final String value) {
-                settings.setNotifyAppointments(Boolean.parseBoolean(value));
-            }
-        });
         tmp.put(reloadTimes.getPath(), new ReadOnlyValue() {
             private static final int MINUTE = 60 * 1000;
             public boolean isAvailable(final Session session) {
@@ -683,7 +663,7 @@ public final class ConfigTree {
 				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
 						session.getContext()).hasWebMail();
 			}
-            protected Object isSet(final UserSettingMail settings) {
+            protected Boolean isSet(final UserSettingMail settings) {
                 return settings.isUseColorQuote();
             }
             protected void setValue(final UserSettingMail settings,
@@ -696,7 +676,7 @@ public final class ConfigTree {
 				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
 						session.getContext()).hasWebMail();
 			}
-            protected Object isSet(final UserSettingMail settings) {
+            protected Boolean isSet(final UserSettingMail settings) {
                 return settings.isShowGraphicEmoticons();
             }
             protected void setValue(final UserSettingMail settings,
@@ -709,7 +689,7 @@ public final class ConfigTree {
 				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
 						session.getContext()).hasWebMail();
 			}
-            protected Object isSet(final UserSettingMail settings) {
+            protected Boolean isSet(final UserSettingMail settings) {
                 return settings.isHardDeleteMsgs();
             }
             protected void setValue(final UserSettingMail settings,
@@ -722,7 +702,7 @@ public final class ConfigTree {
 				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
 						session.getContext()).hasWebMail();
 			}
-            protected Object isSet(final UserSettingMail settings) {
+            protected Boolean isSet(final UserSettingMail settings) {
                 return settings.isDisplayHtmlInlineContent();
             }
             protected void setValue(final UserSettingMail settings,
@@ -736,7 +716,7 @@ public final class ConfigTree {
 				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
 						session.getContext()).hasWebMail();
 			}
-            protected Object isSet(final UserSettingMail settings) {
+            protected Boolean isSet(final UserSettingMail settings) {
                 return !settings.isIgnoreOriginalMailTextOnReply();
             }
             protected void setValue(final UserSettingMail settings,
