@@ -11,7 +11,7 @@
     <property file="build.properties"/>
 
 	<property name="version" value="${Bundle-Version}"/>
-	<property name="project.name" value="${Bundle-SymbolicName}"/>
+	<property name="bundle.name" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
 	<property name="composite.name" value="open-xchange-monitoring-${version}" />
 
     <!-- Install Constants -->
@@ -45,7 +45,7 @@
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/${composite.name}.jar"
+        <jar jarfile="${tmp.dir}/${bundle.name}"
             manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
         </jar>
@@ -56,13 +56,12 @@
         <mkdir dir="${destdir}/${bundlesdir}"/>
         <copy todir="${destdir}/${bundlesdir}">
             <fileset dir="${tmp.dir}">
-                <include name="${composite.name}.jar"/>
+                <include name="${bundle.name}"/>
             </fileset>
         </copy>
     </target>
 
 	<!-- Dist -->
-	<!-- Cargo Culted from openexchange-common -->
 	<target name="dist" depends="clean">
 		<property name="dist-package" value="dist-package"/>
     	<delete dir="${dist-package}"/>

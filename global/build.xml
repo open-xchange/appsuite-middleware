@@ -61,7 +61,6 @@
     </target>
 
 	<!-- Dist -->
-	<!-- Cargo Culted from openexchange-common -->
 	<target name="dist" depends="clean">
 		<property name="dist-package" value="dist-package"/>
     	<delete dir="${dist-package}"/>
