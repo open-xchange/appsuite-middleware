@@ -1,6 +1,11 @@
 package com.openexchange.ajax;
 
 
+import java.io.ByteArrayInputStream;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -15,9 +20,6 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.URLParameter;
-import java.io.ByteArrayInputStream;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class UserTest extends AbstractAJAXTest {
 	

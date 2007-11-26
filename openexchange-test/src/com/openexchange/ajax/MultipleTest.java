@@ -1,6 +1,12 @@
 package com.openexchange.ajax;
 
 
+import java.io.ByteArrayInputStream;
+import java.util.TimeZone;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
@@ -8,13 +14,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.tools.URLParameter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintWriter;
-import java.util.TimeZone;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONWriter;
 
 public class MultipleTest extends AbstractAJAXTest {
 	

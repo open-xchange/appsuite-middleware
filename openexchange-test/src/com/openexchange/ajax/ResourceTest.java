@@ -1,6 +1,11 @@
 package com.openexchange.ajax;
 
 
+import java.io.ByteArrayInputStream;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -10,9 +15,6 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.tools.URLParameter;
-import java.io.ByteArrayInputStream;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public class ResourceTest extends AbstractAJAXTest {
 	
