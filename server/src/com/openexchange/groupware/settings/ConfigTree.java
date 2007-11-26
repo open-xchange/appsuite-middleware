@@ -89,11 +89,6 @@ public final class ConfigTree {
     private static final Log LOG = LogFactory.getLog(ConfigTree.class);
 
     /**
-     * Path name containing the timezone of the user.
-     */
-    public static final String TIMEZONE = "timezone";
-
-    /**
      * Reference to the settings tree.
      */
     private static Setting tree;
@@ -207,6 +202,7 @@ public final class ConfigTree {
 
     private static Class< ? extends SettingSetup>[] getClasses() {
         return (Class< ? extends SettingSetup>[]) new Class[] {
+            com.openexchange.groupware.settings.tree.ContactId.class,
             com.openexchange.groupware.settings.tree.FastGUI.class,
             com.openexchange.groupware.settings.tree.GUI.class,
             com.openexchange.groupware.settings.tree.Identifier.class,
@@ -238,7 +234,8 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.tasks.DelegateTasks.class,
             com.openexchange.groupware.settings.tree.Participants.class,
             com.openexchange.groupware.settings.tree.participants.ShowWithoutEmail.class,
-            com.openexchange.groupware.settings.tree.TaskNotification.class
+            com.openexchange.groupware.settings.tree.TaskNotification.class,
+            com.openexchange.groupware.settings.tree.TimeZone.class
         };
     }
 
@@ -253,10 +250,6 @@ public final class ConfigTree {
         }
         tree = new Setting("", true);
         tree.setId(-1);
-
-        final Setting timezone = new Setting(TIMEZONE, true);
-        timezone.setId(-1);
-        tree.addElement(timezone);
 
         final Setting calNotification = new Setting("calendarnotification",
             true);
@@ -373,21 +366,6 @@ public final class ConfigTree {
         mail.addElement(spamButton);
 
         final Map<String, SharedValue> tmp = new HashMap<String, SharedValue>();
-        tmp.put(timezone.getPath(), new AbstractUserFuncs() {
-            public void getValue(final Session session,
-                final Setting setting) {
-                setting.setSingleValue(UserStorage.getStorageUser(session.getUserId(), session.getContext()).getTimeZone());
-            }
-            public boolean isAvailable(final Session session) {
-                return true;
-            }
-            public boolean isWritable() {
-                return true;
-            }
-            protected void setValue(final UserImpl user, final String value) {
-                user.setTimeZone(value);
-            }
-        });
         tmp.put(calNotification.getPath(), new AbstractMailFuncs() {
             public boolean isAvailable(final Session session) {
                 final UserConfiguration config = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
