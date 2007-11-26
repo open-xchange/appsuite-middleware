@@ -78,7 +78,7 @@ public abstract class AbstractModules extends AbstractNode {
              */
             public void getValue(final Session session,
                 final Setting setting) throws SettingException {
-                setting.setSingleValue(getModule(session));
+                setting.setSingleValue(Boolean.valueOf(getModule(session)));
             }
             /**
              * {@inheritDoc}
