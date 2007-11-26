@@ -30,14 +30,13 @@
     </fileset>
 
     <!-- Install Constants -->
-    <property name="bundlesdir" value="${destdir}${prefix}/bundles"/>
+    <property name="bundlesdir" value="${prefix}/bundles"/>
 	<property name="project.name" value="${Bundle-SymbolicName}" />
 	<property name="version" value="${Bundle-Version}"/>
 	<property name="composite.name" value="open-xchange-server-${version}" />
 		
     <!-- Replacements -->
-    <property name="lib.install.dir" value="${prefix}/lib"/>
-    <property name="lib.install.copy.dir" location="${destdir}${lib.install.dir}"/>
+    <property name="bundles.install.dir" value="${destdir}${bundlesdir}"/>
     <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
     <property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
     <property name="log.install.copy.dir" location="${destdir}${log.install.dir}"/>
@@ -151,10 +150,9 @@
     <target name="build" depends="jar"/>
 
     <!-- Install targets -->
-
     <target name="installJars" depends="build">
-        <mkdir dir="${bundlesdir}"/>
-        <copy todir="${bundlesdir}" overwrite="true">
+        <mkdir dir="${bundles.install.dir}"/>
+        <copy todir="${bundles.install.dir}" overwrite="true">
             <fileset refid="server-jars" />
         </copy>
     </target>
