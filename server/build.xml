@@ -61,6 +61,7 @@
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
     <property name="globaljar" value="com.openexchange.global_6.5.0.jar"/>
     <property name="configjar" value="com.openexchange.config_6.5.0.jar"/>
+    <property name="monitoringjar" value="com.openexchange.monitoring_6.5.0.jar"/>
     <property name="sessiondjar" value="com.openexchange.sessiond_6.5.0.jar"/>
 
     <property name="activationjar" value="activation.jar" />
@@ -87,6 +88,7 @@
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
         <pathelement location="${bundlesdir}/${globaljar}"/>
         <pathelement location="${bundlesdir}/${configjar}"/>
+        <pathelement location="${bundlesdir}/${monitoringjar}"/>
         <pathelement location="${bundlesdir}/${sessiondjar}"/>
 
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${activationjar}"/>
