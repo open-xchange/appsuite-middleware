@@ -11,26 +11,24 @@
     <property file="build.properties"/>
 
 	<property name="version" value="${Bundle-Version}"/>
-	<property name="project.name" value="${Bundle-SymbolicName}"/>
+	<property name="bundle.name" value="${Bundle-SymbolicName}-${Bundle-Version}.jar"/>
 	<property name="composite.name" value="open-xchange-global-${version}" />
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
 
     <!-- JAR names for classpath -->
-    <property name="commonBundle" value="com.openexchange.common"/>
 	<property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
 	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
+    <property name="commonBundle" value="com.openexchange.common"/>
 	<property name="jcsjar" value="jcs-1.2.7.9.2.jar" />
-	
+
     <!-- Classpath -->
     <path id="project.classpath">
 		<pathelement location="${bundlesdir}/${commonsloggingjar}"/>
 		<pathelement location="${bundlesdir}/${osgijar}"/>
 		<pathelement location="${bundlesdir}/${commonBundle}/lib/${jcsjar}"/>
     </path>
-
-    <property name="globalJar" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
 
     <!-- Compile -->
     <target name="prepare">
@@ -46,7 +44,7 @@
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/${globalJar}"
+        <jar jarfile="${tmp.dir}/${bundle.name}"
             manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
         </jar>
@@ -57,7 +55,7 @@
         <mkdir dir="${destdir}/${bundlesdir}"/>
         <copy todir="${destdir}/${bundlesdir}">
             <fileset dir="${tmp.dir}">
-                <include name="${globalJar}"/>
+                <include name="${bundle.name}"/>
             </fileset>
         </copy>
     </target>

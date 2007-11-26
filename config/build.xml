@@ -11,21 +11,22 @@
     <property file="build.properties"/>
 
 	<property name="version" value="${Bundle-Version}"/>
-    <property name="package.name" value="open-xchange-config"/>
+    <property name="bundle.name" value="${Bundle-Name}_${Bundle-Version}.jar"/>
+    <property name="composite.name" value="open-xchange-config"/>
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
-    <property name="globaljar" value="com.openexchange.global_6.5.0.jar" />
 	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
-	
+    <property name="globaljar" value="com.openexchange.global_6.5.0.jar" />
+
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
-        <pathelement location="${bundlesdir}/${globaljar}"/>
    	    <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
+        <pathelement location="${bundlesdir}/${globaljar}"/>
 	</path>
 
     <!-- Compile -->
@@ -42,7 +43,7 @@
     </target>
 
     <target name="jar" depends="prepare,compile">
-        <jar jarfile="${tmp.dir}/${Bundle-SymbolicName}_${Bundle-Version}.jar"
+        <jar jarfile="${tmp.dir}/${bundle.name}"
             manifest="META-INF/MANIFEST.MF">
             <fileset dir="${output..}"/>
         </jar>
@@ -53,7 +54,7 @@
         <mkdir dir="${destdir}/${bundlesdir}"/>
         <copy todir="${destdir}/${bundlesdir}">
             <fileset dir="${tmp.dir}">
-                <include name="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
+                <include name="${bundle.name}"/>
             </fileset>
         </copy>
     </target>
@@ -61,8 +62,8 @@
     <target name="dist" depends="clean">
 		<property name="dist-package" value="dist-package"/>
     	<delete dir="${dist-package}"/>
-        <mkdir dir="${dist-package}/${package.name}-${version}"/>
-        <copy todir="${dist-package}/${package.name}-${version}">
+        <mkdir dir="${dist-package}/${composite.name}-${version}"/>
+        <copy todir="${dist-package}/${composite.name}-${version}">
             <fileset dir=".">
                 <exclude name="**${dist-package}/**"/>
                 <exclude name="**debian/**"/>
@@ -70,9 +71,9 @@
                 <exclude name="Todo"/>
             </fileset>
         </copy>
-        <tar destfile="../${package.name}-${version}.tar.gz"
+        <tar destfile="../${composite.name}-${version}.tar.gz"
 	        basedir="${dist-package}"
-    	    includes="${package.name}-${version}/"
+    	    includes="${composite.name}-${version}/"
          	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
     	<delete dir="${dist-package}"/>
     </target>
