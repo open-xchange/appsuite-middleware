@@ -44,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.groupware.settings.ConfigTree;
+import com.openexchange.groupware.settings.tree.TimeZone;
 
 /**
  * This test case tests the AJAX interface of the config system for the AJAX
@@ -82,15 +83,15 @@ public class ConfigMenuTest extends AbstractAJAXTest {
      */
     public void testTimeZone() throws Throwable {
         final String timeZone = readSetting(getWebConversation(), getHostName(),
-            getSessionId(), ConfigTree.TIMEZONE);
+            getSessionId(), TimeZone.NAME);
         final String testTimeZone = "Australia/Hobart";
         storeSetting(getWebConversation(), getHostName(), getSessionId(),
-            ConfigTree.TIMEZONE, testTimeZone);
+            TimeZone.NAME, testTimeZone);
         assertEquals("Written timezone isn't returned from server.",
             testTimeZone, readSetting(getWebConversation(), getHostName(),
-                getSessionId(), ConfigTree.TIMEZONE));
+                getSessionId(), TimeZone.NAME));
         storeSetting(getWebConversation(), getHostName(), getSessionId(),
-            ConfigTree.TIMEZONE, timeZone);
+            TimeZone.NAME, timeZone);
     }
 
     /**
