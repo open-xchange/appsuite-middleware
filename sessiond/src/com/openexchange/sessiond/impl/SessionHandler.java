@@ -49,13 +49,13 @@
 
 package com.openexchange.sessiond.impl;
 
-import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Timer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -92,6 +92,8 @@ public class SessionHandler {
 	private static int[] numberOfSessionsInContainer;
 
 	private static final Log LOG = LogFactory.getLog(SessionHandler.class);
+	
+	private static AtomicInteger numberOfActiveSessions = new AtomicInteger();
 
 	public SessionHandler() {
 
@@ -174,7 +176,7 @@ public class SessionHandler {
 		randomMap.put(randomToken, sessionId);
 		userMap.put(loginName, sessionId);
 		LOG.warn("TODO: MonitoringInfo still missing");
-		// MonitoringInfo.incrementNumberOfActiveSessions();
+		numberOfActiveSessions.incrementAndGet();
 
 		return sessionId;
 	}
@@ -201,8 +203,6 @@ public class SessionHandler {
 						sessions.remove(sessionid);
 						// the session is only moved to the first container so a
 						// decrement is not nessesary
-						// MonitoringInfo.decrementNumberOfActiveSessions();
-						LOG.warn("TODO: MonitoringInfo still missing");
 					}
 
 					return true;
@@ -212,7 +212,7 @@ public class SessionHandler {
 				}
 				sessions.remove(sessionid);
 				LOG.warn("TODO: MonitoringInfo still missing");
-				// MonitoringInfo.decrementNumberOfActiveSessions();
+				numberOfActiveSessions.decrementAndGet();
 
 				return false;
 			}
@@ -233,8 +233,7 @@ public class SessionHandler {
 			if (sessions.containsKey(sessionid)) {
 				final SessionControlObject session = sessions.remove(sessionid);
 				// session.closingOperations();
-				// MonitoringInfo.decrementNumberOfActiveSessions();
-				LOG.warn("TODO: MonitoringInfo still missing");
+				numberOfActiveSessions.decrementAndGet();
 
 				return true;
 			}
@@ -318,7 +317,6 @@ public class SessionHandler {
 			numberOfSessionsInContainer[a] = sessionList.get(a).size();
 		}
 
-		// MonitoringInfo.setNumberOfSessionsInContainer(numberOfSessionsInContainer);
 		LOG.warn("TODO: MonitoringInfo still missing");
 	}
 
@@ -334,16 +332,7 @@ public class SessionHandler {
 		if ((session.getTimestamp().getTime() + session.getLifetime()) < System.currentTimeMillis()) {
 			return false;
 		}
-		try {
-			// if (!session.getSession().getContext().isEnabled() ||
-			// !session.getSession().getUserObject()
-			// .isMailEnabled()) {
-			// return false;
-			// }
-			LOG.warn("TODO: enabled check not missing");
-		} catch (UndeclaredThrowableException e) {
-			return false;
-		}
+
 		return true;
 	}
 	
@@ -357,5 +346,13 @@ public class SessionHandler {
 		noLimit = false;
 		isInit = false;
 		numberOfSessionsInContainer = null;
+	}
+
+	public static int getNumberOfActiveSessions() {
+		return numberOfActiveSessions.get();
+	}
+	
+	public static int[] getNumberOfSessionsInContainer() {
+		return numberOfSessionsInContainer;
 	}
 }
