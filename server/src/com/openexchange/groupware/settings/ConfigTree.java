@@ -60,7 +60,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
@@ -178,7 +177,7 @@ public final class ConfigTree {
     /**
      * This class contains the shared functions for all user settings.
      */
-    private abstract static class AbstractUserFuncs implements SharedValue {
+    public abstract static class AbstractUserFuncs implements SharedValue {
 
         /**
          * {@inheritDoc}
@@ -187,7 +186,8 @@ public final class ConfigTree {
             final Setting setting) throws SettingException {
             try {
                 final UserStorage storage = UserStorage.getInstance();
-                final User oldUser = storage.getUser(session.getUserId(), session.getContext());
+                final User oldUser = storage.getUser(session.getUserId(),
+                    session.getContext());
                 final UserImpl user = new UserImpl(oldUser);
                 setValue(user, (String) setting.getSingleValue());
                 storage.updateUser(user, session.getContext());
@@ -207,9 +207,10 @@ public final class ConfigTree {
 
     private static Class< ? extends SettingSetup>[] getClasses() {
         return (Class< ? extends SettingSetup>[]) new Class[] {
-            com.openexchange.groupware.settings.tree.Identifier.class,
             com.openexchange.groupware.settings.tree.FastGUI.class,
             com.openexchange.groupware.settings.tree.GUI.class,
+            com.openexchange.groupware.settings.tree.Identifier.class,
+            com.openexchange.groupware.settings.tree.Language.class,
             com.openexchange.groupware.settings.tree.MaxUploadIdleTimeout.class,
             com.openexchange.groupware.settings.tree.Modules.class,
             com.openexchange.groupware.settings.tree.modules.Calendar.class,
@@ -235,6 +236,8 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.Tasks.class,
             com.openexchange.groupware.settings.tree.modules.tasks.Module.class,
             com.openexchange.groupware.settings.tree.modules.tasks.DelegateTasks.class,
+            com.openexchange.groupware.settings.tree.Participants.class,
+            com.openexchange.groupware.settings.tree.participants.ShowWithoutEmail.class,
             com.openexchange.groupware.settings.tree.TaskNotification.class
         };
     }
@@ -250,14 +253,6 @@ public final class ConfigTree {
         }
         tree = new Setting("", true);
         tree.setId(-1);
-
-        final Setting contactId = new Setting("contact_id", true);
-        contactId.setId(-1);
-        tree.addElement(contactId);
-
-        final Setting language = new Setting("language", true);
-        language.setId(-1);
-        tree.addElement(language);
 
         final Setting timezone = new Setting(TIMEZONE, true);
         timezone.setId(-1);
@@ -377,41 +372,7 @@ public final class ConfigTree {
         spamButton.setId(-1);
         mail.addElement(spamButton);
 
-        final Setting participants = new Setting("participants", true);
-        participants.setId(-1);
-        tree.addElement(participants);
-
-        final Setting showWithoutEmail = new Setting("showWithoutEmail", true);
-        showWithoutEmail.setId(-1);
-        participants.addElement(showWithoutEmail);
-
         final Map<String, SharedValue> tmp = new HashMap<String, SharedValue>();
-        tmp.put(contactId.getPath(), new ReadOnlyValue() {
-            public boolean isAvailable(final Session session) {
-                return true;
-            }
-            public void getValue(final Session session,
-                final Setting setting) {
-                setting.setSingleValue(Integer.valueOf(UserStorage.getStorageUser(session.getUserId(), session.getContext())
-                    .getContactId()));
-            }
-        });
-        tmp.put(language.getPath(), new AbstractUserFuncs() {
-            public void getValue(final Session session,
-                final Setting setting) {
-                setting.setSingleValue(UserStorage.getStorageUser(session.getUserId(), session.getContext())
-                    .getPreferredLanguage());
-            }
-            public boolean isAvailable(final Session session) {
-                return true;
-            }
-            public boolean isWritable() {
-                return true;
-            }
-            protected void setValue(final UserImpl user, final String value) {
-                user.setPreferredLanguage(value);
-            }
-        });
         tmp.put(timezone.getPath(), new AbstractUserFuncs() {
             public void getValue(final Session session,
                 final Setting setting) {
@@ -885,19 +846,6 @@ public final class ConfigTree {
 					throw new SettingException(e);
 				}
 			}
-        });
-        tmp.put(showWithoutEmail.getPath(), new ReadOnlyValue() {
-            public boolean isAvailable(final Session session) {
-				final UserConfiguration config = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-						session.getUserId(), session.getContext());
-				return config.hasCalendar() || config.hasTask();
-			}
-            public void getValue(final Session session,
-                final Setting setting) throws SettingException {
-                setting.setSingleValue(Boolean.valueOf(ParticipantConfig
-                    .getProperty(ParticipantConfig.Property
-                    .SHOW_WITHOUT_EMAIL)));
-            }
         });
         
         try {
