@@ -157,7 +157,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 
 	/**
 	 * This property defines if this permission declares the owner to be the
-	 * folder administrator who posseses the rights to alter a folder's
+	 * folder administrator who possesses the rights to alter a folder's
 	 * properties or to rename a folder
 	 */
 	private boolean folderAdmin;
