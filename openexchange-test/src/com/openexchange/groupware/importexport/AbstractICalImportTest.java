@@ -71,7 +71,7 @@ public class AbstractICalImportTest extends AbstractContactTest {
     protected static Context ctx;
 
     @BeforeClass
-	public static void initialize() throws SQLException, AbstractOXException {
+	public static void initialize() throws Exception {
 		Init.startServer();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance();

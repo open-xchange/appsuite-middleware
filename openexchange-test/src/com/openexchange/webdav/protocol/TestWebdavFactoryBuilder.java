@@ -57,7 +57,6 @@ public class TestWebdavFactoryBuilder {
 		if(mode == INFO) {
 			Init.loadTestProperties();
 			Init.startServer();
-			ContextStorage.init();
 		}
 	}
 	

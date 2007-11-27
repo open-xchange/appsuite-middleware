@@ -110,7 +110,7 @@ public class Bug8475 extends AbstractICalImportTest{
 		assertTrue("Found attendee?" , found);
 	}
 	
-	@Test public void testInternalAttendee() throws UnsupportedEncodingException, SQLException, NumberFormatException, AbstractOXException{
+	@Test public void testInternalAttendee() throws Exception{
 		final User testUser = getUserParticipant();
 		final String ical = 
 			"BEGIN:VCALENDAR\n" +

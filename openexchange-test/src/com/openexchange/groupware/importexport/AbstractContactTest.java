@@ -409,7 +409,7 @@ public class AbstractContactTest {
 	}
 
 	@BeforeClass
-	public static void initialize() throws SQLException, AbstractOXException {
+	public static void initialize() throws Exception {
 		Init.startServer();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance();
@@ -505,9 +505,9 @@ public class AbstractContactTest {
 	 * Loads a user that is different from the usual user for testing
 	 * 
 	 * @return the user information of user_participant1 as defined in ajax.properties 
-	 * @throws AbstractOXException
+	 * @throws Exception
 	 */
-	public static User getUserParticipant() throws AbstractOXException{
+	public static User getUserParticipant() throws Exception{
 		Init.startServer();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance();
