@@ -94,7 +94,8 @@ public class SessiondInit implements Initialization {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Starting Sessiond");
 			}
-			Sessiond.getInstance(config);
+			final Sessiond sessiond = Sessiond.getInstance(config);
+			sessiond.start();			
 		}
 		started.set(true);
 	}
