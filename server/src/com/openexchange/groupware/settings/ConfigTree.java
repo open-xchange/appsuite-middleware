@@ -54,7 +54,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,14 +65,12 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.SettingException.Code;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterface;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
@@ -204,6 +201,7 @@ public final class ConfigTree {
         return (Class< ? extends SettingSetup>[]) new Class[] {
             com.openexchange.groupware.settings.tree.CalendarNotification.class,
             com.openexchange.groupware.settings.tree.ContactId.class,
+            com.openexchange.groupware.settings.tree.CurrentTime.class,
             com.openexchange.groupware.settings.tree.FastGUI.class,
             com.openexchange.groupware.settings.tree.GUI.class,
             com.openexchange.groupware.settings.tree.Identifier.class,
@@ -235,6 +233,8 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.tasks.DelegateTasks.class,
             com.openexchange.groupware.settings.tree.Participants.class,
             com.openexchange.groupware.settings.tree.participants.ShowWithoutEmail.class,
+            com.openexchange.groupware.settings.tree.ReloadTimes.class,
+            com.openexchange.groupware.settings.tree.ServerVersion.class,
             com.openexchange.groupware.settings.tree.TaskNotification.class,
             com.openexchange.groupware.settings.tree.TimeZone.class
         };
@@ -251,18 +251,6 @@ public final class ConfigTree {
         }
         tree = new Setting("", true);
         tree.setId(-1);
-
-        final Setting reloadTimes = new Setting("reloadtimes", true);
-        reloadTimes.setId(-1);
-        tree.addElement(reloadTimes);
-
-        final Setting serverVersion = new Setting("serverVersion", true);
-        serverVersion.setId(-1);
-        tree.addElement(serverVersion);
-
-        final Setting currentTime = new Setting("currentTime", true);
-        currentTime.setId(-1);
-        tree.addElement(currentTime);
 
         final Setting folder = new Setting("folder", true);
         folder.setId(-1);
@@ -362,42 +350,6 @@ public final class ConfigTree {
         mail.addElement(spamButton);
 
         final Map<String, SharedValue> tmp = new HashMap<String, SharedValue>();
-        tmp.put(reloadTimes.getPath(), new ReadOnlyValue() {
-            private static final int MINUTE = 60 * 1000;
-            public boolean isAvailable(final Session session) {
-                return true;
-            }
-            public void getValue(final Session session,
-                final Setting setting) {
-                setting.addMultiValue(0); // Never
-                setting.addMultiValue(5 * MINUTE); // 5 Minutes
-                setting.addMultiValue(10 * MINUTE); // 10 Minutes
-                setting.addMultiValue(15 * MINUTE); // 15 Minutes
-                setting.addMultiValue(30 * MINUTE); // 30 Minutes
-            }
-        });
-        tmp.put(serverVersion.getPath(), new ReadOnlyValue() {
-            public boolean isAvailable(final Session session) {
-                return true;
-            }
-            public void getValue(final Session session,
-                final Setting setting) {
-                setting.setSingleValue(Version.VERSION_STRING);
-            }
-        });
-        tmp.put(currentTime.getPath(), new ReadOnlyValue() {
-            public boolean isAvailable(final Session session) {
-                return true;
-            }
-            public void getValue(final Session session,
-                final Setting setting) {
-                long time = System.currentTimeMillis();
-                final TimeZone zone = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(),
-						session.getContext()).getTimeZone());
-				time  += zone.getOffset(time);
-                setting.setSingleValue(time);
-            }
-        });
         tmp.put(tasks.getPath(), new ReadOnlyValue() {
             public boolean isAvailable(final Session session) {
 				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
