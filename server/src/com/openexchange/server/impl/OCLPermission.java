@@ -169,16 +169,19 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	private boolean groupPermission;
 
 	/**
-	 * Constructor
-	 * 
+	 * Initializes a new {@link OCLPermission}
 	 */
 	public OCLPermission() {
 		super();
 	}
 
 	/**
-	 * Constructor
+	 * Initializes a new {@link OCLPermission}
 	 * 
+	 * @param entity
+	 *            The entity ID
+	 * @param fuid
+	 *            The folder ID
 	 */
 	public OCLPermission(final int entity, final int fuid) {
 		super();
@@ -201,10 +204,22 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		groupPermission = false;
 	}
 
+	/**
+	 * Sets the name
+	 * 
+	 * @param name
+	 *            The name
+	 */
 	public void setName(final String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Sets the entity ID
+	 * 
+	 * @param entity
+	 *            The entity ID
+	 */
 	public void setEntity(final int entity) {
 		this.entity = entity;
 		if (name == null) {
@@ -212,6 +227,13 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		}
 	}
 
+	/**
+	 * Set folder admin
+	 * 
+	 * @param folderAdmin
+	 *            <code>true</code> to allow folder admin; otherwise
+	 *            <code>false</code>
+	 */
 	public void setFolderAdmin(final boolean folderAdmin) {
 		this.folderAdmin = folderAdmin;
 		if (name == null) {
@@ -219,6 +241,13 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		}
 	}
 
+	/**
+	 * Set group permission
+	 * 
+	 * @param folderAdmin
+	 *            <code>true</code> to mark as group; otherwise
+	 *            <code>false</code>
+	 */
 	public void setGroupPermission(final boolean groupPermission) {
 		this.groupPermission = groupPermission;
 		if (name == null) {
@@ -226,6 +255,14 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		}
 	}
 
+	/**
+	 * Sets the folder permission
+	 * 
+	 * @param p
+	 *            The folder permission
+	 * @return <code>true</code> if given permission value could be
+	 *         successfully applied; otherwise <code>false</code>
+	 */
 	public boolean setFolderPermission(final int p) {
 		if (validatePermission(p)) {
 			this.fp = p;
@@ -234,6 +271,14 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		return false;
 	}
 
+	/**
+	 * Sets the read permission
+	 * 
+	 * @param p
+	 *            The read permission
+	 * @return <code>true</code> if given permission value could be
+	 *         successfully applied; otherwise <code>false</code>
+	 */
 	public boolean setReadObjectPermission(final int p) {
 		if (validatePermission(p)) {
 			this.orp = p;
@@ -242,6 +287,14 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		return false;
 	}
 
+	/**
+	 * Sets the write permission
+	 * 
+	 * @param p
+	 *            The write permission
+	 * @return <code>true</code> if given permission value could be
+	 *         successfully applied; otherwise <code>false</code>
+	 */
 	public boolean setWriteObjectPermission(final int p) {
 		if (validatePermission(p)) {
 			this.owp = p;
@@ -250,6 +303,14 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		return false;
 	}
 
+	/**
+	 * Sets the delete permission
+	 * 
+	 * @param p
+	 *            The delete permission
+	 * @return <code>true</code> if given permission value could be
+	 *         successfully applied; otherwise <code>false</code>
+	 */
 	public boolean setDeleteObjectPermission(final int p) {
 		if (validatePermission(p)) {
 			this.odp = p;
@@ -258,6 +319,18 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		return false;
 	}
 
+	/**
+	 * Sets all object-related permission
+	 * 
+	 * @param pr
+	 *            The read permission
+	 * @param pw
+	 *            The write permission
+	 * @param pd
+	 *            The delete permission
+	 * @return <code>true</code> if given permission values could be
+	 *         successfully applied; otherwise <code>false</code>
+	 */
 	public boolean setAllObjectPermission(final int pr, final int pw, final int pd) {
 		if (validatePermission(pr) && validatePermission(pw) && validatePermission(pd)) {
 			this.orp = pr;
@@ -268,6 +341,20 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		return false;
 	}
 
+	/**
+	 * Sets all permission
+	 * 
+	 * @param fp
+	 *            The folder permission
+	 * @param opr
+	 *            The read permission
+	 * @param opw
+	 *            The write permission
+	 * @param opd
+	 *            The delete permission
+	 * @return <code>true</code> if given permission values could be
+	 *         successfully applied; otherwise <code>false</code>
+	 */
 	public boolean setAllPermission(final int fp, final int opr, final int opw, final int opd) {
 		if (validatePermission(fp) && validatePermission(opr) && validatePermission(opw) && validatePermission(opd)) {
 			this.fp = fp;
@@ -279,38 +366,90 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		return false;
 	}
 
-	private boolean validatePermission(final int p) {
+	/**
+	 * Validates given permission value
+	 * 
+	 * @param p
+	 *            The permission value to validate
+	 * @return <code>true</code> if value is valid; otherwise
+	 *         <code>false</code>
+	 */
+	private final boolean validatePermission(final int p) {
 		return ((p % 2 == 0 && (p <= 128 && p >= 0)));
 	}
 
-	public void setFuid(final int pid) {
-		this.fuid = pid;
+	/**
+	 * Sets the folder ID
+	 * 
+	 * @param fuid
+	 *            The folder ID
+	 */
+	public void setFuid(final int fuid) {
+		this.fuid = fuid;
 	}
 
+	/**
+	 * Checks if this permission grants folder admin
+	 * 
+	 * @return <code>true</code> if this permission grants folder admin;
+	 *         otherwise <code>false</code>
+	 */
 	public boolean isFolderAdmin() {
 		return folderAdmin;
 	}
 
+	/**
+	 * Checks if this permission is marked as group permission
+	 * 
+	 * @return <code>true</code> if this permission is marked as group
+	 *         permission; otherwise <code>false</code>
+	 */
 	public boolean isGroupPermission() {
 		return groupPermission;
 	}
 
+	/**
+	 * Gets the folder permission
+	 * 
+	 * @return The folder permission
+	 */
 	public int getFolderPermission() {
 		return fp;
 	}
 
+	/**
+	 * Gets the read permission
+	 * 
+	 * @return The read permission
+	 */
 	public int getReadPermission() {
 		return orp;
 	}
 
+	/**
+	 * Gets the write permission
+	 * 
+	 * @return The write permission
+	 */
 	public int getWritePermission() {
 		return owp;
 	}
 
+	/**
+	 * Gets the delete permission
+	 * 
+	 * @return The delete permission
+	 */
 	public int getDeletePermission() {
 		return odp;
 	}
 
+	/**
+	 * Checks if this permission grants at least folder's visibility
+	 * 
+	 * @return <code>true</code> if folder's visibility is granted; otherwise
+	 *         <code>false</code>
+	 */
 	public boolean isFolderVisible() {
 		if (isFolderAdmin()) {
 			return true;
@@ -318,46 +457,109 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		return (getFolderPermission() >= READ_FOLDER);
 	}
 
+	/**
+	 * Checks if this permission grants at least object creation
+	 * 
+	 * @return <code>true</code> if object creation is granted; otherwise
+	 *         <code>false</code>
+	 */
 	public boolean canCreateObjects() {
 		return (getFolderPermission() >= CREATE_OBJECTS_IN_FOLDER);
 	}
 
+	/**
+	 * Checks if this permission grants at least subfolder creation
+	 * 
+	 * @return <code>true</code> if subfolder creation is granted; otherwise
+	 *         <code>false</code>
+	 */
 	public boolean canCreateSubfolders() {
 		return (getFolderPermission() >= CREATE_SUB_FOLDERS);
 	}
 
+	/**
+	 * Checks if this permission grants at least own object read access
+	 * 
+	 * @return <code>true</code> if own object read access is granted;
+	 *         otherwise <code>false</code>
+	 */
 	public boolean canReadOwnObjects() {
 		return (getReadPermission() >= READ_OWN_OBJECTS);
 	}
 
+	/**
+	 * Checks if this permission grants at least all object read access
+	 * 
+	 * @return <code>true</code> if all object read access is granted;
+	 *         otherwise <code>false</code>
+	 */
 	public boolean canReadAllObjects() {
 		return (getReadPermission() >= READ_ALL_OBJECTS);
 	}
 
+	/**
+	 * Checks if this permission grants at least own object write access
+	 * 
+	 * @return <code>true</code> if own object write access is granted;
+	 *         otherwise <code>false</code>
+	 */
 	public boolean canWriteOwnObjects() {
 		return (getWritePermission() >= WRITE_OWN_OBJECTS);
 	}
 
+	/**
+	 * Checks if this permission grants at least all object write access
+	 * 
+	 * @return <code>true</code> if all object write access is granted;
+	 *         otherwise <code>false</code>
+	 */
 	public boolean canWriteAllObjects() {
 		return (getWritePermission() >= WRITE_ALL_OBJECTS);
 	}
 
+	/**
+	 * Checks if this permission grants at least own object deletion
+	 * 
+	 * @return <code>true</code> if own object deletion is granted; otherwise
+	 *         <code>false</code>
+	 */
 	public boolean canDeleteOwnObjects() {
 		return (getDeletePermission() >= DELETE_OWN_OBJECTS);
 	}
 
+	/**
+	 * Checks if this permission grants at least all object deletion
+	 * 
+	 * @return <code>true</code> if all object deletion is granted; otherwise
+	 *         <code>false</code>
+	 */
 	public boolean canDeleteAllObjects() {
 		return (getDeletePermission() >= DELETE_ALL_OBJECTS);
 	}
 
+	/**
+	 * Gets the name
+	 * 
+	 * @return The name
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Gets the entity ID
+	 * 
+	 * @return The entity ID
+	 */
 	public int getEntity() {
 		return entity;
 	}
 
+	/**
+	 * Gets the folder ID
+	 * 
+	 * @return The folder ID
+	 */
 	public int getFuid() {
 		return fuid;
 	}
