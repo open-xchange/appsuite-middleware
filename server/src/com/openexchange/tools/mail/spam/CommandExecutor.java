@@ -80,7 +80,7 @@ public final class CommandExecutor {
 	private final OutputStream inputStream;
 
 	/**
-	 * Creates and starts a process that executs given command
+	 * Creates and starts a process that executes given command
 	 */
 	public CommandExecutor(final String cmd) throws IOException, OXException {
 		if (cmd == null) {
