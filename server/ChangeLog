@@ -1,3 +1,7 @@
+* 2007-11-27 - marcus.klein@open-xchange.com
+
+ - Bugfix #10276: Excluded in the end date range query the end date.
+
 * 2007-11-21 - thorben.betten@open-xchange.com
 
  - Bugfix #10033: Fixed 'edit-draft'

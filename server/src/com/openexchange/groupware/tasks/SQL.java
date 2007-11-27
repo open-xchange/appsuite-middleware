@@ -298,7 +298,7 @@ public final class SQL {
         final Date[] range = search.getRange();
         if (null != range) {
             if (range.length == 2) {
-                sql.append("(end >= ? AND end <= ?)");
+                sql.append("(end >= ? AND end < ?)");
             } else {
                 throw new TaskException(Code.WRONG_DATE_RANGE, range.length);
             }
