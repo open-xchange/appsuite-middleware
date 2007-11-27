@@ -236,10 +236,11 @@ public final class AJPv13Listener implements Runnable {
 				waitingOnAJPSocket = true;
 				/*
 				 * Keep on processing underlying stream's data as long as
-				 * accepted client socket is alive and its input is not shut
-				 * down
+				 * accepted client socket is alive, its input is not shut down
+				 * and no communication failure occurred.
 				 */
-				while (client != null && !client.isInputShutdown()) {
+				boolean communicationFailure = false;
+				while (client != null && !client.isInputShutdown() && !communicationFailure) {
 					try {
 						ajpCon.processRequest();
 						ajpCon.createResponse();
@@ -275,6 +276,7 @@ public final class AJPv13Listener implements Runnable {
 						/*
 						 * Obviously client socket is down. So leave.
 						 */
+						communicationFailure = true;
 						continue;
 					} catch (final AJPv13InvalidByteSequenceException e) {
 						/*
@@ -287,10 +289,16 @@ public final class AJPv13Listener implements Runnable {
 					} catch (final AbstractOXException e) {
 						LOG.error(e.getMessage(), e);
 						closeAndKeepAlive();
+					} catch (final IOException e) {
+						LOG.error(e.getMessage(), e);
+						/*
+						 * Obviously a communication error occurred
+						 */
+						communicationFailure = true;
+						continue;
 					} catch (final Throwable e) {
 						/*
-						 * Catch Throwable to catch every Exception, even
-						 * RuntimeExceptions
+						 * Catch every throwable object
 						 */
 						final AJPv13Exception wrapper = new AJPv13Exception(e);
 						LOG.error(wrapper.getMessage(), wrapper);

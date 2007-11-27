@@ -1,3 +1,8 @@
+* 2007-11-27 - thorben.betten@open-xchange.com
+
+ - Bugfix #9963: Avoiding infinite loops of broke pipe errors on a lost
+   socket connection
+
 * 2007-11-27 - marcus.klein@open-xchange.com
 
  - Bugfix #10276: Excluded in the end date range query the end date.
