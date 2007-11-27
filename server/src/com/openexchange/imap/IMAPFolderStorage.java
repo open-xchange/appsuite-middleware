@@ -85,7 +85,6 @@ import com.openexchange.imap.user2acl.User2ACLArgs;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailFolderStorage;
 import com.openexchange.mail.MailSessionParameterNames;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
@@ -444,9 +443,14 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 			/*
 			 * Insert
 			 */
-			final String parentFullname = prepareMailFolderParam(toCreate.getParentFullname());
-			IMAPFolder parent = DEFAULT_FOLDER_ID.equals(parentFullname) ? (IMAPFolder) imapStore.getDefaultFolder()
-					: (IMAPFolder) imapStore.getFolder(parentFullname);
+			String parentFullname = prepareMailFolderParam(toCreate.getParentFullname());
+			IMAPFolder parent;
+			if (DEFAULT_FOLDER_ID.equals(parentFullname)) {
+				parent = (IMAPFolder) imapStore.getDefaultFolder();
+				parentFullname = parent.getFullName();
+			} else {
+				parent = (IMAPFolder) imapStore.getFolder(parentFullname);
+			}
 			if (!parent.exists()) {
 				parent = checkForNamespaceFolder(parentFullname);
 				if (null == parent) {
@@ -469,7 +473,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 				throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character
 						.valueOf(parent.getSeparator()));
 			}
-			final IMAPFolder createMe = (IMAPFolder) imapStore.getFolder(new StringBuilder(parentFullname).append(
+			final IMAPFolder createMe = (IMAPFolder) imapStore.getFolder(new StringBuilder(parent.getFullName()).append(
 					parent.getSeparator()).append(toCreate.getName()).toString());
 			if (createMe.exists()) {
 				throw new IMAPException(IMAPException.Code.DUPLICATE_FOLDER, createMe.getFullName());
