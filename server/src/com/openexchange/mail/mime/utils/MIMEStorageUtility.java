@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap.utils;
+package com.openexchange.mail.mime.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,17 +67,17 @@ import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.UIDSet;
 
 /**
- * {@link IMAPStorageUtility} - Provides IMAP-specific storage utility methods
+ * {@link MIMEStorageUtility} - Provides MIME-specific storage utility methods
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class IMAPStorageUtility {
+public final class MIMEStorageUtility {
 
 	/**
 	 * No instance
 	 */
-	private IMAPStorageUtility() {
+	private MIMEStorageUtility() {
 		super();
 	}
 
@@ -135,7 +135,7 @@ public final class IMAPStorageUtility {
 	 * constants from given fetch profile
 	 * 
 	 * @param fetchProfile
-	 *            The ftehc profile
+	 *            The fetch profile
 	 * @return An appropriate collection of {@link MailListField} enumeration
 	 *         constants
 	 */
@@ -235,7 +235,7 @@ public final class IMAPStorageUtility {
 					/*
 					 * Break in sequence. Need to reexamine this message at the
 					 * top of the outer loop, so decrement 'i' to cancel the
-					 * outer loop's autoincrement
+					 * outer loop's auto-increment
 					 */
 					i--;
 					break Inner;
@@ -268,7 +268,7 @@ public final class IMAPStorageUtility {
 	static {
 		ENV_FIELDS = new HashSet<MailListField>(8);
 		/*
-		 * The Envelope is an aggregration of the common attributes of a
+		 * The Envelope is an aggregation of the common attributes of a
 		 * Message: From, To, Cc, Bcc, ReplyTo, Subject and Date.
 		 */
 		ENV_FIELDS.add(MailListField.FROM);

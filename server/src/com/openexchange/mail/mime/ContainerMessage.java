@@ -593,15 +593,15 @@ public final class ContainerMessage extends Message implements Serializable {
 		return headers.size();
 	}
 
-	public Enumeration getAllHeaders() throws MessagingException {
+	public Enumeration<?> getAllHeaders() throws MessagingException {
 		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
-	public Enumeration getMatchingHeaders(final String[] header_names) throws MessagingException {
+	public Enumeration<?> getMatchingHeaders(final String[] header_names) throws MessagingException {
 		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
-	public Enumeration getNonMatchingHeaders(final String[] header_names) throws MessagingException {
+	public Enumeration<?> getNonMatchingHeaders(final String[] header_names) throws MessagingException {
 		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
@@ -698,9 +698,12 @@ public final class ContainerMessage extends Message implements Serializable {
 		private static final String TYPE = "rfc822";
 
 		private final String address;
+		
+		private final int hashCode;
 
 		public DummyAddress(final String address) {
 			this.address = MessageUtility.decodeMultiEncodedHeader(address);
+			hashCode = address.toLowerCase().hashCode();
 		}
 
 		@Override
@@ -732,5 +735,9 @@ public final class ContainerMessage extends Message implements Serializable {
 			return false;
 		}
 
+		@Override
+		public int hashCode() {
+			return hashCode;
+		}
 	}
 }

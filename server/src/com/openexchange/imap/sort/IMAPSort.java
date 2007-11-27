@@ -49,10 +49,10 @@
 
 package com.openexchange.imap.sort;
 
-import static com.openexchange.imap.utils.IMAPStorageUtility.getCacheFetchProfile;
-import static com.openexchange.imap.utils.IMAPStorageUtility.getCacheFields;
-import static com.openexchange.imap.utils.IMAPStorageUtility.getFetchProfile;
 import static com.openexchange.mail.MailInterfaceImpl.mailInterfaceMonitor;
+import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getCacheFetchProfile;
+import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getCacheFields;
+import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 import static com.openexchange.mail.utils.StorageUtility.EMPTY_MSGS;
 
 import java.text.Collator;

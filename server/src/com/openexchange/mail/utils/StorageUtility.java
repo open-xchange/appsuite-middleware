@@ -58,7 +58,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.mail.Message;
-import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 
 import com.openexchange.mail.MailException;
@@ -66,15 +65,10 @@ import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.sun.mail.iap.ProtocolException;
-import com.sun.mail.iap.Response;
-import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.protocol.FetchResponse;
-import com.sun.mail.imap.protocol.IMAPProtocol;
 
 /**
- * {@link StorageUtility} - Offers general prurpose methods for both folder and
- * message storage
+ * {@link StorageUtility} - Offers general methods for both folder and message
+ * storage
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -175,78 +169,6 @@ public final class StorageUtility {
 		return (addressBuilder.toString());
 	}
 
-	private static final String STR_UID = "UID";
-
-	private static final String TMPL_FETCH_HEADER_REV1 = "FETCH %s (BODY.PEEK[HEADER])";
-
-	private static final String TMPL_FETCH_HEADER_NON_REV1 = "FETCH %s (RFC822.HEADER)";
-
-	private static final Pattern PATTERN_PARSE_HEADER = Pattern
-			.compile("(\\S+):\\s(.*)((?:\r?\n(?:\\s(?:.+)))*|(?:$))");
-
-	/**
-	 * Call this method if JavaMail's routine fails to load a message's header.
-	 * Headers are read in a safe manner and filled into a map which is then
-	 * returned
-	 * 
-	 * @param msg
-	 *            The message which headers shall be loaded
-	 * @param uid
-	 *            <code>true</code> to reference to message via its UID;
-	 *            otherwise via its sequence ID
-	 * @return A {@link Map} containing the headers
-	 * @throws MessagingException
-	 * @throws ProtocolException
-	 */
-	public static Map<String, String> loadHeaders(final Message msg, final boolean uid) throws MessagingException,
-			ProtocolException {
-		final IMAPFolder fld = (IMAPFolder) msg.getFolder();
-		final IMAPProtocol p = fld.getProtocol();
-		final String tmpl = p.isREV1() ? TMPL_FETCH_HEADER_REV1 : TMPL_FETCH_HEADER_NON_REV1;
-		final String cmd;
-		if (uid) {
-			cmd = new StringBuilder(64).append(STR_UID).append(' ').append(
-					String.format(tmpl, Long.valueOf(fld.getUID(msg)))).toString();
-		} else {
-			cmd = String.format(tmpl, Integer.valueOf(msg.getMessageNumber()));
-		}
-		final Map<String, String> retval = new HashMap<String, String>();
-		final Response[] r = p.command(cmd, null);
-		final Response response = r[r.length - 1];
-		try {
-			if (response.isOK()) {
-				final int len = r.length - 1;
-				final StringBuilder valBuilder = new StringBuilder();
-				NextResponse: for (int i = 0; i < len; i++) {
-					if (r[i] == null) {
-						continue NextResponse;
-					} else if (!(r[i] instanceof FetchResponse)) {
-						continue NextResponse;
-					}
-					final FetchResponse f = ((FetchResponse) r[i]);
-					if (f.getNumber() != msg.getMessageNumber()) {
-						continue NextResponse;
-					}
-					final Matcher m = PATTERN_PARSE_HEADER.matcher(unfold(f.toString()));
-					while (m.find()) {
-						valBuilder.append(m.group(2));
-						if (m.group(3) != null) {
-							valBuilder.append(unfold(m.group(3)));
-						}
-						retval.put(m.group(1), valBuilder.toString());
-						valBuilder.setLength(0);
-					}
-					r[i] = null;
-				}
-			}
-		} finally {
-			// dispatch remaining untagged responses
-			p.notifyResponseHandlers(r);
-			p.handleResult(response);
-		}
-		return null;
-	}
-
 	private static final String ENC_ASCII = "US-ASCII";
 
 	/**
@@ -267,6 +189,9 @@ public final class StorageUtility {
 			return null;
 		}
 	}
+
+	private static final Pattern PATTERN_PARSE_HEADER = Pattern
+			.compile("(\\S+):\\s(.*)((?:\r?\n(?:\\s(?:.+)))*|(?:$))");
 
 	/**
 	 * Parses specified headers into a map

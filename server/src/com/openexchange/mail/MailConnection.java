@@ -60,7 +60,9 @@ import com.openexchange.cache.OXCachingException;
 import com.openexchange.mail.cache.MailConnectionCache;
 import com.openexchange.mail.config.GlobalMailConfig;
 import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.mime.MIMEHeaderLoader;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
+import com.openexchange.mail.mime.spam.SpamHandler;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtilityInit;
@@ -162,6 +164,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 		MessageUtilityInit.getInstance().stop();
 		UserSettingMailStorage.releaseInstance();
 		MailConnectionWatcher.stop();
+		SpamHandler.releaseInstance();
 		internalInstance.shutdownInternal();
 	}
 
@@ -180,7 +183,8 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	public static final MailConnection<?, ?, ?> getInstance(final Session session) throws MailException {
 		try {
 			if (MailConnectionCache.getInstance().containsMailConnection(session)) {
-				final MailConnection<?, ?, ?> mailConnection = MailConnectionCache.getInstance().removeMailConnection(session);
+				final MailConnection<?, ?, ?> mailConnection = MailConnectionCache.getInstance().removeMailConnection(
+						session);
 				if (mailConnection != null) {
 					/*
 					 * Apply new thread's trace information
@@ -215,8 +219,8 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 				 * Try to fetch from cache again
 				 */
 				if (MailConnectionCache.getInstance().containsMailConnection(session)) {
-					final MailConnection<?, ?, ?> mailConnection = MailConnectionCache.getInstance().removeMailConnection(
-							session);
+					final MailConnection<?, ?, ?> mailConnection = MailConnectionCache.getInstance()
+							.removeMailConnection(session);
 					if (mailConnection != null) {
 						/*
 						 * Apply new thread's trace information
@@ -277,6 +281,15 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 */
 	public static final String getMailPermissionClass() {
 		return internalInstance.getMailPermissionClassInternal();
+	}
+
+	/**
+	 * Gets the class name of {@link MIMEHeaderLoader} implementation
+	 * 
+	 * @return The class name of {@link MIMEHeaderLoader} implementation
+	 */
+	public static final String getHeaderLoaderClass() {
+		return internalInstance.getHeaderLoaderClassInternal();
 	}
 
 	/**
@@ -398,7 +411,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	/**
 	 * Checks if all necessary fields are set in this connection object
 	 * <p>
-	 * This routine is implicitely invoked by {@link #connect()}
+	 * This routine is implicitly invoked by {@link #connect()}
 	 * 
 	 * @throws MailException
 	 *             If a necessary field is missing
@@ -411,7 +424,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 		 */
 		if (getMailServer() == null) {
 			throw new MailException(MailException.Code.MISSING_CONNECT_PARAM, "mail server");
-		} else if (getMailServerPort() == -1) {
+		} else if (checkMailServerPort() && getMailServerPort() == -1) {
 			throw new MailException(MailException.Code.MISSING_CONNECT_PARAM, "mail server port");
 		} else if (getLogin() == null) {
 			throw new MailException(MailException.Code.MISSING_CONNECT_PARAM, "login");
@@ -499,6 +512,15 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 			}
 		}
 	}
+
+	/**
+	 * Defines if mail server port has to be set before establishing any
+	 * connection
+	 * 
+	 * @return <code>true</code> if mail server port has to be set before
+	 *         establishing any connection; otherwise <code>false</code>
+	 */
+	protected abstract boolean checkMailServerPort();
 
 	/**
 	 * Initializes the user-specific mail configuration. Initialization of mail
@@ -612,6 +634,13 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 * @return The name of {@link MailPermission} implementation
 	 */
 	protected abstract String getMailPermissionClassInternal();
+
+	/**
+	 * Gets the name of {@link MIMEHeaderLoader} implementation
+	 * 
+	 * @return The name of {@link MIMEHeaderLoader} implementation
+	 */
+	protected abstract String getHeaderLoaderClassInternal();
 
 	/**
 	 * Trigger all necessary startup actions

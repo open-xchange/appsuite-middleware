@@ -122,7 +122,7 @@ public final class ContentType implements Serializable {
 
 	public ContentType(final String contentTypeArg, final boolean strict) throws MailException {
 		this();
-		final String contentType = contentTypeArg.trim();
+		final String contentType = removeEndingSemicolon(contentTypeArg.trim().replaceAll("\\s*=\\s*", "="));
 		if (strict) {
 			/*
 			 * Expect a correct base type (e.g. text/plain) and
@@ -444,4 +444,19 @@ public final class ContentType implements Serializable {
 		return sb.toString();
 	}
 
+	/**
+	 * Removes ending '<code>;</code>' character if present
+	 * 
+	 * @param contentTypeArg
+	 *            The content type string argument
+	 * @return The content type string w/o ending '<code>;</code>' character
+	 */
+	private static String removeEndingSemicolon(final String contentTypeArg) {
+		String contentType = contentTypeArg;
+		final int lastPos = contentType.length() - 1;
+		if (contentType.charAt(lastPos) == ';') {
+			contentType = contentType.substring(0, lastPos);
+		}
+		return contentType;
+	}
 }

@@ -263,8 +263,8 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		}
 	}
 
-	private MailFolder[] getSubfolderArray(final boolean all, final IMAPFolder parent) throws MailConfigException,
-			MessagingException, MailException {
+	private MailFolder[] getSubfolderArray(final boolean all, final IMAPFolder parent) throws MessagingException,
+			MailException {
 		final Folder[] subfolders;
 		if (IMAPConfig.isIgnoreSubscription() || all) {
 			subfolders = parent.list(PATTERN_ALL);

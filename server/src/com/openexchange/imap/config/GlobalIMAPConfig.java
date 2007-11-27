@@ -95,8 +95,6 @@ public final class GlobalIMAPConfig extends GlobalMailConfig {
 
 	private int imapConnectionIdleTime;
 
-	private String spamHandlerClass;
-
 	private String imapAuthEnc;
 
 	private String user2AclImpl;
@@ -209,12 +207,6 @@ public final class GlobalIMAPConfig extends GlobalMailConfig {
 		}
 
 		{
-			spamHandlerClass = imapProperties.getProperty("spamHandlerClass",
-					"com.openexchange.mail.imap.spam.SpamAssassinSpamHandler").trim();
-			logBuilder.append("\tSpam Handler Class: ").append(spamHandlerClass).append('\n');
-		}
-
-		{
 			final String imapAuthEncStr = imapProperties.getProperty("imapAuthEnc", "UTF-8").trim();
 			if (Charset.isSupported(imapAuthEncStr)) {
 				imapAuthEnc = imapAuthEncStr;
@@ -318,15 +310,6 @@ public final class GlobalIMAPConfig extends GlobalMailConfig {
 	 */
 	int getImapTimeout() {
 		return imapTimeout;
-	}
-
-	/**
-	 * Gets the spamHandlerClass
-	 * 
-	 * @return the spamHandlerClass
-	 */
-	String getSpamHandlerClass() {
-		return spamHandlerClass;
 	}
 
 	/**

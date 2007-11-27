@@ -47,69 +47,48 @@
  *
  */
 
-package com.openexchange.imap.spam;
+package com.openexchange.imap;
 
-import static com.openexchange.imap.utils.IMAPStorageUtility.toUIDSet;
-import static com.openexchange.mail.utils.StorageUtility.prepareMailFolderParam;
+import static com.openexchange.imap.IMAPCommandsCollection.loadHeadersIMAP;
 
-import java.util.Arrays;
+import java.util.Map;
 
+import javax.mail.Message;
 import javax.mail.MessagingException;
 
-import com.openexchange.imap.IMAPConnection;
-import com.openexchange.imap.IMAPException;
-import com.openexchange.imap.command.CopyIMAPCommand;
-import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.mime.MIMEHeaderLoader;
 import com.sun.mail.iap.ProtocolException;
-import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.IMAPStore;
 
 /**
- * {@link DefaultSpamHandler}
+ * {@link IMAPHeaderLoader}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class DefaultSpamHandler extends SpamHandler {
+public final class IMAPHeaderLoader extends MIMEHeaderLoader {
 
 	/**
-	 * Constructor
+	 * Initializes a new {@link IMAPHeaderLoader}
 	 */
-	public DefaultSpamHandler() {
+	public IMAPHeaderLoader() {
 		super();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.mime.MIMEHeaderLoader#loadHeaders(javax.mail.Message,
+	 *      boolean)
+	 */
 	@Override
-	public void handleHam(final IMAPFolder spamFolder, final long[] msgUIDs, final boolean move,
-			final IMAPConnection imapConnection, final IMAPStore imapStore) throws MessagingException, MailException {
-		/*
-		 * Copy to confirmed ham
-		 */
-		new CopyIMAPCommand(spamFolder, msgUIDs, prepareMailFolderParam(imapConnection.getFolderStorage()
-				.getConfirmedHamFolder()), false, true).doCommand();
-		if (move) {
-			/*
-			 * Copy messages to INBOX
-			 */
-			new CopyIMAPCommand(spamFolder, msgUIDs, "INBOX", false, true).doCommand();
-			/*
-			 * Delete messages
-			 */
-			new FlagsIMAPCommand(spamFolder, msgUIDs, FLAGS_DELETED, true, false).doCommand();
-			/*
-			 * Expunge messages immediately
-			 */
-			try {
-				spamFolder.getProtocol().uidexpunge(toUIDSet(msgUIDs));
-				/*
-				 * Force folder cache update through a close
-				 */
-				spamFolder.close(false);
-			} catch (final ProtocolException e) {
-				throw new IMAPException(IMAPException.Code.MOVE_PARTIALLY_COMPLETED, e, Arrays.toString(msgUIDs),
-						spamFolder.getFullName(), e.getMessage());
-			}
+	public Map<String, String> loadHeaders(final Message msg, final boolean uid) throws MailException {
+		try {
+			return loadHeadersIMAP(msg, uid);
+		} catch (final ProtocolException e) {
+			throw IMAPException.handleMessagingException(new MessagingException(e.getMessage(), e));
+		} catch (final MessagingException e) {
+			throw IMAPException.handleMessagingException(e);
 		}
 	}
 

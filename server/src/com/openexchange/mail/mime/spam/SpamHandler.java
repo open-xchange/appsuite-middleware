@@ -47,31 +47,28 @@
  *
  */
 
-package com.openexchange.imap.spam;
+package com.openexchange.mail.mime.spam;
 
-import static com.openexchange.imap.utils.IMAPStorageUtility.toUIDSet;
 import static com.openexchange.mail.utils.StorageUtility.prepareMailFolderParam;
 
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Store;
+import javax.mail.UIDFolder;
 
-import com.openexchange.imap.IMAPConnection;
-import com.openexchange.imap.IMAPException;
-import com.openexchange.imap.command.CopyIMAPCommand;
-import com.openexchange.imap.command.FlagsIMAPCommand;
-import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
-import com.sun.mail.iap.ProtocolException;
-import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.IMAPStore;
+import com.openexchange.mail.config.MailConfig;
 
 /**
- * {@link SpamHandler}
+ * {@link SpamHandler} - Handles spam/ham messages with <a
+ * href="java.sun.com/products/javamail/">JavaMail API</a>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -97,7 +94,7 @@ public abstract class SpamHandler {
 			LOCK.lock();
 			try {
 				if (null == instance) {
-					final String clazz = IMAPConfig.getSpamHandlerClass();
+					final String clazz = MailConfig.getSpamHandlerClass();
 					if (clazz == null || clazz.length() == 0) {
 						instance = new DefaultSpamHandler();
 					} else {
@@ -157,59 +154,73 @@ public abstract class SpamHandler {
 	 *            The message UIDs
 	 * @param move
 	 *            Whether to move or to copy the messages
-	 * @param imapConnection
-	 *            The IMAP connection providing access to storages
-	 * @param imapStore
-	 *            The imap store
+	 * @param mailConnection
+	 *            The mail connection providing access to storages
+	 * @param store
+	 *            The store
 	 * @throws MessagingException
 	 * @throws MailException
 	 */
-	public abstract void handleHam(IMAPFolder spamFolder, long[] msgUIDs, boolean move, IMAPConnection imapConnection,
-			IMAPStore imapStore) throws MessagingException, MailException;
+	public abstract void handleHam(Folder spamFolder, long[] msgUIDs, boolean move,
+			MailConnection<?, ?, ?> mailConnection, Store store) throws MessagingException, MailException;
 
 	/**
 	 * Handles messages that should be treated as spam messages
 	 * 
-	 * @param imapFolder
-	 *            The IMAP folder
+	 * @param folder
+	 *            The folder
 	 * @param msgUIDs
 	 *            The message UIDs
 	 * @param move
 	 *            Whether to move or to copy the messages
-	 * @param imapConnection
-	 *            The IMAP connection providing access to storages
+	 * @param mailConnection
+	 *            The mail connection providing access to storages
+	 * @param store
+	 *            The store
 	 * @throws MessagingException
 	 * @throws MailException
 	 */
-	public void handleSpam(final IMAPFolder imapFolder, final long[] msgUIDs, final boolean move,
-			final IMAPConnection imapConnection) throws MessagingException, MailException {
+	public void handleSpam(final Folder folder, final long[] msgUIDs, final boolean move,
+			final MailConnection<?, ?, ?> mailConnection, final Store store) throws MessagingException, MailException {
+		if (!(folder instanceof UIDFolder)) {
+			throw new IllegalArgumentException("Folder argument must implement " + UIDFolder.class.getCanonicalName());
+		}
 		/*
 		 * Copy to confirmed spam
 		 */
-		new CopyIMAPCommand(imapFolder, msgUIDs, prepareMailFolderParam(imapConnection.getFolderStorage()
-				.getConfirmedSpamFolder()), false, true).doCommand();
-		if (move) {
-			/*
-			 * Copy messages to spam folder
-			 */
-			new CopyIMAPCommand(imapFolder, msgUIDs, prepareMailFolderParam(imapConnection.getFolderStorage()
-					.getSpamFolder()), false, true).doCommand();
-			/*
-			 * Delete messages
-			 */
-			new FlagsIMAPCommand(imapFolder, msgUIDs, FLAGS_DELETED, true, false).doCommand();
-			/*
-			 * Expunge messages immediately
-			 */
-			try {
-				imapFolder.getProtocol().uidexpunge(toUIDSet(msgUIDs));
+		final boolean closeFolder = !folder.isOpen();
+		try {
+			if (closeFolder) {
+				folder.open(Folder.READ_ONLY);
+			}
+			final Message[] uidMsgs = ((UIDFolder) folder).getMessagesByUID(msgUIDs);
+			folder.copyMessages(uidMsgs, store.getFolder(prepareMailFolderParam(mailConnection.getFolderStorage()
+					.getConfirmedSpamFolder())));
+			if (move) {
+				/*
+				 * Copy messages to spam folder
+				 */
+				folder.copyMessages(uidMsgs, store.getFolder(prepareMailFolderParam(mailConnection.getFolderStorage()
+						.getSpamFolder())));
+				/*
+				 * Delete messages
+				 */
+				for (int i = 0; i < uidMsgs.length; i++) {
+					uidMsgs[i].setFlag(Flags.Flag.DELETED, true);
+				}
+				/*
+				 * TODO: Ensure that only affected messages got expunged.
+				 * Expunge messages immediately
+				 */
+				folder.expunge();
 				/*
 				 * Force folder cache update through a close
 				 */
-				imapFolder.close(false);
-			} catch (final ProtocolException e) {
-				throw new IMAPException(IMAPException.Code.MOVE_PARTIALLY_COMPLETED, e, Arrays.toString(msgUIDs),
-						imapFolder.getFullName(), e.getMessage());
+				folder.close(false);
+			}
+		} finally {
+			if (closeFolder && folder.isOpen()) {
+				folder.close(false);
 			}
 		}
 	}

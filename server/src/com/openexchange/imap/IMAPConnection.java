@@ -59,7 +59,6 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.imap.config.GlobalIMAPConfig;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPSessionProperties;
-import com.openexchange.imap.spam.SpamHandler;
 import com.openexchange.imap.user2acl.User2ACLInit;
 import com.openexchange.imap.user2acl.User2ACL.User2ACLException;
 import com.openexchange.mail.MailConnection;
@@ -380,6 +379,11 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 		return ACLPermission.class.getName();
 	}
 
+	@Override
+	protected String getHeaderLoaderClassInternal() {
+		return IMAPHeaderLoader.class.getName();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -416,7 +420,6 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	protected void shutdownInternal() throws MailException {
 		try {
 			User2ACLInit.getInstance().stop();
-			SpamHandler.releaseInstance();
 		} catch (final User2ACLException e) {
 			throw new MailException(e);
 		} catch (final MailException e) {
@@ -425,4 +428,15 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 			throw new MailException(e);
 		}
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.MailConnection#checkMailServerPort()
+	 */
+	@Override
+	protected boolean checkMailServerPort() {
+		return true;
+	}
+
 }

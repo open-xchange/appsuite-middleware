@@ -245,15 +245,6 @@ public final class IMAPConfig extends MailConfig {
 	}
 
 	/**
-	 * Gets the spamHandlerClass
-	 * 
-	 * @return the spamHandlerClass
-	 */
-	public static String getSpamHandlerClass() {
-		return ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).getSpamHandlerClass();
-	}
-
-	/**
 	 * Gets the global supportsACLs
 	 * 
 	 * @return the global supportsACLs

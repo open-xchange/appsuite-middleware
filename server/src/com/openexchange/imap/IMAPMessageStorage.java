@@ -49,11 +49,11 @@
 
 package com.openexchange.imap;
 
-import static com.openexchange.imap.utils.IMAPStorageUtility.getCacheFetchProfile;
-import static com.openexchange.imap.utils.IMAPStorageUtility.getCacheFields;
-import static com.openexchange.imap.utils.IMAPStorageUtility.getFetchProfile;
 import static com.openexchange.mail.MailInterfaceImpl.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
+import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getCacheFetchProfile;
+import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getCacheFields;
+import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 import static com.openexchange.mail.utils.StorageUtility.prepareMailFolderParam;
 
 import java.io.Serializable;
@@ -83,7 +83,6 @@ import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.sort.IMAPSort;
-import com.openexchange.imap.spam.SpamHandler;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
 import com.openexchange.imap.threadsort.TreeNode;
 import com.openexchange.mail.MailException;
@@ -97,6 +96,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContainerMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.spam.SpamHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.ImageMessageHandler;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
@@ -1022,6 +1022,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 
 	public void releaseResources() throws IMAPException {
 		if (null != imapFolder) {
+			keepSeen();
 			try {
 				imapFolder.close(false);
 				resetIMAPFolder();
@@ -1131,7 +1132,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 				 * Handle spam
 				 */
 				try {
-					SpamHandler.getInstance().handleSpam(imapFolder, msgUIDs, move, imapConnection);
+					SpamHandler.getInstance().handleSpam(imapFolder, msgUIDs, move, imapConnection, imapStore);
 					/*
 					 * Close and reopen to force internal message cache update
 					 */

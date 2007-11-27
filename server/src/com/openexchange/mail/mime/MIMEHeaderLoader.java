@@ -47,67 +47,76 @@
  *
  */
 
-package com.openexchange.mail.permission;
+package com.openexchange.mail.mime;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
+
+import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
-import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.session.Session;
-
 
 /**
- * {@link MailPermission}
+ * {@link MIMEHeaderLoader}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MailPermission extends OCLPermission {
+public abstract class MIMEHeaderLoader {
 
-	private static Class<? extends MailPermission> clazz;
+	private static final AtomicBoolean initialized = new AtomicBoolean();
 
-	protected final Session session;
-
-	/**
-	 * No instance
-	 */
-	protected MailPermission(final Session session) {
-		super();
-		this.session = session;
-	}
-
-	static void initialzeMailPermission(final Class<? extends MailPermission> clazz) {
-		MailPermission.clazz = clazz;
-	}
-
-	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { Session.class };
+	private static MIMEHeaderLoader instance;
 
 	/**
-	 * Gets the proper mail permission implementation
+	 * Gets the singleton instance of {@link MIMEHeaderLoader}
 	 * 
-	 * @param session
-	 *            The session
-	 * @return The proper mail permission implementation
+	 * @return The singleton instance of {@link MIMEHeaderLoader}
 	 * @throws MailException
 	 */
-	public static MailPermission getInstance(final Session session) throws MailException {
-		/*
-		 * Create a new mail permission
-		 */
-		try {
-			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { session });
-		} catch (final SecurityException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final NoSuchMethodException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalArgumentException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InstantiationException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalAccessException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InvocationTargetException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+	public static final MIMEHeaderLoader getInstance() throws MailException {
+		if (!initialized.get()) {
+			synchronized (initialized) {
+				try {
+					if (null == instance) {
+						instance = Class.forName(MailConnection.getHeaderLoaderClass()).asSubclass(
+								MIMEHeaderLoader.class).newInstance();
+						initialized.set(true);
+					}
+				} catch (final InstantiationException e) {
+					throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, e.getLocalizedMessage());
+				} catch (final IllegalAccessException e) {
+					throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, e.getLocalizedMessage());
+				} catch (final ClassNotFoundException e) {
+					throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, e.getLocalizedMessage());
+				}
+			}
 		}
+		return instance;
 	}
+
+	/**
+	 * Initializes a new {@link MIMEHeaderLoader}
+	 */
+	protected MIMEHeaderLoader() {
+		super();
+	}
+
+	/**
+	 * Call this method if JavaMail's routine fails to load a message's header.
+	 * Headers are read in a safe manner and filled into a map which is then
+	 * returned
+	 * 
+	 * @param msg
+	 *            The message which headers shall be loaded
+	 * @param uid
+	 *            <code>true</code> to reference to message via its UID;
+	 *            otherwise via its sequence ID
+	 * @return A {@link Map} containing the headers
+	 * @throws MailException
+	 *             If an error occurs
+	 */
+	public abstract Map<String, String> loadHeaders(final Message msg, final boolean uid) throws MailException;
 }

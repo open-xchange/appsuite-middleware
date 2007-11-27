@@ -50,16 +50,19 @@
 package com.openexchange.imap;
 
 import static com.openexchange.imap.sort.IMAPSort.getMessageComparator;
-import static com.openexchange.imap.utils.IMAPStorageUtility.getFetchProfile;
+import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
+import static javax.mail.internet.MimeUtility.unfold;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -118,6 +121,78 @@ public final class IMAPCommandsCollection {
 	 */
 	private IMAPCommandsCollection() {
 		super();
+	}
+
+	private static final String STR_UID = "UID";
+
+	private static final String TMPL_FETCH_HEADER_REV1 = "FETCH %s (BODY.PEEK[HEADER])";
+
+	private static final String TMPL_FETCH_HEADER_NON_REV1 = "FETCH %s (RFC822.HEADER)";
+
+	private static final Pattern PATTERN_PARSE_HEADER = Pattern
+			.compile("(\\S+):\\s(.*)((?:\r?\n(?:\\s(?:.+)))*|(?:$))");
+
+	/**
+	 * Call this method if JavaMail's routine fails to load a message's header.
+	 * Headers are read in a safe manner and filled into a map which is then
+	 * returned
+	 * 
+	 * @param msg
+	 *            The message which headers shall be loaded
+	 * @param uid
+	 *            <code>true</code> to reference to message via its UID;
+	 *            otherwise via its sequence ID
+	 * @return A {@link Map} containing the headers
+	 * @throws MessagingException
+	 * @throws ProtocolException
+	 */
+	public static Map<String, String> loadHeadersIMAP(final Message msg, final boolean uid) throws MessagingException,
+			ProtocolException {
+		final IMAPFolder fld = (IMAPFolder) msg.getFolder();
+		final IMAPProtocol p = fld.getProtocol();
+		final String tmpl = p.isREV1() ? TMPL_FETCH_HEADER_REV1 : TMPL_FETCH_HEADER_NON_REV1;
+		final String cmd;
+		if (uid) {
+			cmd = new StringBuilder(64).append(STR_UID).append(' ').append(
+					String.format(tmpl, Long.valueOf(fld.getUID(msg)))).toString();
+		} else {
+			cmd = String.format(tmpl, Integer.valueOf(msg.getMessageNumber()));
+		}
+		final Map<String, String> retval = new HashMap<String, String>();
+		final Response[] r = p.command(cmd, null);
+		final Response response = r[r.length - 1];
+		try {
+			if (response.isOK()) {
+				final int len = r.length - 1;
+				final StringBuilder valBuilder = new StringBuilder();
+				NextResponse: for (int i = 0; i < len; i++) {
+					if (r[i] == null) {
+						continue NextResponse;
+					} else if (!(r[i] instanceof FetchResponse)) {
+						continue NextResponse;
+					}
+					final FetchResponse f = ((FetchResponse) r[i]);
+					if (f.getNumber() != msg.getMessageNumber()) {
+						continue NextResponse;
+					}
+					final Matcher m = PATTERN_PARSE_HEADER.matcher(unfold(f.toString()));
+					while (m.find()) {
+						valBuilder.append(m.group(2));
+						if (m.group(3) != null) {
+							valBuilder.append(unfold(m.group(3)));
+						}
+						retval.put(m.group(1), valBuilder.toString());
+						valBuilder.setLength(0);
+					}
+					r[i] = null;
+				}
+			}
+		} finally {
+			// dispatch remaining untagged responses
+			p.notifyResponseHandlers(r);
+			p.handleResult(response);
+		}
+		return null;
 	}
 
 	/**

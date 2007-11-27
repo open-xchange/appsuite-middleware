@@ -47,67 +47,88 @@
  *
  */
 
-package com.openexchange.mail.permission;
+package com.openexchange.mail.mime;
 
-import java.lang.reflect.InvocationTargetException;
+import static javax.mail.internet.MimeUtility.unfold;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
 
 import com.openexchange.mail.MailException;
-import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.session.Session;
-
 
 /**
- * {@link MailPermission}
+ * {@link DefaultHeaderLoader} - Default header loader
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MailPermission extends OCLPermission {
-
-	private static Class<? extends MailPermission> clazz;
-
-	protected final Session session;
+public final class DefaultHeaderLoader extends MIMEHeaderLoader {
 
 	/**
-	 * No instance
+	 * Initializes a new {@link DefaultHeaderLoader}
 	 */
-	protected MailPermission(final Session session) {
+	public DefaultHeaderLoader() {
 		super();
-		this.session = session;
 	}
 
-	static void initialzeMailPermission(final Class<? extends MailPermission> clazz) {
-		MailPermission.clazz = clazz;
-	}
+	private static final Pattern PATTERN_PARSE_HEADER = Pattern
+			.compile("(\\S+):\\s(.*)((?:\r?\n(?:\\s(?:.+)))*|(?:$))");
 
-	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { Session.class };
-
-	/**
-	 * Gets the proper mail permission implementation
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param session
-	 *            The session
-	 * @return The proper mail permission implementation
-	 * @throws MailException
+	 * @see com.openexchange.mail.mime.MIMEHeaderLoader#loadHeaders(javax.mail.Message,
+	 *      boolean)
 	 */
-	public static MailPermission getInstance(final Session session) throws MailException {
-		/*
-		 * Create a new mail permission
-		 */
+	@Override
+	public Map<String, String> loadHeaders(final Message msg, final boolean uid) throws MailException {
 		try {
-			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { session });
-		} catch (final SecurityException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final NoSuchMethodException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalArgumentException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InstantiationException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalAccessException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InvocationTargetException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+			final String headers = getMessageHeaders(msg);
+			final StringBuilder valBuilder = new StringBuilder(128);
+			final Matcher m = PATTERN_PARSE_HEADER.matcher(unfold(headers));
+			final Map<String, String> retval = new HashMap<String, String>();
+			while (m.find()) {
+				valBuilder.append(m.group(2));
+				if (m.group(3) != null) {
+					valBuilder.append(unfold(m.group(3)));
+				}
+				retval.put(m.group(1), valBuilder.toString());
+				valBuilder.setLength(0);
+			}
+			return retval;
+		} catch (final IOException e) {
+			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+		} catch (final MessagingException e) {
+			throw MIMEMailException.handleMessagingException(e);
 		}
+	}
+
+	private static String getMessageHeaders(final Message msg) throws IOException, MessagingException {
+		final StringBuilder sb = new StringBuilder(1024);
+		/*
+		 * Get message's source
+		 */
+		final ByteArrayOutputStream out = new ByteArrayOutputStream(msg.getSize());
+		msg.writeTo(out);
+		/*
+		 * Transform into an input stream
+		 */
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(out
+				.toByteArray()), "US-ASCII"));
+		String line = null;
+		while ((line = reader.readLine()) != null) {
+			sb.append(line).append("\r\n");
+		}
+		return sb.toString();
 	}
 }

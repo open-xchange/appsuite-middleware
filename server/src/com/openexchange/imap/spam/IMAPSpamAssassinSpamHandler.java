@@ -49,23 +49,26 @@
 
 package com.openexchange.imap.spam;
 
-import static com.openexchange.imap.utils.IMAPStorageUtility.toUIDSet;
+import static com.openexchange.mail.mime.utils.MIMEStorageUtility.toUIDSet;
 import static com.openexchange.mail.utils.StorageUtility.prepareMailFolderParam;
 
 import javax.mail.FetchProfile;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Store;
 
 import com.openexchange.imap.IMAPConnection;
 import com.openexchange.imap.command.CopyIMAPCommand;
 import com.openexchange.imap.command.ExtractSpamMsgIMAPCommand;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
+import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.mime.ContainerMessage;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.spam.SpamHandler;
 import com.openexchange.tools.Collections.SmartLongArray;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.AppendUID;
@@ -74,36 +77,36 @@ import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
 /**
- * {@link SpamAssassinSpamHandler}
+ * {@link IMAPSpamAssassinSpamHandler}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SpamAssassinSpamHandler extends SpamHandler {
+public final class IMAPSpamAssassinSpamHandler extends SpamHandler {
 
 	private static final String STR_MSEC = "msec";
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SpamAssassinSpamHandler.class);
+			.getLog(IMAPSpamAssassinSpamHandler.class);
 
 	private static final String STR_INBOX = "INBOX";
 
 	private static final String WARN_FLD_ALREADY_CLOSED = "Invoked close() on a closed folder";
 
 	/**
-	 * 
+	 * Initializes a new {@link IMAPSpamAssassinSpamHandler}
 	 */
-	public SpamAssassinSpamHandler() {
+	public IMAPSpamAssassinSpamHandler() {
 		super();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.spam.SpamHandler#handleHam()
-	 */
 	@Override
-	public void handleHam(final IMAPFolder spamFolder, final long[] msgUIDs, final boolean move,
+	public void handleHam(final Folder spamFolder, final long[] msgUIDs, final boolean move,
+			final MailConnection<?, ?, ?> mailConnection, final Store store) throws MessagingException, MailException {
+		_handleHam((IMAPFolder) spamFolder, msgUIDs, move, (IMAPConnection) mailConnection, (IMAPStore) store);
+	}
+
+	private void _handleHam(final IMAPFolder spamFolder, final long[] msgUIDs, final boolean move,
 			final IMAPConnection imapConnection, final IMAPStore imapStore) throws MessagingException, MailException {
 		/*
 		 * Mark as ham. In contrast to mark as spam this is a very time sucking
@@ -115,10 +118,10 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
 		final FetchProfile fp = new FetchProfile();
 		fp.add(MessageHeaders.HDR_X_SPAM_FLAG);
 		fp.add(FetchProfile.Item.CONTENT_INFO);
-		final ContainerMessage[] msgs = (ContainerMessage[]) new FetchIMAPCommand(spamFolder, msgUIDs, fp, false,
-				false).doCommand();
+		final ContainerMessage[] msgs = (ContainerMessage[]) new FetchIMAPCommand(spamFolder, msgUIDs, fp, false, false)
+				.doCommand();
 		/*
-		 * Seperate the plain from the nested messages inside spam folder
+		 * Separate the plain from the nested messages inside spam folder
 		 */
 		SmartLongArray plainUIDs = new SmartLongArray(msgUIDs.length);
 		SmartLongArray extractUIDs = new SmartLongArray(msgUIDs.length);
@@ -223,4 +226,5 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
 		}
 		return retval;
 	}
+
 }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.mime;
+package com.openexchange.mail.mime.utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +59,7 @@ import javax.mail.internet.ParseException;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.session.Session;
 import com.openexchange.tools.mail.ContentType;
 

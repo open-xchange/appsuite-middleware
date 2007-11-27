@@ -50,10 +50,10 @@
 package com.openexchange.mail.mime.converters;
 
 import static com.openexchange.mail.utils.MessageUtility.decodeMultiEncodedHeader;
-import static com.openexchange.mail.utils.StorageUtility.loadHeaders;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -62,12 +62,15 @@ import java.util.Map;
 import javax.activation.DataHandler;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
+import javax.mail.Folder;
 import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
+import javax.mail.UIDFolder;
 import javax.mail.Message.RecipientType;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -82,14 +85,13 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContainerMessage;
 import com.openexchange.mail.mime.MIMEDefaultSession;
+import com.openexchange.mail.mime.MIMEHeaderLoader;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.tools.mail.ContentType;
-import com.sun.mail.iap.ProtocolException;
-import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
@@ -110,7 +112,7 @@ public final class MIMEMessageConverter {
 	private static final String MULTI_SUBTYPE_ALTERNATIVE = "ALTERNATIVE";
 
 	private static final String MULTI_SUBTYPE_MIXED = "MIXED";
-	
+
 	private static final String MULTI_SUBTYPE_SIGNED = "SIGNED";
 
 	/*
@@ -120,17 +122,31 @@ public final class MIMEMessageConverter {
 
 	private static interface MailMessageFieldFiller {
 		/**
-		 * Fills a fields from source message in given mail message
+		 * Fills a fields from source instance of {@link Message} in given
+		 * destination instance of {@link MailMessage}
 		 * 
 		 * @param mailMessage
 		 *            The mail message to fill
 		 * @param msg
 		 *            The source message
 		 * @throws MessagingException
+		 *             If a messaging error occurs
 		 * @throws MailException
+		 *             If a mail related error occurs
 		 */
 		public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
 				MailException;
+	}
+
+	private static abstract class ExtendedMailMessageFieldFiller implements MailMessageFieldFiller {
+
+		final Folder folder;
+
+		public ExtendedMailMessageFieldFiller(final Folder folder) {
+			super();
+			this.folder = folder;
+		}
+
 	}
 
 	/**
@@ -334,6 +350,54 @@ public final class MIMEMessageConverter {
 
 	/**
 	 * Converts given array of {@link Message} instances to an array of
+	 * {@link MailMessage} instances. The single elements of the array are
+	 * expected to be instances of {@link ContainerMessage}; meaning the
+	 * messages were created through a manual fetch.
+	 * <p>
+	 * Only the fields specified through parameter <code>fields</code> are
+	 * going to be set
+	 * 
+	 * @see #convertMessages(Message[], Folder, MailListField[]) to convert
+	 *      common instances of {@link Message}
+	 * 
+	 * @param msgs
+	 *            The source messages
+	 * @param fields
+	 *            The fields to fill
+	 * @return The converted array of {@link Message} instances
+	 * @throws MailException
+	 *             If conversion fails
+	 * 
+	 */
+	public static MailMessage[] convertMessages(final Message[] msgs, final MailListField[] fields)
+			throws MailException {
+		/**
+		 * TODO: Change signature to:
+		 * 
+		 * <pre>
+		 * convertMessages(final ContainerMessage[] msgs, final MailListField[] fields)
+		 * </pre>
+		 */
+		try {
+			final MailMessageFieldFiller[] fillers = createFieldFillers(fields);
+			final MailMessage[] mails = new MIMEMailMessage[msgs.length];
+			for (int i = 0; i < mails.length; i++) {
+				if (null != msgs[i]) {
+					/*
+					 * Create with no reference to content
+					 */
+					mails[i] = new MIMEMailMessage();
+					fillMessage(fillers, mails[i], msgs[i]);
+				}
+			}
+			return mails;
+		} catch (final MessagingException e) {
+			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+		}
+	}
+
+	/**
+	 * Converts given array of {@link Message} instances to an array of
 	 * {@link MailMessage} instances.
 	 * <p>
 	 * Only the fields specified through parameter <code>fields</code> are
@@ -341,15 +405,18 @@ public final class MIMEMessageConverter {
 	 * 
 	 * @param msgs
 	 *            The source messages
+	 * @param folder
+	 *            The folder containing source messages
 	 * @param fields
 	 *            The fields to fill
-	 * @return converted array of {@link Message} instances
+	 * @return The converted array of {@link Message} instances
 	 * @throws MailException
+	 *             If conversion fails
 	 */
-	public static MailMessage[] convertMessages(final Message[] msgs, final MailListField[] fields)
+	public static MailMessage[] convertMessages(final Message[] msgs, final Folder folder, final MailListField[] fields)
 			throws MailException {
 		try {
-			final MailMessageFieldFiller[] fillers = createFieldFillers(fields);
+			final MailMessageFieldFiller[] fillers = createFieldFillers(folder, fields);
 			final MailMessage[] mails = new MIMEMailMessage[msgs.length];
 			for (int i = 0; i < mails.length; i++) {
 				if (null != msgs[i]) {
@@ -373,6 +440,17 @@ public final class MIMEMessageConverter {
 		}
 	}
 
+	/**
+	 * Creates the field fillers and expects the messages to be instances of
+	 * {@link ContainerMessage}
+	 * 
+	 * @param fields
+	 *            The fields to fill
+	 * @return An array of appropriate {@link MailMessageFieldFiller}
+	 *         implementations
+	 * @throws MailException
+	 *             If field fillers cannot be created
+	 */
 	private static MailMessageFieldFiller[] createFieldFillers(final MailListField[] fields) throws MailException {
 		final MailMessageFieldFiller[] fillers = new MailMessageFieldFiller[fields.length];
 		for (int i = 0; i < fields.length; i++) {
@@ -420,16 +498,14 @@ public final class MIMEMessageConverter {
 			case TO:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.addTo((InternetAddress[]) ((ContainerMessage) msg)
-								.getRecipients(RecipientType.TO));
+						mailMessage.addTo((InternetAddress[]) ((ContainerMessage) msg).getRecipients(RecipientType.TO));
 					}
 				};
 				break;
 			case CC:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.addCc((InternetAddress[]) ((ContainerMessage) msg)
-								.getRecipients(RecipientType.CC));
+						mailMessage.addCc((InternetAddress[]) ((ContainerMessage) msg).getRecipients(RecipientType.CC));
 					}
 				};
 				break;
@@ -548,6 +624,243 @@ public final class MIMEMessageConverter {
 		return fillers;
 	}
 
+	/**
+	 * Creates the field fillers and expects the messages to be common instances
+	 * of {@link Message}
+	 * 
+	 * @param folder
+	 *            The folder containing the messages
+	 * @param fields
+	 *            The fields to fill
+	 * @return An array of appropriate {@link MailMessageFieldFiller}
+	 *         implementations
+	 * @throws MailException
+	 *             If field fillers cannot be created
+	 */
+	private static MailMessageFieldFiller[] createFieldFillers(final Folder folder, final MailListField[] fields)
+			throws MailException {
+		final MailMessageFieldFiller[] fillers = new MailMessageFieldFiller[fields.length];
+		for (int i = 0; i < fields.length; i++) {
+			switch (fields[i]) {
+			case ID:
+				fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
+
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						mailMessage.setMailId(((UIDFolder) folder).getUID(msg));
+					}
+				};
+				break;
+			case FOLDER_ID:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						mailMessage.setSeparator(folder.getSeparator());
+						mailMessage.setFolder(folder.getFullName());
+					}
+				};
+				break;
+			case ATTACHMENT:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
+							MailException {
+						ContentType ct = null;
+						try {
+							ct = new ContentType(msg.getContentType());
+						} catch (final MailException e) {
+							/*
+							 * Cannot occur
+							 */
+							LOG.error("Invalid content type: " + msg.getContentType(), e);
+							try {
+								ct = new ContentType(MIMETypes.MIME_DEFAULT);
+							} catch (MailException e1) {
+								/*
+								 * Cannot occur
+								 */
+								LOG.error(e1.getLocalizedMessage(), e1);
+								return;
+							}
+						}
+						mailMessage.setContentType(ct);
+						try {
+							mailMessage.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)
+									&& (ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED) || hasAttachments((Multipart) msg
+											.getContent(), ct.getSubType())));
+						} catch (final IOException e) {
+							throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+						}
+					}
+				};
+				break;
+			case FROM:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						try {
+							mailMessage.addFrom((InternetAddress[]) msg.getFrom());
+						} catch (final AddressException e) {
+							final String[] fromHdr = msg.getHeader(MessageHeaders.HDR_FROM);
+							if (LOG.isDebugEnabled()) {
+								LOG.debug("Unparseable addresse(s): " + Arrays.toString(fromHdr), e);
+							}
+							mailMessage.addFrom(new ContainerMessage.DummyAddress(fromHdr[0]));
+						}
+					}
+				};
+				break;
+			case TO:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						try {
+							mailMessage.addTo((InternetAddress[]) msg.getRecipients(RecipientType.TO));
+						} catch (final AddressException e) {
+							final String[] hdr = msg.getHeader(MessageHeaders.HDR_TO);
+							if (LOG.isDebugEnabled()) {
+								LOG.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
+							}
+							mailMessage.addTo(new ContainerMessage.DummyAddress(hdr[0]));
+						}
+					}
+				};
+				break;
+			case CC:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						try {
+							mailMessage.addCc((InternetAddress[]) msg.getRecipients(RecipientType.CC));
+						} catch (final AddressException e) {
+							final String[] hdr = msg.getHeader(MessageHeaders.HDR_CC);
+							if (LOG.isDebugEnabled()) {
+								LOG.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
+							}
+							mailMessage.addCc(new ContainerMessage.DummyAddress(hdr[0]));
+						}
+					}
+				};
+				break;
+			case BCC:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						try {
+							mailMessage.addBcc((InternetAddress[]) msg.getRecipients(RecipientType.BCC));
+						} catch (final AddressException e) {
+							final String[] hdr = msg.getHeader(MessageHeaders.HDR_BCC);
+							if (LOG.isDebugEnabled()) {
+								LOG.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
+							}
+							mailMessage.addBcc(new ContainerMessage.DummyAddress(hdr[0]));
+						}
+					}
+				};
+				break;
+			case SUBJECT:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						mailMessage.setSubject(decodeMultiEncodedHeader(msg.getSubject()));
+					}
+				};
+				break;
+			case SIZE:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						mailMessage.setSize(msg.getSize());
+					}
+				};
+				break;
+			case SENT_DATE:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						mailMessage.setSentDate(msg.getSentDate());
+					}
+				};
+				break;
+			case RECEIVED_DATE:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						mailMessage.setReceivedDate(msg.getReceivedDate());
+					}
+				};
+				break;
+			case FLAGS:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
+							MailException {
+						parseFlags(msg.getFlags(), mailMessage);
+					}
+				};
+				break;
+			case THREAD_LEVEL:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						/*
+						 * TODO: Thread level
+						 */
+						mailMessage.setThreadLevel(0);
+					}
+				};
+				break;
+			case DISPOSITION_NOTIFICATION_TO:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						final String[] val = msg.getHeader(MessageHeaders.HDR_DISP_NOT_TO);
+						if (val != null && val.length > 0) {
+							mailMessage.setDispositionNotification(InternetAddress.parse(val[0], true)[0]);
+							mailMessage.removeHeader(MessageHeaders.HDR_DISP_NOT_TO);
+						}
+					}
+				};
+				break;
+			case PRIORITY:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						final String[] val = msg.getHeader(MessageHeaders.HDR_X_PRIORITY);
+						if (val != null && val.length > 0) {
+							parsePriority(val[0], mailMessage);
+							mailMessage.removeHeader(MessageHeaders.HDR_X_PRIORITY);
+						}
+					}
+				};
+				break;
+			case MSG_REF:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						/*
+						 * Ignore
+						 */
+					}
+				};
+				break;
+			case COLOR_LABEL:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
+							MailException {
+						parseFlags(msg.getFlags(), mailMessage);
+					}
+				};
+				break;
+			case FOLDER:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						/*
+						 * Ignore
+						 */
+					}
+				};
+				break;
+			case FLAG_SEEN:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						/*
+						 * Ignore
+						 */
+					}
+				};
+				break;
+			default:
+				throw new MailException(MailException.Code.INVALID_FIELD, fields[i].toString());
+			}
+		}
+		return fillers;
+	}
+
 	private static boolean hasAttachments(final BODYSTRUCTURE bodystructure) {
 		if (bodystructure.isMulti()) {
 			if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(bodystructure.subtype)) {
@@ -565,6 +878,29 @@ public final class MIMEMessageConverter {
 			}
 		}
 		return false;
+	}
+
+	private static boolean hasAttachments(final Multipart mp, final String subtype) throws MessagingException,
+			MailException, IOException {
+		if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(subtype)) {
+			return (mp.getCount() > 2);
+		} else if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) {
+			return (mp.getCount() > 2);
+		} else if (mp.getCount() > 1) {
+			return true;
+		} else {
+			boolean found = false;
+			final int count = mp.getCount();
+			final ContentType ct = new ContentType();
+			for (int i = 0; i < count && !found; i++) {
+				final BodyPart part = mp.getBodyPart(i);
+				ct.setContentType(part.getContentType());
+				if (ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+					found |= hasAttachments((Multipart) part.getContent(), ct.getSubType());
+				}
+			}
+			return found;
+		}
 	}
 
 	/**
@@ -588,10 +924,10 @@ public final class MIMEMessageConverter {
 				/*
 				 * No nested message
 				 */
-				final IMAPFolder f = (IMAPFolder) msg.getFolder();
+				final Folder f = msg.getFolder();
 				mail.setFolder(f.getFullName());
 				mail.setSeparator(f.getSeparator());
-				mail.setMailId(f.getUID(msg));
+				mail.setMailId(((UIDFolder) f).getUID(msg));
 			}
 			setHeaders(msg, mail);
 			mail.addFrom((InternetAddress[]) msg.getFrom());
@@ -752,15 +1088,16 @@ public final class MIMEMessageConverter {
 
 	private static final String STR_CANNOT_LOAD_HEADER = "Cannot load header";
 
-	private static void setHeaders(final Part part, final MailPart mailPart) throws MessagingException {
+	@SuppressWarnings("unchecked")
+	private static void setHeaders(final Part part, final MailPart mailPart) throws MailException {
 		/*
 		 * HEADERS
 		 */
 		Map<String, String> headerMap = null;
 		try {
 			headerMap = new HashMap<String, String>();
-			for (final Enumeration e = part.getAllHeaders(); e.hasMoreElements();) {
-				final Header h = (Header) e.nextElement();
+			for (final Enumeration<Header> e = part.getAllHeaders(); e.hasMoreElements();) {
+				final Header h = e.nextElement();
 				headerMap.put(h.getName(), h.getValue());
 			}
 		} catch (final MessagingException e) {
@@ -768,12 +1105,7 @@ public final class MIMEMessageConverter {
 				/*
 				 * Headers could not be loaded
 				 */
-				try {
-					headerMap = loadHeaders((Message) part, false);
-				} catch (final ProtocolException e1) {
-					LOG.error(e.getMessage(), e);
-					headerMap = new HashMap<String, String>();
-				}
+				headerMap = MIMEHeaderLoader.getInstance().loadHeaders((Message) part, false);
 			} else {
 				headerMap = new HashMap<String, String>();
 			}

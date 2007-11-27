@@ -181,6 +181,11 @@ public abstract class IMAPFolderWorker {
 				 * exist".
 				 */
 				return;
+			} else if (markAsSeen.isSet(Flags.Flag.SEEN)) {
+				/*
+				 * Already marked as SEEN
+				 */
+				return;
 			} else if (imapConfig.isSupportsACLs()) {
 				/*
 				 * Check \KEEP_SEEN right

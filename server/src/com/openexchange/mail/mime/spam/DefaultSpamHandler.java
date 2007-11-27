@@ -47,67 +47,71 @@
  *
  */
 
-package com.openexchange.mail.permission;
+package com.openexchange.mail.mime.spam;
 
-import java.lang.reflect.InvocationTargetException;
+import static com.openexchange.mail.utils.StorageUtility.prepareMailFolderParam;
 
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Store;
+import javax.mail.UIDFolder;
+
+import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
-import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.session.Session;
-
 
 /**
- * {@link MailPermission}
+ * {@link DefaultSpamHandler}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MailPermission extends OCLPermission {
-
-	private static Class<? extends MailPermission> clazz;
-
-	protected final Session session;
+public final class DefaultSpamHandler extends SpamHandler {
 
 	/**
-	 * No instance
+	 * Constructor
 	 */
-	protected MailPermission(final Session session) {
+	public DefaultSpamHandler() {
 		super();
-		this.session = session;
 	}
 
-	static void initialzeMailPermission(final Class<? extends MailPermission> clazz) {
-		MailPermission.clazz = clazz;
-	}
-
-	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { Session.class };
-
-	/**
-	 * Gets the proper mail permission implementation
-	 * 
-	 * @param session
-	 *            The session
-	 * @return The proper mail permission implementation
-	 * @throws MailException
-	 */
-	public static MailPermission getInstance(final Session session) throws MailException {
+	@Override
+	public void handleHam(final Folder spamFolder, final long[] msgUIDs, final boolean move,
+			final MailConnection<?, ?, ?> mailConnection, final Store store) throws MessagingException, MailException {
+		final boolean closeFolder = !spamFolder.isOpen();
 		/*
-		 * Create a new mail permission
+		 * Copy to confirmed ham
 		 */
 		try {
-			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { session });
-		} catch (final SecurityException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final NoSuchMethodException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalArgumentException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InstantiationException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalAccessException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InvocationTargetException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+			if (closeFolder) {
+				spamFolder.open(Folder.READ_ONLY);
+			}
+			final Message[] uidMsgs = ((UIDFolder) spamFolder).getMessagesByUID(msgUIDs);
+			spamFolder.copyMessages(uidMsgs, store.getFolder(prepareMailFolderParam(mailConnection.getFolderStorage()
+					.getConfirmedHamFolder())));
+			if (move) {
+				/*
+				 * Copy messages to INBOX
+				 */
+				spamFolder.copyMessages(uidMsgs, store.getFolder("INBOX"));
+				/*
+				 * Delete messages
+				 */
+				for (int i = 0; i < uidMsgs.length; i++) {
+					uidMsgs[i].setFlag(Flags.Flag.DELETED, true);
+				}
+				/*
+				 * TODO: Ensure that only affected messages got deleted.
+				 * Expunge messages
+				 */
+				spamFolder.expunge();
+			}
+		} finally {
+			if (closeFolder && spamFolder.isOpen()) {
+				spamFolder.close(false);
+			}
 		}
 	}
+
 }

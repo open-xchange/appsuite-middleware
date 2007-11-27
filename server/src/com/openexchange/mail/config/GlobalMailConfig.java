@@ -129,6 +129,8 @@ public abstract class GlobalMailConfig {
 	private int watcherFrequency;
 
 	private boolean watcherShallClose;
+	
+	private String spamHandlerClass;
 
 	/**
 	 * Initializes a new global mail config
@@ -137,7 +139,7 @@ public abstract class GlobalMailConfig {
 		super();
 	}
 
-	protected static final Class[] CONSTRUCTOR_ARGS = new Class[0];
+	protected static final Class<?>[] CONSTRUCTOR_ARGS = new Class[0];
 
 	static final void initializeGlobalMailConfig(final Class<? extends GlobalMailConfig> clazz) throws MailException {
 		try {
@@ -395,6 +397,12 @@ public abstract class GlobalMailConfig {
 			final String watcherShallCloseStr = mailProperties.getProperty("watcherShallClose", STR_FALSE);
 			watcherShallClose = Boolean.parseBoolean(watcherShallCloseStr);
 			logBuilder.append("\tWatcher Shall Close: ").append(watcherShallClose).append('\n');
+		}
+
+		{
+			spamHandlerClass = mailProperties.getProperty("spamHandlerClass",
+					"com.openexchange.mail.mime.spam.DefaultSpamHandler").trim();
+			logBuilder.append("\tSpam Handler Class: ").append(spamHandlerClass).append('\n');
 		}
 
 		/*
@@ -657,6 +665,15 @@ public abstract class GlobalMailConfig {
 	 */
 	final int getWatcherTime() {
 		return watcherTime;
+	}
+
+	/**
+	 * Gets the spamHandlerClass
+	 * 
+	 * @return the spamHandlerClass
+	 */
+	String getSpamHandlerClass() {
+		return spamHandlerClass;
 	}
 
 }
