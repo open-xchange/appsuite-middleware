@@ -186,6 +186,9 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		this.fuid = fuid;
 	}
 
+	/**
+	 * Reset for re-usage
+	 */
 	public void reset() {
 		name = null;
 		fuid = 0;
