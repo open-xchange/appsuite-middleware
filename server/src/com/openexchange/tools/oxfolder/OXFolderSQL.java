@@ -1353,7 +1353,7 @@ public class OXFolderSQL {
 		}
 	}
 
-	private static final String SQL_REASSIGN_UPDATE_PERM = "UPDATE #PERM# SET fp = ?, orp = ?, owp = ?, odp = ?, admin_flag = ? WHERE cid = ? AND permission_id = ? AND fuid = ?";
+	private static final String SQL_REASSIGN_UPDATE_PERM = "UPDATE #PERM# SET fp = ?, orp = ?, owp = ?, odp = ?, admin_flag = ?, group_flag = ? WHERE cid = ? AND permission_id = ? AND fuid = ?";
 
 	private static final void updateSingleEntityPermission(final OCLPermission mergedPerm, final int mailAdmin,
 			final int fuid, final String permTable, final Connection writeConArg, final Context ctx)
@@ -1372,9 +1372,10 @@ public class OXFolderSQL {
 			stmt.setInt(3, mergedPerm.getWritePermission());
 			stmt.setInt(4, mergedPerm.getDeletePermission());
 			stmt.setInt(5, mergedPerm.isFolderAdmin() ? 1 : 0);
-			stmt.setInt(6, ctx.getContextId());
-			stmt.setInt(7, mailAdmin);
-			stmt.setInt(8, fuid);
+			stmt.setInt(6, mergedPerm.isGroupPermission() ? 1 : 0);
+			stmt.setInt(7, ctx.getContextId());
+			stmt.setInt(8, mailAdmin);
+			stmt.setInt(9, fuid);
 			stmt.executeUpdate();
 		} finally {
 			closeResources(null, stmt, close ? wc : null, false, ctx);
@@ -1421,11 +1422,13 @@ public class OXFolderSQL {
 				final OCLPermission adminPerm = new OCLPermission(mailAdmin, fuid);
 				adminPerm.setAllPermission(innerRs.getInt(1), innerRs.getInt(2), innerRs.getInt(3), innerRs.getInt(4));
 				adminPerm.setFolderAdmin(innerRs.getInt(5) > 0);
+				adminPerm.setGroupPermission(false);
 				return adminPerm;
 			}
 			final OCLPermission adminPerm = new OCLPermission(mailAdmin, fuid);
 			adminPerm.setAllPermission(innerRs.getInt(1), innerRs.getInt(2), innerRs.getInt(3), innerRs.getInt(4));
 			adminPerm.setFolderAdmin(innerRs.getInt(5) > 0);
+			adminPerm.setGroupPermission(false);
 			innerRs.close();
 			innerStmt.close();
 			innerStmt = readCon.prepareStatement(SQL_REASSIGN_SEL_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
@@ -1450,6 +1453,7 @@ public class OXFolderSQL {
 			mergedPerm.setDeleteObjectPermission(Math.max(adminPerm.getDeletePermission(), entityPerm
 					.getDeletePermission()));
 			mergedPerm.setFolderAdmin(adminPerm.isFolderAdmin() || entityPerm.isFolderAdmin());
+			mergedPerm.setGroupPermission(false);
 			return mergedPerm;
 		} finally {
 			closeResources(innerRs, innerStmt, closeRead ? readCon : null, true, ctx);
