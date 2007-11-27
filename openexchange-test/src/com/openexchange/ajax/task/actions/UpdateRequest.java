@@ -54,7 +54,6 @@ import java.util.TimeZone;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -114,7 +113,7 @@ public class UpdateRequest extends AbstractTaskRequest {
     /**
      * {@inheritDoc}
      */
-    public AbstractAJAXParser getParser() {
+    public UpdateParser getParser() {
         return new UpdateParser();
     }
 

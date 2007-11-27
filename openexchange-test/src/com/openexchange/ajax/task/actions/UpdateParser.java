@@ -52,14 +52,13 @@ package com.openexchange.ajax.task.actions;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class UpdateParser extends AbstractAJAXParser {
+public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
 
     /**
      * Default constructor.
@@ -72,7 +71,7 @@ public class UpdateParser extends AbstractAJAXParser {
      * {@inheritDoc}
      */
     @Override
-    protected AbstractAJAXResponse createResponse(final Response response)
+    protected UpdateResponse createResponse(final Response response)
         throws JSONException {
         return new UpdateResponse(response);
     }

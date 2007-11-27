@@ -57,7 +57,6 @@ import java.util.TimeZone;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -142,20 +141,20 @@ public class NewAppointmentSearchRequest extends AbstractAppointmentRequest {
      * {@inheritDoc}
      */
     public Parameter[] getParameters() {
-		final List parameterList = new ArrayList();
+		final List<Parameter> parameterList = new ArrayList<Parameter>();
 		parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW_APPOINTMENTS));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_START, String.valueOf(start.getTime())));
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_END, String.valueOf(end.getTime())));
 		parameterList.add(new Parameter("limit", String.valueOf(limit)));
 		parameterList.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
 
-		return (Parameter[])parameterList.toArray(new Parameter[parameterList.size()]);
+		return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 
     /**
      * {@inheritDoc}
      */
-    public AbstractAJAXParser getParser() {
+    public NewAppointmentSearchParser getParser() {
         return new NewAppointmentSearchParser(columns, timeZone);
     }
 }

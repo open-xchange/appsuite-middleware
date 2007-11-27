@@ -4,7 +4,6 @@
 package com.openexchange.ajax.session;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * 
@@ -32,7 +31,7 @@ public class RedirectRequest extends AbstractRequest {
     /**
      * {@inheritDoc}
      */
-    public AbstractAJAXParser getParser() {
+    public RedirectResponseParser getParser() {
         return new RedirectResponseParser();
     }
 

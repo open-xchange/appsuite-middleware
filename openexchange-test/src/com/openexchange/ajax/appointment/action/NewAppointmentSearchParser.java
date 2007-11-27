@@ -60,7 +60,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class NewAppointmentSearchParser extends AbstractAJAXParser {
+public class NewAppointmentSearchParser extends AbstractAJAXParser<NewAppointmentSearchResponse> {
 
 	final int[] columns;
 	

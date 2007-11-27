@@ -60,7 +60,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class UpdateParser extends AbstractAJAXParser {
+public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
 
     /**
      * Remembers if this parser fails out with an error.
