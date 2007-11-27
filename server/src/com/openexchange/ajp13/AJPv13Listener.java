@@ -292,7 +292,7 @@ public final class AJPv13Listener implements Runnable {
 					} catch (final IOException e) {
 						LOG.error(e.getMessage(), e);
 						/*
-						 * Obviously a communication error occurred
+						 * Obviously a socket communication error occurred
 						 */
 						communicationStopped = true;
 						continue;
