@@ -239,8 +239,8 @@ public final class AJPv13Listener implements Runnable {
 				 * accepted client socket is alive, its input is not shut down
 				 * and no communication failure occurred.
 				 */
-				boolean communicationFailure = false;
-				while (client != null && !client.isInputShutdown() && !communicationFailure) {
+				boolean communicationStopped = false;
+				while (client != null && !client.isInputShutdown() && !communicationStopped) {
 					try {
 						ajpCon.processRequest();
 						ajpCon.createResponse();
@@ -276,7 +276,7 @@ public final class AJPv13Listener implements Runnable {
 						/*
 						 * Obviously client socket is down. So leave.
 						 */
-						communicationFailure = true;
+						communicationStopped = true;
 						continue;
 					} catch (final AJPv13InvalidByteSequenceException e) {
 						/*
@@ -294,7 +294,7 @@ public final class AJPv13Listener implements Runnable {
 						/*
 						 * Obviously a communication error occurred
 						 */
-						communicationFailure = true;
+						communicationStopped = true;
 						continue;
 					} catch (final Throwable e) {
 						/*
