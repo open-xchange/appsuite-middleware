@@ -103,7 +103,7 @@ public class SessionObjectWrapper {
 			final String sessionobjectidentifier) throws LdapException {
 		final SessionObject so = new SessionObject(sessionobjectidentifier);
 		so.setContext(ctx);
-		//so.setUserObject(UserStorage.getInstance(ctx).getUser(user_id));
+        so.setUsername(String.valueOf(user_id));
 		return so;
 	}
 
