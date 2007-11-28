@@ -40,7 +40,7 @@ public class PluginStarter {
         this.loader = loader;
     }
 
-    public void start(final BundleContext context) throws RemoteException, AlreadyBoundException {
+    public void start(final BundleContext context) throws RemoteException, AlreadyBoundException, StorageException {
         try {
             Thread.currentThread().setContextClassLoader(loader);
 
@@ -81,6 +81,7 @@ public class PluginStarter {
             throw e;
         } catch (final StorageException e) {
             log.fatal("Error while creating one instance for RMI interface", e);
+            throw e;
         }
     }
 
@@ -115,7 +116,7 @@ public class PluginStarter {
 
             moni = new MonitorAgent(jmx_port,iaddr);
             moni.start();
-        } catch (UnknownHostException e) {
+        } catch (final UnknownHostException e) {
             log.error("Could NOT start start JMX monitor ",e);
         }
         
