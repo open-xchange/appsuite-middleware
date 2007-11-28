@@ -77,10 +77,12 @@
         <filter token="loggingproperties" value="${prefix}/${oxconfdir}/file-logging.properties"/>
         <filter token="configdbdump"      value="${prefix}/${oxconfdir}/mysql/configdb-dump.sql"/>
         <filter token="oxdbdump"          value="${prefix}/${oxconfdir}/mysql/open-xchangedb-dump.sql"/>
-        <filter token="nonoxlibpath"      value="${lib.dir}"/>
-        <filter token="oxlibpath"         value="${lib.dir}"/>
+        <filter token="oxlibpath"         value="${bundlesdir}/${commonBundle}/lib"/>
+        <filter token="oxadminjar"        value="${bundlesdir}/${bundle.name}"/>
+        <filter token="oxosgijar"         value="${bundlesdir}/${osgijar}"/>
         <filter token="serverconfdir"     value="${serverconfdir}"/>
         <filter token="oxconfdir"         value="${oxconfdir}"/>
+        <filter token="oxserverconfdir"   value="${serverconfdir}"/>
         <filter token="absoxconfdir"      value="${prefix}/${oxconfdir}"/>
         <filter token="absserverconfdir"  value="${prefix}/${serverconfdir}"/>
         <filter token="adminlogfile"      value="${logdir}/open-xchange-admin.log"/>
