@@ -86,8 +86,6 @@ public class AdminCache {
 
     private final Log log = LogFactory.getLog(this.getClass());
 
-    private OXRunner oxrunner = null;
-    
     private OXAdminPoolInterface pool = null;
 
     private ArrayList<String> sequence_tables = null;
@@ -456,8 +454,8 @@ public class AdminCache {
         try {
             this.log.info("OX init starting...");
     
-            this.oxrunner = new OXRunner();
-            this.oxrunner.init();
+            /* this.oxrunner = new OXRunner();
+            this.oxrunner.init(); */
             
             delreg = DeleteRegistry.getInstance();
             this.log.info("...OX init done!");
