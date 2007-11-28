@@ -47,7 +47,7 @@ import com.openexchange.admin.tools.database.TableColumnObject;
 import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.admin.tools.database.TableRowObject;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.IDGenerator;
+import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 /**

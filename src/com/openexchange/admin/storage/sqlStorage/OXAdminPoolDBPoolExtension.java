@@ -7,7 +7,7 @@ import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.database.Database;
 import java.sql.Connection;
 
-import com.openexchange.server.DBPoolingException;
+import com.openexchange.server.impl.DBPoolingException;
 
 public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXAdminPoolInterfaceExtension {
     
