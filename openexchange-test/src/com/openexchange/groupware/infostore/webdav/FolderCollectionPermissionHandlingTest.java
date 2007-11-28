@@ -14,10 +14,8 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.infostore.utils.DelUserFolderDiscoverer;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
@@ -26,8 +24,8 @@ import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
-import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.test.AjaxInit;
 
 import junit.framework.TestCase;
 
@@ -63,8 +61,8 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		Init.startServer();
 		ctx = ContextStorage.getInstance().getContext(1); 
 		
-		String userNameA = Init.getAJAXProperty("login");
-		String userNameB = Init.getAJAXProperty("seconduser");
+		String userNameA = AjaxInit.getAJAXProperty("login");
+		String userNameB = AjaxInit.getAJAXProperty("seconduser");
 		
 		userIdA = UserStorage.getInstance().getUserId(userNameA, ctx);
 		userIdB = UserStorage.getInstance().getUserId(userNameB, ctx);

@@ -11,8 +11,8 @@ import org.json.JSONException;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.Init;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.test.TestInit;
 
 public class SearchTest extends InfostoreAJAXTest {
 	
@@ -153,7 +153,7 @@ public class SearchTest extends InfostoreAJAXTest {
 	}
 	
 	public void testVersions() throws Exception {
-		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		
 		int id = clean.get(0);
 		

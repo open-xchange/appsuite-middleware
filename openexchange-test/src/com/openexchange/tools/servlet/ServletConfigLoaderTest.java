@@ -5,13 +5,13 @@ import java.io.File;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
-import com.openexchange.groupware.Init;
+import com.openexchange.test.TestInit;
 
 import junit.framework.TestCase;
 
 public class ServletConfigLoaderTest extends TestCase {
 	public void testLoadGeneralConfig(){
-		ServletConfigLoader loader = new ServletConfigLoader(new File(Init.getTestProperty("testServletConfigs")));
+		ServletConfigLoader loader = new ServletConfigLoader(new File(TestInit.getTestProperty("testServletConfigs")));
 		ServletConfig config = loader.getConfig("com.openexchange.servlets.ImaginaryServlet");
 		
 		assertEquals("13", config.getInitParameter("cool.temperature"));
@@ -24,7 +24,7 @@ public class ServletConfigLoaderTest extends TestCase {
 	}
 	
 	public void testLoadSpecializedConfig() {
-		ServletConfigLoader loader = new ServletConfigLoader(new File(Init.getTestProperty("testServletConfigs")));
+		ServletConfigLoader loader = new ServletConfigLoader(new File(TestInit.getTestProperty("testServletConfigs")));
 		ServletConfig config = loader.getConfig("com.openexchange.servlets.OtherImaginaryServlet","imaginary/other");
 		
 		assertEquals("overridden", config.getInitParameter("overrideMe"));
@@ -48,7 +48,7 @@ public class ServletConfigLoaderTest extends TestCase {
 	}
 	
 	public void testLoadSpecializedOnly() {
-		ServletConfigLoader loader = new ServletConfigLoader(new File(Init.getTestProperty("testServletConfigs")));
+		ServletConfigLoader loader = new ServletConfigLoader(new File(TestInit.getTestProperty("testServletConfigs")));
 		ServletConfig config = loader.getConfig("com.openexchange.servlets.NotConfiguredServlet","imaginary/other");
 		
 		assertEquals("overridden", config.getInitParameter("overrideMe"));
@@ -57,7 +57,7 @@ public class ServletConfigLoaderTest extends TestCase {
 	}
 	
 	public void testLoadSpecializedIgnoreWildcards(){
-		ServletConfigLoader loader = new ServletConfigLoader(new File(Init.getTestProperty("testServletConfigs")));
+		ServletConfigLoader loader = new ServletConfigLoader(new File(TestInit.getTestProperty("testServletConfigs")));
 		ServletConfig config = loader.getConfig("com.openexchange.servlets.OtherImaginaryServlet","imaginary/other*");
 		
 		assertEquals("overridden", config.getInitParameter("overrideMe"));
@@ -65,7 +65,7 @@ public class ServletConfigLoaderTest extends TestCase {
 	}
 	
 	public void testOnlySpecialized(){
-		ServletConfigLoader loader = new ServletConfigLoader(new File(Init.getTestProperty("testServletConfigs")));
+		ServletConfigLoader loader = new ServletConfigLoader(new File(TestInit.getTestProperty("testServletConfigs")));
 		ServletConfig config = loader.getConfig("com.openexchange.servlets.NotConfiguredServlet","imaginary/otherest");
 		
 		assertEquals("13", config.getInitParameter("cool.temperature"));
@@ -73,7 +73,7 @@ public class ServletConfigLoaderTest extends TestCase {
 	}
 	
 	public void testDefault() {
-		ServletConfigLoader loader = new ServletConfigLoader(new File(Init.getTestProperty("testServletConfigs")));
+		ServletConfigLoader loader = new ServletConfigLoader(new File(TestInit.getTestProperty("testServletConfigs")));
 		ServletConfigWrapper config = new ServletConfigWrapper();
 		ServletContextWrapper context = new ServletContextWrapper(config);
 		config.setServletContextWrapper(context);

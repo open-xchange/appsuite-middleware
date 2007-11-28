@@ -19,6 +19,7 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
+import com.openexchange.test.TestInit;
 import junit.framework.TestCase;
 
 import java.sql.Connection;
@@ -51,8 +52,8 @@ public class InfostoreFacadeTest extends TestCase {
 	public void setUp() throws Exception {
 		clean = new ArrayList<DocumentMetadata>();
 		cleanFolders = new ArrayList<FolderObject>();
-		
-		Init.loadTestProperties();
+
+        TestInit.loadTestProperties();
 		Init.startServer();
 		ContextStorage.init();
 		

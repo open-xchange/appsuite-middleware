@@ -2,7 +2,6 @@ package com.openexchange.ajax.infostore;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -14,9 +13,10 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.test.TestInit;
+import com.openexchange.test.OXTestToolkit;
 
 public class CopyTest extends InfostoreAJAXTest {
 	
@@ -59,7 +59,7 @@ public class CopyTest extends InfostoreAJAXTest {
 	}
 	
 	public void testCopyFile() throws Exception {
-		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		int id = createNew(
 				getWebConversation(),
 				getHostName(),
@@ -99,7 +99,7 @@ public class CopyTest extends InfostoreAJAXTest {
 			//	System.out.println(line);
 			//}
 			
-			assertSameContent(is,is2);
+			OXTestToolkit.assertSameContent(is,is2);
 		} finally {
 			if(is!=null)
 				is.close();
@@ -135,7 +135,7 @@ public class CopyTest extends InfostoreAJAXTest {
 	}
 	
 	public void testUploadCopy() throws Exception {
-		File upload = new File(Init.getTestProperty("webdavPropertiesFile"));
+		File upload = new File(TestInit.getTestProperty("webdavPropertiesFile"));
 		int id = copy(getWebConversation(), getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m("title" , "copy"), upload, "text/plain");
 		clean.add(id);
 		

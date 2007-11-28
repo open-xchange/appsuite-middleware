@@ -61,8 +61,6 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 import javax.mail.Session;
 
@@ -75,7 +73,6 @@ import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
@@ -88,13 +85,13 @@ import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
+import com.openexchange.test.AjaxInit;
 
 /**
  * Basis for folder tests: Creates a folder and deletes it after testing.
@@ -341,12 +338,12 @@ public class AbstractContactTest {
 	public static int userId;
 	public static int contextId;
 	public static int folderId;
-	public String DISPLAY_NAME1 = "Tobias Prinz";
-	public String NAME1 = "Prinz";
-	public String EMAIL1 = "tobias.prinz@open-xchange.com";
-	public String DISPLAY_NAME2 = "Francisco Laguna";
-	public String NAME2 = "Laguna";
-	public String EMAIL2 = "francisco.laguna@open-xchange.com";
+	public String DISPLAY_NAME1 = ContactTestData.DISPLAY_NAME1;
+	public String NAME1 = ContactTestData.NAME1;
+	public String EMAIL1 = ContactTestData.EMAIL1;
+	public String DISPLAY_NAME2 = ContactTestData.DISPLAY_NAME2;
+	public String NAME2 = ContactTestData.NAME2;
+	public String EMAIL2 = ContactTestData.EMAIL2;
 	public static Importer imp;
 	public Format defaultFormat;
 
@@ -395,26 +392,13 @@ public class AbstractContactTest {
 		}
 	}
 
-	public static String readStreamAsString(InputStream is) throws IOException {
-		int len; 
-		byte[] buffer = new byte[0xFFFF];
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		while( (len = is.read(buffer)) != -1 ){
-			baos.write(buffer, 0, len);
-		}
-		is.close();
-		buffer = baos.toByteArray();
-		baos.close();
-		return new String(buffer, "UTF-8");
-	}
-
-	@BeforeClass
+    @BeforeClass
 	public static void initialize() throws Exception {
 		Init.startServer();
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance();
         Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
-        userId = uStorage.getUserId(Init.getAJAXProperty("login"), ctx);
+        userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), ctx);
 	    sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-tests");
 		userId = sessObj.getUserId();
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "csvContactTestFolder");
@@ -512,7 +496,7 @@ public class AbstractContactTest {
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance();
 		final Context ctx = new ContextImpl(1);
-		final int uid = uStorage.getUserId(Init.getAJAXProperty("user_participant1"), ctx);
+		final int uid = uStorage.getUserId(AjaxInit.getAJAXProperty("user_participant1"), ctx);
 		return uStorage.getUser(uid, ctx);
 	}
 }

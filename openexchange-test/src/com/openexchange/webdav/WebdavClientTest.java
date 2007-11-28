@@ -18,8 +18,8 @@ import org.apache.webdav.lib.WebdavResources;
 
 import com.meterware.httpunit.Base64;
 import com.meterware.httpunit.WebRequest;
-import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
+import com.openexchange.test.WebdavInit;
 
 import junit.framework.TestCase;
 
@@ -33,7 +33,7 @@ public class WebdavClientTest extends TestCase {
 
 	public void setUp() throws Exception {
 		// Copied from AbstractWebdavTest
-		webdavProps = Init.getWebdavProperties();
+		webdavProps = WebdavInit.getWebdavProperties();
 		login = AbstractConfigWrapper.parseProperty(webdavProps, "login", "");
 		password = AbstractConfigWrapper.parseProperty(webdavProps, "password", "");
 		hostname = AbstractConfigWrapper.parseProperty(webdavProps, "hostname", "localhost");

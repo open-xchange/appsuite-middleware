@@ -19,7 +19,6 @@ import junit.framework.TestCase;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.SystemConfig;
-import com.openexchange.groupware.Init;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -47,6 +46,7 @@ import com.openexchange.i18n.TemplateListResourceBundle;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.session.Session;
+import com.openexchange.test.TestInit;
 
 public class ParticipantNotifyTest extends TestCase{
 	
@@ -454,9 +454,9 @@ public class ParticipantNotifyTest extends TestCase{
 	
 	public void setUp() throws Exception {
 		
-		System.setProperty("openexchange.propfile", Init.getTestProperty("openexchange.propfile"));
+		System.setProperty("openexchange.propfile", TestInit.getTestProperty("openexchange.propfile"));
 		SystemConfig.init();
-		String templates = Init.getTestProperty("templatePath");
+		String templates = TestInit.getTestProperty("templatePath");
 		TemplateListResourceBundle.setTemplatePath(new File(templates));
 		
 		session = new SessionObject("my_fake_sessionid");

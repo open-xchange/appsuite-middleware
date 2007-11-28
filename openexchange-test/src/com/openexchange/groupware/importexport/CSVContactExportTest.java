@@ -72,6 +72,7 @@ import com.openexchange.groupware.importexport.csv.CSVParser;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.exporters.CSVContactExporter;
 import com.openexchange.groupware.importexport.importers.CSVContactImporter;
+import com.openexchange.test.OXTestToolkit;
 
 
 public class CSVContactExportTest extends AbstractContactTest {
@@ -117,7 +118,7 @@ public class CSVContactExportTest extends AbstractContactTest {
 	
 	@Test public void exportHead() throws ImportExportException, IOException{
 		InputStream is = exp.exportData(sessObj, Format.CSV, String.valueOf( folderId ), TEST1_BASE, null);
-		assertEquals("Head only", TEST1_RESULT, readStreamAsString(is) );
+		assertEquals("Head only", TEST1_RESULT, OXTestToolkit.readStreamAsString(is) );
 	}
 	
 	@Test public void exportData() throws NumberFormatException, Exception{
@@ -133,7 +134,7 @@ public class CSVContactExportTest extends AbstractContactTest {
 		//exporting and asserting
 		is = exp.exportData(sessObj, Format.CSV, String.valueOf( folderId ),TEST2_BASE, null);
 		CSVParser parser = new CSVParser();
-		String resStr = readStreamAsString(is);
+		String resStr = OXTestToolkit.readStreamAsString(is);
 		assertEquals("Two imports", parser.parse(TEST2_RESULT), parser.parse(resStr) );
 		
 		//cleaning up
@@ -156,7 +157,7 @@ public class CSVContactExportTest extends AbstractContactTest {
 		//exporting and asserting
 		is = exp.exportData(sessObj, Format.CSV, String.valueOf( folderId ),TEST_EMPTY_BASE, null);
 		CSVParser parser = new CSVParser();
-		String resStr = readStreamAsString(is);
+		String resStr = OXTestToolkit.readStreamAsString(is);
 		assertEquals("Two imports", parser.parse(TEST_EMPTY_RESULT), parser.parse(resStr) );
 		
 		//cleaning up

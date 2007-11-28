@@ -7,6 +7,7 @@ import com.openexchange.ajax.ContactTest;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
+import com.openexchange.test.OXTestToolkit;
 
 public class UpdateTest extends ContactTest {
 	
@@ -95,7 +96,7 @@ public class UpdateTest extends ContactTest {
 		
 		byte[] b = loadImage(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 		
-		assertEqualsAndNotNull("image", contactObj.getImage1(), b);
+		OXTestToolkit.assertEqualsAndNotNull("image", contactObj.getImage1(), b);
 	}
 	
 	public void testUpdateContactWithImage() throws Exception {
@@ -108,7 +109,7 @@ public class UpdateTest extends ContactTest {
 		
 		byte[] b = loadImage(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 		
-		assertEqualsAndNotNull("image", contactObj.getImage1(), b);
+		OXTestToolkit.assertEqualsAndNotNull("image", contactObj.getImage1(), b);
 	}
 }
 

@@ -65,6 +65,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.test.AjaxInit;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -95,7 +96,7 @@ public class Bug7470Test extends AbstractContactTest {
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance();
 	    ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
-        userId = uStorage.getUserId(Init.getAJAXProperty("login"),ctx);
+        userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"),ctx);
 	    sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-tests");
 
         userId = sessObj.getUserId();

@@ -43,6 +43,7 @@ import com.openexchange.groupware.container.ResourceGroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.TestException;
+import com.openexchange.test.OXTestToolkit;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.URLParameter;
 
@@ -141,12 +142,12 @@ public class AppointmentTest extends AbstractAJAXTest {
 			long newEndTime) throws Exception {
 		assertEquals("id", appointmentObj1.getObjectID(), appointmentObj2
 				.getObjectID());
-		assertEqualsAndNotNull("title", appointmentObj1.getTitle(),
+		OXTestToolkit.assertEqualsAndNotNull("title", appointmentObj1.getTitle(),
 				appointmentObj2.getTitle());
 		assertEquals("start", newStartTime, appointmentObj2.getStartDate()
 		.getTime());
 		assertEquals("end", newEndTime, appointmentObj2.getEndDate().getTime());
-		assertEqualsAndNotNull("location", appointmentObj1.getLocation(),
+		OXTestToolkit.assertEqualsAndNotNull("location", appointmentObj1.getLocation(),
 				appointmentObj2.getLocation());
 		assertEquals("shown_as", appointmentObj1.getShownAs(), appointmentObj2
 				.getShownAs());
@@ -170,14 +171,14 @@ public class AppointmentTest extends AbstractAJAXTest {
 				appointmentObj2.getDayInMonth());
 		assertEquals("until", appointmentObj1.getUntil(), appointmentObj2
 				.getUntil());
-		assertEqualsAndNotNull("note", appointmentObj1.getNote(),
+		OXTestToolkit.assertEqualsAndNotNull("note", appointmentObj1.getNote(),
 				appointmentObj2.getNote());
-		assertEqualsAndNotNull("categories", appointmentObj1.getCategories(),
+		OXTestToolkit.assertEqualsAndNotNull("categories", appointmentObj1.getCategories(),
 				appointmentObj2.getCategories());
-		assertEqualsAndNotNull("delete_exceptions", appointmentObj1.getDeleteException(),
+		OXTestToolkit.assertEqualsAndNotNull("delete_exceptions", appointmentObj1.getDeleteException(),
 				appointmentObj2.getDeleteException());
 		
-		assertEqualsAndNotNull("participants are not equals",
+		OXTestToolkit.assertEqualsAndNotNull("participants are not equals",
 				participants2String(appointmentObj1.getParticipants()),
 				participants2String(appointmentObj2.getParticipants()));
 	}

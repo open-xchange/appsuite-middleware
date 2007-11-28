@@ -56,7 +56,6 @@ import junit.framework.TestCase;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -70,6 +69,7 @@ import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.versit.converter.ConverterPrivacyException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
+import com.openexchange.test.AjaxInit;
 
 /**
  * This test was only written to test additions that I made to 
@@ -93,7 +93,7 @@ public class OXContainerConverterTest extends TestCase {
 
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance();
-		int userId = uStorage.getUserId(Init.getAJAXProperty("login"), new ContextImpl(1));
+		int userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), new ContextImpl(1));
 		SessionObject sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-tests");
 		return sessObj;
 	}
@@ -210,7 +210,7 @@ public class OXContainerConverterTest extends TestCase {
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance();
 		final Context ctx = new ContextImpl(1);
-		final int uid = uStorage.getUserId(Init.getAJAXProperty("user_participant1"), ctx);
+		final int uid = uStorage.getUserId(AjaxInit.getAJAXProperty("user_participant1"), ctx);
 		return uStorage.getUser(uid, ctx);
 	}
 }

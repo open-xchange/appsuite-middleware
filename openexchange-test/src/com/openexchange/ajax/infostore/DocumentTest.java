@@ -7,7 +7,8 @@ import java.io.InputStream;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.InfostoreAJAXTest;
-import com.openexchange.groupware.Init;
+import com.openexchange.test.TestInit;
+import com.openexchange.test.OXTestToolkit;
 
 public class DocumentTest extends InfostoreAJAXTest {
 	
@@ -20,7 +21,7 @@ public class DocumentTest extends InfostoreAJAXTest {
 	
 	public void setUp() throws Exception{
 		super.setUp();
-		upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		id = createNew(
 				getWebConversation(),
 				getHostName(),
@@ -41,7 +42,7 @@ public class DocumentTest extends InfostoreAJAXTest {
 			is = new FileInputStream(upload);
 			is2 = document(getWebConversation(),getHostName(),sessionId, id, -1);
 			
-			assertSameContent(is,is2);
+			OXTestToolkit.assertSameContent(is,is2);
 		} finally {
 			if(is!=null)
 				is.close();

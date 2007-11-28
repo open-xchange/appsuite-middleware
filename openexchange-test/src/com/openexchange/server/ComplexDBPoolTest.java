@@ -10,6 +10,7 @@ import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.test.AjaxInit;
 
 public class ComplexDBPoolTest extends TestCase {
     
@@ -35,7 +36,7 @@ public class ComplexDBPoolTest extends TestCase {
     }
     
     protected Properties getAJAXProperties() {
-        Properties properties = Init.getAJAXProperties();
+        Properties properties = AjaxInit.getAJAXProperties();
         return properties;
     }    
     

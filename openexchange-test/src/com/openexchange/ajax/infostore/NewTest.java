@@ -13,8 +13,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.TestInit;
+import com.openexchange.test.OXTestToolkit;
 
 
 public class NewTest extends InfostoreAJAXTest {
@@ -32,7 +33,7 @@ public class NewTest extends InfostoreAJAXTest {
 	}
 	
 	public void testUpload() throws Exception{
-		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		int id = createNew(
 				getWebConversation(),
 				getHostName(),
@@ -67,7 +68,7 @@ public class NewTest extends InfostoreAJAXTest {
 			//	System.out.println(line);
 			//}
 			
-			assertSameContent(is,is2);
+			OXTestToolkit.assertSameContent(is,is2);
 		} finally {
 			if(is!=null)
 				is.close();
@@ -155,7 +156,7 @@ public class NewTest extends InfostoreAJAXTest {
 	
 	// Bug 3928
 	public void testVersionCommentForNewDocument() throws Exception {
-		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		int id = createNew(
 				getWebConversation(),
 				getHostName(),
@@ -177,7 +178,7 @@ public class NewTest extends InfostoreAJAXTest {
 
 //	Bug 4120
 	public void testUniqueFilenamesOnUpload() throws Exception {
-		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		
 		int id = clean.get(0);
 		
@@ -211,7 +212,7 @@ public class NewTest extends InfostoreAJAXTest {
 
 	
 	public void testTitleFromFilename() throws Exception {
-		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		int id = createNew(
 				getWebConversation(),
 				getHostName(),

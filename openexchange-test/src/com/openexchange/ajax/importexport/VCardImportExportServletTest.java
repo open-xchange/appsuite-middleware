@@ -60,8 +60,8 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.importexport.AbstractContactTest;
 import com.openexchange.groupware.importexport.Format;
+import com.openexchange.test.OXTestToolkit;
 
 /**
  *Tests the VCard imports and exports by using the servlets.
@@ -99,7 +99,7 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
 			req = new GetMethodWebRequest( getUrl(EXPORT_SERVLET, folderId, format) );
 			webRes = webconv.sendRequest(req);
 			is = webRes.getInputStream();
-			String resultingVCard = AbstractContactTest.readStreamAsString(is);
+			String resultingVCard = OXTestToolkit.readStreamAsString(is);
 			//finally: checking
 			for(String test: IMPORT_VCARD_AWAITED_ELEMENTS){
 				assertTrue("VCard contains " + test + "?", resultingVCard.contains(test));

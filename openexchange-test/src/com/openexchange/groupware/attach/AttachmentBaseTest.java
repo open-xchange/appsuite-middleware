@@ -1,11 +1,10 @@
 package com.openexchange.groupware.attach;
 
-import com.openexchange.ajax.AbstractAJAXTest;
+
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.attach.util.GetSwitch;
@@ -21,6 +20,8 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.ConfigurableDBProvider;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.test.OXTestToolkit;
 import com.openexchange.tools.iterator.SearchIterator;
 
 import java.io.*;
@@ -180,7 +181,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 		 InputStream in2 = null;
 		 try {
 			 in2 = attachmentBase.getAttachedFile(folderId, attachedId, moduleId, attachment.getId(), MODE.getContext(), MODE.getUser(), null);
-			 AbstractAJAXTest.assertSameContent(in = new FileInputStream(testFile),in2);
+			 OXTestToolkit.assertSameContent(in = new FileInputStream(testFile),in2);
 		 } finally {
 			 if(in != null)
 				 in.close();
@@ -380,7 +381,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 		InputStream in2 = null;
 		try {
 			 in2 = e.getAttachedFile();
-			 AbstractAJAXTest.assertSameContent(in = new FileInputStream(testFile),in2);
+			 OXTestToolkit.assertSameContent(in = new FileInputStream(testFile),in2);
 		} finally {
 			 if(in != null)
 				 in.close();

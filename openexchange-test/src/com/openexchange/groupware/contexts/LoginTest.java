@@ -42,6 +42,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.impl.LoginInfo;
+import com.openexchange.test.AjaxInit;
 
 import junit.framework.TestCase;
 
@@ -76,8 +77,8 @@ public class LoginTest extends TestCase {
 
     public void testLogin() throws Throwable {
         final LoginInfo login = LoginInfo.getInstance();
-        final String user = Init.getAJAXProperty("login");
-        final String password = Init.getAJAXProperty("password");
+        final String user = AjaxInit.getAJAXProperty("login");
+        final String password = AjaxInit.getAJAXProperty("password");
         for (int i = 0; i < TRIES; i++) {
             final long start = System.currentTimeMillis();
             final String[] result = login.handleLoginInfo(user, password);

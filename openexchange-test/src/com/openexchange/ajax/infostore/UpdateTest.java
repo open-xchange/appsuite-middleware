@@ -6,14 +6,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.test.TestInit;
+import com.openexchange.test.OXTestToolkit;
 
 
 public class UpdateTest extends InfostoreAJAXTest {
@@ -84,7 +84,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 	}
 	
 	public void testUpload() throws Exception{
-		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		
 		int id = clean.get(0);
 		
@@ -104,7 +104,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 		try {
 			is = new FileInputStream(upload);
 			is2 = document(getWebConversation(),getHostName(),sessionId, id, 1);
-			assertSameContent(is,is2);
+			OXTestToolkit.assertSameContent(is,is2);
 		} finally {
 			if(is!=null)
 				is.close();
@@ -115,7 +115,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 	
 	//Bug 4120
 	public void testUniqueFilenamesOnUpload() throws Exception {
-		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		
 		int id = clean.get(0);
 		
@@ -132,7 +132,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 	
 	//Bug 4120
 	public void testUniqueFilenamesOnSwitchVersions() throws Exception {
-		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		
 		int id = clean.get(0);
 		
@@ -186,7 +186,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 	}
 	
 	public void testSwitchVersion() throws Exception{
-		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		
 		int id = clean.get(0);
 		
@@ -213,7 +213,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 	}
 	
 	public void testUpdateCurrentVersionByDefault() throws Exception{
-		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		
 		int id = clean.get(0);
 		
@@ -235,7 +235,7 @@ public class UpdateTest extends InfostoreAJAXTest {
 	
 	// Bug 3928
 	public void testVersionCommentForNewVersion() throws Exception {
-		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		
 		int id = clean.get(0);
 		

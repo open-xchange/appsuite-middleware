@@ -1,9 +1,6 @@
 package com.openexchange.groupware.infostore;
 
-import java.sql.Connection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
@@ -15,7 +12,6 @@ import com.openexchange.groupware.infostore.utils.DelUserFolderDiscoverer;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
@@ -23,6 +19,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.test.AjaxInit;
 
 import junit.framework.TestCase;
 
@@ -48,8 +45,8 @@ public class DelUserFolderDiscovererTest extends TestCase{
 		Init.startServer();
 		ctx = ContextStorage.getInstance().getContext(1); 
 		
-		String userNameA = Init.getAJAXProperty("login");
-		String userNameB = Init.getAJAXProperty("seconduser");
+		String userNameA = AjaxInit.getAJAXProperty("login");
+		String userNameB = AjaxInit.getAJAXProperty("seconduser");
 		
 		userIdA = UserStorage.getInstance().getUserId(userNameA, ctx);
 		userIdB = UserStorage.getInstance().getUserId(userNameB, ctx);

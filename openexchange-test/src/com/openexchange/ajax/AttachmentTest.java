@@ -19,8 +19,8 @@ import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.Init;
 import com.openexchange.groupware.attach.AttachmentMetadata;
+import com.openexchange.test.TestInit;
 
 public class AttachmentTest extends AbstractAJAXTest {
 	
@@ -36,8 +36,8 @@ public class AttachmentTest extends AbstractAJAXTest {
 	
 	public void setUp() throws Exception {
 		sessionId = getSessionId();
-		testFile = new File(Init.getTestProperty("ajaxPropertiesFile"));
-		testFile2 = new File(Init.getTestProperty("webdavPropertiesFile"));
+		testFile = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+		testFile2 = new File(TestInit.getTestProperty("webdavPropertiesFile"));
 	}
 	
 	public void tearDown() throws Exception {

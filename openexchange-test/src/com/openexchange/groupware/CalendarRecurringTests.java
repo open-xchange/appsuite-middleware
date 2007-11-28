@@ -5,7 +5,6 @@ import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import java.sql.Connection;
@@ -37,6 +36,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.test.AjaxInit;
 
 
 public class CalendarRecurringTests extends TestCase {
@@ -66,7 +66,7 @@ public class CalendarRecurringTests extends TestCase {
     }
     
     private static Properties getAJAXProperties() {
-        Properties properties = Init.getAJAXProperties();
+        Properties properties = AjaxInit.getAJAXProperties();
         return properties;
     }
     

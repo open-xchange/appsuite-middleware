@@ -28,8 +28,6 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
@@ -39,6 +37,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.test.AjaxInit;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -82,7 +81,7 @@ public class FolderTest extends TestCase {
 		/*
 		 * Create session
 		 */
-		userId = resolveUser(Init.getAJAXProperty("login"));
+		userId = resolveUser(AjaxInit.getAJAXProperty("login"));
 		// ComfireConfig.loadProperties("/opt/openexchange/conf/groupware/system.properties");
 		session = SessionObjectWrapper.createSessionObject(userId, CONTEXT_ID, "thorben_session_id");
 	}
@@ -208,7 +207,7 @@ public class FolderTest extends TestCase {
 			 * ERROR: Define a second admin
 			 */
 			ocl = new OCLPermission();
-			ocl.setEntity(resolveUser(Init.getAJAXProperty("seconduser")));
+			ocl.setEntity(resolveUser(AjaxInit.getAJAXProperty("seconduser")));
 			ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
 			ocl.setGroupPermission(false);
 			ocl.setFolderAdmin(true);
@@ -533,7 +532,7 @@ public class FolderTest extends TestCase {
 				 * Rename & Move folder
 				 */
 				final int stdCalFolder = OXFolderTools.getCalendarDefaultFolder(userId, session.getContext());
-				final int secondUserId = resolveUser(Init.getAJAXProperty("seconduser"));
+				final int secondUserId = resolveUser(AjaxInit.getAJAXProperty("seconduser"));
 				fo.reset();
 				fo.setObjectID(fuid);
 				fo.setParentFolderID(stdCalFolder);
@@ -936,7 +935,7 @@ public class FolderTest extends TestCase {
     }
 	
 	private static final Properties getAJAXProperties() {
-        Properties properties = Init.getAJAXProperties();
+        Properties properties = AjaxInit.getAJAXProperties();
         return properties;
     }
 	

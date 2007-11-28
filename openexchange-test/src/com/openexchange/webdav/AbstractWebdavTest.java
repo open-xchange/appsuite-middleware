@@ -4,10 +4,10 @@ import com.meterware.httpunit.Base64;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
-import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.webdav.xml.GroupUserTest;
-import java.util.Date;
+import com.openexchange.test.WebdavInit;
+
 import java.util.Properties;
 
 import junit.framework.TestCase;
@@ -65,7 +65,7 @@ public abstract class AbstractWebdavTest extends TestCase {
 		webCon = new WebConversation();
 		secondWebCon = new WebConversation();
 		
-		webdavProps = Init.getWebdavProperties();
+		webdavProps = WebdavInit.getWebdavProperties();
 		
 		login = AbstractConfigWrapper.parseProperty(webdavProps, "login", "");
 		password = AbstractConfigWrapper.parseProperty(webdavProps, "password", "");

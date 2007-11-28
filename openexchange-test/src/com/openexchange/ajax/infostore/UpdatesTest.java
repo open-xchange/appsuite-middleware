@@ -8,9 +8,9 @@ import org.json.JSONArray;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.test.TestInit;
 
 public class UpdatesTest extends InfostoreAJAXTest{
 
@@ -67,7 +67,7 @@ public class UpdatesTest extends InfostoreAJAXTest{
 		assertNoError(res);
 		long ts = res.getTimestamp().getTime()+2;
 		
-		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m("version_comment" , "Comment 1"), upload, "text/plain");
 		assertNoError(res);
 		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m("version_comment" , "Comment 2"), upload, "text/plain");

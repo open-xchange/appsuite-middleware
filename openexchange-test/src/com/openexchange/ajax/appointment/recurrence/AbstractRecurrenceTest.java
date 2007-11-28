@@ -15,6 +15,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.test.OXTestToolkit;
 
 public class AbstractRecurrenceTest extends AppointmentTest {
 	
@@ -74,8 +75,8 @@ public class AbstractRecurrenceTest extends AppointmentTest {
 	public static void assertOccurrence(int expectedPosition, Date expectedStartDate, Date expectedEndDate, Occurrence occurrence, TimeZone timeZone) throws Exception {
 		assertNotNull("occurrence is null", occurrence);
 		assertEquals("position is not equals", expectedPosition, occurrence.getPosition());
-		assertEqualsAndNotNull("start date is not equals at position: " + expectedPosition, addOffsetToDate(expectedStartDate, timeZone), addOffsetToDate(occurrence.getStartDate(), timeZone));
-		assertEqualsAndNotNull("end date is not equals at position: " + expectedPosition, addOffsetToDate(expectedEndDate, timeZone), addOffsetToDate(occurrence.getEndDate(), timeZone));
+		OXTestToolkit.assertEqualsAndNotNull("start date is not equals at position: " + expectedPosition, addOffsetToDate(expectedStartDate, timeZone), addOffsetToDate(occurrence.getStartDate(), timeZone));
+		OXTestToolkit.assertEqualsAndNotNull("end date is not equals at position: " + expectedPosition, addOffsetToDate(expectedEndDate, timeZone), addOffsetToDate(occurrence.getEndDate(), timeZone));
 	}
 	
 	public static Date addOffsetToDate(final Date value, final TimeZone timeZone) throws JSONException {

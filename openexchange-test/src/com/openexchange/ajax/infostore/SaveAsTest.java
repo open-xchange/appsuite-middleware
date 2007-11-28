@@ -2,7 +2,6 @@ package com.openexchange.ajax.infostore;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 import org.json.JSONException;
@@ -13,6 +12,7 @@ import com.openexchange.ajax.attach.TaskAttachmentTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.OXTestToolkit;
 
 public class SaveAsTest extends InfostoreAJAXTest {
 	
@@ -48,7 +48,7 @@ public class SaveAsTest extends InfostoreAJAXTest {
 		try {
 			is = new FileInputStream(upload);
 			is2 = document(getWebConversation(),getHostName(),sessionId, id, 1);
-			assertSameContent(is,is2);
+			OXTestToolkit.assertSameContent(is,is2);
 		} finally {
 			if(is!=null)
 				is.close();

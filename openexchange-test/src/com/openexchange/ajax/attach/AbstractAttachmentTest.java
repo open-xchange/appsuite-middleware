@@ -22,6 +22,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
+import com.openexchange.test.OXTestToolkit;
 
 public abstract class AbstractAttachmentTest extends AttachmentTest {
 
@@ -227,7 +228,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 		
 		try {
 			data = document(getWebConversation(),sessionId,folderId,attachedId,moduleId, clean.get(0).getId());
-			assertSameContent(local = new FileInputStream(testFile),data);
+			OXTestToolkit.assertSameContent(local = new FileInputStream(testFile),data);
 		} finally {
 			if(data != null)
 				data.close();

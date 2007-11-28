@@ -79,9 +79,9 @@ import com.openexchange.groupware.importexport.importers.CSVContactImporter;
  *
  */
 public class CSVContactImportTest extends AbstractContactTest {
-	public String IMPORT_HEADERS = ContactField.GIVEN_NAME.getReadableName()+","+ContactField.EMAIL1.getReadableName()+", "+ContactField.DISPLAY_NAME.getReadableName()+"\n";
-	public String IMPORT_ONE = IMPORT_HEADERS+NAME1+", "+EMAIL1+", "+DISPLAY_NAME1;
-	public String IMPORT_MULTIPLE = IMPORT_ONE + "\n"+NAME2+", "+EMAIL2+", "+DISPLAY_NAME2+"\n";
+	public String IMPORT_HEADERS = ContactTestData.IMPORT_HEADERS;
+	public String IMPORT_ONE = ContactTestData.IMPORT_ONE;
+	public String IMPORT_MULTIPLE = ContactTestData.IMPORT_MULTIPLE;
 	public String IMPORT_DUPLICATE = IMPORT_MULTIPLE + "Laguna, francisco.laguna@open-xchange.com, Francisco Laguna\n";
 	public String IMPORT_EMPTY = IMPORT_HEADERS+",,";
 	public boolean doDebugging = false;

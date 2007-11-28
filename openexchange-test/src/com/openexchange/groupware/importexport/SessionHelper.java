@@ -52,13 +52,11 @@ package com.openexchange.groupware.importexport;
 import java.sql.SQLException;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Init;
-import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.test.AjaxInit;
 
 /**
  * This class gets you a SessionObject, since nearly everything within
@@ -75,7 +73,7 @@ public class SessionHelper {
 
 	public static SessionObject getSession() throws SQLException, AbstractOXException{
 		final UserStorage uStorage = UserStorage.getInstance();
-	    final int userId = uStorage.getUserId(Init.getAJAXProperty("login"), new ContextImpl(1));
+	    final int userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), new ContextImpl(1));
 	    return SessionObjectWrapper.createSessionObject(userId, 1, "sessionhelper");
 	}
 	

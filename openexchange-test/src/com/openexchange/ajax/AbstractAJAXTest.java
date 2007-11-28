@@ -29,7 +29,7 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.groupware.Init;
+import com.openexchange.test.AjaxInit;
 
 /**
  * This class implements inheritable methods for AJAX tests.
@@ -99,7 +99,7 @@ public abstract class AbstractAJAXTest extends TestCase {
 	
 	protected Properties getAJAXProperties() {
 		if (null == ajaxProps) {
-			ajaxProps = Init.getAJAXProperties();
+			ajaxProps = AjaxInit.getAJAXProperties();
 		}
 		return ajaxProps;
 	}
@@ -293,40 +293,8 @@ public abstract class AbstractAJAXTest extends TestCase {
 	public static void assertNoError(Response res) {
 		assertFalse(res.getErrorMessage()+" : "+res.getErrorParams(),res.hasError());
 	}
-	
-	public static void assertEqualsAndNotNull(String message, Date expect, Date value) throws Exception {
-		if (expect != null) {
-			assertNotNull(message + " is null", value);
-			assertEquals(message, expect.getTime(), value.getTime());
-		}
-	}
-	
-	public static void assertEqualsAndNotNull(String message, byte[] expect, byte[] value) throws Exception {
-		if (expect != null) {
-			assertNotNull(message + " is null", value);
-			assertEquals(message + " byte array size is not equals", expect.length, value.length);
-			for (int a = 0; a < expect.length; a++) {
-				assertEquals(message + " byte in pos (" + a + ") is not equals",  expect[a], value[a]);
-			}
-		}
-	}
-	
-	public static void assertEqualsAndNotNull(String message, Object expect, Object value) throws Exception {
-		if (expect != null) {
-			assertNotNull(message + " is null", value);
-			assertEquals(message, expect, value);
-		}
-	}
-	
-	public static void assertSameContent(InputStream is1, InputStream is2) throws IOException {
-		int i = 0;
-		while((i = is1.read()) != -1){
-			assertEquals(i, is2.read());
-		}
-		assertEquals(-1,is2.read());
-	}
-	
-	public static JSONObject extractFromCallback(String html) throws JSONException {
+
+    public static JSONObject extractFromCallback(String html) throws JSONException {
 		Matcher matcher = CALLBACK_ARG_PATTERN.matcher(html);
 		if(matcher.find()){
 			return new JSONObject(matcher.group(1));

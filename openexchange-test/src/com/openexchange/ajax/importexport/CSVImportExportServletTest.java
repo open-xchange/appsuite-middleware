@@ -61,9 +61,9 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.importexport.AbstractContactTest;
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.csv.CSVParser;
+import com.openexchange.test.OXTestToolkit;
 
 /**
  * Tests the CSV imports and exports by using the servlets.
@@ -101,7 +101,7 @@ public class CSVImportExportServletTest extends AbstractImportExportServletTest 
 			req = new GetMethodWebRequest( getCSVColumnUrl(EXPORT_SERVLET, folderId, format) );
 			webRes = webconv.sendRequest(req);
 			is = webRes.getInputStream();
-			String resultingCSV = AbstractContactTest.readStreamAsString(is);
+			String resultingCSV = OXTestToolkit.readStreamAsString(is);
 			//finally: checking
 			CSVParser parser1 = new CSVParser(insertedCSV);
 			CSVParser parser2 = new CSVParser(resultingCSV);

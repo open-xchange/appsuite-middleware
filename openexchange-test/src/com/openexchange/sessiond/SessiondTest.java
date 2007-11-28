@@ -12,6 +12,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.services.SessiondService;
 import com.openexchange.session.Session;
+import com.openexchange.test.TestInit;
 
 public class SessiondTest extends TestCase {
 	
@@ -48,7 +49,7 @@ public class SessiondTest extends TestCase {
 		
 		Init.startServer();
 
-		Properties prop = Init.getTestProperties();
+		Properties prop = TestInit.getTestProperties();
 		
 		String propfile = prop.getProperty(sessiondPropertiesFile);
 		

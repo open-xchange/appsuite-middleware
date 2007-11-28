@@ -6,7 +6,7 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.Init;
+import com.openexchange.test.TestInit;
 
 
 public class GetTest extends InfostoreAJAXTest {
@@ -29,7 +29,7 @@ public class GetTest extends InfostoreAJAXTest {
 	}
 	
 	public void getVersion() throws Exception {
-		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		Response res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m("description","New description"), upload, "text/plain");
 		assertNoError(res);
 		

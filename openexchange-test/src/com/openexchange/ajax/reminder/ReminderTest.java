@@ -20,6 +20,7 @@ import com.openexchange.ajax.fields.ReminderFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.test.TestException;
+import com.openexchange.test.OXTestToolkit;
 import com.openexchange.tools.URLParameter;
 
 public class ReminderTest extends AbstractAJAXTest {
@@ -142,8 +143,8 @@ public class ReminderTest extends AbstractAJAXTest {
 	
 	public void compareReminder(ReminderObject reminderObj1, ReminderObject reminderObj2) throws Exception {
 		assertEquals("id", reminderObj1.getObjectId(), reminderObj2.getObjectId());
-		assertEqualsAndNotNull("folder", reminderObj1.getFolder(), reminderObj2.getFolder());
-		assertEqualsAndNotNull("alarm", reminderObj1.getDate(), reminderObj2.getDate());
+		OXTestToolkit.assertEqualsAndNotNull("folder", reminderObj1.getFolder(), reminderObj2.getFolder());
+		OXTestToolkit.assertEqualsAndNotNull("alarm", reminderObj1.getDate(), reminderObj2.getDate());
 	}
 }
 

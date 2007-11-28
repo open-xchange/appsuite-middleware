@@ -9,12 +9,12 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
-import com.openexchange.groupware.infostore.webdav.LockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.Lock;
 import com.openexchange.groupware.infostore.webdav.LockManager;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.test.AjaxInit;
 
 import junit.framework.TestCase;
 
@@ -41,7 +41,7 @@ public class EntityLockManagerTest extends TestCase {
 	}
 	
 	private String getUsername() {
-		return Init.getAJAXProperty("login");
+		return AjaxInit.getAJAXProperty("login");
 	}
 
 	public void tearDown() throws Exception {

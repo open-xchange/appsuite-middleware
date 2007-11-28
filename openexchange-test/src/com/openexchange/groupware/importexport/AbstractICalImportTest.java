@@ -52,18 +52,15 @@ package com.openexchange.groupware.importexport;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.contact.ContactConfig;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.importexport.importers.ICalImporter;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.test.AjaxInit;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-
-import java.sql.SQLException;
 
 public class AbstractICalImportTest extends AbstractContactTest {
 
@@ -76,7 +73,7 @@ public class AbstractICalImportTest extends AbstractContactTest {
 		ContextStorage.init();
 		final UserStorage uStorage = UserStorage.getInstance();
         ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
-        userId = uStorage.getUserId(Init.getAJAXProperty("login"), ctx);
+        userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), ctx);
 	    sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-tests");
 		userId = sessObj.getUserId();
 		imp = new ICalImporter();

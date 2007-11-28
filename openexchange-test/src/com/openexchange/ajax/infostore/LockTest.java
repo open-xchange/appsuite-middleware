@@ -21,11 +21,11 @@ import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.FolderTest;
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.URLParameter;
+import com.openexchange.test.TestInit;
 
 public class LockTest extends InfostoreAJAXTest {
 	
@@ -36,7 +36,7 @@ public class LockTest extends InfostoreAJAXTest {
 	}
 	
 	public void setUp() throws Exception{
-		testFile = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		testFile = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		sessionId = getSessionId();
 		// Copied-without-thinking from FolderTest
 		final int userId = FolderTest.getUserId(getWebConversation(), getHostName(), getLogin(), getPassword());

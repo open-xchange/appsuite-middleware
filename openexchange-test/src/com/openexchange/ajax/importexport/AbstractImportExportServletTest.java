@@ -49,27 +49,24 @@
 
 package com.openexchange.ajax.importexport;
 
+import com.openexchange.ajax.AbstractAJAXTest;
+import com.openexchange.ajax.ImportExport;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.importexport.ContactTestData;
+import com.openexchange.groupware.importexport.Format;
+import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.webdav.xml.FolderTest;
+import org.json.JSONException;
+import org.xml.sax.SAXException;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.json.JSONException;
-import org.xml.sax.SAXException;
-
-import com.openexchange.ajax.AbstractAJAXTest;
-import com.openexchange.ajax.ImportExport;
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.Init;
-import com.openexchange.groupware.contact.ContactConfig;
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.importexport.CSVContactImportTest;
-import com.openexchange.groupware.importexport.Format;
-import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.webdav.xml.FolderTest;
 
 
 /**
@@ -82,7 +79,8 @@ import com.openexchange.webdav.xml.FolderTest;
 public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
 	//private SessionObject sessObj;
 	public String FOLDER_NAME = "csv-contact-roundtrip-ajax-test";
-	public String IMPORTED_CSV = new CSVContactImportTest().IMPORT_MULTIPLE;
+
+    public String IMPORTED_CSV = ContactTestData.IMPORT_MULTIPLE;
 	public String EXPORT_SERVLET = "export";
 	public String IMPORT_SERVLET = "import";
 	public String IMPORT_VCARD = "BEGIN:VCARD\nVERSION:3.0\nPRODID:OPEN-XCHANGE\nFN:Prinz\\, Tobias\nN:Prinz;Tobias;;;\nNICKNAME:Tierlieb\nBDAY:19810501\nADR;TYPE=work:;;;Meinerzhagen;NRW;58540;DE\nTEL;TYPE=home,voice:+49 2358 7192\nEMAIL:tobias.prinz@open-xchange.com\nORG:- deactivated -\nREV:20061204T160750.018Z\nURL:www.tobias-prinz.de\nUID:80@ox6.netline.de\nEND:VCARD\n";

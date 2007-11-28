@@ -5,8 +5,8 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
-import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
+import com.openexchange.test.WebdavInit;
 
 public class TestUpload extends TestCase {
 
@@ -32,7 +32,7 @@ public class TestUpload extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        webdavProps = Init.getWebdavProperties();
+        webdavProps = WebdavInit.getWebdavProperties();
         login = AbstractConfigWrapper.parseProperty(webdavProps, "login", "");
         password = AbstractConfigWrapper.parseProperty(webdavProps, "password", "");
         hostname = AbstractConfigWrapper.parseProperty(webdavProps, "hostname", "localhost");

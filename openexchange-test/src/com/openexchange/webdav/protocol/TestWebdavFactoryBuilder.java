@@ -1,20 +1,18 @@
 package com.openexchange.webdav.protocol;
 
 
-import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.impl.FolderLockManagerImpl;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
-import com.openexchange.groupware.tx.AlwaysWriteConnectionProvider;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.webdav.protocol.impl.DummyResourceManager;
+import com.openexchange.test.TestInit;
 
 public class TestWebdavFactoryBuilder {
 
@@ -55,7 +53,7 @@ public class TestWebdavFactoryBuilder {
 	
 	public static void setUp() throws Exception {
 		if(mode == INFO) {
-			Init.loadTestProperties();
+            TestInit.loadTestProperties();
 			Init.startServer();
 		}
 	}

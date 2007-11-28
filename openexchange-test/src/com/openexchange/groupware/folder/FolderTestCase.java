@@ -16,6 +16,7 @@ import com.openexchange.tools.oxfolder.OXFolderLogicException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
+import com.openexchange.test.AjaxInit;
 import junit.framework.TestCase;
 
 import java.sql.Connection;
@@ -46,7 +47,7 @@ public class FolderTestCase extends TestCase {
 	}
 	
 	private String getUsername() {
-		return Init.getAJAXProperty("login");
+		return AjaxInit.getAJAXProperty("login");
 	}
 
 	public void tearDown() throws Exception {

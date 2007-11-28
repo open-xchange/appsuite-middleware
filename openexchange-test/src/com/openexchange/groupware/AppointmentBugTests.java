@@ -39,6 +39,7 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
+import com.openexchange.test.AjaxInit;
 
 
 public class AppointmentBugTests extends TestCase {
@@ -68,7 +69,7 @@ public class AppointmentBugTests extends TestCase {
     }
     
     private static Properties getAJAXProperties() {
-        Properties properties = Init.getAJAXProperties();
+        Properties properties = AjaxInit.getAJAXProperties();
         return properties;
     }        
     

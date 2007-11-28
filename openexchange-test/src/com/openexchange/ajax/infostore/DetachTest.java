@@ -10,8 +10,8 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.InfostoreAJAXTest;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.Init;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.test.TestInit;
 
 public class DetachTest extends InfostoreAJAXTest {
 
@@ -21,7 +21,7 @@ public class DetachTest extends InfostoreAJAXTest {
 	
 	public void setUp() throws Exception {
 		super.setUp();
-		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		Response res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m(), upload, "text/plain");
 		assertNoError(res);
 		res = update(getWebConversation(),getHostName(),sessionId,clean.get(0),System.currentTimeMillis(),m(), upload, "text/plain");
@@ -116,7 +116,7 @@ public class DetachTest extends InfostoreAJAXTest {
 	
 //	Bug 4120
 	public void testUniqueFilenames() throws Exception {
-		File upload = new File(Init.getTestProperty("ajaxPropertiesFile"));
+		File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
 		
 		int id = clean.get(0);
 		
