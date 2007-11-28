@@ -108,16 +108,15 @@ public class PluginStarter {
         int jmx_port = Integer.parseInt(prop.getProp("JMX_PORT", "9998"));
         String addr = prop.getProp("JMX_BIND_ADDRESS","localhost");
         InetAddress iaddr = null;
-        if(!addr.trim().equals("0")){
-            // bind only on specified interfaces
-            try {
-                iaddr = InetAddress.getByName(addr);
-                
-                moni = new MonitorAgent(jmx_port,iaddr);
-                moni.start();
-            } catch (UnknownHostException e) {
-               log.error("Could NOT start start JMX monitor ",e);
-            }
+        
+        // bind only on specified interfaces
+        try {
+            iaddr = InetAddress.getByName(addr);
+
+            moni = new MonitorAgent(jmx_port,iaddr);
+            moni.start();
+        } catch (UnknownHostException e) {
+            log.error("Could NOT start start JMX monitor ",e);
         }
         
         String servername = prop.getProp(AdminProperties.Prop.SERVER_NAME, "local");
