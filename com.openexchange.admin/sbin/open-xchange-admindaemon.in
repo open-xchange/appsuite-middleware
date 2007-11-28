@@ -54,6 +54,7 @@ OXCONFIG=@oxscriptconf@
 OXPREFIX=@oxprefix@
 CONSOLELOG=@consolelogfile@
 OXCONFIGDIR=@oxconfdir@
+OXSERVERCONFIGDIR=@oxserverconfdir@
 
 test -f $OXFUNCTIONS || {
 	echo "missing common shell functions file"
@@ -80,9 +81,10 @@ test -d $OSGICACHEDIR && rm -rf $OSGICACHEDIR
 
 umask 066
 exec $JAVA_BIN $JAVA_XTRAOPTS -Dopenexchange.propfile=$SYSTEMPROPERTIES \
+		   -Dopenexchange.propdir=$OXPREFIX/$OXSERVERCONFIGDIR \
 		   -Dconfigdir=$OXPREFIX/$OXCONFIGDIR \
 		   -Djava.util.logging.config.file=$LOGGINGPROPERTIES \
 		   -Duser.timezone=GMT \
 		   -Dlibdir=$LIBPATH \
-		   -jar $LIBPATH/org.eclipse.osgi_3.2.2.ox.jar \
+		   -jar $OSGIJAR \
 		   -configuration file:$OSGIPATH/ > $CONSOLELOG 2>&1
