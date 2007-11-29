@@ -99,7 +99,6 @@ public class LoginLDAPAuth implements Authentication {
     /**
      * {@inheritDoc}
      */
-    @Override
     public String[] handleLoginInfo(final Object... loginInfo)
         throws LoginException {
         if (loginInfo.length < 2) {

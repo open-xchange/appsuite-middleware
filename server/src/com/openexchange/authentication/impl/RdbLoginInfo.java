@@ -75,7 +75,6 @@ public class RdbLoginInfo implements Authentication {
     /**
      * {@inheritDoc}
      */
-    @Override
     public String[] handleLoginInfo(final Object... loginInfo)
         throws LoginException {
         final String password = (String) loginInfo[1];
