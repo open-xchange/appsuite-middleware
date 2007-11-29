@@ -47,44 +47,33 @@
  *
  */
 
-package com.openexchange.groupware.contexts.impl;
+package com.openexchange.authentication.service;
 
-import com.openexchange.authentication.LoginException;
-import com.openexchange.server.Initialization;
+import com.openexchange.authentication.Authentication;
+import com.openexchange.server.ServiceHolder;
 
 /**
- * This class contains the initialization for contexts.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ContextInit implements Initialization {
-
-    private static final ContextInit singleton = new ContextInit();
+public final class AuthenticationService extends ServiceHolder<Authentication> {
 
     /**
-     * Prevent instantiation.
+     * Reference to the singleton instance.
      */
-    private ContextInit() {
+    private static final AuthenticationService singleton = new AuthenticationService();
+
+    /**
+     * Default constructor.
+     */
+    private AuthenticationService() {
         super();
     }
 
     /**
      * @return the singleton instance.
      */
-    public static final ContextInit getInstance() {
+    public static final AuthenticationService getInstance() {
         return singleton;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void start() throws LoginException, ContextException {
-        ContextStorage.start();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void stop() {
-        ContextStorage.stop();
     }
 }

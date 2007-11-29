@@ -4,7 +4,8 @@ Bundle-Name: Open-Xchange Global
 Bundle-SymbolicName: com.openexchange.global
 Bundle-Version: 6.5.0
 Bundle-Vendor: Open-Xchange Inc.
-Export-Package: com.openexchange.cache,
+Export-Package: com.openexchange.authentication,
+ com.openexchange.cache,
  com.openexchange.cache.dynamic,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,

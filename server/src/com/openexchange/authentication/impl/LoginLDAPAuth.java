@@ -47,9 +47,7 @@
  *
  */
 
-
-
-package com.openexchange.groupware.contexts.impl;
+package com.openexchange.authentication.impl;
 
 import static com.openexchange.tools.io.IOUtils.closeStreamStuff;
 
@@ -68,17 +66,18 @@ import javax.naming.ldap.LdapContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.authentication.Authentication;
+import com.openexchange.authentication.LoginException;
+import com.openexchange.authentication.LoginException.Code;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
-import com.openexchange.groupware.impl.LoginException;
-import com.openexchange.groupware.impl.LoginException.Code;
 
 /**
  * This class implements the login by using an LDAP for authentication.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class LoginLDAPAuth extends LoginInfo {
+public class LoginLDAPAuth implements Authentication {
 
     /**
      * Logger.
@@ -151,7 +150,7 @@ public class LoginLDAPAuth extends LoginInfo {
     }
 
     /**
-     * Initializes the properties for the ldap auth.
+     * Initializes the properties for the ldap authentication.
      * @throws ConfigurationException if configuration fails.
      */
     private static void initLDAP() throws ConfigurationException {
@@ -183,6 +182,36 @@ public class LoginLDAPAuth extends LoginInfo {
                 }
             }
         }
+    }
+
+    /**
+     * Splits user name and context.
+     * @param loginInfo combined information separated by an @ sign.
+     * @return a string array with context and user name (in this order).
+     * @throws LoginException if no separator is found.
+     */
+    private String[] split(final String loginInfo) throws LoginException {
+        return split(loginInfo, '@');
+    }
+
+    /**
+     * Splits user name and context.
+     * @param loginInfo combined information separated by an @ sign.
+     * @param character for splitting user name and context.
+     * @return a string array with context and user name (in this order).
+     * @throws LoginException if no separator is found.
+     */
+    private String[] split(final String loginInfo, final char separator) {
+        final int pos = loginInfo.lastIndexOf(separator);
+        final String[] splitted = new String[2];
+        if (-1 == pos) {
+            splitted[1] = loginInfo;
+            splitted[0] = "defaultcontext";
+        } else {
+            splitted[1] = loginInfo.substring(0, pos);
+            splitted[0] = loginInfo.substring(pos + 1);
+        }
+        return splitted;
     }
 
 }

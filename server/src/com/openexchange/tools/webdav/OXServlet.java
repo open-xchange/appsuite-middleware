@@ -61,12 +61,12 @@ import org.apache.commons.logging.LogFactory;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
+import com.openexchange.authentication.LoginException;
+import com.openexchange.authentication.service.Authentication;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.contexts.impl.LoginInfo;
-import com.openexchange.groupware.impl.LoginException;
 import com.openexchange.groupware.impl.PasswordExpiredException;
 import com.openexchange.groupware.impl.UserNotActivatedException;
 import com.openexchange.groupware.impl.UserNotFoundException;
@@ -347,9 +347,7 @@ public abstract class OXServlet extends WebDavServlet {
 			final String ipAddress) throws AbstractOXException {
 		Session session = null;
 		try {
-			// move user auth from sessiond to login servlet
-			final LoginInfo li = LoginInfo.getInstance();
-			final String[] login_infos = li.handleLoginInfo(login, pass);
+			final String[] login_infos = Authentication.login(login, pass);
 
 			final String contextname = login_infos[0];
 			final String username = login_infos[1];

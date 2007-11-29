@@ -60,6 +60,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.openexchange.authentication.Authentication;
+import com.openexchange.authentication.impl.RdbLoginInfo;
+import com.openexchange.authentication.service.AuthenticationService;
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.Configuration;
 import com.openexchange.monitoring.MonitorAgent;
@@ -102,48 +105,45 @@ public class Activator implements BundleActivator {
 	 */
 	public void start(final BundleContext context) throws Exception {
 		try {
-			/*
-			 * Init service trackers
-			 */
+		    // Configuration service is always needed.
 			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
 					new BundleServiceTracker<Configuration>(context, ConfigurationService.getInstance(),
 							Configuration.class)));
-			serviceTrackerList.add(new ServiceTracker(context, SessiondConnectorInterface.class.getName(),
-					new BundleServiceTracker<SessiondConnectorInterface>(context, SessiondService.getInstance(),
-							SessiondConnectorInterface.class)));
-			serviceTrackerList.add(new ServiceTracker(context, MonitorAgent.class.getName(), new MonitorServiceTracker(
-					context)));
-			/*
-			 * Open service trackers
-			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
-				tracker.open();
-			}
 			/*
 			 * Start server
 			 */
 			if (isAdminBundleInstalled(context)) {
-				/*
-				 * Start up server to only fit admin needs
-				 */
+                // Start up server to only fit admin needs.
 				starter.adminStart();
 			} else {
-				/*
-				 * Start up server the usual way
-				 */
+			    // SessionD is only needed for groupware.
+                serviceTrackerList.add(new ServiceTracker(context, SessiondConnectorInterface.class.getName(),
+                    new BundleServiceTracker<SessiondConnectorInterface>(context, SessiondService.getInstance(),
+                            SessiondConnectorInterface.class)));
+                // Monitoring is only needed for groupware.
+                serviceTrackerList.add(new ServiceTracker(context, MonitorAgent.class.getName(), new MonitorServiceTracker(
+                    context)));
+                // Authentication is only needed for groupware.
+                serviceTrackerList.add(new ServiceTracker(context, Authentication.class.getName(),
+                    new BundleServiceTracker<Authentication>(context, AuthenticationService.getInstance(), Authentication.class)));
+				// Start up server the usual way
 				starter.start();
+				// Register authentication service.
+				registrationList.add(context.registerService(Authentication
+				    .class.getName(), new RdbLoginInfo(), null));
 			}
+            // Open service trackers
+            for (ServiceTracker tracker : serviceTrackerList) {
+                tracker.open();
+            }
 			/**
 			 * In future:
-			 * 
 			 * <pre>
 			 * final ServiceProxyListener l = new ServerStarterServiceListener(starter, isAdminBundleInstalled(context));
 			 * ConfigurationService.getInstance().addServiceProxyListener(l);
 			 * </pre>
 			 */
-			/*
-			 * Register server's services
-			 */
+			// Register server's services
 			registrationList.add(context.registerService(CharsetProvider.class.getName(), charsetProvider, null));
 			registrationList.add(context.registerService(HttpService.class.getName(), httpService, null));
 		} catch (final Throwable t) {

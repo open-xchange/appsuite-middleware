@@ -47,44 +47,48 @@
  *
  */
 
-package com.openexchange.groupware.contexts.impl;
+package com.openexchange.authentication.service;
 
 import com.openexchange.authentication.LoginException;
-import com.openexchange.server.Initialization;
 
 /**
- * This class contains the initialization for contexts.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ContextInit implements Initialization {
-
-    private static final ContextInit singleton = new ContextInit();
+public final class Authentication {
 
     /**
-     * Prevent instantiation.
+     * Handles the reference to the authentication service.
      */
-    private ContextInit() {
+    private static final AuthenticationService service = AuthenticationService
+        .getInstance();
+
+    /**
+     * Default constructor.
+     */
+    private Authentication() {
         super();
     }
 
     /**
-     * @return the singleton instance.
+     * Performs a login using an authentication service.
+     * @param login entered login.
+     * @param pass entered password.
+     * @return a string array with two elements in which the first contains the
+     * login info for the context and the second contains the login info for the
+     * user.
+     * @throws LoginException if something with the login info is wrong.
      */
-    public static final ContextInit getInstance() {
-        return singleton;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void start() throws LoginException, ContextException {
-        ContextStorage.start();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void stop() {
-        ContextStorage.stop();
+    public static String[] login(final String login, final String pass)
+        throws LoginException {
+        final com.openexchange.authentication.Authentication auth = service.getService();
+        if (null == auth) {
+            throw new LoginException(LoginException.Code.COMMUNICATION);
+        }
+        try {
+            return auth.handleLoginInfo(login, pass);
+        } finally {
+            service.ungetService();
+        }
     }
 }

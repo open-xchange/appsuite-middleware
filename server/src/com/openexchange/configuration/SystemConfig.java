@@ -187,10 +187,6 @@ public final class SystemConfig extends AbstractConfig implements
          */
         CONFIGDB("configDB"),
         /**
-         * Class implementing the LoginInfo.
-         */
-        LOGIN_INFO("LoginInfo"),
-        /**
          * Class implementing the SetupLink.
          */
         SETUP_LINK("SetupLink"),
@@ -238,10 +234,6 @@ public final class SystemConfig extends AbstractConfig implements
          * UserConfigurationStorage.
          */
         USER_CONF_STORAGE("UserConfigurationStorage"),
-        /**
-         * Config file for the login implementation.
-         */
-        LoginInfoConfig("LoginInfoConfig"),
         /**
          * Directory in which all property files for servlet mapping are kept.
          */

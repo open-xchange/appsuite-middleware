@@ -47,9 +47,7 @@
  *
  */
 
-
-
-package com.openexchange.groupware.impl;
+package com.openexchange.authentication;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
@@ -59,7 +57,6 @@ import com.openexchange.groupware.Component;
  * we have a lot of different exceptions for all possible exception types but
  * this seems to be not handy anymore. So all different states should be
  * consolidated here.
- * TODO move to com.openexchange.groupware.login
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class LoginException extends AbstractOXException {

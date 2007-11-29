@@ -64,11 +64,11 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajp13.AJPv13RequestHandler;
+import com.openexchange.authentication.LoginException;
+import com.openexchange.authentication.service.Authentication;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.contexts.impl.LoginInfo;
-import com.openexchange.groupware.impl.LoginException;
 import com.openexchange.groupware.impl.PasswordExpiredException;
 import com.openexchange.groupware.impl.UserNotActivatedException;
 import com.openexchange.groupware.impl.UserNotFoundException;
@@ -89,17 +89,11 @@ public class Login extends AJAXServlet {
 	 */
 	private static final long serialVersionUID = 7680745138705836499L;
 
-	private static final String ERROR_INVALID_CREDENTIALS = "Invalid credentials";
-
 	private static final String ERROR_USER_NOT_FOUND = "User not found";
 
 	private static final String ERROR_USER_NOT_ACTIVE = "User not active";
 
 	private static final String ERROR_PASSWORD_EXPIRED = "Password expired";
-
-	private static final String ERROR_CONTEXT_NOT_FOUND = "Context not found";
-
-	// private static final String ERROR_NO_VALID_SESSION = "No valid session";
 
 	private static final String ERROR_INVALID_ACTION = "Invalid session";
 
@@ -110,8 +104,6 @@ public class Login extends AJAXServlet {
 	private static final String _name = "name";
 
 	private static final String _password = "password";
-
-	// private static final String _setCookie = "Set-Cookie";
 
 	private static final String _redirectUrl = "/index.html#id=";
 
@@ -144,9 +136,7 @@ public class Login extends AJAXServlet {
 			Session sessionObj = null;
 			final Response response = new Response();
 			try {
-				// move user auth from sessiond to login servlet
-				final LoginInfo li = LoginInfo.getInstance();
-				final String[] login_infos = li.handleLoginInfo(name, password);
+                final String[] login_infos = Authentication.login(name, password);
 
 				final String contextname = login_infos[0];
 				final String username = login_infos[1];

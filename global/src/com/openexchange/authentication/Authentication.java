@@ -47,60 +47,27 @@
  *
  */
 
-package com.openexchange.groupware.contexts.impl;
-
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.impl.LoginException;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
-import com.openexchange.groupware.ldap.UserStorage;
+package com.openexchange.authentication;
 
 /**
- * This implementation authenticates the user against the database.
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * This interface defines the methods for handling the login information. E.g.
+ * the login information <code>user@domain.tld</code> is split into
+ * <code>user</code> and <code>domain.tld</code> and the context part will be
+ * used to resolve the context while the user part will be used to authenticate
+ * the user.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class RdbLoginInfo extends LoginInfo {
+public interface Authentication {
 
     /**
-     * {@inheritDoc}
+     * This method maps the login information from the login screen to the both
+     * parts needed to resolve the context and the user of that context.
+     * @param loginInfo the complete login informations from the login screen.
+     * @return a string array with two elements in which the first contains the
+     * login info for the context and the second contains the login info for the
+     * user.
+     * @throws LoginException if something with the login info is wrong.
      */
-    @Override
-    public String[] handleLoginInfo(final Object... loginInfo)
-        throws LoginException {
-        final String password = (String) loginInfo[1];
-        if (null == password || 0 == password.length()) {
-            throw new LoginException(LoginException.Code.INVALID_CREDENTIALS);
-        }
-        final String[] splitted = split((String) loginInfo[0]);
-        final ContextStorage ctxStor = ContextStorage.getInstance();
-        try {
-            final int ctxId = ctxStor.getContextId(splitted[0]);
-            if (ContextStorage.NOT_FOUND == ctxId) {
-                throw new LoginException(LoginException.Code
-                    .INVALID_CREDENTIALS);
-            }
-            final Context ctx = ctxStor.getContext(ctxId);
-            final UserStorage userStor = UserStorage.getInstance();
-            final int userId;
-            try {
-                userId = userStor.getUserId(splitted[1], ctx);
-            } catch (LdapException e) {
-                throw new LoginException(LoginException.Code
-                    .INVALID_CREDENTIALS, e);
-            }
-            final User user = userStor.getUser(userId, ctx);
-            if (!userStor.authenticate(user, password)) {
-                throw new LoginException(LoginException.Code
-                    .INVALID_CREDENTIALS);
-            }
-        } catch (ContextException e) {
-            throw new LoginException(e);
-        } catch (LdapException e) {
-            throw new LoginException(e);
-        } catch (UserException e) {
-            throw new LoginException(e);
-        }
-        return splitted;
-    }
+    String[] handleLoginInfo(Object... loginInfo) throws LoginException;
+
 }
