@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open_xchange_admin_plugin_hosting Plug-in
 Bundle-SymbolicName: open_xchange_admin_plugin_hosting
-Bundle-Version: 1.0.0
+Bundle-Version: 6.5.0
 Bundle-Activator: com.openexchange.admin.Activator
 Bundle-Localization: plugin
 Import-Package: org.apache.commons.logging,
