@@ -13,9 +13,7 @@
     <property name="bundle.name" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
 	<property name="composite.name" value="open-xchange-admin-${version}" />
 	
-    <property name="project.name" value="open-xchange-admin" />
     <property name="test.xml.dir" value="test-results" />
-    <property name="daemon.jar" value="${bundle.name}"/>
     <property name="client.jar" value="ox_admin_rmiclient.jar"/>
     <property name="logdir"  value="/var/log/open-xchange"/>
     <property name="distribution" value="debian"/>
@@ -29,26 +27,29 @@
 	<!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
 
-    <!-- JAR names for classpath -->
-    <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
-	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
-    <property name="globaljar" value="com.openexchange.global_6.5.0.jar" />
-	<property name="configjar" value="com.openexchange.config_6.5.0.jar" />
-	<property name="serverjar" value="com.openexchange.server_6.5.0.jar" />
+    <!-- required osgi bundles -->
+    <property name="osgibundle"           value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
+    <property name="osgiservicesbundle"   value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
+	<property name="commonsloggingbundle" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
+    <property name="globalbundle"         value="com.openexchange.global_6.5.0.jar"/>
+	<property name="configbundle"         value="com.openexchange.config_6.5.0.jar"/>
+	<property name="serverbundle"         value="com.openexchange.server_6.5.0.jar"/>
+	<property name="monitoringbundle"     value="com.openexchange.monitoring_6.5.0.jar"/>
+	<property name="sessiondbundle"       value="com.openexchange.sessiond_6.5.0.jar"/>
+	<property name="servletbundle"        value="javax.servlet_2.4.0.v200706111738.jar"/>
 
-	<!-- all required jars -->
-	<property name="oxserver" value="ox_server.jar"/>
-	<property name="oxlanguages" value="ox_languages.jar"/>
+	<!-- non-osgi jars -->
+	<property name="oxlanguages"        value="ox_languages.jar"/>
 	<property name="commons-fileupload" value="commons-fileupload.jar"/>
 	<property name="commons-httpclient" value="commons-httpclient-2.0.2.jar"/>
-	<property name="commons-io" value="commons-io.jar"/>
-	<property name="concurrent" value="concurrent.jar"/>
-	<property name="activation" value="activation.jar"/>
-	<property name="jcs" value="jcs-1.2.7.9.2.jar"/>
-	<property name="mail" value="mail.jar"/>
-	<property name="junit" value="junit-4.1.jar"/>
-	<property name="mysql-connector" value="mysql-connector-java-3.1.13-bin.jar"/>
-	<property name="jdom" value="jdom.jar"/>
+	<property name="commons-io"         value="commons-io.jar"/>
+	<property name="concurrent"         value="concurrent.jar"/>
+	<property name="activation"         value="activation.jar"/>
+	<property name="jcs"                value="jcs-1.2.7.9.2.jar"/>
+	<property name="mail"               value="mail.jar"/>
+	<property name="junit"              value="junit-4.1.jar"/>
+	<property name="mysql-connector"    value="mysql-connector-java-3.1.13-bin.jar"/>
+	<property name="jdom"               value="jdom.jar"/>
 	
 	
 	<path id="project.classpath">
@@ -62,11 +63,11 @@
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${junit}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${mysql-connector}"/>
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${jdom}"/>
-        <pathelement location="${bundlesdir}/${osgijar}"/>
-		<pathelement location="${bundlesdir}/${commonsloggingjar}" />
-        <pathelement location="${bundlesdir}/${globaljar}"/>
-		<pathelement location="${bundlesdir}/${configjar}"/>
-		<pathelement location="${bundlesdir}/${serverjar}"/>
+        <pathelement location="${bundlesdir}/${osgibundle}"/>
+		<pathelement location="${bundlesdir}/${commonsloggingbundle}" />
+        <pathelement location="${bundlesdir}/${globalbundle}"/>
+		<pathelement location="${bundlesdir}/${configbundle}"/>
+		<pathelement location="${bundlesdir}/${serverbundle}"/>
     </path>
 
     <filterset id="pathsubst">
@@ -78,8 +79,6 @@
         <filter token="configdbdump"      value="${prefix}/${oxconfdir}/mysql/configdb-dump.sql"/>
         <filter token="oxdbdump"          value="${prefix}/${oxconfdir}/mysql/open-xchangedb-dump.sql"/>
         <filter token="oxlibpath"         value="${bundlesdir}/${commonBundle}/lib"/>
-        <filter token="oxadminjar"        value="${bundlesdir}/${bundle.name}"/>
-        <filter token="oxosgijar"         value="${bundlesdir}/${osgijar}"/>
         <filter token="serverconfdir"     value="${serverconfdir}"/>
         <filter token="oxconfdir"         value="${oxconfdir}"/>
         <filter token="oxserverconfdir"   value="${serverconfdir}"/>
@@ -93,6 +92,18 @@
 		<filter token="admin_name"        value="${project.name}"/>
         <filter token="buildnumber"       value="${pversion}"/>
     	<filter token="templates"		  value="/opt/open-xchange/var/templates" />
+
+        <filter token="oxosgibundle"           value="${bundlesdir}/${osgibundle}"/>
+    	<filter token="oxadminbundle"		   value="${bundlesdir}/${bundle.name}"/>
+    	<filter token="oxcommonbundle"		   value="${bundlesdir}/${commonBundle}"/>
+       	<filter token="oxserverbundle"		   value="${bundlesdir}/${serverbundle}"/>
+       	<filter token="oxglobalbundle"		   value="${bundlesdir}/${globalbundle}"/>
+       	<filter token="oxconfigbundle"		   value="${bundlesdir}/${configbundle}"/>
+       	<filter token="oxsessiondbundle"	   value="${bundlesdir}/${sessiondbundle}"/>
+    	<filter token="oxmonitoringbundle"	   value="${bundlesdir}/${monitoringbundle}"/>
+    	<filter token="servletbundle"		   value="${bundlesdir}/${servletbundle}"/>
+       	<filter token="loggingbundle"		   value="${bundlesdir}/${commonsloggingbundle}"/>
+       	<filter token="osgiservicesbundle"	   value="${bundlesdir}/${osgiservicesbundle}"/>
     </filterset>
 
     <property name="test.xml.dir" location="test-results" />
@@ -200,12 +211,10 @@
 		<copy file="META-INF/MANIFEST.MF" tofile="META-INF/MANIFEST.MF.package"/>
 		<manifest mode="update" file="META-INF/MANIFEST.MF.package">
 				<attribute name="Bundle-ClassPath" value=".,
-					 external:$libdir$/${oxserver},
 					 external:$libdir$/${oxlanguages},
 					 external:$libdir$/${commons-fileupload},
 					 external:$libdir$/${commons-httpclient},
 					 external:$libdir$/${commons-io},
-					 external:$libdir$/${commons-logging},
 					 external:$libdir$/${concurrent},
 					 external:$libdir$/${jcs},
 					 external:$libdir$/${jdom},
@@ -242,7 +251,7 @@
 
     <target name="jar" depends="compile,manifest">
         <mkdir dir="jar"/>
-        <jar jarfile="jar/${daemon.jar}"
+        <jar jarfile="jar/${bundle.name}"
         excludes="com/openexchange/admin/test**"
         basedir="classes"
         manifest="META-INF/MANIFEST.MF.package"/>
@@ -378,7 +387,7 @@
 	
     <target name="install-jar" depends="jar">
         <mkdir dir="${destdir}/${bundlesdir}"/>
-        <copy todir="${destdir}/${bundlesdir}" file="jar/${daemon.jar}" overwrite="true"/>
+        <copy todir="${destdir}/${bundlesdir}" file="jar/${bundle.name}" overwrite="true"/>
     </target>
 
 	<target name="install-client" depends="client">
