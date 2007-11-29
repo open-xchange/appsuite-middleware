@@ -1,11 +1,5 @@
 # System Properties
 
-# Name of the class that implements how the login information should be
-# processed.
-# * com.openexchange.groupware.contexts.RdbLoginInfo split only the login info
-#   by the @ sign and resolve context and user in database.
-LoginInfo=com.openexchange.groupware.contexts.RdbLoginInfo
-
 # Name of the class implementing the UserConfigurationStorage.
 # Currenlty known aliases: Caching, DB
 UserConfigurationStorage=Caching
