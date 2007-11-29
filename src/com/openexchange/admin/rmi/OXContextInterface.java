@@ -199,9 +199,24 @@ public interface OXContextInterface extends Remote {
      * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
      * @throws RemoteException General RMI Exception
      * @throws StorageException When an error in the subsystems occurred.
+     * @deprecated This method is deprecated and will be removed in the future please use {@link #listAll(Credentials)} instead. Listing all contexts with a search pattern doesn't make any sense.
      */
     public Context[] listAll(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
+    /**
+     * Convenience method for listing all contexts
+     * Use this for search a context or list all contexts.
+     * 
+     * @param auth Credentials for authenticating against server.
+     * @param search_pattern Search pattern e.g "*mycontext*".
+     * @return Contexts.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     */
+    public Context[] listAll(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+    
     /**
      * Disable all contexts.<br>
      * 

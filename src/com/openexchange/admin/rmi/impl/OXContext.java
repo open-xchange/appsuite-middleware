@@ -324,6 +324,10 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     public Context[] listAll(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         return list("*", auth);
     }
+
+    public Context[] listAll(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        return list("*", auth);
+    }
     
     public Context[] listByDatabase(final Database db, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
         try {
