@@ -79,12 +79,16 @@ rm -f $CONSOLELOG
 OSGICACHEDIR=${OXPREFIX}/${OXCONFIGDIR}/osgi/org.eclipse.osgi
 test -d $OSGICACHEDIR && rm -rf $OSGICACHEDIR
 
+
+test -z "$1" && OPTOUTPUT="> $CONSOLELOG 2>&1" || OPTOUTPUT="$1"
+
 umask 066
-exec $JAVA_BIN $JAVA_XTRAOPTS -Dopenexchange.propfile=$SYSTEMPROPERTIES \
-		   -Dopenexchange.propdir=$OXPREFIX/$OXSERVERCONFIGDIR \
-		   -Dconfigdir=$OXPREFIX/$OXCONFIGDIR \
-		   -Djava.util.logging.config.file=$LOGGINGPROPERTIES \
-		   -Duser.timezone=GMT \
-		   -Dlibdir=$LIBPATH \
-		   -jar $OSGIJAR \
-		   -configuration file:$OSGIPATH/ > $CONSOLELOG 2>&1
+exec $JAVA_BIN $JAVA_XTRAOPTS \
+	-Dopenexchange.propfile=$SYSTEMPROPERTIES \
+	-Dopenexchange.propdir=$OXPREFIX/$OXSERVERCONFIGDIR \
+	-Dconfigdir=$OXPREFIX/$OXCONFIGDIR \
+	-Djava.util.logging.config.file=$LOGGINGPROPERTIES \
+	-Duser.timezone=GMT \
+	-Dlibdir=$LIBPATH \
+	-jar $OSGIBUNDLE \
+	-configuration file:$OSGIPATH/ $OPTOUTPUT
