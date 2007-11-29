@@ -50,6 +50,7 @@
 package com.openexchange.server.impl;
 
 import com.openexchange.config.Configuration;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.ServiceHolderListener;
 
 /**
@@ -78,7 +79,7 @@ public final class ServerStarterServiceListener implements ServiceHolderListener
 	 * 
 	 * @see com.openexchange.server.ServiceProxyListener#onServiceAvailable(java.lang.Object)
 	 */
-	public void onServiceAvailable(final Object service) {
+	public void onServiceAvailable(final Object service) throws AbstractOXException {
 		if (service instanceof Configuration) {
 			/*
 			 * Start server

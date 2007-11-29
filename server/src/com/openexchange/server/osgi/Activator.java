@@ -65,6 +65,7 @@ import com.openexchange.authentication.impl.RdbLoginInfo;
 import com.openexchange.authentication.service.AuthenticationService;
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.Configuration;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.monitoring.MonitorAgent;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.osgiservice.BundleServiceTracker;

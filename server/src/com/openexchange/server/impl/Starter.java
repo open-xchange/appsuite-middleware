@@ -1,4 +1,4 @@
-package com.openexchange.server.impl;/*
+/*
  *
  *    OPEN-XCHANGE legal information
  *
@@ -47,6 +47,8 @@ package com.openexchange.server.impl;/*
  *
  */
 
+package com.openexchange.server.impl;
+
 import java.text.DecimalFormat;
 import java.util.Properties;
 import java.util.Stack;
@@ -55,7 +57,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.impl.GroupwareInit;
 import com.openexchange.server.Initialization;
 
 /**
@@ -200,28 +201,15 @@ public class Starter implements Initialization {
 	/**
 	 * {@inheritDoc}
 	 */
-	public void start() {
+	public void start() throws AbstractOXException {
 
 		dumbServerInfos();
 
-		try {
-			for (Initialization init : inits) {
-				init.start();
-				started.push(init);
-			}
-		} catch (final AbstractOXException e) {
-			LOG.error("Initializing the configuration failed.", e);
-			stop();
-			System.exit(1);
+		for (Initialization init : inits) {
+			init.start();
+			started.push(init);
 		}
 
-		// New server startup.
-		try {
-			GroupwareInit.init();
-		} catch (final AbstractOXException e) {
-			LOG.error("Initializing the groupware server failed.", e);
-			System.exit(1);
-		}
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Groupware server successfully initialized.");
 		}
@@ -240,19 +228,13 @@ public class Starter implements Initialization {
 	/**
 	 * Start in admin mode
 	 */
-	public void adminStart() {
+	public void adminStart() throws AbstractOXException {
 
 		dumbServerInfos();
 
-		try {
-			for (Initialization init : adminInits) {
-				init.start();
-				started.push(init);
-			}
-		} catch (final AbstractOXException e) {
-			LOG.error("Initializing the configuration failed.", e);
-			stop();
-			System.exit(1);
+		for (Initialization init : adminInits) {
+			init.start();
+			started.push(init);
 		}
 
 		if (LOG.isInfoEnabled()) {
@@ -312,5 +294,4 @@ public class Starter implements Initialization {
 			}
 		}
 	}
-
 }

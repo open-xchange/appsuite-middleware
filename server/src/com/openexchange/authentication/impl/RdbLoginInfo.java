@@ -66,6 +66,13 @@ import com.openexchange.groupware.ldap.UserStorage;
 public class RdbLoginInfo implements Authentication {
 
     /**
+     * Default constructor.
+     */
+    public RdbLoginInfo() {
+        super();
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

@@ -90,6 +90,13 @@ public class LoginLDAPAuth implements Authentication {
     private static Properties props;
 
     /**
+     * Default constructor.
+     */
+    public LoginLDAPAuth() {
+        super();
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
