@@ -1,38 +1,56 @@
 <project name="open-xchange-admin-plugin-hosting" default="jar" basedir=".">
 
+    <!-- Customizable values -->
+	<property name="destdir" value=""/>
+    <property name="prefix" value="/opt/open-xchange"/>
+
+    <!-- Constants -->
+    <property file="META-INF/MANIFEST.MF"/>
+    <property name="version" value="${Bundle-Version}"/>
+    <property name="bundle.name" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
+	<property name="composite.name" value="open-xchange-admin-plugin-hosting-${version}"/>
     <property name="project.name" value="open-xchange-admin-plugin-hosting" />
     <property name="test.xml.dir" value="test-results" />
-    <property name="prefix" value="/opt/open-xchange"/>
-    <property name="destdir" value=""/>
-    <property name="plugin.jar" value="ox_admin_plugin_hosting.jar"/>
-    <property name="lib.dir" value="lib"/>
 	<property name="oxconfdir" value="etc/admindaemon"/>
 	<property name="serverconfdir" value="etc/groupware"/>
     <property name="admin.classpath" value="../open-xchange-admin/classes"/>
 	<property name="client.jar" value="ox_admin_hosting_rmiclient.jar"/>
 
-	<!-- all required jars -->
-	<property name="oxserver" value="ox_server.jar"/>
-	<property name="commons-io" value="commons-io.jar"/>
-	<property name="commons-logging" value="commons-logging.jar"/>
-	<property name="mysql-connector" value="mysql-connector-java-3.1.13-bin.jar"/>
-	<property name="eclipse-osgi" value="org.eclipse.osgi_3.2.2.ox.jar"/>
-	<property name="junit" value="junit-4.1.jar"/>
+    <!-- Bundle dependencies -->
+    <property name="commonBundle" value="com.openexchange.common"/>
+
+	<!-- Install Constants -->
+    <property name="bundlesdir" value="${prefix}/bundles"/>
+
+	<!-- required osgi bundles -->
+    <property name="osgibundle"           value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
+    <property name="osgiservicesbundle"   value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
+	<property name="commonsloggingbundle" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
+    <property name="globalbundle"         value="com.openexchange.global_6.5.0.jar"/>
+	<property name="configbundle"         value="com.openexchange.config_6.5.0.jar"/>
+	<property name="serverbundle"         value="com.openexchange.server_6.5.0.jar"/>
+	<property name="monitoringbundle"     value="com.openexchange.monitoring_6.5.0.jar"/>
+	<property name="sessiondbundle"       value="com.openexchange.sessiond_6.5.0.jar"/>
+
+	<!-- non-osgi jars -->
+	<property name="commons-io"         value="commons-io.jar"/>
+	<property name="junit"              value="junit-4.1.jar"/>
+	<property name="mysql-connector"    value="mysql-connector-java-3.1.13-bin.jar"/>
+	<property name="jdom"               value="jdom.jar"/>
 
 	<path id="project.classpath">
-	  <pathelement location="${lib.dir}/${oxserver}"/>
-	  <pathelement location="${lib.dir}/${commons-logging}"/>
-      <pathelement location="${lib.dir}/${commons-io}"/>
-	  <pathelement location="${lib.dir}/${eclipse-osgi}"/>
-      <pathelement location="${admin.classpath}"/>
-	  <pathelement location="${lib.dir}/${junit}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${commons-io}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${junit}"/>
+        <pathelement location="${bundlesdir}/${osgibundle}"/>
+		<pathelement location="${bundlesdir}/${commonsloggingbundle}" />
+		<pathelement location="${bundlesdir}/${serverbundle}"/>
+		<pathelement location="${bundlesdir}/${globalbundle}"/>
+        <pathelement location="${admin.classpath}"/>
     </path>
 
 	<filterset id="pathsubst">
         <filter token="oxfunctions"       value="${prefix}/${oxconfdir}/oxfunctions.sh"/>
         <filter token="oxscriptconf"      value="${prefix}/${oxconfdir}/ox-admin-scriptconf.sh"/>
-        <filter token="nonoxlibpath"      value="${prefix}/${lib.dir}"/>
-        <filter token="oxlibpath"         value="${lib.dir}"/>
         <filter token="absoxconfdir"      value="${prefix}/${oxconfdir}"/>
         <filter token="absserverconfdir"  value="${prefix}/${serverconfdir}"/>
     </filterset>
@@ -56,20 +74,20 @@
         </javac>
     </target>
 
-	<target name="manifest">
+<!--	<target name="manifest">
 		<copy file="META-INF/MANIFEST.MF" tofile="META-INF/MANIFEST.MF.package"/>
 		<manifest mode="update" file="META-INF/MANIFEST.MF.package">
 				<attribute name="Bundle-ClassPath" value=".,
-					 external:$libdir$/${mysql-connector},
 					 external:$log4j$"/>
 		</manifest>
-	</target>
+	</target> -->
 
-    <target name="jar" depends="compile,manifest">
+<!--    <target name="jar" depends="compile,manifest"> -->
+    <target name="jar" depends="compile">
         <mkdir dir="jar"/>
-        <jar jarfile="jar/${plugin.jar}"
+        <jar jarfile="jar/${bundle.name}"
         basedir="classes"
-        manifest="META-INF/MANIFEST.MF.package"/>
+        manifest="META-INF/MANIFEST.MF"/>
     </target>
 
     <target name="client" depends="compile">
@@ -110,29 +128,32 @@
     <target name="dist" depends="clean">
 		<property name="dist-package" value="dist-package"/>
     	<delete dir="${dist-package}"/>
-        <mkdir dir="${dist-package}/${project.name}-${version}"/>
-        <copy todir="${dist-package}/${project.name}-${version}">
+        <mkdir dir="${dist-package}/${composite.name}"/>
+        <copy todir="${dist-package}/${composite.name}">
             <fileset dir=".">
                 <exclude name="**${dist-package}/**"/>
+                <exclude name="**debian/**"/>
                 <exclude name="**CVS/**"/>
+                <exclude name="Todo"/>
             </fileset>
         </copy>
-        <tar destfile="../${project.name}-${version}.tar.bz2"
+        <tar destfile="../${composite.name}.tar.gz"
         basedir="${dist-package}"
-        includes="${project.name}-${version}/"
-        compression="bzip2"/>
+        includes="${composite.name}/"
+        compression="gzip"/>
     	<delete dir="${dist-package}"/>
+		<antcall target="dist-plugins"></antcall>
     </target>
 
 	<target name="install-client" depends="client">
-        <mkdir dir="${destdir}/${prefix}/lib"/>
-        <copy file="jar/${client.jar}" todir="${destdir}/${prefix}/lib"/>
+        <mkdir dir="${destdir}/${bundlesdir}"/>
+        <copy file="jar/${client.jar}" todir="${destdir}/${bundlesdir}"/>
     </target>
 
     <target name="install" depends="jar,doc,replacer">
         <mkdir dir="${destdir}/${prefix}/sbin"/>
-        <mkdir dir="${destdir}/${prefix}/lib"/>
-        <copy todir="${destdir}/${prefix}/lib" file="jar/${plugin.jar}" overwrite="true"/>
+        <mkdir dir="${destdir}/${bundlesdir}"/>
+        <copy todir="${destdir}/${bundlesdir}" file="jar/${bundle.name}" overwrite="true"/>
         <mkdir dir="${destdir}/${prefix}/${oxconfdir}"/>
     	<copy todir="${destdir}/${prefix}/${oxconfdir}" overwrite="true">
             <fileset dir="etc" excludes="**/*.in"/>
