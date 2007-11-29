@@ -78,5 +78,4 @@
 	<bean id="iCalExporter" 		class="com.openexchange.groupware.importexport.exporters.ICalExporter" />
 	<bean id="vCardExporter" 		class="com.openexchange.groupware.importexport.exporters.VCardExporter" />
 	<bean id="csvContactExporter" 	class="com.openexchange.groupware.importexport.exporters.CSVContactExporter" />
-
 </beans>
