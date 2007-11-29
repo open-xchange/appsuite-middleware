@@ -50,6 +50,7 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Enumeration;
 
 import javax.servlet.ServletException;
@@ -68,6 +69,8 @@ import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.services.SessiondService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondConnectorInterface;
@@ -264,6 +267,17 @@ public abstract class SessionServlet extends AJAXServlet {
 		Session retval = null;
 		try {
 			retval = sessiondCon.getSession(sessionId);
+			
+			try {
+				final Context context = retval.getContext();
+				final User user = UserStorage.getStorageUser(retval.getUserId(), context);
+				if (!context.isEnabled() ||!user.isMailEnabled()) {
+					throw EXCEPTION.create(3, sessionId);
+				}
+			} catch (UndeclaredThrowableException e) {
+				throw EXCEPTION.create(3, sessionId);
+			}
+
 		} finally {
 			SessiondService.getInstance().ungetService();
 		}

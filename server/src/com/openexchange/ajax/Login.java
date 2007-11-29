@@ -50,6 +50,7 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
+import java.lang.reflect.UndeclaredThrowableException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -187,10 +188,23 @@ public class Login extends AJAXServlet {
 
 				final SessiondConnectorInterface sessiondCon = SessiondService.getInstance()
 						.getService();
+				
+				if (sessiondCon == null) {
+					throw new LoginException(LoginException.Code.COMMUNICATION);
+				}
+
 				try {
 					final String sessionId = sessiondCon.addSession(userId, name, password,
 							context, req.getRemoteAddr());
 					sessionObj = sessiondCon.getSession(sessionId);
+					
+					try {
+						if (!context.isEnabled() ||!u.isMailEnabled()) {
+							 throw new LoginException(LoginException.Code.INVALID_CREDENTIALS);
+						}
+					} catch (UndeclaredThrowableException e) {
+						throw new LoginException(LoginException.Code.UNKNOWN, e);
+					}
 				} finally {
 					SessiondService.getInstance().ungetService();
 				}
@@ -309,6 +323,16 @@ public class Login extends AJAXServlet {
 			try {
 				sessiondCon = SessiondService.getInstance().getService();
 				sessionObj = sessiondCon.getSessionByRandomToken(randomToken);
+				
+				try {
+					final Context context = sessionObj.getContext();
+					final User user = UserStorage.getStorageUser(sessionObj.getUserId(), context);
+					if (!context.isEnabled() ||!user.isMailEnabled()) {
+						resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+					}
+				} catch (UndeclaredThrowableException e) {
+					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+				}
 			} finally {
 				SessiondService.getInstance().ungetService();
 			}
@@ -336,6 +360,17 @@ public class Login extends AJAXServlet {
 								final Session sessionObj = sessiondCon.getSession(session);
 								SessionServlet
 										.checkIP(sessionObj.getLocalIp(), req.getRemoteAddr());
+								
+								try {
+									final Context context = sessionObj.getContext();
+									final User user = UserStorage.getStorageUser(sessionObj.getUserId(), context);
+									if (!context.isEnabled() ||!user.isMailEnabled()) {
+										 throw new LoginException(LoginException.Code.INVALID_CREDENTIALS);
+									}
+								} catch (UndeclaredThrowableException e) {
+									throw new LoginException(LoginException.Code.UNKNOWN, e);
+								}
+
 								response.setData(writeLogin(sessionObj));
 								break;
 							}
@@ -363,6 +398,13 @@ public class Login extends AJAXServlet {
 						OXJSONException.Code.JSON_WRITE_ERROR, e);
 				LOG.error(oje.getMessage(), oje);
 				response.setException(oje);
+			} catch (LoginException e) {
+				if (LoginException.Source.USER == e.getSource()) {
+					LOG.debug(e.getMessage(), e);
+				} else {
+					LOG.error(e.getMessage(), e);
+				}
+				response.setException(e);
 			}
 			/*
 			 * The magic spell to disable caching
