@@ -221,7 +221,7 @@ public class AJPv13Response {
 		case SEND_BODY_CHUNK_PREFIX_CODE:
 			final int length = responseDataChunk.length;
 			if (length == 0) {
-				throw new AJPv13Exception(AJPCode.NO_EMPTY_SENT_BODY_CHUNK);
+				throw new AJPv13Exception(AJPCode.NO_EMPTY_SENT_BODY_CHUNK, true);
 			}
 			/*
 			 * prefix + chunk_length (2 bytes) + chunk bytes + terminating zero byte
@@ -303,7 +303,7 @@ public class AJPv13Response {
 			fillStartBytes(prefixCode, dataLength, byteArray);
 			break;
 		default:
-			throw new AJPv13Exception(AJPCode.UNKNOWN_PREFIX_CODE, Integer.valueOf(prefixCode));
+			throw new AJPv13Exception(AJPCode.UNKNOWN_PREFIX_CODE, true, Integer.valueOf(prefixCode));
 		}
 		return byteArray.toByteArray();
 	}
@@ -320,7 +320,7 @@ public class AJPv13Response {
 	public static final byte[] getSendBodyChunkBytes(final byte[] responseDataChunk) throws AJPv13Exception {
 		final int length = responseDataChunk.length;
 		if (length == 0) {
-			throw new AJPv13Exception(AJPCode.NO_EMPTY_SENT_BODY_CHUNK);
+			throw new AJPv13Exception(AJPCode.NO_EMPTY_SENT_BODY_CHUNK, true);
 		}
 		/*
 		 * prefix + chunk_length (2 bytes) + chunk bytes + terminating zero byte
@@ -571,7 +571,7 @@ public class AJPv13Response {
 	private static final void writeInt(final int intValue, final UnsynchronizedByteArrayOutputStream byteArray)
 			throws AJPv13Exception {
 		if (intValue > MAX_INT_VALUE) {
-			throw new AJPv13Exception(AJPCode.INTEGER_VALUE_TOO_BIG, Integer.valueOf(intValue));
+			throw new AJPv13Exception(AJPCode.INTEGER_VALUE_TOO_BIG, true, Integer.valueOf(intValue));
 		}
 		final int high = (intValue >> 8);
 		final int low = (intValue & (255));

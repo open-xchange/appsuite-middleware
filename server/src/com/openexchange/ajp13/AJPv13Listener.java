@@ -239,8 +239,7 @@ public final class AJPv13Listener implements Runnable {
 				 * accepted client socket is alive, its input is not shut down
 				 * and no communication failure occurred.
 				 */
-				boolean communicationStopped = false;
-				while (client != null && !client.isInputShutdown() && !communicationStopped) {
+				while (client != null && !client.isInputShutdown()) {
 					try {
 						ajpCon.processRequest();
 						ajpCon.createResponse();
@@ -263,45 +262,34 @@ public final class AJPv13Listener implements Runnable {
 					} catch (final ServletException e) {
 						LOG.error(e.getMessage(), e);
 						closeAndKeepAlive();
-					} catch (final AJPv13SocketClosedException e) {
-						if (listenerStarted) {
-							if (e.isError()) {
-								LOG.error(e.getMessage(), e);
-							} else {
-								if (LOG.isWarnEnabled()) {
-									LOG.warn(e.getMessage(), e);
-								}
-							}
+					} catch (final AJPv13Exception e) {
+						LOG.error(e.getMessage(), e);
+						if (e.keepAlive()) {
+							closeAndKeepAlive();
+						} else {
+							/*
+							 * Leave outer while loop since connection shall be
+							 * closed
+							 */
+							throw e;
 						}
-						/*
-						 * Obviously client socket is down. So leave.
-						 */
-						communicationStopped = true;
-						continue;
-					} catch (final AJPv13InvalidByteSequenceException e) {
-						/*
-						 * TODO: We received invalid starting bytes. Maybe we
-						 * should add special treatment (kind of retry
-						 * mechanism) for this error
-						 */
-						LOG.error(e.getMessage(), e);
-						closeAndKeepAlive();
-					} catch (final AbstractOXException e) {
-						LOG.error(e.getMessage(), e);
-						closeAndKeepAlive();
 					} catch (final IOException e) {
-						LOG.error(e.getMessage(), e);
 						/*
 						 * Obviously a socket communication error occurred
 						 */
-						communicationStopped = true;
-						continue;
+						throw new AJPv13SocketClosedException(AJPv13Exception.AJPCode.IO_ERROR, e, e
+								.getLocalizedMessage());
 					} catch (final Throwable e) {
 						/*
-						 * Catch every throwable object
+						 * Catch every exception
 						 */
-						final AJPv13Exception wrapper = new AJPv13Exception(e);
-						LOG.error(wrapper.getMessage(), wrapper);
+						final AbstractOXException logMe;
+						if (e instanceof AbstractOXException) {
+							logMe = (AbstractOXException) e;
+						} else {
+							logMe = new AJPv13Exception(e);
+						}
+						LOG.error(logMe.getMessage(), logMe);
 						closeAndKeepAlive();
 					}
 					ajpCon.resetConnection(false);
@@ -310,6 +298,13 @@ public final class AJPv13Listener implements Runnable {
 					AJPv13Server.ajpv13ListenerMonitor.incrementNumRequests();
 					processing = false;
 					client.getOutputStream().flush();
+				}
+			} catch (final AJPv13SocketClosedException e) {
+				/*
+				 * Just as warning
+				 */
+				if (LOG.isWarnEnabled()) {
+					LOG.warn(e.getMessage(), e);
 				}
 			} catch (final AJPv13Exception e) {
 				LOG.error(e.getMessage(), e);

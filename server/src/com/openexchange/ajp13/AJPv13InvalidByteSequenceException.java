@@ -55,11 +55,11 @@ public class AJPv13InvalidByteSequenceException extends AJPv13Exception {
 	private static final long serialVersionUID = 7742237204124391724L;
 	
 	public AJPv13InvalidByteSequenceException(final Object... messageArgs) {
-		super(AJPCode.INVALID_BYTE_SEQUENCE, messageArgs);
+		super(AJPCode.INVALID_BYTE_SEQUENCE, true, messageArgs);
 	}
 	
 	public AJPv13InvalidByteSequenceException(final Exception cause, final Object... messageArgs) {
-		super(AJPCode.INVALID_BYTE_SEQUENCE, cause, messageArgs);
+		super(AJPCode.INVALID_BYTE_SEQUENCE, true, cause, messageArgs);
 	}
 
 }

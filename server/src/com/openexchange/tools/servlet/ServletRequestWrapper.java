@@ -177,7 +177,7 @@ public class ServletRequestWrapper implements ServletRequest {
 				ct = new ContentType(value);
 			} catch (final MailException e) {
 				LOG.error(e.getMessage(), e);
-				throw new AJPv13Exception(AJPCode.INVALID_CONTENT_TYPE, value);
+				throw new AJPv13Exception(AJPCode.INVALID_CONTENT_TYPE, true, value);
 			}
 			if (ct.getParameter("charset") == null) {
 				/*
@@ -188,14 +188,14 @@ public class ServletRequestWrapper implements ServletRequest {
 				try {
 					setCharacterEncoding(ServerConfig.getProperty(Property.DefaultEncoding));
 				} catch (UnsupportedEncodingException e) {
-					throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, ServerConfig
+					throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, ServerConfig
 							.getProperty(Property.DefaultEncoding));
 				}
 			} else {
 				try {
 					setCharacterEncoding(ct.getParameter("charset"));
 				} catch (UnsupportedEncodingException e) {
-					throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, ct.getParameter("charset"));
+					throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, ct.getParameter("charset"));
 				}
 			}
 		} else {
@@ -207,7 +207,7 @@ public class ServletRequestWrapper implements ServletRequest {
 			try {
 				setCharacterEncoding(ServerConfig.getProperty(Property.DefaultEncoding));
 			} catch (UnsupportedEncodingException e) {
-				throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, ServerConfig
+				throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, ServerConfig
 						.getProperty(Property.DefaultEncoding));
 			}
 		}
@@ -222,11 +222,11 @@ public class ServletRequestWrapper implements ServletRequest {
 		return headers.containsKey(name.toLowerCase(Locale.ENGLISH));
 	}
 
-	public Enumeration getHeaders(final String name) {
+	public Enumeration<?> getHeaders(final String name) {
 		return makeEnumeration(headers.get(name.toLowerCase(Locale.ENGLISH)));
 	}
 
-	public Enumeration getHeaderNames() {
+	public Enumeration<?> getHeaderNames() {
 		return new IteratorEnumeration(headers.keySet().iterator());
 	}
 
@@ -242,11 +242,11 @@ public class ServletRequestWrapper implements ServletRequest {
 		return parameters.containsKey(name) ? (parameters.get(name))[0] : null;
 	}
 
-	public Enumeration getParameterNames() {
+	public Enumeration<?> getParameterNames() {
 		return new IteratorEnumeration(parameters.keySet().iterator());
 	}
 
-	public Map getParameterMap() {
+	public Map<?, ?> getParameterMap() {
 		return parameters;
 	}
 
@@ -258,7 +258,7 @@ public class ServletRequestWrapper implements ServletRequest {
 		return attributes.containsKey(name);
 	}
 
-	public Enumeration getAttributeNames() {
+	public Enumeration<?> getAttributeNames() {
 		return new IteratorEnumeration(attributes.keySet().iterator());
 	}
 
@@ -297,7 +297,7 @@ public class ServletRequestWrapper implements ServletRequest {
 		return protocol;
 	}
 
-	public Enumeration getLocales() {
+	public Enumeration<?> getLocales() {
 		return null;
 	}
 
@@ -406,12 +406,12 @@ public class ServletRequestWrapper implements ServletRequest {
 		return values[0];
 	}
 
-	protected Enumeration makeEnumeration(final Object obj) {
-		final Class type = obj.getClass();
+	protected Enumeration<?> makeEnumeration(final Object obj) {
+		final Class<?> type = obj.getClass();
 		if (!type.isArray()) {
 			throw new IllegalArgumentException(obj.getClass().toString());
 		}
-		return (new Enumeration() {
+		return (new Enumeration<Object>() {
 			int size = Array.getLength(obj);
 
 			int cursor;
@@ -447,11 +447,11 @@ public class ServletRequestWrapper implements ServletRequest {
 	 * 
 	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
 	 */
-	private static class IteratorEnumeration implements Enumeration {
+	private static class IteratorEnumeration implements Enumeration<Object> {
 
-		private final Iterator iter;
+		private final Iterator<?> iter;
 		
-		public IteratorEnumeration(Iterator iter) {
+		public IteratorEnumeration(Iterator<?> iter) {
 			this.iter = iter;
 		}
 		

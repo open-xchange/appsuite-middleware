@@ -140,7 +140,7 @@ public class AJPv13Server implements Runnable {
 		try {
 			serverSocket = new ServerSocket(AJP13_PORT, DEFAULT_BACKLOG, AJPv13Config.getAJPBindAddress());
 		} catch (final IOException ex) {
-			throw new AJPv13Exception(AJPCode.STARTUP_ERROR, ex, Integer.valueOf(AJP13_PORT));
+			throw new AJPv13Exception(AJPCode.STARTUP_ERROR, false, ex, Integer.valueOf(AJP13_PORT));
 		}
 	}
 

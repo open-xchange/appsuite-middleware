@@ -178,21 +178,24 @@ public final class AJPv13RequestHandler {
 		 */
 		AJPv13Server.ajpv13ListenerMonitor.incrementNumWaiting();
 		try {
+			long start = 0L;
 			final int[] magic;
 			try {
 				/*
 				 * Read first two bytes
 				 */
 				ajpCon.markListenerNonProcessing();
+				start = System.currentTimeMillis();
 				magic = new int[] { ajpCon.getInputStream().read(), ajpCon.getInputStream().read() };
 			} catch (final SocketException e) {
-				throw new AJPv13SocketClosedException(AJPCode.SOCKET_CLOSED_BY_WEB_SERVER, false, e, Integer
-						.valueOf(ajpCon == null ? 1 : ajpCon.getPackageNumber()));
+				throw new AJPv13SocketClosedException(AJPCode.SOCKET_CLOSED_BY_WEB_SERVER, e, Integer
+						.valueOf(ajpCon == null ? 1 : ajpCon.getPackageNumber()), Long.valueOf((System
+						.currentTimeMillis() - start)));
 			}
 			if (checkMagicBytes(magic)) {
 				dataLength = (ajpCon.getInputStream().read() << 8) + ajpCon.getInputStream().read();
 			} else if (magic[0] == -1 || magic[1] == -1) {
-				throw new AJPv13SocketClosedException(AJPCode.EMPTY_INPUT_SREAM, false, null, Integer.valueOf(ajpCon
+				throw new AJPv13SocketClosedException(AJPCode.EMPTY_INPUT_SREAM, null, Integer.valueOf(ajpCon
 						.getPackageNumber()));
 			} else {
 				throw new AJPv13InvalidByteSequenceException(Integer.valueOf(ajpCon.getPackageNumber()),
@@ -317,7 +320,7 @@ public final class AJPv13RequestHandler {
 				handleContentLength();
 			}
 		} catch (final IOException e) {
-			throw new AJPv13Exception(AJPCode.IO_ERROR, e, e.getMessage());
+			throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
 		}
 	}
 
@@ -374,7 +377,7 @@ public final class AJPv13RequestHandler {
 			}
 			ajpRequest.response(ajpCon.getOutputStream(), this);
 		} catch (final IOException e) {
-			throw new AJPv13Exception(AJPCode.IO_ERROR, e, e.getMessage());
+			throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
 		}
 	}
 

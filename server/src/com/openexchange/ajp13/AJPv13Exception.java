@@ -79,9 +79,10 @@ public class AJPv13Exception extends AbstractOXException {
 		INVALID_BYTE_SEQUENCE("Corrupt AJP package #%d: First two bytes do not indicate a package from server to container: %s %s\nWrong AJP package's data:\n%s",
 				Category.SOCKET_CONNECTION, 2),
 		/**
-		 * Socket closed by web server
+		 * Socket closed by web server. Wait for input data of package #%d took
+		 * %dmsec.
 		 */
-		SOCKET_CLOSED_BY_WEB_SERVER("Socket closed by web server", Category.SOCKET_CONNECTION, 3),
+		SOCKET_CLOSED_BY_WEB_SERVER("Socket closed by web server. Wait for input data of package #%d took %dmsec.", Category.SOCKET_CONNECTION, 3),
 		/**
 		 * No data provided from web server: input stream returned \"-1\" while
 		 * reading AJP magic bytes in package #%d
@@ -195,23 +196,80 @@ public class AJPv13Exception extends AbstractOXException {
 		}
 	}
 
-	public AJPv13Exception(final AJPCode code) {
-		this(code, (Exception) null, new Object[0]);
+protected static final Object[] EMPTY_ARGS = new Object[0];
+	
+	/**
+	 * Determines if AJP connection shall be kept alive or closed
+	 */
+	private final boolean keepAlive;
+
+	/**
+	 * Initializes a new {@link AJPv13Exception}
+	 * 
+	 * @param code
+	 *            The AJP error code
+	 * @param keepAlive
+	 *            Whether to keep the AJP connection alive or not
+	 */
+	public AJPv13Exception(final AJPCode code, final boolean keepAlive) {
+		this(code, keepAlive, (Exception) null, EMPTY_ARGS);
 	}
 
-	public AJPv13Exception(final AJPCode code, final Object... messageArgs) {
-		this(code, (Exception) null, messageArgs);
+	/**
+	 * Initializes a new {@link AJPv13Exception}
+	 * 
+	 * @param code
+	 *            The AJP error code
+	 * @param keepAlive
+	 *            Whether to keep the AJP connection alive or not
+	 * @param messageArgs
+	 *            The error message arguments
+	 */
+	public AJPv13Exception(final AJPCode code, final boolean keepAlive, final Object... messageArgs) {
+		this(code, keepAlive, (Exception) null, messageArgs);
 	}
 
-	public AJPv13Exception(final AJPCode code, final Exception cause, final Object... messageArgs) {
+	/**
+	 * Initializes a new {@link AJPv13Exception}
+	 * 
+	 * @param code
+	 *            The AJP error code
+	 * @param keepAlive
+	 *            Whether to keep the AJP connection alive or not
+	 * @param cause
+	 *            The init cause
+	 * @param messageArgs
+	 *            The error message arguments
+	 */
+	public AJPv13Exception(final AJPCode code, final boolean keepAlive, final Exception cause,
+			final Object... messageArgs) {
 		super(Component.AJP, code.category, code.detailNumber, code.message, cause);
 		setMessageArgs(messageArgs);
+		this.keepAlive = keepAlive;
 	}
 
+	/**
+	 * Initializes a new {@link AJPv13Exception} used as wrapper for given
+	 * throwable to be correspond to logging format
+	 * 
+	 * @param cause
+	 *            The throwable to wrap
+	 */
 	public AJPv13Exception(final Throwable cause) {
 		super(Component.AJP, AJPCode.INTERNAL_EXCEPTION.category, AJPCode.INTERNAL_EXCEPTION.detailNumber, cause
 				.getMessage(), cause);
-		setMessageArgs(new Object[0]);
+		setMessageArgs(EMPTY_ARGS);
+		this.keepAlive = false;
+	}
+
+	/**
+	 * Determines if AJP connection shall be kept alive or closed
+	 * 
+	 * @return <code>true</code> if AJP connection shall be kept alive;
+	 *         otherwise <code>false</code> for closure
+	 */
+	public boolean keepAlive() {
+		return keepAlive;
 	}
 
 }

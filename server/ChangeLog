@@ -1,3 +1,9 @@
+* 2007-11-29 - thorben.betten@open-xchange.com
+
+ - Bugfix #10460: AJP exception enhanced by a keep alive flag to indicate
+   whether to close or keep established AJP connection. Thus any exception
+   related to a broken socket has its flag set to false -> close connection.
+
 * 2007-11-27 - thorben.betten@open-xchange.com
 
  - Bugfix #9963: Avoiding infinite loops of broken pipe errors on a lost

@@ -55,7 +55,7 @@ public class AJPv13UnknownPrefixCodeException extends AJPv13Exception {
 	private static final long serialVersionUID = -11763074640120576L;
 
 	public AJPv13UnknownPrefixCodeException(int unknownPrefixCode) {
-		super(AJPCode.UNKNOWN_PREFIX_CODE, Integer.valueOf(unknownPrefixCode));
+		super(AJPCode.UNKNOWN_PREFIX_CODE, true, Integer.valueOf(unknownPrefixCode));
 	}
 
 }

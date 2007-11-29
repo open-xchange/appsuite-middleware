@@ -61,7 +61,7 @@ public class AJPv13MaxPackgeSizeException extends AJPv13Exception {
 	private static final long serialVersionUID = 6426776659588515820L;
 
 	public AJPv13MaxPackgeSizeException(int packageSize) {
-		super(AJPCode.MAX_PACKAGE_SIZE, Integer.valueOf(packageSize));
+		super(AJPCode.MAX_PACKAGE_SIZE, true, Integer.valueOf(packageSize));
 	}
 
 }

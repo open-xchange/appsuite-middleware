@@ -191,7 +191,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		try {
 			servletRequest.setProtocol(parseString());
 		} catch (final AJPv13Exception e) {
-			throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, e, "protocol");
+			throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, true, e, "protocol");
 		}
 		/*
 		 * Determine req_uri
@@ -210,7 +210,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 			servletRequest.setRequestURI(requestURI);
 			servletRequest.setPathInfo(requestURI);
 		} catch (final AJPv13Exception e) {
-			throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, e, "req_uri");
+			throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, true, e, "req_uri");
 		}
 		/*
 		 * Determine remote_addr
@@ -218,7 +218,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		try {
 			servletRequest.setRemoteAddr(parseString());
 		} catch (final AJPv13Exception e) {
-			throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, e, "remote_addr");
+			throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, true, e, "remote_addr");
 		}
 		/*
 		 * Determine remote_host
@@ -226,7 +226,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		try {
 			servletRequest.setRemoteHost(parseString());
 		} catch (final AJPv13Exception e) {
-			throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, e, "remote_host");
+			throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, true, e, "remote_host");
 		}
 		/*
 		 * Determine server_name
@@ -234,7 +234,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		try {
 			servletRequest.setServerName(parseString());
 		} catch (final AJPv13Exception e) {
-			throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, e, "server_name");
+			throw new AJPv13Exception(AJPCode.UNPARSEABLE_HEADER_FIELD, true, e, "server_name");
 		}
 		/*
 		 * Determine server_name
@@ -454,7 +454,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 			} else {
 				final String attributeName = attributeMapping.get(attrNum);
 				if (attributeName == null) {
-					throw new AJPv13Exception(AJPCode.NO_ATTRIBUTE_NAME, Byte.valueOf(nextByte));
+					throw new AJPv13Exception(AJPCode.NO_ATTRIBUTE_NAME, true, Byte.valueOf(nextByte));
 				}
 				servletRequest.setAttribute(attributeName, parseString());
 			}
@@ -557,15 +557,15 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 			}
 		}
 		if (nextByte() != 0x00) {
-			throw new AJPv13Exception(AJPCode.UNPARSEABLE_STRING);
+			throw new AJPv13Exception(AJPCode.UNPARSEABLE_STRING, true);
 		}
 		if (encoded) {
 			try {
 				return QuotedPrintable.decodeString(sb.toString(), DEFAULT_ENCODING);
 			} catch (final IOException e) {
-				throw new AJPv13Exception(AJPCode.IO_ERROR, e, e.getMessage());
+				throw new AJPv13Exception(AJPCode.IO_ERROR, true, e, e.getMessage());
 			} catch (final MessagingException e) {
-				throw new AJPv13Exception(AJPCode.MESSAGING_ERROR, e, e.getMessage());
+				throw new AJPv13Exception(AJPCode.MESSAGING_ERROR, true, e, e.getMessage());
 			}
 		}
 		return sb.toString();

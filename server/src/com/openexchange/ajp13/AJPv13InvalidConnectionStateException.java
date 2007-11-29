@@ -62,7 +62,7 @@ public class AJPv13InvalidConnectionStateException extends AJPv13Exception {
 	private static final long serialVersionUID = -7972551880925412663L;
 	
 	public AJPv13InvalidConnectionStateException() {
-		super(AJPCode.INVALID_CONNECTION_STATE);
+		super(AJPCode.INVALID_CONNECTION_STATE, true);
 	}
 
 }
