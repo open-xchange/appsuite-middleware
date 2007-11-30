@@ -177,7 +177,7 @@ public class ServletRequestWrapper implements ServletRequest {
 				ct = new ContentType(value);
 			} catch (OXException e) {
 				LOG.error(e.getMessage(), e);
-				throw new AJPv13Exception(AJPCode.INVALID_CONTENT_TYPE, value);
+				throw new AJPv13Exception(AJPCode.INVALID_CONTENT_TYPE, true, value);
 			}
 			if (ct.getParameter("charset") == null) {
 				/*
@@ -188,14 +188,14 @@ public class ServletRequestWrapper implements ServletRequest {
 				try {
 					setCharacterEncoding(ServerConfig.getProperty(Property.DefaultEncoding));
 				} catch (UnsupportedEncodingException e) {
-					throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, ServerConfig
+					throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, ServerConfig
 							.getProperty(Property.DefaultEncoding));
 				}
 			} else {
 				try {
 					setCharacterEncoding(ct.getParameter("charset"));
 				} catch (UnsupportedEncodingException e) {
-					throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, ct.getParameter("charset"));
+					throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, ct.getParameter("charset"));
 				}
 			}
 		} else {
@@ -207,7 +207,7 @@ public class ServletRequestWrapper implements ServletRequest {
 			try {
 				setCharacterEncoding(ServerConfig.getProperty(Property.DefaultEncoding));
 			} catch (UnsupportedEncodingException e) {
-				throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, ServerConfig
+				throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, ServerConfig
 						.getProperty(Property.DefaultEncoding));
 			}
 		}

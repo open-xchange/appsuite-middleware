@@ -1,3 +1,9 @@
+* 2007-11-30 - thorben.betten@open-xchange.com
+
+ - Bugfix #10460: Changed handling of exceptions in AJP container to not end up
+   in endless loops if only InputStream is EOF, to keep AJP connections if it is
+   possible.
+
 * 2007-11-19 - thorben.betten@open-xchange.com
 
  - Bugfix #10234: Fixed SQL query to lookup duplicate folders when sharing

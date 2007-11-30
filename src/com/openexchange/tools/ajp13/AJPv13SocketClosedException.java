@@ -64,23 +64,16 @@ public class AJPv13SocketClosedException extends AJPv13Exception {
 	 */
 	private static final long serialVersionUID = 3627750166902286241L;
 	
-	private boolean error = true;
-	
-	public AJPv13SocketClosedException(final AJPCode code, final boolean error) {
-		this(code, error, null, new Object[0]);
+	public AJPv13SocketClosedException(final AJPCode code) {
+		this(code, null, EMPTY_ARGS);
 	}
 	
-	public AJPv13SocketClosedException(final AJPCode code, final boolean error, final Exception cause) {
-		super(code, cause, new Object[0]);
-		this.error = error;
+	public AJPv13SocketClosedException(final AJPCode code, final Exception cause) {
+		super(code, false, cause, EMPTY_ARGS);
 	}
 	
-	public AJPv13SocketClosedException(final AJPCode code, final boolean error, final Exception cause, final Object... messageArgs) {
-		super(code, cause, messageArgs);
-		this.error = error;
+	public AJPv13SocketClosedException(final AJPCode code, final Exception cause, final Object... messageArgs) {
+		super(code, false, cause, messageArgs);
 	}
-    
-    public final boolean isError() {
-    	return error;
-    }
+
 }

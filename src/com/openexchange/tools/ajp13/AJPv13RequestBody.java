@@ -80,7 +80,7 @@ public final class AJPv13RequestBody extends AJPv13Request {
 	@Override
 	public void processRequest(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception, IOException {
 		if (payloadData == null) {
-			throw new AJPv13Exception(AJPCode.MISSING_PAYLOAD_DATA);
+			throw new AJPv13Exception(AJPCode.MISSING_PAYLOAD_DATA, true);
 		}
 		if (payloadData.length == 0) {
 			/*
@@ -92,7 +92,7 @@ public final class AJPv13RequestBody extends AJPv13Request {
 				 */
 				if (LOG.isWarnEnabled()) {
 					final AJPv13Exception ajpExc = new AJPv13Exception(AJPCode.UNEXPECTED_EMPTY_DATA_PACKAGE,
-							Integer.valueOf(ajpRequestHandler.getTotalRequestedContentLength()), Integer
+							true, Integer.valueOf(ajpRequestHandler.getTotalRequestedContentLength()), Integer
 									.valueOf(ajpRequestHandler.getContentLength()));
 					ajpExc.fillInStackTrace();
 					LOG.warn(ajpExc.getMessage(), ajpExc);
