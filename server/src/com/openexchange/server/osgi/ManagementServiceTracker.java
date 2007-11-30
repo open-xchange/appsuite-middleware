@@ -57,42 +57,42 @@ import org.osgi.framework.BundleContext;
 
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.mail.MailInterfaceImpl;
-import com.openexchange.monitoring.MonitorAgent;
+import com.openexchange.management.ManagementAgent;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 
 /**
- * {@link MonitorServiceTracker}
+ * {@link ManagementServiceTracker}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MonitorServiceTracker extends BundleServiceTracker<MonitorAgent> {
+public final class ManagementServiceTracker extends BundleServiceTracker<ManagementAgent> {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MonitorServiceTracker.class);
+			.getLog(ManagementServiceTracker.class);
 
 	/**
-	 * Initializes a new {@link MonitorServiceTracker}
+	 * Initializes a new {@link ManagementServiceTracker}
 	 * 
 	 * @param context
 	 *            The bundle context
 	 */
-	public MonitorServiceTracker(final BundleContext context) {
-		super(context, MonitorAgent.class);
+	public ManagementServiceTracker(final BundleContext context) {
+		super(context, ManagementAgent.class);
 	}
 
 	@Override
-	protected void addingServiceInternal(final MonitorAgent monitorAgent) {
+	protected void addingServiceInternal(final ManagementAgent managementAgent) {
 		try {
 			/*
 			 * Add all mbeans since monitoring service is now available
 			 */
-			monitorAgent.registerMBean(
+			managementAgent.registerMBean(
 					getObjectName(AJPv13Server.ajpv13ServerThreadsMonitor.getClass().getName(), true),
 					AJPv13Server.ajpv13ServerThreadsMonitor);
-			monitorAgent.registerMBean(getObjectName(AJPv13Server.ajpv13ListenerMonitor.getClass().getName(), true),
+			managementAgent.registerMBean(getObjectName(AJPv13Server.ajpv13ListenerMonitor.getClass().getName(), true),
 					AJPv13Server.ajpv13ListenerMonitor);
-			monitorAgent.registerMBean(
+			managementAgent.registerMBean(
 					getObjectName(MailInterfaceImpl.mailInterfaceMonitor.getClass().getName(), true),
 					MailInterfaceImpl.mailInterfaceMonitor);
 		} catch (final MalformedObjectNameException e) {
