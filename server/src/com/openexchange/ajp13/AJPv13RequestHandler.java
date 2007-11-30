@@ -195,8 +195,10 @@ public final class AJPv13RequestHandler {
 			if (checkMagicBytes(magic)) {
 				dataLength = (ajpCon.getInputStream().read() << 8) + ajpCon.getInputStream().read();
 			} else if (magic[0] == -1 || magic[1] == -1) {
-				throw new AJPv13SocketClosedException(AJPCode.EMPTY_INPUT_SREAM, null, Integer.valueOf(ajpCon
-						.getPackageNumber()));
+				throw new AJPv13SocketClosedException(AJPCode.EMPTY_INPUT_STREAM, null, Integer
+						.valueOf(ajpCon == null ? 1 : ajpCon.getPackageNumber()), Long.valueOf(System
+						.currentTimeMillis()
+						- start));
 			} else {
 				throw new AJPv13InvalidByteSequenceException(Integer.valueOf(ajpCon.getPackageNumber()),
 						toHexString(magic[0]), toHexString(magic[1]), dumpBytes((byte) magic[0], (byte) magic[1],

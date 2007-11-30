@@ -85,10 +85,10 @@ public class AJPv13Exception extends AbstractOXException {
 		SOCKET_CLOSED_BY_WEB_SERVER("Socket closed by web server. Wait for input data of package #%d took %dmsec.", Category.SOCKET_CONNECTION, 3),
 		/**
 		 * No data provided from web server: input stream returned \"-1\" while
-		 * reading AJP magic bytes in package #%d
+		 * reading AJP magic bytes in package #%d. Wait for input data took %dmsec.
 		 */
-		EMPTY_INPUT_SREAM(
-				"No data provided from web server: input stream returned \"-1\" while reading AJP magic bytes in package #%d",
+		EMPTY_INPUT_STREAM(
+				"No data provided from web server: input stream returned \"-1\" while reading AJP magic bytes in package #%d. Wait for input data took %dmsec.",
 				Category.SOCKET_CONNECTION, 4),
 		/**
 		 * AJP connection is not set to status "ASSIGNED"
