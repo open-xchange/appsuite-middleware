@@ -65,11 +65,12 @@ import com.openexchange.authentication.impl.RdbLoginInfo;
 import com.openexchange.authentication.service.AuthenticationService;
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.Configuration;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.monitoring.MonitorAgent;
+import com.openexchange.management.ManagementAgent;
+import com.openexchange.monitoring.MonitorInterface;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.server.services.ConfigurationService;
+import com.openexchange.server.services.MonitorService;
 import com.openexchange.server.services.SessiondService;
 import com.openexchange.sessiond.SessiondConnectorInterface;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
@@ -121,9 +122,12 @@ public class Activator implements BundleActivator {
                 serviceTrackerList.add(new ServiceTracker(context, SessiondConnectorInterface.class.getName(),
                     new BundleServiceTracker<SessiondConnectorInterface>(context, SessiondService.getInstance(),
                             SessiondConnectorInterface.class)));
-                // Monitoring is only needed for groupware.
-                serviceTrackerList.add(new ServiceTracker(context, MonitorAgent.class.getName(), new MonitorServiceTracker(
+                // Management is only needed for groupware.
+                serviceTrackerList.add(new ServiceTracker(context, ManagementAgent.class.getName(), new ManagementServiceTracker(
                     context)));
+                serviceTrackerList.add(new ServiceTracker(context, MonitorInterface.class.getName(),
+                        new BundleServiceTracker<MonitorInterface>(context, MonitorService.getInstance(),
+                                MonitorInterface.class)));
                 // Authentication is only needed for groupware.
                 serviceTrackerList.add(new ServiceTracker(context, Authentication.class.getName(),
                     new BundleServiceTracker<Authentication>(context, AuthenticationService.getInstance(), Authentication.class)));
