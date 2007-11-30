@@ -51,12 +51,15 @@ package com.openexchange.monitoring.internal;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.config.Configuration;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.monitoring.services.MonitoringConfiguration;
+import com.openexchange.management.ManagementAgent;
+import com.openexchange.management.services.ManagementService;
 import com.openexchange.server.Initialization;
 
 /**
@@ -96,18 +99,28 @@ public final class MonitoringInit implements Initialization {
 			LOG.error(MonitoringInit.class.getName() + " already started");
 			return;
 		}
-		final MonitorAgentImpl agent = MonitorAgentImpl.getInstance();
-		final Configuration c = MonitoringConfiguration.getInstance().getService();
+		
+		/*
+		 * Create Beans and register them
+		 */
+		final ManagementAgent managementAgent = ManagementService.getInstance().getService();
+
+		final GeneralMonitor generalMonitorBean = new GeneralMonitor();
 		try {
-			final int jmxPort = c.getIntProperty("MonitorJMXPort", 9999);
-			agent.setJmxPort(jmxPort);
-			agent.setJmxBindAddr(c.getProperty("MonitorJMXBindAddress", "localhost"));
-		} finally {
-			MonitoringConfiguration.getInstance().ungetService();
+			managementAgent.registerMBean( new ObjectName("com.openexchange.monitoring", "name", "GeneralMonitor"), generalMonitorBean);
+		} catch (MalformedObjectNameException exc) {
+			// TODO Auto-generated catch block
+			exc.printStackTrace();
+		} catch (NullPointerException exc) {
+			// TODO Auto-generated catch block
+			exc.printStackTrace();
+		} catch (Exception exc) {
+			// TODO Auto-generated catch block
+			exc.printStackTrace();
 		}
-		agent.run();
+		
 		if (LOG.isInfoEnabled()) {
-			LOG.info("JMX server successfully initialized.");
+			LOG.info("JMX Monitor applied");
 		}
 		started.set(true);
 	}
@@ -120,8 +133,6 @@ public final class MonitoringInit implements Initialization {
 			LOG.error(MonitoringInit.class.getName() + " has not been started");
 			return;
 		}
-		final MonitorAgentImpl agent = MonitorAgentImpl.getInstance();
-		agent.stop();
 		started.set(false);
 	}
 

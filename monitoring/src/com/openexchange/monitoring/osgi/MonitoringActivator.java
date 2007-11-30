@@ -51,18 +51,21 @@ package com.openexchange.monitoring.osgi;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
+
+import javax.management.ObjectName;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.openexchange.config.Configuration;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.monitoring.MonitorAgent;
-import com.openexchange.monitoring.internal.MonitorAgentImpl;
+import com.openexchange.management.ManagementAgent;
+import com.openexchange.management.services.ManagementService;
+import com.openexchange.monitoring.MonitorInterface;
+import com.openexchange.monitoring.internal.MonitorImpl;
 import com.openexchange.monitoring.internal.MonitoringInit;
-import com.openexchange.monitoring.services.MonitoringConfiguration;
 import com.openexchange.server.ServiceHolderListener;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 
@@ -81,6 +84,8 @@ public final class MonitoringActivator implements BundleActivator {
 
 	private ServiceRegistration serviceRegistration;
 
+	private final Stack<ObjectName> objectNames = new Stack<ObjectName>();
+
 	/**
 	 * Initializes a new {@link MonitoringActivator}
 	 */
@@ -98,9 +103,9 @@ public final class MonitoringActivator implements BundleActivator {
 			/*
 			 * Init service trackers
 			 */
-			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
-					new BundleServiceTracker<Configuration>(context, MonitoringConfiguration.getInstance(),
-							Configuration.class)));
+			serviceTrackerList.add(new ServiceTracker(context, ManagementAgent.class.getName(),
+					new BundleServiceTracker<ManagementAgent>(context, ManagementService
+							.getInstance(), ManagementAgent.class)));
 			/*
 			 * Open service trackers
 			 */
@@ -113,12 +118,18 @@ public final class MonitoringActivator implements BundleActivator {
 			final ServiceHolderListener l = new ServiceHolderListener() {
 
 				public void onServiceAvailable(final Object service) throws AbstractOXException {
-					if (service instanceof Configuration) {
+					if (service instanceof ManagementAgent) {
 						try {
 							if (MonitoringInit.getInstance().isStarted()) {
 								MonitoringInit.getInstance().stop();
 							}
 							MonitoringInit.getInstance().start();
+
+							/*
+							 * Register monitor service
+							 */
+							serviceRegistration = context.registerService(MonitorInterface.class
+									.getCanonicalName(), new MonitorImpl(), null);
 						} catch (final AbstractOXException e) {
 							LOG.error(e.getLocalizedMessage(), e);
 							MonitoringInit.getInstance().stop();
@@ -130,17 +141,12 @@ public final class MonitoringActivator implements BundleActivator {
 
 				}
 			};
-			MonitoringConfiguration.getInstance().addServiceHolderListener(l);
-			/*
-			 * Register monitor service
-			 */
-			serviceRegistration = context.registerService(MonitorAgent.class.getCanonicalName(), MonitorAgentImpl
-					.getInstance(), null);
+
+			ManagementService.getInstance().addServiceHolderListener(l);
 		} catch (final Throwable t) {
 			LOG.error(t.getLocalizedMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
-
 	}
 
 	/*

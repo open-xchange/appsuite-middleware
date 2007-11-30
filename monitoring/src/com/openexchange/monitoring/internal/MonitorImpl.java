@@ -47,59 +47,29 @@
  *
  */
 
-package com.openexchange.monitoring;
 
+
+package com.openexchange.monitoring.internal;
+
+import javax.management.MBeanRegistration;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
+import com.openexchange.monitoring.MonitorInterface;
+import com.openexchange.monitoring.MonitoringInfo;
+
 /**
- * {@link MonitorAgent}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
-public interface MonitorAgent {
+public class MonitorImpl implements MonitorInterface {
+	
+	public MonitorImpl() {
+		super();
+	}
 
-	/**
-	 * Registers a new MBean
-	 * 
-	 * @param name
-	 *            The bean name
-	 * @param mbean
-	 *            The bean to register
-	 * @throws Exception
-	 *             If registration fails
-	 */
-	public void registerMBean(String name, Object mbean) throws Exception;
-
-	/**
-	 * Registers a new MBean
-	 * 
-	 * @param objectName
-	 *            The bean's object name
-	 * @param mbean
-	 *            The bean to register
-	 * @throws Exception
-	 *             If registration fails
-	 */
-	public void registerMBean(ObjectName objectName, Object mbean) throws Exception;
-
-	/**
-	 * Unregisters the MBean corresponding to given name
-	 * 
-	 * @param name
-	 *            The bean name
-	 * @throws Exception
-	 *             If bean cannot be unregistered
-	 */
-	public void unregisterMBean(String name) throws Exception;
-
-	/**
-	 * Unregisters the MBean corresponding to given object name
-	 * 
-	 * @param objectName
-	 *            The bean's object name
-	 * @throws Exception
-	 *             If bean cannot be unregistered
-	 */
-	public void unregisterMBean(ObjectName objectName) throws Exception;
+	public void dummyMethod() {
+		
+	}
 }

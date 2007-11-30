@@ -6,6 +6,8 @@ Bundle-Version: 6.5.0
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.openexchange.config,
  com.openexchange.groupware,
+ com.openexchange.management,
+ com.openexchange.management.services,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
  org.apache.commons.logging,
