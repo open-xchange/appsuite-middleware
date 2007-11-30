@@ -263,8 +263,8 @@ public final class AJPv13Listener implements Runnable {
 						LOG.error(e.getMessage(), e);
 						closeAndKeepAlive();
 					} catch (final AJPv13Exception e) {
-						LOG.error(e.getMessage(), e);
 						if (e.keepAlive()) {
+							LOG.error(e.getMessage(), e);
 							closeAndKeepAlive();
 						} else {
 							/*
