@@ -257,8 +257,7 @@ public final class AJPv13Listener implements Runnable {
 						 */
 						writeSendHeaders(client, (HttpServletResponseWrapper) e.getRes());
 						writeSendBody(client, e.getData().getBytes("UTF-8"));
-						writeEndResponse(client, false);
-						ajpCon.getAjpRequestHandler().setEndResponseSent(true);
+						closeAndKeepAlive();
 					} catch (final ServletException e) {
 						LOG.error(e.getMessage(), e);
 						closeAndKeepAlive();
