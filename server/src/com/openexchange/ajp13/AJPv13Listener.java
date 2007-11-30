@@ -300,10 +300,10 @@ public final class AJPv13Listener implements Runnable {
 				}
 			} catch (final AJPv13SocketClosedException e) {
 				/*
-				 * Just as warning
+				 * Just as debug info
 				 */
-				if (LOG.isWarnEnabled()) {
-					LOG.warn(e.getMessage(), e);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(e.getMessage(), e);
 				}
 			} catch (final AJPv13Exception e) {
 				LOG.error(e.getMessage(), e);
