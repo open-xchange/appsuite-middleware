@@ -454,6 +454,9 @@ public class AbstractOXException extends Exception {
                 msg = super.getMessage();
             } catch (IllegalFormatException e) {
                 LOG.error(e.getMessage(), e);
+                final Exception logMe = new Exception(super.getMessage());
+                logMe.setStackTrace(super.getStackTrace());
+                LOG.error("Illegal message format.", logMe);
                 msg = super.getMessage();
             }
         }
