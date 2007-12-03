@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Management Plug-in
+Bundle-Name: Management Bundle
 Bundle-SymbolicName: com.openexchange.management
-Bundle-Version: 1.0.0
+Bundle-Version: 6.5.0
 Bundle-Activator: com.openexchange.management.osgi.ManagementActivator
 Import-Package: com.openexchange.config,
  com.openexchange.groupware,
@@ -17,3 +17,4 @@ Import-Package: com.openexchange.config,
  org.osgi.util.tracker;version="1.3.3"
 Export-Package: com.openexchange.management,
  com.openexchange.management.services
+Bundle-Vendor: Open-Xchange Inc.
