@@ -93,7 +93,7 @@
     <target name="client" depends="compile">
         <mkdir dir="jar"/>
         <jar jarfile="jar/${client.jar}"
-         includes="com/openexchange/admin/rmi/"
+         includes="com/openexchange/admin/rmi/,com/openexchange/admin/console/"
          excludes="com/openexchange/admin/rmi/impl/"
          basedir="classes"/>
     </target>
