@@ -518,10 +518,14 @@
 
     <target name="patchOSGiIni">
         <fail message="Define bundlesdir." unless="bundlesdir"/>
+        <fail message="Define log.install.dir." unless="log.install.dir"/>
         <move tofile="${patch.conf.dir}/osgi/config.ini"
             file="${patch.conf.dir}/osgi/config.ini.in" overwrite="true"/>
         <replace file="${patch.conf.dir}/osgi/config.ini">
             <replacefilter token="@bundlesdir@" value="${bundlesdir}"/>
+        </replace>
+        <replace file="${patch.conf.dir}/osgi/config.ini">
+            <replacefilter token="@logfile@" value="${log.install.dir}/osgi-groupware.log"/>
         </replace>
     </target>
 

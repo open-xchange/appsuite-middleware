@@ -6,3 +6,4 @@ osgi.framework=file\:@bundlesdir@/org.eclipse.osgi_3.3.0.v20070530.jar
 osgi.configuration.cascaded=false
 eclipse.ignoreApp=true
 osgi.classloader.singleThreadLoads=true
+osgi.logfile=@logfile@
