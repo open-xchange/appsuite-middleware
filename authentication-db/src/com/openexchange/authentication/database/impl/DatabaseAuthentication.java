@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.authentication.impl;
+package com.openexchange.authentication.database.impl;
 
 import com.openexchange.authentication.Authentication;
 import com.openexchange.authentication.LoginException;
@@ -63,12 +63,12 @@ import com.openexchange.groupware.ldap.UserStorage;
  * This implementation authenticates the user against the database.
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class RdbLoginInfo implements Authentication {
+public class DatabaseAuthentication implements Authentication {
 
     /**
      * Default constructor.
      */
-    public RdbLoginInfo() {
+    public DatabaseAuthentication() {
         super();
     }
 

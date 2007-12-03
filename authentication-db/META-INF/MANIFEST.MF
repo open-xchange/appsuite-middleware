@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Database Authentication
+Bundle-SymbolicName: com.openexchange.authentication.database
+Bundle-Version: 6.5.0
+Bundle-Activator: com.openexchange.authentication.database.osgi.Activator
+Bundle-Vendor: Open-Xchange Inc.
+Import-Package: com.openexchange.authentication,
+ com.openexchange.groupware,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.contexts.impl,
+ com.openexchange.groupware.ldap,
+ org.osgi.framework;version="1.3.0"

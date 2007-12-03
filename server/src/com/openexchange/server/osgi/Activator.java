@@ -61,7 +61,6 @@ import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.authentication.Authentication;
-import com.openexchange.authentication.impl.RdbLoginInfo;
 import com.openexchange.authentication.service.AuthenticationService;
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.Configuration;
@@ -133,9 +132,6 @@ public class Activator implements BundleActivator {
                     new BundleServiceTracker<Authentication>(context, AuthenticationService.getInstance(), Authentication.class)));
 				// Start up server the usual way
 				starter.start();
-				// Register authentication service.
-				registrationList.add(context.registerService(Authentication
-				    .class.getName(), new RdbLoginInfo(), null));
 			}
             // Open service trackers
             for (ServiceTracker tracker : serviceTrackerList) {
