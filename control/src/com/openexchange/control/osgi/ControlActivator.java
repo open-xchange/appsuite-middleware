@@ -121,7 +121,9 @@ public final class ControlActivator implements BundleActivator {
 							if (ControlInit.getInstance().isStarted()) {
 								ControlInit.getInstance().stop();
 							}
-							ControlInit.getInstance().start();
+							final ControlInit controlInit = ControlInit.getInstance();
+							controlInit.setBundleContext(context);
+							controlInit.start();							
 						} catch (final AbstractOXException e) {
 							LOG.error(e.getLocalizedMessage(), e);
 							ControlInit.getInstance().stop();
