@@ -64,10 +64,12 @@ import com.openexchange.authentication.Authentication;
 import com.openexchange.authentication.service.AuthenticationService;
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.Configuration;
+import com.openexchange.configjump.ConfigJumpInterface;
 import com.openexchange.management.ManagementAgent;
 import com.openexchange.monitoring.MonitorInterface;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
+import com.openexchange.server.services.ConfigJumpService;
 import com.openexchange.server.services.ConfigurationService;
 import com.openexchange.server.services.MonitorService;
 import com.openexchange.server.services.SessiondService;
@@ -121,6 +123,10 @@ public class Activator implements BundleActivator {
                 serviceTrackerList.add(new ServiceTracker(context, SessiondConnectorInterface.class.getName(),
                     new BundleServiceTracker<SessiondConnectorInterface>(context, SessiondService.getInstance(),
                             SessiondConnectorInterface.class)));
+			    // ConfigJump is only needed for groupware.
+                serviceTrackerList.add(new ServiceTracker(context, ConfigJumpInterface.class.getName(),
+                    new BundleServiceTracker<ConfigJumpInterface>(context, ConfigJumpService.getInstance(),
+                            ConfigJumpInterface.class)));
                 // Management is only needed for groupware.
                 serviceTrackerList.add(new ServiceTracker(context, ManagementAgent.class.getName(), new ManagementServiceTracker(
                     context)));
