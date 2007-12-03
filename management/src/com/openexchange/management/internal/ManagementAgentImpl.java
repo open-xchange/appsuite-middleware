@@ -171,7 +171,7 @@ public class ManagementAgentImpl extends AbstractAgent implements ManagementAgen
 		}
 	}
 
-	private static final String ERR_REGISTRATION = "MBean registration denied: MonitorAgent is not running";
+	private static final String ERR_REGISTRATION = "MBean registration denied: ManagementAgent is not running.";
 
 	@Override
 	public void registerMBean(final Object object, final ObjectName objectName) throws Exception {
