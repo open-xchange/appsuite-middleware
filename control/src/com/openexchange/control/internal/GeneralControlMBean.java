@@ -58,11 +58,11 @@ package com.openexchange.control.internal;
  */
 public interface GeneralControlMBean {
 
-	public void start() ;
+	public void start(final String name) ;
 	
-	public void stop();
+	public void stop(final String name);
 	
-	public void restart();
+	public void restart(final String name);
 
 	public void install();
 	
