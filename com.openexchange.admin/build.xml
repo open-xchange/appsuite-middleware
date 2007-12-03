@@ -394,8 +394,8 @@
     </target>
 
 	<target name="install-client" depends="client">
-        <mkdir dir="${destdir}/${bundlesdir}"/>
-        <copy file="jar/${client.jar}" todir="${destdir}/${bundlesdir}"/>
+        <mkdir dir="${destdir}/${prefix}/lib"/>
+        <copy file="jar/${client.jar}" todir="${destdir}/${prefix}/lib"/>
     </target>
 	
 <!--    <target name="install-doc" depends="doc">
