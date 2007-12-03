@@ -61,8 +61,9 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.groupware.integration.SetupLink;
-import com.openexchange.groupware.integration.SetupLinkException;
+import com.openexchange.configjump.ConfigJumpInterface;
+import com.openexchange.configjump.ConfigJumpException;
+import com.openexchange.server.services.ConfigJumpService;
 import com.openexchange.session.Session;
 
 /**
@@ -99,20 +100,22 @@ public class ConfigJump extends SessionServlet {
         final Session sessionObj = getSessionObject(req);
         final Response response = new Response();
         try {
-            final SetupLink setupLink = SetupLink.getInstance();
+        	final ConfigJumpInterface configJump = ConfigJumpService.getInstance().getService();
             //protocol, host, port, userId, password
             String protocol = "http";
             if (req.isSecure()) {
                 protocol = "https";
             }
-            final URL url = setupLink.getLink(sessionObj.getContext()
+            final URL url = configJump.getLink(sessionObj.getContext()
                 .getContextId(), sessionObj.getUserlogin(), sessionObj
                 .getPassword(), protocol, req.getServerName(), req
                 .getServerPort(), req.getCookies());
             response.setData(url);
-        } catch (SetupLinkException e) {
+        } catch (ConfigJumpException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
+        } finally {
+        	ConfigJumpService.getInstance().ungetService();
         }
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
