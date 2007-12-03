@@ -79,7 +79,7 @@
         <filter token="loggingproperties" value="${prefix}/${oxconfdir}/file-logging.properties"/>
         <filter token="configdbdump"      value="${prefix}/${oxconfdir}/mysql/configdb-dump.sql"/>
         <filter token="oxdbdump"          value="${prefix}/${oxconfdir}/mysql/open-xchangedb-dump.sql"/>
-        <filter token="oxlibpath"         value="${bundlesdir}/${commonBundle}/lib"/>
+        <filter token="oxlibpath"         value="${prefix}/lib"/>
         <filter token="serverconfdir"     value="${serverconfdir}"/>
         <filter token="oxconfdir"         value="${oxconfdir}"/>
         <filter token="oxserverconfdir"   value="${serverconfdir}"/>
@@ -265,7 +265,7 @@
     <target name="client" depends="compile_libs">
         <mkdir dir="jar"/>
         <jar jarfile="jar/${client.jar}"
-         includes="com/openexchange/admin/rmi/"
+         includes="com/openexchange/admin/rmi/,com/openexchange/admin/console/"
          excludes="com/openexchange/admin/rmi/impl/"
          basedir="classes"/>
     </target>
