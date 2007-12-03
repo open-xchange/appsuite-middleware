@@ -112,6 +112,10 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		LOG.info("uninstall package");
 	}
 	
+	public void close() {
+
+	}
+	
 	private Bundle getBundleByName(final String name, final Bundle[] bundle) {
 		for (int a = 0; a < bundle.length; a++) {
 			if (bundle[a].getSymbolicName().equals(name)) {

@@ -67,5 +67,7 @@ public interface GeneralControlMBean {
 	public void install();
 	
 	public void uninstall();
+	
+	public void close();
 
 }
