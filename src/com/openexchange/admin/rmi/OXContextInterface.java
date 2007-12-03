@@ -4,7 +4,6 @@ package com.openexchange.admin.rmi;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import com.openexchange.admin.exceptions.OXContextException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -18,6 +17,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchDatabaseException;
 import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
+import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 

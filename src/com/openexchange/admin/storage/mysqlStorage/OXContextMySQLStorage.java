@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.DatabaseContextMappingException;
-import com.openexchange.admin.exceptions.OXContextException;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -36,6 +35,7 @@ import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXUser;
