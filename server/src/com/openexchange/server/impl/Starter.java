@@ -170,6 +170,10 @@ public class Starter implements Initialization {
 	 * Reads configdb.properties.
 	 */
 	com.openexchange.configuration.ConfigDB.getInstance(),
+        /**
+         * Read in update tasks
+         */
+        com.openexchange.groupware.update.UpdateTaskCollectionInit.getInstance(),
 	/**
 	 * Sets the caching system JCS up.
 	 */
