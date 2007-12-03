@@ -1,7 +1,8 @@
 osgi.noShutdown=true
-osgi.bundles=reference\:file\:@oxadminbundle@@1\:start,reference\:file\:@oxcommonbundle@@2\:start,reference\:file\:@oxserverbundle@@2\:start,reference\:file\:@oxglobalbundle@@2\:start,reference\:file\:@oxconfigbundle@@2\:start,reference\:file\:@oxmonitoringbundle@@2\:start,reference\:file\:@oxsessiondbundle@@2\:start,reference\:file\:@servletbundle@@2\:start,reference\:file\:@loggingbundle@@2\:start,reference\:file\:@osgiservicesbundle@@2\:start
+osgi.bundles=reference\:file\:@oxadminbundle@@1\:start,reference\:file\:@oxcommonbundle@@2\:start,reference\:file\:@oxmanagementbundle@@2\:start,reference\:file\:@oxserverbundle@@2\:start,reference\:file\:@oxglobalbundle@@2\:start,reference\:file\:@oxconfigbundle@@2\:start,reference\:file\:@oxmonitoringbundle@@2\:start,reference\:file\:@oxsessiondbundle@@2\:start,reference\:file\:@servletbundle@@2\:start,reference\:file\:@loggingbundle@@2\:start,reference\:file\:@osgiservicesbundle@@2\:start
 osgi.bundles.defaultStartLevel=4
 osgi.framework=file\:@oxosgibundle@
 osgi.configuration.cascaded=false
 eclipse.ignoreApp=true
 osgi.classloader.singleThreadLoads=true
+osgi.logfile=@osgilogfile@
