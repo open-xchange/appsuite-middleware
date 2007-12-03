@@ -7,6 +7,7 @@ Bundle-Vendor: Open-Xchange Inc.
 Export-Package: com.openexchange.authentication,
  com.openexchange.cache,
  com.openexchange.cache.dynamic,
+ com.openexchange.configjump,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.upload,
