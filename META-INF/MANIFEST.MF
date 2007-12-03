@@ -5,23 +5,24 @@ Bundle-SymbolicName: open_xchange_admin_plugin_hosting
 Bundle-Version: 6.5.0
 Bundle-Activator: com.openexchange.admin.Activator
 Bundle-Localization: plugin
-Import-Package: org.apache.commons.logging,
- org.apache.commons.logging.impl,
- com.mysql.jdbc,
+Import-Package: com.mysql.jdbc,
  com.openexchange.api2,
  com.openexchange.cache,
  com.openexchange.configuration,
  com.openexchange.database,
- com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
+ com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.delete,
  com.openexchange.groupware.impl,
+ com.openexchange.groupware.update,
  com.openexchange.server,
  com.openexchange.server.impl,
- com.openexchange.tools.oxfolder,
  com.openexchange.tools,
- com.openexchange.groupware.update,
+ com.openexchange.tools.oxfolder,
+ javax.management,
  org.apache.commons.io,
+ org.apache.commons.logging,
+ org.apache.commons.logging.impl,
  org.osgi.framework;version="1.3.0"
 Require-Bundle: open_xchange_admin
