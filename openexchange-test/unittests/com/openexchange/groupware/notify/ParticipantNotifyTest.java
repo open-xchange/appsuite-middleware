@@ -462,7 +462,7 @@ public class ParticipantNotifyTest extends TestCase{
 		session = new SessionObject("my_fake_sessionid");
 		
 		session.setContext(new ContextImpl(1));
-		session.setUserlogin("1");  // getUserId parses this string. 
+		session.setUsername("1");  // getUserId parses this string. 
 		//session.setUserConfiguration(new UserConfigurationFactory().getConfiguration(1));
 	}
 	
