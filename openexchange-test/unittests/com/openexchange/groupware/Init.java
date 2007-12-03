@@ -2,6 +2,7 @@ package com.openexchange.groupware;
 
 import com.openexchange.config.Configuration;
 import com.openexchange.config.internal.ConfigurationImpl;
+import com.openexchange.groupware.impl.GroupwareInit;
 import com.openexchange.monitoring.services.MonitoringConfiguration;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.SessiondService;
@@ -131,6 +132,7 @@ public final class Init {
             init.start();
             started.add(init);
         }
+        GroupwareInit.init();
     }
 
     private static void injectTestServices() throws Exception {
@@ -155,9 +157,8 @@ public final class Init {
     }
 
     private static void startAndInjectSessiondBundle() throws Exception {
-        //TODO: Fix this!
-        //SessiondConfiguration.getInstance().setService((Configuration)services.get(Configuration.class));
-        //SessiondService.getInstance().setService(new SessiondConnectorImpl());
+        SessiondConfiguration.getInstance().setService((Configuration)services.get(Configuration.class));
+        SessiondService.getInstance().setService(new SessiondConnectorImpl());
     }
 
 
