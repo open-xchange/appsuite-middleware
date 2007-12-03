@@ -55,6 +55,10 @@ import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+
 /**
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -65,21 +69,39 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(GeneralControl.class);
 
 	private MBeanServer server;
+	
+	private BundleContext bundleContext;
 
-	public GeneralControl() {
+	public GeneralControl(final BundleContext bundleContext) {
 		super();
+		this.bundleContext = bundleContext;
 	}
 
-	public void start() {
+	public void start(final String name) {
+		final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
+		try {
+			bundle.start();
+		} catch (BundleException exc) {
+			// TODO Auto-generated catch block
+			exc.printStackTrace();
+		}
 		LOG.info("start package");
 	}
 	
-	public void stop() {
+	public void stop(final String name) {
+		final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
+		try {
+			bundle.stop();
+		} catch (BundleException exc) {
+			// TODO Auto-generated catch block
+			exc.printStackTrace();
+		}
 		LOG.info("stop package");
 	}
 	
-	public void restart() {
-		LOG.info("restart package");
+	public void restart(final String name) {
+		stop(name);
+		start(name);
 	}
 
 	public void install() {
@@ -90,6 +112,14 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		LOG.info("uninstall package");
 	}
 	
+	private Bundle getBundleByName(final String name, final Bundle[] bundle) {
+		for (int a = 0; a < bundle.length; a++) {
+			if (bundle[a].getSymbolicName().equals(name)) {
+				return bundle[a];
+			}
+		}
+		return null;
+	}
 
 	public ObjectName preRegister(final MBeanServer server, final ObjectName nameArg) throws Exception {
 		ObjectName name = nameArg;
