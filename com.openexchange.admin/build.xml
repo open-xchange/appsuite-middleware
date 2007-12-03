@@ -35,6 +35,7 @@
 	<property name="configbundle"         value="com.openexchange.config_6.5.0.jar"/>
 	<property name="serverbundle"         value="com.openexchange.server_6.5.0.jar"/>
 	<property name="monitoringbundle"     value="com.openexchange.monitoring_6.5.0.jar"/>
+	<property name="managementbundle"     value="com.openexchange.management_6.5.0.jar"/>
 	<property name="sessiondbundle"       value="com.openexchange.sessiond_6.5.0.jar"/>
 	<property name="servletbundle"        value="javax.servlet_2.4.0.v200706111738.jar"/>
 
@@ -86,6 +87,7 @@
         <filter token="absserverconfdir"  value="${prefix}/${serverconfdir}"/>
         <filter token="adminlogfile"      value="${logdir}/open-xchange-admin.log"/>
         <filter token="consolelogfile"    value="${logdir}/open-xchange-admin-console.log"/>
+        <filter token="osgilogfile"       value="${logdir}/osgi-admin.log"/>
 		<filter token="admin_major"       value="${admin_major}"/>
 		<filter token="admin_minor"       value="${admin_minor}"/>
 		<filter token="admin_patch"       value="${admin_patch}"/>
@@ -101,6 +103,7 @@
        	<filter token="oxconfigbundle"		   value="${bundlesdir}/${configbundle}"/>
        	<filter token="oxsessiondbundle"	   value="${bundlesdir}/${sessiondbundle}"/>
     	<filter token="oxmonitoringbundle"	   value="${bundlesdir}/${monitoringbundle}"/>
+    	<filter token="oxmanagementbundle"	   value="${bundlesdir}/${managementbundle}"/>
     	<filter token="servletbundle"		   value="${bundlesdir}/${servletbundle}"/>
        	<filter token="loggingbundle"		   value="${bundlesdir}/${commonsloggingbundle}"/>
        	<filter token="osgiservicesbundle"	   value="${bundlesdir}/${osgiservicesbundle}"/>
