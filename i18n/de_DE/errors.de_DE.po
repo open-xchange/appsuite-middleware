@@ -990,6 +990,15 @@
 # Antje Faber, 2007.
 # Antje Faber, 2007.
 # Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
+# Antje Faber, 2007.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER.
 # Antje Faber, 2007.
 #
@@ -997,7 +1006,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2007-10-18 12:41+0200\n"
+"PO-Revision-Date: 2007-12-03 15:41+0100\n"
 "Last-Translator: Antje Faber\n"
 "Language-Team:  <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1112,7 +1121,9 @@ msgstr "Aktionstyp wird nicht unterstützt : %d"
 msgid ""
 "Administration rights required. In the Rights tab add at least one user with "
 "administration rights."
-msgstr "Administrationsrechte benötigt. Fügen Sie im Reiter Rechte mindestens einen Benutzer mit Administrationsrechten hinzu."
+msgstr ""
+"Administrationsrechte benötigt. Fügen Sie im Reiter Rechte mindestens einen "
+"Benutzer mit Administrationsrechten hinzu."
 
 msgid "An I/O error occurred: %1$s."
 msgstr "Es trat ein E/A-Fehler auf: %1$s."
@@ -1131,6 +1142,11 @@ msgstr "Es trat ein SQL-Fehler im Kontext %s auf"
 
 msgid "An SQL error occurred while creating table 'version': %1$s."
 msgstr "SQL-Fehler beim Erstellen der Tabelle 'version': %1$s."
+
+msgid ""
+"An SQL error occurred while performing task "
+"ClearLeftoverAttachmentsUpdateTask: %1$s."
+msgstr "SQL-Fehler beim Ausführen der Aufgabe ClearLeftoverAttachmentsUpdateTask: %1$s."
 
 msgid "An SQL error occurred while performing task CreateTableVersion: %1$s."
 msgstr "SQL-Fehler beim Ausführen der Aufgabe CreateTableVersion: %1$s."
@@ -1294,6 +1310,9 @@ msgstr "Es kann nur jeweils in einen Ordner importiert werden."
 
 msgid "Can't access DBPool"
 msgstr "Kein Zugriff auf DBPool"
+
+msgid "Can't resolve filestore."
+msgstr "Dateispeicher kann nicht aufgelöst werden."
 
 msgid "Cannot add external participant without email address."
 msgstr "Externer Teilnehmer ohne E-Mail-Adresse kann nicht hinzugefügt werden"
@@ -1565,6 +1584,11 @@ msgstr ""
 "Datei konnte nicht aus Dateispeicher gelöscht werden. Dateispeicher: %s "
 "Kontext: %s"
 
+msgid "Could not delete files from filestore. Context: %d."
+msgstr ""
+"Dateien konnten nicht aus Dateispeicher gelöscht werden. "
+"Kontext: %d"
+
 msgid "Could not encode as UTF-8"
 msgstr "UTF-8-Kodierung fehlgeschlagen"
 
@@ -1617,6 +1641,9 @@ msgstr "InputStream konnte nicht als Zeichenkette gelesen werden"
 
 msgid "Could not recognize format of the following data: %s"
 msgstr "Unbekanntes Format für folgende Daten: %s"
+
+msgid "Could not remove attachments from database. Context: %d."
+msgstr "Anhänge konnten nicht aus Datenbank entfernt werden. Kontext: %d."
 
 msgid "Could not remove file from file store."
 msgstr "Datei konnte nicht aus Dateispeicher entfernt werden"
@@ -2257,6 +2284,11 @@ msgstr ""
 "Nachricht erfolgreich versendet, jedoch konnte wegen abgelaufener Quota "
 "keine Kopie in Ihren Gesendet-Ordner gelegt werden."
 
+msgid ""
+"Message has been successfully sent, but a copy was not placed in your sent "
+"folder."
+msgstr "Nachricht erfolgreich versendet, jedoch wurde keine Kopie in Ihren Gesendet-Ordner gelegt."
+
 msgid "Message move aborted for user %s. Source and destination folder are equal: %s"
 msgstr ""
 "Verschieben der Nachricht für den Benutzer %s abgebrochen. Quell- und "
@@ -2446,10 +2478,10 @@ msgstr ""
 
 msgid ""
 "No data provided from web server: input stream returned \"-1\" while reading "
-"AJP magic bytes in package #%d"
+"AJP magic bytes in package #%d. Wait for input data took %dmsec."
 msgstr ""
 "Keine Daten vom Web-Server bereitgestellt: Eingabe-Stream gab beim Lesen von "
-"AJP magic bytes im Paket #%d \"-1\" zurück "
+"AJP magic bytes im Paket #%d \"-1\" zurück. Warten auf Eingabe-Daten dauerte %dmsec."
 
 msgid "No default constructor specified in servlet class \"%s\""
 msgstr "Kein Standard-Constructor für servlet class \"%s\" angegeben"
@@ -2721,8 +2753,8 @@ msgstr ""
 msgid "Shared folder owner not given !"
 msgstr "Kein Eigentümer für freigegebenen Ordner angegeben"
 
-msgid "Socket closed by web server"
-msgstr "Socket durch Webserver geschlossen"
+msgid "Socket closed by web server. Wait for input data of package #%d took %dmsec."
+msgstr "Socket von Webserver geschlossen. Warten auf Eingabedaten von Paket #%d dauerte %dmsec."
 
 msgid "Some fields have values, that are too long"
 msgstr "Die Werte einiger Felder sind zu lang"
@@ -3177,8 +3209,7 @@ msgid ""
 msgstr ""
 "Das Kontaktfoto kann nicht skaliert werden. Es handelt sich entweder um "
 "einen nicht unterstützten Dateityp oder das Bild ist zu groß. Der MIME-Typ "
-"ist %1$s und die Bildgröße ist %2$d. Die maximal erlaubte Bildgröße ist %3"
-"$d."
+"ist %1$s und die Bildgröße ist %2$d. Die maximal erlaubte Bildgröße ist %3$d."
 
 msgid ""
 "Unable to syncronize the old contact with the new changes: Context %1$d "
@@ -3490,8 +3521,10 @@ msgstr "Sie haben keine Berechtigung zum Delegieren von Aufgaben."
 
 msgid ""
 "You are not allowed to delete objects in the source folder, so this document "
-"cannot be mo Tved."
-msgstr "Sie haben keine Berechtigung, Objekte im Quellordner zu löschen. Das Dokument kann somit nicht verschoben werden."
+"cannot be moved."
+msgstr ""
+"Sie haben keine Berechtigung, Objekte im Quellordner zu löschen. Das "
+"Dokument kann somit nicht verschoben werden."
 
 msgid "You are not allowed to delete the task."
 msgstr "Sie haben keine Berechtigung zum Löschen der Aufgabe."
