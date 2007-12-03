@@ -22,7 +22,7 @@
 	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
     <property name="configjar" value="com.openexchange.config_6.5.0.jar"/>
     <property name="globaljar" value="com.openexchange.global_6.5.0.jar"/>
-    <property name="managementjar" value="com.openexchange.management_1.0.0.jar"/>
+    <property name="managementjar" value="com.openexchange.management_6.5.0.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
