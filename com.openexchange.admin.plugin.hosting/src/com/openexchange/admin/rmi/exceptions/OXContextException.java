@@ -1,5 +1,5 @@
 
-package com.openexchange.admin.exceptions;
+package com.openexchange.admin.rmi.exceptions;
 
 
 /**
