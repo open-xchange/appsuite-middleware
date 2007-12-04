@@ -51,12 +51,16 @@
 
 package com.openexchange.control.internal;
 
+import java.util.List;
+
 /**
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
 public interface GeneralControlMBean {
+	
+	public List list();
 
 	public void start(final String name) ;
 	
@@ -64,9 +68,9 @@ public interface GeneralControlMBean {
 	
 	public void restart(final String name);
 
-	public void install();
+	public void install(final String local);
 	
-	public void uninstall();
+	public void uninstall(final String name);
 	
 	public void close();
 
