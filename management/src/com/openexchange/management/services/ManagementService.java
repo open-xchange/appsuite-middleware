@@ -63,9 +63,9 @@ public final class ManagementService extends ServiceHolder<ManagementAgent> {
 	private static final ManagementService instance = new ManagementService();
 
 	/**
-	 * Gets the configuration service instance.
+	 * Gets the management service instance.
 	 * 
-	 * @return The configuration service instance.
+	 * @return The management service instance.
 	 */
 	public static ManagementService getInstance() {
 		return instance;
