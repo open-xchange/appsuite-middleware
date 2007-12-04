@@ -110,26 +110,24 @@ public final class ManagementActivator implements BundleActivator {
 			/*
 			 * Start management when configuration service is available
 			 */
-			final ServiceHolderListener l = new ServiceHolderListener() {
+			final ServiceHolderListener<Configuration> l = new ServiceHolderListener<Configuration>() {
 
-				public void onServiceAvailable(final Object service) throws AbstractOXException {
-					if (service instanceof Configuration) {
-						try {
-							if (ManagementInit.getInstance().isStarted()) {
-								ManagementInit.getInstance().stop();
-							}
-							ManagementInit.getInstance().start();
-							
-							/*
-							 * Register management service
-							 */
-							serviceRegistration = context.registerService(ManagementAgent.class.getCanonicalName(), ManagementAgentImpl
-									.getInstance(), null);
-
-						} catch (final AbstractOXException e) {
-							LOG.error(e.getLocalizedMessage(), e);
+				public void onServiceAvailable(final Configuration service) throws AbstractOXException {
+					try {
+						if (ManagementInit.getInstance().isStarted()) {
 							ManagementInit.getInstance().stop();
 						}
+						ManagementInit.getInstance().start();
+						
+						/*
+						 * Register management service
+						 */
+						serviceRegistration = context.registerService(ManagementAgent.class.getCanonicalName(), ManagementAgentImpl
+								.getInstance(), null);
+
+					} catch (final AbstractOXException e) {
+						LOG.error(e.getLocalizedMessage(), e);
+						ManagementInit.getInstance().stop();
 					}
 				}
 

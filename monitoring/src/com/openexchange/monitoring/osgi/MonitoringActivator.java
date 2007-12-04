@@ -51,9 +51,6 @@ package com.openexchange.monitoring.osgi;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
-
-import javax.management.ObjectName;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -84,8 +81,6 @@ public final class MonitoringActivator implements BundleActivator {
 
 	private ServiceRegistration serviceRegistration;
 
-	private final Stack<ObjectName> objectNames = new Stack<ObjectName>();
-
 	/**
 	 * Initializes a new {@link MonitoringActivator}
 	 */
@@ -115,25 +110,23 @@ public final class MonitoringActivator implements BundleActivator {
 			/*
 			 * Start monitoring when configuration service is available
 			 */
-			final ServiceHolderListener l = new ServiceHolderListener() {
+			final ServiceHolderListener<ManagementAgent> l = new ServiceHolderListener<ManagementAgent>() {
 
-				public void onServiceAvailable(final Object service) throws AbstractOXException {
-					if (service instanceof ManagementAgent) {
-						try {
-							if (MonitoringInit.getInstance().isStarted()) {
-								MonitoringInit.getInstance().stop();
-							}
-							MonitoringInit.getInstance().start();
-
-							/*
-							 * Register monitor service
-							 */
-							serviceRegistration = context.registerService(MonitorInterface.class
-									.getCanonicalName(), new MonitorImpl(), null);
-						} catch (final AbstractOXException e) {
-							LOG.error(e.getLocalizedMessage(), e);
+				public void onServiceAvailable(final ManagementAgent service) throws AbstractOXException {
+					try {
+						if (MonitoringInit.getInstance().isStarted()) {
 							MonitoringInit.getInstance().stop();
 						}
+						MonitoringInit.getInstance().start();
+
+						/*
+						 * Register monitor service
+						 */
+						serviceRegistration = context.registerService(MonitorInterface.class
+								.getCanonicalName(), new MonitorImpl(), null);
+					} catch (final AbstractOXException e) {
+						LOG.error(e.getLocalizedMessage(), e);
+						MonitoringInit.getInstance().stop();
 					}
 				}
 

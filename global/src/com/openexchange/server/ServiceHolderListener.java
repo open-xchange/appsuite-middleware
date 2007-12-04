@@ -55,7 +55,7 @@ package com.openexchange.server;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public interface ServiceHolderListener {
+public interface ServiceHolderListener<S> {
 
 	/**
 	 * Invoked if service reference is applied to service proxy
@@ -63,7 +63,7 @@ public interface ServiceHolderListener {
 	 * @param service
 	 *            The service reference
 	 */
-	public void onServiceAvailable(Object service) throws Exception;
+	public void onServiceAvailable(S service) throws Exception;
 
 	/**
 	 * Invoked if service reference is removed from service porxy

@@ -105,19 +105,17 @@ public class SessiondActivator implements BundleActivator {
 			/*
 			 * Start sessiond when configuration service is available
 			 */
-			final ServiceHolderListener l = new ServiceHolderListener() {
+			final ServiceHolderListener<Configuration> l = new ServiceHolderListener<Configuration>() {
 
-				public void onServiceAvailable(final Object service) throws AbstractOXException {
-					if (service instanceof Configuration) {
-						try {
-							if (SessiondInit.getInstance().isStarted()) {
-								SessiondInit.getInstance().stop();
-							}
-							SessiondInit.getInstance().start();
-						} catch (final AbstractOXException e) {
-							LOG.error(e.getLocalizedMessage(), e);
+				public void onServiceAvailable(final Configuration service) throws AbstractOXException {
+					try {
+						if (SessiondInit.getInstance().isStarted()) {
 							SessiondInit.getInstance().stop();
 						}
+						SessiondInit.getInstance().start();
+					} catch (final AbstractOXException e) {
+						LOG.error(e.getLocalizedMessage(), e);
+						SessiondInit.getInstance().stop();
 					}
 				}
 

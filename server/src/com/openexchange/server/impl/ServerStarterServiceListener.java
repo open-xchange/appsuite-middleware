@@ -59,7 +59,7 @@ import com.openexchange.server.ServiceHolderListener;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ServerStarterServiceListener implements ServiceHolderListener {
+public final class ServerStarterServiceListener implements ServiceHolderListener<Configuration> {
 
 	private final boolean adminStart;
 
@@ -79,22 +79,20 @@ public final class ServerStarterServiceListener implements ServiceHolderListener
 	 * 
 	 * @see com.openexchange.server.ServiceProxyListener#onServiceAvailable(java.lang.Object)
 	 */
-	public void onServiceAvailable(final Object service) throws AbstractOXException {
-		if (service instanceof Configuration) {
+	public void onServiceAvailable(final Configuration service) throws AbstractOXException {
+		/*
+		 * Start server
+		 */
+		if (adminStart) {
 			/*
-			 * Start server
+			 * Start up server to only fit admin needs
 			 */
-			if (adminStart) {
-				/*
-				 * Start up server to only fit admin needs
-				 */
-				starter.adminStart();
-			} else {
-				/*
-				 * Start up server the usual way
-				 */
-				starter.start();
-			}
+			starter.adminStart();
+		} else {
+			/*
+			 * Start up server the usual way
+			 */
+			starter.start();
 		}
 	}
 

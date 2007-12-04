@@ -66,7 +66,7 @@ public abstract class ServiceHolder<S> {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ServiceHolder.class);
 
-	private final Map<Class<? extends ServiceHolderListener>, ServiceHolderListener> listeners;
+	private final Map<String, ServiceHolderListener<S>> listeners;
 
 	private final AtomicInteger countActive;
 
@@ -81,7 +81,7 @@ public abstract class ServiceHolder<S> {
 		super();
 		countActive = new AtomicInteger();
 		waiting = new AtomicBoolean();
-		listeners = new ConcurrentHashMap<Class<? extends ServiceHolderListener>, ServiceHolderListener>();
+		listeners = new ConcurrentHashMap<String, ServiceHolderListener<S>>();
 	}
 
 	/**
@@ -92,11 +92,11 @@ public abstract class ServiceHolder<S> {
 	 * @throws Exception
 	 *             If listener cannot be added
 	 */
-	public final void addServiceHolderListener(final ServiceHolderListener listener) throws Exception {
+	public final void addServiceHolderListener(final ServiceHolderListener<S> listener) throws Exception {
 		if (listeners.containsKey(listener.getClass())) {
 			return;
 		}
-		listeners.put(listener.getClass(), listener);
+		listeners.put(listener.getClass().getName(), listener);
 		if (null != service) {
 			listener.onServiceAvailable(service);
 		}
@@ -108,7 +108,7 @@ public abstract class ServiceHolder<S> {
 	 * @param clazz
 	 *            Listener class
 	 */
-	public final void removeServiceHolderListener(final Class<? extends ServiceHolderListener> clazz) {
+	public final void removeServiceHolderListener(final Class<? extends ServiceHolderListener<S>> clazz) {
 		listeners.remove(clazz);
 	}
 
@@ -128,7 +128,7 @@ public abstract class ServiceHolder<S> {
 	}
 
 	private final void notifyListener(final boolean isAvailable) throws Exception {
-		for (final Iterator<ServiceHolderListener> iter = listeners.values().iterator(); iter.hasNext();) {
+		for (final Iterator<ServiceHolderListener<S>> iter = listeners.values().iterator(); iter.hasNext();) {
 			if (isAvailable) {
 				iter.next().onServiceAvailable(service);
 			} else {
