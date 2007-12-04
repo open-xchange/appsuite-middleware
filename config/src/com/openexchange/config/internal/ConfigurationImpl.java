@@ -60,6 +60,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.config.Configuration;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
@@ -72,8 +75,7 @@ import com.openexchange.config.internal.filewatcher.FileWatcher;
  */
 public final class ConfigurationImpl implements Configuration {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ConfigurationImpl.class);
+	private static final Log LOG = LogFactory.getLog(ConfigurationImpl.class);
 
 	private static final String EXT = ".properties";
 
@@ -217,7 +219,38 @@ public final class ConfigurationImpl implements Configuration {
 		return defaultValue;
 	}
 
-	/*
+	/**
+     * {@inheritDoc}
+     */
+    @Override
+    public Properties getFile(final String filename) {
+        return getFile(filename, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Properties getFile(final String filename,
+        final PropertyListener listener) {
+        final Properties retval = new Properties();
+        final Iterator<Entry<String,String>> iter = propertiesFiles.entrySet().iterator();
+        while (iter.hasNext()) {
+            final Entry<String,String> entry = iter.next();
+            if (entry.getValue().endsWith(filename)) {
+                final String value;
+                if (null == listener) {
+                    value = getProperty(entry.getKey());
+                } else {
+                    value = getProperty(entry.getKey(), listener);
+                }
+                retval.put(entry.getKey(), value);
+            }
+        }
+        return retval;
+    }
+
+    /*
 	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.config.Configuration#getProperty(java.lang.String,

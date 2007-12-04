@@ -50,6 +50,7 @@
 package com.openexchange.config;
 
 import java.util.Iterator;
+import java.util.Properties;
 
 /**
  * {@link Configuration}
@@ -124,6 +125,31 @@ public interface Configuration {
 	 *         given default value argument.
 	 */
 	public String getProperty(String name, String defaultValue, PropertyListener listener);
+
+    /**
+     * Returns all properties defined in a specific properties file. The
+     * filename of the properties file must not contains any path segments. If
+     * no such property file has been read empty properties will be returned.
+     * @param filename The filename of the properties file.
+     * @return the properties from that file or an empty properties if that file
+     * was not read.
+     */
+	public Properties getFile(String filename);
+
+	/**
+	 * Returns all properties defined in a specific properties file. The
+	 * filename of the properties file must not contains any path segments. If
+	 * no such property file has been read empty properties will be returned.
+	 * <p>
+     * Furthermore the specified listener will be notified if any changes are
+     * noticed on properties of that properties file.
+	 * @param filename The filename of the properties file.
+	 * @param listener This property listener is notified on changes on
+	 * properties of that file.
+	 * @return the properties from that file or an empty properties if that file
+	 * was not read.
+	 */
+	public Properties getFile(String filename, PropertyListener listener);
 
 	/**
 	 * Searches for the property with the specified name in this property list.
