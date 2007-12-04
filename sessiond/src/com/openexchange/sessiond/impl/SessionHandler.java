@@ -175,7 +175,6 @@ public class SessionHandler {
 		sessions.put(sessionId, sessionControlObject);
 		randomMap.put(randomToken, sessionId);
 		userMap.put(loginName, sessionId);
-		LOG.warn("TODO: MonitoringInfo still missing");
 		numberOfActiveSessions.incrementAndGet();
 
 		return sessionId;
