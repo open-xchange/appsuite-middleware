@@ -58,7 +58,7 @@ package com.openexchange.server;
 public interface ServiceHolderListener<S> {
 
 	/**
-	 * Invoked if service reference is applied to service proxy
+	 * Invoked if service reference is applied to service holder
 	 * 
 	 * @param service
 	 *            The service reference
@@ -66,7 +66,7 @@ public interface ServiceHolderListener<S> {
 	public void onServiceAvailable(S service) throws Exception;
 
 	/**
-	 * Invoked if service reference is removed from service porxy
+	 * Invoked if service reference is removed from service holder
 	 */
 	public void onServiceRelease() throws Exception;
 
