@@ -99,7 +99,6 @@ public final class MonitoringInit implements Initialization {
 			LOG.error(MonitoringInit.class.getName() + " already started");
 			return;
 		}
-		
 		/*
 		 * Create Beans and register them
 		 */
@@ -107,18 +106,15 @@ public final class MonitoringInit implements Initialization {
 
 		final GeneralMonitor generalMonitorBean = new GeneralMonitor();
 		try {
-			managementAgent.registerMBean( new ObjectName("com.openexchange.monitoring", "name", "GeneralMonitor"), generalMonitorBean);
+			managementAgent.registerMBean(new ObjectName("com.openexchange.monitoring", "name", "GeneralMonitor"),
+					generalMonitorBean);
 		} catch (MalformedObjectNameException exc) {
-			// TODO Auto-generated catch block
-			exc.printStackTrace();
+			LOG.error(exc.getLocalizedMessage(), exc);
 		} catch (NullPointerException exc) {
-			// TODO Auto-generated catch block
-			exc.printStackTrace();
+			LOG.error(exc.getLocalizedMessage(), exc);
 		} catch (Exception exc) {
-			// TODO Auto-generated catch block
-			exc.printStackTrace();
+			LOG.error(exc.getLocalizedMessage(), exc);
 		}
-		
 		if (LOG.isInfoEnabled()) {
 			LOG.info("JMX Monitor applied");
 		}
