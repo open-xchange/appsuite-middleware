@@ -51,6 +51,11 @@
 
 package com.openexchange.control.internal;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -76,14 +81,25 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		super();
 		this.bundleContext = bundleContext;
 	}
+	
+	public List<Map<String, String>> list() {
+		final List<Map<String, String>> arrayList = new ArrayList<Map<String, String>>();
+		final Bundle[] bundles = bundleContext.getBundles();
+		for (int a = 0; a < bundles.length; a++) {
+			final Map<String,String> map = new HashMap<String,String>();
+			map.put(bundles[a].getSymbolicName(), resolvState(bundles[a].getState()));
+			arrayList.add(map);
+		}
+		
+		return arrayList;
+	}
 
 	public void start(final String name) {
 		final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
 		try {
 			bundle.start();
 		} catch (BundleException exc) {
-			// TODO Auto-generated catch block
-			exc.printStackTrace();
+			LOG.error("cannot start bundle: " + name, exc);
 		}
 		LOG.info("start package");
 	}
@@ -93,8 +109,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		try {
 			bundle.stop();
 		} catch (BundleException exc) {
-			// TODO Auto-generated catch block
-			exc.printStackTrace();
+			LOG.error("cannot stop bundle: " + name, exc);
 		}
 		LOG.info("stop package");
 	}
@@ -104,11 +119,22 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		start(name);
 	}
 
-	public void install() {
+	public void install(final String location) {
+		try {
+			bundleContext.installBundle(location);
+		} catch (BundleException exc) {
+			LOG.error("cannot install bundle: " + location, exc);
+		}
 		LOG.info("install package");
 	}
 	
-	public void uninstall() {
+	public void uninstall(final String name) {
+		final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
+		try {
+			bundle.uninstall();
+		} catch (BundleException exc) {
+			LOG.error("cannot uninstall bundle: " + name, exc);
+		}
 		LOG.info("uninstall package");
 	}
 	
@@ -161,4 +187,22 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		}
 	}
 
+	private String resolvState(final int state) {
+		// TODO: add all states
+		switch (state) {
+		case Bundle.ACTIVE:
+			return "ACTIVE";
+		case Bundle.INSTALLED:
+			return "INSTALLED";
+		case Bundle.RESOLVED:
+			return "RESOLVED";
+		case Bundle.STOPPING:
+			return "STOPPING";
+		case Bundle.UNINSTALLED:
+			return "UNINSTALLED";
+		default:
+			return "UNKNOWN";
+		}			
+	}
+	
 }
