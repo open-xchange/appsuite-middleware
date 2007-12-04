@@ -482,6 +482,9 @@ public final class SMTPTransport extends MailTransport {
 				}
 				try {
 					smtpMessage.saveChanges();
+					/*
+					 * TODO: Do encryption here
+					 */
 					transport.sendMessage(smtpMessage, allRecipients);
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				} finally {
