@@ -182,7 +182,11 @@ public class Starter implements Initialization {
 	 * Setup of ContextStorage and LoginInfo.
 	 */
 	com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
-	/**
+    /**
+	 * User configuration init
+	 */
+	com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
+    /**
 	 * Notification Configuration
 	 */
 	com.openexchange.groupware.notify.NotificationConfig.getInstance() };
