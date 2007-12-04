@@ -227,6 +227,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 						 */
 						mailConnection.initMailConfig(session);
 						mailConnection.connectInternal();
+						MailConnectionWatcher.addMailConnection(mailConnection);
 						return mailConnection;
 					}
 				}
@@ -465,41 +466,56 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 *            <code>true</code> to try to put this mail connection into
 	 *            cache; otherwise <code>false</code>
 	 */
-	public final void close(final boolean put2Cache) {
+	public final void close(final boolean put2CacheArg) {
 		if (!isConnectedUnsafe()) {
 			return;
 		}
-		/*
-		 * Release all used, non-cachable resources
-		 */
-		releaseResources();
-		// resetFields();
+		boolean put2Cache = put2CacheArg;
 		try {
-			/*
-			 * Cache connection if desired
-			 */
-			if (put2Cache && MailConnectionCache.getInstance().putMailConnection(session, this)) {
-				if (MailConfig.getMaxNumOfConnections() > 0) {
-					LOCK_CON.lock();
-					try {
-						LOCK_CON_CONDITION.signalAll();
-						if (LOG.isDebugEnabled()) {
-							LOG.debug("Sending signal to possible waiting threads");
-						}
-					} finally {
-						LOCK_CON.unlock();
-					}
-				}
-				return;
+			try {
+				/*
+				 * Release all used, non-cachable resources
+				 */
+				releaseResources();
+			} catch (final Throwable t) {
+				/*
+				 * Dropping
+				 */
+				LOG.error("Resources could not be properly released. Dropping mail connection for safety reasons", t);
+				put2Cache = false;
 			}
-		} catch (final OXCachingException e) {
-			LOG.error(e.getLocalizedMessage(), e);
+			// resetFields();
+			try {
+				/*
+				 * Cache connection if desired/possible anymore
+				 */
+				if (put2Cache && MailConnectionCache.getInstance().putMailConnection(session, this)) {
+					signalAvailableConnection();
+					/*
+					 * Remove from watcher as long as cached
+					 */
+					return;
+				}
+			} catch (final OXCachingException e) {
+				LOG.error(e.getLocalizedMessage(), e);
+			}
+			/*
+			 * Close mail connection
+			 */
+			closeInternal();
+			signalAvailableConnection();
+		} finally {
+			/*
+			 * Remove from watcher no matter if cached or closed
+			 */
+			MailConnectionWatcher.removeMailConnection(this);
 		}
-		/*
-		 * Close mail connection
-		 */
-		closeInternal();
-		MailConnectionWatcher.removeMailConnection(this);
+	}
+
+	/**
+	 * Signals an available connection
+	 */
+	private void signalAvailableConnection() {
 		if (MailConfig.getMaxNumOfConnections() > 0) {
 			LOCK_CON.lock();
 			try {
