@@ -54,7 +54,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
 import com.openexchange.configjump.ConfigJumpInterface;
-import com.openexchange.configjump.internal.ConfigJumpInit;
 import com.openexchange.configjump.internal.EmptyImpl;
 
 /**
@@ -86,12 +85,11 @@ public final class ConfigJumpActivator implements BundleActivator {
 	 */
 	public void start(final BundleContext context) throws Exception {
 		try {
-			ConfigJumpInit.getInstance().start();
 			ConfigJumpInterface configJumpImpl= new EmptyImpl();
 			serviceRegister = context.registerService(ConfigJumpInterface.class.getName(), configJumpImpl,
 					null);
 		} catch (final Throwable t) {
-			LOG.error(t.getLocalizedMessage(), t);
+			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
 	}
@@ -102,11 +100,6 @@ public final class ConfigJumpActivator implements BundleActivator {
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(final BundleContext context) throws Exception {
-		try {
-			ConfigJumpInit.getInstance().stop();
-		} catch (final Throwable t) {
-			LOG.error(t.getLocalizedMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		}
+	    serviceRegister.unregister();
 	}
 }
