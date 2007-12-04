@@ -268,8 +268,8 @@ public final class MIMEStorageUtility {
 	static {
 		ENV_FIELDS = new HashSet<MailListField>(8);
 		/*
-		 * The Envelope is an aggregation of the common attributes of a
-		 * Message: From, To, Cc, Bcc, ReplyTo, Subject and Date.
+		 * The Envelope is an aggregation of the common attributes of a Message:
+		 * From, To, Cc, Bcc, ReplyTo, Subject and Date.
 		 */
 		ENV_FIELDS.add(MailListField.FROM);
 		ENV_FIELDS.add(MailListField.TO);
