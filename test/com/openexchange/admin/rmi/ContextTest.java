@@ -38,40 +38,37 @@ public class ContextTest extends AbstractTest {
         return new JUnit4TestAdapter(ContextTest.class);
     }
     
-    
     @Test
     public void testGetAndChangeContext() throws Exception {
-        
         final Credentials cred = DummyMasterCredentials();
         final String hosturl = getRMIHostUrl();
         Context ctx = addSystemContext(getTestContextObject(cred), getRMIHostUrl(), cred);
-        
+
         OXContextInterface xctx = (OXContextInterface) Naming.lookup(hosturl + OXContextInterface.RMI_NAME);
-        
-       Context srv_loaded =  xctx.getData(ctx, cred);
-       
-       assertTrue("Expected same context ids", ctx.getId().intValue()==srv_loaded.getId().intValue());
-              
-       String add_mapping = srv_loaded.getId().intValue()+"_"+System.currentTimeMillis();
-       srv_loaded.addLoginMapping(add_mapping);
-       
-       String changed_context_name = srv_loaded.getName()+"_"+System.currentTimeMillis();
-       srv_loaded.setName(changed_context_name);
-       
-       // change context and load again
-       xctx.change(srv_loaded, cred);
-       
-       Context edited_ctx = xctx.getData(ctx, cred);
-       
-       // ids must be correct again and the mapping should now exist
-       assertTrue("Expected same context ids", edited_ctx.getId().intValue()==srv_loaded.getId().intValue());
-       
-       // new mapping must exists
-       assertTrue("Expected changed login mapping in loaded context", edited_ctx.getLoginMappings().contains(add_mapping));
-       
-       // changed conmtext name must exists
-       assertTrue("Expected changed context name to be same as loaded ctx", edited_ctx.getName().equals(changed_context_name));
-       
+
+        Context srv_loaded = xctx.getData(ctx, cred);
+
+        assertTrue("Expected same context ids", ctx.getId().intValue() == srv_loaded.getId().intValue());
+
+        String add_mapping = srv_loaded.getId().intValue() + "_" + System.currentTimeMillis();
+        srv_loaded.addLoginMapping(add_mapping);
+
+        String changed_context_name = srv_loaded.getName() + "_" + System.currentTimeMillis();
+        srv_loaded.setName(changed_context_name);
+
+        // change context and load again
+        xctx.change(srv_loaded, cred);
+
+        Context edited_ctx = xctx.getData(ctx, cred);
+
+        // ids must be correct again and the mapping should now exist
+        assertTrue("Expected same context ids", edited_ctx.getId().intValue() == srv_loaded.getId().intValue());
+
+        // new mapping must exists
+        assertTrue("Expected changed login mapping in loaded context", edited_ctx.getLoginMappings().contains(add_mapping));
+
+        // changed conmtext name must exists
+        assertTrue("Expected changed context name to be same as loaded ctx", edited_ctx.getName().equals(changed_context_name));
     }
 
     @Test
