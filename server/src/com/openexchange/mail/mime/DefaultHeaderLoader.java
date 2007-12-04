@@ -83,7 +83,7 @@ public final class DefaultHeaderLoader extends MIMEHeaderLoader {
 
 	private static final Pattern PATTERN_PARSE_HEADER = Pattern
 			.compile("(\\S+):\\s(.*)((?:\r?\n(?:\\s(?:.+)))*|(?:$))");
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -126,7 +126,13 @@ public final class DefaultHeaderLoader extends MIMEHeaderLoader {
 		final BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(out
 				.toByteArray()), "US-ASCII"));
 		String line = null;
-		while ((line = reader.readLine()) != null) {
+		NextLine: while ((line = reader.readLine()) != null) {
+			if (line.length() == 0) {
+				/*
+				 * Found separating line
+				 */
+				break NextLine;
+			}
 			sb.append(line).append("\r\n");
 		}
 		return sb.toString();
