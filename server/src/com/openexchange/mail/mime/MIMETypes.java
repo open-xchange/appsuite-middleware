@@ -96,7 +96,7 @@ public final class MIMETypes {
 	public static final String MIME_TEXT_HTML = "text/html";
 
 	/**
-	 * multipart/alternative
+	 * multipart/mixed
 	 */
 	public static final String MIME_MULTIPART_MIXED = "multipart/mixed";
 
