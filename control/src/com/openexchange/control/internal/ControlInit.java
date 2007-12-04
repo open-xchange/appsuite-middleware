@@ -111,15 +111,8 @@ public final class ControlInit implements Initialization {
 		final GeneralControl generalControlBean = new GeneralControl(bundleContext);
 		try {
 			managementAgent.registerMBean( new ObjectName("com.openexchange.control", "name", "Control"), generalControlBean);
-		} catch (MalformedObjectNameException exc) {
-			// TODO Auto-generated catch block
-			exc.printStackTrace();
-		} catch (NullPointerException exc) {
-			// TODO Auto-generated catch block
-			exc.printStackTrace();
 		} catch (Exception exc) {
-			// TODO Auto-generated catch block
-			exc.printStackTrace();
+			LOG.error("cannot register mbean", exc);
 		}
 		
 		if (LOG.isInfoEnabled()) {
