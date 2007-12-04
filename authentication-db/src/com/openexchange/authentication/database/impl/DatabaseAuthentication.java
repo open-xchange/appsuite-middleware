@@ -126,7 +126,7 @@ public class DatabaseAuthentication implements Authentication {
     /**
      * Splits user name and context.
      * @param loginInfo combined information seperated by an @ sign.
-     * @param character for spliting user name and context.
+     * @param separator for spliting user name and context.
      * @return a string array with context and user name (in this order).
      * @throws LoginException if no seperator is found.
      */
