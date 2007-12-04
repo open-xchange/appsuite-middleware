@@ -66,10 +66,4 @@ public interface ConfigJumpInterface {
      * @throws ConfigJumpException if creating the url fails.
      */
     public URL getLink(Object... values) throws ConfigJumpException;
-
-    public int getContextId(final Object... values);
-
-    public String getUserLogin(final Object... values);
-
-    public String getPassword(final Object... values);
 }
