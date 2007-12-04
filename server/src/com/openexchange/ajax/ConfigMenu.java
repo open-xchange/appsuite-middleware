@@ -251,34 +251,25 @@ public class ConfigMenu extends SessionServlet {
         JSONException {
         if (setting.isLeaf()) {
             final String value = (String) setting.getSingleValue();
-            if (null != value) {
-                try {
-                    final JSONArray array = new JSONArray(value);
-                    for (int i = 0; i < array.length(); i++) {
-                        setting.addMultiValue(array.getString(i));
-                    }
-                    setting.setSingleValue(null);
-                } catch (JSONException e) {
-                    // I check if there is a JSON array in the value.
-                    // No logging here because this is not an error.
-                	if (LOG.isTraceEnabled()) { // Added to remove PMD warning about an empty catch clause
-                		LOG.trace(e.getMessage(), e);
-                	}
+            if (null != value && value.length() > 0 && '[' == value.charAt(0)) {
+                final JSONArray array = new JSONArray(value);
+                for (int i = 0; i < array.length(); i++) {
+                    setting.addMultiValue(array.getString(i));
                 }
+                setting.setSingleValue(null);
             }
             storage.save(setting);
         } else {
             final JSONObject json = new JSONObject((String) setting
                 .getSingleValue());
-            final int numOfKeys = json.length();
-            final Iterator iter = json.keys();
+            final Iterator<String> iter = json.keys();
             SettingException exc = null;
-            for (int k = 0; k < numOfKeys; k++) {
+            while (iter.hasNext()) {
                 final String key = (String) iter.next();
                 final Setting sub = ConfigTree.getSettingByPath(setting, key);
                 sub.setSingleValue(json.getString(key));
                 try {
-                    // FIXME catch single exceptions if GUI writes not writable
+                    // Catch single exceptions if GUI writes not writable
                     // fields.
                     saveSettingWithSubs(storage, sub);
                 } catch (SettingException e) {

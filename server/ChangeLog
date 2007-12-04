@@ -1,3 +1,7 @@
+* 2007-12-04 - marcus.klein@open-xchange.com
+
+ - Bugfix #10524: Removed a wrong logging.
+
 * 2007-11-29 - thorben.betten@open-xchange.com
 
  - Bugfix #10460: AJP exception enhanced by a keep alive flag to indicate
