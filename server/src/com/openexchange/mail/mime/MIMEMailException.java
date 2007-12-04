@@ -326,24 +326,24 @@ public class MIMEMailException extends MailException {
 	private static final String ERR_AUTH_FAILED = "bad authentication failed";
 
 	private static final String ERR_MSG_TOO_LARGE = "message too large";
-	
+
 	private static final String ERR_QUOTA = "quota";
 
 	/**
 	 * Handles given instance of {@link MessagingException} and creates an
-	 * appropiate instance of {@link MIMEMailException}
+	 * appropriate instance of {@link MIMEMailException}
 	 * 
 	 * @param e
 	 *            The messaging exception
 	 * @param mailConnection
 	 *            The corresponding mail connection used to add informations
 	 *            like mail server etc.
-	 * @return An appropiate instance of {@link MIMEMailException}
+	 * @return An appropriate instance of {@link MIMEMailException}
 	 */
 	public static MIMEMailException handleMessagingException(final MessagingException e,
-			final MailConnection mailConnection) {
+			final MailConnection<?, ?, ?> mailConnection) {
 		if (e instanceof AuthenticationFailedException
-				|| e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_AUTH_FAILED) != -1) {
+				|| (e.getMessage() != null && e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_AUTH_FAILED) != -1)) {
 			final boolean temporary = e.getMessage() != null
 					&& ERR_TMP.equals(e.getMessage().toLowerCase(Locale.ENGLISH));
 			if (temporary) {

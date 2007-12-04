@@ -255,7 +255,7 @@ public abstract class User2ACL {
 	}
 
 	/**
-	 * Resest user2acl
+	 * Resets user2acl
 	 */
 	final static void resetUser2ACL() {
 		singleton = null;

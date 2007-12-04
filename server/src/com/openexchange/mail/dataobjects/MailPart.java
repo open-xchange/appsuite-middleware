@@ -663,7 +663,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * @return an appropriate {@link DataHandler} or <code>null</code> if not
 	 *         applicable
 	 * @throws MailException
-	 *             If an appropiate {@link DataHandler} cannot be returned
+	 *             If an appropriate {@link DataHandler} cannot be returned
 	 */
 	public abstract DataHandler getDataHandler() throws MailException;
 
