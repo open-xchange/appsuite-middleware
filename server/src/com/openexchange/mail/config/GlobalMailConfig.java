@@ -80,6 +80,8 @@ public abstract class GlobalMailConfig {
 			.getLog(GlobalMailConfig.class);
 
 	private static final String STR_FALSE = "false";
+	
+	private static final String STR_TRUE = "true";
 
 	private static GlobalMailConfig mailInstance;
 	
@@ -131,6 +133,8 @@ public abstract class GlobalMailConfig {
 	private boolean watcherShallClose;
 	
 	private String spamHandlerClass;
+	
+	private boolean supportSubscription;
 
 	/**
 	 * Initializes a new global mail config
@@ -298,6 +302,12 @@ public abstract class GlobalMailConfig {
 			final String ignoreSubsStr = mailProperties.getProperty("ignoreSubscription", STR_FALSE).trim();
 			ignoreSubscription = Boolean.parseBoolean(ignoreSubsStr);
 			logBuilder.append("\tIgnore Folder Subscription: ").append(ignoreSubscription).append('\n');
+		}
+
+		{
+			final String supSubsStr = mailProperties.getProperty("supportSubscription", STR_TRUE).trim();
+			supportSubscription = Boolean.parseBoolean(supSubsStr);
+			logBuilder.append("\tSupport Subscription: ").append(supportSubscription).append('\n');
 		}
 
 		{
@@ -530,6 +540,15 @@ public abstract class GlobalMailConfig {
 	 */
 	final boolean isIgnoreSubscription() {
 		return ignoreSubscription;
+	}
+
+	/**
+	 * Gets the supportSubscription
+	 * 
+	 * @return the supportSubscription
+	 */
+	final boolean isSupportSubscription() {
+		return supportSubscription;
 	}
 
 	/**

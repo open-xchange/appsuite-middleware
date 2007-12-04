@@ -326,6 +326,15 @@ public abstract class MailConfig {
 	}
 
 	/**
+	 * Gets the supportSubscription
+	 * 
+	 * @return the supportSubscription
+	 */
+	public static final boolean isSupportSubscription() {
+		return GlobalMailConfig.getInstance().isSupportSubscription();
+	}
+
+	/**
 	 * Gets the mailFetchLimit
 	 * 
 	 * @return the mailFetchLimit
