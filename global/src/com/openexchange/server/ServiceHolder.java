@@ -55,6 +55,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * {@link ServiceHolder}
  * 
@@ -63,8 +66,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class ServiceHolder<S> {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ServiceHolder.class);
+	private static final Log LOG = LogFactory.getLog(ServiceHolder.class);
 
 	private final Map<String, ServiceHolderListener<S>> listeners;
 
@@ -148,18 +150,21 @@ public abstract class ServiceHolder<S> {
 			return;
 		}
 		if (countActive.get() > 0) {
-			waiting.set(true);
-			synchronized (countActive) {
-				try {
-					while (countActive.get() > 0) {
-						countActive.wait();
-					}
-				} catch (final InterruptedException e) {
-					LOG.error(e.getLocalizedMessage(), e);
-				} finally {
-					waiting.set(false);
-				}
-			}
+		    // Blocking OSGi framework is not allowed.
+		    LOG.error("Service counting for " + this.getClass().getName()
+		        + " is not zero: " + countActive.toString());
+//			waiting.set(true);
+//			synchronized (countActive) {
+//				try {
+//					while (countActive.get() > 0) {
+//						countActive.wait();
+//					}
+//				} catch (final InterruptedException e) {
+//					LOG.error(e.getLocalizedMessage(), e);
+//				} finally {
+//					waiting.set(false);
+//				}
+//			}
 		}
 		this.service = null;
 		notifyListener(false);
