@@ -219,13 +219,16 @@ public final class ConfigurationImpl implements Configuration {
 		return defaultValue;
 	}
 
-	
-
+	/**
+     * {@inheritDoc}
+     */
     public Properties getFile(final String filename) {
         return getFile(filename, null);
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     public Properties getFile(final String filename,
         final PropertyListener listener) {
         final Properties retval = new Properties();
