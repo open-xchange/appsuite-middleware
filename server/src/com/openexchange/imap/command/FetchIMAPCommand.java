@@ -585,7 +585,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
 		public final static void createHeaderHandlers(final FetchItemHandler itemHandler, final InternetHeaders h) {
 			itemHandler.hdrHandlers = new HashMap<String, HeaderHandler>();
-			for (final Enumeration e = h.getAllHeaders(); e.hasMoreElements();) {
+			for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
 				final Header hdr = (Header) e.nextElement();
 				addHeaderHandlers(itemHandler, hdr);
 			}
@@ -807,6 +807,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 								msg.setContentType(new ContentType(DEFAULT_CONTENT_TYPE));
 							}
 						}
+						msg.setHasAttachment(bs.isMulti()
+								&& (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || hasAttachments(bs)));
 					}
 				};
 			} else if (item instanceof UID) {
@@ -838,7 +840,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 						if (!this.containsHeaderHandlers()) {
 							FetchItemHandler.createHeaderHandlers(this, h);
 						}
-						for (final Enumeration e = h.getAllHeaders(); e.hasMoreElements();) {
+						for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
 							final Header hdr = (Header) e.nextElement();
 							HeaderHandler hdrHandler = this.getHdrHandler(hdr.getName());
 							if (hdrHandler == null) {
@@ -920,4 +922,28 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		return sb.toString();
 	}
 
+	private static final String MULTI_SUBTYPE_ALTERNATIVE = "ALTERNATIVE";
+
+	private static final String MULTI_SUBTYPE_MIXED = "MIXED";
+
+	private static final String MULTI_SUBTYPE_SIGNED = "SIGNED";
+
+	private static boolean hasAttachments(final BODYSTRUCTURE bodystructure) {
+		if (bodystructure.isMulti()) {
+			if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(bodystructure.subtype)) {
+				return (bodystructure.bodies.length > 2);
+			} else if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(bodystructure.subtype)) {
+				return (bodystructure.bodies.length > 2);
+			} else if (bodystructure.bodies.length > 1) {
+				return true;
+			} else {
+				boolean found = false;
+				for (int i = 0; i < bodystructure.bodies.length && !found; i++) {
+					found |= hasAttachments(bodystructure.bodies[i]);
+				}
+				return found;
+			}
+		}
+		return false;
+	}
 }

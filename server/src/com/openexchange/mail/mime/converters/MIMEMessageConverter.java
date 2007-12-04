@@ -50,6 +50,7 @@
 package com.openexchange.mail.mime.converters;
 
 import static com.openexchange.mail.utils.MessageUtility.decodeMultiEncodedHeader;
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.hasAttachments;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -92,8 +93,6 @@ import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.tools.mail.ContentType;
-import com.sun.mail.imap.IMAPMessage;
-import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
 /**
  * {@link MIMEMessageConverter}
@@ -105,15 +104,6 @@ public final class MIMEMessageConverter {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MIMEMessageConverter.class);
-
-	/*
-	 * Mulipart subtype constants
-	 */
-	private static final String MULTI_SUBTYPE_ALTERNATIVE = "ALTERNATIVE";
-
-	private static final String MULTI_SUBTYPE_MIXED = "MIXED";
-
-	private static final String MULTI_SUBTYPE_SIGNED = "SIGNED";
 
 	/*
 	 * Content-Type parameter name constants
@@ -472,8 +462,8 @@ public final class MIMEMessageConverter {
 				break;
 			case ATTACHMENT:
 				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						final BODYSTRUCTURE bodystructure = ((ContainerMessage) msg).getBodystructure();
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MailException,
+							MessagingException {
 						try {
 							mailMessage.setContentType(((ContainerMessage) msg).getContentType());
 						} catch (final MailException e) {
@@ -482,9 +472,7 @@ public final class MIMEMessageConverter {
 							 */
 							LOG.error(e.getLocalizedMessage(), e);
 						}
-						mailMessage
-								.setHasAttachment(bodystructure.isMulti()
-										&& (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bodystructure.subtype) || hasAttachments(bodystructure)));
+						mailMessage.setHasAttachment(((ContainerMessage) msg).hasAttachment());
 					}
 				};
 				break;
@@ -651,7 +639,7 @@ public final class MIMEMessageConverter {
 				};
 				break;
 			case FOLDER_ID:
-				fillers[i] = new MailMessageFieldFiller() {
+				fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
 						mailMessage.setSeparator(folder.getSeparator());
 						mailMessage.setFolder(folder.getFullName());
@@ -681,13 +669,17 @@ public final class MIMEMessageConverter {
 							}
 						}
 						mailMessage.setContentType(ct);
-						try {
+						mailMessage.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
+						/*
+						 * TODO: Detailed attachment information like done with IMAP's bodystructure information
+						 */
+						/*try {
 							mailMessage.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)
 									&& (ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED) || hasAttachments((Multipart) msg
 											.getContent(), ct.getSubType())));
 						} catch (final IOException e) {
 							throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-						}
+						}*/
 					}
 				};
 				break;
@@ -861,48 +853,6 @@ public final class MIMEMessageConverter {
 		return fillers;
 	}
 
-	private static boolean hasAttachments(final BODYSTRUCTURE bodystructure) {
-		if (bodystructure.isMulti()) {
-			if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(bodystructure.subtype)) {
-				return (bodystructure.bodies.length > 2);
-			} else if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(bodystructure.subtype)) {
-				return (bodystructure.bodies.length > 2);
-			} else if (bodystructure.bodies.length > 1) {
-				return true;
-			} else {
-				boolean found = false;
-				for (int i = 0; i < bodystructure.bodies.length && !found; i++) {
-					found |= hasAttachments(bodystructure.bodies[i]);
-				}
-				return found;
-			}
-		}
-		return false;
-	}
-
-	private static boolean hasAttachments(final Multipart mp, final String subtype) throws MessagingException,
-			MailException, IOException {
-		if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(subtype)) {
-			return (mp.getCount() > 2);
-		} else if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) {
-			return (mp.getCount() > 2);
-		} else if (mp.getCount() > 1) {
-			return true;
-		} else {
-			boolean found = false;
-			final int count = mp.getCount();
-			final ContentType ct = new ContentType();
-			for (int i = 0; i < count && !found; i++) {
-				final BodyPart part = mp.getBodyPart(i);
-				ct.setContentType(part.getContentType());
-				if (ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
-					found |= hasAttachments((Multipart) part.getContent(), ct.getSubType());
-				}
-			}
-			return found;
-		}
-	}
-
 	/**
 	 * Creates a message data object from given IMAP message
 	 * 
@@ -931,9 +881,9 @@ public final class MIMEMessageConverter {
 			}
 			setHeaders(msg, mail);
 			mail.addFrom((InternetAddress[]) msg.getFrom());
-			mail.addTo((InternetAddress[]) msg.getRecipients(IMAPMessage.RecipientType.TO));
-			mail.addCc((InternetAddress[]) msg.getRecipients(IMAPMessage.RecipientType.CC));
-			mail.addBcc((InternetAddress[]) msg.getRecipients(IMAPMessage.RecipientType.BCC));
+			mail.addTo((InternetAddress[]) msg.getRecipients(Message.RecipientType.TO));
+			mail.addCc((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC));
+			mail.addBcc((InternetAddress[]) msg.getRecipients(Message.RecipientType.BCC));
 			mail.setContentType(msg.getContentType());
 			{
 				final String[] tmp = msg.getHeader(MessageHeaders.HDR_CONTENT_ID);

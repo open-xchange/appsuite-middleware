@@ -168,17 +168,9 @@ public final class ContainerMessage extends Message implements Serializable {
 
 	private boolean expunged;
 
+	private boolean hasAttachment;
+	
 	private BODYSTRUCTURE bodystructure;
-
-	public static ContainerMessage[] getExpungedMessageArr(final long[] uids) {
-		final ContainerMessage[] retval = new ContainerMessage[uids.length];
-		for (int i = 0; i < retval.length; i++) {
-			retval[i] = new ContainerMessage();
-			retval[i].setUid(uids[i]);
-			retval[i].setExpunged(true);
-		}
-		return retval;
-	}
 
 	private ContainerMessage() {
 		super();
@@ -381,14 +373,14 @@ public final class ContainerMessage extends Message implements Serializable {
 		this.expunged = expunged;
 	}
 
-	public BODYSTRUCTURE getBodystructure() {
-		return bodystructure;
+	public boolean hasAttachment() {
+		return hasAttachment;
 	}
 
-	public void setBodystructure(final BODYSTRUCTURE bodystructure) {
-		this.bodystructure = bodystructure;
+	public void setHasAttachment(final boolean hasAttachment) {
+		this.hasAttachment = hasAttachment;
 	}
-
+	
 	private static final MailDateFormat MDF = new MailDateFormat();
 
 	@Override
@@ -739,5 +731,23 @@ public final class ContainerMessage extends Message implements Serializable {
 		public int hashCode() {
 			return hashCode;
 		}
+	}
+
+	/**
+	 * Gets the bodystructure
+	 *
+	 * @return the bodystructure
+	 */
+	public BODYSTRUCTURE getBodystructure() {
+		return bodystructure;
+	}
+
+	/**
+	 * Sets the bodystructure
+	 *
+	 * @param bodystructure the bodystructure to set
+	 */
+	public void setBodystructure(BODYSTRUCTURE bodystructure) {
+		this.bodystructure = bodystructure;
 	}
 }
