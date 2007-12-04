@@ -249,9 +249,8 @@ public final class IMAPConfig extends MailConfig {
 	 * 
 	 * @return the global supportsACLs
 	 */
-	public static boolean isSupportsACLsConfig() {
-		return BoolCapVal.TRUE.equals(((GlobalIMAPConfig) GlobalMailConfig.getInstance()).getSupportsACLs()) ? true
-				: false;
+	public static BoolCapVal isSupportsACLsConfig() {
+		return ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).getSupportsACLs();
 	}
 
 	/**

@@ -57,10 +57,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.regex.Pattern;
 
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.user2acl.User2ACL.User2ACLException;
 import com.openexchange.imap.user2acl.User2ACLInit.IMAPServer;
+import com.openexchange.mail.config.MailConfig.BoolCapVal;
 
 /**
  * {@link User2ACLAutoDetector}
@@ -82,6 +84,8 @@ public final class User2ACLAutoDetector {
 	private static final int BUFSIZE = 512;
 
 	private static final String IMAPCMD_LOGOUT = "A11 LOGOUT\r\n";
+
+	private static final String IMAPCMD_CAPABILITY = "A10 CAPABILITY\r\n";
 
 	private static final String CHARSET_US_ASCII = "US-ASCII";
 
@@ -127,7 +131,8 @@ public final class User2ACLAutoDetector {
 		return impl;
 	}
 
-	private static IMAPServer mapInfo2IMAPServer(final String info) throws User2ACLException {
+	private static IMAPServer mapInfo2IMAPServer(final String info, final InetAddress inetAddress, final int port)
+			throws IOException, User2ACLException {
 		final IMAPServer[] iServers = IMAPServer.values();
 		for (int i = 0; i < iServers.length; i++) {
 			if (toLowerCase(info).indexOf(toLowerCase(iServers[i].getName())) > -1) {
@@ -139,17 +144,21 @@ public final class User2ACLAutoDetector {
 		 * user2acl is never used and can safely be mapped to default
 		 * implementation.
 		 */
-		if (!IMAPConfig.isSupportsACLsConfig()) {
+		final BoolCapVal supportsACLs = IMAPConfig.isSupportsACLsConfig();
+		if (BoolCapVal.FALSE.equals(supportsACLs)
+				|| (BoolCapVal.AUTO.equals(supportsACLs) && !checkForACLSupport(inetAddress, port))) {
 			/*
 			 * Return fallback implementation
 			 */
 			if (LOG.isWarnEnabled()) {
 				LOG
 						.warn(new StringBuilder(512)
-								.append("No IMAP server found that corresponds to greeting:\r\n\"")
+								.append("No IMAP server found that corresponds to greeting:\n\"")
 								.append(info.replaceAll("\r?\n", ""))
+								.append("\" on ")
+								.append(inetAddress.toString())
 								.append(
-										"\"\r\nSince ACLs are disabled (through IMAP configuration) or not supported by IMAP server, \"")
+										".\nSince ACLs are disabled (through IMAP configuration) or not supported by IMAP server, \"")
 								.append(IMAPServer.CYRUS.getName()).append("\" is used as fallback."));
 			}
 			return IMAPServer.CYRUS;
@@ -165,14 +174,12 @@ public final class User2ACLAutoDetector {
 		return new String(buf);
 	}
 
-	private static User2ACL loadUser2ACLImpl(final InetAddress inetAddress, final int imapPort) throws IOException,
+	private static final Pattern PAT_ACL = Pattern.compile("(^|\\s)(ACL)(\\s+|$)");
+
+	private static boolean checkForACLSupport(final InetAddress inetAddress, final int imapPort) throws IOException,
 			User2ACLException {
 		CONTACT_LOCK.lock();
 		try {
-			User2ACL user2Acl = map.get(inetAddress);
-			if (user2Acl != null) {
-				return user2Acl;
-			}
 			Socket s = null;
 			InputStreamReader isr = null;
 			try {
@@ -189,7 +196,66 @@ public final class User2ACLAutoDetector {
 				if ((bytesRead = isr.read(buf, 0, buf.length)) != -1) {
 					sb.append(buf, 0, bytesRead);
 				}
-				final IMAPServer imapServer = mapInfo2IMAPServer(sb.toString());
+				s.getOutputStream().write(IMAPCMD_CAPABILITY.getBytes(CHARSET_US_ASCII));
+				s.getOutputStream().flush();
+				sb.setLength(0);
+				if ((bytesRead = isr.read(buf, 0, buf.length)) != -1) {
+					sb.append(buf, 0, bytesRead);
+				}
+				final boolean retval = PAT_ACL.matcher(sb.toString()).find();
+				s.getOutputStream().write(IMAPCMD_LOGOUT.getBytes(CHARSET_US_ASCII));
+				s.getOutputStream().flush();
+				sb.setLength(0);
+				while ((bytesRead = isr.read(buf, 0, buf.length)) != -1) {
+					sb.append(buf, 0, bytesRead);
+				}
+				return retval;
+			} finally {
+				if (isr != null) {
+					try {
+						isr.close();
+					} catch (final IOException e) {
+						LOG.error(e.getLocalizedMessage(), e);
+					}
+				}
+				if (s != null) {
+					try {
+						s.close();
+					} catch (final IOException e) {
+						LOG.error(e.getLocalizedMessage(), e);
+					}
+				}
+			}
+		} finally {
+			CONTACT_LOCK.unlock();
+		}
+	}
+
+	private static User2ACL loadUser2ACLImpl(final InetAddress inetAddress, final int imapPort) throws IOException,
+			User2ACLException {
+		User2ACL user2Acl = map.get(inetAddress);
+		if (user2Acl != null) {
+			return user2Acl;
+		}
+		CONTACT_LOCK.lock();
+		try {
+			Socket s = null;
+			InputStreamReader isr = null;
+			try {
+				try {
+					s = new Socket(inetAddress, imapPort);
+				} catch (final IOException e) {
+					throw new User2ACLException(User2ACLException.Code.CREATING_SOCKET_FAILED, e, inetAddress
+							.toString(), e.getLocalizedMessage());
+				}
+				isr = new InputStreamReader(s.getInputStream(), CHARSET_US_ASCII);
+				final StringBuilder sb = new StringBuilder(BUFSIZE);
+				final char[] buf = new char[BUFSIZE];
+				int bytesRead = -1;
+				if ((bytesRead = isr.read(buf, 0, buf.length)) != -1) {
+					sb.append(buf, 0, bytesRead);
+				}
+				final IMAPServer imapServer = mapInfo2IMAPServer(sb.toString(), inetAddress, imapPort);
 				try {
 					user2Acl = Class.forName(imapServer.getImpl()).asSubclass(User2ACL.class).newInstance();
 				} catch (final InstantiationException e) {
