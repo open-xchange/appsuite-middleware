@@ -76,7 +76,7 @@ public final class MailConnectionWatcher {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailConnectionWatcher.class);
 
-	private static final ConcurrentMap<MailConnection, Long> mailConnections = new ConcurrentHashMap<MailConnection, Long>();
+	private static final ConcurrentMap<MailConnection<?, ?, ?>, Long> mailConnections = new ConcurrentHashMap<MailConnection<?, ?, ?>, Long>();
 
 	private static final Lock LOCK = new ReentrantLock();
 
@@ -145,21 +145,22 @@ public final class MailConnectionWatcher {
 
 	/**
 	 * Adds specified mail connection to this watcher's tracing if not already
-	 * added before
+	 * added before. If already present its timestamp is updated.
 	 * <p>
 	 * Watcher is established if not running, yet
 	 * 
 	 * @param mailConnection
 	 *            The mail connection to add
 	 */
-	public static void addMailConnection(final MailConnection mailConnection) {
+	public static void addMailConnection(final MailConnection<?, ?, ?> mailConnection) {
 		if (!initialized.get()) {
 			LOG.error("Mail connection watcher is not running. Aborting addMailConnection()");
 			return;
 		}
-		if (!mailConnections.containsKey(mailConnection)) {
-			mailConnections.put(mailConnection, Long.valueOf(System.currentTimeMillis()));
-		}
+		/*
+		 * Insert or update mailconnection's timestamp
+		 */
+		mailConnections.put(mailConnection, Long.valueOf(System.currentTimeMillis()));
 	}
 
 	/**
@@ -168,7 +169,7 @@ public final class MailConnectionWatcher {
 	 * @param mailConnection
 	 *            The mail connection to remove
 	 */
-	public static void removeMailConnection(final MailConnection mailConnection) {
+	public static void removeMailConnection(final MailConnection<?, ?, ?> mailConnection) {
 		if (!initialized.get()) {
 			LOG.error("Mail connection watcher is not running. Aborting removeMailConnection()");
 			return;
@@ -191,10 +192,10 @@ public final class MailConnectionWatcher {
 		@Override
 		public void run() {
 			final StringBuilder sb = new StringBuilder(512);
-			final List<MailConnection> exceededCons = new ArrayList<MailConnection>();
-			for (final Iterator<Entry<MailConnection, Long>> iter = mailConnections.entrySet().iterator(); iter
+			final List<MailConnection<?, ?, ?>> exceededCons = new ArrayList<MailConnection<?, ?, ?>>();
+			for (final Iterator<Entry<MailConnection<?, ?, ?>, Long>> iter = mailConnections.entrySet().iterator(); iter
 					.hasNext();) {
-				final Entry<MailConnection, Long> e = iter.next();
+				final Entry<MailConnection<?, ?, ?>, Long> e = iter.next();
 				if (!e.getKey().isConnectedUnsafe()) {
 					/*
 					 * Remove closed connection from watcher
@@ -216,7 +217,7 @@ public final class MailConnectionWatcher {
 				 */
 				final int n = exceededCons.size();
 				for (int i = 0; i < n; i++) {
-					final MailConnection mailConnection = exceededCons.get(i);
+					final MailConnection<?, ?, ?> mailConnection = exceededCons.get(i);
 					try {
 						if (MailConfig.isWatcherShallClose()) {
 							sb.setLength(0);
