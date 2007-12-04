@@ -12,6 +12,7 @@
     <property file="PVERSION"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
 	<property name="composite.name" value="open-xchange-admin-${version}" />
+
 	
     <property name="test.xml.dir" value="test-results" />
     <property name="client.jar" value="ox_admin_rmiclient.jar"/>
