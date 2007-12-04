@@ -188,6 +188,7 @@ public final class SystemConfig extends AbstractConfig implements
         CONFIGDB("configDB"),
         /**
          * Class implementing the SetupLink.
+         * TODO Remove due to OSGi Service.
          */
         SETUP_LINK("SetupLink"),
         /**
@@ -224,6 +225,7 @@ public final class SystemConfig extends AbstractConfig implements
         NOTIFICATION("Notification"),
         /**
          * configjump.properties.
+         * TODO Remove due to OSGi service.
          */
         ConfigJumpConf("ConfigJumpConf"),
         /**
