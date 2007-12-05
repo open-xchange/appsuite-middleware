@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.mime.dataobjects;
 
-import static com.openexchange.tools.mail.ContentType.isMimeType;
+import static com.openexchange.mail.mime.ContentType.isMimeType;
 
 import java.io.IOException;
 import java.io.InputStream;

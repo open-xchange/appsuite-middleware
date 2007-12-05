@@ -79,19 +79,19 @@ import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.writer.MessageWriter;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
+import com.openexchange.mail.text.Enriched2HtmlConverter;
+import com.openexchange.mail.text.Html2TextConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.mail.uuencode.UUEncodedPart;
 import com.openexchange.session.Session;
-import com.openexchange.tools.mail.ContentType;
-import com.openexchange.tools.mail.Enriched2HtmlConverter;
-import com.openexchange.tools.mail.Html2TextConverter;
-import com.openexchange.tools.mail.UUEncodedPart;
 
 /**
  * {@link JSONMessageHandler}

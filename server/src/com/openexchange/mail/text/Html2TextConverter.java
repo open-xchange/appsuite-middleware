@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.mail;
+package com.openexchange.mail.text;
 
 import static com.openexchange.mail.utils.MessageUtility.PATTERN_HREF;
 import static com.openexchange.mail.utils.MessageUtility.getHTMLEntity;

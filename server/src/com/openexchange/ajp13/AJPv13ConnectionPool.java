@@ -94,7 +94,7 @@ public class AJPv13ConnectionPool {
 
 	/**
 	 * Fetches an existing connection from pool or creates & returns a new
-	 * instance if none availbale in pool
+	 * instance if none available in pool
 	 */
 	public static AJPv13Connection getAJPv13Connection(final AJPv13Listener l) {
 		final AJPv13Connection ajpCon = CONNECTION_QUEUE.poll();

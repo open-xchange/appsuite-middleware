@@ -88,6 +88,7 @@ import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.TransportMailMessage;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
@@ -111,7 +112,6 @@ import com.openexchange.smtp.dataobjects.SMTPMailMessage;
 import com.openexchange.smtp.dataobjects.SMTPMailPart;
 import com.openexchange.smtp.dataobjects.SMTPReferencedPart;
 import com.openexchange.smtp.filler.SMTPMessageFiller;
-import com.openexchange.tools.mail.ContentType;
 import com.sun.mail.smtp.SMTPMessage;
 
 /**

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.mail;
+package com.openexchange.mail.uuencode;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

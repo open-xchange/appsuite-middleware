@@ -95,7 +95,7 @@ public class AJPv13RequestHandlerPool {
 
 	/**
 	 * Fetches an existing instance from pool or creates & returns a new one.
-	 * The given conenction is then assigned to the request handler instance.
+	 * The given connection is then assigned to the request handler instance.
 	 */
 	public static AJPv13RequestHandler getRequestHandler(final AJPv13Connection ajpCon) {
 		AJPv13RequestHandler reqHandler = REQUEST_HANDLER_POOL.poll();

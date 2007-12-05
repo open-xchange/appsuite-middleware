@@ -83,7 +83,7 @@ public final class AJPv13Connection {
 
 	private AJPv13RequestHandler ajpRequestHandler;
 	
-	public AJPv13Connection(AJPv13Listener listener) {
+	public AJPv13Connection(final AJPv13Listener listener) {
 		this();
 		setAndApplyListener(listener);
 	}

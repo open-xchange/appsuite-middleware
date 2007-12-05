@@ -267,7 +267,15 @@ public final class SystemConfig extends AbstractConfig implements
         /**
          * push component configuration file.
          */
-        PUSH("PUSHPROPERTIES");
+        PUSH("PUSHPROPERTIES"),
+        /**
+         * TidyMessages.properties
+         */
+        TidyMessages("TidyMessages"),
+        /**
+         * TidyConfiguration.properties
+         */
+        TidyConfiguration("TidyConfiguration");
 
         /**
          * Name of the property in the server.properties file.

@@ -73,10 +73,10 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContainerMessage;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.session.Session;
-import com.openexchange.tools.mail.ContentType;
 
 /**
  * {@link MIMEMessageUtility}

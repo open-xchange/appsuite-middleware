@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.mail;
+package com.openexchange.mail.text;
 
 import java.io.IOException;
 import java.io.Reader;

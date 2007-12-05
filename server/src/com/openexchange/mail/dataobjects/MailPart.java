@@ -65,9 +65,9 @@ import javax.activation.DataHandler;
 import javax.mail.internet.MimeUtility;
 
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.tools.mail.ContentType;
 
 /**
  * {@link MailPart}

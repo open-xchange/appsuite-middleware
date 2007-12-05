@@ -81,6 +81,7 @@ import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
@@ -94,7 +95,6 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
-import com.openexchange.tools.mail.ContentType;
 
 /**
  * {@link MimeReply}

@@ -49,7 +49,7 @@
 
 
 
-package com.openexchange.tools.mail;
+package com.openexchange.mail.uuencode;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;

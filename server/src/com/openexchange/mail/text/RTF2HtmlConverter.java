@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.mail;
+package com.openexchange.mail.text;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;

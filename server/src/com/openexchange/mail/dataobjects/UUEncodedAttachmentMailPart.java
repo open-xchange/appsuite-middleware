@@ -55,11 +55,11 @@ import java.io.InputStream;
 import javax.activation.DataHandler;
 
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.tools.mail.ContentType;
-import com.openexchange.tools.mail.UUEncodedPart;
+import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
  * {@link UUEncodedAttachmentMailPart}

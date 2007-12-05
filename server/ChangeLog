@@ -1,3 +1,9 @@
+* 2007-12-05 - thorben.betten@open-xchange.com
+
+ - Bugfix #10503: Sending W3C conform html
+ - Bugfix #10526: Text-only drafts are now kept as text-only and got no
+   more converted to html
+
 * 2007-12-04 - marcus.klein@open-xchange.com
 
  - Bugfix #10524: Removed a wrong logging.

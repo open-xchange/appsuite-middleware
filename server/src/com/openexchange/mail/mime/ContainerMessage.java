@@ -77,7 +77,6 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.tools.mail.ContentType;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
 /**

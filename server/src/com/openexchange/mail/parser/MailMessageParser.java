@@ -79,6 +79,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
@@ -86,8 +87,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.tools.mail.ContentType;
-import com.openexchange.tools.mail.UUEncodedMultiPart;
+import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 
 /**
  * {@link MailMessageParser} - A callback parser to parse instances of

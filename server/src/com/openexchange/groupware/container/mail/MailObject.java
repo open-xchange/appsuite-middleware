@@ -65,11 +65,11 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.session.Session;
-import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**

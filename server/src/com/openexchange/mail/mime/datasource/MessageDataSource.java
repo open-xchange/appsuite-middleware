@@ -61,7 +61,7 @@ import javax.activation.DataSource;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
-import com.openexchange.tools.mail.ContentType;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**

@@ -61,12 +61,12 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.UUEncodedAttachmentMailPart;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
-import com.openexchange.tools.mail.ContentType;
-import com.openexchange.tools.mail.UUEncodedPart;
+import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
  * {@link NonInlinePartHandler} - Gathers all occuring non-inline parts in a

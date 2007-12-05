@@ -72,7 +72,7 @@ import com.openexchange.ajp13.AJPv13Exception.AJPCode;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.mail.MailException;
-import com.openexchange.tools.mail.ContentType;
+import com.openexchange.mail.mime.ContentType;
 
 /**
  * HttpServletRequestWrapper

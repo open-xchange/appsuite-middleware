@@ -49,7 +49,7 @@
 
 
 
-package com.openexchange.tools.mail;
+package com.openexchange.mail.text;
 
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;

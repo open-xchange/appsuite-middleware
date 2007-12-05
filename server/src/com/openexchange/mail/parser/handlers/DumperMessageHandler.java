@@ -61,11 +61,11 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.tools.mail.ContentType;
-import com.openexchange.tools.mail.UUEncodedPart;
+import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
  * {@link DumperMessageHandler} - For testing purposes

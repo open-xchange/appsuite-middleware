@@ -82,9 +82,9 @@ import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailListField;
+import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.text.Html2TextConverter;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.tools.mail.ContentType;
-import com.openexchange.tools.mail.Html2TextConverter;
 import com.sun.mail.imap.IMAPFolder;
 
 /**

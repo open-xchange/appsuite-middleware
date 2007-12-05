@@ -52,6 +52,7 @@ package com.openexchange.smtp.filler;
 import static com.openexchange.mail.utils.MessageUtility.formatHrefLinks;
 import static com.openexchange.mail.utils.MessageUtility.performLineFolding;
 import static com.openexchange.mail.utils.MessageUtility.replaceHTMLSimpleQuotesForDisplay;
+import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -91,11 +92,13 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.mail.text.Html2TextConverter;
 import com.openexchange.mail.transport.SendType;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -105,7 +108,6 @@ import com.openexchange.session.Session;
 import com.openexchange.smtp.SMTPException;
 import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.dataobjects.SMTPMailMessage;
-import com.openexchange.tools.mail.Html2TextConverter;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
@@ -270,7 +272,12 @@ public final class SMTPMessageFiller {
 		final boolean sendMultipartAlternative;
 		if (mail.isDraft()) {
 			sendMultipartAlternative = false;
-			mail.setContentType(MIMETypes.MIME_TEXT_HTML);
+			if (mail.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALTERNATIVE)) {
+				/*
+				 * Allow only html if a draft message should be "sent"
+				 */
+				mail.setContentType(MIMETypes.MIME_TEXT_HTML);
+			}
 		} else {
 			sendMultipartAlternative = mail.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALTERNATIVE);
 		}
@@ -308,39 +315,14 @@ public final class SMTPMessageFiller {
 				 */
 				if (mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_PLAIN)) {
 					/*
-					 * Convert html content to reguar text. First: Create a body
-					 * part for text content
+					 * Append text content
 					 */
-					final MimeBodyPart text = new MimeBodyPart();
-					/*
-					 * Define text content
-					 */
-					text.setText(performLineFolding(getConverter().convertWithQuotes((String) mail.getContent()),
-							false, usm.getAutoLinebreak()), SMTPConfig.getDefaultMimeCharset());
-					text.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-					text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, SMTPConfig
-							.getDefaultMimeCharset()));
-					/*
-					 * Add body part
-					 */
-					primaryMultipart.addBodyPart(text);
+					primaryMultipart.addBodyPart(createTextBodyPart((String) mail.getContent()));
 				} else {
 					/*
 					 * Append html content
 					 */
-					final MimeBodyPart html = new MimeBodyPart();
-					/*
-					 * Define html content
-					 */
-					final String ct = PAT_HTML_CT.replaceFirst(REPLACE_CS, SMTPConfig.getDefaultMimeCharset());
-					html.setContent(performLineFolding(replaceHTMLSimpleQuotesForDisplay(formatHrefLinks((String) mail
-							.getContent())), true, usm.getAutoLinebreak()), ct);
-					html.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-					html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct);
-					/*
-					 * Add body part
-					 */
-					primaryMultipart.addBodyPart(html);
+					primaryMultipart.addBodyPart(createHtmlBodyPart((String) mail.getContent()));
 				}
 			}
 			final int size = mail.getEnclosedCount();
@@ -431,13 +413,13 @@ public final class SMTPMessageFiller {
 				final String mailText;
 				if (isPlainText) {
 					/*
-					 * Convert html content to reguar text
+					 * Convert html content to regular text
 					 */
 					mailText = performLineFolding(getConverter().convertWithQuotes((String) mail.getContent()), false,
 							usm.getAutoLinebreak());
 				} else {
-					mailText = performLineFolding(replaceHTMLSimpleQuotesForDisplay(formatHrefLinks((String) mail
-							.getContent())), true, usm.getAutoLinebreak());
+					mailText = getConformHTML(replaceHTMLSimpleQuotesForDisplay(formatHrefLinks((String) mail
+							.getContent())), mail.getContentType());
 				}
 				smtpMessage.setContent(mailText, mail.getContentType().toString());
 				smtpMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
@@ -532,7 +514,7 @@ public final class SMTPMessageFiller {
 	 * going to be appended as the "html" version
 	 */
 	private Multipart createMultipartAlternative(final SMTPMailMessage mail, final boolean embeddedImages)
-			throws MailException, MessagingException {
+			throws MailException, MessagingException, IOException {
 		/*
 		 * Create an "alternative" multipart
 		 */
@@ -540,21 +522,11 @@ public final class SMTPMessageFiller {
 		/*
 		 * Create a body part for both text and html content
 		 */
-		final MimeBodyPart text = new MimeBodyPart();
 		final String mailBody = (String) mail.getContent();
 		/*
 		 * Define & add text content
 		 */
-		try {
-			text.setText(performLineFolding(getConverter().convertWithQuotes(mailBody), false, usm.getAutoLinebreak()),
-					SMTPConfig.getDefaultMimeCharset());
-		} catch (final IOException e) {
-			throw new SMTPException(SMTPException.Code.HTML2TEXT_CONVERTER_ERROR, e, e.getMessage());
-		}
-		text.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-		text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, SMTPConfig
-				.getDefaultMimeCharset()));
-		alternativeMultipart.addBodyPart(text);
+		alternativeMultipart.addBodyPart(createTextBodyPart(mailBody));
 		/*
 		 * Define html content
 		 */
@@ -568,7 +540,7 @@ public final class SMTPMessageFiller {
 			 * content as a new body part to first index
 			 */
 			relatedMultipart.addBodyPart(createHtmlBodyPart(processReferencedLocalImages(mailBody, relatedMultipart,
-					this), usm.getAutoLinebreak()), 0);
+					this)), 0);
 			/*
 			 * Traverse Content-IDs
 			 */
@@ -602,7 +574,7 @@ public final class SMTPMessageFiller {
 			altBodyPart.setContent(relatedMultipart);
 			alternativeMultipart.addBodyPart(altBodyPart);
 		} else {
-			final BodyPart html = createHtmlBodyPart(mailBody, usm.getAutoLinebreak());
+			final BodyPart html = createHtmlBodyPart(mailBody);
 			/*
 			 * Add html part to superior multipart
 			 */
@@ -815,13 +787,32 @@ public final class SMTPMessageFiller {
 		}
 	}
 
-	private static BodyPart createHtmlBodyPart(final String htmlContent, final int linewrap) throws MessagingException {
-		final String htmlCT = PAT_HTML_CT.replaceFirst(REPLACE_CS, SMTPConfig.getDefaultMimeCharset());
+	private BodyPart createTextBodyPart(final String htmlContent) throws MessagingException, IOException {
+		/*
+		 * Convert html content to regular text. First: Create a body part for
+		 * text content
+		 */
+		final MimeBodyPart text = new MimeBodyPart();
+		/*
+		 * Define text content
+		 */
+		text.setText(performLineFolding(getConverter().convertWithQuotes(htmlContent), false, usm.getAutoLinebreak()),
+				SMTPConfig.getDefaultMimeCharset());
+		text.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
+		text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, SMTPConfig
+				.getDefaultMimeCharset()));
+		return text;
+	}
+
+	private static BodyPart createHtmlBodyPart(final String htmlContent) throws MessagingException, MailException,
+			IOException {
+		final ContentType htmlCT = new ContentType(PAT_HTML_CT.replaceFirst(REPLACE_CS, SMTPConfig
+				.getDefaultMimeCharset()));
 		final MimeBodyPart html = new MimeBodyPart();
-		html.setContent(performLineFolding(replaceHTMLSimpleQuotesForDisplay(formatHrefLinks(htmlContent)), true,
-				linewrap), htmlCT);
+		html.setContent(getConformHTML(replaceHTMLSimpleQuotesForDisplay(formatHrefLinks(htmlContent)), htmlCT), htmlCT
+				.toString());
 		html.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-		html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, htmlCT);
+		html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, htmlCT.toString());
 		return html;
 	}
 

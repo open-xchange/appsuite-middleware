@@ -58,12 +58,12 @@ import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.text.Html2TextConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.tools.mail.ContentType;
-import com.openexchange.tools.mail.Html2TextConverter;
-import com.openexchange.tools.mail.UUEncodedMultiPart;
+import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 
 /**
  * {@link MimeProcessingUtility} - Provides some utility methods for

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.mail;
+package com.openexchange.mail.mime;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
