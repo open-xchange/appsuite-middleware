@@ -21,6 +21,7 @@
 	<property name="oxconfdir" value="etc/admindaemon"/>
 	<property name="serverconfdir" value="etc/groupware"/>
 	<property name="masterauthfile" value="mpasswd"/>
+    <property name="bundle.d" value="${prefix}/${oxconfdir}/osgi/bundle.d"/>
 
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
@@ -383,7 +384,12 @@
 		<!-- EXAMPLE -->
     	<!-- <antcall target="install-suse"/> -->
     	<!-- <antcall target="install-redhat"/> -->
-		<antcall target="install-jar"></antcall>
+        
+    	<mkdir dir="${destdir}/${bundle.d}"/>
+        <echo file="${destdir}/${bundle.d}/${composite.name}.ini"
+            message="${bundlesdir}/${bundle.name}${line.separator}"/>
+
+    	<antcall target="install-jar"></antcall>
 
     	<antcall target="install-plugins"></antcall>
 		<antcall target="install-console"></antcall>
