@@ -76,11 +76,13 @@ ulimit -n $NRFILES
 pushd $OXPREFIX
 
 rm -f $CONSOLELOG
-OSGICACHEDIR=${OXPREFIX}/${OXCONFIGDIR}/osgi/org.eclipse.osgi
+OSGICACHEDIR=${OSGIPATH}/org.eclipse.osgi
 test -d $OSGICACHEDIR && rm -rf $OSGICACHEDIR
 
 
 test -z "$1" && OPTOUTPUT="> $CONSOLELOG 2>&1" || OPTOUTPUT="$1"
+
+ox_update_config_init "$OSGIPATH/config.ini" "$OSGIPATH/config.ini.template" "$OSGIPATH/bundle.d"
 
 umask 066
 exec $JAVA_BIN $JAVA_XTRAOPTS \
