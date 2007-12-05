@@ -71,7 +71,7 @@ import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
-import com.openexchange.tools.mail.ContentType;
+import com.openexchange.mail.mime.ContentType;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPStore;
