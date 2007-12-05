@@ -56,7 +56,7 @@
     <target name="installConfig">
         <mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${composite.name}.ini"
-            message="${bundlesdir}/${bundle.name}"/>
+            message="${bundlesdir}/${bundle.name}${line.separator}"/>
     </target>
 
     <target name="installJar" depends="jar">
