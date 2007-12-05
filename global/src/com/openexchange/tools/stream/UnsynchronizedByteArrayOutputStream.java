@@ -102,7 +102,7 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
 	 * @exception IllegalArgumentException
 	 *                if size is negative.
 	 */
-	public UnsynchronizedByteArrayOutputStream(int size) {
+	public UnsynchronizedByteArrayOutputStream(final int size) {
 		if (size < 0) {
 			throw new IllegalArgumentException("Negative initial size: " + size);
 		}
