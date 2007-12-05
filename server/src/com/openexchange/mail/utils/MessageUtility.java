@@ -81,12 +81,12 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.text.Html2TextConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.Collections.SmartIntArray;
-import com.openexchange.tools.mail.ContentType;
-import com.openexchange.tools.mail.Html2TextConverter;
 
 /**
  * {@link MessageUtility} - Provides various helper methods for message
@@ -259,7 +259,7 @@ public final class MessageUtility {
 
 	/**
 	 * Performs the line folding after specified number of characters through
-	 * <code>linewrap</code>. Occuring html links are excluded.
+	 * <code>linewrap</code>. Occurring html links are excluded.
 	 * <p>
 	 * If parameter <code>isHtml</code> is set to <code>true</code> the
 	 * content is returned unchanged.
@@ -276,11 +276,10 @@ public final class MessageUtility {
 	public static String performLineFolding(final String content, final boolean isHtml, final int linewrap) {
 		if (linewrap <= 0) {
 			return content;
-		}
-		final StringBuilder sb = new StringBuilder(content.length() + 128);
-		if (isHtml) {
+		} else if (isHtml) {
 			return content;
 		}
+		final StringBuilder sb = new StringBuilder(content.length() + 128);
 		final String[] lines = content.split(SPLIT_LINES);
 		for (int i = 0; i < lines.length; i++) {
 			sb.append(foldTextLine(lines[i], linewrap)).append(CHAR_BREAK);
