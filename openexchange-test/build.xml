@@ -1,104 +1,128 @@
-<project name="openexchange-test" default="jar" basedir=".">
+<project name="openexchange-test" default="default" basedir=".">
 
-  <property name="src" value="src"/>
-  <property name="build" value="bin"/>
-  <property name="lib" value="lib"/>
-  <property name="test.xml.dir" location="test-results" />
-  <property name="conf.dir" location="conf" />
-  <property name="logging.propFile" value="/opt/openexchange/etc/groupware/logging.properties" />
-  
-  <property name="build.compiler" value="modern"/>
-  <path id="project.classpath"> 
-  		<pathelement location="${lib}/ox_server.jar" />
-  		<pathelement location="${lib}/ox_languages.jar" />
-		<pathelement location="${lib}/junit-4.1.jar"/>
-		<pathelement location="${lib}/commons-httpclient-2.0.2.jar"/>
-		<pathelement location="${lib}/logging.jar"/>
-		<pathelement location="${lib}/servlet-api-2.4.jar"/>
-		<pathelement location="${lib}/activation.jar"/>
-		<pathelement location="${lib}/mail.jar"/>
-		<pathelement location="${lib}/jdom.jar"/>
-		<pathelement location="${lib}/httpunit.jar"/>
-		<pathelement location="${lib}/js.jar"/>
-		<pathelement location="${lib}/servlet.jar"/>
-		<pathelement location="${lib}/Tidy.jar"/>
-		<pathelement location="${lib}/xercesImpl.jar"/>
-		<pathelement location="${lib}/xmlParserAPIs.jar"/>
-		<pathelement location="${lib}/nekohtml.jar"/>
-		<pathelement location="${lib}/commons-logging.jar"/>
-		<pathelement location="${lib}/json.jar"/>
-		<pathelement location="${lib}/commons-fileupload.jar"/>
-		<pathelement location="${lib}/commons-io.jar"/>
-		<pathelement location="${lib}/jdom.jar" />
-		<pathelement location="${lib}/jcs-1.2.7.9.2.jar" />
-		<pathelement location="${lib}/spring-beans_1.2.7.jar" />
-		<pathelement location="${lib}/spring-core_1.2.7.jar" />
-		<pathelement location="${lib}/concurrent.jar" />
-  		<pathelement location="${lib}/jakarta-slide-webdavlib-2.1.jar" />
-  		<pathelement location="${lib}/junitperf-1.9.1.jar" />
-		<pathelement location="${lib}/commons-codec-1.3.jar"/>
+	<!-- Customizable values -->
+	<property name="destdir" value=""/>
+	<property name="prefix" value="/opt/open-xchange"/>
+
+	<!-- Constants -->
+	<property name="tmp.dir" value="tmp"/>
+
+	<property file="META-INF/MANIFEST.MF"/>
+	<property file="build.properties"/>
+
+	<property name="version" value="${Bundle-Version}"/>
+	<property name="bundle.name" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
+	<property name="composite.name" value="open-xchange-global-${version}" />
+
+	<!-- Install Constants -->
+	<property name="bundlesdir" value="${prefix}/bundles"/>
+
+   	<!-- Compile Constants -->
+	<property name="src.common" value="common"/>
+	<property name="src.iface" value="src"/>
+	<property name="src.unit" value="unittests"/>
+	<property name="build" value="bin"/>
+	<property name="lib" value="lib"/>
+
+	<!-- Runtime constants -->
+	<property name="test.xml.dir" location="test-results" />
+	
+	<!-- NOTE: Make sure all jars from CVS/openexchange-common/common/jars/ are accessible under common.libs! -->
+
+	<!-- Classpath -->
+	<path id="project.classpath">
+		<fileset dir="${bundlesdir}">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${lib}">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${common.libs}">
+			<include name="*.jar" />
+		</fileset>
 	</path>
-
-  <target name="init">
-    <tstamp/>
-    <mkdir dir="${build}"/>
-    <mkdir dir="${lib}"/>
-  </target>
-
-  <target name="compile" depends="init">
-    <mkdir dir="${build}"/>
-    <mkdir dir="${lib}"/>
-    <javac srcdir="${src}" destdir="${build}" optimize="no" debug="yes" encoding="UTF-8">
-    	<classpath refid="project.classpath" />
-	</javac>
-  </target>
-  
-  <target name="junit" depends="jar">
-	<junit printsummary="on" showoutput="on" failureproperty="on">
-	  <formatter type="plain" usefile="off"/>
-	  <test name="com.openexchange.groupware.ldap.OffspringTest"/>
-	  <!--test name="com.openexchange.groupware.ldap.UserGroupHandleTest"/>
-	  <test name="com.openexchange.groupware.ldap.ResourcesHandleTest"/-->
-	  <classpath>
-		<path refid="project.classpath" />
-		<pathelement location="openexchange-test.jar"/>
-      </classpath>
-	</junit> 
-  </target>
-
-  <target name="jar" depends="compile">
-    <jar jarfile="openexchange-test.jar" basedir="${build}" includes="**"/>
-  </target>
-  
-  
-  <target name="cc-test" depends="jar"> 
-	<delete dir="${test.xml.dir}"/> 
-	<mkdir dir="${test.xml.dir}"/> 
-	<junit errorProperty="test.failed" failureProperty="test.failed"  showoutput="yes" printsummary="yes"> 
-		<classpath>
-			<path refid="project.classpath" />
-			<pathelement location="${lib}/mysql-connector-java-3.1.13-bin.jar" />
-			<pathelement location="openexchange-test.jar"/>
-    	</classpath>
-    	
-    	<test name="com.openexchange.test.CCTests" todir="${test.xml.dir}" />
+	
+	<target name="default" depends="interface-jar, unit-jar" />
+	
+	<target name="clean">
+		<delete dir="${build}" />
+		<delete dir="${test.xml.dir}" />
+		<delete file="open-xchange-iface-tests.jar" />
+		<delete file="open-xchange-unit-tests.jar" />
 		
-		<formatter type="brief" usefile="false" /> 
-		<formatter type="xml" /> 
-		<sysproperty key="test.propfile" value="${conf.dir}/test.properties" />
-		<sysproperty key="java.util.logging.config.file" value="${logging.propFile}" />
-	</junit> 
-	
-	<fail message="Tests failed!" if="test.failed" />
-	
 	</target>
 	
+	<target name="compile-common">
+		<mkdir dir="${build}"/>
+		<javac srcdir="${src.common}" destdir="${build}" optimize="no" debug="yes" encoding="UTF-8">
+	    	<classpath>
+				<path refid="project.classpath" />
+			</classpath>
+		</javac>
+	</target>
+	
+	<target name="compile-specific">
+ 		<mkdir dir="${build}"/>
+		<javac srcdir="${test.src}" destdir="${build}" optimize="no" debug="yes" encoding="UTF-8">
+	    	<classpath>
+				<path refid="project.classpath" />
+				<pathelement location="${build}" />
+			</classpath>
+		</javac>
+	</target>
+	
+	<target name="compile-interface-tests" depends="compile-common">
+		<antcall target="compile-specific">
+			<param name="test.src" value="${src.iface}" />
+		</antcall>
+	</target>
+	
+	<target name="compile-unit-tests" depends="compile-common">
+		<antcall target="compile-specific">
+			<param name="test.src" value="${src.unit}" />
+		</antcall>
+	</target>
+	
+	<target name="interface-jar" depends="compile-interface-tests">
+		<jar jarfile="open-xchange-iface-tests.jar" basedir="${build}" includes="**"/>
+	</target>
+	
+	<target name="unit-jar" depends="compile-unit-tests">
+		<jar jarfile="open-xchange-unit-tests.jar" basedir="${build}" includes="**"/>
+	</target>
 
-  <target name="clean">
-    <delete dir="${build}"/>
-    <delete file="openexchange-test.jar"/>
-  </target>
+	<target name="run-interface-tests" depends="interface-jar">
+		<antcall target="run-tests">
+			<param name="test.jar" value="open-xchange-iface-tests.jar" />
+			<param name="test.class" value="com.openexchange.test.InterfaceTests" />
+		</antcall>
+	</target>
+	
+	<target name="run-unit-tests" depends="unit-jar">
+		<antcall target="run-tests">
+			<param name="test.jar" value="open-xchange-unit-tests.jar" />
+			<param name="test.class" value="com.openexchange.test.UnitTests" />
+		</antcall>
+	</target>
+	
+	<target name="run-tests">
+		<delete dir="${test.xml.dir}"/> 
+		<mkdir dir="${test.xml.dir}"/> 
+		<junit errorProperty="test.failed" failureProperty="test.failed"  showoutput="yes" printsummary="yes"> 
+			<classpath>
+				<path refid="project.classpath" />
+				<pathelement location="${test.jar}"/>
+				<pathelement location="test-common.jar" />
+	    	</classpath>
+
+	    	<test name="${test.class}" todir="${test.xml.dir}" />
+
+			<formatter type="brief" usefile="false" /> 
+			<formatter type="xml" /> 
+			<sysproperty key="test.propfile" value="${conf.dir}/test.properties" />
+		</junit> 
+
+		<fail message="Tests failed!" if="test.failed" />
+	</target>
 
 </project>
-
-
