@@ -1,5 +1,4 @@
 osgi.noShutdown=true
-osgi.bundles=reference\:file\:@oxadminbundle@@start,reference\:file\:@oxcommonbundle@@start,reference\:file\:@oxmanagementbundle@@start,reference\:file\:@oxserverbundle@@start,reference\:file\:@oxglobalbundle@@start,reference\:file\:@oxconfigbundle@@start,reference\:file\:@oxmonitoringbundle@@start,reference\:file\:@oxsessiondbundle@@start,reference\:file\:@servletbundle@@start,reference\:file\:@loggingbundle@@start,reference\:file\:@osgiservicesbundle@@start
 osgi.bundles.defaultStartLevel=4
 osgi.framework=file\:@oxosgibundle@
 osgi.configuration.cascaded=false
