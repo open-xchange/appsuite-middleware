@@ -15,6 +15,7 @@
 	<property name="serverconfdir" value="etc/groupware"/>
     <property name="admin.classpath" value="../open-xchange-admin/classes"/>
 	<property name="client.jar" value="ox_admin_hosting_rmiclient.jar"/>
+    <property name="bundle.d" value="${prefix}/${oxconfdir}/osgi/bundle.d"/>
 
     <!-- Bundle dependencies -->
     <property name="commonBundle" value="com.openexchange.common"/>
@@ -168,6 +169,9 @@
     	<chmod perm="755">
             <fileset dir="${destdir}/${prefix}/sbin" includes="*"/>
         </chmod>
+    	<mkdir dir="${destdir}/${bundle.d}"/>
+        <echo file="${destdir}/${bundle.d}/${composite.name}.ini"
+            message="${bundlesdir}/${bundle.name}${line.separator}"/>
     </target>
 	
 	<target name="compile-tests">
