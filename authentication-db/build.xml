@@ -16,6 +16,7 @@
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
+    <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
@@ -50,7 +51,14 @@
     </target>
 
     <!-- Install -->
-    <target name="install" depends="jar">
+    <target name="install" depends="installJar,installConfig"/>
+
+    <target name="installConfig">
+        <echo file="${destdir}/${bundle.d}/${composite.name}.ini"
+            message="${bundlesdir}/${bundle.name}"/>
+    </target>
+
+    <target name="installJar" depends="jar">
         <mkdir dir="${destdir}/${bundlesdir}"/>
         <copy todir="${destdir}/${bundlesdir}">
             <fileset dir="${tmp.dir}">
