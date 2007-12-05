@@ -227,63 +227,6 @@ ox_update_config_init() {
     fi
 }
 
-ox_register_plugin() {
-    local plugin=$1
-    local osgicf=$2
-    local plugpath=$3
-    local level=$4
-
-    test -z "$plugin" && die \
-	"ox_register_plugin: missing plugin argument (arg 1)"
-    test -z "$osgicf" && die \
-	"ox_register_plugin: missing osgicf argument (arg 2)"
-    test -z "$plugpath" && die \
-	"ox_register_plugin: missing plugpath argument (arg 3)"
-#    test -z "$level" && die \
-#	"ox_register_plugin: missing level argument (arg 4)"
-
-    if grep $plugin $osgicf >/dev/null; then
-	echo "plugin $plugin already registered"
-    else
-	echo "registering plugin $plugin"
-
-	local osgicftmp=${osgicf}.$$
-	sed -e "s;\(^osgi.bundles=.*\)$;\1,reference\\:file\\:${plugpath}/${plugin}@start;" \
-	    < $osgicf > $osgicftmp
-	mv $osgicftmp $osgicf
-    fi
-}
-
-ox_unregister_plugin() {
-    local plugin=$1
-    local osgicf=$2
-
-    test -z "$plugin" && die \
-	"ox_unregister_plugin: missing plugin argument (arg 1)"
-    test -z "$osgicf" && die \
-	"ox_unregister_plugin: missing osgicf argument (arg 2)"
-
-    if grep $plugin $osgicf >/dev/null; then
-	echo "unregistering plugin $plugin"
-
-	local osgicftmp=${osgicf}.$$
-	local ALLPLUGS=$(sed -e 's;,; ;g' -n -e 's;^osgi.bundles=\(.*\);\1;p' $osgicf)
-	local NEWPLUGS=$(
-	    for plug in $ALLPLUGS; do
-		if ! echo $plug | grep $plugin >/dev/null; then
-		    echo -n "$plug,"
-		fi
-	    done)
-	NEWPLUGS=${NEWPLUGS:0:( ${#NEWPLUGS} -1 )}
-
-	sed -e "s;^osgi.bundles=.*;osgi.bundles=$NEWPLUGS;" \
-	    < $osgicf > $osgicftmp
-	mv $osgicftmp $osgicf
-    else
-	echo "plugin $plugin not registered"
-    fi
-}
-
 ox_add_hosts_hostip() {
     local fqhn=$1
     local addr=$2
