@@ -54,6 +54,7 @@
     <target name="install" depends="installJar,installConfig"/>
 
     <target name="installConfig">
+        <mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${composite.name}.ini"
             message="${bundlesdir}/${bundle.name}"/>
     </target>
