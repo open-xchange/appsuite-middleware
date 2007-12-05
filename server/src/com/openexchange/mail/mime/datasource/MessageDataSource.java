@@ -72,8 +72,6 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class MessageDataSource implements DataSource {
 
-	private static final String PARAM_CHARSET = "charset";
-
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MessageDataSource.class);
 
@@ -141,8 +139,7 @@ public final class MessageDataSource implements DataSource {
 			MailException {
 		this.contentType = contentType;
 		final ContentType ct = new ContentType(contentType);
-		this.data = data.getBytes(ct.getParameter(PARAM_CHARSET) == null ? DEFAULT_ENCODING : ct
-				.getParameter(PARAM_CHARSET));
+		this.data = data.getBytes(ct.getCharsetParameter() == null ? DEFAULT_ENCODING : ct.getCharsetParameter());
 	}
 
 	/**
@@ -150,8 +147,8 @@ public final class MessageDataSource implements DataSource {
 	 */
 	public MessageDataSource(final String data, final ContentType contentType) throws UnsupportedEncodingException {
 		this.contentType = contentType.toString();
-		this.data = data.getBytes(contentType.getParameter(PARAM_CHARSET) == null ? DEFAULT_ENCODING : contentType
-				.getParameter(PARAM_CHARSET));
+		this.data = data.getBytes(contentType.getCharsetParameter() == null ? DEFAULT_ENCODING : contentType
+				.getCharsetParameter());
 	}
 
 	/**

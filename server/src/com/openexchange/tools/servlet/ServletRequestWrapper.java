@@ -179,7 +179,7 @@ public class ServletRequestWrapper implements ServletRequest {
 				LOG.error(e.getMessage(), e);
 				throw new AJPv13Exception(AJPCode.INVALID_CONTENT_TYPE, true, value);
 			}
-			if (ct.getParameter("charset") == null) {
+			if (ct.getCharsetParameter() == null) {
 				/*
 				 * Although http defines to use charset "ISO-8859-1" if protocol
 				 * is set to "HTTP/1.1", we use a pre-defined charset given
@@ -193,9 +193,9 @@ public class ServletRequestWrapper implements ServletRequest {
 				}
 			} else {
 				try {
-					setCharacterEncoding(ct.getParameter("charset"));
+					setCharacterEncoding(ct.getCharsetParameter());
 				} catch (UnsupportedEncodingException e) {
-					throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, ct.getParameter("charset"));
+					throw new AJPv13Exception(AJPCode.UNSUPPORTED_ENCODING, true, ct.getCharsetParameter());
 				}
 			}
 		} else {

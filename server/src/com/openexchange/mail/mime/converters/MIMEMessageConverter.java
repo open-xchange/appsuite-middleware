@@ -50,7 +50,6 @@
 package com.openexchange.mail.mime.converters;
 
 import static com.openexchange.mail.utils.MessageUtility.decodeMultiEncodedHeader;
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.hasAttachments;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -104,11 +103,6 @@ public final class MIMEMessageConverter {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MIMEMessageConverter.class);
-
-	/*
-	 * Content-Type parameter name constants
-	 */
-	private static final String PARAM_CHARSET = "charset";
 
 	private static interface MailMessageFieldFiller {
 		/**
@@ -186,8 +180,8 @@ public final class MIMEMessageConverter {
 	public static Message convertMailMessage(final MailMessage mail) throws MailException {
 		try {
 			final MimeMessage mimeMsg = new MimeMessage(MIMEDefaultSession.getDefaultSession());
-			final String charset = mail.getContentType().getParameter(PARAM_CHARSET) == null ? MailConfig
-					.getDefaultMimeCharset() : mail.getContentType().getParameter(PARAM_CHARSET);
+			final String charset = mail.getContentType().containsCharsetParameter() ? mail.getContentType()
+					.getCharsetParameter() : MailConfig.getDefaultMimeCharset();
 			/*
 			 * Set headers
 			 */
@@ -260,8 +254,8 @@ public final class MIMEMessageConverter {
 			 * Text content
 			 */
 			addPartHeaders(part, mailPart);
-			if (contentType.getParameter(PARAM_CHARSET) == null) {
-				contentType.addParameter(PARAM_CHARSET, MailConfig.getDefaultMimeCharset());
+			if (!contentType.containsCharsetParameter()) {
+				contentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
 			}
 			part.setDataHandler(new DataHandler(
 					new MessageDataSource(mailPart.getInputStream(), contentType.toString())));
@@ -271,8 +265,8 @@ public final class MIMEMessageConverter {
 			/*
 			 * Other content
 			 */
-			if (contentType.getParameter(PARAM_CHARSET) == null) {
-				contentType.addParameter(PARAM_CHARSET, MailConfig.getDefaultMimeCharset());
+			if (!contentType.containsCharsetParameter()) {
+				contentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
 			}
 			addPartHeaders(part, mailPart);
 			part.setDataHandler(new DataHandler(

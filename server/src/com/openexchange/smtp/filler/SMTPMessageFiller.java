@@ -124,8 +124,6 @@ import com.sun.mail.smtp.SMTPMessage;
  */
 public final class SMTPMessageFiller {
 
-	private static final String PARAM_CHARSET = "charset";
-
 	private static final String VERSION_1_0 = "1.0";
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
@@ -406,8 +404,8 @@ public final class SMTPMessageFiller {
 		 */
 		if (mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
 			final boolean isPlainText = mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_PLAIN);
-			if (mail.getContentType().getParameter(PARAM_CHARSET) == null) {
-				mail.getContentType().setParameter(PARAM_CHARSET, SMTPConfig.getDefaultMimeCharset());
+			if (mail.getContentType().getCharsetParameter() == null) {
+				mail.getContentType().setCharsetParameter(SMTPConfig.getDefaultMimeCharset());
 			}
 			if (primaryMultipart == null) {
 				final String mailText;

@@ -109,11 +109,6 @@ public final class MailMessageParser {
 
 	private static final String TNEF_IPM_MS_READ_RECEIPT = "IPM.Microsoft Mail.Read Receipt";
 
-	/*
-	 * String constants
-	 */
-	private static final String STR_CHARSET = "charset";
-
 	private boolean stop;
 
 	private boolean multipartDetected;
@@ -170,7 +165,7 @@ public final class MailMessageParser {
 				prefix, partCount), mailPart.getContentType().getBaseType());
 		final ContentType contentType = mailPart.containsContentType() ? mailPart.getContentType() : new ContentType(
 				MIMETypes.MIME_APPL_OCTET);
-		String charset = contentType.getParameter(STR_CHARSET);
+		String charset = contentType.getCharsetParameter();
 		if (null == charset) {
 			charset = MailConfig.getDefaultMimeCharset();
 		}

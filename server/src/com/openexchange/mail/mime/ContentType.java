@@ -274,6 +274,13 @@ public final class ContentType implements Serializable {
 	}
 
 	/**
+	 * Sets charset parameter
+	 */
+	public void setCharsetParameter(final String charset) {
+		parameters.put(PARAM_CHARSET, prepareParamSet(charset));
+	}
+
+	/**
 	 * Sets given parameter
 	 */
 	public void setParameter(final String key, final String value) {
@@ -315,6 +322,15 @@ public final class ContentType implements Serializable {
 		}
 	}
 
+	private static final String PARAM_CHARSET = "charset";
+
+	/**
+	 * @return the charset value or <code>null</code> if not present
+	 */
+	public String getCharsetParameter() {
+		return prepareParamGet(parameters.get(PARAM_CHARSET));
+	}
+
 	/**
 	 * @return the value associated with given key or <code>null</code> if not
 	 *         present
@@ -348,6 +364,14 @@ public final class ContentType implements Serializable {
 		} catch (final UnsupportedEncodingException e) {
 			return paramArg;
 		}
+	}
+
+	/**
+	 * @return <code>true</code> if charset parameter is present,
+	 *         <code>false</code> otherwise
+	 */
+	public boolean containsCharsetParameter() {
+		return parameters.containsKey(PARAM_CHARSET);
 	}
 
 	/**

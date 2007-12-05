@@ -128,8 +128,6 @@ public class MailObject {
 		}
 	}
 
-	private final static String STR_CHARSET = "charset";
-
 	private final static String HEADER_XPRIORITY = "X-Priority";
 
 	private final static String HEADER_DISPNOTTO = "Disposition-Notification-Toy";
@@ -177,16 +175,16 @@ public class MailObject {
 				msg.setRecipients(RecipientType.BCC, internetAddrs);
 			}
 			final ContentType ct = new ContentType(contentType);
-			if (ct.getParameter(STR_CHARSET) == null) {
+			if (!ct.containsCharsetParameter()) {
 				/*
 				 * Ensure a charset is set
 				 */
-				ct.addParameter(STR_CHARSET, MailConfig.getDefaultMimeCharset());
+				ct.setCharsetParameter(MailConfig.getDefaultMimeCharset());
 			}
 			/*
 			 * Set subject
 			 */
-			msg.setSubject(subject, ct.getParameter(STR_CHARSET));
+			msg.setSubject(subject, ct.getCharsetParameter());
 			/*
 			 * Set content and its type
 			 */
@@ -194,10 +192,10 @@ public class MailObject {
 				if ("html".equalsIgnoreCase(ct.getSubType()) || "htm".equalsIgnoreCase(ct.getSubType())) {
 					msg.setContent(text, ct.toString());
 				} else if ("plain".equalsIgnoreCase(ct.getSubType()) || "enriched".equalsIgnoreCase(ct.getSubType())) {
-					if (ct.getParameter(STR_CHARSET) == null) {
+					if (!ct.containsCharsetParameter()) {
 						msg.setText(text);
 					} else {
-						msg.setText(text, ct.getParameter(STR_CHARSET));
+						msg.setText(text, ct.getCharsetParameter());
 					}
 				} else {
 					throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, ct.toString());
@@ -242,8 +240,7 @@ public class MailObject {
 			/*
 			 * Finally send mail
 			 */
-			final MailTransport transport = MailTransport.getInstance(session, MailConnection
-					.getInstance(session));
+			final MailTransport transport = MailTransport.getInstance(session, MailConnection.getInstance(session));
 			final UnsynchronizedByteArrayOutputStream bos = new UnsynchronizedByteArrayOutputStream();
 			msg.writeTo(bos);
 			transport.sendRawMessage(bos.toByteArray());

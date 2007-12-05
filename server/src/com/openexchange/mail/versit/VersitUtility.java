@@ -86,8 +86,6 @@ public final class VersitUtility {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(VersitUtility.class);
 
-	private static final String PARAM_CHARSET = "charset";
-
 	/**
 	 * No instantiation
 	 */
@@ -119,7 +117,7 @@ public final class VersitUtility {
 		 */
 		final VersitDefinition def = Versit.getDefinition(versitPart.getContentType().getBaseType());
 		final VersitDefinition.Reader r = def.getReader(versitPart.getInputStream(), versitPart.getContentType()
-				.containsParameter(PARAM_CHARSET) ? versitPart.getContentType().getParameter(PARAM_CHARSET)
+				.containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter()
 				: MailConfig.getDefaultMimeCharset());
 		/*
 		 * Ok, convert versit object to corresponding data object and save this
@@ -185,7 +183,7 @@ public final class VersitUtility {
 		 */
 		final VersitDefinition def = Versit.getDefinition(versitPart.getContentType().getBaseType());
 		final VersitDefinition.Reader r = def.getReader(versitPart.getInputStream(), versitPart.getContentType()
-				.containsParameter(PARAM_CHARSET) ? versitPart.getContentType().getParameter(PARAM_CHARSET)
+				.containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter()
 				: MailConfig.getDefaultMimeCharset());
 		/*
 		 * Ok, convert versit object to corresponding data object and save this

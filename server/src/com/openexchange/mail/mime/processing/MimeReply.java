@@ -109,11 +109,6 @@ public final class MimeReply {
 
 	private static final String PREFIX_RE = "Re: ";
 
-	/*
-	 * Parameter constants
-	 */
-	private static final String PARAM_CHARSET = "charset";
-
 	/**
 	 * No instantiation
 	 */
@@ -216,7 +211,8 @@ public final class MimeReply {
 				/*
 				 * Add user's aliases to filter
 				 */
-				final String[] userAddrs = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getAliases();
+				final String[] userAddrs = UserStorage.getStorageUser(session.getUserId(), session.getContext())
+						.getAliases();
 				if (userAddrs != null && userAddrs.length > 0) {
 					final StringBuilder addrBuilder = new StringBuilder();
 					addrBuilder.append(userAddrs[0]);
@@ -325,8 +321,8 @@ public final class MimeReply {
 				for (int i = list.size() - 1; i >= 0; i--) {
 					replyTextBuilder.append(list.get(i));
 				}
-				if (retvalContentType.getParameter(PARAM_CHARSET) == null) {
-					retvalContentType.addParameter(PARAM_CHARSET, MailConfig.getDefaultMimeCharset());
+				if (retvalContentType.getCharsetParameter() == null) {
+					retvalContentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
 				}
 				replyText = replyTextBuilder.toString();
 			}
@@ -342,8 +338,7 @@ public final class MimeReply {
 				final Multipart multiRelated = new MimeMultipart("related");
 				{
 					final MimeBodyPart text = new MimeBodyPart();
-					text.setText(replyText, retvalContentType.getParameter(PARAM_CHARSET), retvalContentType
-							.getSubType());
+					text.setText(replyText, retvalContentType.getCharsetParameter(), retvalContentType.getSubType());
 					text.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
 					text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, retvalContentType.toString());
 					multiRelated.addBodyPart(text);
@@ -360,8 +355,7 @@ public final class MimeReply {
 				/*
 				 * Set message's content directly to reply text
 				 */
-				replyMsg.setText(replyText, retvalContentType.getParameter(PARAM_CHARSET), retvalContentType
-						.getSubType());
+				replyMsg.setText(replyText, retvalContentType.getCharsetParameter(), retvalContentType.getSubType());
 				replyMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
 				replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, retvalContentType.toString());
 				replyMsg.saveChanges();

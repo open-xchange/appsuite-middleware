@@ -821,8 +821,6 @@ public final class MessageUtility {
 		return start >= 5 && STR_IMG_SRC.equalsIgnoreCase(line.substring(start - 5, start));
 	}
 
-	private static final String STR_CHARSET = "charset";
-
 	/**
 	 * Reads the string out of MIME part's input stream. On first try the input
 	 * stream retrieved by <code>javax.mail.Part.getInputStream()</code> is
@@ -843,7 +841,7 @@ public final class MessageUtility {
 		/*
 		 * Use specified charset if available else use default one
 		 */
-		String charset = ct.getParameter(STR_CHARSET);
+		String charset = ct.getCharsetParameter();
 		if (null == charset) {
 			charset = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
 		}

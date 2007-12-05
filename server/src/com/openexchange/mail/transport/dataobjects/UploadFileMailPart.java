@@ -83,8 +83,6 @@ public abstract class UploadFileMailPart extends MailPart {
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(UploadFileMailPart.class);
 
-	private static final String PARAM_CHARSET = "charset";
-
 	private final transient File uploadFile;
 
 	private transient DataSource dataSource;
@@ -115,11 +113,11 @@ public abstract class UploadFileMailPart extends MailPart {
 		 */
 		if (null == dataSource) {
 			try {
-				if (getContentType().getParameter(PARAM_CHARSET) == null) {
+				if (getContentType().getCharsetParameter() == null) {
 					/*
 					 * Add system charset
 					 */
-					getContentType().addParameter(PARAM_CHARSET,
+					getContentType().setCharsetParameter(
 							System.getProperty("file.encoding", MailConfig.getDefaultMimeCharset()));
 				}
 				dataSource = new MessageDataSource(new FileInputStream(uploadFile), getContentType());
@@ -142,7 +140,7 @@ public abstract class UploadFileMailPart extends MailPart {
 			return cachedContent;
 		}
 		if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
-			String charset = getContentType().getParameter(PARAM_CHARSET);
+			String charset = getContentType().getCharsetParameter();
 			if (charset == null) {
 				charset = System.getProperty("file.encoding", MailConfig.getDefaultMimeCharset());
 			}

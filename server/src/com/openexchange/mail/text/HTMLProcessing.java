@@ -68,20 +68,17 @@ import com.openexchange.mail.mime.ContentType;
  */
 public final class HTMLProcessing {
 
+	private static final String HTML_META_TEMPLATE = "\r\n    <meta content=\"#CT#\" http-equiv=\"Content-Type\">";
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HTMLProcessing.class);
 
-	/**
-	 * Initializes a new {@link HTMLProcessing}
-	 */
-	private HTMLProcessing() {
-		super();
-	}
-
-	private static final String HTML_META_TEMPLATE = "\r\n    <meta content=\"#CT#\" http-equiv=\"Content-Type\">";
-
 	private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>",
 			Pattern.CASE_INSENSITIVE);
+
+	private static final String TAG_E_HEAD = "</head>";
+
+	private static final String TAG_S_HEAD = "<head>";
 
 	/**
 	 * Creates valid HTML from specified HTML content conform to W3C standards.
@@ -98,13 +95,13 @@ public final class HTMLProcessing {
 		 */
 		final String htmlContent;
 		{
-			String charset = contentType.getParameter("charset");
+			String charset = contentType.getCharsetParameter();
 			if (null == charset) {
 				if (LOG.isWarnEnabled()) {
 					LOG.warn("Missing charset in HTML content type. Using fallback \"US-ASCII\" instead.");
 				}
 				charset = "US-ASCII";
-				contentType.setParameter("charset", charset);
+				contentType.setCharsetParameter(charset);
 			}
 			htmlContent = validate(htmlContentArg, charset);
 		}
@@ -112,8 +109,8 @@ public final class HTMLProcessing {
 		 * Check for meta tag in validated html content which indicates
 		 * documents content type. Add if missing.
 		 */
-		final int start = htmlContent.indexOf("<head>") + 6;
-		final Matcher m = PAT_META_CT.matcher(htmlContent.substring(start, htmlContent.indexOf("</head>")));
+		final int start = htmlContent.indexOf(TAG_S_HEAD) + 6;
+		final Matcher m = PAT_META_CT.matcher(htmlContent.substring(start, htmlContent.indexOf(TAG_E_HEAD)));
 		if (!m.find()) {
 			final StringBuilder sb = new StringBuilder(htmlContent);
 			sb.insert(start, HTML_META_TEMPLATE.replaceFirst("#CT#", contentType.toString()));
@@ -156,5 +153,12 @@ public final class HTMLProcessing {
 		final StringWriter writer = new StringWriter(htmlContent.length());
 		tidy.parse(new StringReader(htmlContent), writer);
 		return writer.toString();
+	}
+
+	/**
+	 * Initializes a new {@link HTMLProcessing}
+	 */
+	private HTMLProcessing() {
+		super();
 	}
 }

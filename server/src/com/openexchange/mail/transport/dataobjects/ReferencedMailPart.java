@@ -102,8 +102,6 @@ public abstract class ReferencedMailPart extends MailPart {
 
 	private static final int MB = 1048576;
 
-	private static final String PARAM_CHARSET = "charset";
-
 	private transient DataSource dataSource;
 
 	private transient Object cachedContent;
@@ -150,8 +148,7 @@ public abstract class ReferencedMailPart extends MailPart {
 	 * @throws SMTPException
 	 *             If referenced part cannot be loaded
 	 */
-	public String loadReferencedPart(final MailMessage referencedMail, final Session session)
-			throws MailException {
+	public String loadReferencedPart(final MailMessage referencedMail, final Session session) throws MailException {
 		return loadReferencedPart(null, referencedMail, session);
 	}
 
@@ -192,8 +189,8 @@ public abstract class ReferencedMailPart extends MailPart {
 		}
 	}
 
-	private String handleReferencedPart(final MailPart referencedPart, final Session session)
-			throws MailException, IOException {
+	private String handleReferencedPart(final MailPart referencedPart, final Session session) throws MailException,
+			IOException {
 		final long size = referencedPart.getSize();
 		if (size <= TransportConfig.getReferencedPartLimit()) {
 			copy2ByteArr(referencedPart.getInputStream());
@@ -290,20 +287,20 @@ public abstract class ReferencedMailPart extends MailPart {
 			try {
 				if (data != null) {
 					if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)
-							&& getContentType().getParameter(PARAM_CHARSET) == null) {
+							&& getContentType().getCharsetParameter() == null) {
 						/*
 						 * Add default mail charset
 						 */
-						getContentType().addParameter(PARAM_CHARSET, MailConfig.getDefaultMimeCharset());
+						getContentType().setCharsetParameter(MailConfig.getDefaultMimeCharset());
 					}
 					return (dataSource = new MessageDataSource(data, getContentType().toString()));
 				} else if (file != null) {
 					if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)
-							&& getContentType().getParameter(PARAM_CHARSET) == null) {
+							&& getContentType().getCharsetParameter() == null) {
 						/*
 						 * Add system charset
 						 */
-						getContentType().addParameter(PARAM_CHARSET,
+						getContentType().setCharsetParameter(
 								System.getProperty("file.encoding", MailConfig.getDefaultMimeCharset()));
 					}
 					return (dataSource = new MessageDataSource(new FileInputStream(file), getContentType()));
@@ -332,14 +329,14 @@ public abstract class ReferencedMailPart extends MailPart {
 		}
 		if (getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
 			if (data != null) {
-				String charset = getContentType().getParameter(PARAM_CHARSET);
+				String charset = getContentType().getCharsetParameter();
 				if (null == charset) {
 					charset = MailConfig.getDefaultMimeCharset();
 				}
 				applyByteContent(charset);
 				return cachedContent;
 			} else if (file != null) {
-				String charset = getContentType().getParameter(PARAM_CHARSET);
+				String charset = getContentType().getCharsetParameter();
 				if (null == charset) {
 					charset = System.getProperty("file.encoding", MailConfig.getDefaultMimeCharset());
 				}

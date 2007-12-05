@@ -160,7 +160,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart {
 			return cachedContent;
 		}
 		if (getContentType().isMimeType("text/*")) {
-			String charset = getContentType().getParameter("charset");
+			String charset = getContentType().getCharsetParameter();
 			if (charset == null) {
 				charset = "US-ASCII";
 			}

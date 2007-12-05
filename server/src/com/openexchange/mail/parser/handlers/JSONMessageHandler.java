@@ -104,11 +104,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(JSONMessageHandler.class);
 
-	/*
-	 * Parameter constants
-	 */
-	private static final String PARAM_CHARSET = "charset";
-
 	private final Session session;
 
 	private TimeZone timeZone;
@@ -285,8 +280,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 				if (part.getContentType().isMimeType(MIMETypes.MIME_TEXT_RTF)) {
 					jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
 				} else {
-					final String charset = part.getContentType().containsParameter(PARAM_CHARSET) ? part
-							.getContentType().getParameter(PARAM_CHARSET) : MailConfig.getDefaultMimeCharset();
+					final String charset = part.getContentType().containsCharsetParameter() ? part.getContentType()
+							.getCharsetParameter() : MailConfig.getDefaultMimeCharset();
 					jsonObject.put(MailJSONField.CONTENT.getKey(), MessageUtility.formatContentForDisplay(
 							MessageUtility.readMailPart(part, charset), part.getContentType().isMimeType(
 									MIMETypes.MIME_TEXT_HTM_ALL), session, mailPath, displayVersion));

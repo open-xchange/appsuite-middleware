@@ -99,8 +99,8 @@ public final class MailPartHandler implements MailMessageHandler {
 			super();
 			this.text = text;
 			setSize(text.length());
-			if (contentType.getParameter("charset") == null) {
-				contentType.setParameter("charset", MailConfig.getDefaultMimeCharset());
+			if (contentType.getCharsetParameter() == null) {
+				contentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
 			}
 			setContentType(contentType);
 		}
