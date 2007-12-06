@@ -250,7 +250,7 @@ public abstract class ServiceHolder<S> {
 		final Thread thread = Thread.currentThread();
 		Map<ServiceProxy, Object> proxySet = usingThreads.get(thread);
 		if (null == proxySet) {
-			proxySet = new ConcurrentHashMap<ServiceProxy, Object>(5);
+			proxySet = new ConcurrentHashMap<ServiceProxy, Object>(4);
 			usingThreads.put(thread, proxySet);
 		}
 		final ServiceProxy proxy = new ServiceProxy(service, thread.getStackTrace());
