@@ -242,7 +242,6 @@
     </target>
 
 	<!-- Dist -->
-	<!-- Cargo Culted from openexchange-common -->
 	<target name="dist" depends="clean">
 		<property name="dist-package" value="dist-package"/>
     	<delete dir="${dist-package}"/>
@@ -534,12 +533,12 @@
     <target name="patchOSGiIni">
         <fail message="Define bundlesdir." unless="bundlesdir"/>
         <fail message="Define log.install.dir." unless="log.install.dir"/>
-        <move tofile="${patch.conf.dir}/osgi/config.ini"
-            file="${patch.conf.dir}/osgi/config.ini.in" overwrite="true"/>
-        <replace file="${patch.conf.dir}/osgi/config.ini">
+        <move tofile="${patch.conf.dir}/osgi/config.ini.template"
+            file="${patch.conf.dir}/osgi/config.ini.template.in" overwrite="true"/>
+        <replace file="${patch.conf.dir}/osgi/config.ini.template">
             <replacefilter token="@bundlesdir@" value="${bundlesdir}"/>
         </replace>
-        <replace file="${patch.conf.dir}/osgi/config.ini">
+        <replace file="${patch.conf.dir}/osgi/config.ini.template">
             <replacefilter token="@logfile@" value="${log.install.dir}/osgi-groupware.log"/>
         </replace>
     </target>
