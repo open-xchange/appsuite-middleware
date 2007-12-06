@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange I18n
+Bundle-Version: 6.5.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-SymbolicName: com.openexchange.i18n
+Bundle-Activator: com.openexchange.i18n.osgi.I18nActivator
+Import-Package: com.openexchange.config,
+ com.openexchange.configuration,
+ com.openexchange.i18n,
+ com.openexchange.server,
+ com.openexchange.server.osgiservice,
+ org.apache.commons.logging,
+ org.osgi.framework;version="1.3.0",
+ org.osgi.util.tracker;version="1.3.3"
+Eclipse-LazyStart: true
