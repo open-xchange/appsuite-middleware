@@ -49,8 +49,12 @@
 
 package com.openexchange.server;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -59,22 +63,143 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * {@link ServiceHolder}
+ * {@link ServiceHolder} - Provides convenient access to a bundle service
+ * formerly applied with {@link #setService(Object)}. The service may be
+ * acquired multiple times.
+ * <p>
+ * The service is acquired through {@link #getService()} and must be released
+ * afterwards via {@link #ungetService(Object)}
+ * <p>
+ * A security mechanism keeps track of acquired services and forces an "unget"
+ * after a certain timeout
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public abstract class ServiceHolder<S> {
 
+	/*
+	 * TODO: Make timeout configurable
+	 */
+	private static final int TIMEOUT = 10000;
+
+	private final class ServiceHolderTask extends TimerTask {
+		@Override
+		public void run() {
+			for (final Iterator<Map.Entry<Thread, Map<ServiceProxy, Object>>> iter = usingThreads.entrySet().iterator(); iter
+					.hasNext();) {
+				final Map.Entry<Thread, Map<ServiceProxy, Object>> e = iter.next();
+				final Map<ServiceProxy, Object> q = e.getValue();
+				for (final Iterator<ServiceProxy> proxyIter = q.keySet().iterator(); proxyIter.hasNext();) {
+					final ServiceProxy proxy = proxyIter.next();
+					if ((System.currentTimeMillis() - proxy.creationTime) > TIMEOUT) {
+						LOG.error("Forced unget: Found non-ungetted service after " + TIMEOUT
+								+ "msec that was acquired at:\n" + printStackTrace(proxy.trace));
+						proxy.proxyService = null;
+						proxy.delegate = null;
+						proxy.propagateForcedUnget();
+						proxyIter.remove();
+					}
+				}
+				if (q.isEmpty()) {
+					iter.remove();
+				}
+			}
+		}
+	}
+
+	private final class ServiceProxy implements java.lang.reflect.InvocationHandler {
+
+		private final long creationTime;
+
+		private S delegate;
+
+		private S proxyService;
+
+		private final StackTraceElement[] trace;
+
+		public ServiceProxy(final S service, final StackTraceElement[] trace) {
+			this.delegate = service;
+			creationTime = System.currentTimeMillis();
+			this.trace = trace;
+		}
+
+		@Override
+		public boolean equals(final Object other) {
+			if (other == null) {
+				return false;
+			} else if (other == this) {
+				return true;
+			}
+			return (ServiceProxy.class.isInstance(other) && ServiceProxy.class.cast(other).creationTime == creationTime);
+		}
+
+		@Override
+		public int hashCode() {
+			return Long.valueOf(creationTime).hashCode();
+		}
+
+		public Object invoke(final Object proxy, final Method m, final Object[] args) throws Throwable {
+			if (delegate == null) {
+				throw new NullPointerException("Service is not available anymore. Forgot to unget and reacquire?");
+			}
+			Object result;
+			try {
+				result = m.invoke(delegate, args);
+			} catch (final InvocationTargetException e) {
+				throw e.getTargetException();
+			} catch (final Exception e) {
+				throw new RuntimeException("unexpected invocation exception: " + e.getMessage());
+			}
+			return result;
+		}
+
+		@SuppressWarnings("unchecked")
+		public S newProxyInstance() {
+			if (proxyService == null) {
+				proxyService = (S) java.lang.reflect.Proxy.newProxyInstance(delegate.getClass().getClassLoader(),
+						delegate.getClass().getInterfaces(), this);
+			}
+			return proxyService;
+		}
+
+		public void propagateForcedUnget() {
+			if (countActive.get() > 0) {
+				countActive.decrementAndGet();
+			}
+			if (waiting.get()) {
+				synchronized (countActive) {
+					if (waiting.get()) {
+						countActive.notifyAll();
+					}
+				}
+			}
+		}
+	}
+
+	private static final Object DUMMY = new Object();
+
 	private static final Log LOG = LogFactory.getLog(ServiceHolder.class);
 
-	private final Map<String, ServiceHolderListener<S>> listeners;
+	private static final Timer serviceHolderTimer = new Timer("ServiceHolderTimer");
+
+	private static final String printStackTrace(final StackTraceElement[] trace) {
+		final StringBuilder sb = new StringBuilder(512);
+		for (int i = 2; i < trace.length; i++) {
+			sb.append("\tat ").append(trace[i]).append('\n');
+		}
+		return sb.toString();
+	}
 
 	private final AtomicInteger countActive;
 
-	private final AtomicBoolean waiting;
+	private final Map<String, ServiceHolderListener<S>> listeners;
 
 	private S service;
+
+	private Map<Thread, Map<ServiceProxy, Object>> usingThreads = new ConcurrentHashMap<Thread, Map<ServiceProxy, Object>>();
+
+	private final AtomicBoolean waiting;
 
 	/**
 	 * Default constructor
@@ -84,6 +209,7 @@ public abstract class ServiceHolder<S> {
 		countActive = new AtomicInteger();
 		waiting = new AtomicBoolean();
 		listeners = new ConcurrentHashMap<String, ServiceHolderListener<S>>();
+		serviceHolderTimer.schedule(new ServiceHolderTask(), 1000, 5000);
 	}
 
 	/**
@@ -102,6 +228,90 @@ public abstract class ServiceHolder<S> {
 		if (null != service) {
 			listener.onServiceAvailable(service);
 		}
+	}
+
+	/**
+	 * Gets the service or <code>null</code> if service is not active, yet<br>
+	 * <b>Note:</b> Don't forget to unget the service via
+	 * {@link #ungetService()}
+	 * 
+	 * <pre>
+	 * 
+	 * ...
+	 * final MyService myService = MyService.getInstance();
+	 * final Service s = myService.getService();
+	 * try {
+	 *     // Do something...
+	 * } finally {
+	 *     myService.ungetService(s);
+	 * }
+	 * ...
+	 * 
+	 * </pre>
+	 * 
+	 * @return The bundle service instance
+	 */
+	public S getService() {
+		if (null == service) {
+			return null;
+		}
+		if (LOG.isWarnEnabled() && usingThreads.containsKey(Thread.currentThread())) {
+			LOG.warn("Found thread using two (or more) services without ungetting service.", new Throwable());
+		}
+		countActive.incrementAndGet();
+		final Thread thread = Thread.currentThread();
+		Map<ServiceProxy, Object> proxySet = usingThreads.get(thread);
+		if (null == proxySet) {
+			proxySet = new ConcurrentHashMap<ServiceProxy, Object>();
+			usingThreads.put(thread, proxySet);
+		}
+		final ServiceProxy proxy = new ServiceProxy(service, thread.getStackTrace());
+		proxySet.put(proxy, DUMMY);
+		return proxy.newProxyInstance();
+	}
+
+	private final void notifyListener(final boolean isAvailable) throws Exception {
+		for (final Iterator<ServiceHolderListener<S>> iter = listeners.values().iterator(); iter.hasNext();) {
+			if (isAvailable) {
+				iter.next().onServiceAvailable(service);
+			} else {
+				iter.next().onServiceRelease();
+			}
+		}
+	}
+
+	/**
+	 * Removes the service from this service holder
+	 * 
+	 * @throws Exception
+	 *             If service cannot be properly removed
+	 */
+	public void removeService() throws Exception {
+		if (null == service) {
+			return;
+		}
+		if (countActive.get() > 0) {
+			/*
+			 * Blocking OSGi framework is not allowed, but security mechanism
+			 * built into this class ensures that an acquired service is
+			 * released in any case.
+			 */
+			LOG.error("Service counting for " + this.getClass().getName() + " is not zero: " + countActive.toString());
+			waiting.set(true);
+			synchronized (countActive) {
+				try {
+					while (countActive.get() > 0) {
+						countActive.wait();
+					}
+				} catch (final InterruptedException e) {
+					LOG.error(e.getLocalizedMessage(), e);
+				} finally {
+					waiting.set(false);
+				}
+			}
+		}
+		this.service = null;
+		notifyListener(false);
 	}
 
 	/**
@@ -129,82 +339,28 @@ public abstract class ServiceHolder<S> {
 		}
 	}
 
-	private final void notifyListener(final boolean isAvailable) throws Exception {
-		for (final Iterator<ServiceHolderListener<S>> iter = listeners.values().iterator(); iter.hasNext();) {
-			if (isAvailable) {
-				iter.next().onServiceAvailable(service);
-			} else {
-				iter.next().onServiceRelease();
+	/**
+	 * Ungets the given bundle service instance
+	 * 
+	 * @param service
+	 *            The bundle service instance
+	 */
+	public void ungetService(final S service) {
+		if (service == null || countActive.get() == 0) {
+			return;
+		}
+		final Thread thread = Thread.currentThread();
+		final Map<ServiceProxy, Object> proxySet = usingThreads.get(thread);
+		if (null != proxySet) {
+			for (final Iterator<ServiceProxy> iter = proxySet.keySet().iterator(); iter.hasNext();) {
+				final ServiceProxy proxy = iter.next();
+				if (proxy.proxyService == service) {
+					iter.remove();
+				}
 			}
-		}
-	}
-
-	/**
-	 * Removes the service from this service holder
-	 * 
-	 * @throws Exception
-	 *             If service cannot be properly removed
-	 */
-	public void removeService() throws Exception {
-		if (null == service) {
-			return;
-		}
-		if (countActive.get() > 0) {
-		    // Blocking OSGi framework is not allowed.
-		    LOG.error("Service counting for " + this.getClass().getName()
-		        + " is not zero: " + countActive.toString());
-//			waiting.set(true);
-//			synchronized (countActive) {
-//				try {
-//					while (countActive.get() > 0) {
-//						countActive.wait();
-//					}
-//				} catch (final InterruptedException e) {
-//					LOG.error(e.getLocalizedMessage(), e);
-//				} finally {
-//					waiting.set(false);
-//				}
-//			}
-		}
-		this.service = null;
-		notifyListener(false);
-	}
-
-	/**
-	 * Gets the service or <code>null</code> if service is not active, yet<br>
-	 * <b>Note:</b> Don't forget to unget the service via
-	 * {@link #ungetService()}
-	 * 
-	 * <pre>
-	 * 
-	 * ...
-	 * final MyService myService = MyService.getInstance();
-	 * final Service s = myService.getService();
-	 * try {
-	 *     // Do something...
-	 * } finally {
-	 *     myService.ungetService();
-	 * }
-	 * ...
-	 * 
-	 * </pre>
-	 * 
-	 * @return The bundle service instance
-	 */
-	public S getService() {
-		if (null == service) {
-			return null;
-		}
-		countActive.incrementAndGet();
-		return service;
-	}
-
-	/**
-	 * Ungets the bundle service instance
-	 */
-	public void ungetService() {
-		if (countActive.get() == 0) {
-			return;
+			if (proxySet.isEmpty()) {
+				usingThreads.remove(thread);
+			}
 		}
 		countActive.decrementAndGet();
 		if (waiting.get()) {
@@ -215,5 +371,4 @@ public abstract class ServiceHolder<S> {
 			}
 		}
 	}
-
 }
