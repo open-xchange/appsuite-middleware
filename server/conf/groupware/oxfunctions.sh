@@ -192,9 +192,11 @@ ox_update_config_init() {
 	dirbundles+=( "reference\:file\:${bpath}@start" )
     done
 
+    if [ -f $cini ]; then
     # read all bundles listed in config.ini into an array
     local configbundles=( $(sed -e '/^osgi.bundles.*/Is;^osgi.bundles=\(.*\);\1;' \
-	-n -e 's;,; ;gp' < $cini ) )
+        -n -e 's;,; ;gp' < $cini ) )
+	fi
 
     # check if amount of bundles installed in bundles directory does not
     # match and if that's the case, generate new config.ini
