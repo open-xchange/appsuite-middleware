@@ -103,20 +103,23 @@ public final class MonitoringInit implements Initialization {
 		 * Create Beans and register them
 		 */
 		final ManagementAgent managementAgent = ManagementService.getInstance().getService();
-
-		final GeneralMonitor generalMonitorBean = new GeneralMonitor();
 		try {
-			managementAgent.registerMBean(new ObjectName("com.openexchange.monitoring", "name", "GeneralMonitor"),
-					generalMonitorBean);
-		} catch (MalformedObjectNameException exc) {
-			LOG.error(exc.getLocalizedMessage(), exc);
-		} catch (NullPointerException exc) {
-			LOG.error(exc.getLocalizedMessage(), exc);
-		} catch (Exception exc) {
-			LOG.error(exc.getLocalizedMessage(), exc);
-		}
-		if (LOG.isInfoEnabled()) {
-			LOG.info("JMX Monitor applied");
+			final GeneralMonitor generalMonitorBean = new GeneralMonitor();
+			try {
+				managementAgent.registerMBean(new ObjectName("com.openexchange.monitoring", "name", "GeneralMonitor"),
+						generalMonitorBean);
+			} catch (MalformedObjectNameException exc) {
+				LOG.error(exc.getLocalizedMessage(), exc);
+			} catch (NullPointerException exc) {
+				LOG.error(exc.getLocalizedMessage(), exc);
+			} catch (Exception exc) {
+				LOG.error(exc.getLocalizedMessage(), exc);
+			}
+			if (LOG.isInfoEnabled()) {
+				LOG.info("JMX Monitor applied");
+			}
+		} finally {
+			ManagementService.getInstance().ungetService(managementAgent);
 		}
 		started.set(true);
 	}
