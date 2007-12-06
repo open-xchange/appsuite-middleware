@@ -56,7 +56,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.config.Configuration;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.management.services.ManagementService;
 import com.openexchange.server.Initialization;
 
 /**
@@ -108,7 +107,7 @@ public final class ManagementInit implements Initialization {
 			agent.setJmxPort(jmxPort);
 			agent.setJmxBindAddr(bindAddress);
 		} finally {
-			ManagementService.getInstance().ungetService();
+			ConfigurationService.getInstance().ungetService(c);
 		}
 		agent.run();
 		if (LOG.isInfoEnabled()) {
