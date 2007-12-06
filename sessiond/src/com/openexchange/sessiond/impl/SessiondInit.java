@@ -87,15 +87,17 @@ public class SessiondInit implements Initialization {
 		}
 
 		final Configuration conf = ConfigurationService.getInstance().getService();
-
 		if (conf != null) {
-			config = new SessiondConfigImpl(conf);
-
+			try {
+				config = new SessiondConfigImpl(conf);
+			} finally  {
+				ConfigurationService.getInstance().ungetService(conf);
+			}
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Starting Sessiond");
 			}
 			final Sessiond sessiond = Sessiond.getInstance(config);
-			sessiond.start();			
+			sessiond.start();
 		}
 		started.set(true);
 	}
