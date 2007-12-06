@@ -86,6 +86,9 @@ public abstract class ServiceHolder<S> {
 	private final class ServiceHolderTask extends TimerTask {
 		@Override
 		public void run() {
+			if (usingThreads.isEmpty()) {
+				return;
+			}
 			for (final Iterator<Map.Entry<Thread, Map<ServiceProxy, Object>>> iter = usingThreads.entrySet().iterator(); iter
 					.hasNext();) {
 				final Map.Entry<Thread, Map<ServiceProxy, Object>> e = iter.next();
@@ -122,21 +125,6 @@ public abstract class ServiceHolder<S> {
 			this.delegate = service;
 			creationTime = System.currentTimeMillis();
 			this.trace = trace;
-		}
-
-		@Override
-		public boolean equals(final Object other) {
-			if (other == null) {
-				return false;
-			} else if (other == this) {
-				return true;
-			}
-			return (ServiceProxy.class.isInstance(other) && ServiceProxy.class.cast(other).creationTime == creationTime);
-		}
-
-		@Override
-		public int hashCode() {
-			return (int) (creationTime ^ (creationTime >>> 32));
 		}
 
 		public Object invoke(final Object proxy, final Method m, final Object[] args) throws Throwable {
