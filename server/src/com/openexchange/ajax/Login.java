@@ -196,7 +196,7 @@ public class Login extends AJAXServlet {
 						throw new LoginException(LoginException.Code.UNKNOWN, e);
 					}
 				} finally {
-					SessiondService.getInstance().ungetService();
+					SessiondService.getInstance().ungetService(sessiondCon);
 				}
 			} catch (LoginException e) {
 				if (LoginException.Source.USER == e.getSource()) {
@@ -287,12 +287,11 @@ public class Login extends AJAXServlet {
 				}
 			}
 			if (session != null) {
-				SessiondConnectorInterface sessiondCon;
+				final SessiondConnectorInterface sessiondCon = SessiondService.getInstance().getService();
 				try {
-					sessiondCon = SessiondService.getInstance().getService();
 					sessiondCon.removeSession(session);
 				} finally {
-					SessiondService.getInstance().ungetService();
+					SessiondService.getInstance().ungetService(sessiondCon);
 				}
 
 			} else if (LOG.isDebugEnabled()) {
@@ -308,10 +307,9 @@ public class Login extends AJAXServlet {
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
-			SessiondConnectorInterface sessiondCon;
+			final SessiondConnectorInterface sessiondCon = SessiondService.getInstance().getService();
 			Session sessionObj = null;
 			try {
-				sessiondCon = SessiondService.getInstance().getService();
 				sessionObj = sessiondCon.getSessionByRandomToken(randomToken);
 				
 				try {
@@ -324,7 +322,7 @@ public class Login extends AJAXServlet {
 					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 				}
 			} finally {
-				SessiondService.getInstance().ungetService();
+				SessiondService.getInstance().ungetService(sessiondCon);
 			}
 			if (null == sessionObj) {
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -339,9 +337,8 @@ public class Login extends AJAXServlet {
 				if (cookies == null) {
 					throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
 				}
-				final SessiondConnectorInterface sessiondCon;
+				final SessiondConnectorInterface sessiondCon = SessiondService.getInstance().getService();
 				try {
-					sessiondCon = SessiondService.getInstance().getService();
 					for (Cookie cookie : cookies) {
 						final String cookieName = cookie.getName();
 						if (cookieName.startsWith(cookiePrefix)) {
@@ -372,7 +369,7 @@ public class Login extends AJAXServlet {
 						}
 					}
 				} finally {
-					SessiondService.getInstance().ungetService();
+					SessiondService.getInstance().ungetService(sessiondCon);
 				}
 				if (null == response.getData()) {
 					throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);

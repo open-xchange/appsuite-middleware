@@ -135,7 +135,7 @@ public abstract class SessionServlet extends AJAXServlet {
 				try {
 					sessiondCon.removeSession(sessionId);
 				} finally {
-					SessiondService.getInstance().ungetService();
+					SessiondService.getInstance().ungetService(sessiondCon);
 				}
 				throw EXCEPTION.create(4);
 			}
@@ -193,7 +193,7 @@ public abstract class SessionServlet extends AJAXServlet {
 			if (LOG.isDebugEnabled()) {
 				final StringBuilder debug = new StringBuilder();
 				debug.append("Parameter session not found: ");
-				final Enumeration enm = req.getParameterNames();
+				final Enumeration<?> enm = req.getParameterNames();
 				while (enm.hasMoreElements()) {
 					debug.append(enm.nextElement());
 					debug.append(',');
@@ -279,7 +279,7 @@ public abstract class SessionServlet extends AJAXServlet {
 			}
 
 		} finally {
-			SessiondService.getInstance().ungetService();
+			SessiondService.getInstance().ungetService(sessiondCon);
 		}
 		if (null == retval) {
 			throw EXCEPTION.create(3, sessionId);

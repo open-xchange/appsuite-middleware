@@ -99,8 +99,8 @@ public class ConfigJump extends SessionServlet {
         final HttpServletResponse resp) throws ServletException, IOException {
         final Session sessionObj = getSessionObject(req);
         final Response response = new Response();
+        final ConfigJumpInterface configJump = ConfigJumpService.getInstance().getService();
         try {
-        	final ConfigJumpInterface configJump = ConfigJumpService.getInstance().getService();
             //protocol, host, port, userId, password
             String protocol = "http";
             if (req.isSecure()) {
@@ -115,7 +115,7 @@ public class ConfigJump extends SessionServlet {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } finally {
-        	ConfigJumpService.getInstance().ungetService();
+        	ConfigJumpService.getInstance().ungetService(configJump);
         }
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {

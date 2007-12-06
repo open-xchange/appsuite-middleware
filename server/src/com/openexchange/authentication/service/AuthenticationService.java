@@ -73,7 +73,7 @@ public final class AuthenticationService extends ServiceHolder<Authentication> {
     /**
      * @return the singleton instance.
      */
-    public static final AuthenticationService getInstance() {
+    public static AuthenticationService getInstance() {
         return singleton;
     }
 }

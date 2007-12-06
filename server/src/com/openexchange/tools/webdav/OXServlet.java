@@ -397,7 +397,7 @@ public abstract class OXServlet extends WebDavServlet {
 						pass, context, ipAddress);
 				session = sessiondCon.getSession(sessionId);
 			} finally {
-				SessiondService.getInstance().ungetService();
+				SessiondService.getInstance().ungetService(sessiondCon);
 			}
 		} catch (LoginException e) {
 			if (LoginException.Source.USER == e.getSource()) {
@@ -428,12 +428,11 @@ public abstract class OXServlet extends WebDavServlet {
 	 *         exist.
 	 */
 	private Session getSession(final String sessionId) {
-		final SessiondConnectorInterface sessiondCon;
+		final SessiondConnectorInterface sessiondCon = SessiondService.getInstance().getService();
 		try {
-			sessiondCon = SessiondService.getInstance().getService();
 			return sessiondCon.getSession(sessionId);
 		} finally {
-			SessiondService.getInstance().ungetService();
+			SessiondService.getInstance().ungetService(sessiondCon);
 		}
 	}
 

@@ -88,7 +88,7 @@ public final class Authentication {
         try {
             return auth.handleLoginInfo(login, pass);
         } finally {
-            service.ungetService();
+            service.ungetService(auth);
         }
     }
 }
