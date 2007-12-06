@@ -90,9 +90,9 @@ import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.i18n.StringHelper;
-import com.openexchange.i18n.StringTemplate;
-import com.openexchange.i18n.Template;
+import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.i18n.tools.StringTemplate;
+import com.openexchange.i18n.tools.Template;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;

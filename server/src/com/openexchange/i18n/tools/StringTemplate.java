@@ -47,54 +47,19 @@
  *
  */
 
-package com.openexchange.groupware.ldap;
+package com.openexchange.i18n.tools;
 
-import java.util.Date;
+public class StringTemplate extends CompiledLineParserTemplate {
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.i18n.Groups;
-import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.tools.LocaleTools;
+	private String s;
 
-/**
- * Tool methods for groups.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- */
-public final class GroupTools {
+	public StringTemplate(String s) {
+		this.s = s;
+	}
+	
+	@Override
+	protected char[] getContent() {
+		return s.toCharArray();
+	}
 
-    /**
-     * Cloneable object for group 0.
-     */
-    static final Group GROUP_ZERO;
-
-    /**
-     * Prevent instantiation
-     */
-    private GroupTools() {
-        super();
-    }
-
-    public static Group getGroupZero(final Context ctx)
-        throws LdapException, UserException {
-        final Group retval;
-        try {
-            retval = (Group) GROUP_ZERO.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new UserException(UserException.Code.NOT_CLONEABLE, e,
-                Group.class.getName());
-        }
-        final UserStorage ustor = UserStorage.getInstance();
-        retval.setMember(ustor.listAllUser(ctx));
-        retval.setLastModified(new Date());
-        final User admin = ustor.getUser(ctx.getMailadmin(), ctx);
-        final StringHelper helper = new StringHelper(LocaleTools.getLocale(admin
-            .getPreferredLanguage()));
-        retval.setDisplayName(helper.getString(Groups.ZERO_DISPLAYNAME));
-        return retval;
-    }
-
-    static {
-        GROUP_ZERO = new Group();
-        GROUP_ZERO.setIdentifier(0);
-    }
 }

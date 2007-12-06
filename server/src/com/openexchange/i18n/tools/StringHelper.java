@@ -49,7 +49,7 @@
 
 
 
-package com.openexchange.i18n;
+package com.openexchange.i18n.tools;
 
 import java.util.Locale;
 import java.util.MissingResourceException;
@@ -57,6 +57,9 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.groupware.i18n.Groups;
+import com.openexchange.i18n.I18nTools;
 
 /**
  * StringHelper
@@ -68,24 +71,30 @@ public class StringHelper {
 	
 	private static final Log LOG = LogFactory.getLog(StringHelper.class);
 	
+	@Deprecated
 	public static final String SERVER_BUNDLE = "com.openexchange.groupware.i18n.ServerMessages";
 
-	private ResourceBundle serverBundle;
+	@Deprecated
+	private ResourceBundle serverBundle;	
+	
+	private I18nTools i18n = null;
 	
 	public StringHelper(final Locale locale) {
-		// We won't have a dedicated english bundle, so don't use default locale!
+
 		if(locale.getLanguage().equalsIgnoreCase("en")) {
-			this.serverBundle = null;
 			return;
 		}
+		
 		try {
-			this.serverBundle = ResourceBundle.getBundle(SERVER_BUNDLE, locale);
+			final I18nServices i18nServices = I18nServices.getInstance();
+			i18n = i18nServices.getService(locale);
 		} catch (MissingResourceException x) {
 			LOG.debug("Cannot find bundle for Locale "+locale);
-			this.serverBundle = null;
 		}
+
 	}
 
+	@Deprecated
 	public StringHelper(final String resourceBundle, final Locale locale) {
 		// We won't have a dedicated english bundle, so don't use default locale!
 		if(locale.getLanguage().equalsIgnoreCase("en")) {
@@ -107,14 +116,14 @@ public class StringHelper {
 	 * with the gettext tools.
 	 */
 	public final String getString(final String key) {
-		if (serverBundle == null) {
+		if (null == i18n) {
 			return key;
 		}
 		try {
-			return serverBundle.getString(key);
+			return i18n.getLocalized(key);
 		} catch (MissingResourceException x) {
 			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder("Using default for bundle ").append(serverBundle));
+				LOG.info(new StringBuilder("Using default for bundle "));
 			}
 			return key;
 		}
@@ -122,28 +131,29 @@ public class StringHelper {
 	
 	@Override
 	public int hashCode(){
-		if(serverBundle == null) {
+		if(i18n == null) {
 			return 0;
 		}
-		return serverBundle.getClass().hashCode();
+		return i18n.getClass().hashCode();
 	}
 	
 	@Override
 	public boolean equals(final Object o) {
 		if (o instanceof StringHelper) {
 			final StringHelper sh = (StringHelper) o;
-			if(serverBundle == null && sh.serverBundle == null) {
+			if(i18n == null && sh.i18n == null) {
 				return true;
 			}
-			if(serverBundle == null && sh.serverBundle != null) {
+			if(i18n == null && sh.i18n != null) {
 				return false;
 			}
-			if(serverBundle != null && sh.serverBundle == null) {
+			if(i18n != null && sh.i18n == null) {
 				return false;
 			}
 			
-			return sh.serverBundle.hashCode() == serverBundle.hashCode();
+			return sh.i18n.hashCode() == i18n.hashCode();
 		}
 		return false;
 	}
+	
 }

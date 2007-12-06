@@ -47,54 +47,71 @@
  *
  */
 
-package com.openexchange.groupware.ldap;
+package com.openexchange.server.osgi;
 
-import java.util.Date;
+import java.util.Locale;
 
-import com.openexchange.groupware.contexts.Context;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
 import com.openexchange.groupware.i18n.Groups;
-import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.tools.LocaleTools;
+import com.openexchange.i18n.I18nTools;
+import com.openexchange.i18n.tools.I18nServices;
 
-/**
- * Tool methods for groups.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- */
-public final class GroupTools {
-
-    /**
-     * Cloneable object for group 0.
-     */
-    static final Group GROUP_ZERO;
-
-    /**
-     * Prevent instantiation
-     */
-    private GroupTools() {
+public class I18nServiceListener implements ServiceTrackerCustomizer{
+	
+    private final BundleContext context;
+	
+    private final I18nServices services = I18nServices.getInstance();
+    
+	private static final Log LOG = LogFactory.getLog(I18nServiceListener.class);
+	
+	
+	public I18nServiceListener(final BundleContext context){
         super();
-    }
-
-    public static Group getGroupZero(final Context ctx)
-        throws LdapException, UserException {
-        final Group retval;
-        try {
-            retval = (Group) GROUP_ZERO.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new UserException(UserException.Code.NOT_CLONEABLE, e,
-                Group.class.getName());
+        this.context = context;
+	}
+	
+	public Object addingService(ServiceReference reference) {
+        final I18nTools i18n = (I18nTools)context.getService(reference); 
+        
+        LOG.info("Adding Service Bundle I18nTools "+i18n.getLocale());
+        
+        services.addService(i18n.getLocale(), i18n);
+        
+        if (i18n.getLocale().equals(new Locale("fr","FR"))){
+        	test();
         }
-        final UserStorage ustor = UserStorage.getInstance();
-        retval.setMember(ustor.listAllUser(ctx));
-        retval.setLastModified(new Date());
-        final User admin = ustor.getUser(ctx.getMailadmin(), ctx);
-        final StringHelper helper = new StringHelper(LocaleTools.getLocale(admin
-            .getPreferredLanguage()));
-        retval.setDisplayName(helper.getString(Groups.ZERO_DISPLAYNAME));
-        return retval;
-    }
+        
+		return i18n;
+	}
 
-    static {
-        GROUP_ZERO = new Group();
-        GROUP_ZERO.setIdentifier(0);
-    }
+	private void test() {
+		
+		I18nServices i18ns =I18nServices.getInstance();
+		
+		I18nTools i8n = i18ns.getService(new Locale("fr","FR"));
+		
+		System.out.println("HARDCORE TEST START");
+		System.out.println("HARDCORE TEST START ->"+i8n.getLocalized(Groups.ZERO_DISPLAYNAME));	
+		
+		
+	}
+
+	public void modifiedService(ServiceReference reference, Object service) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void removedService(ServiceReference reference, Object service) {
+        final I18nTools i18n = (I18nTools)context.getService(reference);
+        
+        LOG.info("Removing Service Bundle I18nTools "+i18n.getLocale());
+        
+        services.removeService(i18n.getLocale(), i18n); 
+	}
+
 }

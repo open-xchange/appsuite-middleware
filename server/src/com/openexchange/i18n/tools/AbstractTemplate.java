@@ -47,19 +47,26 @@
  *
  */
 
-package com.openexchange.i18n;
+package com.openexchange.i18n.tools;
 
-public class StringTemplate extends CompiledLineParserTemplate {
+import java.util.HashMap;
+import java.util.Map;
 
-	private String s;
+public abstract class AbstractTemplate implements Template {
 
-	public StringTemplate(String s) {
-		this.s = s;
-	}
-	
-	@Override
-	protected char[] getContent() {
-		return s.toCharArray();
+
+	public String render(final String... substitutions) {
+		if(substitutions.length % 2 != 0) {
+			throw new IllegalArgumentException("Must provide matching key value pairs");
+		}
+		
+		final Map<String,String> m = new HashMap<String,String>();
+		
+		for(int i = 0; i < substitutions.length; i++) {
+			m.put(substitutions[i++], substitutions[i]);
+		}
+		
+		return render(m);
 	}
 
 }

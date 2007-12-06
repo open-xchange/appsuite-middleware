@@ -47,26 +47,12 @@
  *
  */
 
-package com.openexchange.i18n;
+package com.openexchange.i18n.tools;
 
-import java.util.HashMap;
 import java.util.Map;
 
-public abstract class AbstractTemplate implements Template {
-
-
-	public String render(final String... substitutions) {
-		if(substitutions.length % 2 != 0) {
-			throw new IllegalArgumentException("Must provide matching key value pairs");
-		}
-		
-		final Map<String,String> m = new HashMap<String,String>();
-		
-		for(int i = 0; i < substitutions.length; i++) {
-			m.put(substitutions[i++], substitutions[i]);
-		}
-		
-		return render(m);
-	}
-
+public interface Template {
+	public String render(Map<String,String> substitutions);
+	
+	public String render(String...substitutions);
 }

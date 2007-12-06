@@ -52,10 +52,13 @@ package com.openexchange.server.osgi;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -75,6 +78,8 @@ import com.openexchange.server.services.MonitorService;
 import com.openexchange.server.services.SessiondService;
 import com.openexchange.sessiond.SessiondConnectorInterface;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
+import com.openexchange.i18n.I18nTools;
+import com.openexchange.i18n.tools.I18nServices;
 
 /**
  * OSGi bundle activator for the server.
@@ -96,7 +101,7 @@ public class Activator implements BundleActivator {
 	private final List<ServiceRegistration> registrationList = new ArrayList<ServiceRegistration>();
 
 	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
-
+	
 	/**
 	 * Bundle ID of admin.<br>
 	 * TODO: Maybe this should be read by config.ini
@@ -112,6 +117,10 @@ public class Activator implements BundleActivator {
 			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
 					new BundleServiceTracker<Configuration>(context, ConfigurationService.getInstance(),
 							Configuration.class)));
+			
+			// I18n service load
+			serviceTrackerList.add(new ServiceTracker(context, I18nTools.class.getName(), new I18nServiceListener(context)));
+			
 			/*
 			 * Start server
 			 */
@@ -152,7 +161,7 @@ public class Activator implements BundleActivator {
 			 */
 			// Register server's services
 			registrationList.add(context.registerService(CharsetProvider.class.getName(), charsetProvider, null));
-			registrationList.add(context.registerService(HttpService.class.getName(), httpService, null));
+			registrationList.add(context.registerService(HttpService.class.getName(), httpService, null));	
 		} catch (final Throwable t) {
 			LOG.error("Server Activator: start: ", t);
 			// Try to stop what already has been started.
@@ -209,5 +218,5 @@ public class Activator implements BundleActivator {
 			}
 		}
 		return false;
-	}
+	}	
 }

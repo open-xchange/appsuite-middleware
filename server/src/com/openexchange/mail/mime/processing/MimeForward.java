@@ -68,7 +68,7 @@ import javax.mail.internet.MimeUtility;
 
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.i18n.StringHelper;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.ComposedMailMessage;

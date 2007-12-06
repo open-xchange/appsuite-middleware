@@ -47,47 +47,50 @@
  *
  */
 
-package com.openexchange.i18n;
+package com.openexchange.i18n.tools;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.openexchange.i18n.I18nTools;
 
-public class FileTemplate extends CompiledLineParserTemplate {
-	private static final Log LOG = LogFactory.getLog(CompiledLineParserTemplate.class);
-	private File file;
+public class I18nServices {
 	
-	public FileTemplate(File f) {
-		this.file = f;
+	private final ConcurrentHashMap<Locale, I18nTools> services = new ConcurrentHashMap<Locale, I18nTools>();
+	
+	private static final I18nServices instance = new I18nServices();
+	
+    private I18nServices() {
+        super();
+    }
+
+    public int addService(final Locale l, final I18nTools i18n) {
+    	services.put(l, i18n);
+    	return services.size();
+    }
+
+    public int removeService(final Locale l, final I18nTools i18n) {
+    	services.remove(l, i18n);
+    	return services.size();
+
+    }
+    
+	public static I18nServices getInstance() {
+		return instance;
 	}
-	
-	@Override
-	protected synchronized char[] getContent() {
-		BufferedReader reader = null;
-		try {
-			reader = new BufferedReader(new FileReader(file));
-			final StringBuffer collect = new StringBuffer();
-			String line = null;
-			while((line = reader.readLine()) != null) {
-				collect.append(line);
-			}
-			return collect.toString().toCharArray();
-		} catch (IOException e) {
-			LOG.debug(e);
-			return e.toString().toCharArray();
-		} finally {
-			if(reader != null) {
-				try {
-					reader.close();
-				} catch (IOException e) {
-					LOG.debug(e);
-				}
-			}
+
+	public int getNumberOfServices(){
+		if (null != services){
+			return services.size();
 		}
+		return 0;
 	}
-
+	
+	public I18nTools getService(Locale l){
+		if (null != services){
+			return services.get(l);
+		}
+		return null;
+	}
+	
 }

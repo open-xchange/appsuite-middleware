@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.i18n;
+package com.openexchange.i18n.tools;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;

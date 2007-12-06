@@ -47,12 +47,47 @@
  *
  */
 
-package com.openexchange.i18n;
+package com.openexchange.i18n.tools;
 
-import java.util.Map;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
-public interface Template {
-	public String render(Map<String,String> substitutions);
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+public class FileTemplate extends CompiledLineParserTemplate {
+	private static final Log LOG = LogFactory.getLog(CompiledLineParserTemplate.class);
+	private File file;
 	
-	public String render(String...substitutions);
+	public FileTemplate(File f) {
+		this.file = f;
+	}
+	
+	@Override
+	protected synchronized char[] getContent() {
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new FileReader(file));
+			final StringBuffer collect = new StringBuffer();
+			String line = null;
+			while((line = reader.readLine()) != null) {
+				collect.append(line);
+			}
+			return collect.toString().toCharArray();
+		} catch (IOException e) {
+			LOG.debug(e);
+			return e.toString().toCharArray();
+		} finally {
+			if(reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					LOG.debug(e);
+				}
+			}
+		}
+	}
+
 }
