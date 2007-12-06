@@ -110,7 +110,7 @@ public abstract class ServiceHolder<S> {
 
 	private final class ServiceProxy implements java.lang.reflect.InvocationHandler {
 
-		private final Long creationTime;
+		private final long creationTime;
 
 		private S delegate;
 
@@ -120,7 +120,7 @@ public abstract class ServiceHolder<S> {
 
 		public ServiceProxy(final S service, final StackTraceElement[] trace) {
 			this.delegate = service;
-			creationTime = Long.valueOf(System.currentTimeMillis());
+			creationTime = System.currentTimeMillis();
 			this.trace = trace;
 		}
 
@@ -131,13 +131,12 @@ public abstract class ServiceHolder<S> {
 			} else if (other == this) {
 				return true;
 			}
-			return (ServiceProxy.class.isInstance(other) && ServiceProxy.class.cast(other).creationTime
-					.equals(creationTime));
+			return (ServiceProxy.class.isInstance(other) && ServiceProxy.class.cast(other).creationTime == creationTime);
 		}
 
 		@Override
 		public int hashCode() {
-			return creationTime.hashCode();
+			return (int) (creationTime ^ (creationTime >>> 32));
 		}
 
 		public Object invoke(final Object proxy, final Method m, final Object[] args) throws Throwable {
