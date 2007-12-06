@@ -32,7 +32,7 @@ if [ -d @oxgroupwaresysconfdir@/log4j ]; then
     CLASSPATH="${CLASSPATH}:@oxgroupwaresysconfdir@/log4j"
 fi
 
-if [ -n $CLASSPATH ]; then
+if [ -n "$CLASSPATH" ]; then
 	CLASSPATH="-classpath $CLASSPATH"
 fi
 
