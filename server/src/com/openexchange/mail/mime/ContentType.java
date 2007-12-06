@@ -93,6 +93,11 @@ public final class ContentType implements Serializable {
 
 	private static final Pattern PATTERN_SINGLE_PARAM = Pattern.compile("([^\\s]+)(\\s*[=|:]\\s*)([^\\s^;]+)");
 
+	/**
+	 * The MIME type delimiter
+	 * 
+	 * @value /
+	 */
 	private static final char DELIMITER = '/';
 
 	private static final char SEMICOLON = ';';
@@ -111,15 +116,37 @@ public final class ContentType implements Serializable {
 
 	private final Map<String, String> parameters;
 
+	/**
+	 * Initializes a new {@link ContentType}
+	 */
 	public ContentType() {
 		super();
 		parameters = new HashMap<String, String>();
 	}
 
+	/**
+	 * Initializes a new {@link ContentType}
+	 * 
+	 * @param contentType
+	 *            The content type
+	 * @throws MailException
+	 *             If content type cannot be parsed
+	 */
 	public ContentType(final String contentType) throws MailException {
 		this(contentType, true);
 	}
 
+	/**
+	 * Initializes a new {@link ContentType}
+	 * 
+	 * @param contentTypeArg
+	 *            The content type
+	 * @param strict
+	 *            <code>true</code> for strict parsing; otherwise
+	 *            <code>false</code>
+	 * @throws MailException
+	 *             If content type cannot be parsed
+	 */
 	public ContentType(final String contentTypeArg, final boolean strict) throws MailException {
 		this();
 		final String contentType = removeEndingSemicolon(contentTypeArg.trim().replaceAll("\\s*=\\s*", "="));
@@ -393,11 +420,11 @@ public final class ContentType implements Serializable {
 	 * Sets Content-Type
 	 */
 	public void setContentType(final String contentType) throws MailException {
-		parseContentType(contentType);
+		parseContentType(removeEndingSemicolon(contentType.trim().replaceAll("\\s*=\\s*", "=")));
 	}
 
 	/**
-	 * Checks if Content-Type's base type matches given wilcard pattern (e.g
+	 * Checks if Content-Type's base type matches given wildcard pattern (e.g
 	 * text/plain, text/* or text/htm*)
 	 * 
 	 * @return <code>true</code> if Content-Type's base type matches given
@@ -410,7 +437,7 @@ public final class ContentType implements Serializable {
 	}
 
 	/**
-	 * Checks if given MIME type's base type matches given wilcard pattern (e.g
+	 * Checks if given MIME type's base type matches given wildcard pattern (e.g
 	 * text/plain, text/* or text/htm*)
 	 * 
 	 * 
