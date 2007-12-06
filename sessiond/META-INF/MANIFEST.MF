@@ -5,6 +5,7 @@ Bundle-SymbolicName: com.openexchange.sessiond
 Bundle-Version: 6.5.0
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.openexchange.config,
+ com.openexchange.config.services,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.upload,
