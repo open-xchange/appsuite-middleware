@@ -77,7 +77,7 @@ import com.openexchange.configuration.SystemConfig;
  * @author Dave Raggett <a href="mailto:dsr@w3.org">dsr@w3.org </a>
  * @author Andy Quick <a href="mailto:ac.quick@sympatico.ca">ac.quick@sympatico.ca </a> (translation to Java)
  * @author Fabrizio Giustina
- * @version $Revision: 1.1 $ ($Author: thorben $)
+ * @version $Revision: 1.2 $ ($Author: thorben $)
  */
 public final class Report
 {
@@ -645,6 +645,10 @@ public final class Report
         }
         catch (MissingResourceException exc)
         {
+        	/*
+			 * According to COPYRIGHT NOTICE point 2 the following represents
+			 * modified code that is NOT part of the original code
+			 */
         	InputStream in = null;
     		try
     		{
@@ -672,6 +676,9 @@ public final class Report
     				}
     			}
     		}
+    		/*
+    		 * Modified code ends here
+    		 */
         }
     }
 
