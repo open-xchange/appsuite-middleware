@@ -5,6 +5,7 @@ Bundle-SymbolicName: com.openexchange.management
 Bundle-Version: 6.5.0
 Bundle-Activator: com.openexchange.management.osgi.ManagementActivator
 Import-Package: com.openexchange.config,
+ com.openexchange.config.services,
  com.openexchange.groupware,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
