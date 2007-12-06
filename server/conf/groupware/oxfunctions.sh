@@ -168,3 +168,40 @@ die() {
     exit 1
 }
 
+ox_update_config_init() {
+    local cini=$1
+    local cinitemplate=$2
+    local bdir=$3
+
+    test -z "$cini" && die \
+	"ox_update_config_init: missing config.ini argument (arg 1)"
+    test -z "$cinitemplate" && die \
+	"ox_update_config_init: missing config.ini template argument (arg 2)"
+    test -z "$bdir" && die \
+	"ox_update_config_init: missing bundle.d argument (arg 3)"
+
+    test -d $bdir || die "$bdir is not a directory"
+    test -f $cinitemplate || die "$cinitemplate does not exist"
+    test "$(echo $bdir/*.ini)" == "$bdir/*.ini" && die "$bdir is empty"
+
+    # read all installed bundles into an array
+    local dirbundles=()
+    local bpath=
+    for bundle in $bdir/*.ini; do
+	read bpath < $bundle
+	dirbundles+=( "reference\:file\:${bpath}@start" )
+    done
+
+    # read all bundles listed in config.ini into an array
+    local configbundles=( $(sed -e '/^osgi.bundles.*/Is;^osgi.bundles=\(.*\);\1;' \
+	-n -e 's;,; ;gp' < $cini ) )
+
+    # check if amount of bundles installed in bundles directory does not
+    # match and if that's the case, generate new config.ini
+    #
+    if [ ${#dirbundles[@]} -ne ${#configbundles[@]} ]; then
+	echo "updating $cini"
+	cp $cinitemplate $cini
+	echo "osgi.bundles="$(echo ${dirbundles[@]} | sed 's; ;,;') >> $cini
+    fi
+}

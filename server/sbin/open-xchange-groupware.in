@@ -16,6 +16,8 @@ test -f $OXCONFIG && . $OXCONFIG
 
 ox_set_JAVA_BIN
 
+ox_update_config_init @configini@ @configini@.template @bundle.d@
+
 test -z "$JAVA_XTRAOPTS" && JAVA_XTRAOPTS="-Xms50M -Xmx50M"
 
 JAVA_OPTS="${JAVA_XTRAOPTS} \

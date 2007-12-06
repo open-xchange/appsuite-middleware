@@ -74,16 +74,4 @@ public class EmptyImpl implements ConfigJumpInterface {
     public URL getLink(final Object... values) throws ConfigJumpException {
         throw new ConfigJumpException(Code.NOT_IMPLEMENTED);
     }
-
-    public int getContextId(final Object... values) {
-        return (Integer) values[0];
-    }
-
-    public String getUserLogin(final Object... values) {
-        return (String) values[1];
-    }
-
-    public String getPassword(final Object... values) {
-        return (String) values[2];
-    }
 }

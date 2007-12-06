@@ -24,6 +24,10 @@
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
 
+	<property name="version" value="${Bundle-Version}"/>
+    <property name="bundle.name" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
+	<property name="composite.name" value="open-xchange-server-${version}" />
+
     <fileset dir="." id="metainf">
         <include name="META-INF/**"/>
         <exclude name="CVS"/>
@@ -31,10 +35,9 @@
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
-	<property name="version" value="${Bundle-Version}"/>
-    <property name="bundle.name" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
-	<property name="composite.name" value="open-xchange-server-${version}" />
-		
+    <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+    <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
+
     <!-- Replacements -->
     <property name="bundles.install.dir" value="${destdir}${bundlesdir}"/>
     <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
@@ -151,7 +154,16 @@
     <target name="build" depends="jar"/>
 
     <!-- Install targets -->
-    <target name="installJars" depends="build">
+    <target name="installInclude">
+        <mkdir dir="${destdir}/${gwbundle.d}"/>
+        <echo file="${destdir}/${gwbundle.d}/${composite.name}.ini"
+            message="${bundlesdir}/${bundle.name}${line.separator}"/>
+        <mkdir dir="${destdir}/${adbundle.d}"/>
+        <echo file="${destdir}/${adbundle.d}/${composite.name}.ini"
+            message="${bundlesdir}/${bundle.name}${line.separator}"/>
+    </target>
+
+    <target name="installJars" depends="build,installInclude">
         <mkdir dir="${bundles.install.dir}"/>
         <copy todir="${bundles.install.dir}" overwrite="true">
             <fileset refid="server-jars" />
@@ -177,6 +189,7 @@
                 <exclude name="oxfunctions.sh"/>
                 <exclude name="*.in"/>
                 <exclude name="CVS"/>
+                <exclude name="osgi/**"/>
             </fileset>
         </copy>
     </target>
@@ -194,9 +207,11 @@
     </target>
 
     <target name="installScripts" depends="patchConfig,patchScripts">
+        <mkdir dir="${conf.install.copy.dir}"/>
         <copy todir="${conf.install.copy.dir}" overwrite="true">
             <fileset dir="${patch.conf.dir}">
                 <include name="oxfunctions.sh"/>
+                <include name="osgi/**"/>
             </fileset>
         </copy>
         <copy todir="${bin.install.copy.dir}" overwrite="true">
@@ -604,6 +619,8 @@
             <replacefilter token="@prefix@" value="${prefix}"/>
             <replacefilter token="@consolelogfile@" value= "${log.install.dir}/open-xchange-console.log"/>
             <replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}"/>
+            <replacefilter token="@configini@" value="${conf.subst.patch}/osgi/config.ini"/>
+            <replacefilter token="@bundle.d@" value="${gwbundle.d}"/>
         </replace>
     </target>
 

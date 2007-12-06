@@ -4,11 +4,6 @@ Bundle-Name: Empty ConfigJump
 Bundle-SymbolicName: com.openexchange.configjump.empty
 Bundle-Version: 6.5.0
 Bundle-Activator: com.openexchange.configjump.osgi.ConfigJumpActivator
-Import-Package: com.openexchange.config,
- com.openexchange.configjump,
- com.openexchange.configuration,
- com.openexchange.groupware,
- com.openexchange.server,
- com.openexchange.server.osgiservice,
+Import-Package: com.openexchange.configjump,
  org.apache.commons.logging,
  org.osgi.framework;version="1.3.0"

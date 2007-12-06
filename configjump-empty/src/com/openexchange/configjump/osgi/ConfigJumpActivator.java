@@ -49,6 +49,8 @@
 
 package com.openexchange.configjump.osgi;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -64,11 +66,8 @@ import com.openexchange.configjump.internal.EmptyImpl;
  */
 public final class ConfigJumpActivator implements BundleActivator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ConfigJumpActivator.class);
-	
-	private ConfigJumpInterface configJumpInterface;
-	
+	private static final Log LOG = LogFactory.getLog(ConfigJumpActivator.class);
+
 	private ServiceRegistration serviceRegister = null;
 
 	/**
@@ -85,7 +84,7 @@ public final class ConfigJumpActivator implements BundleActivator {
 	 */
 	public void start(final BundleContext context) throws Exception {
 		try {
-			ConfigJumpInterface configJumpImpl= new EmptyImpl();
+		    final ConfigJumpInterface configJumpImpl= new EmptyImpl();
 			serviceRegister = context.registerService(ConfigJumpInterface.class.getName(), configJumpImpl,
 					null);
 		} catch (final Throwable t) {
