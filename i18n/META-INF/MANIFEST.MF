@@ -6,7 +6,6 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-SymbolicName: com.openexchange.i18n
 Bundle-Activator: com.openexchange.i18n.osgi.I18nActivator
 Import-Package: com.openexchange.config,
- com.openexchange.configuration,
  com.openexchange.i18n,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
