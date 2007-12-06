@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Configjump Plug-in
-Bundle-SymbolicName: com.openexchange.configjump
-Bundle-Version: 1.0.0
+Bundle-Name: Empty ConfigJump
+Bundle-SymbolicName: com.openexchange.configjump.empty
+Bundle-Version: 6.5.0
 Bundle-Activator: com.openexchange.configjump.osgi.ConfigJumpActivator
 Import-Package: com.openexchange.config,
  com.openexchange.configjump,

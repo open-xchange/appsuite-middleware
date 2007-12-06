@@ -1,4 +1,4 @@
-<project name="com.openexchange.configjump" default="install" basedir=".">
+<project name="com.openexchange.configjump.empty" default="install" basedir=".">
 
     <!-- Customizable values -->
     <property name="destdir" value=""/>
@@ -12,7 +12,7 @@
 
 	<property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
-    <property name="composite.name" value="open-xchange-configjump-${version}"/>
+    <property name="composite.name" value="open-xchange-configjump-empty-${version}"/>
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
