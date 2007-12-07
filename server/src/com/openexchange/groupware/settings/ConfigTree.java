@@ -479,12 +479,34 @@ public final class ConfigTree {
 			}
 
 			public void writeValue(final Session session, final Setting setting) throws SettingException {
-				final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(
-						session.getUserId(), session.getContext());
-				settings.setSendAddr((String) setting.getSingleValue());
+			    final User user;
+			    try {
+    			    final UserStorage userStor = UserStorage.getInstance();
+    			    user = userStor.getUser(session.getUserId(), session
+    			        .getContext());
+			    } catch (LdapException e) {
+			        throw new SettingException(e);
+			    }
+			    final String newAlias = (String) setting.getSingleValue();
+			    final String[] aliases = user.getAliases();
+			    boolean found = false;
+			    for (int i = 0; aliases != null && i < aliases.length && !found; i++) {
+			        found = aliases[i].equals(newAlias);
+		        }
+			    if (user.getMail().equals(newAlias)) {
+			        found = true;
+			    }
+			    if (!found) {
+			        throw new SettingException(Code.INVALID_VALUE, newAlias,
+			            sendaddress.getPath());
+			    }
+			    final UserSettingMail settings = UserSettingMailStorage
+			        .getInstance().getUserSettingMail(session.getUserId(),
+		            session.getContext());
+			    settings.setSendAddr(newAlias);
 				try {
-					UserSettingMailStorage.getInstance().saveUserSettingMail(settings, session.getUserId(),
-							session.getContext());
+					UserSettingMailStorage.getInstance().saveUserSettingMail(
+					    settings, session.getUserId(), session.getContext());
 				} catch (OXException e) {
 					throw new SettingException(e);
 				}

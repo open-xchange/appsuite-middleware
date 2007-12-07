@@ -1,3 +1,7 @@
+* 2007-12-07 - marcus.klein@open-xchange.com
+
+ - Bugfix 10559: Checking the defaultSendAddress if a valid value is written.
+
 * 2007-12-05 - thorben.betten@open-xchange.com
 
  - Bugfix #10503: Sending W3C conform html
