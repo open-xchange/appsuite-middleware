@@ -1,3 +1,7 @@
+* 2007-12-07 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#10577[HEAD ]admin does breake Database replication
+
 * 2007-11-13 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#10180 RuntimeExceptions aren't logged
