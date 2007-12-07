@@ -1,3 +1,8 @@
+* 2007-12-07 - manuel.kraft@open-xchange.com
+
+  - Bugfix ID#10559 setDefaultSenderAddress does not work in changeUser
+  - Bugfix ID#10501 context delete brakes replication
+
 * 2007-11-12 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#10049 L3: display name of contact blocks creation of new user
