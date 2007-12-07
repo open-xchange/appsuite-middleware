@@ -594,10 +594,14 @@ public final class ConfigTree {
             }
             public void writeValue(final SessionObject session, final Setting setting) throws SettingException {
                 final String newAlias = (String) setting.getSingleValue();
-				final String[] aliases = session.getUserObject().getAliases();
+                final User user = session.getUserObject();
+				final String[] aliases = user.getAliases();
 				boolean found = false;
-				for (int i = 0; i < aliases.length && !found; i++) {
+				for (int i = 0; aliases != null && i < aliases.length && !found; i++) {
 				    found = aliases[i].equals(newAlias);
+				}
+				if (user.getMail().equals(newAlias)) {
+				    found = true;
 				}
 				if (!found) {
 				    throw new SettingException(Code.INVALID_VALUE, newAlias,
