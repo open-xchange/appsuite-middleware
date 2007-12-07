@@ -185,52 +185,86 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         PreparedStatement configdb_stmt = null;
 
         try {
-            log.debug("Fetching connection and scheme for context " + ctx.getId());
-            // 1. we need the right connection and scheme for this context
-            final int source_database_id = cache.getDBPoolIdForContextId(ctx.getId());
-            final String scheme = cache.getSchemeForContextId(ctx.getId());
-            write_ox_con = cache.getWRITEConnectionForPoolId(source_database_id, scheme);
-            if (log.isDebugEnabled()) {
-                log.debug("Connection and scheme fetched for context " + ctx.getId());
-
-                // 2. fetch tables which can contain context data and sort these
-                // tables magically by foreign keys
-                log.debug("Fetching table structure from database scheme for context " + ctx.getId());
-            }
-            final Vector<TableObject> fetchTableObjects = fetchTableObjects(write_ox_con);
-            if (log.isDebugEnabled()) {
-                // ####### ##### if something goes wrong -> enableContext(); ########
-                log.debug("Table structure fetched for context " + ctx.getId());
-                log.debug("Try to find foreign key dependencies between tables and sort table for context " + ctx.getId());
-            }
-            // 3. sort the tables by references (foreign keys)
-            final ArrayList<TableObject> sorted_tables = sortTableObjects(fetchTableObjects, write_ox_con);
-            if (log.isDebugEnabled()) {
-                // ####### ##### if something goes wrong -> enableContext(); ########
-                log.debug("Dependencies found and tables sorted for context " + ctx.getId());
-            }
-            // 4. loop through tables and execute delete statements on each
-            // table
-            write_ox_con.setAutoCommit(false);
-            if (log.isDebugEnabled()) {
-                log.debug("Now deleting data for context " + ctx.getId());
-            }
-            for (int a = sorted_tables.size() - 1; a >= 0; a--) {
-                final TableObject to = sorted_tables.get(a);
-                del_stmt = write_ox_con.prepareStatement("DELETE FROM " + to.getName() + " WHERE cid = ?");
-                del_stmt.setInt(1, ctx.getId());
+            
+            
+            try {
+                log.debug("Fetching connection and scheme for context " + ctx.getId());
+                // 1. we need the right connection and scheme for this context
+                final int source_database_id = cache.getDBPoolIdForContextId(ctx.getId());
+                final String scheme = cache.getSchemeForContextId(ctx.getId());
+                write_ox_con = cache.getWRITEConnectionForPoolId(source_database_id, scheme);
                 if (log.isDebugEnabled()) {
-                    log.debug("Deleting data from table \"" + to.getName() + "\" for context " + ctx.getId());
+                    log.debug("Connection and scheme fetched for context " + ctx.getId());
+
+                    // 2. fetch tables which can contain context data and sort
+                    // these
+                    // tables magically by foreign keys
+                    log.debug("Fetching table structure from database scheme for context " + ctx.getId());
                 }
-                del_stmt.executeUpdate();
-                del_stmt.close();
+                final Vector<TableObject> fetchTableObjects = fetchTableObjects(write_ox_con);
+                if (log.isDebugEnabled()) {
+                    // ####### ##### if something goes wrong -> enableContext();
+                    // ########
+                    log.debug("Table structure fetched for context " + ctx.getId());
+                    log.debug("Try to find foreign key dependencies between tables and sort table for context " + ctx.getId());
+                }
+                // 3. sort the tables by references (foreign keys)
+                final ArrayList<TableObject> sorted_tables = sortTableObjects(fetchTableObjects, write_ox_con);
+                if (log.isDebugEnabled()) {
+                    // ####### ##### if something goes wrong -> enableContext();
+                    // ########
+                    log.debug("Dependencies found and tables sorted for context " + ctx.getId());
+                }
+                // 4. loop through tables and execute delete statements on each
+                // table
+                write_ox_con.setAutoCommit(false);
+                if (log.isDebugEnabled()) {
+                    log.debug("Now deleting data for context " + ctx.getId());
+                }
+                for (int a = sorted_tables.size() - 1; a >= 0; a--) {
+                    final TableObject to = sorted_tables.get(a);
+                    del_stmt = write_ox_con.prepareStatement("DELETE FROM " + to.getName() + " WHERE cid = ?");
+                    del_stmt.setInt(1, ctx.getId());
+                    if (log.isDebugEnabled()) {
+                        log.debug("Deleting data from table \"" + to.getName() + "\" for context " + ctx.getId());
+                    }
+                    del_stmt.executeUpdate();
+                    del_stmt.close();
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("Data delete for context " + ctx.getId() + " completed!");
+                }
+                
+                // commit groupware data scheme deletes BEFORE database get dropped in "deleteContextFromConfigDB" .see bug #10501
+                write_ox_con.commit();
+            } catch (SQLException exp) {
+                log.error("SQL Error", exp);
+                this.oxcontextcommon.handleContextDeleteRollback(write_ox_con, null);
+                throw exp;
+            } catch (final PoolException e) {
+                log.error("Pool Error", e);
+                this.oxcontextcommon.handleContextDeleteRollback(write_ox_con, null);
+                throw e;
+            }finally{
+                
+                // must be pushed back here, because in the "deleteContextFromConfigDB" the connection is "reset" in the pool.
+                // else we would get an not nice error in the logfile from the dbpool
+                try {
+                    if (write_ox_con != null) {
+                        cache.pushOXDBWrite(ctx.getId(), write_ox_con);
+                    }
+                } catch (final Exception exp) {
+                    log.error("Error pushing ox write connection to pool!", exp);
+                }
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Data delete for context " + ctx.getId() + " completed!");
-            }
-            // 5a fetch infos for filestore from configdb before deleting on this connection
+            
+            // 5b fetch infos for filestore from configdb before deleting on this connection
             con_write = cache.getWRITEConnectionForCONFIGDB();
             con_write.setAutoCommit(false);
+            
+            // 5a. Execute delete context from configdb AND the drop database command if this context is the last one
+            this.oxcontextcommon.deleteContextFromConfigDB(con_write, ctx.getId());
+                        
             
             configdb_stmt = con_write.prepareStatement("SELECT concat(filestore.uri,'/',context.filestore_name) as store_path FROM context join filestore on context.filestore_id=filestore.id WHERE context.cid=?");
             configdb_stmt.setInt(1,ctx.getId());
@@ -240,14 +274,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 store_path = rs.getString("store_path");
             }
             rs.close();
-            configdb_stmt.close();            
+            configdb_stmt.close(); 
             
-            // 5b. Execute delete context from configdb            
-            this.oxcontextcommon.deleteContextFromConfigDB(con_write, ctx.getId());
-            
-            //  6. submit delete to database under any circumstance before the filestore gets deleted.see bug 9947
-            write_ox_con.commit();
-            con_write.commit();             
+            //  6. submit delete to database under any circumstance before the filestore gets deleted.see bug 9947            
+            con_write.commit();
             
             // 7. Delete filestore directory of the context    
             if (store_path != null) {
@@ -279,14 +309,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } finally {
             closePreparedStatement(del_stmt);
             closePreparedStatement(configdb_stmt);
-            
-            try {
-                if (write_ox_con != null) {
-                    cache.pushOXDBWrite(ctx.getId(), write_ox_con);
-                }
-            } catch (final Exception exp) {
-                log.error("Error pushing ox write connection to pool!", exp);
-            }
             
             try {
                 if (con_write != null) {
@@ -899,8 +921,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
                 rs2.close();
                 stmt2.close();
-                
-
+                cache.pushOXDBRead(context_id, oxdb_read);
                 quota_used /= Math.pow(2, 20);
                 // set used quota in context setup
                 cs.setUsedQuota(quota_used);
