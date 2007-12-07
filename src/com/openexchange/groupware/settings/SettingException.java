@@ -137,7 +137,12 @@ public class SettingException extends AbstractOXException {
          * Problem while initialising configuration tree.
          */
         INIT("Problem while initialising configuration tree.", Category
-            .CODE_ERROR, 8);
+            .CODE_ERROR, 8),
+        /**
+         * Invalid value %s written to setting %s.
+         */
+        INVALID_VALUE("Invalid value %s written to setting %s.", Category
+            .USER_INPUT, 9);
 
         /**
          * Message of the exception.

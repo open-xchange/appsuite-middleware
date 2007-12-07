@@ -593,8 +593,18 @@ public final class ConfigTree {
                 return true;
             }
             public void writeValue(final SessionObject session, final Setting setting) throws SettingException {
-				final UserSettingMail settings = session.getUserSettingMail();
-				settings.setSendAddr((String) setting.getSingleValue());
+                final String newAlias = (String) setting.getSingleValue();
+				final String[] aliases = session.getUserObject().getAliases();
+				boolean found = false;
+				for (int i = 0; i < aliases.length && !found; i++) {
+				    found = aliases[i].equals(newAlias);
+				}
+				if (!found) {
+				    throw new SettingException(Code.INVALID_VALUE, newAlias,
+				        sendaddress.getPath());
+				}
+                final UserSettingMail settings = session.getUserSettingMail();
+				settings.setSendAddr(newAlias);
 				try {
 					UserSettingMailStorage.getInstance().saveUserSettingMail(settings, session.getUserObject().getId(),
 							session.getContext());

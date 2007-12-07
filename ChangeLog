@@ -1,3 +1,7 @@
+* 2007-12-07 - marcus.klein@open-xchange.com
+
+ - Bugfix 10559: Checking the defaultSendAddress if a valid value is written.
+
 * 2007-11-30 - thorben.betten@open-xchange.com
 
  - Bugfix #10460: Changed handling of exceptions in AJP container to not end up
