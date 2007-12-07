@@ -331,6 +331,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             log.error(e.getMessage(), e);
         }
         
+        try {
+            // clear cache for defaul sender address and other mail settings regarding to bug #10559
+            JCS cache = JCS.getInstance("UserSettingMail");
+            cache.remove(new CacheKey(ctx.getId(), userid));
+        } catch (final CacheException e) {
+            log.error(e.getMessage(), e);
+        }
+        
         if(usrdata.getDisplay_name()!=null){
             //  update folder name via ox api if displayname was changed 
             int[] changedfields = new int[]{ContactObject.DISPLAY_NAME};
@@ -655,6 +663,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             
             try {
                 JCS cache = JCS.getInstance("User");
+                cache.remove(new CacheKey(ctx.getId(), user.getId()));
+            } catch (final CacheException e) {
+                log.error(e.getMessage(), e);
+            }
+            
+            try {
+                // clear cache for defaul sender address and other mail settings regarding to bug #10559
+                JCS cache = JCS.getInstance("UserSettingMail");
                 cache.remove(new CacheKey(ctx.getId(), user.getId()));
             } catch (final CacheException e) {
                 log.error(e.getMessage(), e);
