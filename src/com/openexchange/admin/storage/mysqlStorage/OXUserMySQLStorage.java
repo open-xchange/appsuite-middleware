@@ -461,8 +461,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
             }
             
-            // update the mailfolder mapping
-            final String send_addr = usrdata.getPrimaryEmail();
+            // update the user mail settings
+            final String send_addr = usrdata.getDefaultSenderAddress(); // see bug #10559
             if (null != send_addr) {
                 folder_update = write_ox_con
                         .prepareStatement("UPDATE user_setting_mail SET send_addr = ? WHERE cid = ? AND user = ?");
