@@ -1,3 +1,7 @@
+* 2007-12-07 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#10577 [HEAD ]admin does breake Database replication
+
 * 2007-10-29 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#9974 [HEAD] context deletion not to use any server api calls
