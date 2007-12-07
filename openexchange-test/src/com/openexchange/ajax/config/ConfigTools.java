@@ -71,6 +71,9 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
+import com.openexchange.ajax.config.actions.SetRequest;
+import com.openexchange.ajax.config.actions.SetResponse;
+import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
@@ -176,8 +179,8 @@ public final class ConfigTools extends Assert {
         SAXException, JSONException, AjaxException, ConfigurationException {
         AJAXConfig.init();
         final AJAXSession session = new AJAXSession(conversation, sessionId);
-        return ConfigTools.get(session, new GetRequest(GetRequest.Tree
-            .Identifier)).getInteger();
+        return ConfigTools.get(session, new GetRequest(Tree.Identifier))
+            .getInteger();
     }
 
     /**
@@ -196,8 +199,8 @@ public final class ConfigTools extends Assert {
         SAXException, JSONException, AjaxException, ConfigurationException {
         AJAXConfig.init();
         final AJAXSession session = new AJAXSession(conversation, sessionId);
-        final String value = ConfigTools.get(session, new GetRequest(GetRequest
-            .Tree.TimeZone)).getString();
+        final String value = ConfigTools.get(session, new GetRequest(Tree
+            .TimeZone)).getString();
         return TimeZone.getTimeZone(value);
     }
 
@@ -211,5 +214,11 @@ public final class ConfigTools extends Assert {
         final GetRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
         return (GetResponse) Executor.execute(session, request);
+    }
+
+    public static SetResponse set(final AJAXClient client,
+        final SetRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (SetResponse) Executor.execute(client.getSession(), request);
     }
 }

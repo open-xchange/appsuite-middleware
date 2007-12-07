@@ -59,6 +59,7 @@ import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.session.LoginRequest;
 import com.openexchange.ajax.session.LoginTools;
 import com.openexchange.ajax.session.LogoutRequest;
@@ -110,8 +111,8 @@ public class AJAXClient {
     public int getUserId() throws AjaxException, IOException, SAXException,
         JSONException {
         if (-1 == userId) {
-            userId = ConfigTools.get(session, new GetRequest(GetRequest.Tree
-                .Identifier)).getInteger();
+            userId = ConfigTools.get(session, new GetRequest(Tree.Identifier))
+                .getInteger();
         }
         return userId;
     }
@@ -119,8 +120,8 @@ public class AJAXClient {
     public TimeZone getTimeZone() throws AjaxException, IOException,
         SAXException, JSONException {
         if (null == timeZone) {
-            final String tzId = ConfigTools.get(session, new GetRequest(
-                GetRequest.Tree.TimeZone)).getString();
+            final String tzId = ConfigTools.get(session, new GetRequest(Tree
+                .TimeZone)).getString();
             timeZone = TimeZone.getTimeZone(tzId);
         }
         return timeZone;
@@ -128,8 +129,8 @@ public class AJAXClient {
 
     public Date getServerTime() throws AjaxException, IOException, SAXException,
         JSONException {
-        long serverTime = ConfigTools.get(this, new GetRequest(
-            GetRequest.Tree.CurrentTime)).getLong();
+        long serverTime = ConfigTools.get(this, new GetRequest(Tree
+            .CurrentTime)).getLong();
         serverTime -= getTimeZone().getOffset(serverTime);
         return new Date(serverTime);
     }
@@ -137,8 +138,8 @@ public class AJAXClient {
     public Locale getLocale() throws AjaxException, IOException, SAXException,
         JSONException {
         if (null == locale) {
-            final String localeId = ConfigTools.get(session, new GetRequest(
-                GetRequest.Tree.Language)).getString();
+            final String localeId = ConfigTools.get(session, new GetRequest(Tree
+                .Language)).getString();
             locale = LocaleTools.getLocale(localeId);
         }
         return locale;
@@ -148,7 +149,7 @@ public class AJAXClient {
         SAXException, JSONException {
         if (-1 == privateAppointmentFolder) {
             privateAppointmentFolder = ConfigTools.get(session, new GetRequest(
-                GetRequest.Tree.PrivateAppointmentFolder)).getInteger();
+                Tree.PrivateAppointmentFolder)).getInteger();
         }
         return privateAppointmentFolder;
     }
@@ -157,7 +158,7 @@ public class AJAXClient {
         SAXException, JSONException {
         if (-1 == privateTaskFolder) {
             privateTaskFolder = ConfigTools.get(session, new GetRequest(
-                GetRequest.Tree.PrivateTaskFolder)).getInteger();
+                Tree.PrivateTaskFolder)).getInteger();
         }
         return privateTaskFolder;
     }
@@ -166,7 +167,7 @@ public class AJAXClient {
         SAXException, JSONException {
         if (-1 == privateContactFolder) {
             privateContactFolder = ConfigTools.get(this, new GetRequest(
-                GetRequest.Tree.PrivateContactFolder)).getInteger();
+                Tree.PrivateContactFolder)).getInteger();
         }
         return privateContactFolder;
     }

@@ -47,40 +47,46 @@
  *
  */
 
-package com.openexchange.ajax.config;
+package com.openexchange.ajax.config.actions;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
 
-import com.openexchange.ajax.config.actions.GetRequest;
-import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-public class MaxUploadIdleTimeoutTest extends AbstractAJAXSession {
-
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(MaxUploadIdleTimeoutTest
-        .class);
+/**
+ * 
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public final class SetParser extends AbstractAJAXParser<SetResponse> {
 
     /**
-     * Default constructor.
-     * @param name Name of the test.
+     * @param failOnError
      */
-    public MaxUploadIdleTimeoutTest(final String name) {
-        super(name);
+    public SetParser(boolean failOnError) {
+        super(failOnError);
     }
 
     /**
-     * Tests if the spam button option is sent to the GUI.
-     * @throws Throwable if an exception occurs.
+     * {@inheritDoc}
      */
-    public void testMaxUploadIdleTimeout() throws Throwable {
-        final int value = ConfigTools.get(getClient(), new GetRequest(
-            Tree.MaxUploadIdleTimeout)).getInteger();
-        LOG.info("Max upload idle timeout: " + value);
-        assertTrue("Got no value for the maxUploadIdleTimeout configuration "
-            + "parameter.", value > 0);
+    @Override
+    protected SetResponse createResponse(final Response response)
+        throws JSONException {
+        return new SetResponse(response);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Response getResponse(final String body) throws JSONException {
+        final Response response;
+        if (body.length() > 0) {
+            response = super.getResponse(body);
+        } else {
+            response = new Response();
+        }
+        return response;
     }
 }

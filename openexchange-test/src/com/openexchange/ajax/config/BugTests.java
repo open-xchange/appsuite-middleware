@@ -52,13 +52,22 @@ package com.openexchange.ajax.config;
 import static com.openexchange.ajax.config.ConfigTools.readSetting;
 import static com.openexchange.ajax.config.ConfigTools.storeSetting;
 
+import com.meterware.httpunit.WebConversation;
 import com.openexchange.ajax.AbstractAJAXTest;
+import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.config.actions.SetRequest;
+import com.openexchange.ajax.config.actions.SetResponse;
+import com.openexchange.ajax.config.actions.Tree;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.tools.RandomString;
 
 /**
  * Tests resulting from bug reports.
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class BugTests extends AbstractAJAXTest {
+public class BugTests extends AbstractAJAXSession {
 
     /**
      * Path to the configuration parameter.
@@ -98,6 +107,18 @@ public class BugTests extends AbstractAJAXTest {
      */
     public BugTests(final String name) {
         super(name);
+    }
+
+    private WebConversation getWebConversation() {
+        return getClient().getSession().getConversation();
+    }
+
+    private String getHostName() {
+        return AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
+    }
+
+    private String getSessionId() {
+        return getClient().getSession().getId();
     }
 
     /**
@@ -144,6 +165,33 @@ public class BugTests extends AbstractAJAXTest {
                 getHostName(), getSessionId(), path);
             assertEquals("Restoring original value failed.", origValue,
                 testValue);
+        }
+    }
+
+    /**
+     * Tests if any desired senderAddress can be written to the config tree.
+     * @throws Throwable
+     */
+    public void testWriteSenderAddress() throws Throwable {
+        final AJAXClient client = getClient();
+        // Get original value.
+        final String origAddress = ConfigTools.get(client, new GetRequest(Tree
+            .SendAddress)).getString();
+        try {
+            // Write something for the test.
+            String garbage;
+            do {
+                garbage = RandomString.generateLetter(20);
+            } while (garbage.equals(origAddress));
+            final SetResponse response = ConfigTools.set(client, new SetRequest(Tree
+                .SendAddress, garbage, false));
+            if (!response.hasError()) {
+                fail("SendAddress in config tree can be written with garbage.");
+            }
+        } finally {
+            // Restore original value
+            ConfigTools.set(client, new SetRequest(Tree.SendAddress,
+                origAddress));
         }
     }
 }

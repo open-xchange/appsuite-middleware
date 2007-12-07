@@ -58,7 +58,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-class GetParser extends AbstractAJAXParser {
+class GetParser extends AbstractAJAXParser<GetResponse> {
 
     /**
      * Default constructor.
@@ -75,5 +75,4 @@ class GetParser extends AbstractAJAXParser {
         throws JSONException {
         return new GetResponse(response);
     }
-
 }

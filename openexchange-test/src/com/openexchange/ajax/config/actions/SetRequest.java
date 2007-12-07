@@ -47,40 +47,72 @@
  *
  */
 
-package com.openexchange.ajax.config;
+package com.openexchange.ajax.config.actions;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
 
-import com.openexchange.ajax.config.actions.GetRequest;
-import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+/**
+ * 
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public final class SetRequest extends AbstractConfigRequest {
 
-public class MaxUploadIdleTimeoutTest extends AbstractAJAXSession {
+    private final Tree param;
+
+    private final Object value;
+
+    private final boolean failOnError;
 
     /**
-     * Logger.
+     * Easier constructor.
      */
-    private static final Log LOG = LogFactory.getLog(MaxUploadIdleTimeoutTest
-        .class);
-
-    /**
-     * Default constructor.
-     * @param name Name of the test.
-     */
-    public MaxUploadIdleTimeoutTest(final String name) {
-        super(name);
+    public SetRequest(final Tree param, final Object value) {
+        this(param, value, true);
     }
 
     /**
-     * Tests if the spam button option is sent to the GUI.
-     * @throws Throwable if an exception occurs.
+     * Default constructor.
      */
-    public void testMaxUploadIdleTimeout() throws Throwable {
-        final int value = ConfigTools.get(getClient(), new GetRequest(
-            Tree.MaxUploadIdleTimeout)).getInteger();
-        LOG.info("Max upload idle timeout: " + value);
-        assertTrue("Got no value for the maxUploadIdleTimeout configuration "
-            + "parameter.", value > 0);
+    public SetRequest(final Tree param, final Object value, final boolean failOnError) {
+        super();
+        this.param = param;
+        this.value = value;
+        this.failOnError = failOnError;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getServletPath() {
+        return super.getServletPath() + param.getPath();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Object getBody() throws JSONException {
+        return value;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Method getMethod() {
+        return Method.PUT;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Parameter[] getParameters() {
+        return new Parameter[0];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public SetParser getParser() {
+        return new SetParser(failOnError);
     }
 }

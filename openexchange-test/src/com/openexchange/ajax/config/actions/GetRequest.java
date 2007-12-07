@@ -51,8 +51,6 @@ package com.openexchange.ajax.config.actions;
 
 import org.json.JSONException;
 
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -74,7 +72,7 @@ public class GetRequest extends AbstractConfigRequest {
      */
     @Override
     public String getServletPath() {
-        return super.getServletPath() + param.path;
+        return super.getServletPath() + param.getPath();
     }
 
     /**
@@ -101,22 +99,7 @@ public class GetRequest extends AbstractConfigRequest {
     /**
      * {@inheritDoc}
      */
-    public AbstractAJAXParser getParser() {
+    public GetParser getParser() {
         return new GetParser();
-    }
-
-    public enum Tree {
-        Identifier("/identifier"),
-        TimeZone("/timezone"),
-        PrivateAppointmentFolder("/folder/calendar"),
-        PrivateContactFolder("/folder/contacts"),
-        PrivateTaskFolder("/folder/tasks"),
-        MaxUploadIdleTimeout("/maxUploadIdleTimeout"),
-        Language("/language"),
-        CurrentTime("/currentTime");
-        private String path;
-        private Tree(final String path) {
-            this.path=path;
-        }
     }
 }
