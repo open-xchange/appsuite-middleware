@@ -50,6 +50,7 @@ package com.openexchange.admin.storage.mysqlStorage;
 
 import java.sql.Connection;
 import java.sql.DataTruncation;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -177,13 +178,13 @@ public class OXUtilMySQLStorageCommon {
             if (con.getAutoCommit()) {
                 con.setAutoCommit(false);
             }
+            
             st = con.createStatement();
-            st.addBatch("DROP DATABASE if exists `" + db.getScheme() + "`");
-            st.executeBatch();
+            st.execute("DROP DATABASE if exists `" + db.getScheme() + "`");
 
             con.commit();
         } catch (final ClassNotFoundException cnf) {
-            log.error("Driver not found to create database.", cnf);
+            log.error("Driver not found to delete database.", cnf);
             throw new StorageException(cnf);
         } catch (final SQLException cp) {
             log.error("SQL Error", cp);
