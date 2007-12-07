@@ -171,7 +171,7 @@ public class OXUtilMySQLStorageCommon {
 
     public void deleteDatabase(final Database db) throws StorageException {
         Connection con = null;
-        PreparedStatement st = null;
+        Statement st = null;
         try {
 
             con = cache.getSimpleSqlConnection(db.getUrl(), db.getLogin(), db.getPassword(), db.getDriver());
@@ -179,9 +179,8 @@ public class OXUtilMySQLStorageCommon {
                 con.setAutoCommit(false);
             }
             
-            st = con.prepareStatement("DROP DATABASE if exists `?`");
-            st.setString(1,db.getScheme());
-            st.executeUpdate();
+            st = con.createStatement();
+            st.execute("DROP DATABASE if exists `" + db.getScheme() + "`");
 
             con.commit();
         } catch (final ClassNotFoundException cnf) {
