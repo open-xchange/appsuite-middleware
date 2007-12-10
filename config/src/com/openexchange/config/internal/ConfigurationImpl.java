@@ -125,7 +125,11 @@ public final class ConfigurationImpl implements Configuration {
 	private static void processDirectory(final File dir, final FileFilter fileFilter,
 			final Map<String, String> properties, final Map<String, String> propertiesFiles) {
 		final File[] files = dir.listFiles(fileFilter);
-		for (int i = 0; i < files.length; i++) {
+        if(files == null) {
+            LOG.info("Can't read "+dir+". Skipping.");
+            return;
+        }
+        for (int i = 0; i < files.length; i++) {
 			if (files[i].isDirectory()) {
 				processDirectory(files[i], fileFilter, properties, propertiesFiles);
 			} else {
