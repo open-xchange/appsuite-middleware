@@ -258,28 +258,29 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
             }
             
-            // 5b fetch infos for filestore from configdb before deleting on this connection
+            // 5a. fetch infos for filestore from configdb before deleting on this connection
             con_write = cache.getWRITEConnectionForCONFIGDB();
             con_write.setAutoCommit(false);
             
-            // 5a. Execute delete context from configdb AND the drop database command if this context is the last one
-            this.oxcontextcommon.deleteContextFromConfigDB(con_write, ctx.getId());
-                        
-            
             configdb_stmt = con_write.prepareStatement("SELECT concat(filestore.uri,'/',context.filestore_name) as store_path FROM context join filestore on context.filestore_id=filestore.id WHERE context.cid=?");
             configdb_stmt.setInt(1,ctx.getId());
-            ResultSet rs = configdb_stmt.executeQuery();
+            final ResultSet rs = configdb_stmt.executeQuery();
             String store_path = null;
-            while (rs.next()) {
-                store_path = rs.getString("store_path");
+            try {
+                while (rs.next()) {
+                    store_path = rs.getString("store_path");
+                }
+            } finally {
+                rs.close();
             }
-            rs.close();
-            configdb_stmt.close(); 
-            
+
+            // 5b. Execute delete context from configdb AND the drop database command if this context is the last one
+            this.oxcontextcommon.deleteContextFromConfigDB(con_write, ctx.getId());
+                        
             //  6. submit delete to database under any circumstance before the filestore gets deleted.see bug 9947            
             con_write.commit();
             
-            // 7. Delete filestore directory of the context    
+            // 7. Delete filestore directory of the context
             if (store_path != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Starting filestore delete(cid=" + ctx.getId() + ") from disc!");
@@ -297,6 +298,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 if (log.isDebugEnabled()) {
                     log.debug("Filestore delete(cid=" + ctx.getId() + ") from disc finished!");
                 }
+            } else {
+                log.error("No filestore for context: " + ctx.getIdAsString() + ". Thus we can't delete the filestore.");
             }
         } catch (final SQLException exp) {
             log.error("SQL Error", exp);
