@@ -49,102 +49,33 @@
 
 package com.openexchange.control.internal;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleContext;
-
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.management.ManagementAgent;
-import com.openexchange.server.Initialization;
+import com.openexchange.server.ServiceHolder;
 
 /**
+ * {@link ManagementService}
  * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public final class ControlInit implements Initialization {
+public final class ManagementService extends ServiceHolder<ManagementAgent> {
 
-	private static final AtomicBoolean started = new AtomicBoolean();
-
-	private static final ControlInit singleton = new ControlInit();
-	
-	private BundleContext bundleContext = null;
+	private static final ManagementService instance = new ManagementService();
 
 	/**
-	 * Logger.
+	 * Gets the management service instance.
+	 * 
+	 * @return The management service instance.
 	 */
-	private static final Log LOG = LogFactory.getLog(ControlInit.class);
+	public static ManagementService getInstance() {
+		return instance;
+	}
 
 	/**
-	 * Prevent instantiation.
+	 * Default constructor
 	 */
-	private ControlInit() {
+	private ManagementService() {
 		super();
 	}
 
-	/**
-	 * @return the singleton instance.
-	 */
-	public static ControlInit getInstance() {
-		return singleton;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void start() throws AbstractOXException {
-		if (started.get()) {
-			LOG.error(ControlInit.class.getName() + " already started");
-			return;
-		}
-		
-		/*
-		 * Create Beans and register them
-		 */
-		final ManagementAgent managementAgent = ManagementService.getInstance().getService();
-
-		final GeneralControl generalControlBean = new GeneralControl(bundleContext);
-		try {
-			managementAgent.registerMBean( new ObjectName("com.openexchange.control", "name", "Control"), generalControlBean);
-		} catch (Exception exc) {
-			LOG.error("cannot register mbean", exc);
-		}
-		
-		if (LOG.isInfoEnabled()) {
-			LOG.info("JMX control applied");
-		}
-		started.set(true);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void stop() throws AbstractOXException {
-		if (!started.get()) {
-			LOG.error(ControlInit.class.getName() + " has not been started");
-			return;
-		}
-		removeBundleContext();
-		started.set(false);
-	}
-
-	/**
-	 * @return <code>true</code> if monitoring has been started; otherwise
-	 *         <code>false</code>
-	 */
-	public boolean isStarted() {
-		return started.get();
-	}
-	
-	public void setBundleContext(final BundleContext bundleContext) {
-		this.bundleContext = bundleContext;
-	}
-	
-	public void removeBundleContext() {
-		bundleContext = null;
-	}
 }

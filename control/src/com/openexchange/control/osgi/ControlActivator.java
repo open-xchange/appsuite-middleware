@@ -61,9 +61,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.control.internal.ControlInit;
+import com.openexchange.control.internal.ManagementService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.management.ManagementAgent;
-import com.openexchange.management.services.ManagementService;
 import com.openexchange.server.ServiceHolderListener;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 
