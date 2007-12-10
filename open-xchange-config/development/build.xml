@@ -37,7 +37,7 @@
     <target name="patchConfigFiles">
         <fail message="Define conf.subst.patch." unless="conf.subst.patch"/>
         <antcall target="patchSessiondProperties"/>
-        <antcall target="patchSystemProperties"/>
+        <antcall target="patchPath"/>
     </target>
 
     <target name="patchSessiondProperties">
@@ -47,9 +47,14 @@
         </replace>
     </target>
 
-    <target name="patchSystemProperties">
-        <move tofile="${patch.conf.dir}/system.properties" file="${patch.conf.dir}/system.properties.in" overwrite="true"/>
-        <replace file="${patch.conf.dir}/system.properties">
+    <target name="patchPath">
+        <move todir="${patch.conf.dir}" includeemptydirs="false">
+            <fileset dir="${patch.conf.dir}">
+                <include name="*.in"/>
+            </fileset>
+            <mapper type="glob" from="*.in" to="*"/>
+        </move>
+        <replace dir="${patch.conf.dir}">
             <replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}"/>
         </replace>
     </target>
