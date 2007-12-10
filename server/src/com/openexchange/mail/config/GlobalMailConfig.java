@@ -327,7 +327,7 @@ public abstract class GlobalMailConfig {
 				logBuilder.append("\tDefault Separator: ").append(defaultSeparator).append('\n');
 			}
 		}
-
+		
 		{
 			final String maxNum = mailProperties.getProperty("maxNumOfConnections", "0").trim();
 			try {

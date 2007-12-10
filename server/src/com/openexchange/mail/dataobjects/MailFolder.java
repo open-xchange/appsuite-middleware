@@ -105,6 +105,10 @@ public final class MailFolder implements Serializable {
 
 	private boolean b_holdsMessages;
 
+	private boolean holdsFolders;
+
+	private boolean b_holdsFolders;
+
 	private int messageCount;
 
 	private boolean b_messageCount;
@@ -657,6 +661,44 @@ public final class MailFolder implements Serializable {
 	public void setHoldsMessages(final boolean holdsMessages) {
 		this.holdsMessages = holdsMessages;
 		b_holdsMessages = true;
+	}
+
+	/**
+	 * Checks if this folder holds folders
+	 * 
+	 * @return <code>true</code> if folder holds folders; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isHoldsFolders() {
+		return holdsFolders;
+	}
+
+	/**
+	 * @return <code>true</code> if this folder holds folders; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean containsHoldsFolders() {
+		return b_holdsFolders;
+	}
+
+	/**
+	 * Removes the holds folders flag
+	 */
+	public void removeHoldsFolders() {
+		holdsFolders = false;
+		b_holdsFolders = false;
+	}
+
+	/**
+	 * Sets if this folder holds folders
+	 * 
+	 * @param holdsFolders
+	 *            <code>true</code> if folder holds folders; otherwise
+	 *            <code>false</code>
+	 */
+	public void setHoldsFolders(final boolean holdsFolders) {
+		this.holdsFolders = holdsFolders;
+		b_holdsFolders = true;
 	}
 
 	/**

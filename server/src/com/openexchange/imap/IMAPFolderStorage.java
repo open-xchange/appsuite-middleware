@@ -419,7 +419,12 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					}
 					final String prefix = tmp.toString();
 					tmp.setLength(0);
-					final int type = (Folder.HOLDS_MESSAGES | Folder.HOLDS_FOLDERS);
+					final int type;
+					if (IMAPConfig.isMBoxEnabled()) {
+						type = Folder.HOLDS_MESSAGES;
+					} else {
+						type = FOLDER_TYPE;
+					}
 					/*
 					 * Check default folders
 					 */
@@ -469,16 +474,34 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					throw new IMAPException(IMAPException.Code.NO_ACCESS, parentFullname);
 				}
 			}
-			if (toCreate.getName().indexOf(parent.getSeparator()) != -1) {
+			if (!checkFolderNameValidity(toCreate.getName(), parent.getSeparator())) {
 				throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character
 						.valueOf(parent.getSeparator()));
 			}
-			final IMAPFolder createMe = (IMAPFolder) imapStore.getFolder(new StringBuilder(parent.getFullName()).append(
-					parent.getSeparator()).append(toCreate.getName()).toString());
+			final IMAPFolder createMe;
+			if (parent.getFullName().length() == 0) {
+				/*
+				 * Below default folder
+				 */
+				createMe = (IMAPFolder) imapStore.getFolder(toCreate.getName());
+			} else {
+				createMe = (IMAPFolder) imapStore.getFolder(new StringBuilder(parent.getFullName()).append(
+						parent.getSeparator()).append(toCreate.getName()).toString());
+			}
 			if (createMe.exists()) {
 				throw new IMAPException(IMAPException.Code.DUPLICATE_FOLDER, createMe.getFullName());
 			}
-			if (!createMe.create(FOLDER_TYPE)) {
+			final int ftype;
+			if (IMAPConfig.isMBoxEnabled()) {
+				/*
+				 * Determine folder creation type dependent on folder name
+				 */
+				ftype = createMe.getName().endsWith(String.valueOf(parent.getSeparator())) ? Folder.HOLDS_FOLDERS
+						: Folder.HOLDS_MESSAGES;
+			} else {
+				ftype = FOLDER_TYPE;
+			}
+			if (!createMe.create(ftype)) {
 				throw new IMAPException(IMAPException.Code.FOLDER_CREATION_FAILED, createMe.getFullName(),
 						parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parent.getFullName());
 			}
@@ -583,11 +606,23 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 						throw new IMAPException(IMAPException.Code.NO_ACCESS, newParent);
 					}
 				}
+				if (!checkFolderNameValidity(newName == null ? updateMe.getName() : newName, updateMe.getSeparator())) {
+					throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(updateMe
+							.getSeparator()));
+				}
 				if (destFolder.getFullName().startsWith(updateMe.getFullName())) {
 					throw new IMAPException(IMAPException.Code.NO_MOVE_TO_SUBFLD, updateMe.getName(), destFolder
 							.getName());
 				}
-				updateMe = moveFolder(updateMe, destFolder, newName);
+				try {
+					updateMe = moveFolder(updateMe, destFolder, newName);
+				} catch (final MailException e) {
+					deleteTemporaryCreatedFolder(destFolder, newName == null ? updateMe.getName() : newName);
+					throw e;
+				} catch (final MessagingException e) {
+					deleteTemporaryCreatedFolder(destFolder, newName == null ? updateMe.getName() : newName);
+					throw e;
+				}
 			}
 			/*
 			 * Is rename operation?
@@ -606,6 +641,10 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					} catch (final MessagingException e) {
 						throw new IMAPException(IMAPException.Code.NO_ACCESS, updateMe.getFullName());
 					}
+				}
+				if (!checkFolderNameValidity(newName, updateMe.getSeparator())) {
+					throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(updateMe
+							.getSeparator()));
 				}
 				/*
 				 * Rename can only be invoked on a closed folder
@@ -746,6 +785,21 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 
 	}
 
+	private void deleteTemporaryCreatedFolder(final IMAPFolder destFolder, final String name) throws MessagingException {
+		/*
+		 * Delete moved folder if operation failed
+		 */
+		final IMAPFolder tmp = (IMAPFolder) imapStore.getFolder(new StringBuilder(destFolder.getFullName()).append(
+				destFolder.getSeparator()).append(name).toString());
+		if (tmp.exists()) {
+			try {
+				tmp.delete(true);
+			} catch (final MessagingException e1) {
+				LOG.error("Temporary created folder could not be deleted: " + tmp.getFullName(), e1);
+			}
+		}
+	}
+
 	public String updateFolder(final long fullname, final MailFolder toUpdate) throws IMAPException {
 		throw new IllegalStateException(ERR_IDS_NOT_SUPPORTED);
 	}
@@ -760,8 +814,9 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, fullname);
 				}
 			}
-			final String trashFullname = prepareMailFolderParam(getTrashFolder());
-			if (deleteMe.getParent().getFullName().equals(trashFullname)) {
+			final IMAPFolder trashFolder = (IMAPFolder) imapStore.getFolder(prepareMailFolderParam(getTrashFolder()));
+			if (deleteMe.getParent().getFullName().equals(trashFolder.getFullName())
+					|| ((trashFolder.getType() & Folder.HOLDS_FOLDERS) == 0)) {
 				/*
 				 * Delete permanently
 				 */
@@ -773,7 +828,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 				final String name = deleteMe.getName();
 				int appendix = 1;
 				final StringBuilder sb = new StringBuilder();
-				IMAPFolder newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFullname).append(
+				IMAPFolder newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(
 						deleteMe.getSeparator()).append(name).toString());
 				while (newFolder.exists()) {
 					/*
@@ -782,10 +837,18 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					 * again.
 					 */
 					sb.setLength(0);
-					newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFullname).append(
+					newFolder = (IMAPFolder) imapStore.getFolder(sb.append(trashFolder.getFullName()).append(
 							deleteMe.getSeparator()).append(name).append('_').append(++appendix).toString());
 				}
-				moveFolder(deleteMe, (IMAPFolder) imapStore.getFolder(trashFullname), newFolder, false);
+				try {
+					moveFolder(deleteMe, trashFolder, newFolder, false);
+				} catch (final MailException e) {
+					deleteTemporaryCreatedFolder(trashFolder, newFolder.getName());
+					throw e;
+				} catch (final MessagingException e) {
+					deleteTemporaryCreatedFolder(trashFolder, newFolder.getName());
+					throw e;
+				}
 			}
 			return fullnameArg;
 		} catch (final MessagingException e) {
@@ -1319,4 +1382,26 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		return altnamespace;
 	}
 
+	/**
+	 * Checks id specified folder name is allowed to be used on folder creation.
+	 * The folder name is valid if the separator character does not appear or
+	 * provided that mbox format is enabled may only appear at name's end.
+	 * 
+	 * @param name
+	 *            The folder name to check.
+	 * @param separator
+	 *            The separator character.
+	 * @return <code>true</code> if folder name is valid; otherwise
+	 *         <code>false</code>
+	 */
+	private static boolean checkFolderNameValidity(final String name, final char separator) {
+		final int pos = name.indexOf(separator);
+		if (IMAPConfig.isMBoxEnabled()) {
+			/*
+			 * Allow trailing separator
+			 */
+			return (pos == -1) || (pos == name.length() - 1);
+		}
+		return (pos == -1);
+	}
 }

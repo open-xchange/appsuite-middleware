@@ -1,3 +1,7 @@
+* 2007-12-10 - thorben.betten@open-xchange.com
+
+ - Bugfix #10393: MBox support
+
 * 2007-12-07 - marcus.klein@open-xchange.com
 
  - Bugfix 10559: Checking the defaultSendAddress if a valid value is written.

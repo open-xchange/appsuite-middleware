@@ -99,6 +99,8 @@ public final class GlobalIMAPConfig extends GlobalMailConfig {
 
 	private String user2AclImpl;
 
+	private boolean mboxEnabled;
+
 	private final Map<String, Boolean> newACLExtMap = new ConcurrentHashMap<String, Boolean>();
 
 	/**
@@ -225,6 +227,12 @@ public final class GlobalIMAPConfig extends GlobalMailConfig {
 			}
 		}
 
+		{
+			final String mboxEnabledStr = imapProperties.getProperty("mboxEnabled", STR_FALSE).trim();
+			mboxEnabled = Boolean.parseBoolean(mboxEnabledStr);
+			logBuilder.append("\tMBox Enabled: ").append(mboxEnabled).append('\n');
+		}
+
 		logBuilder.append("Global IMAP properties successfully loaded!");
 		if (LOG.isInfoEnabled()) {
 			LOG.info(logBuilder.toString());
@@ -328,6 +336,15 @@ public final class GlobalIMAPConfig extends GlobalMailConfig {
 	 */
 	String getUser2AclImpl() {
 		return user2AclImpl;
+	}
+
+	/**
+	 * Gets the mboxEnabled
+	 * 
+	 * @return The mboxEnabled
+	 */
+	boolean isMBoxEnabled() {
+		return mboxEnabled;
 	}
 
 	/**

@@ -274,39 +274,10 @@ public final class ACLPermission extends MailPermission {
 			 */
 			return acl;
 		}
-		final Rights rights = new Rights();
-		boolean hasAnyRights = false;
-		if (isFolderAdmin()) {
-			rights.add(RIGHTS_FOLDER_ADMIN);
-			hasAnyRights = true;
-		}
-		if (canCreateSubfolders()) {
-			rights.add(RIGHTS_FOLDER_CREATE_SUBFOLDERS);
-			hasAnyRights = true;
-		} else if (canCreateObjects()) {
-			rights.add(RIGHTS_FOLDER_CREATE_OBJECTS);
-			hasAnyRights = true;
-		} else if (isFolderVisible()) {
-			rights.add(RIGHTS_FOLDER_VISIBLE);
-			hasAnyRights = true;
-		}
-		if (getReadPermission() >= OCLPermission.READ_ALL_OBJECTS) {
-			rights.add(RIGHTS_READ_ALL);
-			hasAnyRights = true;
-		}
-		if (getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS) {
-			rights.add(RIGHTS_WRITE_ALL);
-			hasAnyRights = true;
-		}
-		if (getDeletePermission() >= OCLPermission.DELETE_ALL_OBJECTS) {
-			rights.add(RIGHTS_DELETE_ALL);
-			hasAnyRights = true;
-		}
-		if (hasAnyRights) {
-			rights.add(RIGHTS_UNMAPPABLE);
-		}
-		return (acl = new ACL(User2ACL.getInstance(UserStorage.getStorageUser(session.getUserId(), session.getContext()))
-				.getACLName(getEntity(), session.getContext(), user2aclArgs), rights));
+		final Rights rights = permission2Rights(this);
+		return (acl = new ACL(User2ACL.getInstance(
+				UserStorage.getStorageUser(session.getUserId(), session.getContext())).getACLName(getEntity(),
+				session.getContext(), user2aclArgs), rights));
 	}
 
 	/**
@@ -318,8 +289,8 @@ public final class ACLPermission extends MailPermission {
 	 * @throws AbstractOXException
 	 */
 	public void parseACL(final ACL acl, final User2ACLArgs user2aclArgs) throws AbstractOXException {
-		setEntity(User2ACL.getInstance(UserStorage.getStorageUser(session.getUserId(), session.getContext())).getUserID(
-				acl.getName(), session.getContext(), user2aclArgs));
+		setEntity(User2ACL.getInstance(UserStorage.getStorageUser(session.getUserId(), session.getContext()))
+				.getUserID(acl.getName(), session.getContext(), user2aclArgs));
 		parseRights(acl.getRights());
 		this.acl = acl;
 	}
@@ -332,6 +303,48 @@ public final class ACLPermission extends MailPermission {
 	 */
 	public void parseRights(final Rights rights) {
 		rights2Permission(rights, this);
+	}
+
+	/**
+	 * Maps given permission to rights
+	 * 
+	 * @param permission
+	 *            The permission
+	 * @return Mapped rights
+	 */
+	public static Rights permission2Rights(final OCLPermission permission) {
+		final Rights rights = new Rights();
+		boolean hasAnyRights = false;
+		if (permission.isFolderAdmin()) {
+			rights.add(RIGHTS_FOLDER_ADMIN);
+			hasAnyRights = true;
+		}
+		if (permission.canCreateSubfolders()) {
+			rights.add(RIGHTS_FOLDER_CREATE_SUBFOLDERS);
+			hasAnyRights = true;
+		} else if (permission.canCreateObjects()) {
+			rights.add(RIGHTS_FOLDER_CREATE_OBJECTS);
+			hasAnyRights = true;
+		} else if (permission.isFolderVisible()) {
+			rights.add(RIGHTS_FOLDER_VISIBLE);
+			hasAnyRights = true;
+		}
+		if (permission.getReadPermission() >= OCLPermission.READ_ALL_OBJECTS) {
+			rights.add(RIGHTS_READ_ALL);
+			hasAnyRights = true;
+		}
+		if (permission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS) {
+			rights.add(RIGHTS_WRITE_ALL);
+			hasAnyRights = true;
+		}
+		if (permission.getDeletePermission() >= OCLPermission.DELETE_ALL_OBJECTS) {
+			rights.add(RIGHTS_DELETE_ALL);
+			hasAnyRights = true;
+		}
+		if (hasAnyRights) {
+			rights.add(RIGHTS_UNMAPPABLE);
+		}
+		return rights;
 	}
 
 	/**

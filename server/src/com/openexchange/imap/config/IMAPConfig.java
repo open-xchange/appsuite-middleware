@@ -263,6 +263,16 @@ public final class IMAPConfig extends MailConfig {
 	}
 
 	/**
+	 * Checks if mbox format is enabled
+	 * 
+	 * @return <code>true</code> if mbox format is enabled; otherwise
+	 *         <code>false</code>
+	 */
+	public static boolean isMBoxEnabled() {
+		return ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).isMBoxEnabled();
+	}
+
+	/**
 	 * Checks if given IMAP server implements newer ACL extension conforming to
 	 * RFC 4314
 	 * 
