@@ -4,6 +4,7 @@ Bundle-Name: Open-Xchange SessionD
 Bundle-SymbolicName: com.openexchange.sessiond
 Bundle-Version: 6.5.0
 Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.config,
  com.openexchange.config.services,
  com.openexchange.groupware,

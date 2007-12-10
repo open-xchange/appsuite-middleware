@@ -4,6 +4,7 @@ Bundle-Name: Control Plug-in
 Bundle-SymbolicName: com.openexchange.control
 Bundle-Version: 6.5.0
 Bundle-Activator: com.openexchange.control.osgi.ControlActivator
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.groupware,
  com.openexchange.management,
  com.openexchange.management.services,

@@ -5,6 +5,7 @@ Bundle-Version: 6.5.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-SymbolicName: com.openexchange.i18n
 Bundle-Activator: com.openexchange.i18n.osgi.I18nActivator
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.config,
  com.openexchange.i18n,
  com.openexchange.server,

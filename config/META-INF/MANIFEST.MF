@@ -4,6 +4,7 @@ Bundle-Name: Open-Xchange Config
 Bundle-SymbolicName: com.openexchange.config
 Bundle-Version: 6.5.0
 Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.server,
  com.openexchange.server.osgiservice,
  org.apache.commons.logging,
