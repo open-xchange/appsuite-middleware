@@ -70,6 +70,9 @@ public class AttachmentContextDelete extends ContextDelete {
 
 
     public void deletePerformed(DeleteEvent deleteEvent, Connection readCon, Connection writeCon) throws DeleteFailedException {
+        if(!isContextDelete(deleteEvent)) {
+            return;
+        }
         provider.setReadConnection(readCon);
         provider.setWriteConnection(writeCon);
         try{

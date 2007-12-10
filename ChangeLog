@@ -1,58 +1,6 @@
-* 2007-12-07 - marcus.klein@open-xchange.com
+* 2007-12-10 - francisco.laguna@open-xchange.com
 
- - Bugfix 10559: Checking the defaultSendAddress if a valid value is written.
-
-* 2007-11-30 - thorben.betten@open-xchange.com
-
- - Bugfix #10460: Changed handling of exceptions in AJP container to not end up
-   in endless loops if only InputStream is EOF, to keep AJP connections if it is
-   possible.
-
-* 2007-11-19 - thorben.betten@open-xchange.com
-
- - Bugfix #10234: Fixed SQL query to lookup duplicate folders when sharing
-   a private folder
-
-* 2007-11-13 - marcus.klein@open-xchange.com
-
- - Bugfix #10117: Fixed moving problems.
-
-* 2007-11-12 - thorben.betten@open-xchange.com
-
- - Bugfix #10121: Keep AJP connection alive on thrown error
- - Bugfix #10053: Forces to use base64 as 'Content-Transfer-Encoding' header
-   to ensure data is kept as it is.
- - Bugfix #10117: Properly checks for duplicate folders on create/update/rename
-
-* 2007-11-12 - martin.kauss@open-xchange.com
-
- - Fixed bug #10061. If a user changes an appointment in a shared folder
-   all participants except the owner of the shared folder are remived.
-   This has been fixed.
-
-* 2007-11-08 - sebastian.kauss@open-xchange.com
-
- - Fixed bug #10119 - API does not return deleted items properly
-
-* 2007-11-08 - martin.kauss@open-xchange.com
-
- * Fixed bug #10120. If a users creates a recurring appointment and an exception
-   and deletes afterwards the exception the whole sequence is gone. This bug
-   was produced in the bugfix phase and did never exist in a produvtive
-   environmen.
-
-* 2007-11-07 - manuel.kraft@open-xchange.com
-
-  - Bugfix ID#10050 Database leftovers of deleted contexts
-
-* 2007-11-06 - dennis.sieben@open-xchange.com
-
- - Bugfix #8919: [L3] 'checkconsistency' does not provide any usage information and
-   does not work as well
-
-* 2007-11-06 - thorben.betten@open-xchange.com
-
- - Bugfix #10034: Fixed moving of messages without UIDCOPY capability
+ - Bugfix #10583: Remove all attachments in a context ONLY on context delete.
 
 * 2007-10-30 - francisco.laguna@open-xchange.com
 
