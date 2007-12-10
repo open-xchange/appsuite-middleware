@@ -908,23 +908,30 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
                 logininfo.setInt(1, context_id);
                 rs2 = logininfo.executeQuery();
-                while (rs2.next()) {
-                    cs.addLoginMapping(rs.getString(1));
+                try {
+                    while (rs2.next()) {
+                        cs.addLoginMapping(rs.getString(1));
+                    }
+                } finally {
+                    rs2.close();
                 }
-                rs2.close();
 
                 oxdb_read = cache.getREADConnectionForContext(context_id);
-                stmt2 = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
-                stmt2.setInt(1, context_id);
-                rs2 = stmt2.executeQuery();
-
                 long quota_used = 0;
-                while (rs2.next()) {
-                    quota_used = rs2.getLong(1);
+                try {
+                    stmt2 = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
+                    stmt2.setInt(1, context_id);
+                    rs2 = stmt2.executeQuery();
+
+                    while (rs2.next()) {
+                        quota_used = rs2.getLong(1);
+                    }
+                } finally {
+                    rs2.close();
+                    stmt2.close();
+                    cache.pushOXDBRead(context_id, oxdb_read);
                 }
-                rs2.close();
-                stmt2.close();
-                cache.pushOXDBRead(context_id, oxdb_read);
+
                 quota_used /= Math.pow(2, 20);
                 // set used quota in context setup
                 cs.setUsedQuota(quota_used);
@@ -936,8 +943,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
                 list.add(cs);
             }
-            rs.close();
-            stmt.close();
 
             return list.toArray(new Context[list.size()]);
         } catch (final PoolException e) {
@@ -948,12 +953,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw new StorageException(e);
         } finally {
             closePreparedStatement(stmt);
-            closePreparedStatement(stmt2);
             closePreparedStatement(logininfo);
             closeRecordset(rs);
-            closeRecordset(rs2);
             pushConnectionToPoolConfigDB(con);
-            pushConnectionToPool(context_id, oxdb_read);
         }
     }
 

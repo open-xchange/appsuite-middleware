@@ -1,6 +1,7 @@
 * 2007-12-10 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#10592 [HEAD] Filestorage leftovers for deleted contexts
+  - Bugfix ID#10603 [HEAD] double push back on db connection causes warning log
 
 * 2007-12-07 - dennis.sieben@open-xchange.com
 
