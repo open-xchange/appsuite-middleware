@@ -47,93 +47,47 @@
  *
  */
 
-package com.openexchange.management.internal;
+package com.openexchange.management;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.config.Configuration;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.Initialization;
+import javax.management.ObjectName;
 
 /**
+ * {@link ManagementAgent}
  * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public final class ManagementInit implements Initialization {
-
-	private static final AtomicBoolean started = new AtomicBoolean();
-
-	private static final ManagementInit singleton = new ManagementInit();
+public interface ManagementAgent {
 
 	/**
-	 * Logger.
+	 * Registers a new MBean
+	 * 
+	 * @param objectName
+	 *            The bean's object name
+	 * @param mbean
+	 *            The bean to register
+	 * @throws Exception
+	 *             If registration fails
 	 */
-	private static final Log LOG = LogFactory.getLog(ManagementInit.class);
+	public void registerMBean(ObjectName objectName, Object mbean) throws Exception;
 
 	/**
-	 * Prevent instantiation.
+	 * Unregisters the MBean corresponding to given name
+	 * 
+	 * @param name
+	 *            The bean name
+	 * @throws Exception
+	 *             If bean cannot be unregistered
 	 */
-	private ManagementInit() {
-		super();
-	}
+	public void unregisterMBean(String name) throws Exception;
 
 	/**
-	 * @return the singleton instance.
+	 * Unregisters the MBean corresponding to given object name
+	 * 
+	 * @param objectName
+	 *            The bean's object name
+	 * @throws Exception
+	 *             If bean cannot be unregistered
 	 */
-	public static ManagementInit getInstance() {
-		return singleton;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void start() throws AbstractOXException {
-		if (started.get()) {
-			LOG.error(ManagementInit.class.getName() + " already started");
-			return;
-		}
-		final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();
-		final Configuration c = ConfigurationService.getInstance().getService();
-		try {
-			String bindAddress = c.getProperty("MonitorJMXBindAddress", "localhost");
-			if (bindAddress == null) {
-				bindAddress = "localhost";
-			}
-			
-			final int jmxPort = c.getIntProperty("MonitorJMXPort", 9999);
-			agent.setJmxPort(jmxPort);
-			agent.setJmxBindAddr(bindAddress);
-		} finally {
-			ConfigurationService.getInstance().ungetService(c);
-		}
-		agent.run();
-		if (LOG.isInfoEnabled()) {
-			LOG.info("JMX server successfully initialized.");
-		}
-		started.set(true);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void stop() throws AbstractOXException {
-		if (!started.get()) {
-			LOG.error(ManagementInit.class.getName() + " has not been started");
-			return;
-		}
-		final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();
-		agent.stop();
-		started.set(false);
-	}
-
-	/**
-	 * @return <code>true</code> if monitoring has been started; otherwise
-	 *         <code>false</code>
-	 */
-	public boolean isStarted() {
-		return started.get();
-	}
+	public void unregisterMBean(ObjectName objectName) throws Exception;
 }

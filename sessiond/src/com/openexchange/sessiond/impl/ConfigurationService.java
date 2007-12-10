@@ -47,93 +47,35 @@
  *
  */
 
-package com.openexchange.management.internal;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+package com.openexchange.sessiond.impl;
 
 import com.openexchange.config.Configuration;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.Initialization;
+import com.openexchange.server.ServiceHolder;
 
 /**
+ * {@link ConfigurationService} - The service holder for configuration service
  * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public final class ManagementInit implements Initialization {
+public final class ConfigurationService extends ServiceHolder<Configuration> {
 
-	private static final AtomicBoolean started = new AtomicBoolean();
-
-	private static final ManagementInit singleton = new ManagementInit();
+	private static final ConfigurationService instance = new ConfigurationService();
 
 	/**
-	 * Logger.
+	 * Gets the configuration service instance.
+	 * 
+	 * @return The singleton instance of {@link ConfigurationService}
 	 */
-	private static final Log LOG = LogFactory.getLog(ManagementInit.class);
+	public static ConfigurationService getInstance() {
+		return instance;
+	}
 
 	/**
-	 * Prevent instantiation.
+	 * Initializes a new {@link ConfigurationService}
 	 */
-	private ManagementInit() {
+	private ConfigurationService() {
 		super();
 	}
 
-	/**
-	 * @return the singleton instance.
-	 */
-	public static ManagementInit getInstance() {
-		return singleton;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void start() throws AbstractOXException {
-		if (started.get()) {
-			LOG.error(ManagementInit.class.getName() + " already started");
-			return;
-		}
-		final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();
-		final Configuration c = ConfigurationService.getInstance().getService();
-		try {
-			String bindAddress = c.getProperty("MonitorJMXBindAddress", "localhost");
-			if (bindAddress == null) {
-				bindAddress = "localhost";
-			}
-			
-			final int jmxPort = c.getIntProperty("MonitorJMXPort", 9999);
-			agent.setJmxPort(jmxPort);
-			agent.setJmxBindAddr(bindAddress);
-		} finally {
-			ConfigurationService.getInstance().ungetService(c);
-		}
-		agent.run();
-		if (LOG.isInfoEnabled()) {
-			LOG.info("JMX server successfully initialized.");
-		}
-		started.set(true);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void stop() throws AbstractOXException {
-		if (!started.get()) {
-			LOG.error(ManagementInit.class.getName() + " has not been started");
-			return;
-		}
-		final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();
-		agent.stop();
-		started.set(false);
-	}
-
-	/**
-	 * @return <code>true</code> if monitoring has been started; otherwise
-	 *         <code>false</code>
-	 */
-	public boolean isStarted() {
-		return started.get();
-	}
 }

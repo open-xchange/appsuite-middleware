@@ -47,60 +47,35 @@
  *
  */
 
-package com.openexchange.management;
+package com.openexchange.management.internal;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
+import com.openexchange.config.Configuration;
+import com.openexchange.server.ServiceHolder;
 
 /**
- * {@link ManagementAgent}
+ * {@link ConfigurationService} - The service holder for configuration service
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public interface ManagementAgent {
-	
-	/**
-	 * Registers a new MBean
-	 * 
-	 * @param name
-	 *            The bean name
-	 * @param mbean
-	 *            The bean to register
-	 * @throws Exception
-	 *             If registration fails
-	 */
-	public void registerMBean(String name, Object mbean) throws Exception;
+public final class ConfigurationService extends ServiceHolder<Configuration> {
+
+	private static final ConfigurationService instance = new ConfigurationService();
 
 	/**
-	 * Registers a new MBean
+	 * Gets the configuration service instance.
 	 * 
-	 * @param objectName
-	 *            The bean's object name
-	 * @param mbean
-	 *            The bean to register
-	 * @throws Exception
-	 *             If registration fails
+	 * @return The singleton instance of {@link ConfigurationService}
 	 */
-	public void registerMBean(ObjectName objectName, Object mbean) throws Exception;
+	public static ConfigurationService getInstance() {
+		return instance;
+	}
 
 	/**
-	 * Unregisters the MBean corresponding to given name
-	 * 
-	 * @param name
-	 *            The bean name
-	 * @throws Exception
-	 *             If bean cannot be unregistered
+	 * Initializes a new {@link ConfigurationService}
 	 */
-	public void unregisterMBean(String name) throws Exception;
+	private ConfigurationService() {
+		super();
+	}
 
-	/**
-	 * Unregisters the MBean corresponding to given object name
-	 * 
-	 * @param objectName
-	 *            The bean's object name
-	 * @throws Exception
-	 *             If bean cannot be unregistered
-	 */
-	public void unregisterMBean(ObjectName objectName) throws Exception;
 }

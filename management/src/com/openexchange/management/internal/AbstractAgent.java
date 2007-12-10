@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.management;
+package com.openexchange.management.internal;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -73,8 +73,6 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 import javax.management.remote.rmi.RMIConnectorServer;
-
-import com.sun.jmx.snmp.daemon.SnmpAdaptorServer;
 
 /**
  * 
@@ -326,19 +324,6 @@ public abstract class AbstractAgent {
 			LOG.error(e);
 			return;
 		}
-	}
-
-	/**
-	 * Create a Snmp adaptor and start it
-	 */
-	public final void addSnmpAdaptor(final int port) throws Exception {
-		// Register and start the SNMP adaptor
-		final SnmpAdaptorServer adapter = new SnmpAdaptorServer();
-		final ObjectName adapterName = new ObjectName("Adaptors:type=SNMP,port=" + port);
-		adapter.setPort(port);
-		mbs.registerMBean(adapter, adapterName);
-		adapter.start();
-		printTrace("SnmpAdaptor on port " + port);
 	}
 
 	/**

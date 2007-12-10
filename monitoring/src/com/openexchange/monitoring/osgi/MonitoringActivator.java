@@ -59,8 +59,8 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.management.ManagementAgent;
-import com.openexchange.management.services.ManagementService;
 import com.openexchange.monitoring.MonitorInterface;
+import com.openexchange.monitoring.internal.ManagementService;
 import com.openexchange.monitoring.internal.MonitorImpl;
 import com.openexchange.monitoring.internal.MonitoringInit;
 import com.openexchange.server.ServiceHolderListener;

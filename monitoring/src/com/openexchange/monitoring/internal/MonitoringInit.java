@@ -59,7 +59,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.management.ManagementAgent;
-import com.openexchange.management.services.ManagementService;
 import com.openexchange.server.Initialization;
 
 /**
