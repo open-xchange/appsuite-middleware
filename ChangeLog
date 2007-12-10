@@ -1,3 +1,9 @@
+* 2007-12-10 - choeger@open-xchange.com
+
+  - Bugfix ID#10585 [L3] no admin user available after context creation
+    Database replication problem.
+    Fix: do not use read connections at all anymore 
+    
 * 2007-12-07 - manuel.kraft@open-xchange.com
 
   - Bugfix ID#10559 setDefaultSenderAddress does not work in changeUser
