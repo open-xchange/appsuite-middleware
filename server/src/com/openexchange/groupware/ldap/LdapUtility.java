@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.ldap;
 
 import java.lang.reflect.Constructor;
@@ -72,7 +70,6 @@ import com.openexchange.groupware.ldap.LdapException.Code;
 import com.openexchange.tools.file.TagFiller;
 import com.openexchange.tools.file.TagFillerAdapter;
 import com.openexchange.tools.tag.LineParserUtility;
-import com.sun.jndi.ldap.LdapName;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein </a>
@@ -171,29 +168,6 @@ public final class LdapUtility {
         final Name retval = (Name) name2.clone();
         retval.addAll(name1);
         return retval;
-    }
-
-    /**
-     * Builds a distinguished name.
-     * @param propName Name of the property that contains the definition for the
-     *        distinguished name to build.
-     * @param replace Map containing the values that fill the dynamic parts of
-     *        the configuration properties.
-     * @param values user specific ldap values.
-     * @return the full qualified distinguished name.
-     * @throws LdapException if a property is missing or building the dn fails.
-     */
-    public static Name buildDN(final String propName,
-        final Map<String, String> replace, final Credentials values)
-        throws LdapException {
-        String tmp = findProperty(propName);
-        tmp = LineParserUtility.parseLine(tmp, FILLER, new TagFillerData(values,
-            replace));
-        try {
-            return new LdapName(tmp);
-        } catch (InvalidNameException e) {
-            throw new LdapException(Component.LDAP, Code.DN_PROBLEM, e, tmp);
-        }
     }
 
     /**
