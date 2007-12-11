@@ -105,7 +105,7 @@ public abstract class OXContextMySQLStorageCommon {
         final int context_id = ctx.getId();
 
         try {
-            oxdb_read = cache.getREADConnectionForContext(context_id);
+            oxdb_read = cache.getConnectionForContext(context_id);
 
             prep = configdb_con.prepareStatement("SELECT context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema, login2context.login_info FROM context LEFT JOIN ( login2context, context_server2db_pool, server ) ON ( context.cid = context_server2db_pool.cid AND context_server2db_pool.server_id = server.server_id AND context.cid = login2context.cid ) WHERE context.cid = ? AND server.name = ?");
             prep.setInt(1, context_id);
@@ -180,7 +180,7 @@ public abstract class OXContextMySQLStorageCommon {
             closePreparedStatement(prep);
             try {
                 if (oxdb_read != null) {
-                    cache.pushOXDBRead(context_id, oxdb_read);
+                    cache.pushConnectionForContext(context_id, oxdb_read);
                 }
             } catch (final PoolException exp) {
                 log.error("Pool Error pushing ox read connection to pool!",exp);

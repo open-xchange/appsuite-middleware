@@ -159,38 +159,21 @@ public class AdminCache {
         return this.prop;
     }
 
-    public Connection getREADConnectionForContext(final int context_id) throws PoolException {
+    public Connection getConnectionForContext(final int context_id) throws PoolException {
         checkDatabaseLocked();
-        return this.pool.getREADConnectionForContext(context_id);
+        return this.pool.getConnectionForContext(context_id);
     }
 
-    public Connection getWRITEConnectionForContext(final int context_id) throws PoolException {
-        checkDatabaseLocked();
-        return this.pool.getWRITEConnectionForContext(context_id);
+    public boolean pushConnectionForContext(final int context_id, final Connection con) throws PoolException {
+        return this.pool.pushConnectionForContext(context_id, con);
     }
 
-    public boolean pushOXDBWrite(final int context_id, final Connection con) throws PoolException {
-        return this.pool.pushOXDBWrite(context_id, con);
+    public Connection getConnectionForConfigDB() throws PoolException {
+        return this.pool.getConnectionForConfigDB();
     }
 
-    public boolean pushOXDBRead(final int context_id, final Connection con) throws PoolException {
-        return this.pool.pushOXDBRead(context_id, con);
-    }
-
-    public Connection getREADConnectionForCONFIGDB() throws PoolException {
-        return this.pool.getREADConnectionForCONFIGDB();
-    }
-
-    public Connection getWRITEConnectionForCONFIGDB() throws PoolException {
-        return this.pool.getWRITEConnectionForCONFIGDB();
-    }
-
-    public boolean pushConfigDBRead(final Connection con) throws PoolException {
-        return this.pool.pushConfigDBRead(con);
-    }
-
-    public boolean pushConfigDBWrite(final Connection con) throws PoolException {
-        return this.pool.pushConfigDBWrite(con);
+    public boolean pushConnectionForConfigDB(final Connection con) throws PoolException {
+        return this.pool.pushConnectionForConfigDB(con);
     }
 
     /**

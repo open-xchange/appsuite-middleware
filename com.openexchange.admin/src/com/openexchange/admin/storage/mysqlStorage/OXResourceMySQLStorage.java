@@ -90,7 +90,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         final int resource_id = res.getId();
         try {
 
-            con = cache.getWRITEConnectionForContext(context_id);
+            con = cache.getConnectionForContext(context_id);
             con.setAutoCommit(false);
 
             int edited_the_resource = 0;
@@ -196,7 +196,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                 log.error("Error closing PreparedStatement", ex);
             }
             try {
-                cache.pushOXDBWrite(context_id, con);
+                cache.pushConnectionForContext(context_id, con);
             } catch (final PoolException e) {
                 log.error("Error pushing ox write connection to pool!", e);
             }
@@ -212,7 +212,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         final int context_ID = ctx.getId();
         try {
 
-            con = cache.getWRITEConnectionForContext(context_ID);
+            con = cache.getConnectionForContext(context_ID);
             con.setAutoCommit(false);
 
             final String identifier = res.getName();
@@ -287,7 +287,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             }
 
             try {
-                cache.pushOXDBWrite(context_ID, con);
+                cache.pushConnectionForContext(context_ID, con);
             } catch (final PoolException e) {
                 log.error("Error pushing ox write connection to pool!", e);
             }
@@ -301,7 +301,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         PreparedStatement prep_del = null;
         final int context_id = ctx.getId();
         try {
-            con = cache.getWRITEConnectionForContext(context_id);
+            con = cache.getConnectionForContext(context_id);
             con.setAutoCommit(false);
 
             final DeleteEvent delev = new DeleteEvent(this, resource_id, DeleteEvent.TYPE_RESOURCE, context_id);
@@ -341,7 +341,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             }
             try {
 
-                cache.pushOXDBWrite(context_id, con);
+                cache.pushConnectionForContext(context_id, con);
             } catch (final PoolException e) {
                 log.error("Error pushing ox write connection to pool!", e);
             }
@@ -356,7 +356,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         final int resource_id = resource.getId().intValue();
         final int context_id = ctx.getId();
         try {
-            con = cache.getWRITEConnectionForContext(context_id);
+            con = cache.getConnectionForContext(context_id);
             con.setAutoCommit(false);
             
             final DeleteEvent delev = new DeleteEvent(this, resource_id, DeleteEvent.TYPE_RESOURCE, context_id);
@@ -396,7 +396,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             }
             try {
                 
-                cache.pushOXDBWrite(context_id, con);
+                cache.pushConnectionForContext(context_id, con);
             } catch (final PoolException e) {
                 log.error("Error pushing ox write connection to pool!", e);
             }
@@ -412,7 +412,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         final int context_id = ctx.getId();
         try {
             
-            con = cache.getREADConnectionForContext(context_id);
+            con = cache.getConnectionForContext(context_id);
 
             prep_list = con.prepareStatement("SELECT cid,id,identifier,displayName,available,description,mail FROM resource WHERE resource.cid = ? AND resource.id = ?");
             prep_list.setInt(1, context_id);
@@ -472,7 +472,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             }
 
             try {
-                cache.pushOXDBRead(context_id, con);
+                cache.pushConnectionForContext(context_id, con);
             } catch (final PoolException e) {
                 log.error("Error pushing ox read connection to pool!", e);
             }
@@ -486,7 +486,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         final int context_id = ctx.getId();
         try {
             
-            con = cache.getREADConnectionForContext(context_id);
+            con = cache.getConnectionForContext(context_id);
 
             prep_list = con.prepareStatement("SELECT cid,id,identifier,displayName,available,description,mail FROM resource WHERE resource.cid = ? AND resource.id = ?");
             prep_list.setInt(1, context_id);
@@ -550,7 +550,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             }
 
             try {
-                cache.pushOXDBRead(context_id, con);
+                cache.pushConnectionForContext(context_id, con);
             } catch (final PoolException e) {
                 log.error("Error pushing ox read connection to pool!", e);
             }
@@ -567,7 +567,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
         final int context_id = ctx.getId();
         try {
             final ArrayList<Resource> list = new ArrayList<Resource>();
-            con = cache.getREADConnectionForContext(context_id);
+            con = cache.getConnectionForContext(context_id);
 
             prep_list = con.prepareStatement("SELECT resource.mail,resource.cid,resource.id,resource.identifier,resource.displayName,resource.available,resource.description FROM resource WHERE resource.cid = ? AND (resource.identifier like ? OR resource.displayName = ?)");
             prep_list.setInt(1, context_id);
@@ -634,7 +634,7 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
                 log.error("Error closing PreparedStatement", ex);
             }
             try {
-                cache.pushOXDBRead(context_id, con);
+                cache.pushConnectionForContext(context_id, con);
             } catch (final PoolException e) {
                 log.error("Error pushing ox read connection to pool!", e);
             }
