@@ -49,7 +49,6 @@
 
 package com.openexchange.sessiond.exception;
 
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXExceptionFactory;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -58,13 +57,13 @@ import com.openexchange.groupware.AbstractOXException.Category;
  * Factory for creating session exceptions.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class SessionExceptionFactory extends AbstractOXExceptionFactory {
+public class SessionExceptionFactory extends AbstractOXExceptionFactory<SessiondException> {
 
     /**
      * Default constructor.
      * @param clazz this factory is used to create exception for this class.
      */
-    public SessionExceptionFactory(final Class clazz) {
+    public SessionExceptionFactory(final Class<?> clazz) {
         super(clazz);
     }
 
@@ -72,7 +71,7 @@ public class SessionExceptionFactory extends AbstractOXExceptionFactory {
      * {@inheritDoc}
      */
     @Override
-    protected AbstractOXException buildException(final Component component,
+    protected SessiondException buildException(final Component component,
         final Category category, final int number, final String message,
         final Throwable cause, final Object... msgArgs) {
         return new SessiondException(component, category, number, message, cause,
