@@ -51,7 +51,6 @@ package com.openexchange.sessiond.exception;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
-import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
  * Exception if something not works as expected with the session.
