@@ -1,3 +1,7 @@
+* 2007-12-11 - choeger@open-xchange.com
+
+  - Bugfix ID#10596 using read connections results into permanent problems in replication scenarios
+
 * 2007-12-07 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#10577 [HEAD ]admin does breake Database replication
