@@ -51,15 +51,15 @@
 
 package com.openexchange.ajax;
 
-import java.io.File;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
-import org.springframework.core.io.FileSystemResource;
-
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.importexport.ImporterExporter;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.core.io.FileSystemResource;
+
+import java.io.File;
 
 /**
  * Abtract class for both importers and exporters that does 
@@ -85,8 +85,13 @@ public abstract class ImportExport extends SessionServlet {
 		//spring init
 		String beanPath = SystemConfig.getProperty("IMPORTEREXPORTER");
 		if (beanPath != null) {
-			XmlBeanFactory beanfactory = new XmlBeanFactory( new FileSystemResource( new File(beanPath) ) );
-			importerExporter = (ImporterExporter) beanfactory.getBean("importerExporter");
+			//XmlBeanFactory beanfactory = new XmlBeanFactory( new FileSystemResource( new File(beanPath) ) );
+            DefaultListableBeanFactory beanfactory = new DefaultListableBeanFactory();
+            XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanfactory);
+            reader.setBeanClassLoader(ImportExport.class.getClassLoader()); // Use the classloader that loaded this instance.
+            reader.loadBeanDefinitions(new FileSystemResource( new File(beanPath) ));
+
+            importerExporter = (ImporterExporter) beanfactory.getBean("importerExporter");
 		} else {
 			LOG.error("missing property: IMPORTEREXPORTER");
 		}
