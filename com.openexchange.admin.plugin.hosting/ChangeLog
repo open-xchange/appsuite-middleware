@@ -1,3 +1,8 @@
+* 2007-12-11 - choeger@open-xchange.com
+
+  - Bugfix ID#10223
+    [L3] file plugin/hosting.properties gets overwritten on package update
+    
 * 2007-12-10 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#10592 [HEAD] Filestorage leftovers for deleted contexts
