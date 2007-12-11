@@ -56,19 +56,11 @@ import java.sql.Connection;
 
 public interface OXAdminPoolInterface {
     
-    public Connection getREADConnectionForCONFIGDB() throws PoolException;
+    public Connection getConnectionForConfigDB() throws PoolException;
     
-    public Connection getWRITEConnectionForCONFIGDB() throws PoolException;
+    public Connection getConnectionForContext( int context_id ) throws PoolException;
     
-    public Connection getREADConnectionForContext( int context_id ) throws PoolException;
+    public boolean pushConnectionForConfigDB(Connection con) throws PoolException;
     
-    public Connection getWRITEConnectionForContext( int context_id ) throws PoolException;
-    
-    public boolean pushConfigDBRead(Connection con) throws PoolException;
-    
-    public boolean pushConfigDBWrite(Connection con) throws PoolException;
-    
-    public boolean pushOXDBWrite(int context_id,Connection con) throws PoolException;
-    
-    public boolean pushOXDBRead(int context_id,Connection con) throws PoolException;
+    public boolean pushConnectionForContext(int context_id,Connection con) throws PoolException;
 }

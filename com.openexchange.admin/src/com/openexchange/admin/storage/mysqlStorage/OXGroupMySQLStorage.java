@@ -113,7 +113,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         final int context_id = ctx.getId().intValue();
         try {
 
-            con = cache.getWRITEConnectionForContext(context_id);
+            con = cache.getConnectionForContext(context_id);
             con.setAutoCommit(false);
 
             for (final User member : members) {
@@ -162,7 +162,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 log.error("SQL Error", e);
             }
             try {
-                cache.pushOXDBWrite(context_id, con);
+                cache.pushConnectionForContext(context_id, con);
             } catch (final PoolException e) {
                 log.error("Error pushing ox write connection to pool! ", e);
             }
@@ -175,7 +175,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         PreparedStatement prep_del_member = null;
         final int context_id = ctx.getId().intValue();
         try {
-            con = cache.getWRITEConnectionForContext(context_id);
+            con = cache.getConnectionForContext(context_id);
             con.setAutoCommit(false);
 
             for (final User member : members) {
@@ -227,7 +227,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 log.error("SQL Error", ee);
             }
             try {
-                cache.pushOXDBWrite(context_id, con);
+                cache.pushConnectionForContext(context_id, con);
             } catch (final PoolException e) {
                 log.error("Error pushing ox write connection to pool! ", e);
             }
@@ -240,7 +240,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         PreparedStatement prep_edit_group = null;
         final int context_id = ctx.getId();
         try {
-            con = cache.getWRITEConnectionForContext(context_id);
+            con = cache.getConnectionForContext(context_id);
             con.setAutoCommit(false);
             final int group_id = grp.getId();
             final String identifier = grp.getName();
@@ -327,7 +327,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
 
             try {
                 if (con != null) {
-                    cache.pushOXDBWrite(context_id, con);
+                    cache.pushConnectionForContext(context_id, con);
                 }
             } catch (final PoolException e) {
                 log.error("Pool Error", e);
@@ -342,7 +342,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         PreparedStatement prep_insert = null;
         final int context_ID = ctx.getId().intValue();
         try {
-            con = cache.getWRITEConnectionForContext(context_ID);
+            con = cache.getConnectionForContext(context_ID);
             con.setAutoCommit(false);
             final String identifier = grp.getName();
 
@@ -420,7 +420,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
 
             try {
                 if(con!=null){
-                    cache.pushOXDBWrite(context_ID, con);
+                    cache.pushConnectionForContext(context_ID, con);
                 }
             } catch (final PoolException e) {
                 log.error("Pool Error", e);
@@ -440,7 +440,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             
             tool.existsGroup(ctx, grps);
 
-            con = cache.getWRITEConnectionForContext(context_id);
+            con = cache.getConnectionForContext(context_id);
             con.setAutoCommit(false);
             for (final Group grp : grps) {
                 final int grp_id = grp.getId();
@@ -519,7 +519,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
 
             try {
                 if(con!=null){
-                    cache.pushOXDBWrite(context_id, con);
+                    cache.pushConnectionForContext(context_id, con);
                 }
             } catch (final PoolException e) {
                 log.error("Pool Error", e);
@@ -533,7 +533,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         final int context_id = ctx.getId();
         try {
 
-            con = cache.getREADConnectionForContext(context_id);
+            con = cache.getConnectionForContext(context_id);
             
             Integer[] as =  getMembers(ctx, grp_id,con);
             User[] ret = new User[as.length];
@@ -548,7 +548,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         } finally {
             try {
                 if(con!=null){
-                    cache.pushOXDBRead(context_id, con);
+                    cache.pushConnectionForContext(context_id, con);
                 }
             } catch (final PoolException e) {
                 log.error("Pool Error", e);
@@ -629,7 +629,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         
         try {
         	
-            con = cache.getREADConnectionForContext(ctx.getId().intValue());
+            con = cache.getConnectionForContext(ctx.getId().intValue());
 
             return get(ctx, grp, con);        
         } catch (final PoolException e) {
@@ -638,7 +638,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         } finally {
             try {
                 if (con != null) {
-                    cache.pushOXDBRead(ctx.getId().intValue(), con);
+                    cache.pushConnectionForContext(ctx.getId().intValue(), con);
                 }
             } catch (final PoolException e) {
                 log.error("Pool Error", e);
@@ -659,7 +659,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 pattern_temp = pattern.replace('*', '%');
             }
 
-            con = cache.getREADConnectionForContext(context_id);
+            con = cache.getConnectionForContext(context_id);
 
             prep_list = con.prepareStatement("SELECT cid,id,identifier,displayName FROM groups WHERE groups.cid = ? AND (identifier like ? OR displayName like ?)");
             prep_list.setInt(1, context_id);
@@ -704,7 +704,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
 
             try {
                 if(con!=null){
-                    cache.pushOXDBRead(context_id, con);
+                    cache.pushConnectionForContext(context_id, con);
                 }
             } catch (final PoolException e) {
                 log.error("Pool Error", e);
@@ -819,7 +819,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         PreparedStatement prep_list = null;  
         try {
 
-            con = cache.getREADConnectionForContext(ctx.getId().intValue());
+            con = cache.getConnectionForContext(ctx.getId().intValue());
             // fetch all group ids the user is member of
             prep_list = con.prepareStatement("SELECT id FROM groups_member WHERE cid = ? AND member = ?");
             prep_list.setInt(1, ctx.getId().intValue());
@@ -848,7 +848,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
 
             try {
                 if (con != null) {
-                    cache.pushOXDBRead(ctx.getId().intValue(), con);
+                    cache.pushConnectionForContext(ctx.getId().intValue(), con);
                 }
             } catch (final PoolException e) {
                 log.error("Pool Error", e);

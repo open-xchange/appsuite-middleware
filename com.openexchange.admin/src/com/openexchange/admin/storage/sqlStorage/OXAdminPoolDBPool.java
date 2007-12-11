@@ -69,34 +69,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         super();
     }
     
-    public Connection getREADConnectionForCONFIGDB() throws PoolException {
-        Connection con = null;
-        try{
-            con =  DBPool.pickup();
-        }catch(DBPoolingException ep){
-            if (log.isErrorEnabled()) {
-            log.error("Error pickup configdb database read connection from ox pool!",ep);
-            }
-            throw new PoolException(""+ep.getMessage());
-        }
-        return con;
-    }
-    
-    public Connection getREADConnectionForContext(int context_id) throws PoolException {
-        Context ctx = new ContextImpl(context_id);
-        Connection con = null;
-        try{
-            con =  DBPool.pickup(ctx);
-        }catch(DBPoolingException ep){
-            if (log.isErrorEnabled()) {
-            log.error("Error pickup oxdb database read connection from ox pool!",ep);
-            }
-            throw new PoolException(""+ep.getMessage());
-        }
-        return con;
-    }
-    
-    public Connection getWRITEConnectionForCONFIGDB() throws PoolException {
+    public Connection getConnectionForConfigDB() throws PoolException {
         Connection con = null;
         try{
             con =  DBPool.pickupWriteable();
@@ -109,7 +82,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         return con;
     }
     
-    public Connection getWRITEConnectionForContext(int context_id) throws PoolException {
+    public Connection getConnectionForContext(int context_id) throws PoolException {
         Context ctx = new ContextImpl(context_id);
         Connection con = null;
         try{
@@ -123,24 +96,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         return con;
     }
     
-    public boolean pushConfigDBRead(Connection con) throws PoolException {
-        boolean ret = false;
-        
-        try {
-            if(con != null && !con.getAutoCommit() && !con.isClosed() ){
-                con.setAutoCommit(true);
-            }
-            ret = DBPool.push(con);
-        } catch (Exception e) {
-            if (log.isErrorEnabled()) {
-            log.error("Error pushing configdb read connection to pool!",e);
-            }
-            throw new PoolException(""+e.getMessage());
-        }
-        return ret;
-    }
-    
-    public boolean pushConfigDBWrite(Connection con) throws PoolException {
+    public boolean pushConnectionForConfigDB(Connection con) throws PoolException {
         boolean ret = false;
         
         try {
@@ -157,25 +113,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         return ret;
     }
     
-    public boolean pushOXDBRead(int context_id, Connection con) throws PoolException {
-        boolean ret = false;
-        Context ctx = new ContextImpl(context_id);
-        
-        try {
-            if(con != null && !con.getAutoCommit() && !con.isClosed() ){
-                con.setAutoCommit(true);
-            }
-            ret = DBPool.push(ctx,con);
-        } catch (Exception e) {
-            if (log.isErrorEnabled()) {
-            log.error("Error pushing ox db read connection to pool!",e);
-            }
-            throw new PoolException(""+e.getMessage());
-        }
-        return ret;
-    }
-    
-    public boolean pushOXDBWrite(int context_id, Connection con) throws PoolException {
+    public boolean pushConnectionForContext(int context_id, Connection con) throws PoolException {
         boolean ret = false;
         Context ctx = new ContextImpl(context_id);
         
