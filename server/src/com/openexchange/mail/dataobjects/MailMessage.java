@@ -131,7 +131,7 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	public static final int FLAG_USER = 64;
 
 	/**
-	 * Virtal Spam flags
+	 * Virtual Spam flag
 	 * 
 	 * @value 128
 	 */
