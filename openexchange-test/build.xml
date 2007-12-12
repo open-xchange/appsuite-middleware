@@ -101,7 +101,7 @@
 				<pathelement location="test-common.jar" />
 	    	</classpath>
 
-	    	<test name="SmokeTestSuite" todir="${test.xml.dir}" />
+	    	<test name="com.openexchange.SmokeTestSuite" todir="${test.xml.dir}" />
 
 			<test name="com.openexchange.ajax.session.LoginTest" todir="${test.xml.dir}" />
 			<test name="com.openexchange.ajax.session.RedirectTest" todir="${test.xml.dir}" />
