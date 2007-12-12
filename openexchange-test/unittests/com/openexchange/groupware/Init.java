@@ -5,6 +5,7 @@ import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.monitoring.services.MonitoringConfiguration;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.SessiondService;
+import com.openexchange.sessiond.impl.ConfigurationService;
 import com.openexchange.sessiond.impl.SessiondConnectorImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.test.TestInit;
@@ -155,7 +156,7 @@ public final class Init {
     }
 
     private static void startAndInjectSessiondBundle() throws Exception {
-
+        ConfigurationService.getInstance().setService((Configuration)services.get(Configuration.class));
         SessiondService.getInstance().setService(new SessiondConnectorImpl());
     }
 

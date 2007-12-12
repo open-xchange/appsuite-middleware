@@ -105,4 +105,5 @@ public class Bug8681forVCard extends AbstractVCardTest {
 	}
 	        */
     // TODO: Mock UserConfiguration. How to do that?
+    @Test public void testDummy(){}
 }

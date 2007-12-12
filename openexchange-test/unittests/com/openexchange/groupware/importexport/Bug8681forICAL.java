@@ -80,8 +80,10 @@ public class Bug8681forICAL extends AbstractICalImportTest {
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(Bug8681forICAL.class);
 	}
-	
-	/*@Test public void checkAppointment() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXException{
+
+    @Test public void testDummy(){}
+
+    /*@Test public void checkAppointment() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXException{
 		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "bug8681 for ical appointments");
 		
 		//session

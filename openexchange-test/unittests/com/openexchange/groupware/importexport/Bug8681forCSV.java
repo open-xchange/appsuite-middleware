@@ -75,8 +75,8 @@ public class Bug8681forCSV extends AbstractContactTest {
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(Bug8681forCSV.class);
 	}
-
-	/*@Test public void testOurCSV() throws UnsupportedEncodingException, DBPoolingException, SQLException, OXException{
+    
+    /*@Test public void testOurCSV() throws UnsupportedEncodingException, DBPoolingException, SQLException, OXException{
 		imp = new CSVContactImporter();
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj, "bug8681 for csv");
 		
