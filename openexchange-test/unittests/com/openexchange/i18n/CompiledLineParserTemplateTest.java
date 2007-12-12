@@ -1,5 +1,7 @@
 package com.openexchange.i18n;
 
+import com.openexchange.i18n.tools.CompiledLineParserTemplate;
+import com.openexchange.i18n.tools.StringTemplate;
 import junit.framework.TestCase;
 
 public class CompiledLineParserTemplateTest extends TestCase {
