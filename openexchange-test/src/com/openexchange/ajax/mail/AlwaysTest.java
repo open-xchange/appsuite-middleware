@@ -172,7 +172,7 @@ public class AlwaysTest extends AbstractAJAXTest {
             final int pos = max == -1 ? i : rand.nextInt(array.length());
             final JSONArray mailInfo = array.getJSONArray(pos);
             final String mailId = mailInfo.getString(0);
-            LOG.trace("Getting mail: " + mailId);
+            LOG.info("Getting mail: " + mailId);
             final Response mailResponse = MailTest.getMail(getWebConversation(),
                 getHostName(), getSessionId(), mailId);
             assertFalse(mailResponse.getErrorMessage(), mailResponse.hasError());
@@ -187,7 +187,7 @@ public class AlwaysTest extends AbstractAJAXTest {
             }, false));
         final Map<String, String> retval = new HashMap<String, String>();
         for (Object[] row : listR) {
-            retval.put((String) row[0], (String) row[1]);
+            retval.put(row[0].toString(), row[1].toString());
         }
         return retval;
     }
