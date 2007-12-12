@@ -106,10 +106,10 @@ public final class MailTransportInit implements Initialization {
 							 * Fallback
 							 */
 							if (LOG.isWarnEnabled()) {
-								LOG.warn("Using fallback \"com.openexchange.mail.transport.smtp.SMTPTransport\"");
+								LOG.warn("Using fallback \"com.openexchange.smtp.SMTPTransport\"");
 							}
 							final Class<? extends MailTransport> clazz = Class.forName(
-									"com.openexchange.mail.transport.smtp.SMTPTransport").asSubclass(
+									"com.openexchange.smtp.SMTPTransport").asSubclass(
 									MailTransport.class);
 							MailTransport.setImplementingClass(clazz);
 							initialized.set(true);
