@@ -50,7 +50,6 @@
 package com.openexchange.mail.json.parser;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -88,6 +87,9 @@ import com.openexchange.session.Session;
  * 
  */
 public final class MessageParser {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(MessageParser.class);
 
 	/**
 	 * No instantiation
@@ -173,8 +175,7 @@ public final class MessageParser {
 	 * @throws MailException
 	 *             If parsing fails
 	 */
-	public static TransportMailMessage parse(final JSONObject jsonObj, final Session session)
-			throws MailException {
+	public static TransportMailMessage parse(final JSONObject jsonObj, final Session session) throws MailException {
 		final TransportMailMessage transportMail = MailTransport.getNewTransportMailMessage();
 		parse(jsonObj, transportMail, session);
 		return transportMail;
@@ -194,6 +195,25 @@ public final class MessageParser {
 	 *             If parsing fails
 	 */
 	public static void parse(final JSONObject jsonObj, final MailMessage mail, final Session session)
+			throws MailException {
+		parse(jsonObj, mail, TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), session.getContext())
+				.getTimeZone()));
+	}
+
+	/**
+	 * Parses given instance of {@link JSONObject} to given instance of
+	 * {@link MailMessage}
+	 * 
+	 * @param jsonObj
+	 *            The JSON object (source)
+	 * @param mail
+	 *            The mail(target), which should be empty
+	 * @param timeZone
+	 *            The user time zone
+	 * @throws MailException
+	 *             If parsing fails
+	 */
+	public static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone)
 			throws MailException {
 		try {
 			/*
@@ -321,8 +341,6 @@ public final class MessageParser {
 				/*
 				 * Sent & received date
 				 */
-				final TimeZone timeZone = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(),
-						session.getContext()).getTimeZone());
 				if (jsonObj.has(MailJSONField.SENT_DATE.getKey()) && !jsonObj.isNull(MailJSONField.SENT_DATE.getKey())) {
 					final Date date = new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()));
 					final int offset = timeZone.getOffset(date.getTime());
@@ -395,13 +413,77 @@ public final class MessageParser {
 
 	private static InternetAddress[] parseAddressKey(final String key, final JSONObject jo) throws JSONException,
 			AddressException {
-		final List<InternetAddress> retList = new ArrayList<InternetAddress>();
 		String value = null;
 		if (!jo.has(key) || jo.isNull(key) || (value = jo.getString(key)).length() == 0) {
 			return EMPTY_ADDRS;
 		}
-		retList.addAll(Arrays.asList(MessageUtility.parseAddressList(value, false)));
-		return retList.toArray(new InternetAddress[retList.size()]);
+		if (value.charAt(0) == '[') {
+			/*
+			 * Treat as JSON array
+			 */
+			try {
+				final JSONArray jsonArr = new JSONArray(value);
+				final int length = jsonArr.length();
+				if (length == 0) {
+					return EMPTY_ADDRS;
+				}
+				value = parseAdressArray(jsonArr, length);
+			} catch (final JSONException e) {
+				LOG.error(e.getLocalizedMessage(), e);
+				/*
+				 * Reset
+				 */
+				value = jo.getString(key);
+			}
+		}
+		return MessageUtility.parseAddressList(value, false);
+	}
+
+	/**
+	 * Expects the specified JSON array to be an array of arrays. Each inner
+	 * array conforms to pattern:
+	 * 
+	 * <pre>
+	 * [&quot;&lt;personal&gt;&quot;, &quot;&lt;email-address&gt;&quot;]
+	 * </pre>
+	 * 
+	 * @param jsonArray
+	 *            The JSON array
+	 * @return Parsed address list combined in a {@link String} object
+	 * @throws JSONException
+	 *             If a JSON error occurs
+	 */
+	private static String parseAdressArray(final JSONArray jsonArray, final int length) throws JSONException {
+		final StringBuilder sb = new StringBuilder(length * 64);
+		{
+			/*
+			 * Add first address
+			 */
+			final JSONArray persAndAddr = jsonArray.getJSONArray(0);
+			final String personal = persAndAddr.getString(0);
+			final boolean hasPersonal = (personal != null && !"null".equals(personal));
+			if (hasPersonal) {
+				sb.append(MessageUtility.quotePersonal(personal)).append(" <");
+			}
+			sb.append(persAndAddr.getString(1));
+			if (hasPersonal) {
+				sb.append('>');
+			}
+		}
+		for (int i = 1; i < length; i++) {
+			sb.append(", ");
+			final JSONArray persAndAddr = jsonArray.getJSONArray(i);
+			final String personal = persAndAddr.getString(0);
+			final boolean hasPersonal = (personal != null && !"null".equals(personal));
+			if (hasPersonal) {
+				sb.append(MessageUtility.quotePersonal(personal)).append(" <");
+			}
+			sb.append(persAndAddr.getString(1));
+			if (hasPersonal) {
+				sb.append('>');
+			}
+		}
+		return sb.toString();
 	}
 
 	private static InternetAddress getEmailAddress(final String addrStr) {
