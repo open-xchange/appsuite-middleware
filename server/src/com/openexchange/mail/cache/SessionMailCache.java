@@ -152,7 +152,7 @@ public final class SessionMailCache {
 	 * @param entry
 	 *            The mail cache entry
 	 */
-	public void put(final SessionMailCacheEntry entry) {
+	public void put(final SessionMailCacheEntry<?> entry) {
 		final Lock writeLock = getKeyLock(entry.getKey()).writeLock();
 		writeLock.lock();
 		try {
@@ -173,7 +173,7 @@ public final class SessionMailCache {
 	 *            The mail cache entry
 	 */
 	@SuppressWarnings("unchecked")
-	public void get(final SessionMailCacheEntry entry) {
+	public void get(final SessionMailCacheEntry<Object> entry) {
 		final Lock readLock = getKeyLock(entry.getKey()).readLock();
 		readLock.lock();
 		try {
@@ -192,7 +192,7 @@ public final class SessionMailCache {
 	 *            The mail cache entry
 	 */
 	@SuppressWarnings("unchecked")
-	public void remove(final SessionMailCacheEntry entry) {
+	public void remove(final SessionMailCacheEntry<Object> entry) {
 		final Lock writeLock = getKeyLock(entry.getKey()).writeLock();
 		writeLock.lock();
 		try {
