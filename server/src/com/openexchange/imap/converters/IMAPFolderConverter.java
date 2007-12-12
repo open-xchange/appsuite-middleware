@@ -71,6 +71,7 @@ import com.openexchange.imap.user2acl.User2ACLInit.IMAPServer;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.server.impl.OCLPermission;
@@ -283,7 +284,7 @@ public final class IMAPFolderConverter {
 					/*
 					 * Distinguish between holds folders and none
 					 */
-					if ((imapFolder.getType() & javax.mail.Folder.HOLDS_FOLDERS) > 0) {
+					if (mailFolder.isHoldsFolders()) {
 						/*
 						 * This is the tricky case: Allow subfolder creation for
 						 * a common imap folder but deny it for imap server's
@@ -399,8 +400,28 @@ public final class IMAPFolderConverter {
 		if (IMAPConfig.hasNewACLExt(imapConfig.getServer()) && !ownRights.contains(Rights.Right.ADMINISTER)) {
 			addOwnACL(session, mailFolder, ownRights);
 		} else {
+			final ACL[] acls;
 			try {
-				final ACL[] acls = imapFolder.getACL();
+				acls = imapFolder.getACL();
+			} catch (final MessagingException e) {
+				if (!ownRights.contains(Rights.Right.ADMINISTER)) {
+					if (LOG.isWarnEnabled()) {
+						LOG.warn(new StringBuilder(256).append("ACLs could not be requested for folder ").append(
+								imapFolder.getFullName()).append(
+								". A newer ACL extension (RFC 4314) seems to be supported by IMAP server ").append(
+								imapConfig.getServer()).append(
+								", which denies GETACL command if no ADMINISTER right is granted."), e);
+					}
+					/*
+					 * Remember newer IMAP server's ACL extension
+					 */
+					IMAPConfig.setNewACLExt(imapConfig.getServer(), true);
+					addOwnACL(session, mailFolder, ownRights);
+					return;
+				}
+				throw MIMEMailException.handleMessagingException(e);
+			}
+			try {
 				final User2ACLArgs args = new MyUser2ACLArgs(session.getUserId(), imapFolder.getFullName(), imapFolder
 						.getSeparator());
 				for (int j = 0; j < acls.length; j++) {
@@ -420,18 +441,7 @@ public final class IMAPFolderConverter {
 					}
 				}
 			} catch (final MessagingException e) {
-				if (LOG.isWarnEnabled()) {
-					LOG.warn(new StringBuilder(256).append("ACLs could not be requested for folder ").append(
-							imapFolder.getFullName()).append(
-							". A newer ACL extension (RFC 4314) seems to be supported by IMAP server ").append(
-							imapConfig.getServer()).append(
-							" which denies GETACL command if no ADMINISTER right is granted."), e);
-				}
-				/*
-				 * Remember newer IMAP server's ACL extension
-				 */
-				IMAPConfig.setNewACLExt(imapConfig.getServer(), true);
-				addOwnACL(session, mailFolder, ownRights);
+				throw MIMEMailException.handleMessagingException(e);
 			}
 		}
 	}
@@ -478,7 +488,8 @@ public final class IMAPFolderConverter {
 				if (userFolders[i].getFullName().startsWith(fullname)) {
 					return true;
 				}
-				final NamespaceFolder nsf = new NamespaceFolder(imapStore, userFolders[i].getFullName(), userFolders[i].getSeparator());
+				final NamespaceFolder nsf = new NamespaceFolder(imapStore, userFolders[i].getFullName(), userFolders[i]
+						.getSeparator());
 				final Folder[] subFolders = nsf.list();
 				for (int j = 0; j < subFolders.length; j++) {
 					if (subFolders[j].getFullName().startsWith(fullname)) {
@@ -497,7 +508,7 @@ public final class IMAPFolderConverter {
 		}
 		return false;
 	}
-	
+
 	private static final String STR_MAILBOX_NOT_EXISTS = "NO Mailbox does not exist";
 
 	private static final String STR_FULL_RIGHTS = "acdilprsw";
