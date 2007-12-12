@@ -337,21 +337,19 @@ public final class MessageParser {
 			if (jsonObj.has(MailJSONField.SIZE.getKey())) {
 				mail.setSize(jsonObj.getInt(MailJSONField.SIZE.getKey()));
 			}
-			{
-				/*
-				 * Sent & received date
-				 */
-				if (jsonObj.has(MailJSONField.SENT_DATE.getKey()) && !jsonObj.isNull(MailJSONField.SENT_DATE.getKey())) {
-					final Date date = new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()));
-					final int offset = timeZone.getOffset(date.getTime());
-					mail.setSentDate(new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()) - offset));
-				}
-				if (jsonObj.has(MailJSONField.RECEIVED_DATE.getKey())
-						&& !jsonObj.isNull(MailJSONField.RECEIVED_DATE.getKey())) {
-					final Date date = new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()));
-					final int offset = timeZone.getOffset(date.getTime());
-					mail.setReceivedDate(new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()) - offset));
-				}
+			/*
+			 * Sent & received date
+			 */
+			if (jsonObj.has(MailJSONField.SENT_DATE.getKey()) && !jsonObj.isNull(MailJSONField.SENT_DATE.getKey())) {
+				final Date date = new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()));
+				final int offset = timeZone.getOffset(date.getTime());
+				mail.setSentDate(new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()) - offset));
+			}
+			if (jsonObj.has(MailJSONField.RECEIVED_DATE.getKey())
+					&& !jsonObj.isNull(MailJSONField.RECEIVED_DATE.getKey())) {
+				final Date date = new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()));
+				final int offset = timeZone.getOffset(date.getTime());
+				mail.setReceivedDate(new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()) - offset));
 			}
 			/*
 			 * Parse attachments
