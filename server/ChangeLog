@@ -1,3 +1,8 @@
+* 2007-12-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #10608: Allowing email addresses with pipe character "|" in
+   personal part
+
 * 2007-12-10 - thorben.betten@open-xchange.com
 
  - Bugfix #10393: MBox support

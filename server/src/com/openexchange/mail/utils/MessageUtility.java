@@ -185,21 +185,24 @@ public final class MessageUtility {
 			throws AddressException {
 		final InternetAddress[] addrs = InternetAddress
 				.parse(replaceWithComma(MimeUtility.unfold(addresslist)), strict);
-		for (int i = 0; i < addrs.length; i++) {
-			try {
+		try {
+			for (int i = 0; i < addrs.length; i++) {
 				addrs[i].setPersonal(addrs[i].getPersonal(), MailConfig.getDefaultMimeCharset());
-			} catch (final UnsupportedEncodingException e) {
-				LOG.error("Unsupported encoding in a message detected and monitored.", e);
-				mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 			}
+		} catch (final UnsupportedEncodingException e) {
+			/*
+			 * Cannot occur since default charset is checked on global mail
+			 * configuration initialization
+			 */
+			LOG.error(e.getLocalizedMessage(), e);
 		}
 		return addrs;
 	}
 
-	private static final Pattern PATTERN_REPLACE = Pattern.compile("([^\"]\\S+?)(\\s*)([;|])(\\s*)");
+	private static final Pattern PATTERN_REPLACE = Pattern.compile("([^\"]\\S+?)(\\s*)([;])(\\s*)");
 
 	private static String replaceWithComma(final String addressList) {
-		final StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder(addressList.length());
 		final Matcher m = PATTERN_REPLACE.matcher(addressList);
 		int lastMatch = 0;
 		while (m.find()) {
@@ -436,8 +439,6 @@ public final class MessageUtility {
 		return retval;
 	}
 
-	private static final String[] COLORS = MailConfig.getQuoteLineColors();
-
 	private static final String DEFAULT_COLOR = "#0026ff";
 
 	private static final String BLOCKQUOTE_START_TEMPLATE = "<blockquote type=\"cite\" style=\"margin-left: 0px; padding-left: 10px; color:%s; border-left: solid 1px %s;\">";
@@ -450,8 +451,9 @@ public final class MessageUtility {
 	 * @return the color for given <code>quotelevel</code>
 	 */
 	private static String getLevelColor(final int quotelevel) {
-		return COLORS != null && COLORS.length > 0 ? (quotelevel >= COLORS.length ? COLORS[COLORS.length - 1]
-				: COLORS[quotelevel]) : DEFAULT_COLOR;
+		final String[] colors = MailConfig.getQuoteLineColors();
+		return colors != null && colors.length > 0 ? (quotelevel >= colors.length ? colors[colors.length - 1]
+				: colors[quotelevel]) : DEFAULT_COLOR;
 	}
 
 	private static final String BLOCKQUOTE_END = "</blockquote>\n";
