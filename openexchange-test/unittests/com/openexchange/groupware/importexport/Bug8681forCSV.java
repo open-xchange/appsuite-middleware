@@ -146,6 +146,5 @@ public class Bug8681forCSV extends AbstractContactTest {
 			deleteTestFolder(folderId);
 		}
 	}
-    //TODO: Mock UserConfiguration
-    @Test public void testDummy() {}
+ 
 }
