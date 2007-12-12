@@ -380,7 +380,7 @@ public final class MessageParser {
 					}
 				} else {
 					final TextBodyMailPart part = MailTransport.getNewTextBodyPart("");
-					part.setContentType("text/plain; charset=us-ascii");
+					part.setContentType(MIMETypes.MIME_DEFAULT);
 					mail.setContentType(part.getContentType());
 					transportMail.setBodyPart(part);
 				}
