@@ -259,10 +259,12 @@ public abstract class ServiceHolder<S> {
 	}
 
 	private final void notifyListener(final boolean isAvailable) throws Exception {
-		for (final Iterator<ServiceHolderListener<S>> iter = listeners.values().iterator(); iter.hasNext();) {
-			if (isAvailable) {
+		if (isAvailable) {
+			for (final Iterator<ServiceHolderListener<S>> iter = listeners.values().iterator(); iter.hasNext();) {
 				iter.next().onServiceAvailable(service);
-			} else {
+			}
+		} else {
+			for (final Iterator<ServiceHolderListener<S>> iter = listeners.values().iterator(); iter.hasNext();) {
 				iter.next().onServiceRelease();
 			}
 		}
