@@ -92,10 +92,55 @@
 	</target>
 
 	<target name="run-interface-tests" depends="interface-jar">
-		<antcall target="run-tests">
-			<param name="test.jar" value="open-xchange-iface-tests.jar" />
-			<param name="test.class" value="com.openexchange.test.InterfaceTests" />
-		</antcall>
+		<delete dir="${test.xml.dir}"/> 
+		<mkdir dir="${test.xml.dir}"/> 
+		<junit errorProperty="test.failed" failureProperty="test.failed"  showoutput="yes" printsummary="yes"> 
+			<classpath>
+				<path refid="project.classpath" />
+				<pathelement location="${test.jar}"/>
+				<pathelement location="test-common.jar" />
+	    	</classpath>
+
+	    	<test name="SmokeTestSuite" todir="${test.xml.dir}" />
+
+			<test name="com.openexchange.ajax.session.LoginTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.ajax.session.RedirectTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.ajax.FolderTest" todir="${test.xml.dir}" />
+			<test name="ReminderAJAXSuite" todir="${test.xml.dir}" />
+			<test name="ReminderBugTestSuite" todir="${test.xml.dir}" />
+
+			<test name="com.openexchange.ajax.infostore.InfostoreAJAXSuite" todir="${test.xml.dir}" />
+			<test name="com.openexchange.ajax.config.ConfigTestSuite" todir="${test.xml.dir}" />
+			<test name="com.openexchange.ajax.appointment.AppointmentAJAXSuite" todir="${test.xml.dir}" />
+
+			<test name="com.openexchange.ajax.contact.ContactAJAXSuite" todir="${test.xml.dir}" />
+			<test name="com.openexchange.ajax.UserTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.ajax.GroupTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.ajax.ResourceTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.ajax.LinkTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.ajax.MultipleTest" todir="${test.xml.dir}" />
+
+			<test name="com.openexchange.groupware.importexport.ImportExportServerSuite" todir="${test.xml.dir}" />
+
+			<test name="com.openexchange.ajax.attach.SimpleAttachmentTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.ajax.attach.TaskAttachmentTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.ajax.task.TaskTestSuite" todir="${test.xml.dir}" />
+
+			<test name="com.openexchange.webdav.xml.appointment.AppointmentWebdavSuite" todir="${test.xml.dir}" />
+			<test name="com.openexchange.webdav.xml.appointment.AppointmentBugTestSuite" todir="${test.xml.dir}" />
+			<test name="com.openexchange.webdav.xml.contact.ContactWebdavSuite" todir="${test.xml.dir}" />
+			<test name="com.openexchange.webdav.xml.folder.FolderWebdavSuite" todir="${test.xml.dir}" />
+			<test name="com.openexchange.webdav.xml.task.TaskWebdavSuite" todir="${test.xml.dir}" />
+			<test name="com.openexchange.webdav.xml.attachment.AttachmentWebdavSuite" todir="${test.xml.dir}" />
+			<test name="com.openexchange.webdav.xml.GroupUserTest" todir="${test.xml.dir}" />
+			<test name="com.openexchange.webdav.client.NaughtyClientTest" todir="${test.xml.dir}" />
+
+			<formatter type="brief" usefile="false" /> 
+			<formatter type="xml" /> 
+			<sysproperty key="test.propfile" value="${conf.dir}/test.properties" />
+		</junit> 
+
+		<fail message="Tests failed!" if="test.failed" />
 	</target>
 	
 	<target name="run-unit-tests" depends="unit-jar">
