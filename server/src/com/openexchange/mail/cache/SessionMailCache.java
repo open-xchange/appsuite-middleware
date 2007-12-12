@@ -88,7 +88,7 @@ public final class SessionMailCache {
 	 * 
 	 * @param session
 	 *            The session whose mail cache shall be returned
-	 * @return The the session-bound mail cache
+	 * @return The session-bound mail cache
 	 */
 	public static SessionMailCache getInstance(final Session session) {
 		SessionMailCache mailCache = (SessionMailCache) session
