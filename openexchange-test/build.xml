@@ -106,8 +106,8 @@
 			<test name="com.openexchange.ajax.session.LoginTest" todir="${test.xml.dir}" />
 			<test name="com.openexchange.ajax.session.RedirectTest" todir="${test.xml.dir}" />
 			<test name="com.openexchange.ajax.FolderTest" todir="${test.xml.dir}" />
-			<test name="ReminderAJAXSuite" todir="${test.xml.dir}" />
-			<test name="ReminderBugTestSuite" todir="${test.xml.dir}" />
+			<test name="com.openexchange.ajax.ReminderAJAXSuite" todir="${test.xml.dir}" />
+			<test name="com.openexchange.ajax.ReminderBugTestSuite" todir="${test.xml.dir}" />
 
 			<test name="com.openexchange.ajax.infostore.InfostoreAJAXSuite" todir="${test.xml.dir}" />
 			<test name="com.openexchange.ajax.config.ConfigTestSuite" todir="${test.xml.dir}" />
