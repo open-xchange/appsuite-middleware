@@ -184,7 +184,7 @@ public enum MailJSONField {
 	 */
 	UNREAD("unread"),
 	/**
-	 * Deleteed count
+	 * Deleted count
 	 */
 	DELETED("deleted"),
 	/**
