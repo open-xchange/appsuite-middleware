@@ -323,7 +323,10 @@ public abstract class ServiceHolder<S> {
 	 *             If service cannot be applied
 	 */
 	public void setService(final S service) throws Exception {
-		if (null == this.service) {
+        if(null == service) {
+            LOG.warn("#setService called with null argument! ", new Throwable());
+        }
+        if (null == this.service) {
 			this.service = service;
 			notifyListener(true);
 		}

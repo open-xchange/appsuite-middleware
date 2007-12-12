@@ -112,7 +112,10 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer {
 	 */
 	public final Object addingService(final ServiceReference reference) {
 		final Object addedService = context.getService(reference);
-		if (serviceClass.isInstance(addedService)) {
+        if(null == addedService) {
+            LOG.warn("added service is null! "+serviceClass.getName(), new Throwable());
+        }
+        if (serviceClass.isInstance(addedService)) {
 			try {
 				final S service = serviceClass.cast(addedService);
 				if (serviceHolder != null) {
