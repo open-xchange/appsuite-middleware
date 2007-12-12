@@ -19,6 +19,7 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AJAXRequest.FieldParameter;
 import com.openexchange.ajax.framework.AJAXRequest.FileParameter;
 import com.openexchange.ajax.framework.AJAXRequest.Method;
 import com.openexchange.ajax.framework.AJAXRequest.Parameter;
@@ -85,6 +86,7 @@ public class Executor extends Assert {
                 + getPUTParameter(session, request));
             post.setMimeEncoded(true);
             req = post;
+            addFieldParameter(post, request);
             addFileParameter(post, request);
             break;
         case PUT:
@@ -121,6 +123,15 @@ public class Executor extends Assert {
         }
     }
 
+    private static void addFieldParameter(final PostMethodWebRequest post, final AJAXRequest request) {
+		for (Parameter param : request.getParameters()) {
+			if (param instanceof FieldParameter) {
+				final FieldParameter fparam = (FieldParameter) param;
+				post.setParameter(fparam.getFieldName(), fparam.getFieldContent());
+			}
+		}
+	}
+
     private static void addFileParameter(final PostMethodWebRequest post,
         final AJAXRequest request) {
         for (Parameter param : request.getParameters()) {
@@ -140,7 +151,7 @@ public class Executor extends Assert {
                 .getId());
         }
         for (Parameter param : request.getParameters()) {
-            if (!(param instanceof FileParameter)) {
+            if (!(param instanceof FileParameter) && !(param instanceof FieldParameter)) {
                 parameter.setParameter(param.getName(), param.getValue());
             }
         }

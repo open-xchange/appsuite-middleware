@@ -90,6 +90,8 @@ public class AJAXClient {
     private int privateTaskFolder = -1;
 
     private int privateContactFolder = -1;
+    
+    private String inboxFolder;
 
     /**
      * Default constructor.
@@ -171,6 +173,14 @@ public class AJAXClient {
         }
         return privateContactFolder;
     }
+
+    public String getInboxFolder() throws AjaxException, IOException, SAXException, JSONException {
+		if (null == inboxFolder) {
+			inboxFolder = ConfigTools.get(session, new GetRequest(Tree.InboxFolder))
+					.getString();
+		}
+		return inboxFolder;
+	}
 
     public enum User {
         User1(Property.LOGIN, Property.PASSWORD),

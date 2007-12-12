@@ -64,7 +64,7 @@ public class CommonListRequest implements AJAXRequest {
 
     private final String servletPath;
 
-    private final int[][] folderAndObjectIds;
+    private final String[][] folderAndObjectIds;
 
     private final int[] columns;
 
@@ -86,6 +86,33 @@ public class CommonListRequest implements AJAXRequest {
         final boolean failOnError) {
         super();
         this.servletPath = servletPath;
+        this.folderAndObjectIds = new String[folderAndObjectIds.length][];
+        for (int i = 0; i < folderAndObjectIds.length; i++) {
+        	this.folderAndObjectIds[i] = new String[folderAndObjectIds[i].length];
+        	for (int j = 0; j < folderAndObjectIds[i].length; j++) {
+        		this.folderAndObjectIds[i][j] = String.valueOf(folderAndObjectIds[i][j]);
+			}
+		}
+        this.columns = columns;
+        this.failOnError = failOnError;
+    }
+
+    /**
+     * Default constructor.
+     */
+    public CommonListRequest(final String servletPath,
+        final String[][] folderAndObjectIds, final int[] columns) {
+        this(servletPath, folderAndObjectIds, columns, true);
+    }
+
+    /**
+     * Constructor with all parameters.
+     */
+    public CommonListRequest(final String servletPath,
+        final String[][] folderAndObjectIds, final int[] columns,
+        final boolean failOnError) {
+        super();
+        this.servletPath = servletPath;
         this.folderAndObjectIds = folderAndObjectIds;
         this.columns = columns;
         this.failOnError = failOnError;
@@ -103,7 +130,7 @@ public class CommonListRequest implements AJAXRequest {
      */
     public Object getBody() throws JSONException {
         final JSONArray array = new JSONArray();
-        for (int[] folderAndObject : folderAndObjectIds) {
+        for (String[] folderAndObject : folderAndObjectIds) {
             final JSONObject json = new JSONObject();
             json.put(AJAXServlet.PARAMETER_INFOLDER, folderAndObject[0]);
             json.put(DataFields.ID, folderAndObject[1]);

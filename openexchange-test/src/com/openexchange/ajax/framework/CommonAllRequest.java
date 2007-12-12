@@ -66,7 +66,7 @@ public class CommonAllRequest implements AJAXRequest {
 
     private final String servletPath;
 
-    private final int folderId;
+    private final String folderId;
 
     private final int[] columns;
 
@@ -84,7 +84,22 @@ public class CommonAllRequest implements AJAXRequest {
         final boolean failOnError) {
         super();
         this.servletPath = servletPath;
-        this.folderId = folderId;
+        this.folderId = String.valueOf(folderId);
+        this.columns = columns;
+        this.sort = sort;
+        this.order = order;
+        this.failOnError = failOnError;
+    }
+
+    /**
+     * Default constructor.
+     */
+    public CommonAllRequest(final String servletPath, final String folderPath,
+        final int[] columns, final int sort, final Order order,
+        final boolean failOnError) {
+        super();
+        this.servletPath = servletPath;
+        this.folderId = folderPath;
         this.columns = columns;
         this.sort = sort;
         this.order = order;

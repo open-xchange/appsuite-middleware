@@ -150,6 +150,37 @@ public interface AJAXRequest {
         }
     }
 
+    class FieldParameter extends Parameter {
+    	private final String fieldName;
+    	private final String fieldContent;
+		/**
+		 * Initializes a new {@link FieldParameter}
+		 * @param fieldName
+		 * @param fieldContent
+		 */
+		public FieldParameter(String fieldName, String fieldContent) {
+			super(fieldName, (String) null);
+			this.fieldName = fieldName;
+			this.fieldContent = fieldContent;
+		}
+		/**
+		 * Gets the fieldName
+		 *
+		 * @return the fieldName
+		 */
+		public String getFieldName() {
+			return fieldName;
+		}
+		/**
+		 * Gets the fieldContent
+		 *
+		 * @return the fieldContent
+		 */
+		public String getFieldContent() {
+			return fieldContent;
+		}
+    }
+
     /**
      * This method has to return all parameters that are necessary for the
      * request. The session request parameter is added by the {@link Executor}.

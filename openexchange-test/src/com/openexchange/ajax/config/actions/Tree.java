@@ -73,7 +73,9 @@ public enum Tree {
 
     MailAddresses("/mail/addresses"),
 
-    SendAddress("/mail/sendaddress");
+    SendAddress("/mail/sendaddress"),
+    
+    InboxFolder("/mail/folder/inbox");
 
     private final String path;
 
