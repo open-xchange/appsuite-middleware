@@ -273,7 +273,7 @@
     </target>
 
 
-<!--    TODO <target name="doc">
+    <target name="doc">
 		<property name="plugdocpath" value="open-xchange-admin-plugin**/src/com/openexchange/admin/rmi"/>
     	<mkdir dir="doc"/>
     	<copy todir="doc/resources" file="javadoc/OX_Logo.jpg"/>
@@ -306,7 +306,7 @@
             </classpath>
         	<link href="http://java.sun.com/j2se/1.5.0/docs/api/"/>
         </javadoc>
-    </target> -->
+    </target>
 
 
     <target name="clean">
@@ -405,12 +405,12 @@
         <copy file="jar/${client.jar}" todir="${destdir}/${prefix}/lib"/>
     </target>
 	
-<!--    <target name="install-doc" depends="doc">
+    <target name="install-doc" depends="doc">
         <mkdir dir="${destdir}/${prefix}/doc/oxadmin"/>
         <copy todir="${destdir}/${prefix}/doc/oxadmin">
             <fileset dir="doc"/>
         </copy>
-    </target> -->
+    </target>
 
 	<target name="compile-tests">
 		<mkdir dir="classes"/>
