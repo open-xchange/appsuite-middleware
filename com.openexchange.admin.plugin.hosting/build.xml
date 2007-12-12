@@ -143,7 +143,6 @@
         includes="${composite.name}/"
         compression="gzip"/>
     	<delete dir="${dist-package}"/>
-		<antcall target="dist-plugins"></antcall>
     </target>
 
 	<target name="install-client" depends="client">
