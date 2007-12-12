@@ -97,7 +97,7 @@
 		<junit errorProperty="test.failed" failureProperty="test.failed"  showoutput="yes" printsummary="yes"> 
 			<classpath>
 				<path refid="project.classpath" />
-				<pathelement location="${test.jar}"/>
+				<pathelement location="open-xchange-iface-tests.jar"/>
 				<pathelement location="test-common.jar" />
 	    	</classpath>
 
