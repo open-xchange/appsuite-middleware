@@ -264,176 +264,27 @@
 
     <!-- I18N Stuff -->
 
-    <target name="all-i18n" depends="create-pot,check-pot,create-codes-csv,create-lang-jar" />
-
-    <target name="check-msgfmt-executable" unless="exists_msgfmt">
-        <exec executable="${msgfmt}" dir="${basedir}" failonerror="false" failifexecutionfails="false" outputproperty="garbage" resultproperty="result_msgmft">
-            <arg value="--help" />
-        </exec>
-        <condition property="exists_msgfmt">
-            <equals arg1="0" arg2="${result_msgmft}" />
-        </condition>
-        <antcall target="show-missing-msgfmt"/>
-    </target>
-
-    <target name="check-xgettext-executable" unless="exists_xgettext">
-        <exec executable="${xgettext}" dir="${basedir}" failonerror="false" failifexecutionfails="false" outputproperty="garbage" resultproperty="result_xgettext">
-            <arg value="--help"/>
-        </exec>
-        <condition property="exists_xgettext">
-            <equals arg1="0" arg2="${result_xgettext}"/>
-        </condition>
-        <antcall target="show-missing-xgettext"/>
-    </target>
-
-    <target name="check_apt_executable" unless="exists_apt">
-        <exec executable="${java_apt}" dir="${basedir}" failonerror="false" failifexecutionfails="false" outputproperty="garbage" resultproperty="result_apt">
-            <arg value="-help" />
-        </exec>
-        <condition property="exists_apt">
-            <equals arg1="0" arg2="${result_apt}" />
-        </condition>
-        <antcall target="show-missing-apt"></antcall>
-    </target>
-
-    <target name="check-i18n-executables" depends="check-msgfmt-executable,check-xgettext-executable,check_apt_executable">
-        <antcall target="show-missing-executables"/>
-    </target>
-
-    <target name="show-missing-executables" depends="show-missing-xgettext,show-missing-msgfmt,show-missing-apt"/>
-
-    <target name="show-missing-xgettext" unless="exists_xgettext">
-        <echo message="xgettext can't be found. POT files won't be generated." />
-    </target>
-
-    <target name="show-missing-msgfmt" unless="exists_msgfmt">
-        <echo message="msgfmt can't be found. Language Bundle won't be generated." />
-    </target>
-
-    <target name="show-missing-apt" unless="exists_apt">
-        <echo message="apt can't be found. Error codes cannot be read from server code." />
-    </target>
-
     <!-- TODO -->
+    <!--
+    <target name="all-i18n" depends="check-pot,create-codes-csv,create-lang-jar" />
+
     <target name="create-lang-jar" depends="check-msgfmt-executable,prepare" if="exists_msgfmt">
-        <!-- FIXME Discover Files and languages dynamically -->
         <exec executable="${msgfmt}" dir="${basedir}">
-            <arg line="--java2 -d ${output..} -r com.openexchange.groupware.i18n.ServerMessages -l de_DE ${i18n.dir}/de_DE/server.de_DE.po" />
+            <arg line="- -java2 -d ${output..} -r com.openexchange.groupware.i18n.ServerMessages -l de_DE ${i18n.dir}/de_DE/server.de_DE.po" />
         </exec>
         <exec executable="${msgfmt}" dir="${basedir}">
-            <arg line="--java2 -d ${output..} -r com.openexchange.groupware.i18n.ServerMessages -l de ${i18n.dir}/de_DE/server.de_DE.po" />
+            <arg line="- -java2 -d ${output..} -r com.openexchange.groupware.i18n.ServerMessages -l de ${i18n.dir}/de_DE/server.de_DE.po" />
         </exec>
-    	<!-- french -->
     	<exec executable="${msgfmt}" dir="${basedir}">
-            <arg line="--java2 -d ${output..} -r com.openexchange.groupware.i18n.ServerMessages -l fr_FR ${i18n.dir}/fr_FR/server.fr_FR.po" />
+            <arg line="- -java2 -d ${output..} -r com.openexchange.groupware.i18n.ServerMessages -l fr_FR ${i18n.dir}/fr_FR/server.fr_FR.po" />
         </exec>
         <exec executable="${msgfmt}" dir="${basedir}">
-            <arg line="--java2 -d ${output..} -r com.openexchange.groupware.i18n.ServerMessages -l fr ${i18n.dir}/fr_FR/server.fr_FR.po" />
+            <arg line="- -java2 -d ${output..} -r com.openexchange.groupware.i18n.ServerMessages -l fr ${i18n.dir}/fr_FR/server.fr_FR.po" />
         </exec>
         <jar jarfile="${tmp.dir}/${Bundle-SymbolicName}_languages.jar" basedir="${output..}"
             includes="com/openexchange/groupware/i18n/ServerMessages*" />
     </target>
 
-    <target name="create-ser" depends="create-annotations-ser,create-codes-ser" />
-
-    <target name="create-codes-ser" depends="jar">
-        <echo message="Creating ${i18n.dir}/codes.ser" />
-        <java classname="ListErrorCodes">
-            <classpath>
-                <pathelement location="lib/ox_server.jar" />
-                <path refid="project.classpath" />
-                <pathelement location="${java.class.path}"/>
-            </classpath>
-            <sysproperty key="com.openexchange.tools.exceptions.SerializationProcessor.file" value="${i18n.dir}/codes.ser" />
-            <arg value="lib/ox_server.jar" />
-            <arg value="com.openexchange.tools.exceptions.SerializationProcessor"/>
-        </java>
-    </target>
-
-    <target name="create-annotations-ser" depends="check-i18n-executables,jar" if="exists_apt" >
-        <echo message="Creating ${i18n.dir}/codesAnnotation.ser" />
-        <path id="apt.classpath">
-            <path refid="project.classpath" />
-            <path refid="server-jars"/>
-            <pathelement location="${java.class.path}" />
-        </path>
-        <exec executable="find" dir="${basedir}" output="${tmp.dir}/sources.txt">
-            <arg value="${source..}"/>
-            <arg value="-name"/>
-            <arg value="*.java"/>
-        </exec>
-        <exec executable="${java_apt}" dir="${basedir}">
-            <arg value="-cp" />
-            <arg pathref="apt.classpath" />
-            <arg value="-d" />
-            <arg value="${output..}" />
-            <arg value="-AerrorCodeProcessor=com.openexchange.tools.exceptions.SerializationProcessor" />
-            <arg value="-factory" />
-            <arg value="com.openexchange.tools.exceptions.OXExceptionAnnotationFactory" />
-            <arg value="-nocompile" />
-            <arg value="@${tmp.dir}/sources.txt"/>
-        </exec>
-        <delete file="${tmp.dir}/sources.txt"/>
-        <!--
-        <java classname="com.sun.tools.apt.Main">
-            <classpath>
-                <pathelement location="lib/ox_server.jar"/>
-                <path refid="project.classpath" />
-            </classpath>
-            <arg value="-AerrorCodeProcessor=com.openexchange.tools.exceptions.SerializationProcessor" />
-            <arg value="-factory" />
-            <arg value="com.openexchange.tools.exceptions.OXExceptionAnnotationFactory" />
-            <arg value="${src.dir}/**/*.java" />
-        </java>
-        -->
-        <move file="codes.ser" tofile="${i18n.dir}/codesAnnotation.ser" />
-    </target>
-
-    <target name="create-pot" depends="create-server-pot,create-error-pot" />
-
-    <target name="create-server-pot" depends="check-i18n-executables" if="exists_xgettext">
-        <echo message="Generating ${i18n.dir}/server.pot" />
-        <apply executable="${xgettext}" dir="${source..}" parallel="true" verbose="true" relative="true">
-            <arg value="-a" />
-            <arg value="--language=Java" />
-            <arg value="--output-dir=${i18n.dir}" />
-            <arg value="--output=server.pot"/>
-            <fileset refid="i18n.sources" />
-        </apply>
-        <replaceregexp file="${i18n.dir}/server.pot" match="&quot;POT-Creation-Date:(.*)&quot;\n" replace="" flags="g"/>
-        <!-- remove date and source files to make server.pot less changing -->
-        <!--
-        <replaceregexp file="${i18n.dir}/server.pot" match="#:(.*)\n" replace="" flags="g"/>
-        -->
-    </target>
-
-    <target name="create-error-pot" depends="compile,check-i18n-executables,create-ser" if="exists_xgettext">
-        <echo message="Generating ${i18n.dir}/errors.pot" />
-        <java classname="ProcessErrorCodes">
-            <classpath>
-                <pathelement location="${output..}" />
-                <path refid="project.classpath" />
-            </classpath>
-            <sysproperty key="errorCodeProcessor" value="com.openexchange.tools.exceptions.JavaMessageCatalogBuilder" />
-            <sysproperty key="output" value="${i18n.dir}/GUIMessages.java" />
-            <arg value="${i18n.dir}/codes.ser" />
-            <arg value="${i18n.dir}/codesAnnotation.ser" />
-        </java>
-        <apply executable="${xgettext}" dir="${i18n.dir}" parallel="true" verbose="true" relative="true">
-            <arg value="-a" />
-            <arg value="--language=Java" />
-            <arg value="--output=errors.pot"/>
-            <fileset dir="${i18n.dir}">
-                <filename name="GUIMessages.java" />
-            </fileset>
-        </apply>
-        <!-- remove date and source files to make errors.pot less changing -->
-        <replaceregexp file="${i18n.dir}/errors.pot" match="&quot;POT-Creation-Date:(.*)&quot;\n" replace="" flags="g"/>
-        <replaceregexp file="${i18n.dir}/errors.pot" match="#:(.*)\n" replace="" flags="g"/>
-        <delete file="${i18n.dir}/GUIMessages.java" />
-    </target>
-
-	<!-- comparing source .pot files to translated .po files-->
 	<target name="check-pot" depends="create-pot">
 	    <antcall target="check-lang-pot">
 	    	<param name="lang" value="de_DE"/>
@@ -510,7 +361,7 @@
             <arg value="${i18n.dir}/codesAnnotation.ser" />
         </java>
     </target>
-
+    -->
     <!-- Replacing in templates -->
 
     <target name="patchVersionJava">
