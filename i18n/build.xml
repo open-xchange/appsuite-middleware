@@ -1,0 +1,161 @@
+<project name="com.openexchange.i18n" default="install" basedir=".">
+
+    <!-- Customizable values -->
+    <property name="destdir" value=""/>
+    <property name="prefix" value="/opt/open-xchange"/>
+
+    <!-- Constants -->
+    <property name="tmp.dir" value="tmp"/>
+
+    <property file="META-INF/MANIFEST.MF"/>
+    <property file="build.properties"/>
+
+	<property name="version" value="${Bundle-Version}"/>
+	<property name="bundle.name" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
+	<property name="composite.name" value="open-xchange-i18n-${version}" />
+
+	<property name="msgfmt" value="msgfmt" />
+
+    <!-- Install Constants -->
+    <property name="bundlesdir" value="${prefix}/bundles"/>
+    <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+    <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
+	<property name="gwconfig.d" value="${prefix}/etc/groupware/" />
+	<property name="adconfig.d" value="${prefix}/etc/admindaemon/" />
+		
+
+    <!-- JAR names for classpath -->
+    <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
+	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
+    <property name="configjar" value="com.openexchange.config_6.5.0.jar"/>
+    <property name="globaljar" value="com.openexchange.global_6.5.0.jar"/>
+
+    <!-- Classpath -->
+    <path id="project.classpath">
+        <pathelement location="${bundlesdir}/${osgijar}"/>
+		<pathelement location="${bundlesdir}/${commonsloggingjar}"/>
+		<pathelement location="${bundlesdir}/${configjar}"/>
+		<pathelement location="${bundlesdir}/${globaljar}"/>
+    </path>
+
+    <!-- Compile -->
+    <target name="prepare">
+        <mkdir dir="${output..}"/>
+        <mkdir dir="${tmp.dir}"/>
+    </target>
+
+    <target name="compile" depends="prepare">
+        <javac srcdir="${source..}" destdir="${output..}" debug="true"
+            encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+            <classpath refid="project.classpath" />
+        </javac>
+    </target>
+
+    <target name="jar" depends="prepare,compile">
+        <jar jarfile="${tmp.dir}/${bundle.name}"
+            manifest="META-INF/MANIFEST.MF">
+            <fileset dir="${output..}"/>
+        </jar>
+    </target>
+
+	<target name="create-lang-jars" depends="check-msgfmt-executable" if="exists_msgfmt">
+		<antcall target="create-lang-jar">
+			<param name="language" value="de_DE" />
+		</antcall>
+		<antcall target="create-lang-jar">
+			<param name="language" value="fr_FR" />
+		</antcall>
+		<antcall target="create-lang-jar">
+			<param name="language" value="es_ES" />
+		</antcall>
+		<antcall target="create-lang-jar">
+			<param name="language" value="pl_PL" />
+		</antcall>
+	</target>
+	
+	<target name="create-lang-jar" depends="prepare">
+		<echo message="Creating language jar for ${language}" />
+		<mkdir dir="${tmp.dir}/i18n" />
+		<exec executable="${msgfmt}" dir="${basedir}">
+			<arg line="- -java2 -d ${output..} -r com.openexchange.groupware.i18n.ServerMessages -l ${language} ${language}/server.${language}.po" />
+		</exec>
+		<jar jarfile="${tmp.dir}/i18n/${language}.jar" basedir="${output..}"
+			includes="com/openexchange/groupware/i18n/ServerMessages_${language}*" />
+	</target>
+
+    <!-- Install -->
+    <target name="install" depends="installJar,installConfig,installLanguages"/>
+
+    <target name="installConfig">
+		<copy todir="${gwconfig.d}">
+			<fileset dir="conf" includes="**" />
+		</copy>
+		<copy todir="${adconfig.d}">
+			<fileset dir="conf" includes="**" />
+		</copy>
+        <mkdir dir="${destdir}/${gwbundle.d}"/>
+        <echo file="${destdir}/${gwbundle.d}/${composite.name}.ini"
+            message="${bundlesdir}/${bundle.name}${line.separator}"/>
+        <mkdir dir="${destdir}/${adbundle.d}"/>
+        <echo file="${destdir}/${adbundle.d}/${composite.name}.ini"
+            message="${bundlesdir}/${bundle.name}${line.separator}"/>
+    </target>
+
+	<target name="installLanguages" depends="create-lang-jars">
+		<mkdir dir="${destdir}/${prefix}/i18n" />
+		<copy todir="${destdir}/${prefix}/i18n">
+			<fileset dir="${tmp.dir}/i18n/" includes="*.jar" />
+		</copy>
+	</target>
+
+    <target name="installJar" depends="jar">
+        <mkdir dir="${destdir}/${bundlesdir}"/>
+        <copy todir="${destdir}/${bundlesdir}">
+            <fileset dir="${tmp.dir}">
+                <include name="${bundle.name}"/>
+            </fileset>
+        </copy>
+    </target>
+
+	<!-- Dist -->
+	<target name="dist" depends="clean">
+		<property name="dist-package" value="dist-package"/>
+    	<delete dir="${dist-package}"/>
+        <mkdir dir="${dist-package}/${composite.name}"/>
+        <copy todir="${dist-package}/${composite.name}">
+            <fileset dir=".">
+                <exclude name="**${dist-package}/**"/>
+                <exclude name="**debian/**"/>
+                <exclude name="**CVS/**"/>
+                <exclude name="Todo"/>
+            </fileset>
+        </copy>
+        <tar destfile="../${composite.name}.tar.gz"
+	        basedir="${dist-package}"
+    	    includes="${composite.name}/"
+         	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
+    	<delete dir="${dist-package}"/>
+    </target>
+
+    <target name="clean">
+        <delete dir="${output..}"/>
+        <delete dir="${tmp.dir}"/>
+    </target>
+
+	<!-- Checks -->
+	
+	<target name="check-msgfmt-executable" unless="exists_msgfmt">
+        <exec executable="${msgfmt}" dir="${basedir}" failonerror="false" failifexecutionfails="false" outputproperty="garbage" resultproperty="result_msgmft">
+            <arg value="--help" />
+        </exec>
+        <condition property="exists_msgfmt">
+            <equals arg1="0" arg2="${result_msgmft}" />
+        </condition>
+        <antcall target="show-missing-msgfmt"/>
+    </target>
+    
+	<target name="show-missing-msgfmt" unless="exists_msgfmt">
+        <echo message="msgfmt can't be found. Language Bundle won't be generated. You may have to install GNU gettext." />
+    </target>
+
+</project>
