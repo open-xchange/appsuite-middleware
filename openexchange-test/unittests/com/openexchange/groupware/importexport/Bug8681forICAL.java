@@ -59,12 +59,20 @@ import java.sql.SQLException;
 import junit.framework.JUnit4TestAdapter;
 
 import org.junit.Test;
+import org.junit.BeforeClass;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.OverridingUserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.impl.DBPoolingException;
 
 /**
@@ -81,18 +89,29 @@ public class Bug8681forICAL extends AbstractICalImportTest {
 		return new JUnit4TestAdapter(Bug8681forICAL.class);
 	}
 
+
+    @BeforeClass
+
+    public static void initialize() throws Exception {
+        AbstractICalImportTest.initialize();
+        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
+    }
+
     @Test public void testDummy(){}
 
-    /*@Test public void checkAppointment() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXException{
-		folderId = createTestFolder(FolderObject.CALENDAR, sessObj, "bug8681 for ical appointments");
+    @Test public void checkAppointment() throws AbstractOXException, UnsupportedEncodingException, SQLException, OXException, LdapException {
+		folderId = createTestFolder(FolderObject.CALENDAR, sessObj,ctx, "bug8681 for ical appointments");
 		
-		//session
-		TestSession newSession = new TestSession("no appointments");
-		newSession.delegateSessionObject = sessObj;
-		UserConfiguration config = sessObj.getUserConfiguration();
-		config.setCalendar(false);
-		newSession.delegateUserConfiguration = config;
-		sessObj = newSession;
+		UserConfigurationStorage original = UserConfigurationStorage.getInstance();
+        OverridingUserConfigurationStorage override = new OverridingUserConfigurationStorage(original) {
+            public UserConfiguration getOverride(int userId, int[] groups, Context ctx) throws UserConfigurationException {
+                UserConfiguration orig = delegate.getUserConfiguration(userId, ctx);
+                UserConfiguration copy = (UserConfiguration) orig.clone();
+                copy.setContact(false);
+                return copy;
+            }
+        };
+        override.override();
 		
 		try {
 			String ical = //from bug 7732
@@ -125,23 +144,25 @@ public class Bug8681forICAL extends AbstractICalImportTest {
 			assertEquals(Category.PERMISSION, e.getCategory());
 			assertEquals("I_E-0507", e.getErrorCode());
 		} finally {
-			sessObj = newSession.delegateSessionObject;
+			override.takeBack();
 			deleteTestFolder(folderId);
 		}
 		
 	}
 
-    @Test public void checkTask() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXException{
+    @Test public void checkTask() throws AbstractOXException, UnsupportedEncodingException, SQLException, OXException, LdapException {
 		folderId = createTestFolder(FolderObject.TASK, sessObj,ctx, "bug8681 for ical tasks");
 		
-		//session
-		TestSession newSession = new TestSession("no tasks");
-		newSession.delegateSessionObject = sessObj;
-		UserConfiguration config = sessObj.getUserConfiguration();
-		config.setTask(false);
-		newSession.delegateUserConfiguration = config;
-		sessObj = newSession;
-		
+		UserConfigurationStorage original = UserConfigurationStorage.getInstance();
+        OverridingUserConfigurationStorage override = new OverridingUserConfigurationStorage(original) {
+            public UserConfiguration getOverride(int userId, int[] groups, Context ctx) throws UserConfigurationException {
+                UserConfiguration orig = delegate.getUserConfiguration(userId, ctx);
+                UserConfiguration copy = (UserConfiguration) orig.clone();
+                copy.setContact(false);
+                return copy;
+            }
+        };
+        override.override();
 		try {
 			String ical = //from bug 7718
 				"BEGIN:VCALENDAR\n" +
@@ -171,10 +192,9 @@ public class Bug8681forICAL extends AbstractICalImportTest {
 			assertEquals(Category.PERMISSION, e.getCategory());
 			assertEquals("I_E-0508", e.getErrorCode());
 		} finally {
-			sessObj = newSession.delegateSessionObject;
+			override.takeBack();
 			deleteTestFolder(folderId);
 		}
 		
-	}     */
-    //TODO: Mock UserConfiguration. How do we do this?
+	}
 }

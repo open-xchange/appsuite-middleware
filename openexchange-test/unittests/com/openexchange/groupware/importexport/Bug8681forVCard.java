@@ -55,10 +55,16 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.OverridingUserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.impl.DBPoolingException;
 import junit.framework.JUnit4TestAdapter;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import org.junit.BeforeClass;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
@@ -72,27 +78,34 @@ public class Bug8681forVCard extends AbstractVCardTest {
 	public static junit.framework.Test suite() {
 		return new JUnit4TestAdapter(Bug8681forVCard.class);
 	}
-	
-	/*@Test public void checkVCard() throws DBPoolingException, UnsupportedEncodingException, SQLException, OXException{
+
+    @BeforeClass
+
+    public static void initialize() throws Exception {
+        AbstractVCardTest.initialize();
+        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
+    }
+
+    @Test public void checkVCard() throws AbstractOXException, UnsupportedEncodingException, SQLException, OXException{
 		//creating folder before changing permissions...
-		folderId = createTestFolder(FolderObject.CONTACT, sessObj, "vcard7719Folder");
+		folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "vcard7719Folder");
 		
-		//changing user permissions
-		final TestSession newSession = new TestSession("elvis");
-		newSession.delegateSessionObject = sessObj;
-		try {
-            UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
-            final UserConfiguration conf = userConfigStorage.getUserConfiguration(sessObj.getUserId(),ctx);
-			conf.setContact(false);
-			newSession.delegateUserConfiguration = conf;
-			sessObj = newSession;
-			assertFalse( sessObj.getUserConfiguration().hasContact() );
-			
+		UserConfigurationStorage original = UserConfigurationStorage.getInstance();
+        OverridingUserConfigurationStorage override = new OverridingUserConfigurationStorage(original) {
+            public UserConfiguration getOverride(int userId, int[] groups, Context ctx) throws UserConfigurationException {
+                UserConfiguration orig = delegate.getUserConfiguration(userId, ctx);
+                UserConfiguration copy = (UserConfiguration) orig.clone();
+                copy.setContact(false);
+                return copy;
+            }
+        };
+        override.override();
+        try {
 			//uploading
 			final List <String> folders = Arrays.asList( Integer.toString(folderId) );
 	
 			try{
-				imp.canImport(newSession, Format.VCARD, folders, null);
+				imp.canImport(sessObj, Format.VCARD, folders, null);
 				fail("Could import Contacts without permission on Contact module!");
 			} catch(ImportExportException e) {
 				assertEquals(Category.PERMISSION, e.getCategory());
@@ -100,10 +113,8 @@ public class Bug8681forVCard extends AbstractVCardTest {
 			}
 		} finally {
 			//undo changes
-			sessObj = newSession.delegateSessionObject;
+			override.takeBack();
 		}
 	}
-	        */
-    // TODO: Mock UserConfiguration. How to do that?
     @Test public void testDummy(){}
 }
