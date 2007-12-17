@@ -299,11 +299,6 @@
 				<include name="${plugdocpath}/exceptions/*"/>
             	<exclude name="${plugdocpath}/*ResourceGroup*"/>
             </fileset>
-            <classpath>
-				<path>
-					<fileset dir="${lib.dir}" includes="*.jar"/>
-				</path>
-            </classpath>
         	<link href="http://java.sun.com/j2se/1.5.0/docs/api/"/>
         </javadoc>
     </target>
