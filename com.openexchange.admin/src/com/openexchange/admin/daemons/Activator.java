@@ -87,7 +87,7 @@ public class Activator implements BundleActivator {
         log.info("Starting Admindaemon...");
         this.daemon.registerBundleListener(context);
         this.daemon.initCache(context);
-
+        this.daemon.initAccessCombinationsInCache(); // EXTRA INIT BECAUSE WE NEED TO GET THE EXCEPTIONS TO FAIL ON STARTUP
         this.daemon.initRMI(this.getClass().getClassLoader(), context);
         if(log.isInfoEnabled()){
         log.info("Version: " + Version.MAJOR + "." + Version.MINOR + "." + Version.PATCH);
