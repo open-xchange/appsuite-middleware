@@ -154,8 +154,7 @@ public class AdminCache {
 		readSequenceTables();
 		cacheSqlScripts();
 		readMasterCredentials();
-		configureAuthentication(); // disabling authentication mechs
-		initAccessCombinations();
+		configureAuthentication(); // disabling authentication mechs		
 		initOXProccess();
 		this.log.info("Init Cache");
 		initPool();
@@ -171,16 +170,18 @@ public class AdminCache {
 		return named_access_combinations.containsKey(name);
 	}
 
-	private void initAccessCombinations() {
+	public void initAccessCombinations() throws ClassNotFoundException, OXGenericException {
 		
 		try {
 			log.debug("Processing access combinations...");
 			named_access_combinations = getAccessCombinations(loadValidAccessModules(),loadAccessCombinations());
 			log.debug("Access combinations processed!");
 		} catch (ClassNotFoundException e) {			
-			log.error("Error loading access modules and methods!",e);			
+			log.error("Error loading access modules and methods!",e);	
+			throw e;
 		} catch (OXGenericException e) {
-			log.error("Error processing access combinations config file!!",e);			
+			log.error("Error processing access combinations config file!!",e);
+			throw e;
 		}
 		
 	}

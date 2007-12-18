@@ -48,6 +48,7 @@
  */
 package com.openexchange.admin.daemons;
 
+import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.OXAdminCoreInterface;
 import com.openexchange.admin.rmi.OXGroupInterface;
@@ -136,11 +137,18 @@ public class AdminDaemon {
 
     public void initCache(final BundleContext context) {
         bundlelist = new ArrayList<Bundle>();
+        
         this.cache = new AdminCache();
-        this.cache.initCache();
+        
+        this.cache.initCache();         
+        
         ClientAdminThread.cache = this.cache;
         prop = this.cache.getProperties();        
         log.info("Cache and Pools initialized!");
+    }
+    
+    public void initAccessCombinationsInCache() throws ClassNotFoundException, OXGenericException{
+    	this.cache.initAccessCombinations();
     }
 
     public void initRMI(final ClassLoader loader, final BundleContext context) {
