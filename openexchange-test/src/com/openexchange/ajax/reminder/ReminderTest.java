@@ -117,7 +117,7 @@ public class ReminderTest extends AbstractAJAXTest {
 		return reminderObj;
 	}
 	
-	public static void deleteReminder(WebConversation webConversation, int objectId, String host, String sessionId) throws Exception, TestException {
+	public static int[] deleteReminder(WebConversation webConversation, int objectId, String host, String sessionId) throws Exception, TestException {
 		host = appendPrefix(host);
 		
 		URLParameter parameter = new URLParameter();
@@ -135,10 +135,21 @@ public class ReminderTest extends AbstractAJAXTest {
 		assertEquals(200, webResponse.getResponseCode());
 		
 		JSONObject jsonResponse = new JSONObject(webResponse.getText());
-		
+				
 		if (jsonResponse.has(jsonTagError)) {
 			throw new TestException("server error: " + jsonResponse.get(jsonTagError));
 		}
+		
+		if (jsonResponse.has("data")) {
+			final JSONArray jsonArray = jsonResponse.getJSONArray("data");
+			final int[] failedObjects = new int[jsonArray.length()];
+			for (int a = 0; a < failedObjects.length; a++) {
+				failedObjects[a] = jsonArray.getInt(a);
+			}
+			return failedObjects;
+		}
+		
+		return new int[] { };
 	}
 	
 	public void compareReminder(ReminderObject reminderObj1, ReminderObject reminderObj2) throws Exception {
