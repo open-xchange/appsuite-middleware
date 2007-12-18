@@ -158,7 +158,7 @@ public class Bug8681forICAL extends AbstractICalImportTest {
             public UserConfiguration getOverride(int userId, int[] groups, Context ctx) throws UserConfigurationException {
                 UserConfiguration orig = delegate.getUserConfiguration(userId, ctx);
                 UserConfiguration copy = (UserConfiguration) orig.clone();
-                copy.setCalendar(false);
+                copy.setTask(false);
                 return copy;
             }
         };
