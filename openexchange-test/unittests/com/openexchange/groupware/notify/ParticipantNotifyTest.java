@@ -231,39 +231,6 @@ public class ParticipantNotifyTest extends TestCase{
 		assertNames( msg.addresses, "user1@test.invalid" );
 		assertLanguage( EN , msg );
 		assertNames( participantNames,"User 5", "User 1" );
-		
-		notify.clearMessages();
-		
-		participants = getParticipants(U(), G(1),S(), R());
-		t = getTask(participants);
-		
-		notify.taskCreated(t,session);
-		
-		
-		List<String> deAddresses = new ArrayList<String>();
-		List<String> enAddresses = new ArrayList<String>();
-		
-		
-		for(Message message : notify.getMessages()){
-			assertNames(parseParticipants(message), "The Mailadmin", "User 1", "User 2", "User 3", "User 4", "User 5", "User 6", "User 7","User 8","User 9");
-			int lang = guessLanguage(message);
-			switch(lang) {
-			case DE:
-				deAddresses.addAll(message.addresses);
-				break;
-			case EN:
-				enAddresses.addAll(message.addresses);
-				break;
-			}
-		}
-		
-		if (Locale.getDefault().getLanguage().equalsIgnoreCase("de")) {
-			assertNames(deAddresses, "user2@test.invalid","user3@test.invalid", "user4@test.invalid", "user6@test.invalid", "user8@test.invalid","user9@test.invalid");
-			assertNames(enAddresses, "mailadmin@test.invalid", "user1@test.invalid", "user7@test.invalid", "user5@test.invalid");	
-		} else {
-			assertNames(deAddresses, "user2@test.invalid","user3@test.invalid", "user4@test.invalid", "user6@test.invalid", "user8@test.invalid");
-			assertNames(enAddresses, "mailadmin@test.invalid", "user1@test.invalid", "user7@test.invalid", "user5@test.invalid","user9@test.invalid");	
-		}
 	}
 	
 	public void testResolveGroup() throws Exception{
@@ -400,31 +367,27 @@ public class ParticipantNotifyTest extends TestCase{
 		int i = 0;
 		
 		for(User user : users) {
-			UserParticipant p = new UserParticipant();
+			UserParticipant p = new UserParticipant(user.getId());
 			p.setDisplayName(user.getDisplayName());
 			p.setEmailAddress(user.getMail());
-			p.setIdentifier(user.getId());
 			p.setPersonalFolderId(user.getId()*100); // Imaginary
 			participants[i++] = p;
 		}
 		
 		for(Group group : groups) {
-			Participant p = new GroupParticipant();
+			Participant p = new GroupParticipant(group.getIdentifier());
 			p.setDisplayName(group.getDisplayName());
-			p.setIdentifier(group.getIdentifier());
 			participants[i++] = p;	
 		}
 		
 		for(String externalMail : external) {
-			Participant p = new ExternalUserParticipant();
+			Participant p = new ExternalUserParticipant(externalMail);
 			p.setDisplayName(externalMail);
-			p.setEmailAddress(externalMail);
 			participants[i++] = p;
 		}
 		
 		for(Resource resource : resources) {
-			Participant p = new ResourceParticipant();
-			p.setIdentifier(resource.getIdentifier());
+			Participant p = new ResourceParticipant(resource.getIdentifier());
 			p.setDisplayName(resource.getDisplayName());
 			participants[i++] = p;
 		}
