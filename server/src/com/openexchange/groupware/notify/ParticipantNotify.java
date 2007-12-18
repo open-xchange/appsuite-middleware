@@ -337,16 +337,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			retval.put(args[i], args[++i]);
 		}
 		return retval;
-	}
-
-	private Locale getLocale(String lang) {
-		final int index = lang.indexOf('_');
-		if(index != -1) {
-			lang = lang.substring(0,index);
-		}
-		
-		return new Locale(lang);
-	}
+    }
 	
 	private void sortExternalParticipantsAndResources(final Participant[] participants, final Set<String> participantSet, final Set<String> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final Session sessionObj,final Map<String,EmailableParticipant> all) {
 		if(participants == null) {
@@ -429,7 +420,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 								groups,
 								user.getMail(),
 								user.getDisplayName(),
-								getLocale(lang),
+								user.getLocale(),
 								tz,
 								10,
 								-1
@@ -465,15 +456,17 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	}
 
 	private EmailableParticipant getUserParticipant(final Participant participant, final Context ctx) {
-		String lang  = null;
+		
 		int[] groups = null;
 		TimeZone tz = null;
 		String mail = null;
 		String displayName = null;
 		int folderId = -1;
-		try {
+		Locale locale = null;
+        
+        try {
 			final User user = resolveUsers(ctx,participant.getIdentifier())[0];
-			lang = user.getPreferredLanguage();
+			locale = user.getLocale();
 			mail = user.getMail();
 			if(mail == null) {
 				mail = participant.getEmailAddress();
@@ -493,7 +486,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			LL.log(e);
 		}
 		
-		final Locale locale = getLocale(lang);
+
 		
 		EmailableParticipant p;
 		if(mail != null) {

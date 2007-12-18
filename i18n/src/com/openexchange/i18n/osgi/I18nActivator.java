@@ -52,10 +52,7 @@ package com.openexchange.i18n.osgi;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -74,6 +71,7 @@ import com.openexchange.server.ServiceHolderListener;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.i18n.impl.I18nConfiguration;
 import com.openexchange.i18n.impl.I18nImpl;
+import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.i18n.I18nTools;
 
 
@@ -147,49 +145,23 @@ public class I18nActivator implements BundleActivator {
 		}
 		
 		File dir = new File(directory_name);
-		
-		
-		if (dir.isFile()){
-			throw new FileNotFoundException("Unable to load language files."+dir+" is not a directory");	
-		}
-		
-		String[] files = getFilesFromLanguageFolder(dir);
-		
-		for (String file : files){
+        
+
+
+        for (ResourceBundle rc : new ResourceBundleDiscoverer(dir).getResourceBundles()){
 			Locale l = null;
 			
-			try{
-				if (file.indexOf("_") != -1){
-					l = new Locale(file.substring(0, file.indexOf("_")), file.substring(file.indexOf("_")+1,file.indexOf(".")));
-				}
-
-				URLClassLoader ul = new URLClassLoader(new URL[]{new URL("file:"+dir+File.separator+file)});
-				ResourceBundle rc = ResourceBundle.getBundle("com.openexchange.groupware.i18n.ServerMessages", l , ul);
-			
-				I18nTools i18n = new I18nImpl(rc);
+		    I18nTools i18n = new I18nImpl(rc);
 				
-				Properties prop = new Properties();
-				prop.put("language", l);
+			Properties prop = new Properties();
+			prop.put("language", rc.getLocale());
 				
-				serviceRegister = context.registerService(I18nTools.class.getName(), i18n, prop);
-			} catch (java.util.MissingResourceException mr){
-				LOG.error("Unable to init Language Bundle! This file seems to be broken: "+file);
-				throw mr;
-			}
+			serviceRegister = context.registerService(I18nTools.class.getName(), i18n, prop);
 		}
 	}
-	
-	private static String[] getFilesFromLanguageFolder(File dir){
-		String[] files = dir.list(new FilenameFilter() {
-		    public boolean accept(File d, String f) {
-		       return f.endsWith(".jar");
-		    }
-		});
-		return files;
-	}
-	
 
-	public void stop(BundleContext context) throws Exception {
+
+    public void stop(BundleContext context) throws Exception {
 		if (LOG.isDebugEnabled())
 			LOG.debug("Stopping I18n");
 		

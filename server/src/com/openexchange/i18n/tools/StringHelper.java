@@ -76,22 +76,16 @@ public class StringHelper {
 
 	@Deprecated
 	private ResourceBundle serverBundle;	
-	
-	private I18nTools i18n = null;
-	
-	public StringHelper(final Locale locale) {
+
+    private Locale locale;
+
+    public StringHelper(final Locale locale) {
 
 		if(locale.getLanguage().equalsIgnoreCase("en")) {
 			return;
 		}
 		
-		try {
-			final I18nServices i18nServices = I18nServices.getInstance();
-			i18n = i18nServices.getService(locale);
-		} catch (MissingResourceException x) {
-			LOG.debug("Cannot find bundle for Locale "+locale);
-		}
-
+		this.locale = locale;
 	}
 
 	@Deprecated
@@ -116,14 +110,22 @@ public class StringHelper {
 	 * with the gettext tools.
 	 */
 	public final String getString(final String key) {
-		if (null == i18n) {
+		if (null == locale) {
 			return key;
 		}
-		try {
-			return i18n.getLocalized(key);
-		} catch (MissingResourceException x) {
+        I18nTools tool;
+        try {
+            tool = I18nServices.getInstance().getService(locale);
+            if(tool == null) {
+                if (LOG.isInfoEnabled()) {
+				    LOG.info("No service for "+locale+"  found. Using default for bundle ");
+			    }
+                return key;
+            }
+            return tool.getLocalized(key);
+       	} catch (MissingResourceException x) {
 			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder("Using default for bundle "));
+				LOG.info("MissingResource for "+locale+". Using default for bundle ");
 			}
 			return key;
 		}
@@ -131,27 +133,27 @@ public class StringHelper {
 	
 	@Override
 	public int hashCode(){
-		if(i18n == null) {
+		if(locale == null) {
 			return 0;
 		}
-		return i18n.getClass().hashCode();
+		return locale.getClass().hashCode();
 	}
 	
 	@Override
 	public boolean equals(final Object o) {
 		if (o instanceof StringHelper) {
 			final StringHelper sh = (StringHelper) o;
-			if(i18n == null && sh.i18n == null) {
+			if(locale == null && sh.locale == null) {
 				return true;
 			}
-			if(i18n == null && sh.i18n != null) {
+			if(locale == null && sh.locale != null) {
 				return false;
 			}
-			if(i18n != null && sh.i18n == null) {
+			if(locale != null && sh.locale == null) {
 				return false;
 			}
 			
-			return sh.i18n.hashCode() == i18n.hashCode();
+			return sh.locale.equals(locale);
 		}
 		return false;
 	}

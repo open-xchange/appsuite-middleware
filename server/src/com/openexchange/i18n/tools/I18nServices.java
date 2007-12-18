@@ -65,12 +65,12 @@ public class I18nServices {
     }
 
     public int addService(final Locale l, final I18nTools i18n) {
-    	services.put(l, i18n);
+        services.put(l, i18n);
     	return services.size();
     }
 
     public int removeService(final Locale l, final I18nTools i18n) {
-    	services.remove(l, i18n);
+        services.remove(l, i18n);
     	return services.size();
 
     }
