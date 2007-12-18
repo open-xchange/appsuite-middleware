@@ -438,7 +438,15 @@ public class MockUser implements User {
 	}
 
 	public Locale getLocale() {
-		return locale;
+        if(locale == null && preferredLanguage != null) {
+            String[] lang = preferredLanguage.split("_");
+            if(lang.length == 2) {
+                locale = new Locale(lang[0], lang[1]);
+            } else {
+                locale = new Locale(lang[0]);
+            }
+        }
+        return locale;
 	}
 
 	public void setLocale(Locale locale) {

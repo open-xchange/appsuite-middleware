@@ -2,6 +2,9 @@ package com.openexchange.groupware;
 
 import com.openexchange.config.Configuration;
 import com.openexchange.config.internal.ConfigurationImpl;
+import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
+import com.openexchange.i18n.impl.I18nImpl;
+import com.openexchange.i18n.tools.I18nServices;
 import com.openexchange.monitoring.services.MonitoringConfiguration;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.SessiondService;
@@ -10,10 +13,9 @@ import com.openexchange.sessiond.impl.SessiondConnectorImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.test.TestInit;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.*;
 
 /**
  * This class contains methods for initialising tests.
@@ -141,8 +143,19 @@ public final class Init {
         // handles dynamically
 
         startAndInjectConfigBundle();
+        startAndInjectI18NBundle();
         startAndInjectMonitoringBundle();
         startAndInjectSessiondBundle();
+    }
+
+    private static void startAndInjectI18NBundle() throws FileNotFoundException {
+        Configuration config = (Configuration)services.get(Configuration.class);
+        String directory_name = config.getProperty("i18n.language.path");
+		File dir = new File(directory_name);
+        I18nServices i18nServices = I18nServices.getInstance();
+        for (ResourceBundle rc : new ResourceBundleDiscoverer(dir).getResourceBundles()) {
+            i18nServices.addService(rc.getLocale(), new I18nImpl(rc));    
+        }
     }
 
     private static void startAndInjectConfigBundle() {

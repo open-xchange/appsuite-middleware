@@ -117,8 +117,8 @@ public class MockUserLookup {
 		user.setMail("user9@test.invalid");
 		user.setGroups(new int[]{1,4});
 		addUser(user);
-		
-	}
+  		
+    }
 
 	private void addUser(User user) {
 		users.put(user.getId(),user);

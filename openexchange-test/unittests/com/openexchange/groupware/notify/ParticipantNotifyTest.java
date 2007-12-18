@@ -1,52 +1,30 @@
 package com.openexchange.groupware.notify;
 
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.Init;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.container.*;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.ldap.*;
+import com.openexchange.groupware.notify.ParticipantNotify.EmailableParticipant;
+import com.openexchange.groupware.notify.ParticipantNotify.LinkableState;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.i18n.tools.StringTemplate;
+import com.openexchange.i18n.tools.TemplateListResourceBundle;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.test.TestInit;
+import junit.framework.TestCase;
+
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
 import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-
-import junit.framework.TestCase;
-
-import com.openexchange.api2.OXException;
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.ExternalUserParticipant;
-import com.openexchange.groupware.container.GroupParticipant;
-import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.ResourceParticipant;
-import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.ldap.Group;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.MockGroupLookup;
-import com.openexchange.groupware.ldap.MockResourceLookup;
-import com.openexchange.groupware.ldap.MockUserLookup;
-import com.openexchange.groupware.ldap.Resource;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserConfigurationFactory;
-import com.openexchange.groupware.notify.ParticipantNotify.EmailableParticipant;
-import com.openexchange.groupware.notify.ParticipantNotify.LinkableState;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.i18n.tools.StringTemplate;
-import com.openexchange.i18n.tools.TemplateListResourceBundle;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.session.Session;
-import com.openexchange.test.TestInit;
+import java.util.*;
 
 public class ParticipantNotifyTest extends TestCase{
 	
@@ -67,8 +45,10 @@ public class ParticipantNotifyTest extends TestCase{
 	private Date start = new Date();
 	private Date end = new Date();
 	private SessionObject session = null;
-	
-	// Bug 7507
+
+
+
+    // Bug 7507
 	public void testGenerateLink() {
 		EmailableParticipant p = new EmailableParticipant(0, 0, null, "", "", null, null, 0, 23); //FolderId: 23
 		Task task = new Task();
@@ -454,9 +434,8 @@ public class ParticipantNotifyTest extends TestCase{
 	
 	public void setUp() throws Exception {
 		
-		System.setProperty("openexchange.propfile", TestInit.getTestProperty("openexchange.propfile"));
-		SystemConfig.init();
-		String templates = TestInit.getTestProperty("templatePath");
+		Init.startServer();
+        String templates = TestInit.getTestProperty("templatePath");
 		TemplateListResourceBundle.setTemplatePath(new File(templates));
 		
 		session = new SessionObject("my_fake_sessionid");
@@ -468,7 +447,8 @@ public class ParticipantNotifyTest extends TestCase{
 	
 	public void tearDown() throws Exception {
 		notify.clearMessages();
-	}
+        Init.stopServer();
+    }
 	
 	private String[] parseParticipants(Message msg) {
 		int language = guessLanguage(msg);
