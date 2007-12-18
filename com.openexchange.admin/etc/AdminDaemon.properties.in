@@ -28,3 +28,11 @@ RESOURCE_STORAGE=com.openexchange.admin.storage.mysqlStorage.OXResourceMySQLStor
 
 # how many jobs should be executed concurrently
 CONCURRENT_JOBS=2
+
+# Where are the access combinations defined ?
+#
+# IF THE SPECIFIED FILE DOES NOT EXISTS,
+# SERVER WILL USE FALLBACK ACCESS COMBINATIONS
+#
+ACCESS_COMBINATIONS_FILE=$PWD/@oxconfdir@/ModuleAccessDefinitions.properties
+
