@@ -106,12 +106,10 @@ public class DeleteTest extends ReminderTest {
 				pos = a;
 			}
 		}
-		try {
-			deleteReminder(getWebConversation(), reminderObj[pos].getObjectId()+1000, getHostName(), getSessionId());
-			fail("object not found exception excected!");
-		} catch (TestException ex) {
-			assertTrue(true);
-		}
+
+		final int[] failedObjects = deleteReminder(getWebConversation(), reminderObj[pos].getObjectId()+1000, getHostName(), getSessionId());
+		assertTrue("failed object size is not > 0", failedObjects.length > 0);
+		assertEquals("fail object id not equals expected", reminderObj[pos].getObjectId()+1000, failedObjects[0]);
 		
 		AppointmentTest.deleteAppointment(getWebConversation(), targetId, folderId, getHostName(), getSessionId());
 	}
