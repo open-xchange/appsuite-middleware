@@ -57,11 +57,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavMultistatusException;
-import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.*;
 
 public abstract class AbstractCollection extends AbstractResource implements
 		WebdavCollection {
@@ -134,12 +130,12 @@ public abstract class AbstractCollection extends AbstractResource implements
 	protected abstract void internalDelete() throws WebdavException;
 	
 	@Override
-	public AbstractCollection instance(final String url) throws WebdavException {
+	public AbstractCollection instance(final WebdavPath url) throws WebdavException {
 		return (AbstractCollection) getFactory().resolveCollection(url);
 	}
 	
 	@Override
-	public WebdavResource copy(final String dest, final boolean noroot, final boolean overwrite) throws WebdavException {
+	public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavException {
 		final List<WebdavException> exceptions = new ArrayList<WebdavException>();
 		try {
 			WebdavResource copy = null;
@@ -150,10 +146,8 @@ public abstract class AbstractCollection extends AbstractResource implements
 			}
 			
 			for(WebdavResource res : new ArrayList<WebdavResource>(getChildren())) {
-				final String oldUri = res.getUrl();
-				final String name = oldUri.substring(oldUri.lastIndexOf('/')+1);
 				try {
-					res.copy(dest+"/"+name);
+					res.copy(dest.dup().append(res.getUrl().name()));
 				} catch (WebdavException x) {
 					exceptions.add(x);
 				}
@@ -180,11 +174,11 @@ public abstract class AbstractCollection extends AbstractResource implements
 		throw new WebdavException("Collections have no bodies", getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 
-	public WebdavResource resolveResource(final String subPath) throws WebdavException {
-		return getFactory().resolveResource(getUrl()+"/"+subPath);
+	public WebdavResource resolveResource(final WebdavPath subPath) throws WebdavException {
+		return getFactory().resolveResource(getUrl().dup().append(subPath));
 	}
 
-	public WebdavCollection resolveCollection(final String subPath) throws WebdavException {
+	public WebdavCollection resolveCollection(final WebdavPath subPath) throws WebdavException {
 		return getFactory().resolveCollection(getUrl()+"/"+subPath);
 	}
 

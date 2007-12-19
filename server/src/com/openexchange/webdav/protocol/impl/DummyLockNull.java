@@ -49,21 +49,18 @@
 
 package com.openexchange.webdav.protocol.impl;
 
-import java.util.HashMap;
-
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavLock;
-import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.*;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
+
+import java.util.HashMap;
 
 public class DummyLockNull extends DummyCollection {
 	
 	private static final WEBDAV_METHOD[] OPTIONS = {WEBDAV_METHOD.PUT, WEBDAV_METHOD.MKCOL, WEBDAV_METHOD.OPTIONS, WEBDAV_METHOD.PROPFIND, WEBDAV_METHOD.LOCK, WEBDAV_METHOD.UNLOCK, WEBDAV_METHOD.TRACE};
 	private WebdavResource realResource;
 	
-	public DummyLockNull(DummyResourceManager manager, String url) {
+	public DummyLockNull(DummyResourceManager manager, WebdavPath url) {
 		super(manager, url);
 	}
 	

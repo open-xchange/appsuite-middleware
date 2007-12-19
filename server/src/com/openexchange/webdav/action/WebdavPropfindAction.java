@@ -49,11 +49,12 @@
 
 package com.openexchange.webdav.action;
 
-import java.io.IOException;
-import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
-
+import com.openexchange.webdav.loader.LoadingHints;
+import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavCollection;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.xml.resources.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
@@ -62,15 +63,9 @@ import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
 
-import com.openexchange.webdav.loader.LoadingHints;
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.xml.resources.PropfindAllPropsMarshaller;
-import com.openexchange.webdav.xml.resources.PropfindPropNamesMarshaller;
-import com.openexchange.webdav.xml.resources.PropfindResponseMarshaller;
-import com.openexchange.webdav.xml.resources.RecursiveMarshaller;
-import com.openexchange.webdav.xml.resources.ResourceMarshaller;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
 
 public class WebdavPropfindAction extends AbstractAction {
 
@@ -97,7 +92,7 @@ public class WebdavPropfindAction extends AbstractAction {
 			forceAllProp = true; //Assume All Prop, if all else fails
 			
 		} catch (final IOException e1) {
-			throw new WebdavException("",HttpServletResponse.SC_BAD_REQUEST);
+			throw new WebdavException(new WebdavPath(),HttpServletResponse.SC_BAD_REQUEST);
 		}
 		
 		ResourceMarshaller marshaller = null;

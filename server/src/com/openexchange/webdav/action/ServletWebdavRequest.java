@@ -49,6 +49,14 @@
 
 package com.openexchange.webdav.action;
 
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavPath;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -59,20 +67,11 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.webdav.protocol.WebdavFactory;
-
 public class ServletWebdavRequest extends AbstractWebdavRequest implements WebdavRequest {
 	private HttpServletRequest req;
 	private String urlPrefix;
-	private String url;
-	private String destUrl;
+	private WebdavPath url;
+	private WebdavPath destUrl;
 
 	private static final Log LOG = LogFactory.getLog(ServletWebdavRequest.class);
 	
@@ -84,8 +83,6 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 		builder.append('/');
 		this.urlPrefix = builder.toString();
 		this.url = toWebdavURL(req.getRequestURI());
-		if(!this.url.equals("/") && this.url.endsWith("/"))
-			url = url.substring(0,url.length()-1);
 		
 	}
 
@@ -110,18 +107,18 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 		return urlPrefix;
 	}
 
-	public String getUrl() {
+	public WebdavPath getUrl() {
 		return url;
 	}
 
-	public String getDestinationUrl() {
+	public WebdavPath getDestinationUrl() {
 		if(destUrl != null)
 			return destUrl;
 		
 		return destUrl = toWebdavURL(req.getHeader("destination"));
 	}
 	
-	protected String toWebdavURL(String url) {
+	protected WebdavPath toWebdavURL(String url) {
 		if(url == null)
 			return null;
 		
@@ -136,9 +133,9 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 			url =  url.substring(req.getServletPath().length());
 		}
 		try {
-			return URLDecoder.decode(url,req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding());
+			return new WebdavPath(URLDecoder.decode(url,req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding()));
 		} catch (UnsupportedEncodingException e) {
-			return url;
+			return new WebdavPath(url);
 		}
 	}
 

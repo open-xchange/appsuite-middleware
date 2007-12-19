@@ -57,18 +57,14 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavMultistatusException;
-import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.*;
 import com.openexchange.webdav.protocol.Protocol.Property;
 
 public class DummyCollection extends DummyResource implements WebdavCollection {
 	
 	private final List<WebdavResource> children = new ArrayList<WebdavResource>();
 
-	public DummyCollection(final DummyResourceManager manager, final String url) {
+	public DummyCollection(final DummyResourceManager manager, final WebdavPath url) {
 		super(manager,url);
 	}
 	
@@ -138,13 +134,13 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 	}
 	
 	@Override
-	public DummyCollection instance(final String url) {
+	public DummyCollection instance(final WebdavPath url) {
 		return new DummyCollection(mgr,url);
 	}
 	
 	
 	@Override
-	public WebdavResource copy(final String dest, final boolean noroot, final boolean overwrite) throws WebdavException {
+	public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavException {
 		checkParentExists(dest);
 		final List<WebdavException> exceptions = new ArrayList<WebdavException>();
 		try {
@@ -157,10 +153,8 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 			
 			final List<WebdavResource> tmpList = new ArrayList<WebdavResource>(children);
 			for(final WebdavResource res : tmpList) {
-				final String oldUri = res.getUrl();
-				final String name = oldUri.substring(oldUri.lastIndexOf('/')+1);
 				try {
-					res.copy(dest+'/'+name);
+					res.copy(dest.dup().append(res.getUrl().name()));
 				} catch (final WebdavException x) {
 					exceptions.add(x);
 				}
@@ -190,12 +184,12 @@ public class DummyCollection extends DummyResource implements WebdavCollection {
 		throw new WebdavException("Collections have no bodies", getUrl(), HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE);
 	}
 
-	public WebdavResource resolveResource(final String subPath) throws WebdavException {
-		return mgr.resolveResource(url+'/'+subPath);
+	public WebdavResource resolveResource(final WebdavPath subPath) throws WebdavException {
+		return mgr.resolveResource(url.dup().append(subPath));
 	}
 
-	public WebdavCollection resolveCollection(final String subPath) throws WebdavException {
-		return mgr.resolveCollection(url+'/'+subPath);
+	public WebdavCollection resolveCollection(final WebdavPath subPath) throws WebdavException {
+		return mgr.resolveCollection(url.dup().append(subPath));
 	}
 	
 	public List<WebdavResource> getChildren(){

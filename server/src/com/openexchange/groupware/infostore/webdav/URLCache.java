@@ -49,10 +49,12 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
+import com.openexchange.webdav.protocol.WebdavPath;
+
 public interface URLCache {
 
 	public static enum Type {RESOURCE, COLLECTION};
 	
-	void invalidate(String url, int id, Type type);
+	void invalidate(WebdavPath url, int id, Type type);
 
 }

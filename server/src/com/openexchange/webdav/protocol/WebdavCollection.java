@@ -55,9 +55,9 @@ public interface WebdavCollection extends WebdavResource, Iterable<WebdavResourc
 
 	public static final int  INFINITY = -1;
 
-	WebdavResource resolveResource(String subPath) throws WebdavException;
+	WebdavResource resolveResource(WebdavPath subPath) throws WebdavException;
 
-	WebdavCollection resolveCollection(String subPath) throws WebdavException;
+	WebdavCollection resolveCollection(WebdavPath subPath) throws WebdavException;
 
 	List<WebdavResource> getChildren() throws WebdavException;
 

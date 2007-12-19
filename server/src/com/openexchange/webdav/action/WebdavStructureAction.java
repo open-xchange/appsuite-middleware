@@ -49,13 +49,10 @@
 
 package com.openexchange.webdav.action;
 
-import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.webdav.loader.LoadingHints;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.*;
+
+import javax.servlet.http.HttpServletResponse;
 
 public abstract class WebdavStructureAction extends AbstractAction {
 
@@ -82,12 +79,12 @@ public abstract class WebdavStructureAction extends AbstractAction {
 			if(dest.isCollection()) {
 				int depth = req.getDepth(WebdavCollection.INFINITY);
 				
-				int sourceUrlLength = req.getUrl().length();
-				String destUrl = req.getDestinationUrl();
+				int sourceUrlLength = req.getUrl().size();
+				WebdavPath destUrl = req.getDestinationUrl();
 				
 				for(WebdavResource res : req.getCollection().toIterable(depth)) {
-					String url = res.getUrl();
-					url = destUrl + url.substring(sourceUrlLength);
+					WebdavPath url = res.getUrl();
+					url = destUrl.dup().append(url.subpath(sourceUrlLength));
 					WebdavResource d = factory.resolveResource(url);
 					if(d.exists() && !d.isCollection())
 						throw new WebdavException(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);

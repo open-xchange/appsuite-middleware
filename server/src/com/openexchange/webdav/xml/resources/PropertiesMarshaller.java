@@ -101,7 +101,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 
 	public List<Element> marshal(final WebdavResource resource) {
 		final Element response =  new Element("response",DAV_NS);
-		response.addContent(marshalHREF(resource.getUrl()));
+		response.addContent(marshalHREF(resource.getUrl().toString())); //TODO: Fix the new bug here
 		final Multistatus<Iterable<WebdavProperty>> multistatus = getProps(resource);
 		for(final int statusCode : multistatus.getStatusCodes()) {
 			for(final WebdavStatus<Iterable<WebdavProperty>> status : multistatus.toIterable(statusCode)) {

@@ -56,18 +56,18 @@ public class WebdavMultistatusException extends WebdavException {
 	private static final long serialVersionUID = 1L;
 	private WebdavException[] exceptions;
 
-	public WebdavMultistatusException(String url, WebdavException...exceptions) {
-		super(url, 207);
-		this.exceptions = exceptions;
-	}
-	
-	public WebdavMultistatusException(String url, Collection<WebdavException> exceptions){
-		this(url, exceptions.toArray(new WebdavException[exceptions.size()]));
-	}
-	
-	public WebdavException[] getExceptions(){
+
+    public WebdavMultistatusException(WebdavPath url, WebdavException...exceptions) {
+        super(url, 207);
+        this.exceptions = exceptions;
+    }
+
+    public WebdavMultistatusException(WebdavPath url, Collection<WebdavException> exceptions){
+        this(url, exceptions.toArray(new WebdavException[exceptions.size()]));
+    }
+
+
+    public WebdavException[] getExceptions(){
 		return exceptions;
 	}
-
-
 }

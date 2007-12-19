@@ -49,17 +49,12 @@
 
 package com.openexchange.webdav.protocol.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.openexchange.webdav.protocol.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavResource;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DummyResourceManager implements WebdavFactory {
 
@@ -81,12 +76,11 @@ public class DummyResourceManager implements WebdavFactory {
 	
 	private static final Protocol PROTOCOL = new Protocol();
 	
-	private final Map<String,WebdavResource> resources = new HashMap<String,WebdavResource>();
-	private final Map<String,DummyLockNull> lockNullResources = new HashMap<String,DummyLockNull>();
-	
-	
-	public WebdavResource resolveResource(final String url) {
-		if(!resources.containsKey(url)) {
+	private final Map<WebdavPath,WebdavResource> resources = new HashMap<WebdavPath,WebdavResource>();
+	private final Map<WebdavPath,DummyLockNull> lockNullResources = new HashMap<WebdavPath,DummyLockNull>();
+
+    public WebdavResource resolveResource(WebdavPath url) {
+        if(!resources.containsKey(url)) {
 			if(lockNullResources.containsKey(url)) {
 				final DummyLockNull lockNull = lockNullResources.get(url);
 				lockNull.setRealResource(new DummyResource(this,url)); // FIXME Multithreading?
@@ -95,10 +89,10 @@ public class DummyResourceManager implements WebdavFactory {
 			return new DummyResource(this, url);
 		}
 		return resources.get(url);
-	}
+    }
 
-	public WebdavCollection resolveCollection(final String url) {
-		if(!resources.containsKey(url)) {
+    public WebdavCollection resolveCollection(WebdavPath url) {
+        if(!resources.containsKey(url)) {
 			if(lockNullResources.containsKey(url)) {
 				final DummyLockNull lockNull = lockNullResources.get(url);
 				lockNull.setRealResource(new DummyCollection(this,url)); // FIXME Multithreading?
@@ -107,26 +101,29 @@ public class DummyResourceManager implements WebdavFactory {
 			return new DummyCollection(this, url);
 		}
 		return (WebdavCollection) resources.get(url);
+    }
+
+    public WebdavResource resolveResource(final String url) {
+		return resolveResource(new WebdavPath(url));
 	}
 
-	public synchronized void save(String url, final DummyResource res) {
-		url = normalize(url);
+	public WebdavCollection resolveCollection(final String url) {
+		return resolveCollection(new WebdavPath(url));
+	}
+
+	public synchronized void save(WebdavPath url, final DummyResource res) {
 		getParent(url).addChild(res);
 		resources.put(url,res);
 	}
 
-	public void remove(String url, final DummyResource res) {
-		url = normalize(url);
+	public void remove(WebdavPath url, final DummyResource res) {
 		getParent(url).removeChild(res);
 		resources.remove(url);
 	}
 
-	private DummyCollection getParent(final String url) {
-		String parentUrl = url.substring(0,url.lastIndexOf('/'));
-		if("".equals(parentUrl)) {
-			parentUrl = "/";
-		}
-		return (DummyCollection) resolveCollection(parentUrl);
+	private DummyCollection getParent(final WebdavPath url) {
+
+		return (DummyCollection) resolveCollection(url.parent());
 	}
 
 	private String normalize(String url) {
@@ -147,7 +144,7 @@ public class DummyResourceManager implements WebdavFactory {
 		return lockNull;
 	}
 
-	public void removeLockNull(final String url) {
+	public void removeLockNull(final WebdavPath url) {
 		lockNullResources.remove(url);
 	}
 

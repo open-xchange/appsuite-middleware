@@ -49,25 +49,18 @@
 
 package com.openexchange.webdav.protocol.impl;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
-
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavLock;
-import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.*;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
 import com.openexchange.webdav.protocol.util.PropertySwitch;
 import com.openexchange.webdav.protocol.util.Utils;
 import com.openexchange.webdav.xml.WebdavLockWriter;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public abstract class AbstractResource implements WebdavResource {
 	
@@ -77,14 +70,13 @@ public abstract class AbstractResource implements WebdavResource {
 		checkParentExists(getUrl());
 	}
 	
-	protected void checkParentExists(final String url) throws WebdavException {
-		final String[] comps = url.split("/");
-		final StringBuilder path = new StringBuilder();
-		
-		for(int i = 1; i < comps.length-1; i++) {
-			path.append('/');
-			path.append(comps[i]);
-			final WebdavResource res = getFactory().resolveResource(path.toString());
+	protected void checkParentExists(final WebdavPath url) throws WebdavException {
+		WebdavPath check = new WebdavPath();
+
+        for(String comp : url) {
+			check.append(url);
+            if(check.equals(url)) break;
+            final WebdavResource res = getFactory().resolveResource(check);
 			if(!res.exists() || !res.isCollection()) {
 				throw new WebdavException("Conflict with: "+res.getUrl()+" exists: "+res.exists()+" collection: "+res.isCollection(), getUrl(), HttpServletResponse.SC_CONFLICT);
 			}
@@ -103,11 +95,11 @@ public abstract class AbstractResource implements WebdavResource {
 		return null;
 	}
 	
-	public WebdavResource move(final String string) throws WebdavException {
+	public WebdavResource move(final WebdavPath string) throws WebdavException {
 		return move(string,false, true);
 	}
 
-	public WebdavResource copy(final String string) throws WebdavException {
+	public WebdavResource copy(final WebdavPath string) throws WebdavException {
 		return copy(string,false, true);
 	}
 	
@@ -115,14 +107,14 @@ public abstract class AbstractResource implements WebdavResource {
 		return this.getFactory().resolveResource(getUrl());
 	}
 	
-	public WebdavResource move(final String dest, final boolean noroot, final boolean overwrite) throws WebdavException {
+	public WebdavResource move(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavException {
 		final WebdavResource copy = copy(dest);
 		delete();
 		((AbstractResource)copy).setCreationDate(getCreationDate());
 		return copy;
 	}
 	
-	public WebdavResource copy(final String dest, final boolean noroot, final boolean overwrite) throws WebdavException {
+	public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavException {
 		final AbstractResource clone = instance(dest);
 		if(hasBody()) {
 			clone.putBody(getBody());
@@ -135,7 +127,7 @@ public abstract class AbstractResource implements WebdavResource {
 	}
 
 
-	public AbstractResource instance(final String dest) throws WebdavException {
+	public AbstractResource instance(final WebdavPath dest) throws WebdavException {
 		return (AbstractResource) getFactory().resolveResource(dest);
 	}
 	
@@ -208,21 +200,18 @@ public abstract class AbstractResource implements WebdavResource {
 	}
 	
 	protected WebdavCollection parent() throws WebdavException{
-		final String url = getUrl();
-		final String parentUrl = url.substring(0, url.lastIndexOf('/'));
-		return getFactory().resolveCollection(parentUrl);
+		return getFactory().resolveCollection(getUrl().parent());
 	}
 	
 	protected List<WebdavCollection> parents() throws WebdavException{
 		final List<WebdavCollection> parents = new ArrayList<WebdavCollection>();
-		final String[] comps = getUrl().split("/");
-		final StringBuilder path = new StringBuilder();
-		
-		for(int i = 1; i < comps.length-1; i++) {
-			path.append('/');
-			path.append(comps[i]);
-			final WebdavCollection res = getFactory().resolveCollection(path.toString());
+		WebdavPath path = new WebdavPath();
+		for(String comp : getUrl()) {
+			path.append(comp);
+            if(path.equals(getUrl())) break;
+            final WebdavCollection res = getFactory().resolveCollection(path);
 			parents.add(res);
+
 		}
 		return parents;
 	}
@@ -284,7 +273,7 @@ public abstract class AbstractResource implements WebdavResource {
 	
 	@Override
 	public String toString(){
-		return getUrl();
+		return getUrl().toString();
 	}
 
 	public abstract void putBody(InputStream body, boolean guessSize) throws WebdavException;

@@ -53,9 +53,9 @@ public class WebdavStatusImpl<T> implements WebdavStatus<T> {
 
 	private int status;
 	private T additional;
-	private String url;
+	private WebdavPath url;
 	
-	public WebdavStatusImpl(int status, String url, T additional) {
+	public WebdavStatusImpl(int status, WebdavPath url, T additional) {
 		this.status = status;
 		this.url = url;
 		this.additional = additional;
@@ -69,7 +69,7 @@ public class WebdavStatusImpl<T> implements WebdavStatus<T> {
 		return status;
 	}
 
-	public String getUrl() {
+	public WebdavPath getUrl() {
 		return url;
 	}
 

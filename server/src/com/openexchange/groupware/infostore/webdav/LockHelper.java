@@ -49,15 +49,6 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -68,6 +59,10 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.webdav.protocol.WebdavPath;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.*;
 
 public abstract class LockHelper {
 	private final Map<String, WebdavLock> locks = new HashMap<String, WebdavLock>();
@@ -127,7 +122,7 @@ public abstract class LockHelper {
 			lock.setToken("http://www.open-xchange.com/webdav/locks/"+lockId);
 			locks.put(lock.getToken(), lock);
 		} catch (final OXException e) {
-			throw new WebdavException(e.toString(), e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new WebdavException(e.toString(), e, new WebdavPath(url), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -169,7 +164,7 @@ public abstract class LockHelper {
 			}
 			setLocks(cleanedLocks);
 		} catch (final OXException e) {
-			throw new WebdavException(e.getMessage(), e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new WebdavException(e.getMessage(), e, new WebdavPath(url), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 	

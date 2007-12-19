@@ -49,6 +49,14 @@
 
 package com.openexchange.webdav.action;
 
+import static com.openexchange.tools.io.IOTools.reallyBloodySkip;
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavResource;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,16 +66,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavResource;
-
-import static com.openexchange.tools.io.IOTools.reallyBloodySkip;
 
 public class WebdavGetAction extends WebdavHeadAction {
 	private static final Log LOG = LogFactory.getLog(WebdavGetAction.class);
@@ -188,7 +186,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 		return retVal;
 	}
 
-	private ByteRange parseRange(final String range, final long length, final String url) throws WebdavException {
+	private ByteRange parseRange(final String range, final long length, final WebdavPath url) throws WebdavException {
 		if(range.charAt(0) == '-') {
 			final long reqLength = Long.parseLong(range.substring(1));
 			if(reqLength > length) {

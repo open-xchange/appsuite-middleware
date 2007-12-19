@@ -49,25 +49,16 @@
 
 package com.openexchange.webdav.protocol.impl;
 
+import com.openexchange.tools.collections.Injector;
+import com.openexchange.tools.collections.OXCollections;
+import com.openexchange.webdav.protocol.Protocol.Property;
+import com.openexchange.webdav.protocol.*;
+
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletResponse;
-
-import com.openexchange.tools.collections.Injector;
-import com.openexchange.tools.collections.OXCollections;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavLock;
-import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.Protocol.Property;
+import java.util.*;
 
 public class DummyResource extends AbstractResource implements WebdavResource  {
 
@@ -75,7 +66,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 	
 	private boolean exists;
 	protected DummyResourceManager mgr;
-	protected String url;
+	protected WebdavPath url;
 	private String displayName;
 	private long length;
 	private String eTag;
@@ -93,13 +84,13 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 	
 	private byte[] body;
 
-	public DummyResource(final DummyResourceManager manager, final String url) {
+	public DummyResource(final DummyResourceManager manager, final WebdavPath url) {
 		this.mgr = manager;
 		this.url = url;
-		if(url.indexOf('/') != -1) {
-			displayName = url.substring(url.lastIndexOf('/')+1);
+		if(url.size() != 0) {
+			displayName = url.name();
 		} else {
-			displayName = url;
+			displayName = "";
 		}
 		lang = "en";
 		eTag = "1";
@@ -168,7 +159,7 @@ public class DummyResource extends AbstractResource implements WebdavResource  {
 		lastModified = new Date();
 	}
 
-	public String getUrl() {
+	public WebdavPath getUrl() {
 		return url;
 	}
 

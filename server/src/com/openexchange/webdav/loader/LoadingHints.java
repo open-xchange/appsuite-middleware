@@ -49,10 +49,11 @@
 
 package com.openexchange.webdav.loader;
 
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProperty;
+
 import java.util.HashSet;
 import java.util.Set;
-
-import com.openexchange.webdav.protocol.WebdavProperty;
 
 public class LoadingHints {
 	public static enum Property {ALL, SOME, NONE}
@@ -60,7 +61,7 @@ public class LoadingHints {
 	private Property property;
 	private Set<WebdavProperty> properties = new HashSet<WebdavProperty>();
 	private int depth;
-	private String url;
+	private WebdavPath url;
 	private boolean loadLocks;
 
 	public void setProps(Property which) {
@@ -87,11 +88,11 @@ public class LoadingHints {
 		return depth;
 	}
 
-	public void setUrl(String url) {
+	public void setUrl(WebdavPath url) {
 		this.url = url;
 	}
 	
-	public String getUrl(){
+	public WebdavPath getUrl(){
 		return url;
 	}
 

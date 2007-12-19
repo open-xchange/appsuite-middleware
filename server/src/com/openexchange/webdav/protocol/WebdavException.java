@@ -49,8 +49,6 @@
 
 package com.openexchange.webdav.protocol;
 
-import java.util.Date;
-
 /**
  * TODO Error codes
  */
@@ -58,41 +56,41 @@ public class WebdavException extends Exception implements WebdavStatus<Object>{
 
 	private static final long serialVersionUID = 617401197355575125L;
 	private int status;
-	private String url;
+	private WebdavPath url;
 	private String message;
-	
-	public WebdavException(String url, int status) {
+
+    public WebdavException(WebdavPath url, int status) {
 		super();
 		this.url = url;
 		this.status = status;
 	}
 
-	public WebdavException(String arg0, String url, int status) {
+	public WebdavException(String arg0, WebdavPath url, int status) {
 		super(arg0);
 		this.message=arg0;
 		this.url = url;
 		this.status = status;
 	}
 
-	public WebdavException(String arg0, Throwable arg1, String url, int status) {
+	public WebdavException(String arg0, Throwable arg1, WebdavPath url, int status) {
 		super(arg0, arg1);
 		this.message=arg0;
 		this.url = url;
 		this.status = status;
 	}
 
-	public WebdavException(Throwable arg0, String url, int status) {
+	public WebdavException(Throwable arg0, WebdavPath url, int status) {
 		super(arg0);
 		this.message = arg0.toString();
 		this.url = url;
 		this.status = status;
 	}
 
-	public int getStatus() {
+    public int getStatus() {
 		return status;
 	}
 	
-	public String getUrl(){
+	public WebdavPath getUrl(){
 		return url;
 	}
 

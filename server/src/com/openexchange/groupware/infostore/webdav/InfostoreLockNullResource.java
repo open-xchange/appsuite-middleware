@@ -49,6 +49,22 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.infostore.webdav.URLCache.Type;
+import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.webdav.protocol.*;
+import com.openexchange.webdav.protocol.Protocol.Property;
+import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
+import com.openexchange.webdav.protocol.impl.AbstractCollection;
+import com.openexchange.webdav.protocol.impl.AbstractResource;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -57,29 +73,6 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.infostore.webdav.URLCache.Type;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.sessiond.impl.SessionHolder;
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavLock;
-import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.Protocol.Property;
-import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
-import com.openexchange.webdav.protocol.impl.AbstractCollection;
-import com.openexchange.webdav.protocol.impl.AbstractResource;
 
 public class InfostoreLockNullResource extends AbstractCollection implements OXWebdavResource{
 
@@ -106,7 +99,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		this.resource = resource;
 		this.factory = factory;
 		this.sessionHolder = factory.getSessionHolder();
-		this.lockHelper = new EntityLockHelper(factory.getLockNullLockManager(), sessionHolder, resource.getUrl());
+		this.lockHelper = new EntityLockHelper(factory.getLockNullLockManager(), sessionHolder, resource.getUrl().toString());
 		this.provider = factory.getProvider();
 	}
 	
@@ -115,12 +108,12 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		this.setId(id);
 	}
 	
-	public static int findInfostoreLockNullResource(final String url, final Connection readCon, final Context ctx) throws WebdavException {
+	public static int findInfostoreLockNullResource(final WebdavPath url, final Connection readCon, final Context ctx) throws WebdavException {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
 			stmt = readCon.prepareStatement("SELECT id FROM lock_null WHERE url = ? and cid = ?");
-			stmt.setString(1,url);
+			stmt.setString(1,url.toString());
 			stmt.setInt(2, ctx.getContextId());
 			rs = stmt.executeQuery();
 			if(rs.next()) {
@@ -319,7 +312,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		return null;
 	}
 
-	public String getUrl() {
+	public WebdavPath getUrl() {
 		return resource.getUrl();
 	}
 
@@ -402,7 +395,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			stmt = writeCon.prepareStatement("INSERT INTO lock_null (cid, id, url) VALUES (?,?,?)");
 			stmt.setInt(1,ctx.getContextId());
 			stmt.setInt(2, id);
-			stmt.setString(3, getUrl());
+			stmt.setString(3, getUrl().toString());
 			stmt.executeUpdate();
 			setId(id);
 			writeCon.commit();

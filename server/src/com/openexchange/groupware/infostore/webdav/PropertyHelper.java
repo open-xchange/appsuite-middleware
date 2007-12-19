@@ -49,21 +49,15 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.*;
 
 public class PropertyHelper {
 	
@@ -149,7 +143,7 @@ public class PropertyHelper {
 			properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 			
 		} catch (final OXException e) {
-			throw new WebdavException(e.getMessage(), e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new WebdavException(e.getMessage(), e, new WebdavPath(url), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -165,7 +159,7 @@ public class PropertyHelper {
 				properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 			}
 		} catch (final OXException e) {
-			throw new WebdavException(e.getMessage(), e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new WebdavException(e.getMessage(), e, new WebdavPath(url), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 	

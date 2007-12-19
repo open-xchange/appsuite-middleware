@@ -51,7 +51,7 @@ package com.openexchange.webdav.protocol;
 
 public interface WebdavStatus<T> {
 	public int getStatus();
-	public String getUrl();
+	public WebdavPath getUrl();
 	public T getAdditional();
 
 }

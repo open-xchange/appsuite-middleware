@@ -63,13 +63,13 @@ public interface WebdavResource {
 
 	void delete() throws WebdavException;
 	
-	WebdavResource move(String newUri) throws WebdavException;
+	WebdavResource move(WebdavPath newUri) throws WebdavException;
 	
-	WebdavResource move(String string, boolean noroot, boolean overwrite) throws WebdavException;
+	WebdavResource move(WebdavPath string, boolean noroot, boolean overwrite) throws WebdavException;
 	
-	WebdavResource copy(String string) throws WebdavException;
+	WebdavResource copy(WebdavPath string) throws WebdavException;
 	
-	WebdavResource copy(String string, boolean noroot, boolean overwrite) throws WebdavException;
+	WebdavResource copy(WebdavPath string, boolean noroot, boolean overwrite) throws WebdavException;
 	
 	boolean isCollection();
 
@@ -81,7 +81,7 @@ public interface WebdavResource {
 
 	void save() throws WebdavException;
 
-	String getUrl();
+	WebdavPath getUrl();
 
 	WebdavProperty getProperty(String namespace, String name) throws WebdavException;
 

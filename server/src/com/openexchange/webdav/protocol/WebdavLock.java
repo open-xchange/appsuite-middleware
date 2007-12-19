@@ -116,8 +116,8 @@ public class WebdavLock {
 	}
 	
 	public boolean locks(final WebdavResource locked, final WebdavResource resource) {
-		final String urlLocked = locked.getUrl();
-		final String urlRes = resource.getUrl();
+		final WebdavPath urlLocked = locked.getUrl();
+		final WebdavPath urlRes = resource.getUrl();
 				
 		if(!urlRes.startsWith(urlLocked)) {
 			return false;
@@ -129,7 +129,7 @@ public class WebdavLock {
 			return urlLocked.equals(urlRes);
 		}
 		if(depth == 1) {
-			return urlLocked.equals(urlRes.substring(0,urlRes.lastIndexOf('/')));
+			return urlLocked.equals(urlRes.parent());
 		}
 		return false;
 	}

@@ -49,20 +49,6 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
-import java.sql.Connection;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
@@ -79,26 +65,23 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.oxfolder.OXFolderException;
-import com.openexchange.tools.oxfolder.OXFolderManager;
-import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
-import com.openexchange.tools.oxfolder.OXFolderPermissionException;
-import com.openexchange.tools.oxfolder.OXFolderTools;
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavLock;
-import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.tools.oxfolder.*;
+import com.openexchange.webdav.protocol.*;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.impl.AbstractCollection;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import javax.servlet.http.HttpServletResponse;
+import java.sql.Connection;
+import java.sql.Timestamp;
+import java.util.*;
 
 public class FolderCollection extends AbstractCollection implements OXWebdavResource {
 
 	private static final Log LOG = LogFactory.getLog(FolderCollection.class);
 	private InfostoreWebdavFactory factory;
-	private String url;
+	private WebdavPath url;
 	private PropertyHelper propertyHelper;
 	private SessionHolder sessionHolder;
 	private FolderLockHelper lockHelper;
@@ -113,16 +96,16 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	private boolean loadedChildren;
 	private ArrayList<OCLPermission> overrideNewACL;
 	
-	public FolderCollection(final String url, final InfostoreWebdavFactory factory) {
+	public FolderCollection(final WebdavPath url, final InfostoreWebdavFactory factory) {
 		this(url,factory,null);
 	}
 	
-	public FolderCollection(final String url, final InfostoreWebdavFactory factory, final FolderObject folder) {
+	public FolderCollection(final WebdavPath url, final InfostoreWebdavFactory factory, final FolderObject folder) {
 		this.url = url;
 		this.factory = factory;
 		this.sessionHolder = factory.getSessionHolder();
-		this.propertyHelper = new PropertyHelper(factory.getFolderProperties(), sessionHolder, url);
-		this.lockHelper = new FolderLockHelper(factory.getFolderLockManager(), sessionHolder, url);
+		this.propertyHelper = new PropertyHelper(factory.getFolderProperties(), sessionHolder, url.toString());
+		this.lockHelper = new FolderLockHelper(factory.getFolderLockManager(), sessionHolder, url.toString());
 		this.provider = factory.getProvider();
 		if(folder!=null) {
 			setId(folder.getObjectID());
@@ -166,30 +149,25 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	}
 	
 	private WebdavResource mergeTo(final FolderCollection to, final boolean move, final boolean overwrite) throws WebdavException {
-		final StringBuilder builder = new StringBuilder(to.getUrl());
-		if(!(builder.charAt(builder.length()-1)!='/')) {
-			builder.append('/');
-		}
+
 		
-		final int lengthUrl = getUrl().length();
-		final int resetTo = builder.length();
-		
-		
+		final int lengthUrl = getUrl().size();
+
 		for(final WebdavResource res : getChildren()) {
-			builder.append(res.getUrl().substring(lengthUrl));
+			WebdavPath toUrl = to.getUrl().dup().append(res.getUrl().subpath(lengthUrl));
 			if(move) {
-				res.move(builder.toString(), false, overwrite);
+				res.move(toUrl, false, overwrite);
 			} else {
-				res.copy(builder.toString(), false, overwrite);
+				res.copy(toUrl, false, overwrite);
 			}
-			builder.setLength(resetTo);
+
 		}
 		
 		return this;
 	}
 	
 	@Override
-	public WebdavResource move(final String dest, final boolean noroot, final boolean overwrite) throws WebdavException {
+	public WebdavResource move(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavException {
 		final FolderCollection coll = (FolderCollection) factory.resolveCollection(dest);
 		if(coll.exists()) {
 			if(overwrite) {
@@ -207,8 +185,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			return moved;
 		}
 		loadFolder();
-		final int index = dest.lastIndexOf('/');
-		final String name = dest.substring(index+1);
+		final String name = dest.name();
 		
 		folder.setFolderName(name);
 		folder.setParentFolderID(((OXWebdavResource) coll.parent()).getId());
@@ -232,7 +209,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	
 
 	@Override
-	public WebdavResource copy(final String dest, final boolean noroot, final boolean overwrite) throws WebdavException {
+	public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavException {
 		final FolderCollection coll = (FolderCollection) factory.resolveCollection(dest);
 		if(!coll.exists()) {
 			loadFolder();
@@ -384,7 +361,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		return null;
 	}
 
-	public String getUrl() {
+	public WebdavPath getUrl() {
 		if(url == null) {
 			initUrl();
 		}
@@ -532,9 +509,9 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		initParent(folder);
 		folder.setType(FolderObject.PUBLIC);
 		folder.setModule(FolderObject.INFOSTORE);
-		if((folder.getFolderName() == null || folder.getFolderName().length() == 0) && url.contains("/")) {
+		if (folder.getFolderName() == null || folder.getFolderName().length() == 0) {
 			//if(url.contains("/")) {
-				folder.setFolderName(url.substring(url.lastIndexOf('/')+1));
+				folder.setFolderName(url.name());
 			//}
 		}
 	}
@@ -614,17 +591,11 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			
 			final SearchIterator iter = OXFolderTools.getVisibleSubfoldersIterator(id, user.getId(),user.getGroups(), ctx, userConfig, new Timestamp(0));
 			
-			final StringBuilder urlBuilder = new StringBuilder(getUrl());
-			urlBuilder.append('/');
-			final int resetTo = urlBuilder.length();
-			
+
 			while(iter.hasNext()) {
 				final FolderObject folder = (FolderObject) iter.next();
-				urlBuilder.append(folder.getFolderName());
-				
-				children.add(new FolderCollection(urlBuilder.toString(), factory, folder));
-				
-				urlBuilder.setLength(resetTo);
+				WebdavPath newUrl = getUrl().dup().append(folder.getFolderName());
+                children.add(new FolderCollection(newUrl, factory, folder));
 			}
 			
 			//children.addAll(factory.getCollections(folder.getSubfolderIds(true, sessionHolder.getSessionObject().getContext())));
@@ -641,11 +612,11 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 
 	public void initUrl() {
 		if(id == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
-			url = "/";
+			url = new WebdavPath();
 			return;
 		}
 		try {
-			url = parent().getUrl()+'/'+getDisplayName();
+			url = parent().getUrl().dup().append(getDisplayName());
 		} catch (final WebdavException e) {
 			if (LOG.isErrorEnabled()) {
 				LOG.error(e.getMessage(), e);
@@ -666,8 +637,8 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 			loadFolder();
 			return folder.getParentFolderID();
 		}
-		final String url = getUrl();
-		return ((OXWebdavResource) factory.resolveCollection(url.substring(0,url.lastIndexOf('/')))).getId();
+		final WebdavPath url = getUrl();
+		return ((OXWebdavResource) factory.resolveCollection(url.parent())).getId();
 	}
 
 	public void removedParent() throws WebdavException {

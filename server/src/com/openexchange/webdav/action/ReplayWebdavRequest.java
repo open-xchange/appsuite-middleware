@@ -49,22 +49,18 @@
 
 package com.openexchange.webdav.action;
 
+import com.openexchange.webdav.action.ifheader.IfHeader;
+import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
+import com.openexchange.webdav.protocol.*;
+import org.jdom.Document;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-
-import org.jdom.Document;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
-
-import com.openexchange.webdav.action.ifheader.IfHeader;
-import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavResource;
 
 public class ReplayWebdavRequest implements WebdavRequest{
 	private WebdavRequest delegate;
@@ -107,7 +103,7 @@ public class ReplayWebdavRequest implements WebdavRequest{
 		return delegate.getDestination();
 	}
 
-	public String getDestinationUrl() {
+	public WebdavPath getDestinationUrl() {
 		return delegate.getDestinationUrl();
 	}
 
@@ -127,7 +123,7 @@ public class ReplayWebdavRequest implements WebdavRequest{
 		return delegate.getResource();
 	}
 
-	public String getUrl() {
+	public WebdavPath getUrl() {
 		return delegate.getUrl();
 	}
 

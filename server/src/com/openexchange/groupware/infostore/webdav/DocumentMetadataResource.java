@@ -49,28 +49,12 @@
 
 package com.openexchange.groupware.infostore.webdav;
 
-import java.io.InputStream;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.infostore.Classes;
-import com.openexchange.groupware.infostore.ConflictException;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreException;
-import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
-import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.*;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.GetSwitch;
 import com.openexchange.groupware.infostore.database.impl.SetSwitch;
@@ -81,13 +65,18 @@ import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavLock;
-import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.Protocol.Property;
+import com.openexchange.webdav.protocol.*;
 import com.openexchange.webdav.protocol.impl.AbstractResource;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 
 @OXExceptionSource(
@@ -113,7 +102,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	
 	private final PropertyHelper propertyHelper;
 
-	private String url;
+	private WebdavPath url;
 	
 	private final SessionHolder sessionHolder;
 	
@@ -128,22 +117,22 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	private boolean metadataChanged;
 
 	
-	public DocumentMetadataResource(final String url, final InfostoreWebdavFactory factory) {
+	public DocumentMetadataResource(final WebdavPath url, final InfostoreWebdavFactory factory) {
 		this.factory = factory;
 		this.url = url;
 		this.sessionHolder = factory.getSessionHolder();
-		this.lockHelper = new EntityLockHelper(factory.getInfoLockManager(), sessionHolder, url);
+		this.lockHelper = new EntityLockHelper(factory.getInfoLockManager(), sessionHolder, url.toString());
 		this.database = factory.getDatabase();
-		this.propertyHelper = new PropertyHelper(factory.getInfoProperties(), sessionHolder, url);
+		this.propertyHelper = new PropertyHelper(factory.getInfoProperties(), sessionHolder, url.toString());
 	}
 	
-	public DocumentMetadataResource(final String url, final DocumentMetadata docMeta, final InfostoreWebdavFactory factory) {
+	public DocumentMetadataResource(final WebdavPath url, final DocumentMetadata docMeta, final InfostoreWebdavFactory factory) {
 		this.factory = factory;
 		this.url = url;
 		this.sessionHolder = factory.getSessionHolder();
-		this.lockHelper = new EntityLockHelper(factory.getInfoLockManager(), sessionHolder, url);
+		this.lockHelper = new EntityLockHelper(factory.getInfoLockManager(), sessionHolder, url.toString());
 		this.database = factory.getDatabase();
-		this.propertyHelper = new PropertyHelper(factory.getInfoProperties(), sessionHolder, url);
+		this.propertyHelper = new PropertyHelper(factory.getInfoProperties(), sessionHolder, url.toString());
 		
 		this.metadata = docMeta;
 		this.loadedMetadata = true;
@@ -308,7 +297,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		return null;
 	}
 
-	public String getUrl() {
+	public WebdavPath getUrl() {
 		return url;
 	}
 
@@ -391,21 +380,20 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	// 
 
 	@Override
-	public WebdavResource move(final String dest, final boolean noroot, final boolean overwrite) throws WebdavException {
+	public WebdavResource move(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavException {
 		final WebdavResource res = factory.resolveResource(dest);
 		if(res.exists()) {
 			if(!overwrite) {
-				throw new WebdavException(String.format("%s exists", dest), HttpServletResponse.SC_PRECONDITION_FAILED);
+				throw new WebdavException(String.format("%s exists", dest),getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 			}
 			res.delete();
 		}
-		final int index = dest.lastIndexOf('/');
-		final String parent = dest.substring(0, index);
-		final String name = dest.substring(index+1);
+		final WebdavPath parent = dest.parent();
+		final String name = dest.name();
 		
 		final FolderCollection coll = (FolderCollection) factory.resolveCollection(parent);
 		if(!coll.exists()) {
-			throw new WebdavException(String.format("The folder %s doesn't exist",parent), HttpServletResponse.SC_CONFLICT);
+			throw new WebdavException(String.format("The folder %s doesn't exist",parent),getUrl(), HttpServletResponse.SC_CONFLICT);
 		}
 		
 		loadMetadata();
@@ -431,20 +419,20 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	}
 	
 	@Override
-	public WebdavResource copy(final String dest, final boolean noroot, final boolean overwrite) throws WebdavException {
-		final int index = dest.lastIndexOf('/');
-		final String parent = dest.substring(0, index);
-		final String name = dest.substring(index+1);
+	public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavException {
+
+		final WebdavPath parent = dest.parent();
+		final String name = dest.name();
 		
 		final FolderCollection coll = (FolderCollection) factory.resolveCollection(parent);
 		if(!coll.exists()) {
-			throw new WebdavException(String.format("The folder %s doesn't exist", parent), HttpServletResponse.SC_CONFLICT);
+			throw new WebdavException(String.format("The folder %s doesn't exist", parent),getUrl(), HttpServletResponse.SC_CONFLICT);
 		}	
 		
 		final DocumentMetadataResource copy = (DocumentMetadataResource) factory.resolveResource(dest);
 		if(copy.exists()) {
 			if(!overwrite) {
-				throw new WebdavException(String.format("%s exists", dest), HttpServletResponse.SC_PRECONDITION_FAILED);
+				throw new WebdavException(String.format("%s exists", dest),getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 			}
 			copy.delete();
 		}
@@ -588,9 +576,9 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		if(!exists && !existsInDB) {
 			metadata.setVersion(InfostoreFacade.NEW);
 			metadata.setId(InfostoreFacade.NEW);
-			if((metadata.getFileName() == null || metadata.getFileName().trim().length()==0) && (url.contains("/"))) {
+			if(metadata.getFileName() == null || metadata.getFileName().trim().length()==0){
 				//if(url.contains("/"))
-					metadata.setFileName(url.substring(url.lastIndexOf("/")+1));
+					metadata.setFileName(url.name());
 			}
 			metadata.setTitle(metadata.getFileName());
 			if(fileData != null && guessSize) {
