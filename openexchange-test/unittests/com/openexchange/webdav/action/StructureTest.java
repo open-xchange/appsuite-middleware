@@ -1,28 +1,37 @@
 package com.openexchange.webdav.action;
 
-import java.io.ByteArrayInputStream;
+import com.openexchange.webdav.protocol.*;
 
 import javax.servlet.http.HttpServletResponse;
-
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavResource;
+import java.io.ByteArrayInputStream;
 
 public abstract class StructureTest extends ActionTestCase {
 	// noroot ?
 	
-	public void testResource() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		final String COPIED_INDEX_HTML_URL = testCollection+"/copied_index.html";
-		
+	private WebdavPath INDEX_HTML_URL = null;
+	private WebdavPath COPIED_INDEX_HTML_URL = null;
+    private WebdavPath SITEMAP_HTML_URL = null;
+    private WebdavPath DEVELOPMENT_URL = null;
+    private WebdavPath PM_URL = null;
+
+    public void setUp() throws Exception {
+        super.setUp();
+        INDEX_HTML_URL = testCollection.dup().append("index.html");
+        COPIED_INDEX_HTML_URL = testCollection.dup().append("copied_index.html");
+        SITEMAP_HTML_URL = testCollection.dup().append("sitemap.html");
+        DEVELOPMENT_URL = testCollection.dup().append("development");
+        PM_URL = testCollection.dup().append("pm");
+    }
+
+    public void testResource() throws Exception {
+
 		String content = getContent(INDEX_HTML_URL);
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(INDEX_HTML_URL);
-		req.setHeader("Destination", COPIED_INDEX_HTML_URL);
+		req.setHeader("Destination", COPIED_INDEX_HTML_URL.toString());
 		
 		WebdavAction action = getAction(factory);
 		action.perform(req, res);
@@ -39,14 +48,12 @@ public abstract class StructureTest extends ActionTestCase {
 	}
 	
 	public void testOverwrite() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		final String SITEMAP_HTML_URL = testCollection+"/sitemap.html";
-		
+
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(INDEX_HTML_URL);
-		req.setHeader("Destination", SITEMAP_HTML_URL);
+		req.setHeader("Destination", SITEMAP_HTML_URL.toString());
 		req.setHeader("Overwrite", "F");
 		
 		WebdavAction action = getAction(factory);
@@ -59,14 +66,12 @@ public abstract class StructureTest extends ActionTestCase {
 	}
 	
 	public void testSuccessfulOverwrite() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		final String SITEMAP_HTML_URL = testCollection+"/sitemap.html";
-		
+
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(INDEX_HTML_URL);
-		req.setHeader("Destination", SITEMAP_HTML_URL);
+		req.setHeader("Destination", SITEMAP_HTML_URL.toString());
 		req.setHeader("Overwrite", "T");
 		
 		WebdavAction action = getAction(factory);
@@ -77,17 +82,15 @@ public abstract class StructureTest extends ActionTestCase {
 	}
 	
 	public void testOverwriteCollection() throws Exception {
-		final String DEVELOPMENT_URL = testCollection+"/development";
-		final String PM_URL = testCollection+"/pm";
-		
-		factory.resolveCollection(DEVELOPMENT_URL).resolveResource("test.html").create();
-		factory.resolveCollection(PM_URL).resolveResource("test.html").create();
+
+		factory.resolveCollection(DEVELOPMENT_URL).resolveResource(new WebdavPath("test.html")).create();
+		factory.resolveCollection(PM_URL).resolveResource(new WebdavPath("test.html")).create();
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(DEVELOPMENT_URL);
-		req.setHeader("Destination", PM_URL);
+		req.setHeader("Destination", PM_URL.toString());
 		req.setHeader("Overwrite", "F");
 		
 		WebdavAction action = getAction(factory);
@@ -101,14 +104,11 @@ public abstract class StructureTest extends ActionTestCase {
 	}
 	
 	public void testMergeCollection() throws Exception {
-		final String DEVELOPMENT_URL = testCollection+"/development";
-		final String PM_URL = testCollection+"/pm";
-		
-		WebdavResource r = factory.resolveCollection(DEVELOPMENT_URL).resolveResource("test.html");
+		WebdavResource r = factory.resolveCollection(DEVELOPMENT_URL).resolveResource(new WebdavPath("test.html"));
 		r.putBodyAndGuessLength(new ByteArrayInputStream(new byte[2]));
 		r.create(); // FIXME
 		
-		r = factory.resolveCollection(PM_URL).resolveResource("test2.html");
+		r = factory.resolveCollection(PM_URL).resolveResource(new WebdavPath("test2.html"));
 		r.putBodyAndGuessLength(new ByteArrayInputStream(new byte[2]));
 		r.create(); // FIXME
 		
@@ -116,7 +116,7 @@ public abstract class StructureTest extends ActionTestCase {
 		MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(DEVELOPMENT_URL);
-		req.setHeader("Destination", PM_URL);
+		req.setHeader("Destination", PM_URL.toString());
 		
 		WebdavAction action = getAction(factory);
 		
@@ -127,14 +127,12 @@ public abstract class StructureTest extends ActionTestCase {
 	}
 	
 	public void testSame() throws Exception {
-		final String DEVELOPMENT_URL = testCollection+"/development";
-		
-		
+
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(DEVELOPMENT_URL);
-		req.setHeader("Destination", DEVELOPMENT_URL);
+		req.setHeader("Destination", DEVELOPMENT_URL.toString());
 		
 		WebdavAction action = getAction(factory);
 		try {
@@ -146,8 +144,7 @@ public abstract class StructureTest extends ActionTestCase {
 	}
 	
 	public void testConflict() throws Exception {
-		final String DEVELOPMENT_URL = testCollection+"/development";
-			
+
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		

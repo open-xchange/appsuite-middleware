@@ -1,12 +1,14 @@
 package com.openexchange.webdav.action;
 
+import com.openexchange.webdav.protocol.WebdavPath;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 public class OptionsTest extends ActionTestCase {
 	public void testOptions() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
+		final WebdavPath INDEX_HTML_URL = testCollection.dup().append("index.html");
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();

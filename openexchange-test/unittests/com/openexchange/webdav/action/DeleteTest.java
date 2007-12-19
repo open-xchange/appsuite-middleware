@@ -1,10 +1,12 @@
 package com.openexchange.webdav.action;
 
+import com.openexchange.webdav.protocol.WebdavPath;
+
 public class DeleteTest extends ActionTestCase {
 	public void testResource() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		final String DEVELOPMENT_URL = testCollection+"/development";
-		final String DEVELOPMENT_GUI_INDEX3_HTML_URL = testCollection+"/development/gui/index3.html";
+		final WebdavPath INDEX_HTML_URL = testCollection.dup().append("index.html");
+		final WebdavPath DEVELOPMENT_URL = testCollection.dup().append("development");
+		final WebdavPath DEVELOPMENT_GUI_INDEX3_HTML_URL = testCollection.dup().append("development/gui/index3.html");
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();

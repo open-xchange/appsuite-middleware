@@ -1,14 +1,15 @@
 package com.openexchange.webdav.action;
 
-import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavPath;
+
+import javax.servlet.http.HttpServletResponse;
 
 public class NotExistTest extends ActionTestCase {
 	private MockAction mockAction;
 	
 	public void testNotExists() throws Exception {
-		final String NOT_EXIST_URL = "notExists.txt";
+		final WebdavPath NOT_EXIST_URL = new WebdavPath("notExists.txt");
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
@@ -28,7 +29,7 @@ public class NotExistTest extends ActionTestCase {
 	}
 	
 	public void testExists() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
+		final WebdavPath INDEX_HTML_URL = testCollection.dup().append("index.html");
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();

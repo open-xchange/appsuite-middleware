@@ -83,13 +83,13 @@ public class ResourceTest extends AbstractResourceTest{
 		
 		Thread.sleep(1000);
 		
-		String url = res.getUrl();
+		WebdavPath url = res.getUrl();
 		
-		res.move(testCollection+"/moved");
+		res.move(testCollection.dup().append("moved"));
 		res = FACTORY.resolveResource(url);
 		assertFalse(res.exists());
 		
-		res = resourceManager.resolveResource(testCollection+"/moved");
+		res = resourceManager.resolveResource(testCollection.dup().append("moved"));
 		assertTrue(res.exists());
 		
 		assertFalse(lastModified.equals(res.getLastModified()));		
@@ -133,8 +133,8 @@ public class ResourceTest extends AbstractResourceTest{
 		
 		Thread.sleep(1000);
 		
-		String url = res.getUrl();
-		res.copy(testCollection+"/copy");
+		WebdavPath url = res.getUrl();
+		res.copy(testCollection.dup().append("copy"));
 		
 		res = FACTORY.resolveResource(url);
 		assertTrue(res.exists());

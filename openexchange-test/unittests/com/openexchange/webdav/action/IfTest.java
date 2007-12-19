@@ -2,19 +2,15 @@ package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavLock;
-import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.*;
 import com.openexchange.webdav.protocol.WebdavLock.Scope;
 import com.openexchange.webdav.protocol.WebdavLock.Type;
 
 public class IfTest extends ActionTestCase {
 	private MockAction mockAction;
+    private WebdavPath INDEX_HTML_URL;
 
-	public void testETag() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
+    public void testETag() throws Exception {
 		String etag = factory.resolveResource(INDEX_HTML_URL).getETag();
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost/");
@@ -49,7 +45,6 @@ public class IfTest extends ActionTestCase {
 	}
 	
 	public void testLockedResource() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
 		WebdavResource resource = factory.resolveResource(INDEX_HTML_URL);
 		WebdavLock lock = new WebdavLock();
 		lock.setDepth(0);
@@ -92,7 +87,6 @@ public class IfTest extends ActionTestCase {
 	}
 	
 	public void testOr() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
 		String etag = factory.resolveResource(INDEX_HTML_URL).getETag();
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost/");
@@ -111,8 +105,6 @@ public class IfTest extends ActionTestCase {
 	}
 	
 	public void testTrue() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		
 		MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
@@ -129,7 +121,6 @@ public class IfTest extends ActionTestCase {
 	}
 	
 	public void testFalse() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
 		String etag = factory.resolveResource(INDEX_HTML_URL).getETag();
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost/");
@@ -198,7 +189,6 @@ public class IfTest extends ActionTestCase {
 	}
 	
 	public void testTagged() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
 		String etag = factory.resolveResource(INDEX_HTML_URL).getETag();
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost/");
@@ -234,7 +224,6 @@ public class IfTest extends ActionTestCase {
 	}
 	
 	public void testMissingLockToken() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
 		WebdavResource resource = factory.resolveResource(INDEX_HTML_URL);
 		WebdavLock lock = new WebdavLock();
 		lock.setDepth(0);
@@ -283,7 +272,6 @@ public class IfTest extends ActionTestCase {
 	}
 	
 	public void testMissingLockTokenDestination() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
 		WebdavResource resource = factory.resolveResource(INDEX_HTML_URL);
 		WebdavLock lock = new WebdavLock();
 		lock.setDepth(0);
@@ -297,7 +285,7 @@ public class IfTest extends ActionTestCase {
 		MockWebdavResponse res = new MockWebdavResponse();
 		
 		req.setUrl(testCollection);
-		req.setHeader("destination", INDEX_HTML_URL);
+		req.setHeader("destination", INDEX_HTML_URL.toString());
 		
 		WebdavIfAction action = new WebdavIfAction();
 		action.setDefaultDepth(0);
@@ -321,5 +309,6 @@ public class IfTest extends ActionTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 		mockAction = new MockAction();
-	}
+        INDEX_HTML_URL = testCollection.dup().append("index.html");
+    }
 }

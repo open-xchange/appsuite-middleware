@@ -12,10 +12,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
-import com.openexchange.webdav.protocol.DummySessionHolder;
-import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.*;
 import junit.framework.TestCase;
 import org.junit.Test;
 
@@ -37,9 +34,9 @@ public class DropBoxScenarioTest extends TestCase{
 	
 	private InfostoreWebdavFactory factory = null;
 	
-	String dropBox = null;
+	WebdavPath dropBox = null;
 	
-	List<String> clean = new ArrayList<String>();
+	List<WebdavPath> clean = new ArrayList<WebdavPath>();
 	
 	@Override
 	public void setUp() throws Exception {
@@ -70,14 +67,14 @@ public class DropBoxScenarioTest extends TestCase{
 		try {
 			switchUser(user2);
 			
-			WebdavResource res = factory.resolveResource(dropBox+"/testFile");
+			WebdavResource res = factory.resolveResource(dropBox.dup().append("testFile"));
 			res.putBodyAndGuessLength(new ByteArrayInputStream(new byte[]{1,2,3,4,5,6,7,8,9,10}));
-			clean.add(dropBox+"/testFile");
+			clean.add(dropBox.dup().append("testFile"));
 			res.create();
 			
 			switchUser(user1);
 			
-			res = factory.resolveResource(dropBox+"/testFile");
+			res = factory.resolveResource(dropBox.dup().append("testFile"));
 			InputStream is = res.getBody();
 			
 			for(int i = 0; i < 10; i++) {
@@ -111,7 +108,7 @@ public class DropBoxScenarioTest extends TestCase{
 	public void tearDown() throws Exception {
 		try {
 			switchUser(user1);
-			for(String url : clean) {
+			for(WebdavPath url : clean) {
 				factory.resolveResource(url).delete();
 			}
 		} finally {
@@ -169,7 +166,7 @@ public class DropBoxScenarioTest extends TestCase{
 		newFolder.setPermissions(perms);
 		
 		mgr.createFolder(newFolder, true, System.currentTimeMillis());
-		dropBox = fo.getFolderName()+"/"+newFolder.getFolderName();
+		dropBox = new WebdavPath(fo.getFolderName(), newFolder.getFolderName());
 		
 		clean.add(factory.resolveCollection(dropBox).getUrl());
 	}

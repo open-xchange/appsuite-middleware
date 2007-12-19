@@ -3,12 +3,14 @@ package com.openexchange.webdav.action;
 import javax.servlet.http.HttpServletResponse;
 
 import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavPath;
 
 public class IfMatchTest extends ActionTestCase {
 	private MockAction mockAction;
+    private WebdavPath INDEX_HTML_URL;
 
-	public void testIfMatchWorks() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
+
+    public void testIfMatchWorks() throws Exception {
 		String etag = factory.resolveResource(INDEX_HTML_URL).getETag();
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
@@ -29,8 +31,7 @@ public class IfMatchTest extends ActionTestCase {
 	}
 	
 	public void testIfMatchFails() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		
+
 		MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
@@ -51,7 +52,6 @@ public class IfMatchTest extends ActionTestCase {
 	}
 	
 	public void testIfMatchMany() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
 		String etag = factory.resolveResource(INDEX_HTML_URL).getETag();
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
@@ -70,8 +70,6 @@ public class IfMatchTest extends ActionTestCase {
 	}
 	
 	public void testWildcardsIfMatchWorks() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
@@ -92,7 +90,7 @@ public class IfMatchTest extends ActionTestCase {
 		MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
-		req.setUrl("/doesntExist");
+		req.setUrl(new WebdavPath("doesntExist"));
 		req.setHeader("If-Match", "*");
 		
 		AbstractAction action = new WebdavIfMatchAction();
@@ -110,8 +108,6 @@ public class IfMatchTest extends ActionTestCase {
 
 	
 	public void testIfNoneMatchWorks() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
@@ -128,8 +124,6 @@ public class IfMatchTest extends ActionTestCase {
 	}
 	
 	public void testIfNoneMatchFails() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		
 		String etag = factory.resolveResource(INDEX_HTML_URL).getETag();
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost");
@@ -152,8 +146,6 @@ public class IfMatchTest extends ActionTestCase {
 	}
 	
 	public void testIfNoneMatchMany() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		
 		String etag = factory.resolveResource(INDEX_HTML_URL).getETag();
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost");
@@ -179,7 +171,7 @@ public class IfMatchTest extends ActionTestCase {
 		MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
-		req.setUrl("/doesntExist");
+		req.setUrl(new WebdavPath("doesntExist"));
 		req.setHeader("If-None-Match", "*");
 		
 		AbstractAction action = new WebdavIfMatchAction();
@@ -193,8 +185,6 @@ public class IfMatchTest extends ActionTestCase {
 	}
 	
 	public void testWildcardsIfNonMatchFails() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		
 		MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
@@ -215,8 +205,6 @@ public class IfMatchTest extends ActionTestCase {
 	}
 	
 	public void testNoneSet() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
@@ -234,5 +222,6 @@ public class IfMatchTest extends ActionTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 		mockAction = new MockAction();
-	}
+        INDEX_HTML_URL = testCollection.dup().append("index.html");
+    }
 }

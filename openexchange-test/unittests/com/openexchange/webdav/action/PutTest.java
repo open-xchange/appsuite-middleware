@@ -1,14 +1,24 @@
 package com.openexchange.webdav.action;
 
-import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
 
+import javax.servlet.http.HttpServletResponse;
+
 public class PutTest extends ActionTestCase {
-	
-	public void testBasic() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
+
+    private WebdavPath INDEX_HTML_URL = null;
+    private WebdavPath INDEX23_HTML_URL = null;
+
+    public void setUp() throws Exception {
+        super.setUp();
+        INDEX_HTML_URL = testCollection.dup().append("index.html");
+        INDEX23_HTML_URL =  testCollection.dup().append("index23.html");
+    }
+
+
+    public void testBasic() throws Exception {
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
@@ -33,8 +43,6 @@ public class PutTest extends ActionTestCase {
 	}
 	
 	public void testCreate() throws Exception {
-		final String INDEX23_HTML_URL = testCollection+"/index23.html";
-		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
@@ -61,8 +69,6 @@ public class PutTest extends ActionTestCase {
 	
 	// Bug 6104
 	public void testTooLarge() throws Exception {
-		final String INDEX23_HTML_URL = testCollection+"/index23.html";
-		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
@@ -93,7 +99,7 @@ public class PutTest extends ActionTestCase {
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
-		req.setUrl("/notExists/lalala");
+		req.setUrl(new WebdavPath("notExists/lalala"));
 		
 		String content = "<html><head /><body>The New, Better Index</body></html>";
 		req.setBodyAsString(content);

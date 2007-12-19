@@ -8,15 +8,23 @@ import com.openexchange.test.XMLCompare;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.WebdavPath;
 
 public class LockTest extends ActionTestCase {
 	
 	private static final Namespace TEST_NS = Namespace.getNamespace("http://www.open-xchange.com/namespace/webdav-test");
-	
-	public void testLock() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		
-		
+    private WebdavPath INDEX_HTML_URL;
+    private WebdavPath GUI_URL;
+    private WebdavPath LOCK_HTML_URL;
+
+    public void setUp() throws Exception {
+        super.setUp();
+        INDEX_HTML_URL = testCollection.dup().append("index.html");
+        GUI_URL = testCollection.dup().append("/development/gui");
+        LOCK_HTML_URL = testCollection.dup().append("lock.html");
+    }
+
+    public void testLock() throws Exception {
 		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><lockinfo xmlns=\"DAV:\"><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>me</owner></lockinfo>";
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
@@ -52,9 +60,7 @@ public class LockTest extends ActionTestCase {
 	}
 	
 	public void testLockOwnerInXML() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		
-		
+
 		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><lockinfo xmlns=\"DAV:\"><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner><shortName xmlns=\""+TEST_NS.getURI()+"\">me</shortName></owner></lockinfo>";
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
@@ -91,9 +97,6 @@ public class LockTest extends ActionTestCase {
 	}
 	
 	public void testDepth() throws Exception {
-		final String GUI_URL = testCollection+"/development/gui";
-		
-		
 		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><lockinfo xmlns=\"DAV:\"><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>me</owner></lockinfo>";
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
@@ -132,9 +135,7 @@ public class LockTest extends ActionTestCase {
 	}
 	
 	public void testTimeoutInSeconds() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		
-		
+
 		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><lockinfo xmlns=\"DAV:\"><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>me</owner></lockinfo>";
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
@@ -163,7 +164,7 @@ public class LockTest extends ActionTestCase {
 	}
 	
 	public void testLockNull() throws Exception {
-		final String LOCK_HTML_URL = testCollection+"/lock.html";
+
 		
 		
 		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><lockinfo xmlns=\"DAV:\"><lockscope><exclusive /></lockscope><locktype><write /></locktype><owner>me</owner></lockinfo>";

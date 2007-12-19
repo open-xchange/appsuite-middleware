@@ -3,20 +3,20 @@ package com.openexchange.webdav.action;
 import javax.servlet.http.HttpServletResponse;
 
 import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavPath;
 
 //Bug 6104
 public class MaxUploadSizeActionTest extends ActionTestCase {
 	private MockAction mockAction;
+    private WebdavPath INDEX_HTML_URL;
 
-	public void setUp() throws Exception {
+    public void setUp() throws Exception {
 		super.setUp();
 		mockAction = new MockAction();
-	}
+        INDEX_HTML_URL = testCollection.dup().append("index_new.html");
+    }
 	
 	public void testPassThru() throws WebdavException{
-		final String INDEX_HTML_URL = testCollection+"/index_new.html";
-		
-		
 		MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
@@ -32,9 +32,6 @@ public class MaxUploadSizeActionTest extends ActionTestCase {
 	}
 	
 	public void testDeny(){
-		final String INDEX_HTML_URL = testCollection+"/index_new.html";
-		
-		
 		MockWebdavRequest req = new MockWebdavRequest(factory,"http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		

@@ -23,10 +23,10 @@ public class CollectionTest extends ResourceTest {
 	public static final String INDEX3_HTML = "<html><head /><body>GUI Site</body></html>";
 	public static final String INDEX2_HTML = "<html><head /><body>PM Site</body></html>";
 
-	protected List<String> clean = new ArrayList<String>();
+	protected List<WebdavPath> clean = new ArrayList<WebdavPath>();
 	
 	public void tearDown() throws Exception {
-		for(String path : clean) {
+		for(WebdavPath path : clean) {
 			FACTORY.resolveResource(path).delete();
 		}
 		super.tearDown();
@@ -34,11 +34,11 @@ public class CollectionTest extends ResourceTest {
 	
 	public void testRoot() throws Exception {
 		
-		List<WebdavResource> children = FACTORY.resolveCollection("/").getChildren();
+		List<WebdavResource> children = FACTORY.resolveCollection(new WebdavPath()).getChildren();
 		int size = children.size();
-		FACTORY.resolveCollection("/test").create();
-		clean.add("/test");
-		List<WebdavResource> childrenAfter = FACTORY.resolveCollection("/").getChildren();
+		FACTORY.resolveCollection(new WebdavPath("test")).create();
+		clean.add(new WebdavPath("test"));
+		List<WebdavResource> childrenAfter = FACTORY.resolveCollection(new WebdavPath()).getChildren();
 		assertEquals(childrenAfter.toString(), size+1, childrenAfter.size());
 		
 		Set<String> childrenNames = new HashSet<String>();
@@ -66,25 +66,25 @@ public class CollectionTest extends ResourceTest {
 		String content = "Hallo Welt!";
 		byte[] bytes = content.getBytes("UTF-8");
 		
-		WebdavResource res = coll.resolveResource("index.html");
+		WebdavResource res = coll.resolveResource(new WebdavPath("index.html"));
 		res.putBody(new ByteArrayInputStream(INDEX_HTML.getBytes("UTF-8")));
 		res.setContentType("text/html");
 		res.putBodyAndGuessLength(new ByteArrayInputStream(bytes));
 		res.create();
 		
-		res = coll.resolveResource("sitemap.html");
+		res = coll.resolveResource(new WebdavPath("sitemap.html"));
 		res.putBody(new ByteArrayInputStream(SITEMAP_HTML.getBytes("UTF-8")));
 		res.setContentType("text/html");
 		res.setLength((long)SITEMAP_HTML.getBytes("UTF-8").length);
 		res.create();
 		
-		res = coll.resolveCollection("development");
+		res = coll.resolveCollection(new WebdavPath("development"));
 		res.create();
 		
-		res = res.toCollection().resolveCollection("gui");
+		res = res.toCollection().resolveCollection(new WebdavPath("gui"));
 		res.create();
 		
-		res = res.toCollection().resolveResource("index3.html");
+		res = res.toCollection().resolveResource(new WebdavPath("index3.html"));
 		res.putBody(new ByteArrayInputStream(INDEX3_HTML.getBytes("UTF-8")));
 		res.setContentType("text/html");
 		res.setLength((long)INDEX3_HTML.getBytes("UTF-8").length);
@@ -93,13 +93,13 @@ public class CollectionTest extends ResourceTest {
 		res = factory.resolveCollection(coll.getUrl()+"/pm");
 		res.create();
 		
-		res = coll.resolveCollection("pm").resolveResource("index2.html");
+		res = coll.resolveCollection(new WebdavPath("pm")).resolveResource(new WebdavPath("index2.html"));
 		res.putBody(new ByteArrayInputStream(INDEX2_HTML.getBytes("UTF-8")));
 		res.setContentType("text/html");
 		res.setLength((long)INDEX2_HTML.getBytes("UTF-8").length);
 		res.create();
 		
-		res = coll.resolveCollection("special characters?");
+		res = coll.resolveCollection(new WebdavPath("special characters?"));
 		res.create();
 		
 	}
@@ -111,19 +111,19 @@ public class CollectionTest extends ResourceTest {
 		List<WebdavResource> children = coll.getChildren();
 		assertResources(children, "index.html", "sitemap.html", "development", "pm", "special characters?");
 		
-		WebdavCollection dev = coll.resolveCollection("development");
+		WebdavCollection dev = coll.resolveCollection(new WebdavPath("development"));
 		children = dev.getChildren();
 		assertResources(children,"gui");
 		
-		WebdavCollection gui = dev.resolveCollection("gui");
+		WebdavCollection gui = dev.resolveCollection(new WebdavPath("gui"));
 		children = gui.getChildren();
 		assertResources(children, "index3.html");
 		
-		WebdavCollection pm = coll.resolveCollection("pm");
+		WebdavCollection pm = coll.resolveCollection(new WebdavPath("pm"));
 		children = pm.getChildren();
 		assertResources(children,"index2.html");
 		
-		WebdavResource res = pm.resolveResource("index2.html");
+		WebdavResource res = pm.resolveResource(new WebdavPath("index2.html"));
 		res.delete();
 		
 		children = pm.getChildren();
@@ -150,7 +150,7 @@ public class CollectionTest extends ResourceTest {
 	public void testDelete() throws Exception {
 		WebdavCollection coll = createResource().toCollection();
 		createStructure(coll, resourceManager);
-		WebdavCollection dev = coll.resolveCollection("development");
+		WebdavCollection dev = coll.resolveCollection(new WebdavPath("development"));
 		
 		List<WebdavResource> subList = new ArrayList<WebdavResource>();
 		subList.add(dev);
@@ -168,7 +168,7 @@ public class CollectionTest extends ResourceTest {
 	public void testMove() throws Exception {
 		WebdavCollection coll = createResource().toCollection();
 		createStructure(coll, resourceManager);
-		WebdavCollection dev = coll.resolveCollection("development");
+		WebdavCollection dev = coll.resolveCollection(new WebdavPath("development"));
 		
 		Date lastModified = dev.getLastModified();
 		Date creationDate = dev.getCreationDate();
@@ -186,13 +186,13 @@ public class CollectionTest extends ResourceTest {
 		subList = OXCollections.inject(subList, dev, new DisplayNameCollector());
 		
 		Thread.sleep(1000);
-		String url = dev.getUrl();
+		WebdavPath url = dev.getUrl();
 		
-		dev.move(coll.getUrl()+"/dev2");
+		dev.move(coll.getUrl().dup().append("dev2"));
 		dev = FACTORY.resolveCollection(url);
 		assertFalse(dev.exists());
 		
-		WebdavCollection dev2 = coll.resolveCollection("dev2");
+		WebdavCollection dev2 = coll.resolveCollection(new WebdavPath("dev2"));
 		assertResources(dev2, subList.toArray(new String[subList.size()]));
 		
 		assertFalse(lastModified.equals(dev2.getLastModified()));
@@ -211,7 +211,7 @@ public class CollectionTest extends ResourceTest {
 	public void testCopy() throws Exception {
 		WebdavCollection coll = createResource().toCollection();
 		createStructure(coll, resourceManager);
-		WebdavCollection dev = coll.resolveCollection("development");
+		WebdavCollection dev = coll.resolveCollection(new WebdavPath("development"));
 		
 		Date lastModified = dev.getLastModified();
 		Date creationDate = dev.getCreationDate();
@@ -228,11 +228,11 @@ public class CollectionTest extends ResourceTest {
 		subList = OXCollections.inject(subList, dev, new DisplayNameCollector());
 		
 		Thread.sleep(1000);
-		dev.copy(coll.getUrl()+"/dev2");
+		dev.copy(coll.getUrl().dup().append("dev2"));
 		
 		assertTrue(dev.exists());
 		
-		WebdavCollection dev2 = coll.resolveCollection("dev2");
+		WebdavCollection dev2 = coll.resolveCollection(new WebdavPath("dev2"));
 		assertResources(dev2, subList.toArray(new String[subList.size()]));
 		
 		assertFalse(lastModified.equals(dev2.getLastModified()));
@@ -277,7 +277,7 @@ public class CollectionTest extends ResourceTest {
 		coll.lock(lock);
 		coll.save();
 		
-		Set<String> urls = new HashSet<String>();
+		Set<WebdavPath> urls = new HashSet<WebdavPath>();
 		for(WebdavResource res : coll) {
 			urls.add(res.getUrl());
 			assertNotNull(res.getLock(lock.getToken()));
@@ -303,7 +303,7 @@ public class CollectionTest extends ResourceTest {
 		
 		// All level 2+ resources should be left in urls and should not be locked
 		
-		for(String url : urls) {
+		for(WebdavPath url : urls) {
 			WebdavResource res = resourceManager.resolveResource(url);
 			assertEquals(res.getUrl()+" is locked!", 0, res.getLocks().size());
 		}

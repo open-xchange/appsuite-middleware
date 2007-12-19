@@ -17,7 +17,7 @@ public static final int SKEW = 1000;
 	
 	protected WebdavFactory resourceManager;
 	
-	protected String testCollection = "/testCollection"+Math.random();
+	protected WebdavPath testCollection = new WebdavPath("testCollection"+Math.random());
 	
 	protected abstract WebdavFactory getWebdavFactory() throws Exception;
 	protected abstract List<Property> getPropertiesToTest() throws Exception;
@@ -120,6 +120,6 @@ public static final int SKEW = 1000;
 	}
 	
 	public void throwEx(Exception x) throws WebdavException {
-		throw new WebdavException(x.getMessage(), x, "" ,500 );
+		throw new WebdavException(x.getMessage(), x, new WebdavPath() ,500 );
 	}
 }

@@ -1,13 +1,14 @@
 package com.openexchange.webdav.action;
 
-import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavResource;
+
+import javax.servlet.http.HttpServletResponse;
 
 public class MkcolTest extends ActionTestCase {
 	public void testCreateCollection() throws Exception {
-		final String NEW_COLLECTION = testCollection+"/newCollection";
+		final WebdavPath NEW_COLLECTION = testCollection.dup().append("newCollection");
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
@@ -28,7 +29,7 @@ public class MkcolTest extends ActionTestCase {
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
-		req.setUrl("/doesntExist/lalala");
+		req.setUrl(new WebdavPath("doesntExist/lalala"));
 		
 		WebdavAction action = new WebdavMkcolAction();
 		

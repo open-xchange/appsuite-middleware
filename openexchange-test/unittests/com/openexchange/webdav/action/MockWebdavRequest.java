@@ -1,5 +1,13 @@
 package com.openexchange.webdav.action;
 
+import com.openexchange.webdav.action.ifheader.IfHeader;
+import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
+import com.openexchange.webdav.action.ifheader.IfHeaderParser;
+import com.openexchange.webdav.protocol.*;
+import org.jdom.Document;
+import org.jdom.JDOMException;
+import org.jdom.input.SAXBuilder;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,21 +17,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.jdom.Document;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
-
-import com.openexchange.webdav.action.ifheader.IfHeader;
-import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
-import com.openexchange.webdav.action.ifheader.IfHeaderParser;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavResource;
-
 public class MockWebdavRequest implements WebdavRequest {
 
-	private String url;
+	private WebdavPath url;
 	private String uriPrefix = null;
 	private WebdavFactory factory;
 	private String content;
@@ -36,11 +32,12 @@ public class MockWebdavRequest implements WebdavRequest {
 		this.uriPrefix = prefix;
 	}
 	
-	public void setUrl(String url) {
-		this.url = url;
-	}
 
-	public WebdavResource getResource() throws WebdavException {
+    public void setUrl(WebdavPath url) {
+        this.url = url;
+    }
+
+    public WebdavResource getResource() throws WebdavException {
 		if(res != null)
 			return res;
 		return res = factory.resolveResource(url);
@@ -60,11 +57,11 @@ public class MockWebdavRequest implements WebdavRequest {
 		return (WebdavCollection) (res = factory.resolveCollection(url));
 	}
 	
-	public String getDestinationUrl(){
-		return getHeader("destination");
+	public WebdavPath getDestinationUrl(){
+		return new WebdavPath(getHeader("destination"));
 	}
 
-	public String getUrl() {
+	public WebdavPath getUrl() {
 		return url;
 	}
 

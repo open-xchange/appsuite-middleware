@@ -1,18 +1,24 @@
 package com.openexchange.webdav.action;
 
+import com.openexchange.webdav.protocol.WebdavException;
+import com.openexchange.webdav.protocol.WebdavPath;
+
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.servlet.http.HttpServletResponse;
-
-import com.openexchange.webdav.protocol.WebdavException;
-
 
 public class GetTest extends ActionTestCase {
-	
-	public void testBasic() throws Exception {
-		
-		final String INDEX_HTML_URL = testCollection+"/index.html";
+
+    private WebdavPath INDEX_HTML_URL = null;
+
+    public void setUp() throws Exception {
+        super.setUp();
+        INDEX_HTML_URL = testCollection.dup().append("index.html");
+
+    }
+
+    public void testBasic() throws Exception {
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
@@ -37,7 +43,7 @@ public class GetTest extends ActionTestCase {
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
-		req.setUrl("iDontExist");
+		req.setUrl(new WebdavPath("iDontExist"));
 		
 		WebdavAction action = new WebdavGetAction();
 		
@@ -51,7 +57,6 @@ public class GetTest extends ActionTestCase {
 	}
 	
 	public void testPartial() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
 		assertEquals((Long) 11l, factory.resolveResource(INDEX_HTML_URL).getLength());
 		
 		rangeTest(INDEX_HTML_URL, "2-5", getBytes(INDEX_HTML_URL, 2, 5));
@@ -59,28 +64,24 @@ public class GetTest extends ActionTestCase {
 	
 
 	public void testPartialWithOpenEnd() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
 		assertEquals((Long) 11l, factory.resolveResource(INDEX_HTML_URL).getLength());
 		
 		rangeTest(INDEX_HTML_URL, "5-", getBytes(INDEX_HTML_URL, 5, 10));
 	}
 	
 	public void testPartialWithOpenBeginning() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
 		assertEquals((Long) 11l, factory.resolveResource(INDEX_HTML_URL).getLength());
 		
 		rangeTest(INDEX_HTML_URL, "-5", getBytes(INDEX_HTML_URL, 6, 10));
 	}
 	
 	public void testPartialWithOpenBeginningTooMuch() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
 		assertEquals((Long) 11l, factory.resolveResource(INDEX_HTML_URL).getLength());
 		
 		rangeTest(INDEX_HTML_URL, "-23", getBytes(INDEX_HTML_URL, 0, 10));
 	}
 	
 	public void testBogusRange() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
 		assertEquals((Long) 11l, factory.resolveResource(INDEX_HTML_URL).getLength());
 		
 		rangeTest(INDEX_HTML_URL, "5-2", new byte[0]);
@@ -89,7 +90,6 @@ public class GetTest extends ActionTestCase {
 	}
 	
 	public void testRangeOutsideLength() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
 		assertEquals((Long) 11l, factory.resolveResource(INDEX_HTML_URL).getLength());
 		try {
 			rangeTest(INDEX_HTML_URL, "23-25", getBytes(INDEX_HTML_URL, 0, 10));
@@ -100,7 +100,6 @@ public class GetTest extends ActionTestCase {
 	}
 	
 	public void testMultipleRanges() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
 		assertEquals((Long) 11l, factory.resolveResource(INDEX_HTML_URL).getLength());
 		byte[] all = getBytes(INDEX_HTML_URL, 0, 10);
 		byte[] expect = new byte[]{all[0], all[10]};
@@ -108,7 +107,7 @@ public class GetTest extends ActionTestCase {
 		
 	}
 	
-	private void rangeTest(String url, String byteHeader, byte[] expect) throws WebdavException {
+	private void rangeTest(WebdavPath url, String byteHeader, byte[] expect) throws WebdavException {
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
 		
@@ -130,7 +129,7 @@ public class GetTest extends ActionTestCase {
 		}
 	}
 	
-	private byte[] getBytes(String url, int start, int stop) throws WebdavException, IOException {
+	private byte[] getBytes(WebdavPath url, int start, int stop) throws WebdavException, IOException {
 		InputStream is = null;
 		try {
 			is = factory.resolveResource(url).getBody();

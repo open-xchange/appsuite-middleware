@@ -1,33 +1,27 @@
 package com.openexchange.webdav.action;
 
+import com.openexchange.webdav.protocol.*;
+import junit.framework.TestCase;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 
-import junit.framework.TestCase;
-
-import com.openexchange.webdav.protocol.CollectionTest;
-import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
-import com.openexchange.webdav.protocol.WebdavCollection;
-import com.openexchange.webdav.protocol.WebdavException;
-import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavResource;
-
 public abstract class ActionTestCase extends TestCase {
 	
-	protected List<String> clean = new LinkedList<String>();
+	protected List<WebdavPath> clean = new LinkedList<WebdavPath>();
 	
 	protected WebdavFactory factory = null;
 	
-	protected String testCollection = null;
+	protected WebdavPath testCollection = null;
 	
 	public void setUp() throws Exception {
 		TestWebdavFactoryBuilder.setUp();
 		factory = TestWebdavFactoryBuilder.buildFactory();
 		factory.beginRequest();
 		try {
-			testCollection = "/testCollection"+System.currentTimeMillis();
+			testCollection = new WebdavPath("testCollection"+System.currentTimeMillis());
 			WebdavCollection coll = factory.resolveCollection(testCollection);
 			coll.create();
 			clean.add(coll.getUrl());
@@ -41,7 +35,7 @@ public abstract class ActionTestCase extends TestCase {
 	
 	public void tearDown() throws Exception {
 		try {
-			for(String url : clean) {
+			for(WebdavPath url : clean) {
 				factory.resolveResource(url).delete();
 			}
 		} finally {
@@ -50,7 +44,7 @@ public abstract class ActionTestCase extends TestCase {
 		}
 	}
 	
-	public String getContent(String url) throws WebdavException, IOException {
+	public String getContent(WebdavPath url) throws WebdavException, IOException {
 		WebdavResource res = factory.resolveResource(url);
 		byte[] bytes = new byte[(int)(long)res.getLength()];
 		InputStream in = res.getBody();

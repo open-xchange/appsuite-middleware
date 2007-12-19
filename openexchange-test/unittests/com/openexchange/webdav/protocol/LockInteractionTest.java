@@ -17,13 +17,13 @@ public class LockInteractionTest extends TestCase {
 	
 	static protected WebdavFactory FACTORY = null;
 	static protected final Random RANDOM = new Random();
-	private String testCollection;
+	private WebdavPath testCollection;
 	
 	public void setUp() throws Exception {
 		TestWebdavFactoryBuilder.setUp();
 		FACTORY = TestWebdavFactoryBuilder.buildFactory();
 		FACTORY.beginRequest();
-		testCollection = "/testCollection"+ RANDOM.nextInt();
+		testCollection = new WebdavPath("/testCollection"+ RANDOM.nextInt());
 		
 		FACTORY.resolveCollection(testCollection).create();
 	}
@@ -52,7 +52,7 @@ public class LockInteractionTest extends TestCase {
 		
 		collection.lock(lock);
 		
-		WebdavResource res = collection.resolveResource("test.txt");
+		WebdavResource res = collection.resolveResource(new WebdavPath("test.txt"));
 		res.create();
 		assertEquals(lockNumber, res.getLocks().size());
 
@@ -75,12 +75,12 @@ public class LockInteractionTest extends TestCase {
 		
 		WebdavCollection collection = FACTORY.resolveCollection(testCollection);
 		
-		WebdavResource res = collection.resolveResource("test.txt");
+		WebdavResource res = collection.resolveResource(new WebdavPath("test.txt"));
 		res.create();
 		res.lock(lock);
 		res.delete();
 		
-		res = collection.resolveResource("test.txt");
+		res = collection.resolveResource(new WebdavPath("test.txt"));
 		assertEquals(0, res.getLocks().size());
 		
 	}
@@ -90,12 +90,12 @@ public class LockInteractionTest extends TestCase {
 		
 		WebdavCollection collection = FACTORY.resolveCollection(testCollection);
 		
-		WebdavResource res = collection.resolveResource("test.txt");
+		WebdavResource res = collection.resolveResource(new WebdavPath("test.txt"));
 		res.create();
 		res.lock(lock);
-		res.move(testCollection+"/test2.txt");
+		res.move(testCollection.dup().append("test2.txt"));
 		
-		res = collection.resolveResource("test2.txt");
+		res = collection.resolveResource(new WebdavPath("test2.txt"));
 		assertEquals(0, res.getLocks().size());
 	}
 	
@@ -103,9 +103,9 @@ public class LockInteractionTest extends TestCase {
 		WebdavLock lock = getLock(0);
 		
 		WebdavCollection collection = FACTORY.resolveCollection(testCollection);
-		WebdavResource res = collection.resolveResource("test.txt");
+		WebdavResource res = collection.resolveResource(new WebdavPath("test.txt"));
 		res.lock(lock);
-		res = collection.resolveResource("test.txt");
+		res = collection.resolveResource(new WebdavPath("test.txt"));
 		
 		assertTrue(res.isLockNull());
 		assertTrue(res.exists());
@@ -116,20 +116,20 @@ public class LockInteractionTest extends TestCase {
 		WebdavLock lock = getLock(0);
 		
 		WebdavCollection collection = FACTORY.resolveCollection(testCollection);
-		WebdavResource res = collection.resolveResource("test.txt");
+		WebdavResource res = collection.resolveResource(new WebdavPath("test.txt"));
 		res.lock(lock);
-		res = collection.resolveResource("test.txt");
+		res = collection.resolveResource(new WebdavPath("test.txt"));
 		assertTrue(res.isLockNull());
 		res.unlock(lock.getToken());
 		
-		res = collection.resolveResource("test.txt");
+		res = collection.resolveResource(new WebdavPath("test.txt"));
 		
 		assertFalse(res.exists());
 	}
 	
 	public void testLockNullProperties() throws Exception {
 		testCreateLockNullResource();
-		WebdavResource res = FACTORY.resolveResource(testCollection+"/test.txt");
+		WebdavResource res = FACTORY.resolveResource(testCollection.dup().append("test.txt"));
 		
 		assertNull(res.getProperty("DAV:", "creationdate"));
 		assertNull(res.getProperty("DAV:", "getcontentlanguage"));
@@ -150,9 +150,9 @@ public class LockInteractionTest extends TestCase {
 		WebdavLock lock = getLock(0);
 		
 		WebdavCollection collection = FACTORY.resolveCollection(testCollection);
-		WebdavResource res = collection.resolveResource("test.txt");
+		WebdavResource res = collection.resolveResource(new WebdavPath("test.txt"));
 		res.lock(lock);
-		res = collection.resolveResource("test.txt");
+		res = collection.resolveResource(new WebdavPath("test.txt"));
 		
 		WEBDAV_METHOD[] methods = res.getOptions();
 		List<WEBDAV_METHOD> expect = Arrays.asList(WEBDAV_METHOD.PUT, WEBDAV_METHOD.MKCOL, WEBDAV_METHOD.OPTIONS, WEBDAV_METHOD.PROPFIND, WEBDAV_METHOD.LOCK, WEBDAV_METHOD.UNLOCK, WEBDAV_METHOD.TRACE);
@@ -163,13 +163,13 @@ public class LockInteractionTest extends TestCase {
 	public void testTransformLockNullResource() throws Exception {
 		WebdavLock lock = getLock(0);
 		WebdavCollection collection = FACTORY.resolveCollection(testCollection);
-		WebdavResource res = collection.resolveResource("test.txt");
+		WebdavResource res = collection.resolveResource(new WebdavPath("test.txt"));
 		res.lock(lock);
-		res = collection.resolveResource("test.txt");
+		res = collection.resolveResource(new WebdavPath("test.txt"));
 		res.putBodyAndGuessLength(new ByteArrayInputStream(new byte[2]));
 		res.create();
 		
-		res = collection.resolveResource("test.txt");
+		res = collection.resolveResource(new WebdavPath("test.txt"));
 		assertTrue(res.exists());
 		assertFalse(res.isCollection());
 		assertFalse(res.isLockNull());
@@ -186,12 +186,12 @@ public class LockInteractionTest extends TestCase {
 		WebdavLock lock = getLock(0);
 		
 		WebdavCollection collection = FACTORY.resolveCollection(testCollection);
-		WebdavResource res = collection.resolveResource("test");
+		WebdavResource res = collection.resolveResource(new WebdavPath("test"));
 		res.lock(lock);
-		res = collection.resolveCollection("test");
+		res = collection.resolveCollection(new WebdavPath("test"));
 		res.create();
 		
-		res = collection.resolveResource("test");
+		res = collection.resolveResource(new WebdavPath("test"));
 		assertTrue(res.exists());
 		assertTrue(res.isCollection());
 		assertFalse(res.isLockNull());

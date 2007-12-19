@@ -1,24 +1,34 @@
 package com.openexchange.webdav.action;
 
-import java.util.Date;
-
-import org.jdom.Namespace;
-
 import com.openexchange.test.XMLCompare;
 import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.util.Utils;
+import org.jdom.Namespace;
+
+import java.util.Date;
 
 public class PropfindTest extends ActionTestCase {
 	
 	private static final Namespace TEST_NS = Namespace.getNamespace("http://www.open-xchange.com/namespace/webdav-test");
-	
-	//TODO: noroot
+
+    private WebdavPath INDEX_HTML_URL = null;
+    private WebdavPath DEVELOPMENT_URL = null;
+    private WebdavPath SPECIAL_URL;
+
+    public void setUp() throws Exception {
+        super.setUp();
+        INDEX_HTML_URL = testCollection.dup().append(new WebdavPath("index.html"));
+        DEVELOPMENT_URL = testCollection.dup().append("development");
+        SPECIAL_URL = testCollection.dup().append("special characters?");
+
+    }
+
+//TODO: noroot
 	
 	public void testOneProperty() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		
 		Date lastModified = factory.resolveResource(INDEX_HTML_URL).getLastModified();
 		
 		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:prop><D:getlastmodified/></D:prop></D:propfind>";
@@ -55,8 +65,6 @@ public class PropfindTest extends ActionTestCase {
 	}
 	
 	public void testManyProperties() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		
 		Date lastModified = factory.resolveResource(INDEX_HTML_URL).getLastModified();
 		
 		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:prop><D:getlastmodified/><D:displayname/><D:resourcetype/></D:prop></D:propfind>";
@@ -79,8 +87,7 @@ public class PropfindTest extends ActionTestCase {
 	}
 	
 	public void testPropNames() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		
+
 		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:propname /></D:propfind>";
 		String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><multistatus xmlns=\"DAV:\"><response><href>http://localhost/"+INDEX_HTML_URL+"</href><propstat><prop><getlastmodified /><creationdate /><resourcetype /><displayname /><getcontentlanguage /><getcontentlength /><getcontenttype /><getetag /><lockdiscovery /><supportedlock /><source /></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>";
 		
@@ -100,8 +107,7 @@ public class PropfindTest extends ActionTestCase {
 	}
 	
 	public void testAllProperties() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		
+
 		WebdavResource resource = factory.resolveResource(INDEX_HTML_URL);
 		
 		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:allprop /></D:propfind>"; 
@@ -122,14 +128,13 @@ public class PropfindTest extends ActionTestCase {
 	}
 	
 	public void testCollection() throws Exception {
-		final String DEVELOPMENT_URL = testCollection+"/development";
 		final String PM_URL = testCollection+"/pm";
 		final String INDEX_HTML_URL = testCollection+"/index.html";
 		final String SITEMAP_HTML_URL = testCollection+"/sitemap.html";
 		final String GUI_URL = DEVELOPMENT_URL+"/gui";
 		final String INDEX3_HTML_URL = GUI_URL+"/index3.html";
 		final String SPECIAL_CHARACTERS_URL = testCollection+"/special%20characters%3F";
-		
+
 		String testCollDispName = factory.resolveResource(testCollection).getDisplayName();
 		
 		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:prop><D:displayname/><D:resourcetype /></D:prop></D:propfind>";
@@ -180,8 +185,6 @@ public class PropfindTest extends ActionTestCase {
 	}
 	
 	public void testXMLProperty() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
-		
 		WebdavResource resource = factory.resolveResource(INDEX_HTML_URL);
 		WebdavProperty property = new WebdavProperty();
 		property.setNamespace(TEST_NS.getURI());
@@ -212,7 +215,6 @@ public class PropfindTest extends ActionTestCase {
 	}
 	
 	public void testMissingProperty() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
 		
 		Date lastModified = factory.resolveResource(INDEX_HTML_URL).getLastModified();
 		
@@ -236,7 +238,7 @@ public class PropfindTest extends ActionTestCase {
 	}
 	
 	public void testURLEncodedHREF() throws Exception{
-		final String SPECIAL_URL = testCollection+"/special characters?";
+
 		Date lastModified = factory.resolveResource(SPECIAL_URL).getLastModified();
 		
 		String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:prop><D:getlastmodified/></D:prop></D:propfind>";

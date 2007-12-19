@@ -1,33 +1,27 @@
 package com.openexchange.groupware.infostore.webdav;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderTools;
 import com.openexchange.webdav.protocol.TestWebdavFactoryBuilder;
 import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.test.AjaxInit;
-
+import com.openexchange.webdav.protocol.WebdavPath;
 import junit.framework.TestCase;
+
+import java.util.*;
 
 public class FolderCollectionPermissionHandlingTest extends TestCase {
 	
@@ -180,8 +174,8 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		manager.createFolder(copyMe, true, System.currentTimeMillis());
 		folders.add(copyMe);
 		
-		String url = url(privateInfostoreFolder, copyMe);
-		String copyUrl = "/"+privateInfostoreFolder.getFolderName()+"/copy";
+		WebdavPath url = url(privateInfostoreFolder, copyMe);
+		WebdavPath copyUrl = new WebdavPath(privateInfostoreFolder.getFolderName()).append("copy");
 		
 		factory.resolveCollection(url).copy(copyUrl);
 		
@@ -199,8 +193,8 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		manager.createFolder(moveMe, true, System.currentTimeMillis());
 		folders.add(moveMe);
 		
-		String url = url(privateInfostoreFolder, moveMe);
-		String moveUrl = "/"+privateInfostoreFolder.getFolderName()+"/moved";
+		WebdavPath url = url(privateInfostoreFolder, moveMe);
+		WebdavPath moveUrl = new WebdavPath(privateInfostoreFolder.getFolderName()).append("moved");
 		
 		factory.resolveCollection(url).move(moveUrl);
 		
@@ -223,8 +217,8 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		manager.createFolder(overwriteMe, true, System.currentTimeMillis());	
 		folders.add(overwriteMe);
 		
-		String url = url(privateInfostoreFolder, copyMe);
-		String copyUrl = url(privateInfostoreFolder, overwriteMe);
+		WebdavPath url = url(privateInfostoreFolder, copyMe);
+		WebdavPath copyUrl = url(privateInfostoreFolder, overwriteMe);
 		
 		factory.resolveCollection(url).copy(copyUrl,false,true);
 		
@@ -245,8 +239,8 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		manager.createFolder(overwriteMe, true, System.currentTimeMillis());		
 		folders.add(overwriteMe);
 		
-		String url = url(privateInfostoreFolder, moveMe);
-		String moveUrl = url(privateInfostoreFolder, overwriteMe);
+		WebdavPath url = url(privateInfostoreFolder, moveMe);
+		WebdavPath moveUrl = url(privateInfostoreFolder, overwriteMe);
 		
 		factory.resolveCollection(url).move(moveUrl,false,true);
 		
@@ -267,8 +261,8 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		manager.createFolder(overwriteMe, true, System.currentTimeMillis());	
 		folders.add(overwriteMe);
 		
-		String url = url(privateInfostoreFolder, copyMe);
-		String copyUrl = url(privateInfostoreFolder, overwriteMe);
+		WebdavPath url = url(privateInfostoreFolder, copyMe);
+		WebdavPath copyUrl = url(privateInfostoreFolder, overwriteMe);
 		
 		factory.resolveCollection(url).copy(copyUrl,false,false);
 		
@@ -289,8 +283,8 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		manager.createFolder(overwriteMe, true, System.currentTimeMillis());		
 		folders.add(overwriteMe);
 		
-		String url = url(privateInfostoreFolder, moveMe);
-		String moveUrl = url(privateInfostoreFolder, overwriteMe);
+		WebdavPath url = url(privateInfostoreFolder, moveMe);
+		WebdavPath moveUrl = url(privateInfostoreFolder, overwriteMe);
 		
 		factory.resolveCollection(url).move(moveUrl,false,false);
 		
@@ -341,13 +335,13 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		return perm;
 	}
 
-	private String url(FolderObject... folders) {
-		StringBuilder b = new StringBuilder();
+	private WebdavPath url(FolderObject... folders) {
+		WebdavPath path = new WebdavPath();
 		for(FolderObject fo : folders) {
-			b.append(fo.getFolderName()).append("/");
+			path.append(fo.getFolderName());
 		}
-		b.setLength(b.length()-1);
-		return b.toString();
+
+		return path;
 	}
 	
 	

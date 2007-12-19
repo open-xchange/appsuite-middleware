@@ -16,7 +16,8 @@ public class UnitTests {
 		tests.addTestSuite(com.openexchange.ajax.attach.AttachmentParserTest.class);
 		tests.addTestSuite(com.openexchange.ajax.attach.AttachmentWriterTest.class);
 		tests.addTest(com.openexchange.webdav.protocol.ProtocolTestSuite.suite());
-		tests.addTest(com.openexchange.webdav.action.ActionTestSuite.suite());
+        tests.addTestSuite(com.openexchange.webdav.protocol.WebdavPathTest.class);        
+        tests.addTest(com.openexchange.webdav.action.ActionTestSuite.suite());
 		tests.addTest(com.openexchange.webdav.xml.writer.WriterSuite.suite());
 		tests.addTestSuite(com.openexchange.webdav.action.IfHeaderParserTest.class);
 		tests.addTestSuite(com.openexchange.webdav.infostore.integration.DropBoxScenarioTest.class);

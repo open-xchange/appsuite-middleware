@@ -1,8 +1,10 @@
 package com.openexchange.webdav.action;
 
+import com.openexchange.webdav.protocol.WebdavPath;
+
 public class TraceTest extends ActionTestCase {
 	public void testBasic() throws Exception {
-		final String INDEX_HTML_URL = testCollection+"/index.html";
+		final WebdavPath INDEX_HTML_URL = testCollection.dup().append("index.html");
 		
 		MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
 		MockWebdavResponse res = new MockWebdavResponse();
