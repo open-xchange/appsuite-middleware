@@ -1621,6 +1621,11 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         } finally {
             closeRecordSet(rs);
             closePreparedStatement(stmt);
+            try {
+                cache.pushConnectionForConfigDB(con);
+            } catch (final PoolException e) {
+                log.error("Error pushing ox db read connection to pool!", e);
+            }
         }
     }
 
