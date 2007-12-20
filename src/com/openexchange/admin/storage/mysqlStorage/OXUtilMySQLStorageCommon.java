@@ -51,6 +51,7 @@ package com.openexchange.admin.storage.mysqlStorage;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -78,6 +79,7 @@ public class OXUtilMySQLStorageCommon {
 
         Connection con = null;
         Statement st = null;
+        PreparedStatement prep = null;
         try {
 
             String sql_pass = "";
@@ -87,12 +89,16 @@ public class OXUtilMySQLStorageCommon {
 
             con = cache.getSimpleSqlConnection(db.getUrl(), db.getLogin(), sql_pass, db.getDriver());
 
-            try {
-                con.setCatalog(db.getScheme());
-                // if exists, show error
-                throw new StorageException("Database \"" + db.getScheme() + "\" already exists");
-            } catch (final SQLException ecp) {
+            prep = con.prepareStatement("SHOW DATABASES like ?");
+            prep.setString(1,db.getScheme());
+            
+            ResultSet rs = prep.executeQuery();
+            if(rs.next()){
+            	// database exists
+            	throw new StorageException("Database \"" + db.getScheme() + "\" already exists");
             }
+            
+            rs.close();
 
             if (con.getAutoCommit()) {
                 con.setAutoCommit(false);
@@ -127,6 +133,13 @@ public class OXUtilMySQLStorageCommon {
             try {
                 if (st != null) {
                     st.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing statement", e);
+            }
+            try {
+                if (prep != null) {
+                    prep.close();
                 }
             } catch (final SQLException e) {
                 log.error("Error closing statement", e);
