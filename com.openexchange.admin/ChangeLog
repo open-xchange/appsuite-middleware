@@ -1,3 +1,7 @@
+* 2007-12-20 - choeger@open-xchange.com
+
+  - Bugfix ID#10659 [HEAD] "Object was not returned" in database pool after context operations
+
 * 2007-12-11 - choeger@open-xchange.com
 
   - Bugfix ID#10596 using read connections results into permanent problems in replication scenarios
