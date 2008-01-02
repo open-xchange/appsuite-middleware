@@ -41,7 +41,7 @@ public class LockInteractionTest extends TestCase {
 		lock.setScope(Scope.EXCLUSIVE_LITERAL);
 		lock.setTimeout(WebdavLock.NEVER);
 		lock.setType(Type.WRITE_LITERAL);
-		
+
 		return lock;
 	}
 	
