@@ -540,6 +540,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			// UPDATE
 			final Session session = sessionHolder.getSessionObject();
 			try {
+				database.startTransaction();
 				loadMetadata();
 				if(guessSize) {
 					metadata.setFileSize(0);
@@ -553,6 +554,12 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 					LOG.error("Couldn't rollback transaction. Run the recovery tool.");
 				}
 				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			} finally {
+				try {
+					database.finish();
+				} catch (OXException x) {
+					LOG.error("Couldn't finish transaction: ",x);
+				}
 			}
 		}
 		
@@ -585,6 +592,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 				metadata.setFileSize(0);
 				
 			}
+			database.startTransaction();
 			try {
 				if(fileData == null) {
 					database.saveDocumentMetadata(metadata, InfostoreFacade.NEW, session);
@@ -600,8 +608,11 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 					LOG.error("Couldn't roll back: ",x2);
 				}
 				throw x;
+			} finally {
+				database.finish();
 			}
 		} else {
+			database.startTransaction();
 			if(setMetadata.contains(Metadata.FILENAME_LITERAL)) {
 				metadata.setTitle(metadata.getFileName());
 				setMetadata.add(Metadata.TITLE_LITERAL);
@@ -616,6 +627,8 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 					LOG.error("Can't roll back", x2);
 				}
 				throw x;
+			} finally {
+				database.finish();
 			}
 		}
 		existsInDB = true;
@@ -635,15 +648,24 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	)
 	private void deleteMetadata() throws OXException, IllegalAccessException {
 		final Session session = sessionHolder.getSessionObject();
-		final int[] nd = database.removeDocument(new int[]{ id }, Long.MAX_VALUE,session); 
-		if(nd.length>0) {
-			database.rollback();
-			throw EXCEPTIONS.create(0,Integer.valueOf(nd[0]));
-		}
-		database.commit();
-	}
+	 database.startTransaction();
+        try {
+            final int[] nd = database.removeDocument(new int[]{id}, Long.MAX_VALUE, session);
+            if (nd.length > 0) {
+                database.rollback();
+                throw EXCEPTIONS.create(0, Integer.valueOf(nd[0]));
+            }
+            database.commit();
+        } catch (OXException x) {
+            database.rollback();
+            throw x;
+        } finally {
+            database.finish();
+        }
+    }
 
-	public int getId() {
+
+    public int getId() {
 		return id;
 	}
 

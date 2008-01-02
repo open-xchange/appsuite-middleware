@@ -1147,7 +1147,17 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 
 	private void deleteContainedDocuments(final int folderID) throws OXException {
 		final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
-		db.removeDocument(folderID, System.currentTimeMillis(), session);
+		db.setTransactional(true);
+		db.startTransaction();
+		try {
+			db.removeDocument(folderID, System.currentTimeMillis(), session);
+			db.commit();
+		} catch (OXException x) {
+			db.rollback();
+			throw x;
+		} finally {
+			db.finish();
+		}
 	}
 
 	/**

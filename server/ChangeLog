@@ -16,6 +16,7 @@
 
  - Bugfix #8676 : Requests for LockNullResources are supposed to return
    404 on most requests.
+ - Bugfix #9903: Applied patch.
 
 * 2007-12-12 - thorben.betten@open-xchange.com
 
