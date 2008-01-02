@@ -55,6 +55,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.webdav.protocol.WebdavPath;
 
 public class EntityLockHelper extends LockHelper {
 
@@ -65,7 +66,7 @@ public class EntityLockHelper extends LockHelper {
 	private static final String TOKEN_PREFIX = "http://www.open-xchange.com/webdav/locks/";
 	private static final int TOKEN_PREFIX_LENGTH = TOKEN_PREFIX.length();
 	
-	public EntityLockHelper(final EntityLockManager entityLockManager, final SessionHolder sessionHolder, final String url) {
+	public EntityLockHelper(final EntityLockManager entityLockManager, final SessionHolder sessionHolder, final WebdavPath url) {
 		super(entityLockManager, sessionHolder, url);
 		this.sessionHolder = sessionHolder;
 		this.entityLockManager = entityLockManager;

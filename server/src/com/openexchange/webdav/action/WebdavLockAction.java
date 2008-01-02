@@ -138,7 +138,7 @@ public class WebdavLockAction extends AbstractAction {
 	}
 
 	private int getDepth(final String header) {
-		if(null == header) {
+        if(null == header) {
 			return 0;
 		}
 		if(header.equalsIgnoreCase("infinity")) {

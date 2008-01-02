@@ -153,7 +153,7 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 		}
 		lock.setType(Type.WRITE);
 		final long timeout =  (rs.getLong("timeout") - System.currentTimeMillis());
-		lock.setTimeout(timeout);
+        lock.setTimeout(timeout);
 		lock.setOwnerDescription(rs.getString("ownerDesc"));
 	}
 	

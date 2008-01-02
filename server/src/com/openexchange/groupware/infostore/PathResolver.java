@@ -55,9 +55,10 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.Service;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.webdav.protocol.WebdavPath;
 
 public interface PathResolver extends Service {
-	public Resolved resolve(int relativeToFolder, String path, Context ctx, User user, UserConfiguration userConfig) throws OXException, OXObjectNotFoundException;
-	public String getPathForFolder(int relativeToFolder, int folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	public String getPathForDocument(int relativeToFolder, int documentId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	public Resolved resolve(int relativeToFolder, WebdavPath path, Context ctx, User user, UserConfiguration userConfig) throws OXException, OXObjectNotFoundException;
+	public WebdavPath getPathForFolder(int relativeToFolder, int folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+	public WebdavPath getPathForDocument(int relativeToFolder, int documentId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 }

@@ -57,13 +57,14 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.webdav.protocol.WebdavPath;
 
 public class FolderLockHelper extends LockHelper {
 
 	private FolderLockManager lockManager;
 	private SessionHolder sessionHolder;
 
-	public FolderLockHelper(FolderLockManager lockManager, SessionHolder sessionHolder, String url) {
+	public FolderLockHelper(FolderLockManager lockManager, SessionHolder sessionHolder, WebdavPath url) {
 		super(lockManager, sessionHolder, url);
 		this.lockManager = lockManager;
 		this.sessionHolder = sessionHolder;

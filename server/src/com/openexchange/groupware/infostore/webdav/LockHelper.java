@@ -66,7 +66,7 @@ import java.util.*;
 
 public abstract class LockHelper {
 	private final Map<String, WebdavLock> locks = new HashMap<String, WebdavLock>();
-	private String url;
+	private WebdavPath url;
 	protected int id;
 	
 	private final Set<String> removedLocks = new HashSet<String>();
@@ -76,7 +76,7 @@ public abstract class LockHelper {
 	private boolean loadedLocks;
 
 
-	public LockHelper(final LockManager lockManager, final SessionHolder sessionHolder, final String url) {
+	public LockHelper(final LockManager lockManager, final SessionHolder sessionHolder, final WebdavPath url) {
 		this.lockManager = lockManager;
 		if(null == sessionHolder) {
 			throw new IllegalArgumentException("sessionHolder may not be null");
@@ -122,7 +122,7 @@ public abstract class LockHelper {
 			lock.setToken("http://www.open-xchange.com/webdav/locks/"+lockId);
 			locks.put(lock.getToken(), lock);
 		} catch (final OXException e) {
-			throw new WebdavException(e.toString(), e, new WebdavPath(url), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new WebdavException(e.toString(), e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -164,7 +164,7 @@ public abstract class LockHelper {
 			}
 			setLocks(cleanedLocks);
 		} catch (final OXException e) {
-			throw new WebdavException(e.getMessage(), e, new WebdavPath(url), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new WebdavException(e.getMessage(), e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 	

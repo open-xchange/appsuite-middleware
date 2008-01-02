@@ -65,11 +65,7 @@ import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
 
 import com.openexchange.webdav.action.behaviour.BehaviourLookup;
-import com.openexchange.webdav.protocol.Multistatus;
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.WebdavStatus;
+import com.openexchange.webdav.protocol.*;
 import com.openexchange.webdav.protocol.util.Utils;
 
 public class PropertiesMarshaller implements ResourceMarshaller {
@@ -101,7 +97,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 
 	public List<Element> marshal(final WebdavResource resource) {
 		final Element response =  new Element("response",DAV_NS);
-		response.addContent(marshalHREF(resource.getUrl().toString())); //TODO: Fix the new bug here
+		response.addContent(marshalHREF(resource.getUrl())); //TODO: Fix the new bug here
 		final Multistatus<Iterable<WebdavProperty>> multistatus = getProps(resource);
 		for(final int statusCode : multistatus.getStatusCodes()) {
 			for(final WebdavStatus<Iterable<WebdavProperty>> status : multistatus.toIterable(statusCode)) {
@@ -121,13 +117,16 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		return Arrays.asList(response);
 	}
 	
-	public Element marshalHREF(String uri) {
+	public Element marshalHREF(WebdavPath uri) {
 		final Element href = new Element("href", DAV_NS);
-		if (uri.length() > 0 && uri.charAt(0) == '/') {
-			uri = uri.substring(1);
-		}
-		
-		href.setText(escape(uriPrefix+uri));
+        StringBuilder builder = new StringBuilder(uriPrefix);
+        if(builder.charAt(builder.length()-1) != '/')
+            builder.append("/");
+        for(String component : uri) {
+            builder.append(escape(component)).append("/");
+        }
+        builder.setLength(builder.length()-1);
+        href.setText(builder.toString());
 		return href;
 	}
 	
@@ -137,22 +136,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 			return encoder.encode(string);
 		}
 		try {
-			String[] components = string.split("/+");
-			StringBuilder builder = new StringBuilder();
-			boolean first = true;
-			for(String comp : components) {
-				if(comp != null && !"".equals(comp)) {
-					if(first && comp.endsWith(":") && comp.startsWith("http")) {
-						first = false;
-						builder.append(comp);
-						builder.append("/");
-					} else {
-						builder.append("/");
-						builder.append(URLEncoder.encode(comp,charset).replaceAll("\\+","%20"));
-					}
-				}
-			}
-			return builder.toString();
+			return URLEncoder.encode(string,charset).replaceAll("\\+","%20");
 		} catch (UnsupportedEncodingException e) {
 			LOG.fatal(e);
 			return string;

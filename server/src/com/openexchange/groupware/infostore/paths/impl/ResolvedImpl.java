@@ -50,20 +50,21 @@
 package com.openexchange.groupware.infostore.paths.impl;
 
 import com.openexchange.groupware.infostore.Resolved;
+import com.openexchange.webdav.protocol.WebdavPath;
 
 public class ResolvedImpl implements Resolved {
 
-	private String path;
+	private WebdavPath path;
 	private int id;
 	private boolean document;
 
-	public ResolvedImpl(String path, int id, boolean document) {
+	public ResolvedImpl(WebdavPath path, int id, boolean document) {
 		this.path = path;
 		this.id = id;
 		this.document = document;
 	}
 	
-	public String getPath() {
+	public WebdavPath getPath() {
 		return path;
 	}
 

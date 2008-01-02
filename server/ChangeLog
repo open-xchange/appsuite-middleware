@@ -1,3 +1,19 @@
+* 2008-01-02 - francisco.laguna@open-xchange.com
+
+ - Bugfix #9837: Allow forward slashes as part of WebDAV URLs
+
+############### CONFIG CHANGE ##################
+#                                              #
+#   For this to work, this must be added to    #
+#   the apache config:                         #
+#                                              #
+#   AllowEncodedSlashes On                     #
+#                                              #
+#   Otherwise the forward slashes are not      #
+#   passed to our servlet container.           #
+#                                              #
+################################################
+
 * 2007-12-12 - thorben.betten@open-xchange.com
 
  - Bugfix #10608: Allowing email addresses with pipe character "|" in

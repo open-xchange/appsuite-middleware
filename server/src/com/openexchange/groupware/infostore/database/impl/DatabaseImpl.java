@@ -630,7 +630,7 @@ public class DatabaseImpl extends DBService {
 	 *            database names (del_infostore_documents etc. are self-build
 	 * @return The number of changed entries in the basetable in int[0] and the
 	 *         number of deleted entries in int[1]
-	 * @throws BackendException
+	 * @throws OXException
 	 */
 	private int[] removeDocumentFromTable(final String identifier, final Context ctx,
 			final String basetablename) throws OXException {

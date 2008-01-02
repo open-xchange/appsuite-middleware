@@ -137,7 +137,7 @@ public class Infostore extends OXServlet {
 	}
 
 	private void doIt(HttpServletRequest req, HttpServletResponse resp, Action action) throws ServletException, IOException {
-		final Session session = getSession(req);
+        final Session session = getSession(req);
 		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
 		if(!(uc.hasWebDAV() && uc.hasInfostore())){
 			resp.setStatus(HttpServletResponse.SC_PRECONDITION_FAILED);

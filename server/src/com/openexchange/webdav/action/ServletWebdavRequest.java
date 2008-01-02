@@ -82,8 +82,7 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 		builder.append(req.getServletPath());
 		builder.append('/');
 		this.urlPrefix = builder.toString();
-		this.url = toWebdavURL(req.getRequestURI());
-		
+        this.url = toWebdavURL(req.getRequestURI());
 	}
 
 	public InputStream getBody() throws IOException {
@@ -133,7 +132,15 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 			url =  url.substring(req.getServletPath().length());
 		}
 		try {
-			return new WebdavPath(URLDecoder.decode(url,req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding()));
+            String encoding = req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
+            WebdavPath path = new WebdavPath();
+            for(String component : url.split("/+")) {
+                if(component.equals("")){
+                    continue;
+                }
+                path.append(URLDecoder.decode(component,encoding));
+            }
+            return path;
 		} catch (UnsupportedEncodingException e) {
 			return new WebdavPath(url);
 		}

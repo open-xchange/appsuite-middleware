@@ -104,8 +104,8 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		this.url = url;
 		this.factory = factory;
 		this.sessionHolder = factory.getSessionHolder();
-		this.propertyHelper = new PropertyHelper(factory.getFolderProperties(), sessionHolder, url.toString());
-		this.lockHelper = new FolderLockHelper(factory.getFolderLockManager(), sessionHolder, url.toString());
+		this.propertyHelper = new PropertyHelper(factory.getFolderProperties(), sessionHolder, url);
+		this.lockHelper = new FolderLockHelper(factory.getFolderLockManager(), sessionHolder, url);
 		this.provider = factory.getProvider();
 		if(folder!=null) {
 			setId(folder.getObjectID());

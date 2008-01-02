@@ -49,8 +49,10 @@
 
 package com.openexchange.groupware.infostore;
 
+import com.openexchange.webdav.protocol.WebdavPath;
+
 public interface Resolved {
-	public String getPath();
+	public WebdavPath getPath();
 	public boolean isDocument();
 	public boolean isFolder();
 	public int getId();

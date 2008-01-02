@@ -88,9 +88,9 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 	
 	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(PathResolverImpl.class);
 	
-	private final ThreadLocal<Map<String,Resolved>> resolveCache = new ThreadLocal<Map<String,Resolved>>();
-	private final ThreadLocal<Map<Integer,String>> docPathCache = new ThreadLocal<Map<Integer,String>>();
-	private final ThreadLocal<Map<Integer,String>> folderPathCache = new ThreadLocal<Map<Integer,String>>();
+	private final ThreadLocal<Map<WebdavPath,Resolved>> resolveCache = new ThreadLocal<Map<WebdavPath,Resolved>>();
+	private final ThreadLocal<Map<Integer,WebdavPath>> docPathCache = new ThreadLocal<Map<Integer,WebdavPath>>();
+	private final ThreadLocal<Map<Integer,WebdavPath>> folderPathCache = new ThreadLocal<Map<Integer,WebdavPath>>();
 
 	private InfostoreFacade database;
 	
@@ -114,10 +114,10 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 			exceptionId=0,
 			msg="Illegal argument: Document %d contains no file"
 	)
-	public String getPathForDocument(final int relativeToFolder, final int documentId,
+	public WebdavPath getPathForDocument(final int relativeToFolder, final int documentId,
 			final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-		final Map<Integer, String> cache = docPathCache.get();
-		final Map<String, Resolved> resCache = resolveCache.get();
+		final Map<Integer, WebdavPath> cache = docPathCache.get();
+		final Map<WebdavPath, Resolved> resCache = resolveCache.get();
 		final Integer key = Integer.valueOf(documentId);
 		if(cache.containsKey(key)) {
 			return relative(relativeToFolder, cache.get(key), ctx, user, userConfig);
@@ -127,26 +127,25 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 		if(dm.getFileName() == null || dm.getFileName().equals("")) {
 			throw EXCEPTIONS.create(0, key);
 		}
-		String path = getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, (int)dm.getFolderId(),ctx,user,userConfig)+'/'+dm.getFileName();
+		WebdavPath path = getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, (int)dm.getFolderId(),ctx,user,userConfig).dup().append(dm.getFileName());
 		
-		path = normalize(path);
 		cache.put(key, path);
 		resCache.put(path, new ResolvedImpl(path, documentId, true));
 		return relative(relativeToFolder,path, ctx, user, userConfig);
 	
 	}
 
-	public String getPathForFolder(final int relativeToFolder, final int folderId,
+	public WebdavPath getPathForFolder(final int relativeToFolder, final int folderId,
 			final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
 		if(folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
-			return "/";
+			return new WebdavPath();
 		}
 		if(folderId == relativeToFolder) {
-			return "";
+			return new WebdavPath();
 		}
 		
-		final Map<String, Resolved> resCache = resolveCache.get();
-		final Map<Integer,String> cache = folderPathCache.get();
+		final Map<WebdavPath, Resolved> resCache = resolveCache.get();
+		final Map<Integer,WebdavPath> cache = folderPathCache.get();
 		final Integer key = Integer.valueOf(folderId);
 		if(cache.containsKey(key)) {
 			return relative(relativeToFolder, cache.get(key), ctx, user, userConfig);
@@ -166,19 +165,17 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 		
 		
 		final int length = path.size();
-		final StringBuilder pathBuilder = new StringBuilder().append('/');
+		WebdavPath thePath = new WebdavPath();
 		for(int i = length-1; i > -1; i--) {
 			folder = path.get(i);
-			pathBuilder.append(folder.getFolderName());
-			final String p = normalize(pathBuilder.toString());
-			cache.put(Integer.valueOf(folder.getObjectID()), p);
-			resCache.put(p, new ResolvedImpl(p, folder.getObjectID(), false));
-			pathBuilder.append('/');
+			thePath.append(folder.getFolderName());
+            WebdavPath current = thePath.dup();
+            cache.put(Integer.valueOf(folder.getObjectID()), current);
+			resCache.put(current, new ResolvedImpl(current, folder.getObjectID(), false));
 		}
 		
-		pathBuilder.setLength(pathBuilder.length()-1);
-		final String p = normalize(pathBuilder.toString());
-		return relative(relativeToFolder, p, ctx, user, userConfig);
+
+		return relative(relativeToFolder, thePath, ctx, user, userConfig);
 	}
 	
 	@OXThrowsMultiple(
@@ -187,48 +184,40 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 			exceptionId = { 1,2 },
 			msg = { "Folder %d has two subfolders named %s. Your database is not consistent.", "Incorrect SQL Query: %s" }
 	)
-	public Resolved resolve(final int relativeToFolder, final String path, final Context ctx,
+	public Resolved resolve(final int relativeToFolder, final WebdavPath path, final Context ctx,
 			final User user, final UserConfiguration userConfig) throws OXException,
 			OXObjectNotFoundException {
 		
-		final Map<String, Resolved> cache = resolveCache.get();
+		final Map<WebdavPath, Resolved> cache = resolveCache.get();
 		
-		final String absolutePath = absolute(relativeToFolder, path, ctx, user, userConfig);
+		final WebdavPath absolutePath = absolute(relativeToFolder, path, ctx, user, userConfig);
 		
 		if(cache.containsKey(absolutePath)) {
 			return cache.get(absolutePath);
 		}
 		
-		final String[] components = path.split("/+");
-		
 		Connection con = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		
-		
-		final StringBuilder pathBuilder = new StringBuilder(getPathForFolder(0, relativeToFolder, ctx, user, userConfig));
+		WebdavPath relpath = getPathForFolder(0, relativeToFolder, ctx, user, userConfig);
 
-		Resolved resolved = new ResolvedImpl(pathBuilder.toString(),relativeToFolder, false);
+		Resolved resolved = new ResolvedImpl(relpath,relativeToFolder, false);
 		cache.put(resolved.getPath(), resolved);
 
-		try {
+        WebdavPath current = new WebdavPath();
+        try {
 			int parentId = relativeToFolder;
 			boolean dbMode = false;
-			
-			for(int i = 0; i < components.length; i++) {
-				final String component = components[i];
-				if(component == null || component.length() == 0) {
-					continue;
-				}
-				
-				pathBuilder.append(component);
-				pathBuilder.append('/');
-				
-				final String pathString = normalize(pathBuilder.toString());
-				
+			int compCount = 0;
+			for(String component : path) {
+			    compCount++;
+                boolean last = compCount == path.size();
+                current.append(component);
+
 				if(!dbMode) {
 					
-					resolved = cache.get(pathString);
+					resolved = cache.get(current);
 					if(resolved != null) {
 						parentId = resolved.getId();
 					} else {
@@ -245,7 +234,7 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 					
 					rs = stmt.executeQuery();
 					if(!rs.next()) {
-						if(i == components.length -1) {
+						if(last) {
 							// Maybe infoitem?
 							stmt.close();
 							stmt = con.prepareStatement("SELECT info.id FROM infostore AS info JOIN infostore_document AS doc ON (info.cid = doc.cid AND info.id = doc.infostore_id AND doc.version_number = info.version) WHERE info.cid = ? AND info.folder_id = ? AND doc.filename = ?");
@@ -256,7 +245,7 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 							if(!rs.next()) {
 								throw new OXObjectNotFoundException();
 							}
-							resolved = new ResolvedImpl(pathString,rs.getInt(1), true);
+							resolved = new ResolvedImpl(current,rs.getInt(1), true);
 							cache.put(resolved.getPath(), resolved);
 							return resolved;
 						}
@@ -270,11 +259,11 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 					}
 					rs.close();
 					parentId = nextStep;
-					final Resolved res = new ResolvedImpl(pathString, parentId, false);
+					final Resolved res = new ResolvedImpl(current, parentId, false);
 					cache.put(res.getPath(), res);
 				}
 			}
-			return new ResolvedImpl(normalize(pathBuilder.toString()),parentId, false);
+			return new ResolvedImpl(current,parentId, false);
 		} catch (final SQLException x) {
 			throw EXCEPTIONS.create(2, x,stmt.toString());
 		} finally {
@@ -285,7 +274,7 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 	
 	public void invalidate(WebdavPath url, final int id , final Type type) {
 
-		resolveCache.get().remove(url.toString());
+		resolveCache.get().remove(url);
 		switch(type) {
 		case COLLECTION : 
 			folderPathCache.get().remove(Integer.valueOf(id));break;
@@ -306,9 +295,9 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 	@Override
 	public void startTransaction() throws TransactionException {
 		super.startTransaction();
-		resolveCache.set(new HashMap<String,Resolved>());
-		docPathCache.set(new HashMap<Integer,String>());
-		folderPathCache.set(new HashMap<Integer,String>());
+		resolveCache.set(new HashMap<WebdavPath,Resolved>());
+		docPathCache.set(new HashMap<Integer,WebdavPath>());
+		folderPathCache.set(new HashMap<Integer,WebdavPath>());
 	}
 
 	/*@Override

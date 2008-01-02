@@ -121,18 +121,18 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		this.factory = factory;
 		this.url = url;
 		this.sessionHolder = factory.getSessionHolder();
-		this.lockHelper = new EntityLockHelper(factory.getInfoLockManager(), sessionHolder, url.toString());
+		this.lockHelper = new EntityLockHelper(factory.getInfoLockManager(), sessionHolder, url);
 		this.database = factory.getDatabase();
-		this.propertyHelper = new PropertyHelper(factory.getInfoProperties(), sessionHolder, url.toString());
+		this.propertyHelper = new PropertyHelper(factory.getInfoProperties(), sessionHolder, url);
 	}
 	
 	public DocumentMetadataResource(final WebdavPath url, final DocumentMetadata docMeta, final InfostoreWebdavFactory factory) {
 		this.factory = factory;
 		this.url = url;
 		this.sessionHolder = factory.getSessionHolder();
-		this.lockHelper = new EntityLockHelper(factory.getInfoLockManager(), sessionHolder, url.toString());
+		this.lockHelper = new EntityLockHelper(factory.getInfoLockManager(), sessionHolder, url);
 		this.database = factory.getDatabase();
-		this.propertyHelper = new PropertyHelper(factory.getInfoProperties(), sessionHolder, url.toString());
+		this.propertyHelper = new PropertyHelper(factory.getInfoProperties(), sessionHolder, url);
 		
 		this.metadata = docMeta;
 		this.loadedMetadata = true;

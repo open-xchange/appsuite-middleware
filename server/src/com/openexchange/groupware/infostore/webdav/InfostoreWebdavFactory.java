@@ -245,7 +245,8 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		if (s.lockNull.containsKey(url)) {
 			final InfostoreLockNullResource res = (InfostoreLockNullResource) s.lockNull.get(url);
 			res.setResource(new DocumentMetadataResource(url,this));
-		}
+            return res;
+        }
 		try {
 			final OXWebdavResource res = tryLoad(url, new DocumentMetadataResource(url,this));
 			if (res.isLockNull()) {
@@ -281,7 +282,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		final Context ctx = sessionHolder.getSessionObject().getContext();
 		final Session session = sessionHolder.getSessionObject();
 		try {
-			final Resolved resolved = resolver.resolve(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, url.toString(), session
+			final Resolved resolved = resolver.resolve(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, url, session
 					.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()), UserConfigurationStorage.getInstance()
 					.getUserConfigurationSafe(session.getUserId(), session.getContext()));
 			if(resolved.isFolder()) {

@@ -56,45 +56,18 @@ import com.openexchange.groupware.infostore.PathResolver;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.webdav.protocol.WebdavPath;
 
 public abstract class AbstractPathResolver extends DBService implements
 		PathResolver {
 	
-	protected final String absolute(final int relativeToFolder, final String path, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-		final String rel = this.getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, relativeToFolder, ctx, user, userConfig);
-		final StringBuilder retVal = new StringBuilder(rel);
-		if(rel.length()==0 || rel.charAt(rel.length()-1)!= '/') {
-			retVal.append('/');
-		}
-		retVal.append(path);
-		return retVal.toString();
+	protected final WebdavPath absolute(final int relativeToFolder, final WebdavPath path, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+		final WebdavPath rel = this.getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, relativeToFolder, ctx, user, userConfig);
+		return rel.dup().append(path);
 	}
 	
-	protected final String relative(final int relativeToFolder, final String absolute, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
-		final String rel = this.getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, relativeToFolder, ctx, user, userConfig);
-		int index = rel.length();
-		if(rel.length()>0 && rel.charAt(index-1) == '/') {
-			index--;
-		}
-		return absolute.substring(index);
+	protected final WebdavPath relative(final int relativeToFolder, final WebdavPath absolute, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+		final WebdavPath rel = this.getPathForFolder(FolderObject.SYSTEM_ROOT_FOLDER_ID, relativeToFolder, ctx, user, userConfig);
+	    return absolute.subpath(rel.size());
 	}
-	
-	protected final String parent(String url) {
-		url = normalize(url);
-		return url.substring(0, url.lastIndexOf('/'));
-	}
-	
-	protected final String normalize(String url) {
-		if(url.length()==0) {
-			return "/";
-		}
-		url = url.replaceAll("/+", "/");
-		if(url.charAt(url.length()-1)=='/') {
-			return url.substring(0,url.length()-1);
-		}
-		return url;
-	}
-	
-	
-
 }

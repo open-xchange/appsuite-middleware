@@ -99,7 +99,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		this.resource = resource;
 		this.factory = factory;
 		this.sessionHolder = factory.getSessionHolder();
-		this.lockHelper = new EntityLockHelper(factory.getLockNullLockManager(), sessionHolder, resource.getUrl().toString());
+		this.lockHelper = new EntityLockHelper(factory.getLockNullLockManager(), sessionHolder, resource.getUrl());
 		this.provider = factory.getProvider();
 	}
 	
@@ -113,7 +113,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		ResultSet rs = null;
 		try {
 			stmt = readCon.prepareStatement("SELECT id FROM lock_null WHERE url = ? and cid = ?");
-			stmt.setString(1,url.toString());
+			stmt.setString(1,url.toEscapedString());
 			stmt.setInt(2, ctx.getContextId());
 			rs = stmt.executeQuery();
 			if(rs.next()) {
@@ -395,7 +395,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 			stmt = writeCon.prepareStatement("INSERT INTO lock_null (cid, id, url) VALUES (?,?,?)");
 			stmt.setInt(1,ctx.getContextId());
 			stmt.setInt(2, id);
-			stmt.setString(3, getUrl().toString());
+			stmt.setString(3, getUrl().toEscapedString());
 			stmt.executeUpdate();
 			setId(id);
 			writeCon.commit();

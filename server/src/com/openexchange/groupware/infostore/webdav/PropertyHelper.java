@@ -71,12 +71,12 @@ public class PropertyHelper {
 	private SessionHolder sessionHolder;
 	
 	private int id;
-	private String url;
+	private WebdavPath url;
 
 	private boolean changed;
 	
 	
-	public PropertyHelper(final PropertyStore props, final SessionHolder sessionHolder, final String url) {
+	public PropertyHelper(final PropertyStore props, final SessionHolder sessionHolder, final WebdavPath url) {
 		this.propertyStore = props;
 		this.sessionHolder = sessionHolder;
 		this.url = url;
@@ -143,7 +143,7 @@ public class PropertyHelper {
 			properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 			
 		} catch (final OXException e) {
-			throw new WebdavException(e.getMessage(), e, new WebdavPath(url), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new WebdavException(e.getMessage(), e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -159,7 +159,7 @@ public class PropertyHelper {
 				properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 			}
 		} catch (final OXException e) {
-			throw new WebdavException(e.getMessage(), e, new WebdavPath(url), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			throw new WebdavException(e.getMessage(), e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 	
