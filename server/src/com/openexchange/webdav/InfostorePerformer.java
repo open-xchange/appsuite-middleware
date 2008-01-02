@@ -51,8 +51,7 @@ package com.openexchange.webdav;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.EnumMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -130,9 +129,9 @@ public class InfostorePerformer implements SessionHolder {
 		PUT,
 		TRACE
 	}
-	
-	
-	private  InfostoreWebdavFactory factory;
+
+
+    private  InfostoreWebdavFactory factory;
 	private  Protocol protocol = new Protocol();
 	
 	private Map<Action, WebdavAction> actions = new EnumMap<Action, WebdavAction>(Action.class);
@@ -202,11 +201,29 @@ public class InfostorePerformer implements SessionHolder {
 		actions.put(Action.HEAD, head);
 		actions.put(Action.PUT, put);
 		actions.put(Action.TRACE, trace);
-		
-		loadRequestSpecificBehaviourRegistry();
+
+        makeLockNullTolerant();
+
+        loadRequestSpecificBehaviourRegistry();
 	}
-	
-	private void loadRequestSpecificBehaviourRegistry() {
+
+    private void makeLockNullTolerant(){
+        for(Action action : new Action[]{Action.OPTIONS, Action.LOCK, Action.MKCOL, Action.PUT}) {
+            WebdavAction webdavAction = actions.get(action);
+            while(webdavAction != null) {
+                if(webdavAction instanceof WebdavExistsAction) {
+                    ((WebdavExistsAction) webdavAction).setTolerateLockNull(true);
+                    webdavAction = null;
+                } else if (webdavAction instanceof AbstractAction) {
+                    webdavAction = ((AbstractAction) webdavAction).getNext();
+                } else {
+                    webdavAction = null;
+                }
+            }
+        }
+    }
+
+    private void loadRequestSpecificBehaviourRegistry() {
 		String beanPath = SystemConfig.getProperty(SystemConfig.Property.WebdavOverrides);
 		if (beanPath != null && new File(beanPath).exists()) {
 			try {

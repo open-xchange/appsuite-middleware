@@ -54,12 +54,19 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.webdav.protocol.WebdavException;
 
 public class WebdavExistsAction extends AbstractAction {
+    private boolean tolerateLockNull = false;
 
-	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavException {
+    public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavException {
 		if(!req.getResource().exists()) {
 			throw new WebdavException(req.getUrl(), HttpServletResponse.SC_NOT_FOUND);
 		}
-		yield(req,res);
+        if(req.getResource().isLockNull() && !tolerateLockNull) {
+            throw new WebdavException(req.getUrl(), HttpServletResponse.SC_NOT_FOUND);            
+        }
+        yield(req,res);
 	}
 
+    public void setTolerateLockNull(boolean b) {
+        tolerateLockNull = b;
+    }
 }

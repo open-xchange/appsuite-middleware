@@ -14,6 +14,9 @@
 #                                              #
 ################################################
 
+ - Bugfix #8676 : Requests for LockNullResources are supposed to return
+   404 on most requests.
+
 * 2007-12-12 - thorben.betten@open-xchange.com
 
  - Bugfix #10608: Allowing email addresses with pipe character "|" in

@@ -101,9 +101,11 @@ public class WebdavLockAction extends AbstractAction {
 			final Element owner = root.getChild("owner",DAV_NS);
 			
 			final XMLOutputter outputter = new XMLOutputter();
-			
-			lock.setOwner(outputter.outputString(owner.cloneContent()));
-			
+
+            if(owner != null) {
+                lock.setOwner(outputter.outputString(owner.cloneContent()));
+            }
+
 			WebdavResource resource = req.getResource();
 			int status = HttpServletResponse.SC_OK;
 			 
