@@ -256,9 +256,36 @@ public class PropfindTest extends ActionTestCase {
 		
 		XMLCompare compare = new XMLCompare();
 		compare.setCheckTextNames("href");
-		
-		System.out.println(res.getResponseBodyAsString());
+
+        System.out.println(res.getResponseBodyAsString());
 		assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
 	}
+
+    // Bug 9837
+    public void testURLEncodedHREFWithSlash() throws Exception {
+        WebdavPath problematicUrl = testCollection.dup().append("contains//slahes\\\\and backslashes");
+        factory.resolveCollection(problematicUrl).save();
+        Date lastModified = factory.resolveResource(problematicUrl).getLastModified();
+
+        String body = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:propfind xmlns:D=\"DAV:\"><D:prop><D:getlastmodified/></D:prop></D:propfind>";
+        String expect = "<?xml version=\"1.0\" encoding=\"utf-8\" ?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>http://localhost"+testCollection+"/contains%2F%2Fslahes%5C%5Cand%20backslashes</D:href><D:propstat><D:prop><D:getlastmodified>"+Utils.convert(lastModified)+"</D:getlastmodified></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>";
+
+        MockWebdavRequest req = new MockWebdavRequest(factory, "http://localhost/");
+        MockWebdavResponse res = new MockWebdavResponse();
+
+        req.setBodyAsString(body);
+        req.setUrl(problematicUrl);
+
+        WebdavAction action = new WebdavPropfindAction();
+        action.perform(req, res);
+        assertEquals(Protocol.SC_MULTISTATUS, res.getStatus());
+
+        XMLCompare compare = new XMLCompare();
+        compare.setCheckTextNames("href");
+
+        System.out.println(res.getResponseBodyAsString());
+        assertTrue(compare.compare(expect, res.getResponseBodyAsString()));
+
+    }
 	
 }

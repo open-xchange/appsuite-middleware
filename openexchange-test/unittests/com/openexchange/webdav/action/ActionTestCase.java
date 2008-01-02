@@ -28,7 +28,8 @@ public abstract class ActionTestCase extends TestCase {
 		
 			CollectionTest.createStructure(coll, factory);
 		} catch (Exception x) {
-			tearDown();
+            x.printStackTrace();
+            tearDown();
 			throw x;
 		}
 	}

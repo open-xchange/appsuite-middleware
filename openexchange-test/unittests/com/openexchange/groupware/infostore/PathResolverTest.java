@@ -19,11 +19,14 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.oxfolder.*;
+import com.openexchange.webdav.protocol.WebdavPath;
 import junit.framework.TestCase;
 
 import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+
+import static com.openexchange.webdav.protocol.WebdavPathTest.assertComponents;
 
 public class PathResolverTest extends TestCase {
 
@@ -104,43 +107,43 @@ public class PathResolverTest extends TestCase {
 	}
 
 	public void testResolvePathDocument() throws Exception {
-		Resolved resolved = pathResolver.resolve(root, "/this/is/a/nice/path/document.txt", ctx, user, userConfig);
+		Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path/document.txt"), ctx, user, userConfig);
 		assertTrue(resolved.isDocument());
 		assertFalse(resolved.isFolder());
 		assertEquals(id6, resolved.getId());
 		
-		resolved = pathResolver.resolve(id2, "a/nice/path/document.txt", ctx, user, userConfig);
+		resolved = pathResolver.resolve(id2, new WebdavPath("a/nice/path/document.txt"), ctx, user, userConfig);
 		assertTrue(resolved.isDocument());
 		assertFalse(resolved.isFolder());
 		assertEquals(id6, resolved.getId());
 	}
 
 	public void testResolvePathFolder() throws Exception {
-		Resolved resolved = pathResolver.resolve(root, "/this/is/a/nice/path", ctx, user, userConfig);
+		Resolved resolved = pathResolver.resolve(root, new WebdavPath("/this/is/a/nice/path"), ctx, user, userConfig);
 		assertFalse(resolved.isDocument());
 		assertTrue(resolved.isFolder());
 		assertEquals(id5, resolved.getId());
 		
-		resolved = pathResolver.resolve(id2, "a/nice/path", ctx, user, userConfig);
+		resolved = pathResolver.resolve(id2, new WebdavPath("a/nice/path"), ctx, user, userConfig);
 		assertFalse(resolved.isDocument());
 		assertTrue(resolved.isFolder());
 		assertEquals(id5, resolved.getId());
 	}
 
 	public void testGetPathDocument() throws Exception {
-		String path = pathResolver.getPathForDocument(root, id6, ctx, user, userConfig);
-		assertEquals("/this/is/a/nice/path/document.txt", path);
+		WebdavPath path = pathResolver.getPathForDocument(root, id6, ctx, user, userConfig);
+        assertComponents(path, "this", "is", "a","nice","path","document.txt");
 	}
 
 	public void testGetPathFolder() throws Exception {
-		String path = pathResolver.getPathForFolder(root, id5, ctx, user, userConfig);
-		assertEquals("/this/is/a/nice/path", path);
+		WebdavPath path = pathResolver.getPathForFolder(root, id5, ctx, user, userConfig);
+        assertComponents(path, "this","is","a","nice","path");
 	
 	}
 	
 	public void testNotExists() throws Exception {
 		try {
-			pathResolver.resolve(root, "/i/dont/exist", ctx, user, userConfig);
+			pathResolver.resolve(root, new WebdavPath("/i/dont/exist"), ctx, user, userConfig);
 			fail("Expected OXObjectNotFoundException");
 		} catch (OXObjectNotFoundException x) {
 			assertTrue(true);

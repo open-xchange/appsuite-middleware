@@ -129,7 +129,7 @@ public class WebdavPathTest extends TestCase {
         assertComponents(path.subpath(0,2),"i", "am");
     }
 
-    private static void assertComponents(WebdavPath path, String...components) {
+    public static void assertComponents(WebdavPath path, String...components) {
         assertEquals(components.length,path.size());
         int i = 0;
         for(String component : path) {

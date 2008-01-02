@@ -80,11 +80,11 @@ public class CollectionTest extends ResourceTest {
 		
 		res = coll.resolveCollection(new WebdavPath("development"));
 		res.create();
-		
-		res = res.toCollection().resolveCollection(new WebdavPath("gui"));
+
+        res = res.toCollection().resolveCollection(new WebdavPath("gui"));
 		res.create();
-		
-		res = res.toCollection().resolveResource(new WebdavPath("index3.html"));
+
+        res = res.toCollection().resolveResource(new WebdavPath("index3.html"));
 		res.putBody(new ByteArrayInputStream(INDEX3_HTML.getBytes("UTF-8")));
 		res.setContentType("text/html");
 		res.setLength((long)INDEX3_HTML.getBytes("UTF-8").length);

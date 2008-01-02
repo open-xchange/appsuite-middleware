@@ -20,7 +20,7 @@ public class LockTest extends ActionTestCase {
     public void setUp() throws Exception {
         super.setUp();
         INDEX_HTML_URL = testCollection.dup().append("index.html");
-        GUI_URL = testCollection.dup().append("/development/gui");
+        GUI_URL = testCollection.dup().append("development").append("gui");
         LOCK_HTML_URL = testCollection.dup().append("lock.html");
     }
 
