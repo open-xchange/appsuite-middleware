@@ -60,8 +60,9 @@ public class UnitTests {
 
 		tests.addTestSuite(com.openexchange.groupware.infostore.PathResolverTest.class);
 		tests.addTestSuite(com.openexchange.groupware.infostore.webdav.FolderCollectionPermissionHandlingTest.class);
+        tests.addTestSuite(com.openexchange.groupware.infostore.webdav.PermissionTest.class);
 
-		tests.addTestSuite(com.openexchange.i18n.CompiledLineParserTemplateTest.class);
+        tests.addTestSuite(com.openexchange.i18n.CompiledLineParserTemplateTest.class);
 		tests.addTestSuite(com.openexchange.groupware.notify.ParticipantNotifyTest.class);
 
 		tests.addTestSuite(com.openexchange.groupware.attach.AttachmentBaseTest.class);
