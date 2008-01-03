@@ -1,3 +1,7 @@
+* 2008-01-03 - francisco.laguna@open-xchange.com
+
+ - Bugfix #10395: Don't recurse for webdav listing if permissions don't allow it.
+
 * 2008-01-02 - francisco.laguna@open-xchange.com
 
  - Bugfix #9837: Allow forward slashes as part of WebDAV URLs

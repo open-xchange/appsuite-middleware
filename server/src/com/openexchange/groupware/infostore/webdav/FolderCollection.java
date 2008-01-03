@@ -59,9 +59,11 @@ import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -659,5 +661,26 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	public String toString(){
 		return super.toString()+" :"+id;
 	}
-	
+
+    public EffectivePermission getEffectivePermission() throws WebdavException {
+        loadFolder();
+        final Session session = sessionHolder.getSessionObject();
+
+        final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
+        final Context ctx = session.getContext();
+
+        Connection con = null;
+        try {
+            con = provider.getReadConnection(ctx);
+            return folder.getEffectiveUserPermission(session.getUserId(), userConfig, con);
+        } catch (Exception e) {
+            throw new WebdavException(e.getMessage(), e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } finally {
+
+            if (con != null) {
+                provider.releaseReadConnection(ctx, con);
+            }
+        }
+
+    }
 }

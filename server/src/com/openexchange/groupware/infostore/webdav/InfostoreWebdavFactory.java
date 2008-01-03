@@ -73,6 +73,7 @@ import com.openexchange.webdav.loader.BulkLoader;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.*;
 import com.openexchange.webdav.protocol.impl.AbstractResource;
+import com.openexchange.server.impl.EffectivePermission;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -437,13 +438,17 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		return retVal;
 	}
 
-	public Collection<? extends OXWebdavResource> getResourcesInFolder(final FolderCollection collection, final int folderId) throws OXException, IllegalAccessException, SearchIteratorException {
+	public Collection<? extends OXWebdavResource> getResourcesInFolder(final FolderCollection collection, final int folderId) throws OXException, IllegalAccessException, SearchIteratorException, WebdavException {
 		if(folderId == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID) {
 			return new ArrayList<OXWebdavResource>();
 		}
 		final State s = state.get();
 		final Session session = sessionHolder.getSessionObject();
-		final SearchIterator<?> iter = database.getDocuments(
+        EffectivePermission perm = collection.getEffectivePermission();
+        if(!(perm.canReadAllObjects() || perm.canReadOwnObjects())) {
+            return new ArrayList<OXWebdavResource>();
+        }
+        final SearchIterator<?> iter = database.getDocuments(
 				folderId,
 				session.getContext(),
 				UserStorage.getStorageUser(session.getUserId(), session.getContext()),

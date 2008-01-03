@@ -83,7 +83,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 		classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INFOSTORESECURITYIMPL,
 		component=Component.INFOSTORE
 )
-public class InfostoreSecurityImpl extends DBService{
+public class InfostoreSecurityImpl extends DBService implements InfostoreSecurity {
 
 	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(InfostoreSecurityImpl.class);
 	

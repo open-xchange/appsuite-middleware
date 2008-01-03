@@ -86,19 +86,7 @@ import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
-import com.openexchange.groupware.infostore.database.impl.CreateVersionAction;
-import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
-import com.openexchange.groupware.infostore.database.impl.DeleteDocumentAction;
-import com.openexchange.groupware.infostore.database.impl.DeleteVersionAction;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.infostore.database.impl.GetSwitch;
-import com.openexchange.groupware.infostore.database.impl.InfostoreIterator;
-import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
-import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
-import com.openexchange.groupware.infostore.database.impl.SetSwitch;
-import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
-import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
+import com.openexchange.groupware.infostore.database.impl.*;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.validation.InvalidCharactersValidator;
 import com.openexchange.groupware.infostore.validation.ValidationChain;
@@ -161,7 +149,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 
 	private final DatabaseImpl db = new DatabaseImpl();
 
-	private final InfostoreSecurityImpl security = new InfostoreSecurityImpl();
+	private InfostoreSecurity security = new InfostoreSecurityImpl();
 
 	private final EntityLockManager lockManager = new EntityLockManagerImpl(
 			"infostore_lock");
@@ -178,7 +166,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		setProvider(provider);
 	}
 
-	public boolean exists(final int id, final int version, final Context ctx, final User user,
+    public void setSecurity(InfostoreSecurity security) {
+        this.security = security;
+        if(null != getProvider()) {
+            setProvider(getProvider());
+        }
+    }
+
+    public boolean exists(final int id, final int version, final Context ctx, final User user,
 			final UserConfiguration userConfig) throws OXException {
 		try {
 			return security.getInfostorePermission(id, ctx, user, userConfig).canReadObject();
@@ -1424,7 +1419,39 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		}
 	}
 
-	@Override
+    private static enum ServiceMethod {
+        COMMIT, FINISH, ROLLBACK, SET_REQUEST_TRANSACTIONAL, START_TRANSACTION, SET_PROVIDER;
+
+        public void call(Object o, Object...args) {
+            if(!(o instanceof DBService)) {
+                return;
+            }
+            DBService service = (DBService) o;
+            switch(this) {
+                default : return;
+                case SET_REQUEST_TRANSACTIONAL: service.setRequestTransactional((Boolean) args[0]); break;
+                case SET_PROVIDER: service.setProvider((DBProvider)args[0]); break;
+            }
+        }
+
+        public void callUnsafe(Object o, Object...args) throws TransactionException {
+            if(!(o instanceof DBService)) {
+                return;
+            }
+            DBService service = (DBService) o;
+            switch(this) {
+                default : call(o, args); break;
+                case COMMIT: service.commit(); break;
+                case FINISH: service.finish(); break;
+                case ROLLBACK: service.rollback(); break;
+                case START_TRANSACTION: service.startTransaction(); break;
+            }
+        }
+
+    }
+
+
+    @Override
 	@OXThrowsMultiple(category = { Category.SUBSYSTEM_OR_SERVICE_DOWN,
 			Category.SUBSYSTEM_OR_SERVICE_DOWN }, desc = {
 			"Cannot reach the file store so some documents were not deleted.",
@@ -1434,9 +1461,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 			"Cannot remove file. Database and file store are probably inconsistent. Please contact an administrator to run the recovery tool." }
 
 	)
-	public void commit() throws TransactionException {
+    public void commit() throws TransactionException {
 		db.commit();
-		security.commit();
+		ServiceMethod.COMMIT.callUnsafe(security);
 		lockManager.commit();
 		if (null != fileIdRemoveList.get() && fileIdRemoveList.get().size() > 0) {
 			try {
@@ -1465,14 +1492,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		fileIdRemoveList.set(null);
 		ctxHolder.set(null);
 		db.finish();
-		security.finish();
+        ServiceMethod.FINISH.callUnsafe(security);
 		super.finish();
 	}
 
 	@Override
 	public void rollback() throws TransactionException {
 		db.rollback();
-		security.rollback();
+        ServiceMethod.ROLLBACK.callUnsafe(security);
 		lockManager.rollback();
 		super.rollback();
 	}
@@ -1480,7 +1507,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 	@Override
 	public void setRequestTransactional(final boolean transactional) {
 		db.setRequestTransactional(transactional);
-		security.setRequestTransactional(transactional);
+        ServiceMethod.SET_REQUEST_TRANSACTIONAL.call(security, transactional);
 		lockManager.setRequestTransactional(transactional);
 		super.setRequestTransactional(transactional);
 	}
@@ -1495,7 +1522,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		fileIdRemoveList.set(new ArrayList<String>());
 		ctxHolder.set(null);
 		db.startTransaction();
-		security.startTransaction();
+        ServiceMethod.START_TRANSACTION.callUnsafe(security);
 		lockManager.startTransaction();
 		super.startTransaction();
 	}
@@ -1504,7 +1531,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 	public void setProvider(final DBProvider provider) {
 		super.setProvider(provider);
 		db.setProvider(provider);
-		security.setProvider(provider);
+        ServiceMethod.SET_PROVIDER.call(security, provider);
 		if (lockManager instanceof DBService) {
 			((DBService) lockManager).setProvider(provider);
 		}
