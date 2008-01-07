@@ -127,22 +127,6 @@ public class Credentials implements Serializable{
         this.password = null;
         
     }
-    
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj instanceof Credentials) {
-            final Credentials otherCredentials = (Credentials)obj;
-            if (otherCredentials.login.equals(this.login) &&
-                otherCredentials.password.equals(this.password)) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    }
 
     /**
      * Constructs a <code>String</code> with all attributes
@@ -165,6 +149,38 @@ public class Credentials implements Serializable{
         
         return retValue.toString();
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((login == null) ? 0 : login.hashCode());
+		result = prime * result
+				+ ((password == null) ? 0 : password.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		final Credentials other = (Credentials) obj;
+		if (login == null) {
+			if (other.login != null)
+				return false;
+		} else if (!login.equals(other.login))
+			return false;
+		if (password == null) {
+			if (other.password != null)
+				return false;
+		} else if (!password.equals(other.password))
+			return false;
+		return true;
+	}
     
     
 }
