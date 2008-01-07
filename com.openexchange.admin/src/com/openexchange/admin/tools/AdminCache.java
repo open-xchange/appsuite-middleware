@@ -1,4 +1,4 @@
-/*
+ /*
  *
  *    OPEN-XCHANGE legal information
  *
@@ -65,6 +65,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
@@ -166,21 +167,39 @@ public class AdminCache {
     public boolean existsNamedAccessCombination(String name) {
         return named_access_combinations.containsKey(name);
     }
-
-    public void initAccessCombinations() throws ClassNotFoundException, OXGenericException {
-
-        try {
-            log.debug("Processing access combinations...");
-            named_access_combinations = getAccessCombinations(loadValidAccessModules(), loadAccessCombinations());
-            log.debug("Access combinations processed!");
-        } catch (ClassNotFoundException e) {
-            log.error("Error loading access modules and methods!", e);
-            throw e;
-        } catch (OXGenericException e) {
-            log.error("Error processing access combinations config file!!", e);
-            throw e;
+    
+    public String getNameForAccessCombination(UserModuleAccess access_combination) {
+        if(named_access_combinations.containsValue(access_combination)){
+        	Iterator<String> names = named_access_combinations.keySet().iterator();
+        	String retval = null;
+        	while(names.hasNext()){
+        		String combi_name = (String)names.next();
+        		if(named_access_combinations.get(combi_name).equals(access_combination)){
+        			retval =  combi_name;
+        			break;
+        		}
+        	}
+        	return retval;
+        }else{
+        	return null;
         }
+    }
 
+    public void initAccessCombinations() throws ClassNotFoundException, OXGenericException  {
+    	if (named_access_combinations == null) {
+			try {
+				log.info("Processing access combinations...");			
+				named_access_combinations = getAccessCombinations(loadValidAccessModules(), loadAccessCombinations());
+				log.info("Access combinations processed!");
+			} catch (ClassNotFoundException e) {
+				log.error("Error loading access modules and methods!", e);
+				throw e;
+			} catch (OXGenericException e) {
+				log.error("Error processing access combinations config file!!",e);
+				throw e;
+			}
+		}
+    	
     }
 
     private HashMap<String, UserModuleAccess> getAccessCombinations(HashMap<String, Method> module_method_mapping, Properties access_props) throws OXGenericException {
@@ -263,7 +282,7 @@ public class AdminCache {
     private Properties loadAccessCombinations() {
         // Load properties from file , if does not exists use fallback
         // properties!
-        final String access_prop_file = this.prop.getProp("ACCESS_COMBINATIONS_FILE", "/opt/open-xchange/admindaemon/etc/ModuleAccessDefinitions.properties");
+        final String access_prop_file = this.prop.getProp("ACCESS_COMBINATIONS_FILE", "/opt/open-xchange/etc/admindaemon/ModuleAccessDefinitions.properties");
 
         Properties access_props = new Properties();
 
