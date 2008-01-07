@@ -1,8 +1,6 @@
 classes
-.classpath
 .settings
 jar
-.project
 doc
 build-stamp
 configure-stamp
