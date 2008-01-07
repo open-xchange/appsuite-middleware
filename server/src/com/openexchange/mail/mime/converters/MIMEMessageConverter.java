@@ -92,6 +92,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.utils.StorageUtility;
 
 /**
  * {@link MIMEMessageConverter}
@@ -665,15 +666,18 @@ public final class MIMEMessageConverter {
 						mailMessage.setContentType(ct);
 						mailMessage.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
 						/*
-						 * TODO: Detailed attachment information like done with IMAP's bodystructure information
+						 * TODO: Detailed attachment information like done with
+						 * IMAP's bodystructure information
 						 */
-						/*try {
-							mailMessage.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)
-									&& (ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED) || hasAttachments((Multipart) msg
-											.getContent(), ct.getSubType())));
-						} catch (final IOException e) {
-							throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-						}*/
+						/*
+						 * try {
+						 * mailMessage.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL) &&
+						 * (ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED) ||
+						 * hasAttachments((Multipart) msg .getContent(),
+						 * ct.getSubType()))); } catch (final IOException e) {
+						 * throw new MailException(MailException.Code.IO_ERROR,
+						 * e, e.getLocalizedMessage()); }
+						 */
 					}
 				};
 				break;
@@ -874,10 +878,38 @@ public final class MIMEMessageConverter {
 				mail.setMailId(((UIDFolder) f).getUID(msg));
 			}
 			setHeaders(msg, mail);
-			mail.addFrom((InternetAddress[]) msg.getFrom());
-			mail.addTo((InternetAddress[]) msg.getRecipients(Message.RecipientType.TO));
-			mail.addCc((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC));
-			mail.addBcc((InternetAddress[]) msg.getRecipients(Message.RecipientType.BCC));
+			try {
+				mail.addFrom((InternetAddress[]) msg.getFrom());
+			} catch (final AddressException e) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(e.getLocalizedMessage(), e);
+				}
+				mail.addFrom(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_FROM)));
+			}
+			try {
+				mail.addTo((InternetAddress[]) msg.getRecipients(Message.RecipientType.TO));
+			} catch (final AddressException e) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(e.getLocalizedMessage(), e);
+				}
+				mail.addTo(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_TO)));
+			}
+			try {
+				mail.addCc((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC));
+			} catch (final AddressException e) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(e.getLocalizedMessage(), e);
+				}
+				mail.addCc(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_CC)));
+			}
+			try {
+				mail.addBcc((InternetAddress[]) msg.getRecipients(Message.RecipientType.BCC));
+			} catch (final AddressException e) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(e.getLocalizedMessage(), e);
+				}
+				mail.addBcc(getAddressesOnParseError(msg.getHeader(MessageHeaders.HDR_BCC)));
+			}
 			mail.setContentType(msg.getContentType());
 			{
 				final String[] tmp = msg.getHeader(MessageHeaders.HDR_CONTENT_ID);
@@ -1055,6 +1087,14 @@ public final class MIMEMessageConverter {
 			}
 		}
 		mailPart.addHeaders(headerMap);
+	}
+
+	private static InternetAddress[] getAddressesOnParseError(final String[] addrs) {
+		final InternetAddress[] retval = new InternetAddress[addrs.length];
+		for (int i = 0; i < addrs.length; i++) {
+			retval[i] = new StorageUtility.DummyAddress(addrs[i]);
+		}
+		return retval;
 	}
 
 	/**
