@@ -191,7 +191,7 @@ public class CheckSizeSwitch implements MetadataSwitcher {
 	}
 
 	public Object url() {
-		return Boolean.valueOf(length <= 128);
+		return Boolean.valueOf(length <= 256);
 	}
 
 	public Object version() {
