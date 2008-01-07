@@ -49,8 +49,18 @@
 
 package com.openexchange.tools.mail;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.openexchange.configuration.SystemConfig;
 
 /**
  * MailTools
@@ -63,44 +73,49 @@ public final class MailTools {
 
 	private static final String HTML_BR = "<br>";
 
-	private static final String HTML_QUOT = "&quot;";
-
-	private static final String REPL_QUOTE = "\"";
-
 	private static final String REPL_LINEBREAK = "\r?\n";
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailTools.class);
 
-	private static final String[] htmlchars = new String[256];
+	private static final AtomicBoolean initialized = new AtomicBoolean();
 
-	static {
-		final String[] entry = { "nbsp", "iexcl", "cent", "pound", "curren", "yen", "brvbar", "sect", "uml", "copy",
-				"ordf", "laquo", "not", "shy", "reg", "macr", "deg", "plusmn", "sup2", "sup3", "acute", "micro",
-				"para", "middot", "cedil", "sup1", "ordm", "raquo", "frac14", "frac12", "frac34", "iquest", "Agrave",
-				"Aacute", "Acirc", "Atilde", "Auml", "Aring", "AElig", "CCedil", "Egrave", "Eacute", "Ecirc", "Euml",
-				"Igrave", "Iacute", "Icirc", "Iuml", "ETH", "Ntilde", "Ograve", "Oacute", "Ocirc", "Otilde", "Ouml",
-				"times", "Oslash", "Ugrave", "Uacute", "Ucirc", "Uuml", "Yacute", "THORN", "szlig", "agrave", "aacute",
-				"acirc", "atilde", "auml", "aring", "aelig", "ccedil", "egrave", "eacute", "ecirc", "euml", "igrave",
-				"iacute", "icirc", "iuml", "eth", "ntilde", "ograve", "oacute", "ocirc", "otilde", "ouml", "divid",
-				"oslash", "ugrave", "uacute", "ucirc", "uuml", "yacute", "thorn", "yuml" };
+	private static Map<Character, String> htmlCharMap;
 
-		htmlchars['&'] = "&amp;";
-		htmlchars['<'] = "&lt;";
-		htmlchars['>'] = "&gt;";
-		htmlchars['\''] = "&#39;";
-
-		for (int c = '\u00A0', i = 0; c <= '\u00FF'; c++, i++) {
-			htmlchars[c] = '&' + entry[i] + ';';
+	private static void initHtmlCharMap() {
+		synchronized (initialized) {
+			if (null == htmlCharMap) {
+				final Properties htmlEntities = new Properties();
+				InputStream in = null;
+				try {
+					in = new FileInputStream(SystemConfig.getProperty(SystemConfig.Property.HTMLEntities));
+					htmlEntities.load(in);
+				} catch (final IOException e) {
+					LOG.error(e.getLocalizedMessage(), e);
+					htmlCharMap = null;
+				} finally {
+					if (null != in) {
+						try {
+							in.close();
+						} catch (final IOException e) {
+							LOG.error(e.getLocalizedMessage(), e);
+						}
+					}
+				}
+				/*
+				 * Build up map
+				 */
+				htmlCharMap = new HashMap<Character, String>();
+				final Iterator<Map.Entry<Object, Object>> iter = htmlEntities.entrySet().iterator();
+				final int size = htmlEntities.size();
+				for (int i = 0; i < size; i++) {
+					final Map.Entry<Object, Object> entry = iter.next();
+					htmlCharMap.put(Character.valueOf((char) Integer.parseInt((String) entry.getValue())),
+							(String) entry.getKey());
+				}
+				initialized.set(true);
+			}
 		}
-
-		for (int c = '\u0083', i = 131; c <= '\u009f'; c++, i++) {
-			htmlchars[c] = "&#" + i + ';';
-		}
-
-		htmlchars['\u0088'] = htmlchars['\u008D'] = htmlchars['\u008E'] = null;
-		htmlchars['\u008F'] = htmlchars['\u0090'] = htmlchars['\u0098'] = null;
-		htmlchars['\u009D'] = null;
 	}
 
 	/*
@@ -116,21 +131,23 @@ public final class MailTools {
 	public static final String NUMBER_WO_DIGITS = "#####0";
 
 	private static String escape(final String s, final boolean withQuote) {
+		if (!initialized.get()) {
+			initHtmlCharMap();
+		}
 		final int len = s.length();
-		final StringBuilder sb = new StringBuilder(len * 5 / 4);
+		final StringBuilder sb = new StringBuilder(len);
 		/*
 		 * Escape
 		 */
 		for (int i = 0; i < len; i++) {
-			final char c = s.charAt(i);
-			final String elem = htmlchars[c & 0xff];
-			if (elem == null) {
-				sb.append(c);
+			final Character c = Character.valueOf(s.charAt(i));
+			if (withQuote ? htmlCharMap.containsKey(c) : (c.charValue() == '"' ? false : htmlCharMap.containsKey(c))) {
+				sb.append('&').append(htmlCharMap.get(c)).append(';');
 			} else {
-				sb.append(elem);
+				sb.append(c);
 			}
 		}
-		return withQuote ? sb.toString().replaceAll(REPL_QUOTE, HTML_QUOT) : sb.toString();
+		return sb.toString();
 	}
 
 	/**
@@ -229,6 +246,9 @@ public final class MailTools {
 		 * No target specified
 		 */
 		final int pos = anchorTag.indexOf('>');
+		if (pos == -1) {
+			return anchorTag;
+		}
 		final StringBuilder sb = new StringBuilder(128);
 		return sb.append(anchorTag.substring(0, pos)).append(" target=\"").append(STR_BLANK).append('"').append(
 				anchorTag.substring(pos)).toString();

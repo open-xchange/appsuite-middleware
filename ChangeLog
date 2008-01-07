@@ -1,3 +1,8 @@
+* 2008-01-07 - thorben.betten@open-xchange.com
+
+ - Bugfix #9996: Proper escaping of HTML entities (includes Japanese
+   characters)
+
 * 2007-12-10 - francisco.laguna@open-xchange.com
 
  - Bugfix #10583: Remove all attachments in a context ONLY on context delete.
