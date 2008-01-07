@@ -1,6 +1,7 @@
 * 2008-01-07 - francisco.laguna@open-xchange.com
 
  - Bugfix #9064: Added update task to fix folder name collisions below any parent folder.
+ - Bugfix #10403: Log exceptions based on the exceptions category.
 
 * 2008-01-03 - francisco.laguna@open-xchange.com
 

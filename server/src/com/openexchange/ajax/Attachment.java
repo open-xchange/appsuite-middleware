@@ -101,6 +101,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.exceptions.LoggingLogic;
 
 /**
  * Attachment
@@ -135,7 +136,9 @@ public class Attachment extends PermissionServlet {
 	
 	private static transient final Log LOG = LogFactory.getLog(Attachment.class);
 
-	private long maxUploadSize = -2;
+    private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(Attachment.class,  LOG);
+
+    private long maxUploadSize = -2;
 	
 	@Override
 	protected boolean hasModulePermission(final Session sessionObj) {
@@ -438,7 +441,7 @@ public class Attachment extends PermissionServlet {
 			} catch (TransactionException e) {
 				LOG.error(e);
 			}
-			handle(res,t,Response.ERROR, null);
+            handle(res,t,Response.ERROR, null);
 			return;
 		} catch (JSONException e) {
 			try {
@@ -508,7 +511,7 @@ public class Attachment extends PermissionServlet {
 	}
 	
 	private void handle(final HttpServletResponse res, final AbstractOXException t, final String action, final String fragmentOverride) {
-		LOG.debug("",t);
+		LL.log(t);
 		
 		res.setContentType(MIME_TEXT_HTML_CHARSET_UTF8);
 
