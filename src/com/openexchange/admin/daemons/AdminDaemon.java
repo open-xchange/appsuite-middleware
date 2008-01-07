@@ -135,13 +135,12 @@ public class AdminDaemon {
         context.addBundleListener(bl);
     }
 
-    public void initCache(final BundleContext context) {
+    public void initCache(final BundleContext context) throws ClassNotFoundException, OXGenericException {
         bundlelist = new ArrayList<Bundle>();
         
         this.cache = new AdminCache();
         
-        this.cache.initCache();         
-        
+        this.cache.initCache();  
         ClientAdminThread.cache = this.cache;
         prop = this.cache.getProperties();        
         log.info("Cache and Pools initialized!");
