@@ -413,6 +413,31 @@ public class UserModuleAccess implements Serializable {
     }
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (PinboardWrite ? 1231 : 1237);
+		result = prime * result + (Projects ? 1231 : 1237);
+		result = prime * result + (RssBookmarks ? 1231 : 1237);
+		result = prime * result + (RssPortal ? 1231 : 1237);
+		result = prime * result + (Syncml ? 1231 : 1237);
+		result = prime * result + (Tasks ? 1231 : 1237);
+		result = prime * result + (Vcard ? 1231 : 1237);
+		result = prime * result + (Webdav ? 1231 : 1237);
+		result = prime * result + (WebdavXml ? 1231 : 1237);
+		result = prime * result + (Webmail ? 1231 : 1237);
+		result = prime * result + (calendar ? 1231 : 1237);
+		result = prime * result + (contacts ? 1231 : 1237);
+		result = prime * result + (delegateTask ? 1231 : 1237);
+		result = prime * result + (editPublicFolders ? 1231 : 1237);
+		result = prime * result + (forum ? 1231 : 1237);
+		result = prime * result + (ical ? 1231 : 1237);
+		result = prime * result + (infostore ? 1231 : 1237);
+		result = prime * result + (readCreateSharedFolders ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -459,4 +484,6 @@ public class UserModuleAccess implements Serializable {
 			return false;
 		return true;
 	}
+
+	
 }
