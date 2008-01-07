@@ -67,7 +67,10 @@ public class UserModuleAccess implements Serializable {
      * For serialization
      */
     private static final long serialVersionUID = -5336341908204911967L;
-
+    
+    // ALL ACCESS MODULES; 
+    // MAKE SURE YOU REWRITE THE "equals" METHOD
+    // IF YOU CHANGE SOMETHING HERE!!!
     private boolean calendar = true;
 
     private boolean contacts = true;
@@ -408,4 +411,52 @@ public class UserModuleAccess implements Serializable {
         ret.append("]");
         return ret.toString();
     }
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		final UserModuleAccess other = (UserModuleAccess) obj;
+		if (PinboardWrite != other.PinboardWrite)
+			return false;
+		if (Projects != other.Projects)
+			return false;
+		if (RssBookmarks != other.RssBookmarks)
+			return false;
+		if (RssPortal != other.RssPortal)
+			return false;
+		if (Syncml != other.Syncml)
+			return false;
+		if (Tasks != other.Tasks)
+			return false;
+		if (Vcard != other.Vcard)
+			return false;
+		if (Webdav != other.Webdav)
+			return false;
+		if (WebdavXml != other.WebdavXml)
+			return false;
+		if (Webmail != other.Webmail)
+			return false;
+		if (calendar != other.calendar)
+			return false;
+		if (contacts != other.contacts)
+			return false;
+		if (delegateTask != other.delegateTask)
+			return false;
+		if (editPublicFolders != other.editPublicFolders)
+			return false;
+		if (forum != other.forum)
+			return false;
+		if (ical != other.ical)
+			return false;
+		if (infostore != other.infostore)
+			return false;
+		if (readCreateSharedFolders != other.readCreateSharedFolders)
+			return false;
+		return true;
+	}
 }
