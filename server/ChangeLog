@@ -1,3 +1,7 @@
+* 2008-01-07 - francisco.laguna@open-xchange.com
+
+ - Bugfix #9064: Added update task to fix folder name collisions below any parent folder.
+
 * 2008-01-03 - francisco.laguna@open-xchange.com
 
  - Bugfix #10395: Don't recurse for webdav listing if permissions don't allow it.

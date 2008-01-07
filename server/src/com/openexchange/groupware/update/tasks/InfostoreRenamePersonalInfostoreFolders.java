@@ -93,7 +93,7 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 	public void perform(Schema schema, int contextId)
 			throws AbstractOXException {
 		try {
-			List<NameCollision> collisions = NameCollision.getCollisions(contextId);
+			List<NameCollision> collisions = NameCollision.getCollisions(contextId, getParentFolder());
 			
 			for(NameCollision collision : collisions) {
 				collision.resolve();
@@ -104,9 +104,13 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 			EXCEPTIONS.create(1, e.getLocalizedMessage(), e);
 		}
 	}
-	
-	
-	private static final class NameCollision {
+
+    protected int getParentFolder() {
+        return FolderObject.SYSTEM_INFOSTORE_FOLDER_ID;
+    }
+
+
+    private static final class NameCollision {
 		private String name;
 		private int contextId;
 		
@@ -198,7 +202,6 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 					}
 				}
 			}
-		
 		}
 		
 		
@@ -247,17 +250,22 @@ public class InfostoreRenamePersonalInfostoreFolders implements UpdateTask {
 		
 		
 		
-		public static List<NameCollision> getCollisions(int contextId) throws SQLException, DBPoolingException {
+		public static List<NameCollision> getCollisions(int contextId, int parentFolder) throws SQLException, DBPoolingException {
 			List<NameCollision> c = new ArrayList<NameCollision>();
 			Connection writeCon = null;
 			PreparedStatement stmt = null;
 			ResultSet rs = null;
 			try {
 				writeCon = Database.get(contextId, true);
-				stmt = writeCon.prepareStatement("SELECT fname, cid  FROM oxfolder_tree WHERE module = ? and parent = ? GROUP BY fname,cid,parent HAVING count(*) > 1");
-				stmt.setInt(1, FolderObject.INFOSTORE);
-				stmt.setInt(2, FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
-				
+                if(parentFolder == -1) {
+                    stmt = writeCon.prepareStatement("SELECT fname, cid  FROM oxfolder_tree WHERE module = ? GROUP BY fname,cid,parent HAVING count(*) > 1");
+                    stmt.setInt(1, FolderObject.INFOSTORE);
+				} else {
+                    stmt = writeCon.prepareStatement("SELECT fname, cid  FROM oxfolder_tree WHERE module = ? and parent = ? GROUP BY fname,cid,parent HAVING count(*) > 1");
+                    stmt.setInt(1, FolderObject.INFOSTORE);
+                    stmt.setInt(2, parentFolder);
+				}
+
 				rs = stmt.executeQuery();
 				
 				while(rs.next()) {
