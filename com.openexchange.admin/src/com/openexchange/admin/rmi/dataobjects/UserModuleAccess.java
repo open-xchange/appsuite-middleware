@@ -275,11 +275,15 @@ public class UserModuleAccess implements Serializable {
     public void setEditPublicFolders(boolean val) {
         this.editPublicFolders = val;
     }
-
+    /**
+     * Currently NOT in use!
+     */
     public boolean getForum() {
         return forum;
     }
-
+    /**
+     * Currently NOT in use!
+     */
     public void setForum(boolean val) {
         this.forum = val;
     }
@@ -299,19 +303,29 @@ public class UserModuleAccess implements Serializable {
     public void setInfostore(boolean val) {
         this.infostore = val;
     }
-
+    /**
+     * Currently NOT in use!
+     */
     public boolean getPinboardWrite() {
         return PinboardWrite;
     }
-
+    /**
+     * Currently NOT in use!
+     */
     public void setPinboardWrite(boolean val) {
         this.PinboardWrite = val;
     }
-
+    
+    /**
+     * Currently NOT in use!
+     */
     public boolean getProjects() {
         return Projects;
     }
 
+    /**
+     * Currently NOT in use!
+     */
     public void setProjects(boolean val) {
         this.Projects = val;
     }
@@ -323,19 +337,27 @@ public class UserModuleAccess implements Serializable {
     public void setReadCreateSharedFolders(boolean val) {
         this.readCreateSharedFolders = val;
     }
-
+    /**
+     * Currently NOT in use!
+     */
     public boolean getRssBookmarks() {
         return RssBookmarks;
     }
-
+    /**
+     * Currently NOT in use!
+     */
     public void setRssBookmarks(boolean val) {
         this.RssBookmarks = val;
     }
-
+    /**
+     * Currently NOT in use!
+     */
     public boolean getRssPortal() {
         return RssPortal;
     }
-
+    /**
+     * Currently NOT in use!
+     */
     public void setRssPortal(boolean val) {
         this.RssPortal = val;
     }
