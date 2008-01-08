@@ -36,8 +36,10 @@ public class TestWebdavFactoryBuilder {
 	private static WebdavFactory buildInfoFactory() throws Exception{
 		
 		InfostoreWebdavFactory factory = new InfostoreWebdavFactory();
-		factory.setDatabase(new InfostoreFacadeImpl());
-		factory.setFolderLockManager(new FolderLockManagerImpl());
+        InfostoreFacadeImpl database = new InfostoreFacadeImpl();
+        factory.setDatabase(database);
+        factory.setSecurity(database.getSecurity());
+        factory.setFolderLockManager(new FolderLockManagerImpl());
 		factory.setFolderProperties(new PropertyStoreImpl("oxfolder_property"));
 		factory.setInfoLockManager(new EntityLockManagerImpl("infostore_lock"));
 		factory.setLockNullLockManager(new EntityLockManagerImpl("lock_null_lock"));
