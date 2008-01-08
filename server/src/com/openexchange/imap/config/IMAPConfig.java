@@ -101,11 +101,11 @@ public final class IMAPConfig extends MailConfig {
 	 */
 	public static IMAPConfig getImapConfig(final Session session) throws MailConfigException {
 		final IMAPConfig imapConf = new IMAPConfig();
-		fillLoginAndPassword(imapConf, session);
 		/*
 		 * Fetch user object and create its IMAP properties
 		 */
 		final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
+		fillLoginAndPassword(imapConf, session, user);
 		if (LoginType.GLOBAL.equals(getLoginType())) {
 			String imapServer = MailConfig.getMailServer();
 			if (imapServer == null) {

@@ -126,21 +126,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 		/*
 		 * Create internal instance
 		 */
-		try {
-			internalInstance = clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { null });
-		} catch (SecurityException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (NoSuchMethodException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (IllegalArgumentException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (InstantiationException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (IllegalAccessException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (InvocationTargetException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		}
+		internalInstance = createNewMailConnection(null);
 	}
 
 	/**
@@ -191,6 +177,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 					 */
 					mailConnection.initMailConfig(session);
 					mailConnection.connectInternal();
+					MailConnectionWatcher.addMailConnection(mailConnection);
 					return mailConnection;
 				}
 			}
@@ -246,6 +233,19 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 		/*
 		 * Create a new mail connection
 		 */
+		return createNewMailConnection(session);
+	}
+
+	/**
+	 * Creates a new mail connection instance
+	 * 
+	 * @param session
+	 *            The session providing user (login) data
+	 * @return Newly created mail connection instance
+	 * @throws MailException
+	 *             If mail connection creation fails
+	 */
+	private static MailConnection<?, ?, ?> createNewMailConnection(final Session session) throws MailException {
 		try {
 			final MailConnection<?, ?, ?> mailConnection = clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(
 					new Object[] { session });

@@ -90,11 +90,11 @@ public final class SMTPConfig extends TransportConfig {
 	 */
 	public static SMTPConfig getSmtpConfig(final Session session) throws MailConfigException {
 		final SMTPConfig smtpConf = new SMTPConfig();
-		fillLoginAndPassword(smtpConf, session);
 		/*
 		 * Fetch user object and create its IMAP properties
 		 */
 		final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
+		fillLoginAndPassword(smtpConf, session, user);
 		if (LoginType.GLOBAL.equals(getLoginType())) {
 			String smtpServer = MailConfig.getTransportServer();
 			if (smtpServer == null) {

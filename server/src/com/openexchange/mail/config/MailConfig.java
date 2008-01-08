@@ -172,12 +172,11 @@ public abstract class MailConfig {
 	 *            The session providing needed user data
 	 * @throws MailConfigException
 	 */
-	protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session)
+	protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final User user)
 			throws MailConfigException {
 		/*
 		 * Fetch user object and create its mail properties
 		 */
-		final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
 		if (LoginType.GLOBAL.equals(getLoginType())) {
 			final String masterPw = GlobalMailConfig.getInstance().getMasterPassword();
 			if (masterPw == null) {
@@ -188,14 +187,14 @@ public abstract class MailConfig {
 			mailConfig.password = masterPw;
 		} else if (LoginType.USER.equals(getLoginType())) {
 			if (getCredSrc() == null || CredSrc.SESSION.equals(getCredSrc())) {
-				mailConfig.login = getLocalMailLogin(session, false);
+				mailConfig.login = getLocalMailLogin(session, user, false);
 				mailConfig.password = session.getPassword();
 			} else if (CredSrc.OTHER.equals(getCredSrc())) {
 				mailConfig.password = TEST_PW;
 				mailConfig.login = getRandomTestLogin();
 			} else if (CredSrc.USER_IMAPLOGIN.equals(getCredSrc())) {
 				mailConfig.password = session.getPassword();
-				mailConfig.login = getLocalMailLogin(session, true);
+				mailConfig.login = getLocalMailLogin(session, user, true);
 			}
 		} else if (LoginType.ANONYMOUS.equals(getLoginType())) {
 			mailConfig.login = LoginType.ANONYMOUS.toString();
@@ -212,13 +211,15 @@ public abstract class MailConfig {
 	 * 
 	 * @param session -
 	 *            the user's session
+	 * @param user -
+	 *            the user object
 	 * @param lookUp -
 	 *            determines whether to look up {@link User#getImapLogin()} or
 	 *            not
 	 * @return The session-associated user's login
 	 */
-	private static final String getLocalMailLogin(final Session session, final boolean lookUp) {
-		String login = lookUp ? UserStorage.getStorageUser(session.getUserId(), session.getContext()).getImapLogin() : null;
+	private static final String getLocalMailLogin(final Session session, final User user, final boolean lookUp) {
+		String login = lookUp ? user.getImapLogin() : null;
 		if (login == null || login.length() == 0) {
 			login = session.getUserlogin() != null && session.getUserlogin().length() > 0 ? session.getUserlogin()
 					: String.valueOf(session.getUserId());
