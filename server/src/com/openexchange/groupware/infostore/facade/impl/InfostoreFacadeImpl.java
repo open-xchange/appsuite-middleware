@@ -1409,7 +1409,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		}
 	}
 
-	private static final class NotAllowed extends RuntimeException {
+    public InfostoreSecurity getSecurity() {
+        return security;
+    }
+
+    private static final class NotAllowed extends RuntimeException {
 		private static final long serialVersionUID = 4872889537922290831L;
 
 		public int id;
@@ -1532,9 +1536,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		super.setProvider(provider);
 		db.setProvider(provider);
         ServiceMethod.SET_PROVIDER.call(security, provider);
-		if (lockManager instanceof DBService) {
-			((DBService) lockManager).setProvider(provider);
-		}
+        ServiceMethod.SET_PROVIDER.call(lockManager, provider);
 	}
 
 	private static final UserConfiguration getUserConfiguration(final Session sessionObj) {

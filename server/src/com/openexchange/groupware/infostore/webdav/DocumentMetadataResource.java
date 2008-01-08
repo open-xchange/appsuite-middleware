@@ -58,6 +58,7 @@ import com.openexchange.groupware.infostore.*;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.GetSwitch;
 import com.openexchange.groupware.infostore.database.impl.SetSwitch;
+import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -107,8 +108,10 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	private final SessionHolder sessionHolder;
 	
 	private final InfostoreFacade database;
-	
-	private boolean loadedMetadata;
+
+    private final InfostoreSecurity security;
+
+    private boolean loadedMetadata;
 
 	private boolean existsInDB;
 
@@ -123,7 +126,8 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		this.sessionHolder = factory.getSessionHolder();
 		this.lockHelper = new EntityLockHelper(factory.getInfoLockManager(), sessionHolder, url);
 		this.database = factory.getDatabase();
-		this.propertyHelper = new PropertyHelper(factory.getInfoProperties(), sessionHolder, url);
+        this.security = factory.getSecurity();
+        this.propertyHelper = new PropertyHelper(factory.getInfoProperties(), sessionHolder, url);
 	}
 	
 	public DocumentMetadataResource(final WebdavPath url, final DocumentMetadata docMeta, final InfostoreWebdavFactory factory) {
@@ -132,7 +136,8 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		this.sessionHolder = factory.getSessionHolder();
 		this.lockHelper = new EntityLockHelper(factory.getInfoLockManager(), sessionHolder, url);
 		this.database = factory.getDatabase();
-		this.propertyHelper = new PropertyHelper(factory.getInfoProperties(), sessionHolder, url);
+        this.security = factory.getSecurity();
+        this.propertyHelper = new PropertyHelper(factory.getInfoProperties(), sessionHolder, url);
 		
 		this.metadata = docMeta;
 		this.loadedMetadata = true;
@@ -322,7 +327,16 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	public void save() throws WebdavException {
 		try {
 			dumpMetadataToDB();
-			propertyHelper.dumpPropertiesToDB();
+            if(propertyHelper.mustWrite()) {
+                final Session session = sessionHolder.getSessionObject();
+                EffectiveInfostorePermission perm = security.getInfostorePermission(getId(),session.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()),
+					UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
+							session.getContext()));
+                if(!perm.canWriteObject()) {
+                    throw new WebdavException("No Write Permission", getUrl(), HttpServletResponse.SC_FORBIDDEN);    
+                }
+            }
+            propertyHelper.dumpPropertiesToDB();
 			lockHelper.dumpLocksToDB();
 		} catch (final WebdavException x) {
 			throw x;
@@ -507,7 +521,14 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 				set.setValue(m.doSwitch(get));
 				m.doSwitch(set);
 			}
-		} catch (final Exception x) {
+        } catch (InfostoreException x) {
+            if(InfostoreExceptionFactory.isPermissionException(x)) {
+                metadata.setId(getId());
+                metadata.setFolderId(((OXWebdavResource)parent()).getId());
+            } else {
+                throw new WebdavException(x.getMessage(), x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
+        } catch (final Exception x) {
 			throw new WebdavException(x.getMessage(), x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -574,7 +595,9 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			parent = (FolderCollection) parent();
 			if(!parent.exists()) {
 				throw new WebdavException(getUrl(), HttpServletResponse.SC_CONFLICT);
-			}
+			} else if (parent.isRoot()) {
+                throw new WebdavException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
+            }
 		} catch (final ClassCastException x) {
 			throw new WebdavException(getUrl(), HttpServletResponse.SC_CONFLICT);
 		}

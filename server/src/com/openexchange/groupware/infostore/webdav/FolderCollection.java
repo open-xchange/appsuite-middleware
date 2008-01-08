@@ -56,6 +56,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
+import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBProvider;
@@ -97,8 +98,9 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	
 	private boolean loadedChildren;
 	private ArrayList<OCLPermission> overrideNewACL;
-	
-	public FolderCollection(final WebdavPath url, final InfostoreWebdavFactory factory) {
+    private InfostoreSecurity security;
+
+    public FolderCollection(final WebdavPath url, final InfostoreWebdavFactory factory) {
 		this(url,factory,null);
 	}
 	
@@ -108,7 +110,8 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 		this.sessionHolder = factory.getSessionHolder();
 		this.propertyHelper = new PropertyHelper(factory.getFolderProperties(), sessionHolder, url);
 		this.lockHelper = new FolderLockHelper(factory.getFolderLockManager(), sessionHolder, url);
-		this.provider = factory.getProvider();
+        this.security = factory.getSecurity();
+        this.provider = factory.getProvider();
 		if(folder!=null) {
 			setId(folder.getObjectID());
 			this.folder = folder;
@@ -377,7 +380,16 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	public void save() throws WebdavException {
 		try {
 			dumpToDB();
-			propertyHelper.dumpPropertiesToDB();
+            if(propertyHelper.mustWrite()) {
+                final Session session = sessionHolder.getSessionObject();
+                EffectivePermission perm = security.getFolderPermission(getId(),session.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()),
+					UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
+							session.getContext()));
+                if(!perm.isFolderAdmin()) {
+                    throw new WebdavException("No Write Permission", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+                }
+            }
+            propertyHelper.dumpPropertiesToDB();
 			lockHelper.dumpLocksToDB();
 		} catch (final WebdavException x) {
 			throw x;
@@ -682,5 +694,9 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
             }
         }
 
+    }
+
+    public boolean isRoot() {
+        return id == FolderObject.SYSTEM_INFOSTORE_FOLDER_ID;
     }
 }

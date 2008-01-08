@@ -54,6 +54,7 @@ import java.io.InputStream;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
@@ -114,4 +115,5 @@ public interface InfostoreFacade extends Service{
 	public void unlock(int id, Session sessionObj) throws OXException;
 
 	public void lock(int id, long diff, Session sessionObj) throws OXException;
+
 }

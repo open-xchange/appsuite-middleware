@@ -2,6 +2,7 @@
 
  - Fix Exception handling in AjaxServlet#service. Wrap everything except ServletException in
    a ServletException (many thanks to Thorben).
+ - Fixes for bugs #9109, #10051, #10044, #10052
 
 * 2008-01-07 - francisco.laguna@open-xchange.com
 

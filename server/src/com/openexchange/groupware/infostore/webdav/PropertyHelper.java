@@ -125,8 +125,12 @@ public class PropertyHelper {
 	private void markChanged() {
 		changed = true;
 	}
-	
-	private void loadProperty(final String namespace, final String name) throws WebdavException {
+
+    public boolean mustWrite(){
+        return changed;
+    }
+
+    private void loadProperty(final String namespace, final String name) throws WebdavException {
 		if(removedProperties.contains(new WebdavProperty(namespace, name))) {
 			return;
 		}

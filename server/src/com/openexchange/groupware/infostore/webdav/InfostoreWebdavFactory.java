@@ -58,6 +58,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.PathResolver;
 import com.openexchange.groupware.infostore.Resolved;
+import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBProvider;
@@ -84,8 +85,8 @@ import java.util.*;
 public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 	
 	private static final Protocol PROTOCOL = new Protocol();
-	
-	private static final class State {
+
+    private static final class State {
 		public final Map<WebdavPath, DocumentMetadataResource> resources = new HashMap<WebdavPath, DocumentMetadataResource>();
 		public final Map<WebdavPath, FolderCollection> folders = new HashMap<WebdavPath, FolderCollection>();
 		
@@ -188,7 +189,8 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 	private PropertyStore infoProperties;
 	private PropertyStore folderProperties;
 	private InfostoreFacade database;
-	private DBProvider provider;
+    private InfostoreSecurity security;    
+    private DBProvider provider;
 	
 	private final Log LOG = LogFactory.getLog(InfostoreWebdavFactory.class);
 
@@ -403,8 +405,22 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 	public InfostoreFacade getDatabase() {
 		return database;
 	}
-	
-	public void setDatabase(final InfostoreFacade database){
+
+    public void setSecurity(InfostoreSecurity security){
+        if(this.security instanceof Service) {
+            removeService((Service) this.security);
+        }
+        this.security = security;
+        if(this.security instanceof Service) {
+            addService((Service) this.security);
+        }
+   	}
+
+    public InfostoreSecurity getSecurity() {
+        return security;
+    }
+
+    public void setDatabase(final InfostoreFacade database){
 		removeService(this.database);
 		this.database=database;
 		addService(this.database);
