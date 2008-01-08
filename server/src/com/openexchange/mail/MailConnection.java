@@ -249,7 +249,9 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 		try {
 			final MailConnection<?, ?, ?> mailConnection = clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(
 					new Object[] { session });
-			mailConnection.initMailConfig(session);
+			if (null != session) {
+				mailConnection.initMailConfig(session);
+			}
 			return mailConnection;
 		} catch (SecurityException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
