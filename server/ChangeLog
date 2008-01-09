@@ -1,3 +1,7 @@
+* 2008-01-09 - francisco.laguna@open-xchange.com
+
+ - Bug #10706: Don't lose the filename in an update to an infoitem via webdav.
+
 * 2008-01-09 - marcus.klein@open-xchange.com
 
  - Bugfix #10688: Schema should be unlocked if a SQLException occurs during
