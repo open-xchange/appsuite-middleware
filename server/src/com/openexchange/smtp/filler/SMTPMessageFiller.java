@@ -583,25 +583,18 @@ public final class SMTPMessageFiller {
 
 	private void addMessageBodyPart(final Multipart mp, final MailPart part, final boolean inline)
 			throws MessagingException, MailException {
-		final MimeBodyPart messageBodyPart;
-		if (part.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
-			messageBodyPart = new MimeBodyPart();
-			messageBodyPart.setDataHandler(part.getDataHandler());
-			messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, part.getContentType().toString());
-		} else {
-			if (part.getContentType().isMimeType(MIMETypes.MIME_APPL_OCTET) && part.getFileName() != null) {
-				/*
-				 * Try to determine MIME type
-				 */
-				final String ct = MIMEType2ExtMap.getContentType(part.getFileName());
-				final int pos = ct.indexOf('/');
-				part.getContentType().setPrimaryType(ct.substring(0, pos));
-				part.getContentType().setSubType(ct.substring(pos + 1));
-			}
-			messageBodyPart = new MimeBodyPart();
-			messageBodyPart.setDataHandler(part.getDataHandler());
-			messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, part.getContentType().toString());
+		final MimeBodyPart messageBodyPart = new MimeBodyPart();
+		if (part.getContentType().isMimeType(MIMETypes.MIME_APPL_OCTET) && part.getFileName() != null) {
+			/*
+			 * Try to determine MIME type
+			 */
+			final String ct = MIMEType2ExtMap.getContentType(part.getFileName());
+			final int pos = ct.indexOf('/');
+			part.getContentType().setPrimaryType(ct.substring(0, pos));
+			part.getContentType().setSubType(ct.substring(pos + 1));
 		}
+		messageBodyPart.setDataHandler(part.getDataHandler());
+		messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, part.getContentType().toString());
 		/*
 		 * Filename
 		 */
@@ -613,14 +606,16 @@ public final class SMTPMessageFiller {
 				messageBodyPart.setFileName(part.getFileName());
 			}
 		}
+		if (!inline) {
+			/*
+			 * Force base64 encoding to keep data as it is
+			 */
+			messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
+		}
 		/*
 		 * Disposition
 		 */
 		messageBodyPart.setDisposition(inline ? Part.INLINE : Part.ATTACHMENT);
-		/*
-		 * Force base64 encoding to keep data as it is
-		 */
-		messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
 		/*
 		 * Content-ID
 		 */
