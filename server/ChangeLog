@@ -1,3 +1,8 @@
+* 2008-01-09 - marcus.klein@open-xchange.com
+
+ - Bugfix #10688: Schema should be unlocked if a SQLException occurs during
+   locking.
+
 * 2008-01-08 - francisco.laguna@open-xchange.com
 
  - Fix Exception handling in AjaxServlet#service. Wrap everything except ServletException in

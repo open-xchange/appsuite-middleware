@@ -217,76 +217,76 @@ public class SchemaStoreImpl extends SchemaStore {
 		/*
 		 * Start of update process, so lock schema
 		 */
+        boolean error = false;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Connection writeCon = null;
+        try {
+            writeCon = Database.get(contextId, true);
+        } catch (final DBPoolingException e) {
+            LOG.error(e.getMessage(), e);
+            throw new SchemaException(e);
+        }
 		try {
-			boolean error = false;
-			Connection writeCon = null;
-			PreparedStatement stmt = null;
-			ResultSet rs = null;
-			try {
+			/*
+			 * Try to obtain exclusive lock on table 'version'
+			 */
+			writeCon.setAutoCommit(false); // BEGIN
+			stmt = writeCon.prepareStatement(SQL_SELECT_LOCKED_FOR_UPDATE);
+			rs = stmt.executeQuery();
+			if (!rs.next()) {
+				error = true;
+				throw EXCEPTION.create(7);
+			} else if (rs.getBoolean(1)) {
 				/*
-				 * Try to obtain exclusive lock on table 'version'
+				 * Schema is already locked by another update process
 				 */
-				writeCon = Database.get(contextId, true);
-				writeCon.setAutoCommit(false); // BEGIN
-				stmt = writeCon.prepareStatement(SQL_SELECT_LOCKED_FOR_UPDATE);
-				rs = stmt.executeQuery();
-				if (!rs.next()) {
-					error = true;
-					throw EXCEPTION.create(7);
-				} else if (rs.getBoolean(1)) {
-					/*
-					 * Schema is already locked by another update process
-					 */
-					error = true;
-					throw EXCEPTION.create(8, schema.getSchema());
-				}
-				rs.close();
-				rs = null;
-				stmt.close();
-				stmt = null;
-				/*
-				 * Lock schema
-				 */
-				stmt = writeCon.prepareStatement(SQL_UPDATE_LOCKED);
-				stmt.setBoolean(1, true);
-				if (stmt.executeUpdate() == 0) {
-					/*
-					 * Schema could not be locked
-					 */
-					error = true;
-					throw EXCEPTION.create(9, schema.getSchema());
-				}
-				/*
-				 * Everything went fine. Schema is marked as locked
-				 */
-				writeCon.commit(); // COMMIT
-			} finally {
-				closeSQLStuff(rs, stmt);
-				if (writeCon != null) {
-					if (error) {
-						try {
-							writeCon.rollback();
-						} catch (final SQLException e) {
-							LOG.error(e.getMessage(), e);
-						}
-					}
-					if (!writeCon.getAutoCommit()) {
-						try {
-							writeCon.setAutoCommit(true);
-						} catch (final SQLException e) {
-							LOG.error(e.getMessage(), e);
-						}
-					}
-					Database.back(contextId, true, writeCon);
-				}
+				error = true;
+				throw EXCEPTION.create(8, schema.getSchema());
 			}
-		} catch (final DBPoolingException e) {
-			LOG.error(e.getMessage(), e);
-			throw new SchemaException(e);
-		} catch (final SQLException e) {
-			throw EXCEPTION.create(6, e, e.getMessage());
+			rs.close();
+			rs = null;
+			stmt.close();
+			stmt = null;
+			/*
+			 * Lock schema
+			 */
+			stmt = writeCon.prepareStatement(SQL_UPDATE_LOCKED);
+			stmt.setBoolean(1, true);
+			if (stmt.executeUpdate() == 0) {
+				/*
+				 * Schema could not be locked
+				 */
+				error = true;
+				throw EXCEPTION.create(9, schema.getSchema());
+			}
+			/*
+			 * Everything went fine. Schema is marked as locked
+			 */
+			writeCon.commit(); // COMMIT
+        } catch (final SQLException e) {
+            error = true;
+            throw EXCEPTION.create(6, e, e.getMessage());
+		} finally {
+			closeSQLStuff(rs, stmt);
+			if (writeCon != null) {
+				if (error) {
+					try {
+						writeCon.rollback();
+					} catch (final SQLException e) {
+						LOG.error(e.getMessage(), e);
+					}
+				}
+				try {
+	                if (!writeCon.getAutoCommit()) {
+	                    writeCon.setAutoCommit(true);
+	                }
+				} catch (final SQLException e) {
+					LOG.error(e.getMessage(), e);
+				}
+				Database.back(contextId, true, writeCon);
+			}
 		}
-
 	}
 
 	private static final String SQL_UPDATE_VERSION = "UPDATE version SET version = ?, locked = ?, gw_compatible = ?, admin_compatible = ?";
