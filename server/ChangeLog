@@ -1,3 +1,8 @@
+* 2008-01-09 - thorben.betten@open-xchange.com
+
+ - Bugfix #10214: Using "Java port of Mozilla charset detector" to guess
+   proper charset for uploaded files
+
 * 2008-01-09 - francisco.laguna@open-xchange.com
 
  - Bug #10706: Don't lose the filename in an update to an infoitem via webdav.
