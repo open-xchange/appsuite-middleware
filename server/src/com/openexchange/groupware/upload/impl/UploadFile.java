@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.upload.impl;
 
 import java.io.File;
@@ -64,6 +62,8 @@ public class UploadFile {
 	private String fieldName;
 
 	private String fileName;
+
+	private String preparedFileName;
 
 	private File tmpFile;
 
@@ -105,6 +105,29 @@ public class UploadFile {
 	 */
 	public String getFileName() {
 		return fileName;
+	}
+
+	/**
+	 * Gets the prepared file name; meaning prepending path informations omitted
+	 * 
+	 * @return The prepared file name
+	 */
+	public String getPreparedFileName() {
+		if (null == preparedFileName) {
+			if (null == fileName) {
+				return null;
+			}
+			preparedFileName = fileName;
+			/*
+			 * Try guessing the filename separator
+			 */
+			if (preparedFileName.indexOf('\\') != -1) {
+				preparedFileName = preparedFileName.substring(preparedFileName.lastIndexOf('\\') + 1);
+			} else if (preparedFileName.indexOf('/') != -1) {
+				preparedFileName = preparedFileName.substring(preparedFileName.lastIndexOf('/') + 1);
+			}
+		}
+		return preparedFileName;
 	}
 
 	public void setFileName(final String fileName) {
