@@ -752,8 +752,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        try {
-            // con = cache.getREADConnectionForContext(context_id);
+        try {            
             stmt = con.prepareStatement("SELECT user FROM user_setting_admin WHERE cid = ?");
             stmt.setInt(1, ctx.getId());
             rs = stmt.executeQuery();
@@ -776,6 +775,27 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             closePreparedStatement(stmt);
         }
         return admin_id;
+    }
+   
+    public int getAdminForContext(final Context ctx) throws StorageException {    	
+    	Connection con = null;
+    	
+    	try{
+    		con = cache.getConnectionForContext(ctx.getId());
+    		return getAdminForContext(ctx, con);	
+        } catch (final PoolException e) {
+            log.error("Pool Error",e);
+            throw new StorageException(e);
+        } finally {            
+            try {
+                if (con != null) {
+                    cache.pushConnectionForContext(ctx.getId(), con);
+                }
+            } catch (final PoolException e) {
+                log.error("Error pushing oxdb read connection to pool!", e);
+            }
+    	
+        }
     }
 
     @Override
