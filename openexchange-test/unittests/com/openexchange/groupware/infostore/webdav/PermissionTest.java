@@ -7,16 +7,20 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.oxfolder.*;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.api2.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionHolder;
@@ -26,9 +30,7 @@ import com.openexchange.configuration.AJAXConfig;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
@@ -38,8 +40,13 @@ public class PermissionTest extends TestCase implements SessionHolder {
     private Context ctx;
     private Session session;
 
+    private User user;
     private User user1;
     private User user2;
+
+    private UserConfiguration userConfig;
+    private UserConfiguration userConfig1;
+    private UserConfiguration userConfig2;
 
     private User cleanupUser;
 
@@ -64,9 +71,11 @@ public class PermissionTest extends TestCase implements SessionHolder {
 
         session1 = SessionObjectWrapper.createSessionObject(userStorage.getUserId(AJAXConfig.getProperty(AJAXConfig.Property.LOGIN), ctx), ctx, getClass().getName());
 		user1 = userStorage.getUser(session1.getUserId(), ctx);
+        userConfig1 = userConfigStorage.getUserConfiguration(user1.getId(),ctx);
 
         session2 = SessionObjectWrapper.createSessionObject(userStorage.getUserId(AJAXConfig.getProperty(AJAXConfig.Property.SECONDUSER), ctx), ctx, getClass().getName());
 		user2 = userStorage.getUser(session2.getUserId(), ctx);
+        userConfig2 = userConfigStorage.getUserConfiguration(user2.getId(), ctx);
 
         final OXFolderAccess oxfa = new OXFolderAccess(ctx);
 		root = oxfa.getFolderObject(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
@@ -203,6 +212,80 @@ public class PermissionTest extends TestCase implements SessionHolder {
         }
     }
 
+    //Bug 10706
+    public void testDontDulicateDocumentsWithCreateAndWritePermissions() throws Exception {
+        FolderObject testFolder = createFolder(root, "test"+ System.currentTimeMillis(),
+                adminPermission(user1),
+                permission(user2, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.WRITE_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS));
+
+        switchUser(user2);
+
+        WebdavResource resource = factory.resolveResource(new WebdavPath(testFolder.getFolderName(), "test.bin"));
+
+        resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[0]));
+        resource.create();
+
+        factory.endRequest(200);
+        factory.beginRequest();
+
+        resource = factory.resolveResource(new WebdavPath(testFolder.getFolderName(), "test.bin"));
+
+        resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] {1,2,3}));
+        assertTrue(resource.exists());
+        resource.save();
+
+        // Verify that it has not doubled, but was overwritten (correctly)
+        switchUser(user1);
+
+        TimedResult documents = factory.getDatabase().getDocuments(testFolder.getObjectID(),session.getContext(), user, userConfig);
+
+        Map<String, Integer> counter =  new HashMap<String,Integer>();
+        for(DocumentMetadata metadata : SearchIteratorAdapter.toIterable((SearchIterator<DocumentMetadata>)documents.results())) {
+            String name = metadata.getFileName();
+            assertNotNull(name);
+            assertEquals("test.bin", name);
+            Integer value = 0;
+            if(null != counter.get(name)) {
+                value = counter.get(name);
+            }
+            value += 1;
+            counter.put(name, value);
+        }
+        assertTrue(counter.values().size() > 0);
+        for(Integer count : counter.values()) {
+            assertEquals(new Integer(1), count);
+        }
+    }
+
+
+    //Bug 10706
+    public void testDontDulicateOtherPersonsDocumentWithCreateAndWritePermissions() throws Exception {
+        FolderObject testFolder = createFolder(root, "test"+ System.currentTimeMillis(),
+                adminPermission(user1),
+                permission(user2, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.WRITE_OWN_OBJECTS, OCLPermission.NO_PERMISSIONS));
+
+        WebdavResource resource = factory.resolveResource(new WebdavPath(testFolder.getFolderName(), "test.bin"));
+
+        resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[0]));
+        resource.create();
+
+        switchUser(user2);
+
+        resource = factory.resolveResource(new WebdavPath(testFolder.getFolderName(), "test.bin"));
+
+        try {
+            resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[] {1,2,3}));
+            resource.save();
+            fail("Could update document even without write permissions to it");
+        } catch (WebdavException x) {
+            if(x.getStatus() != 403) {
+                x.printStackTrace();
+            }
+            assertEquals(403,x.getStatus());
+        }
+    }
+
+
     public void testDisallowSavingInRootVirtualFolder() throws Exception {
         WebdavResource res = factory.resolveResource("/test.txt");
         try {
@@ -213,7 +296,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
             if(x.getStatus() != 403) {
                 x.printStackTrace();
             }
-            assertEquals(403, x.getStatus());
+            assertEquals(403,x.getStatus());
         }
 
     }
@@ -276,8 +359,12 @@ public class PermissionTest extends TestCase implements SessionHolder {
     public void switchUser(User user) {
         if(user.getId() == user1.getId()) {
           session = session1;
+          this.user = user1;
+          userConfig = userConfig1;
         } else if (user.getId() == user2.getId()) {
           session = session2;
+          this.user = user2;
+          userConfig = userConfig2;
         } else {
             throw new IllegalArgumentException("I don't know user "+user.getId());
         }

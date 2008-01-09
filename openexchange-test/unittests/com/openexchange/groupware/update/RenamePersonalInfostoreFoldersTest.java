@@ -19,6 +19,7 @@ import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.tasks.InfostoreRenamePersonalInfostoreFolders;
+import com.openexchange.groupware.update.tasks.InfostoreResolveFolderNameCollisions;
 import com.openexchange.server.impl.DBPoolingException;
 
 import junit.framework.TestCase;
