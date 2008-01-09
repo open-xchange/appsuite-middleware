@@ -83,7 +83,7 @@ public class WebdavLockWriter {
 		if(WebdavLock.NEVER == lock.getTimeout()) {
 			lockXML.append("Infinite");
 		} else {
-			lockXML.append(lock.getTimeout());
+			lockXML.append("Second-"+lock.getTimeout());
 		}
 		lockXML.append("</D:timeout>");
 	}
