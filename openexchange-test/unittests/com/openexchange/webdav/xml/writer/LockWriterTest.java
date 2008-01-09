@@ -17,7 +17,7 @@ public class LockWriterTest extends TestCase {
 		
 		WebdavLockWriter writer = new WebdavLockWriter();
 
-		WebdavLock lock = new WebdavLock();
+		WebdavLock lock = new TestLock();
 		
 		lock.setType(WebdavLock.Type.WRITE_LITERAL);
 		lock.setScope(WebdavLock.Scope.EXCLUSIVE_LITERAL);
@@ -53,7 +53,26 @@ public class LockWriterTest extends TestCase {
 		got = "<blupp xmlns:D=\"DAV:\">"+writer.lock2xml(lock)+"</blupp>";
 		
 		assertTrue(xmlCompare.compare(expect,got));
-		
-	}
+
+        lock.setTimeout(23);
+        expect = "<blupp xmlns:D=\"DAV:\"><D:activelock> <D:locktype><D:write /></D:locktype> <D:lockscope><D:shared/></D:lockscope> <D:depth>infinity</D:depth> <D:owner>me</D:owner> <D:timeout>Second-23</D:timeout> <D:locktoken><D:href>opaquelocktoken:blaaaa</D:href></D:locktoken> </D:activelock></blupp>";
+        got = "<blupp xmlns:D=\"DAV:\">"+writer.lock2xml(lock)+"</blupp>";
+        System.out.println(got);
+        assertTrue(xmlCompare.compare(expect,got));
+        		
+    }
+
+    private static final class TestLock extends WebdavLock {
+        private long timeout;
+        public long getTimeout() {
+            return timeout;
+        }
+
+        public void setTimeout(long timeout) {
+            this.timeout = timeout;
+        }
+        
+    }
+
 
 }
