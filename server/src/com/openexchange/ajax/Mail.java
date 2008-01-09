@@ -2441,7 +2441,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				final UploadFile uploadFile = iter.next();
 				if (uploadQuotaPerFile > 0 && uploadFile.getSize() > uploadQuotaPerFile) {
 					final MailException oxme = new MailException(MailException.Code.UPLOAD_QUOTA_EXCEEDED_FOR_FILE,
-							Long.valueOf(uploadQuotaPerFile), uploadFile.getFileName(), Long.valueOf(uploadFile
+							Long.valueOf(uploadQuotaPerFile), uploadFile.getPreparedFileName(), Long.valueOf(uploadFile
 									.getSize()));
 					JSONObject responseObj = null;
 					try {

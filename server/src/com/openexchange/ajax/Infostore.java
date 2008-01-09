@@ -685,14 +685,7 @@ public class Infostore extends PermissionServlet {
 
 	protected void initMetadata(final DocumentMetadata metadata, final UploadFile upload) {
 		if (metadata.getFileName() == null || "".equals(metadata.getFileName())) {
-			String s = upload.getFileName();
-			// Try guessing the filename separator
-			if (s.contains("\\")) {
-				s = s.substring(s.lastIndexOf('\\') + 1);
-			} else if (s.contains("/")) {
-				s = s.substring(s.lastIndexOf('/') + 1);
-			}
-			metadata.setFileName(s);
+			metadata.setFileName(upload.getPreparedFileName());
 		}
 		if (metadata.getFileSize() <= 0) {
 			metadata.setFileSize(upload.getSize());

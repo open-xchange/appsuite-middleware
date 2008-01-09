@@ -491,14 +491,7 @@ public class Attachment extends PermissionServlet {
 				continue;
 			}
 			if(attachment.getFilename() == null || "".equals(attachment.getFilename())){
-				String s = upload.getFileName();
-				// Try guessing the filename separator
-				if(s.contains("\\")){
-					s = s.substring(s.lastIndexOf('\\')+1);
-				} else if (s.contains("/")){
-					s = s.substring(s.lastIndexOf('/')+1);
-				}
-				attachment.setFilename(s);
+				attachment.setFilename(upload.getPreparedFileName());
 			}
 			if(attachment.getFilesize() <= 0){
 				attachment.setFilesize(upload.getSize());
