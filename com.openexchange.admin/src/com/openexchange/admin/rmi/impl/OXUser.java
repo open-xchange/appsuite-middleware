@@ -439,7 +439,87 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     public User create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        try {
+        // Call common create method directly because we already have out access module
+    	return createUserCommon(ctx, usr, access, auth);
+    }
+    
+    public User create(final Context ctx, final User usrdata,final String access_combination_name, final Credentials auth)
+		throws RemoteException, StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
+
+    	/*
+		 * Resolve the access rights by the specified combination name. If
+		 * combination name does not exists, throw error as it is described in
+		 * the spec!
+		 */
+        
+    	
+    	try {
+			doNullCheck(usrdata, access_combination_name);
+			if (access_combination_name.trim().length() == 0) {
+				throw new InvalidDataException("Invalid access combination name");
+			}
+		} catch (final InvalidDataException e3) {
+			log.error("One of the given arguments for create is null", e3);
+			throw e3;
+		}
+
+		if (log.isDebugEnabled()) {
+			log.debug(ctx.toString() + " - " + usrdata.toString() + " - "+ access_combination_name.toString() + " - "+ auth.toString());
+		}
+
+		basicauth.doAuthentication(auth, ctx);
+
+		
+        UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim());
+        if(access==null){
+        	// no such access combination name defined in configuration
+        	// throw error!
+        	throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
+        }
+        
+        // Call main create user method with resolved access rights
+    	return createUserCommon(ctx, usrdata, access, auth);
+    }
+
+
+    public User create(final Context ctx, final User usrdata, final Credentials auth)
+		throws RemoteException, StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
+
+		/*
+		 * Resolve current access rights from the specified context (admin) as
+		 * it is described in the spec and then call the main create user method
+		 * with the access rights!
+		 */
+    	
+    	try {
+			doNullCheck(usrdata);			
+		} catch (final InvalidDataException e3) {
+			log.error("One of the given arguments for create is null", e3);
+			throw e3;
+		}
+
+		if (log.isDebugEnabled()) {
+			log.debug(ctx.toString() + " - " + usrdata.toString() + " - "+ auth.toString());
+		}
+
+		basicauth.doAuthentication(auth, ctx);
+		
+		/*
+		 * Resolve admin user of specified context via tools and then get his current module access rights
+		 */		
+		
+		int admin_id = tool.getAdminForContext(ctx);
+		UserModuleAccess access = oxu.getModuleAccess(ctx, admin_id);
+		
+    	return createUserCommon(ctx, usrdata, access, auth);
+    }
+    
+    /*
+     * Main method to create a user. Which all inner create methods MUST use after resolving the access rights!
+     */
+    private User createUserCommon(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+    	
+    	try {
             doNullCheck(usr,access);
         } catch (final InvalidDataException e3) {
             log.error("One of the given arguments for create is null", e3);
@@ -544,7 +624,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         }
         return usr;
-    }
+    } 
 
     public void delete(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         delete(ctx, new User[]{user}, auth);
@@ -1182,4 +1262,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw new InvalidDataException("Illegal chars: \""+illegal+"\"");
         }
     }
+
+
+	
 }

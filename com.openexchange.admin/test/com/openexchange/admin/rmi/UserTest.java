@@ -91,7 +91,7 @@ import com.openexchange.admin.rmi.extensions.OXCommonExtension;
  */
 public class UserTest extends AbstractTest {
     
-    
+    public final static String NAMED_ACCESS_COMBINATION_BASIC = "basic";
     // list of chars that must be valid
 //    protected static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@";
     protected static final String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -119,6 +119,50 @@ public class UserTest extends AbstractTest {
         final UserModuleAccess access = new UserModuleAccess();    
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
         final User createduser = oxu.create(ctx,urs,access,cred);        
+        
+        // now load user from server and check if data is correct, else fail
+        final User srv_loaded = oxu.getData(ctx,createduser,cred);
+        if(createduser.getId().equals(srv_loaded.getId())){
+            //verify data
+            compareUser(createduser,srv_loaded);
+        }else{
+            fail("Expected to get user data for added user");
+        }
+    }
+    
+    @Test
+    public void testCreateWithContextModuleAccessRights() throws Exception {        
+        
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        
+        // create new user
+        final OXUserInterface oxu = getUserClient();        
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        final User createduser = oxu.create(ctx,urs,cred);        
+        
+        // now load user from server and check if data is correct, else fail
+        final User srv_loaded = oxu.getData(ctx,createduser,cred);
+        if(createduser.getId().equals(srv_loaded.getId())){
+            //verify data
+            compareUser(createduser,srv_loaded);
+        }else{
+            fail("Expected to get user data for added user");
+        }
+    }
+    
+    @Test
+    public void testCreateWithNamedModuleAccessRights() throws Exception {        
+        
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        
+        // create new user
+        final OXUserInterface oxu = getUserClient();        
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER+System.currentTimeMillis(), pass);
+        final User createduser = oxu.create(ctx,urs,NAMED_ACCESS_COMBINATION_BASIC,cred);        
         
         // now load user from server and check if data is correct, else fail
         final User srv_loaded = oxu.getData(ctx,createduser,cred);

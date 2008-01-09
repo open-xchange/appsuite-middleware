@@ -131,7 +131,65 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException
      */
     public User create(final Context ctx, final User usrdata, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+    
+    
+    /**
+     * Creates a new user within the given context.
+     * 
+     * @param context
+     *            Context in which the new user will exist.
+     * @param usrdata
+     *            User containing user data.
+     * @param auth
+     *            Credentials for authenticating against server.
+     * @param access_combination_name
+     *            Access combination name identifying the module rights for the new user. 
+     *            
+     * @return int containing the id of the new user. 
+     * 
+     * @throws RemoteException
+     *             General RMI Exception
+     * @throws StorageException
+     *             When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException
+     *             When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException
+     *             If the context does not exist in the system.
+     * @throws InvalidDataException
+     *             If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException
+     */
+    public User create(final Context ctx, final User usrdata, final String access_combination_name, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+    
+    
+    /**
+     * Creates a new user within the given context.<br>
+     * Default context access rights are used! 
+     * 
+     * @param context
+     *            Context in which the new user will exist.
+     * @param usrdata
+     *            User containing user data.
+     * @param auth
+     *            Credentials for authenticating against server.     
+     *            
+     * @return int containing the id of the new user. 
+     * 
+     * @throws RemoteException
+     *             General RMI Exception
+     * @throws StorageException
+     *             When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException
+     *             When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException
+     *             If the context does not exist in the system.
+     * @throws InvalidDataException
+     *             If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException
+     */
+    public User create(final Context ctx, final User usrdata, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
+    
     /**
      * Manipulate user data within the given context.
      * 

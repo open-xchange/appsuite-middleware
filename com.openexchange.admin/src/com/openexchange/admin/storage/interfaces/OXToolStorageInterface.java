@@ -345,6 +345,8 @@ public abstract class OXToolStorageInterface {
 
     public abstract int getAdminForContext(final Context ctx, final Connection con) throws StorageException;
     
+    public abstract int getAdminForContext(final Context ctx) throws StorageException;
+    
     public abstract int getContextIDByContextname(final String ctxname) throws StorageException;
 
     public abstract int getDatabaseIDByDatabasename(final String dbname) throws StorageException;
