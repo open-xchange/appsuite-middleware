@@ -150,12 +150,24 @@ public abstract class OXUserStorageInterface {
     /**
      * Manipulate user module access within the given context.    
      * @param ctx Context object.
-     * @param user_id long containing the user id.
+     * @param user_id int[] containing the user id.
      * @param moduleAccess UserModuleAccess containing module access.     
      *
      * @throws StorageException
      */
     public abstract void changeModuleAccess(final Context ctx,final int user_id,final UserModuleAccess moduleAccess) throws StorageException;
+    
+    /**
+     * Manipulate users module access within the given context.    
+     * 
+     * @param ctx Context object.
+     * @param user_ids int[] containing the user ids.
+     * @param moduleAccess UserModuleAccess containing module access.     
+     *
+     * @throws StorageException
+     */
+    public abstract void changeModuleAccess(final Context ctx,final int[] user_ids,final UserModuleAccess moduleAccess) throws StorageException;
+    
     
     /**
      * Retrieve user objects for a range of users identified by User.getUsername().
@@ -199,7 +211,7 @@ public abstract class OXUserStorageInterface {
      * Retrieve all user ids for a given context.
      *
      * @param ctx numerical context identifier     
-     * @return long[] containing user ids. 
+     * @return int[] containing user ids. 
      * @throws StorageException
      *
      */
@@ -209,7 +221,7 @@ public abstract class OXUserStorageInterface {
      * Retrieve all user objects for a given context. Which match the given search_pattern
      *
      * @param ctx numerical context identifier     
-     * @return long[] containing user ids. 
+     * @return User[] containing user ids. 
      * @throws StorageException
      *
      */
