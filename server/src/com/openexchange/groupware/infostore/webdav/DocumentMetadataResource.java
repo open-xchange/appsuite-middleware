@@ -525,6 +525,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             if(InfostoreExceptionFactory.isPermissionException(x)) {
                 metadata.setId(getId());
                 metadata.setFolderId(((OXWebdavResource)parent()).getId());
+                initNameAndTitle();
             } else {
                 throw new WebdavException(x.getMessage(), x, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
@@ -574,7 +575,10 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 				} catch (final TransactionException e) {
 					LOG.error("Couldn't rollback transaction. Run the recovery tool.");
 				}
-				throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                if(x instanceof InfostoreException && InfostoreExceptionFactory.isPermissionException((InfostoreException)x)) {
+                    throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+                }
+                throw new WebdavException(x.getMessage(), x, getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			} finally {
 				try {
 					database.finish();
@@ -601,20 +605,18 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		} catch (final ClassCastException x) {
 			throw new WebdavException(getUrl(), HttpServletResponse.SC_CONFLICT);
 		}
-		final Session session = sessionHolder.getSessionObject();
+
+        initNameAndTitle();
+        if(fileData != null && guessSize) {
+            metadata.setFileSize(0);
+        }
+
+        final Session session = sessionHolder.getSessionObject();
 		metadata.setFolderId(parent.getId());
 		if(!exists && !existsInDB) {
 			metadata.setVersion(InfostoreFacade.NEW);
 			metadata.setId(InfostoreFacade.NEW);
-			if(metadata.getFileName() == null || metadata.getFileName().trim().length()==0){
-				//if(url.contains("/"))
-					metadata.setFileName(url.name());
-			}
-			metadata.setTitle(metadata.getFileName());
-			if(fileData != null && guessSize) {
-				metadata.setFileSize(0);
-				
-			}
+
 			database.startTransaction();
 			try {
 				if(fileData == null) {
@@ -659,7 +661,15 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		metadataChanged=false;
 	}
 
-	private void dumpMetadataToDB() throws OXException, IllegalAccessException, ConflictException, WebdavException {
+    private void initNameAndTitle() {
+        if(metadata.getFileName() == null || metadata.getFileName().trim().length()==0){
+            //if(url.contains("/"))
+            metadata.setFileName(url.name());
+        }
+        metadata.setTitle(metadata.getFileName());
+    }
+
+    private void dumpMetadataToDB() throws OXException, IllegalAccessException, ConflictException, WebdavException {
 		dumpMetadataToDB(null,false);
 	}
 
