@@ -1899,24 +1899,26 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     public void delete(final Context ctx, final User user) throws StorageException {
         delete(ctx, new User[] {user});
     }
-
+    
     @Override
-    public void changeModuleAccess(final Context ctx, final int user_id,
-            final UserModuleAccess moduleAccess) throws StorageException {
-        Connection read_ox_con = null;
+    public void changeModuleAccess(final Context ctx, final int[] user_ids,final UserModuleAccess moduleAccess) throws StorageException {
+    	Connection read_ox_con = null;
         Connection write_ox_con = null;
 
         try {
+        	
             read_ox_con = cache.getConnectionForContext(ctx.getId());
             write_ox_con = cache.getConnectionForContext(ctx.getId());
             write_ox_con.setAutoCommit(false);
 
-            // first get all groups the user is in
-            final int[] all_groups = getGroupsForUser(ctx, user_id, read_ox_con);
-            // update last modified column
-            changeLastModified(user_id, ctx, write_ox_con);
-            myChangeInsertModuleAccess(ctx, user_id, moduleAccess, false,
-                    read_ox_con, write_ox_con, all_groups);
+            // LOOP through the int[] and change the module access rights for each user
+            for (int user_id : user_ids) {
+            	// first get all groups the user is in
+                final int[] all_groups = getGroupsForUser(ctx, user_id, read_ox_con);
+                // update last modified column
+                changeLastModified(user_id, ctx, write_ox_con);
+                myChangeInsertModuleAccess(ctx, user_id, moduleAccess, false,read_ox_con, write_ox_con, all_groups);                
+			}            
             write_ox_con.commit();
         } catch (final SQLException sqle) {
             log.error("SQL Error", sqle);
@@ -1958,6 +1960,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 log.error("Pool Error pushing ox write connection to pool!", exp);
             }
         }
+    }
+
+    @Override
+    public void changeModuleAccess(final Context ctx, final int user_id,final UserModuleAccess moduleAccess) throws StorageException {
+        int[] ids = {user_id};
+        changeModuleAccess(ctx, ids, moduleAccess);
     }
 
     @Override
