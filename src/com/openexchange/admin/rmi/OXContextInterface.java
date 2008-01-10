@@ -130,6 +130,22 @@ public interface OXContextInterface extends Remote {
     public void delete(final Context ctx, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, DatabaseUpdateException, InvalidDataException;
 
     /**
+     * If context was changed, call this method to flush data
+     * which is no longer needed due to access permission changes!
+     * 
+     * @param ctx Context object
+     * @param auth Credentials for authenticating against server.
+     * @throws RemoteException General RMI Exception 
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException 
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws DatabaseUpdateException
+     * @throws InvalidDataException
+     */
+    public void downgrade(final Context ctx, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, DatabaseUpdateException, InvalidDataException;
+
+    
+    /**
      * Move all data of a context contained on the filestore to another filestore
      *         <p>
      *         This method returns immediately and the data is going to be copied
@@ -313,6 +329,73 @@ public interface OXContextInterface extends Remote {
      * @throws InvalidDataException
      */
     public void change(final Context ctx, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    
+    
+    /**
+     * Change module access rights for ALL users in the specified context.<br>
+     * IF you want to change data of a context like quota etc.<br>
+     * use Method change(final Context ctx, final Credentials auth)
+     * 
+     * This method modifies ONLY the access rights of the context! 
+     *     
+     * 
+     * @param ctx
+     * @param access
+     * @param auth
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
+    public void changeModuleAccess(final Context ctx,final UserModuleAccess access, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    
+    
+    /**
+     * Change module access rights by "access combination name" for ALL users in the specified context.<br>
+     * IF you want to change data of a context like quota etc.<br>
+     * use Method change(Context ctx, Credentials auth)
+     * 
+     * This method modifies ONLY the access rights of the context!
+     * 
+     * @param ctx
+     * @param access
+     * @param auth
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
+    public void changeModuleAccess(final Context ctx,final String access_combination_name, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    
+    /**
+     * Get current module access rights of the context based on the rights of the admin user!
+     * 
+     * @param ctx
+     * @param auth
+     * @return Current module access rights!
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
+    public UserModuleAccess getModuleAccess(final Context ctx,final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+    
+    /**
+     * Get current access combination name of the context based on the rights of the admin user!
+     * 
+     * @param ctx
+     * @param auth
+     * @return Access combination name!
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
+    public String getAccessCombinationName(final Context ctx,final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
     
     
     /**

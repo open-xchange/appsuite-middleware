@@ -612,5 +612,34 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         return src;
     }
 
+	public void changeModuleAccess(Context ctx, UserModuleAccess access,Credentials auth) 
+		throws RemoteException,InvalidCredentialsException, NoSuchContextException,	StorageException, InvalidDataException {
+		
+		
+	}
+
+	public void changeModuleAccess(Context ctx, String access_combination_name,Credentials auth)
+		throws RemoteException,InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+		
+		
+	}
+
+	public void downgrade(Context ctx, Credentials auth)
+		throws RemoteException, InvalidCredentialsException,NoSuchContextException, StorageException, DatabaseUpdateException,InvalidDataException {
+		
+	}
+
+	public String getAccessCombinationName(Context ctx, Credentials auth)
+		throws RemoteException, InvalidCredentialsException,NoSuchContextException, StorageException, InvalidDataException {
+		
+		return null;
+	}
+
+	public UserModuleAccess getModuleAccess(Context ctx, Credentials auth)
+		throws RemoteException, InvalidCredentialsException,NoSuchContextException, StorageException, InvalidDataException {
+		
+		return null;
+	}
+
 	
 }
