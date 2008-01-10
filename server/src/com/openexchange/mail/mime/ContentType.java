@@ -51,9 +51,13 @@ package com.openexchange.mail.mime;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -70,6 +74,92 @@ import com.openexchange.mail.MailException;
  * 
  */
 public final class ContentType implements Serializable {
+
+	private static final class ParameterContinuation {
+
+		private final List<String> parameterContinuations;
+
+		private String charset;
+
+		private String language;
+
+		public ParameterContinuation() {
+			super();
+			parameterContinuations = new ArrayList<String>(2);
+		}
+
+		/**
+		 * Gets the charset
+		 * 
+		 * @return the charset
+		 */
+		public String getCharset() {
+			return charset;
+		}
+
+		/**
+		 * Sets the charset
+		 * 
+		 * @param charset
+		 *            the charset to set
+		 */
+		public void setCharset(final String charset) {
+			this.charset = charset;
+		}
+
+		/**
+		 * Gets the language
+		 * 
+		 * @return the language
+		 */
+		public String getLanguage() {
+			return language;
+		}
+
+		/**
+		 * Sets the language
+		 * 
+		 * @param language
+		 *            the language to set
+		 */
+		public void setLanguage(final String language) {
+			this.language = language;
+		}
+
+		/**
+		 * Adds a contiguous value to this continuation parameter
+		 * 
+		 * @param number
+		 *            The parameter's number
+		 * @param contiguousValue
+		 *            The contiguous value
+		 * @throws IndexOutOfBoundsException
+		 *             If number does not fit into parameter continuations
+		 */
+		public void addParameterContinuation(final int number, final String contiguousValue) {
+			final int index = number - 1;
+			if (index < 0) {
+				throw new IndexOutOfBoundsException(String.valueOf(number));
+			}
+			parameterContinuations.add(index, contiguousValue);
+		}
+
+		/**
+		 * Writes this parameter's contiguous value into specified instance of
+		 * {@link StringBuilder}
+		 * 
+		 * @param sb
+		 *            The instance of {@link StringBuilder} to fill
+		 */
+		public void writeValue(final StringBuilder sb) {
+			for (int i = 0; i < parameterContinuations.size(); i++) {
+				if (null != parameterContinuations.get(i)) {
+					sb.append(parameterContinuations.get(i));
+				}
+			}
+		}
+
+	}
 
 	private static final long serialVersionUID = -9197784872892324694L;
 
@@ -115,6 +205,8 @@ public final class ContentType implements Serializable {
 	private String baseType;
 
 	private final Map<String, String> parameters;
+
+	private Map<String, ParameterContinuation> parameterContinuations;
 
 	/**
 	 * Initializes a new {@link ContentType}
@@ -202,16 +294,88 @@ public final class ContentType implements Serializable {
 		}
 		baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
 		parseParameters(ctMatcher.group(3));
+		mergeContinuationParameters();
 	}
 
 	private void parseParameters(final String params) {
 		final Matcher paramMatcher = PATTERN_PARAMETER.matcher(params);
 		NextParam: while (paramMatcher.find()) {
-			final String value = paramMatcher.group(2);
+			String value = paramMatcher.group(2);
 			if (value == null || value.length() == 0) {
 				continue NextParam;
 			}
-			parameters.put(paramMatcher.group(1).toLowerCase(Locale.ENGLISH), value);
+			String name = paramMatcher.group(1).toLowerCase(Locale.ENGLISH);
+			String charset = null;
+			String language = null;
+			boolean addCL = false;
+			/*
+			 * Check for decoding
+			 */
+			if (name.charAt(name.length() - 1) == '*') {
+				/*
+				 * An asterisk at the end of a parameter name acts as an
+				 * indicator that character set and language information may
+				 * appear at the beginning of the parameter value.
+				 */
+				name = name.substring(0, name.length() - 1);
+				if (value.indexOf('\'') != -1) {
+					int nextQuote = value.indexOf('\'', 1);
+					charset = value.substring(value.charAt(0) == '\'' ? 1 : 0, nextQuote);
+					language = value.substring(nextQuote + 1, (nextQuote = value.indexOf('\'', nextQuote + 1)));
+					addCL = true;
+					value = value.substring(nextQuote + 1);
+				} else {
+					final ParameterContinuation parameterContinuation = getParamaterContinuation(name);
+					if (null != parameterContinuation) {
+						charset = parameterContinuation.getCharset();
+						language = parameterContinuation.getLanguage();
+					}
+				}
+				if (null != charset) {
+					value = rfc2231Decode(value, charset);
+				}
+			}
+			final int pos = name.indexOf('*');
+			if (pos != -1) {
+				/*
+				 * Parameter continuation mechanism:
+				 * title*0*=us-ascii'en'This%20is%20even%20more%20
+				 * title*1*=%2A%2A%2Afun%2A%2A%2A%20
+				 */
+				int number = -1;
+				try {
+					number = Integer.parseInt(name.substring(pos + 1));
+				} catch (final NumberFormatException e) {
+					LOG.error("Invalid contiguous parameter", e);
+				}
+				if (number != -1) {
+					if (addCL) {
+						addParamaterContinuation(name, number, value, charset, language);
+					} else {
+						addParamaterContinuation(name, number, value);
+					}
+				}
+			} else {
+				/*
+				 * No continuation, add value immediately
+				 */
+				parameters.put(name, value);
+			}
+		}
+	}
+
+	private void mergeContinuationParameters() {
+		if (null == parameterContinuations) {
+			return;
+		}
+		final Iterator<Map.Entry<String, ParameterContinuation>> iter = parameterContinuations.entrySet().iterator();
+		final int size = parameterContinuations.size();
+		final StringBuilder sb = new StringBuilder(64);
+		for (int i = 0; i < size; i++) {
+			final Map.Entry<String, ParameterContinuation> e = iter.next();
+			sb.setLength(0);
+			e.getValue().writeValue(sb);
+			parameters.put(e.getKey(), sb.toString());
 		}
 	}
 
@@ -495,6 +659,44 @@ public final class ContentType implements Serializable {
 		return sb.toString();
 	}
 
+	private ParameterContinuation getParamaterContinuation(final String nameArg) {
+		if (parameterContinuations == null) {
+			return null;
+		}
+		final int pos = nameArg.indexOf('*');
+		return parameterContinuations.get(pos == -1 ? nameArg : nameArg.substring(0, pos));
+	}
+
+	private void addParamaterContinuation(final String name, final int number, final String contiguousValue) {
+		addParamaterContinuation(name, number, contiguousValue, null, null);
+	}
+
+	private void addParamaterContinuation(final String nameArg, final int number, final String contiguousValue,
+			final String charset, final String language) {
+		if (parameterContinuations == null) {
+			parameterContinuations = new HashMap<String, ParameterContinuation>();
+		}
+		final String name;
+		{
+			final int pos = nameArg.indexOf('*');
+			name = pos == -1 ? nameArg : nameArg.substring(0, pos);
+		}
+		final ParameterContinuation pc;
+		if (parameterContinuations.containsKey(name)) {
+			pc = parameterContinuations.get(name);
+		} else {
+			pc = new ParameterContinuation();
+			parameterContinuations.put(name, pc);
+		}
+		if (null != charset && charset.length() > 0) {
+			pc.setCharset(charset);
+		}
+		if (null != language && language.length() > 0) {
+			pc.setLanguage(language);
+		}
+		pc.addParameterContinuation(number, contiguousValue);
+	}
+
 	/**
 	 * Removes ending '<code>;</code>' character if present
 	 * 
@@ -510,4 +712,50 @@ public final class ContentType implements Serializable {
 		}
 		return contentType;
 	}
+
+	/**
+	 * Decodes specified encoded value according to mechanism provided through
+	 * RFC2231.
+	 * 
+	 * @param encoded
+	 *            The encoded value
+	 * @param charset
+	 *            The charset name
+	 * @return The decoded value
+	 */
+	private static String rfc2231Decode(final String encoded, final String charset) {
+		if (!Charset.isSupported(charset)) {
+			LOG.error("Unsupported charset: " + charset, new Throwable());
+			return encoded;
+		}
+		final Charset cs = Charset.forName(charset);
+		final char[] chars = encoded.toCharArray();
+		final ByteBuffer bb = ByteBuffer.allocate(chars.length);
+		for (int i = 0; i < chars.length; i++) {
+			final char c = chars[i];
+			if (c == '%' && isHexDigit(chars[i + 1]) && isHexDigit(chars[i + 2])) {
+				final byte b = (byte) ((Character.digit(chars[i + 1], 16) << 4) | (Character.digit(chars[i + 2], 16)));
+				bb.put(b);
+				i += 2;
+			} else {
+				bb.put((byte) c);
+			}
+		}
+		bb.flip();
+		return cs.decode(bb).toString();
+	}
+
+	/**
+	 * Checks if given character represents a hexadecimal digit.
+	 * 
+	 * @param charArg
+	 *            The character
+	 * @return <code>true</code> if given character represents a hexadecimal
+	 *         digit, otherwise <code>false</code>
+	 */
+	private static boolean isHexDigit(final char charArg) {
+		final char c = Character.toLowerCase(charArg);
+		return (c >= '0' && c <= '9') || (c >= 'a' || c <= 'f');
+	}
+
 }

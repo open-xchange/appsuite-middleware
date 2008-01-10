@@ -925,7 +925,14 @@ public final class MIMEMessageConverter {
 				}
 			}
 			mail.removeHeader(MessageHeaders.HDR_DISP_NOT_TO);
-			mail.setFileName(decodeMultiEncodedHeader(msg.getFileName()));
+			String filename = decodeMultiEncodedHeader(msg.getFileName());
+			if (filename == null) {
+				/*
+				 * Look up content type header for contiguous "name" parameter
+				 */
+				filename = mail.getContentType().getParameter("name");
+			}
+			mail.setFileName(filename);
 			parseFlags(msg.getFlags(), mail);
 			parsePriority(mail.getHeader(MessageHeaders.HDR_X_PRIORITY), mail);
 			mail.removeHeader(MessageHeaders.HDR_X_PRIORITY);
@@ -971,7 +978,14 @@ public final class MIMEMessageConverter {
 				}
 			}
 			mailPart.setDisposition(part.getDisposition());
-			mailPart.setFileName(decodeMultiEncodedHeader(part.getFileName()));
+			String filename = decodeMultiEncodedHeader(part.getFileName());
+			if (filename == null) {
+				/*
+				 * Look up content type header for contiguous "name" parameter
+				 */
+				filename = mailPart.getContentType().getParameter("name");
+			}
+			mailPart.setFileName(filename);
 			int size = part.getSize();
 			if (size == -1) {
 				/*
