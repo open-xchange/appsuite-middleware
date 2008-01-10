@@ -94,10 +94,10 @@ import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.CacheKey;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 /**
  * @author d7
@@ -437,6 +437,75 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }        
         // END OF JCS
     }
+    
+    public void changeModuleAccess(Context ctx, User user,String access_combination_name, Credentials auth)
+			throws RemoteException, StorageException,InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+		
+    	try {
+            doNullCheck(user,access_combination_name);
+            if (access_combination_name.trim().length() == 0) {
+				throw new InvalidDataException("Invalid access combination name");
+			}
+        } catch (final InvalidDataException e1) {
+            final InvalidDataException invalidDataException = new InvalidDataException("User or UserModuleAccess is null");
+            log.error(invalidDataException.getMessage(), invalidDataException);
+            throw invalidDataException;
+        }
+        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + user + " - "+ access_combination_name+ " - " + auth.toString());
+        }
+
+        try {
+            basicauth.doAuthentication(auth, ctx);
+            checkSchemaBeingLocked(ctx);
+            setIdOrGetIDFromNameAndIdObject(ctx, user);
+            final int user_id = user.getId();
+            if (!tool.existsUser(ctx, user_id)) {
+                throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
+            }
+            
+            UserModuleAccess access = cache.getNamedAccessCombination(access_combination_name.trim());
+            if(access==null){
+            	// no such access combination name defined in configuration
+            	// throw error!
+            	throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
+            }            
+            oxu.changeModuleAccess(ctx, user_id, access);
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final DatabaseUpdateException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final NoSuchUserException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+        
+//      JCS
+        try {
+            UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId(), new ContextImpl(ctx.getId()));
+        } catch (UserConfigurationException e) {
+            log.error("Error removing user "+user.getId()+" in context "+ctx.getId()+" from configuration storage",e);            
+        }        
+        // END OF JCS
+    	
+    	
+    	
+    	
+    	
+		
+	}
 
     public User create(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         // Call common create method directly because we already have out access module
@@ -1262,6 +1331,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw new InvalidDataException("Illegal chars: \""+illegal+"\"");
         }
     }
+
+
+	
 
 
 	
