@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update;
 
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -108,7 +109,11 @@ public class UpdateProcess implements Runnable {
 					return;
 				}
 				try {
-					lockSchema(schema);
+				    try {
+				        lockSchema(schema);
+				    } catch (final SchemaException e) {
+				        unlock = null != e.getCause() && e.getCause() instanceof SQLException;
+				    }
 					/*
 					 * Lock successfully obtained, thus remember to unlock
 					 */

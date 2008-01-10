@@ -1,3 +1,8 @@
+* 2008-01-09 - marcus.klein@open-xchange.com
+
+ - Bugfix #10688: Schema should be unlocked if a SQLException occurs during
+   locking.
+
 * 2008-01-07 - thorben.betten@open-xchange.com
 
  - Bugfix #9996: Proper escaping of HTML entities (includes Japanese
