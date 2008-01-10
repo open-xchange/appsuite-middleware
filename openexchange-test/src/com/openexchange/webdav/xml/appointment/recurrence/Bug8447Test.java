@@ -20,7 +20,7 @@ public class Bug8447Test extends AbstractRecurrenceTest {
 		
 	}
 	
-	public void _notestBug8447() throws Exception {
+	public void testBug8447() throws Exception {
 		Date modified = new Date();
 
 		final Date startDate = simpleDateFormatUTC.parse("2007-06-01 00:00:00");
