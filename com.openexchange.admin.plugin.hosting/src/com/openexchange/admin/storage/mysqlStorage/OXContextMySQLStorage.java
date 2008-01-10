@@ -1028,7 +1028,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
                 boolean newSchemaCreated = false;
                 if (this.CONTEXTS_PER_SCHEMA == 1) {
-                    // synchronized (ClientAdminThread.create_mutex) {
                     // FIXME: generate unique schema name
                     String schema_name;
                     synchronized (ClientAdminThread.create_mutex) {
@@ -1116,11 +1115,15 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 final String def_group_disp_name = prop.getGroupProp("DEFAULT_CONTEXT_GROUP_" + lang.toUpperCase(), "Users");
                 this.oxcontextcommon.createStandardGroupForContext(context_id, ox_write_con, def_group_disp_name, group_id, gid_number);
 
+                
+                // TODO: MAKE THE DEFAULT CONTEXT ACCESS RIGHTS ######## 
+                // CONFIGURABLE VIA ACCESS COMBINATION NAME!                
                 final UserModuleAccess access = new UserModuleAccess();
-                // webmail package access per default
+                // Webmail package access per default
                 access.disableAll();
                 access.setWebmail(true);
                 access.setContacts(true);
+                // END OF TODO! ########################################
                 this.oxcontextcommon.createAdminForContext(ctx, admin_user, ox_write_con, internal_user_id_for_admin, contact_id_for_admin, uid_number, access);
                 // create system folder for context
                 // get lang and displayname of admin
