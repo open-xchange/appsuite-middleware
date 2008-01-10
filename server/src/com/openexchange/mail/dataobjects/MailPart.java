@@ -743,7 +743,9 @@ public abstract class MailPart implements Serializable, Cloneable {
 			Pattern.CASE_INSENSITIVE);
 
 	/**
-	 * Parses the value of header "Content-Disposition"
+	 * Parses the value of header "Content-Disposition".
+	 * <p>
+	 * TODO: Add RFC2231 decoding
 	 * 
 	 * <pre>
 	 * Content-Disposition: attachment; filename=&quot;=?UTF-8?Q?m=C3=B6p.txt?=&quot;
