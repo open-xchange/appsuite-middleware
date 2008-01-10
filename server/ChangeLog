@@ -1,3 +1,7 @@
+* 2007-01-10 - sebastian.kauss@open-xchange.com
+
+ - Bugfix #6455: WebDAV Interface: Unexpected SQL Error!
+
 * 2008-01-10 - thorben.betten@open-xchange.com
 
  - Bugfix #10668: Decoding for newer mail-safe encoding as per RFC2231
