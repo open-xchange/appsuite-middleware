@@ -62,8 +62,8 @@ import com.openexchange.api2.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SearchIteratorAdapter implements SearchIterator {
-	
-	private Iterator delegate;
+
+    private Iterator delegate;
 	
 	private int size;
 	
@@ -175,4 +175,35 @@ public class SearchIteratorAdapter implements SearchIterator {
 		}
 		return new ArrayIterator(array);
 	}
+
+    public static <T> Iterable<T> toIterable(final SearchIterator<T> iterator) {
+        class SIIterator implements Iterator<T> {
+
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
+
+            public T next() {
+                try {
+                    return iterator.next();
+                } catch (SearchIteratorException e) {
+                   //IGNORE
+                } catch (OXException e) {
+                   //IGNORE
+                }
+                return null;
+            }
+
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        }
+
+        return new Iterable<T>() {
+
+            public Iterator<T> iterator() {
+                return new SIIterator();
+            }
+        };
+    }
 }
