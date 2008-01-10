@@ -57,7 +57,8 @@ import com.openexchange.mail.transport.MailTransportInit;
 import com.openexchange.server.Initialization;
 
 /**
- * {@link MailInitialization}
+ * {@link MailInitialization} - Initializes whole mail implementation and
+ * therefore provides a central point for starting/stopping mail implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

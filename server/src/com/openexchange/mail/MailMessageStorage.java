@@ -82,6 +82,9 @@ public interface MailMessageStorage {
 	 * A convenience method that delivers all messages contained in given
 	 * folder. See parameter description to know which messages are going to be
 	 * returned
+	 * <p>
+	 * Note that sorting needs not to be supported by underlying mailing system.
+	 * This can be done n application side, too
 	 * 
 	 * @param folder
 	 *            The folder fullname
@@ -109,6 +112,11 @@ public interface MailMessageStorage {
 	 * In contrast to {@link #getMessage(String, long)} the returned instances
 	 * of {@link MailMessage} are only pre-filled with the fields specified
 	 * through parameter <code>fields</code>.
+	 * <p>
+	 * <b>Note</b> that sorting needs not to be supported by underlying mailing
+	 * system. This can be done on application side, too.<br>
+	 * Same is for search but in most cases it's faster to search on mailing
+	 * system, but this heavily depends on how mails are accessed.
 	 * 
 	 * @param folder
 	 *            The folder fullname
@@ -140,12 +148,14 @@ public interface MailMessageStorage {
 			throws MailException;
 
 	/**
-	 * Gets the messages located in given folder sorted by message thread
-	 * reference.
+	 * An <b>optional</b> method that gets the messages located in given folder
+	 * sorted by message thread reference.
 	 * <p>
-	 * This method requires the IMAPv4 SORT extension or in detail the IMAP
-	 * <code>CAPABILITY</code> command should contain "SORT
-	 * THREAD=ORDEREDSUBJECT THREAD=REFERENCES"
+	 * If underlying mailing system is IMAP, this method requires the IMAPv4
+	 * SORT extension or in detail the IMAP <code>CAPABILITY</code> command
+	 * should contain "SORT THREAD=ORDEREDSUBJECT THREAD=REFERENCES". This
+	 * method may be omitted if mailing system does not support message thread
+	 * reference.
 	 * 
 	 * @param folder
 	 *            The folder fullname
@@ -187,6 +197,7 @@ public interface MailMessageStorage {
 	 *            otherwise <code>false</code>
 	 * @return The desired, pre-filled instances of {@link MailMessage}
 	 * @throws MailException
+	 *             If messages cannot be returned.
 	 */
 	public MailMessage[] getMessagesByUID(String folder, long[] mailIds, MailListField[] fields, boolean tryFromCache)
 			throws MailException;
@@ -208,6 +219,8 @@ public interface MailMessageStorage {
 	 * @param limit
 	 *            The max. number of returned unread messages
 	 * @return Unread messages contained in an array of {@link MailMessage}
+	 * @throws MailException
+	 *             If unread messages cannot be returned.
 	 */
 	public MailMessage[] getUnreadMessages(String folder, MailListField sortField, OrderDirection order,
 			MailListField[] fields, int limit) throws MailException;
@@ -227,11 +240,12 @@ public interface MailMessageStorage {
 	 * @return <code>true</code> if delete was successful; otherwise
 	 *         <code>false</code>
 	 * @throws MailException
+	 *             If messages cannot be deleted.
 	 */
 	public boolean deleteMessages(String folder, long[] mailIds, boolean hardDelete) throws MailException;
 
 	/**
-	 * Copies the messages identifed through given mail IDs from source folder
+	 * Copies the messages identified through given mail IDs from source folder
 	 * to destination folder
 	 * 
 	 * @param sourceFolder
@@ -251,12 +265,13 @@ public interface MailMessageStorage {
 	 *            <code>false</code>
 	 * @return The corresponding UIDs if copied messages in destination folder
 	 * @throws MailException
+	 *             If messages cannot be copied.
 	 */
 	public long[] copyMessages(String sourceFolder, String destFolder, long[] mailIds, boolean move, boolean fast)
 			throws MailException;
 
 	/**
-	 * Appends given messages to given folder
+	 * Appends given messages to given folder.
 	 * 
 	 * @param destFolder
 	 *            The destination folder
@@ -265,12 +280,34 @@ public interface MailMessageStorage {
 	 *            incl. content references)
 	 * @return The corresponding mail IDs in destination folder
 	 * @throws MailException
+	 *             If messages cannot be appended.
 	 */
 	public long[] appendMessages(String destFolder, MailMessage[] msgs) throws MailException;
 
 	/**
 	 * Updates the system flags of the messages specified by given mail IDs
-	 * located in given folder
+	 * located in given folder.
+	 * <p>
+	 * System flags are:
+	 * <ul>
+	 * <li>ANSWERED - This flag is set by clients to indicate that this message
+	 * has been answered to.</li>
+	 * <li>DELETED - Clients set this flag to mark a message as deleted. The
+	 * expunge operation on a folder removes all messages in that folder that
+	 * are marked for deletion.</li>
+	 * <li>DRAFT - This flag is set by clients to indicate that the message is
+	 * a draft message.</li>
+	 * <li>FLAGGED - No semantic is defined for this flag. Clients alter this
+	 * flag.</li>
+	 * <li>RECENT - Folder implementations set this flag to indicate that this
+	 * message is new to this folder, that is, it has arrived since the last
+	 * time this folder was opened. </li>
+	 * <li>SEEN - This flag is implicitly set by the implementation when the
+	 * this Message's content is returned to the client in some form.Clients can
+	 * alter this flag.</li>
+	 * <li>USER - A special flag that indicates that this folder supports user
+	 * defined flags. </li>
+	 * </ul>
 	 * 
 	 * @param folder
 	 *            The folder fullname
@@ -287,8 +324,14 @@ public interface MailMessageStorage {
 	public void updateMessageFlags(String folder, long[] mailIds, int flags, boolean set) throws MailException;
 
 	/**
-	 * Updates the color label of the messages specified by given mail IDs
-	 * located in given folder
+	 * An <b>optional</b> method that updates the color label of the messages
+	 * specified by given mail IDs located in given folder.
+	 * <p>
+	 * The underlying mailing system needs to support some kind of
+	 * user-definable flags.
+	 * <p>
+	 * The color labels are user flags with the common prefix <code>"cl_"</code>
+	 * and its numeric color code appended (currently numbers 0 through 10).
 	 * 
 	 * @param folder
 	 *            The folder fullname
@@ -303,7 +346,7 @@ public interface MailMessageStorage {
 
 	/**
 	 * Fetches the mail message's attachment identified through given
-	 * <code>sequenceId</code>
+	 * <code>sequenceId</code>.
 	 * 
 	 * @param folder
 	 *            The folder fullname
@@ -316,6 +359,8 @@ public interface MailMessageStorage {
 	 *            purpose
 	 * @return The attachment wrapped by an {@link MailPart} instance
 	 * @throws MailException
+	 *             If no attachment can be found whose sequence ID matches given
+	 *             <code>sequenceId</code>.
 	 */
 	public MailPart getAttachment(String folder, long mailId, String sequenceId, boolean displayVersion)
 			throws MailException;
@@ -332,6 +377,8 @@ public interface MailMessageStorage {
 	 *            The value of header <code>Content-ID</code>
 	 * @return The image attachment wrapped by an {@link MailPart} instance
 	 * @throws MailException
+	 *             If no image can be found whose "Content-ID" header matches
+	 *             given <code>cid</code>.
 	 */
 	public MailPart getImageAttachment(String folder, long mailId, String cid) throws MailException;
 
@@ -340,6 +387,7 @@ public interface MailMessageStorage {
 	 * {@link MailConnection}
 	 * 
 	 * @throws MailException
+	 *             If resources cannot be released
 	 */
 	public void releaseResources() throws MailException;
 

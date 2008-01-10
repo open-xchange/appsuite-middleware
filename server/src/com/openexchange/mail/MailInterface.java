@@ -60,7 +60,11 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link MailInterface}
+ * {@link MailInterface} - The mail interface which invokes the mail layer
+ * methods.
+ * <p>
+ * This interface's purpose is to be conform to other interfaces used in other
+ * groupware modules which are used throughout servlet instances.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

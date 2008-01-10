@@ -50,7 +50,8 @@
 package com.openexchange.mail;
 
 /**
- * {@link MailSessionParameterNames}
+ * {@link MailSessionParameterNames} - Constants used as keys for session
+ * parameters.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

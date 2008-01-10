@@ -56,7 +56,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * {@link MailPath} - Represents a message's unique path inside a mailbox
+ * {@link MailPath} - Represents a message's unique path inside a mailbox.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

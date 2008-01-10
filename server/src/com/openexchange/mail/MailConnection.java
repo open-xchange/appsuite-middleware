@@ -70,7 +70,13 @@ import com.openexchange.mail.watcher.MailConnectionWatcher;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailConnection}
+ * {@link MailConnection} - The main class of a mail implementation.
+ * <p>
+ * Handles connecting to the mailing system while using an internal cache for
+ * established connections (see {@link MailConnectionCache}).
+ * <p>
+ * Moreover it provides access to either message storage, folder storage and
+ * logic tools.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

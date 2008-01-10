@@ -53,13 +53,20 @@ import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link MailLogicTools}
+ * {@link MailLogicTools} - Extends the mail message/folder storage
+ * functionality by requesting quota informations, replying to/forwarding a mail
+ * message and storing attached versit (ical & vcard) objects.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public interface MailLogicTools {
 
+	/**
+	 * Constant which indicates unlimited quota
+	 * 
+	 * @value <code>-1</code>
+	 */
 	public static final int UNLIMITED_QUOTA = -1;
 
 	/**
@@ -126,8 +133,7 @@ public interface MailLogicTools {
 	public CommonObject[] saveVersitAttachment(String folder, long msgUID, String sequenceId) throws MailException;
 
 	/**
-	 * Releases all resources used by this message storage when closing parental
-	 * {@link MailConnection}
+	 * Releases all resources when closing parental {@link MailConnection}
 	 * 
 	 * @throws MailException
 	 */

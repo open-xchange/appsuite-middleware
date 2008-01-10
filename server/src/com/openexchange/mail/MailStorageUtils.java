@@ -50,7 +50,7 @@
 package com.openexchange.mail;
 
 /**
- * MailStorageUtils
+ * MailStorageUtils - Mail storage utilities.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -61,7 +61,7 @@ public final class MailStorageUtils {
 	 * Prevent instantiation
 	 */
 	private MailStorageUtils() {
-		// TODO Auto-generated constructor stub
+		super();
 	}
 
 	public static enum OrderDirection {

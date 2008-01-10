@@ -107,8 +107,8 @@ public interface MailFolderStorage {
 	public MailFolder getFolder(final long id) throws MailException;
 
 	/**
-	 * Gets the subfolders located below the folder whose fullname matches given
-	 * parameter <code>parentFullname</code>
+	 * Gets the first level subfolders located below the folder whose fullname
+	 * matches given parameter <code>parentFullname</code>
 	 * 
 	 * @param parentFullname
 	 *            The parent fullname
@@ -121,8 +121,8 @@ public interface MailFolderStorage {
 	public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException;
 
 	/**
-	 * Gets the subfolders located below the folder whose id matches given
-	 * parameter <code>parentId</code>
+	 * Gets the first level subfolders located below the folder whose id matches
+	 * given parameter <code>parentId</code>
 	 * 
 	 * @param parentId
 	 *            The parent ID
@@ -144,7 +144,7 @@ public interface MailFolderStorage {
 	public MailFolder getRootFolder() throws MailException;
 
 	/**
-	 * Checks user's default folder as definded in user's mail settings and
+	 * Checks user's default folder as defined in user's mail settings and
 	 * creates them if any is missing
 	 * 
 	 * @throws MailException
@@ -164,7 +164,7 @@ public interface MailFolderStorage {
 	public String createFolder(MailFolder toCreate) throws MailException;
 
 	/**
-	 * Updates an existing mail folder identifed through given fullname. All
+	 * Updates an existing mail folder identified through given fullname. All
 	 * attributes set in given mail folder parameter are applied.
 	 * 
 	 * @param fullname
@@ -177,7 +177,7 @@ public interface MailFolderStorage {
 	public String updateFolder(String fullname, MailFolder toUpdate) throws MailException;
 
 	/**
-	 * Updates an existing mail folder identifed through given ID. All
+	 * Updates an existing mail folder identified through given ID. All
 	 * attributes set in given mail folder parameter are applied.
 	 * 
 	 * @param long
@@ -190,7 +190,7 @@ public interface MailFolderStorage {
 	public String updateFolder(long id, MailFolder toUpdate) throws MailException;
 
 	/**
-	 * Deletes an existing mail folder identifed through given fullname. If
+	 * Deletes an existing mail folder identified through given fullname. If
 	 * folder is not located below default trash folder it is moved (including
 	 * subfolder tree) to default trash folder; otherwise it is deleted
 	 * permanently.
@@ -203,7 +203,7 @@ public interface MailFolderStorage {
 	public String deleteFolder(String fullname) throws MailException;
 
 	/**
-	 * Deletes an existing mail folder identifed through given ID. If folder is
+	 * Deletes an existing mail folder identified through given ID. If folder is
 	 * not located below default trash folder it is moved (including subfolder
 	 * tree) to default trash folder; otherwise it is deleted permanently.
 	 * 
@@ -236,14 +236,14 @@ public interface MailFolderStorage {
 	public void clearFolder(long id) throws MailException;
 
 	/**
-	 * Gets the reverse path from the folder indentified through given fullname
-	 * to parental default folder. All occuring folders on that path are
+	 * Gets the reverse path from the folder identified through given fullname
+	 * to parental default folder. All occurring folders on that path are
 	 * contained in reverse order in returned array of {@link MailFolder}
 	 * instances.
 	 * 
 	 * @param fullname
 	 *            The folder fullname
-	 * @return All occuring folders in reverse order as an array of
+	 * @return All occurring folders in reverse order as an array of
 	 *         {@link MailFolder} instances.
 	 * @throws MailException
 	 *             If path cannot be determined
@@ -251,13 +251,13 @@ public interface MailFolderStorage {
 	public MailFolder[] getPath2DefaultFolder(String fullname) throws MailException;
 
 	/**
-	 * Gets the reverse path from the folder indentified through given ID to
-	 * parental default folder. All occuring folders on that path are contained
+	 * Gets the reverse path from the folder identified through given ID to
+	 * parental default folder. All occurring folders on that path are contained
 	 * in reverse order in returned array of {@link MailFolder} instances.
 	 * 
 	 * @param id
 	 *            The folder ID
-	 * @return All occuring folders in reverse order as an array of
+	 * @return All occurring folders in reverse order as an array of
 	 *         {@link MailFolder} instances.
 	 * @throws MailException
 	 *             If path cannot be determined

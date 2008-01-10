@@ -58,7 +58,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
 /**
- * {@link MailConnectionInit}
+ * {@link MailConnectionInit} - Initializes the mail connection implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

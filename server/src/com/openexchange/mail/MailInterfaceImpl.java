@@ -68,7 +68,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
- * {@link MailInterfaceImpl}
+ * {@link MailInterfaceImpl} - The mail interface implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -101,8 +101,7 @@ public final class MailInterfaceImpl extends MailInterface {
 		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext())
 				.hasWebMail()) {
 			throw new MailException(MailException.Code.NO_MAIL_ACCESS);
-		} else if (/* IMAPProperties.noAdminMailbox() && */session.getUserId() == session.getContext()
-				.getMailadmin()) {
+		} else if (/* IMAPProperties.noAdminMailbox() && */session.getUserId() == session.getContext().getMailadmin()) {
 			throw new MailException(MailException.Code.ACCOUNT_DOES_NOT_EXIST, Integer.valueOf(session.getContext()
 					.getContextId()));
 		}
@@ -342,8 +341,8 @@ public final class MailInterfaceImpl extends MailInterface {
 	}
 
 	@Override
-	public SearchIterator<?> getNewMessages(final String folder, final int sortCol, final int order, final int[] fields,
-			final int limit) throws MailException {
+	public SearchIterator<?> getNewMessages(final String folder, final int sortCol, final int order,
+			final int[] fields, final int limit) throws MailException {
 		initConnection();
 		return SearchIteratorAdapter.createArrayIterator(mailConnection.getMessageStorage().getUnreadMessages(folder,
 				MailListField.getField(sortCol), OrderDirection.getOrderDirection(order),
@@ -408,9 +407,9 @@ public final class MailInterfaceImpl extends MailInterface {
 	}
 
 	@Override
-	public SearchIterator<?> getThreadedMessages(final String folder, final int[] fromToIndices, final int[] searchCols,
-			final String[] searchPatterns, final boolean linkSearchTermsWithOR, final int[] fields)
-			throws MailException {
+	public SearchIterator<?> getThreadedMessages(final String folder, final int[] fromToIndices,
+			final int[] searchCols, final String[] searchPatterns, final boolean linkSearchTermsWithOR,
+			final int[] fields) throws MailException {
 		initConnection();
 		return SearchIteratorAdapter.createArrayIterator(mailConnection.getMessageStorage().getThreadSortedMessages(
 				folder, fromToIndices, MailListField.getFields(searchCols), searchPatterns, linkSearchTermsWithOR,

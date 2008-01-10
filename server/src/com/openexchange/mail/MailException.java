@@ -53,7 +53,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 
 /**
- * {@link MailException}
+ * {@link MailException} - Base class for mail exceptions
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -75,9 +75,9 @@ public class MailException extends AbstractOXException {
 		 */
 		INVALID_PERMISSION("Invalid permission values: fp=%d orp=%d owp=%d odp=%d", Category.CODE_ERROR, 2),
 		/**
-		 * A JSON error occured: %s
+		 * A JSON error occurred: %s
 		 */
-		JSON_ERROR("A JSON error occured: %s", Category.CODE_ERROR, 3),
+		JSON_ERROR("A JSON error occurred: %s", Category.CODE_ERROR, 3),
 		/**
 		 * Missing parameter in mail connection: %s
 		 */
