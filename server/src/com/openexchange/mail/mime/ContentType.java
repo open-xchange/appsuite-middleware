@@ -66,6 +66,7 @@ import java.util.regex.Pattern;
 import javax.mail.internet.MimeUtility;
 
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.utils.MessageUtility;
 
 /**
  * {@link ContentType} - Parses value of MIME header <code>Content-Type</code>
@@ -304,6 +305,9 @@ public final class ContentType implements Serializable {
 			if (value == null || value.length() == 0) {
 				continue NextParam;
 			}
+			if (value.charAt(0) == '"' && value.charAt(value.length() - 1) == '"') {
+				value = value.substring(1, value.length() - 1);
+			}
 			String name = paramMatcher.group(1).toLowerCase(Locale.ENGLISH);
 			String charset = null;
 			String language = null;
@@ -325,10 +329,10 @@ public final class ContentType implements Serializable {
 					addCL = true;
 					value = value.substring(nextQuote + 1);
 				} else {
-					final ParameterContinuation parameterContinuation = getParamaterContinuation(name);
-					if (null != parameterContinuation) {
-						charset = parameterContinuation.getCharset();
-						language = parameterContinuation.getLanguage();
+					final ParameterContinuation pc = getParamaterContinuation(name);
+					if (null != pc) {
+						charset = pc.getCharset();
+						language = pc.getLanguage();
 					}
 				}
 				if (null != charset) {
@@ -545,16 +549,12 @@ public final class ContentType implements Serializable {
 		if (paramArg == null) {
 			return paramArg;
 		}
-		try {
-			final String param = MimeUtility.decodeText(paramArg);
-			final int mlen = param.length() - 1;
-			if (param.charAt(0) == '"' && param.charAt(mlen) == '"') {
-				return param.substring(1, mlen);
-			}
-			return param;
-		} catch (final UnsupportedEncodingException e) {
-			return paramArg;
+		final String param = MessageUtility.decodeMultiEncodedHeader(paramArg);
+		final int mlen = param.length() - 1;
+		if (param.charAt(0) == '"' && param.charAt(mlen) == '"') {
+			return param.substring(1, mlen);
 		}
+		return param;
 	}
 
 	/**
@@ -649,12 +649,42 @@ public final class ContentType implements Serializable {
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder();
+		final StringBuilder tmp = new StringBuilder();
 		sb.append(primaryType).append(DELIMITER).append(subType);
 		final int size = parameters.size();
 		final Iterator<Map.Entry<String, String>> iter = parameters.entrySet().iterator();
 		for (int i = 0; i < size; i++) {
 			final Map.Entry<String, String> entry = iter.next();
-			sb.append("; ").append(entry.getKey()).append('=').append(entry.getValue());
+			String value = entry.getValue();
+			if (!isAscii(value)) {
+				value = rfc2231Encode(value, "utf-8", null);
+				int num = 1;
+				while (value.length() > 64) {
+					int delimPos = 63;
+					while (Character.isWhitespace(value.charAt(delimPos)) || value.charAt(delimPos) != '%') {
+						delimPos--;
+					}
+					if (value.charAt(delimPos) == '%') {
+						delimPos--;
+					}
+					final String chunk = value.substring(0, delimPos + 1);
+					value = value.substring(delimPos + 1);
+					tmp.setLength(0);
+					tmp.append(entry.getKey()).append('*').append(num++);
+					if (chunk.indexOf('%') != -1) {
+						tmp.append('*');
+					}
+					sb.append("; ").append(tmp.toString()).append('=').append(chunk);
+				}
+				tmp.setLength(0);
+				tmp.append(entry.getKey()).append(num > 1 ? String.valueOf(num) : "");
+				if (value.indexOf('%') != -1) {
+					tmp.append('*');
+				}
+				sb.append("; ").append(tmp.toString()).append('=').append(value);
+			} else {
+				sb.append("; ").append(entry.getKey()).append('=').append(entry.getValue());
+			}
 		}
 		return sb.toString();
 	}
@@ -746,6 +776,47 @@ public final class ContentType implements Serializable {
 	}
 
 	/**
+	 * Encodes specified string according to mechanism provided through RFC2231.
+	 * 
+	 * @param toEncode
+	 *            The string to encode
+	 * @param charset
+	 *            The charset used for encoding
+	 * @param language
+	 *            The language
+	 * @return The encoded string
+	 */
+	private static String rfc2231Encode(final String toEncode, final String charset, final String language) {
+		if (!Charset.isSupported(charset)) {
+			LOG.error("Unsupported charset: " + charset, new Throwable());
+			return toEncode;
+		} else if (isAscii(toEncode)) {
+			return toEncode;
+		}
+		final Charset cs = Charset.forName(charset);
+		final char[] chars = toEncode.toCharArray();
+		final StringBuilder retval = new StringBuilder(chars.length * 3 + 16);
+		/*
+		 * Append encoding information: charset name and language delimited by
+		 * single quotes
+		 */
+		retval.append('\'').append(charset).append('\'').append(
+				language == null || language.length() == 0 ? "" : language).append('\'');
+		for (int i = 0; i < chars.length; i++) {
+			final char c = chars[i];
+			if (Character.isWhitespace(c) || !isAscii(c)) {
+				final byte[] bytes = String.valueOf(c).getBytes(cs);
+				for (int j = 0; j < bytes.length; j++) {
+					retval.append('%').append(Integer.toHexString((bytes[j] & 0xFF)).toUpperCase());
+				}
+			} else {
+				retval.append(c);
+			}
+		}
+		return retval.toString();
+	}
+
+	/**
 	 * Checks if given character represents a hexadecimal digit.
 	 * 
 	 * @param charArg
@@ -758,4 +829,27 @@ public final class ContentType implements Serializable {
 		return (c >= '0' && c <= '9') || (c >= 'a' || c <= 'f');
 	}
 
+	/**
+	 * Checks if given string only consists of ASCII characters
+	 * 
+	 * @param s
+	 *            The string to check
+	 * @return <code>true</code> if given string only consists of ASCII
+	 *         characters; otherwise <code>false</code>
+	 */
+	private static boolean isAscii(final String s) {
+		if (null == s) {
+			return true;
+		}
+		final char[] chars = s.toCharArray();
+		boolean isAscii = true;
+		for (int i = 0; i < chars.length && isAscii; i++) {
+			isAscii &= (chars[i] < 128);
+		}
+		return isAscii;
+	}
+
+	private static boolean isAscii(final char ch) {
+		return (ch < 128);
+	}
 }
