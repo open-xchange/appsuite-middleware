@@ -61,6 +61,7 @@ import java.util.Map;
 import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import com.openexchange.ajp13.AJPv13Exception.AJPCode;
 import com.openexchange.configuration.ServerConfig;
@@ -481,6 +482,16 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 							 */
 							break NextCookie;
 						}
+						/*
+						 * Check corresponding HTTP session
+						 */
+						final HttpSession httpSession = HttpSessionManagement.getHttpSession(current.getValue());
+						if (httpSession == null || HttpSessionManagement.isHttpSessionExpired(httpSession)) {
+							/*
+							 * Invalid cookie
+							 */
+							break NextCookie;
+						}
 						jsessionIDCookie = current;
 						ajpRequestHandler.setHttpSessionId(current.getValue(), true);
 					} else {
@@ -520,8 +531,24 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 			jsessionIdVal = jsessionIDVal.toString();
 			join = true;
 		} else {
-			jsessionIdVal = id;
-			join = false;
+			/*
+			 * Check corresponding HTTP session
+			 */
+			final HttpSession httpSession = HttpSessionManagement.getHttpSession(id);
+			if (httpSession == null || HttpSessionManagement.isHttpSessionExpired(httpSession)) {
+				/*
+				 * Invalid cookie. Create a new unique id
+				 */
+				final StringBuilder jsessionIDVal = new StringBuilder(HttpSessionManagement.getNewUniqueId());
+				if (AJPv13Config.getJvmRoute() != null && AJPv13Config.getJvmRoute().length() > 0) {
+					jsessionIDVal.append('.').append(AJPv13Config.getJvmRoute());
+				}
+				jsessionIdVal = jsessionIDVal.toString();
+				join = true;
+			} else {
+				jsessionIdVal = id;
+				join = false;
+			}
 		}
 		final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIdVal);
 		jsessionIDCookie.setPath("/");
