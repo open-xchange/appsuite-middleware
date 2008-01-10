@@ -1009,9 +1009,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
         }
     }
-
-    public Context create(final Context ctx, final User admin_user) throws StorageException, InvalidDataException {
-        Connection configdb_write_con = null;
+    
+    public Context create(final Context ctx, final User admin_user, final UserModuleAccess access) throws StorageException, InvalidDataException {
+    	Connection configdb_write_con = null;
         Connection ox_write_con = null;
         final int context_id = ctx.getId();
         try {
@@ -1116,14 +1116,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 this.oxcontextcommon.createStandardGroupForContext(context_id, ox_write_con, def_group_disp_name, group_id, gid_number);
 
                 
-                // TODO: MAKE THE DEFAULT CONTEXT ACCESS RIGHTS ######## 
-                // CONFIGURABLE VIA ACCESS COMBINATION NAME!                
-                final UserModuleAccess access = new UserModuleAccess();
-                // Webmail package access per default
-                access.disableAll();
-                access.setWebmail(true);
-                access.setContacts(true);
-                // END OF TODO! ########################################
+                
                 this.oxcontextcommon.createAdminForContext(ctx, admin_user, ox_write_con, internal_user_id_for_admin, contact_id_for_admin, uid_number, access);
                 // create system folder for context
                 // get lang and displayname of admin
@@ -1171,31 +1164,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } catch (final SQLException ecop) {
             log.error("SQL Error", ecop);
             this.oxcontextcommon.handleCreateContextRollback(configdb_write_con, ox_write_con, context_id);
-            throw new StorageException(ecop);
-            // } catch (OXException ecop4) {
-            // log.error("Error processing createContext!Rollback starts!",
-            // ecop4);
-            // handleCreateContextRollback(configdb_write_con, ox_write_con,
-            // context_id);
-            // throw ecop4;
-            // } catch (RemoteException ecop5) {
-            // log.error("Error processing createContext!Rollback starts!",
-            // ecop5);
-            // handleCreateContextRollback(configdb_write_con, ox_write_con,
-            // context_id);
-            // throw ecop5;
-            // } catch (DBPoolingException ecop6) {
-            // log.error("Error processing createContext!Rollback starts!",
-            // ecop6);
-            // handleCreateContextRollback(configdb_write_con, ox_write_con,
-            // context_id);
-            // throw ecop6;
-            // } catch (NoSuchAlgorithmException ecop7) {
-            // log.error("Error processing createContext!Rollback starts!",
-            // ecop7);
-            // handleCreateContextRollback(configdb_write_con, ox_write_con,
-            // context_id);
-            // throw ecop7;
+            throw new StorageException(ecop);            
         } catch (final OXContextException e) {
             log.error("Context Error", e);
             this.oxcontextcommon.handleCreateContextRollback(configdb_write_con, ox_write_con, context_id);
@@ -1225,6 +1194,20 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 log.error("Error pushing ox write connection to pool!", ecp);
             }
         }
+    }
+
+    public Context create(final Context ctx, final User admin_user) throws StorageException, InvalidDataException {
+    	
+    	// TODO: MAKE THE DEFAULT CONTEXT ACCESS RIGHTS ######## 
+        // CONFIGURABLE VIA ACCESS COMBINATION NAME!                
+        final UserModuleAccess access = new UserModuleAccess();
+        // Webmail package access per default
+        access.disableAll();
+        access.setWebmail(true);
+        access.setContacts(true);
+        // END OF TODO! ########################################    	
+    	
+        return create(ctx, admin_user, access);
     }
 
     /**

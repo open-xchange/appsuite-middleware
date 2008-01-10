@@ -110,19 +110,53 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     public Context create(final Context ctx, final User admin_user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
-        return createcommon(ctx, admin_user, null, auth);
+        return createcommon(ctx, admin_user, null, null, auth);
     }
     
     public Context create(Context ctx, User admin_user,String access_combination_name, Credentials auth)
 		throws RemoteException, StorageException,InvalidCredentialsException, InvalidDataException,	ContextExistsException {
     	
-    	return null;
+    	// Resolve access rights by name    	
+    	try {
+			doNullCheck(admin_user, access_combination_name);
+			if (access_combination_name.trim().length() == 0) {
+				throw new InvalidDataException("Invalid access combination name");
+			}
+		} catch (final InvalidDataException e3) {
+			log.error("One of the given arguments for create is null", e3);
+			throw e3;
+		}
+
+		if (log.isDebugEnabled()) {
+			log.debug(ctx.toString() + " - " + admin_user.toString() + " - "+ access_combination_name.toString() + " - "+ auth.toString());
+		}
+		
+		final BasicAuthenticator basicAuthenticator = new BasicAuthenticator();
+		basicAuthenticator.doAuthentication(auth);
+
+		
+        UserModuleAccess access = ClientAdminThreadExtended.cache.getNamedAccessCombination(access_combination_name.trim());
+        if(access==null){
+        	// no such access combination name defined in configuration
+        	// throw error!
+        	throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
+        }
+    	
+    	return createcommon(ctx, admin_user, null, access, auth);
     }
 
     public Context create(Context ctx, User admin_user,UserModuleAccess access, Credentials auth) 
     	throws RemoteException,StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException {
     	
-    	return null;
+    	try {
+			doNullCheck(admin_user, access);			
+		} catch (final InvalidDataException e3) {
+			log.error("One of the given arguments for create is null", e3);
+			throw e3;
+		}
+    	
+    	return createcommon(ctx, admin_user, null, access, auth);
+    	
     }
 
     public void delete(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
@@ -540,11 +574,17 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
     }
 
-    protected Context createmaincall(final Context ctx, final User admin_user, Database db) throws StorageException, InvalidDataException {
+    protected Context createmaincall(final Context ctx, final User admin_user, Database db, UserModuleAccess access) throws StorageException, InvalidDataException {
         validateloginmapping(ctx);
         final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-        final Context retval = oxcox.create(ctx, admin_user);
-        return retval;
+        
+        // If access == null, use default create method, 
+        // else the new create method with the access objects
+        if(access==null){
+        	return oxcox.create(ctx, admin_user);
+        }else{
+        	return oxcox.create(ctx, admin_user,access);
+        }
     }
     
     private void validateloginmapping(final Context ctx) throws InvalidDataException {
