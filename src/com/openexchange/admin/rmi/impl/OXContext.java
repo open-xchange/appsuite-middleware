@@ -31,6 +31,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
+import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.DatabaseDataMover;
@@ -614,31 +615,158 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
 	public void changeModuleAccess(Context ctx, UserModuleAccess access,Credentials auth) 
 		throws RemoteException,InvalidCredentialsException, NoSuchContextException,	StorageException, InvalidDataException {
+				
+		try {
+			doNullCheck(access);			
+		} catch (final InvalidDataException e3) {
+			log.error("One of the given arguments for create is null", e3);
+			throw e3;
+		}	
 		
+		new BasicAuthenticator().doAuthentication(auth);
+        
+        setIdOrGetIDFromNameAndIdObject(null, ctx);
+        
+        log.debug(ctx+" - "+access);
+        
+        try {
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            }            
+            
+            OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+            
+            // change rights for all users in context to specified one in access
+            oxu.changeModuleAccess(ctx, oxu.getAll(ctx), access);
+                 
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } 
 		
 	}
 
 	public void changeModuleAccess(Context ctx, String access_combination_name,Credentials auth)
 		throws RemoteException,InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+			
 		
+		try {
+			doNullCheck(access_combination_name);	
+			if (access_combination_name.trim().length() == 0) {
+				throw new InvalidDataException("Invalid access combination name");
+			}
+		} catch (final InvalidDataException e3) {
+			log.error("One of the given arguments for create is null", e3);
+			throw e3;
+		}	
+		
+		new BasicAuthenticator().doAuthentication(auth);
+        
+        setIdOrGetIDFromNameAndIdObject(null, ctx);
+        
+        log.debug(ctx+" - "+access_combination_name);
+        
+        try {
+        	
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            }
+            
+            UserModuleAccess access = ClientAdminThreadExtended.cache.getNamedAccessCombination(access_combination_name.trim());
+            if(access==null){
+            	// no such access combination name defined in configuration
+            	// throw error!
+            	throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
+            }
+            
+            OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+            
+            // change rights for all users in context to specified one in access combination name
+            oxu.changeModuleAccess(ctx, oxu.getAll(ctx), access);
+                 
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } 
 		
 	}
 
 	public void downgrade(Context ctx, Credentials auth)
 		throws RemoteException, InvalidCredentialsException,NoSuchContextException, StorageException, DatabaseUpdateException,InvalidDataException {
 		
+		// TODO: OX GROUPWARE MUST SUPPLY AN API FUNCTION FOR DOWNGRADE!
+		
 	}
 
 	public String getAccessCombinationName(Context ctx, Credentials auth)
 		throws RemoteException, InvalidCredentialsException,NoSuchContextException, StorageException, InvalidDataException {
 		
-		return null;
+		// Resolve admin user and get the module access from db and query cache for access combination name
+		try {
+            doNullCheck(ctx);
+        } catch (final InvalidDataException e1) {
+            final InvalidDataException invalidDataException = new InvalidDataException("Context is invalid");
+            log.error(invalidDataException.getMessage(), invalidDataException);
+            throw invalidDataException;
+        }
+        
+        new BasicAuthenticator().doAuthentication(auth);
+        
+        setIdOrGetIDFromNameAndIdObject(null, ctx);
+        
+        log.debug(ctx);
+        
+        try {
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            }
+            
+            // Get admin id and fetch current access object and query cache for its name!
+            OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+                        
+            String access_combination_name = ClientAdminThreadExtended.cache.getNameForAccessCombination(oxu.getModuleAccess(ctx, tool.getAdminForContext(ctx)));
+            if(access_combination_name!=null){
+            	// name is valid, return it
+            	return access_combination_name;
+            }else{
+            	// undefined access rights are set, return UNDEFINED
+            	return "UNDEFINED";
+            }
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } 
 	}
 
 	public UserModuleAccess getModuleAccess(Context ctx, Credentials auth)
 		throws RemoteException, InvalidCredentialsException,NoSuchContextException, StorageException, InvalidDataException {
 		
-		return null;
+		try {
+            doNullCheck(ctx);
+        } catch (final InvalidDataException e1) {
+            final InvalidDataException invalidDataException = new InvalidDataException("Context is invalid");
+            log.error(invalidDataException.getMessage(), invalidDataException);
+            throw invalidDataException;
+        }
+        
+        new BasicAuthenticator().doAuthentication(auth);
+        
+        setIdOrGetIDFromNameAndIdObject(null, ctx);
+        
+        log.debug(ctx);
+        
+        try {
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            }
+            
+            // Get admin id and fetch current access object and return it to the client!
+            OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+            return oxu.getModuleAccess(ctx, tool.getAdminForContext(ctx));            
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } 
 	}
 
 	
