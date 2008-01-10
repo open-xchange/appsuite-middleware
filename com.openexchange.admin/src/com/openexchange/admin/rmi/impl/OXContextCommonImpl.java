@@ -57,6 +57,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -101,9 +102,9 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         GenericChecks.checkValidMailAddress(admin_user.getPrimaryEmail());
     }
 
-    protected abstract Context createmaincall(final Context ctx, final User admin_user, Database db) throws StorageException, InvalidDataException;
+    protected abstract Context createmaincall(final Context ctx, final User admin_user, Database db, UserModuleAccess access) throws StorageException, InvalidDataException;
 
-    protected Context createcommon(final Context ctx, final User admin_user, final Database db, final Credentials auth) throws InvalidCredentialsException, ContextExistsException, InvalidDataException, StorageException {
+    protected Context createcommon(final Context ctx, final User admin_user, final Database db, UserModuleAccess access, final Credentials auth) throws InvalidCredentialsException, ContextExistsException, InvalidDataException, StorageException {
         try{
             doNullCheck(ctx,admin_user);
         } catch (final InvalidDataException e1) {
@@ -130,7 +131,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                 // Add the name of the context to the login mappings and the id
                 ctx.addLoginMapping(name);
             }
-            return createmaincall(ctx, admin_user, db);
+            return createmaincall(ctx, admin_user, db, access);
         } catch (final ContextExistsException e) {
             log.error(e.getMessage(),e);
             throw e;
