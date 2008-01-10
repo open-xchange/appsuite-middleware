@@ -386,9 +386,10 @@ public interface OXContextInterface extends Remote {
     /**
      * Get current access combination name of the context based on the rights of the admin user!
      * 
+     * 
      * @param ctx
      * @param auth
-     * @return Access combination name!
+     * @return Access combination name or null if current access rights cannot be mapped to an access combination name.
      * @throws RemoteException
      * @throws InvalidCredentialsException
      * @throws NoSuchContextException
