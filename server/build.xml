@@ -81,6 +81,7 @@
     <property name="springbeanjar" value="spring-beans_1.2.7.jar" />
     <property name="springcorejar" value="spring-core_1.2.7.jar" />
     <property name="tnefjar" value="tnef.jar" />
+	<property name="chardetjar" value="chardet.jar" />
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -109,6 +110,7 @@
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${springbeanjar}" />
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${springcorejar}" />
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${tnefjar}" />
+		<pathelement location="${bundlesdir}/${commonBundle}/lib/${chardetjar}" />
     </path>
 
     <!-- JARs for running server -->
