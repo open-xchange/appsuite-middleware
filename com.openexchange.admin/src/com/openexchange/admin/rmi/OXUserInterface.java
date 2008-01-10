@@ -313,6 +313,24 @@ public interface OXUserInterface extends Remote {
      */
     public UserModuleAccess getModuleAccess(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
+    
+    /**
+     * Get current access combination name of an user!
+     * 
+     * @param ctx
+     * @þaram user 
+     * @param auth
+     * @return Access combination name or null if current access rights cannot be mapped to an access combination name.
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
+    public String getAccessCombinationName(final Context ctx,final User user,final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,
+	InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    
+    
     /**
      * Manipulate user module access within the given context.
      * 

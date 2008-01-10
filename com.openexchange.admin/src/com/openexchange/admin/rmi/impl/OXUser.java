@@ -1066,6 +1066,59 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e;
         }
     }
+    
+    public String getAccessCombinationName(Context ctx, User user,Credentials auth) 
+    	throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,
+    	InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    	
+    	try {
+            doNullCheck(user);
+        } catch (final InvalidDataException e) {
+            final InvalidDataException invalidDataException = new InvalidDataException("User object is null");
+            log.error(invalidDataException.getMessage(), invalidDataException);
+            throw invalidDataException;
+        }        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.toString() + " - " + user + " - " + auth.toString());
+        }        
+        try {
+            basicauth.doAuthentication(auth, ctx);
+            checkSchemaBeingLocked(ctx);
+            setIdOrGetIDFromNameAndIdObject(ctx, user);
+            final int user_id = user.getId();
+            
+            if (!tool.existsUser(ctx, user_id)) {
+                throw new NoSuchUserException("No such user " + user + " in context " + ctx.getId());
+            }
+            
+            return cache.getNameForAccessCombination(oxu.getModuleAccess(ctx, user_id));            
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final DatabaseUpdateException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final NoSuchUserException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+    	
+		
+	}
+
+
+	
+
+
 
     public boolean isContextAdmin(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         try {
@@ -1334,7 +1387,5 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
 
 	
-
-
 	
 }
