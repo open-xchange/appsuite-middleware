@@ -21,7 +21,7 @@ public class Create extends CreateCore {
 	// which access rights template should be used
     protected Option accessRightsCombinationName = null;
     
-    protected static final String OPT_ACCESSRIGHTS_COMBINATION_NAME = "access-combination-name";
+    public static final String OPT_ACCESSRIGHTS_COMBINATION_NAME = "access-combination-name";
     
     
 

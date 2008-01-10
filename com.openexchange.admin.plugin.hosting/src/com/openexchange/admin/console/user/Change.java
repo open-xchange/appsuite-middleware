@@ -4,10 +4,12 @@ package com.openexchange.admin.console.user;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -17,6 +19,8 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Change extends ChangeCore {
 
+	protected Option accessRightsCombinationName = null;
+	
     public static void main(final String[] args) {
         new Change(args);
     }
@@ -29,12 +33,22 @@ public class Change extends ChangeCore {
     }
 
     @Override
-    protected void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    protected void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         oxusr.change(ctx, usr, auth);
+        
+        // Change module access IF an access combination name was supplied!
+        // The normal change of access rights is done in the "commonfunctions"
+        final String accesscombinationname = (String) parser.getOptionValue(this.accessRightsCombinationName);        
+        if (null != accesscombinationname) {
+            // Change user with access rights combination name
+        	oxusr.changeModuleAccess(ctx, usr, accesscombinationname, auth);        	
+        }
+        
     }
 
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
+    	this.accessRightsCombinationName = setLongOpt(parser,Create.OPT_ACCESSRIGHTS_COMBINATION_NAME,"Access combination name", true, false,true);        
     }
 
 }
