@@ -133,7 +133,7 @@ public abstract class ChangeCore extends UserAbstraction {
 
             // finally do change call last (must be done last because else we cannot
             // change admin password
-            maincall(parser, oxusr, ctx, usr, auth);
+            maincall(parser, oxusr, ctx, usr, access, auth);
             
             displayChangedMessage(successtext, ctx.getId(), parser);
             sysexit(0);
@@ -144,6 +144,6 @@ public abstract class ChangeCore extends UserAbstraction {
 
     }
 
-    protected abstract void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, MalformedURLException, NotBoundException, DuplicateExtensionException;
+    protected abstract void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, MalformedURLException, NotBoundException, DuplicateExtensionException;
 
 }
