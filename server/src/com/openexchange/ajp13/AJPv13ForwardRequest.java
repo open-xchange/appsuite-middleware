@@ -463,7 +463,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 	}
 
 	private static void checkJSessionIDCookie(final HttpServletRequestWrapper servletRequest,
-			final HttpServletResponse resp, final AJPv13RequestHandler ajpRequestHandler) {
+			final HttpServletResponseWrapper resp, final AJPv13RequestHandler ajpRequestHandler) {
 		final Cookie[] cookies = servletRequest.getCookies();
 		Cookie jsessionIDCookie = null;
 		if (cookies != null) {
@@ -490,6 +490,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 							/*
 							 * Invalid cookie
 							 */
+							resp.removeCookie(current);
 							break NextCookie;
 						}
 						jsessionIDCookie = current;

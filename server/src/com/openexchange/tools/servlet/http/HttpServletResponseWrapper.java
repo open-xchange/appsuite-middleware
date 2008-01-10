@@ -369,6 +369,16 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		cookies.add(cookie);
 	}
 
+	/**
+	 * Removes specified cookie from cookie set
+	 * 
+	 * @param cookie
+	 *            The cookie to remove
+	 */
+	public void removeCookie(final Cookie cookie) {
+		cookies.remove(cookie);
+	}
+
 	private static final String SET_COOKIE = "Set-Cookie";
 
 	public Map<String, List<String>> getFormatedCookies() {
