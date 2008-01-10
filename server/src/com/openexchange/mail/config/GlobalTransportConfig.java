@@ -56,7 +56,7 @@ import com.openexchange.configuration.SystemConfig;
 import com.openexchange.mail.MailException;
 
 /**
- * {@link GlobalTransportConfig}
+ * {@link GlobalTransportConfig} - Global transport properties
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

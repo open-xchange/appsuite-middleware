@@ -56,7 +56,9 @@ import com.openexchange.cache.ElementEventHandlerWrapper;
 import com.openexchange.mail.MailConnection;
 
 /**
- * {@link MailConnectionEventHandler}
+ * {@link MailConnectionEventHandler} - The mail connection event handler which
+ * preludes mail connection closure if an instance of {@link MailConnection} is
+ * removed from mail connection cache.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -78,7 +80,7 @@ public final class MailConnectionEventHandler extends ElementEventHandlerWrapper
 	@Override
 	protected void onExceededIdletimeBackground(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailConnection) cacheElem.getVal());
+		close((MailConnection<?, ?, ?>) cacheElem.getVal());
 	}
 
 	/*
@@ -89,7 +91,7 @@ public final class MailConnectionEventHandler extends ElementEventHandlerWrapper
 	@Override
 	protected void onExceededMaxlifeBackground(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailConnection) cacheElem.getVal());
+		close((MailConnection<?, ?, ?>) cacheElem.getVal());
 	}
 
 	/*
@@ -100,7 +102,7 @@ public final class MailConnectionEventHandler extends ElementEventHandlerWrapper
 	@Override
 	protected void onSpooledDiskNotAvailable(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailConnection) cacheElem.getVal());
+		close((MailConnection<?, ?, ?>) cacheElem.getVal());
 	}
 
 	/*
@@ -111,13 +113,13 @@ public final class MailConnectionEventHandler extends ElementEventHandlerWrapper
 	@Override
 	protected void onSpooledNotAllowed(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailConnection) cacheElem.getVal());
+		close((MailConnection<?, ?, ?>) cacheElem.getVal());
 	}
 
 	/**
 	 * Closes given instance of {@link MailConnection}
 	 */
-	private void close(final MailConnection mailConnection) {
+	private void close(final MailConnection<?, ?, ?> mailConnection) {
 		mailConnection.close(false);
 	}
 }

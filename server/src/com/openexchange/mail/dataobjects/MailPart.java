@@ -70,7 +70,10 @@ import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
 
 /**
- * {@link MailPart}
+ * {@link MailPart} - Abstract super class for all {@link MailPart} subclasses.
+ * <p>
+ * It's main purpose is to provide access to common part headers and part's
+ * content.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

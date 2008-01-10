@@ -62,7 +62,8 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
- * {@link UUEncodedAttachmentMailPart}
+ * {@link UUEncodedAttachmentMailPart} - Subclass of {@link MailPart} designed
+ * for designed for uuencoded mail parts.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

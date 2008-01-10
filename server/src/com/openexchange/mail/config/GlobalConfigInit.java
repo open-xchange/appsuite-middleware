@@ -60,7 +60,8 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.server.Initialization;
 
 /**
- * {@link GlobalConfigInit}
+ * {@link GlobalConfigInit} - Initializes global mail configuration
+ * implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

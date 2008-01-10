@@ -52,31 +52,32 @@ package com.openexchange.mail.cache;
 import com.openexchange.cache.CacheKey;
 
 /**
- * {@link SessionMailCacheEntry}
- *
+ * {@link SessionMailCacheEntry} - A cache entry suitable for any object.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
 public interface SessionMailCacheEntry<V> {
-	
+
 	/**
 	 * Gets the key
 	 * 
 	 * @return The key
 	 */
 	public CacheKey getKey();
-	
+
 	/**
 	 * Gets the value
 	 * 
 	 * @return The value
 	 */
 	public V getValue();
-	
+
 	/**
 	 * Sets the value
 	 * 
-	 * @param value The value to set
+	 * @param value
+	 *            The value to set
 	 */
 	public void setValue(V value);
 

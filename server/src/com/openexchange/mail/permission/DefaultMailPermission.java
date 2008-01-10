@@ -52,9 +52,9 @@ package com.openexchange.mail.permission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 
-
 /**
- * {@link DefaultMailPermission}
+ * {@link DefaultMailPermission} - The default mail permission which grants full
+ * access to a mail folder
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

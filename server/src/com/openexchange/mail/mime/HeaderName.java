@@ -69,6 +69,13 @@ public final class HeaderName {
 		this.s = s;
 	}
 
+	/**
+	 * Initializes a new header name from specified string.
+	 * 
+	 * @param s
+	 *            The string
+	 * @return The new header name.
+	 */
 	public static HeaderName valueOf(final String s) {
 		return new HeaderName(s);
 	}

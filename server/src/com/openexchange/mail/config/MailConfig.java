@@ -56,13 +56,15 @@ import java.util.Random;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.mail.spellcheck.SpellCheckConfig;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailConfig}
+ * {@link MailConfig} - The user-specific mail properties; e.g. containing
+ * user's login data.
+ * <p>
+ * Provides access to global mail properties.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

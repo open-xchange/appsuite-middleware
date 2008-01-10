@@ -63,7 +63,7 @@ import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.session.Session;
 
 /**
- * {@link SessionMailCache} - Several cacheable data bound to a user session
+ * {@link SessionMailCache} - Several cacheable data bound to a user session.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

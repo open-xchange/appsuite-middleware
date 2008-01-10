@@ -79,7 +79,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.session.Session;
 
 /**
- * {@link MIMEMessageUtility}
+ * {@link MIMEMessageUtility} - Utilities for MIME messages.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

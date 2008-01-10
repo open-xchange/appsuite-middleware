@@ -49,9 +49,10 @@
 
 package com.openexchange.mail.config;
 
-
 /**
- * {@link TransportConfig} - The transport configuration
+ * {@link TransportConfig} - The user-specific transport configuration
+ * <p>
+ * Provides access to global transport properties.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

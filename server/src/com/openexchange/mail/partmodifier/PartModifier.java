@@ -54,9 +54,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.parser.MailMessageParser;
 
 /**
- * {@link PartModifier}
+ * {@link PartModifier} - Abstract class to modify a mail part prior to parsing
+ * it by {@link MailMessageParser}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

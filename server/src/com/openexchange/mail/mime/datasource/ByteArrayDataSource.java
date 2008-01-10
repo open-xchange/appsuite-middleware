@@ -58,19 +58,19 @@ import java.io.OutputStream;
 import javax.activation.DataSource;
 
 /**
- * ByteArrayDataSource
+ * ByteArrayDataSource - A data source backed by a byte array
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
 public class ByteArrayDataSource implements DataSource {
-	
+
 	private String contentType;
-	
+
 	private String name;
-	
+
 	private byte[] bytes;
-	
+
 	private ByteArrayOutputStream baos;
 
 	public ByteArrayDataSource() {
@@ -85,7 +85,7 @@ public class ByteArrayDataSource implements DataSource {
 		this.name = name;
 		this.bytes = bytes;
 	}
-	
+
 	/**
 	 * Set <code>byte[]</code> to read from.
 	 * 
@@ -107,7 +107,7 @@ public class ByteArrayDataSource implements DataSource {
 	public String getContentType() {
 		return contentType;
 	}
-	
+
 	public void setContentType(final String contentType) {
 		this.contentType = contentType;
 	}
@@ -122,7 +122,7 @@ public class ByteArrayDataSource implements DataSource {
 	public String getName() {
 		return name;
 	}
-	
+
 	public void setName(final String name) {
 		this.name = name;
 	}

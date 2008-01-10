@@ -76,7 +76,7 @@ import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
- * {@link VersitUtility}
+ * {@link VersitUtility} - Utilities for versit handling.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -110,15 +110,15 @@ public final class VersitUtility {
 	 * @throws IOException
 	 *             If mail part's data cannot be parsed
 	 */
-	public static void saveVCard(final MailPart versitPart, final List<CommonObject> retvalList,
-			final Session session) throws MailException, IOException {
+	public static void saveVCard(final MailPart versitPart, final List<CommonObject> retvalList, final Session session)
+			throws MailException, IOException {
 		/*
 		 * Define versit reader
 		 */
 		final VersitDefinition def = Versit.getDefinition(versitPart.getContentType().getBaseType());
 		final VersitDefinition.Reader r = def.getReader(versitPart.getInputStream(), versitPart.getContentType()
-				.containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter()
-				: MailConfig.getDefaultMimeCharset());
+				.containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter() : MailConfig
+				.getDefaultMimeCharset());
 		/*
 		 * Ok, convert versit object to corresponding data object and save this
 		 * object via its interface
@@ -176,15 +176,15 @@ public final class VersitUtility {
 	 * @throws OXException
 	 *             If mail part cannot be saved
 	 */
-	public static void saveICal(final MailPart versitPart, final List<CommonObject> retvalList,
-			final Session session) throws MailException, IOException {
+	public static void saveICal(final MailPart versitPart, final List<CommonObject> retvalList, final Session session)
+			throws MailException, IOException {
 		/*
 		 * Define versit reader
 		 */
 		final VersitDefinition def = Versit.getDefinition(versitPart.getContentType().getBaseType());
 		final VersitDefinition.Reader r = def.getReader(versitPart.getInputStream(), versitPart.getContentType()
-				.containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter()
-				: MailConfig.getDefaultMimeCharset());
+				.containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter() : MailConfig
+				.getDefaultMimeCharset());
 		/*
 		 * Ok, convert versit object to corresponding data object and save this
 		 * object via its interface
@@ -208,8 +208,8 @@ public final class VersitUtility {
 						final CalendarDataObject appointmentObj = oxc.convertAppointment(vo);
 						appointmentObj.setContext(session.getContext());
 						if (defaultCalendarFolder == -1) {
-							defaultCalendarFolder = access.getDefaultFolder(session.getUserId(),
-									FolderObject.CALENDAR).getObjectID();
+							defaultCalendarFolder = access.getDefaultFolder(session.getUserId(), FolderObject.CALENDAR)
+									.getObjectID();
 						}
 						appointmentObj.setParentFolderID(defaultCalendarFolder);
 						/*
@@ -229,8 +229,8 @@ public final class VersitUtility {
 						 */
 						final Task taskObj = oxc.convertTask(vo);
 						if (defaultTaskFolder == -1) {
-							defaultTaskFolder = access.getDefaultFolder(session.getUserId(),
-									FolderObject.TASK).getObjectID();
+							defaultTaskFolder = access.getDefaultFolder(session.getUserId(), FolderObject.TASK)
+									.getObjectID();
 						}
 						taskObj.setParentFolderID(defaultTaskFolder);
 						/*

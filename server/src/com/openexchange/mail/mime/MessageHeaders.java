@@ -50,7 +50,7 @@
 package com.openexchange.mail.mime;
 
 /**
- * MessageHeaders
+ * {@link MessageHeaders} - Various constants for MIME message headers.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

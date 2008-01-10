@@ -55,9 +55,14 @@ import com.openexchange.mail.MailException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 
-
 /**
- * {@link MailPermission}
+ * {@link MailPermission} - The mail permission defining a set of access rights
+ * on a mail folder for a certain entity.
+ * <p>
+ * This depends on if mailing system supports any kind of access control for
+ * entities; e.g. for IMAP it is the ACL capability. If no access control is
+ * defined by mailing system, {@link DefaultMailPermission} is used which grants
+ * full access and therefore bypasses access control.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

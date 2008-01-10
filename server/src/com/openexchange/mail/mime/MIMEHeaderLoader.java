@@ -53,13 +53,12 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.mail.Message;
-import javax.mail.MessagingException;
 
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
 
 /**
- * {@link MIMEHeaderLoader}
+ * {@link MIMEHeaderLoader} - Implementation-specific header loader.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

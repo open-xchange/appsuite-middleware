@@ -81,7 +81,8 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
 
 /**
- * {@link MessageParser}
+ * {@link MessageParser} - Parses instances of {@link JSONObject} to instances
+ * of {@link MailMessage}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

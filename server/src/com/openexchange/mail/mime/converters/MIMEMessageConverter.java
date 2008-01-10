@@ -95,7 +95,8 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.utils.StorageUtility;
 
 /**
- * {@link MIMEMessageConverter}
+ * {@link MIMEMessageConverter} - Provides several methods to convert instances
+ * of {@link MimeMessage} to {@link MailMessage} in vice versa.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

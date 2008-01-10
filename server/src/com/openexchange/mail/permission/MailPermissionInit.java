@@ -59,7 +59,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.server.Initialization;
 
 /**
- * {@link MailPermissionInit}
+ * {@link MailPermissionInit} - Initializes the mail permission implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

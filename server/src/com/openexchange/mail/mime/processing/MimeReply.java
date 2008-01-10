@@ -97,7 +97,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
 
 /**
- * {@link MimeReply}
+ * {@link MimeReply} - MIME message reply.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

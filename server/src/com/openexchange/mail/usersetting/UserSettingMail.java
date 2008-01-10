@@ -62,7 +62,7 @@ import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 
 /**
- * {@link UserSettingMail}
+ * {@link UserSettingMail} - User's mail settings
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

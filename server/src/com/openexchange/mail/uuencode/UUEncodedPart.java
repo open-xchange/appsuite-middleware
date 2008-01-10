@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.mail.uuencode;
 
 import java.io.BufferedOutputStream;
@@ -66,6 +64,7 @@ import javax.mail.internet.MimeUtility;
  * attachment.
  * 
  * @author <a href="mailto:stefan.preuss@open-xchange.com">Stefan Preuss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 
 public class UUEncodedPart extends UUEncodedMultiPart {
@@ -102,11 +101,11 @@ public class UUEncodedPart extends UUEncodedMultiPart {
 	}
 
 	/**
-	 * Return the filesize attribute of the UUEncodedPart object. Note: This
+	 * Return the file size attribute of the UUEncodedPart object. Note: This
 	 * value may be different from the saved file. This is normal because this
 	 * is the size of the raw (not encoded) object.
 	 * 
-	 * @return filesize - The filesize
+	 * @return The file size
 	 */
 	public int getFileSize() {
 		try {
@@ -177,7 +176,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
 	}
 
 	/**
-	 * Output an appropriately encoded bytestream to the given OutputStream.
+	 * Output an appropriately encoded byte stream to the given OutputStream.
 	 * 
 	 * @param out -
 	 *            The inputStream

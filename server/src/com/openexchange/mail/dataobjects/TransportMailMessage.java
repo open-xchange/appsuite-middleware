@@ -53,7 +53,7 @@ import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
 
 /**
  * {@link TransportMailMessage} - Subclass of {@link MailPart} designed for
- * composing a transport mail
+ * composing a transport mail.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

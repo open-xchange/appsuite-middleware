@@ -59,7 +59,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.server.Initialization;
 
 /**
- * {@link MailTransportInit}
+ * {@link MailTransportInit} - Initializes the mail transport implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -109,8 +109,7 @@ public final class MailTransportInit implements Initialization {
 								LOG.warn("Using fallback \"com.openexchange.smtp.SMTPTransport\"");
 							}
 							final Class<? extends MailTransport> clazz = Class.forName(
-									"com.openexchange.smtp.SMTPTransport").asSubclass(
-									MailTransport.class);
+									"com.openexchange.smtp.SMTPTransport").asSubclass(MailTransport.class);
 							MailTransport.setImplementingClass(clazz);
 							initialized.set(true);
 							return;

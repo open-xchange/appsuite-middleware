@@ -64,7 +64,8 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.HeaderName;
 
 /**
- * MailMessage
+ * {@link MailMessage} - Abstract super class for all {@link MailMessage}
+ * subclasses.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

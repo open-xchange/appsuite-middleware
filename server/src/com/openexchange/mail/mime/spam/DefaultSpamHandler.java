@@ -62,7 +62,8 @@ import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
 
 /**
- * {@link DefaultSpamHandler}
+ * {@link DefaultSpamHandler} - Assumes that no wrapping message holds the
+ * original spam message.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -102,8 +103,8 @@ public final class DefaultSpamHandler extends SpamHandler {
 					uidMsgs[i].setFlag(Flags.Flag.DELETED, true);
 				}
 				/*
-				 * TODO: Ensure that only affected messages got deleted.
-				 * Expunge messages
+				 * TODO: Ensure that only affected messages got deleted. Expunge
+				 * messages
 				 */
 				spamFolder.expunge();
 			}

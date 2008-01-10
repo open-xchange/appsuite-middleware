@@ -61,7 +61,8 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 
 /**
- * {@link MIMEMailMessage}
+ * {@link MIMEMailMessage} - A subclass of {@link MailMessage} to support MIME
+ * messages (as per RFC822).
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

@@ -68,7 +68,7 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 
 /**
- * {@link MIMEMailPart}
+ * {@link MIMEMailPart} - Represents a MIME part as per RFC 822.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

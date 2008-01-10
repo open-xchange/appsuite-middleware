@@ -66,7 +66,8 @@ import com.openexchange.mail.transport.dataobjects.UploadFileMailPart;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailTransport}
+ * {@link MailTransport} - Provides various operations related to a mail
+ * transport.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -114,8 +115,8 @@ public abstract class MailTransport {
 	 * @throws MailException
 	 *             If instantiation fails
 	 */
-	public static final MailTransport getInstance(final Session session,
-			final MailConnection<?, ?, ?> mailConnection) throws MailException {
+	public static final MailTransport getInstance(final Session session, final MailConnection<?, ?, ?> mailConnection)
+			throws MailException {
 		/*
 		 * Create a new mail transport
 		 */
@@ -218,8 +219,7 @@ public abstract class MailTransport {
 	 *            The session providing user data
 	 * @return A new instance of {@link ReferencedMailPart}
 	 */
-	public static final ReferencedMailPart getNewReferencedPart(final MailPart referencedPart,
-			final Session session) {
+	public static final ReferencedMailPart getNewReferencedPart(final MailPart referencedPart, final Session session) {
 		try {
 			return internalInstance.getNewReferencedPartInternal(referencedPart, session);
 		} catch (final MailException e) {

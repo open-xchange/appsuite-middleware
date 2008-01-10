@@ -88,7 +88,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
 
 /**
- * {@link MimeForward}
+ * {@link MimeForward} - MIME message forward.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
