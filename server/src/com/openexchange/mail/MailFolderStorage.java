@@ -52,7 +52,7 @@ package com.openexchange.mail;
 import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
- * {@link MailFolderStorage}
+ * {@link MailFolderStorage} - Offers basic access methods to mail folder(s)
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
