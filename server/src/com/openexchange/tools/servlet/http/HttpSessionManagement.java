@@ -81,32 +81,84 @@ public class HttpSessionManagement {
 		super();
 	}
 
+	/**
+	 * Gets the HTTP session whose unique ID matches given
+	 * <code>sessionId</code>.
+	 * 
+	 * @param sessionId
+	 *            The session ID
+	 * @return The HTTP session whose unique ID matches given
+	 *         <code>sessionId</code>.
+	 */
 	public static HttpSession getHttpSession(final String sessionId) {
 		return sessions.get(sessionId);
 	}
 
+	/**
+	 * Puts specified HTTP session into this management
+	 * 
+	 * @param httpSession
+	 *            The HTTP session to add
+	 */
 	public static void putHttpSession(final HttpSession httpSession) {
 		sessions.put(httpSession.getId(), httpSession);
 	}
 
+	/**
+	 * Checks if this management contains a HTTP session whose unique ID matches
+	 * given <code>sessionId</code>.
+	 * 
+	 * @param sessionId
+	 *            The session ID
+	 * @return <code>true</code> if this management contains a HTTP session
+	 *         whose unique ID matches given <code>sessionId</code>,
+	 *         otherwise <code>false</code>.
+	 */
 	public static boolean containsHttpSession(final String sessionId) {
 		return sessions.containsKey(sessionId);
 	}
 
+	/**
+	 * Removes HTTP session whose unique ID matches given <code>sessionId</code>.
+	 * 
+	 * @param sessionId
+	 *            The session ID
+	 */
 	public static void removeHttpSession(final String sessionId) {
 		sessions.remove(sessionId);
 	}
 
+	/**
+	 * Creates a new HTTP session with given unique ID
+	 * 
+	 * @param uniqueId
+	 *            The unique ID to apply to HTTP session
+	 * @return The new HTTP session
+	 */
 	public static HttpSession createHttpSession(final String uniqueId) {
 		final HttpSessionWrapper httpSession = new HttpSessionWrapper(uniqueId);
 		putHttpSession(httpSession);
 		return httpSession;
 	}
 
+	/**
+	 * Creates a new HTTP session
+	 * 
+	 * @return The new HTTP session
+	 */
 	public static HttpSession createHttpSession() {
 		return createHttpSession(getNewUniqueId());
 	}
 
+	/**
+	 * Checks if given HTTP session has expired; meaning its last accessed
+	 * timestamp exceeds max. inactive interval
+	 * 
+	 * @param httpSession
+	 *            The HTTP session to check
+	 * @return <code>true</code> if given HTTP session has expired; otherwise
+	 *         <code>false</code>
+	 */
 	public final static boolean isHttpSessionExpired(final HttpSession httpSession) {
 		return httpSession.getMaxInactiveInterval() > 0 ? (System.currentTimeMillis() - httpSession
 				.getLastAccessedTime()) > httpSession.getMaxInactiveInterval() : false;
