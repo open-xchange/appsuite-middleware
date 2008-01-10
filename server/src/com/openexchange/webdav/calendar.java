@@ -69,6 +69,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXConcurrentModificationException;
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
@@ -202,6 +203,16 @@ public final class calendar extends XmlServlet {
 					LOG.error(_parsePropChilds, exc);
 					writeResponse(appointmentobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, SERVER_ERROR_EXCEPTION + exc.toString(), client_id, os, xo);
 				}
+			} catch (OXException exc) {
+				if (exc.getCategory() == Category.TRUNCATED) {
+					LOG.debug(_parsePropChilds, exc);
+					writeResponse(appointmentobject, HttpServletResponse.SC_CONFLICT,
+							USER_INPUT_EXCEPTION, client_id, os, xo);
+				} else {
+					LOG.error(_parsePropChilds, exc);
+					writeResponse(appointmentobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+							SERVER_ERROR_EXCEPTION + exc.toString(), client_id, os, xo);
+				}
 			} catch (Exception exc) {
 				LOG.error(_parsePropChilds, exc);
 				writeResponse(appointmentobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, SERVER_ERROR_EXCEPTION + exc.toString(), client_id, os, xo);
@@ -234,7 +245,3 @@ public final class calendar extends XmlServlet {
 		return (uc.hasWebDAVXML() && uc.hasCalendar());
 	}
 }
-
-
-
-
