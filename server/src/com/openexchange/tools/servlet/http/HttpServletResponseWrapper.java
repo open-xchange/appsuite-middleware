@@ -521,7 +521,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		return headers.entrySet();
 	}
 
-	public Enumeration getHeaders(final String name) {
+	public Enumeration<?> getHeaders(final String name) {
 		return makeEnumeration(headers.get(name));
 	}
 
@@ -588,12 +588,12 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 		sendError(status, statusMsgs.get(Integer.valueOf(status)));
 	}
 
-	private Enumeration makeEnumeration(final Object obj) {
-		final Class type = obj.getClass();
+	private Enumeration<?> makeEnumeration(final Object obj) {
+		final Class<?> type = obj.getClass();
 		if (!type.isArray()) {
 			throw new IllegalArgumentException(obj.getClass().toString());
 		}
-		return (new Enumeration() {
+		return (new Enumeration<Object>() {
 			int size = Array.getLength(obj);
 
 			int cursor;
