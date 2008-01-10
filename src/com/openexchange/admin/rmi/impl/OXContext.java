@@ -19,6 +19,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -110,6 +111,18 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     public Context create(final Context ctx, final User admin_user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
         return createcommon(ctx, admin_user, null, auth);
+    }
+    
+    public Context create(Context ctx, User admin_user,String access_combination_name, Credentials auth)
+		throws RemoteException, StorageException,InvalidCredentialsException, InvalidDataException,	ContextExistsException {
+    	
+    	return null;
+    }
+
+    public Context create(Context ctx, User admin_user,UserModuleAccess access, Credentials auth) 
+    	throws RemoteException,StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException {
+    	
+    	return null;
     }
 
     public void delete(final Context ctx, final Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, DatabaseUpdateException, InvalidDataException {
@@ -558,4 +571,6 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
         return src;
     }
+
+	
 }

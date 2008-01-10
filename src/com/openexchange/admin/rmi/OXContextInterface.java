@@ -9,6 +9,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -79,6 +80,39 @@ public interface OXContextInterface extends Remote {
      */
     public Context create(final Context ctx, final User admin_user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException;
 
+    /**
+     * Create a new context! Given access combination name will be used for admin module access rights!
+     * @param ctx Context object
+     * @param admin_user User data of administrative user account for this context
+     * @param access_combination_name String Access combination name! 
+     * @param auth Credentials for authenticating against server.
+     * 
+     * @return Context object.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws ContextExistsException 
+     */
+    public Context create(final Context ctx, final User admin_user, String access_combination_name,final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException;
+
+    /**
+     * Create a new context! Given access rights be used for admin!
+     * @param ctx Context object
+     * @param admin_user User data of administrative user account for this context
+     * @param access UserModuleAccess Access rights!
+     * @param auth Credentials for authenticating against server.
+     * 
+     * @return Context object.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException If the data sent within the method contained invalid data.
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws ContextExistsException 
+     */
+    public Context create(final Context ctx, final User admin_user, UserModuleAccess access,final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException,InvalidDataException, ContextExistsException;
+
+    
     /**
      * Delete a context.<br>
      * Note: Deleting a context will delete all data which the context include (all users, groups, appointments, ... )
