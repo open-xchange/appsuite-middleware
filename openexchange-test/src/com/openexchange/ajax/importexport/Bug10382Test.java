@@ -47,48 +47,50 @@
  *
  */
 
-package com.openexchange.ajax.importexport.actions;
+package com.openexchange.ajax.importexport;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractUploadParser;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.importexport.actions.ICalImportRequest;
+import com.openexchange.ajax.importexport.actions.ICalImportResponse;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.container.AppointmentObject;
 
 /**
- * 
+ * Test class for bug 10382.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ICalImportParser extends AbstractUploadParser<ICalImportResponse> {
-
-    private final boolean failOnError;
+public class Bug10382Test extends AbstractAJAXSession {
 
     /**
-     * @param failOnError
+     * @param name
      */
-    public ICalImportParser(final boolean failOnError) {
-        super(failOnError);
-        this.failOnError = failOnError;
+    public Bug10382Test(final String name) {
+        super(name);
     }
 
     /**
-     * {@inheritDoc}
+     * Tries to import an iCal.
+     * TODO Use a user in a context with only webmail package available.
+     * @throws Throwable if an exception occurs.
      */
-    @Override
-    protected ICalImportResponse createResponse(final Response response)
-        throws JSONException {
-        final ICalImportResponse retval = new ICalImportResponse(response);
-        final Object data = response.getData();
-        if (data instanceof JSONArray) {
-            final JSONArray array = (JSONArray) data;
-            final Response[] responses = new Response[array.length()];
-            for (int i = 0; i < array.length(); i++) {
-                responses[i] = Response.parse(array.getString(i));
-            }
-            retval.setImports(responses);
-        } else if (failOnError) {
-            fail("Wrong data in response.");
+    public void testBug() throws Throwable {
+        final AJAXClient client = getClient();
+        final AppointmentObject appointment = new AppointmentObject();
+        appointment.setTitle("Bug10382Test");
+        final ICalImportResponse response = Tools.importICal(client,
+            new ICalImportRequest(29, Tools.toICal(client, appointment),
+            false));
+        if (!response.hasError()) {
+            fail("ICal imported without permissions.");
         }
-        return retval;
+        final AbstractOXException exception = response.getException();
+        if (exception.getComponent() != Component.IMPORT_EXPORT) {
+            fail("Wrong component in exception.");
+        }
+        if (exception.getDetailNumber() != 1100) {
+            fail("Wrong error code in exception.");
+        }
     }
 }
