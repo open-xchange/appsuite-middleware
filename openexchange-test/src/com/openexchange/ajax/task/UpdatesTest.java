@@ -90,8 +90,8 @@ public class UpdatesTest extends AbstractTaskTest {
     public void testUpdates() throws Throwable {
         final int total = UPDATES + UNTOUCHED + DELETES;
         final AJAXClient client = getClient();
-        final int folderId = client.getPrivateTaskFolder();
-        final TimeZone timeZone = client.getTimeZone();
+        final int folderId = client.getValues().getPrivateTaskFolder();
+        final TimeZone timeZone = client.getValues().getTimeZone();
         final InsertRequest[] inserts =
             new InsertRequest[total];
         for (int i = 0; i < inserts.length; i++) {

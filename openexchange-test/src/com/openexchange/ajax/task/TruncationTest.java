@@ -103,7 +103,7 @@ public class TruncationTest extends AbstractTaskTest {
         task.setTripMeter(RandomString.generateFixLetter(300));
         task.setParentFolderID(getPrivateFolder());
         final InsertResponse response = TaskTools.insert(getSession(),
-            new InsertRequest(task, client.getTimeZone(), false));
+            new InsertRequest(task, client.getValues().getTimeZone(), false));
         assertTrue("Server did not detect truncated data.", response
             .hasError());
         assertTrue("Array of truncated attribute identifier is empty.", response

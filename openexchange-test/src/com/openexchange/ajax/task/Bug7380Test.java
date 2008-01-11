@@ -90,17 +90,18 @@ public class Bug7380Test extends AbstractTaskTest {
         final AJAXSession session = getSession();
         final List<Participant> participants = ParticipantTools.getParticipants(
             session.getConversation(), AJAXConfig.getProperty(AJAXConfig
-            .Property.HOSTNAME), session.getId(), 1, true, client.getUserId());
+            .Property.HOSTNAME), session.getId(), 1, true, client.getValues()
+            .getUserId());
         task.setParticipants(participants);
         final InsertResponse iResponse = TaskTools.insert(session,
-            new InsertRequest(task, client.getTimeZone()));
+            new InsertRequest(task, client.getValues().getTimeZone()));
         task.setObjectID(iResponse.getId());
         final GetResponse gResponse = TaskTools.get(session,
             new GetRequest(getPrivateFolder(), task.getObjectID()));
         task.setLastModified(gResponse.getTimestamp());
         task.setParticipants((Participant[]) null);
         final UpdateResponse uResponse = TaskTools.update(session,
-            new UpdateRequest(task, client.getTimeZone()));
+            new UpdateRequest(task, client.getValues().getTimeZone()));
         task.setLastModified(uResponse.getTimestamp());
         TaskTools.delete(session, new DeleteRequest(task));
     }

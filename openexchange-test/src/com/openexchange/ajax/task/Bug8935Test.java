@@ -95,12 +95,12 @@ public class Bug8935Test extends AbstractTaskTest {
     public void testNull() throws Throwable {
         final Task task = Create.createWithDefaults();
         task.setTitle("null");
-        task.setParentFolderID(client.getPrivateTaskFolder());
+        task.setParentFolderID(client.getValues().getPrivateTaskFolder());
         final InsertResponse iResponse = TaskTools.insert(client,
-            new InsertRequest(task, client.getTimeZone()));
+            new InsertRequest(task, client.getValues().getTimeZone()));
         final GetResponse gResponse = TaskTools.get(client,
             new GetRequest(iResponse));
-        final Task reload = gResponse.getTask(client.getTimeZone());
+        final Task reload = gResponse.getTask(client.getValues().getTimeZone());
         TaskTools.compareAttributes(task, reload);
         TaskTools.delete(client, new DeleteRequest(reload));
     }
@@ -108,12 +108,12 @@ public class Bug8935Test extends AbstractTaskTest {
     public void testRealNull() throws Throwable {
         final Task task = Create.createWithDefaults();
         task.removeTitle();
-        task.setParentFolderID(client.getPrivateTaskFolder());
+        task.setParentFolderID(client.getValues().getPrivateTaskFolder());
         final InsertResponse iResponse = TaskTools.insert(client,
-            new SpecialInsertRequest(task, client.getTimeZone()));
+            new SpecialInsertRequest(task, client.getValues().getTimeZone()));
         final GetResponse gResponse = TaskTools.get(client,
             new GetRequest(iResponse));
-        final Task reload = gResponse.getTask(client.getTimeZone());
+        final Task reload = gResponse.getTask(client.getValues().getTimeZone());
         TaskTools.compareAttributes(task, reload);
         TaskTools.delete(client, new DeleteRequest(reload));
     }
@@ -139,14 +139,14 @@ public class Bug8935Test extends AbstractTaskTest {
         final Task task = Create.createWithDefaults();
         // Empty string must be interpreted as null.
         task.setTitle("");
-        task.setParentFolderID(client.getPrivateTaskFolder());
+        task.setParentFolderID(client.getValues().getPrivateTaskFolder());
         final InsertResponse iResponse = TaskTools.insert(client,
-            new SpecialInsertRequest(task, client.getTimeZone()));
+            new SpecialInsertRequest(task, client.getValues().getTimeZone()));
         // remove it because server won't sent empty fields.
         task.removeTitle();
         final GetResponse gResponse = TaskTools.get(client,
             new GetRequest(iResponse));
-        final Task reload = gResponse.getTask(client.getTimeZone());
+        final Task reload = gResponse.getTask(client.getValues().getTimeZone());
         TaskTools.compareAttributes(task, reload);
         TaskTools.delete(client, new DeleteRequest(reload));
     }

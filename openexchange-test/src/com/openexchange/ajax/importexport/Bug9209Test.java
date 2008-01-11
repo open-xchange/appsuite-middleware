@@ -89,7 +89,7 @@ public final class Bug9209Test extends AbstractAJAXSession {
     public void test9209CSV() throws Throwable {
         final AJAXClient client = getClient();
         final CSVImportResponse iResponse = Tools.importCSV(client,
-            new CSVImportRequest(client.getPrivateContactFolder(),
+            new CSVImportRequest(client.getValues().getPrivateContactFolder(),
             new ByteArrayInputStream(TEST_BYTES), false));
         assertTrue("CSV importer does not give an error.", iResponse.hasError());
     }
@@ -101,7 +101,7 @@ public final class Bug9209Test extends AbstractAJAXSession {
     public void test9209ICal() throws Throwable {
         final AJAXClient client = getClient();
         final ICalImportResponse iResponse = Tools.importICal(client,
-            new ICalImportRequest(client.getPrivateAppointmentFolder(),
+            new ICalImportRequest(client.getValues().getPrivateAppointmentFolder(),
             new ByteArrayInputStream(TEST_BYTES), false));
         assertTrue("ICal importer does not give an error.", iResponse.hasError());
     }
@@ -113,7 +113,7 @@ public final class Bug9209Test extends AbstractAJAXSession {
     public void test9209VCard() throws Throwable {
         final AJAXClient client = getClient();
         final VCardImportResponse iResponse = Tools.importVCard(client,
-            new VCardImportRequest(client.getPrivateContactFolder(),
+            new VCardImportRequest(client.getValues().getPrivateContactFolder(),
             new ByteArrayInputStream(TEST_BYTES), false));
         assertTrue("VCard importer does not give an error.", iResponse.hasError());
     }
@@ -125,7 +125,7 @@ public final class Bug9209Test extends AbstractAJAXSession {
     public void test9209OutlookCSV() throws Throwable {
         final AJAXClient client = getClient();
         final OutlookCSVImportResponse iResponse = Tools.importOutlookCSV(client,
-            new OutlookCSVImportRequest(client.getPrivateContactFolder(),
+            new OutlookCSVImportRequest(client.getValues().getPrivateContactFolder(),
             new ByteArrayInputStream(TEST_BYTES), false));
         assertTrue("Outlook CSV importer does not give an error.", iResponse.hasError());
     }

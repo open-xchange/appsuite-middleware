@@ -93,9 +93,9 @@ public class Bug10119Test extends AbstractTaskTest {
      */
     public void testFunambol() throws Throwable {
         final AJAXClient client = getClient();
-        final int folderId = client.getPrivateTaskFolder();
-        final TimeZone timeZone = client.getTimeZone();
-        final Date beforeInsert = client.getServerTime();
+        final int folderId = client.getValues().getPrivateTaskFolder();
+        final TimeZone timeZone = client.getValues().getTimeZone();
+        final Date beforeInsert = client.getValues().getServerTime();
         final MultipleResponse mInsert;
         {
             final InsertRequest[] initialInserts = new InsertRequest[2];

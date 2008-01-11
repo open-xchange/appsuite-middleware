@@ -71,6 +71,8 @@ public enum Tree {
 
     PrivateTaskFolder("/folder/tasks"),
 
+    DefaultAddress("/mail/defaultaddress"),
+
     MailAddresses("/mail/addresses"),
 
     SendAddress("/mail/sendaddress"),

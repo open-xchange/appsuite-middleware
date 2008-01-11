@@ -83,13 +83,13 @@ public class SmokeTest extends AbstractTaskTest {
      */
     public void testCase1803() throws Throwable {
         final AJAXClient client = getClient();
-        final int folderId = client.getPrivateTaskFolder();
+        final int folderId = client.getValues().getPrivateTaskFolder();
         final Task task = Create.createWithDefaults();
         task.setParentFolderID(folderId);
         task.setTitle("Buy a birthday gift for Mr. Kärner");
-        final TimeZone timeZone = client.getTimeZone();
+        final TimeZone timeZone = client.getValues().getTimeZone();
         final DateFormat dateF = new SimpleDateFormat("dd.MM.yyyy", client
-            .getLocale());
+            .getValues().getLocale());
         dateF.setTimeZone(timeZone);
         task.setStartDate(dateF.parse("26.02.2007"));
         task.setEndDate(dateF.parse("27.02.2007"));

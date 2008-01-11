@@ -49,11 +49,15 @@
 
 package com.openexchange.ajax.importexport;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 
+import com.openexchange.ajax.Appointment;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.importexport.actions.CSVImportRequest;
@@ -64,7 +68,16 @@ import com.openexchange.ajax.importexport.actions.OutlookCSVImportRequest;
 import com.openexchange.ajax.importexport.actions.OutlookCSVImportResponse;
 import com.openexchange.ajax.importexport.actions.VCardImportRequest;
 import com.openexchange.ajax.importexport.actions.VCardImportResponse;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.settings.tree.modules.interfaces.ICal;
 import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.tools.versit.ICalendar;
+import com.openexchange.tools.versit.Versit;
+import com.openexchange.tools.versit.VersitDefinition;
+import com.openexchange.tools.versit.VersitObject;
+import com.openexchange.tools.versit.VersitDefinition.Writer;
+import com.openexchange.tools.versit.converter.ConverterException;
+import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * 
@@ -101,5 +114,23 @@ public final class Tools {
         final OutlookCSVImportRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
         return (OutlookCSVImportResponse) Executor.execute(client, request);
+    }
+
+    public static InputStream toICal(final AJAXClient client,
+        final AppointmentObject appointment) throws AjaxException, IOException,
+        SAXException, JSONException, ConverterException {
+        final VersitDefinition definition = ICalendar.vEvent2;
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final OXContainerConverter conv = new OXContainerConverter(
+            client.getValues().getTimeZone(), client.getValues()
+            .getDefaultAddress());
+        final VersitObject versit = conv.convertAppointment(appointment);
+        final Writer writer = definition.getWriter(baos, "UTF-8");
+        definition.write(writer, versit);
+        definition.writeEnd(writer, versit);
+        baos.flush();
+        writer.flush();
+        conv.close();
+        return new ByteArrayInputStream(baos.toByteArray());
     }
 }

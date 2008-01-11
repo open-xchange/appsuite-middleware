@@ -143,7 +143,7 @@ public final class TaskTools extends Assert {
         OXException, AjaxException {
         final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
             sessionId));
-        return client.getPrivateTaskFolder();
+        return client.getValues().getPrivateTaskFolder();
     }
 
     /**
@@ -167,7 +167,7 @@ public final class TaskTools extends Assert {
         final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
             sessionId));
         final InsertResponse insertR = insert(client, new InsertRequest(task,
-            client.getTimeZone()));
+            client.getValues().getTimeZone()));
         return insertR.getResponse();
     }
 
@@ -227,7 +227,7 @@ public final class TaskTools extends Assert {
         final Task task, final Date lastModified) throws JSONException,
         IOException, SAXException, AjaxException, ConfigurationException {
         final TimeZone timeZone = new AJAXClient(new AJAXSession(conversation,
-            sessionId)).getTimeZone();
+            sessionId)).getValues().getTimeZone();
 		final JSONObject jsonObj = new JSONObject();
         new TaskWriter( timeZone).writeTask(task, jsonObj);
         return updateTask(conversation, hostName, sessionId, folderId, task
@@ -262,7 +262,7 @@ public final class TaskTools extends Assert {
         final GetResponse getR = get(client, new GetRequest(folderId,
             taskId));
         final Response response = getR.getResponse();
-        response.setData(getR.getTask(client.getTimeZone()));
+        response.setData(getR.getTask(client.getValues().getTimeZone()));
         return response;
     }
 

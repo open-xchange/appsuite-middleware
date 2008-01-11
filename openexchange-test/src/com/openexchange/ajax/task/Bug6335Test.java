@@ -78,9 +78,9 @@ public class Bug6335Test extends AbstractTaskTest {
         final AJAXClient client = getClient();
         final Task task = Create.createWithDefaults();
         task.setTitle("\u001f");
-        task.setParentFolderID(client.getPrivateTaskFolder());
+        task.setParentFolderID(client.getValues().getPrivateTaskFolder());
         final InsertResponse iResponse = TaskTools.insert(client,
-            new InsertRequest(task, client.getTimeZone(), false));
+            new InsertRequest(task, client.getValues().getTimeZone(), false));
         assertTrue("Invalid character was not detected.", iResponse.hasError());
         final TaskException.Code code = TaskException.Code.INVALID_DATA;
         final AbstractOXException exc = iResponse.getException();

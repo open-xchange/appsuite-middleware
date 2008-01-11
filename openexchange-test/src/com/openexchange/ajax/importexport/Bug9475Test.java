@@ -116,7 +116,7 @@ public final class Bug9475Test extends AbstractAJAXSession {
     public void testBigFile() throws Throwable {
         final AJAXClient client = getClient();
         final VCardImportResponse iResponse = Tools.importVCard(client,
-            new VCardImportRequest(client.getPrivateContactFolder(),
+            new VCardImportRequest(client.getValues().getPrivateContactFolder(),
             new FileInputStream(tmp), false));
         assertTrue("VCard importer does not give an error.", iResponse.hasError());
     }

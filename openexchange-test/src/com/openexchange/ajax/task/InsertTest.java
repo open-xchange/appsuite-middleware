@@ -90,9 +90,9 @@ public class InsertTest extends AbstractTaskTest {
      * @throws Throwable if an error occurs.
      */
     public void testInsertPrivateTask() throws Throwable {
-        final int folderId = client.getPrivateTaskFolder();
+        final int folderId = client.getValues().getPrivateTaskFolder();
         final AJAXSession session = client.getSession();
-        final TimeZone timeZone = client.getTimeZone();
+        final TimeZone timeZone = client.getValues().getTimeZone();
         final Task task = Create.createTask();
         task.setParentFolderID(folderId);
         final InsertResponse insertR = TaskTools.insert(session,

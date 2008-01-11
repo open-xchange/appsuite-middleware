@@ -98,27 +98,27 @@ public class Bug7276Test extends AbstractTaskTest {
         // User 1 inserts task.
         Task task = Create.createWithDefaults();
         task.setTitle("Test bug #7276");
-        task.setParentFolderID(client1.getPrivateTaskFolder());
+        task.setParentFolderID(client1.getValues().getPrivateTaskFolder());
         task.setParticipants(ParticipantTools.createParticipants(client1
-            .getUserId(), client2.getUserId()));
+            .getValues().getUserId(), client2.getValues().getUserId()));
         final InsertResponse iResponse = TaskTools.insert(client1,
-            new InsertRequest(task, client1.getTimeZone()));
+            new InsertRequest(task, client1.getValues().getTimeZone()));
         final int taskId = iResponse.getId();
         // User 2 checks if he can see it.
-        TaskTools.get(client2, new GetRequest(client2.getPrivateTaskFolder(),
-            taskId));
+        TaskTools.get(client2, new GetRequest(client2.getValues()
+            .getPrivateTaskFolder(), taskId));
         // User 1 modifies the task and removes participant User 2
         final GetResponse gResponse1 = TaskTools.get(client1, new GetRequest(
             iResponse));
-        task = gResponse1.getTask(client1.getTimeZone());
+        task = gResponse1.getTask(client1.getValues().getTimeZone());
         task.setParticipants(ParticipantTools.createParticipants(client1
-            .getUserId()));
+            .getValues().getUserId()));
         final UpdateResponse uResponse1 = TaskTools.update(client1,
-            new UpdateRequest(task, client1.getTimeZone()));
+            new UpdateRequest(task, client1.getValues().getTimeZone()));
         task.setLastModified(uResponse1.getTimestamp());
         // Now User 2 tries to load the task again.
         final GetResponse gResponse2 = TaskTools.get(client2, new GetRequest(
-            client2.getPrivateTaskFolder(), taskId, false));
+            client2.getValues().getPrivateTaskFolder(), taskId, false));
         assertTrue("Server does not give exception although it has to.",
             gResponse2.hasError());
         final TaskException.Code code = TaskException.Code.NO_PERMISSION;

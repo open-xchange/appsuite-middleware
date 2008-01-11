@@ -50,23 +50,16 @@
 package com.openexchange.ajax.framework;
 
 import java.io.IOException;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 
-import com.openexchange.ajax.config.ConfigTools;
-import com.openexchange.ajax.config.actions.GetRequest;
-import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.session.LoginRequest;
 import com.openexchange.ajax.session.LoginTools;
 import com.openexchange.ajax.session.LogoutRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.AJAXConfig.Property;
-import com.openexchange.tools.LocaleTools;
 import com.openexchange.tools.servlet.AjaxException;
 
 /**
@@ -79,19 +72,7 @@ public class AJAXClient {
 
     private final AJAXSession session;
 
-    private int userId = -1;
-
-    private TimeZone timeZone;
-
-    private Locale locale;
-
-    private int privateAppointmentFolder = -1;
-
-    private int privateTaskFolder = -1;
-
-    private int privateContactFolder = -1;
-    
-    private String inboxFolder;
+    private final UserValues values = new UserValues(this);
 
     /**
      * Default constructor.
@@ -109,78 +90,6 @@ public class AJAXClient {
         session.setId(LoginTools.login(session, new LoginRequest(login,
             password)).getSessionId());
     }
-
-    public int getUserId() throws AjaxException, IOException, SAXException,
-        JSONException {
-        if (-1 == userId) {
-            userId = ConfigTools.get(session, new GetRequest(Tree.Identifier))
-                .getInteger();
-        }
-        return userId;
-    }
-
-    public TimeZone getTimeZone() throws AjaxException, IOException,
-        SAXException, JSONException {
-        if (null == timeZone) {
-            final String tzId = ConfigTools.get(session, new GetRequest(Tree
-                .TimeZone)).getString();
-            timeZone = TimeZone.getTimeZone(tzId);
-        }
-        return timeZone;
-    }
-
-    public Date getServerTime() throws AjaxException, IOException, SAXException,
-        JSONException {
-        long serverTime = ConfigTools.get(this, new GetRequest(Tree
-            .CurrentTime)).getLong();
-        serverTime -= getTimeZone().getOffset(serverTime);
-        return new Date(serverTime);
-    }
-
-    public Locale getLocale() throws AjaxException, IOException, SAXException,
-        JSONException {
-        if (null == locale) {
-            final String localeId = ConfigTools.get(session, new GetRequest(Tree
-                .Language)).getString();
-            locale = LocaleTools.getLocale(localeId);
-        }
-        return locale;
-    }
-
-    public int getPrivateAppointmentFolder() throws AjaxException, IOException,
-        SAXException, JSONException {
-        if (-1 == privateAppointmentFolder) {
-            privateAppointmentFolder = ConfigTools.get(session, new GetRequest(
-                Tree.PrivateAppointmentFolder)).getInteger();
-        }
-        return privateAppointmentFolder;
-    }
-
-    public int getPrivateTaskFolder() throws AjaxException, IOException,
-        SAXException, JSONException {
-        if (-1 == privateTaskFolder) {
-            privateTaskFolder = ConfigTools.get(session, new GetRequest(
-                Tree.PrivateTaskFolder)).getInteger();
-        }
-        return privateTaskFolder;
-    }
-
-    public int getPrivateContactFolder() throws AjaxException, IOException,
-        SAXException, JSONException {
-        if (-1 == privateContactFolder) {
-            privateContactFolder = ConfigTools.get(this, new GetRequest(
-                Tree.PrivateContactFolder)).getInteger();
-        }
-        return privateContactFolder;
-    }
-
-    public String getInboxFolder() throws AjaxException, IOException, SAXException, JSONException {
-		if (null == inboxFolder) {
-			inboxFolder = ConfigTools.get(session, new GetRequest(Tree.InboxFolder))
-					.getString();
-		}
-		return inboxFolder;
-	}
 
     public enum User {
         User1(Property.LOGIN, Property.PASSWORD),
@@ -207,5 +116,12 @@ public class AJAXClient {
             session.setId(null);
         }
         session.getConversation().clearContents();
+    }
+
+    /**
+     * @return the values
+     */
+    public UserValues getValues() {
+        return values;
     }
 }

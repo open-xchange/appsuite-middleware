@@ -80,7 +80,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 	}
 
 	protected String getInboxFolder() throws AjaxException, IOException, SAXException, JSONException {
-		return getClient().getInboxFolder();
+		return getClient().getValues().getInboxFolder();
 	}
 
 	protected String getSendAddress() throws AjaxException, IOException, SAXException, JSONException {
@@ -91,10 +91,10 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 	 * @return the private task folder of the user.
 	 */
 	protected int getPrivateFolder() throws AjaxException, IOException, SAXException, JSONException {
-		return getClient().getPrivateTaskFolder();
+		return getClient().getValues().getPrivateTaskFolder();
 	}
 
 	protected TimeZone getTimeZone() throws AjaxException, IOException, SAXException, JSONException {
-		return getClient().getTimeZone();
+		return getClient().getValues().getTimeZone();
 	}
 }

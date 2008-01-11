@@ -96,7 +96,8 @@ public class Bug9252Test extends AbstractTaskTest {
     public void testReadAccess() throws Throwable {
         // Create public folder.
         final FolderObject folder = Create.createPublicFolder(
-            "Bug9295TaskFolder", FolderObject.TASK, client1.getUserId());
+            "Bug9295TaskFolder", FolderObject.TASK, client1.getValues()
+            .getUserId());
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         final CommonInsertResponse fInsertR = FolderTools.insert(client1,
             new com.openexchange.ajax.folder.actions.InsertRequest(folder));
@@ -108,12 +109,13 @@ public class Bug9252Test extends AbstractTaskTest {
             task.setParentFolderID(folder.getObjectID());
             task.setTitle("Test bug #9295");
             final InsertResponse iResponse = TaskTools.insert(client1,
-                new InsertRequest(task, client1.getTimeZone()));
+                new InsertRequest(task, client1.getValues().getTimeZone()));
             task.setObjectID(iResponse.getId());
             // Now second user tries to read the task.
             final GetResponse gResponse = TaskTools.get(client2,
                 new GetRequest(folder.getObjectID(), task.getObjectID()));
-            final Task reload = gResponse.getTask(client2.getTimeZone());
+            final Task reload = gResponse.getTask(client2.getValues()
+                .getTimeZone());
             TaskTools.compareAttributes(task, reload);
         } finally {
             FolderTools.delete(client1, new com.openexchange.ajax.folder.actions

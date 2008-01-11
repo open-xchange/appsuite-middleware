@@ -77,11 +77,11 @@ public abstract class AbstractTaskTest extends AbstractAJAXSession {
      */
     protected int getPrivateFolder() throws AjaxException, IOException,
         SAXException, JSONException {
-        return getClient().getPrivateTaskFolder();
+        return getClient().getValues().getPrivateTaskFolder();
     }
 
     protected TimeZone getTimeZone() throws AjaxException, IOException,
         SAXException, JSONException {
-        return getClient().getTimeZone();
+        return getClient().getValues().getTimeZone();
     }
 }
