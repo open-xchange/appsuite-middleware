@@ -335,7 +335,6 @@ public final class AJPv13Listener implements Runnable {
 				 * Listener could be successfully put into pool, so put him
 				 * asleep
 				 */
-				AJPv13Server.ajpv13ListenerMonitor.incrementNumIdle();
 				pooled = true;
 				listenerLock.lock();
 				try {

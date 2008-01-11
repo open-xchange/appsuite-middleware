@@ -247,6 +247,7 @@ public class AJPv13ListenerPool {
 	public static boolean putBack(final AJPv13Listener listener, final boolean enforcedPut) {
 		if (enforcedPut || LISTENER_QUEUE.size() < LISTENER_POOL_SIZE) {
 			AJPv13Server.ajpv13ListenerMonitor.incrementPoolSize();
+			AJPv13Server.ajpv13ListenerMonitor.incrementNumIdle();
 			return LISTENER_QUEUE.offer(listener);
 		}
 		return false;
