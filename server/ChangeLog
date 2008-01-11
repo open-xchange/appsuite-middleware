@@ -1,3 +1,8 @@
+* 2007-01-11 - sebastian.kauss@open-xchange.com
+
+ - Bugfix #6960: Missing recurrence_id when deleting a 
+   synchronized exception
+
 * 2008-01-11 - thorben.betten@open-xchange.com
 
  - Bugfix #10691: Increased IMAP timeout settings for both initial socket
