@@ -117,7 +117,8 @@ public class AppointmentWriter extends CalendarWriter {
 	
 	protected final static int[] deleteFields = {
 		DataObject.OBJECT_ID,
-		DataObject.LAST_MODIFIED
+		DataObject.LAST_MODIFIED,
+		AppointmentObject.RECURRENCE_ID
 	};
 	
 	private static final Log LOG = LogFactory.getLog(AppointmentWriter.class);
@@ -222,6 +223,11 @@ public class AppointmentWriter extends CalendarWriter {
 		if (delete) {
 			addElement(AppointmentFields.OBJECT_ID, ao.getObjectID(), e_prop);
 			addElement(AppointmentFields.LAST_MODIFIED, ao.getLastModified(), e_prop);
+			
+			if (ao.containsRecurrenceID()) {
+				addElement(AppointmentFields.RECURRENCE_ID, ao.getRecurrenceID(), e_prop);
+			}
+			
 			addElement("object_status", "DELETE", e_prop);
 		} else {
 			addElement("object_status", "CREATE", e_prop);
