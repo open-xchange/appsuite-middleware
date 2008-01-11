@@ -1,3 +1,8 @@
+* 2008-01-11 - thorben.betten@open-xchange.com
+
+ - Bugfix #10691: Increased IMAP timeout settings for both initial socket
+   connect and socket I/O
+
 * 2007-01-10 - sebastian.kauss@open-xchange.com
 
  - Bugfix #6455: WebDAV Interface: Unexpected SQL Error!
