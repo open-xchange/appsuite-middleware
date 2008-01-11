@@ -179,7 +179,7 @@ public class HttpSessionManagement {
 			final String rndNumber = Integer.valueOf(secRandom.nextInt()).toString();
 			final MessageDigest sha = MessageDigest.getInstance("SHA-1");
 			final byte[] inputBytes = sha.digest(rndNumber.getBytes());
-			final StringBuilder result = new StringBuilder();
+			final StringBuilder result = new StringBuilder(inputBytes.length * 2);
 			for (int i = 0; i < inputBytes.length; i++) {
 				final byte b = inputBytes[i];
 				result.append(digits[(b & 0xf0) >> 4]);
