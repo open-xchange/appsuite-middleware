@@ -53,6 +53,7 @@ package com.openexchange.api2;
 
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.groupware.reminder.ReminderDeleteInterface;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.tools.iterator.SearchIterator;
 import java.sql.Connection;
@@ -64,6 +65,8 @@ import java.util.Date;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public interface ReminderSQLInterface {
+	
+	public void setReminderDeleteInterface(ReminderDeleteInterface reminderDeleteInterface);
 	
 	public int insertReminder(ReminderObject reminderObj) throws OXMandatoryFieldException, OXConflictException, OXException;
 
@@ -86,6 +89,8 @@ public interface ReminderSQLInterface {
 	public boolean existsReminder(int targetId, int userId, int module) throws OXException;
 	
 	public ReminderObject loadReminder(int targetId, int userId, int module) throws OXException;
+	
+	public ReminderObject loadReminder(int objectId) throws OXMandatoryFieldException, OXConflictException, OXException;
 
     /**
      * This method loads the reminder for several target objects.

@@ -76,6 +76,8 @@ import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.reminder.EmptyReminderDeleteImpl;
+import com.openexchange.groupware.reminder.ReminderDeleteInterface;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -123,12 +125,27 @@ public class ReminderRequest {
         final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
         final int recurrencePosition = DataParser.parseInt(jData, CalendarFields.RECURRENCE_POSITION);
         
-        final ReminderHandler reminderSql = new ReminderHandler(sessionObj);
+        final ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
         final JSONArray jsonArray = new JSONArray();
         
         try {
             int uid = userObj.getId();
             final ReminderObject reminder = reminderSql.loadReminder(id);
+            final ReminderDeleteInterface reminderDeleteInterface;
+            final int module = reminder.getModule();
+            switch (module) {
+            	case Types.APPOINTMENT:
+            		reminderDeleteInterface = new EmptyReminderDeleteImpl();
+            		break;
+            	case Types.TASK:
+            		reminderDeleteInterface = new EmptyReminderDeleteImpl();
+            		break;
+            	default:
+            		reminderDeleteInterface = new EmptyReminderDeleteImpl();
+            }
+            
+            reminderSql.setReminderDeleteInterface(reminderDeleteInterface);
+            
             if (reminder != null) {
                 if (reminder.isRecurrenceAppointment()) {
                     final int targetId = Integer.parseInt(reminder.getTargetId());

@@ -94,6 +94,8 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 	
 	private final Context context;
 	
+	private ReminderDeleteInterface reminderDeleteInterface;
+	
 	private static final String sqlInsert = "INSERT INTO reminder (object_id, cid, target_id, module, userid, alarm, recurrence, last_modified, folder) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	
 	private static final String sqlUpdate = "UPDATE reminder SET alarm = ?, recurrence = ?, description = ?, last_modified = ?, folder = ? WHERE cid = ? AND target_id = ? AND userid = ?";
@@ -120,10 +122,21 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 	
 	public ReminderHandler(final Session sessionObj) {
 		context = sessionObj.getContext();
+		reminderDeleteInterface = new EmptyReminderDeleteImpl();
 	}
 	
 	public ReminderHandler(final Context context) {
 		this.context = context;
+		reminderDeleteInterface = new EmptyReminderDeleteImpl();
+	}
+
+	public ReminderHandler(final Context context, final ReminderDeleteInterface reminderDeleteInterface) {
+		this.context = context;
+		this.reminderDeleteInterface = reminderDeleteInterface;
+	}
+	
+	public void setReminderDeleteInterface(ReminderDeleteInterface reminderDeleteInterface) {
+		this.reminderDeleteInterface = reminderDeleteInterface;
 	}
 	
 	public int insertReminder( final ReminderObject reminderObj) throws OXException {
@@ -378,6 +391,8 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			if (deleted == 0) {
                 throw new ReminderException(Code.NOT_FOUND, Integer.parseInt(targetId), contextId);
 			}
+			
+			reminderDeleteInterface.updateTargetObject(targetId, userId);
 		} catch (final SQLException exc) {
 			throw new ReminderException(ReminderException.Code.DELETE_EXCEPTION, exc);
 		} finally {
@@ -445,6 +460,8 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			if (deleted == 0) {
                 throw new ReminderException(Code.NOT_FOUND, Integer.parseInt(targetId), contextId);
 			}
+			
+			reminderDeleteInterface.updateTargetObject(targetId);
 		} catch (final SQLException exc) {
 			throw new ReminderException(ReminderException.Code.DELETE_EXCEPTION, exc);
 		} finally {
