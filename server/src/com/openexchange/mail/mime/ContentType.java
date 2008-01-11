@@ -793,25 +793,31 @@ public final class ContentType implements Serializable {
 		} else if (isAscii(toEncode)) {
 			return toEncode;
 		}
-		final Charset cs = Charset.forName(charset);
 		final char[] chars = toEncode.toCharArray();
 		final StringBuilder retval = new StringBuilder(chars.length * 3 + 16);
 		/*
 		 * Append encoding information: charset name and language delimited by
 		 * single quotes
 		 */
-		retval.append('\'').append(charset).append('\'').append(
-				language == null || language.length() == 0 ? "" : language).append('\'');
-		for (int i = 0; i < chars.length; i++) {
-			final char c = chars[i];
-			if (Character.isWhitespace(c) || !isAscii(c)) {
-				final byte[] bytes = String.valueOf(c).getBytes(cs);
-				for (int j = 0; j < bytes.length; j++) {
-					retval.append('%').append(Integer.toHexString((bytes[j] & 0xFF)).toUpperCase());
+		try {
+			retval.append('\'').append(charset).append('\'').append(
+					language == null || language.length() == 0 ? "" : language).append('\'');
+			for (int i = 0; i < chars.length; i++) {
+				final char c = chars[i];
+				if (Character.isWhitespace(c) || !isAscii(c)) {
+					final byte[] bytes = String.valueOf(c).getBytes(charset);
+					for (int j = 0; j < bytes.length; j++) {
+						retval.append('%').append(Integer.toHexString((bytes[j] & 0xFF)).toUpperCase());
+					}
+				} else {
+					retval.append(c);
 				}
-			} else {
-				retval.append(c);
 			}
+		} catch (final UnsupportedEncodingException e) {
+			/*
+			 * Cannot occur
+			 */
+			LOG.error(e.getLocalizedMessage(), e);
 		}
 		return retval.toString();
 	}
