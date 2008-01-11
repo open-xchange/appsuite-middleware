@@ -3,6 +3,9 @@
  - Bugfix #6960: Missing recurrence_id when deleting a 
    synchronized exception
 
+ - Bugfix: #9734: add number_of_attachments and number_of_links to 
+   json array (calendar, contacts, tasks)
+
 * 2008-01-11 - thorben.betten@open-xchange.com
 
  - Bugfix #10691: Increased IMAP timeout settings for both initial socket
