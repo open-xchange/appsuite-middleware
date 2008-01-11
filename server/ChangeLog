@@ -2,6 +2,8 @@
 
  - Bugfix #10691: Increased IMAP timeout settings for both initial socket
    connect and socket I/O
+ - Bugfix #10739: Added connect timeout and timeout for blocking operations
+   to socket when detecting IMAP server
 
 * 2007-01-10 - sebastian.kauss@open-xchange.com
 

@@ -51,8 +51,8 @@ package com.openexchange.imap.user2acl;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.InterruptedIOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
@@ -185,11 +185,21 @@ public final class User2ACLAutoDetector {
 			InputStreamReader isr = null;
 			try {
 				try {
-					s = TimedSocket.getSocket(inetAddress, imapPort, IMAPConfig.getImapConnectionTimeout());
+					s = new Socket();
 					/*
-					 * Define timeout for blocking operations
+					 * Set connect timeout
 					 */
-					s.setSoTimeout(IMAPConfig.getImapTimeout());
+					if (IMAPConfig.getImapConnectionTimeout() > 0) {
+						s.connect(new InetSocketAddress(inetAddress, imapPort), IMAPConfig.getImapConnectionTimeout());
+					} else {
+						s.connect(new InetSocketAddress(inetAddress, imapPort));
+					}
+					if (IMAPConfig.getImapTimeout() > 0) {
+						/*
+						 * Define timeout for blocking operations
+						 */
+						s.setSoTimeout(IMAPConfig.getImapTimeout());
+					}
 				} catch (final IOException e) {
 					throw new User2ACLException(User2ACLException.Code.CREATING_SOCKET_FAILED, e, inetAddress
 							.toString(), e.getLocalizedMessage());
@@ -248,11 +258,21 @@ public final class User2ACLAutoDetector {
 			InputStreamReader isr = null;
 			try {
 				try {
-					s = TimedSocket.getSocket(inetAddress, imapPort, IMAPConfig.getImapConnectionTimeout());
+					s = new Socket();
 					/*
-					 * Define timeout for blocking operations
+					 * Set connect timeout
 					 */
-					s.setSoTimeout(IMAPConfig.getImapTimeout());
+					if (IMAPConfig.getImapConnectionTimeout() > 0) {
+						s.connect(new InetSocketAddress(inetAddress, imapPort), IMAPConfig.getImapConnectionTimeout());
+					} else {
+						s.connect(new InetSocketAddress(inetAddress, imapPort));
+					}
+					if (IMAPConfig.getImapTimeout() > 0) {
+						/*
+						 * Define timeout for blocking operations
+						 */
+						s.setSoTimeout(IMAPConfig.getImapTimeout());
+					}
 				} catch (final IOException e) {
 					throw new User2ACLException(User2ACLException.Code.CREATING_SOCKET_FAILED, e, inetAddress
 							.toString(), e.getLocalizedMessage());
@@ -306,222 +326,4 @@ public final class User2ACLAutoDetector {
 		}
 	}
 
-	/**
-	 * {@link TimedSocket} - This class offers a timeout feature on socket
-	 * connections. A maximum length of time allowed for a connection can be
-	 * specified, along with a host and port.
-	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-	 * 
-	 */
-	private static final class TimedSocket {
-
-		/**
-		 * Polling delay for socket checks (in milliseconds)
-		 */
-		private static final int POLL_DELAY = 100;
-
-		/**
-		 * Attempts to connect to a service at the specified address and port,
-		 * for a specified maximum amount of time.
-		 * 
-		 * @param addr
-		 *            Address of host
-		 * @param port
-		 *            Port of service
-		 * @param delay
-		 *            Delay in milliseconds
-		 * @return The established client socket
-		 * @throws InterruptedIOException
-		 *             If socket connect times out
-		 * @throws IOException
-		 *             If an I/O error occurs
-		 */
-		public static Socket getSocket(final InetAddress addr, final int port, final int delay)
-				throws InterruptedIOException, IOException {
-			/*
-			 * Create a new socket thread, and start it running
-			 */
-			final SocketThread st = new SocketThread(addr, port);
-			st.start();
-			int timer = 0;
-			Socket sock = null;
-			/*
-			 * Frequently checking for established socket until delay is
-			 * reached.
-			 */
-			for (;;) {
-				/*
-				 * Check if a connection is established
-				 */
-				if (st.isConnected()) {
-					sock = st.getSocket();
-					break;
-				}
-				/*
-				 * Check if an error occurred
-				 */
-				if (st.isError()) {
-					throw (st.getException());
-				}
-				/*
-				 * Sleep for a short period of time
-				 */
-				try {
-					Thread.sleep(POLL_DELAY);
-				} catch (final InterruptedException ie) {
-					LOG.warn(ie.getLocalizedMessage(), ie);
-				}
-				/*
-				 * Increment timer
-				 */
-				timer += POLL_DELAY;
-				/*
-				 * Check to see if time limit exceeded
-				 */
-				if (timer > delay) {
-					/*
-					 * Can't connect to server
-					 */
-					throw new InterruptedIOException("Could not connect for " + delay + " milliseconds");
-				}
-			}
-			/*
-			 * Return established socket
-			 */
-			return sock;
-		}
-
-		/**
-		 * Attempts to connect to a service at the specified address and port,
-		 * for a specified maximum amount of time.
-		 * 
-		 * @param host
-		 *            Address of host
-		 * @param port
-		 *            Port of service
-		 * @param delay
-		 *            Delay in milliseconds
-		 * @return The established client socket
-		 * @throws InterruptedIOException
-		 *             If socket connect times out
-		 * @throws IOException
-		 *             If an I/O error occurs
-		 */
-		public static Socket getSocket(final String host, final int port, final int delay)
-				throws InterruptedIOException, IOException {
-			/*
-			 * Convert host into an InetAddress, and call getSocket method
-			 */
-			return getSocket(InetAddress.getByName(host), port, delay);
-		}
-	}
-
-	/**
-	 * {@link SocketThread} - Establishes a socket
-	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-	 * 
-	 */
-	private static final class SocketThread extends Thread {
-
-		/**
-		 * Socket connection to remote host
-		 */
-		volatile private Socket m_connection = null;
-
-		/**
-		 * Host name to connect to
-		 */
-		private String m_host = null;
-
-		/**
-		 * Internet Address to connect to
-		 */
-		private InetAddress m_inet = null;
-
-		/**
-		 * Port number to connect to
-		 */
-		private int m_port = 0;
-
-		/**
-		 * Exception in the event a connection error occurs
-		 */
-		private IOException m_exception = null;
-
-		/**
-		 * Initializes a new {@link SocketThread}
-		 * 
-		 * @param host
-		 *            The host name
-		 * @param port
-		 *            The port
-		 */
-		public SocketThread(final String host, final int port) {
-			m_host = host;
-			m_port = port;
-		}
-
-		/**
-		 * Initializes a new {@link SocketThread}
-		 * 
-		 * @param inetAddr
-		 *            The internet address
-		 * @param port
-		 *            The port
-		 */
-		public SocketThread(final InetAddress inetAddr, final int port) {
-			m_inet = inetAddr;
-			m_port = port;
-		}
-
-		@Override
-		public void run() {
-			/*
-			 * Socket used for establishing a connection
-			 */
-			Socket sock = null;
-			try {
-				/*
-				 * Was a string or an internet address specified?
-				 */
-				if (m_host != null) {
-					/*
-					 * Connect to a remote host - BLOCKING I/O
-					 */
-					sock = new Socket(m_host, m_port);
-				} else {
-					/*
-					 * Connect to a remote host - BLOCKING I/O
-					 */
-					sock = new Socket(m_inet, m_port);
-				}
-			} catch (final IOException ioe) {
-				m_exception = ioe;
-				return;
-			}
-			/*
-			 * If socket constructor returned without error, then connection
-			 * finished
-			 */
-			m_connection = sock;
-		}
-
-		public boolean isConnected() {
-			return (m_connection != null);
-		}
-
-		public boolean isError() {
-			return (m_exception != null);
-		}
-
-		public Socket getSocket() {
-			return m_connection;
-		}
-
-		public IOException getException() {
-			return m_exception;
-		}
-	}
 }
