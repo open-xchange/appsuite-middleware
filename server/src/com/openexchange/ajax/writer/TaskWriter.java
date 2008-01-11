@@ -51,14 +51,16 @@
 
 package com.openexchange.ajax.writer;
 
-import com.openexchange.ajax.fields.TaskFields;
-import com.openexchange.groupware.tasks.Task;
 import java.util.TimeZone;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.openexchange.ajax.fields.TaskFields;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * TaskWriter
@@ -222,6 +224,12 @@ public class TaskWriter extends CalendarWriter {
             case Task.ALARM:
                 writeValue(taskObject.getAlarm(), timeZone, jsonArray);
                 break;
+			case Task.NUMBER_OF_ATTACHMENTS:
+				writeValue(taskObject.getNumberOfAttachments(), jsonArray);
+				break;
+			case Task.NUMBER_OF_LINKS:
+				writeValue(taskObject.getNumberOfLinks(), jsonArray);
+				break;
 			default: 
 				LOG.warn("missing field in mapping: " + field);
 		}

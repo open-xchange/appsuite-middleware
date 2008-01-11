@@ -302,6 +302,12 @@ public class AppointmentWriter extends CalendarWriter {
 					jsonArray.put(JSONObject.NULL);
 				}
 				break;
+			case AppointmentObject.NUMBER_OF_ATTACHMENTS:
+				writeValue(appointmentObject.getNumberOfAttachments(), jsonArray);
+				break;
+			case AppointmentObject.NUMBER_OF_LINKS:
+				writeValue(appointmentObject.getNumberOfLinks(), jsonArray);
+				break;
 			default:
 				LOG.warn("missing field in mapping: " + field);
 		}

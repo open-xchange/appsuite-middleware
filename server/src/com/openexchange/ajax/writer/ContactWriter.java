@@ -51,17 +51,17 @@
 
 package com.openexchange.ajax.writer;
 
+import java.util.TimeZone;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.LinkEntryObject;
-import java.io.PrintWriter;
-import java.util.TimeZone;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONWriter;
 
 /**
  * ContactWriter
@@ -569,6 +569,12 @@ public class ContactWriter extends CommonWriter {
 				} else {
 					jsonArray.put(jsonDistributionListArray);
 				}
+				break;
+			case ContactObject.NUMBER_OF_ATTACHMENTS:
+				writeValue(contactobject.getNumberOfAttachments(), jsonArray);
+				break;
+			case ContactObject.NUMBER_OF_LINKS:
+				writeValue(contactobject.getNumberOfLinks(), jsonArray);
 				break;
 			default:
 				throw new JSONException("missing field in mapping: " + field);
