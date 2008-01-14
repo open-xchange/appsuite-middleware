@@ -119,7 +119,7 @@ public class UUEncodedMultiPart {
 
 	/**
 	 * Try to find attachments recursive. Must containing the "begin" and "end"
-	 * parameter, and specified tokens as well. Usualy looks like:
+	 * parameter, and specified tokens as well. Usually looks like:
 	 * 
 	 * <pre>
 	 * begin 600 filename.doc
