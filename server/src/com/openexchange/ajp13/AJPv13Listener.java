@@ -151,7 +151,6 @@ public final class AJPv13Listener implements Runnable {
 			} finally {
 				listenerLock.unlock();
 			}
-			AJPv13Server.ajpv13ListenerMonitor.incrementNumActive();
 			return true;
 		}
 		/*
@@ -159,7 +158,6 @@ public final class AJPv13Listener implements Runnable {
 		 */
 		listenerThread.start();
 		listenerStarted = true;
-		AJPv13Server.ajpv13ListenerMonitor.incrementNumActive();
 		return true;
 	}
 
@@ -216,6 +214,7 @@ public final class AJPv13Listener implements Runnable {
 		boolean keepOnRunning = true;
 		changeNumberOfRunningAJPListeners(true);
 		while (keepOnRunning && client != null) {
+			AJPv13Server.ajpv13ListenerMonitor.incrementNumActive();
 			final long start = System.currentTimeMillis();
 			/*
 			 * Assign a connection to this listener
@@ -330,7 +329,7 @@ public final class AJPv13Listener implements Runnable {
 			 * Put back listener into pool. Use an enforced put if mod_jk is
 			 * enabled.
 			 */
-			if (AJPv13ListenerPool.putBack(this, AJPv13Config.isAJPModJK())) {
+			if (AJPv13ListenerPool.putBack(this, false/* AJPv13Config.isAJPModJK() */)) {
 				/*
 				 * Listener could be successfully put into pool, so put him
 				 * asleep
@@ -344,20 +343,20 @@ public final class AJPv13Listener implements Runnable {
 					if (this.listenerThread.isDead()) {
 						keepOnRunning = false;
 					}
-					pooled = false;
 				} catch (final InterruptedException e) {
 					if (listenerStarted) {
 						LOG.error(e.getMessage(), e);
 					}
 					keepOnRunning = false;
 				} finally {
+					pooled = false;
 					listenerLock.unlock();
 				}
 			} else {
 				/*
 				 * Listener could NOT be put back. Leave run() method and let
-				 * this listener die since he finished working on assigned
-				 * socket
+				 * this listener die since he finished working and socket is
+				 * closed.
 				 */
 				final long duration = System.currentTimeMillis() - start;
 				AJPv13Server.ajpv13ListenerMonitor.addUseTime(duration);
