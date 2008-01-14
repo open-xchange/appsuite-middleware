@@ -199,9 +199,11 @@ public final class MIMEMessageConverter {
 			mimeMsg.setRecipients(Message.RecipientType.TO, mail.getTo());
 			mimeMsg.setRecipients(Message.RecipientType.CC, mail.getCc());
 			mimeMsg.setRecipients(Message.RecipientType.BCC, mail.getBcc());
-			mimeMsg.setDisposition(mail.getDisposition());
+			mimeMsg.setDisposition(mail.getContentDisposition().getDisposition());
 			if (mail.containsFileName() && mail.getFileName() != null) {
 				mimeMsg.setFileName(mail.getFileName());
+			} else if (mail.getContentDisposition().containsFilenameParameter()) {
+				mimeMsg.setFileName(mail.getContentDisposition().getFilenameParameter());
 			}
 			if (mail.containsFlags()) {
 				parseMimeFlags(mail.getFlags(), mimeMsg);
@@ -292,12 +294,14 @@ public final class MIMEMessageConverter {
 			/*
 			 * Set disposition & filename
 			 */
-			part.setDisposition(mailPart.getDisposition());
+			part.setDisposition(mailPart.getContentDisposition().getDisposition());
 			if (mailPart.containsContentId()) {
 				part.setHeader(MessageHeaders.HDR_CONTENT_ID, mailPart.getContentId());
 			}
 			if (mailPart.containsFileName() && mailPart.getFileName() != null) {
 				part.setFileName(mailPart.getFileName());
+			} else if (mailPart.getContentDisposition().containsFilenameParameter()) {
+				part.setFileName(mailPart.getContentDisposition().getFilenameParameter());
 			}
 			/*
 			 * Set content type
@@ -918,7 +922,12 @@ public final class MIMEMessageConverter {
 					mail.setContentId(tmp[0]);
 				}
 			}
-			mail.setDisposition(msg.getDisposition());
+			{
+				final String tmp = msg.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
+				if (tmp != null && tmp.length() > 0) {
+					mail.setContentDisposition(tmp);
+				}
+			}
 			{
 				final String dispNot = msg.getHeader(MessageHeaders.HDR_DISP_NOT_TO, null);
 				if (dispNot != null) {
@@ -928,10 +937,10 @@ public final class MIMEMessageConverter {
 			mail.removeHeader(MessageHeaders.HDR_DISP_NOT_TO);
 			String filename = decodeMultiEncodedHeader(msg.getFileName());
 			if (filename == null) {
-				/*
-				 * Look up content type header for contiguous "name" parameter
-				 */
-				filename = mail.getContentType().getParameter("name");
+				filename = mail.getContentDisposition().getFilenameParameter();
+				if (filename == null) {
+					filename = mail.getContentType().getParameter("name");
+				}
 			}
 			mail.setFileName(filename);
 			parseFlags(msg.getFlags(), mail);
@@ -954,14 +963,14 @@ public final class MIMEMessageConverter {
 	private static final String ENC_BASE64 = "base64";
 
 	/**
-	 * Creates a mail part object from given part
+	 * Creates a mail part object from given MIME part
 	 * 
 	 * @param part
 	 *            The part
 	 * @return an instance of <code>{@link MailPart}</code> containing the
 	 *         attributes from given part
 	 */
-	public static MailPart convertIMAPPart(final Part part) throws MailException {
+	public static MailPart convertPart(final Part part) throws MailException {
 		try {
 			/*
 			 * Create with reference to content
@@ -978,13 +987,18 @@ public final class MIMEMessageConverter {
 					mailPart.setContentId(tmp[0]);
 				}
 			}
-			mailPart.setDisposition(part.getDisposition());
+			{
+				final String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION);
+				if (tmp != null && tmp.length > 0) {
+					mailPart.setContentDisposition(tmp[0]);
+				}
+			}
 			String filename = decodeMultiEncodedHeader(part.getFileName());
 			if (filename == null) {
-				/*
-				 * Look up content type header for contiguous "name" parameter
-				 */
-				filename = mailPart.getContentType().getParameter("name");
+				filename = mailPart.getContentDisposition().getFilenameParameter();
+				if (filename == null) {
+					filename = mailPart.getContentType().getParameter("name");
+				}
 			}
 			mailPart.setFileName(filename);
 			int size = part.getSize();

@@ -797,15 +797,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 							if (LOG.isWarnEnabled()) {
 								LOG.warn(e.getMessage(), e);
 							}
-							/*
-							 * Try with less strict parsing
-							 */
-							try {
-								msg.setContentType(new ContentType(sb.toString(), false));
-							} catch (final MailException ie) {
-								LOG.error(ie.getMessage(), ie);
-								msg.setContentType(new ContentType(DEFAULT_CONTENT_TYPE));
-							}
+							msg.setContentType(new ContentType(DEFAULT_CONTENT_TYPE));
 						}
 						msg.setHasAttachment(bs.isMulti()
 								&& (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || hasAttachments(bs)));

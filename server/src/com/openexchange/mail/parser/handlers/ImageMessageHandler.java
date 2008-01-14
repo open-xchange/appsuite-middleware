@@ -357,8 +357,8 @@ public final class ImageMessageHandler implements MailMessageHandler {
 	 */
 	public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String id)
 			throws MailException {
-		return handleAttachment(part, !Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition()), baseContentType, part
-				.getFileName(), id);
+		return handleAttachment(part, !Part.ATTACHMENT.equalsIgnoreCase(part.getContentDisposition().getDisposition()),
+				baseContentType, part.getFileName(), id);
 	}
 
 	/*

@@ -313,15 +313,7 @@ public final class MIMEMessageUtility {
 							if (LOG.isWarnEnabled()) {
 								LOG.warn(e.getMessage(), e);
 							}
-							/*
-							 * Try with less strict parsing
-							 */
-							try {
-								ct = new ContentType(src.getContentType(), false);
-							} catch (final MailException ie) {
-								LOG.error(ie.getMessage(), ie);
-								ct = new ContentType(MIMETypes.MIME_DEFAULT);
-							}
+							ct = new ContentType(MIMETypes.MIME_DEFAULT);
 						}
 						dest.setContentType(ct);
 						try {

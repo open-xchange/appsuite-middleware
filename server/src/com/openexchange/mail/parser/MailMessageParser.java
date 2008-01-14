@@ -159,7 +159,7 @@ public final class MailMessageParser {
 		 * Set part infos
 		 */
 		int partCount = partCountArg;
-		final String disposition = mailPart.containsDisposition() ? mailPart.getDisposition() : null;
+		final String disposition = mailPart.containsContentDisposition() ? mailPart.getContentDisposition().getDisposition() : null;
 		final long size = mailPart.getSize();
 		final String filename = MailMessageParser.getFileName(mailPart.getFileName(), MailMessageParser.getSequenceId(
 				prefix, partCount), mailPart.getContentType().getBaseType());
@@ -396,7 +396,7 @@ public final class MailMessageParser {
 				 * Iterate TNEF attachments and nested messages
 				 */
 				final int s = message.getAttachments().size();
-				final Iterator iter = message.getAttachments().iterator();
+				final Iterator<?> iter = message.getAttachments().iterator();
 				final ByteArrayOutputStream os = new ByteArrayOutputStream(1024);
 				for (int i = 0; i < s; i++) {
 					final Attachment attachment = (Attachment) iter.next();

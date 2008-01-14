@@ -234,7 +234,7 @@ public final class AJAXFile extends PermissionServlet {
 				contentType.setPrimaryType(ct.substring(0, pos));
 				contentType.setSubType(ct.substring(pos + 1));
 			}
-			contentType.addParameter("name", fileName);
+			contentType.setParameter("name", fileName);
 			resp.setContentType(contentType.toString());
 			resp.setHeader("Content-disposition", new StringBuilder(50).append("inline; filename=\"").append(fileName)
 					.append('"').toString());

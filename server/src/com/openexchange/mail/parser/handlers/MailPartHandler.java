@@ -409,8 +409,9 @@ public final class MailPartHandler implements MailMessageHandler {
 	 */
 	public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String id)
 			throws MailException {
-		return handleAttachment(part,
-				(!Part.ATTACHMENT.equalsIgnoreCase(part.getDisposition()) && part.getFileName() == null),
+		return handleAttachment(
+				part,
+				(!Part.ATTACHMENT.equalsIgnoreCase(part.getContentDisposition().getDisposition()) && part.getFileName() == null),
 				baseContentType, part.getFileName(), id);
 	}
 
@@ -462,7 +463,7 @@ public final class MailPartHandler implements MailMessageHandler {
 	}
 
 	private static void checkFilename(final MailPart mailPart, final String id, final String baseMimeType) {
-		if (!mailPart.containsFileName() || mailPart.getFileName() == null) {
+		if (mailPart.getFileName() == null) {
 			mailPart.setFileName(generateFilename(id, baseMimeType));
 		}
 	}

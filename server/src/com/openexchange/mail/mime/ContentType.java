@@ -50,23 +50,10 @@
 package com.openexchange.mail.mime;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.mail.internet.MimeUtility;
-
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.utils.MessageUtility;
 
 /**
  * {@link ContentType} - Parses value of MIME header <code>Content-Type</code>
@@ -74,115 +61,15 @@ import com.openexchange.mail.utils.MessageUtility;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ContentType implements Serializable {
-
-	private static final class ParameterContinuation {
-
-		private final List<String> parameterContinuations;
-
-		private String charset;
-
-		private String language;
-
-		public ParameterContinuation() {
-			super();
-			parameterContinuations = new ArrayList<String>(2);
-		}
-
-		/**
-		 * Gets the charset
-		 * 
-		 * @return the charset
-		 */
-		public String getCharset() {
-			return charset;
-		}
-
-		/**
-		 * Sets the charset
-		 * 
-		 * @param charset
-		 *            the charset to set
-		 */
-		public void setCharset(final String charset) {
-			this.charset = charset;
-		}
-
-		/**
-		 * Gets the language
-		 * 
-		 * @return the language
-		 */
-		public String getLanguage() {
-			return language;
-		}
-
-		/**
-		 * Sets the language
-		 * 
-		 * @param language
-		 *            the language to set
-		 */
-		public void setLanguage(final String language) {
-			this.language = language;
-		}
-
-		/**
-		 * Adds a contiguous value to this continuation parameter
-		 * 
-		 * @param number
-		 *            The parameter's number
-		 * @param contiguousValue
-		 *            The contiguous value
-		 * @throws IndexOutOfBoundsException
-		 *             If number does not fit into parameter continuations
-		 */
-		public void addParameterContinuation(final int number, final String contiguousValue) {
-			final int index = number - 1;
-			if (index < 0) {
-				throw new IndexOutOfBoundsException(String.valueOf(number));
-			}
-			parameterContinuations.add(index, contiguousValue);
-		}
-
-		/**
-		 * Writes this parameter's contiguous value into specified instance of
-		 * {@link StringBuilder}
-		 * 
-		 * @param sb
-		 *            The instance of {@link StringBuilder} to fill
-		 */
-		public void writeValue(final StringBuilder sb) {
-			for (int i = 0; i < parameterContinuations.size(); i++) {
-				if (null != parameterContinuations.get(i)) {
-					sb.append(parameterContinuations.get(i));
-				}
-			}
-		}
-
-	}
+public final class ContentType extends ParameterizedHeader implements Serializable {
 
 	private static final long serialVersionUID = -9197784872892324694L;
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ContentType.class);
 
 	/**
 	 * The regular expression that should match whole content type
 	 */
 	private static final Pattern PATTERN_CONTENT_TYPE = Pattern
-			.compile("(?:([\\p{ASCII}&&[^/;\\s\"]]+)(?:/([\\p{ASCII}&&[^;\\s\"]]+))?)((?:(?:\\s*;\\s*|\\s+)[\\p{ASCII}&&[^=\"\\s]]+(?:=(?:(?:[^\"][\\p{ASCII}&&[^\\s,;:\\\\\"/\\[\\]?=()<>@]]*)|(?:\"\\p{ASCII}+?\")))?)*)");
-
-	/**
-	 * The regular expression to parse parameters
-	 */
-	private static final Pattern PATTERN_PARAMETER = Pattern
-			.compile("(?:\\s*;\\s*|\\s+)([\\p{ASCII}&&[^=\"\\s]]+)(?:=((?:[^\"][\\p{ASCII}&&[^\\s,;:\\\\\"/\\[\\]?=()<>@]]*)|(?:\"\\p{ASCII}+?\")))?");
-
-	private static final Pattern PATTERN_BASETYPE = Pattern
-			.compile("([\\x00-\\x7F&&[^/;\\s]]+)(?:/([\\x00-\\x7F&&[^;\\s]]+))?");
-
-	private static final Pattern PATTERN_SINGLE_PARAM = Pattern.compile("([^\\s]+)(\\s*[=|:]\\s*)([^\\s^;]+)");
+			.compile("(?:([\\p{ASCII}&&[^/;\\s\"]]+)(?:/([\\p{ASCII}&&[^;\\s\"]]+))?)");
 
 	/**
 	 * The MIME type delimiter
@@ -191,13 +78,9 @@ public final class ContentType implements Serializable {
 	 */
 	private static final char DELIMITER = '/';
 
-	private static final char SEMICOLON = ';';
-
-	private static final int NONE = -1;
-
-	private static final String SPLIT = "\\s*";
-
 	private static final String DEFAULT_SUBTYPE = "OCTET-STREAM";
+
+	private static final String PARAM_CHARSET = "charset";
 
 	private String primaryType;
 
@@ -205,16 +88,12 @@ public final class ContentType implements Serializable {
 
 	private String baseType;
 
-	private final Map<String, String> parameters;
-
-	private Map<String, ParameterContinuation> parameterContinuations;
-
 	/**
 	 * Initializes a new {@link ContentType}
 	 */
 	public ContentType() {
 		super();
-		parameters = new HashMap<String, String>();
+		parameterList = new ParameterList();
 	}
 
 	/**
@@ -226,67 +105,19 @@ public final class ContentType implements Serializable {
 	 *             If content type cannot be parsed
 	 */
 	public ContentType(final String contentType) throws MailException {
-		this(contentType, true);
+		super();
+		parseContentType(contentType);
 	}
 
-	/**
-	 * Initializes a new {@link ContentType}
-	 * 
-	 * @param contentTypeArg
-	 *            The content type
-	 * @param strict
-	 *            <code>true</code> for strict parsing; otherwise
-	 *            <code>false</code>
-	 * @throws MailException
-	 *             If content type cannot be parsed
-	 */
-	public ContentType(final String contentTypeArg, final boolean strict) throws MailException {
-		this();
-		final String contentType = removeEndingSemicolon(contentTypeArg.trim().replaceAll("\\s*=\\s*", "="));
-		if (strict) {
-			/*
-			 * Expect a correct base type (e.g. text/plain) and
-			 * semicolon-separated parameters (if any)
-			 */
-			parseContentType(contentType);
-		} else {
-			int pos = NONE;
-			final Matcher m = PATTERN_BASETYPE.matcher(contentType);
-			if (m.find()) {
-				baseType = null;
-				primaryType = m.group(1);
-				subType = m.group(2);
-				if (subType == null || subType.length() == 0) {
-					subType = DEFAULT_SUBTYPE;
-				}
-				pos = m.end();
-			} else {
-				throw new MailException(MailException.Code.INVALID_CONTENT_TYPE, contentType);
-			}
-			if (pos != NONE) {
-				final String paramStr = contentType.substring(pos);
-				final int delim = paramStr.charAt(0) == SEMICOLON ? SEMICOLON : Character.isWhitespace(paramStr
-						.charAt(0)) ? paramStr.charAt(0) : NONE;
-				if (delim != NONE) {
-					final String[] paramArr = paramStr.split(new StringBuilder(SPLIT).append((char) delim)
-							.append(SPLIT).toString());
-					NextParam: for (int i = 0; i < paramArr.length; i++) {
-						final Matcher paramMatcher;
-						if (paramArr[i].length() == 0) {
-							continue NextParam;
-						} else if ((paramMatcher = PATTERN_SINGLE_PARAM.matcher(paramArr[i])).matches()) {
-							parameters.put(paramMatcher.group(1).toLowerCase(Locale.ENGLISH), paramMatcher.group(3));
-						}
-					}
-				}
-			}
-		}
+	private void parseContentType(final String contentType) throws MailException {
+		parseContentType(contentType, true);
 	}
 
-	private void parseContentType(final String ct) throws MailException {
-		final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(ct);
-		if (!ctMatcher.matches()) {
-			throw new MailException(MailException.Code.INVALID_CONTENT_TYPE, ct);
+	private void parseContentType(final String contentTypeArg, final boolean paramList) throws MailException {
+		final String contentType = prepareParameterizedHeader(contentTypeArg);
+		final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(contentType);
+		if (!ctMatcher.find() || ctMatcher.start() != 0) {
+			throw new MailException(MailException.Code.INVALID_CONTENT_TYPE, contentTypeArg);
 		}
 		primaryType = ctMatcher.group(1);
 		subType = ctMatcher.group(2);
@@ -294,106 +125,73 @@ public final class ContentType implements Serializable {
 			subType = DEFAULT_SUBTYPE;
 		}
 		baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
-		parseParameters(ctMatcher.group(3));
-		mergeContinuationParameters();
-	}
-
-	private void parseParameters(final String params) {
-		final Matcher paramMatcher = PATTERN_PARAMETER.matcher(params);
-		NextParam: while (paramMatcher.find()) {
-			String value = paramMatcher.group(2);
-			if (value == null || value.length() == 0) {
-				continue NextParam;
-			}
-			if (value.charAt(0) == '"' && value.charAt(value.length() - 1) == '"') {
-				value = value.substring(1, value.length() - 1);
-			}
-			String name = paramMatcher.group(1).toLowerCase(Locale.ENGLISH);
-			String charset = null;
-			String language = null;
-			boolean addCL = false;
-			/*
-			 * Check for decoding
-			 */
-			if (name.charAt(name.length() - 1) == '*') {
-				/*
-				 * An asterisk at the end of a parameter name acts as an
-				 * indicator that character set and language information may
-				 * appear at the beginning of the parameter value.
-				 */
-				name = name.substring(0, name.length() - 1);
-				if (value.indexOf('\'') != -1) {
-					int nextQuote = value.indexOf('\'', 1);
-					charset = value.substring(value.charAt(0) == '\'' ? 1 : 0, nextQuote);
-					language = value.substring(nextQuote + 1, (nextQuote = value.indexOf('\'', nextQuote + 1)));
-					addCL = true;
-					value = value.substring(nextQuote + 1);
-				} else {
-					final ParameterContinuation pc = getParamaterContinuation(name);
-					if (null != pc) {
-						charset = pc.getCharset();
-						language = pc.getLanguage();
-					}
-				}
-				if (null != charset) {
-					value = rfc2231Decode(value, charset);
-				}
-			}
-			final int pos = name.indexOf('*');
-			if (pos != -1) {
-				/*
-				 * Parameter continuation mechanism:
-				 * title*0*=us-ascii'en'This%20is%20even%20more%20
-				 * title*1*=%2A%2A%2Afun%2A%2A%2A%20
-				 */
-				int number = -1;
-				try {
-					number = Integer.parseInt(name.substring(pos + 1));
-				} catch (final NumberFormatException e) {
-					LOG.error("Invalid contiguous parameter", e);
-				}
-				if (number != -1) {
-					if (addCL) {
-						addParamaterContinuation(name, number, value, charset, language);
-					} else {
-						addParamaterContinuation(name, number, value);
-					}
-				}
-			} else {
-				/*
-				 * No continuation, add value immediately
-				 */
-				parameters.put(name, value);
-			}
+		if (paramList) {
+			parameterList = new ParameterList(contentType.substring(ctMatcher.end()));
 		}
 	}
 
-	private void mergeContinuationParameters() {
-		if (null == parameterContinuations) {
-			return;
-		}
-		final Iterator<Map.Entry<String, ParameterContinuation>> iter = parameterContinuations.entrySet().iterator();
-		final int size = parameterContinuations.size();
-		final StringBuilder sb = new StringBuilder(64);
-		for (int i = 0; i < size; i++) {
-			final Map.Entry<String, ParameterContinuation> e = iter.next();
-			sb.setLength(0);
-			e.getValue().writeValue(sb);
-			parameters.put(e.getKey(), sb.toString());
-		}
-	}
+	// /**
+	// * Initializes a new {@link ContentType}
+	// *
+	// * @param contentTypeArg
+	// * The content type
+	// * @param strict
+	// * <code>true</code> for strict parsing; otherwise
+	// * <code>false</code>
+	// * @throws MailException
+	// * If content type cannot be parsed
+	// */
+	// public ContentType(final String contentTypeArg, final boolean strict)
+	// throws MailException {
+	// super();
+	// final String contentType = prepareContentType(contentTypeArg);
+	// if (strict) {
+	// /*
+	// * Expect a correct base type (e.g. text/plain) and
+	// * semicolon-separated parameters (if any)
+	// */
+	// parseContentType(contentType);
+	// } else {
+	// int pos = NONE;
+	// final Matcher m = PATTERN_BASETYPE.matcher(contentType);
+	// if (m.find()) {
+	// baseType = null;
+	// primaryType = m.group(1);
+	// subType = m.group(2);
+	// if (subType == null || subType.length() == 0) {
+	// subType = DEFAULT_SUBTYPE;
+	// }
+	// pos = m.end();
+	// } else {
+	// throw new MailException(MailException.Code.INVALID_CONTENT_TYPE,
+	// contentType);
+	// }
+	// if (pos != NONE) {
+	// final String paramStr = contentType.substring(pos);
+	// final int delim = paramStr.charAt(0) == SEMICOLON ? SEMICOLON :
+	// Character.isWhitespace(paramStr
+	// .charAt(0)) ? paramStr.charAt(0) : NONE;
+	// if (delim != NONE) {
+	// final String[] paramArr = paramStr.split(new
+	// StringBuilder(SPLIT).append((char) delim)
+	// .append(SPLIT).toString());
+	// NextParam: for (int i = 0; i < paramArr.length; i++) {
+	// final Matcher paramMatcher;
+	// if (paramArr[i].length() == 0) {
+	// continue NextParam;
+	// } else if ((paramMatcher =
+	// PATTERN_SINGLE_PARAM.matcher(paramArr[i])).matches()) {
+	// parameters.put(paramMatcher.group(1).toLowerCase(Locale.ENGLISH),
+	// paramMatcher.group(3));
+	// }
+	// }
+	// }
+	// }
+	// }
+	// }
 
 	private void parseBaseType(final String baseType) throws MailException {
-		final Matcher baseTypeMatcher = PATTERN_BASETYPE.matcher(baseType);
-		if (!baseTypeMatcher.matches()) {
-			throw new MailException(MailException.Code.INVALID_CONTENT_TYPE, baseType);
-		}
-		primaryType = baseTypeMatcher.group(1);
-		subType = baseTypeMatcher.group(2);
-		if (subType == null || subType.length() == 0) {
-			subType = DEFAULT_SUBTYPE;
-		}
-		this.baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+		parseContentType(baseType, false);
 	}
 
 	/**
@@ -401,11 +199,14 @@ public final class ContentType implements Serializable {
 	 * 
 	 * @param contentType
 	 *            The content type to apply
-	 * @throws OXException
+	 * @throws MailException
 	 */
 	public void setContentType(final ContentType contentType) throws MailException {
+		if (contentType == this) {
+			return;
+		}
 		setBaseType(contentType.getBaseType());
-		this.parameters.putAll(contentType.parameters);
+		this.parameterList = (ParameterList) contentType.parameterList.clone();
 	}
 
 	/**
@@ -456,105 +257,17 @@ public final class ContentType implements Serializable {
 	}
 
 	/**
-	 * Adds given key-value-pair to content-type's parameter list. Any existing
-	 * parameters are overwritten.
-	 */
-	public void addParameter(final String key, final String value) {
-		if (containsSpecial(key)) {
-			final MailException me = new MailException(MailException.Code.INVALID_PARAMETER, key);
-			LOG.error(me.getLocalizedMessage(), me);
-			return;
-		}
-		parameters.put(key.toLowerCase(Locale.ENGLISH), prepareParamSet(value));
-	}
-
-	/**
 	 * Sets charset parameter
 	 */
 	public void setCharsetParameter(final String charset) {
-		parameters.put(PARAM_CHARSET, prepareParamSet(charset));
+		setParameter(PARAM_CHARSET, charset);
 	}
-
-	/**
-	 * Sets given parameter
-	 */
-	public void setParameter(final String key, final String value) {
-		addParameter(key, value);
-	}
-
-	/**
-	 * Special characters (binary sorted) that must be in quoted-string to be
-	 * used within parameter values
-	 */
-	private static final char[] SPECIALS = { '\t', '\n', '\r', ' ', '"', '(', ')', ',', '/', ':', ';', '<', '=', '>',
-			'?', '@', '[', '\\', ']' };
-
-	private static boolean containsSpecial(final String str) {
-		final char[] chars = str.toCharArray();
-		boolean quote = false;
-		for (int i = 0; i < chars.length && !quote; i++) {
-			quote |= (Arrays.binarySearch(SPECIALS, chars[i]) >= 0);
-		}
-		return quote;
-	}
-
-	private static final String ENC_QUOTED_PRINTABLE = "Q";
-
-	private static final String CHARSET_UTF8 = "UTF-8";
-
-	private static String prepareParamSet(final String paramArg) {
-		if (paramArg == null) {
-			return paramArg;
-		}
-		try {
-			final String param = MimeUtility.encodeText(paramArg, CHARSET_UTF8, ENC_QUOTED_PRINTABLE);
-			if (containsSpecial(param)) {
-				return new StringBuilder(param.length() + 2).append('"').append(param).append('"').toString();
-			}
-			return param;
-		} catch (final UnsupportedEncodingException e) {
-			return paramArg;
-		}
-	}
-
-	private static final String PARAM_CHARSET = "charset";
 
 	/**
 	 * @return the charset value or <code>null</code> if not present
 	 */
 	public String getCharsetParameter() {
-		return prepareParamGet(parameters.get(PARAM_CHARSET));
-	}
-
-	/**
-	 * @return the value associated with given key or <code>null</code> if not
-	 *         present
-	 */
-	public String getParameter(final String key) {
-		return prepareParamGet(parameters.get(key.toLowerCase(Locale.ENGLISH)));
-	}
-
-	/**
-	 * Removes & returns the value associated with given key or
-	 * <code>null</code> if not present
-	 * 
-	 * @return the value associated with given key or <code>null</code> if not
-	 *         present
-	 */
-	public String removeParameter(final String key) {
-		return prepareParamGet(parameters.remove(key.toLowerCase(Locale.ENGLISH)));
-	}
-
-	private static String prepareParamGet(final String paramArg) {
-		if (paramArg == null) {
-			return paramArg;
-		}
-		final String param = MessageUtility.decodeMultiEncodedHeader(paramArg);
-		final int mlen = param.length() - 1;
-		if (param.charAt(0) == '"' && param.charAt(mlen) == '"') {
-			return param.substring(1, mlen);
-		}
-		return param;
+		return getParameter(PARAM_CHARSET);
 	}
 
 	/**
@@ -562,29 +275,14 @@ public final class ContentType implements Serializable {
 	 *         <code>false</code> otherwise
 	 */
 	public boolean containsCharsetParameter() {
-		return parameters.containsKey(PARAM_CHARSET);
-	}
-
-	/**
-	 * @return <code>true</code> if parameter is present, <code>false</code>
-	 *         otherwise
-	 */
-	public boolean containsParameter(final String key) {
-		return parameters.containsKey(key.toLowerCase(Locale.ENGLISH));
-	}
-
-	/**
-	 * @return an <code>java.util.Iterator</code> of available parameter names
-	 */
-	public Iterator<String> getParameterNames() {
-		return parameters.keySet().iterator();
+		return containsParameter(PARAM_CHARSET);
 	}
 
 	/**
 	 * Sets Content-Type
 	 */
 	public void setContentType(final String contentType) throws MailException {
-		parseContentType(removeEndingSemicolon(contentType.trim().replaceAll("\\s*=\\s*", "=")));
+		parseContentType(contentType);
 	}
 
 	/**
@@ -630,7 +328,7 @@ public final class ContentType implements Serializable {
 	 *             If an invalid MIME type is detected
 	 */
 	public static String getBaseType(final String mimeType) throws MailException {
-		final Matcher m = PATTERN_BASETYPE.matcher(mimeType);
+		final Matcher m = PATTERN_CONTENT_TYPE.matcher(mimeType);
 		if (m.find()) {
 			String subType = m.group(2);
 			if (subType == null || subType.length() == 0) {
@@ -648,214 +346,10 @@ public final class ContentType implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder();
-		final StringBuilder tmp = new StringBuilder();
+		final StringBuilder sb = new StringBuilder(64);
 		sb.append(primaryType).append(DELIMITER).append(subType);
-		final int size = parameters.size();
-		final Iterator<Map.Entry<String, String>> iter = parameters.entrySet().iterator();
-		for (int i = 0; i < size; i++) {
-			final Map.Entry<String, String> entry = iter.next();
-			String value = entry.getValue();
-			if (!isAscii(value)) {
-				value = rfc2231Encode(value, "utf-8", null);
-				int num = 1;
-				while (value.length() > 64) {
-					int delimPos = 63;
-					while (Character.isWhitespace(value.charAt(delimPos)) || value.charAt(delimPos) != '%') {
-						delimPos--;
-					}
-					if (value.charAt(delimPos) == '%') {
-						delimPos--;
-					}
-					final String chunk = value.substring(0, delimPos + 1);
-					value = value.substring(delimPos + 1);
-					tmp.setLength(0);
-					tmp.append(entry.getKey()).append('*').append(num++);
-					if (chunk.indexOf('%') != -1) {
-						tmp.append('*');
-					}
-					sb.append("; ").append(tmp.toString()).append('=').append(chunk);
-				}
-				tmp.setLength(0);
-				tmp.append(entry.getKey()).append(num > 1 ? String.valueOf(num) : "");
-				if (value.indexOf('%') != -1) {
-					tmp.append('*');
-				}
-				sb.append("; ").append(tmp.toString()).append('=').append(value);
-			} else {
-				sb.append("; ").append(entry.getKey()).append('=').append(entry.getValue());
-			}
-		}
+		parameterList.appendUnicodeString(sb);
 		return sb.toString();
 	}
 
-	private ParameterContinuation getParamaterContinuation(final String nameArg) {
-		if (parameterContinuations == null) {
-			return null;
-		}
-		final int pos = nameArg.indexOf('*');
-		return parameterContinuations.get(pos == -1 ? nameArg : nameArg.substring(0, pos));
-	}
-
-	private void addParamaterContinuation(final String name, final int number, final String contiguousValue) {
-		addParamaterContinuation(name, number, contiguousValue, null, null);
-	}
-
-	private void addParamaterContinuation(final String nameArg, final int number, final String contiguousValue,
-			final String charset, final String language) {
-		if (parameterContinuations == null) {
-			parameterContinuations = new HashMap<String, ParameterContinuation>();
-		}
-		final String name;
-		{
-			final int pos = nameArg.indexOf('*');
-			name = pos == -1 ? nameArg : nameArg.substring(0, pos);
-		}
-		final ParameterContinuation pc;
-		if (parameterContinuations.containsKey(name)) {
-			pc = parameterContinuations.get(name);
-		} else {
-			pc = new ParameterContinuation();
-			parameterContinuations.put(name, pc);
-		}
-		if (null != charset && charset.length() > 0) {
-			pc.setCharset(charset);
-		}
-		if (null != language && language.length() > 0) {
-			pc.setLanguage(language);
-		}
-		pc.addParameterContinuation(number, contiguousValue);
-	}
-
-	/**
-	 * Removes ending '<code>;</code>' character if present
-	 * 
-	 * @param contentTypeArg
-	 *            The content type string argument
-	 * @return The content type string w/o ending '<code>;</code>' character
-	 */
-	private static String removeEndingSemicolon(final String contentTypeArg) {
-		String contentType = contentTypeArg;
-		final int lastPos = contentType.length() - 1;
-		if (contentType.charAt(lastPos) == ';') {
-			contentType = contentType.substring(0, lastPos);
-		}
-		return contentType;
-	}
-
-	/**
-	 * Decodes specified encoded value according to mechanism provided through
-	 * RFC2231.
-	 * 
-	 * @param encoded
-	 *            The encoded value
-	 * @param charset
-	 *            The charset name
-	 * @return The decoded value
-	 */
-	private static String rfc2231Decode(final String encoded, final String charset) {
-		if (!Charset.isSupported(charset)) {
-			LOG.error("Unsupported charset: " + charset, new Throwable());
-			return encoded;
-		}
-		final Charset cs = Charset.forName(charset);
-		final char[] chars = encoded.toCharArray();
-		final ByteBuffer bb = ByteBuffer.allocate(chars.length);
-		for (int i = 0; i < chars.length; i++) {
-			final char c = chars[i];
-			if (c == '%' && isHexDigit(chars[i + 1]) && isHexDigit(chars[i + 2])) {
-				final byte b = (byte) ((Character.digit(chars[i + 1], 16) << 4) | (Character.digit(chars[i + 2], 16)));
-				bb.put(b);
-				i += 2;
-			} else {
-				bb.put((byte) c);
-			}
-		}
-		bb.flip();
-		return cs.decode(bb).toString();
-	}
-
-	/**
-	 * Encodes specified string according to mechanism provided through RFC2231.
-	 * 
-	 * @param toEncode
-	 *            The string to encode
-	 * @param charset
-	 *            The charset used for encoding
-	 * @param language
-	 *            The language
-	 * @return The encoded string
-	 */
-	private static String rfc2231Encode(final String toEncode, final String charset, final String language) {
-		if (!Charset.isSupported(charset)) {
-			LOG.error("Unsupported charset: " + charset, new Throwable());
-			return toEncode;
-		} else if (isAscii(toEncode)) {
-			return toEncode;
-		}
-		final char[] chars = toEncode.toCharArray();
-		final StringBuilder retval = new StringBuilder(chars.length * 3 + 16);
-		/*
-		 * Append encoding information: charset name and language delimited by
-		 * single quotes
-		 */
-		try {
-			retval.append('\'').append(charset).append('\'').append(
-					language == null || language.length() == 0 ? "" : language).append('\'');
-			for (int i = 0; i < chars.length; i++) {
-				final char c = chars[i];
-				if (Character.isWhitespace(c) || !isAscii(c)) {
-					final byte[] bytes = String.valueOf(c).getBytes(charset);
-					for (int j = 0; j < bytes.length; j++) {
-						retval.append('%').append(Integer.toHexString((bytes[j] & 0xFF)).toUpperCase());
-					}
-				} else {
-					retval.append(c);
-				}
-			}
-		} catch (final UnsupportedEncodingException e) {
-			/*
-			 * Cannot occur
-			 */
-			LOG.error(e.getLocalizedMessage(), e);
-		}
-		return retval.toString();
-	}
-
-	/**
-	 * Checks if given character represents a hexadecimal digit.
-	 * 
-	 * @param charArg
-	 *            The character
-	 * @return <code>true</code> if given character represents a hexadecimal
-	 *         digit, otherwise <code>false</code>
-	 */
-	private static boolean isHexDigit(final char charArg) {
-		final char c = Character.toLowerCase(charArg);
-		return (c >= '0' && c <= '9') || (c >= 'a' || c <= 'f');
-	}
-
-	/**
-	 * Checks if given string only consists of ASCII characters
-	 * 
-	 * @param s
-	 *            The string to check
-	 * @return <code>true</code> if given string only consists of ASCII
-	 *         characters; otherwise <code>false</code>
-	 */
-	private static boolean isAscii(final String s) {
-		if (null == s) {
-			return true;
-		}
-		final char[] chars = s.toCharArray();
-		boolean isAscii = true;
-		for (int i = 0; i < chars.length && isAscii; i++) {
-			isAscii &= (chars[i] < 128);
-		}
-		return isAscii;
-	}
-
-	private static boolean isAscii(final char ch) {
-		return (ch < 128);
-	}
 }

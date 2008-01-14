@@ -1069,7 +1069,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 						contentType.setPrimaryType(ct.substring(0, pos));
 						contentType.setSubType(ct.substring(pos + 1));
 					}
-					contentType.addParameter(STR_NAME, fileName);
+					contentType.setParameter(STR_NAME, fileName);
 					resp.setHeader(STR_CONTENT_DISPOSITION, new StringBuilder(50).append(STR_INLINE_FILENAME).append(
 							fileName).append('"').toString());
 				}

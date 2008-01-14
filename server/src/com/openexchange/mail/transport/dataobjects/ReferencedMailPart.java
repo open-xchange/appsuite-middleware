@@ -268,7 +268,7 @@ public abstract class ReferencedMailPart extends MailPart {
 			setContentId(referencedPart.getContentId());
 		}
 		setContentType(referencedPart.getContentType());
-		setDisposition(referencedPart.getDisposition());
+		setContentDisposition(referencedPart.getContentDisposition());
 		setFileName(referencedPart.getFileName());
 		setSize(referencedPart.getSize());
 		final int count = referencedPart.getHeadersSize();

@@ -135,7 +135,7 @@ public final class MIMEMailPart extends MailPart {
 			if (obj instanceof MimeMessage) {
 				return MIMEMessageConverter.convertMessage((MimeMessage) obj);
 			} else if (obj instanceof Part) {
-				return MIMEMessageConverter.convertIMAPPart((Part) obj);
+				return MIMEMessageConverter.convertPart((Part) obj);
 			} else {
 				return obj;
 			}
@@ -214,7 +214,7 @@ public final class MIMEMailPart extends MailPart {
 				if (null == multipart) {
 					multipart = (Multipart) part.getContent();
 				}
-				return MIMEMessageConverter.convertIMAPPart(multipart.getBodyPart(index));
+				return MIMEMessageConverter.convertPart(multipart.getBodyPart(index));
 			} catch (final MessagingException e) {
 				throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
 			} catch (final IOException e) {

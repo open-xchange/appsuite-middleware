@@ -53,21 +53,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.activation.DataHandler;
-import javax.mail.internet.MimeUtility;
 
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
-import com.openexchange.mail.mime.MessageHeaders;
 
 /**
  * {@link MailPart} - Abstract super class for all {@link MailPart} subclasses.
@@ -181,7 +177,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	/**
 	 * The disposition (either <code>null</code>, INLINE, or ATTACHMENT)
 	 */
-	private String disposition;
+	private ContentDisposition contentDisposition;
 
 	private boolean b_disposition;
 
@@ -228,6 +224,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 		super();
 		try {
 			contentType = new ContentType("text/plain; charset=us-ascii");
+			contentDisposition = new ContentDisposition();
 		} catch (final MailException e) {
 			/*
 			 * Cannot occur
@@ -297,23 +294,23 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * 
 	 * @return the disposition
 	 */
-	public String getDisposition() {
-		return disposition;
+	public ContentDisposition getContentDisposition() {
+		return contentDisposition;
 	}
 
 	/**
 	 * @return <code>true</code> if disposition is set; otherwise
 	 *         <code>false</code>
 	 */
-	public boolean containsDisposition() {
+	public boolean containsContentDisposition() {
 		return b_disposition;
 	}
 
 	/**
 	 * Removes the disposition
 	 */
-	public void removeDisposition() {
-		disposition = null;
+	public void removeContentDisposition() {
+		contentDisposition = null;
 		b_disposition = false;
 	}
 
@@ -322,9 +319,22 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * 
 	 * @param disposition
 	 *            the disposition to set
+	 * @throws MailException
+	 *             If content disposition is invalid or could not be parsed
 	 */
-	public void setDisposition(final String disposition) {
-		this.disposition = disposition;
+	public void setContentDisposition(final String disposition) throws MailException {
+		this.contentDisposition = new ContentDisposition(disposition);
+		b_disposition = true;
+	}
+
+	/**
+	 * Sets the disposition
+	 * 
+	 * @param disposition
+	 *            the disposition to set
+	 */
+	public void setContentDisposition(final ContentDisposition disposition) {
+		this.contentDisposition = disposition;
 		b_disposition = true;
 	}
 
@@ -334,7 +344,14 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * @return the fileName
 	 */
 	public String getFileName() {
-		return fileName;
+		if (b_fileName) {
+			return fileName;
+		}
+		String fn = contentDisposition.getFilenameParameter();
+		if (fn == null) {
+			fn = contentType.getParameter("name");
+		}
+		return fn;
 	}
 
 	/**
@@ -361,6 +378,8 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 */
 	public void setFileName(final String fileName) {
 		this.fileName = fileName;
+		contentType.setParameter("name", fileName);
+		contentDisposition.setFilenameParameter(fileName);
 		b_fileName = true;
 	}
 
@@ -739,47 +758,4 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 */
 	public abstract void prepareForCaching();
 
-	private static final Pattern PAT_DISP = Pattern
-			.compile("([\\S&&[^;]]+)(?:\\s?;\\s?([\\S&&[^\"=]]+)=\"?([\\S&&[^\"]]+)\"?)*");
-
-	private static final Pattern PAT_FILENAME = Pattern.compile("\\s?;\\s?(filename)=\"?([\\S&&[^\"]]+)\"?",
-			Pattern.CASE_INSENSITIVE);
-
-	/**
-	 * Parses the value of header "Content-Disposition".
-	 * <p>
-	 * TODO: Add RFC2231 decoding
-	 * 
-	 * <pre>
-	 * Content-Disposition: attachment; filename=&quot;=?UTF-8?Q?m=C3=B6p.txt?=&quot;
-	 * </pre>
-	 * 
-	 * @param dispVal
-	 *            The value of header "Content-Disposition"
-	 * @throws MailstoreException
-	 *             If parsing fails
-	 */
-	protected final void parseDisposition(final String dispVal) throws MailException {
-		if (dispVal == null) {
-			setDisposition(null);
-			return;
-		}
-		Matcher m = PAT_DISP.matcher(dispVal);
-		if (m.matches()) {
-			setDisposition(m.group(1));
-			m = PAT_FILENAME.matcher(dispVal);
-			if (m.find()) {
-				/*
-				 * Apply filename
-				 */
-				try {
-					setFileName(MimeUtility.decodeText(m.group(2)));
-				} catch (final UnsupportedEncodingException e) {
-					throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
-				}
-			}
-		} else {
-			throw new MailException(MailException.Code.HEADER_PARSE_ERROR, MessageHeaders.DISPOSITION.toString());
-		}
-	}
 }

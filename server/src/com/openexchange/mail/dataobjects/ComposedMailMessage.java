@@ -110,8 +110,8 @@ public final class ComposedMailMessage extends MailMessage {
 		if (delegate.containsContentType()) {
 			setContentType(delegate.getContentType());
 		}
-		if (delegate.containsDisposition()) {
-			setDisposition(delegate.getDisposition());
+		if (delegate.containsContentDisposition()) {
+			setContentDisposition(delegate.getContentDisposition());
 		}
 		if (delegate.containsDispositionNotification()) {
 			setDispositionNotification(delegate.getDispositionNotification());
