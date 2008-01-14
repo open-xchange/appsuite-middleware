@@ -9,6 +9,7 @@ Import-Package: com.openexchange.groupware,
  com.openexchange.management,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
+ javax.management,
  org.apache.commons.logging,
  org.osgi.framework;version="1.3.0",
  org.osgi.util.tracker;version="1.3.3"

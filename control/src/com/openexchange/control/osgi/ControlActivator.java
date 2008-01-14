@@ -80,8 +80,6 @@ public final class ControlActivator implements BundleActivator {
 
 	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
 
-	private ServiceRegistration serviceRegistration;
-	
 	private final Stack<ObjectName> objectNames = new Stack<ObjectName>();
 
 	/**
@@ -150,8 +148,6 @@ public final class ControlActivator implements BundleActivator {
 	 */
 	public void stop(final BundleContext context) throws Exception {
 		try {
-			serviceRegistration.unregister();
-			serviceRegistration = null;
 			/*
 			 * Close service trackers
 			 */
