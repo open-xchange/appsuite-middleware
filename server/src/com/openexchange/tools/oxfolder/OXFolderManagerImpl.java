@@ -58,9 +58,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.OXException;
@@ -118,8 +120,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			.getLog(OXFolderManagerImpl.class);
 
 	/**
-	 * Constructor which only uses <code>Session</code>. Optional
-	 * connections are going to be set to <code>null</code>.
+	 * Constructor which only uses <code>Session</code>. Optional connections
+	 * are going to be set to <code>null</code>.
 	 */
 	public OXFolderManagerImpl(final Session session) {
 		this(session, null, null);
@@ -135,8 +137,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	}
 
 	/**
-	 * Constructor which uses <code>Session</code> and also uses a
-	 * readable and a writable <code>Connection</code>.
+	 * Constructor which uses <code>Session</code> and also uses a readable
+	 * and a writable <code>Connection</code>.
 	 */
 	public OXFolderManagerImpl(final Session session, final Connection readCon, final Connection writeCon) {
 		this(session, null, readCon, writeCon);
@@ -147,8 +149,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	 * <code>OXFolderAccess</code> and also uses a readable and a writable
 	 * <code>Connection</code>.
 	 */
-	public OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess,
-			final Connection readCon, final Connection writeCon) {
+	public OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess, final Connection readCon,
+			final Connection writeCon) {
 		super();
 		this.session = session;
 		this.ctx = session.getContext();
@@ -277,6 +279,47 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+		}
+		/*
+		 * This folder shall be shared to other users
+		 */
+		if (folderObj.getType() == FolderObject.PRIVATE && folderObj.getPermissions().size() > 1) {
+			final int[] diff = getShareEntities(null, folderObj.getPermissions(), user.getId());
+			if (diff.length > 0) {
+				try {
+					/*
+					 * Check duplicate folder names
+					 */
+					final FolderObject[] allSharedFolders;
+					{
+						final int[] fuids = OXFolderSQL.getSharedFoldersOf(user.getId(), readCon, ctx);
+						allSharedFolders = new FolderObject[fuids.length];
+						for (int i = 0; i < fuids.length; i++) {
+							allSharedFolders[i] = getOXFolderAccess().getFolderObject(fuids[i]);
+						}
+					}
+					Foo: for (int i = 0; i < diff.length; i++) {
+						final int entity = diff[i];
+						for (FolderObject f : allSharedFolders) {
+							final List<OCLPermission> l = f.getPermissions();
+							for (OCLPermission permission : l) {
+								if (permission.getEntity() == entity
+										&& f.getFolderName().equals(folderObj.getFolderName())) {
+									LOG.error("SIMILAR NAMED SHARED FOLDER DETECTED!");
+									// TODO: Throw exception if bug #9111 says so
+									break Foo;
+								}
+							}
+						}
+					}
+				} catch (final DBPoolingException e) {
+					throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+				} catch (final DataTruncation e) {
+					throw new OXFolderException(FolderCode.TRUNCATED, e, folderObj.getFolderName());
+				} catch (final SQLException e) {
+					throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+				}
+			}
 		}
 		/*
 		 * Get new folder ID
@@ -461,7 +504,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 					getFolderName(folderObj), Integer.valueOf(ctx.getContextId()));
 		}
 		/*
-		 * Get storage version (and thus implicitely check existence)
+		 * Get storage version (and thus implicitly check existence)
 		 */
 		final FolderObject storageObj;
 		try {
@@ -522,7 +565,13 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		checkPermissionsAgainstSessionUserConfig(folderObj, userConfig, ctx);
 		checkFolderPermissions(folderObj, user.getId(), ctx);
 		checkPermissionsAgainstUserConfigs(folderObj, ctx);
+		boolean rename = false;
 		if (folderObj.containsFolderName() && !storageObj.getFolderName().equals(folderObj.getFolderName())) {
+			rename = true;
+			/*
+			 * Check for invalid characters
+			 */
+			checkFolderStringData(folderObj);
 			/*
 			 * Rename: Check if duplicate folder exists
 			 */
@@ -541,6 +590,49 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 				throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
 			} catch (final DBPoolingException e) {
 				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+			}
+		}
+		/*
+		 * This folder shall be shared to other users
+		 */
+		if (folderObj.getType() == FolderObject.PRIVATE && folderObj.getPermissions().size() > 1) {
+			final int[] diff = getShareEntities(rename ? null : storageObj.getPermissions(),
+					folderObj.getPermissions(), user.getId());
+			if (diff.length > 0) {
+				try {
+					/*
+					 * Check duplicate folder names
+					 */
+					final FolderObject[] allSharedFolders;
+					{
+						final int[] fuids = OXFolderSQL.getSharedFoldersOf(user.getId(), readCon, ctx);
+						allSharedFolders = new FolderObject[fuids.length];
+						for (int i = 0; i < fuids.length; i++) {
+							allSharedFolders[i] = getOXFolderAccess().getFolderObject(fuids[i]);
+						}
+					}
+					Foo: for (int i = 0; i < diff.length; i++) {
+						final int entity = diff[i];
+						for (FolderObject f : allSharedFolders) {
+							final List<OCLPermission> l = f.getPermissions();
+							for (OCLPermission permission : l) {
+								if (permission.getEntity() == entity
+										&& f.getFolderName().equals(
+												rename ? folderObj.getFolderName() : storageObj.getFolderName())) {
+									LOG.error("SIMILAR NAMED SHARED FOLDER DETECTED!");
+									// TODO: Throw exception if bug #9111 says so
+									break Foo;
+								}
+							}
+						}
+					}
+				} catch (final DBPoolingException e) {
+					throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+				} catch (final DataTruncation e) {
+					throw new OXFolderException(FolderCode.TRUNCATED, e, folderObj.getFolderName());
+				} catch (final SQLException e) {
+					throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+				}
 			}
 		}
 		/*
@@ -567,7 +659,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		}
 		checkFolderStringData(folderObj);
 		/*
-		 * Get storage version (and thus implicitely check existence)
+		 * Get storage version (and thus implicitly check existence)
 		 */
 		final FolderObject storageObj;
 		try {
@@ -620,6 +712,47 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+		}
+		/*
+		 * This folder shall be shared to other users
+		 */
+		if (folderObj.getType() == FolderObject.PRIVATE && folderObj.getPermissions().size() > 1) {
+			final int[] diff = getShareEntities(null, folderObj.getPermissions(), user.getId());
+			if (diff.length > 0) {
+				try {
+					/*
+					 * Check duplicate folder names
+					 */
+					final FolderObject[] allSharedFolders;
+					{
+						final int[] fuids = OXFolderSQL.getSharedFoldersOf(user.getId(), readCon, ctx);
+						allSharedFolders = new FolderObject[fuids.length];
+						for (int i = 0; i < fuids.length; i++) {
+							allSharedFolders[i] = getOXFolderAccess().getFolderObject(fuids[i]);
+						}
+					}
+					Foo: for (int i = 0; i < diff.length; i++) {
+						final int entity = diff[i];
+						for (FolderObject f : allSharedFolders) {
+							final List<OCLPermission> l = f.getPermissions();
+							for (OCLPermission permission : l) {
+								if (permission.getEntity() == entity
+										&& f.getFolderName().equals(storageObj.getFolderName())) {
+									LOG.error("SIMILAR NAMED SHARED FOLDER DETECTED!");
+									// TODO: Throw exception if bug #9111 says so
+									break Foo;
+								}
+							}
+						}
+					}
+				} catch (final DBPoolingException e) {
+					throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
+				} catch (final DataTruncation e) {
+					throw new OXFolderException(FolderCode.TRUNCATED, e, folderObj.getFolderName());
+				} catch (final SQLException e) {
+					throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
+				}
+			}
 		}
 		/*
 		 * Call SQL rename
@@ -1599,5 +1732,57 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		if (checkMe.containsFolderName() && (result = containsInvalidChars(checkMe.getFolderName())) != null) {
 			throw new OXFolderException(OXFolderException.FolderCode.INVALID_DATA, result);
 		}
+	}
+
+	/**
+	 * Gets those entities which are new or updated in given update list
+	 * compared to given storage list or whole update list if storage list is
+	 * <code>null</code>.
+	 * 
+	 * @param storageList
+	 *            The storage list of permissions (if <code>null</code> whole
+	 *            update list entities are added)
+	 * @param updateList
+	 *            The update list of permissions
+	 * @param user
+	 *            The user ID
+	 * @return An array of <code>int</code> containing share entities.
+	 */
+	private static int[] getShareEntities(final List<OCLPermission> storageList, final List<OCLPermission> updateList,
+			final int user) {
+		final Set<Integer> retval = new HashSet<Integer>();
+		if (null != storageList) {
+			final int ssize = storageList.size();
+			for (OCLPermission update : updateList) {
+				boolean found = false;
+				for (int i = 0; i < ssize && !found; i++) {
+					final OCLPermission storage = storageList.get(i);
+					if (storage.getEntity() == update.getEntity()) {
+						found = true;
+						if (!update.equalsPermission(storage)) {
+							retval.add(Integer.valueOf(update.getEntity()));
+						}
+
+					}
+				}
+				if (!found) {
+					retval.add(Integer.valueOf(update.getEntity()));
+				}
+			}
+		} else {
+			for (OCLPermission update : updateList) {
+				retval.add(Integer.valueOf(update.getEntity()));
+			}
+		}
+		/*
+		 * Remove user ID
+		 */
+		retval.remove(Integer.valueOf(user));
+		final int[] ints = new int[retval.size()];
+		final Iterator<Integer> iter = retval.iterator();
+		for (int i = 0; i < ints.length; i++) {
+			ints[i] = iter.next().intValue();
+		}
+		return ints;
 	}
 }

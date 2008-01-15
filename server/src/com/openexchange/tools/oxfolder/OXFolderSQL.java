@@ -77,6 +77,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
@@ -157,6 +158,60 @@ public class OXFolderSQL {
 				return rs.getInt(1);
 			}
 			return -1;
+		} finally {
+			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
+		}
+	}
+
+	private static final String SQL_SELECT_ALL_SHARED_FLDS = "SELECT ot.fuid FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.type = ? AND ot.created_from = ? AND "
+			+ "(SELECT COUNT(op.permission_id) FROM oxfolder_permissions AS op WHERE op.cid = ot.cid AND op.fuid = ot.fuid) > 1 GROUP BY ot.fuid";
+
+	private static final int[] EMPTY_INTARR = new int[0];
+
+	/**
+	 * Gets all private folders of specified owner which are shared to other
+	 * users.
+	 * 
+	 * @param owner
+	 *            The owner's ID
+	 * @param readConArg
+	 *            A readable connection or <code>null</code> to fetch a new
+	 *            one from connection pool
+	 * @param ctx
+	 *            The context
+	 * @return All private folders of specified owner which are shared to other
+	 *         users.
+	 * @throws DBPoolingException
+	 *             If parameter <code>readConArg</code> is <code>null</code>
+	 *             and no readable connection could be fetched from or put back
+	 *             into connection pool
+	 * @throws SQLException
+	 *             If a SQL error occurs
+	 */
+	public static final int[] getSharedFoldersOf(final int owner, final Connection readConArg, final Context ctx)
+			throws DBPoolingException, SQLException {
+		Connection readCon = readConArg;
+		boolean closeReadCon = false;
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		try {
+			if (readCon == null) {
+				readCon = DBPool.pickup(ctx);
+				closeReadCon = true;
+			}
+			stmt = readCon.prepareStatement(SQL_SELECT_ALL_SHARED_FLDS);
+			stmt.setInt(1, ctx.getContextId());
+			stmt.setInt(2, FolderObject.PRIVATE);
+			stmt.setInt(3, owner);
+			rs = stmt.executeQuery();
+			if (!rs.next()) {
+				return EMPTY_INTARR;
+			}
+			final SmartIntArray sia = new SmartIntArray(16);
+			do {
+				sia.append(rs.getInt(1));
+			} while (rs.next());
+			return sia.toArray();
 		} finally {
 			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
 		}
