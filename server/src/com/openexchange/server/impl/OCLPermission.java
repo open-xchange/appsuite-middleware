@@ -564,6 +564,50 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 		return fuid;
 	}
 
+	/**
+	 * Compares this permission's sole permission values to the ones in
+	 * <code>op</code>.
+	 * 
+	 * @param op
+	 *            The other permission
+	 * @return <code>true</code> if sole permission settings are equal;
+	 *         otherwise <code>false</code>.
+	 */
+	public boolean equalsPermission(final OCLPermission op) {
+		if (this == op) {
+			return true;
+		}
+		return (fp == op.fp) && (orp == op.orp) && (owp == op.owp) && (odp == op.odp)
+				&& (folderAdmin == op.folderAdmin) && (groupPermission == op.groupPermission);
+	}
+
+	@Override
+	public boolean equals(final Object other) {
+		if (this == other) {
+			return true;
+		}
+		if (other instanceof OCLPermission) {
+			final OCLPermission op = (OCLPermission) other;
+			return (entity == op.entity) && (fuid == op.fuid) && (fp == op.fp) && (orp == op.orp) && (owp == op.owp)
+					&& (odp == op.odp) && (folderAdmin == op.folderAdmin) && (groupPermission == op.groupPermission);
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 31 * hash + entity;
+		hash = 31 * hash + fuid;
+		hash = 31 * hash + fp;
+		hash = 31 * hash + orp;
+		hash = 31 * hash + owp;
+		hash = 31 * hash + odp;
+		hash = 31 * hash + (folderAdmin ? 1 : 0);
+		hash = 31 * hash + (groupPermission ? 1 : 0);
+		return hash;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
