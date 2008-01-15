@@ -125,7 +125,7 @@ public final class Collections {
 	/**
 	 * 
 	 * SmartIntArray - A tiny helper class to increase arrays of
-	 * <code>int</code> like dynamical lists
+	 * <code>int</code> like dynamically lists
 	 * 
 	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
 	 * 
@@ -176,7 +176,7 @@ public final class Collections {
 	/**
 	 * 
 	 * SmartLongArray - A tiny helper class to increase arrays of
-	 * <code>long</code> as dynamical lists
+	 * <code>long</code> as dynamically lists
 	 * 
 	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
 	 * 
