@@ -1,9 +1,13 @@
+* 2008-01-15 - sebastian.kauss@open-xchange.com
+
+ - Bugfix: #10760: Missing recurrence attributes in appointment requests
+
 * 2008-01-15 - thorben.betten@open-xchange.com
 
  - Preparations for bugfix #9111: Check for duplicate names when sharing a
    folder
 
-* 2007-01-11 - sebastian.kauss@open-xchange.com
+* 2008-01-11 - sebastian.kauss@open-xchange.com
 
  - Bugfix #6960: Missing recurrence_id when deleting a 
    synchronized exception
