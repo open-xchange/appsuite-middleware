@@ -912,6 +912,9 @@ public class AppointmentTest extends AbstractAJAXTest {
 			case AppointmentObject.RECURRENCE_TYPE:
 				appointmentObj.setRecurrenceType(jsonArray.getInt(pos));
 				break;
+			case AppointmentObject.RECURRENCE_ID:
+				appointmentObj.setRecurrenceID(jsonArray.getInt(pos));
+				break;
 			case AppointmentObject.INTERVAL:
 				appointmentObj.setInterval(jsonArray.getInt(pos));
 				break;
