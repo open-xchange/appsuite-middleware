@@ -168,8 +168,9 @@
     	<chmod perm="755">
             <fileset dir="${destdir}/${prefix}/sbin" includes="*"/>
         </chmod>
+		<!-- generate config.ini registry snippet -->
     	<mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${composite.name}.ini"
+    	<echo file="${destdir}/${bundle.d}/${composite.name}.ini"
             message="${bundlesdir}/${bundle.name}${line.separator}"/>
     </target>
 	
