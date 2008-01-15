@@ -73,6 +73,7 @@ public class AJAXSession {
         super();
         this.conversation = conversation;
         this.id = id;
+        conversation.getClientProperties().setAcceptGzip(false);
     }
     
     /**
