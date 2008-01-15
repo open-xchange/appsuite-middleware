@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Control Plug-in
+Bundle-Name: Open-Xchange Control
 Bundle-SymbolicName: com.openexchange.control
 Bundle-Version: 6.5.0
 Bundle-Activator: com.openexchange.control.osgi.ControlActivator
@@ -13,3 +13,4 @@ Import-Package: com.openexchange.groupware,
  org.apache.commons.logging,
  org.osgi.framework;version="1.3.0",
  org.osgi.util.tracker;version="1.3.3"
+Bundle-Vendor: Open-Xchange Inc.

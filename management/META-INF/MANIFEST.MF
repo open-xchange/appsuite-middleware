@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Management Bundle
+Bundle-Name: Open-Xchange Management
 Bundle-SymbolicName: com.openexchange.management
 Bundle-Version: 6.5.0
 Bundle-Activator: com.openexchange.management.osgi.ManagementActivator
