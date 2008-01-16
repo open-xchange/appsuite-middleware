@@ -71,6 +71,8 @@ public final class MonitoringInit implements Initialization {
 
 	private static final MonitoringInit singleton = new MonitoringInit();
 
+	private ObjectName objectName;
+
 	/**
 	 * Logger.
 	 */
@@ -81,6 +83,13 @@ public final class MonitoringInit implements Initialization {
 	 */
 	private MonitoringInit() {
 		super();
+	}
+
+	private ObjectName getObjectName() throws MalformedObjectNameException, NullPointerException {
+		if (null == objectName) {
+			objectName = new ObjectName("com.openexchange.monitoring", "name", "GeneralMonitor");
+		}
+		return objectName;
 	}
 
 	/**
@@ -105,8 +114,7 @@ public final class MonitoringInit implements Initialization {
 		try {
 			final GeneralMonitor generalMonitorBean = new GeneralMonitor();
 			try {
-				managementAgent.registerMBean(new ObjectName("com.openexchange.monitoring", "name", "GeneralMonitor"),
-						generalMonitorBean);
+				managementAgent.registerMBean(getObjectName(), generalMonitorBean);
 			} catch (MalformedObjectNameException exc) {
 				LOG.error(exc.getLocalizedMessage(), exc);
 			} catch (NullPointerException exc) {
@@ -130,6 +138,23 @@ public final class MonitoringInit implements Initialization {
 		if (!started.get()) {
 			LOG.error(MonitoringInit.class.getName() + " has not been started");
 			return;
+		}
+		final ManagementAgent managementAgent = ManagementService.getInstance().getService();
+		try {
+			try {
+				managementAgent.unregisterMBean(getObjectName());
+			} catch (MalformedObjectNameException exc) {
+				LOG.error(exc.getLocalizedMessage(), exc);
+			} catch (NullPointerException exc) {
+				LOG.error(exc.getLocalizedMessage(), exc);
+			} catch (Exception exc) {
+				LOG.error(exc.getLocalizedMessage(), exc);
+			}
+			if (LOG.isInfoEnabled()) {
+				LOG.info("JMX Monitor removed");
+			}
+		} finally {
+			ManagementService.getInstance().ungetService(managementAgent);
 		}
 		started.set(false);
 	}

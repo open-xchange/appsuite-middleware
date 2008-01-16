@@ -81,6 +81,8 @@ public final class MonitoringActivator implements BundleActivator {
 
 	private ServiceRegistration serviceRegistration;
 
+	private ServiceHolderListener<ManagementAgent> listener;
+
 	/**
 	 * Initializes a new {@link MonitoringActivator}
 	 */
@@ -99,8 +101,8 @@ public final class MonitoringActivator implements BundleActivator {
 			 * Init service trackers
 			 */
 			serviceTrackerList.add(new ServiceTracker(context, ManagementAgent.class.getName(),
-					new BundleServiceTracker<ManagementAgent>(context, ManagementService
-							.getInstance(), ManagementAgent.class)));
+					new BundleServiceTracker<ManagementAgent>(context, ManagementService.getInstance(),
+							ManagementAgent.class)));
 			/*
 			 * Open service trackers
 			 */
@@ -110,7 +112,7 @@ public final class MonitoringActivator implements BundleActivator {
 			/*
 			 * Start monitoring when configuration service is available
 			 */
-			final ServiceHolderListener<ManagementAgent> l = new ServiceHolderListener<ManagementAgent>() {
+			listener = new ServiceHolderListener<ManagementAgent>() {
 
 				public void onServiceAvailable(final ManagementAgent service) throws AbstractOXException {
 					try {
@@ -122,8 +124,8 @@ public final class MonitoringActivator implements BundleActivator {
 						/*
 						 * Register monitor service
 						 */
-						serviceRegistration = context.registerService(MonitorInterface.class
-								.getCanonicalName(), new MonitorImpl(), null);
+						serviceRegistration = context.registerService(MonitorInterface.class.getCanonicalName(),
+								new MonitorImpl(), null);
 					} catch (final AbstractOXException e) {
 						LOG.error(e.getLocalizedMessage(), e);
 						MonitoringInit.getInstance().stop();
@@ -135,7 +137,7 @@ public final class MonitoringActivator implements BundleActivator {
 				}
 			};
 
-			ManagementService.getInstance().addServiceHolderListener(l);
+			ManagementService.getInstance().addServiceHolderListener(listener);
 		} catch (final Throwable t) {
 			LOG.error(t.getLocalizedMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -149,6 +151,12 @@ public final class MonitoringActivator implements BundleActivator {
 	 */
 	public void stop(final BundleContext context) throws Exception {
 		try {
+			ManagementService.getInstance().removeServiceHolderListener(listener.getClass().getName());
+
+			if (MonitoringInit.getInstance().isStarted()) {
+				MonitoringInit.getInstance().stop();
+			}
+
 			serviceRegistration.unregister();
 			serviceRegistration = null;
 			/*
