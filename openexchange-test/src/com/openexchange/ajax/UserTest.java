@@ -25,6 +25,7 @@ public class UserTest extends AbstractAJAXTest {
 	
 	protected final static int[] CONTACT_FIELDS = {
 		DataObject.OBJECT_ID,
+		ContactObject.INTERNAL_USERID,
 		ContactObject.EMAIL1,
 	};
 	
@@ -102,8 +103,8 @@ public class UserTest extends AbstractAJAXTest {
 		for (int a = 0; a < user.length; a++) {
 			final JSONArray jsonContactArray = jsonArray.getJSONArray(a);
 			user[a] = new UserImpl4Test();
-			user[a].setId(jsonContactArray.getInt(0));
-			user[a].setMail(jsonContactArray.getString(1));
+			user[a].setId(jsonContactArray.getInt(1));
+			user[a].setMail(jsonContactArray.getString(2));
 		}
 		
 		return user;
@@ -153,8 +154,8 @@ public class UserTest extends AbstractAJAXTest {
 		for (int a = 0; a < user.length; a++) {
 			final JSONArray jsonContactArray = jsonArray.getJSONArray(a);
 			user[a] = new UserImpl4Test();
-			user[a].setId(jsonContactArray.getInt(0));
-			user[a].setMail(jsonContactArray.getString(1));
+			user[a].setId(jsonContactArray.getInt(1));
+			user[a].setMail(jsonContactArray.getString(2));
 		}
 		
 		return user;
