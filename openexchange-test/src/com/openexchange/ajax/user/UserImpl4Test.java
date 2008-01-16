@@ -65,7 +65,7 @@ public class UserImpl4Test implements User {
 		this.id = id;
 	}
 	
-	public void setMail(String mail1) {
+	public void setMail(String mail) {
 		this.mail = mail;
 	}
 	
