@@ -137,6 +137,10 @@ public class AppointmentParser extends CalendarParser {
 			appointmentobject.setIgnoreConflicts(parseBoolean(jsonobject, AppointmentFields.IGNORE_CONFLICTS));
 		}
 
+		if (jsonobject.has(AppointmentFields.TIMEZONE)) {
+			appointmentobject.setTimezone(parseString(jsonobject, AppointmentFields.TIMEZONE));
+		}
+
 		parseElementCalendar(appointmentobject, jsonobject);
 	}
 }
