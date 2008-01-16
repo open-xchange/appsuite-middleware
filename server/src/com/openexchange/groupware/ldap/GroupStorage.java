@@ -145,7 +145,6 @@ public abstract class GroupStorage {
 
     /**
      * Creates a new instance implementing the group storage interface.
-     * @param context Context.
      * @return an instance implementing the group storage interface.
      * @throws LdapException if the instance can't be created.
      */
@@ -157,7 +156,6 @@ public abstract class GroupStorage {
     /**
      * Creates a new instance implementing the group storage interface. The
      * returned instance can also handle the group with identifier 0.
-     * @param context Context.
      * @param group0 <code>true</code> if group with identifier 0 should be
      * handled.
      * @return an instance implementing the group storage interface.
