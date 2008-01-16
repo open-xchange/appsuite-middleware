@@ -576,6 +576,9 @@ public class ContactWriter extends CommonWriter {
 			case ContactObject.NUMBER_OF_LINKS:
 				writeValue(contactobject.getNumberOfLinks(), jsonArray);
 				break;
+			case ContactObject.NUMBER_OF_DISTRIBUTIONLIST:
+				writeValue(contactobject.getNumberOfDistributionLists(), jsonArray);
+				break;
 			default:
 				throw new JSONException("missing field in mapping: " + field);
 		}
