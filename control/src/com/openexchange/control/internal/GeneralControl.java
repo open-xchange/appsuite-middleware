@@ -137,7 +137,17 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		}
 		LOG.info("uninstall package");
 	}
-	
+
+	public void update(final String name) {
+	    final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
+        try {
+            bundle.update();
+        } catch (BundleException exc) {
+            LOG.error("cannot update bundle: " + name, exc);
+        }
+        LOG.info("update package");
+	}
+
 	public void close() {
 
 	}
