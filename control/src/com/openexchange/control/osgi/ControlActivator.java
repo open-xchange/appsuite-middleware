@@ -57,7 +57,6 @@ import javax.management.ObjectName;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.control.internal.ControlInit;
@@ -81,6 +80,8 @@ public final class ControlActivator implements BundleActivator {
 	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
 
 	private final Stack<ObjectName> objectNames = new Stack<ObjectName>();
+
+	private ServiceHolderListener<ManagementAgent> listener;
 
 	/**
 	 * Initializes a new {@link ControlActivator}
@@ -111,30 +112,28 @@ public final class ControlActivator implements BundleActivator {
 			/*
 			 * Start monitoring when configuration service is available
 			 */
-			final ServiceHolderListener l = new ServiceHolderListener() {
+			listener = new ServiceHolderListener<ManagementAgent>() {
 
-				public void onServiceAvailable(final Object service) throws AbstractOXException {
-					if (service instanceof ManagementAgent) {
-						try {
-							if (ControlInit.getInstance().isStarted()) {
-								ControlInit.getInstance().stop();
-							}
-							final ControlInit controlInit = ControlInit.getInstance();
-							controlInit.setBundleContext(context);
-							controlInit.start();							
-						} catch (final AbstractOXException e) {
-							LOG.error(e.getLocalizedMessage(), e);
+				public void onServiceAvailable(final ManagementAgent service) throws AbstractOXException {
+					try {
+						if (ControlInit.getInstance().isStarted()) {
 							ControlInit.getInstance().stop();
 						}
+						final ControlInit controlInit = ControlInit.getInstance();
+						controlInit.setBundleContext(context);
+						controlInit.start();
+					} catch (final AbstractOXException e) {
+						LOG.error(e.getLocalizedMessage(), e);
+						ControlInit.getInstance().stop();
 					}
 				}
 
 				public void onServiceRelease() {
 
 				}
-			};	
-			
-			ManagementService.getInstance().addServiceHolderListener(l);
+			};
+
+			ManagementService.getInstance().addServiceHolderListener(listener);
 		} catch (final Throwable t) {
 			LOG.error(t.getLocalizedMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -148,6 +147,10 @@ public final class ControlActivator implements BundleActivator {
 	 */
 	public void stop(final BundleContext context) throws Exception {
 		try {
+			ManagementService.getInstance().removeServiceHolderListener(listener.getClass().getName());
+			if (ControlInit.getInstance().isStarted()) {
+				ControlInit.getInstance().stop();
+			}
 			/*
 			 * Close service trackers
 			 */
