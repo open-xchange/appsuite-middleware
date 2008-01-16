@@ -83,6 +83,8 @@ public class SessiondActivator implements BundleActivator {
 
 	private ServiceRegistration serviceRegister = null;
 
+	private ServiceHolderListener<Configuration> listener;
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -105,7 +107,7 @@ public class SessiondActivator implements BundleActivator {
 			/*
 			 * Start sessiond when configuration service is available
 			 */
-			final ServiceHolderListener<Configuration> l = new ServiceHolderListener<Configuration>() {
+			listener = new ServiceHolderListener<Configuration>() {
 
 				public void onServiceAvailable(final Configuration service) throws AbstractOXException {
 					try {
@@ -123,7 +125,7 @@ public class SessiondActivator implements BundleActivator {
 
 				}
 			};
-			ConfigurationService.getInstance().addServiceHolderListener(l);
+			ConfigurationService.getInstance().addServiceHolderListener(listener);
 
 			// sessiondInit = SessiondInit.getInstance();
 			// sessiondInit.start();
@@ -145,12 +147,15 @@ public class SessiondActivator implements BundleActivator {
 	 */
 	public void stop(final BundleContext context) throws Exception {
 		try {
+			ConfigurationService.getInstance().removeServiceHolderListener(listener.getClass().getName());
+			
+			if (SessiondInit.getInstance().isStarted()) {
+				SessiondInit.getInstance().stop();
+			}
+			
 			serviceRegister.unregister();
 			sessiondConInterface = null;
 			serviceRegister = null;
-
-			SessiondInit sessiondInit = SessiondInit.getInstance();
-			sessiondInit.stop();
 			/*
 			 * Close service trackers
 			 */
