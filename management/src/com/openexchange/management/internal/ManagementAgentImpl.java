@@ -55,6 +55,7 @@ import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.management.ObjectName;
+import javax.management.remote.JMXServiceURL;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -84,7 +85,7 @@ public class ManagementAgentImpl extends AbstractAgent implements ManagementAgen
 
 	private final Stack<ObjectName> objectNames = new Stack<ObjectName>();
 
-	private String jmxURL;
+	private JMXServiceURL jmxURL;
 
 	private final AtomicBoolean running = new AtomicBoolean();
 
@@ -125,9 +126,9 @@ public class ManagementAgentImpl extends AbstractAgent implements ManagementAgen
 			 * Create a JMX connector and start it
 			 */
 			final String ip = getIPAddress(jmxBindAddr.charAt(0) == '*' ? "localhost" : jmxBindAddr);
-			jmxURL = new StringBuilder(100).append("service:jmx:rmi:///jndi/rmi://").append(
+			final String jmxURLStr = new StringBuilder(128).append("service:jmx:rmi:///jndi/rmi://").append(
 					ip == null ? "localhost" : ip).append(':').append(jmxPort).append("/server").toString();
-			addConnector(jmxURL);
+			jmxURL = addConnector(jmxURLStr);
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(100).append(
 						"\n\n\tUse the JConsole or the MC4J to connect the MBeanServer with this url: ").append(jmxURL)
@@ -177,8 +178,8 @@ public class ManagementAgentImpl extends AbstractAgent implements ManagementAgen
 		}
 		super.registerMBean(object, objectName);
 		objectNames.push(objectName);
-	}	
-	
+	}
+
 	@Override
 	public void registerMBean(final String name, final Object mbean) throws Exception {
 		if (!running.get()) {

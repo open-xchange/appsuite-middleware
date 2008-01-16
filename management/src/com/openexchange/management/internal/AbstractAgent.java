@@ -138,7 +138,7 @@ public abstract class AbstractAgent {
 		mbs.registerMBean(object, objectName);
 		printTrace(object + " registered");
 	}
-	
+
 	/**
 	 * Uniquely identify the MBeans and register them with the MBeanServer
 	 */
@@ -296,30 +296,33 @@ public abstract class AbstractAgent {
 		return portnumbers;
 	}
 
-	private final Map<String, JMXConnectorServer> connectors = new HashMap<String, JMXConnectorServer>();
+	private final Map<JMXServiceURL, JMXConnectorServer> connectors = new HashMap<JMXServiceURL, JMXConnectorServer>();
 
 	/**
 	 * Create a JMX connector and starts it
+	 * 
+	 * @return The assigned JMX URL
 	 */
-	protected final void addConnector(final String urlstr) throws Exception {
+	protected final JMXServiceURL addConnector(final String urlstr) throws Exception {
 		final JMXServiceURL url = new JMXServiceURL(urlstr);
 		final JMXConnectorServer cs = JMXConnectorServerFactory.newJMXConnectorServer(url, null, mbs);
 		cs.start();
-		connectors.put(urlstr, cs);
+		connectors.put(url, cs);
 		printTrace("Connector on " + urlstr + " is started");
+		return url;
 	}
 
 	/**
 	 * Remove a JMX connector and stop it
 	 */
-	protected final void removeConnector(final String urlstr) {
-		final JMXConnectorServer connector = connectors.remove(urlstr);
+	protected final void removeConnector(final JMXServiceURL url) {
+		final JMXConnectorServer connector = connectors.remove(url);
 		if (connector == null) {
 			return;
 		}
 		try {
 			connector.stop();
-			printTrace("Connector on " + urlstr + " is stopped");
+			printTrace("Connector on " + url + " is stopped");
 		} catch (final IOException e) {
 			LOG.error(e);
 			return;

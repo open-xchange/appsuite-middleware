@@ -81,6 +81,8 @@ public final class ManagementActivator implements BundleActivator {
 
 	private ServiceRegistration serviceRegistration;
 
+	private ServiceHolderListener<Configuration> listener;
+
 	/**
 	 * Initializes a new {@link ManagementActivator}
 	 */
@@ -110,7 +112,7 @@ public final class ManagementActivator implements BundleActivator {
 			/*
 			 * Start management when configuration service is available
 			 */
-			final ServiceHolderListener<Configuration> l = new ServiceHolderListener<Configuration>() {
+			listener = new ServiceHolderListener<Configuration>() {
 
 				public void onServiceAvailable(final Configuration service) throws AbstractOXException {
 					try {
@@ -118,12 +120,12 @@ public final class ManagementActivator implements BundleActivator {
 							ManagementInit.getInstance().stop();
 						}
 						ManagementInit.getInstance().start();
-						
+
 						/*
 						 * Register management service
 						 */
-						serviceRegistration = context.registerService(ManagementAgent.class.getCanonicalName(), ManagementAgentImpl
-								.getInstance(), null);
+						serviceRegistration = context.registerService(ManagementAgent.class.getCanonicalName(),
+								ManagementAgentImpl.getInstance(), null);
 
 					} catch (final AbstractOXException e) {
 						LOG.error(e.getLocalizedMessage(), e);
@@ -132,11 +134,10 @@ public final class ManagementActivator implements BundleActivator {
 				}
 
 				public void onServiceRelease() {
-
 				}
 			};
-			
-			ConfigurationService.getInstance().addServiceHolderListener(l);			
+
+			ConfigurationService.getInstance().addServiceHolderListener(listener);
 		} catch (final Throwable t) {
 			LOG.error(t.getLocalizedMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -151,6 +152,12 @@ public final class ManagementActivator implements BundleActivator {
 	 */
 	public void stop(final BundleContext context) throws Exception {
 		try {
+			ConfigurationService.getInstance().removeServiceHolderListener(listener.getClass().getName());
+
+			if (ManagementInit.getInstance().isStarted()) {
+				ManagementInit.getInstance().stop();
+			}
+
 			serviceRegistration.unregister();
 			serviceRegistration = null;
 			/*
