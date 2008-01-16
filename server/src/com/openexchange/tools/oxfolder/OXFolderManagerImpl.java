@@ -1770,6 +1770,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 
 	private static void checkSimilarNamedSharedFolder(final Set<Integer> userIds,
 			final FolderObject[] allSharedFolders, final String folderName, final Context ctx) {
+		final List<Integer> affectedUsers = new ArrayList<Integer>();
 		for (final FolderObject f : allSharedFolders) {
 			if (null == f) {
 				continue;
@@ -1784,11 +1785,11 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 						final int[] members = GroupStorage.getInstance(true).getGroup(permission.getEntity(), ctx)
 								.getMember();
 						for (int j = 0; j < members.length; j++) {
-							if (userIds.contains(Integer.valueOf(members[j])) && f.getFolderName().equals(folderName)) {
-								LOG.warn("SIMILAR NAMED SHARED FOLDER DETECTED!", new Throwable());
+							final Integer cur = Integer.valueOf(members[j]);
+							if (userIds.contains(cur) && f.getFolderName().equals(folderName)) {
+								affectedUsers.add(cur);
 								// TODO: Throw exception if bug #9111 says
 								// so
-								return;
 							}
 						}
 					} catch (final LdapException e) {
@@ -1798,14 +1799,21 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 					/*
 					 * Check against entity itself
 					 */
-					if (userIds.contains(Integer.valueOf(permission.getEntity()))
-							&& f.getFolderName().equals(folderName)) {
-						LOG.warn("SIMILAR NAMED SHARED FOLDER DETECTED!", new Throwable());
+					final Integer cur = Integer.valueOf(permission.getEntity());
+					if (userIds.contains(cur) && f.getFolderName().equals(folderName)) {
+						affectedUsers.add(cur);
 						// TODO: Throw exception if bug #9111 says so
-						return;
 					}
 				}
 			}
+		}
+		if (affectedUsers.size() > 0) {
+			String affectedUsersStr = affectedUsers.toString();
+			affectedUsersStr = affectedUsersStr.substring(1, affectedUsersStr.length() - 1);
+			LOG.warn(new StringBuilder(128).append("A private folder of the name \"").append(folderName).append(
+					"\" is already shared to user(s): ").append(affectedUsersStr).append(
+					".\nEither direct or affected user(s) are members of group to whom the folder is shared")
+					.toString(), new Throwable());
 		}
 	}
 }
