@@ -1,3 +1,8 @@
+* 2008-01-16 - marcus.klein@open-xchange.com
+
+ - Bugfix #8411: Fixed completely missing recurrence rule in WebDAV iCal
+   interface. 
+
 * 2008-01-15 - sebastian.kauss@open-xchange.com
 
  - Bugfix: #10760: Missing recurrence attributes in appointment requests
