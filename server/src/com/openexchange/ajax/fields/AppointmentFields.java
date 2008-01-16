@@ -61,4 +61,6 @@ public interface AppointmentFields extends CalendarFields {
 	
 	public static final String HARD_CONFLICT = "hard_conflict";
 	
+	public static final String TIMEZONE = "timezone";
+	
 }
