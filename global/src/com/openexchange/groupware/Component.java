@@ -262,7 +262,11 @@ public enum Component {
     /**
      * Any errors related to handling a <code></code>
      */
-    DELETE_EVENT("DEL");
+    DELETE_EVENT("DEL"),
+    /**
+     * Any errors related to an OSGi service
+     */
+    SERVICE("SRV");
 
     /**
      * The abbrevation for components.
