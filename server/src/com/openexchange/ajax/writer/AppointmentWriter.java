@@ -164,6 +164,10 @@ public class AppointmentWriter extends CalendarWriter {
 		if (appointmentObject.getIgnoreConflicts()) {
 			writeParameter(AppointmentFields.IGNORE_CONFLICTS, true, jsonObj);
 		}
+
+		if (appointmentObject.containsTimezone()) {
+			writeParameter(AppointmentFields.TIMEZONE, appointmentObject.getTimezone(), jsonObj);
+		}
 		
 		if (appointmentObject instanceof CalendarDataObject && ((CalendarDataObject)appointmentObject).isHardConflict()) {
 			writeParameter(AppointmentFields.HARD_CONFLICT, true, jsonObj);
@@ -239,6 +243,9 @@ public class AppointmentWriter extends CalendarWriter {
 				writeValue(appointmentObject.getNote(), jsonArray);
 				break;
 				// modification for mobility support
+			case AppointmentObject.RECURRENCE_ID:
+				writeValue(appointmentObject.getRecurrenceID(), jsonArray);
+				break;
 			case AppointmentObject.RECURRENCE_TYPE:
 				writeValue(appointmentObject.getRecurrenceType(), jsonArray);
 				break;
