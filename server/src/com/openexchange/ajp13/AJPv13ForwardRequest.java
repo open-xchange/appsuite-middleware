@@ -397,7 +397,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 			}
 			headerValue = parseString();
 			if (isCookie) {
-				final String[] cookies = headerValue.split(";");
+				final String[] cookies = headerValue.split("[;\\,]");
 				final List<Cookie> cookieList = new ArrayList<Cookie>(cookies.length);
 				/*
 				 * Version "0" complies with the original cookie specification
