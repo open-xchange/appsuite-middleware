@@ -58,6 +58,7 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -95,7 +96,7 @@ public abstract class ServiceHolder<S> {
 				final Map<ServiceProxy, Object> q = e.getValue();
 				for (final Iterator<ServiceProxy> proxyIter = q.keySet().iterator(); proxyIter.hasNext();) {
 					final ServiceProxy proxy = proxyIter.next();
-					if ((System.currentTimeMillis() - proxy.creationTime) > TIMEOUT) {
+					if (proxy.isExceeded()) {
 						LOG.error("Forced unget: Found non-ungetted service after " + TIMEOUT
 								+ "msec that was acquired at:\n" + printStackTrace(proxy.trace));
 						proxy.proxyService = null;
@@ -163,6 +164,14 @@ public abstract class ServiceHolder<S> {
 				}
 			}
 		}
+
+		public boolean isExceeded() {
+			return (System.currentTimeMillis() - creationTime) > TIMEOUT;
+		}
+
+		public StackTraceElement[] getTrace() {
+			return trace;
+		}
 	}
 
 	private static final Object DUMMY = new Object();
@@ -183,11 +192,13 @@ public abstract class ServiceHolder<S> {
 
 	private final Map<String, ServiceHolderListener<S>> listeners;
 
-	private S service;
+	// private S service;
 
 	private Map<Thread, Map<ServiceProxy, Object>> usingThreads = new ConcurrentHashMap<Thread, Map<ServiceProxy, Object>>();
 
 	private final AtomicBoolean waiting;
+
+	private final AtomicReference<S> serviceReference;
 
 	/**
 	 * Default constructor
@@ -197,6 +208,7 @@ public abstract class ServiceHolder<S> {
 		countActive = new AtomicInteger();
 		waiting = new AtomicBoolean();
 		listeners = new ConcurrentHashMap<String, ServiceHolderListener<S>>();
+		serviceReference = new AtomicReference<S>();
 		serviceHolderTimer.schedule(new ServiceHolderTask(), 1000, 5000);
 	}
 
@@ -213,8 +225,8 @@ public abstract class ServiceHolder<S> {
 			return;
 		}
 		listeners.put(listener.getClass().getName(), listener);
-		if (null != service) {
-			listener.onServiceAvailable(service);
+		if (null != serviceReference.get()) {
+			listener.onServiceAvailable(serviceReference.get());
 		}
 	}
 
@@ -224,7 +236,6 @@ public abstract class ServiceHolder<S> {
 	 * {@link #ungetService()}
 	 * 
 	 * <pre>
-	 * 
 	 * ...
 	 * final MyService myService = MyService.getInstance();
 	 * final Service s = myService.getService();
@@ -234,13 +245,13 @@ public abstract class ServiceHolder<S> {
 	 *     myService.ungetService(s);
 	 * }
 	 * ...
-	 * 
 	 * </pre>
 	 * 
-	 * @return The bundle service instance
+	 * @return The bundle service instance or <code>null</code> if none
+	 *         available
 	 */
-	public S getService() {
-		if (null == service) {
+	public final S getService() {
+		if (null == serviceReference.get()) {
 			return null;
 		}
 		if (LOG.isWarnEnabled() && usingThreads.containsKey(Thread.currentThread())) {
@@ -253,7 +264,7 @@ public abstract class ServiceHolder<S> {
 			proxySet = new ConcurrentHashMap<ServiceProxy, Object>(4);
 			usingThreads.put(thread, proxySet);
 		}
-		final ServiceProxy proxy = new ServiceProxy(service, thread.getStackTrace());
+		final ServiceProxy proxy = new ServiceProxy(serviceReference.get(), thread.getStackTrace());
 		proxySet.put(proxy, DUMMY);
 		return proxy.newProxyInstance();
 	}
@@ -261,7 +272,7 @@ public abstract class ServiceHolder<S> {
 	private final void notifyListener(final boolean isAvailable) throws Exception {
 		if (isAvailable) {
 			for (final Iterator<ServiceHolderListener<S>> iter = listeners.values().iterator(); iter.hasNext();) {
-				iter.next().onServiceAvailable(service);
+				iter.next().onServiceAvailable(serviceReference.get());
 			}
 		} else {
 			for (final Iterator<ServiceHolderListener<S>> iter = listeners.values().iterator(); iter.hasNext();) {
@@ -276,10 +287,11 @@ public abstract class ServiceHolder<S> {
 	 * @throws Exception
 	 *             If service cannot be properly removed
 	 */
-	public void removeService() throws Exception {
-		if (null == service) {
+	public final void removeService() throws Exception {
+		if (null == serviceReference.get()) {
 			return;
 		}
+		final S service = serviceReference.get();
 		if (countActive.get() > 0) {
 			/*
 			 * Blocking OSGi framework is not allowed, but security mechanism
@@ -287,21 +299,26 @@ public abstract class ServiceHolder<S> {
 			 * released in any case.
 			 */
 			LOG.error("Service counting for " + this.getClass().getName() + " is not zero: " + countActive.toString());
-			waiting.set(true);
-			synchronized (countActive) {
-				try {
-					while (countActive.get() > 0) {
-						countActive.wait();
+			if (waiting.compareAndSet(false, true)) {
+				synchronized (countActive) {
+					try {
+						while (countActive.get() > 0) {
+							countActive.wait();
+						}
+					} catch (final InterruptedException e) {
+						LOG.error(e.getLocalizedMessage(), e);
+					} finally {
+						waiting.set(false);
 					}
-				} catch (final InterruptedException e) {
-					LOG.error(e.getLocalizedMessage(), e);
-				} finally {
-					waiting.set(false);
 				}
 			}
 		}
-		this.service = null;
-		notifyListener(false);
+		if (serviceReference.compareAndSet(service, null)) {
+			/*
+			 * No other thread removed service in the meantime
+			 */
+			notifyListener(false);
+		}
 	}
 
 	/**
@@ -339,12 +356,14 @@ public abstract class ServiceHolder<S> {
 	 * @throws Exception
 	 *             If service cannot be applied
 	 */
-	public void setService(final S service) throws Exception {
+	public final void setService(final S service) throws Exception {
 		if (null == service) {
 			LOG.warn("#setService called with null argument! ", new Throwable());
 		}
-		if (null == this.service) {
-			this.service = service;
+		if (serviceReference.compareAndSet(null, service)) {
+			/*
+			 * No other thread set the service in the meantime
+			 */
 			notifyListener(true);
 		}
 	}
@@ -355,7 +374,7 @@ public abstract class ServiceHolder<S> {
 	 * @param service
 	 *            The bundle service instance
 	 */
-	public void ungetService(final S service) {
+	public final void ungetService(final S service) {
 		if (service == null || countActive.get() == 0) {
 			return;
 		}
