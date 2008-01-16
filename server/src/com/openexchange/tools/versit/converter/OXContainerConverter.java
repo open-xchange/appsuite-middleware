@@ -49,7 +49,11 @@
 
 package com.openexchange.tools.versit.converter;
 
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.CalendarRecurringCollection;
+import com.openexchange.groupware.calendar.RecurringResults;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
@@ -1423,6 +1427,7 @@ public class OXContainerConverter {
 	}
 
 	public VersitObject convertAppointment(final AppointmentObject app) throws ConverterException {
+	    modifyRecurring(app);
 		final VersitObject object = new VersitObject("VEVENT");
 		// TODO CLASS
 		addProperty(object, "CLASS", "PUBLIC");
@@ -1531,6 +1536,24 @@ public class OXContainerConverter {
 		return object;
 	}
 
+	private static void modifyRecurring(final AppointmentObject app) throws ConverterException {
+	    if (app.getRecurrenceType() != CalendarObject.NONE) {
+	        RecurringResults result;
+            try {
+                result = CalendarRecurringCollection.calculateFirstRecurring(app);
+            } catch (OXException e) {
+                LOG.error(e.getMessage(), e);
+                throw new ConverterException(e);
+            }
+            if (result.size() == 1) {
+                app.setStartDate(new Date(result.getRecurringResult(0).getStart()));
+                app.setEndDate(new Date(result.getRecurringResult(0).getEnd()));
+            } else {
+                throw new ConverterException("Unable to calculate first occurence of an appointment.");
+            }
+	    }
+	}
+	
 	public VersitObject convertContact(final ContactObject contact, final String version) throws ConverterException {
 		final VersitObject object = new VersitObject("VCARD");
 		// VERSION
