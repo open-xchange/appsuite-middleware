@@ -209,7 +209,7 @@ public abstract class ServiceHolder<S> {
 	 *             If listener cannot be added
 	 */
 	public final void addServiceHolderListener(final ServiceHolderListener<S> listener) throws Exception {
-		if (listeners.containsKey(listener.getClass())) {
+		if (listeners.containsKey(listener.getClass().getName())) {
 			return;
 		}
 		listeners.put(listener.getClass().getName(), listener);
@@ -311,7 +311,24 @@ public abstract class ServiceHolder<S> {
 	 *            Listener class
 	 */
 	public final void removeServiceHolderListener(final Class<? extends ServiceHolderListener<S>> clazz) {
-		listeners.remove(clazz);
+		listeners.remove(clazz.getName());
+	}
+
+	/**
+	 * Removes the listener with given class name
+	 * 
+	 * @param className
+	 *            Listener class name
+	 */
+	public final void removeServiceHolderListener(final String className) {
+		listeners.remove(className);
+	}
+
+	/**
+	 * Clears service holder listeners
+	 */
+	public final void clearServiceHolderListener() {
+		listeners.clear();
 	}
 
 	/**
@@ -323,10 +340,10 @@ public abstract class ServiceHolder<S> {
 	 *             If service cannot be applied
 	 */
 	public void setService(final S service) throws Exception {
-        if(null == service) {
-            LOG.warn("#setService called with null argument! ", new Throwable());
-        }
-        if (null == this.service) {
+		if (null == service) {
+			LOG.warn("#setService called with null argument! ", new Throwable());
+		}
+		if (null == this.service) {
 			this.service = service;
 			notifyListener(true);
 		}
