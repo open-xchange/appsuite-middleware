@@ -1,0 +1,106 @@
+<project name="open-xchange-common" default="install" basedir=".">
+
+    <!-- Customizable values -->
+    <property name="destdir" value=""/>
+    <property name="prefix" value="/opt/open-xchange"/>
+
+    <!-- Constants -->
+    <property name="tmpdir" value="tmp"/>
+
+    <property file="META-INF/MANIFEST.MF"/>
+
+	<property name="version" value="${Bundle-Version}"/>
+    <property name="bundle.name" value="${Bundle-SymbolicName}"/>
+	<property name="composite.name" value="open-xchange-common-${version}"/>
+
+    <fileset dir="lib/lib" id="jarfiles">
+        <include name="*"/>
+        <exclude name="CVS"/>
+    </fileset>
+
+    <fileset dir="." id="metainf">
+        <include name="META-INF/**"/>
+        <exclude name="CVS"/>
+    </fileset>
+
+    <fileset dir="lib/jars" id="framework">
+        <include name="org.eclipse.osgi*"/>
+        <include name="javax.servlet*"/>
+        <include name="org.apache.commons.logging*"/>
+    </fileset>
+
+    <!-- Install Constants -->
+    <property name="bundlesdir" value="${prefix}/bundles"/>
+    <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+    <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
+
+    <!-- Install targets -->
+    <target name="install" depends="installJars,installConfig"/>
+
+    <target name="installJars">
+        <property name="bundlesdestdir" value="${destdir}${bundlesdir}"/>
+        <!-- Framework -->
+        <mkdir dir="${bundlesdestdir}"/>
+        <copy todir="${bundlesdestdir}">
+            <fileset refid="framework"/>
+        </copy>
+        <!-- Common Bundle -->
+        <property name="commondir" value="${bundlesdestdir}/${bundle.name}"/>
+        <mkdir dir="${commondir}/lib"/>
+        <copy todir="${commondir}/lib">
+            <fileset refid="jarfiles"/>
+        </copy>
+        <copy todir="${commondir}">
+            <fileset refid="metainf"/>
+        </copy>
+    </target>
+
+    <target name="installConfig">
+        <mkdir dir="${destdir}/${gwbundle.d}"/>
+        <echo file="${destdir}/${gwbundle.d}/org.eclipse.osgi.services.ini"
+            message="${bundlesdir}/org.eclipse.osgi.services_3.1.200.v20070605.jar${line.separator}"/>
+        <echo file="${destdir}/${gwbundle.d}/org.apache.commons.logging.ini"
+            message="${bundlesdir}/org.apache.commons.logging_1.0.4.v200706111724.jar${line.separator}"/>
+        <echo file="${destdir}/${gwbundle.d}/javax.servlet.ini"
+            message="${bundlesdir}/javax.servlet_2.4.0.v200706111738.jar${line.separator}"/>
+        <echo file="${destdir}/${gwbundle.d}/${composite.name}.ini"
+            message="${bundlesdir}/${bundle.name}${line.separator}"/>
+
+        <mkdir dir="${destdir}/${adbundle.d}"/>
+        <echo file="${destdir}/${adbundle.d}/org.eclipse.osgi.services.ini"
+            message="${bundlesdir}/org.eclipse.osgi.services_3.1.200.v20070605.jar${line.separator}"/>
+        <echo file="${destdir}/${adbundle.d}/org.apache.commons.logging.ini"
+            message="${bundlesdir}/org.apache.commons.logging_1.0.4.v200706111724.jar${line.separator}"/>
+        <echo file="${destdir}/${adbundle.d}/javax.servlet.ini"
+            message="${bundlesdir}/javax.servlet_2.4.0.v200706111738.jar${line.separator}"/>
+        <echo file="${destdir}/${adbundle.d}/${composite.name}.ini"
+            message="${bundlesdir}/${bundle.name}${line.separator}"/>
+    </target>
+
+    <!-- Dist -->
+    <target name="dist" depends="clean">
+		<property name="dist-package" value="dist-package"/>
+    	<delete dir="${dist-package}"/>
+        <mkdir dir="${dist-package}/${composite.name}"/>
+        <copy todir="${dist-package}/${composite.name}">
+            <fileset dir=".">
+                <exclude name="**${dist-package}/**"/>
+                <exclude name="**debian/**"/>
+                <exclude name="**CVS/**"/>
+                <exclude name="Todo"/>
+            </fileset>
+        </copy>
+        <tar destfile="../${composite.name}.tar.gz"
+	        basedir="${dist-package}"
+    	    includes="${composite.name}/"
+         	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
+    	<delete dir="${dist-package}"/>
+    </target>
+
+    <!-- Clean -->
+    <target name="clean">
+        <delete file="${disttar}"/>
+        <delete dir="${tmpdir}"/>
+    </target>
+
+</project>

@@ -1,0 +1,73 @@
+* 2008-01-09 - thorben.betten@open-xchange.com
+
+ - Bugfix #10214: Using "Java port of Mozilla charset detector" to guess
+   proper charset for uploaded files
+
+* 2007-09-25 - dennis.sieben@open-xchange.com
+
+  - Removed Jars for usage of commons-configuration.
+  - Removed sources and javadoc for commons-collections
+
+* 2007-09-10 - choeger@open-xchange.com
+
+ - Bugfix ID#8265 open-xchange-common package shows description "openexchange"
+
+* 2007-08-31 - thorben.betten@open-xchange.com
+
+ - Bugfix #7862/#9125: Adding library with additional charsets to Java VM
+   to solve encoding problems with messages which uses java-foreign charset
+   encodings
+
+* 2007-08-29 - dennis.sieben@open-xchange.com
+
+  - Added Jars for usage of commons-configuration.
+  - Added sources and javadoc for commons-collections
+  
+* 2007-07-23 - marcus.klein@open-xchange.com
+
+ - Removed Suns BASE64 en/decoder.
+
+* 2007-06-28 - dennis.sieben@open-xchange.com
+
+  - updated ldb-client
+
+* 2007-06-25 - choeger@open-xchange.com
+
+  - Bugfix ID#7972 Fresh install - admin cannot login
+    replace official org.eclipse.osgi with own build containing fix from
+    https://bugs.eclipse.org/bugs/show_bug.cgi?id=121737
+
+* 2007-06-19 - dennis.sieben@open-xchange.com
+
+  - added ant.jar for convertion methods used in license plugin
+
+* 2007-06-01 - dennis.sieben@open-xchange.com
+
+  - added ldb-client
+
+* 2007-05-15 - marcus.klein@open-xchange.com
+
+  - Added 3rd party licenses.
+
+* 2007-04-25 - dennis.sieben@open-xchange.com
+
+  - removed commons-cli
+
+* 2007-04-19 - choeger@open-xchange.com
+
+  - added log4j
+
+* 2007-04-12 - dennis.sieben@open-xchange.com
+
+ - Added needed jars for admin daemon license plugin
+ 
+* 2007-04-12 - thorben.betten@open-xchange.com
+
+ - New commons-fileupload.jar library v1.2
+ - Added needed jars from apache commons: commons-io.jar v1.3.1,
+   commons-lang.jar v2.3
+
+* 2007-03-29 - choeger@open-xchange.com
+
+  - initial ChangeLog
+

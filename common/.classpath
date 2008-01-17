@@ -1,7 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="lib/lib/xerces.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lib/activation.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lib/chardet.jar" sourcepath="lib/source/chardet-1.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lib/commons-codec-1.3.jar" sourcepath="lib/source/commons-codec-1.3-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lib/commons-fileupload.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lib/commons-httpclient-2.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lib/commons-io.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lib/concurrent.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lib/jakarta-slide-webdavlib-2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lib/jcs-1.2.7.9.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lib/jdom.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lib/json.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lib/mail.jar" sourcepath="lib/source/mail-1.4.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lib/mysql-connector-java-3.1.13-bin.jar" sourcepath="lib/source/mysql-connector-java-3.1.13-src.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lib/spring-beans_1.2.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lib/spring-core_1.2.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/lib/tnef.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
