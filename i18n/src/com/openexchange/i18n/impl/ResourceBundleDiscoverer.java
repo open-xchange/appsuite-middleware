@@ -27,7 +27,7 @@ public class ResourceBundleDiscoverer {
     public List<ResourceBundle> getResourceBundles() throws java.util.MissingResourceException {
         String[] files = getFilesFromLanguageFolder();
         if(files.length == 0) {
-            return Collections.EMPTY_LIST;
+        	Collections.emptyList();
         }
         List<ResourceBundle> list = new ArrayList<ResourceBundle>(files.length);
 		for (String file : files){

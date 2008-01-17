@@ -69,17 +69,17 @@ public class I18nImpl implements I18nTools {
 	
 	private ResourceBundle serverBundle = null;
 	
-	public I18nImpl(ResourceBundle bundle){
+	public I18nImpl(final ResourceBundle bundle){
 		this.serverBundle = bundle;
 	}
 	
-	public String getLocalized(String key) {
+	public String getLocalized(final String key) {
 		if (serverBundle == null) {
 			return key;
 		}
 		try {
 			return serverBundle.getString(key);
-		} catch (MissingResourceException x) {
+		} catch (final MissingResourceException x) {
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder("Using default for bundle ").append(serverBundle));
 			}
@@ -90,9 +90,8 @@ public class I18nImpl implements I18nTools {
 	public Locale getLocale() {
 		if (null == serverBundle){
 			return null;
-		} else{
+		}
 			
-			return serverBundle.getLocale();
-		}		
+		return serverBundle.getLocale();	
 	}
 } 

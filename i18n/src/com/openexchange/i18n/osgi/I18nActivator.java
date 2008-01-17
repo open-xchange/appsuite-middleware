@@ -49,13 +49,10 @@
 
 package com.openexchange.i18n.osgi;
 
-
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
@@ -67,110 +64,132 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.config.Configuration;
-import com.openexchange.server.ServiceHolderListener;
-import com.openexchange.server.osgiservice.BundleServiceTracker;
+import com.openexchange.i18n.I18nTools;
 import com.openexchange.i18n.impl.I18nConfiguration;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
-import com.openexchange.i18n.I18nTools;
-
+import com.openexchange.server.ServiceHolderListener;
+import com.openexchange.server.osgiservice.BundleServiceTracker;
 
 public class I18nActivator implements BundleActivator {
 
 	private static final class I18nServiceHolderListener implements ServiceHolderListener<Configuration> {
 
 		private final BundleContext context;
-		private final ServiceRegistration serviceRegister;
-		
-		public I18nServiceHolderListener(final BundleContext context, ServiceRegistration serviceRegister) {
+
+		private ServiceRegistration[] serviceRegistrations;
+
+		public I18nServiceHolderListener(final BundleContext context) {
 			super();
 			this.context = context;
-			this.serviceRegister = serviceRegister;
 		}
-		
+
 		public void onServiceAvailable(final Configuration service) throws Exception {
-			initI18nServices(context, serviceRegister);
+			serviceRegistrations = initI18nServices(context);
 		}
 
 		public void onServiceRelease() throws Exception {
-			// TODO Auto-generated method stub		
+			// TODO Auto-generated method stub
 		}
-		
+
+		public void unregisterAll() {
+			if (null == serviceRegistrations) {
+				return;
+			}
+			for (int i = 0; i < serviceRegistrations.length; i++) {
+				serviceRegistrations[i].unregister();
+				serviceRegistrations[i] = null;
+			}
+			serviceRegistrations = null;
+			if (LOG.isInfoEnabled()) {
+				LOG.info("All I18n services unregistered");
+			}
+		}
 	}
-	
+
 	private static final Log LOG = LogFactory.getLog(I18nActivator.class);
-	
-	private ServiceRegistration serviceRegister = null;	
-	
+
+	private I18nServiceHolderListener listener;
+
 	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
-	
-	
-	
-	public void start(BundleContext context) throws Exception {
+
+	public void start(final BundleContext context) throws Exception {
 
 		if (LOG.isDebugEnabled())
 			LOG.debug("I18n Starting");
-		
-		
+
 		try {
 			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
 					new BundleServiceTracker<Configuration>(context, I18nConfiguration.getInstance(),
 							Configuration.class)));
 
-			for (ServiceTracker tracker : serviceTrackerList) {
+			for (final ServiceTracker tracker : serviceTrackerList) {
 				tracker.open();
 			}
-			
-			I18nConfiguration.getInstance().addServiceHolderListener(new I18nServiceHolderListener(context, serviceRegister));
+
+			listener = new I18nServiceHolderListener(context);
+			I18nConfiguration.getInstance().addServiceHolderListener(listener);
 
 		} catch (final Throwable e) {
 			throw e instanceof Exception ? (Exception) e : new Exception(e);
-		}	
-		
-		
+		}
+
 		if (LOG.isDebugEnabled())
-			LOG.debug("I18n Started");		
+			LOG.debug("I18n Started");
 	}
-	
-	private static void initI18nServices(BundleContext context, ServiceRegistration serviceRegister) throws MalformedURLException, FileNotFoundException {
-		
-		//File dir = new File("/home/fred/i18n/osgi/");
-		
-		Configuration conf = I18nConfiguration.getInstance().getService();
-		String directory_name = null;
-		try {
-			directory_name = conf.getProperty("i18n.language.path");
-		} finally {
-			I18nConfiguration.getInstance().ungetService(conf);
+
+	private static ServiceRegistration[] initI18nServices(final BundleContext context) throws FileNotFoundException {
+
+		// File dir = new File("/home/fred/i18n/osgi/");
+
+		final File dir;
+		{
+			final Configuration conf = I18nConfiguration.getInstance().getService();
+			try {
+				dir = new File(conf.getProperty("i18n.language.path"));
+			} finally {
+				I18nConfiguration.getInstance().ungetService(conf);
+			}
 		}
-		
-		File dir = new File(directory_name);
-        
 
+		final List<ResourceBundle> resourceBundles = new ResourceBundleDiscoverer(dir).getResourceBundles();
+		final List<ServiceRegistration> serviceRegistrations = new ArrayList<ServiceRegistration>();
+		for (final ResourceBundle rc : resourceBundles) {
+			final I18nTools i18n = new I18nImpl(rc);
 
-        for (ResourceBundle rc : new ResourceBundleDiscoverer(dir).getResourceBundles()){
-			Locale l = null;
-			
-		    I18nTools i18n = new I18nImpl(rc);
-				
-			Properties prop = new Properties();
+			final Properties prop = new Properties();
 			prop.put("language", rc.getLocale());
-				
-			serviceRegister = context.registerService(I18nTools.class.getName(), i18n, prop);
+
+			serviceRegistrations.add(context.registerService(I18nTools.class.getName(), i18n, prop));
 		}
+		if (LOG.isInfoEnabled()) {
+			LOG.info("All I18n services registered");
+		}
+		return serviceRegistrations.toArray(new ServiceRegistration[serviceRegistrations.size()]);
 	}
 
-
-    public void stop(BundleContext context) throws Exception {
+	public void stop(final BundleContext context) throws Exception {
 		if (LOG.isDebugEnabled())
 			LOG.debug("Stopping I18n");
-		
-		try {
-			serviceRegister.unregister();
-			serviceRegister = null;
 
+		try {
+			I18nConfiguration.getInstance().removeServiceHolderListener(listener.getClass().getName());
+			/*
+			 * Unregister through listener
+			 */
+			if (null != listener) {
+				listener.unregisterAll();
+				listener = null;
+			}
+			/*
+			 * Close service trackers
+			 */
+			for (ServiceTracker tracker : serviceTrackerList) {
+				tracker.close();
+			}
+			serviceTrackerList.clear();
 		} catch (final Throwable e) {
-			LOG.error("SessiondActivator: start: ", e);
+			LOG.error("I18nActivator: stop: ", e);
 			throw e instanceof Exception ? (Exception) e : new Exception(e);
 		}
 		if (LOG.isDebugEnabled())
@@ -178,4 +197,3 @@ public class I18nActivator implements BundleActivator {
 	}
 
 }
- 
