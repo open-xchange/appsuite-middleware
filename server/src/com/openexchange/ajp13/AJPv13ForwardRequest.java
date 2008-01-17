@@ -62,7 +62,6 @@ import java.util.regex.Matcher;
 import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import com.openexchange.ajp13.AJPv13Exception.AJPCode;
 import com.openexchange.configuration.ServerConfig;
@@ -547,8 +546,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 						/*
 						 * Check corresponding HTTP session
 						 */
-						final HttpSession httpSession = HttpSessionManagement.getHttpSession(current.getValue());
-						if (httpSession == null || HttpSessionManagement.isHttpSessionExpired(httpSession)) {
+						if (!HttpSessionManagement.isHttpSessionValid(current.getValue())) {
 							/*
 							 * Invalid cookie
 							 */
@@ -597,8 +595,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 			/*
 			 * Check corresponding HTTP session
 			 */
-			final HttpSession httpSession = HttpSessionManagement.getHttpSession(id);
-			if (httpSession == null || HttpSessionManagement.isHttpSessionExpired(httpSession)) {
+			if (!HttpSessionManagement.isHttpSessionValid(id)) {
 				/*
 				 * Invalid cookie. Create a new unique id
 				 */

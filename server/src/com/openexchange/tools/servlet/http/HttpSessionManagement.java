@@ -62,11 +62,11 @@ import javax.servlet.http.HttpSession;
 import com.openexchange.server.impl.ServerTimer;
 
 /**
- * HttpSessionManagement
+ * {@link HttpSessionManagement} - Management for HTTP sessions
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HttpSessionManagement {
+public final class HttpSessionManagement {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HttpSessionManagement.class);
@@ -159,9 +159,21 @@ public class HttpSessionManagement {
 	 * @return <code>true</code> if given HTTP session has expired; otherwise
 	 *         <code>false</code>
 	 */
-	public final static boolean isHttpSessionExpired(final HttpSession httpSession) {
+	public static boolean isHttpSessionExpired(final HttpSession httpSession) {
 		return httpSession.getMaxInactiveInterval() > 0 ? (System.currentTimeMillis() - httpSession
 				.getLastAccessedTime()) > httpSession.getMaxInactiveInterval() : false;
+	}
+
+	/**
+	 * Checks if HTTP session referenced by specified sessionId is valid
+	 * 
+	 * @param sessionId
+	 *            The HTTP session ID
+	 * @return <code>true</code> if valid; otherwise <code>false</code>
+	 */
+	public static boolean isHttpSessionValid(final String sessionId) {
+		final HttpSession httpSession = sessions.get(sessionId);
+		return (httpSession != null && !isHttpSessionExpired(httpSession));
 	}
 
 	private static final char[] digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
@@ -172,7 +184,7 @@ public class HttpSessionManagement {
 	 * 
 	 * @return The unique ID
 	 */
-	public static final String getNewUniqueId() {
+	public static String getNewUniqueId() {
 		String retval = null;
 		try {
 			final SecureRandom secRandom = SecureRandom.getInstance("SHA1PRNG");
