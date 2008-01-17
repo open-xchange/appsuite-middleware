@@ -144,6 +144,6 @@ public abstract class ChangeCore extends UserAbstraction {
 
     }
 
-    protected abstract void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, MalformedURLException, NotBoundException, DuplicateExtensionException;
+    protected abstract void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, MalformedURLException, NotBoundException, DuplicateExtensionException;
 
 }
