@@ -169,7 +169,11 @@ public class AJPv13Exception extends AbstractOXException {
 		/**
 		 * File "%s" could not be found
 		 */
-		FILE_NOT_FOUND("File \"%s\" could not be found.", Category.CODE_ERROR, 22);
+		FILE_NOT_FOUND("File \"%s\" could not be found.", Category.CODE_ERROR, 22),
+		/**
+		 * Invalid cookie header value: %s
+		 */
+		INVALID_COOKIE_HEADER("Invalid cookie header value: %s", Category.CODE_ERROR, 23);
 
 		private final String message;
 

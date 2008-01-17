@@ -70,7 +70,7 @@ public final class RFC2616Regex {
 		super();
 	}
 
-	private static final String tokenRegex = "[\\p{ASCII}&&[^\\p{Cntrl}()<>@,;:\\\"/\\[\\]?={} \t]]*";
+	private static final String tokenRegex = "[\\p{ASCII}&&[^\\p{Cntrl}()<>@,;:\\\"/\\[\\]?={}\\p{Blank}]]*";
 
 	/**
 	 * Regular expression that satisfies a <i>token</i> as per <a

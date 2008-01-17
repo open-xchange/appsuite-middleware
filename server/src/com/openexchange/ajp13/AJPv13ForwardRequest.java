@@ -57,6 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.Cookie;
@@ -67,6 +68,7 @@ import com.openexchange.ajp13.AJPv13Exception.AJPCode;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.tools.codec.QuotedPrintable;
+import com.openexchange.tools.regex.RFC2616Regex;
 import com.openexchange.tools.servlet.OXServletInputStream;
 import com.openexchange.tools.servlet.OXServletOutputStream;
 import com.openexchange.tools.servlet.http.HttpServletRequestWrapper;
@@ -371,79 +373,139 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		boolean contentTypeSet = false;
 		NextHeader: for (int i = 1; i <= numHeaders; i++) {
 			final String headerName;
-			final String headerValue;
 			final boolean isCookie;
-			/*
-			 * Header name is encoded as an integer value.
-			 */
-			final byte firstByte = nextByte();
-			final byte secondByte = nextByte();
-			if (firstByte == (byte) 0xA0) {
-				headerName = httpHeaderMapping.get(Integer.valueOf(secondByte));
-				if (!contentTypeSet && secondByte == 0x07) {
-					servletRequest.setContentType(parseString());
-					contentTypeSet = true;
-					continue NextHeader;
-				}
-				isCookie = (secondByte == 0x09);
-			} else {
-				headerName = parseString(firstByte, secondByte);
-				if (!contentTypeSet && HDR_CONTENT_TYPE.equalsIgnoreCase(headerName)) {
-					servletRequest.setContentType(parseString());
-					contentTypeSet = true;
-					continue NextHeader;
-				}
-				isCookie = ("cookie".equalsIgnoreCase(headerName));
-			}
-			headerValue = parseString();
-			if (isCookie) {
-				final String[] cookies = headerValue.split("[;\\,]");
-				final List<Cookie> cookieList = new ArrayList<Cookie>(cookies.length);
-				/*
-				 * Version "0" complies with the original cookie specification
-				 * drafted by Netscape
-				 */
-				int version = 0;
-				NextCookie: for (int j = 0; j < cookies.length; j++) {
-					final Cookie c;
-					final String[] cookieNameValuePair = cookies[j].trim().split("=");
-					if (cookieNameValuePair.length == 1) {
-						c = new Cookie(cookieNameValuePair[0], STR_EMPTY);
-						c.setVersion(version);
-						cookieList.add(c);
-					} else if (cookieNameValuePair[0].length() > 0 && cookieNameValuePair[0].charAt(0) == '$') {
-						if ("$Version".equalsIgnoreCase(cookieNameValuePair[0])) {
-							try {
-								version = Integer.parseInt(cookieNameValuePair[1]);
-							} catch (final NumberFormatException e) {
-								LOG.error(new StringBuilder("Special Cookie could not be parsed: $Version=")
-										.append(cookieNameValuePair[1]));
-								version = 0;
-							}
-						} else {
-							if (LOG.isInfoEnabled()) {
-								LOG.info(new StringBuilder(100).append("Special cookie ")
-										.append(cookieNameValuePair[0]).append(" not handled, yet!"));
-							}
-						}
-					} else {
-						try {
-							c = new Cookie(cookieNameValuePair[0], cookieNameValuePair[1]);
-						} catch (final IllegalArgumentException e) {
-							if (LOG.isWarnEnabled()) {
-								LOG.warn("Discarding cookie: " + e.getMessage(), e);
-							}
-							continue NextCookie;
-						}
-						c.setVersion(version);
-						cookieList.add(c);
+			{
+				final byte firstByte = nextByte();
+				final byte secondByte = nextByte();
+				if (firstByte == (byte) 0xA0) {
+					/*
+					 * Header name is encoded as an integer value.
+					 */
+					headerName = httpHeaderMapping.get(Integer.valueOf(secondByte));
+					if (!contentTypeSet && secondByte == 0x07) {
+						servletRequest.setContentType(parseString());
+						contentTypeSet = true;
+						continue NextHeader;
 					}
+					isCookie = (secondByte == 0x09);
+				} else {
+					headerName = parseString(firstByte, secondByte);
+					if (!contentTypeSet && HDR_CONTENT_TYPE.equalsIgnoreCase(headerName)) {
+						servletRequest.setContentType(parseString());
+						contentTypeSet = true;
+						continue NextHeader;
+					}
+					isCookie = ("cookie".equalsIgnoreCase(headerName));
 				}
-				servletRequest.setCookies(cookieList.toArray(new Cookie[cookieList.size()]));
+			}
+			final String headerValue = parseString();
+			if (isCookie) {
+				servletRequest.setCookies(parseCookieHeader(headerValue));
 			} else {
 				servletRequest.setHeader(headerName, headerValue, false);
 			}
 		}
+	}
+
+	private static Cookie[] parseCookieHeader(final String headerValue) throws AJPv13Exception {
+		Matcher m = RFC2616Regex.COOKIES.matcher(headerValue);
+		if (m.matches()) {
+			final String versionStr = m.group(1);
+			final int version = versionStr == null ? 0 : Integer.parseInt(versionStr);
+			m = RFC2616Regex.COOKIE_VALUE.matcher(versionStr == null ? headerValue : headerValue.substring(m.end(1)));
+			final List<Cookie> cookieList = new ArrayList<Cookie>();
+			while (m.find()) {
+				final String name = m.group(1);
+				if (name.charAt(0) == '$' && LOG.isInfoEnabled()) {
+					LOG.info(new StringBuilder(32).append("Special cookie ").append(name).append(" not handled, yet!"));
+				}
+				final Cookie c = new Cookie(name, stripQuotes(m.group(2)));
+				String attr = m.group(3);
+				if (attr != null) {
+					/*
+					 * Set path attribute
+					 */
+					c.setPath(attr);
+				}
+				attr = m.group(4);
+				if (attr != null) {
+					/*
+					 * Set domain attribute
+					 */
+					c.setDomain(attr);
+				}
+				/*
+				 * Ignore port, apply version, and add to list
+				 */
+				c.setVersion(version);
+				cookieList.add(c);
+			}
+			return cookieList.toArray(new Cookie[cookieList.size()]);
+		}
+		throw new AJPv13Exception(AJPv13Exception.AJPCode.INVALID_COOKIE_HEADER, true, headerValue);
+		// final String[] cookies = headerValue.split("\\s*[;,]\\s*");
+		// final List<Cookie> cookieList = new
+		// ArrayList<Cookie>(cookies.length);
+		// /*
+		// * Version "0" complies with the original cookie specification
+		// * drafted by Netscape
+		// */
+		// int version = 0;
+		// NextCookie: for (int j = 0; j < cookies.length; j++) {
+		// final Cookie c;
+		// final String[] cookieNameValuePair =
+		// cookies[j].trim().split("\\s*=\\s*");
+		// if (cookieNameValuePair.length == 1) {
+		// c = new Cookie(cookieNameValuePair[0], STR_EMPTY);
+		// c.setVersion(version);
+		// cookieList.add(c);
+		// } else if (cookieNameValuePair[0].length() > 0 &&
+		// cookieNameValuePair[0].charAt(0) == '$') {
+		// if ("$Version".equalsIgnoreCase(cookieNameValuePair[0])) {
+		// try {
+		// version = Integer.parseInt(cookieNameValuePair[1]);
+		// } catch (final NumberFormatException e) {
+		// LOG.error(new StringBuilder("Special Cookie could not be parsed:
+		// $Version=")
+		// .append(cookieNameValuePair[1]));
+		// version = 0;
+		// }
+		// } else {
+		// if (LOG.isInfoEnabled()) {
+		// LOG.info(new StringBuilder(100).append("Special cookie ")
+		// .append(cookieNameValuePair[0]).append(" not handled, yet!"));
+		// }
+		// }
+		// } else {
+		// try {
+		// c = new Cookie(cookieNameValuePair[0], cookieNameValuePair[1]);
+		// } catch (final IllegalArgumentException e) {
+		// if (LOG.isWarnEnabled()) {
+		// LOG.warn("Discarding cookie: " + e.getMessage(), e);
+		// }
+		// continue NextCookie;
+		// }
+		// c.setVersion(version);
+		// cookieList.add(c);
+		// }
+		// }
+		// return cookieList.toArray(new Cookie[cookieList.size()]);
+	}
+
+	/**
+	 * Removes heading/trailing quote character <code>'"'</code> if both
+	 * present.
+	 * 
+	 * @param cookieValue
+	 *            The cookie value to strip quotes from
+	 * @return The stripped cookie value.
+	 */
+	private static String stripQuotes(final String cookieValue) {
+		final int mlen = cookieValue.length() - 1;
+		if (cookieValue.charAt(0) == '"' && cookieValue.charAt(mlen) == '"') {
+			return cookieValue.substring(1, mlen);
+		}
+		return cookieValue;
 	}
 
 	private void parseAttributes(final HttpServletRequestWrapper servletRequest) throws AJPv13Exception {
