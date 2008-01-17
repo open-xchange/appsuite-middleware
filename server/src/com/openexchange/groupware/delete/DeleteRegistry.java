@@ -99,7 +99,6 @@ public final class DeleteRegistry {
 	}
 
 	private void init() throws Exception {
-		SystemConfig.init();
 		/*
 		 * Insert module delete listener
 		 */

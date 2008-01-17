@@ -49,6 +49,8 @@
 
 package com.openexchange.configuration;
 
+import java.io.File;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -78,7 +80,7 @@ public final class SystemConfig extends AbstractConfig implements
      * Key of the system property that contains the file name of the
      * system.properties configuration file.
      */
-    private static final String KEY = "openexchange.propfile";
+    private static final String KEY = "openexchange.propdir";
 
     /**
      * Prevent instantiation.
@@ -151,27 +153,15 @@ public final class SystemConfig extends AbstractConfig implements
     }
 
     /**
-     * Initializes the system configuration.
-     * FIXME this method should be removed.
-     * @throws ConfigurationException if initialization fails.
-     * @deprecated since interface {@link Initialization} exists. This method
-     * should not be called all over the server. Other component should rely on
-     * a proper startup.
-     */
-    public static void init() throws ConfigurationException {
-        getInstance().start();
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
     protected String getPropertyFileName() throws ConfigurationException {
-        final String filename = System.getProperty(KEY);
-        if (null == filename) {
+        final String directory = System.getProperty(KEY);
+        if (null == directory) {
             throw new ConfigurationException(Code.PROPERTY_MISSING, KEY);
         }
-        return filename;
+        return directory + File.separator + "system.properties";
     }
 
     /**

@@ -689,18 +689,6 @@ public final class OXFolderAdminHelper {
 			final Context ctx = new ContextImpl(cid);
 			final StringHelper strHelper = new StringHelper(LocaleTools.getLocale(language));
 			/*
-			 * Load the propfile manually if not done, yet
-			 */
-			try {
-				SystemConfig.init();
-			} catch (final ConfigurationException e) {
-				/*
-				 * Propfile could NOT be loaded
-				 */
-				LOG.error(e.getMessage(), e);
-				throw new OXException(e);
-			}
-			/*
 			 * Check infostore sibling
 			 */                        
 			if (OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, displayName, FolderObject.INFOSTORE,
