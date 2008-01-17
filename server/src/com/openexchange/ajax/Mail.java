@@ -138,6 +138,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.regex.RegexUtility;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -1483,7 +1484,13 @@ public class Mail extends PermissionServlet implements UploadListener {
 		return response;
 	}
 
-	private static final Pattern PATTERN_IDS = Pattern.compile("\"id\":\".+?/([0-9]+?)\"\\s*,\\s*\"folder\":\"(.+?)\"");
+	private static final String idRegex = "\"id\":\".+?/([0-9]+?)\"";
+
+	private static final String fldRegex = "\"folder\":\"(.+?)\"";
+
+	private static final String commaRegex = "\\p{Blank}*,\\p{Blank}*";
+
+	private static final Pattern PATTERN_IDS = Pattern.compile(RegexUtility.OR(RegexUtility.group(RegexUtility.concat(idRegex, commaRegex, fldRegex), false), RegexUtility.group(RegexUtility.concat(fldRegex, commaRegex, idRegex), false)));
 
 	@SuppressWarnings("null")
 	private static final void fillMap(final Map<String, SmartLongArray> idMap, final String requestBody,
@@ -1492,20 +1499,37 @@ public class Mail extends PermissionServlet implements UploadListener {
 		String folder = null;
 		SmartLongArray sla = null;
 		while (m.find()) {
+			String fld, id;
+			if (m.group(2) == null) {
+				fld = m.group(3);
+				id = m.group(4);
+			} else {
+				fld = m.group(2);
+				id = m.group(1);
+			}
 			boolean found = false;
 			do {
-				if (folder == null || !folder.equals(m.group(2))) {
-					folder = m.group(2);
+				if (folder == null || !folder.equals(fld)) {
+					folder = fld;
 					sla = new SmartLongArray(length);
 					idMap.put(folder, sla);
 				}
-				sla.append(Long.parseLong(m.group(1)));
+				sla.append(Long.parseLong(id));
 				found = m.find();
-			} while (found && folder.equals(m.group(2)));
+				if (found) {
+					if (m.group(2) == null) {
+						fld = m.group(3);
+						id = m.group(4);
+					} else {
+						fld = m.group(2);
+						id = m.group(1);
+					}
+				}
+			} while (found && folder.equals(fld));
 			if (found) {
-				folder = m.group(2);
+				folder = fld;
 				sla = new SmartLongArray(length);
-				sla.append(Long.parseLong(m.group(1)));
+				sla.append(Long.parseLong(id));
 				idMap.put(folder, sla);
 			}
 		}
