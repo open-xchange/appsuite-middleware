@@ -145,8 +145,6 @@ public final class HttpServletManagerInit implements Initialization {
 
 	private final static String STR_PROPERTIES = ".properties";
 
-	private final static Class[] CLASS_ARR = new Class[] {};
-
 	private void initServletMappings() throws OXServletException {
 		if (!initialized.get()) {
 			initLock.lock();
@@ -182,80 +180,17 @@ public final class HttpServletManagerInit implements Initialization {
 				});
 				final Map<String, Constructor<?>> servletConstructorMap = new HashMap<String, Constructor<?>>();
 				for (int i = 0; i < propFiles.length; i++) {
-					final File f = propFiles[i];
-
 					/*
 					 * Read properties from file
 					 */
-					Properties properties = null;
-					FileInputStream fis = null;
-					try {
-						fis = new FileInputStream(f);
-						properties = new Properties();
-						properties.load(fis);
-					} finally {
-						if (fis != null) {
-							try {
-								fis.close();
-							} catch (final IOException e) {
-								LOG.error(e.getLocalizedMessage(), e);
-							}
-							fis = null;
-						}
-					}
+					final Properties properties = getPropertiesFromFile(propFiles[i]);
 					/*
-					 * Initialize servlets' default constructor
+					 * Initialize servlets' default constructors
 					 */
 					final int size = properties.keySet().size();
 					final Iterator<Object> iter = properties.keySet().iterator();
-					NextMapping: for (int k = 0; k < size; k++) {
-						String value = null;
-						try {
-							final String name = iter.next().toString();
-							if (!checkServletPath(name)) {
-								LOG.error(new StringBuilder("Invalid servlet path: ").append(name).toString());
-								continue NextMapping;
-							}
-							Object tmp = properties.get(name);
-							if (null == tmp || (value = tmp.toString().trim()).length() == 0) {
-								if (LOG.isWarnEnabled()) {
-									final OXServletException e = new OXServletException(
-											OXServletException.Code.NO_CLASS_NAME_FOUND, name);
-									LOG.warn(e.getLocalizedMessage(), e);
-								}
-								continue NextMapping;
-							}
-							tmp = null;
-							if (servletConstructorMap.containsKey(name)) {
-								final boolean isEqual = servletConstructorMap.get(name).toString().indexOf(value) != -1;
-								if (!isEqual && LOG.isWarnEnabled()) {
-									final OXServletException e = new OXServletException(
-											OXServletException.Code.ALREADY_PRESENT, name, servletConstructorMap
-													.get(name), value);
-									LOG.warn(e.getLocalizedMessage(), e);
-								}
-							} else {
-								servletConstructorMap.put(name, Class.forName(value).getConstructor(CLASS_ARR));
-							}
-						} catch (final SecurityException e) {
-							if (LOG.isWarnEnabled()) {
-								final OXServletException se = new OXServletException(
-										OXServletException.Code.SECURITY_ERR, e, value);
-								LOG.warn(se.getLocalizedMessage(), se);
-							}
-						} catch (final ClassNotFoundException e) {
-							if (LOG.isWarnEnabled()) {
-								final OXServletException se = new OXServletException(
-										OXServletException.Code.CLASS_NOT_FOUND, e, value);
-								LOG.warn(se.getLocalizedMessage(), se);
-							}
-						} catch (final NoSuchMethodException e) {
-							if (LOG.isWarnEnabled()) {
-								final OXServletException se = new OXServletException(
-										OXServletException.Code.NO_DEFAULT_CONSTRUCTOR, e, value);
-								LOG.warn(se.getLocalizedMessage(), se);
-							}
-						}
+					for (int k = 0; k < size; k++) {
+						addServletClass(iter.next().toString().trim(), properties, servletConstructorMap);
 					}
 				}
 				HttpServletManager.initHttpServletManager(servletConstructorMap);
@@ -265,6 +200,74 @@ public final class HttpServletManagerInit implements Initialization {
 						.getLocalizedMessage());
 			} finally {
 				initLock.unlock();
+			}
+		}
+	}
+
+	private static Properties getPropertiesFromFile(final File f) throws IOException {
+		FileInputStream fis = null;
+		try {
+			fis = new FileInputStream(f);
+			final Properties properties = new Properties();
+			properties.load(fis);
+			return properties;
+		} finally {
+			if (fis != null) {
+				try {
+					fis.close();
+				} catch (final IOException e) {
+					LOG.error(e.getLocalizedMessage(), e);
+				}
+				fis = null;
+			}
+		}
+	}
+
+	private final static Class<?>[] CLASS_ARR = new Class[] {};
+
+	private static void addServletClass(final String name, final Properties properties,
+			final Map<String, Constructor<?>> servletConstructorMap) {
+		String value = null;
+		try {
+			if (!checkServletPath(name)) {
+				LOG.error(new StringBuilder("Invalid servlet path: ").append(name).toString());
+				return;
+			}
+			Object tmp = properties.get(name);
+			if (null == tmp || (value = tmp.toString().trim()).length() == 0) {
+				if (LOG.isWarnEnabled()) {
+					final OXServletException e = new OXServletException(OXServletException.Code.NO_CLASS_NAME_FOUND,
+							name);
+					LOG.warn(e.getLocalizedMessage(), e);
+				}
+				return;
+			}
+			tmp = null;
+			if (servletConstructorMap.containsKey(name)) {
+				final boolean isEqual = servletConstructorMap.get(name).toString().indexOf(value) != -1;
+				if (!isEqual && LOG.isWarnEnabled()) {
+					final OXServletException e = new OXServletException(OXServletException.Code.ALREADY_PRESENT, name,
+							servletConstructorMap.get(name), value);
+					LOG.warn(e.getLocalizedMessage(), e);
+				}
+			} else {
+				servletConstructorMap.put(name, Class.forName(value).getConstructor(CLASS_ARR));
+			}
+		} catch (final SecurityException e) {
+			if (LOG.isWarnEnabled()) {
+				final OXServletException se = new OXServletException(OXServletException.Code.SECURITY_ERR, e, value);
+				LOG.warn(se.getLocalizedMessage(), se);
+			}
+		} catch (final ClassNotFoundException e) {
+			if (LOG.isWarnEnabled()) {
+				final OXServletException se = new OXServletException(OXServletException.Code.CLASS_NOT_FOUND, e, value);
+				LOG.warn(se.getLocalizedMessage(), se);
+			}
+		} catch (final NoSuchMethodException e) {
+			if (LOG.isWarnEnabled()) {
+				final OXServletException se = new OXServletException(OXServletException.Code.NO_DEFAULT_CONSTRUCTOR, e,
+						value);
+				LOG.warn(se.getLocalizedMessage(), se);
 			}
 		}
 	}
