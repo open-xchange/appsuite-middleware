@@ -95,6 +95,9 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
 		final Object addedService = context.getService(reference);
 		if (addedService instanceof CharsetProvider) {
 			collectionCharsetProvider.addCharsetProvider((CharsetProvider) addedService);
+			if (LOG.isInfoEnabled()) {
+				LOG.info("New charset provider detected and added: " + addedService.getClass().getName());
+			}
 		}
 		return addedService;
 	}
@@ -172,6 +175,9 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
 	public void removedService(final ServiceReference reference, final Object service) {
 		if (service instanceof CharsetProvider) {
 			collectionCharsetProvider.removeCharsetProvider((CharsetProvider) service);
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Charset provider removed: " + service.getClass().getName());
+			}
 		}
 		context.ungetService(reference);
 	}
