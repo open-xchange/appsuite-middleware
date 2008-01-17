@@ -261,8 +261,8 @@ public class DataWriter {
 	}
 
 	public void writeValue(final Date value, final Date offsetDate, final TimeZone timeZone, final JSONArray jsonArray) throws JSONException {
-		final int offset = timeZone.getOffset(offsetDate.getTime());
 		if (value != null) {
+			final int offset = timeZone.getOffset(offsetDate.getTime());
 			jsonArray.put(value.getTime()+offset);
 		} else {
 			jsonArray.put(JSONObject.NULL);
