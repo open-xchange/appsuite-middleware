@@ -363,8 +363,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 		return response;
 	}
 
-	public void actionGetMailCount(final Session sessionObj, final JSONWriter writer,
-			final JSONObject requestObj, final MailInterface mi) throws JSONException {
+	public void actionGetMailCount(final Session sessionObj, final JSONWriter writer, final JSONObject requestObj,
+			final MailInterface mi) throws JSONException {
 		Response.write(actionGetMailCount(sessionObj, ParamContainer.getInstance(requestObj, Component.MAIL), mi),
 				writer);
 	}
@@ -1490,7 +1490,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	private static final String commaRegex = "\\p{Blank}*,\\p{Blank}*";
 
-	private static final Pattern PATTERN_IDS = Pattern.compile(RegexUtility.OR(RegexUtility.group(RegexUtility.concat(idRegex, commaRegex, fldRegex), false), RegexUtility.group(RegexUtility.concat(fldRegex, commaRegex, idRegex), false)));
+	private static final Pattern PATTERN_IDS = Pattern.compile(RegexUtility.OR(RegexUtility.group(RegexUtility.concat(
+			idRegex, commaRegex, fldRegex), false), RegexUtility.group(RegexUtility.concat(fldRegex, commaRegex,
+			idRegex), false)));
 
 	@SuppressWarnings("null")
 	private static final void fillMap(final Map<String, SmartLongArray> idMap, final String requestBody,
@@ -1827,9 +1829,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 		actionPutMailMultiple(sessionObj, writer, mailIDs, srcFolder, destFolder, false, mailInterface);
 	}
 
-	public final void actionPutMailMultiple(final Session sessionObj, final JSONWriter writer,
-			final String[] mailIDs, final String srcFolder, final String destFolder, final boolean move,
-			final MailInterface mailInterfaceArg) throws JSONException {
+	public final void actionPutMailMultiple(final Session sessionObj, final JSONWriter writer, final String[] mailIDs,
+			final String srcFolder, final String destFolder, final boolean move, final MailInterface mailInterfaceArg)
+			throws JSONException {
 		try {
 			MailInterface mailInterface = mailInterfaceArg;
 			boolean closeMailInterface = false;
@@ -1880,9 +1882,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 		}
 	}
 
-	public void actionPutStoreFlagsMultiple(final Session sessionObj, final JSONWriter writer,
-			final String[] mailIDs, final String folder, final int flagsBits, final boolean flagValue,
-			final MailInterface mailInterfaceArg) throws JSONException {
+	public void actionPutStoreFlagsMultiple(final Session sessionObj, final JSONWriter writer, final String[] mailIDs,
+			final String folder, final int flagsBits, final boolean flagValue, final MailInterface mailInterfaceArg)
+			throws JSONException {
 		try {
 			MailInterface mailInterface = mailInterfaceArg;
 			boolean closeMailInterface = false;
@@ -1914,9 +1916,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 		}
 	}
 
-	public void actionPutColorLabelMultiple(final Session sessionObj, final JSONWriter writer,
-			final String[] mailIDs, final String folder, final int colorLabel, final MailInterface mailInterfaceArg)
-			throws JSONException {
+	public void actionPutColorLabelMultiple(final Session sessionObj, final JSONWriter writer, final String[] mailIDs,
+			final String folder, final int colorLabel, final MailInterface mailInterfaceArg) throws JSONException {
 		try {
 			MailInterface mailInterface = mailInterfaceArg;
 			boolean closeMailInterface = false;
@@ -2004,14 +2005,14 @@ public class Mail extends PermissionServlet implements UploadListener {
 							UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
 									sessionObj.getContext()));
 					if (!p.isFolderVisible()) {
-						throw new OXFolderException(FolderCode.NOT_VISIBLE, getFolderName(folderObj), getUserName(
-								sessionObj, UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext())),
-								Integer.valueOf(sessionObj.getContext().getContextId()));
+						throw new OXFolderException(FolderCode.NOT_VISIBLE, getFolderName(folderObj),
+								getUserName(sessionObj, UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj
+										.getContext())), Integer.valueOf(sessionObj.getContext().getContextId()));
 					}
 					if (!p.canWriteOwnObjects()) {
 						throw new OXFolderException(FolderCode.NO_WRITE_PERMISSION, getUserName(sessionObj, UserStorage
-								.getStorageUser(sessionObj.getUserId(), sessionObj.getContext())), getFolderName(folderObj),
-								Integer.valueOf(sessionObj.getContext().getContextId()));
+								.getStorageUser(sessionObj.getUserId(), sessionObj.getContext())),
+								getFolderName(folderObj), Integer.valueOf(sessionObj.getContext().getContextId()));
 					}
 				}
 				/*
