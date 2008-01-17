@@ -184,12 +184,18 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
 	public void start(final BundleContext context) throws Exception {
 		try {
 			modifyCharsetExtendedProvider();
+			if (LOG.isInfoEnabled()) {
+				LOG.info("External charset provider replaced with collection charset provider");
+			}
 			/*
 			 * Initialize a service tracker to track bundle chars providers
 			 */
 			this.context = context;
 			serviceTracker = new ServiceTracker(context, CharsetProvider.class.getName(), this);
 			serviceTracker.open();
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Charset bundle successfully started");
+			}
 		} catch (final Throwable t) {
 			LOG.error(t.getLocalizedMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -208,6 +214,10 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
 			 * Restore original
 			 */
 			restoreCharsetExtendedProvider();
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Collection charset provider replaced with former external charset provider");
+				LOG.info("Charset bundle successfully stopped");
+			}
 		} catch (final Throwable t) {
 			LOG.error(t.getLocalizedMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
