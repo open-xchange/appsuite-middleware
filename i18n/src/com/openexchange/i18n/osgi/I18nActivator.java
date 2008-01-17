@@ -73,6 +73,11 @@ import com.openexchange.server.osgiservice.BundleServiceTracker;
 
 public class I18nActivator implements BundleActivator {
 
+	/**
+	 * {@link I18nServiceHolderListener} - Properly registers all I18n services
+	 * defined through property <code>"i18n.language.path"</code> when
+	 * configuration service is available
+	 */
 	private static final class I18nServiceHolderListener implements ServiceHolderListener<Configuration> {
 
 		private final BundleContext context;
@@ -85,13 +90,17 @@ public class I18nActivator implements BundleActivator {
 		}
 
 		public void onServiceAvailable(final Configuration service) throws Exception {
+			unregisterAll();
 			serviceRegistrations = initI18nServices(context);
 		}
 
 		public void onServiceRelease() throws Exception {
-			// TODO Auto-generated method stub
 		}
 
+		/**
+		 * Unregisters all registered I18n services and resets them to
+		 * <code>null</code>.
+		 */
 		public void unregisterAll() {
 			if (null == serviceRegistrations) {
 				return;
@@ -109,35 +118,19 @@ public class I18nActivator implements BundleActivator {
 
 	private static final Log LOG = LogFactory.getLog(I18nActivator.class);
 
-	private I18nServiceHolderListener listener;
-
-	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
-
-	public void start(final BundleContext context) throws Exception {
-
-		if (LOG.isDebugEnabled())
-			LOG.debug("I18n Starting");
-
-		try {
-			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
-					new BundleServiceTracker<Configuration>(context, I18nConfiguration.getInstance(),
-							Configuration.class)));
-
-			for (final ServiceTracker tracker : serviceTrackerList) {
-				tracker.open();
-			}
-
-			listener = new I18nServiceHolderListener(context);
-			I18nConfiguration.getInstance().addServiceHolderListener(listener);
-
-		} catch (final Throwable e) {
-			throw e instanceof Exception ? (Exception) e : new Exception(e);
-		}
-
-		if (LOG.isDebugEnabled())
-			LOG.debug("I18n Started");
-	}
-
+	/**
+	 * Reads in all I18n services configured through property
+	 * <code>"i18n.language.path"</code>, registers them, and returns
+	 * corresponding service registrations for future unregistration.
+	 * 
+	 * @param context
+	 *            The current valid bundle context
+	 * @return The corresponding service registrations of registered I18n
+	 *         services
+	 * @throws FileNotFoundException
+	 *             If directory referenced by <code>"i18n.language.path"</code>
+	 *             does not exist
+	 */
 	private static ServiceRegistration[] initI18nServices(final BundleContext context) throws FileNotFoundException {
 
 		// File dir = new File("/home/fred/i18n/osgi/");
@@ -166,6 +159,35 @@ public class I18nActivator implements BundleActivator {
 			LOG.info("All I18n services registered");
 		}
 		return serviceRegistrations.toArray(new ServiceRegistration[serviceRegistrations.size()]);
+	}
+
+	private I18nServiceHolderListener listener;
+
+	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
+
+	public void start(final BundleContext context) throws Exception {
+
+		if (LOG.isDebugEnabled())
+			LOG.debug("I18n Starting");
+
+		try {
+			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
+					new BundleServiceTracker<Configuration>(context, I18nConfiguration.getInstance(),
+							Configuration.class)));
+
+			for (final ServiceTracker tracker : serviceTrackerList) {
+				tracker.open();
+			}
+
+			listener = new I18nServiceHolderListener(context);
+			I18nConfiguration.getInstance().addServiceHolderListener(listener);
+
+		} catch (final Throwable e) {
+			throw e instanceof Exception ? (Exception) e : new Exception(e);
+		}
+
+		if (LOG.isDebugEnabled())
+			LOG.debug("I18n Started");
 	}
 
 	public void stop(final BundleContext context) throws Exception {
