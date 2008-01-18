@@ -53,7 +53,15 @@
         </copy>
         <copy todir="${commondir}">
             <fileset refid="metainf"/>
+            <filterchain>
+                <tokenfilter>
+                    <replacestring from="lib/lib" to="lib"/>
+                </tokenfilter>
+            </filterchain>
         </copy>
+        <replace dir="${commondir}">
+            <replacefilter token="lib/lib" value="lib"/>
+        </replace>
     </target>
 
     <target name="installConfig">
