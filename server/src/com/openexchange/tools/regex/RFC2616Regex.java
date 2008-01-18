@@ -144,9 +144,10 @@ public final class RFC2616Regex {
 			"\")?");
 
 	private static final String cookieValueRegex = RegexUtility.concat(RegexUtility.group(tokenRegex, true), "=",
-			RegexUtility.group(valueRegex, true), RegexUtility.optional(RegexUtility.group(pathRegex, false)),
-			RegexUtility.optional(RegexUtility.group(domainRegex, false)), RegexUtility.optional(RegexUtility.group(
-					portRegex, false)));
+			RegexUtility.group(valueRegex, true), RegexUtility
+					.optional(pathRegex, RegexUtility.GroupType.NON_CAPTURING), RegexUtility.optional(domainRegex,
+					RegexUtility.GroupType.NON_CAPTURING), RegexUtility.optional(portRegex,
+					RegexUtility.GroupType.NON_CAPTURING));
 
 	/**
 	 * Regular expression that satisfies <i>cookie-value</i> as per <a
