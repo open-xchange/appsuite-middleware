@@ -410,7 +410,19 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		Matcher m = RFC2616Regex.COOKIES.matcher(headerValue);
 		if (m.matches()) {
 			final String versionStr = m.group(1);
-			final int version = versionStr == null ? 0 : Integer.parseInt(versionStr);
+			int version = -1;
+			if (versionStr == null) {
+				version = 0;
+			} else {
+				try {
+					version = Integer.parseInt(versionStr);
+				} catch (final NumberFormatException e) {
+					version = 0;
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("Version set to 0. No number value in $Version cookie: " + versionStr);
+					}
+				}
+			}
 			m = RFC2616Regex.COOKIE_VALUE.matcher(versionStr == null ? headerValue : headerValue.substring(m.end(1)));
 			final List<Cookie> cookieList = new ArrayList<Cookie>();
 			while (m.find()) {
