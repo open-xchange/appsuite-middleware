@@ -206,10 +206,8 @@ public class Activator implements BundleActivator {
 	 *         <code>false</code>
 	 */
 	private static final boolean isAdminBundleInstalled(final BundleContext context) {
-		final Bundle[] bundles = context.getBundles();
-		for (int i = 0; i < bundles.length; i++) {
-			if ((bundles[i].getState() == Bundle.INSTALLED || bundles[i].getState() == Bundle.ACTIVE)
-					&& BUNDLE_ID_ADMIN.equals(bundles[i].getSymbolicName())) {
+		for (Bundle bundle : context.getBundles()) {
+			if (BUNDLE_ID_ADMIN.equals(bundle.getSymbolicName())) {
 				return true;
 			}
 		}
