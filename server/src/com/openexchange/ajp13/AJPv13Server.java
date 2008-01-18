@@ -249,7 +249,7 @@ public class AJPv13Server implements Runnable {
 	 */
 	public void run() {
 		boolean keepOnRunning = true;
-		AcceptSocket: while (keepOnRunning) {
+		AcceptSocket: while (keepOnRunning && running.get()) {
 			Socket client;
 			try {
 				client = serverSocket.accept();
