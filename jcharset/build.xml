@@ -12,7 +12,8 @@
 
 	<property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
-	<property name="composite.name" value="open-xchange-jcharset-${version}" />
+    <property name="distpackage.name" value="open-xchange-jcharset"/>
+	<property name="composite.name" value="${distpackage.name}-${version}" />
 
     <fileset dir="." id="jarfiles">
         <include name="lib/lib/*"/>
@@ -77,8 +78,8 @@
     <target name="dist" depends="clean">
 		<property name="dist-package" value="dist-package"/>
     	<delete dir="${dist-package}"/>
-        <mkdir dir="${dist-package}/${composite.name}"/>
-        <copy todir="${dist-package}/${composite.name}">
+        <mkdir dir="${dist-package}/${distpackage.name}"/>
+        <copy todir="${dist-package}/${distpackage.name}">
             <fileset dir=".">
                 <exclude name="**${dist-package}/**"/>
                 <exclude name="**debian/**"/>
@@ -86,9 +87,9 @@
                 <exclude name="Todo"/>
             </fileset>
         </copy>
-        <tar destfile="../${composite.name}.tar.gz"
+        <tar destfile="../${distpackage.name}.tar.gz"
 	        basedir="${dist-package}"
-    	    includes="${composite.name}/"
+    	    includes="${distpackage.name}/"
          	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
     	<delete dir="${dist-package}"/>
     </target>

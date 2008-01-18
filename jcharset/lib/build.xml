@@ -1,0 +1,30 @@
+<project name="open-xchange-jcharset-lib" default="dist" basedir=".">
+
+	<property name="composite.name" value="openexchange-jcharset"/>
+
+    <!-- Dist -->
+    <target name="dist" depends="clean">
+		<property name="dist-package" value="dist-package"/>
+    	<delete dir="${dist-package}"/>
+        <mkdir dir="${dist-package}/${composite.name}"/>
+        <copy todir="${dist-package}/${composite.name}">
+            <fileset dir=".">
+                <exclude name="**${dist-package}/**"/>
+                <exclude name="**debian/**"/>
+                <exclude name="**CVS/**"/>
+                <exclude name="Todo"/>
+            </fileset>
+        </copy>
+        <tar destfile="../${composite.name}.tar.gz"
+	        basedir="${dist-package}"
+    	    includes="${composite.name}/"
+         	compression="gzip"/> <!-- dpkg-source does not like anything else -->
+    	<delete dir="${dist-package}"/>
+    </target>
+
+    <!-- Clean -->
+    <target name="clean">
+        <delete file="${disttar}"/>
+    </target>
+
+</project>
