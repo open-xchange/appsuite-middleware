@@ -172,7 +172,7 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
      */
     public void start() throws ConfigurationException {
         if (isPropertiesLoadInternal()) {
-            LOG.error("Duplicate initialization of ConfigDB.", new Throwable());
+            LOG.error("Duplicate initialization of ConfigDB.");
             return;
         }
         loadPropertiesInternal();
