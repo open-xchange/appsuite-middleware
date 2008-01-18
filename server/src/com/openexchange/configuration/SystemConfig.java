@@ -139,7 +139,7 @@ public final class SystemConfig extends AbstractConfig implements
      */
     public void start() throws ConfigurationException {
         if (isPropertiesLoadInternal()) {
-            LOG.error("Duplicate initialization of SystemConfig.");
+            LOG.error("Duplicate initialization of SystemConfig.", new Throwable());
             return;
         }
         loadPropertiesInternal();

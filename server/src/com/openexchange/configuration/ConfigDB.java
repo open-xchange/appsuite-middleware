@@ -161,17 +161,6 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
     }
 
     /**
-     * Initializes settings for the ConfigDB.
-     * @throws ConfigurationException if the initialization fails.
-     * @deprecated since interface {@link Initialization} exists. This method
-     * should not be called all over the server. Other component should rely on
-     * a proper startup.
-     */
-    public static void init() throws ConfigurationException {
-        getInstance().start();
-    }
-
-    /**
      * @return the singleton instance.
      */
     public static ConfigDB getInstance() {
@@ -183,7 +172,7 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
      */
     public void start() throws ConfigurationException {
         if (isPropertiesLoadInternal()) {
-            LOG.error("Duplicate initialization of ConfigDB.");
+            LOG.error("Duplicate initialization of ConfigDB.", new Throwable());
             return;
         }
         loadPropertiesInternal();
