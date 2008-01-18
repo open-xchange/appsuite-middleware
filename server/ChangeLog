@@ -1,3 +1,8 @@
+* 2008-01-18 - thorben.betten@open-xchange.com
+
+ - Bugfix #9111: Throwing an error if user tries to share a private folder
+   whose name is equal to another shared folder of the same user.
+
 * 2008-01-16 - marcus.klein@open-xchange.com
 
  - Bugfix #8411: Fixed completely missing recurrence rule in WebDAV iCal

@@ -1769,7 +1769,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	}
 
 	private static void checkSimilarNamedSharedFolder(final Set<Integer> userIds,
-			final FolderObject[] allSharedFolders, final String folderName, final Context ctx) {
+			final FolderObject[] allSharedFolders, final String folderName, final Context ctx) throws OXFolderException {
 		final List<Integer> affectedUsers = new ArrayList<Integer>();
 		for (final FolderObject f : allSharedFolders) {
 			if (null == f) {
@@ -1808,12 +1808,24 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			}
 		}
 		if (affectedUsers.size() > 0) {
-			String affectedUsersStr = affectedUsers.toString();
-			affectedUsersStr = affectedUsersStr.substring(1, affectedUsersStr.length() - 1);
-			LOG.warn(new StringBuilder(128).append("A private folder of the name \"").append(folderName).append(
-					"\" is already shared to user(s): ").append(affectedUsersStr).append(
-					".\nEither direct or affected user(s) are members of group to whom the folder is shared")
-					.toString(), new Throwable());
+			/*
+			 * final StringBuilder sb = new StringBuilder(128); try { final
+			 * UserStorage userStorage = UserStorage.getInstance();
+			 * appendUserName(userStorage.getUser(affectedUsers.get(0).intValue(),
+			 * ctx), sb); for (int i = 1; i < affectedUsers.size(); i++) {
+			 * appendUserName(userStorage.getUser(affectedUsers.get(i).intValue(),
+			 * ctx), sb.append(", ")); } } catch (final LdapException e) {
+			 * LOG.error(e.getLocalizedMessage(), e); sb.setLength(0); }
+			 */
+			throw new OXFolderException(OXFolderException.FolderCode.SIMILAR_NAMED_SHARED_FOLDER, folderName);
 		}
 	}
+
+	/*
+	 * private static void appendUserName(final User u, final StringBuilder sb) {
+	 * if (u.getDisplayName() == null) { sb.append(u.getGivenName()).append('
+	 * ').append(u.getSurname()).append(" (").append(u.getId()).append(')')
+	 * .toString(); } sb.append(u.getDisplayName()).append("
+	 * (").append(u.getId()).append(')').toString(); }
+	 */
 }

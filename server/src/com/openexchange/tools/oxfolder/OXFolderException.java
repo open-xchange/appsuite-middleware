@@ -196,12 +196,15 @@ public class OXFolderException extends OXException {
 		ONLY_PRIVATE_FOLDER_OWNER_ADMIN("Only folder owner may hold admin permission on a private folder",
 				Category.CODE_ERROR, 17),
 		/**
-		 * Administration rights required. In the Rights tab add at least one user with administration rights.
+		 * Administration rights required. In the Rights tab add at least one
+		 * user with administration rights.
 		 * <p>
 		 * No entity has been defined as admin
 		 * </p>
 		 */
-		NO_FOLDER_ADMIN("Administration rights required. In the Rights tab add at least one user with administration rights.", Category.CODE_ERROR, 18),
+		NO_FOLDER_ADMIN(
+				"Administration rights required. In the Rights tab add at least one user with administration rights.",
+				Category.CODE_ERROR, 18),
 		/**
 		 * Invalid object ID %s
 		 * <p>
@@ -544,9 +547,18 @@ public class OXFolderException extends OXException {
 				"An infostore folder named %s already exists below folder %s (%d) in context %d. Please choose another display name.",
 				Category.PERMISSION, 75),
 		/**
-         * Folder contains invalid data: "%1$s"
-         */
-        INVALID_DATA("Folder contains invalid data: \"%1$s\"", Category.USER_INPUT, 76);
+		 * Folder contains invalid data: "%1$s"
+		 */
+		INVALID_DATA("Folder contains invalid data: \"%1$s\"", Category.USER_INPUT, 76),
+		/**
+		 * A private folder with the same name %s has already been shared to
+		 * identical user(s) (Either direct or affected user(s) are members of a
+		 * group to whom the folder is shared).\nPlease enter another name to
+		 * share the folder.
+		 */
+		SIMILAR_NAMED_SHARED_FOLDER(
+				"A private folder with the same name %s has already been shared to identical user(s) (Either direct or affected user(s) are members of a group to whom the folder is shared).\nPlease enter another name to share the folder.",
+				Category.USER_INPUT, 77);
 
 		/**
 		 * Message of the exception.
