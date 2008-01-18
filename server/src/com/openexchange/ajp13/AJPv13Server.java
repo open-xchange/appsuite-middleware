@@ -135,60 +135,71 @@ public class AJPv13Server implements Runnable {
 		instance.stopServer();
 	}
 
-	private AJPv13Server() throws AJPv13Exception {
+	private AJPv13Server() {
 		super();
-		try {
-			serverSocket = new ServerSocket(AJP13_PORT, DEFAULT_BACKLOG, AJPv13Config.getAJPBindAddress());
-		} catch (final IOException ex) {
-			throw new AJPv13Exception(AJPCode.STARTUP_ERROR, false, ex, Integer.valueOf(AJP13_PORT));
-		}
 	}
 
-	private void startServer() {
-		if (running.get()) {
+	private void startServer() throws AJPv13Exception {
+		if (running.compareAndSet(false, true)) {
+			try {
+				serverSocket = new ServerSocket(AJP13_PORT, DEFAULT_BACKLOG, AJPv13Config.getAJPBindAddress());
+			} catch (final IOException ex) {
+				throw new AJPv13Exception(AJPCode.STARTUP_ERROR, false, ex, Integer.valueOf(AJP13_PORT));
+			}
+			initializePools();
+			initializeThreadArray();
+			for (int i = 0; i < threadArr.length; i++) {
+				threadArr[i].setPriority(Thread.MAX_PRIORITY);
+				threadArr[i].start();
+			}
+			ajpv13ServerThreadsMonitor.setNumActive(threadArr.length);
+		} else {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("AJPv13Server is already running...");
 			}
-			return;
 		}
-		initializePools();
-		initializeThreadArray();
-		for (int i = 0; i < threadArr.length; i++) {
-			threadArr[i].setPriority(Thread.MAX_PRIORITY);
-			threadArr[i].start();
-		}
-		ajpv13ServerThreadsMonitor.setNumActive(threadArr.length);
-		running.set(true);
 	}
 
 	private void stopServer() {
-		if (!running.get() && LOG.isInfoEnabled()) {
-			LOG.info("AJPv13Server is not running and thus does not need to be stopped");
-		}
-		/*
-		 * Stop listeners
-		 */
-		AJPv13Watcher.stopListeners();
-		/*
-		 * Reset pools
-		 */
-		resetPools();
-		/*
-		 * Interrupt & destroy threads
-		 */
-		final StringBuilder sb = new StringBuilder(100);
-		for (int i = 0; i < threadArr.length; i++) {
-			try {
-				threadArr[i].interrupt();
-			} catch (final Exception e) {
-				LOG.error(sb.append(threadArr[i].getName()).append(" could NOT be interrupted").toString(), e);
-				sb.setLength(0);
-			} finally {
-				threadArr[i] = null;
+		if (running.compareAndSet(true, false)) {
+			/*
+			 * Stop listeners
+			 */
+			AJPv13Watcher.stopListeners();
+			/*
+			 * Reset pools
+			 */
+			resetPools();
+			/*
+			 * Interrupt & destroy threads
+			 */
+			final StringBuilder sb = new StringBuilder(128);
+			for (int i = 0; i < threadArr.length; i++) {
+				try {
+					threadArr[i].interrupt();
+				} catch (final Exception e) {
+					LOG.error(sb.append(threadArr[i].getName()).append(" could NOT be interrupted").toString(), e);
+					sb.setLength(0);
+				} finally {
+					threadArr[i] = null;
+				}
+			}
+			if (serverSocket != null) {
+				try {
+					serverSocket.close();
+				} catch (final IOException e) {
+					LOG.error(sb.append("AJP server socket bound to port ").append(AJP13_PORT).append(
+							" cannot be closed").toString(), e);
+					sb.setLength(0);
+				}
+				serverSocket = null;
+			}
+			ajpv13ServerThreadsMonitor.setNumActive(0);
+		} else {
+			if (LOG.isInfoEnabled()) {
+				LOG.info("AJPv13Server is not running and thus does not need to be stopped");
 			}
 		}
-		ajpv13ServerThreadsMonitor.setNumActive(0);
-		running.set(false);
 	}
 
 	private final void initializePools() {
@@ -237,7 +248,8 @@ public class AJPv13Server implements Runnable {
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run() {
-		AcceptSocket: while (true) {
+		boolean keepOnRunning = true;
+		AcceptSocket: while (keepOnRunning) {
 			Socket client;
 			try {
 				client = serverSocket.accept();
@@ -258,8 +270,15 @@ public class AJPv13Server implements Runnable {
 				}
 				final long useTime = System.currentTimeMillis() - start;
 				ajpv13ServerThreadsMonitor.addUseTime(useTime);
+			} catch (final java.net.SocketException e) {
+				/*
+				 * Socket closed while being blocked in accept
+				 */
+				LOG.info("AJPv13Server down");
+				keepOnRunning = false;
 			} catch (final IOException ex) {
 				LOG.error(ex.getMessage(), ex);
+				keepOnRunning = false;
 			}
 		}
 	}
