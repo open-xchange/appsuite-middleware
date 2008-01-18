@@ -77,7 +77,7 @@ import com.openexchange.tools.servlet.http.HttpSessionManagement;
 /**
  * AJPv13ForwardRequest - this class' purpose is mainly to fill the http servlet
  * request from AJP's forward request, to identify servlet instance through
- * request path and to apply the load-balancing and http-session-identifiying
+ * request path and to apply the load-balancing and http-session-identifying
  * <tt>JSESSIONID</tt> cookie or URL parameter to the http serlvet response
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
