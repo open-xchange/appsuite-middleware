@@ -9,6 +9,6 @@ java.util.logging.FileHandler.formatter=java.util.logging.SimpleFormatter
 java.util.logging.FileHandler.append=true
 
 sun.rmi.level=INFO
-org.apache.level=INFO
+org.apache.level=WARNING
 com.sun.level=INFO
 javax.management.level=INFO
