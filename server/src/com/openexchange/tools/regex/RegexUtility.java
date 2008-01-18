@@ -172,7 +172,7 @@ public final class RegexUtility {
 	 * Combines specified regular expressions with OR operator <code>'|'</code>:
 	 * 
 	 * <pre>
-	 * regex1 | regex2
+	 * regex1|regex2
 	 * </pre>
 	 * 
 	 * @param regex1
