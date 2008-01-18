@@ -10,10 +10,10 @@
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
 
-	<property name="version" value="${Bundle-Version}"/>
+    <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
     <property name="distpackage.name" value="open-xchange-jcharset"/>
-	<property name="composite.name" value="${distpackage.name}-${version}" />
+    <property name="composite.name" value="${distpackage.name}-${version}" />
 
     <fileset dir="." id="jarfiles">
         <include name="lib/lib/*"/>
@@ -26,13 +26,13 @@
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
-	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
-	
+    <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
+    
     <!-- Classpath -->
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
-		<pathelement location="lib/jcharset-1.3.jar"/>
+        <pathelement location="lib/lib/jcharset-1.3.jar"/>
     </path>
 
     <!-- Compile -->
@@ -65,7 +65,7 @@
             message="${bundlesdir}/${bundle.name}${line.separator}"/>
     </target>
 
-	<target name="installJar" depends="jar">
+    <target name="installJar" depends="jar">
         <mkdir dir="${destdir}/${bundlesdir}"/>
         <copy todir="${destdir}/${bundlesdir}">
             <fileset dir="${tmp.dir}">
@@ -74,10 +74,10 @@
         </copy>
     </target>
 
-	<!-- Dist -->
+    <!-- Dist -->
     <target name="dist" depends="clean">
-		<property name="dist-package" value="dist-package"/>
-    	<delete dir="${dist-package}"/>
+        <property name="dist-package" value="dist-package"/>
+        <delete dir="${dist-package}"/>
         <mkdir dir="${dist-package}/${distpackage.name}"/>
         <copy todir="${dist-package}/${distpackage.name}">
             <fileset dir=".">
@@ -88,10 +88,10 @@
             </fileset>
         </copy>
         <tar destfile="../${distpackage.name}.tar.gz"
-	        basedir="${dist-package}"
-    	    includes="${distpackage.name}/"
-         	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
-    	<delete dir="${dist-package}"/>
+            basedir="${dist-package}"
+            includes="${distpackage.name}/"
+             compression="gzip"/>        <!-- dpkg-source does not like anything else -->
+        <delete dir="${dist-package}"/>
     </target>
 
     <target name="clean">
