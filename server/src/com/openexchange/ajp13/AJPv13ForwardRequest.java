@@ -262,7 +262,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		 */
 		ajpRequestHandler.setContentLength(servletRequest.getIntHeader(HDR_CONTENT_LENGTH));
 		/*
-		 * Determine if content type inidicates form data
+		 * Determine if content type indicates form data
 		 */
 		if (servletRequest.containsHeader(HDR_CONTENT_TYPE)
 				&& MIME_FORM_DATA.regionMatches(0, servletRequest.getHeader(HDR_CONTENT_TYPE), 0, 33)) {
