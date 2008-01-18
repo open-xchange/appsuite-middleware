@@ -91,7 +91,7 @@ public final class RegexUtility {
 		/**
 		 * X, as an independent, non-capturing group: <code>(?>X)</code>
 		 */
-		INDEPENDENT_NON_CAPTURING("(?>X");
+		INDEPENDENT_NON_CAPTURING("(?>");
 
 		private final String openingParenthesis;
 
@@ -103,6 +103,40 @@ public final class RegexUtility {
 			return openingParenthesis;
 		}
 
+		@Override
+		public String toString() {
+			return new StringBuilder(6).append(openingParenthesis).append('X').append(')').toString();
+		}
+	}
+
+	public static enum QuantifierType {
+		/**
+		 * Greedy quantifier &lt;empty-string&gt;
+		 */
+		GREEDY(""),
+		/**
+		 * Reluctant quantifier <code>?</code>
+		 */
+		RELUCTANT("?"),
+		/**
+		 * Possessive quantifier <code>+</code>
+		 */
+		POSSESSIVE("+");
+
+		private final String appendix;
+
+		private QuantifierType(final String appendix) {
+			this.appendix = appendix;
+		}
+
+		private String getAppendix() {
+			return appendix;
+		}
+
+		@Override
+		public String toString() {
+			return appendix;
+		}
 	}
 
 	/**
@@ -153,8 +187,8 @@ public final class RegexUtility {
 	}
 
 	/**
-	 * Appends the optional operator <code>'?'</code> to specified regular
-	 * expression
+	 * Appends the greedy optional operator <code>'?'</code> to specified
+	 * regular expression
 	 * 
 	 * <pre>
 	 * regex?
@@ -162,10 +196,28 @@ public final class RegexUtility {
 	 * 
 	 * @param regex
 	 *            The regular expression
-	 * @return The optional regular expression
+	 * @return The greedy optional regular expression
 	 */
 	public static String optional(final String regex) {
-		return optional(regex, GroupType.NONE);
+		return optional(regex, QuantifierType.GREEDY, GroupType.NONE);
+	}
+
+	/**
+	 * Appends the grouped greedy optional operator <code>'?'</code> to
+	 * specified regular expression
+	 * 
+	 * <pre>
+	 * (&lt;group-type&gt;regex)?
+	 * </pre>
+	 * 
+	 * @param regex
+	 *            The regular expression
+	 * @param groupType
+	 *            The group type
+	 * @return The grouped greedy optional regular expression
+	 */
+	public static String optional(final String regex, final GroupType groupType) {
+		return optional(regex, QuantifierType.GREEDY, groupType);
 	}
 
 	/**
@@ -173,25 +225,27 @@ public final class RegexUtility {
 	 * specified regular expression
 	 * 
 	 * <pre>
-	 * (regex)? OR (?:regex)? OR (?=regex)?...
+	 * (&lt;group-type&gt;regex)?&lt;quantifier-type&gt;
 	 * </pre>
 	 * 
 	 * @param regex
 	 *            The regular expression
+	 * @param qt
+	 *            The quantifier type
 	 * @param groupType
 	 *            The group type
 	 * @return The grouped optional regular expression
 	 */
-	public static String optional(final String regex, final GroupType groupType) {
+	public static String optional(final String regex, final QuantifierType qt, final GroupType groupType) {
 		if (GroupType.NONE.equals(groupType)) {
-			return new StringBuilder(regex.length() + 1).append(regex).append('?').toString();
+			return new StringBuilder(regex.length() + 2).append(regex).append('?').append(qt.getAppendix()).toString();
 		}
-		return _optional(regex, groupType);
+		return _optional(regex, qt, groupType);
 	}
 
-	private static String _optional(final String regex, final GroupType groupType) {
-		return new StringBuilder(regex.length() + 6).append(groupType.getOpeningParenthesis()).append(regex)
-				.append(')').append('?').toString();
+	private static String _optional(final String regex, final QuantifierType qt, final GroupType groupType) {
+		return new StringBuilder(regex.length() + 7).append(groupType.getOpeningParenthesis()).append(regex)
+				.append(')').append('?').append(qt.getAppendix()).toString();
 	}
 
 	/**
@@ -217,7 +271,7 @@ public final class RegexUtility {
 	 * <code>groupType</code>.
 	 * 
 	 * <pre>
-	 * (regex) OR (?:regex) OR (?=regex)...
+	 * (&lt;group-type&gt;regex)
 	 * </pre>
 	 * 
 	 * @param regex
@@ -239,8 +293,8 @@ public final class RegexUtility {
 	}
 
 	/**
-	 * Appends the one-or-more-times operator <code>'+'</code> to specified
-	 * regular expression
+	 * Appends the greedy one-or-more-times operator <code>'+'</code> to
+	 * specified regular expression
 	 * 
 	 * <pre>
 	 * regex+
@@ -248,10 +302,28 @@ public final class RegexUtility {
 	 * 
 	 * @param regex
 	 *            The regular expression
-	 * @return The one-or-more-times regular expression
+	 * @return The greedy one-or-more-times regular expression
 	 */
 	public static String oneOrMoreTimes(final String regex) {
-		return oneOrMoreTimes(regex, GroupType.NONE);
+		return oneOrMoreTimes(regex, QuantifierType.GREEDY, GroupType.NONE);
+	}
+
+	/**
+	 * Appends the grouped greedy one-or-more-times operator <code>'+'</code>
+	 * to specified regular expression
+	 * 
+	 * <pre>
+	 * (&lt;group-type&gt;regex)+
+	 * </pre>
+	 * 
+	 * @param regex
+	 *            The regular expression
+	 * @param groupType
+	 *            The group type
+	 * @return The grouped greedy one-or-more-times regular expression
+	 */
+	public static String oneOrMoreTimes(final String regex, final GroupType groupType) {
+		return oneOrMoreTimes(regex, QuantifierType.GREEDY, groupType);
 	}
 
 	/**
@@ -259,30 +331,32 @@ public final class RegexUtility {
 	 * specified regular expression
 	 * 
 	 * <pre>
-	 * (regex)+ OR (?:regex)+ OR (?=regex)+...
+	 * (&lt;group-type&gt;regex)+&lt;quantifier-type&gt;
 	 * </pre>
 	 * 
 	 * @param regex
 	 *            The regular expression
+	 * @param qt
+	 *            The quantifier type
 	 * @param groupType
 	 *            The group type
 	 * @return The grouped one-or-more-times regular expression
 	 */
-	public static String oneOrMoreTimes(final String regex, final GroupType groupType) {
+	public static String oneOrMoreTimes(final String regex, final QuantifierType qt, final GroupType groupType) {
 		if (GroupType.NONE.equals(groupType)) {
-			return new StringBuilder(regex.length() + 1).append(regex).append('+').toString();
+			return new StringBuilder(regex.length() + 2).append(regex).append('+').append(qt.getAppendix()).toString();
 		}
-		return _oneOrMoreTimes(regex, groupType);
+		return _oneOrMoreTimes(regex, qt, groupType);
 	}
 
-	private static String _oneOrMoreTimes(final String regex, final GroupType groupType) {
-		return new StringBuilder(regex.length() + 6).append(groupType.getOpeningParenthesis()).append(regex)
-				.append(')').append('+').toString();
+	private static String _oneOrMoreTimes(final String regex, final QuantifierType qt, final GroupType groupType) {
+		return new StringBuilder(regex.length() + 7).append(groupType.getOpeningParenthesis()).append(regex)
+				.append(')').append('+').append(qt.getAppendix()).toString();
 	}
 
 	/**
-	 * Appends the zero-or-more-times operator <code>'*'</code> to specified
-	 * regular expression
+	 * Appends the greedy zero-or-more-times operator <code>'*'</code> to
+	 * specified regular expression
 	 * 
 	 * <pre>
 	 * regex*
@@ -290,10 +364,28 @@ public final class RegexUtility {
 	 * 
 	 * @param regex
 	 *            The regular expression
-	 * @return The zero-or-more-times regular expression
+	 * @return The greedy zero-or-more-times regular expression
 	 */
 	public static String zeroOrMoreTimes(final String regex) {
-		return zeroOrMoreTimes(regex, GroupType.NONE);
+		return zeroOrMoreTimes(regex, QuantifierType.GREEDY, GroupType.NONE);
+	}
+
+	/**
+	 * Appends the grouped greedy zero-or-more-times operator <code>'*'</code>
+	 * to specified regular expression
+	 * 
+	 * <pre>
+	 * (&lt;group-type&gt;regex)*
+	 * </pre>
+	 * 
+	 * @param regex
+	 *            The regular expression
+	 * @param groupType
+	 *            The group type
+	 * @return The grouped greedy zero-or-more-times regular expression
+	 */
+	public static String zeroOrMoreTimes(final String regex, final GroupType groupType) {
+		return zeroOrMoreTimes(regex, QuantifierType.GREEDY, groupType);
 	}
 
 	/**
@@ -301,24 +393,225 @@ public final class RegexUtility {
 	 * to specified regular expression
 	 * 
 	 * <pre>
-	 * (regex)* OR (?:regex)* OR (?=regex)*...
+	 * (&lt;group-type&gt;regex)*&lt;quantifier-type&gt;
+	 * </pre>
+	 * 
+	 * @param regex
+	 *            The regular expression
+	 * @param qt
+	 *            The quantifier type
+	 * @param groupType
+	 *            The group type
+	 * @return The grouped zero-or-more-times regular expression
+	 */
+	public static String zeroOrMoreTimes(final String regex, final QuantifierType qt, final GroupType groupType) {
+		if (GroupType.NONE.equals(groupType)) {
+			return new StringBuilder(regex.length() + 2).append(regex).append('*').append(qt.getAppendix()).toString();
+		}
+		return _zeroOrMoreTimes(regex, qt, groupType);
+	}
+
+	private static String _zeroOrMoreTimes(final String regex, final QuantifierType qt, final GroupType groupType) {
+		return new StringBuilder(regex.length() + 6).append(groupType.getOpeningParenthesis()).append(regex)
+				.append(')').append('*').append(qt.getAppendix()).toString();
+	}
+
+	/**
+	 * Appends the greedy exactly-n-times operator <code>{n}</code> to
+	 * specified regular expression
+	 * 
+	 * <pre>
+	 * regex{n}
+	 * </pre>
+	 * 
+	 * @param regex
+	 *            The regular expression
+	 * @return The greedy exactly-n-times regular expression
+	 */
+	public static String exactlyNTimes(final String regex, final int n) {
+		return exactlyNTimes(regex, n, QuantifierType.GREEDY, GroupType.NONE);
+	}
+
+	/**
+	 * Appends the grouped greedy exactly-n-times operator <code>{n}</code> to
+	 * specified regular expression
+	 * 
+	 * <pre>
+	 * (&lt;group-type&gt;regex){n}
 	 * </pre>
 	 * 
 	 * @param regex
 	 *            The regular expression
 	 * @param groupType
 	 *            The group type
-	 * @return The grouped zero-or-more-times regular expression
+	 * @return The grouped greedy exactly-n-times regular expression
 	 */
-	public static String zeroOrMoreTimes(final String regex, final GroupType groupType) {
-		if (GroupType.NONE.equals(groupType)) {
-			return new StringBuilder(regex.length() + 1).append(regex).append('*').toString();
-		}
-		return _zeroOrMoreTimes(regex, groupType);
+	public static String exactlyNTimes(final String regex, final int n, final GroupType groupType) {
+		return exactlyNTimes(regex, n, QuantifierType.GREEDY, groupType);
 	}
 
-	private static String _zeroOrMoreTimes(final String regex, final GroupType groupType) {
-		return new StringBuilder(regex.length() + 6).append(groupType.getOpeningParenthesis()).append(regex)
-				.append(')').append('*').toString();
+	/**
+	 * Appends the exactly-n-times operator <code>{n}</code> and grouping to
+	 * specified regular expression
+	 * 
+	 * <pre>
+	 * (&lt;group-type&gt;regex){n}&lt;quantifier-type&gt;
+	 * </pre>
+	 * 
+	 * @param regex
+	 *            The regular expression
+	 * @param qt
+	 *            The quantifier type
+	 * @param groupType
+	 *            The group type
+	 * @return The grouped exactly-n-times regular expression
+	 */
+	public static String exactlyNTimes(final String regex, final int n, final QuantifierType qt,
+			final GroupType groupType) {
+		if (GroupType.NONE.equals(groupType)) {
+			return new StringBuilder(regex.length() + 5).append(regex).append('{').append(n).append('}').append(
+					qt.getAppendix()).toString();
+		}
+		return _exactlyNTimes(regex, n, qt, groupType);
+	}
+
+	private static String _exactlyNTimes(final String regex, final int n, final QuantifierType qt,
+			final GroupType groupType) {
+		return new StringBuilder(regex.length() + 9).append(groupType.getOpeningParenthesis()).append(regex)
+				.append(')').append('{').append(n).append('}').append(qt.getAppendix()).toString();
+	}
+
+	/**
+	 * Appends the greedy at-least-n-times operator <code>{n,}</code> to
+	 * specified regular expression
+	 * 
+	 * <pre>
+	 * regex{n,}
+	 * </pre>
+	 * 
+	 * @param regex
+	 *            The regular expression
+	 * @return The greedy at-least-n-times regular expression
+	 */
+	public static String atLeastNTimes(final String regex, final int n) {
+		return atLeastNTimes(regex, n, QuantifierType.GREEDY, GroupType.NONE);
+	}
+
+	/**
+	 * Appends the grouped greedy at-least-n-times operator <code>{n,}</code>
+	 * to specified regular expression
+	 * 
+	 * <pre>
+	 * (&lt;group-type&gt;regex){n,}
+	 * </pre>
+	 * 
+	 * @param regex
+	 *            The regular expression
+	 * @param groupType
+	 *            The group type
+	 * @return The grouped greedy at-least-n-times regular expression
+	 */
+	public static String atLeastNTimes(final String regex, final int n, final GroupType groupType) {
+		return atLeastNTimes(regex, n, QuantifierType.GREEDY, groupType);
+	}
+
+	/**
+	 * Appends the at-least-n-times operator <code>{n}</code> and grouping to
+	 * specified regular expression
+	 * 
+	 * <pre>
+	 * (&lt;group-type&gt;regex){n,}&lt;quantifier-type&gt;
+	 * </pre>
+	 * 
+	 * @param regex
+	 *            The regular expression
+	 * @param qt
+	 *            The quantifier type
+	 * @param groupType
+	 *            The group type
+	 * @return The grouped at-least-n-times regular expression
+	 */
+	public static String atLeastNTimes(final String regex, final int n, final QuantifierType qt,
+			final GroupType groupType) {
+		if (GroupType.NONE.equals(groupType)) {
+			return new StringBuilder(regex.length() + 6).append(regex).append('{').append(n).append(',').append('}')
+					.append(qt.getAppendix()).toString();
+		}
+		return _atLeastNTimes(regex, n, qt, groupType);
+	}
+
+	private static String _atLeastNTimes(final String regex, final int n, final QuantifierType qt,
+			final GroupType groupType) {
+		return new StringBuilder(regex.length() + 10).append(groupType.getOpeningParenthesis()).append(regex).append(
+				')').append('{').append(n).append(',').append('}').append(qt.getAppendix()).toString();
+	}
+
+	/**
+	 * Appends the greedy at-least-n-but-not-more-than-m-times operator
+	 * <code>{n,m}</code> to specified regular expression.
+	 * 
+	 * <pre>
+	 * regex{n,m}
+	 * </pre>
+	 * 
+	 * @param regex
+	 *            The regular expression
+	 * @return The greedy at-least-n-but-not-more-than-m-times regular
+	 *         expression
+	 */
+	public static String atLeastNButNotMoreThanMTimes(final String regex, final int n, final int m) {
+		return atLeastNButNotMoreThanMTimes(regex, n, m, QuantifierType.GREEDY, GroupType.NONE);
+	}
+
+	/**
+	 * Appends the grouped greedy at-least-n-but-not-more-than-m-times operator
+	 * <code>{n,m}</code> to specified regular expression.
+	 * 
+	 * <pre>
+	 * (&lt;group-type&gt;regex){n,m}
+	 * </pre>
+	 * 
+	 * @param regex
+	 *            The regular expression
+	 * @param groupType
+	 *            The group type
+	 * @return The grouped greedy at-least-n-but-not-more-than-m-times regular
+	 *         expression
+	 */
+	public static String atLeastNButNotMoreThanMTimes(final String regex, final int n, final int m,
+			final GroupType groupType) {
+		return atLeastNButNotMoreThanMTimes(regex, n, m, QuantifierType.GREEDY, groupType);
+	}
+
+	/**
+	 * Appends the at-least-n-but-not-more-than-m-times operator
+	 * <code>{n,m}</code> and grouping to specified regular expression.
+	 * 
+	 * <pre>
+	 * (&lt;group-type&gt;regex){n,m}&lt;quantifier-type&gt;
+	 * </pre>
+	 * 
+	 * @param regex
+	 *            The regular expression
+	 * @param qt
+	 *            The quantifier type
+	 * @param groupType
+	 *            The group type
+	 * @return The grouped at-least-n-but-not-more-than-m-times regular
+	 *         expression
+	 */
+	public static String atLeastNButNotMoreThanMTimes(final String regex, final int n, final int m,
+			final QuantifierType qt, final GroupType groupType) {
+		if (GroupType.NONE.equals(groupType)) {
+			return new StringBuilder(regex.length() + 8).append(regex).append('{').append(n).append(',').append(m)
+					.append('}').append(qt.getAppendix()).toString();
+		}
+		return _atLeastNButNotMoreThanMTimes(regex, n, m, qt, groupType);
+	}
+
+	private static String _atLeastNButNotMoreThanMTimes(final String regex, final int n, final int m,
+			final QuantifierType qt, final GroupType groupType) {
+		return new StringBuilder(regex.length() + 12).append(groupType.getOpeningParenthesis()).append(regex).append(
+				')').append('{').append(n).append(',').append(m).append('}').append(qt.getAppendix()).toString();
 	}
 }
