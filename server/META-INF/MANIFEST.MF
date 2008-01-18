@@ -106,3 +106,4 @@ Export-Package: com.openexchange.api2,
  com.openexchange.tools.servlet.http,
  com.openexchange.tools.oxfolder,
  com.openexchange.tools.sql
+Bundle-ActivationPolicy: lazy
