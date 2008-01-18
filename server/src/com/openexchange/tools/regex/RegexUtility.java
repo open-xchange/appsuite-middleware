@@ -172,7 +172,7 @@ public final class RegexUtility {
 	 * Combines specified regular expressions with OR operator <code>'|'</code>:
 	 * 
 	 * <pre>
-	 * regex1|regex2
+	 * regex1 | regex2
 	 * </pre>
 	 * 
 	 * @param regex1
@@ -261,6 +261,8 @@ public final class RegexUtility {
 	 *            <code>true</code> as capturing group; <code>false</code>
 	 *            for non-capturing
 	 * @return The grouped regular expression
+	 * @see #group(String, com.openexchange.tools.regex.RegexUtility.GroupType)
+	 *      to define more group types
 	 */
 	public static String group(final String regex, final boolean capturing) {
 		return _group(regex, capturing ? GroupType.CAPTURING : GroupType.NON_CAPTURING);
