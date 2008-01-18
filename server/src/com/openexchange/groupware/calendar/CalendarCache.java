@@ -51,8 +51,6 @@
 
 package com.openexchange.groupware.calendar;
 
-import com.openexchange.cache.impl.Configuration;
-import com.openexchange.configuration.ConfigurationInit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.jcs.JCS;
@@ -75,8 +73,6 @@ public class CalendarCache {
     
     private CalendarCache() {
         try {
-            ConfigurationInit.init();
-            Configuration.load();
             try {
                 jcs = JCS.getInstance(CACHE_NAME);
             } catch (CacheException ce) {

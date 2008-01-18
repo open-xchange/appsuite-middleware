@@ -124,18 +124,6 @@ public final class Configuration implements Initialization {
 		return instance;
 	}
 
-	/**
-	 * Loads the configuration for the caching system.
-	 * 
-	 * @throws ConfigurationException
-	 *             if the configuration can't be loaded.
-	 * @deprecated Use common {@link Initialization#start()}/{@link Initialization#stop()}
-	 *             on singleton instead
-	 */
-	public static void load() throws ConfigurationException {
-		getInstance().configure();
-	}
-
 	private void configure() throws ConfigurationException {
 		if (null != ccmInstance) {
 			/*

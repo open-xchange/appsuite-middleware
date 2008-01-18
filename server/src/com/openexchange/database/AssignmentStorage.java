@@ -233,12 +233,8 @@ public final class AssignmentStorage {
             Pools.CONFIGDB_WRITE_ID, null);
         if (Boolean.parseBoolean(SystemConfig.getProperty(Property.CACHE))) {
             try {
-                Configuration.load();
                 cache = JCS.getInstance(CACHE_NAME);
             } catch (CacheException e) {
-                throw new DBPoolingException(Code.NOT_INITIALIZED, e,
-                    CACHE_NAME);
-            } catch (ConfigurationException e) {
                 throw new DBPoolingException(Code.NOT_INITIALIZED, e,
                     CACHE_NAME);
             }
@@ -248,11 +244,7 @@ public final class AssignmentStorage {
 
     public void stop() {
         if (null != cache) {
-            try {
-                cache.clear();
-            } catch (CacheException e) {
-                LOG.error("Problem clearing the cache.", e);
-            }
+            cache.dispose();
             cache = null;
         }
         configDB = null;
