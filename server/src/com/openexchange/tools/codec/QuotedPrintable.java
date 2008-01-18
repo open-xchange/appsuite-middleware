@@ -49,14 +49,15 @@
 
 package com.openexchange.tools.codec;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeUtility;
+
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * The class <code>QuotedPrintable</code> offers static methods to
@@ -84,6 +85,18 @@ public class QuotedPrintable {
 		super();
 	}
 
+	/**
+	 * Encodes specified original string with given character encoding and
+	 * transfer encoding <code>QUOTED PRINTABLE</code>.
+	 * 
+	 * @param originalStr
+	 *            The original string to encode
+	 * @param charset
+	 *            The character encoding
+	 * @return The quoted-printable encoded string
+	 * @throws UnsupportedEncodingException
+	 *             If specified character encoding is not supported
+	 */
 	public static String encodeString(final String originalStr, final String charset)
 			throws UnsupportedEncodingException {
 		String encStr = MimeUtility.encodeText(originalStr, charset, ENCODE_Q);
@@ -95,11 +108,25 @@ public class QuotedPrintable {
 		return encStr;
 	}
 
+	/**
+	 * Decodes specified quoted-printable encoded string using given character
+	 * encoding.
+	 * 
+	 * @param quotedPrintableStr
+	 *            The quoted-printable encoded string
+	 * @param charset
+	 *            The character encoding
+	 * @return The quoted-printable decoded string
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 */
 	public static String decodeString(final String quotedPrintableStr, final String charset) throws IOException,
 			MessagingException {
-		final InputStream inStream = MimeUtility.decode(new ByteArrayInputStream(quotedPrintableStr.getBytes(charset)),
-				ENCODING_QP);
-		final ByteArrayOutputStream decodedBytes = new ByteArrayOutputStream();
+		final InputStream inStream = MimeUtility.decode(new UnsynchronizedByteArrayInputStream(quotedPrintableStr
+				.getBytes(charset)), ENCODING_QP);
+		final UnsynchronizedByteArrayOutputStream decodedBytes = new UnsynchronizedByteArrayOutputStream();
 		int k = -1;
 		final byte[] buffer = new byte[512];
 		while ((k = inStream.read(buffer)) != -1) {
