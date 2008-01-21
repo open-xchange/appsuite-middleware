@@ -439,8 +439,8 @@ public final class MailMessageParser {
 					}
 				}
 			} catch (final IOException tnefExc) {
-				if (LOG.isErrorEnabled()) {
-					LOG.error(tnefExc.getLocalizedMessage(), tnefExc);
+				if (LOG.isWarnEnabled()) {
+					LOG.warn(tnefExc.getLocalizedMessage(), tnefExc);
 				}
 				if (!mailPart.containsSequenceId()) {
 					mailPart.setSequenceId(MailMessageParser.getSequenceId(prefix, partCount));
