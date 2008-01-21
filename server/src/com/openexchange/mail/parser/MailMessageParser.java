@@ -109,6 +109,9 @@ public final class MailMessageParser {
 
 	private static final String TNEF_IPM_MS_READ_RECEIPT = "IPM.Microsoft Mail.Read Receipt";
 
+	/*
+	 * +++++++++++++++++++ MEMBERS +++++++++++++++++++
+	 */
 	private boolean stop;
 
 	private boolean multipartDetected;
