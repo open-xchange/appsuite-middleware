@@ -727,6 +727,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 log.error("Error closing statement", e);
             }
 
+            try {
+                if (prep2 != null) {
+                    prep2.close();
+                }
+            } catch (final SQLException e) {
+                log.error("Error closing statement", e);
+            }
+            
             if (null != con) {
                 try {
                     cache.pushConnectionForContext(ctxid, con);

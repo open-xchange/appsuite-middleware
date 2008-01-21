@@ -1,3 +1,7 @@
+* 2008-01-21 - dennis.sieben@open-xchange.com
+
+  - Bugfix ID#10805 One PreparedStatement isn't closed in OXToolMySQLStorage
+
 * 2007-12-20 - choeger@open-xchange.com
 
   - Bugfix ID#10659 [HEAD] "Object was not returned" in database pool after context operations
