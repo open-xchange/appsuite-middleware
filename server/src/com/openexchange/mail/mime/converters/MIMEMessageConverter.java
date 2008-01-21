@@ -857,12 +857,12 @@ public final class MIMEMessageConverter {
 	}
 
 	/**
-	 * Creates a message data object from given IMAP message
+	 * Creates a message data object from given MIME message
 	 * 
 	 * @param msg
-	 *            The IMAP message
+	 *            The MIME message
 	 * @return an instance of <code>{@link MailMessage}</code> containing the
-	 *         attributes from given IMAP message
+	 *         attributes from given MIME message
 	 */
 	public static MailMessage convertMessage(final MimeMessage msg) throws MailException {
 		try {

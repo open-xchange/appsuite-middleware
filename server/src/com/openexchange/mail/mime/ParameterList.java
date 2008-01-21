@@ -114,10 +114,12 @@ public final class ParameterList implements Cloneable {
 			final ParameterList clone = (ParameterList) super.clone();
 			final int size = parameters.size();
 			clone.parameters = new HashMap<String, Parameter>(size);
-			final Iterator<Map.Entry<String, Parameter>> iter = parameters.entrySet().iterator();
-			for (int i = 0; i < size; i++) {
-				final Map.Entry<String, Parameter> e = iter.next();
-				clone.parameters.put(e.getKey(), (Parameter) e.getValue().clone());
+			if (size > 0) {
+				final Iterator<Map.Entry<String, Parameter>> iter = parameters.entrySet().iterator();
+				for (int i = 0; i < size; i++) {
+					final Map.Entry<String, Parameter> e = iter.next();
+					clone.parameters.put(e.getKey(), (Parameter) e.getValue().clone());
+				}
 			}
 			return clone;
 		} catch (final CloneNotSupportedException e) {

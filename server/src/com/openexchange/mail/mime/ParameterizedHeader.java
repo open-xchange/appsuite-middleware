@@ -52,7 +52,8 @@ package com.openexchange.mail.mime;
 import java.util.Iterator;
 
 /**
- * {@link ParameterizedHeader}
+ * {@link ParameterizedHeader} - Super class for headers which can hold a
+ * parameter list such as <code>Content-Type</code>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
