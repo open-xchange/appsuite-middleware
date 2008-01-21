@@ -165,7 +165,7 @@ public final class Pools implements Runnable {
                         getConfig(data));
                     retval.registerCleaner(ServerTimer.getTimer(),
                         cleanerInterval);
-                    registerMBean(createMBeanName(poolId), retval);
+//                    registerMBean(createMBeanName(poolId), retval);
                     oxPools.put(Integer.valueOf(poolId), retval);
                 }
             } finally {
@@ -220,7 +220,7 @@ public final class Pools implements Runnable {
                 final Map.Entry<Integer, ConnectionPool> entry = iter.next();
                 final ConnectionPool pool = entry.getValue();
                 if (pool.isEmpty()) {
-                    unregisterMBean(createMBeanName(entry.getKey().intValue()));
+//                    unregisterMBean(createMBeanName(entry.getKey().intValue()));
                     pool.destroy();
                     iter.remove();
                 }
@@ -253,7 +253,7 @@ public final class Pools implements Runnable {
             final List<MBeanServer> servers = MBeanServerFactory
                 .findMBeanServer(null);
             if (servers.size() > 0) {
-                final MBeanServer server = (MBeanServer) servers.get(0);
+                final MBeanServer server = servers.get(0);
                 server.unregisterMBean(objName);
             }
         } catch (MalformedObjectNameException e) {
@@ -297,6 +297,14 @@ public final class Pools implements Runnable {
         }
     }
 
+    public void registerMBeans() {
+//        registerMBean("ConfigDB Read", configDBRead);
+//        if (configDBWrite != configDBRead) {
+//            registerMBean("ConfigDB Write", configDBWrite);
+//        }
+
+    }
+
     /**
      * @return the singleton instance.
      */
@@ -323,13 +331,11 @@ public final class Pools implements Runnable {
         configDBRead = new ConnectionPool(configDB.getReadUrl(),
             configDB.getReadProps(), config);
         configDBRead.registerCleaner(ServerTimer.getTimer(), cleanerInterval);
-        registerMBean("ConfigDB Read", configDBRead);
         if (configDB.isWriteDefined()) {
             configDBWrite = new ConnectionPool(configDB.getWriteUrl(),
                 configDB.getWriteProps(), config);
             configDBWrite.registerCleaner(ServerTimer.getTimer(),
                 cleanerInterval);
-            registerMBean("ConfigDB Write", configDBWrite);
         } else {
             configDBWrite = configDBRead;
         }
@@ -341,12 +347,12 @@ public final class Pools implements Runnable {
     public void stop() {
         // TODO write destroyPool method.
         if (ConfigDB.getInstance().isWriteDefined()) {
-            unregisterMBean("ConfigDB Write");
+//            unregisterMBean("ConfigDB Write");
             configDBWrite.getCleanerTask().cancel();
             configDBWrite.destroy();
         }
         configDBWrite = null;
-        unregisterMBean("ConfigDB Read");
+//        unregisterMBean("ConfigDB Read");
         configDBRead.getCleanerTask().cancel();
         configDBRead.destroy();
         configDBRead = null;
