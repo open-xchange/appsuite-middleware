@@ -226,6 +226,7 @@
 					 external:$libdir$/${mail},
 					 external:$libdir$/${mysql-connector},
 					 external:$log4j$"/>
+			    <attribute name="Build" value="${pversion}"/>
 		</manifest>
 	</target>
 

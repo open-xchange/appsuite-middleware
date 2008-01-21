@@ -49,6 +49,7 @@
 package com.openexchange.admin.daemons;
 
 import java.security.Permission;
+import java.util.Dictionary;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -72,6 +73,7 @@ public class Activator implements BundleActivator {
      * 
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
+    @SuppressWarnings("unchecked")
     public void start(BundleContext context) throws Exception {
         if (null == System.getSecurityManager()) {
             System.setSecurityManager(new SecurityManager() {
@@ -89,10 +91,11 @@ public class Activator implements BundleActivator {
         this.daemon.initCache(context);
         this.daemon.initAccessCombinationsInCache(); // EXTRA INIT BECAUSE WE NEED TO GET THE EXCEPTIONS TO FAIL ON STARTUP
         this.daemon.initRMI(this.getClass().getClassLoader(), context);
-        if(log.isInfoEnabled()){
-        log.info("Version: " + Version.MAJOR + "." + Version.MINOR + "." + Version.PATCH);
-        log.info("Name: " + Version.NAME);
-        log.info("Build: " + Version.BUILD);
+        if (log.isInfoEnabled()) {
+            final Dictionary<Object, Object> headers = context.getBundle().getHeaders();
+            log.info("Version: " + headers.get("Bundle-Version"));
+            log.info("Name: " + headers.get("Bundle-SymbolicName"));
+            log.info("Build: " + headers.get("Build"));
         }
         log.info("Admindaemon successfully started.");
 
