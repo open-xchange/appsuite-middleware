@@ -378,8 +378,10 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 */
 	public void setFileName(final String fileName) {
 		this.fileName = fileName;
-		contentType.setParameter("name", fileName);
-		contentDisposition.setFilenameParameter(fileName);
+		if (null != this.fileName) {
+			contentType.setParameter("name", fileName);
+			contentDisposition.setFilenameParameter(fileName);
+		}
 		b_fileName = true;
 	}
 
