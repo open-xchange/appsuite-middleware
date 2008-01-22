@@ -56,9 +56,9 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletConfig;
@@ -83,12 +83,12 @@ public class HttpServletManager {
 	private static final Map<String, FIFOQueue<HttpServlet>> SERVLET_POOL = new HashMap<String, FIFOQueue<HttpServlet>>();
 
 	private static Map<String, Constructor<?>> servletConstructorMap;
+	
+	private static final AtomicInteger writeCounter = new AtomicInteger();
+	
+	private static final Lock writeLock = new ReentrantLock();
 
-	private static final ReadWriteLock RW_LOCK = new ReentrantReadWriteLock();
-
-	private static final Lock READ_LOCK = RW_LOCK.readLock();
-
-	private static final Lock WRITE_LOCK = RW_LOCK.writeLock();
+	//private static final ReadWriteLock RW_LOCK = new ReentrantReadWriteLock();
 
 	private HttpServletManager() {
 		super();
@@ -106,29 +106,61 @@ public class HttpServletManager {
 	 * @return The instance of {@link HttpServlet}
 	 */
 	public static HttpServlet getServlet(final String path, final StringBuilder pathStorage) {
-		READ_LOCK.lock();
-		try {
+		int storedCounter;
+		HttpServlet retval = null;
+		do {
+			storedCounter = writeCounter.get();
+			while ((storedCounter & 1) == 1) {
+				storedCounter = writeCounter.get();
+			}
 			if (SERVLET_POOL.containsKey(path)) {
 				pathStorage.append(path);
-				return getServletInternal(path);
-			}
-			/*
-			 * Try through resolving
-			 */
-			final int size = SERVLET_POOL.size();
-			final Iterator<String> iter = SERVLET_POOL.keySet().iterator();
-			for (int i = 0; i < size; i++) {
-				final String currentPath = iter.next();
-				if (Pattern.compile(currentPath.replaceFirst("\\*", ".*"), Pattern.CASE_INSENSITIVE).matcher(path)
-						.matches()) {
-					pathStorage.append(currentPath);
-					return getServletInternal(currentPath);
+				retval = getServletInternal(path);
+			} else {
+				/*
+				 * Try through resolving
+				 */
+				final int size = SERVLET_POOL.size();
+				final Iterator<String> iter = SERVLET_POOL.keySet().iterator();
+				for (int i = 0; i < size; i++) {
+					final String currentPath = iter.next();
+					if (Pattern.compile(currentPath.replaceFirst("\\*", ".*"), Pattern.CASE_INSENSITIVE).matcher(path)
+							.matches()) {
+						pathStorage.append(currentPath);
+						retval = getServletInternal(currentPath);
+					}
 				}
 			}
-			return null;
-		} finally {
-			READ_LOCK.unlock();
-		}
+		} while (storedCounter != writeCounter.get());
+		return retval;
+		
+		
+		
+//		final Lock readLock = RW_LOCK.readLock();
+//		readLock.lock();
+//		try {
+//			if (SERVLET_POOL.containsKey(path)) {
+//				pathStorage.append(path);
+//				return getServletInternal(path);
+//			}
+//			/*
+//			 * Try through resolving
+//			 */
+//			final int size = SERVLET_POOL.size();
+//			final Iterator<String> iter = SERVLET_POOL.keySet().iterator();
+//			for (int i = 0; i < size; i++) {
+//				final String currentPath = iter.next();
+//				if (Pattern.compile(currentPath.replaceFirst("\\*", ".*"), Pattern.CASE_INSENSITIVE).matcher(path)
+//						.matches()) {
+//					pathStorage.append(currentPath);
+//					return getServletInternal(currentPath);
+//				}
+//			}
+//			return null;
+//		} finally {
+//			readLock.unlock();
+//		}
+		
 	}
 
 	/**
@@ -195,12 +227,18 @@ public class HttpServletManager {
 	 *            The servlet instance
 	 */
 	public static final void putServlet(final String path, final HttpServlet servletObj) {
-		WRITE_LOCK.lock();
+		if (SERVLET_POOL.containsKey(path) && !(servletObj instanceof SingleThreadModel)) {
+			return;
+		}
+		writeLock.lock();
 		try {
+			writeCounter.incrementAndGet();
 			if (SERVLET_POOL.containsKey(path)) {
-				if (servletObj instanceof SingleThreadModel) {
-					SERVLET_POOL.get(path).enqueue(servletObj);
-				}
+				/*
+				 * Since heading condition failed the servlet must be an
+				 * instance of SingleThreadModel
+				 */
+				SERVLET_POOL.get(path).enqueue(servletObj);
 			} else {
 				final FIFOQueue<HttpServlet> servlets = new FIFOQueue<HttpServlet>(HttpServlet.class, 1);
 				final ServletConfig conf = AJPv13Server.SERVLET_CONFIGS.getConfig(servletObj.getClass()
@@ -214,7 +252,8 @@ public class HttpServletManager {
 				SERVLET_POOL.put(path, servlets);
 			}
 		} finally {
-			WRITE_LOCK.unlock();
+			writeCounter.incrementAndGet();
+			writeLock.unlock();
 		}
 	}
 
@@ -233,8 +272,9 @@ public class HttpServletManager {
 	 */
 	public static final void registerServlet(final String id, final HttpServlet servlet,
 			final Dictionary<String, String> initParams) throws ServletException {
-		WRITE_LOCK.lock();
+		writeLock.lock();
 		try {
+			writeCounter.incrementAndGet();
 			final String path = new URI(id.charAt(0) == '/' ? id.substring(1) : id).normalize().toString();
 			if (SERVLET_POOL.containsKey(path)) {
 				return;
@@ -267,7 +307,8 @@ public class HttpServletManager {
 		} catch (final URISyntaxException e) {
 			throw new ServletException("Servlet path is not a valid URI", e);
 		} finally {
-			WRITE_LOCK.unlock();
+			writeCounter.incrementAndGet();
+			writeLock.unlock();
 		}
 	}
 
@@ -278,12 +319,14 @@ public class HttpServletManager {
 	 *            The servlet ID or alias
 	 */
 	public static final void unregisterServlet(final String id) {
-		WRITE_LOCK.lock();
+		writeLock.lock();
 		try {
+			writeCounter.incrementAndGet();
 			AJPv13Server.SERVLET_CONFIGS.removeConfig(SERVLET_POOL.get(id).dequeue().getClass().getCanonicalName());
 			SERVLET_POOL.remove(id);
 		} finally {
-			WRITE_LOCK.unlock();
+			writeCounter.incrementAndGet();
+			writeLock.unlock();
 		}
 	}
 
@@ -296,8 +339,9 @@ public class HttpServletManager {
 	 *            The servlet instance
 	 */
 	public static final void destroyServlet(final String id, final HttpServlet servletObj) {
-		WRITE_LOCK.lock();
+		writeLock.lock();
 		try {
+			writeCounter.incrementAndGet();
 			if (servletObj instanceof SingleThreadModel) {
 				/*
 				 * Single-thread are used per instance, so theres no reference
@@ -308,16 +352,19 @@ public class HttpServletManager {
 			}
 			SERVLET_POOL.remove(id);
 		} finally {
-			WRITE_LOCK.unlock();
+			writeCounter.incrementAndGet();
+			writeLock.unlock();
 		}
 	}
 
 	private static final void clearServletPool() {
-		WRITE_LOCK.lock();
+		writeLock.lock();
 		try {
+			writeCounter.incrementAndGet();
 			SERVLET_POOL.clear();
 		} finally {
-			WRITE_LOCK.unlock();
+			writeCounter.incrementAndGet();
+			writeLock.unlock();
 		}
 	}
 
@@ -334,8 +381,9 @@ public class HttpServletManager {
 	private static final Object[] INIT_ARGS = new Object[] {};
 
 	private static final void createServlets() {
-		WRITE_LOCK.lock();
+		writeLock.lock();
 		try {
+			writeCounter.incrementAndGet();
 			for (final Iterator<Map.Entry<String, Constructor<?>>> iter = servletConstructorMap.entrySet().iterator(); iter
 					.hasNext();) {
 				final Map.Entry<String, Constructor<?>> entry = iter.next();
@@ -387,7 +435,8 @@ public class HttpServletManager {
 				LOG.info("All Servlet Instances created & initialized");
 			}
 		} finally {
-			WRITE_LOCK.unlock();
+			writeCounter.incrementAndGet();
+			writeLock.unlock();
 		}
 	}
 }
