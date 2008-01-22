@@ -69,6 +69,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
@@ -1775,7 +1776,7 @@ public class OXContainerConverter {
 		public ArrayIterator(final Object array) {
 			final Class type = array.getClass();
 			if (!type.isArray()) {
-				throw new IllegalArgumentException("MailInterface.ArrayIterator:\tInvalid type: " + type);
+				throw new IllegalArgumentException("Invalid type: " + type);
 			}
 			this.array = array;
 			this.size = Array.getLength(array);
@@ -1790,7 +1791,10 @@ public class OXContainerConverter {
 		}
 
 		public Object next() {
-			return Array.get(array, cursor++);
+			if (cursor < size) {
+				return Array.get(array, cursor++);
+			}
+			throw new NoSuchElementException("No next element present in underlying array");
 		}
 	}
 
