@@ -576,6 +576,8 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	public boolean equalsPermission(final OCLPermission op) {
 		if (this == op) {
 			return true;
+		} else if (op == null) {
+			return false;
 		}
 		return (fp == op.fp) && (orp == op.orp) && (owp == op.owp) && (odp == op.odp)
 				&& (folderAdmin == op.folderAdmin) && (groupPermission == op.groupPermission);
@@ -585,13 +587,12 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
 	public boolean equals(final Object other) {
 		if (this == other) {
 			return true;
+		} else if (other == null || !(other instanceof OCLPermission)) {
+			return false;
 		}
-		if (other instanceof OCLPermission) {
-			final OCLPermission op = (OCLPermission) other;
-			return (entity == op.entity) && (fuid == op.fuid) && (fp == op.fp) && (orp == op.orp) && (owp == op.owp)
-					&& (odp == op.odp) && (folderAdmin == op.folderAdmin) && (groupPermission == op.groupPermission);
-		}
-		return false;
+		final OCLPermission op = (OCLPermission) other;
+		return (entity == op.entity) && (fuid == op.fuid) && (fp == op.fp) && (orp == op.orp) && (owp == op.owp)
+				&& (odp == op.odp) && (folderAdmin == op.folderAdmin) && (groupPermission == op.groupPermission);
 	}
 
 	@Override

@@ -115,6 +115,35 @@ public class EffectivePermission extends OCLPermission {
 		validateUserConfig();
 	}
 
+	@Override
+	public boolean equals(final Object other) {
+		if (this == other) {
+			return true;
+		} else if (other == null || !(other instanceof EffectivePermission)) {
+			return false;
+		}
+		final EffectivePermission ep = (EffectivePermission) other;
+		if (!super.equals(ep) && (folderType != ep.folderType) && (folderModule != ep.folderModule)) {
+			return false;
+		}
+		if (null != userConfig) {
+			return userConfig.equals(ep.userConfig);
+		}
+		return (null == ep.userConfig);
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 31 * hash + super.hashCode();
+		hash = 31 * hash + folderType;
+		hash = 31 * hash + folderModule;
+		if (null != userConfig) {
+			hash = 31 * hash + userConfig.hashCode();
+		}
+		return hash;
+	}
+
 	public boolean hasModuleAccess(final int folderModule) {
 		if (validateUserConfig()) {
 			return userConfig.hasModuleAccess(folderModule);
@@ -139,6 +168,18 @@ public class EffectivePermission extends OCLPermission {
 	}
 
 	@Override
+	public void setFolderAdmin(final boolean folderAdmin) {
+		super.setFolderAdmin(folderAdmin);
+		underlyingPerm = null;
+	}
+
+	@Override
+	public void setGroupPermission(final boolean groupPermission) {
+		super.setGroupPermission(groupPermission);
+		underlyingPerm = null;
+	}
+
+	@Override
 	public int getFolderPermission() {
 		if (validateUserConfig()) {
 			if (!hasModuleAccess(folderModule)) {
@@ -152,6 +193,12 @@ public class EffectivePermission extends OCLPermission {
 			}
 		}
 		return super.getFolderPermission();
+	}
+
+	@Override
+	public boolean setFolderPermission(final int fp) {
+		underlyingPerm = null;
+		return super.setFolderPermission(fp);
 	}
 
 	@Override
@@ -171,6 +218,12 @@ public class EffectivePermission extends OCLPermission {
 	}
 
 	@Override
+	public boolean setReadObjectPermission(final int p) {
+		underlyingPerm = null;
+		return super.setReadObjectPermission(p);
+	}
+
+	@Override
 	public int getWritePermission() {
 		if (validateUserConfig()) {
 			if (!hasModuleAccess(folderModule)) {
@@ -184,6 +237,12 @@ public class EffectivePermission extends OCLPermission {
 			}
 		}
 		return super.getWritePermission();
+	}
+
+	@Override
+	public boolean setWriteObjectPermission(final int p) {
+		underlyingPerm = null;
+		return super.setWriteObjectPermission(p);
 	}
 
 	@Override
@@ -204,6 +263,24 @@ public class EffectivePermission extends OCLPermission {
 			}
 		}
 		return super.getDeletePermission();
+	}
+
+	@Override
+	public boolean setDeleteObjectPermission(final int p) {
+		underlyingPerm = null;
+		return super.setDeleteObjectPermission(p);
+	}
+
+	@Override
+	public void setEntity(final int entity) {
+		underlyingPerm = null;
+		super.setEntity(entity);
+	}
+
+	@Override
+	public void setFuid(final int fuid) {
+		underlyingPerm = null;
+		super.setFuid(fuid);
 	}
 
 	private final boolean validateUserConfig() {
