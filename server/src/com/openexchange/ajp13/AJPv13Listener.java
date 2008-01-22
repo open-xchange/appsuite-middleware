@@ -349,8 +349,8 @@ public final class AJPv13Listener implements Runnable {
 					}
 					keepOnRunning = false;
 				} finally {
-					pooled = false;
 					listenerLock.unlock();
+					pooled = false;
 				}
 			} else {
 				/*
