@@ -83,7 +83,8 @@ public class ByteArrayDataSource implements DataSource {
 	public ByteArrayDataSource(String contentType, String name, byte[] bytes) {
 		this.contentType = contentType;
 		this.name = name;
-		this.bytes = bytes;
+		this.bytes = new byte[bytes.length];
+		System.arraycopy(bytes, 0, this.bytes, 0, bytes.length);
 	}
 
 	/**
@@ -92,7 +93,8 @@ public class ByteArrayDataSource implements DataSource {
 	 * @param bytes
 	 */
 	public void setByteArray(final byte[] bytes) {
-		this.bytes = bytes;
+		this.bytes = new byte[bytes.length];
+		System.arraycopy(bytes, 0, this.bytes, 0, bytes.length);
 	}
 
 	/**
@@ -101,7 +103,9 @@ public class ByteArrayDataSource implements DataSource {
 	 * @return
 	 */
 	public byte[] getByteArray() {
-		return baos.toByteArray();
+		final byte[] bytes = new byte[this.bytes.length];
+		System.arraycopy(this.bytes, 0, bytes, 0, bytes.length);
+		return bytes;
 	}
 
 	public String getContentType() {
