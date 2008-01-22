@@ -158,6 +158,56 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 		this.ctx = ctx;
 	}
 
+	@Override
+	public boolean equals(final Object other) {
+		if (this == other) {
+			return true;
+		} else if (other == null || !(other instanceof UserConfiguration)) {
+			return false;
+		}
+		final UserConfiguration uc = (UserConfiguration) other;
+		if (userId != uc.userId || permissionBits != uc.permissionBits) {
+			return false;
+		}
+		if (null != groups) {
+			if (null == uc.groups) {
+				return false;
+			}
+			Arrays.sort(groups);
+			Arrays.sort(uc.groups);
+			if (!Arrays.equals(groups, uc.groups)) {
+				return false;
+			}
+		}
+		if (null != uc.groups) {
+			return false;
+		}
+		if (null != ctx) {
+			if (null == uc.ctx) {
+				return false;
+			}
+			return (ctx.getContextId() == uc.ctx.getContextId());
+		}
+		return (null == uc.ctx);
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 7;
+		hash = 31 * hash + userId;
+		hash = 31 * hash + permissionBits;
+		if (null != groups) {
+			Arrays.sort(groups);
+			for (int i = 0; i < groups.length; i++) {
+				hash = 31 * hash + groups[i];
+			}
+		}
+		if (null != ctx) {
+			hash = 31 * hash + ctx.getContextId();
+		}
+		return hash;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
