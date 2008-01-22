@@ -107,6 +107,118 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         }
     }
 
+    private void closeResultSet(ResultSet rs) {
+        try {
+            if (null != rs) {
+                rs.close();
+            }
+        } catch (final SQLException ex) {
+            log.error("Error closing Resultset!", ex);
+        }
+    }
+
+    private void createRecoveryData(final int group_id, final int context_id, final Connection write_ox_con) throws SQLException {
+        PreparedStatement del_st = null;
+        ResultSet rs = null;
+        try {
+            del_st = write_ox_con.prepareStatement("SELECT identifier,displayName,gidNumber FROM groups WHERE id = ? AND cid = ?");
+            del_st.setInt(1, group_id);
+            del_st.setInt(2, context_id);
+            rs = del_st.executeQuery();
+            String ident = null;
+            String disp = null;
+            int gidNumber = -1;
+            
+            if (rs.next()) {
+                ident = rs.getString("identifier");
+                disp = rs.getString("displayName");
+                gidNumber = rs.getInt("gidNumber");
+            }
+            del_st.close();
+           
+            del_st = write_ox_con.prepareStatement("INSERT into del_groups (id,cid,lastModified,identifier,displayName,gidNumber) VALUES (?,?,?,?,?,?)");
+            del_st.setInt(1, group_id);
+            del_st.setInt(2, context_id);
+            del_st.setLong(3, System.currentTimeMillis());
+            del_st.setString(4, ident);
+            del_st.setString(5, disp);
+            del_st.setInt(6, gidNumber);
+            del_st.executeUpdate();
+        } finally {
+            closeResultSet(rs);
+            closePreparedStatement(del_st);
+        }
+    }
+
+    private void doRollback(Connection con) {
+        try {
+            if (con != null) {
+                con.rollback();
+            }
+        } catch (final SQLException ecp) {
+            log.error("Error processing rollback of connection!", ecp);
+        }
+    }
+
+    private Group get(final Context ctx, final Group grp, final Connection con) throws StorageException {
+        PreparedStatement prep_list = null;
+        final int context_ID = ctx.getId();
+        try {
+            prep_list = con.prepareStatement("SELECT cid,identifier,displayName FROM groups WHERE groups.cid = ? AND groups.id = ?");
+            prep_list.setInt(1, context_ID);
+            prep_list.setInt(2, grp.getId());
+            final ResultSet rs = prep_list.executeQuery();
+
+            while (rs.next()) {
+                final String ident = rs.getString("identifier");
+                final String disp = rs.getString("displayName");
+                grp.setName(ident);
+                grp.setDisplayname(disp);
+            }
+            final Integer []members = getMembers(ctx, grp.getId(), con);
+            if (members != null) {
+                grp.setMembers(members);
+            }
+        } catch (final SQLException sql) {
+            log.error("SQL Error", sql);            
+            throw new StorageException(sql);       
+        } finally {
+            closePreparedStatement(prep_list);
+        }
+        return grp;
+    }
+
+    private Integer[] getMembers(final Context ctx, final int grp_id, final Connection con) throws StorageException {        
+        PreparedStatement prep_list = null;
+        final int context_id = ctx.getId();
+        try {
+            prep_list = con.prepareStatement("SELECT member FROM groups_member WHERE groups_member.cid = ? AND groups_member.id = ?;");
+            prep_list.setInt(1, context_id);
+            prep_list.setInt(2, grp_id);
+            final ResultSet rs = prep_list.executeQuery();
+            final ArrayList<Integer> ids = new ArrayList<Integer>();
+            while (rs.next()) {
+                ids.add(rs.getInt("member"));
+            }
+            return ids.toArray(new Integer[ids.size()]);        
+        } catch (final SQLException sql) {
+            log.error("SQL Error", sql);            
+            throw new StorageException(sql);
+        } finally {
+            closePreparedStatement(prep_list);
+        }
+    }
+
+    private void pushConnectionforContext(Connection con, final int context_id) {
+        try {
+            if (null != con) {
+                cache.pushConnectionForContext(context_id, con);
+            }
+        } catch (final PoolException e) {
+            log.error("Error pushing ox connection to pool!", e);
+        }
+    }
+
     @Override
     public void addMember(final Context ctx, final int grp_id, final User[] members) throws StorageException {
         Connection con = null;
@@ -152,54 +264,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             pushConnectionforContext(con, context_id);
         }
     }
-
-    @Override
-    public void removeMember(final Context ctx, final int grp_id, final User[] members) throws StorageException {
-        Connection con = null;
-        PreparedStatement prep_del_member = null;
-        final int context_id = ctx.getId().intValue();
-        try {
-            con = cache.getConnectionForContext(context_id);
-            con.setAutoCommit(false);
-
-            for (final User member : members) {
-                prep_del_member = con.prepareStatement("DELETE FROM groups_member WHERE cid=? AND id=? AND member=?;");
-                prep_del_member.setInt(1, context_id);
-                prep_del_member.setInt(2, grp_id);
-                prep_del_member.setInt(3, member.getId());
-                prep_del_member.executeUpdate();
-                prep_del_member.close();
-            }
-
-            // set last modified
-            changeLastModifiedOnGroup(context_id, grp_id, con);
-            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
-            OXUserMySQLStorage oxu = new OXUserMySQLStorage();
-            for (final User member : members) {
-                if (tool.existsUser(ctx, member.getId())) {
-                    // update last modified on user
-                    oxu.changeLastModified(member.getId(), ctx, con);
-                }
-            }
-            
-            // let the groupware api know that the group has changed
-            OXFolderAdminHelper.propagateGroupModification(grp_id, con, con, context_id); 
-            
-            con.commit();
-        } catch (final SQLException sql) {
-            log.error("SQL Error", sql);
-            doRollback(con);
-            throw new StorageException(sql);
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);
-            doRollback(con);
-            throw new StorageException(e);
-        } finally {
-            closePreparedStatement(prep_del_member);
-            pushConnectionforContext(con, context_id);
-        }
-    }
-
+    
     @Override
     public void change(final Context ctx, final Group grp) throws StorageException {
         Connection con = null;
@@ -273,16 +338,6 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         } finally {
             closePreparedStatement(prep_edit_group);
             pushConnectionforContext(con, context_id);
-        }
-    }
-
-    private void doRollback(Connection con) {
-        try {
-            if (con != null) {
-                con.rollback();
-            }
-        } catch (final SQLException ecp) {
-            log.error("Error processing rollback of connection!", ecp);
         }
     }
 
@@ -419,6 +474,87 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
     }
 
     @Override
+    public void deleteAllRecoveryData(final Context ctx, final Connection con) throws StorageException {
+        // delete from del_groups table
+        PreparedStatement del_st = null;
+        final int context_id = ctx.getId();
+        try {
+            del_st = con.prepareStatement("DELETE from del_groups WHERE cid = ?");
+            del_st.setInt(1, context_id);
+            del_st.executeUpdate();
+        } catch (final SQLException sql) {
+            log.error("SQL Error", sql);
+            doRollback(con);
+            throw new StorageException(sql);
+        } finally {
+            closePreparedStatement(del_st);
+        }
+    }
+
+    @Override
+    public void deleteRecoveryData(final Context ctx, final int group_id, final Connection con) throws StorageException {
+        // delete from del_groups table
+        PreparedStatement del_st = null;
+        final int context_id = ctx.getId();
+        try {
+            del_st = con.prepareStatement("DELETE from del_groups WHERE id = ? AND cid = ?");
+            del_st.setInt(1, group_id);
+            del_st.setInt(2, context_id);
+            del_st.executeUpdate();
+        } catch (final SQLException sql) {
+            log.error("SQL Error", sql);
+            doRollback(con);
+            throw new StorageException(sql);
+        } finally {
+            closePreparedStatement(del_st);
+        }
+    }
+
+    @Override
+    public Group get(final Context ctx, Group grp) throws StorageException {
+        Connection con = null;
+        try {
+            con = cache.getConnectionForContext(ctx.getId().intValue());
+
+            return get(ctx, grp, con);        
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);            
+            throw new StorageException(e);
+        } finally {
+            pushConnectionforContext(con, ctx.getId().intValue());
+        }
+    }
+
+    @Override
+    public Group[] getGroupsForUser(final Context ctx, final User usr) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep_list = null;
+        try {
+            con = cache.getConnectionForContext(ctx.getId().intValue());
+            // fetch all group ids the user is member of
+            prep_list = con.prepareStatement("SELECT id FROM groups_member WHERE cid = ? AND member = ?");
+            prep_list.setInt(1, ctx.getId().intValue());
+            prep_list.setInt(2, usr.getId().intValue());
+
+            final ResultSet rs = prep_list.executeQuery();
+            ArrayList<Group> grplist = new ArrayList<Group>();
+            while (rs.next()) {
+                grplist.add(get(ctx, new Group(rs.getInt("id")), con));
+            }
+            return grplist.toArray(new Group[grplist.size()]);
+        } catch (final SQLException sql) {
+            log.error("SQL Error", sql);
+            throw new StorageException(sql);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } finally {
+            closePreparedStatement(prep_list);
+            pushConnectionforContext(con, ctx.getId().intValue());
+        }
+    }
+
+    @Override
     public User[] getMembers(final Context ctx, final int grp_id) throws StorageException {
         Connection con = null;
         final int context_id = ctx.getId();
@@ -437,70 +573,6 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             throw new StorageException(e);
         } finally {
             pushConnectionforContext(con, context_id);
-        }
-    }
-    
-    private Integer[] getMembers(final Context ctx, final int grp_id, final Connection con) throws StorageException {        
-        PreparedStatement prep_list = null;
-        final int context_id = ctx.getId();
-        try {
-            prep_list = con.prepareStatement("SELECT member FROM groups_member WHERE groups_member.cid = ? AND groups_member.id = ?;");
-            prep_list.setInt(1, context_id);
-            prep_list.setInt(2, grp_id);
-            final ResultSet rs = prep_list.executeQuery();
-            final ArrayList<Integer> ids = new ArrayList<Integer>();
-            while (rs.next()) {
-                ids.add(rs.getInt("member"));
-            }
-            return ids.toArray(new Integer[ids.size()]);        
-        } catch (final SQLException sql) {
-            log.error("SQL Error", sql);            
-            throw new StorageException(sql);
-        } finally {
-            closePreparedStatement(prep_list);
-        }
-    }
-
-    private Group get(final Context ctx, final Group grp, final Connection con) throws StorageException {
-        PreparedStatement prep_list = null;
-        final int context_ID = ctx.getId();
-        try {
-            prep_list = con.prepareStatement("SELECT cid,identifier,displayName FROM groups WHERE groups.cid = ? AND groups.id = ?");
-            prep_list.setInt(1, context_ID);
-            prep_list.setInt(2, grp.getId());
-            final ResultSet rs = prep_list.executeQuery();
-
-            while (rs.next()) {
-                final String ident = rs.getString("identifier");
-                final String disp = rs.getString("displayName");
-                grp.setName(ident);
-                grp.setDisplayname(disp);
-            }
-            final Integer []members = getMembers(ctx, grp.getId(), con);
-            if (members != null) {
-                grp.setMembers(members);
-            }
-        } catch (final SQLException sql) {
-            log.error("SQL Error", sql);            
-            throw new StorageException(sql);       
-        } finally {
-            closePreparedStatement(prep_list);
-        }
-        return grp;
-    }
-
-    @Override
-    public Group get(final Context ctx, Group grp) throws StorageException {
-        Connection con = null;
-        try {
-            con = cache.getConnectionForContext(ctx.getId().intValue());
-
-            return get(ctx, grp, con);        
-        } catch (final PoolException e) {
-            log.error("Pool Error", e);            
-            throw new StorageException(e);
-        } finally {
-            pushConnectionforContext(con, ctx.getId().intValue());
         }
     }
 
@@ -552,122 +624,50 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         }
     }
 
-    private void closeResultSet(ResultSet rs) {
-        try {
-            if (null != rs) {
-                rs.close();
-            }
-        } catch (final SQLException ex) {
-            log.error("Error closing Resultset!", ex);
-        }
-    }
-
-    private void pushConnectionforContext(Connection con, final int context_id) {
-        try {
-            if (null != con) {
-                cache.pushConnectionForContext(context_id, con);
-            }
-        } catch (final PoolException e) {
-            log.error("Error pushing ox connection to pool!", e);
-        }
-    }
-
     @Override
-    public void deleteRecoveryData(final Context ctx, final int group_id, final Connection con) throws StorageException {
-        // delete from del_groups table
-        PreparedStatement del_st = null;
-        final int context_id = ctx.getId();
-        try {
-            del_st = con.prepareStatement("DELETE from del_groups WHERE id = ? AND cid = ?");
-            del_st.setInt(1, group_id);
-            del_st.setInt(2, context_id);
-            del_st.executeUpdate();
-        } catch (final SQLException sql) {
-            log.error("SQL Error", sql);
-            doRollback(con);
-            throw new StorageException(sql);
-        } finally {
-            closePreparedStatement(del_st);
-        }
-    }
-
-    @Override
-    public void deleteAllRecoveryData(final Context ctx, final Connection con) throws StorageException {
-        // delete from del_groups table
-        PreparedStatement del_st = null;
-        final int context_id = ctx.getId();
-        try {
-            del_st = con.prepareStatement("DELETE from del_groups WHERE cid = ?");
-            del_st.setInt(1, context_id);
-            del_st.executeUpdate();
-        } catch (final SQLException sql) {
-            log.error("SQL Error", sql);
-            doRollback(con);
-            throw new StorageException(sql);
-        } finally {
-            closePreparedStatement(del_st);
-        }
-    }
-
-    private void createRecoveryData(final int group_id, final int context_id, final Connection write_ox_con) throws SQLException {
-        PreparedStatement del_st = null;
-        ResultSet rs = null;
-        try {
-            del_st = write_ox_con.prepareStatement("SELECT identifier,displayName,gidNumber FROM groups WHERE id = ? AND cid = ?");
-            del_st.setInt(1, group_id);
-            del_st.setInt(2, context_id);
-            rs = del_st.executeQuery();
-            String ident = null;
-            String disp = null;
-            int gidNumber = -1;
-            
-            if (rs.next()) {
-                ident = rs.getString("identifier");
-                disp = rs.getString("displayName");
-                gidNumber = rs.getInt("gidNumber");
-            }
-            del_st.close();
-           
-            del_st = write_ox_con.prepareStatement("INSERT into del_groups (id,cid,lastModified,identifier,displayName,gidNumber) VALUES (?,?,?,?,?,?)");
-            del_st.setInt(1, group_id);
-            del_st.setInt(2, context_id);
-            del_st.setLong(3, System.currentTimeMillis());
-            del_st.setString(4, ident);
-            del_st.setString(5, disp);
-            del_st.setInt(6, gidNumber);
-            del_st.executeUpdate();
-        } finally {
-            closeResultSet(rs);
-            closePreparedStatement(del_st);
-        }
-    }
-
-    @Override
-    public Group[] getGroupsForUser(final Context ctx, final User usr) throws StorageException {
+    public void removeMember(final Context ctx, final int grp_id, final User[] members) throws StorageException {
         Connection con = null;
-        PreparedStatement prep_list = null;
+        PreparedStatement prep_del_member = null;
+        final int context_id = ctx.getId().intValue();
         try {
-            con = cache.getConnectionForContext(ctx.getId().intValue());
-            // fetch all group ids the user is member of
-            prep_list = con.prepareStatement("SELECT id FROM groups_member WHERE cid = ? AND member = ?");
-            prep_list.setInt(1, ctx.getId().intValue());
-            prep_list.setInt(2, usr.getId().intValue());
+            con = cache.getConnectionForContext(context_id);
+            con.setAutoCommit(false);
 
-            final ResultSet rs = prep_list.executeQuery();
-            ArrayList<Group> grplist = new ArrayList<Group>();
-            while (rs.next()) {
-                grplist.add(get(ctx, new Group(rs.getInt("id")), con));
+            for (final User member : members) {
+                prep_del_member = con.prepareStatement("DELETE FROM groups_member WHERE cid=? AND id=? AND member=?;");
+                prep_del_member.setInt(1, context_id);
+                prep_del_member.setInt(2, grp_id);
+                prep_del_member.setInt(3, member.getId());
+                prep_del_member.executeUpdate();
+                prep_del_member.close();
             }
-            return grplist.toArray(new Group[grplist.size()]);
+
+            // set last modified
+            changeLastModifiedOnGroup(context_id, grp_id, con);
+            final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
+            OXUserMySQLStorage oxu = new OXUserMySQLStorage();
+            for (final User member : members) {
+                if (tool.existsUser(ctx, member.getId())) {
+                    // update last modified on user
+                    oxu.changeLastModified(member.getId(), ctx, con);
+                }
+            }
+            
+            // let the groupware api know that the group has changed
+            OXFolderAdminHelper.propagateGroupModification(grp_id, con, con, context_id); 
+            
+            con.commit();
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
+            doRollback(con);
             throw new StorageException(sql);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
+            doRollback(con);
             throw new StorageException(e);
         } finally {
-            closePreparedStatement(prep_list);
-            pushConnectionforContext(con, ctx.getId().intValue());
+            closePreparedStatement(prep_del_member);
+            pushConnectionforContext(con, context_id);
         }
     }
 
