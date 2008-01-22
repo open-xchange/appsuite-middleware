@@ -60,13 +60,27 @@ import javax.servlet.http.HttpServlet;
 
 import com.openexchange.ajp13.AJPv13Exception.AJPCode;
 import com.openexchange.monitoring.MonitoringInfo;
+import com.openexchange.tools.servlet.OXServletInputStream;
+import com.openexchange.tools.servlet.OXServletOutputStream;
 import com.openexchange.tools.servlet.http.HttpErrorServlet;
 import com.openexchange.tools.servlet.http.HttpServletManager;
 import com.openexchange.tools.servlet.http.HttpServletRequestWrapper;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 
 /**
+ * {@link AJPv13RequestHandler} - The AJP request handler processes incoming AJP
+ * packages dependent on their prefix code and/or associated package number.
+ * <p>
+ * Whenever an AJP connection delegates processing to a request handler, it
+ * waits on AJP connection's input stream for incoming data. The data is then
+ * processed and control is returned to AJP connection.
+ * <p>
+ * Sub-sequential AJP communication may be initiated through
+ * {@link OXServletInputStream} and {@link OXServletOutputStream} during
+ * servlets' processing.
  * 
+ * @see OXServletInputStream
+ * @see OXServletOutputStream
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
@@ -121,7 +135,7 @@ public final class AJPv13RequestHandler {
 
 	private HttpServlet servlet;
 
-	private String servletId;
+	private final StringBuilder servletId;
 
 	private int connectionType = -1;
 
@@ -160,6 +174,7 @@ public final class AJPv13RequestHandler {
 	public AJPv13RequestHandler() {
 		super();
 		state = State.IDLE;
+		servletId = new StringBuilder(16);
 	}
 
 	/**
@@ -232,7 +247,7 @@ public final class AJPv13RequestHandler {
 			return "";
 		}
 		final String space = "    ";
-		final StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder(1024);
 		sb.append("0000").append(space).append(Integer.toHexString(magic1).toUpperCase()).append(' ').append(
 				Integer.toHexString(magic2).toUpperCase());
 		int c = 2;
@@ -274,7 +289,7 @@ public final class AJPv13RequestHandler {
 			if (state.equals(State.IDLE)) {
 				state = State.ASSIGNED;
 			}
-			ajpCon.increasePackageNumber();
+			ajpCon.incrementPackageNumber();
 			int dataLength = -1;
 			final boolean firstPackage = (ajpCon.getPackageNumber() == 1);
 			dataLength = readInitialBytes(firstPackage && AJPv13Config.getAJPListenerReadTimeout() > 0);
@@ -344,7 +359,7 @@ public final class AJPv13RequestHandler {
 			/*
 			 * Forward request is immediately followed by a data package
 			 */
-			ajpCon.increasePackageNumber();
+			ajpCon.incrementPackageNumber();
 			/*
 			 * Processed package is an AJP forward request which indicates
 			 * presence of a following request body package.
@@ -458,13 +473,13 @@ public final class AJPv13RequestHandler {
 	}
 
 	private void releaseServlet() {
-		if (servletId != null) {
-			HttpServletManager.putServlet(servletId, servlet);
+		if (servletId.length() > 0) {
+			HttpServletManager.putServlet(servletId.toString(), servlet);
 			if (MonitoringInfo.UNKNOWN != connectionType) {
 				MonitoringInfo.decrementNumberOfConnections(connectionType);
 			}
 		}
-		servletId = null;
+		servletId.setLength(0);
 		servlet = null;
 	}
 
@@ -550,15 +565,17 @@ public final class AJPv13RequestHandler {
 		/*
 		 * Lookup path in available servlet paths
 		 */
-		final StringBuilder pathStorage = new StringBuilder(16);
-		HttpServlet servletInst = HttpServletManager.getServlet(path, pathStorage);
+		if (servletId.length() > 0) {
+			servletId.setLength(0);
+		}
+		HttpServlet servletInst = HttpServletManager.getServlet(path, servletId);
 		if (servletInst == null) {
 			servletInst = new HttpErrorServlet("No servlet bound to path/alias: " + path);
 		}
 		servlet = servletInst;
-		servletId = pathStorage.length() > 0 ? pathStorage.toString() : null;
-		if (null != servletId) {
-			servletPath = servletId.replaceFirst("\\*", ""); // path;
+		//servletId = pathStorage.length() > 0 ? pathStorage.toString() : null;
+		if (servletId.length() > 0) {
+			servletPath = servletId.toString().replaceFirst("\\*", ""); // path;
 		}
 		if (MonitoringInfo.UNKNOWN != connectionType) {
 			MonitoringInfo.incrementNumberOfConnections(connectionType);

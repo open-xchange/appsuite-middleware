@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.ajp13;
 
 import java.io.BufferedInputStream;
@@ -58,14 +56,22 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketException;
 
+import javax.servlet.ServletException;
+
 /**
+ * {@link AJPv13Connection} - Represents an AJP connection which mainly
+ * delegates processing of incoming AJP data packages to an assigned AJP request
+ * handler.
+ * <p>
+ * Moreover it keeps track of package numbers.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
 public final class AJPv13Connection {
-	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13Connection.class);
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(AJPv13Connection.class);
 
 	public static final int IDLE_STATE = 1;
 
@@ -74,20 +80,20 @@ public final class AJPv13Connection {
 	private int state;
 
 	private int packageNumber;
-	
+
 	private InputStream inputStream;
-	
+
 	private OutputStream outputStream;
-	
+
 	private AJPv13Listener listener;
 
 	private AJPv13RequestHandler ajpRequestHandler;
-	
+
 	public AJPv13Connection(final AJPv13Listener listener) {
 		this();
 		setAndApplyListener(listener);
 	}
-	
+
 	public AJPv13Connection() {
 		super();
 		state = IDLE_STATE;
@@ -95,11 +101,12 @@ public final class AJPv13Connection {
 	}
 
 	/**
-	 * Resets this connection instance and prepares it for next upcoming ajp
-	 * cycle. That is the request handler will be set to <code>null</code>,
-	 * its state is set to IDLE and the underlying output stream is going to
-	 * be flushed.
+	 * Resets this connection instance and prepares it for next upcoming AJP
+	 * cycle. That is associated request handler will be set to
+	 * <code>null</code>, its state is set to <code>IDLE</code> and the
+	 * output stream is going to be flushed.
 	 * 
+	 * @param releaseRequestHandler
 	 */
 	public void resetConnection(final boolean releaseRequestHandler) {
 		if (state == IDLE_STATE) {
@@ -118,17 +125,17 @@ public final class AJPv13Connection {
 		state = IDLE_STATE;
 		packageNumber = 0;
 	}
-	
+
 	private void resetRequestHandler(final boolean release) {
 		/*
-		 * Discard request handler's reference to this connection if it
-		 * ought to be released from it
+		 * Discard request handler's reference to this connection if it ought to
+		 * be released from it
 		 */
 		ajpRequestHandler.reset(release);
 		if (release) {
 			if (AJPv13RequestHandlerPool.isInitialized()) {
 				/*
-				 * Put resetted request handler back into pool
+				 * Put reseted request handler back into pool
 				 */
 				AJPv13RequestHandlerPool.putRequestHandler(ajpRequestHandler);
 			}
@@ -139,7 +146,19 @@ public final class AJPv13Connection {
 		}
 	}
 
-	public void processRequest() throws IOException, Exception, AJPv13SocketClosedException {
+	/**
+	 * Waits for and processes incoming AJP package through delegating to
+	 * associated request handler.
+	 * <p>
+	 * Moreover this connection's state is switched to <tt>ASSIGNED</tt> if
+	 * it's still <tt>IDLE</tt>.
+	 * 
+	 * @throws IOException
+	 *             If AJP socket is closed
+	 * @throws AJPv13Exception
+	 *             If an AJP error occurs
+	 */
+	public void processRequest() throws IOException, AJPv13Exception {
 		if (listener.getSocket().isClosed()) {
 			throw new IOException("Socket is closed");
 		}
@@ -161,17 +180,40 @@ public final class AJPv13Connection {
 		ajpRequestHandler.processPackage();
 	}
 
-	public void createResponse() throws Exception {
+	/**
+	 * Creates the AJP response data to previously received AJP package through
+	 * delegating to request handler.
+	 * 
+	 * @throws AJPv13Exception
+	 *             If an AJP error occurs while creating response data or this
+	 *             connection is not in <tt>ASSIGNED</tt> state
+	 * @throws ServletException
+	 *             If a servlet error occurs
+	 */
+	public void createResponse() throws AJPv13Exception, ServletException {
 		if (state != ASSIGNED_STATE) {
 			throw new AJPv13InvalidConnectionStateException();
 		}
 		ajpRequestHandler.createResponse();
 	}
 
+	/**
+	 * Gets the associated AJP request handler which processes the AJP data sent
+	 * over this connection
+	 * 
+	 * @return The associated AJP request handler.
+	 */
 	public AJPv13RequestHandler getAjpRequestHandler() {
 		return ajpRequestHandler;
 	}
 
+	/**
+	 * Gets the input stream from AJP client
+	 * 
+	 * @return The input stream from AJP client
+	 * @throws IOException
+	 *             If input stream cannot be returned
+	 */
 	public InputStream getInputStream() throws IOException {
 		if (inputStream == null) {
 			return (inputStream = new BufferedInputStream(listener.getSocket().getInputStream()));
@@ -179,31 +221,61 @@ public final class AJPv13Connection {
 		return inputStream;
 	}
 
+	/**
+	 * Gets the output stream to AJP client
+	 * 
+	 * @return The output stream to AJP client
+	 * @throws IOException
+	 *             If output stream cannot be returned
+	 */
 	public OutputStream getOutputStream() throws IOException {
 		if (outputStream == null) {
-			return (outputStream = new BufferedOutputStream(listener.getSocket().getOutputStream(), AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE));
+			return (outputStream = new BufferedOutputStream(listener.getSocket().getOutputStream(),
+					AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE));
 		}
 		return outputStream;
 	}
-	
+
+	/**
+	 * Sets the SO_TIMEOUT with the specified timeout, in milliseconds.
+	 * 
+	 * @param millis
+	 *            The timeout in milliseconds
+	 * @throws SocketException
+	 *             If there is an error in the underlying protocol, such as a
+	 *             TCP error.
+	 */
 	public void setSoTimeout(final int millis) throws SocketException {
 		listener.getSocket().setSoTimeout(millis);
 	}
 
+	/**
+	 * Gets the number of actual AJP package.
+	 * 
+	 * @return The number of actual AJP package.
+	 */
 	public int getPackageNumber() {
 		return this.packageNumber;
 	}
 
-	public void increasePackageNumber() {
+	/**
+	 * Increments package number by one.
+	 */
+	public void incrementPackageNumber() {
 		this.packageNumber++;
 	}
 
+	/**
+	 * Gets the current AJP connection's state
+	 * 
+	 * @return Current AJP connection's state
+	 */
 	public int getState() {
 		return state;
 	}
-    
+
 	/**
-	 * Removes connection's listener reference and therefore implicitely invokes
+	 * Removes connection's listener reference and therefore implicitly invokes
 	 * the <code>resetConnection(true)</code> method
 	 * 
 	 */
@@ -237,8 +309,10 @@ public final class AJPv13Connection {
 		 */
 		listener = null;
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -248,19 +322,31 @@ public final class AJPv13Connection {
 		sb.append("Listener: ").append(listener.getListenerName()).append(" | ");
 		return sb.toString();
 	}
-    
-    public boolean isAjpListenerNull() {
-    	return (listener.getSocket() == null);
-    }
-    
-    public void markListenerProcessing() {
-    	listener.markProcessing();
-    }
-    
-    public void markListenerNonProcessing() {
-    	listener.markNonProcessing();
-    }
 
+	public boolean isAjpListenerNull() {
+		return (listener.getSocket() == null);
+	}
+
+	/**
+	 * Marks corresponding AJP listener as processing
+	 */
+	public void markListenerProcessing() {
+		listener.markProcessing();
+	}
+
+	/**
+	 * Marks corresponding AJP listener as non-processing
+	 */
+	public void markListenerNonProcessing() {
+		listener.markNonProcessing();
+	}
+
+	/**
+	 * Applies an AJP listener to this AJP connection
+	 * 
+	 * @param listener
+	 *            The AJP listener
+	 */
 	public void setListener(final AJPv13Listener listener) {
 		setAndApplyListener(listener);
 	}
@@ -274,5 +360,5 @@ public final class AJPv13Connection {
 			LOG.error(e.getMessage(), e);
 		}
 	}
-	
+
 }

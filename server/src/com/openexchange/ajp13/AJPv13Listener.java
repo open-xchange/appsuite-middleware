@@ -65,8 +65,14 @@ import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.HttpServletResponseWrapper;
 
 /**
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link AJPv13Listener} - The AJP listener processes an accepted socket
+ * connection of an AJP client (web server) in a separate thread for the whole
+ * socket's lifetime.
+ * <p>
+ * Each starting AJP cycle is delegated to a dedicated AJP connection until the
+ * end of the AJP cycle is reached (<code>END RESPONSE</code> package sent).
  * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13Listener implements Runnable {
 
@@ -129,6 +135,12 @@ public final class AJPv13Listener implements Runnable {
 	 * Starts the listener
 	 */
 	public boolean startListener(final Socket client) {
+		if (waitingOnAJPSocket || processing) {
+			/*
+			 * Listener is already running
+			 */
+			return false;
+		}
 		/*
 		 * Assign a newly accepted client socket
 		 */
@@ -165,7 +177,7 @@ public final class AJPv13Listener implements Runnable {
 	 * Stops the listener by interrupting its worker, marks it as dead and
 	 * removes listener from pool (if pooled)
 	 * <p>
-	 * <b>NOTE: </b>This could lead to an unpredicted behaviour in overall
+	 * <b>NOTE: </b>This could lead to an unpredicted behavior in overall
 	 * system. Please use with care
 	 * </p>
 	 */
@@ -174,6 +186,7 @@ public final class AJPv13Listener implements Runnable {
 		if (listenerThread == null) {
 			return true;
 		}
+		listenerThread.setDead(true);
 		if (pooled) {
 			AJPv13ListenerPool.removeListener(num);
 		}
@@ -190,6 +203,8 @@ public final class AJPv13Listener implements Runnable {
 			listenerThread = new AJPv13ListenerThread(this);
 			listenerThread.setName(new StringBuilder("AJPListener-").append(DF.format(this.num)).toString());
 			listenerStarted = false;
+			processing = false;
+			waitingOnAJPSocket = false;
 		}
 	}
 
@@ -213,7 +228,7 @@ public final class AJPv13Listener implements Runnable {
 	public void run() {
 		boolean keepOnRunning = true;
 		changeNumberOfRunningAJPListeners(true);
-		while (keepOnRunning && client != null) {
+		while (keepOnRunning && client != null && !listenerThread.isDead()) {
 			AJPv13Server.ajpv13ListenerMonitor.incrementNumActive();
 			final long start = System.currentTimeMillis();
 			/*
@@ -308,8 +323,7 @@ public final class AJPv13Listener implements Runnable {
 				LOG.error(e.getMessage(), e);
 			} catch (final Throwable e) {
 				/*
-				 * Catch Throwable to catch every Exception, even
-				 * RuntimeExceptions
+				 * Catch Throwable to catch every throwable object.
 				 */
 				final AJPv13Exception wrapper = new AJPv13Exception(e);
 				LOG.error(wrapper.getMessage(), wrapper);
