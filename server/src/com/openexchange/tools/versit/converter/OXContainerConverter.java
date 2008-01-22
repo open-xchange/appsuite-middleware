@@ -673,7 +673,7 @@ public class OXContainerConverter {
 		}
 		// Multiple properties
 		final StringBuilder cats = new StringBuilder();
-		final ArrayList<?> exdates = new ArrayList<Object>();
+		final ArrayList exdates = new ArrayList<Object>();
 		final int count = object.getPropertyCount();
 		for (int i = 0; i < count; i++) {
 			property = object.getProperty(i);
