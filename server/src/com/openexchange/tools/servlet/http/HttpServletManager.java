@@ -71,7 +71,7 @@ import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.tools.FIFOQueue;
 
 /**
- * HttpServletManager
+ * {@link HttpServletManager} - The HTTP servlet manager
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
