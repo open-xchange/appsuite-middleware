@@ -99,7 +99,7 @@ public class Links {
 	
 	private static final Log LOG = LogFactory.getLog(Links.class);
 	
-	public static modules[] module;	
+	static final modules[] module;	
 	
 	public static interface modules {
 		boolean isReadable(int oid, int folder, int user, int[] group, Session so);
