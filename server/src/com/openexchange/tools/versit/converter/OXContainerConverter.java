@@ -131,31 +131,31 @@ public class OXContainerConverter {
 
 	private static final Map<Integer, Method> SET_FLOAT_METHODS = new HashMap<Integer, Method>();
 
-	private static Method getSetIntegerMethod(final Class containerObjClass, final String methodName) {
+	private static Method getSetIntegerMethod(final Class<?> containerObjClass, final String methodName) {
 		return getSetMethod(containerObjClass, methodName, int.class);
 	}
 
-	private static Method getSetLongMethod(final Class containerObjClass, final String methodName) {
+	private static Method getSetLongMethod(final Class<?> containerObjClass, final String methodName) {
 		return getSetMethod(containerObjClass, methodName, long.class);
 	}
 
-	private static Method getSetDateMethod(final Class containerObjClass, final String methodName) {
+	private static Method getSetDateMethod(final Class<?> containerObjClass, final String methodName) {
 		return getSetMethod(containerObjClass, methodName, Date.class);
 	}
 
-	private static Method getSetStringMethod(final Class containerObjClass, final String methodName) {
+	private static Method getSetStringMethod(final Class<?> containerObjClass, final String methodName) {
 		return getSetMethod(containerObjClass, methodName, String.class);
 	}
 
-	private static Method getSetBooleanMethod(final Class containerObjClass, final String methodName) {
+	private static Method getSetBooleanMethod(final Class<?> containerObjClass, final String methodName) {
 		return getSetMethod(containerObjClass, methodName, boolean.class);
 	}
 
-	private static Method getSetFloatMethod(final Class containerObjClass, final String methodName) {
+	private static Method getSetFloatMethod(final Class<?> containerObjClass, final String methodName) {
 		return getSetMethod(containerObjClass, methodName, float.class);
 	}
 
-	private static Method getSetMethod(final Class containerObjClass, final String methodName, final Class typeClass) {
+	private static Method getSetMethod(final Class<?> containerObjClass, final String methodName, final Class<?> typeClass) {
 		try {
 			return containerObjClass.getMethod(methodName, new Class[] { typeClass });
 		} catch (final Exception e) {
@@ -510,7 +510,7 @@ public class OXContainerConverter {
 		try {
 			final Task taskContainer = new Task();
 			// CLASS
-			PrivacyProperty(taskContainer, object, "CLASS", SET_BOOLEAN_METHODS.get(Task.PRIVATE_FLAG));
+			PrivacyProperty(taskContainer, object, "CLASS", SET_BOOLEAN_METHODS.get(Integer.valueOf(Task.PRIVATE_FLAG)));
 			// COMPLETED
 			DateTimeProperty(taskContainer, object, "COMPLETED", SET_DATE_METHODS.get(Integer
 					.valueOf(Task.DATE_COMPLETED)));
@@ -519,7 +519,7 @@ public class OXContainerConverter {
 			// LOCATION is ignored
 			// ORGANIZER is ignored
 			// PERCENT-COMPLETE
-			IntegerProperty(taskContainer, object, "PERCENT-COMPLETE", SET_INT_METHODS.get(Task.PERCENT_COMPLETED));
+			IntegerProperty(taskContainer, object, "PERCENT-COMPLETE", SET_INT_METHODS.get(Integer.valueOf(Task.PERCENT_COMPLETED)));
 			// PRIORITY
 			Property property = object.getProperty("PRIORITY");
 			if (property != null) {
@@ -551,7 +551,7 @@ public class OXContainerConverter {
 				}
 			}
 			// SUMMARY
-			StringProperty(taskContainer, object, "SUMMARY", SET_STRING_METHODS.get(Task.TITLE));
+			StringProperty(taskContainer, object, "SUMMARY", SET_STRING_METHODS.get(Integer.valueOf(Task.TITLE)));
 			// TODO UID
 			// property = object.getProperty("UID");
 			// if (property != null) {
@@ -562,8 +562,8 @@ public class OXContainerConverter {
 			// }
 			// URL is ignored
 			// DUE and DURATION
-			if (!DateTimeProperty(taskContainer, object, "DUE", SET_DATE_METHODS.get(Task.END_DATE))) {
-				DurationProperty(taskContainer, object, "DURATION", "DTSTART", SET_DATE_METHODS.get(Task.END_DATE));
+			if (!DateTimeProperty(taskContainer, object, "DUE", SET_DATE_METHODS.get(Integer.valueOf(Task.END_DATE)))) {
+				DurationProperty(taskContainer, object, "DURATION", "DTSTART", SET_DATE_METHODS.get(Integer.valueOf(Task.END_DATE)));
 			}
 			// Multiple properties
 			final int count = object.getPropertyCount();
@@ -577,9 +577,9 @@ public class OXContainerConverter {
 				}
 				// CATEGORIES
 				else if (property.name.equals("CATEGORIES")) {
-					final ArrayList al = ((ArrayList) property.getValue());
+					final ArrayList<?> al = ((ArrayList<?>) property.getValue());
 					final int size = al.size();
-					final Iterator j = al.iterator();
+					final Iterator<?> j = al.iterator();
 					for (int k = 0; k < size; k++) {
 						cats.append(j.next());
 						cats.append(',');
@@ -603,7 +603,7 @@ public class OXContainerConverter {
 				taskContainer.setCategories(cats.toString());
 			}
 			// DESCRIPTION (fix: 7718)
-			StringProperty(taskContainer, object, "DESCRIPTION", SET_STRING_METHODS.get(Task.NOTE));
+			StringProperty(taskContainer, object, "DESCRIPTION", SET_STRING_METHODS.get(Integer.valueOf(Task.NOTE)));
 			// VALARM
 			AddAlarms(taskContainer, object);
 			return taskContainer;
@@ -616,10 +616,10 @@ public class OXContainerConverter {
 	public CalendarDataObject convertAppointment(final VersitObject object) throws ConverterException {
 		final CalendarDataObject appContainer = new CalendarDataObject();
 		//CLASS
-		PrivacyProperty(appContainer, object, "CLASS", SET_BOOLEAN_METHODS.get(Task.PRIVATE_FLAG));
+		PrivacyProperty(appContainer, object, "CLASS", SET_BOOLEAN_METHODS.get(Integer.valueOf(Task.PRIVATE_FLAG)));
 		// CREATED is ignored
 		// DESCRIPTION
-		StringProperty(appContainer, object, "DESCRIPTION", SET_STRING_METHODS.get(AppointmentObject.NOTE));
+		StringProperty(appContainer, object, "DESCRIPTION", SET_STRING_METHODS.get(Integer.valueOf(AppointmentObject.NOTE)));
 		// DTSTART
 		Property property = object.getProperty("DTSTART");
 		if (property != null) {
@@ -635,14 +635,14 @@ public class OXContainerConverter {
 		// GEO is ignored
 		// LAST-MODIFIED is ignored
 		// LOCATION
-		StringProperty(appContainer, object, "LOCATION", SET_STRING_METHODS.get(AppointmentObject.LOCATION));
+		StringProperty(appContainer, object, "LOCATION", SET_STRING_METHODS.get(Integer.valueOf(AppointmentObject.LOCATION)));
 		// ORGANIZER is ignored
 		// PRIORITY is ignored
 		// DTSTAMP is ignored
 		// TODO SEQUENCE
 		// STATUS is ignored
 		// SUMMARY
-		StringProperty(appContainer, object, "SUMMARY", SET_STRING_METHODS.get(AppointmentObject.TITLE));
+		StringProperty(appContainer, object, "SUMMARY", SET_STRING_METHODS.get(Integer.valueOf(AppointmentObject.TITLE)));
 		// TRANSP
 		property = object.getProperty("TRANSP");
 		if (property != null) {
@@ -666,14 +666,14 @@ public class OXContainerConverter {
 		// URL is ignored
 		// TODO RECURRENCE-ID
 		// DTEND and DURATION
-		if (!DateTimeProperty(appContainer, object, "DTEND", SET_DATE_METHODS.get(AppointmentObject.END_DATE))
+		if (!DateTimeProperty(appContainer, object, "DTEND", SET_DATE_METHODS.get(Integer.valueOf(AppointmentObject.END_DATE)))
 				&& !DurationProperty(appContainer, object, "DURATION", "DTSTART", SET_DATE_METHODS
-						.get(AppointmentObject.END_DATE))) {
-			DateTimeProperty(appContainer, object, "DSTART", SET_DATE_METHODS.get(AppointmentObject.END_DATE));
+						.get(Integer.valueOf(AppointmentObject.END_DATE)))) {
+			DateTimeProperty(appContainer, object, "DSTART", SET_DATE_METHODS.get(Integer.valueOf(AppointmentObject.END_DATE)));
 		}
 		// Multiple properties
 		final StringBuilder cats = new StringBuilder();
-		final ArrayList exdates = new ArrayList();
+		final ArrayList<?> exdates = new ArrayList<Object>();
 		final int count = object.getPropertyCount();
 		for (int i = 0; i < count; i++) {
 			property = object.getProperty(i);
@@ -684,9 +684,9 @@ public class OXContainerConverter {
 			}
 			// CATEGORIES
 			else if (property.name.equals("CATEGORIES")) {
-				final ArrayList al = ((ArrayList) property.getValue());
+				final ArrayList<?> al = ((ArrayList<?>) property.getValue());
 				final int size = al.size();
-				final Iterator j = al.iterator();
+				final Iterator<?> j = al.iterator();
 				for (int k = 0; k < size; k++) {
 					cats.append(j.next());
 					cats.append(',');
@@ -703,9 +703,9 @@ public class OXContainerConverter {
 			// TODO RELATED-TO
 			// RESOURCES
 			else if (property.name.equals("RESOURCES")) {
-				final ArrayList al = ((ArrayList) property.getValue());
+				final ArrayList<?> al = ((ArrayList<?>) property.getValue());
 				final int size = al.size();
-				final Iterator j = al.iterator();
+				final Iterator<?> j = al.iterator();
 				for (int k = 0; k < size; k++) {
 					final ResourceParticipant p = new ResourceParticipant();
 					p.setDisplayName((String) j.next());
@@ -740,11 +740,11 @@ public class OXContainerConverter {
 		// NAME is ignored
 		// PROFILE is ignored
 		// FN
-		StringProperty(contactContainer, object, "FN", SET_STRING_METHODS.get(ContactObject.DISPLAY_NAME));
+		StringProperty(contactContainer, object, "FN", SET_STRING_METHODS.get(Integer.valueOf(ContactObject.DISPLAY_NAME)));
 		// N
 		Property property = object.getProperty("N");
 		if (property != null) {
-			final ArrayList N = (ArrayList) property.getValue();
+			final ArrayList<?> N = (ArrayList<?>) property.getValue();
 			//fix for 7248
 			if(N != null){
 				for(int i = N.size(); i < 5; i++){
@@ -755,14 +755,14 @@ public class OXContainerConverter {
 			if (N.size() != 5) {
 				throw new ConverterException("Invalid property N, has " + N.size() + " elements, not 5.");
 			}
-			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.SUR_NAME), N.get(0), " ");
-			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.GIVEN_NAME), N.get(1), " ");
-			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.MIDDLE_NAME), N.get(2), " ");
-			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.TITLE), N.get(3), " ");
-			ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.SUFFIX), N.get(4), " ");
+			ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.SUR_NAME)), N.get(0), " ");
+			ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.GIVEN_NAME)), N.get(1), " ");
+			ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.MIDDLE_NAME)), N.get(2), " ");
+			ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TITLE)), N.get(3), " ");
+			ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.SUFFIX)), N.get(4), " ");
 		}
 		// NICKNAME
-		StringProperty(contactContainer, object, "NICKNAME", SET_STRING_METHODS.get(ContactObject.NICKNAME));
+		StringProperty(contactContainer, object, "NICKNAME", SET_STRING_METHODS.get(Integer.valueOf(ContactObject.NICKNAME)));
 		// PHOTO
 		property = object.getProperty("PHOTO");
 		if (property != null) {
@@ -785,20 +785,20 @@ public class OXContainerConverter {
 			}
 		}
 		// BDAY
-		DateTimeProperty(contactContainer, object, "BDAY", SET_DATE_METHODS.get(ContactObject.BIRTHDAY));
+		DateTimeProperty(contactContainer, object, "BDAY", SET_DATE_METHODS.get(Integer.valueOf(ContactObject.BIRTHDAY)));
 		// MAILER is ignored
 		// TZ is ignored
 		// GEO is ignored
 		// TITLE
-		StringProperty(contactContainer, object, "TITLE", SET_STRING_METHODS.get(ContactObject.EMPLOYEE_TYPE));
+		StringProperty(contactContainer, object, "TITLE", SET_STRING_METHODS.get(Integer.valueOf(ContactObject.EMPLOYEE_TYPE)));
 		// ROLE
-		StringProperty(contactContainer, object, "ROLE", SET_STRING_METHODS.get(ContactObject.POSITION));
+		StringProperty(contactContainer, object, "ROLE", SET_STRING_METHODS.get(Integer.valueOf(ContactObject.POSITION)));
 		// LOGO is ignored
 		// TODO AGENT
 		// ORG
 		property = object.getProperty("ORG");
 		if (property != null) {
-			final ArrayList elements = (ArrayList) property.getValue();
+			final ArrayList<?> elements = (ArrayList<?>) property.getValue();
 			if (elements.size() < 1) {
 				throw new ConverterException("Invalid property ORG");
 			}
@@ -818,13 +818,13 @@ public class OXContainerConverter {
 			}
 		}
 		// NOTE
-		StringProperty(contactContainer, object, "NOTE", SET_STRING_METHODS.get(ContactObject.NOTE));
+		StringProperty(contactContainer, object, "NOTE", SET_STRING_METHODS.get(Integer.valueOf(ContactObject.NOTE)));
 		// PRODID is ignored
 		// REV is ignored
 		// SORT-STRING is ignored
 		// SOUND is ignored
 		// URL
-		StringProperty(contactContainer, object, "URL", SET_STRING_METHODS.get(ContactObject.URL));
+		StringProperty(contactContainer, object, "URL", SET_STRING_METHODS.get(Integer.valueOf(ContactObject.URL)));
 		// TODO UID
 		// property = object.getProperty("UID");
 		// if (property != null) {
@@ -852,27 +852,27 @@ public class OXContainerConverter {
 
 		final Method[][][] phones = {
 				{
-						{ SET_STRING_METHODS.get(ContactObject.TELEPHONE_BUSINESS1),
-								SET_STRING_METHODS.get(ContactObject.TELEPHONE_BUSINESS2) },
-						{ SET_STRING_METHODS.get(ContactObject.FAX_BUSINESS) } },
+						{ SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TELEPHONE_BUSINESS1)),
+								SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TELEPHONE_BUSINESS2)) },
+						{ SET_STRING_METHODS.get(Integer.valueOf(ContactObject.FAX_BUSINESS)) } },
 				{
-						{ SET_STRING_METHODS.get(ContactObject.TELEPHONE_HOME1),
-								SET_STRING_METHODS.get(ContactObject.TELEPHONE_HOME2) },
-						{ SET_STRING_METHODS.get(ContactObject.FAX_HOME) } },
+						{ SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TELEPHONE_HOME1)),
+								SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TELEPHONE_HOME2)) },
+						{ SET_STRING_METHODS.get(Integer.valueOf(ContactObject.FAX_HOME)) } },
 				{
-						{ SET_STRING_METHODS.get(ContactObject.CELLULAR_TELEPHONE1),
-								SET_STRING_METHODS.get(ContactObject.CELLULAR_TELEPHONE2) }, {} },
-				{ { SET_STRING_METHODS.get(ContactObject.TELEPHONE_CAR) }, {} },
-				{ { SET_STRING_METHODS.get(ContactObject.TELEPHONE_ISDN) }, {} },
-				{ { SET_STRING_METHODS.get(ContactObject.TELEPHONE_PAGER) }, {} },
-				{ { SET_STRING_METHODS.get(ContactObject.TELEPHONE_OTHER) },
-						{ SET_STRING_METHODS.get(ContactObject.FAX_OTHER) } } };
+						{ SET_STRING_METHODS.get(Integer.valueOf(ContactObject.CELLULAR_TELEPHONE1)),
+								SET_STRING_METHODS.get(Integer.valueOf(ContactObject.CELLULAR_TELEPHONE2)) }, {} },
+				{ { SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TELEPHONE_CAR)) }, {} },
+				{ { SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TELEPHONE_ISDN)) }, {} },
+				{ { SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TELEPHONE_PAGER)) }, {} },
+				{ { SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TELEPHONE_OTHER)) },
+						{ SET_STRING_METHODS.get(Integer.valueOf(ContactObject.FAX_OTHER)) } } };
 
 		final int[][][] index = { { { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } },
 				{ { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } } };
 
-		final Method[] emails = { SET_STRING_METHODS.get(ContactObject.EMAIL1),
-				SET_STRING_METHODS.get(ContactObject.EMAIL2), SET_STRING_METHODS.get(ContactObject.EMAIL3) };
+		final Method[] emails = { SET_STRING_METHODS.get(Integer.valueOf(ContactObject.EMAIL1)),
+				SET_STRING_METHODS.get(Integer.valueOf(ContactObject.EMAIL2)), SET_STRING_METHODS.get(Integer.valueOf(ContactObject.EMAIL3)) };
 
 		final int[] emailIndex = { 0 };
 
@@ -893,7 +893,7 @@ public class OXContainerConverter {
 						isWork |= value.equalsIgnoreCase("work");
 					}
 				}
-				final ArrayList A = (ArrayList) property.getValue();
+				final ArrayList<?> A = (ArrayList<?>) property.getValue();
 				//fix for 7248
 				if(A != null){
 					for(int j = A.size(); j < 7; j++){
@@ -905,19 +905,19 @@ public class OXContainerConverter {
 					throw new ConverterException("Invalid property ADR");
 				}
 				if (isWork) {
-					ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.STREET_BUSINESS), A.get(2), "\n");
-					ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.CITY_BUSINESS), A.get(3), "\n");
-					ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.STATE_BUSINESS), A.get(4), "\n");
-					ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.POSTAL_CODE_BUSINESS), A.get(5),
+					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.STREET_BUSINESS)), A.get(2), "\n");
+					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.CITY_BUSINESS)), A.get(3), "\n");
+					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.STATE_BUSINESS)), A.get(4), "\n");
+					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.POSTAL_CODE_BUSINESS)), A.get(5),
 							"\n");
-					ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.COUNTRY_BUSINESS), A.get(6), "\n");
+					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.COUNTRY_BUSINESS)), A.get(6), "\n");
 				}
 				if (isHome) {
-					ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.STREET_HOME), A.get(2), "\n");
-					ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.CITY_HOME), A.get(3), "\n");
-					ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.STATE_HOME), A.get(4), "\n");
-					ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.POSTAL_CODE_HOME), A.get(5), "\n");
-					ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.COUNTRY_HOME), A.get(6), "\n");
+					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.STREET_HOME)), A.get(2), "\n");
+					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.CITY_HOME)), A.get(3), "\n");
+					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.STATE_HOME)), A.get(4), "\n");
+					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.POSTAL_CODE_HOME)), A.get(5), "\n");
+					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.COUNTRY_HOME)), A.get(6), "\n");
 				}
 			}
 			// LABEL is ignored
@@ -995,7 +995,7 @@ public class OXContainerConverter {
 				cats.addAll((ArrayList) property.getValue());
 			}
 		}
-		ListValue(contactContainer, SET_STRING_METHODS.get(ContactObject.CATEGORIES), cats, ",");
+		ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.CATEGORIES)), cats, ",");
 
 		return contactContainer;
 	}
@@ -1050,7 +1050,7 @@ public class OXContainerConverter {
 			if("CONFIDENTIAL".equals(privacy)){
 				throw new ConverterPrivacyException();
 			}
-			final Object[] args = { isPrivate };
+			final Object[] args = { Boolean.valueOf(isPrivate) };
 			setPrivacyMethod.invoke(containerObj, args);
 			return false;
 		} catch (final ConverterPrivacyException e){
@@ -1203,7 +1203,7 @@ public class OXContainerConverter {
 			} else if (recur.ByDay.size() > 0) {
 				int days = 0, week = 0;
 				final int size = recur.ByDay.size();
-				final Iterator j = recur.ByDay.iterator();
+				final Iterator<?> j = recur.ByDay.iterator();
 				for (int k = 0; k < size; k++) {
 					final RecurrenceValue.Weekday wd = (RecurrenceValue.Weekday) j.next();
 					days |= 1 << (wd.day - Calendar.SUNDAY);
@@ -1229,7 +1229,7 @@ public class OXContainerConverter {
 		case RecurrenceValue.DAILY: //fix: 7703
 			int days = 0;
 			final int size = recur.ByDay.size();
-			final Iterator j = recur.ByDay.iterator();
+			final Iterator<?> j = recur.ByDay.iterator();
 			for (int k = 0; k < size; k++) {
 				days |= 1 << ((RecurrenceValue.Weekday) j.next()).day - Calendar.SUNDAY;
 			}
@@ -1298,7 +1298,7 @@ public class OXContainerConverter {
 	private static void ListValue(final Object containerObj, final Method setMethod, final Object list,
 			final String separator) throws ConverterException {
 		try {
-			final ArrayList al = (ArrayList) list;
+			final ArrayList<?> al = (ArrayList<?>) list;
 			if (al == null || al.size() == 0) {
 				return;
 			}
@@ -1396,7 +1396,7 @@ public class OXContainerConverter {
 		// ATTENDEE
 		if (task.containsParticipants()) {
 			final int length = task.getParticipants().length;
-			final Iterator i = new ArrayIterator(task.getParticipants());
+			final Iterator<?> i = new ArrayIterator(task.getParticipants());
 			for (int k = 0; k < length; k++) {
 				final Participant p = (Participant) i.next();
 				if (p.getType() == Participant.USER) {
@@ -1681,7 +1681,7 @@ public class OXContainerConverter {
 			final int street, final int city, final int state, final int postalCode, final int country)
 			throws ConverterException {
 		try {
-			final ArrayList<ArrayList> adr = new ArrayList<ArrayList>(7);
+			final ArrayList<ArrayList<Object>> adr = new ArrayList<ArrayList<Object>>(7);
 			adr.add(null);
 			adr.add(null);
 			adr.add(makeList(getStreet(street, contactContainer)));
@@ -1765,7 +1765,7 @@ public class OXContainerConverter {
 		}
 	}
 
-	private static class ArrayIterator implements Iterator {
+	private static class ArrayIterator implements Iterator<Object> {
 
 		private final int size;
 
@@ -1774,7 +1774,7 @@ public class OXContainerConverter {
 		private final Object array;
 
 		public ArrayIterator(final Object array) {
-			final Class type = array.getClass();
+			final Class<?> type = array.getClass();
 			if (!type.isArray()) {
 				throw new IllegalArgumentException("Invalid type: " + type);
 			}
