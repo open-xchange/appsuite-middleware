@@ -64,7 +64,7 @@ import java.io.UnsupportedEncodingException;
 
 public class UnixCrypt {
     
-    public static String encoding = "UTF-8";
+    public static final String encoding = "UTF-8";
     
     private static final char[] saltChars =
     ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./".toCharArray());

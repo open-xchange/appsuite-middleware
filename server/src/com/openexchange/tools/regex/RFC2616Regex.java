@@ -197,5 +197,5 @@ public final class RFC2616Regex {
 	 * </pre>
 	 * 
 	 */
-	public static Pattern COOKIES = Pattern.compile(cookiesRegex);
+	public static final Pattern COOKIES = Pattern.compile(cookiesRegex);
 }
