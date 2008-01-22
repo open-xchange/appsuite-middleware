@@ -85,7 +85,6 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
     }
 
     private void changeLastModifiedOnGroup(final int context_id, final int group_id, final Connection write_ox_con) throws SQLException {
-
         PreparedStatement prep_edit_group = null;
         try {
             prep_edit_group = write_ox_con.prepareStatement("UPDATE groups SET lastModified=? WHERE cid=? AND id=?;");
@@ -93,17 +92,19 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             prep_edit_group.setInt(2, context_id);
             prep_edit_group.setInt(3, group_id);
             prep_edit_group.executeUpdate();
-            prep_edit_group.close();
         } finally {
-            try {
-                if (prep_edit_group != null) {
-                    prep_edit_group.close();
-                }
-            } catch (final SQLException ee) {
-                log.error("SQL Error", ee);
-            }
+            closePreparedStatement(prep_edit_group);
         }
+    }
 
+    private void closePreparedStatement(final PreparedStatement prep_edit_group) {
+        try {
+            if (prep_edit_group != null) {
+                prep_edit_group.close();
+            }
+        } catch (final SQLException ee) {
+            log.error("SQL Error", ee);
+        }
     }
 
     @Override
@@ -112,7 +113,6 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         PreparedStatement prep_add_member = null;
         final int context_id = ctx.getId().intValue();
         try {
-
             con = cache.getConnectionForContext(context_id);
             con.setAutoCommit(false);
 
@@ -136,36 +136,20 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             OXFolderAdminHelper.propagateGroupModification(grp_id, con, con, context_id); 
             
             con.commit();
-        }catch (final DataTruncation dt){
+        } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
-            try {
-                con.rollback();
-            } catch (final SQLException ecp) {
-                log.error("Error rollback addmember operation", ecp);
-            }
+            doRollback(con);
             throw new StorageException(sql);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException ecp) {
-                log.error("Error rollback addmember operation", ecp);
-            }
+            doRollback(con);
             throw new StorageException(e);
         } finally {
-            try {
-                prep_add_member.close();
-            } catch (final SQLException e) {
-                log.error("SQL Error", e);
-            }
-            try {
-                cache.pushConnectionForContext(context_id, con);
-            } catch (final PoolException e) {
-                log.error("Error pushing ox write connection to pool! ", e);
-            }
+            closePreparedStatement(prep_add_member);
+            pushConnectionforContext(con, context_id);
         }
     }
 
@@ -204,33 +188,15 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             con.commit();
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
-            try {
-                con.rollback();
-            } catch (final SQLException ecp) {
-                log.error("Error rollback addmember operation", ecp);
-            }
+            doRollback(con);
             throw new StorageException(sql);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException ecp) {
-                log.error("Error rollback addmember operation", ecp);
-            }
+            doRollback(con);
             throw new StorageException(e);
         } finally {
-            try {
-                if (prep_del_member != null) {
-                    prep_del_member.close();
-                }
-            } catch (final SQLException ee) {
-                log.error("SQL Error", ee);
-            }
-            try {
-                cache.pushConnectionForContext(context_id, con);
-            } catch (final PoolException e) {
-                log.error("Error pushing ox write connection to pool! ", e);
-            }
+            closePreparedStatement(prep_del_member);
+            pushConnectionforContext(con, context_id);
         }
     }
 
@@ -293,45 +259,30 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             changeLastModifiedOnGroup(context_id, group_id, con);
 
             con.commit();
-        }catch (final DataTruncation dt){
+        } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
            log.error("SQL Error", e);
-            try {
-                if (con != null) {
-                    con.rollback();
-                }
-            } catch (final SQLException ecp) {
-                log.error("Error processing rollback of connection!", ecp);
-            }
+            doRollback(con);
             throw new StorageException(e);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            try {
-                if (con != null) {
-                    con.rollback();
-                }
-            } catch (final SQLException ecp) {
-                log.error("Error processing rollback of connection!", ecp);
-            }
+            doRollback(con);
             throw new StorageException(e);
         } finally {
-            try {
-                if (prep_edit_group != null) {
-                    prep_edit_group.close();
-                }
-            } catch (final SQLException e) {
-                log.error("SQL Error", e);
-            }
+            closePreparedStatement(prep_edit_group);
+            pushConnectionforContext(con, context_id);
+        }
+    }
 
-            try {
-                if (con != null) {
-                    cache.pushConnectionForContext(context_id, con);
-                }
-            } catch (final PoolException e) {
-                log.error("Pool Error", e);
+    private void doRollback(Connection con) {
+        try {
+            if (con != null) {
+                con.rollback();
             }
+        } catch (final SQLException ecp) {
+            log.error("Error processing rollback of connection!", ecp);
         }
     }
 
@@ -340,25 +291,24 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         int retval = -1;
         Connection con = null;
         PreparedStatement prep_insert = null;
-        final int context_ID = ctx.getId().intValue();
+        final int context_id = ctx.getId().intValue();
         try {
-            con = cache.getConnectionForContext(context_ID);
+            con = cache.getConnectionForContext(context_id);
             con.setAutoCommit(false);
             final String identifier = grp.getName();
 
             final String displayName = grp.getDisplayname();
-            final int groupID = IDGenerator.getId(context_ID, com.openexchange.groupware.Types.PRINCIPAL, con);
+            final int groupID = IDGenerator.getId(context_id, com.openexchange.groupware.Types.PRINCIPAL, con);
             con.commit();
             
             int gid_number = -1;
             if(Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START,"-1"))>0){
-                gid_number = IDGenerator.getId(context_ID, com.openexchange.groupware.Types.GID_NUMBER, con);
+                gid_number = IDGenerator.getId(context_id, com.openexchange.groupware.Types.GID_NUMBER, con);
                 con.commit();
             }
             
-            
             prep_insert = con.prepareStatement("INSERT INTO groups (cid,id,identifier,displayName,lastModified,gidnumber) VALUES (?,?,?,?,?,?);");
-            prep_insert.setInt(1, context_ID);
+            prep_insert.setInt(1, context_id);
             prep_insert.setInt(2, groupID);
             prep_insert.setString(3, identifier);
             prep_insert.setString(4, displayName);
@@ -372,11 +322,11 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             prep_insert.close();
             
             // check for members and add them
-            if(grp.getMembers()!=null && grp.getMembers().length>0){
+            if (grp.getMembers() != null && grp.getMembers().length > 0) {
                 Integer[] as = grp.getMembers();
                 for (Integer member_id : as) {
                     prep_insert = con.prepareStatement("INSERT INTO groups_member (cid,id,member) VALUES (?,?,?)");
-                    prep_insert.setInt(1, context_ID);
+                    prep_insert.setInt(1, context_id);
                     prep_insert.setInt(2, groupID);
                     prep_insert.setInt(3, member_id);
                     prep_insert.executeUpdate();
@@ -390,41 +340,20 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             if (log.isInfoEnabled()) {
                 log.info("Group " + groupID + " created!");
             }
-        }catch (final DataTruncation dt){
+        } catch (final DataTruncation dt) {
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
-            try {
-                con.rollback();
-            } catch (final SQLException ec) {
-                log.error("Error rollback configdb connection", ec);
-            }
+            doRollback(con);
             throw new StorageException(sql);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException ec) {
-                log.error("Error rollback configdb connection", ec);
-            }
+            doRollback(con);
             throw new StorageException(e);
         } finally {
-            try {
-                if (prep_insert != null) {
-                    prep_insert.close();
-                }
-            } catch (final SQLException e) {
-                prep_insert = null;
-            }
-
-            try {
-                if(con!=null){
-                    cache.pushConnectionForContext(context_ID, con);
-                }
-            } catch (final PoolException e) {
-                log.error("Pool Error", e);
-            }
+            closePreparedStatement(prep_insert);
+            pushConnectionforContext(con, context_id);
         }
 
         return retval;
@@ -465,65 +394,27 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 prep_del_group.close();
             }
             
-            
-            
             con.commit();
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
-            try {
-                con.rollback();
-            } catch (final SQLException ecp) {
-                log.error("Error rollback ox db write connection ", ecp);
-            }
+            doRollback(con);
             throw new StorageException(sql);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException ecp) {
-                log.error("Error rollback ox db write connection ", ecp);
-            }
+            doRollback(con);
             throw new StorageException(e);
         } catch (final DeleteFailedException e) {
             log.error("Delete Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException ecp) {
-                log.error("Error rollback ox db write connection ", ecp);
-            }
+            doRollback(con);
             throw new StorageException(e.toString());
         } catch (final ContextException e) {
             log.error("Context Error", e);
-            try {
-                con.rollback();
-            } catch (final SQLException ecp) {
-                log.error("Error rollback ox db write connection ", ecp);
-            }
+            doRollback(con);
             throw new StorageException(e.toString());
         } finally {
-            try {
-                if (prep_del_members != null) {
-                    prep_del_members.close();
-                }
-            } catch (final SQLException e) {
-                prep_del_members = null;
-            }
-
-            try {
-                if (prep_del_group != null) {
-                    prep_del_group.close();
-                }
-            } catch (final SQLException e) {
-                prep_del_group = null;
-            }
-
-            try {
-                if(con!=null){
-                    cache.pushConnectionForContext(context_id, con);
-                }
-            } catch (final PoolException e) {
-                log.error("Pool Error", e);
-            }
+            closePreparedStatement(prep_del_members);
+            closePreparedStatement(prep_del_group);
+            pushConnectionforContext(con, context_id);
         }
     }
 
@@ -532,12 +423,11 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         Connection con = null;
         final int context_id = ctx.getId();
         try {
-
             con = cache.getConnectionForContext(context_id);
             
-            Integer[] as =  getMembers(ctx, grp_id,con);
-            User[] ret = new User[as.length];
-            for(int i = 0;i<as.length;i++){
+            final Integer[] as =  getMembers(ctx, grp_id,con);
+            final User[] ret = new User[as.length];
+            for (int i = 0; i < as.length; i++) {
                 User u = new User(as[i]);
                 ret[i] = u;
             }
@@ -546,21 +436,14 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             log.error("Pool Error", e);            
             throw new StorageException(e);
         } finally {
-            try {
-                if(con!=null){
-                    cache.pushConnectionForContext(context_id, con);
-                }
-            } catch (final PoolException e) {
-                log.error("Pool Error", e);
-            }
+            pushConnectionforContext(con, context_id);
         }
     }
     
-    private Integer[] getMembers(final Context ctx, final int grp_id, Connection con) throws StorageException {        
+    private Integer[] getMembers(final Context ctx, final int grp_id, final Connection con) throws StorageException {        
         PreparedStatement prep_list = null;
         final int context_id = ctx.getId();
         try {
-            
             prep_list = con.prepareStatement("SELECT member FROM groups_member WHERE groups_member.cid = ? AND groups_member.id = ?;");
             prep_list.setInt(1, context_id);
             prep_list.setInt(2, grp_id);
@@ -574,23 +457,14 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             log.error("SQL Error", sql);            
             throw new StorageException(sql);
         } finally {
-            try {
-                if (prep_list != null) {
-                    prep_list.close();
-                }
-            } catch (final SQLException e) {
-                log.error("SQL Error", e);
-            }
+            closePreparedStatement(prep_list);
         }
-
-        
     }
 
-    private Group get(final Context ctx, Group grp,Connection con) throws StorageException{
+    private Group get(final Context ctx, final Group grp, final Connection con) throws StorageException {
         PreparedStatement prep_list = null;
         final int context_ID = ctx.getId();
         try {
-
             prep_list = con.prepareStatement("SELECT cid,identifier,displayName FROM groups WHERE groups.cid = ? AND groups.id = ?");
             prep_list.setInt(1, context_ID);
             prep_list.setInt(2, grp.getId());
@@ -602,33 +476,23 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 grp.setName(ident);
                 grp.setDisplayname(disp);
             }
-            Integer []members = getMembers(ctx, grp.getId(), con);
-            if( members != null ) {
+            final Integer []members = getMembers(ctx, grp.getId(), con);
+            if (members != null) {
                 grp.setMembers(members);
             }
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);            
             throw new StorageException(sql);       
         } finally {
-            try {
-                if (prep_list != null) {
-                    prep_list.close();
-                }
-            } catch (final SQLException e) {
-                log.error("SQL Error", e);
-            }
+            closePreparedStatement(prep_list);
         }
-
         return grp;
     }
 
     @Override
     public Group get(final Context ctx, Group grp) throws StorageException {
-        
         Connection con = null;
-        
         try {
-        	
             con = cache.getConnectionForContext(ctx.getId().intValue());
 
             return get(ctx, grp, con);        
@@ -636,19 +500,12 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             log.error("Pool Error", e);            
             throw new StorageException(e);
         } finally {
-            try {
-                if (con != null) {
-                    cache.pushConnectionForContext(ctx.getId().intValue(), con);
-                }
-            } catch (final PoolException e) {
-                log.error("Pool Error", e);
-            }
+            pushConnectionforContext(con, ctx.getId().intValue());
         }
     }
 
     @Override
     public Group[] list(final Context ctx, final String pattern) throws StorageException {
-        
         Connection con = null;
         PreparedStatement prep_list = null;
         ResultSet rs = null;
@@ -675,8 +532,8 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 final String disp = rs.getString("displayName");
                 // data.put(I_OXGroup.CID,cid);
                 Group retgrp = new Group(id, ident, disp);
-                Integer []members = getMembers(ctx, id, con);
-                if( members != null ) {
+                final Integer []members = getMembers(ctx, id, con);
+                if (members != null) {
                     retgrp.setMembers(members);
                 }
                 list.add(retgrp);
@@ -689,29 +546,30 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             log.error("Pool Error", e);            
             throw new StorageException(e);
         } finally {
-            try {
-                rs.close();
-            } catch (final SQLException ex) {
-                log.error("Error closing Resultset!", ex);
-            }
-            try {
-                if (prep_list != null) {
-                    prep_list.close();
-                }
-            } catch (final SQLException e) {
-                log.error("SQL Error", e);
-            }
-
-            try {
-                if(con!=null){
-                    cache.pushConnectionForContext(context_id, con);
-                }
-            } catch (final PoolException e) {
-                log.error("Pool Error", e);
-            }
+            closeResultSet(rs);
+            closePreparedStatement(prep_list);
+            pushConnectionforContext(con, context_id);
         }
+    }
 
-        
+    private void closeResultSet(ResultSet rs) {
+        try {
+            if (null != rs) {
+                rs.close();
+            }
+        } catch (final SQLException ex) {
+            log.error("Error closing Resultset!", ex);
+        }
+    }
+
+    private void pushConnectionforContext(Connection con, final int context_id) {
+        try {
+            if (null != con) {
+                cache.pushConnectionForContext(context_id, con);
+            }
+        } catch (final PoolException e) {
+            log.error("Error pushing ox connection to pool!", e);
+        }
     }
 
     @Override
@@ -726,20 +584,10 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             del_st.executeUpdate();
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
-            try {
-                con.rollback();
-            } catch (final SQLException ec) {
-                log.error("Error rollback configdb connection", ec);
-            }
+            doRollback(con);
             throw new StorageException(sql);
         } finally {
-            try {
-                if (del_st != null) {
-                    del_st.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closePreparedStatement(del_st);
         }
     }
 
@@ -754,20 +602,10 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             del_st.executeUpdate();
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
-            try {
-                con.rollback();
-            } catch (final SQLException ec) {
-                log.error("Error rollback configdb connection", ec);
-            }
+            doRollback(con);
             throw new StorageException(sql);
         } finally {
-            try {
-                if (del_st != null) {
-                    del_st.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closePreparedStatement(del_st);
         }
     }
 
@@ -789,7 +627,6 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 gidNumber = rs.getInt("gidNumber");
             }
             del_st.close();
-            rs.close();
            
             del_st = write_ox_con.prepareStatement("INSERT into del_groups (id,cid,lastModified,identifier,displayName,gidNumber) VALUES (?,?,?,?,?,?)");
             del_st.setInt(1, group_id);
@@ -799,62 +636,39 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             del_st.setString(5, disp);
             del_st.setInt(6, gidNumber);
             del_st.executeUpdate();
-            del_st.close();
-
         } finally {
-            try {
-                if (del_st != null) {
-                    del_st.close();
-                }
-            } catch (final SQLException e) {
-                log.error("Error closing prepared statement!", e);
-            }
+            closeResultSet(rs);
+            closePreparedStatement(del_st);
         }
     }
 
-	@Override
-	public Group[] getGroupsForUser(Context ctx, User usr) throws StorageException {
-		
-		Connection con = null;
-        PreparedStatement prep_list = null;  
+    @Override
+    public Group[] getGroupsForUser(final Context ctx, final User usr) throws StorageException {
+        Connection con = null;
+        PreparedStatement prep_list = null;
         try {
-
             con = cache.getConnectionForContext(ctx.getId().intValue());
             // fetch all group ids the user is member of
             prep_list = con.prepareStatement("SELECT id FROM groups_member WHERE cid = ? AND member = ?");
             prep_list.setInt(1, ctx.getId().intValue());
             prep_list.setInt(2, usr.getId().intValue());
-            
+
             final ResultSet rs = prep_list.executeQuery();
             ArrayList<Group> grplist = new ArrayList<Group>();
             while (rs.next()) {
-            	grplist.add(get(ctx, new Group(rs.getInt("id")), con));
+                grplist.add(get(ctx, new Group(rs.getInt("id")), con));
             }
             return grplist.toArray(new Group[grplist.size()]);
         } catch (final SQLException sql) {
-            log.error("SQL Error", sql);            
+            log.error("SQL Error", sql);
             throw new StorageException(sql);
         } catch (final PoolException e) {
-            log.error("Pool Error", e);            
+            log.error("Pool Error", e);
             throw new StorageException(e);
         } finally {
-            try {
-                if (prep_list != null) {
-                    prep_list.close();
-                }
-            } catch (final SQLException e) {
-                log.error("SQL Error", e);
-            }
-
-            try {
-                if (con != null) {
-                    cache.pushConnectionForContext(ctx.getId().intValue(), con);
-                }
-            } catch (final PoolException e) {
-                log.error("Pool Error", e);
-            }
+            closePreparedStatement(prep_list);
+            pushConnectionforContext(con, ctx.getId().intValue());
         }
-		
-	}
+    }
 
 }
