@@ -479,7 +479,7 @@ public abstract class MailConfig {
 	public abstract int getCapabilities();
 
 	/**
-	 * Gets occured error
+	 * Gets occurred error
 	 * 
 	 * @return the error (if any) or <code>null</code>
 	 */
