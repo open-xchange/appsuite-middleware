@@ -220,15 +220,24 @@ public final class OXServletOutputStream extends ServletOutputStream {
 			 * Send data cut into MAX_BODY_CHUNK_SIZE pieces
 			 */
 			while (byteBuffer.size() > AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE) {
-				final byte[] currentData = new byte[AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE];
-				final byte[] tmp = new byte[byteBuffer.size() - AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE];
-				final byte[] bufferedBytes = byteBuffer.toByteArray();
-				System.arraycopy(bufferedBytes, 0, currentData, 0, currentData.length);
-				System.arraycopy(bufferedBytes, currentData.length, tmp, 0, tmp.length);
-				ajpCon.getOutputStream().write(AJPv13Response.getSendBodyChunkBytes(currentData));
+				ajpCon.getOutputStream().write(
+						AJPv13Response.getSendBodyChunkBytes(byteBuffer.toByteArray(0,
+								AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE)));
 				ajpCon.getOutputStream().flush();
-				byteBuffer.reset();
-				byteBuffer.write(tmp, 0, tmp.length);
+				byteBuffer.discard(AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE);
+				/**
+				 * <pre>
+				 * final byte[] currentData = new byte[AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE];
+				 * final byte[] tmp = new byte[byteBuffer.size() - AJPv13Response.MAX_SEND_BODY_CHUNK_SIZE];
+				 * final byte[] bufferedBytes = byteBuffer.toByteArray();
+				 * System.arraycopy(bufferedBytes, 0, currentData, 0, currentData.length);
+				 * System.arraycopy(bufferedBytes, currentData.length, tmp, 0, tmp.length);
+				 * ajpCon.getOutputStream().write(AJPv13Response.getSendBodyChunkBytes(currentData));
+				 * ajpCon.getOutputStream().flush();
+				 * byteBuffer.reset();
+				 * byteBuffer.write(tmp, 0, tmp.length);
+				 * </pre>
+				 */
 			}
 			if (byteBuffer.size() > 0) {
 				ajpCon.getOutputStream().write(AJPv13Response.getSendBodyChunkBytes(byteBuffer.toByteArray()));

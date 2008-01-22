@@ -252,8 +252,8 @@ public class HttpServletManager {
 				SERVLET_POOL.put(path, servlets);
 			}
 		} finally {
-			writeCounter.incrementAndGet();
 			writeLock.unlock();
+			writeCounter.incrementAndGet();
 		}
 	}
 
@@ -307,8 +307,8 @@ public class HttpServletManager {
 		} catch (final URISyntaxException e) {
 			throw new ServletException("Servlet path is not a valid URI", e);
 		} finally {
-			writeCounter.incrementAndGet();
 			writeLock.unlock();
+			writeCounter.incrementAndGet();
 		}
 	}
 
@@ -325,8 +325,8 @@ public class HttpServletManager {
 			AJPv13Server.SERVLET_CONFIGS.removeConfig(SERVLET_POOL.get(id).dequeue().getClass().getCanonicalName());
 			SERVLET_POOL.remove(id);
 		} finally {
-			writeCounter.incrementAndGet();
 			writeLock.unlock();
+			writeCounter.incrementAndGet();
 		}
 	}
 
@@ -352,8 +352,8 @@ public class HttpServletManager {
 			}
 			SERVLET_POOL.remove(id);
 		} finally {
-			writeCounter.incrementAndGet();
 			writeLock.unlock();
+			writeCounter.incrementAndGet();
 		}
 	}
 
@@ -363,8 +363,8 @@ public class HttpServletManager {
 			writeCounter.incrementAndGet();
 			SERVLET_POOL.clear();
 		} finally {
-			writeCounter.incrementAndGet();
 			writeLock.unlock();
+			writeCounter.incrementAndGet();
 		}
 	}
 
@@ -435,8 +435,8 @@ public class HttpServletManager {
 				LOG.info("All Servlet Instances created & initialized");
 			}
 		} finally {
-			writeCounter.incrementAndGet();
 			writeLock.unlock();
+			writeCounter.incrementAndGet();
 		}
 	}
 }

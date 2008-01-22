@@ -182,16 +182,58 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
 	}
 
 	/**
+	 * Discards <code>discardSize</code> bytes.
+	 * 
+	 * @param discardSize
+	 *            The number of bytes to discard
+	 * 
+	 * @see java.io.ByteArrayInputStream#count
+	 */
+	public void discard(final int discardSize) {
+		if ((discardSize < 0) || (discardSize > count)) {
+			throw new IndexOutOfBoundsException();
+		}
+		if (discardSize == 0) {
+			return;
+		}
+		final byte newbuf[] = new byte[count - discardSize];
+		System.arraycopy(buf, discardSize, newbuf, 0, newbuf.length);
+		buf = newbuf;
+		count = newbuf.length;
+	}
+
+	/**
 	 * Creates a newly allocated byte array. Its size is the current size of
 	 * this output stream and the valid contents of the buffer have been copied
 	 * into it.
 	 * 
 	 * @return the current contents of this output stream, as a byte array.
-	 * @see java.io.ByteArrayOutputStream#size()
 	 */
 	public byte toByteArray()[] {
 		final byte newbuf[] = new byte[count];
 		System.arraycopy(buf, 0, newbuf, 0, count);
+		return newbuf;
+	}
+
+	/**
+	 * Creates a newly allocated byte array. Its size is specified
+	 * <code>size</code> and the valid contents starting from specified offset
+	 * <code>off</code> are going to be copied into it.
+	 * 
+	 * @param off
+	 *            The offset in valid contents
+	 * @param size
+	 *            The demanded size
+	 * @return the current contents of this output stream, as a byte array.
+	 */
+	public byte toByteArray(final int off, final int size)[] {
+		if ((off < 0) || (off > count) || (size < 0) || ((off + size) > count) || ((off + size) < 0)) {
+			throw new IndexOutOfBoundsException();
+		} else if (size == 0) {
+			return new byte[0];
+		}
+		final byte newbuf[] = new byte[size];
+		System.arraycopy(buf, off, newbuf, 0, size);
 		return newbuf;
 	}
 
