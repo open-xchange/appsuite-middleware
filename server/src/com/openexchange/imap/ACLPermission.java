@@ -70,7 +70,7 @@ public final class ACLPermission extends MailPermission {
 
 	private static final long serialVersionUID = -3140342221453395764L;
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ACLPermission.class);
 
 	private transient ACL acl;
@@ -429,7 +429,7 @@ public final class ACLPermission extends MailPermission {
 			return clone;
 		} catch (final CloneNotSupportedException e) {
 			LOG.error(e.getMessage(), e);
+			throw new RuntimeException("CloneNotSupportedException even though it's cloenable", e);
 		}
-		return null;
 	}
 }
