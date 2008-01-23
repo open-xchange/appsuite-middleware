@@ -4387,4 +4387,1048 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((aliases == null) ? 0 : aliases.hashCode());
+        result = prime * result + (aliasesset ? 1231 : 1237);
+        result = prime * result + ((anniversary == null) ? 0 : anniversary.hashCode());
+        result = prime * result + (anniversaryset ? 1231 : 1237);
+        result = prime * result + ((assistant_name == null) ? 0 : assistant_name.hashCode());
+        result = prime * result + (assistant_nameset ? 1231 : 1237);
+        result = prime * result + ((birthday == null) ? 0 : birthday.hashCode());
+        result = prime * result + (birthdayset ? 1231 : 1237);
+        result = prime * result + ((branches == null) ? 0 : branches.hashCode());
+        result = prime * result + (branchesset ? 1231 : 1237);
+        result = prime * result + ((business_category == null) ? 0 : business_category.hashCode());
+        result = prime * result + (business_categoryset ? 1231 : 1237);
+        result = prime * result + ((categories == null) ? 0 : categories.hashCode());
+        result = prime * result + (categoriesset ? 1231 : 1237);
+        result = prime * result + ((cellular_telephone1 == null) ? 0 : cellular_telephone1.hashCode());
+        result = prime * result + (cellular_telephone1set ? 1231 : 1237);
+        result = prime * result + ((cellular_telephone2 == null) ? 0 : cellular_telephone2.hashCode());
+        result = prime * result + (cellular_telephone2set ? 1231 : 1237);
+        result = prime * result + ((city_business == null) ? 0 : city_business.hashCode());
+        result = prime * result + (city_businessset ? 1231 : 1237);
+        result = prime * result + ((city_home == null) ? 0 : city_home.hashCode());
+        result = prime * result + (city_homeset ? 1231 : 1237);
+        result = prime * result + ((city_other == null) ? 0 : city_other.hashCode());
+        result = prime * result + (city_otherset ? 1231 : 1237);
+        result = prime * result + ((commercial_register == null) ? 0 : commercial_register.hashCode());
+        result = prime * result + (commercial_registerset ? 1231 : 1237);
+        result = prime * result + ((company == null) ? 0 : company.hashCode());
+        result = prime * result + (companyset ? 1231 : 1237);
+        result = prime * result + (contextadmin ? 1231 : 1237);
+        result = prime * result + ((country_business == null) ? 0 : country_business.hashCode());
+        result = prime * result + (country_businessset ? 1231 : 1237);
+        result = prime * result + ((country_home == null) ? 0 : country_home.hashCode());
+        result = prime * result + (country_homeset ? 1231 : 1237);
+        result = prime * result + ((country_other == null) ? 0 : country_other.hashCode());
+        result = prime * result + (country_otherset ? 1231 : 1237);
+        result = prime * result + ((defaultSenderAddress == null) ? 0 : defaultSenderAddress.hashCode());
+        result = prime * result + (defaultSenderAddressset ? 1231 : 1237);
+        result = prime * result + ((default_group == null) ? 0 : default_group.hashCode());
+        result = prime * result + (default_groupset ? 1231 : 1237);
+        result = prime * result + ((department == null) ? 0 : department.hashCode());
+        result = prime * result + (departmentset ? 1231 : 1237);
+        result = prime * result + ((display_name == null) ? 0 : display_name.hashCode());
+        result = prime * result + (display_nameset ? 1231 : 1237);
+        result = prime * result + ((email1 == null) ? 0 : email1.hashCode());
+        result = prime * result + (email1set ? 1231 : 1237);
+        result = prime * result + ((email2 == null) ? 0 : email2.hashCode());
+        result = prime * result + (email2set ? 1231 : 1237);
+        result = prime * result + ((email3 == null) ? 0 : email3.hashCode());
+        result = prime * result + (email3set ? 1231 : 1237);
+        result = prime * result + ((employeeType == null) ? 0 : employeeType.hashCode());
+        result = prime * result + (employeeTypeset ? 1231 : 1237);
+        result = prime * result + ((fax_business == null) ? 0 : fax_business.hashCode());
+        result = prime * result + (fax_businessset ? 1231 : 1237);
+        result = prime * result + ((fax_home == null) ? 0 : fax_home.hashCode());
+        result = prime * result + (fax_homeset ? 1231 : 1237);
+        result = prime * result + ((fax_other == null) ? 0 : fax_other.hashCode());
+        result = prime * result + (fax_otherset ? 1231 : 1237);
+        result = prime * result + ((given_name == null) ? 0 : given_name.hashCode());
+        result = prime * result + (given_nameset ? 1231 : 1237);
+        result = prime * result + ((gui_spam_filter_enabled == null) ? 0 : gui_spam_filter_enabled.hashCode());
+        result = prime * result + (gui_spam_filter_enabledset ? 1231 : 1237);
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + (idset ? 1231 : 1237);
+        result = prime * result + ((imapLogin == null) ? 0 : imapLogin.hashCode());
+        result = prime * result + (imapLoginset ? 1231 : 1237);
+        result = prime * result + ((imapServer == null) ? 0 : imapServer.hashCode());
+        result = prime * result + (imapServerset ? 1231 : 1237);
+        result = prime * result + ((info == null) ? 0 : info.hashCode());
+        result = prime * result + (infoset ? 1231 : 1237);
+        result = prime * result + ((instant_messenger1 == null) ? 0 : instant_messenger1.hashCode());
+        result = prime * result + (instant_messenger1set ? 1231 : 1237);
+        result = prime * result + ((instant_messenger2 == null) ? 0 : instant_messenger2.hashCode());
+        result = prime * result + (instant_messenger2set ? 1231 : 1237);
+        result = prime * result + ((language == null) ? 0 : language.hashCode());
+        result = prime * result + (languageset ? 1231 : 1237);
+        result = prime * result + ((mail_folder_confirmed_ham_name == null) ? 0 : mail_folder_confirmed_ham_name.hashCode());
+        result = prime * result + (mail_folder_confirmed_ham_nameset ? 1231 : 1237);
+        result = prime * result + ((mail_folder_confirmed_spam_name == null) ? 0 : mail_folder_confirmed_spam_name.hashCode());
+        result = prime * result + (mail_folder_confirmed_spam_nameset ? 1231 : 1237);
+        result = prime * result + ((mail_folder_drafts_name == null) ? 0 : mail_folder_drafts_name.hashCode());
+        result = prime * result + (mail_folder_drafts_nameset ? 1231 : 1237);
+        result = prime * result + ((mail_folder_sent_name == null) ? 0 : mail_folder_sent_name.hashCode());
+        result = prime * result + (mail_folder_sent_nameset ? 1231 : 1237);
+        result = prime * result + ((mail_folder_spam_name == null) ? 0 : mail_folder_spam_name.hashCode());
+        result = prime * result + (mail_folder_spam_nameset ? 1231 : 1237);
+        result = prime * result + ((mail_folder_trash_name == null) ? 0 : mail_folder_trash_name.hashCode());
+        result = prime * result + (mail_folder_trash_nameset ? 1231 : 1237);
+        result = prime * result + ((mailenabled == null) ? 0 : mailenabled.hashCode());
+        result = prime * result + (mailenabledset ? 1231 : 1237);
+        result = prime * result + ((manager_name == null) ? 0 : manager_name.hashCode());
+        result = prime * result + (manager_nameset ? 1231 : 1237);
+        result = prime * result + ((marital_status == null) ? 0 : marital_status.hashCode());
+        result = prime * result + (marital_statusset ? 1231 : 1237);
+        result = prime * result + ((middle_name == null) ? 0 : middle_name.hashCode());
+        result = prime * result + (middle_nameset ? 1231 : 1237);
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + (nameset ? 1231 : 1237);
+        result = prime * result + ((nickname == null) ? 0 : nickname.hashCode());
+        result = prime * result + (nicknameset ? 1231 : 1237);
+        result = prime * result + ((note == null) ? 0 : note.hashCode());
+        result = prime * result + (noteset ? 1231 : 1237);
+        result = prime * result + ((number_of_children == null) ? 0 : number_of_children.hashCode());
+        result = prime * result + (number_of_childrenset ? 1231 : 1237);
+        result = prime * result + ((number_of_employee == null) ? 0 : number_of_employee.hashCode());
+        result = prime * result + (number_of_employeeset ? 1231 : 1237);
+        result = prime * result + ((password == null) ? 0 : password.hashCode());
+        result = prime * result + ((passwordMech == null) ? 0 : passwordMech.hashCode());
+        result = prime * result + (passwordMechset ? 1231 : 1237);
+        result = prime * result + ((password_expired == null) ? 0 : password_expired.hashCode());
+        result = prime * result + (password_expiredset ? 1231 : 1237);
+        result = prime * result + (passwordset ? 1231 : 1237);
+        result = prime * result + ((position == null) ? 0 : position.hashCode());
+        result = prime * result + (positionset ? 1231 : 1237);
+        result = prime * result + ((postal_code_business == null) ? 0 : postal_code_business.hashCode());
+        result = prime * result + (postal_code_businessset ? 1231 : 1237);
+        result = prime * result + ((postal_code_home == null) ? 0 : postal_code_home.hashCode());
+        result = prime * result + (postal_code_homeset ? 1231 : 1237);
+        result = prime * result + ((postal_code_other == null) ? 0 : postal_code_other.hashCode());
+        result = prime * result + (postal_code_otherset ? 1231 : 1237);
+        result = prime * result + ((primaryEmail == null) ? 0 : primaryEmail.hashCode());
+        result = prime * result + (primaryEmailset ? 1231 : 1237);
+        result = prime * result + ((profession == null) ? 0 : profession.hashCode());
+        result = prime * result + (professionset ? 1231 : 1237);
+        result = prime * result + ((room_number == null) ? 0 : room_number.hashCode());
+        result = prime * result + (room_numberset ? 1231 : 1237);
+        result = prime * result + ((sales_volume == null) ? 0 : sales_volume.hashCode());
+        result = prime * result + (sales_volumeset ? 1231 : 1237);
+        result = prime * result + ((smtpServer == null) ? 0 : smtpServer.hashCode());
+        result = prime * result + (smtpServerset ? 1231 : 1237);
+        result = prime * result + ((spouse_name == null) ? 0 : spouse_name.hashCode());
+        result = prime * result + (spouse_nameset ? 1231 : 1237);
+        result = prime * result + ((state_business == null) ? 0 : state_business.hashCode());
+        result = prime * result + (state_businessset ? 1231 : 1237);
+        result = prime * result + ((state_home == null) ? 0 : state_home.hashCode());
+        result = prime * result + (state_homeset ? 1231 : 1237);
+        result = prime * result + ((state_other == null) ? 0 : state_other.hashCode());
+        result = prime * result + (state_otherset ? 1231 : 1237);
+        result = prime * result + ((street_business == null) ? 0 : street_business.hashCode());
+        result = prime * result + (street_businessset ? 1231 : 1237);
+        result = prime * result + ((street_home == null) ? 0 : street_home.hashCode());
+        result = prime * result + (street_homeset ? 1231 : 1237);
+        result = prime * result + ((street_other == null) ? 0 : street_other.hashCode());
+        result = prime * result + (street_otherset ? 1231 : 1237);
+        result = prime * result + ((suffix == null) ? 0 : suffix.hashCode());
+        result = prime * result + (suffixset ? 1231 : 1237);
+        result = prime * result + ((sur_name == null) ? 0 : sur_name.hashCode());
+        result = prime * result + (sur_nameset ? 1231 : 1237);
+        result = prime * result + ((tax_id == null) ? 0 : tax_id.hashCode());
+        result = prime * result + (tax_idset ? 1231 : 1237);
+        result = prime * result + ((telephone_assistant == null) ? 0 : telephone_assistant.hashCode());
+        result = prime * result + (telephone_assistantset ? 1231 : 1237);
+        result = prime * result + ((telephone_business1 == null) ? 0 : telephone_business1.hashCode());
+        result = prime * result + (telephone_business1set ? 1231 : 1237);
+        result = prime * result + ((telephone_business2 == null) ? 0 : telephone_business2.hashCode());
+        result = prime * result + (telephone_business2set ? 1231 : 1237);
+        result = prime * result + ((telephone_callback == null) ? 0 : telephone_callback.hashCode());
+        result = prime * result + (telephone_callbackset ? 1231 : 1237);
+        result = prime * result + ((telephone_car == null) ? 0 : telephone_car.hashCode());
+        result = prime * result + (telephone_carset ? 1231 : 1237);
+        result = prime * result + ((telephone_company == null) ? 0 : telephone_company.hashCode());
+        result = prime * result + (telephone_companyset ? 1231 : 1237);
+        result = prime * result + ((telephone_home1 == null) ? 0 : telephone_home1.hashCode());
+        result = prime * result + (telephone_home1set ? 1231 : 1237);
+        result = prime * result + ((telephone_home2 == null) ? 0 : telephone_home2.hashCode());
+        result = prime * result + (telephone_home2set ? 1231 : 1237);
+        result = prime * result + ((telephone_ip == null) ? 0 : telephone_ip.hashCode());
+        result = prime * result + (telephone_ipset ? 1231 : 1237);
+        result = prime * result + ((telephone_isdn == null) ? 0 : telephone_isdn.hashCode());
+        result = prime * result + (telephone_isdnset ? 1231 : 1237);
+        result = prime * result + ((telephone_other == null) ? 0 : telephone_other.hashCode());
+        result = prime * result + (telephone_otherset ? 1231 : 1237);
+        result = prime * result + ((telephone_pager == null) ? 0 : telephone_pager.hashCode());
+        result = prime * result + (telephone_pagerset ? 1231 : 1237);
+        result = prime * result + ((telephone_primary == null) ? 0 : telephone_primary.hashCode());
+        result = prime * result + (telephone_primaryset ? 1231 : 1237);
+        result = prime * result + ((telephone_radio == null) ? 0 : telephone_radio.hashCode());
+        result = prime * result + (telephone_radioset ? 1231 : 1237);
+        result = prime * result + ((telephone_telex == null) ? 0 : telephone_telex.hashCode());
+        result = prime * result + (telephone_telexset ? 1231 : 1237);
+        result = prime * result + ((telephone_ttytdd == null) ? 0 : telephone_ttytdd.hashCode());
+        result = prime * result + (telephone_ttytddset ? 1231 : 1237);
+        result = prime * result + ((timezone == null) ? 0 : timezone.hashCode());
+        result = prime * result + (timezoneset ? 1231 : 1237);
+        result = prime * result + ((title == null) ? 0 : title.hashCode());
+        result = prime * result + (titleset ? 1231 : 1237);
+        result = prime * result + ((url == null) ? 0 : url.hashCode());
+        result = prime * result + (urlset ? 1231 : 1237);
+        result = prime * result + ((userfield01 == null) ? 0 : userfield01.hashCode());
+        result = prime * result + (userfield01set ? 1231 : 1237);
+        result = prime * result + ((userfield02 == null) ? 0 : userfield02.hashCode());
+        result = prime * result + (userfield02set ? 1231 : 1237);
+        result = prime * result + ((userfield03 == null) ? 0 : userfield03.hashCode());
+        result = prime * result + (userfield03set ? 1231 : 1237);
+        result = prime * result + ((userfield04 == null) ? 0 : userfield04.hashCode());
+        result = prime * result + (userfield04set ? 1231 : 1237);
+        result = prime * result + ((userfield05 == null) ? 0 : userfield05.hashCode());
+        result = prime * result + (userfield05set ? 1231 : 1237);
+        result = prime * result + ((userfield06 == null) ? 0 : userfield06.hashCode());
+        result = prime * result + (userfield06set ? 1231 : 1237);
+        result = prime * result + ((userfield07 == null) ? 0 : userfield07.hashCode());
+        result = prime * result + (userfield07set ? 1231 : 1237);
+        result = prime * result + ((userfield08 == null) ? 0 : userfield08.hashCode());
+        result = prime * result + (userfield08set ? 1231 : 1237);
+        result = prime * result + ((userfield09 == null) ? 0 : userfield09.hashCode());
+        result = prime * result + (userfield09set ? 1231 : 1237);
+        result = prime * result + ((userfield10 == null) ? 0 : userfield10.hashCode());
+        result = prime * result + (userfield10set ? 1231 : 1237);
+        result = prime * result + ((userfield11 == null) ? 0 : userfield11.hashCode());
+        result = prime * result + (userfield11set ? 1231 : 1237);
+        result = prime * result + ((userfield12 == null) ? 0 : userfield12.hashCode());
+        result = prime * result + (userfield12set ? 1231 : 1237);
+        result = prime * result + ((userfield13 == null) ? 0 : userfield13.hashCode());
+        result = prime * result + (userfield13set ? 1231 : 1237);
+        result = prime * result + ((userfield14 == null) ? 0 : userfield14.hashCode());
+        result = prime * result + (userfield14set ? 1231 : 1237);
+        result = prime * result + ((userfield15 == null) ? 0 : userfield15.hashCode());
+        result = prime * result + (userfield15set ? 1231 : 1237);
+        result = prime * result + ((userfield16 == null) ? 0 : userfield16.hashCode());
+        result = prime * result + (userfield16set ? 1231 : 1237);
+        result = prime * result + ((userfield17 == null) ? 0 : userfield17.hashCode());
+        result = prime * result + (userfield17set ? 1231 : 1237);
+        result = prime * result + ((userfield18 == null) ? 0 : userfield18.hashCode());
+        result = prime * result + (userfield18set ? 1231 : 1237);
+        result = prime * result + ((userfield19 == null) ? 0 : userfield19.hashCode());
+        result = prime * result + (userfield19set ? 1231 : 1237);
+        result = prime * result + ((userfield20 == null) ? 0 : userfield20.hashCode());
+        result = prime * result + (userfield20set ? 1231 : 1237);
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (!(obj instanceof User))
+            return false;
+        final User other = (User) obj;
+        if (aliases == null) {
+            if (other.aliases != null)
+                return false;
+        } else if (!aliases.equals(other.aliases))
+            return false;
+        if (aliasesset != other.aliasesset)
+            return false;
+        if (anniversary == null) {
+            if (other.anniversary != null)
+                return false;
+        } else if (!anniversary.equals(other.anniversary))
+            return false;
+        if (anniversaryset != other.anniversaryset)
+            return false;
+        if (assistant_name == null) {
+            if (other.assistant_name != null)
+                return false;
+        } else if (!assistant_name.equals(other.assistant_name))
+            return false;
+        if (assistant_nameset != other.assistant_nameset)
+            return false;
+        if (birthday == null) {
+            if (other.birthday != null)
+                return false;
+        } else if (!birthday.equals(other.birthday))
+            return false;
+        if (birthdayset != other.birthdayset)
+            return false;
+        if (branches == null) {
+            if (other.branches != null)
+                return false;
+        } else if (!branches.equals(other.branches))
+            return false;
+        if (branchesset != other.branchesset)
+            return false;
+        if (business_category == null) {
+            if (other.business_category != null)
+                return false;
+        } else if (!business_category.equals(other.business_category))
+            return false;
+        if (business_categoryset != other.business_categoryset)
+            return false;
+        if (categories == null) {
+            if (other.categories != null)
+                return false;
+        } else if (!categories.equals(other.categories))
+            return false;
+        if (categoriesset != other.categoriesset)
+            return false;
+        if (cellular_telephone1 == null) {
+            if (other.cellular_telephone1 != null)
+                return false;
+        } else if (!cellular_telephone1.equals(other.cellular_telephone1))
+            return false;
+        if (cellular_telephone1set != other.cellular_telephone1set)
+            return false;
+        if (cellular_telephone2 == null) {
+            if (other.cellular_telephone2 != null)
+                return false;
+        } else if (!cellular_telephone2.equals(other.cellular_telephone2))
+            return false;
+        if (cellular_telephone2set != other.cellular_telephone2set)
+            return false;
+        if (city_business == null) {
+            if (other.city_business != null)
+                return false;
+        } else if (!city_business.equals(other.city_business))
+            return false;
+        if (city_businessset != other.city_businessset)
+            return false;
+        if (city_home == null) {
+            if (other.city_home != null)
+                return false;
+        } else if (!city_home.equals(other.city_home))
+            return false;
+        if (city_homeset != other.city_homeset)
+            return false;
+        if (city_other == null) {
+            if (other.city_other != null)
+                return false;
+        } else if (!city_other.equals(other.city_other))
+            return false;
+        if (city_otherset != other.city_otherset)
+            return false;
+        if (commercial_register == null) {
+            if (other.commercial_register != null)
+                return false;
+        } else if (!commercial_register.equals(other.commercial_register))
+            return false;
+        if (commercial_registerset != other.commercial_registerset)
+            return false;
+        if (company == null) {
+            if (other.company != null)
+                return false;
+        } else if (!company.equals(other.company))
+            return false;
+        if (companyset != other.companyset)
+            return false;
+        if (contextadmin != other.contextadmin)
+            return false;
+        if (country_business == null) {
+            if (other.country_business != null)
+                return false;
+        } else if (!country_business.equals(other.country_business))
+            return false;
+        if (country_businessset != other.country_businessset)
+            return false;
+        if (country_home == null) {
+            if (other.country_home != null)
+                return false;
+        } else if (!country_home.equals(other.country_home))
+            return false;
+        if (country_homeset != other.country_homeset)
+            return false;
+        if (country_other == null) {
+            if (other.country_other != null)
+                return false;
+        } else if (!country_other.equals(other.country_other))
+            return false;
+        if (country_otherset != other.country_otherset)
+            return false;
+        if (defaultSenderAddress == null) {
+            if (other.defaultSenderAddress != null)
+                return false;
+        } else if (!defaultSenderAddress.equals(other.defaultSenderAddress))
+            return false;
+        if (defaultSenderAddressset != other.defaultSenderAddressset)
+            return false;
+        if (default_group == null) {
+            if (other.default_group != null)
+                return false;
+        } else if (!default_group.equals(other.default_group))
+            return false;
+        if (default_groupset != other.default_groupset)
+            return false;
+        if (department == null) {
+            if (other.department != null)
+                return false;
+        } else if (!department.equals(other.department))
+            return false;
+        if (departmentset != other.departmentset)
+            return false;
+        if (display_name == null) {
+            if (other.display_name != null)
+                return false;
+        } else if (!display_name.equals(other.display_name))
+            return false;
+        if (display_nameset != other.display_nameset)
+            return false;
+        if (email1 == null) {
+            if (other.email1 != null)
+                return false;
+        } else if (!email1.equals(other.email1))
+            return false;
+        if (email1set != other.email1set)
+            return false;
+        if (email2 == null) {
+            if (other.email2 != null)
+                return false;
+        } else if (!email2.equals(other.email2))
+            return false;
+        if (email2set != other.email2set)
+            return false;
+        if (email3 == null) {
+            if (other.email3 != null)
+                return false;
+        } else if (!email3.equals(other.email3))
+            return false;
+        if (email3set != other.email3set)
+            return false;
+        if (employeeType == null) {
+            if (other.employeeType != null)
+                return false;
+        } else if (!employeeType.equals(other.employeeType))
+            return false;
+        if (employeeTypeset != other.employeeTypeset)
+            return false;
+        if (fax_business == null) {
+            if (other.fax_business != null)
+                return false;
+        } else if (!fax_business.equals(other.fax_business))
+            return false;
+        if (fax_businessset != other.fax_businessset)
+            return false;
+        if (fax_home == null) {
+            if (other.fax_home != null)
+                return false;
+        } else if (!fax_home.equals(other.fax_home))
+            return false;
+        if (fax_homeset != other.fax_homeset)
+            return false;
+        if (fax_other == null) {
+            if (other.fax_other != null)
+                return false;
+        } else if (!fax_other.equals(other.fax_other))
+            return false;
+        if (fax_otherset != other.fax_otherset)
+            return false;
+        if (given_name == null) {
+            if (other.given_name != null)
+                return false;
+        } else if (!given_name.equals(other.given_name))
+            return false;
+        if (given_nameset != other.given_nameset)
+            return false;
+        if (gui_spam_filter_enabled == null) {
+            if (other.gui_spam_filter_enabled != null)
+                return false;
+        } else if (!gui_spam_filter_enabled.equals(other.gui_spam_filter_enabled))
+            return false;
+        if (gui_spam_filter_enabledset != other.gui_spam_filter_enabledset)
+            return false;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        if (idset != other.idset)
+            return false;
+        if (imapLogin == null) {
+            if (other.imapLogin != null)
+                return false;
+        } else if (!imapLogin.equals(other.imapLogin))
+            return false;
+        if (imapLoginset != other.imapLoginset)
+            return false;
+        if (imapServer == null) {
+            if (other.imapServer != null)
+                return false;
+        } else if (!imapServer.equals(other.imapServer))
+            return false;
+        if (imapServerset != other.imapServerset)
+            return false;
+        if (info == null) {
+            if (other.info != null)
+                return false;
+        } else if (!info.equals(other.info))
+            return false;
+        if (infoset != other.infoset)
+            return false;
+        if (instant_messenger1 == null) {
+            if (other.instant_messenger1 != null)
+                return false;
+        } else if (!instant_messenger1.equals(other.instant_messenger1))
+            return false;
+        if (instant_messenger1set != other.instant_messenger1set)
+            return false;
+        if (instant_messenger2 == null) {
+            if (other.instant_messenger2 != null)
+                return false;
+        } else if (!instant_messenger2.equals(other.instant_messenger2))
+            return false;
+        if (instant_messenger2set != other.instant_messenger2set)
+            return false;
+        if (language == null) {
+            if (other.language != null)
+                return false;
+        } else if (!language.equals(other.language))
+            return false;
+        if (languageset != other.languageset)
+            return false;
+        if (mail_folder_confirmed_ham_name == null) {
+            if (other.mail_folder_confirmed_ham_name != null)
+                return false;
+        } else if (!mail_folder_confirmed_ham_name.equals(other.mail_folder_confirmed_ham_name))
+            return false;
+        if (mail_folder_confirmed_ham_nameset != other.mail_folder_confirmed_ham_nameset)
+            return false;
+        if (mail_folder_confirmed_spam_name == null) {
+            if (other.mail_folder_confirmed_spam_name != null)
+                return false;
+        } else if (!mail_folder_confirmed_spam_name.equals(other.mail_folder_confirmed_spam_name))
+            return false;
+        if (mail_folder_confirmed_spam_nameset != other.mail_folder_confirmed_spam_nameset)
+            return false;
+        if (mail_folder_drafts_name == null) {
+            if (other.mail_folder_drafts_name != null)
+                return false;
+        } else if (!mail_folder_drafts_name.equals(other.mail_folder_drafts_name))
+            return false;
+        if (mail_folder_drafts_nameset != other.mail_folder_drafts_nameset)
+            return false;
+        if (mail_folder_sent_name == null) {
+            if (other.mail_folder_sent_name != null)
+                return false;
+        } else if (!mail_folder_sent_name.equals(other.mail_folder_sent_name))
+            return false;
+        if (mail_folder_sent_nameset != other.mail_folder_sent_nameset)
+            return false;
+        if (mail_folder_spam_name == null) {
+            if (other.mail_folder_spam_name != null)
+                return false;
+        } else if (!mail_folder_spam_name.equals(other.mail_folder_spam_name))
+            return false;
+        if (mail_folder_spam_nameset != other.mail_folder_spam_nameset)
+            return false;
+        if (mail_folder_trash_name == null) {
+            if (other.mail_folder_trash_name != null)
+                return false;
+        } else if (!mail_folder_trash_name.equals(other.mail_folder_trash_name))
+            return false;
+        if (mail_folder_trash_nameset != other.mail_folder_trash_nameset)
+            return false;
+        if (mailenabled == null) {
+            if (other.mailenabled != null)
+                return false;
+        } else if (!mailenabled.equals(other.mailenabled))
+            return false;
+        if (mailenabledset != other.mailenabledset)
+            return false;
+        if (manager_name == null) {
+            if (other.manager_name != null)
+                return false;
+        } else if (!manager_name.equals(other.manager_name))
+            return false;
+        if (manager_nameset != other.manager_nameset)
+            return false;
+        if (marital_status == null) {
+            if (other.marital_status != null)
+                return false;
+        } else if (!marital_status.equals(other.marital_status))
+            return false;
+        if (marital_statusset != other.marital_statusset)
+            return false;
+        if (middle_name == null) {
+            if (other.middle_name != null)
+                return false;
+        } else if (!middle_name.equals(other.middle_name))
+            return false;
+        if (middle_nameset != other.middle_nameset)
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (nameset != other.nameset)
+            return false;
+        if (nickname == null) {
+            if (other.nickname != null)
+                return false;
+        } else if (!nickname.equals(other.nickname))
+            return false;
+        if (nicknameset != other.nicknameset)
+            return false;
+        if (note == null) {
+            if (other.note != null)
+                return false;
+        } else if (!note.equals(other.note))
+            return false;
+        if (noteset != other.noteset)
+            return false;
+        if (number_of_children == null) {
+            if (other.number_of_children != null)
+                return false;
+        } else if (!number_of_children.equals(other.number_of_children))
+            return false;
+        if (number_of_childrenset != other.number_of_childrenset)
+            return false;
+        if (number_of_employee == null) {
+            if (other.number_of_employee != null)
+                return false;
+        } else if (!number_of_employee.equals(other.number_of_employee))
+            return false;
+        if (number_of_employeeset != other.number_of_employeeset)
+            return false;
+        if (password == null) {
+            if (other.password != null)
+                return false;
+        } else if (!password.equals(other.password))
+            return false;
+        if (passwordMech == null) {
+            if (other.passwordMech != null)
+                return false;
+        } else if (!passwordMech.equals(other.passwordMech))
+            return false;
+        if (passwordMechset != other.passwordMechset)
+            return false;
+        if (password_expired == null) {
+            if (other.password_expired != null)
+                return false;
+        } else if (!password_expired.equals(other.password_expired))
+            return false;
+        if (password_expiredset != other.password_expiredset)
+            return false;
+        if (passwordset != other.passwordset)
+            return false;
+        if (position == null) {
+            if (other.position != null)
+                return false;
+        } else if (!position.equals(other.position))
+            return false;
+        if (positionset != other.positionset)
+            return false;
+        if (postal_code_business == null) {
+            if (other.postal_code_business != null)
+                return false;
+        } else if (!postal_code_business.equals(other.postal_code_business))
+            return false;
+        if (postal_code_businessset != other.postal_code_businessset)
+            return false;
+        if (postal_code_home == null) {
+            if (other.postal_code_home != null)
+                return false;
+        } else if (!postal_code_home.equals(other.postal_code_home))
+            return false;
+        if (postal_code_homeset != other.postal_code_homeset)
+            return false;
+        if (postal_code_other == null) {
+            if (other.postal_code_other != null)
+                return false;
+        } else if (!postal_code_other.equals(other.postal_code_other))
+            return false;
+        if (postal_code_otherset != other.postal_code_otherset)
+            return false;
+        if (primaryEmail == null) {
+            if (other.primaryEmail != null)
+                return false;
+        } else if (!primaryEmail.equals(other.primaryEmail))
+            return false;
+        if (primaryEmailset != other.primaryEmailset)
+            return false;
+        if (profession == null) {
+            if (other.profession != null)
+                return false;
+        } else if (!profession.equals(other.profession))
+            return false;
+        if (professionset != other.professionset)
+            return false;
+        if (room_number == null) {
+            if (other.room_number != null)
+                return false;
+        } else if (!room_number.equals(other.room_number))
+            return false;
+        if (room_numberset != other.room_numberset)
+            return false;
+        if (sales_volume == null) {
+            if (other.sales_volume != null)
+                return false;
+        } else if (!sales_volume.equals(other.sales_volume))
+            return false;
+        if (sales_volumeset != other.sales_volumeset)
+            return false;
+        if (smtpServer == null) {
+            if (other.smtpServer != null)
+                return false;
+        } else if (!smtpServer.equals(other.smtpServer))
+            return false;
+        if (smtpServerset != other.smtpServerset)
+            return false;
+        if (spouse_name == null) {
+            if (other.spouse_name != null)
+                return false;
+        } else if (!spouse_name.equals(other.spouse_name))
+            return false;
+        if (spouse_nameset != other.spouse_nameset)
+            return false;
+        if (state_business == null) {
+            if (other.state_business != null)
+                return false;
+        } else if (!state_business.equals(other.state_business))
+            return false;
+        if (state_businessset != other.state_businessset)
+            return false;
+        if (state_home == null) {
+            if (other.state_home != null)
+                return false;
+        } else if (!state_home.equals(other.state_home))
+            return false;
+        if (state_homeset != other.state_homeset)
+            return false;
+        if (state_other == null) {
+            if (other.state_other != null)
+                return false;
+        } else if (!state_other.equals(other.state_other))
+            return false;
+        if (state_otherset != other.state_otherset)
+            return false;
+        if (street_business == null) {
+            if (other.street_business != null)
+                return false;
+        } else if (!street_business.equals(other.street_business))
+            return false;
+        if (street_businessset != other.street_businessset)
+            return false;
+        if (street_home == null) {
+            if (other.street_home != null)
+                return false;
+        } else if (!street_home.equals(other.street_home))
+            return false;
+        if (street_homeset != other.street_homeset)
+            return false;
+        if (street_other == null) {
+            if (other.street_other != null)
+                return false;
+        } else if (!street_other.equals(other.street_other))
+            return false;
+        if (street_otherset != other.street_otherset)
+            return false;
+        if (suffix == null) {
+            if (other.suffix != null)
+                return false;
+        } else if (!suffix.equals(other.suffix))
+            return false;
+        if (suffixset != other.suffixset)
+            return false;
+        if (sur_name == null) {
+            if (other.sur_name != null)
+                return false;
+        } else if (!sur_name.equals(other.sur_name))
+            return false;
+        if (sur_nameset != other.sur_nameset)
+            return false;
+        if (tax_id == null) {
+            if (other.tax_id != null)
+                return false;
+        } else if (!tax_id.equals(other.tax_id))
+            return false;
+        if (tax_idset != other.tax_idset)
+            return false;
+        if (telephone_assistant == null) {
+            if (other.telephone_assistant != null)
+                return false;
+        } else if (!telephone_assistant.equals(other.telephone_assistant))
+            return false;
+        if (telephone_assistantset != other.telephone_assistantset)
+            return false;
+        if (telephone_business1 == null) {
+            if (other.telephone_business1 != null)
+                return false;
+        } else if (!telephone_business1.equals(other.telephone_business1))
+            return false;
+        if (telephone_business1set != other.telephone_business1set)
+            return false;
+        if (telephone_business2 == null) {
+            if (other.telephone_business2 != null)
+                return false;
+        } else if (!telephone_business2.equals(other.telephone_business2))
+            return false;
+        if (telephone_business2set != other.telephone_business2set)
+            return false;
+        if (telephone_callback == null) {
+            if (other.telephone_callback != null)
+                return false;
+        } else if (!telephone_callback.equals(other.telephone_callback))
+            return false;
+        if (telephone_callbackset != other.telephone_callbackset)
+            return false;
+        if (telephone_car == null) {
+            if (other.telephone_car != null)
+                return false;
+        } else if (!telephone_car.equals(other.telephone_car))
+            return false;
+        if (telephone_carset != other.telephone_carset)
+            return false;
+        if (telephone_company == null) {
+            if (other.telephone_company != null)
+                return false;
+        } else if (!telephone_company.equals(other.telephone_company))
+            return false;
+        if (telephone_companyset != other.telephone_companyset)
+            return false;
+        if (telephone_home1 == null) {
+            if (other.telephone_home1 != null)
+                return false;
+        } else if (!telephone_home1.equals(other.telephone_home1))
+            return false;
+        if (telephone_home1set != other.telephone_home1set)
+            return false;
+        if (telephone_home2 == null) {
+            if (other.telephone_home2 != null)
+                return false;
+        } else if (!telephone_home2.equals(other.telephone_home2))
+            return false;
+        if (telephone_home2set != other.telephone_home2set)
+            return false;
+        if (telephone_ip == null) {
+            if (other.telephone_ip != null)
+                return false;
+        } else if (!telephone_ip.equals(other.telephone_ip))
+            return false;
+        if (telephone_ipset != other.telephone_ipset)
+            return false;
+        if (telephone_isdn == null) {
+            if (other.telephone_isdn != null)
+                return false;
+        } else if (!telephone_isdn.equals(other.telephone_isdn))
+            return false;
+        if (telephone_isdnset != other.telephone_isdnset)
+            return false;
+        if (telephone_other == null) {
+            if (other.telephone_other != null)
+                return false;
+        } else if (!telephone_other.equals(other.telephone_other))
+            return false;
+        if (telephone_otherset != other.telephone_otherset)
+            return false;
+        if (telephone_pager == null) {
+            if (other.telephone_pager != null)
+                return false;
+        } else if (!telephone_pager.equals(other.telephone_pager))
+            return false;
+        if (telephone_pagerset != other.telephone_pagerset)
+            return false;
+        if (telephone_primary == null) {
+            if (other.telephone_primary != null)
+                return false;
+        } else if (!telephone_primary.equals(other.telephone_primary))
+            return false;
+        if (telephone_primaryset != other.telephone_primaryset)
+            return false;
+        if (telephone_radio == null) {
+            if (other.telephone_radio != null)
+                return false;
+        } else if (!telephone_radio.equals(other.telephone_radio))
+            return false;
+        if (telephone_radioset != other.telephone_radioset)
+            return false;
+        if (telephone_telex == null) {
+            if (other.telephone_telex != null)
+                return false;
+        } else if (!telephone_telex.equals(other.telephone_telex))
+            return false;
+        if (telephone_telexset != other.telephone_telexset)
+            return false;
+        if (telephone_ttytdd == null) {
+            if (other.telephone_ttytdd != null)
+                return false;
+        } else if (!telephone_ttytdd.equals(other.telephone_ttytdd))
+            return false;
+        if (telephone_ttytddset != other.telephone_ttytddset)
+            return false;
+        if (timezone == null) {
+            if (other.timezone != null)
+                return false;
+        } else if (!timezone.equals(other.timezone))
+            return false;
+        if (timezoneset != other.timezoneset)
+            return false;
+        if (title == null) {
+            if (other.title != null)
+                return false;
+        } else if (!title.equals(other.title))
+            return false;
+        if (titleset != other.titleset)
+            return false;
+        if (url == null) {
+            if (other.url != null)
+                return false;
+        } else if (!url.equals(other.url))
+            return false;
+        if (urlset != other.urlset)
+            return false;
+        if (userfield01 == null) {
+            if (other.userfield01 != null)
+                return false;
+        } else if (!userfield01.equals(other.userfield01))
+            return false;
+        if (userfield01set != other.userfield01set)
+            return false;
+        if (userfield02 == null) {
+            if (other.userfield02 != null)
+                return false;
+        } else if (!userfield02.equals(other.userfield02))
+            return false;
+        if (userfield02set != other.userfield02set)
+            return false;
+        if (userfield03 == null) {
+            if (other.userfield03 != null)
+                return false;
+        } else if (!userfield03.equals(other.userfield03))
+            return false;
+        if (userfield03set != other.userfield03set)
+            return false;
+        if (userfield04 == null) {
+            if (other.userfield04 != null)
+                return false;
+        } else if (!userfield04.equals(other.userfield04))
+            return false;
+        if (userfield04set != other.userfield04set)
+            return false;
+        if (userfield05 == null) {
+            if (other.userfield05 != null)
+                return false;
+        } else if (!userfield05.equals(other.userfield05))
+            return false;
+        if (userfield05set != other.userfield05set)
+            return false;
+        if (userfield06 == null) {
+            if (other.userfield06 != null)
+                return false;
+        } else if (!userfield06.equals(other.userfield06))
+            return false;
+        if (userfield06set != other.userfield06set)
+            return false;
+        if (userfield07 == null) {
+            if (other.userfield07 != null)
+                return false;
+        } else if (!userfield07.equals(other.userfield07))
+            return false;
+        if (userfield07set != other.userfield07set)
+            return false;
+        if (userfield08 == null) {
+            if (other.userfield08 != null)
+                return false;
+        } else if (!userfield08.equals(other.userfield08))
+            return false;
+        if (userfield08set != other.userfield08set)
+            return false;
+        if (userfield09 == null) {
+            if (other.userfield09 != null)
+                return false;
+        } else if (!userfield09.equals(other.userfield09))
+            return false;
+        if (userfield09set != other.userfield09set)
+            return false;
+        if (userfield10 == null) {
+            if (other.userfield10 != null)
+                return false;
+        } else if (!userfield10.equals(other.userfield10))
+            return false;
+        if (userfield10set != other.userfield10set)
+            return false;
+        if (userfield11 == null) {
+            if (other.userfield11 != null)
+                return false;
+        } else if (!userfield11.equals(other.userfield11))
+            return false;
+        if (userfield11set != other.userfield11set)
+            return false;
+        if (userfield12 == null) {
+            if (other.userfield12 != null)
+                return false;
+        } else if (!userfield12.equals(other.userfield12))
+            return false;
+        if (userfield12set != other.userfield12set)
+            return false;
+        if (userfield13 == null) {
+            if (other.userfield13 != null)
+                return false;
+        } else if (!userfield13.equals(other.userfield13))
+            return false;
+        if (userfield13set != other.userfield13set)
+            return false;
+        if (userfield14 == null) {
+            if (other.userfield14 != null)
+                return false;
+        } else if (!userfield14.equals(other.userfield14))
+            return false;
+        if (userfield14set != other.userfield14set)
+            return false;
+        if (userfield15 == null) {
+            if (other.userfield15 != null)
+                return false;
+        } else if (!userfield15.equals(other.userfield15))
+            return false;
+        if (userfield15set != other.userfield15set)
+            return false;
+        if (userfield16 == null) {
+            if (other.userfield16 != null)
+                return false;
+        } else if (!userfield16.equals(other.userfield16))
+            return false;
+        if (userfield16set != other.userfield16set)
+            return false;
+        if (userfield17 == null) {
+            if (other.userfield17 != null)
+                return false;
+        } else if (!userfield17.equals(other.userfield17))
+            return false;
+        if (userfield17set != other.userfield17set)
+            return false;
+        if (userfield18 == null) {
+            if (other.userfield18 != null)
+                return false;
+        } else if (!userfield18.equals(other.userfield18))
+            return false;
+        if (userfield18set != other.userfield18set)
+            return false;
+        if (userfield19 == null) {
+            if (other.userfield19 != null)
+                return false;
+        } else if (!userfield19.equals(other.userfield19))
+            return false;
+        if (userfield19set != other.userfield19set)
+            return false;
+        if (userfield20 == null) {
+            if (other.userfield20 != null)
+                return false;
+        } else if (!userfield20.equals(other.userfield20))
+            return false;
+        if (userfield20set != other.userfield20set)
+            return false;
+        return true;
+    }
 }
