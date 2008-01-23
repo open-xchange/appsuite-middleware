@@ -343,9 +343,12 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
         final int prime = 31;
         int result = super.hashCode();
         result = prime * result + ((displayname == null) ? 0 : displayname.hashCode());
+        result = prime * result + (displaynameset ? 1231 : 1237);
         result = prime * result + ((id == null) ? 0 : id.hashCode());
         result = prime * result + Arrays.hashCode(members);
+        result = prime * result + (membersset ? 1231 : 1237);
         result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + (nameset ? 1231 : 1237);
         return result;
     }
 
@@ -367,6 +370,8 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
                 return false;
         } else if (!displayname.equals(other.displayname))
             return false;
+        if (displaynameset != other.displaynameset)
+            return false;
         if (id == null) {
             if (other.id != null)
                 return false;
@@ -374,10 +379,14 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
             return false;
         if (!Arrays.equals(members, other.members))
             return false;
+        if (membersset != other.membersset)
+            return false;
         if (name == null) {
             if (other.name != null)
                 return false;
         } else if (!name.equals(other.name))
+            return false;
+        if (nameset != other.nameset)
             return false;
         return true;
     }
