@@ -4,7 +4,6 @@ package com.openexchange.admin.console.user;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.CmdLineParser.Option;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -19,7 +18,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Change extends ChangeCore {
 
-	protected Option accessRightsCombinationName = null;
+    private final UserHostingAbstraction usrabs = new UserHostingAbstraction();
 	
     public static void main(final String[] args) {
         new Change(args);
@@ -38,7 +37,7 @@ public class Change extends ChangeCore {
         
         // Change module access IF an access combination name was supplied!
         // The normal change of access rights is done in the "commonfunctions"
-        final String accesscombinationname = (String) parser.getOptionValue(this.accessRightsCombinationName);        
+        final String accesscombinationname = usrabs.parseAndSetAccessCombinationName(parser);
         if (null != accesscombinationname) {
             // Change user with access rights combination name
         	oxusr.changeModuleAccess(ctx, usr, accesscombinationname, auth);        	
@@ -48,7 +47,7 @@ public class Change extends ChangeCore {
 
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
-    	this.accessRightsCombinationName = setLongOpt(parser,Create.OPT_ACCESSRIGHTS_COMBINATION_NAME,"Access combination name", true, false,true);        
+        usrabs.setAddAccessRightCombinationNameOption(parser, false);
     }
 
 }

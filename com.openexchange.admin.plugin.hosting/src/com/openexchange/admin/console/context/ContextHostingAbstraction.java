@@ -6,6 +6,7 @@ import java.util.Arrays;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CmdLineParser.Option;
+import com.openexchange.admin.console.user.UserHostingAbstraction;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -28,7 +29,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author d7
  *
  */
-public class ContextHostingAbstraction extends ContextAbstraction {
+public class ContextHostingAbstraction extends UserHostingAbstraction {
 //    private final static char OPT_REASON_SHORT = 'r';
 //    private final static String OPT_REASON_LONG= "reason";
 
@@ -53,15 +54,11 @@ public class ContextHostingAbstraction extends ContextAbstraction {
     private Option databaseIdOption = null;
     private Option databaseNameOption = null;
     
-    private Option accessRightsCombinationName = null;
-
     private String[] remove_mappings = null;
     private String[] add_mappings = null;
 
     protected Integer dbid = null;
     protected String dbname = null;
-    
-    protected String accesscombinationname = null;
     
     protected Integer filestoreid = null;
     
@@ -74,12 +71,14 @@ public class ContextHostingAbstraction extends ContextAbstraction {
 //        this.maintenanceReasonIDOption = setShortLongOpt(parser, OPT_REASON_SHORT,OPT_REASON_LONG,"Maintenance reason id",true, convertBooleantoTriState(required));
 //    }
 //    
+    
+    @Override
+    protected String getObjectName() {
+        return "context";
+    }
+
     public void setAddMappingOption(final AdminParser parser,final boolean required ){
         this.addLoginMappingOption = setShortLongOpt(parser, OPT_CONTEXT_ADD_LOGIN_MAPPINGS_SHORT,OPT_CONTEXT_ADD_LOGIN_MAPPINGS_LONG,"Add login mappings.Seperated by \",\"",true, convertBooleantoTriState(required));
-    }
-    
-    public void setAddAccessRightCombinationNameOption(final AdminParser parser,final boolean required ){
-        this.accessRightsCombinationName = setLongOpt(parser,com.openexchange.admin.console.user.Create.OPT_ACCESSRIGHTS_COMBINATION_NAME,"Access combination name", true, false,false);
     }
     
     public void setRemoveMappingOption(final AdminParser parser,final boolean required ){
@@ -212,10 +211,6 @@ public class ContextHostingAbstraction extends ContextAbstraction {
         }
     }
     
-    protected String parseAndSetAccessCombinationName(final AdminParser parser) {
-        return (String) parser.getOptionValue(this.accessRightsCombinationName);
-    }
-
     protected void setFilestoreIdOption(final AdminParser parser) {
         this.targetFilestoreIDOption = setShortLongOpt(parser, OPT_FILESTORE_SHORT, OPT_FILESTORE_LONG, "Target filestore id", true, NeededQuadState.needed);
     }
@@ -224,5 +219,12 @@ public class ContextHostingAbstraction extends ContextAbstraction {
         filestoreid = Integer.parseInt((String) parser.getOptionValue(this.targetFilestoreIDOption));
         final Filestore fs = new Filestore(filestoreid);
         return fs;
+    }
+
+    /**
+     * @return the filestoreid
+     */
+    public final Integer getFilestoreid() {
+        return filestoreid;
     }
 }
