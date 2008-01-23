@@ -11,7 +11,7 @@
     <property file="build.properties"/>
 
 	<property name="version" value="${Bundle-Version}"/>
-    <property name="bundle.name" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
+    <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
 	<property name="composite.name" value="open-xchange-authentication-database-${version}" />
 
     <!-- Install Constants -->
@@ -20,8 +20,8 @@
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
-	<property name="globaljar" value="com.openexchange.global_6.5.0.jar" />
-	<property name="serverjar" value="com.openexchange.server_6.5.0.jar" />
+	<property name="globaljar" value="com.openexchange.global.jar" />
+	<property name="serverjar" value="com.openexchange.server.jar" />
 
     <!-- Classpath -->
     <path id="project.classpath">
