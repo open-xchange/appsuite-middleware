@@ -651,7 +651,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
     
     
-    private final void setModuleAccessOptions(final AdminParser admp) {
+    protected final void setModuleAccessOptions(final AdminParser admp) {
         // TODO: The default values should be dynamically generates from the setting in the core
         this.accessCalendarOption = setLongOpt(admp, OPT_ACCESS_CALENDAR,"on/off","Calendar module (Default is off)", true, false,true);
         this.accessContactOption = setLongOpt(admp, OPT_ACCESS_CONTACTS,"on/off","Contact module access (Default is on)", true, false,true);
