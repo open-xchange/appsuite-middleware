@@ -17,7 +17,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Create extends CreateCore {
-
+	
     private final ContextHostingAbstraction ctxabs = new ContextHostingAbstraction();
     
     public Create(final String[] args2) {
@@ -33,7 +33,8 @@ public class Create extends CreateCore {
 
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
-        ctxabs.setAddMappingOption(parser, false);
+    	 ctxabs.setAddMappingOption(parser, false);
+    	 ctxabs.setAddAccessRightCombinationNameOption(parser, false);
     }
 
     @Override
@@ -46,7 +47,15 @@ public class Create extends CreateCore {
 
         ctxabs.changeMappingSetting(oxctx, ctx, auth, false);
 
-        final Context createdctx = oxctx.create(ctx, usr, auth);
+        Context createdctx = null;
+        
+        String accessCombinationName = ctxabs.parseAndSetAccessCombinationName(parser);
+        if (null != accessCombinationName ) {
+        	// Client supplied access combination name. create context with this name
+        	createdctx = oxctx.create(ctx, usr, accessCombinationName, auth);
+        }else{
+        	createdctx = oxctx.create(ctx, usr, auth);
+        }
         
         // TODO: We have to add a cleanup here. If creation of mappings fails the context should be deleted
         return createdctx;
