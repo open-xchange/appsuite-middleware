@@ -534,4 +534,172 @@ public class Database extends EnforceableDataObject implements NameAndIdObject {
         return urlset;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((clusterWeight == null) ? 0 : clusterWeight.hashCode());
+        result = prime * result + (clusterWeightset ? 1231 : 1237);
+        result = prime * result + ((currentUnits == null) ? 0 : currentUnits.hashCode());
+        result = prime * result + (currentUnitsset ? 1231 : 1237);
+        result = prime * result + ((driver == null) ? 0 : driver.hashCode());
+        result = prime * result + (driverset ? 1231 : 1237);
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + (idset ? 1231 : 1237);
+        result = prime * result + ((login == null) ? 0 : login.hashCode());
+        result = prime * result + (loginset ? 1231 : 1237);
+        result = prime * result + ((master == null) ? 0 : master.hashCode());
+        result = prime * result + ((masterId == null) ? 0 : masterId.hashCode());
+        result = prime * result + (masterIdset ? 1231 : 1237);
+        result = prime * result + (masterset ? 1231 : 1237);
+        result = prime * result + ((maxUnits == null) ? 0 : maxUnits.hashCode());
+        result = prime * result + (maxUnitsset ? 1231 : 1237);
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + (nameset ? 1231 : 1237);
+        result = prime * result + ((password == null) ? 0 : password.hashCode());
+        result = prime * result + (passwordset ? 1231 : 1237);
+        result = prime * result + ((poolHardLimit == null) ? 0 : poolHardLimit.hashCode());
+        result = prime * result + (poolHardLimitset ? 1231 : 1237);
+        result = prime * result + ((poolInitial == null) ? 0 : poolInitial.hashCode());
+        result = prime * result + (poolInitialset ? 1231 : 1237);
+        result = prime * result + ((poolMax == null) ? 0 : poolMax.hashCode());
+        result = prime * result + (poolMaxset ? 1231 : 1237);
+        result = prime * result + ((read_id == null) ? 0 : read_id.hashCode());
+        result = prime * result + (read_idset ? 1231 : 1237);
+        result = prime * result + ((scheme == null) ? 0 : scheme.hashCode());
+        result = prime * result + (schemeset ? 1231 : 1237);
+        result = prime * result + ((url == null) ? 0 : url.hashCode());
+        result = prime * result + (urlset ? 1231 : 1237);
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (!(obj instanceof Database))
+            return false;
+        final Database other = (Database) obj;
+        if (clusterWeight == null) {
+            if (other.clusterWeight != null)
+                return false;
+        } else if (!clusterWeight.equals(other.clusterWeight))
+            return false;
+        if (clusterWeightset != other.clusterWeightset)
+            return false;
+        if (currentUnits == null) {
+            if (other.currentUnits != null)
+                return false;
+        } else if (!currentUnits.equals(other.currentUnits))
+            return false;
+        if (currentUnitsset != other.currentUnitsset)
+            return false;
+        if (driver == null) {
+            if (other.driver != null)
+                return false;
+        } else if (!driver.equals(other.driver))
+            return false;
+        if (driverset != other.driverset)
+            return false;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        if (idset != other.idset)
+            return false;
+        if (login == null) {
+            if (other.login != null)
+                return false;
+        } else if (!login.equals(other.login))
+            return false;
+        if (loginset != other.loginset)
+            return false;
+        if (master == null) {
+            if (other.master != null)
+                return false;
+        } else if (!master.equals(other.master))
+            return false;
+        if (masterId == null) {
+            if (other.masterId != null)
+                return false;
+        } else if (!masterId.equals(other.masterId))
+            return false;
+        if (masterIdset != other.masterIdset)
+            return false;
+        if (masterset != other.masterset)
+            return false;
+        if (maxUnits == null) {
+            if (other.maxUnits != null)
+                return false;
+        } else if (!maxUnits.equals(other.maxUnits))
+            return false;
+        if (maxUnitsset != other.maxUnitsset)
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (nameset != other.nameset)
+            return false;
+        if (password == null) {
+            if (other.password != null)
+                return false;
+        } else if (!password.equals(other.password))
+            return false;
+        if (passwordset != other.passwordset)
+            return false;
+        if (poolHardLimit == null) {
+            if (other.poolHardLimit != null)
+                return false;
+        } else if (!poolHardLimit.equals(other.poolHardLimit))
+            return false;
+        if (poolHardLimitset != other.poolHardLimitset)
+            return false;
+        if (poolInitial == null) {
+            if (other.poolInitial != null)
+                return false;
+        } else if (!poolInitial.equals(other.poolInitial))
+            return false;
+        if (poolInitialset != other.poolInitialset)
+            return false;
+        if (poolMax == null) {
+            if (other.poolMax != null)
+                return false;
+        } else if (!poolMax.equals(other.poolMax))
+            return false;
+        if (poolMaxset != other.poolMaxset)
+            return false;
+        if (read_id == null) {
+            if (other.read_id != null)
+                return false;
+        } else if (!read_id.equals(other.read_id))
+            return false;
+        if (read_idset != other.read_idset)
+            return false;
+        if (scheme == null) {
+            if (other.scheme != null)
+                return false;
+        } else if (!scheme.equals(other.scheme))
+            return false;
+        if (schemeset != other.schemeset)
+            return false;
+        if (url == null) {
+            if (other.url != null)
+                return false;
+        } else if (!url.equals(other.url))
+            return false;
+        if (urlset != other.urlset)
+            return false;
+        return true;
+    }
 }

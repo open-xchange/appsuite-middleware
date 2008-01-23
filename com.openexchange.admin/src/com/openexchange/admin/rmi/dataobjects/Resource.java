@@ -382,4 +382,80 @@ public class Resource extends ExtendableDataObject implements NameAndIdObject {
     public boolean isAvailableset() {
         return availableset;
     }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((available == null) ? 0 : available.hashCode());
+        result = prime * result + (availableset ? 1231 : 1237);
+        result = prime * result + ((description == null) ? 0 : description.hashCode());
+        result = prime * result + (descriptionset ? 1231 : 1237);
+        result = prime * result + ((displayname == null) ? 0 : displayname.hashCode());
+        result = prime * result + (displaynameset ? 1231 : 1237);
+        result = prime * result + ((email == null) ? 0 : email.hashCode());
+        result = prime * result + (emailset ? 1231 : 1237);
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + (nameset ? 1231 : 1237);
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (!(obj instanceof Resource))
+            return false;
+        final Resource other = (Resource) obj;
+        if (available == null) {
+            if (other.available != null)
+                return false;
+        } else if (!available.equals(other.available))
+            return false;
+        if (availableset != other.availableset)
+            return false;
+        if (description == null) {
+            if (other.description != null)
+                return false;
+        } else if (!description.equals(other.description))
+            return false;
+        if (descriptionset != other.descriptionset)
+            return false;
+        if (displayname == null) {
+            if (other.displayname != null)
+                return false;
+        } else if (!displayname.equals(other.displayname))
+            return false;
+        if (displaynameset != other.displaynameset)
+            return false;
+        if (email == null) {
+            if (other.email != null)
+                return false;
+        } else if (!email.equals(other.email))
+            return false;
+        if (emailset != other.emailset)
+            return false;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (nameset != other.nameset)
+            return false;
+        return true;
+    }
 }

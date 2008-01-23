@@ -454,4 +454,133 @@ public class Context extends EnforceableDataObject implements NameAndIdObject {
         return writeDatabaseset;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((average_size == null) ? 0 : average_size.hashCode());
+        result = prime * result + (average_sizeset ? 1231 : 1237);
+        result = prime * result + ((enabled == null) ? 0 : enabled.hashCode());
+        result = prime * result + (enabledset ? 1231 : 1237);
+        result = prime * result + ((filestore_id == null) ? 0 : filestore_id.hashCode());
+        result = prime * result + (filestore_idset ? 1231 : 1237);
+        result = prime * result + ((filestore_name == null) ? 0 : filestore_name.hashCode());
+        result = prime * result + (filestore_nameset ? 1231 : 1237);
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + (idset ? 1231 : 1237);
+        result = prime * result + ((login_mappings == null) ? 0 : login_mappings.hashCode());
+        result = prime * result + ((maintenanceReason == null) ? 0 : maintenanceReason.hashCode());
+        result = prime * result + (maintenanceReasonset ? 1231 : 1237);
+        result = prime * result + ((maxQuota == null) ? 0 : maxQuota.hashCode());
+        result = prime * result + (maxQuotaset ? 1231 : 1237);
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + (nameset ? 1231 : 1237);
+        result = prime * result + ((readDatabase == null) ? 0 : readDatabase.hashCode());
+        result = prime * result + (readDatabaseset ? 1231 : 1237);
+        result = prime * result + ((usedQuota == null) ? 0 : usedQuota.hashCode());
+        result = prime * result + (usedQuotaset ? 1231 : 1237);
+        result = prime * result + ((writeDatabase == null) ? 0 : writeDatabase.hashCode());
+        result = prime * result + (writeDatabaseset ? 1231 : 1237);
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (!(obj instanceof Context))
+            return false;
+        final Context other = (Context) obj;
+        if (average_size == null) {
+            if (other.average_size != null)
+                return false;
+        } else if (!average_size.equals(other.average_size))
+            return false;
+        if (average_sizeset != other.average_sizeset)
+            return false;
+        if (enabled == null) {
+            if (other.enabled != null)
+                return false;
+        } else if (!enabled.equals(other.enabled))
+            return false;
+        if (enabledset != other.enabledset)
+            return false;
+        if (filestore_id == null) {
+            if (other.filestore_id != null)
+                return false;
+        } else if (!filestore_id.equals(other.filestore_id))
+            return false;
+        if (filestore_idset != other.filestore_idset)
+            return false;
+        if (filestore_name == null) {
+            if (other.filestore_name != null)
+                return false;
+        } else if (!filestore_name.equals(other.filestore_name))
+            return false;
+        if (filestore_nameset != other.filestore_nameset)
+            return false;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        if (idset != other.idset)
+            return false;
+        if (login_mappings == null) {
+            if (other.login_mappings != null)
+                return false;
+        } else if (!login_mappings.equals(other.login_mappings))
+            return false;
+        if (maintenanceReason == null) {
+            if (other.maintenanceReason != null)
+                return false;
+        } else if (!maintenanceReason.equals(other.maintenanceReason))
+            return false;
+        if (maintenanceReasonset != other.maintenanceReasonset)
+            return false;
+        if (maxQuota == null) {
+            if (other.maxQuota != null)
+                return false;
+        } else if (!maxQuota.equals(other.maxQuota))
+            return false;
+        if (maxQuotaset != other.maxQuotaset)
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (nameset != other.nameset)
+            return false;
+        if (readDatabase == null) {
+            if (other.readDatabase != null)
+                return false;
+        } else if (!readDatabase.equals(other.readDatabase))
+            return false;
+        if (readDatabaseset != other.readDatabaseset)
+            return false;
+        if (usedQuota == null) {
+            if (other.usedQuota != null)
+                return false;
+        } else if (!usedQuota.equals(other.usedQuota))
+            return false;
+        if (usedQuotaset != other.usedQuotaset)
+            return false;
+        if (writeDatabase == null) {
+            if (other.writeDatabase != null)
+                return false;
+        } else if (!writeDatabase.equals(other.writeDatabase))
+            return false;
+        if (writeDatabaseset != other.writeDatabaseset)
+            return false;
+        return true;
+    }
 }

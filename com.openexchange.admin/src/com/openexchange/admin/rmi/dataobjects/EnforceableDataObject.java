@@ -307,4 +307,36 @@ public abstract class EnforceableDataObject implements Serializable, Cloneable {
         this.unset_members = new ArrayList<String>();
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((unset_members == null) ? 0 : unset_members.hashCode());
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof EnforceableDataObject))
+            return false;
+        final EnforceableDataObject other = (EnforceableDataObject) obj;
+        if (unset_members == null) {
+            if (other.unset_members != null)
+                return false;
+        } else if (!unset_members.equals(other.unset_members))
+            return false;
+        return true;
+    }
+
+    
 }

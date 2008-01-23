@@ -215,5 +215,40 @@ public abstract class ExtendableDataObject extends EnforceableDataObject impleme
         return ret.toString();
     }
 
-    
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((extensions == null) ? 0 : extensions.hashCode());
+        result = prime * result + (extensionsok ? 1231 : 1237);
+        result = prime * result + (extensionsset ? 1231 : 1237);
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!super.equals(obj))
+            return false;
+        if (!(obj instanceof ExtendableDataObject))
+            return false;
+        final ExtendableDataObject other = (ExtendableDataObject) obj;
+        if (extensions == null) {
+            if (other.extensions != null)
+                return false;
+        } else if (!extensions.equals(other.extensions))
+            return false;
+        if (extensionsok != other.extensionsok)
+            return false;
+        if (extensionsset != other.extensionsset)
+            return false;
+        return true;
+    }
 }
