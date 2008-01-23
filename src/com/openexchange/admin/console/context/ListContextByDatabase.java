@@ -9,12 +9,14 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 
-public class ListContextByDatabase extends ContextHostingAbstraction {
+public class ListContextByDatabase extends ContextAbstraction {
 
+    private final ContextHostingAbstraction ctxabs = new ContextHostingAbstraction();
+    
     protected void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
-        setDatabaseIDOption(parser);
-        setDatabaseNameOption(parser, NeededQuadState.eitheror);
+        ctxabs.setDatabaseIDOption(parser);
+        ctxabs.setDatabaseNameOption(parser, NeededQuadState.eitheror);
         
         setCSVOutputOption(parser);
     }
@@ -31,10 +33,10 @@ public class ListContextByDatabase extends ContextHostingAbstraction {
 
             final Database db = new Database();
 
-            parseAndSetDatabaseID(parser, db);
-            parseAndSetDatabasename(parser, db);
+            ctxabs.parseAndSetDatabaseID(parser, db);
+            ctxabs.parseAndSetDatabasename(parser, db);
 
-            successtext = nameOrIdSetInt(this.dbid, this.dbname, "database");
+            successtext = nameOrIdSetInt(db.getId(), db.getName(), "database");
 
             final Credentials auth = credentialsparsing(parser);
 

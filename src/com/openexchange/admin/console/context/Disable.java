@@ -8,8 +8,10 @@ import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 
-public class Disable extends ContextHostingAbstraction {
+public class Disable extends ContextAbstraction {
 
+    private final ContextHostingAbstraction ctxabs = new ContextHostingAbstraction();
+    
     public Disable(final String[] args2) {
 
         final AdminParser parser = new AdminParser("disablecontext");
@@ -35,7 +37,7 @@ public class Disable extends ContextHostingAbstraction {
             oxres.disable(ctx, mr, auth); */
             oxres.disable(ctx, auth);
 
-            displayDisabledMessage(successtext, null, parser);
+            ctxabs.displayDisabledMessage(successtext, null, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, null, e, parser);

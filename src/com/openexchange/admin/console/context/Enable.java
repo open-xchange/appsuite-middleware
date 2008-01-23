@@ -8,7 +8,9 @@ import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 
-public class Enable extends ContextHostingAbstraction {
+public class Enable extends ContextAbstraction {
+    
+    private final ContextHostingAbstraction ctxabs = new ContextHostingAbstraction();
 
     public Enable(final String[] args2) {
 
@@ -32,7 +34,7 @@ public class Enable extends ContextHostingAbstraction {
 
             oxres.enable(ctx, auth);
 
-            displayEnabledMessage(successtext, null, parser);
+            ctxabs.displayEnabledMessage(successtext, null, parser);
             sysexit(0);
         } catch (final Exception e) {
             printErrors(successtext, null, e, parser);
