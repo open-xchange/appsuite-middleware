@@ -52,7 +52,6 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
@@ -68,33 +67,16 @@ public class TaskMgmtTest extends AbstractTest {
     public void testGetTaskResultsContextCredentialsInt() throws MalformedURLException, RemoteException, NotBoundException, Exception {
         final OXTaskMgmtInterface oxtask = getTaskClient();
         final Credentials cred = DummyCredentials();
-        final Context ctx = getTestContextObject(112, 50);
+        final Context ctx = getTestContextObject(1, 50);
 
-        try {
-            oxtask.getTaskResults(ctx, cred, 1);
-        } catch (final InvalidCredentialsException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (final StorageException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (final InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (final ExecutionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (final InvalidDataException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        oxtask.getTaskResults(ctx, cred, 1);
     }
 
     @Test
     public void testGetJobList() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, InvalidCredentialsException, StorageException, Exception {
         final OXTaskMgmtInterface oxtask = getTaskClient();
         final Credentials cred = DummyCredentials();
-        final Context ctx = getTestContextObject(112, 50);
+        final Context ctx = getTestContextObject(1, 50);
         
         System.out.println(oxtask.getJobList(ctx, cred));
     }
