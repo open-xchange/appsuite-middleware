@@ -52,12 +52,16 @@ public class ContextHostingAbstraction extends ContextAbstraction {
     
     private Option databaseIdOption = null;
     private Option databaseNameOption = null;
+    
+    private Option accessRightsCombinationName = null;
 
     private String[] remove_mappings = null;
     private String[] add_mappings = null;
 
     protected Integer dbid = null;
     protected String dbname = null;
+    
+    protected String accesscombinationname = null;
     
     protected Integer filestoreid = null;
     
@@ -72,6 +76,10 @@ public class ContextHostingAbstraction extends ContextAbstraction {
 //    
     public void setAddMappingOption(final AdminParser parser,final boolean required ){
         this.addLoginMappingOption = setShortLongOpt(parser, OPT_CONTEXT_ADD_LOGIN_MAPPINGS_SHORT,OPT_CONTEXT_ADD_LOGIN_MAPPINGS_LONG,"Add login mappings.Seperated by \",\"",true, convertBooleantoTriState(required));
+    }
+    
+    public void setAddAccessRightCombinationNameOption(final AdminParser parser,final boolean required ){
+        this.accessRightsCombinationName = setLongOpt(parser,com.openexchange.admin.console.user.Create.OPT_ACCESSRIGHTS_COMBINATION_NAME,"Access combination name", true, false,false);
     }
     
     public void setRemoveMappingOption(final AdminParser parser,final boolean required ){
@@ -202,6 +210,10 @@ public class ContextHostingAbstraction extends ContextAbstraction {
         if (null != dbname) {
             db.setName(dbname);
         }
+    }
+    
+    protected String parseAndSetAccessCombinationName(final AdminParser parser) {
+        return (String) parser.getOptionValue(this.accessRightsCombinationName);
     }
 
     protected void setFilestoreIdOption(final AdminParser parser) {

@@ -40,9 +40,17 @@ public class Change extends ChangeCore {
         ctxabs.parseAndSetRemoveLoginMapping(parser);
         
         ctxabs.changeMappingSetting(oxctx, ctx, auth, true);
-                    
+        
         // do the change
         oxctx.change(ctx, auth);
+        
+        // do access change if supplied
+        String accessCombinationName = ctxabs.parseAndSetAccessCombinationName(parser);
+        if (null != accessCombinationName ) {
+        	// Client supplied access combination name. change context with this name
+        	oxctx.changeModuleAccess(ctx,  accessCombinationName, auth);
+        }
+        
     }
 
     @Override
@@ -50,5 +58,6 @@ public class Change extends ChangeCore {
         ctxabs.setAddMappingOption(parser, false);
         
         ctxabs.setRemoveMappingOption(parser, false);
+        ctxabs.setAddAccessRightCombinationNameOption(parser, false);
     }
 }

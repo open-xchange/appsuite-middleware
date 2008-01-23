@@ -11,6 +11,7 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -136,7 +137,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 		basicAuthenticator.doAuthentication(auth);
 
 		
-        UserModuleAccess access = ClientAdminThreadExtended.cache.getNamedAccessCombination(access_combination_name.trim());
+        UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim());
         if(access==null){
         	// no such access combination name defined in configuration
         	// throw error!
@@ -672,7 +673,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
             
-            UserModuleAccess access = ClientAdminThreadExtended.cache.getNamedAccessCombination(access_combination_name.trim());
+            UserModuleAccess access = ClientAdminThread.cache.getNamedAccessCombination(access_combination_name.trim());
             if(access==null){
             	// no such access combination name defined in configuration
             	// throw error!
