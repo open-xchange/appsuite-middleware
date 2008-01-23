@@ -86,6 +86,16 @@
             message="${bundlesdir}/${bundle.name}${line.separator}"/>
     </target>
 
+    <target name="installDist">
+        <property name="3rdpartydir" value="${destdir}/3rdparty"/>
+        <copy todir="${3rdpartydir}">
+            <fileset dir="lib/dist">
+                <include name="*"/>
+                <exclude name="CVS"/>
+            </fileset>
+        </copy>
+    </target>
+
     <!-- Dist -->
     <target name="dist" depends="clean">
 		<property name="dist-package" value="dist-package"/>
