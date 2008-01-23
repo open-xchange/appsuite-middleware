@@ -7,7 +7,7 @@
     <!-- Constants -->
     <property file="META-INF/MANIFEST.MF"/>
     <property name="version" value="${Bundle-Version}"/>
-    <property name="bundle.name" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
+    <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
 	<property name="composite.name" value="open-xchange-admin-plugin-hosting-${version}"/>
     <property name="project.name" value="open-xchange-admin-plugin-hosting" />
     <property name="test.xml.dir" value="test-results" />
@@ -27,11 +27,11 @@
     <property name="osgibundle"           value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
     <property name="osgiservicesbundle"   value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
 	<property name="commonsloggingbundle" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
-    <property name="globalbundle"         value="com.openexchange.global_6.5.0.jar"/>
-	<property name="configbundle"         value="com.openexchange.config_6.5.0.jar"/>
-	<property name="serverbundle"         value="com.openexchange.server_6.5.0.jar"/>
-	<property name="monitoringbundle"     value="com.openexchange.monitoring_6.5.0.jar"/>
-	<property name="sessiondbundle"       value="com.openexchange.sessiond_6.5.0.jar"/>
+    <property name="globalbundle"         value="com.openexchange.global.jar"/>
+	<property name="configbundle"         value="com.openexchange.config.jar"/>
+	<property name="serverbundle"         value="com.openexchange.server.jar"/>
+	<property name="monitoringbundle"     value="com.openexchange.monitoring.jar"/>
+	<property name="sessiondbundle"       value="com.openexchange.sessiond.jar"/>
 
 	<!-- non-osgi jars -->
 	<property name="commons-io"         value="commons-io.jar"/>
