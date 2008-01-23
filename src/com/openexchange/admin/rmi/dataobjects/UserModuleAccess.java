@@ -435,77 +435,75 @@ public class UserModuleAccess implements Serializable {
     }
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + (PinboardWrite ? 1231 : 1237);
-		result = prime * result + (Projects ? 1231 : 1237);
-		result = prime * result + (RssBookmarks ? 1231 : 1237);
-		result = prime * result + (RssPortal ? 1231 : 1237);
-		result = prime * result + (Syncml ? 1231 : 1237);
-		result = prime * result + (Tasks ? 1231 : 1237);
-		result = prime * result + (Vcard ? 1231 : 1237);
-		result = prime * result + (Webdav ? 1231 : 1237);
-		result = prime * result + (WebdavXml ? 1231 : 1237);
-		result = prime * result + (Webmail ? 1231 : 1237);
-		result = prime * result + (calendar ? 1231 : 1237);
-		result = prime * result + (contacts ? 1231 : 1237);
-		result = prime * result + (delegateTask ? 1231 : 1237);
-		result = prime * result + (editPublicFolders ? 1231 : 1237);
-		result = prime * result + (forum ? 1231 : 1237);
-		result = prime * result + (ical ? 1231 : 1237);
-		result = prime * result + (infostore ? 1231 : 1237);
-		result = prime * result + (readCreateSharedFolders ? 1231 : 1237);
-		return result;
-	}
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (PinboardWrite ? 1231 : 1237);
+        result = prime * result + (Projects ? 1231 : 1237);
+        result = prime * result + (RssBookmarks ? 1231 : 1237);
+        result = prime * result + (RssPortal ? 1231 : 1237);
+        result = prime * result + (Syncml ? 1231 : 1237);
+        result = prime * result + (Tasks ? 1231 : 1237);
+        result = prime * result + (Vcard ? 1231 : 1237);
+        result = prime * result + (Webdav ? 1231 : 1237);
+        result = prime * result + (WebdavXml ? 1231 : 1237);
+        result = prime * result + (Webmail ? 1231 : 1237);
+        result = prime * result + (calendar ? 1231 : 1237);
+        result = prime * result + (contacts ? 1231 : 1237);
+        result = prime * result + (delegateTask ? 1231 : 1237);
+        result = prime * result + (editPublicFolders ? 1231 : 1237);
+        result = prime * result + (forum ? 1231 : 1237);
+        result = prime * result + (ical ? 1231 : 1237);
+        result = prime * result + (infostore ? 1231 : 1237);
+        result = prime * result + (readCreateSharedFolders ? 1231 : 1237);
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		final UserModuleAccess other = (UserModuleAccess) obj;
-		if (PinboardWrite != other.PinboardWrite)
-			return false;
-		if (Projects != other.Projects)
-			return false;
-		if (RssBookmarks != other.RssBookmarks)
-			return false;
-		if (RssPortal != other.RssPortal)
-			return false;
-		if (Syncml != other.Syncml)
-			return false;
-		if (Tasks != other.Tasks)
-			return false;
-		if (Vcard != other.Vcard)
-			return false;
-		if (Webdav != other.Webdav)
-			return false;
-		if (WebdavXml != other.WebdavXml)
-			return false;
-		if (Webmail != other.Webmail)
-			return false;
-		if (calendar != other.calendar)
-			return false;
-		if (contacts != other.contacts)
-			return false;
-		if (delegateTask != other.delegateTask)
-			return false;
-		if (editPublicFolders != other.editPublicFolders)
-			return false;
-		if (forum != other.forum)
-			return false;
-		if (ical != other.ical)
-			return false;
-		if (infostore != other.infostore)
-			return false;
-		if (readCreateSharedFolders != other.readCreateSharedFolders)
-			return false;
-		return true;
-	}
-
-	
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final UserModuleAccess other = (UserModuleAccess) obj;
+        if (PinboardWrite != other.PinboardWrite)
+            return false;
+        if (Projects != other.Projects)
+            return false;
+        if (RssBookmarks != other.RssBookmarks)
+            return false;
+        if (RssPortal != other.RssPortal)
+            return false;
+        if (Syncml != other.Syncml)
+            return false;
+        if (Tasks != other.Tasks)
+            return false;
+        if (Vcard != other.Vcard)
+            return false;
+        if (Webdav != other.Webdav)
+            return false;
+        if (WebdavXml != other.WebdavXml)
+            return false;
+        if (Webmail != other.Webmail)
+            return false;
+        if (calendar != other.calendar)
+            return false;
+        if (contacts != other.contacts)
+            return false;
+        if (delegateTask != other.delegateTask)
+            return false;
+        if (editPublicFolders != other.editPublicFolders)
+            return false;
+        if (forum != other.forum)
+            return false;
+        if (ical != other.ical)
+            return false;
+        if (infostore != other.infostore)
+            return false;
+        if (readCreateSharedFolders != other.readCreateSharedFolders)
+            return false;
+        return true;
+    }
 }
