@@ -1198,14 +1198,18 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     public Context create(final Context ctx, final User admin_user) throws StorageException, InvalidDataException {
     	
-    	// TODO: MAKE THE DEFAULT CONTEXT ACCESS RIGHTS ######## 
-        // CONFIGURABLE VIA ACCESS COMBINATION NAME!                
-        final UserModuleAccess access = new UserModuleAccess();
-        // Webmail package access per default
-        access.disableAll();
-        access.setWebmail(true);
-        access.setContacts(true);
-        // END OF TODO! ########################################    	
+    	String DEFAULT_ACCESS_COMBINATION_NAME = prop.getProp("NEW_CONTEXT_DEFAULT_ACCESS_COMBINATION_NAME", "NOT_DEFINED");
+    	// If not defined or access combination name does NOT exist, use hardcoded fallback!
+    	UserModuleAccess access = null;
+    	if(DEFAULT_ACCESS_COMBINATION_NAME.equals("NOT_DEFINED") || ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME) == null){
+    		// Webmail package access on fallback
+    		access = new UserModuleAccess();
+            access.disableAll();
+            access.setWebmail(true);
+            access.setContacts(true);
+    	}else{
+    		access = ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME);
+    	}
     	
         return create(ctx, admin_user, access);
     }
