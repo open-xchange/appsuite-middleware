@@ -343,4 +343,91 @@ public class Filestore implements Serializable {
         return usedset;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((currentContexts == null) ? 0 : currentContexts.hashCode());
+        result = prime * result + (currentContextsset ? 1231 : 1237);
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + (idset ? 1231 : 1237);
+        result = prime * result + ((maxContexts == null) ? 0 : maxContexts.hashCode());
+        result = prime * result + (maxContextsset ? 1231 : 1237);
+        result = prime * result + ((reserved == null) ? 0 : reserved.hashCode());
+        result = prime * result + (reservedset ? 1231 : 1237);
+        result = prime * result + ((size == null) ? 0 : size.hashCode());
+        result = prime * result + (sizeset ? 1231 : 1237);
+        result = prime * result + ((url == null) ? 0 : url.hashCode());
+        result = prime * result + (urlset ? 1231 : 1237);
+        result = prime * result + ((used == null) ? 0 : used.hashCode());
+        result = prime * result + (usedset ? 1231 : 1237);
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof Filestore))
+            return false;
+        final Filestore other = (Filestore) obj;
+        if (currentContexts == null) {
+            if (other.currentContexts != null)
+                return false;
+        } else if (!currentContexts.equals(other.currentContexts))
+            return false;
+        if (currentContextsset != other.currentContextsset)
+            return false;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        if (idset != other.idset)
+            return false;
+        if (maxContexts == null) {
+            if (other.maxContexts != null)
+                return false;
+        } else if (!maxContexts.equals(other.maxContexts))
+            return false;
+        if (maxContextsset != other.maxContextsset)
+            return false;
+        if (reserved == null) {
+            if (other.reserved != null)
+                return false;
+        } else if (!reserved.equals(other.reserved))
+            return false;
+        if (reservedset != other.reservedset)
+            return false;
+        if (size == null) {
+            if (other.size != null)
+                return false;
+        } else if (!size.equals(other.size))
+            return false;
+        if (sizeset != other.sizeset)
+            return false;
+        if (url == null) {
+            if (other.url != null)
+                return false;
+        } else if (!url.equals(other.url))
+            return false;
+        if (urlset != other.urlset)
+            return false;
+        if (used == null) {
+            if (other.used != null)
+                return false;
+        } else if (!used.equals(other.used))
+            return false;
+        if (usedset != other.usedset)
+            return false;
+        return true;
+    }
 }
