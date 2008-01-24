@@ -158,8 +158,10 @@ public final class ManagementActivator implements BundleActivator {
 				ManagementInit.getInstance().stop();
 			}
 
-			serviceRegistration.unregister();
-			serviceRegistration = null;
+			if (null != serviceRegistration) {
+			    serviceRegistration.unregister();
+			    serviceRegistration = null;
+			}
 			/*
 			 * Close service trackers
 			 */

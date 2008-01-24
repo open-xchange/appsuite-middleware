@@ -56,6 +56,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMISocketFactory;
@@ -238,7 +239,13 @@ public abstract class AbstractAgent {
 		Registry registry = null;
 		try {
 			initializeRMIServerSocketFactory(bindAddr);
-			registry = LocateRegistry.createRegistry(port, rmiSocketFactory, rmiSocketFactory);
+			try {
+			    registry = LocateRegistry.getRegistry(port);
+			    registry.list();
+			} catch (final RemoteException e) {
+			    LOG.debug(e.getMessage(), e);
+			    registry = LocateRegistry.createRegistry(port, rmiSocketFactory, rmiSocketFactory);
+			}
 		} catch (final Exception e) {
 			printTrace(new StringBuilder(200).append("Can not create a RMI registry on port ").append(port).append(
 					" and bind address ").append(bindAddr).append(": ").append(e.getMessage()).toString());
@@ -263,21 +270,6 @@ public abstract class AbstractAgent {
 			} finally {
 				lockSocketFactory.unlock();
 			}
-		}
-	}
-
-	/**
-	 * remove a RMI registry
-	 * 
-	 * @param port
-	 */
-	protected final void removeRMIRegistry(final int port) {
-		final Registry registry = registries.get(Integer.valueOf(port));
-		try {
-			UnicastRemoteObject.unexportObject(registry, true);
-			printTrace("Unexport RMI registry on port " + port);
-		} catch (final Exception e) {
-			printTrace("Can not unexport RMI registry on port " + port);
 		}
 	}
 

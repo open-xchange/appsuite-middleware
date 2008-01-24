@@ -153,7 +153,6 @@ public class ManagementAgentImpl extends AbstractAgent implements ManagementAgen
 			LOG.error(e.getMessage(), e);
 		}
 		removeConnector(jmxURL);
-		removeRMIRegistry(jmxPort);
 		running.set(false);
 	}
 
