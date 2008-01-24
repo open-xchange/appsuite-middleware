@@ -221,6 +221,21 @@ public class TaskWriter extends CalendarWriter {
             case Task.PRIVATE_FLAG:
                 writeValue(taskObject.getPrivateFlag(), jsonArray);
                 break;
+            case Task.DAYS:
+                writeValue(taskObject.getDays(), jsonArray);
+                break;
+            case Task.DAY_IN_MONTH:
+                writeValue(taskObject.getDayInMonth(), jsonArray);
+                break;
+            case Task.MONTH:
+                writeValue(taskObject.getInterval(), jsonArray);
+                break;
+            case Task.INTERVAL:
+                writeValue(taskObject.getInterval(), jsonArray);
+                break;
+            case Task.UNTIL:
+                writeValue(taskObject.getUntil(), jsonArray);
+                break;
             case Task.ALARM:
                 writeValue(taskObject.getAlarm(), timeZone, jsonArray);
                 break;

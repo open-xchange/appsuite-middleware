@@ -579,6 +579,15 @@ public class ContactWriter extends CommonWriter {
 			case ContactObject.NUMBER_OF_DISTRIBUTIONLIST:
 				writeValue(contactobject.getNumberOfDistributionLists(), jsonArray);
 				break;
+			case ContactObject.IMAGE_LAST_MODIFIED:
+				writeValue(contactobject.getImageLastModified(), jsonArray);
+				break;
+			case ContactObject.FILE_AS:
+				writeValue(contactobject.getFileAs(), jsonArray);
+				break;
+			case ContactObject.IMAGE1_CONTENT_TYPE:
+				writeValue(contactobject.getImageContentType(), jsonArray);
+				break;
 			default:
 				throw new JSONException("missing field in mapping: " + field);
 		}
