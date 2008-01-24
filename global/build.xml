@@ -57,10 +57,10 @@
 
     <target name="installConfig">
         <mkdir dir="${destdir}/${gwbundle.d}"/>
-        <echo file="${destdir}/${gwbundle.d}/${composite.name}.ini"
+        <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${bundle.name}${line.separator}"/>
         <mkdir dir="${destdir}/${adbundle.d}"/>
-        <echo file="${destdir}/${adbundle.d}/${composite.name}.ini"
+        <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${bundle.name}${line.separator}"/>
     </target>
 

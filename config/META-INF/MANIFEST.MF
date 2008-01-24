@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange Config
-Bundle-SymbolicName: com.openexchange.config
+Bundle-Name: Open-Xchange ConfigRead
+Bundle-SymbolicName: com.openexchange.configread
 Bundle-Version: 6.5.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

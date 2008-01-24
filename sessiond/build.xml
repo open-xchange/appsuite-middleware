@@ -57,7 +57,7 @@
 
     <target name="installConfig">
         <mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${composite.name}.ini"
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${bundle.name}${line.separator}"/>
     </target>
 
