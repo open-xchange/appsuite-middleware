@@ -77,6 +77,8 @@ public final class ManagementActivator implements BundleActivator {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ManagementActivator.class);
 
+	private BundleContext context;
+
 	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
 
 	private ServiceRegistration serviceRegistration;
@@ -96,6 +98,7 @@ public final class ManagementActivator implements BundleActivator {
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(final BundleContext context) throws Exception {
+	    this.context = context;
 		try {
 			/*
 			 * Init service trackers
@@ -104,29 +107,14 @@ public final class ManagementActivator implements BundleActivator {
 					new BundleServiceTracker<Configuration>(context, ConfigurationService.getInstance(),
 							Configuration.class)));
 			/*
-			 * Open service trackers
-			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
-				tracker.open();
-			}
-			/*
 			 * Start management when configuration service is available
 			 */
 			listener = new ServiceHolderListener<Configuration>() {
 
 				public void onServiceAvailable(final Configuration service) throws AbstractOXException {
 					try {
-						if (ManagementInit.getInstance().isStarted()) {
-							ManagementInit.getInstance().stop();
-						}
-						ManagementInit.getInstance().start();
-
-						/*
-						 * Register management service
-						 */
-						serviceRegistration = context.registerService(ManagementAgent.class.getCanonicalName(),
-								ManagementAgentImpl.getInstance(), null);
-
+					    stopInternal();
+						startInternal();
 					} catch (final AbstractOXException e) {
 						LOG.error(e.getLocalizedMessage(), e);
 						ManagementInit.getInstance().stop();
@@ -136,13 +124,37 @@ public final class ManagementActivator implements BundleActivator {
 				public void onServiceRelease() {
 				}
 			};
-
 			ConfigurationService.getInstance().addServiceHolderListener(listener);
+            /*
+             * Open service trackers
+             */
+            for (ServiceTracker tracker : serviceTrackerList) {
+                tracker.open();
+            }
 		} catch (final Throwable t) {
 			LOG.error(t.getLocalizedMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
 
+	}
+
+	private void startInternal() throws AbstractOXException {
+        ManagementInit.getInstance().start();
+        /*
+         * Register management service
+         */
+        serviceRegistration = context.registerService(ManagementAgent.class.getCanonicalName(),
+                ManagementAgentImpl.getInstance(), null);
+	}
+
+	private void stopInternal() throws AbstractOXException {
+        if (null != serviceRegistration) {
+            serviceRegistration.unregister();
+            serviceRegistration = null;
+        }
+        if (ManagementInit.getInstance().isStarted()) {
+            ManagementInit.getInstance().stop();
+        }
 	}
 
 	/*
@@ -152,23 +164,15 @@ public final class ManagementActivator implements BundleActivator {
 	 */
 	public void stop(final BundleContext context) throws Exception {
 		try {
+            /*
+             * Close service trackers
+             */
+            for (ServiceTracker tracker : serviceTrackerList) {
+                tracker.close();
+            }
+            serviceTrackerList.clear();
 			ConfigurationService.getInstance().removeServiceHolderListener(listener.getClass().getName());
-
-			if (ManagementInit.getInstance().isStarted()) {
-				ManagementInit.getInstance().stop();
-			}
-
-			if (null != serviceRegistration) {
-			    serviceRegistration.unregister();
-			    serviceRegistration = null;
-			}
-			/*
-			 * Close service trackers
-			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
-				tracker.close();
-			}
-			serviceTrackerList.clear();
+			stopInternal();
 		} catch (final Throwable t) {
 			LOG.error(t.getLocalizedMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
