@@ -382,7 +382,7 @@
     	<!-- <antcall target="install-redhat"/> -->
         
     	<mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${composite.name}.ini"
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${bundle.name}${line.separator}"/>
 
     	<antcall target="install-jar"></antcall>
