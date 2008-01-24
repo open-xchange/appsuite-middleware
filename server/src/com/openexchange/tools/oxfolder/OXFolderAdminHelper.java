@@ -68,8 +68,6 @@ import com.openexchange.api2.OXException;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
