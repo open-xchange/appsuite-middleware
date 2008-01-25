@@ -21,3 +21,5 @@ unregisterdatabase
 unregisterfilestore
 unregisterserver
 changedatabase
+getaccesscombinationnameforcontext
+getmoduleaccessforcontext
