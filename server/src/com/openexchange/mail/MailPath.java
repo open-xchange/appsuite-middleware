@@ -56,7 +56,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * {@link MailPath} - Represents a message's unique path inside a mailbox.
+ * {@link MailPath} - Represents a message's unique path inside a mailbox, that
+ * is the folder fullname followed by the value of {@link #SEPERATOR} followed
+ * by mail's unique numeric ID:<br>
+ * Example: <i>INBOX.Subfolder/1234</i>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -65,7 +68,7 @@ public final class MailPath implements Cloneable {
 
 	public static final char SEPERATOR = '/';
 
-	private static final Pattern DELIM_PATTERN = Pattern.compile(new StringBuilder(15).append("(.+)(")
+	private static final Pattern DELIM_PATTERN = Pattern.compile(new StringBuilder(16).append("(.+)(")
 			.append(SEPERATOR).append(")([0-9]+)").toString());
 
 	/**
@@ -83,36 +86,64 @@ public final class MailPath implements Cloneable {
 	private String str;
 
 	/**
-	 * 
+	 * Default constructor
 	 */
 	public MailPath() {
 		super();
 	}
 
-	public MailPath(final String mailPath) throws MailException {
-		final Matcher m = DELIM_PATTERN.matcher(mailPath);
+	/**
+	 * Initializes a new {@link MailPath}
+	 * 
+	 * @param mailPathStr
+	 *            The mail path's string representation
+	 * @throws MailException
+	 *             If mail path's string representation does not match expected
+	 *             pattern: <i>(.+)(value of {@link #SEPERATOR})([0-9]+)</i>
+	 */
+	public MailPath(final String mailPathStr) throws MailException {
+		final Matcher m = DELIM_PATTERN.matcher(mailPathStr);
 		if (!m.matches()) {
-			throw new MailException(MailException.Code.INVALID_MAIL_IDENTIFIER, mailPath);
+			throw new MailException(MailException.Code.INVALID_MAIL_IDENTIFIER, mailPathStr);
 		}
 		uid = Long.parseLong(m.group(3));
 		folder = m.group(1);
-		str = mailPath;
+		str = mailPathStr;
 	}
 
+	/**
+	 * Initializes a new {@link MailPath}
+	 * 
+	 * @param folder
+	 *            Folder fullname
+	 * @param uid
+	 *            The mail's unique ID
+	 */
 	public MailPath(final String folder, final long uid) {
 		this.folder = folder;
 		this.uid = uid;
 		str = new StringBuilder(folder).append(SEPERATOR).append(uid).toString();
 	}
 
-	public MailPath setMailIdentifierString(final String mailIdentifier) throws MailException {
-		final Matcher m = DELIM_PATTERN.matcher(mailIdentifier);
+	/**
+	 * Sets this mail path's folder fullname and mail's unique ID (for
+	 * re-usage).
+	 * 
+	 * @param mailPathStr
+	 *            The mail paths string representation
+	 * @return The mail path itself
+	 * @throws MailException
+	 *             If mail path's string representation does not match expected
+	 *             pattern: <i>(.+)(value of {@link #SEPERATOR})([0-9]+)</i>
+	 */
+	public MailPath setMailIdentifierString(final String mailPathStr) throws MailException {
+		final Matcher m = DELIM_PATTERN.matcher(mailPathStr);
 		if (!m.matches()) {
-			throw new MailException(MailException.Code.INVALID_MAIL_IDENTIFIER, mailIdentifier);
+			throw new MailException(MailException.Code.INVALID_MAIL_IDENTIFIER, mailPathStr);
 		}
 		uid = Long.parseLong(m.group(3));
 		folder = m.group(1);
-		str = mailIdentifier;
+		str = mailPathStr;
 		return this;
 	}
 
@@ -165,6 +196,13 @@ public final class MailPath implements Cloneable {
 
 	private static final Lock LOCK_COMP = new ReentrantLock();
 
+	/**
+	 * Returns an appropriate {@link Comparator} implementation for
+	 * {@link MailPath} instances
+	 * 
+	 * @return A {@link Comparator} implementation for {@link MailPath}
+	 *         instances
+	 */
 	public static Comparator<MailPath> getMailPathComparator() {
 		if (!compInitialized) {
 			LOCK_COMP.lock();
@@ -188,18 +226,38 @@ public final class MailPath implements Cloneable {
 		return COMP;
 	}
 
-	public static MailPath[] getMailPaths(final String[] mailIDs) throws MailException {
-		final MailPath[] retval = new MailPath[mailIDs.length];
-		for (int i = 0; i < mailIDs.length; i++) {
-			retval[i] = new MailPath(mailIDs[i]);
+	/**
+	 * Returns the mail paths for given mail IDs each conform to pattern
+	 * &lt;folder-path&gt;&lt;value-of-{@link #SEPERATOR}&gt;&lt;mail-ID&gt;
+	 * 
+	 * @param mailPaths
+	 *            The mail IDs
+	 * @return The corresponding mail paths
+	 * @throws MailException
+	 *             If mail paths cannot be generated
+	 */
+	public static MailPath[] getMailPaths(final String[] mailPaths) throws MailException {
+		final MailPath[] retval = new MailPath[mailPaths.length];
+		for (int i = 0; i < mailPaths.length; i++) {
+			retval[i] = new MailPath(mailPaths[i]);
 		}
 		return retval;
 	}
 
-	public static long[] getUIDs(final String[] mailIDs) throws MailException {
-		final long[] retval = new long[mailIDs.length];
-		for (int i = 0; i < mailIDs.length; i++) {
-			retval[i] = new MailPath(mailIDs[i]).uid;
+	/**
+	 * Extracts the UIDs from given mail IDs each conform to pattern
+	 * &lt;folder-path&gt;&lt;value-of-{@link #SEPERATOR}&gt;&lt;mail-ID&gt;
+	 * 
+	 * @param mailPaths
+	 *            The mail IDs
+	 * @return The extracted UIDs
+	 * @throws MailException
+	 *             If UIDs cannot be determined
+	 */
+	public static long[] getUIDs(final String[] mailPaths) throws MailException {
+		final long[] retval = new long[mailPaths.length];
+		for (int i = 0; i < mailPaths.length; i++) {
+			retval[i] = new MailPath(mailPaths[i]).uid;
 		}
 		return retval;
 	}
