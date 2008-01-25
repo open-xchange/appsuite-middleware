@@ -79,10 +79,10 @@ case "${BNAME}" in
     ACTION="context.Delete"
     ;;
     "getmoduleaccessforcontext")
-    ACTION="context.GetModuleAccessForContext"
+    ACTION="context.GetModuleAccess"
     ;;
     "getaccesscombinationnameforcontext")
-    ACTION="context.GetAccessCombinationNameForContext"
+    ACTION="context.GetAccessCombinationName"
     ;;
     "disablecontext")
     ACTION="context.Disable"

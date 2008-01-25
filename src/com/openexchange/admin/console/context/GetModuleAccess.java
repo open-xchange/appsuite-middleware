@@ -12,9 +12,9 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
-public class GetModuleAccessForContext extends ContextAbstraction {
+public class GetModuleAccess extends ContextAbstraction {
    
-    public GetModuleAccessForContext(final String[] args2) {
+    public GetModuleAccess(final String[] args2) {
 
         final AdminParser parser = new AdminParser("getmoduleaccessforcontext");
 
@@ -104,7 +104,7 @@ public class GetModuleAccessForContext extends ContextAbstraction {
 	}
 
 	public static void main(final String args[]) {
-        new GetModuleAccessForContext(args);
+        new GetModuleAccess(args);
     }
 
     private void setOptions(final AdminParser parser) {

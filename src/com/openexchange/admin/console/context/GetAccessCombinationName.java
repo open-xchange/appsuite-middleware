@@ -8,9 +8,9 @@ import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 
-public class GetAccessCombinationNameForContext extends ContextAbstraction {
+public class GetAccessCombinationName extends ContextAbstraction {
    
-    public GetAccessCombinationNameForContext(final String[] args2) {
+    public GetAccessCombinationName(final String[] args2) {
 
         final AdminParser parser = new AdminParser("getaccesscombinationnameforcontext");
 
@@ -43,7 +43,7 @@ public class GetAccessCombinationNameForContext extends ContextAbstraction {
     }
 	
 	public static void main(final String args[]) {
-        new GetAccessCombinationNameForContext(args);
+        new GetAccessCombinationName(args);
     }
 
     private void setOptions(final AdminParser parser) {
