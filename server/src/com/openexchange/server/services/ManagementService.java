@@ -47,63 +47,33 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.server.services;
 
-import static com.openexchange.monitoring.MonitorUtility.getObjectName;
-
-import javax.management.MalformedObjectNameException;
-
-import org.osgi.framework.BundleContext;
-
-import com.openexchange.ajp13.AJPv13Server;
-import com.openexchange.database.Pools;
-import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.management.ManagementAgent;
-import com.openexchange.server.osgiservice.BundleServiceTracker;
-import com.openexchange.server.services.ManagementService;
+import com.openexchange.server.ServiceHolder;
 
 /**
- * {@link ManagementServiceTracker}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ * ManagementService.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ManagementServiceTracker extends BundleServiceTracker<ManagementAgent> {
+public final class ManagementService extends ServiceHolder<ManagementAgent> {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ManagementServiceTracker.class);
+    /**
+     * The singleton.
+     */
+    private static final ManagementService SINGLETON = new ManagementService();
 
-	/**
-	 * Initializes a new {@link ManagementServiceTracker}
-	 * 
-	 * @param context
-	 *            The bundle context
-	 */
-	public ManagementServiceTracker(final BundleContext context) {
-		super(context, ManagementService.getInstance(), ManagementAgent.class);
-	}
+    /**
+     * Default constructor.
+     */
+    private ManagementService() {
+        super();
+    }
 
-	@Override
-	protected void addingServiceInternal(final ManagementAgent managementAgent) {
-		try {
-			/*
-			 * Add all mbeans since monitoring service is now available
-			 */
-			managementAgent.registerMBean(
-					getObjectName(AJPv13Server.ajpv13ServerThreadsMonitor.getClass().getName(), true),
-					AJPv13Server.ajpv13ServerThreadsMonitor);
-			managementAgent.registerMBean(getObjectName(AJPv13Server.ajpv13ListenerMonitor.getClass().getName(), true),
-					AJPv13Server.ajpv13ListenerMonitor);
-			managementAgent.registerMBean(
-					getObjectName(MailInterfaceImpl.mailInterfaceMonitor.getClass().getName(), true),
-					MailInterfaceImpl.mailInterfaceMonitor);
-			Pools.getInstance().registerMBeans();
-		} catch (final MalformedObjectNameException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-		} catch (final NullPointerException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-		} catch (final Exception e) {
-			LOG.error(e.getLocalizedMessage(), e);
-		}
-	}
+    /**
+     * @return the singleton instance.
+     */
+    public static ManagementService getInstance() {
+        return SINGLETON;
+    }
 }

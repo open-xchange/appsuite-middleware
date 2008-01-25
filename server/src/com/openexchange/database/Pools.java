@@ -58,23 +58,22 @@ import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
 import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jdom.JDOMException;
 
 import com.openexchange.configuration.ConfigDB;
 import com.openexchange.configuration.ConfigDB.Property;
+import com.openexchange.management.ManagementAgent;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.ServerTimer;
 import com.openexchange.server.impl.DBPoolingException.Code;
+import com.openexchange.server.services.ManagementService;
 
 /**
  * This class stores all connection pools. It also removes pools that are empty.
@@ -86,10 +85,6 @@ public final class Pools implements Runnable {
      * Singleton.
      */
     private static final Pools SINGLETON = new Pools();
-
-    private static final String ERR_UNREGISTER = "Cannot unregister pool mbean.";
-
-    private static final String ERR_REGISTER = "Cannot register pool mbean.";
 
     /**
      * Logger.
@@ -165,7 +160,7 @@ public final class Pools implements Runnable {
                         getConfig(data));
                     retval.registerCleaner(ServerTimer.getTimer(),
                         cleanerInterval);
-//                    registerMBean(createMBeanName(poolId), retval);
+                    registerMBean(createMBeanName(poolId), retval);
                     oxPools.put(Integer.valueOf(poolId), retval);
                 }
             } finally {
@@ -220,7 +215,7 @@ public final class Pools implements Runnable {
                 final Map.Entry<Integer, ConnectionPool> entry = iter.next();
                 final ConnectionPool pool = entry.getValue();
                 if (pool.isEmpty()) {
-//                    unregisterMBean(createMBeanName(entry.getKey().intValue()));
+                    unregisterMBean(createMBeanName(entry.getKey().intValue()));
                     pool.destroy();
                     iter.remove();
                 }
@@ -246,24 +241,28 @@ public final class Pools implements Runnable {
      * @param name Name of the pool to remove.
      */
     private static void unregisterMBean(final String name) {
-        // TODO finding correct mbean server
         try {
-            final ObjectName objName = new ObjectName(
-                ConnectionPoolMBean.DOMAIN, "name", name);
-            final List<MBeanServer> servers = MBeanServerFactory
-                .findMBeanServer(null);
-            if (servers.size() > 0) {
-                final MBeanServer server = servers.get(0);
-                server.unregisterMBean(objName);
+            final ObjectName objName = new ObjectName(ConnectionPoolMBean
+                .DOMAIN, "name", name);
+            final ManagementService service = ManagementService.getInstance();
+            final ManagementAgent management = service.getService();
+            if (null != management) {
+                try {
+                    management.unregisterMBean(objName);
+                } finally {
+                    service.ungetService(management);
+                }
             }
         } catch (MalformedObjectNameException e) {
-            LOG.error(ERR_UNREGISTER, e);
+            LOG.error(e.getMessage(), e);
         } catch (NullPointerException e) {
-            LOG.error(ERR_UNREGISTER, e);
+            LOG.error(e.getMessage(), e);
         } catch (InstanceNotFoundException e) {
-            LOG.error(ERR_UNREGISTER, e);
+            LOG.error(e.getMessage(), e);
         } catch (MBeanRegistrationException e) {
-            LOG.error(ERR_UNREGISTER, e);
+            LOG.error(e.getMessage(), e);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
@@ -274,35 +273,47 @@ public final class Pools implements Runnable {
      */
     private static void registerMBean(final String name,
         final ConnectionPool pool) {
-        // TODO finding correct mbean server
         try {
-            final ObjectName objName = new ObjectName(
-                ConnectionPoolMBean.DOMAIN, "name", name);
-            final List<MBeanServer> servers = MBeanServerFactory
-                .findMBeanServer(null);
-            if (servers.size() > 0) {
-                final MBeanServer server = servers.get(0);
-                server.registerMBean(pool, objName);
+            final ObjectName objName = new ObjectName(ConnectionPoolMBean
+                .DOMAIN, "name", name);
+            final ManagementService service = ManagementService.getInstance();
+            final ManagementAgent management = service.getService();
+            if (null != management) {
+                try {
+                    management.registerMBean(objName, pool);
+                } finally {
+                    service.ungetService(management);
+                }
             }
         } catch (MalformedObjectNameException e) {
-            LOG.error(ERR_REGISTER, e);
+            LOG.error(e.getMessage(), e);
         } catch (NullPointerException e) {
-            LOG.error(ERR_REGISTER, e);
-        } catch (InstanceAlreadyExistsException e) {
-            LOG.error(ERR_REGISTER, e);
-        } catch (MBeanRegistrationException e) {
-            LOG.error(ERR_REGISTER, e);
-        } catch (NotCompliantMBeanException e) {
-            LOG.error(ERR_REGISTER, e);
+            LOG.error(e.getMessage(), e);
+        } catch (JDOMException e) {
+            LOG.error(e);
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
     public void registerMBeans() {
-//        registerMBean("ConfigDB Read", configDBRead);
-//        if (configDBWrite != configDBRead) {
-//            registerMBean("ConfigDB Write", configDBWrite);
-//        }
-
+        if (null == configDBRead) {
+            // Service appeared before Pools are started.
+            return;
+        }
+        registerMBean("ConfigDB Read", configDBRead);
+        if (configDBWrite != configDBRead) {
+            registerMBean("ConfigDB Write", configDBWrite);
+        }
+        poolsLock.lock();
+        try {
+            for (Map.Entry<Integer, ConnectionPool> entry : oxPools.entrySet()) {
+                registerMBean(createMBeanName(entry.getKey().intValue()),
+                    entry.getValue());
+            }
+        } finally {
+            poolsLock.unlock();
+        }
     }
 
     /**
@@ -317,7 +328,7 @@ public final class Pools implements Runnable {
      * pools for ConfigDB.
      * @throws DBPoolingException if starting fails.
      */
-    public void start() throws DBPoolingException {
+    public void start() {
         if (null != configDBRead) {
             LOG.error("Duplicate startup of Pools.");
             return;
@@ -339,6 +350,7 @@ public final class Pools implements Runnable {
         } else {
             configDBWrite = configDBRead;
         }
+        registerMBeans();
     }
 
     /**
@@ -346,13 +358,24 @@ public final class Pools implements Runnable {
      */
     public void stop() {
         // TODO write destroyPool method.
+        poolsLock.lock();
+        try {
+            for (Map.Entry<Integer, ConnectionPool> entry : oxPools.entrySet()) {
+                unregisterMBean(createMBeanName(entry.getKey().intValue()));
+                final ConnectionPool pool = entry.getValue();
+                pool.getCleanerTask().cancel();
+                pool.destroy();
+            }
+        } finally {
+            poolsLock.unlock();
+        }
         if (ConfigDB.getInstance().isWriteDefined()) {
-//            unregisterMBean("ConfigDB Write");
+            unregisterMBean("ConfigDB Write");
             configDBWrite.getCleanerTask().cancel();
             configDBWrite.destroy();
         }
         configDBWrite = null;
-//        unregisterMBean("ConfigDB Read");
+        unregisterMBean("ConfigDB Read");
         configDBRead.getCleanerTask().cancel();
         configDBRead.destroy();
         configDBRead = null;
