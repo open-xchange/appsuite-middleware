@@ -284,8 +284,11 @@ public final class MessageUtility {
 		}
 		final StringBuilder sb = new StringBuilder(content.length() + 128);
 		final String[] lines = content.split(SPLIT_LINES);
-		for (int i = 0; i < lines.length; i++) {
-			sb.append(foldTextLine(lines[i], linewrap)).append(CHAR_BREAK);
+		if (lines.length > 0) {
+			sb.append(foldTextLine(lines[0], linewrap));
+			for (int i = 1; i < lines.length; i++) {
+				sb.append(CHAR_BREAK).append(foldTextLine(lines[i], linewrap));
+			}
 		}
 		return sb.toString();
 	}
@@ -516,7 +519,10 @@ public final class MessageUtility {
 					sb.append(BLOCKQUOTE_END);
 				}
 			}
-			sb.append(line).append(HTML_BREAK);
+			sb.append(line);
+			if (i < lines.length - 1) {
+				sb.append(HTML_BREAK);
+			}
 		}
 		return sb.toString();
 	}

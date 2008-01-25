@@ -797,8 +797,7 @@ public final class SMTPMessageFiller {
 		return text;
 	}
 
-	private static BodyPart createHtmlBodyPart(final String htmlContent) throws MessagingException, MailException,
-			IOException {
+	private static BodyPart createHtmlBodyPart(final String htmlContent) throws MessagingException, MailException {
 		final ContentType htmlCT = new ContentType(PAT_HTML_CT.replaceFirst(REPLACE_CS, SMTPConfig
 				.getDefaultMimeCharset()));
 		final MimeBodyPart html = new MimeBodyPart();
