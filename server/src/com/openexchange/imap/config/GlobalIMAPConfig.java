@@ -223,7 +223,7 @@ public final class GlobalIMAPConfig extends GlobalMailConfig {
 		{
 			user2AclImpl = imapProperties.getProperty("User2ACLImpl");
 			if (null != user2AclImpl) {
-				user2AclImpl.trim();
+				user2AclImpl = user2AclImpl.trim();
 			}
 		}
 
