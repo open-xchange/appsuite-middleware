@@ -1,39 +1,59 @@
 
 package com.openexchange.admin.console.user;
 
-import java.rmi.RemoteException;
-
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class GetAccessCombinationName extends DeleteCore {
+public class GetAccessCombinationName extends UserAbstraction {
 
     public static void main(final String[] args) {
         new GetAccessCombinationName(args);
+    }
+    
+    protected final void setOptions(final AdminParser parser) {
+        setDefaultCommandLineOptions(parser);
+        setIdOption(parser);
+        setUsernameOption(parser, NeededQuadState.eitheror);        
     }
 
     public GetAccessCombinationName(final String[] args2) {
 
         final AdminParser parser = new AdminParser("getaccesscombinationnameforuser");
 
-        commonfunctions(parser, args2);
-    }
+        // set all needed options in our parser
+        setOptions(parser);
 
-    @Override
-    protected void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        oxusr.delete(ctx, usr, auth);
-    }
+        String successtext = null;
+        
+        try {
+            parser.ownparse(args2);
 
-    @Override
-    protected void setFurtherOptions(AdminParser parser) {
+            // create user obj
+            final User usr = new User();
+            
+            parseAndSetUserId(parser, usr);
+            parseAndSetUsername(parser, usr);
+
+            successtext = nameOrIdSetInt(this.userid, this.username, "user");
+
+            final Context ctx = contextparsing(parser);
+
+            final Credentials auth = credentialsparsing(parser);
+
+            // rmi interface
+            final OXUserInterface oxusr = getUserInterface();
+            
+            // printout access name
+            System.out.println(oxusr.getAccessCombinationName(ctx, usr, auth));
+            
+            sysexit(0);
+        } catch (final Exception e) {
+            printErrors(successtext, ctxid, e, parser);
+        }
     }
+   
 }
