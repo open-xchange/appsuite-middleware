@@ -10,3 +10,4 @@ createresource
 deleteresource
 changeresource
 listresource
+getaccesscombinationnameforuser
