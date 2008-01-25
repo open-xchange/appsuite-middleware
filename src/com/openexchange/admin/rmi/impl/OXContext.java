@@ -725,7 +725,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             // Get admin id and fetch current access object and query cache for its name!
             OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
                         
-            return ClientAdminThreadExtended.cache.getNameForAccessCombination(oxu.getModuleAccess(ctx, tool.getAdminForContext(ctx)));            
+            return ClientAdminThread.cache.getNameForAccessCombination(oxu.getModuleAccess(ctx, tool.getAdminForContext(ctx)));            
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
