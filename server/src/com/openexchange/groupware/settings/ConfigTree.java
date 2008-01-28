@@ -198,9 +198,10 @@ public final class ConfigTree {
     }
 
     private static Class< ? extends SettingSetup>[] getClasses() {
-        return (Class< ? extends SettingSetup>[]) new Class[] {
+        return new Class[] {
             com.openexchange.groupware.settings.tree.CalendarNotification.class,
-            com.openexchange.groupware.settings.tree.ContactId.class,
+            com.openexchange.groupware.settings.tree.ContactID.class,
+            com.openexchange.groupware.settings.tree.ContextID.class,
             com.openexchange.groupware.settings.tree.CurrentTime.class,
             com.openexchange.groupware.settings.tree.FastGUI.class,
             com.openexchange.groupware.settings.tree.GUI.class,

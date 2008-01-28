@@ -63,14 +63,14 @@ import com.openexchange.session.Session;
  * Adds a configuration tree entry for the contact identifier of the user.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ContactId extends AbstractNode {
+public final class ContactID extends AbstractNode {
 
     public static final String NAME = "contact_id";
 
     /**
      * Default constructor.
      */
-    public ContactId() {
+    public ContactID() {
         super();
     }
 

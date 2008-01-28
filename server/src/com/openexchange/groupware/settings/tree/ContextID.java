@@ -56,15 +56,16 @@ import com.openexchange.groupware.settings.SharedValue;
 import com.openexchange.session.Session;
 
 /**
- * 
+ * This class adds a node to the configuration tree containing the context
+ * identifier.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Identifier extends AbstractNode {
+public final class ContextID extends AbstractNode {
 
     /**
      * Default constructor.
      */
-    public Identifier() {
+    public ContextID() {
         super();
     }
 
@@ -81,7 +82,7 @@ public final class Identifier extends AbstractNode {
      */
     @Override
     protected String getName() {
-        return "identifier";
+        return "context_id";
     }
 
     /**
@@ -94,7 +95,8 @@ public final class Identifier extends AbstractNode {
                 return true;
             }
             public void getValue(final Session session, final Setting setting) {
-                setting.setSingleValue(Integer.valueOf(session.getUserId()));
+                setting.setSingleValue(Integer.valueOf(session.getContext()
+                    .getContextId()));
             }
         };
     }
