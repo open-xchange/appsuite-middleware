@@ -83,7 +83,7 @@ public final class SpellCheckUserDictTableTask implements UpdateTask {
 			SpellCheckUserDictTableTask.class);
 
 	private static final String CREATE = "CREATE TABLE spellcheck_user_dict (" + "cid INT4 UNSIGNED NOT NULL,"
-			+ "user INT4 UNSIGNED NOT NULL," + "words TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL)"
+			+ "user INT4 UNSIGNED NOT NULL," + "words TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, PRIMARY KEY  (cid, user))"
 			+ " ENGINE = InnoDB";
 
 	/**
