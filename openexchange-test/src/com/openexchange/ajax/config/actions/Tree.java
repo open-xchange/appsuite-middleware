@@ -55,6 +55,8 @@ package com.openexchange.ajax.config.actions;
  */
 public enum Tree {
 
+    ContextID("/context_id"),
+
     CurrentTime("/currentTime"),
 
     Identifier("/identifier"),

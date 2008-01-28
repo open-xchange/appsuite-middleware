@@ -74,7 +74,7 @@ public class ConfigTestSuite {
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(ConfigMenuTest.class);
         tests.addTestSuite(ForwardInlineOrAttachmentTest.class);
-        tests.addTestSuite(CurrentTimeTest.class);
+        tests.addTestSuite(FunctionTests.class);
         tests.addTestSuite(SpamButtonTest.class);
         tests.addTestSuite(ModulesTest.class);
         tests.addTestSuite(BugTests.class);

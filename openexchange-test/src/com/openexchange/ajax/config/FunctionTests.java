@@ -49,31 +49,37 @@
 
 package com.openexchange.ajax.config;
 
+import java.util.Date;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.Tree;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 
-public class MaxUploadIdleTimeoutTest extends AbstractAJAXSession {
+/**
+ * This class contains tests for added funtionalities of the configuration tree. 
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public class FunctionTests extends AbstractAJAXSession {
 
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(MaxUploadIdleTimeoutTest
-        .class);
+    private static final Log LOG = LogFactory.getLog(FunctionTests.class);
 
     /**
      * Default constructor.
      * @param name Name of the test.
      */
-    public MaxUploadIdleTimeoutTest(final String name) {
+    public FunctionTests(final String name) {
         super(name);
     }
 
     /**
-     * Tests if the spam button option is sent to the GUI.
+     * Tests if the idle timeout for uploaded files is sent to the GUI.
      * @throws Throwable if an exception occurs.
      */
     public void testMaxUploadIdleTimeout() throws Throwable {
@@ -82,5 +88,37 @@ public class MaxUploadIdleTimeoutTest extends AbstractAJAXSession {
         LOG.info("Max upload idle timeout: " + value);
         assertTrue("Got no value for the maxUploadIdleTimeout configuration "
             + "parameter.", value > 0);
+    }
+
+    /**
+     * Maximum time difference between server and client. This test fails if
+     * a greater difference is detected.
+     */
+    private static final long MAX_DIFFERENCE = 1000;
+
+    /**
+     * Tests if the current time is sent by the server through the configuration
+     * interface.
+     */
+    public void testCurrentTime() throws Throwable {
+        final AJAXClient client = getClient();
+        final Date sTime = client.getValues().getServerTime();
+        final long localTime = System.currentTimeMillis();
+        LOG.info("Local time: " + System.currentTimeMillis() + " Server time: "
+            + sTime.getTime());
+        final long difference = Math.abs(localTime - sTime.getTime());
+        LOG.info("Time difference: " + difference);
+        assertTrue("Too big time difference: ", difference < MAX_DIFFERENCE);
+    }
+
+    /**
+     * Tests if the server gives the context identifier.
+     */
+    public void testContextID() throws Throwable {
+        final int value = ConfigTools.get(getClient(), new GetRequest(
+            Tree.ContextID)).getInteger();
+        LOG.info("Context identifier: " + value);
+        assertTrue("Got no value for the contextID configuration parameter.",
+            value > 0);
     }
 }
