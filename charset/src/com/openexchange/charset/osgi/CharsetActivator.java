@@ -188,6 +188,8 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(final BundleContext context) throws Exception {
+		LOG.info("starting bundle: com.openexchange.charset");
+		
 		try {
 			modifyCharsetExtendedProvider();
 			if (LOG.isInfoEnabled()) {
@@ -214,6 +216,8 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(final BundleContext context) throws Exception {
+		LOG.info("stopping bundle: com.openexchange.charset");
+		
 		try {
 			serviceTracker.close();
 			/*

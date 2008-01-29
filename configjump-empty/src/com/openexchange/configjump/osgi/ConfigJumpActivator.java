@@ -83,6 +83,8 @@ public final class ConfigJumpActivator implements BundleActivator {
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(final BundleContext context) throws Exception {
+		LOG.info("starting bundle: com.openexchange.configjump.empty");
+		
 		try {
 		    final ConfigJumpInterface configJumpImpl= new EmptyImpl();
 			serviceRegister = context.registerService(ConfigJumpInterface.class.getName(), configJumpImpl,
@@ -99,6 +101,8 @@ public final class ConfigJumpActivator implements BundleActivator {
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(final BundleContext context) throws Exception {
+		LOG.info("stopping bundle: com.openexchange.configjump.empty");
+		
 	    serviceRegister.unregister();
 	}
 }

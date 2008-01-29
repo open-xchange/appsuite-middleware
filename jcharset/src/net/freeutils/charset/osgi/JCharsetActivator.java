@@ -86,6 +86,8 @@ public final class JCharsetActivator implements BundleActivator {
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
+		LOG.info("starting bundle: net.freeutils.jcharset");
+		
 		try {
 			/*
 			 * Register jcharset's charset provider
@@ -106,6 +108,8 @@ public final class JCharsetActivator implements BundleActivator {
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
+		LOG.info("stopping bundle: net.freeutils.jcharset");
+		
 		try {
 			/*
 			 * Unregister jcharset's charset provider
