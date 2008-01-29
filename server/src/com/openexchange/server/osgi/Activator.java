@@ -108,6 +108,8 @@ public class Activator implements BundleActivator {
 	 * {@inheritDoc}
 	 */
 	public void start(final BundleContext context) throws Exception {
+		LOG.info("starting bundle: com.openexchange.server");
+		
 		try {
 		    // Configuration service is always needed.
 			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
@@ -170,6 +172,8 @@ public class Activator implements BundleActivator {
 	 * {@inheritDoc}
 	 */
 	public void stop(final BundleContext context) throws Exception {
+		LOG.info("stopping bundle: com.openexchange.server");
+		
 		try {
 			try {
 				starter.stop();

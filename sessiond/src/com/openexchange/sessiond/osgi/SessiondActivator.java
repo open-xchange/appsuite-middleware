@@ -69,9 +69,9 @@ import com.openexchange.sessiond.impl.SessiondConnectorImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 
 /**
- * OSGi bundle activator for the server.
+ * OSGi bundle activator for the sesssiond.
  * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class SessiondActivator implements BundleActivator {
 
@@ -89,6 +89,8 @@ public class SessiondActivator implements BundleActivator {
 	 * {@inheritDoc}
 	 */
 	public void start(final BundleContext context) throws Exception {
+		LOG.info("starting bundle: com.openexchange.sessiond");
+		
 		SessiondInit sessiondInit = null;
 
 		try {
@@ -145,6 +147,8 @@ public class SessiondActivator implements BundleActivator {
 	 * {@inheritDoc}
 	 */
 	public void stop(final BundleContext context) throws Exception {
+		LOG.info("stopping bundle: com.openexchange.sessiond");
+
 		try {
 			ConfigurationService.getInstance().removeServiceHolderListener(listener.getClass().getName());
 			

@@ -96,6 +96,8 @@ public final class MonitoringActivator implements BundleActivator {
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(final BundleContext context) throws Exception {
+		LOG.info("starting bundle: com.openexchange.monitoring");
+		
 		try {
 			/*
 			 * Init service trackers
@@ -150,6 +152,8 @@ public final class MonitoringActivator implements BundleActivator {
 	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(final BundleContext context) throws Exception {
+		LOG.info("stopping bundle: com.openexchange.monitoring");
+		
 		try {
 			ManagementService.getInstance().removeServiceHolderListener(listener.getClass().getName());
 
