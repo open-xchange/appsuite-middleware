@@ -72,7 +72,9 @@ public interface GeneralControlMBean {
 	
 	public void uninstall(final String name);
 
-	public void update(final String name);
+	public void update(final String name, final boolean autorefresh);
+
+	public void refresh();
 
 	public void close();
 

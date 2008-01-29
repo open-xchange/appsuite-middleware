@@ -63,6 +63,8 @@ import javax.management.ObjectName;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  * 
@@ -125,7 +127,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		} catch (BundleException exc) {
 			LOG.error("cannot install bundle: " + location, exc);
 		}
-		LOG.info("install package");
+		LOG.info("install package: " + location);
 	}
 	
 	public void uninstall(final String name) {
@@ -138,14 +140,22 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		LOG.info("uninstall package");
 	}
 
-	public void update(final String name) {
+	public void update(final String name, final boolean autofresh) {
 	    final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
         try {
             bundle.update();
+            if (autofresh) {
+            	freshPackages(bundleContext);
+            }
         } catch (BundleException exc) {
             LOG.error("cannot update bundle: " + name, exc);
         }
-        LOG.info("update package");
+        LOG.info("update package: " + name);
+	}
+	
+	public void refresh() {
+		freshPackages(bundleContext);
+        LOG.info("refreshing packages");
 	}
 
 	public void close() {
@@ -215,4 +225,12 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		}			
 	}
 	
+	protected void freshPackages(BundleContext bundleContext) {
+		System.out.println("try to fresh");
+		ServiceReference serviceReference = bundleContext.getServiceReference("org.osgi.service.packageadmin.PackageAdmin");
+		System.out.println("test");
+		PackageAdmin packageAdmin = (PackageAdmin) bundleContext.getService(serviceReference);
+		System.out.println("packageAdmin: " + packageAdmin);
+		packageAdmin.refreshPackages(null);
+	}
 }
