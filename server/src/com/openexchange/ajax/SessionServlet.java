@@ -310,7 +310,7 @@ public abstract class SessionServlet extends AJAXServlet {
 	 *            servlet request.
 	 * @return the remembered session.
 	 */
-	protected Session getSessionObject(final ServletRequest req) {
+	protected static Session getSessionObject(final ServletRequest req) {
 		return (Session) req.getAttribute(SESSION_KEY);
 	}
 }
