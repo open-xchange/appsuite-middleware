@@ -140,21 +140,23 @@ public final class MonitoringInit implements Initialization {
 			return;
 		}
 		final ManagementAgent managementAgent = ManagementService.getInstance().getService();
-		try {
+		if (managementAgent != null) {
 			try {
-				managementAgent.unregisterMBean(getObjectName());
-			} catch (MalformedObjectNameException exc) {
-				LOG.error(exc.getLocalizedMessage(), exc);
-			} catch (NullPointerException exc) {
-				LOG.error(exc.getLocalizedMessage(), exc);
-			} catch (Exception exc) {
-				LOG.error(exc.getLocalizedMessage(), exc);
+				try {
+					managementAgent.unregisterMBean(getObjectName());
+				} catch (MalformedObjectNameException exc) {
+					LOG.error(exc.getLocalizedMessage(), exc);
+				} catch (NullPointerException exc) {
+					LOG.error(exc.getLocalizedMessage(), exc);
+				} catch (Exception exc) {
+					LOG.error(exc.getLocalizedMessage(), exc);
+				}
+				if (LOG.isInfoEnabled()) {
+					LOG.info("JMX Monitor removed");
+				}
+			} finally {
+				ManagementService.getInstance().ungetService(managementAgent);
 			}
-			if (LOG.isInfoEnabled()) {
-				LOG.info("JMX Monitor removed");
-			}
-		} finally {
-			ManagementService.getInstance().ungetService(managementAgent);
 		}
 		started.set(false);
 	}
