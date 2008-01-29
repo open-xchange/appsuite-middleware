@@ -51,6 +51,8 @@ package com.openexchange.groupware.ldap;
 
 import java.util.Locale;
 
+import com.openexchange.cache.dynamic.OXNoRefresh;
+
 /**
  * Interface for the user object.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -72,6 +74,7 @@ public interface User {
      * Getter for uid.
      * @return User identifier.
      */
+    @OXNoRefresh
     int getId();
 
     /**
