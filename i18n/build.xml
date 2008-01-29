@@ -87,11 +87,15 @@
     <target name="install" depends="installJar,installConfig,installLanguages"/>
 
     <target name="installConfig">
-		<copy todir="${gwconfig.d}">
-			<fileset dir="conf" includes="**" />
+		<copy todir="${destdir}/${gwconfig.d}">
+			<fileset dir="conf">
+			    <exclude name="**CVS/**"/>
+		    </fileset>
 		</copy>
-		<copy todir="${adconfig.d}">
-			<fileset dir="conf" includes="**" />
+		<copy todir="${destdir}/${adconfig.d}">
+            <fileset dir="conf">
+                <exclude name="**CVS/**"/>
+            </fileset>
 		</copy>
         <mkdir dir="${destdir}/${gwbundle.d}"/>
         <echo file="${destdir}/${gwbundle.d}/${Bundle-SymbolicName}.ini"
