@@ -49,6 +49,8 @@
 
 package com.openexchange.authentication.database.osgi;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -57,6 +59,8 @@ import com.openexchange.authentication.Authentication;
 import com.openexchange.authentication.database.impl.DatabaseAuthentication;
 
 public class Activator implements BundleActivator {
+	
+	private static transient final Log LOG = LogFactory.getLog(Activator.class);
 
 	/**
 	 * Reference to the service registration.
@@ -67,6 +71,8 @@ public class Activator implements BundleActivator {
 	 * {@inheritDoc}
 	 */
 	public void start(final BundleContext context) throws Exception {
+		LOG.info("starting bundle: com.openexchange.authentication.database");
+
 	    registration = context.registerService(Authentication.class.getName(),
 	        new DatabaseAuthentication(), null);
 	}
@@ -75,6 +81,8 @@ public class Activator implements BundleActivator {
 	 * {@inheritDoc}
 	 */
 	public void stop(final BundleContext context) throws Exception {
+		LOG.info("stopping bundle: com.openexchange.authentication.database");
+		
 	    registration.unregister();
 	}
 }
