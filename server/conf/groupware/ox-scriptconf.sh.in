@@ -1,7 +1,7 @@
 
-SYSTEMPROPERTIES=@systemproperties@
 PROPERTIESDIR=@propertiesdir@
 LOGGINGPROPERTIES=@loggingproperties@
+OSGIPATH=@oxgroupwaresysconfdir@/osgi
 
 JAVA_XTRAOPTS="-Xms193M -Xmx512M -XX:+AggressiveHeap"
 

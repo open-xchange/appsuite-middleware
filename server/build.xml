@@ -407,9 +407,9 @@
     <target name="patchScriptConf">
         <move tofile="${patch.conf.dir}/ox-scriptconf.sh" file="${patch.conf.dir}/ox-scriptconf.sh.in" overwrite="true"/>
         <replace file="${patch.conf.dir}/ox-scriptconf.sh">
-            <replacefilter token="@systemproperties@" value="${conf.subst.patch}/system.properties"/>
             <replacefilter token="@propertiesdir@" value="${conf.subst.patch}"/>
             <replacefilter token="@loggingproperties@" value= "${conf.subst.patch}/file-logging.properties"/>
+            <replacefilter token="@oxgroupwaresysconfdir@" value= "${conf.subst.patch}"/>
         </replace>
     </target>
 
