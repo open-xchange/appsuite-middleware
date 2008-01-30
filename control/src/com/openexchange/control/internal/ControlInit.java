@@ -129,6 +129,16 @@ public final class ControlInit implements Initialization {
 			LOG.error(ControlInit.class.getName() + " has not been started");
 			return;
 		}
+		
+		final ManagementAgent managementAgent = ManagementService.getInstance().getService();
+		try {
+			managementAgent.unregisterMBean(new ObjectName("com.openexchange.control", "name", "Control"));
+		} catch (Exception exc) {
+			LOG.error("cannot unregister mbean", exc);
+		} finally {
+		    ManagementService.getInstance().ungetService(managementAgent);
+		}
+
 		removeBundleContext();
 		started.set(false);
 	}
