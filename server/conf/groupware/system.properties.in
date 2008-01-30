@@ -26,10 +26,6 @@ MimeTypeFile=@oxgroupwaresysconfdir@/mime.types
 # Currenlty known aliases: Caching, DB
 UserConfigurationStorage=Caching
 
-# Name of the class that implements how to get the link for the configuration
-# setup.
-SetupLink=com.openexchange.groupware.integration.EmptyImpl
-
 # Location of the configuration file for the user specific configuration jump.
 # The content of this file depends on the implementation of the SetupLink.
 ConfigJumpConf=@oxgroupwaresysconfdir@/configjump.properties
@@ -81,8 +77,6 @@ EVENTPROPERTIES:@oxgroupwaresysconfdir@/event.properties
 PUSHPROPERTIES:@oxgroupwaresysconfdir@/push.properties
 configDB=@oxgroupwaresysconfdir@/configdb.properties
 FOLDERCACHEPROPERTIES=@oxgroupwaresysconfdir@/foldercache.properties
-#IMAPPROPERTIES=@oxgroupwaresysconfdir@/imap.properties
-#JAVAMAILPROPERTIES=@oxgroupwaresysconfdir@/javamail.properties
 SPELLCHECKCFG=@oxgroupwaresysconfdir@/spellcheck.cfg
 
 UPDATETASKSCFG=@oxgroupwaresysconfdir@/updatetasks.cfg
