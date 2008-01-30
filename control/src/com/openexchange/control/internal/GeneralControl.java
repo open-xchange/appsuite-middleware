@@ -103,7 +103,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		} catch (BundleException exc) {
 			LOG.error("cannot start bundle: " + name, exc);
 		}
-		LOG.info("start package");
+		LOG.info("control command: start package " + name);
 	}
 	
 	public void stop(final String name) {
@@ -113,7 +113,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		} catch (BundleException exc) {
 			LOG.error("cannot stop bundle: " + name, exc);
 		}
-		LOG.info("stop package");
+		LOG.info("control command: stop package " + name);
 	}
 	
 	public void restart(final String name) {
@@ -150,7 +150,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
         } catch (BundleException exc) {
             LOG.error("cannot update bundle: " + name, exc);
         }
-        LOG.info("update package: " + name);
+        LOG.info("control command: update package: " + name);
 	}
 	
 	public void refresh() {
