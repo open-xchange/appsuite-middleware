@@ -1,6 +1,7 @@
 
-SYSTEMPROPERTIES=@systemproperties@
+PROPERTIESDIR=@propertiesdir@
 LOGGINGPROPERTIES=@loggingproperties@
+OSGIPATH=@oxgroupwaresysconfdir@/osgi
 
 JAVA_XTRAOPTS="-Xms14000M -Xmx14000M -XX:NewSize=7000m -XX:MaxNewSize=7000m -XX:SurvivorRatio=6 -XX:+UseConcMarkSweepGC"
 
