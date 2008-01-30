@@ -169,7 +169,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		bais = new ByteArrayInputStream(responseByte);
 		
 		if (status != 207) {
-			fail("response code is not 207 response data: " + new String(responseByte));
+			fail("Invalid response code '" + status + "'. Response code is not 207 as expected. Response data: " + new String(responseByte));
 		}
 
 		Response[] response = ResponseParser.parse(new SAXBuilder().build(bais), Types.GROUPUSER);
