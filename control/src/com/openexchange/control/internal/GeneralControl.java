@@ -226,11 +226,8 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 	}
 	
 	protected void freshPackages(BundleContext bundleContext) {
-		System.out.println("try to fresh");
 		ServiceReference serviceReference = bundleContext.getServiceReference("org.osgi.service.packageadmin.PackageAdmin");
-		System.out.println("test");
 		PackageAdmin packageAdmin = (PackageAdmin) bundleContext.getService(serviceReference);
-		System.out.println("packageAdmin: " + packageAdmin);
 		packageAdmin.refreshPackages(null);
 	}
 }
