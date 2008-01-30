@@ -204,6 +204,6 @@ ox_update_config_init() {
     if [ ${#dirbundles[@]} -ne ${#configbundles[@]} ]; then
 	echo "updating $cini"
 	cp $cinitemplate $cini
-	echo "osgi.bundles=$(echo ${dirbundles[@]} | sed 's; ;,;gp')" >> $cini
+	echo "osgi.bundles=$(echo ${dirbundles[@]} | sed 's; ;,;g')" >> $cini
     fi
 }
