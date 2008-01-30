@@ -1,0 +1,50 @@
+# DEFAULT CACHE REGION   
+jcs.default=
+jcs.default.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.default.cacheattributes.MaxObjects=1000
+jcs.default.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.default.cacheattributes.UseMemoryShrinker=true
+jcs.default.cacheattributes.MaxMemoryIdleTimeSeconds=3600
+jcs.default.cacheattributes.ShrinkerIntervalSeconds=60
+jcs.default.elementattributes=org.apache.jcs.engine.ElementAttributes
+jcs.default.elementattributes.IsEternal=false
+jcs.default.elementattributes.MaxLifeSeconds=-1
+jcs.default.elementattributes.IdleTime=1800
+jcs.default.elementattributes.IsSpool=false
+jcs.default.elementattributes.IsRemote=false
+jcs.default.elementattributes.IsLateral=false
+
+# PRE-DEFINED CACHE REGIONS   
+jcs.region.MailMessageCache=
+jcs.region.MailMessageCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.MailMessageCache.cacheattributes.MaxObjects=10000000
+jcs.region.MailMessageCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.MailMessageCache.cacheattributes.UseMemoryShrinker=true
+jcs.region.MailMessageCache.cacheattributes.MaxMemoryIdleTimeSeconds=60
+jcs.region.MailMessageCache.cacheattributes.ShrinkerIntervalSeconds=30
+jcs.region.MailMessageCache.cacheattributes.MaxSpoolPerRun=500
+jcs.region.MailMessageCache.elementattributes=org.apache.jcs.engine.ElementAttributes
+jcs.region.MailMessageCache.elementattributes.IsEternal=false
+jcs.region.MailMessageCache.elementattributes.MaxLifeSeconds=3600
+jcs.region.MailMessageCache.elementattributes.IdleTime=60
+# NOT APPLICABLE TO ANY AUXILIARY (NEITHER DISK, REMOTE NOR TCP)
+jcs.region.MailMessageCache.elementattributes.IsSpool=false
+jcs.region.MailMessageCache.elementattributes.IsRemote=false
+jcs.region.MailMessageCache.elementattributes.IsLateral=false
+
+# PRE-DEFINED CACHE REGIONS
+jcs.region.MailConnectionCache=
+jcs.region.MailConnectionCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
+jcs.region.MailConnectionCache.cacheattributes.MaxObjects=1000000
+jcs.region.MailConnectionCache.cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache
+jcs.region.MailConnectionCache.cacheattributes.UseMemoryShrinker=true
+jcs.region.MailConnectionCache.cacheattributes.MaxMemoryIdleTimeSeconds=7
+jcs.region.MailConnectionCache.cacheattributes.ShrinkerIntervalSeconds=3
+jcs.region.MailConnectionCache.elementattributes=org.apache.jcs.engine.ElementAttributes
+jcs.region.MailConnectionCache.elementattributes.IsEternal=false
+jcs.region.MailConnectionCache.elementattributes.MaxLifeSeconds=3600
+jcs.region.MailConnectionCache.elementattributes.IdleTime=7
+# NOT APPLICABLE TO ANY AUXILIARY (NEITHER DISK, REMOTE NOR TCP)
+jcs.region.MailConnectionCache.elementattributes.IsSpool=false
+jcs.region.MailConnectionCache.elementattributes.IsRemote=false
+jcs.region.MailConnectionCache.elementattributes.IsLateral=false

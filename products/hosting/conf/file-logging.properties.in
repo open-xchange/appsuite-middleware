@@ -8,8 +8,4 @@ java.util.logging.FileHandler.count=99
 java.util.logging.FileHandler.formatter=java.util.logging.SimpleFormatter
 java.util.logging.FileHandler.append=true
 
-sun.rmi.level=WARNING
-org.apache.level=WARNING
-com.sun.level=WARNING
-javax.management.level=WARNING
 com.openexchange.level=INFO
