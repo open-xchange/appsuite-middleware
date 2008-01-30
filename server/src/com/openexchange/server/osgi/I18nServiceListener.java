@@ -49,15 +49,12 @@
 
 package com.openexchange.server.osgi;
 
-import java.util.Locale;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.i18n.tools.I18nServices;
 
@@ -82,23 +79,7 @@ public class I18nServiceListener implements ServiceTrackerCustomizer{
         
         services.addService(i18n.getLocale(), i18n);
         
-        if (i18n.getLocale().equals(new Locale("fr","FR"))){
-        	test();
-        }
-        
 		return i18n;
-	}
-
-	private void test() {
-		
-		I18nServices i18ns =I18nServices.getInstance();
-		
-		I18nTools i8n = i18ns.getService(new Locale("fr","FR"));
-		
-		System.out.println("HARDCORE TEST START");
-		System.out.println("HARDCORE TEST START ->"+i8n.getLocalized(Groups.ZERO_DISPLAYNAME));	
-		
-		
 	}
 
 	public void modifiedService(ServiceReference reference, Object service) {
