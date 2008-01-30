@@ -407,100 +407,58 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 	}
 
 	private static Cookie[] parseCookieHeader(final String headerValue) throws AJPv13Exception {
-		Matcher m = RFC2616Regex.COOKIES.matcher(headerValue);
+		final Matcher m = RFC2616Regex.COOKIES.matcher(headerValue);
 		if (m.matches()) {
-			final String versionStr = m.group(1);
-			int version = -1;
-			if (versionStr == null) {
-				version = 0;
-			} else {
-				try {
-					version = Integer.parseInt(versionStr);
-				} catch (final NumberFormatException e) {
-					version = 0;
-					if (LOG.isDebugEnabled()) {
-						LOG.debug("Version set to 0. No number value in $Version cookie: " + versionStr);
-					}
-				}
-			}
-			m = RFC2616Regex.COOKIE_VALUE.matcher(versionStr == null ? headerValue : headerValue.substring(m.end(1)));
-			final List<Cookie> cookieList = new ArrayList<Cookie>();
-			while (m.find()) {
-				final String name = m.group(1);
-				if (name.charAt(0) == '$' && LOG.isInfoEnabled()) {
-					LOG.info(new StringBuilder(32).append("Special cookie ").append(name).append(" not handled, yet!"));
-				}
-				final Cookie c = new Cookie(name, stripQuotes(m.group(2)));
-				String attr = m.group(3);
-				if (attr != null) {
-					/*
-					 * Set path attribute
-					 */
-					c.setPath(attr);
-				}
-				attr = m.group(4);
-				if (attr != null) {
-					/*
-					 * Set domain attribute
-					 */
-					c.setDomain(attr);
-				}
-				/*
-				 * Ignore port, apply version, and add to list
-				 */
-				c.setVersion(version);
-				cookieList.add(c);
-			}
-			return cookieList.toArray(new Cookie[cookieList.size()]);
+		    // m.group(0) -> full cookies string to parse.
+		    final List<Cookie> cookieList = new ArrayList<Cookie>();
+		    for (int offset = 0; offset < m.groupCount(); offset = offset + 7) {
+		        // offset + 1 -> complete single cookie
+		        final String versionStr = m.group(offset + 2);
+		        int version = -1;
+		        if (versionStr == null) {
+		            version = 0;
+		        } else {
+		            try {
+		                version = Integer.parseInt(versionStr);
+		            } catch (final NumberFormatException e) {
+		                version = 0;
+		                if (LOG.isDebugEnabled()) {
+		                    LOG.debug("Version set to 0. No number value in $Version cookie: " + versionStr);
+		                }
+		            }
+		        }
+		        final String name = m.group(offset + 3);
+		        if (null == name) {
+		            // Regex has always at minimum 2 cookies as groups.
+		            continue;
+		        }
+		        if (name.charAt(0) == '$' && LOG.isInfoEnabled()) {
+		            LOG.info(new StringBuilder(32).append("Special cookie ").append(name).append(" not handled, yet!"));
+		        }
+		        final Cookie c = new Cookie(name, stripQuotes(m.group(offset + 4)));
+		        c.setVersion(version);
+		        String attr = m.group(offset + 5);
+		        if (attr != null) {
+		            /*
+		             * Set path attribute
+		             */
+		            c.setPath(attr);
+		        }
+		        attr = m.group(offset + 6);
+		        if (attr != null) {
+		            /*
+		             * Set domain attribute
+		             */
+		            c.setDomain(attr);
+		        }
+		        /*
+		         * Ignore port, apply version, and add to list
+		         */
+		        cookieList.add(c);
+		    }
+		    return cookieList.toArray(new Cookie[cookieList.size()]);
 		}
 		throw new AJPv13Exception(AJPv13Exception.AJPCode.INVALID_COOKIE_HEADER, true, headerValue);
-		// final String[] cookies = headerValue.split("\\s*[;,]\\s*");
-		// final List<Cookie> cookieList = new
-		// ArrayList<Cookie>(cookies.length);
-		// /*
-		// * Version "0" complies with the original cookie specification
-		// * drafted by Netscape
-		// */
-		// int version = 0;
-		// NextCookie: for (int j = 0; j < cookies.length; j++) {
-		// final Cookie c;
-		// final String[] cookieNameValuePair =
-		// cookies[j].trim().split("\\s*=\\s*");
-		// if (cookieNameValuePair.length == 1) {
-		// c = new Cookie(cookieNameValuePair[0], STR_EMPTY);
-		// c.setVersion(version);
-		// cookieList.add(c);
-		// } else if (cookieNameValuePair[0].length() > 0 &&
-		// cookieNameValuePair[0].charAt(0) == '$') {
-		// if ("$Version".equalsIgnoreCase(cookieNameValuePair[0])) {
-		// try {
-		// version = Integer.parseInt(cookieNameValuePair[1]);
-		// } catch (final NumberFormatException e) {
-		// LOG.error(new StringBuilder("Special Cookie could not be parsed:
-		// $Version=")
-		// .append(cookieNameValuePair[1]));
-		// version = 0;
-		// }
-		// } else {
-		// if (LOG.isInfoEnabled()) {
-		// LOG.info(new StringBuilder(100).append("Special cookie ")
-		// .append(cookieNameValuePair[0]).append(" not handled, yet!"));
-		// }
-		// }
-		// } else {
-		// try {
-		// c = new Cookie(cookieNameValuePair[0], cookieNameValuePair[1]);
-		// } catch (final IllegalArgumentException e) {
-		// if (LOG.isWarnEnabled()) {
-		// LOG.warn("Discarding cookie: " + e.getMessage(), e);
-		// }
-		// continue NextCookie;
-		// }
-		// c.setVersion(version);
-		// cookieList.add(c);
-		// }
-		// }
-		// return cookieList.toArray(new Cookie[cookieList.size()]);
 	}
 
 	/**

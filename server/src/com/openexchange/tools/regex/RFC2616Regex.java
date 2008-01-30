@@ -136,11 +136,25 @@ public final class RFC2616Regex {
 	 */
 	public static final Pattern VALUE = Pattern.compile(valueRegex);
 
-	private static final String pathRegex = RegexUtility.concat(";\\$Path=", RegexUtility.group(valueRegex, true));
+	/**
+	 * Additionally to the value we allow a simple slash character "/". This
+	 * is a quickfix for commons-httpclient. 
+	 */
+	private static final String pathRegex =
+	    RegexUtility.concat(
+    	    ";\\p{Blank}*\\$Path=",
+    	    RegexUtility.group(
+	            RegexUtility.OR(
+	                valueRegex,
+	                "/"
+                ),
+                true
+            )
+        );
 
-	private static final String domainRegex = RegexUtility.concat(";\\$Domain=", RegexUtility.group(valueRegex, true));
+	private static final String domainRegex = RegexUtility.concat(";\\p{Blank}*\\$Domain=", RegexUtility.group(valueRegex, true));
 
-	private static final String portRegex = RegexUtility.concat(";\\$Port(=\"", RegexUtility.group(valueRegex, false),
+	private static final String portRegex = RegexUtility.concat(";\\p{Blank}*\\$Port(=\"", RegexUtility.group(valueRegex, false),
 			"\")?");
 
 	private static final String cookieValueRegex = RegexUtility.concat(RegexUtility.group(tokenRegex, true), "=",
@@ -182,10 +196,39 @@ public final class RFC2616Regex {
 	 */
 	public static final Pattern COOKIE_VERSION = Pattern.compile(cookieVersionRegex);
 
-	private static final String cookiesRegex = RegexUtility.concat(RegexUtility.optional(RegexUtility.group(
-			RegexUtility.concat(cookieVersionRegex, "(?:;|,)\\p{Blank}*"), false)), RegexUtility.group(
-			cookieValueRegex, false), RegexUtility.zeroOrMoreTimes(RegexUtility.group(RegexUtility.concat(
-			"(?:;|,)\\p{Blank}*", cookieValueRegex), false)));
+	private static final String cookieVersionWithSeperatorRegex =
+	    RegexUtility.group(
+	        RegexUtility.concat(
+	            cookieVersionRegex,
+	            "(?:;|,)\\p{Blank}*"
+	        ),
+	        false
+	    );
+
+	private static final String oneCookieRegex =
+        RegexUtility.group(
+            RegexUtility.concat(
+                RegexUtility.optional(
+                    cookieVersionWithSeperatorRegex
+                ),
+                cookieValueRegex
+            ),
+            true
+        );
+
+	private static final String cookiesRegex =
+	    RegexUtility.concat(
+	        oneCookieRegex,
+            RegexUtility.zeroOrMoreTimes(
+                RegexUtility.group(
+                    RegexUtility.concat(
+                        "(?:;|,)\\p{Blank}*",
+                        oneCookieRegex
+                    ),
+                    false
+                )
+            )
+        );
 
 	/**
 	 * Regular expression that satisfies <i>cookies</i> as per <a
