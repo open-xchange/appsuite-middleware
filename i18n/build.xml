@@ -65,12 +65,6 @@
 		<antcall target="create-lang-jar">
 			<param name="language" value="fr_FR" />
 		</antcall>
-		<antcall target="create-lang-jar">
-			<param name="language" value="es_ES" />
-		</antcall>
-		<antcall target="create-lang-jar">
-			<param name="language" value="pl_PL" />
-		</antcall>
 	</target>
 	
 	<target name="create-lang-jar" depends="prepare">
