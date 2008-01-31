@@ -216,6 +216,8 @@ public final class RFC2616Regex {
             true
         );
 
+	public static final Pattern COOKIE = Pattern.compile(oneCookieRegex);
+
 	private static final String cookiesRegex =
 	    RegexUtility.concat(
 	        oneCookieRegex,
