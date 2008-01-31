@@ -57,6 +57,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.Configuration;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
+import com.openexchange.sessiond.exception.SessiondException;
 
 /**
  * SessiondInit
@@ -96,10 +97,15 @@ public class SessiondInit implements Initialization {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Starting Sessiond");
 			}
-			final Sessiond sessiond = Sessiond.getInstance(config);
-			sessiond.start();
+			
+			if (config != null) {
+				final Sessiond sessiond = Sessiond.getInstance(config);
+				sessiond.start();
+				started.set(true);
+			} else {
+				throw new SessiondException(SessiondException.Code.SESSIOND_CONFIG_EXCEPTION);
+			}
 		}
-		started.set(true);
 	}
 
 	public void stop() throws AbstractOXException {
