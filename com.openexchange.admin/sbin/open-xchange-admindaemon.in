@@ -76,9 +76,6 @@ ulimit -n $NRFILES
 pushd $OXPREFIX
 
 rm -f $CONSOLELOG
-OSGICACHEDIR=${OSGIPATH}/org.eclipse.osgi
-test -d $OSGICACHEDIR && rm -rf $OSGICACHEDIR
-
 
 test -z "$1" && OPTOUTPUT="> $CONSOLELOG 2>&1" || OPTOUTPUT="$1"
 
