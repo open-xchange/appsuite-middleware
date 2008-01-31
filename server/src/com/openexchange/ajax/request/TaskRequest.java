@@ -368,7 +368,7 @@ public class TaskRequest {
 			final TaskWriter taskwriter = new TaskWriter(timeZone);
 
 			final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(sessionObj);
-			it = taskssql.getTaskList(folderId, 0, 500, orderBy, orderDir, internalColumns);
+			it = taskssql.getTaskList(folderId, 0, -1, orderBy, orderDir, internalColumns);
 			
 			while (it.hasNext()) {
 				final Task taskobject = (Task)it.next();
