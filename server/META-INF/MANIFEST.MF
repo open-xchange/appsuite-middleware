@@ -75,6 +75,7 @@ Import-Package: com.mysql.jdbc;version="3.1.13",
  org.springframework.beans.factory.support,
  org.springframework.beans.factory.xml,
  org.springframework.core.io,
+ org.w3c.dom,
  org.xml.sax,
  org.xml.sax.helpers
 Export-Package: com.openexchange.api2,
