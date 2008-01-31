@@ -7,6 +7,7 @@ import com.openexchange.webdav.xml.fields.DataFields;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.Date;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -141,20 +142,16 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 		PropFindMethod propFindMethod = new PropFindMethod(PROTOCOL + hostName + getURL());
 		propFindMethod.setDoAuthentication( true );
 		
-		ByteArrayInputStream bais = new ByteArrayInputStream(requestByte);
-		propFindMethod.setRequestBody(bais);
+		InputStream is = new ByteArrayInputStream(requestByte);
+		propFindMethod.setRequestBody(is);
 		
 		int status = httpclient.executeMethod(propFindMethod);
 		
 		assertEquals("check propfind response", 207, status);
 		
-		byte responseByte[] = propFindMethod.getResponseBody();
-		
-		assertTrue("check body size", responseByte.length > 0);
-		
-		bais = new ByteArrayInputStream(responseByte);
-		
-		Document doc = new SAXBuilder().build(bais);
+        is = propFindMethod.getResponseBodyAsStream();
+        
+		Document doc = new SAXBuilder().build(is);
 		
 		parseResponse(doc, false);
 	}
