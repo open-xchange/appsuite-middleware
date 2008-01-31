@@ -112,7 +112,9 @@ public class SessiondException extends AbstractOXException {
             AbstractOXException.Category.CODE_ERROR),
 		MAX_SESSION_EXCEPTION(
             "Max Session size reached", 2,
-            AbstractOXException.Category.CODE_ERROR);
+            AbstractOXException.Category.CODE_ERROR),
+    	SESSIOND_CONFIG_EXCEPTION("Sessiond Config Exception", 3,
+    	            AbstractOXException.Category.CODE_ERROR);
 
 		/**
 		 * Message of the exception.
