@@ -83,12 +83,13 @@ public class HttpServletManager {
 	private static final Map<String, FIFOQueue<HttpServlet>> SERVLET_POOL = new HashMap<String, FIFOQueue<HttpServlet>>();
 
 	private static Map<String, Constructor<?>> servletConstructorMap;
-	
+
 	private static final AtomicInteger writeCounter = new AtomicInteger();
-	
+
 	private static final Lock writeLock = new ReentrantLock();
 
-	//private static final ReadWriteLock RW_LOCK = new ReentrantReadWriteLock();
+	// private static final ReadWriteLock RW_LOCK = new
+	// ReentrantReadWriteLock();
 
 	private HttpServletManager() {
 		super();
@@ -133,34 +134,33 @@ public class HttpServletManager {
 			}
 		} while (storedCounter != writeCounter.get());
 		return retval;
-		
-		
-		
-//		final Lock readLock = RW_LOCK.readLock();
-//		readLock.lock();
-//		try {
-//			if (SERVLET_POOL.containsKey(path)) {
-//				pathStorage.append(path);
-//				return getServletInternal(path);
-//			}
-//			/*
-//			 * Try through resolving
-//			 */
-//			final int size = SERVLET_POOL.size();
-//			final Iterator<String> iter = SERVLET_POOL.keySet().iterator();
-//			for (int i = 0; i < size; i++) {
-//				final String currentPath = iter.next();
-//				if (Pattern.compile(currentPath.replaceFirst("\\*", ".*"), Pattern.CASE_INSENSITIVE).matcher(path)
-//						.matches()) {
-//					pathStorage.append(currentPath);
-//					return getServletInternal(currentPath);
-//				}
-//			}
-//			return null;
-//		} finally {
-//			readLock.unlock();
-//		}
-		
+
+		// final Lock readLock = RW_LOCK.readLock();
+		// readLock.lock();
+		// try {
+		// if (SERVLET_POOL.containsKey(path)) {
+		// pathStorage.append(path);
+		// return getServletInternal(path);
+		// }
+		// /*
+		// * Try through resolving
+		// */
+		// final int size = SERVLET_POOL.size();
+		// final Iterator<String> iter = SERVLET_POOL.keySet().iterator();
+		// for (int i = 0; i < size; i++) {
+		// final String currentPath = iter.next();
+		// if (Pattern.compile(currentPath.replaceFirst("\\*", ".*"),
+		// Pattern.CASE_INSENSITIVE).matcher(path)
+		// .matches()) {
+		// pathStorage.append(currentPath);
+		// return getServletInternal(currentPath);
+		// }
+		// }
+		// return null;
+		// } finally {
+		// readLock.unlock();
+		// }
+
 	}
 
 	/**
@@ -266,9 +266,10 @@ public class HttpServletManager {
 	 * @param servlet
 	 *            The servlet instance
 	 * @param initParams
-	 *            The servlet's init parameter
+	 *            The servlet's init parameters
 	 * @throws ServletException
-	 *             If servlet's initialization fails
+	 *             If servlet's initialization fails or another servlet has
+	 *             already been registered with the same alias
 	 */
 	public static final void registerServlet(final String id, final HttpServlet servlet,
 			final Dictionary<String, String> initParams) throws ServletException {
@@ -277,7 +278,8 @@ public class HttpServletManager {
 			writeCounter.incrementAndGet();
 			final String path = new URI(id.charAt(0) == '/' ? id.substring(1) : id).normalize().toString();
 			if (SERVLET_POOL.containsKey(path)) {
-				return;
+				throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(id).append(
+						"\" has already been registered before.").toString());
 			}
 			if (null != initParams && !initParams.isEmpty()) {
 				AJPv13Server.SERVLET_CONFIGS.setConfig(servlet.getClass().getCanonicalName(), initParams);
