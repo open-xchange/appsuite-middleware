@@ -64,6 +64,8 @@ import javax.mail.internet.MimeMessage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailInterfaceImpl;
+import com.openexchange.mail.MailProvider;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
@@ -240,7 +242,19 @@ public class MailObject {
 			/*
 			 * Finally send mail
 			 */
-			final MailTransport transport = MailTransport.getInstance(session, MailConnection.getInstance(session));
+			final MailConnection<?,?,?> mailConnection = MailConnection.getInstance(session);
+			try {
+				final long start = System.currentTimeMillis();
+				mailConnection.connect(MailProvider.getInstance().getMailConfig(session));
+				MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				MailInterfaceImpl.mailInterfaceMonitor.changeNumSuccessfulLogins(true);
+			} catch (final MailException e) {
+				if (e.getDetailNumber() == 2) {
+					MailInterfaceImpl.mailInterfaceMonitor.changeNumFailedLogins(true);
+				}
+				throw e;
+			}
+			final MailTransport transport = MailTransport.getInstance(session, mailConnection);
 			final UnsynchronizedByteArrayOutputStream bos = new UnsynchronizedByteArrayOutputStream();
 			msg.writeTo(bos);
 			transport.sendRawMessage(bos.toByteArray());

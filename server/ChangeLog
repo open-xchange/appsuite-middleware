@@ -3,6 +3,8 @@
  - Bugfix #10880: Although version information should ensure that an update
    task only runs once, table existence is checked prior to its creation in
    spell check's update task
+ - Bugfix #10890: Properly connecting mail connection object prior to
+   sending notification
 
 * 2008-01-29 - marcus.klein@open-xchange.com
 
