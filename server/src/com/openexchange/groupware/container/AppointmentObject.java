@@ -51,6 +51,9 @@
 
 package com.openexchange.groupware.container;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.tools.StringCollection;
 
@@ -60,7 +63,12 @@ import com.openexchange.tools.StringCollection;
  */
 
 public class AppointmentObject extends CalendarObject implements Cloneable {
-	
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(AppointmentObject.class);
+
 	public static final int LOCATION = 400;
 	
 	public static final int FULL_TIME = 401;
@@ -126,7 +134,7 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
         if (timezone != null) {
             return timezone;
         }
-        System.out.println("FIX ME AND PROVIDE A TIMEZONE :"+StringCollection.getStackAsString()); // TODO: Remove me
+        LOG.warn("FIX ME AND PROVIDE A TIMEZONE.", new Throwable()); // TODO: Remove me
         return "UTC";
 	}
 	
