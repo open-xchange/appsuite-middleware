@@ -155,7 +155,7 @@ public final class MonitoringActivator implements BundleActivator {
 		LOG.info("stopping bundle: com.openexchange.monitoring");
 		
 		try {
-			ManagementService.getInstance().removeServiceHolderListener(listener.getClass().getName());
+			ManagementService.getInstance().removeServiceHolderListenerByName(listener.getClass().getName());
 
 			if (MonitoringInit.getInstance().isStarted()) {
 				MonitoringInit.getInstance().stop();

@@ -195,7 +195,7 @@ public class I18nActivator implements BundleActivator {
 			LOG.debug("Stopping I18n");
 
 		try {
-			I18nConfiguration.getInstance().removeServiceHolderListener(listener.getClass().getName());
+			I18nConfiguration.getInstance().removeServiceHolderListenerByName(listener.getClass().getName());
 			/*
 			 * Unregister through listener
 			 */

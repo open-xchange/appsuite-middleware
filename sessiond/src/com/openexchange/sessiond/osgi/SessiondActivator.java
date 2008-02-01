@@ -150,7 +150,7 @@ public class SessiondActivator implements BundleActivator {
 		LOG.info("stopping bundle: com.openexchange.sessiond");
 
 		try {
-			ConfigurationService.getInstance().removeServiceHolderListener(listener.getClass().getName());
+			ConfigurationService.getInstance().removeServiceHolderListenerByName(listener.getClass().getName());
 			
 			if (SessiondInit.getInstance().isStarted()) {
 				SessiondInit.getInstance().stop();

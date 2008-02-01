@@ -322,23 +322,37 @@ public abstract class ServiceHolder<S> {
 	}
 
 	/**
-	 * Removes the listener with given class name
+	 * Removes the listener by given class
 	 * 
 	 * @param clazz
 	 *            Listener class
 	 */
-	public final void removeServiceHolderListener(final Class<? extends ServiceHolderListener<S>> clazz) {
+	public final void removeServiceHolderListenerByClass(final Class<? extends ServiceHolderListener<S>> clazz) {
 		listeners.remove(clazz.getName());
 	}
 
 	/**
-	 * Removes the listener with given class name
+	 * Removes the listener by given class name
 	 * 
 	 * @param className
 	 *            Listener class name
 	 */
-	public final void removeServiceHolderListener(final String className) {
+	public final void removeServiceHolderListenerByName(final String className) {
 		listeners.remove(className);
+	}
+
+	/**
+	 * Removes the listener by given listener reference
+	 * 
+	 * @param listener
+	 *            Listener reference
+	 */
+	public final void removeServiceHolderListenerByRef(final ServiceHolderListener<S> listener) {
+		for (final Iterator<ServiceHolderListener<S>> iter = listeners.values().iterator(); iter.hasNext();) {
+			if (iter.next() == listener) {
+				iter.remove();
+			}
+		}
 	}
 
 	/**

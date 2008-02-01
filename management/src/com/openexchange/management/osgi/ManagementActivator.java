@@ -175,7 +175,7 @@ public final class ManagementActivator implements BundleActivator {
                 tracker.close();
             }
             serviceTrackerList.clear();
-			ConfigurationService.getInstance().removeServiceHolderListener(listener.getClass().getName());
+			ConfigurationService.getInstance().removeServiceHolderListenerByName(listener.getClass().getName());
 			stopInternal();
 		} catch (final Throwable t) {
 			LOG.error(t.getLocalizedMessage(), t);

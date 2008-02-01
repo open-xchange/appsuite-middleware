@@ -151,7 +151,7 @@ public final class ControlActivator implements BundleActivator {
 		LOG.info("stopping bundle: com.openexchange.control");
 		
 		try {
-			ManagementService.getInstance().removeServiceHolderListener(listener.getClass().getName());
+			ManagementService.getInstance().removeServiceHolderListenerByName(listener.getClass().getName());
 			if (ControlInit.getInstance().isStarted()) {
 				ControlInit.getInstance().stop();
 			}
