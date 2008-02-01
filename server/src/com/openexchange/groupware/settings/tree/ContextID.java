@@ -49,7 +49,9 @@
 
 package com.openexchange.groupware.settings.tree;
 
-import com.openexchange.groupware.settings.ReadOnlyValue;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingSetup;
 import com.openexchange.groupware.settings.SharedValue;
@@ -61,6 +63,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ContextID extends AbstractNode {
+
+    private static final Log LOG = LogFactory.getLog(ContextID.class);
 
     /**
      * Default constructor.
@@ -90,13 +94,20 @@ public final class ContextID extends AbstractNode {
      */
     @Override
     public SharedValue getSharedValue() {
-        return new ReadOnlyValue() {
+        return new SharedValue() {
             public boolean isAvailable(final Session session) {
                 return true;
             }
             public void getValue(final Session session, final Setting setting) {
                 setting.setSingleValue(Integer.valueOf(session.getContext()
                     .getContextId()));
+            }
+            public boolean isWritable() {
+                return true;
+            }
+            public void writeValue(final Session session,
+                final Setting setting) {
+                LOG.warn(getName() + " written.");
             }
         };
     }
