@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.ContactTest;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 
 public class ListTest extends ContactTest {
@@ -48,5 +49,31 @@ public class ListTest extends ContactTest {
 		
 		contactObject.setObjectID(objectId);
 		compareObject(contactObject, loadContact);
+	}
+
+	public void testListWithNotExistingEntries() throws Exception {
+		ContactObject contactObject = createCompleteContactObject();
+		
+		int objectId = insertContact(getWebConversation(), contactObject, PROTOCOL + getHostName(), getSessionId());
+		int objectId2 = insertContact(getWebConversation(), contactObject, PROTOCOL + getHostName(), getSessionId());
+		
+		final int cols[] = new int[]{ ContactObject.OBJECT_ID, ContactObject.SUR_NAME, ContactObject.DISPLAY_NAME } ;
+		
+		// not existing object last
+		int[][] objectIdAndFolderId1 = { { objectId, contactFolderId }, { objectId+100, contactFolderId } };
+		ContactObject[] contactArray = listContact(getWebConversation(), objectIdAndFolderId1, cols, getHostName(), getSessionId());		
+		assertEquals("check response array", 1, contactArray.length);
+
+		// not existing object first
+		int[][] objectIdAndFolderId2 = { { objectId+100, contactFolderId }, { objectId, contactFolderId } };
+		contactArray = listContact(getWebConversation(), objectIdAndFolderId2, cols, getHostName(), getSessionId());		
+		assertEquals("check response array", 1, contactArray.length);
+		
+		// not existing object first
+		int[][] objectIdAndFolderId3 = { { objectId+100, contactFolderId }, { objectId, contactFolderId }, { objectId2, contactFolderId } };
+		contactArray = listContact(getWebConversation(), objectIdAndFolderId3, cols, getHostName(), getSessionId());		
+		assertEquals("check response array", 2, contactArray.length);
+		
+		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 }
