@@ -52,7 +52,9 @@ package com.openexchange.groupware.update.tasks;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.openexchange.database.Database;
@@ -83,7 +85,8 @@ public final class SpellCheckUserDictTableTask implements UpdateTask {
 			SpellCheckUserDictTableTask.class);
 
 	private static final String CREATE = "CREATE TABLE spellcheck_user_dict (" + "cid INT4 UNSIGNED NOT NULL,"
-			+ "user INT4 UNSIGNED NOT NULL," + "words TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, PRIMARY KEY  (cid, user))"
+			+ "user INT4 UNSIGNED NOT NULL,"
+			+ "words TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL, PRIMARY KEY  (cid, user))"
 			+ " ENGINE = InnoDB";
 
 	/**
@@ -117,18 +120,16 @@ public final class SpellCheckUserDictTableTask implements UpdateTask {
 	 * @see com.openexchange.groupware.update.UpdateTask#perform(com.openexchange.groupware.update.Schema,
 	 *      int)
 	 */
-	@OXThrowsMultiple(
-			category = { Category.CODE_ERROR },
-			desc = { "" },
-			exceptionId = { 1 },
-			msg = { "A SQL error occurred while performing task SpellCheckUserDictTableTask: %1$s." }
-	)
+	@OXThrowsMultiple(category = { Category.CODE_ERROR }, desc = { "" }, exceptionId = { 1 }, msg = { "A SQL error occurred while performing task SpellCheckUserDictTableTask: %1$s." })
 	public void perform(final Schema schema, final int contextId) throws AbstractOXException {
 		Connection writeCon = null;
 		PreparedStatement stmt = null;
 		try {
 			writeCon = Database.get(contextId, true);
 			try {
+				if (tableExists("spellcheck_user_dict", writeCon.getMetaData())) {
+					return;
+				}
 				stmt = writeCon.prepareStatement(CREATE);
 				stmt.executeUpdate();
 			} catch (final SQLException e) {
@@ -144,6 +145,32 @@ public final class SpellCheckUserDictTableTask implements UpdateTask {
 			LOG.info("UpdateTask 'SpellCheckUserDictTableTask' performed!");
 		}
 
+	}
+
+	/**
+	 * The object type "TABLE"
+	 */
+	private static final String[] types = { "TABLE" };
+
+	/**
+	 * Check a table's existence
+	 * 
+	 * @param tableName
+	 *            The table name to check
+	 * @param dbmd
+	 *            The database's meta data
+	 * @return <code>true</code> if table exists; otherwise <code>false</code>
+	 * @throws SQLException
+	 *             If a SQL error occurs
+	 */
+	private static boolean tableExists(final String tableName, final DatabaseMetaData dbmd) throws SQLException {
+		ResultSet resultSet = null;
+		try {
+			resultSet = dbmd.getTables(null, null, tableName, types);
+			return resultSet.next();
+		} finally {
+			closeSQLStuff(resultSet, null);
+		}
 	}
 
 }
