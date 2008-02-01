@@ -549,6 +549,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 	static void stop() {
 		if (null != timerTask) {
 			timerTask.cancel();
+			timerTask = null;
 			ServerTimer.getTimer().purge();
 		}
 	}

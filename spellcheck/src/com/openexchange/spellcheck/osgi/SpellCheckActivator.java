@@ -207,6 +207,7 @@ public final class SpellCheckActivator implements BundleActivator {
 			SpellCheckHttpService.getInstance().removeServiceHolderListenerByName(
 					listeners.httpListener.getClass().getName());
 			listeners = null;
+			SpellCheckInit.getInstance().stop();
 			/*
 			 * Close service trackers
 			 */
