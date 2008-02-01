@@ -248,6 +248,7 @@ public final class MessageUtility {
 					LOG.error("Unsupported encoding in a message detected and monitored.", e);
 					MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 					sb.append(hdrVal.substring(lastMatch));
+					return sb.toString();
 				}
 			} while (m.find());
 			sb.append(hdrVal.substring(lastMatch));
