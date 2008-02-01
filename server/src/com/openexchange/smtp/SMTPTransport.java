@@ -157,8 +157,7 @@ public final class SMTPTransport extends MailTransport {
 	 * @throws MailException
 	 *             If initialization fails
 	 */
-	public SMTPTransport(final Session session, final MailConnection<?, ?, ?> mailConnection)
-			throws MailException {
+	public SMTPTransport(final Session session, final MailConnection<?, ?, ?> mailConnection) throws MailException {
 		super();
 		this.mailConnection = mailConnection;
 		final Properties smtpProps = SMTPSessionProperties.getDefaultSessionProperties();
@@ -387,10 +386,11 @@ public final class SMTPTransport extends MailTransport {
 					 * Load referenced mail parts from original message
 					 */
 					final MailPath mailPath = new MailPath(transportMail.getMsgref());
-					final MailMessage referencedMail = mailConnection.getMessageStorage().getMessage(mailPath.getFolder(),mailPath.getUid());
+					final MailMessage referencedMail = mailConnection.getMessageStorage().getMessage(
+							mailPath.getFolder(), mailPath.getUid());
 					loadReferencedParts((SMTPMailMessage) transportMail, tempIds, referencedMail);
 				}
-				
+
 				/*
 				 * Fill message
 				 */
@@ -512,10 +512,10 @@ public final class SMTPTransport extends MailTransport {
 			 */
 			startTransport = System.currentTimeMillis();
 			final String sentFullname = mailConnection.getFolderStorage().getSentFolder();
-			long uid = -1L;
+			final long[] uidArr;
 			try {
-				uid = mailConnection.getMessageStorage().appendMessages(sentFullname,
-						new MailMessage[] { MIMEMessageConverter.convertMessage(smtpMessage) })[0];
+				uidArr = mailConnection.getMessageStorage().appendMessages(sentFullname,
+						new MailMessage[] { MIMEMessageConverter.convertMessage(smtpMessage) });
 			} catch (final SMTPException e) {
 				throw e;
 			} catch (final MailException e) {
@@ -524,11 +524,18 @@ public final class SMTPTransport extends MailTransport {
 				}
 				throw new SMTPException(SMTPException.Code.COPY_TO_SENT_FOLDER_FAILED, e, new Object[0]);
 			}
+			if (uidArr != null && uidArr[0] != -1) {
+				/*
+				 * Mark newly appended mail as seen
+				 */
+				mailConnection.getMessageStorage().updateMessageFlags(sentFullname, uidArr, MailMessage.FLAG_SEEN,
+						true);
+			}
 			msgFiller.deleteReferencedUploadFiles();
 			for (String id : tempIds) {
 				session.removeUploadedFile(id);
 			}
-			final MailPath retval = new MailPath(sentFullname, uid);
+			final MailPath retval = new MailPath(sentFullname, uidArr[0]);
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(128).append("Mail copy (").append(retval.toString())
 						.append(") appended in ").append(System.currentTimeMillis() - startTransport).append("msec")
@@ -595,8 +602,9 @@ public final class SMTPTransport extends MailTransport {
 		 */
 		final String subject;
 		if ((subject = newSMTPMsg.getSubject()) == null || subject.length() == 0) {
-			newSMTPMsg.setSubject(new StringHelper(UserStorage.getStorageUser(session.getUserId(), session.getContext())
-					.getLocale()).getString(MailStrings.DEFAULT_SUBJECT));
+			newSMTPMsg.setSubject(new StringHelper(UserStorage
+					.getStorageUser(session.getUserId(), session.getContext()).getLocale())
+					.getString(MailStrings.DEFAULT_SUBJECT));
 		}
 	}
 

@@ -5,6 +5,8 @@
    spell check's update task
  - Bugfix #10890: Properly connecting mail connection object prior to
    sending notification
+ - Bugfix #10893: Setting '\Seen' flag when copying a mail message into
+   'Sent' folder
 
 * 2008-01-29 - marcus.klein@open-xchange.com
 
