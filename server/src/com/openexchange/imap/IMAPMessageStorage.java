@@ -145,10 +145,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 	 * @param imapStore
 	 *            The <b>connected</b> IMAP store that provides access to IMAP
 	 *            server
-	 * @throws MailException
 	 */
-	public IMAPMessageStorage(final IMAPStore imapStore, final IMAPConnection imapMailConnection, final Session session)
-			throws MailException {
+	public IMAPMessageStorage(final IMAPStore imapStore, final IMAPConnection imapMailConnection, final Session session) {
 		super(imapStore, imapMailConnection, session);
 		userId = session.getUserId();
 		ctx = session.getContext();

@@ -49,33 +49,19 @@
 
 package com.openexchange.imap;
 
-import static com.openexchange.mail.MailInterfaceImpl.mailInterfaceMonitor;
 import static com.openexchange.mail.utils.StorageUtility.prepareMailFolderParam;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.mail.Folder;
 import javax.mail.MessagingException;
-import javax.mail.Quota;
-import javax.mail.Quota.Resource;
 import javax.mail.internet.MimeMessage;
 
-import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailLogicTools;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.processing.MimeForward;
 import com.openexchange.mail.mime.processing.MimeReply;
-import com.openexchange.mail.parser.MailMessageParser;
-import com.openexchange.mail.parser.handlers.MailPartHandler;
-import com.openexchange.mail.versit.VersitUtility;
 import com.openexchange.session.Session;
-import com.sun.mail.iap.ParsingException;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -94,11 +80,9 @@ public final class IMAPLogicTools extends IMAPFolderWorker implements MailLogicT
 
 	/**
 	 * Constructor
-	 * 
-	 * @throws MailException
 	 */
 	public IMAPLogicTools(final IMAPStore imapStore, final IMAPConnection imapMailConnection,
-			final Session session) throws MailException {
+			final Session session) {
 		super(imapStore, imapMailConnection, session);
 	}
 
@@ -152,137 +136,6 @@ public final class IMAPLogicTools extends IMAPFolderWorker implements MailLogicT
 			throw e;
 		} catch (final MailException e) {
 			throw new IMAPException(e);
-		}
-	}
-
-	private static final String QUOTA_RES_STORAGE = "STORAGE";
-
-	public long[] getQuota(final String folder) throws MailException {
-		try {
-			imapFolder = setAndOpenFolder(imapFolder, folder == null ? STR_INBOX : prepareMailFolderParam(folder),
-					Folder.READ_ONLY);
-			if (!imapConfig.getImapCapabilities().hasQuota()) {
-				return new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
-			}
-			final Quota[] folderQuota;
-			try {
-				final long start = System.currentTimeMillis();
-				folderQuota = imapFolder.getQuota();
-				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-			} catch (final MessagingException mexc) {
-				if (mexc.getNextException() instanceof ParsingException) {
-					return new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
-				}
-				throw mexc;
-			}
-			if (folderQuota.length == 0) {
-				return new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
-			}
-			final Quota.Resource[] resources = folderQuota[0].resources;
-			if (resources.length == 0) {
-				return new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
-			}
-			Resource storageResource = null;
-			for (int i = 0; i < resources.length; i++) {
-				if (QUOTA_RES_STORAGE.equalsIgnoreCase(resources[i].name)) {
-					storageResource = resources[i];
-				}
-			}
-			if (null == storageResource) {
-				/*
-				 * No storage limitations
-				 */
-				if (LOG.isWarnEnabled()) {
-					logUnsupportedQuotaResources(resources, 0);
-				}
-				return new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
-			}
-			if (resources.length > 1 && LOG.isWarnEnabled()) {
-				logUnsupportedQuotaResources(resources, 1);
-			}
-			return new long[] { storageResource.limit, storageResource.usage };
-		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
-		}
-	}
-
-	/**
-	 * Logs unsupported QUOTA resources
-	 * 
-	 * @param resources
-	 *            The QUOTA resources
-	 */
-	private static void logUnsupportedQuotaResources(final Quota.Resource[] resources, final int start) {
-		final StringBuilder sb = new StringBuilder(128)
-				.append("Unsupported QUOTA resource(s) [<name> (<usage>/<limit>]:\n");
-		sb.append(resources[start].name).append(" (").append(resources[start].usage).append('/').append(
-				resources[start].limit).append(')');
-		for (int i = start + 1; i < resources.length; i++) {
-			sb.append(", ").append(resources[i].name).append(" (").append(resources[i].usage).append('/').append(
-					resources[i].limit).append(')');
-
-		}
-		LOG.warn(sb.toString());
-	}
-
-	/**
-	 * Get the QUOTA resource with the highest usage-per-limitation value
-	 * 
-	 * @param resources
-	 *            The QUOTA resources
-	 * @return The QUOTA resource with the highest usage to limitation relation
-	 */
-	private static Resource getMaxUsageResource(final Quota.Resource[] resources) {
-		final Resource maxUsageResource;
-		{
-			int index = 0;
-			long maxUsage = resources[0].usage / resources[0].limit;
-			for (int i = 1; i < resources.length; i++) {
-				final long tmp = resources[i].usage / resources[i].limit;
-				if (tmp > maxUsage) {
-					maxUsage = tmp;
-					index = i;
-				}
-			}
-			maxUsageResource = resources[index];
-		}
-		return maxUsageResource;
-	}
-
-	public CommonObject[] saveVersitAttachment(final String folder, final long msgUID, final String sequenceId)
-			throws MailException {
-		try {
-			// imapFolder = setAndOpenFolder(imapFolder,
-			// prepareMailFolderParam(folder), Folder.READ_ONLY);
-			final MailPartHandler handler = new MailPartHandler(sequenceId);
-			new MailMessageParser().parseMailMessage(imapConnection.getMessageStorage().getMessage(folder, msgUID),
-					handler);
-			final MailPart versitPart = handler.getMailPart();
-			if (versitPart == null) {
-				throw new IMAPException(IMAPException.Code.NO_ATTACHMENT_FOUND, sequenceId);
-			}
-			/*
-			 * Save dependent on content type
-			 */
-			final List<CommonObject> retvalList = new ArrayList<CommonObject>();
-			if (versitPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_X_VCARD)
-					|| versitPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_VCARD)) {
-				/*
-				 * Save VCard
-				 */
-				VersitUtility.saveVCard(versitPart, retvalList, session);
-			} else if (versitPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_X_VCALENDAR)
-					|| versitPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_CALENDAR)) {
-				/*
-				 * Save ICalendar
-				 */
-				VersitUtility.saveICal(versitPart, retvalList, session);
-			} else {
-				throw new IMAPException(IMAPException.Code.UNSUPPORTED_VERSIT_ATTACHMENT, versitPart.getContentType());
-			}
-			return retvalList.toArray(new CommonObject[retvalList.size()]);
-		} catch (final IOException e) {
-			throw new IMAPException(IMAPException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}
 	}
 

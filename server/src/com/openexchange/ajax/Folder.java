@@ -335,8 +335,8 @@ public class Folder extends SessionServlet {
 				try {
 					for (final FolderFieldWriter ffw : writers) {
 						ffw.writeField(jsonWriter, rootFolder, false, FolderObject.getFolderString(rootFolder
-								.getObjectID(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext())
-								.getLocale()), hasSubfolder);
+								.getObjectID(), UserStorage.getStorageUser(sessionObj.getUserId(),
+								sessionObj.getContext()).getLocale()), hasSubfolder);
 					}
 				} finally {
 					jsonWriter.endArray();
@@ -716,8 +716,9 @@ public class Folder extends SessionServlet {
 							if ((it = foldersqlinterface.getNonTreeVisiblePublicCalendarFolders()).hasNext()) {
 								final FolderObject virtualListFolder = FolderObject.createVirtualFolderObject(
 										FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, FolderObject.getFolderString(
-												FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, UserStorage.getStorageUser(
-														sessionObj.getUserId(), sessionObj.getContext()).getLocale()),
+												FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID,
+												UserStorage.getStorageUser(sessionObj.getUserId(),
+														sessionObj.getContext()).getLocale()),
 										FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
 								if (FolderCacheManager.isInitialized()) {
 									FolderCacheManager.getInstance().putFolderObject(virtualListFolder,
@@ -748,8 +749,9 @@ public class Folder extends SessionServlet {
 							if ((it = foldersqlinterface.getNonTreeVisiblePublicContactFolders()).hasNext()) {
 								final FolderObject virtualListFolder = FolderObject.createVirtualFolderObject(
 										FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, FolderObject.getFolderString(
-												FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID, UserStorage.getStorageUser(
-														sessionObj.getUserId(), sessionObj.getContext()).getLocale()),
+												FolderObject.VIRTUAL_LIST_CONTACT_FOLDER_ID,
+												UserStorage.getStorageUser(sessionObj.getUserId(),
+														sessionObj.getContext()).getLocale()),
 										FolderObject.SYSTEM_MODULE, true, FolderObject.SYSTEM_TYPE);
 								if (FolderCacheManager.isInitialized()) {
 									FolderCacheManager.getInstance().putFolderObject(virtualListFolder,
@@ -853,12 +855,12 @@ public class Folder extends SessionServlet {
 				MailInterface mailInterface = null;
 				try {
 					mailInterface = MailInterface.getInstance(sessionObj);
-					final MailFolderFieldWriter[] writers = com.openexchange.mail.json.writer.FolderWriter
-							.getMailFolderFieldWriter(columns, mailInterface.getMailConfig());
 					/*
 					 * E-Mail folder
 					 */
 					it = mailInterface.getChildFolders(parentIdentifier, all);
+					final MailFolderFieldWriter[] writers = com.openexchange.mail.json.writer.FolderWriter
+							.getMailFolderFieldWriter(columns, mailInterface.getMailConfig());
 					final int size = it.size();
 					boolean inboxFound = false;
 					for (int i = 0; i < size; i++) {
@@ -987,8 +989,10 @@ public class Folder extends SessionServlet {
 				final List<FolderObject> list = new ArrayList<FolderObject>(2);
 				final User user = UserStorage.getInstance().getUser(userId, sessionObj.getContext());
 				list.add(FolderObject.createVirtualSharedFolderObject(userId, user.getDisplayName()));
-				final FolderObject systemShared = new OXFolderAccess(sessionObj.getContext()).getFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID);
-				systemShared.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID, user.getLocale()));
+				final FolderObject systemShared = new OXFolderAccess(sessionObj.getContext())
+						.getFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID);
+				systemShared.setFolderName(FolderObject.getFolderString(FolderObject.SYSTEM_SHARED_FOLDER_ID, user
+						.getLocale()));
 				list.add(systemShared);
 				/*
 				 * Pre-Select field writers
@@ -1017,9 +1021,9 @@ public class Folder extends SessionServlet {
 					/*
 					 * Pre-Select field writers
 					 */
+					it = mailInterface.getPathToDefaultFolder(folderIdentifier);
 					final MailFolderFieldWriter[] writers = com.openexchange.mail.json.writer.FolderWriter
 							.getMailFolderFieldWriter(columns, mailInterface.getMailConfig());
-					it = mailInterface.getPathToDefaultFolder(folderIdentifier);
 					final int size = it.size();
 					for (int i = 0; i < size; i++) {
 						final MailFolder fld = (MailFolder) it.next();

@@ -99,7 +99,7 @@ public final class MailConnectionInit implements Initialization {
 			initLock.lock();
 			try {
 				if (!initialized.get()) {
-					final String className = SystemConfig.getProperty(SystemConfig.Property.MailProtocol);
+					final String className = MailProvider.getInstance().getMailConnectionClass();
 					try {
 						if (className == null) {
 							/*

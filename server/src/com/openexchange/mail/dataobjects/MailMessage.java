@@ -141,23 +141,56 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	/*
 	 * ------------------- Priority ------------------------------
 	 */
+	/**
+	 * Highest priority
+	 */
 	public static final int PRIORITY_HIGHEST = 1;
 
+	/**
+	 * High priority
+	 */
 	public static final int PRIORITY_HIGH = 2;
 
+	/**
+	 * Normal priority
+	 */
 	public static final int PRIORITY_NORMAL = 3;
 
+	/**
+	 * Low priority
+	 */
 	public static final int PRIORITY_LOW = 4;
 
+	/**
+	 * Lowest priority
+	 */
 	public static final int PRIORITY_LOWEST = 5;
 
 	/*
 	 * ------------------- Color Label ------------------------------
 	 */
+	/**
+	 * The prefix for a mail message's color labels stored as a user flag
+	 */
 	public static final String COLOR_LABEL_PREFIX = "cl_";
 
+	/**
+	 * The <code>int</code> value for no color label
+	 */
 	public static final int COLOR_LABEL_NONE = 0;
 
+	/**
+	 * Determines the corresponding <code>int</code> value of a given color
+	 * label's string representation.
+	 * <p>
+	 * A color label's string representation matches the pattern:<br>
+	 * &lt;value-of-{@link #COLOR_LABEL_PREFIX}&gt;&lt;color-label-int-value&gt;
+	 * 
+	 * @param cl
+	 *            The color label's string representation
+	 * @return The color label's <code>int</code> value
+	 * @throws MailException
+	 */
 	public static int getColorLabelIntValue(final String cl) throws MailException {
 		if (!cl.startsWith(COLOR_LABEL_PREFIX)) {
 			throw new MailException(MailException.Code.UNKNOWN_COLOR_LABEL, cl);
@@ -165,6 +198,17 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 		return Integer.parseInt(cl.substring(3));
 	}
 
+	/**
+	 * Generates the color label's string representation from given
+	 * <code>int</code> value.
+	 * <p>
+	 * A color label's string representation matches the pattern:<br>
+	 * &lt;value-of-{@link #COLOR_LABEL_PREFIX}&gt;&lt;color-label-int-value&gt;
+	 * 
+	 * @param cl
+	 *            The color label's <code>int</code> value
+	 * @return The color abel's string representation
+	 */
 	public static String getColorLabelStringValue(final int cl) {
 		return new StringBuilder(COLOR_LABEL_PREFIX).append(cl).toString();
 	}
@@ -177,13 +221,6 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	private int flags;
 
 	private boolean b_flags;
-
-	/**
-	 * IMAP uid
-	 */
-	private long uid;
-
-	private boolean b_uid;
 
 	/**
 	 * From addresses
@@ -651,41 +688,6 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	}
 
 	/**
-	 * Gets the uid
-	 * 
-	 * @return the uid
-	 */
-	public long getUid() {
-		return uid;
-	}
-
-	/**
-	 * @return <code>true</code> if uid is set; otherwise <code>false</code>
-	 */
-	public boolean containsUid() {
-		return b_uid;
-	}
-
-	/**
-	 * Removes the uid
-	 */
-	public void removeUid() {
-		uid = 0;
-		b_uid = false;
-	}
-
-	/**
-	 * Sets the uid
-	 * 
-	 * @param uid
-	 *            the uid to set
-	 */
-	public void setUid(final long uid) {
-		this.uid = uid;
-		b_uid = true;
-	}
-
-	/**
 	 * Gets the threadLevel
 	 * 
 	 * @return the threadLevel
@@ -763,7 +765,7 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	 * @return the sentDate
 	 */
 	public Date getSentDate() {
-		return sentDate;
+		return sentDate == null ? null : new Date(sentDate.getTime());
 	}
 
 	/**
@@ -789,7 +791,7 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	 *            the sentDate to set
 	 */
 	public void setSentDate(final Date sentDate) {
-		this.sentDate = sentDate;
+		this.sentDate = sentDate == null ? null : new Date(sentDate.getTime());
 		b_sentDate = true;
 	}
 
@@ -799,7 +801,7 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	 * @return the receivedDate
 	 */
 	public Date getReceivedDate() {
-		return receivedDate;
+		return receivedDate == null ? null : new Date(receivedDate.getTime());
 	}
 
 	/**
@@ -825,7 +827,7 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	 *            the receivedDate to set
 	 */
 	public void setReceivedDate(final Date receivedDate) {
-		this.receivedDate = receivedDate;
+		this.receivedDate = receivedDate == null ? null : new Date(receivedDate.getTime());
 		b_receivedDate = true;
 	}
 
@@ -1215,14 +1217,26 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	}
 
 	/**
-	 * Gets the implementation-specific ID of this mail
+	 * Gets the implementation-specific unique ID of this mail in its mail
+	 * folder. The ID returned by this method is used in storages to refer to a
+	 * mail.
+	 * <p>
+	 * In most cases this method just returns {@link #getUid()}, but an
+	 * abstract method was added to fit the needs if a message's ID differs from
+	 * its UID.
 	 * 
 	 * @return The ID of this mail
 	 */
 	public abstract long getMailId();
 
 	/**
-	 * Sets the implementation-specific mail ID
+	 * Sets the implementation-specific unique mail ID of this mail in its mail
+	 * folder. The ID returned by this method is used in storages to refer to a
+	 * mail.
+	 * <p>
+	 * In most cases this method just invokes {@link #setUid(long)}, but an
+	 * abstract method was added to fit the needs if a message's ID differs from
+	 * its UID.
 	 * 
 	 * @param id
 	 *            The mail ID

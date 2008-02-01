@@ -169,9 +169,7 @@ public final class ComposedMailMessage extends MailMessage {
 		if (delegate.containsTo()) {
 			addTo(delegate.getTo());
 		}
-		if (delegate.containsUid()) {
-			setUid(delegate.getUid());
-		}
+		setMailId(delegate.getMailId());
 		if (delegate.containsUserFlags()) {
 			addUserFlags(delegate.getUserFlags());
 		}

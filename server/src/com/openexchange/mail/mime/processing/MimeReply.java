@@ -169,7 +169,7 @@ public final class MimeReply {
 						rawSubject).toString());
 			}
 			/*
-			 * Set the appropiate recipients
+			 * Set the appropriate recipients
 			 */
 			final InternetAddress[] recipientAddrs;
 			if (originalMsg.getHeader(MessageHeaders.HDR_REPLY_TO) == null) {

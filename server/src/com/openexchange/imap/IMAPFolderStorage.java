@@ -68,7 +68,9 @@ import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.MethodNotSupportedException;
+import javax.mail.Quota;
 import javax.mail.ReadOnlyFolderException;
+import javax.mail.Quota.Resource;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
@@ -91,6 +93,7 @@ import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.CommandFailedException;
+import com.sun.mail.iap.ParsingException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.DefaultFolder;
@@ -105,8 +108,6 @@ import com.sun.mail.imap.Rights;
  * 
  */
 public final class IMAPFolderStorage implements MailFolderStorage, Serializable {
-
-	private static final String ERR_IDS_NOT_SUPPORTED = "Numeric folder IDs not supported by IMAP";
 
 	/**
 	 * Serial Version UID
@@ -126,8 +127,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 
 	private final transient IMAPConfig imapConfig;
 
-	public IMAPFolderStorage(final IMAPStore imapStore, final IMAPConnection imapMailConnection, final Session session)
-			throws MailException {
+	public IMAPFolderStorage(final IMAPStore imapStore, final IMAPConnection imapMailConnection, final Session session) {
 		super();
 		this.imapStore = imapStore;
 		this.imapMailConnection = imapMailConnection;
@@ -150,10 +150,6 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		}
 	}
 
-	public boolean exists(final long id) throws IMAPException {
-		throw new IllegalStateException(ERR_IDS_NOT_SUPPORTED);
-	}
-
 	public MailFolder getFolder(final String fullnameArg) throws MailException {
 		try {
 			final String fullname = prepareMailFolderParam(fullnameArg);
@@ -173,10 +169,6 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapMailConnection);
 		}
-	}
-
-	public MailFolder getFolder(final long id) {
-		throw new IllegalStateException(ERR_IDS_NOT_SUPPORTED);
 	}
 
 	private static final String PATTERN_ALL = "%";
@@ -349,10 +341,6 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 			}
 		}
 		return retval;
-	}
-
-	public MailFolder[] getSubfolders(final long parentId, final boolean all) {
-		throw new IllegalStateException(ERR_IDS_NOT_SUPPORTED);
 	}
 
 	public MailFolder getRootFolder() throws MailException {
@@ -800,10 +788,6 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		}
 	}
 
-	public String updateFolder(final long fullname, final MailFolder toUpdate) throws IMAPException {
-		throw new IllegalStateException(ERR_IDS_NOT_SUPPORTED);
-	}
-
 	public String deleteFolder(final String fullnameArg) throws MailException {
 		try {
 			final String fullname = prepareMailFolderParam(fullnameArg);
@@ -854,10 +838,6 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapMailConnection);
 		}
-	}
-
-	public String deleteFolder(final long id) throws IMAPException {
-		throw new IllegalStateException(ERR_IDS_NOT_SUPPORTED);
 	}
 
 	private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
@@ -935,10 +915,6 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		}
 	}
 
-	public void clearFolder(final long id) throws IMAPException {
-		throw new IllegalStateException(ERR_IDS_NOT_SUPPORTED);
-	}
-
 	private static final MailFolder[] EMPTY_PATH = new MailFolder[0];
 
 	public MailFolder[] getPath2DefaultFolder(final String fullnameArg) throws MailException {
@@ -975,10 +951,6 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		}
 	}
 
-	public MailFolder[] getPath2DefaultFolder(final long id) throws IMAPException {
-		throw new IllegalStateException(ERR_IDS_NOT_SUPPORTED);
-	}
-
 	public String getConfirmedHamFolder() throws MailException {
 		return getStdFolder(StorageUtility.INDEX_CONFIRMED_HAM);
 	}
@@ -1006,8 +978,127 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 	public void releaseResources() throws IMAPException {
 	}
 
+	private static final String QUOTA_RES_STORAGE = "STORAGE";
+
+	public long[] getQuota(final String folder) throws MailException {
+		try {
+			final IMAPFolder f;
+			{
+				final String fullname = folder == null ? STR_INBOX : prepareMailFolderParam(folder);
+				final boolean isDefaultFolder = fullname.equals(DEFAULT_FOLDER_ID);
+				f = (IMAPFolder) (isDefaultFolder ? imapStore.getDefaultFolder() : imapStore.getFolder(fullname));
+				if (!isDefaultFolder && !f.exists()) {
+					throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, fullname);
+				}
+				try {
+					if ((f.getType() & Folder.HOLDS_MESSAGES) == 0) {
+						throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, fullname);
+					} else if (imapConfig.isSupportsACLs()) {
+						if (!RightsCache.getCachedRights(f, true, session).contains(Rights.Right.READ)) {
+							throw new IMAPException(IMAPException.Code.NO_READ_ACCESS, fullname);
+						} else if (!RightsCache.getCachedRights(f, true, session).contains(Rights.Right.DELETE)) {
+							throw new IMAPException(IMAPException.Code.NO_DELETE_ACCESS, fullname);
+						}
+					}
+				} catch (final MessagingException e) {
+					throw new IMAPException(IMAPException.Code.NO_ACCESS, fullname);
+				}
+			}
+			f.open(Folder.READ_ONLY);
+			if (!imapConfig.getImapCapabilities().hasQuota()) {
+				return new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
+			}
+			final Quota[] folderQuota;
+			try {
+				final long start = System.currentTimeMillis();
+				folderQuota = f.getQuota();
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			} catch (final MessagingException mexc) {
+				if (mexc.getNextException() instanceof ParsingException) {
+					return new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
+				}
+				throw mexc;
+			}
+			if (folderQuota.length == 0) {
+				return new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
+			}
+			final Quota.Resource[] resources = folderQuota[0].resources;
+			if (resources.length == 0) {
+				return new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
+			}
+			Resource storageResource = null;
+			for (int i = 0; i < resources.length; i++) {
+				if (QUOTA_RES_STORAGE.equalsIgnoreCase(resources[i].name)) {
+					storageResource = resources[i];
+				}
+			}
+			if (null == storageResource) {
+				/*
+				 * No storage limitations
+				 */
+				if (LOG.isWarnEnabled()) {
+					logUnsupportedQuotaResources(resources, 0);
+				}
+				return new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
+			}
+			if (resources.length > 1 && LOG.isWarnEnabled()) {
+				logUnsupportedQuotaResources(resources, 1);
+			}
+			return new long[] { storageResource.limit, storageResource.usage };
+		} catch (final MessagingException e) {
+			throw IMAPException.handleMessagingException(e, imapMailConnection);
+		}
+	}
+
 	/*
 	 * ++++++++++++++++++ Helper methods ++++++++++++++++++
+	 */
+
+	/**
+	 * Logs unsupported QUOTA resources
+	 * 
+	 * @param resources
+	 *            The QUOTA resources
+	 */
+	private static void logUnsupportedQuotaResources(final Quota.Resource[] resources, final int start) {
+		final StringBuilder sb = new StringBuilder(128)
+				.append("Unsupported QUOTA resource(s) [<name> (<usage>/<limit>]:\n");
+		sb.append(resources[start].name).append(" (").append(resources[start].usage).append('/').append(
+				resources[start].limit).append(')');
+		for (int i = start + 1; i < resources.length; i++) {
+			sb.append(", ").append(resources[i].name).append(" (").append(resources[i].usage).append('/').append(
+					resources[i].limit).append(')');
+
+		}
+		LOG.warn(sb.toString());
+	}
+
+	/**
+	 * Get the QUOTA resource with the highest usage-per-limitation value
+	 * 
+	 * @param resources
+	 *            The QUOTA resources
+	 * @return The QUOTA resource with the highest usage to limitation relation
+	 * 
+	 * <pre>
+	 * private static Resource getMaxUsageResource(final Quota.Resource[] resources) {
+	 * 	final Resource maxUsageResource;
+	 * 	{
+	 * 		int index = 0;
+	 * 		long maxUsage = resources[0].usage / resources[0].limit;
+	 * 		for (int i = 1; i &lt; resources.length; i++) {
+	 * 			final long tmp = resources[i].usage / resources[i].limit;
+	 * 			if (tmp &gt; maxUsage) {
+	 * 				maxUsage = tmp;
+	 * 				index = i;
+	 * 			}
+	 * 		}
+	 * 		maxUsageResource = resources[index];
+	 * 	}
+	 * 	return maxUsageResource;
+	 * }
+	 * </pre>
+	 * 
 	 */
 
 	/**
@@ -1292,7 +1383,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		return retval.toArray(new ACL[retval.size()]);
 	}
 
-	private static final boolean isKnownEntity(final String entity, final User2ACL user2ACL, final Context ctx,
+	private static boolean isKnownEntity(final String entity, final User2ACL user2ACL, final Context ctx,
 			final User2ACLArgs user2ACLArgs) {
 		try {
 			return user2ACL.getUserID(entity, ctx, user2ACLArgs) != -1;

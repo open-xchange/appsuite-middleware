@@ -284,8 +284,7 @@ public final class IMAPException extends MIMEMailException {
 		 * Versit attachment could not be saved due to an unsupported MIME type:
 		 * %s
 		 */
-		UNSUPPORTED_VERSIT_ATTACHMENT("Versit attachment could not be saved due to an unsupported MIME type: %s",
-				Category.USER_INPUT, 2044),
+		UNSUPPORTED_VERSIT_ATTACHMENT(MailException.Code.UNSUPPORTED_VERSIT_ATTACHMENT),
 		/**
 		 * Versit object %s could not be saved
 		 */

@@ -131,7 +131,7 @@ public final class FolderParser {
 							final String entityStr = elem.getString(FolderFields.ENTITY);
 							entity = us.getUserId(entityStr, session.getContext());
 						}
-						final MailPermission mailPerm = MailPermission.getInstance(session);
+						final MailPermission mailPerm = MailPermission.newInstance(session);
 						mailPerm.setEntity(entity);
 						if (!elem.has(FolderFields.BITS)) {
 							throw new MailException(MailException.Code.MISSING_PARAMETER, FolderFields.BITS);

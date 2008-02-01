@@ -49,13 +49,13 @@
 
 package com.openexchange.mail;
 
-import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.processing.MimeForward;
+import com.openexchange.mail.mime.processing.MimeReply;
 
 /**
  * {@link MailLogicTools} - Extends the mail message/folder storage
- * functionality by requesting quota informations, replying to/forwarding a mail
- * message and storing attached versit (ical & vcard) objects.
+ * functionality by replying to/forwarding a mail message.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -63,15 +63,12 @@ import com.openexchange.mail.dataobjects.MailMessage;
 public interface MailLogicTools {
 
 	/**
-	 * Constant which indicates unlimited quota
-	 * 
-	 * @value <code>-1</code>
-	 */
-	public static final int UNLIMITED_QUOTA = -1;
-
-	/**
 	 * Creates a reply message for the message specified by given original UID
-	 * which is located in given folder
+	 * which is located in given folder.
+	 * <p>
+	 * If mailing system deals with common RFC822 messages, this method only
+	 * delegates its request to
+	 * {@link MimeReply#getReplyMail(javax.mail.internet.MimeMessage, boolean, com.openexchange.session.Session, javax.mail.Session)}.
 	 * 
 	 * @param originalUID
 	 *            The original message's UID
@@ -88,7 +85,11 @@ public interface MailLogicTools {
 
 	/**
 	 * Creates a forward message for the message specified by given original UID
-	 * which is located in given folder
+	 * which is located in given folder.
+	 * <p>
+	 * If mailing system deals with common RFC822 messages, this method only
+	 * delegates its request to
+	 * {@link MimeForward#getFowardMail(javax.mail.internet.MimeMessage, com.openexchange.session.Session)}.
 	 * 
 	 * @param originalUID
 	 *            The original message's UID
@@ -100,37 +101,6 @@ public interface MailLogicTools {
 	 *             If forward message cannot be generated
 	 */
 	public MailMessage getFowardMessage(long originalUID, String folder) throws MailException;
-
-	/**
-	 * Detects both quota limit and quota usage on given mailbox's folder
-	 * gathered in an array of <code>long</code>. The first value is the
-	 * quota limit and the second is the quota usage.
-	 * 
-	 * @param folder
-	 *            The folder fullname (if <code>null</code> <i>"INBOX"</i> is
-	 *            used)
-	 * @return Both quota limit and quota usage
-	 * @throws MailException
-	 *             If quota limit and/or quote usage cannot be determined
-	 */
-	public long[] getQuota(String folder) throws MailException;
-
-	/**
-	 * Saves the versit attachment with given sequence ID in the message located
-	 * in given folder with given UID.
-	 * 
-	 * @param folder
-	 *            The folder fullname
-	 * @param msgUID
-	 *            The message UID
-	 * @param sequenceId
-	 *            The versit attachment's sequence ID inside the message
-	 * @return An array of {@link CommonObject} instances representing the saved
-	 *         versit objects
-	 * @throws MailException
-	 *             If versit attachment cannot be saved
-	 */
-	public CommonObject[] saveVersitAttachment(String folder, long msgUID, String sequenceId) throws MailException;
 
 	/**
 	 * Releases all resources when closing parental {@link MailConnection}

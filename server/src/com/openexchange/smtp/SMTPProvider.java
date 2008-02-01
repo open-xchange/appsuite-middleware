@@ -47,75 +47,33 @@
  *
  */
 
-package com.openexchange.mail.mime;
+package com.openexchange.smtp;
 
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.mail.Message;
-
-import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailProvider;
+import com.openexchange.mail.transport.MailTransportProvider;
 
 /**
- * {@link MIMEHeaderLoader} - Implementation-specific header loader.
+ * {@link SMTPProvider}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MIMEHeaderLoader {
-
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
-	private static MIMEHeaderLoader instance;
+public final class SMTPProvider extends MailTransportProvider {
 
 	/**
-	 * Gets the singleton instance of {@link MIMEHeaderLoader}
-	 * 
-	 * @return The singleton instance of {@link MIMEHeaderLoader}
-	 * @throws MailException
+	 * Initializes a new {@link SMTPProvider}
 	 */
-	public static final MIMEHeaderLoader getInstance() throws MailException {
-		if (!initialized.get()) {
-			synchronized (initialized) {
-				try {
-					if (null == instance) {
-						instance = Class.forName(MailProvider.getInstance().getHeaderLoaderClass()).asSubclass(
-								MIMEHeaderLoader.class).newInstance();
-						initialized.set(true);
-					}
-				} catch (final InstantiationException e) {
-					throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, e.getLocalizedMessage());
-				} catch (final IllegalAccessException e) {
-					throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, e.getLocalizedMessage());
-				} catch (final ClassNotFoundException e) {
-					throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, e.getLocalizedMessage());
-				}
-			}
-		}
-		return instance;
-	}
-
-	/**
-	 * Initializes a new {@link MIMEHeaderLoader}
-	 */
-	protected MIMEHeaderLoader() {
+	public SMTPProvider() {
 		super();
 	}
 
-	/**
-	 * Call this method if JavaMail's routine fails to load a message's header.
-	 * Headers are read in a safe manner and filled into a map which is then
-	 * returned
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param msg
-	 *            The message which headers shall be loaded
-	 * @param uid
-	 *            <code>true</code> to reference to message via its UID;
-	 *            otherwise via its sequence ID
-	 * @return A {@link Map} containing the headers
-	 * @throws MailException
-	 *             If an error occurs
+	 * @see com.openexchange.mail.transport.MailTransportProvider#getMailTransportClass()
 	 */
-	public abstract Map<String, String> loadHeaders(final Message msg, final boolean uid) throws MailException;
+	@Override
+	public String getMailTransportClass() {
+		return SMTPTransport.class.getName();
+	}
+
 }

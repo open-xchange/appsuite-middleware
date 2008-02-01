@@ -174,8 +174,8 @@ public final class SMTPTransport extends MailTransport {
 	}
 
 	private void checkMailConnection() throws MailException {
-		if (!mailConnection.isConnected()) {
-			mailConnection.connect();
+		if (!mailConnection.isConnectedUnsafe()) {
+			throw new SMTPException(SMTPException.Code.NOT_CONNECTED);
 		}
 	}
 
@@ -263,7 +263,7 @@ public final class SMTPTransport extends MailTransport {
 			ct.setContentType("message/disposition-notification; name=MDNPart1.txt; charset=UTF-8");
 			final MimeBodyPart ack = new MimeBodyPart();
 			final String msgId = mail.getHeader(MessageHeaders.HDR_MESSAGE_ID);
-			ack.setText(strHelper.getString(ACK_TEXT).replaceFirst("#FROM#", quoteReplacement(fromAddr)).replaceFirst(
+			ack.setText(strHelper.getString(ACK_TEXT).replaceFirst("#FROM#", quoteReplacement(from)).replaceFirst(
 					"#MSG ID#", quoteReplacement(msgId)), MailConfig.getDefaultMimeCharset());
 			ack.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
 			ack.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());

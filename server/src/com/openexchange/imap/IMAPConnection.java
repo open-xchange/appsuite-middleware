@@ -56,7 +56,6 @@ import java.util.Properties;
 import javax.mail.MessagingException;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.imap.config.GlobalIMAPConfig;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.imap.user2acl.User2ACLInit;
@@ -64,7 +63,6 @@ import com.openexchange.imap.user2acl.User2ACL.User2ACLException;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterfaceImpl;
-import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
@@ -106,19 +104,11 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 
 	private boolean decrement;
 
-	private transient Thread usingThread;
-
-	private StackTraceElement[] trace;
-
-	private transient IMAPConfig imapConfig;
-
 	/**
 	 * Default constructor
 	 */
 	public IMAPConnection(final Session session) {
 		super(session);
-		setMailServer("localhost");
-		setMailServerPort(143);
 		setMailProperties((Properties) System.getProperties().clone());
 	}
 
@@ -131,9 +121,6 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 		imapSession = null;
 		connected = false;
 		decrement = false;
-		trace = null;
-		usingThread = null;
-		imapConfig = null;
 	}
 
 	@Override
@@ -169,18 +156,6 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	}
 
 	@Override
-	protected void initMailConfig(final Session session) throws MailException {
-		if (imapConfig == null) {
-			imapConfig = IMAPConfig.getImapConfig(session);
-		}
-	}
-
-	@Override
-	public MailConfig getMailConfig() throws MailException {
-		return imapConfig;
-	}
-
-	@Override
 	protected void closeInternal() {
 		try {
 			if (imapStore != null) {
@@ -189,6 +164,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 				} catch (final MessagingException e) {
 					LOG.error("Error while closing IMAPStore", e);
 				}
+				imapStore = null;
 			}
 		} finally {
 			if (decrement) {
@@ -206,17 +182,11 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.MailConnection#connectInternal()
-	 */
 	@Override
 	protected void connectInternal() throws MailException {
 		if (imapStore != null && imapStore.isConnected()) {
 			connected = true;
-			usingThread = Thread.currentThread();
-			trace = usingThread.getStackTrace();
+			applyNewThread();
 			return;
 		}
 		try {
@@ -238,20 +208,20 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 			 * Get store
 			 */
 			imapStore = (IMAPStore) imapSession.getStore(PROTOCOL_IMAP);
-			String tmpPass = getPassword();
-			if (getPassword() != null) {
+			String tmpPass = getMailConfig().getPassword();
+			if (tmpPass != null) {
 				try {
-					tmpPass = new String(getPassword().getBytes(IMAPConfig.getImapAuthEnc()), CHARENC_ISO8859);
+					tmpPass = new String(tmpPass.getBytes(IMAPConfig.getImapAuthEnc()), CHARENC_ISO8859);
 				} catch (final UnsupportedEncodingException e) {
 					LOG.error(e.getMessage(), e);
 				}
 			}
-			imapStore.connect(getMailServer(), getMailServerPort(), getLogin(), tmpPass);
+			imapStore.connect(getMailConfig().getServer(), getMailConfig().getPort(), getMailConfig().getLogin(), tmpPass);
 			connected = true;
 			/*
-			 * Check server's capabilities
+			 * Add server's capabilities
 			 */
-			imapConfig.initializeCapabilities(imapStore);
+			((IMAPConfig) getMailConfig()).initializeCapabilities(imapStore);
 			/*
 			 * Increase counter
 			 */
@@ -262,8 +232,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 			 * Remember to decrement
 			 */
 			decrement = true;
-			usingThread = Thread.currentThread();
-			trace = usingThread.getStackTrace();
+			applyNewThread();
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, this);
 		}
@@ -340,60 +309,6 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 		return connected;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.MailConnection#getTrace()
-	 */
-	@Override
-	public String getTrace() {
-		final StringBuilder sBuilder = new StringBuilder(512);
-		sBuilder.append(toString());
-		sBuilder.append("\nIMAP connection established (or fetched from cache) at: ").append('\n');
-		/*
-		 * Start at index 2
-		 */
-		for (int i = 2; i < trace.length; i++) {
-			sBuilder.append("\tat ").append(trace[i]).append('\n');
-		}
-		if (null != usingThread && usingThread.isAlive()) {
-			sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append('\n');
-			final StackTraceElement[] trace = usingThread.getStackTrace();
-			for (int i = 0; i < trace.length; i++) {
-				if (i > 0) {
-					sBuilder.append('\n');
-				}
-				sBuilder.append("\tat ").append(trace[i]);
-			}
-		}
-		return sBuilder.toString();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.MailConnection#getMailPermissionClass()
-	 */
-	@Override
-	public String getMailPermissionClassInternal() {
-		return ACLPermission.class.getName();
-	}
-
-	@Override
-	protected String getHeaderLoaderClassInternal() {
-		return IMAPHeaderLoader.class.getName();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.MailConnection#getMailPermissionClass()
-	 */
-	@Override
-	public String getGlobalMailConfigClassInternal() {
-		return GlobalIMAPConfig.class.getName();
-	}
-
 	/**
 	 * Gets used IMAP session
 	 * 
@@ -415,7 +330,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 			throw new MailException(e);
 		}
 	}
-	
+
 	@Override
 	protected void shutdownInternal() throws MailException {
 		try {

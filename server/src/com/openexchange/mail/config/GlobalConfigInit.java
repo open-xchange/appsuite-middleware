@@ -56,6 +56,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailProvider;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.server.Initialization;
 
@@ -88,6 +89,9 @@ public final class GlobalConfigInit implements Initialization {
 		super();
 	}
 
+	/**
+	 * @return The singleton instance
+	 */
 	public static GlobalConfigInit getInstance() {
 		return instance;
 	}
@@ -97,7 +101,7 @@ public final class GlobalConfigInit implements Initialization {
 			initLock.lock();
 			try {
 				if (!initialized.get()) {
-					final String className = MailConnection.getGlobalMailConfigClass();
+					final String className = MailProvider.getInstance().getGlobalMailConfigClass();
 					try {
 						if (className == null) {
 							throw new MailConfigException("Missing global mail config class");

@@ -53,7 +53,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailException;
 import com.openexchange.server.Initialization;
@@ -99,7 +98,7 @@ public final class MailTransportInit implements Initialization {
 			initLock.lock();
 			try {
 				if (!initialized.get()) {
-					final String className = SystemConfig.getProperty(SystemConfig.Property.MailTransportProtocol);
+					final String className = MailTransportProvider.getInstance().getMailTransportClass();
 					try {
 						if (className == null) {
 							/*

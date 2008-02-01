@@ -94,8 +94,9 @@ public abstract class MailPermission extends OCLPermission {
 	 *            The session
 	 * @return The proper mail permission implementation
 	 * @throws MailException
+	 *             If instantiation fails
 	 */
-	public static MailPermission getInstance(final Session session) throws MailException {
+	public static MailPermission newInstance(final Session session) throws MailException {
 		/*
 		 * Create a new mail permission
 		 */

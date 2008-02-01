@@ -54,8 +54,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailProvider;
 import com.openexchange.server.Initialization;
 
 /**
@@ -120,7 +120,7 @@ public final class MailPermissionInit implements Initialization {
 			initLock.lock();
 			try {
 				if (!initialized.get()) {
-					final String className = MailConnection.getMailPermissionClass();
+					final String className = MailProvider.getInstance().getMailPermissionClass();
 					try {
 						if (className == null) {
 							/*

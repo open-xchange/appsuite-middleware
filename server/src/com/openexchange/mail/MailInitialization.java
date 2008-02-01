@@ -54,6 +54,7 @@ import com.openexchange.mail.cache.MailCacheConfiguration;
 import com.openexchange.mail.config.GlobalConfigInit;
 import com.openexchange.mail.permission.MailPermissionInit;
 import com.openexchange.mail.transport.MailTransportInit;
+import com.openexchange.mail.transport.MailTransportProvider;
 import com.openexchange.server.Initialization;
 
 /**
@@ -82,6 +83,8 @@ public final class MailInitialization implements Initialization {
 	 * @see com.openexchange.server.Initialization#start()
 	 */
 	public void start() throws AbstractOXException {
+		MailProvider.initMailProvider();
+		MailTransportProvider.initMailProvider();
 		MailConnectionInit.getInstance().start();
 		MailTransportInit.getInstance().start();
 		GlobalConfigInit.getInstance().start();
@@ -100,6 +103,8 @@ public final class MailInitialization implements Initialization {
 		GlobalConfigInit.getInstance().stop();
 		MailTransportInit.getInstance().stop();
 		MailConnectionInit.getInstance().stop();
+		MailTransportProvider.resetInitMailProvider();
+		MailProvider.resetInitMailProvider();
 	}
 
 }

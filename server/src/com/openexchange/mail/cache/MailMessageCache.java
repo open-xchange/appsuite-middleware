@@ -347,45 +347,46 @@ public final class MailMessageCache {
 		public void updateField(MailMessage mail, Object newValue);
 	}
 
+	private static final MailFieldUpdater flagsUpdater = new MailFieldUpdater() {
+		public void updateField(final MailMessage mail, final Object newValue) {
+			int newFlags = mail.getFlags();
+			int flags = ((Integer) newValue).intValue();
+			final boolean set = flags > 0;
+			flags = set ? flags : flags * -1;
+			if (((flags & MailMessage.FLAG_ANSWERED) > 0)) {
+				newFlags = set ? (newFlags | MailMessage.FLAG_ANSWERED) : (newFlags & ~MailMessage.FLAG_ANSWERED);
+			}
+			if (((flags & MailMessage.FLAG_DELETED) > 0)) {
+				newFlags = set ? (newFlags | MailMessage.FLAG_DELETED) : (newFlags & ~MailMessage.FLAG_DELETED);
+			}
+			if (((flags & MailMessage.FLAG_DRAFT) > 0)) {
+				newFlags = set ? (newFlags | MailMessage.FLAG_DRAFT) : (newFlags & ~MailMessage.FLAG_DRAFT);
+			}
+			if (((flags & MailMessage.FLAG_FLAGGED) > 0)) {
+				newFlags = set ? (newFlags | MailMessage.FLAG_FLAGGED) : (newFlags & ~MailMessage.FLAG_FLAGGED);
+			}
+			if (((flags & MailMessage.FLAG_SEEN) > 0)) {
+				newFlags = set ? (newFlags | MailMessage.FLAG_SEEN) : (newFlags & ~MailMessage.FLAG_SEEN);
+			}
+			mail.setFlags(newFlags);
+		}
+	};
+
+	private static final MailFieldUpdater colorFlagUpdater = new MailFieldUpdater() {
+		public void updateField(final MailMessage mail, final Object newValue) {
+			mail.setColorLabel(((Integer) newValue).intValue());
+		}
+	};
+
 	private static MailFieldUpdater[] createMailFieldUpdater(final MailListField[] changedFields) {
 		final MailFieldUpdater[] updaters = new MailFieldUpdater[changedFields.length];
 		for (int i = 0; i < changedFields.length; i++) {
 			switch (changedFields[i]) {
 			case FLAGS:
-				updaters[i] = new MailFieldUpdater() {
-					public void updateField(final MailMessage mail, final Object newValue) {
-						int newFlags = mail.getFlags();
-						int flags = ((Integer) newValue).intValue();
-						final boolean set = flags > 0;
-						flags = set ? flags : flags * -1;
-						if (((flags & MailMessage.FLAG_ANSWERED) > 0)) {
-							newFlags = set ? (newFlags | MailMessage.FLAG_ANSWERED)
-									: (newFlags & ~MailMessage.FLAG_ANSWERED);
-						}
-						if (((flags & MailMessage.FLAG_DELETED) > 0)) {
-							newFlags = set ? (newFlags | MailMessage.FLAG_DELETED)
-									: (newFlags & ~MailMessage.FLAG_DELETED);
-						}
-						if (((flags & MailMessage.FLAG_DRAFT) > 0)) {
-							newFlags = set ? (newFlags | MailMessage.FLAG_DRAFT) : (newFlags & ~MailMessage.FLAG_DRAFT);
-						}
-						if (((flags & MailMessage.FLAG_FLAGGED) > 0)) {
-							newFlags = set ? (newFlags | MailMessage.FLAG_FLAGGED)
-									: (newFlags & ~MailMessage.FLAG_FLAGGED);
-						}
-						if (((flags & MailMessage.FLAG_SEEN) > 0)) {
-							newFlags = set ? (newFlags | MailMessage.FLAG_SEEN) : (newFlags & ~MailMessage.FLAG_SEEN);
-						}
-						mail.setFlags(newFlags);
-					}
-				};
+				updaters[i] = flagsUpdater;
 				break;
 			case COLOR_LABEL:
-				updaters[i] = new MailFieldUpdater() {
-					public void updateField(final MailMessage mail, final Object newValue) {
-						mail.setColorLabel(((Integer) newValue).intValue());
-					}
-				};
+				updaters[i] = colorFlagUpdater;
 				break;
 			default:
 				throw new IllegalStateException("No Updater for MailListField." + changedFields[i].toString());

@@ -73,6 +73,8 @@ public final class MIMEMailMessage extends MailMessage {
 
 	private final MIMEMailPart mailPart;
 
+	private long uid = -1L;
+
 	/**
 	 * Constructor - Constructs an empty mail message
 	 */
@@ -103,7 +105,7 @@ public final class MIMEMailMessage extends MailMessage {
 		/*
 		 * Mail ID is equal to UID in IMAP
 		 */
-		return getUid();
+		return uid;
 	}
 
 	/*
@@ -116,7 +118,7 @@ public final class MIMEMailMessage extends MailMessage {
 		/*
 		 * Mail ID is equal to UID in IMAP
 		 */
-		setUid(id);
+		this.uid = id;
 	}
 
 	/*

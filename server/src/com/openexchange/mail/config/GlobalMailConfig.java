@@ -69,7 +69,8 @@ import com.openexchange.mail.spellcheck.SpellCheckConfig;
 import com.openexchange.mail.spellcheck.SpellCheckConfigParser;
 
 /**
- * {@link GlobalMailConfig} - Global mail properties
+ * {@link GlobalMailConfig} - Global mail properties read from configuration
+ * file
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -80,11 +81,11 @@ public abstract class GlobalMailConfig {
 			.getLog(GlobalMailConfig.class);
 
 	private static final String STR_FALSE = "false";
-	
+
 	private static final String STR_TRUE = "true";
 
 	private static GlobalMailConfig mailInstance;
-	
+
 	private final AtomicBoolean loaded = new AtomicBoolean();
 
 	/*
@@ -131,9 +132,9 @@ public abstract class GlobalMailConfig {
 	private int watcherFrequency;
 
 	private boolean watcherShallClose;
-	
+
 	private String spamHandlerClass;
-	
+
 	private boolean supportSubscription;
 
 	/**
@@ -327,7 +328,7 @@ public abstract class GlobalMailConfig {
 				logBuilder.append("\tDefault Separator: ").append(defaultSeparator).append('\n');
 			}
 		}
-		
+
 		{
 			final String maxNum = mailProperties.getProperty("maxNumOfConnections", "0").trim();
 			try {

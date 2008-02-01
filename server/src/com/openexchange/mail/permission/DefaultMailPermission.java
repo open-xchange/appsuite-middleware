@@ -54,7 +54,8 @@ import com.openexchange.session.Session;
 
 /**
  * {@link DefaultMailPermission} - The default mail permission which grants full
- * access to a mail folder
+ * access to a mail folder (possibly to bypass permission settings if none
+ * provided by mailing system).
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -64,7 +65,10 @@ public final class DefaultMailPermission extends MailPermission {
 	private static final long serialVersionUID = 8431208323912426087L;
 
 	/**
-	 * Default constructor
+	 * Initializes a new {@link DefaultMailPermission}
+	 * 
+	 * @param session
+	 *            The session providing needed user data
 	 */
 	public DefaultMailPermission(final Session session) {
 		super(session);

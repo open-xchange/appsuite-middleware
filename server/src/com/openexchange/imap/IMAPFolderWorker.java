@@ -96,7 +96,7 @@ public abstract class IMAPFolderWorker {
 
 	protected static final Flags FLAGS_SEEN = new Flags(Flags.Flag.SEEN);
 
-	protected static final MailListField[] FIELDS_FLAGS = new MailListField[] { MailListField.FLAGS };
+	static final MailListField[] FIELDS_FLAGS = new MailListField[] { MailListField.FLAGS };
 
 	/*
 	 * Fields
@@ -119,11 +119,8 @@ public abstract class IMAPFolderWorker {
 
 	/**
 	 * Default constructor
-	 * 
-	 * @throws MailException
 	 */
-	public IMAPFolderWorker(final IMAPStore imapStore, final IMAPConnection imapConnection, final Session session)
-			throws MailException {
+	public IMAPFolderWorker(final IMAPStore imapStore, final IMAPConnection imapConnection, final Session session) {
 		super();
 		this.imapStore = imapStore;
 		this.imapConnection = imapConnection;

@@ -119,6 +119,7 @@ import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailStorageUtils.OrderDirection;
+import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.TransportMailMessage;
@@ -127,6 +128,7 @@ import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
+import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.transport.SendType;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -142,6 +144,7 @@ import com.openexchange.tools.regex.RegexUtility;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.tools.versit.utility.VersitUtility;
 
 /**
  * Mail - the servlet to handle mail requests
@@ -956,8 +959,38 @@ public class Mail extends PermissionServlet implements UploadListener {
 					mailInterface = MailInterface.getInstance(sessionObj);
 					closeMailInterface = true;
 				}
-				final CommonObject[] insertedObjs = mailInterface.saveVersitAttachment(mailPath.getFolder(), mailPath
-						.getUid(), partIdentifier);
+				final CommonObject[] insertedObjs;
+				{
+					final MailPart versitPart = mailInterface.getMessageAttachment(mailPath.getFolder(), mailPath
+							.getUid(), partIdentifier, false);
+					/*
+					 * Save dependent on content type
+					 */
+					final List<CommonObject> retvalList = new ArrayList<CommonObject>();
+					if (versitPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_X_VCARD)
+							|| versitPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_VCARD)) {
+						/*
+						 * Save VCard
+						 */
+						VersitUtility.saveVCard(versitPart.getInputStream(), versitPart.getContentType().getBaseType(),
+								versitPart.getContentType().containsCharsetParameter() ? versitPart.getContentType()
+										.getCharsetParameter() : MailConfig.getDefaultMimeCharset(), retvalList,
+								sessionObj);
+					} else if (versitPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_X_VCALENDAR)
+							|| versitPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_CALENDAR)) {
+						/*
+						 * Save ICalendar
+						 */
+						VersitUtility.saveICal(versitPart.getInputStream(), versitPart.getContentType().getBaseType(),
+								versitPart.getContentType().containsCharsetParameter() ? versitPart.getContentType()
+										.getCharsetParameter() : MailConfig.getDefaultMimeCharset(), retvalList,
+								sessionObj);
+					} else {
+						throw new MailException(MailException.Code.UNSUPPORTED_VERSIT_ATTACHMENT, versitPart
+								.getContentType());
+					}
+					insertedObjs = retvalList.toArray(new CommonObject[retvalList.size()]);
+				}
 				final JSONObject jo = new JSONObject();
 				for (int i = 0; i < insertedObjs.length; i++) {
 					final CommonObject current = insertedObjs[i];

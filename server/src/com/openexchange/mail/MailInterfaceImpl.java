@@ -51,7 +51,6 @@ package com.openexchange.mail;
 
 import com.openexchange.api2.MailInterfaceMonitor;
 import com.openexchange.cache.OXCachingException;
-import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailStorageUtils.OrderDirection;
 import com.openexchange.mail.cache.MailMessageCache;
@@ -85,6 +84,8 @@ public final class MailInterfaceImpl extends MailInterface {
 	 */
 	private MailConnection<?, ?, ?> mailConnection;
 
+	private MailConfig mailConfig;
+
 	private Session session;
 
 	private boolean init;
@@ -117,17 +118,16 @@ public final class MailInterfaceImpl extends MailInterface {
 		 */
 		mailConnection = MailConnection.getInstance(session);
 		if (!mailConnection.isConnected()) {
-			final MailConfig config = mailConnection.getMailConfig();
-			if (config.getError() != null) {
-				throw new MailException(config.getError());
+			/*
+			 * Get new mail configuration
+			 */
+			getMailConfig(true);
+			if (mailConfig.getError() != null) {
+				throw new MailException(mailConfig.getError());
 			}
-			mailConnection.setMailServer(config.getServer());
-			mailConnection.setMailServerPort(config.getPort());
-			mailConnection.setLogin(config.getLogin());
-			mailConnection.setPassword(config.getPassword());
 			final long start = System.currentTimeMillis();
 			try {
-				mailConnection.connect();
+				mailConnection.connect(mailConfig);
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				mailInterfaceMonitor.changeNumSuccessfulLogins(true);
 			} catch (final MailException e) {
@@ -136,6 +136,11 @@ public final class MailInterfaceImpl extends MailInterface {
 				}
 				throw e;
 			}
+		} else {
+			/*
+			 * Get mail configuration
+			 */
+			mailConfig = mailConnection.getMailConfig();
 		}
 		mailConnection.getFolderStorage().checkDefaultFolders();
 		init = true;
@@ -359,19 +364,19 @@ public final class MailInterfaceImpl extends MailInterface {
 	@Override
 	public long[] getQuota() throws MailException {
 		initConnection();
-		return mailConnection.getLogicTools().getQuota(INBOX_ID);
+		return mailConnection.getFolderStorage().getQuota(INBOX_ID);
 	}
 
 	@Override
 	public long getQuotaLimit() throws MailException {
 		initConnection();
-		return mailConnection.getLogicTools().getQuota(INBOX_ID)[0];
+		return mailConnection.getFolderStorage().getQuota(INBOX_ID)[0];
 	}
 
 	@Override
 	public long getQuotaUsage() throws MailException {
 		initConnection();
-		return mailConnection.getLogicTools().getQuota(INBOX_ID)[1];
+		return mailConnection.getFolderStorage().getQuota(INBOX_ID)[1];
 	}
 
 	@Override
@@ -449,13 +454,6 @@ public final class MailInterfaceImpl extends MailInterface {
 	}
 
 	@Override
-	public CommonObject[] saveVersitAttachment(final String folder, final long msgUID, final String partIdentifier)
-			throws MailException {
-		initConnection();
-		return mailConnection.getLogicTools().saveVersitAttachment(folder, msgUID, partIdentifier);
-	}
-
-	@Override
 	public String sendMessage(final TransportMailMessage transportMail, final SendType sendType) throws MailException {
 		initConnection();
 		final MailTransport transport = MailTransport.getInstance(session, mailConnection);
@@ -485,8 +483,16 @@ public final class MailInterfaceImpl extends MailInterface {
 
 	@Override
 	public MailConfig getMailConfig() throws MailException {
-		initConnection();
-		return mailConnection.getMailConfig();
+		return getMailConfig(false);
+		// initConnection();
+		// return mailConnection.getMailConfig();
+	}
+
+	private MailConfig getMailConfig(final boolean create) throws MailException {
+		if (create) {
+			mailConfig = MailProvider.getInstance().getMailConfig(session);
+		}
+		return mailConfig;
 	}
 
 }

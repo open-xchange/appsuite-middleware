@@ -58,12 +58,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.mail.cache.MailConnectionCache;
-import com.openexchange.mail.config.GlobalMailConfig;
 import com.openexchange.mail.config.MailConfig;
-import com.openexchange.mail.mime.MIMEHeaderLoader;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.spam.SpamHandler;
-import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtilityInit;
 import com.openexchange.mail.watcher.MailConnectionWatcher;
@@ -94,19 +91,21 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 
 	private static Class<? extends MailConnection<?, ?, ?>> clazz;
 
+	/**
+	 * Internal instance needed to access implementation-specific methods in a
+	 * static way
+	 */
 	private static MailConnection<?, ?, ?> internalInstance;
 
 	protected final Session session;
 
 	private Properties mailProperties;
 
-	private String mailServer;
+	private transient Thread usingThread;
 
-	private int mailServerPort = -1;
+	private StackTraceElement[] trace;
 
-	private String login;
-
-	private String password;
+	private MailConfig mailConfig;
 
 	/**
 	 * Friendly instantiation
@@ -121,10 +120,9 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 */
 	protected final void resetFields() {
 		mailProperties = null;
-		mailServer = null;
-		mailServerPort = -1;
-		login = null;
-		password = null;
+		mailConfig = null;
+		usingThread = null;
+		trace = null;
 	}
 
 	static void initializeMailConnection(final Class<? extends MailConnection<?, ?, ?>> clazz) throws MailException {
@@ -181,8 +179,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 					/*
 					 * Apply new thread's trace information
 					 */
-					mailConnection.initMailConfig(session);
-					mailConnection.connectInternal();
+					mailConnection.applyNewThread();
 					MailConnectionWatcher.addMailConnection(mailConnection);
 					return mailConnection;
 				}
@@ -218,8 +215,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 						/*
 						 * Apply new thread's trace information
 						 */
-						mailConnection.initMailConfig(session);
-						mailConnection.connectInternal();
+						mailConnection.applyNewThread();
 						MailConnectionWatcher.addMailConnection(mailConnection);
 						return mailConnection;
 					}
@@ -251,13 +247,10 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 * @throws MailException
 	 *             If mail connection creation fails
 	 */
-	private static MailConnection<?, ?, ?> createNewMailConnection(final Session session) throws MailException {
+	private static final MailConnection<?, ?, ?> createNewMailConnection(final Session session) throws MailException {
 		try {
 			final MailConnection<?, ?, ?> mailConnection = clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(
 					new Object[] { session });
-			if (null != session) {
-				mailConnection.initMailConfig(session);
-			}
 			return mailConnection;
 		} catch (SecurityException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
@@ -272,33 +265,6 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 		} catch (InvocationTargetException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
 		}
-	}
-
-	/**
-	 * Gets the class name of {@link GlobalMailConfig} implementation
-	 * 
-	 * @return The class name of {@link GlobalMailConfig} implementation
-	 */
-	public static final String getGlobalMailConfigClass() {
-		return internalInstance.getGlobalMailConfigClassInternal();
-	}
-
-	/**
-	 * Gets the class name of {@link MailPermission} implementation
-	 * 
-	 * @return The class name of {@link MailPermission} implementation
-	 */
-	public static final String getMailPermissionClass() {
-		return internalInstance.getMailPermissionClassInternal();
-	}
-
-	/**
-	 * Gets the class name of {@link MIMEHeaderLoader} implementation
-	 * 
-	 * @return The class name of {@link MIMEHeaderLoader} implementation
-	 */
-	public static final String getHeaderLoaderClass() {
-		return internalInstance.getHeaderLoaderClassInternal();
 	}
 
 	/**
@@ -323,25 +289,6 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	}
 
 	/**
-	 * Gets the login
-	 * 
-	 * @return the login
-	 */
-	public final String getLogin() {
-		return login;
-	}
-
-	/**
-	 * Sets the login
-	 * 
-	 * @param login
-	 *            the login to set
-	 */
-	public final void setLogin(final String login) {
-		this.login = login;
-	}
-
-	/**
 	 * Gets the mailProperties
 	 * 
 	 * @return the mailProperties
@@ -361,63 +308,6 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	}
 
 	/**
-	 * Gets the mailServer
-	 * 
-	 * @return the mailServer
-	 */
-	public final String getMailServer() {
-		return mailServer;
-	}
-
-	/**
-	 * Sets the mailServer
-	 * 
-	 * @param mailServer
-	 *            the mailServer to set
-	 */
-	public final void setMailServer(final String mailServer) {
-		this.mailServer = mailServer;
-	}
-
-	/**
-	 * Gets the mailServerPort
-	 * 
-	 * @return the mailServerPort
-	 */
-	public final int getMailServerPort() {
-		return mailServerPort;
-	}
-
-	/**
-	 * Sets the mailServerPort
-	 * 
-	 * @param mailServerPort
-	 *            the mailServerPort to set
-	 */
-	public final void setMailServerPort(final int mailServerPort) {
-		this.mailServerPort = mailServerPort;
-	}
-
-	/**
-	 * Gets the password
-	 * 
-	 * @return the password
-	 */
-	public final String getPassword() {
-		return password;
-	}
-
-	/**
-	 * Sets the password
-	 * 
-	 * @param password
-	 *            the password to set
-	 */
-	public final void setPassword(final String password) {
-		this.password = password;
-	}
-
-	/**
 	 * Checks if all necessary fields are set in this connection object
 	 * <p>
 	 * This routine is implicitly invoked by {@link #connect()}
@@ -426,39 +316,68 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 *             If a necessary field is missing
 	 * @see #connect()
 	 */
-	protected final void checkFieldsBeforeConnect() throws MailException {
+	protected final void checkFieldsBeforeConnect(final MailConfig mailConfig) throws MailException {
+
 		/*
 		 * Properties are implementation specific and therefore are created
 		 * within connectInternal()
 		 */
-		if (getMailServer() == null) {
+		if (mailConfig.getServer() == null) {
 			throw new MailException(MailException.Code.MISSING_CONNECT_PARAM, "mail server");
-		} else if (checkMailServerPort() && getMailServerPort() == -1) {
+		} else if (checkMailServerPort() && mailConfig.getPort() <= 0) {
 			throw new MailException(MailException.Code.MISSING_CONNECT_PARAM, "mail server port");
-		} else if (getLogin() == null) {
+		} else if (mailConfig.getLogin() == null) {
 			throw new MailException(MailException.Code.MISSING_CONNECT_PARAM, "login");
-		} else if (getPassword() == null) {
+		} else if (mailConfig.getPassword() == null) {
 			throw new MailException(MailException.Code.MISSING_CONNECT_PARAM, "password");
 		}
 	}
 
 	/**
-	 * Opens this connection. May be invoked on an already opened connection to
-	 * apply new thread information to mail connection watcher.
+	 * Opens this connection. May be invoked on an already opened connection.
 	 * 
+	 * @param mailConfig
+	 *            The mail configuration providing connect and login data
 	 * @throws MailException
 	 *             If the connection could not be established for various
 	 *             reasons
+	 * @throws IllegalArgumentException
+	 *             If specified mail configuration is <code>null</code>
 	 */
-	public final void connect() throws MailException {
-		checkFieldsBeforeConnect();
-		connectInternal();
-		MailConnectionWatcher.addMailConnection(this);
+	public final void connect(final MailConfig mailConfig) throws MailException {
+		if (mailConfig == null) {
+			throw new IllegalArgumentException("mail config is null");
+		}
+		if (!isConnectedUnsafe()) {
+			checkFieldsBeforeConnect(mailConfig);
+			this.mailConfig = mailConfig;
+			connectInternal();
+			MailConnectionWatcher.addMailConnection(this);
+		} else {
+			if (mailConfig.equals(this.mailConfig)) {
+				/*
+				 * Already connected with equal config
+				 */
+				return;
+			}
+			/*
+			 * Close and re-connect with given config
+			 */
+			releaseResources();
+			closeInternal();
+			MailConnectionWatcher.removeMailConnection(this);
+			checkFieldsBeforeConnect(mailConfig);
+			this.mailConfig = mailConfig;
+			connectInternal();
+			MailConnectionWatcher.addMailConnection(this);
+		}
 	}
 
 	/**
 	 * Internal connect method to establish a mail connection
 	 * 
+	 * @param mailConfig
+	 *            The mail configuration providing connect and login data
 	 * @throws MailException
 	 *             If connection could not be established
 	 */
@@ -521,6 +440,46 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	}
 
 	/**
+	 * Gets the trace of the thread that lastly obtained this connection.
+	 * <p>
+	 * This is useful to detect certain threads which uses a connection for a
+	 * long time
+	 * 
+	 * @return the trace of the thread that lastly obtained this connection
+	 */
+	public final String getTrace() {
+		final StringBuilder sBuilder = new StringBuilder(512);
+		sBuilder.append(toString());
+		sBuilder.append("\nIMAP connection established (or fetched from cache) at: ").append('\n');
+		/*
+		 * Start at index 2
+		 */
+		for (int i = 2; i < trace.length; i++) {
+			sBuilder.append("\tat ").append(trace[i]).append('\n');
+		}
+		if (null != usingThread && usingThread.isAlive()) {
+			sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append('\n');
+			final StackTraceElement[] trace = usingThread.getStackTrace();
+			sBuilder.append("\tat ").append(trace[0]);
+			for (int i = 1; i < trace.length; i++) {
+				sBuilder.append('\n').append("\tat ").append(trace[i]);
+			}
+		}
+		return sBuilder.toString();
+	}
+
+	/**
+	 * Returns the mail configuration formerly applied through
+	 * {@link #connect(MailConfig)}.
+	 * 
+	 * @return The mail configuration formerly applied through
+	 *         {@link #connect(MailConfig)} or <code>null</code>.
+	 */
+	public final MailConfig getMailConfig() {
+		return mailConfig;
+	}
+
+	/**
 	 * Signals an available connection
 	 */
 	private void signalAvailableConnection() {
@@ -538,45 +497,21 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	}
 
 	/**
-	 * Defines if mail server port has to be set before establishing any
-	 * connection
+	 * Apply new thread's trace informations
+	 */
+	protected final void applyNewThread() {
+		usingThread = Thread.currentThread();
+		trace = usingThread.getStackTrace();
+	}
+
+	/**
+	 * Defines if mail server port has to be present in provided mail
+	 * configuration before establishing any connection.
 	 * 
 	 * @return <code>true</code> if mail server port has to be set before
 	 *         establishing any connection; otherwise <code>false</code>
 	 */
 	protected abstract boolean checkMailServerPort();
-
-	/**
-	 * Initializes the user-specific mail configuration. Initialization of mail
-	 * configuration should happend only one time; meaning any subsequent
-	 * invocations should be treated as a no-op.
-	 * <p>
-	 * For example use the lazy creation pattern:
-	 * 
-	 * <pre>
-	 * ...
-	 * if (this.config == null) {
-	 *     this.config = new MyMailConfig(session);
-	 * }
-	 * ...
-	 * </pre>
-	 * 
-	 * @param session
-	 *            The session providing needed user data
-	 * @throws MailException
-	 *             If mail configuration cannot be initialized
-	 */
-	protected abstract void initMailConfig(Session session) throws MailException;
-
-	/**
-	 * Gets the user-specific mail configuration with properly set login and
-	 * password
-	 * 
-	 * @return User-specific mail configuration
-	 * @throws MailException
-	 *             If mail configuration cannot be determined
-	 */
-	public abstract MailConfig getMailConfig() throws MailException;
 
 	/**
 	 * Releases all used resources prior to caching or closing a connection
@@ -636,41 +571,10 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	public abstract boolean isConnectedUnsafe();
 
 	/**
-	 * Gets the trace of the thread that lastly obtained this connection.
-	 * <p>
-	 * This is useful to detect certain threads which uses a connection for a
-	 * long time
-	 * 
-	 * @return the trace of the thread that lastly obtained this connection
-	 */
-	public abstract String getTrace();
-
-	/**
-	 * Gets the name of {@link GlobalMailConfig} implementation
-	 * 
-	 * @return The name of {@link GlobalMailConfig} implementation
-	 */
-	protected abstract String getGlobalMailConfigClassInternal();
-
-	/**
-	 * Gets the name of {@link MailPermission} implementation
-	 * 
-	 * @return The name of {@link MailPermission} implementation
-	 */
-	protected abstract String getMailPermissionClassInternal();
-
-	/**
-	 * Gets the name of {@link MIMEHeaderLoader} implementation
-	 * 
-	 * @return The name of {@link MIMEHeaderLoader} implementation
-	 */
-	protected abstract String getHeaderLoaderClassInternal();
-
-	/**
 	 * Trigger all necessary startup actions
 	 * 
 	 * @throws MailException
-	 *             If initialization fails
+	 *             If startup actions fail
 	 */
 	protected abstract void startupInternal() throws MailException;
 
@@ -678,7 +582,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 * Trigger all necessary shutdown actions
 	 * 
 	 * @throws MailException
-	 *             If initialization fails
+	 *             If shutdown actions fail
 	 */
 	protected abstract void shutdownInternal() throws MailException;
 }

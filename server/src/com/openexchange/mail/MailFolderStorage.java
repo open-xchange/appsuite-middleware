@@ -60,6 +60,13 @@ import com.openexchange.mail.dataobjects.MailFolder;
 public interface MailFolderStorage {
 
 	/**
+	 * Constant which indicates unlimited quota
+	 * 
+	 * @value <code>-1</code>
+	 */
+	public static final int UNLIMITED_QUOTA = -1;
+
+	/**
 	 * Checks if a folder exists whose fullname matches given
 	 * <code>fullname</code>
 	 * 
@@ -73,18 +80,6 @@ public interface MailFolderStorage {
 	public boolean exists(final String fullname) throws MailException;
 
 	/**
-	 * Checks if a folder exists whose ID matches given <code>id</code>
-	 * 
-	 * @param id
-	 *            The id
-	 * @return <code>true</code> if folder exists in mailbox; otherwise
-	 *         <code>false</code>
-	 * @throws MailException
-	 *             If existence cannot be checked
-	 */
-	public boolean exists(final long id) throws MailException;
-
-	/**
 	 * Gets the folder identified through given fullname
 	 * 
 	 * @param fullname
@@ -94,17 +89,6 @@ public interface MailFolderStorage {
 	 *             If folder could not be fetched
 	 */
 	public MailFolder getFolder(final String fullname) throws MailException;
-
-	/**
-	 * Gets the folder identified through given id
-	 * 
-	 * @param id
-	 *            The id
-	 * @return The corresponding instance of {@link MailFolder}
-	 * @throws MailException
-	 *             If folder could not be fetched
-	 */
-	public MailFolder getFolder(final long id) throws MailException;
 
 	/**
 	 * Gets the first level subfolders located below the folder whose fullname
@@ -119,20 +103,6 @@ public interface MailFolderStorage {
 	 *             If subfolders cannot be delivered
 	 */
 	public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException;
-
-	/**
-	 * Gets the first level subfolders located below the folder whose id matches
-	 * given parameter <code>parentId</code>
-	 * 
-	 * @param parentId
-	 *            The parent ID
-	 * @param all
-	 *            whether if all or only subscribed subfolders shall be returned
-	 * @return An array of {@link MailFolder} representing the subfolders
-	 * @throws MailException
-	 *             If subfolders cannot be delivered
-	 */
-	public MailFolder[] getSubfolders(final long parentId, final boolean all) throws MailException;
 
 	/**
 	 * Gets the mailbox's default folder
@@ -177,19 +147,6 @@ public interface MailFolderStorage {
 	public String updateFolder(String fullname, MailFolder toUpdate) throws MailException;
 
 	/**
-	 * Updates an existing mail folder identified through given ID. All
-	 * attributes set in given mail folder parameter are applied.
-	 * 
-	 * @param long
-	 *            The ID of the mail folder to update
-	 * @param toUpdate
-	 *            The mail folder to update containing only the modified fields
-	 * @return Fullname of the updated mail folder
-	 * @throws MailException
-	 */
-	public String updateFolder(long id, MailFolder toUpdate) throws MailException;
-
-	/**
 	 * Deletes an existing mail folder identified through given fullname. If
 	 * folder is not located below default trash folder it is moved (including
 	 * subfolder tree) to default trash folder; otherwise it is deleted
@@ -203,18 +160,6 @@ public interface MailFolderStorage {
 	public String deleteFolder(String fullname) throws MailException;
 
 	/**
-	 * Deletes an existing mail folder identified through given ID. If folder is
-	 * not located below default trash folder it is moved (including subfolder
-	 * tree) to default trash folder; otherwise it is deleted permanently.
-	 * 
-	 * @param id
-	 *            The ID of the mail folder to delete
-	 * @return Fullname of the deleted mail folder
-	 * @throws MailException
-	 */
-	public String deleteFolder(long id) throws MailException;
-
-	/**
 	 * Deletes the content of the folder identified through given fullname
 	 * 
 	 * @param fullname
@@ -224,16 +169,6 @@ public interface MailFolderStorage {
 	 *             If folder's content cannot be cleared
 	 */
 	public void clearFolder(String fullname) throws MailException;
-
-	/**
-	 * Deletes the content of the folder identified through given ID
-	 * 
-	 * @param id
-	 *            The ID of the mail folder whose content should be cleared
-	 * @throws MailException
-	 *             If folder's content cannot be cleared
-	 */
-	public void clearFolder(long id) throws MailException;
 
 	/**
 	 * Gets the reverse path from the folder identified through given fullname
@@ -251,18 +186,18 @@ public interface MailFolderStorage {
 	public MailFolder[] getPath2DefaultFolder(String fullname) throws MailException;
 
 	/**
-	 * Gets the reverse path from the folder identified through given ID to
-	 * parental default folder. All occurring folders on that path are contained
-	 * in reverse order in returned array of {@link MailFolder} instances.
+	 * Detects both quota limit and quota usage on given mailbox's folder
+	 * gathered in an array of <code>long</code>. The first value is the
+	 * quota limit and the second is the quota usage.
 	 * 
-	 * @param id
-	 *            The folder ID
-	 * @return All occurring folders in reverse order as an array of
-	 *         {@link MailFolder} instances.
+	 * @param folder
+	 *            The folder fullname (if <code>null</code> <i>"INBOX"</i> is
+	 *            used)
+	 * @return Both quota limit and quota usage
 	 * @throws MailException
-	 *             If path cannot be determined
+	 *             If quota limit and/or quote usage cannot be determined
 	 */
-	public MailFolder[] getPath2DefaultFolder(long id) throws MailException;
+	public long[] getQuota(String folder) throws MailException;
 
 	/**
 	 * Gets the ID of default drafts folder

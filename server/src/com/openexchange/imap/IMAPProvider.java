@@ -47,75 +47,78 @@
  *
  */
 
-package com.openexchange.mail.mime;
+package com.openexchange.imap;
 
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.mail.Message;
-
+import com.openexchange.imap.config.GlobalIMAPConfig;
+import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProvider;
+import com.openexchange.mail.config.MailConfig;
+import com.openexchange.session.Session;
 
 /**
- * {@link MIMEHeaderLoader} - Implementation-specific header loader.
+ * {@link IMAPProvider} - The provider for IMAP protocol
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MIMEHeaderLoader {
-
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
-	private static MIMEHeaderLoader instance;
+public final class IMAPProvider extends MailProvider {
 
 	/**
-	 * Gets the singleton instance of {@link MIMEHeaderLoader}
-	 * 
-	 * @return The singleton instance of {@link MIMEHeaderLoader}
-	 * @throws MailException
+	 * Initializes a new {@link IMAPProvider}
 	 */
-	public static final MIMEHeaderLoader getInstance() throws MailException {
-		if (!initialized.get()) {
-			synchronized (initialized) {
-				try {
-					if (null == instance) {
-						instance = Class.forName(MailProvider.getInstance().getHeaderLoaderClass()).asSubclass(
-								MIMEHeaderLoader.class).newInstance();
-						initialized.set(true);
-					}
-				} catch (final InstantiationException e) {
-					throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, e.getLocalizedMessage());
-				} catch (final IllegalAccessException e) {
-					throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, e.getLocalizedMessage());
-				} catch (final ClassNotFoundException e) {
-					throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, e.getLocalizedMessage());
-				}
-			}
-		}
-		return instance;
-	}
-
-	/**
-	 * Initializes a new {@link MIMEHeaderLoader}
-	 */
-	protected MIMEHeaderLoader() {
+	public IMAPProvider() {
 		super();
 	}
 
-	/**
-	 * Call this method if JavaMail's routine fails to load a message's header.
-	 * Headers are read in a safe manner and filled into a map which is then
-	 * returned
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param msg
-	 *            The message which headers shall be loaded
-	 * @param uid
-	 *            <code>true</code> to reference to message via its UID;
-	 *            otherwise via its sequence ID
-	 * @return A {@link Map} containing the headers
-	 * @throws MailException
-	 *             If an error occurs
+	 * @see com.openexchange.mail.MailProvider#getGlobalMailConfigClass()
 	 */
-	public abstract Map<String, String> loadHeaders(final Message msg, final boolean uid) throws MailException;
+	@Override
+	public String getGlobalMailConfigClass() {
+		return GlobalIMAPConfig.class.getName();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.MailProvider#getHeaderLoaderClass()
+	 */
+	@Override
+	public String getHeaderLoaderClass() {
+		return IMAPHeaderLoader.class.getName();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.MailProvider#getMailConnectionClass()
+	 */
+	@Override
+	public String getMailConnectionClass() {
+		return IMAPConnection.class.getName();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.MailProvider#getMailPermissionClass()
+	 */
+	@Override
+	public String getMailPermissionClass() {
+		return ACLPermission.class.getName();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.MailProvider#getMailConfig(com.openexchange.session.Session)
+	 */
+	@Override
+	public MailConfig getMailConfig(final Session session) throws MailException {
+		return IMAPConfig.getImapConfig(session);
+	}
+
 }

@@ -74,6 +74,8 @@ public final class SMTPMailMessage extends TransportMailMessage {
 
 	private SMTPBodyPart mailPart;
 
+	private long uid = -1L;
+
 	private final transient List<MailPart> enclosedParts;
 
 	/**
@@ -155,12 +157,12 @@ public final class SMTPMailMessage extends TransportMailMessage {
 
 	@Override
 	public long getMailId() {
-		return getUid();
+		return uid;
 	}
 
 	@Override
 	public void setMailId(final long id) {
-		setUid(id);
+		this.uid = id;
 	}
 
 }

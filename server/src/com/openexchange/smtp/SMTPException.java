@@ -121,7 +121,11 @@ public final class SMTPException extends MIMEMailException {
 		 */
 		COPY_TO_SENT_FOLDER_FAILED_QUOTA(
 				"Message has been successfully sent, but a copy could not be placed in your sent folder due to exceeded quota.",
-				Category.EXTERNAL_RESOURCE_FULL, 3007);
+				Category.EXTERNAL_RESOURCE_FULL, 3011),
+		/**
+		 * No storage access because mail connection is not connected
+		 */
+		NOT_CONNECTED("No storage access because mail connection is not connected", Category.CODE_ERROR, 3012);
 
 		private final String message;
 
