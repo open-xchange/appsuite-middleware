@@ -12,7 +12,7 @@
 
 	<property name="version" value="${Bundle-Version}"/>
 	<property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-	<property name="composite.name" value="open-xchange-monitoring-${version}" />
+	<property name="composite.name" value="open-xchange-spellcheck-${version}" />
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
