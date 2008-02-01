@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Spellcheck
+Bundle-SymbolicName: com.openexchange.spellcheck
+Bundle-Version: 6.5.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.container,
+ com.openexchange.config,
+ com.openexchange.database,
+ com.openexchange.groupware,
+ com.openexchange.groupware.contexts,
+ com.openexchange.json,
+ com.openexchange.server,
+ com.openexchange.server.impl,
+ com.openexchange.server.osgiservice,
+ com.openexchange.session,
+ com.openexchange.spellcheck,
+ com.openexchange.tools.servlet.http,
+ javax.servlet,
+ javax.servlet.http,
+ org.apache.commons.logging,
+ org.apache.commons.logging.impl,
+ org.json,
+ org.mozilla.intl.chardet,
+ org.osgi.framework;version="1.3.0",
+ org.osgi.service.http;version="1.2.0",
+ org.osgi.util.tracker;version="1.3.3"
+Bundle-Activator: com.openexchange.spellcheck.osgi.SpellCheckActivator
+Bundle-ClassPath: .,
+ lib/lib/jazzy-core.jar
