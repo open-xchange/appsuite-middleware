@@ -26,6 +26,8 @@
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
 	
+	<property name="chardetjar" value="chardet.jar" />
+	
 
     <!-- Classpath -->
     <path id="project.classpath">
