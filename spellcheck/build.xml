@@ -28,6 +28,8 @@
 	
 	<property name="chardetjar" value="chardet.jar" />
 	
+	<!-- Bundle dependencies -->
+	<property name="commonBundle" value="com.openexchange.common"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
