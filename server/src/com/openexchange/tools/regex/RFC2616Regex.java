@@ -196,6 +196,12 @@ public final class RFC2616Regex {
 	 */
 	public static final Pattern COOKIE_VERSION = Pattern.compile(cookieVersionRegex);
 
+	/**
+	 * The version always precedes the cookie with key and value. Both are
+	 * separated with &quot;,&quot; or &quot;;&quot; and optional whitespace
+	 * characters. This regular expression can be used to find the version with
+	 * separator in front of a cookie.
+	 */
 	private static final String cookieVersionWithSeperatorRegex =
 	    RegexUtility.group(
 	        RegexUtility.concat(
@@ -205,6 +211,9 @@ public final class RFC2616Regex {
 	        false
 	    );
 
+	/**
+	 * A cookie consists of the cookie itself preceded by its version.
+	 */
 	private static final String oneCookieRegex =
         RegexUtility.group(
             RegexUtility.concat(
@@ -216,8 +225,19 @@ public final class RFC2616Regex {
             true
         );
 
+	/**
+	 * This pattern matches exactly ONE cookie. It can be used to find cookies
+	 * one by one in a string.
+	 */
 	public static final Pattern COOKIE = Pattern.compile(oneCookieRegex);
 
+	/**
+	 * This regular expression should match one or more cookies. It does not
+	 * work well because the separator between complete cookies and its version,
+	 * path, domain and port are all &quot;,&quot; or &quot;;&quot;. So this
+	 * expression may find the domain as cookie key. Maybe look ahead or
+	 * something like that can fix this expression.
+	 */
 	private static final String cookiesRegex =
 	    RegexUtility.concat(
 	        oneCookieRegex,
@@ -232,7 +252,7 @@ public final class RFC2616Regex {
             )
         );
 
-	/**
+	/*
 	 * Regular expression that satisfies <i>cookies</i> as per <a
 	 * href="http://www.faqs.org/rfcs/rfc2965.html">RFC 2965</a> except that
 	 * heading cookie version is optional instead of forced.
@@ -241,6 +261,10 @@ public final class RFC2616Regex {
 	 * cookie          =  [cookie-version] 1*((&quot;;&quot; | &quot;,&quot;) cookie-value)
 	 * </pre>
 	 * 
+	 */
+	/**
+	 * This pattern should match one or more cookies but it does not work well
+	 * enough. Do NOT use it.
 	 */
 	public static final Pattern COOKIES = Pattern.compile(cookiesRegex);
 }
