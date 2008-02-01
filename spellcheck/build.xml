@@ -36,6 +36,9 @@
     	<pathelement location="${bundlesdir}/${jsdkjar}"/>
 		<pathelement location="${bundlesdir}/${globaljar}"/>
 		<pathelement location="${bundlesdir}/${serverjar}"/>
+    	
+    	<pathelement location="${bundlesdir}/${commonBundle}/lib/${chardetjar}" />
+    	
     	<pathelement location="lib/lib/jazzy-core.jar"/>
     </path>
 
