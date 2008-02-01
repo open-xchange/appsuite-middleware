@@ -20,6 +20,7 @@ Export-Package: com.openexchange.authentication,
  com.openexchange.session,
  com.openexchange.sessiond,
  com.openexchange.sessiond.exception,
+ com.openexchange.spellcheck,
  com.openexchange.tools.arrays,
  com.openexchange.tools.stream
 Import-Package: org.apache.commons.logging,
