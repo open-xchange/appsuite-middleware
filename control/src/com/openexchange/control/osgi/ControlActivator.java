@@ -79,8 +79,6 @@ public final class ControlActivator implements BundleActivator {
 
 	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
 
-	private final Stack<ObjectName> objectNames = new Stack<ObjectName>();
-
 	private ServiceHolderListener<ManagementAgent> listener;
 
 	/**
