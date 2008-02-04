@@ -224,8 +224,6 @@ public abstract class UserSettingMailStorage {
 	/**
 	 * Loads user's mail settings from database
 	 * 
-	 * @param usm
-	 *            the user's mail settings to fill
 	 * @param user
 	 *            the user
 	 * @param ctx
@@ -243,8 +241,6 @@ public abstract class UserSettingMailStorage {
 	/**
 	 * Loads user's mail settings from database
 	 * 
-	 * @param usm
-	 *            the user's mail settings to fill
 	 * @param user
 	 *            the user
 	 * @param ctx

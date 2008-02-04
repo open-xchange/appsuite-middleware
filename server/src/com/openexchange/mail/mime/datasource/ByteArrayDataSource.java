@@ -100,7 +100,7 @@ public class ByteArrayDataSource implements DataSource {
 	/**
 	 * Get written <code>byte[]</code>
 	 * 
-	 * @return
+	 * @return The byte array
 	 */
 	public byte[] getByteArray() {
 		final byte[] bytes = new byte[this.bytes.length];

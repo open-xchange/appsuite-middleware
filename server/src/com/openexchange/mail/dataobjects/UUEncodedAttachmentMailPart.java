@@ -75,7 +75,9 @@ public final class UUEncodedAttachmentMailPart extends MailPart {
 	private final transient UUEncodedPart uuencPart;
 
 	/**
-	 * @param part
+	 * Initializes a new {@link UUEncodedAttachmentMailPart}
+	 * 
+	 * @param uuencPart
 	 *            The uuencoded part
 	 */
 	public UUEncodedAttachmentMailPart(final UUEncodedPart uuencPart) {

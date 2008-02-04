@@ -132,8 +132,8 @@ public final class MessageUtility {
 	 * //Unicode Address: &quot;Doe, Jane&quot; &lt;someone@somewhere.com&gt;
 	 * </pre>
 	 * 
-	 * @param personal
-	 *            The personal
+	 * @param personalArg
+	 *            The personal's string representation
 	 * @return The properly quoted personal for building an internet address
 	 *         according to RFC 822 syntax
 	 */
@@ -991,7 +991,7 @@ public final class MessageUtility {
 	 * 
 	 * @param time
 	 *            The time argument to format
-	 * @return
+	 * @return The RFC 3501 string representation of specified time
 	 */
 	public static String formatDateForIMAPSearch(final long time) {
 		return formatDateForIMAPSearch(new Date(time));
@@ -1011,7 +1011,7 @@ public final class MessageUtility {
 	 * 
 	 * @param date
 	 *            The date to format
-	 * @return
+	 * @return The RFC 3501 string representation of specified time
 	 */
 	public static String formatDateForIMAPSearch(final Date date) {
 		/*

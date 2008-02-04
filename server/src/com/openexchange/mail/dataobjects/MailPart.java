@@ -512,10 +512,8 @@ public abstract class MailPart implements Serializable, Cloneable {
 	}
 
 	/**
-	 * Gets the header's value or <code>null</code>
+	 * Gets the headers as a map
 	 * 
-	 * @param name
-	 *            The header name
 	 * @return The header's value or <code>null</code>
 	 */
 	public Map<HeaderName, String> getHeaders() {

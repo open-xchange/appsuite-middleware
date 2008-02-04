@@ -72,7 +72,7 @@ public abstract class PartModifier {
 	/**
 	 * Performs possible modifications on specified mail part
 	 * 
-	 * @param part
+	 * @param mailPart
 	 *            The mail part to modify
 	 * @return The modified mail part
 	 * @throws MailException

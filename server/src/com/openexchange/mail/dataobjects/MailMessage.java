@@ -1220,10 +1220,6 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	 * Gets the implementation-specific unique ID of this mail in its mail
 	 * folder. The ID returned by this method is used in storages to refer to a
 	 * mail.
-	 * <p>
-	 * In most cases this method just returns {@link #getUid()}, but an
-	 * abstract method was added to fit the needs if a message's ID differs from
-	 * its UID.
 	 * 
 	 * @return The ID of this mail
 	 */
@@ -1233,10 +1229,6 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	 * Sets the implementation-specific unique mail ID of this mail in its mail
 	 * folder. The ID returned by this method is used in storages to refer to a
 	 * mail.
-	 * <p>
-	 * In most cases this method just invokes {@link #setUid(long)}, but an
-	 * abstract method was added to fit the needs if a message's ID differs from
-	 * its UID.
 	 * 
 	 * @param id
 	 *            The mail ID

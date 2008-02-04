@@ -389,7 +389,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 * An already closed connection is not going to be put into cache and is
 	 * treated as a no-op.
 	 * 
-	 * @param put2Cache
+	 * @param put2CacheArg
 	 *            <code>true</code> to try to put this mail connection into
 	 *            cache; otherwise <code>false</code>
 	 */

@@ -140,8 +140,8 @@ public abstract class ReferencedMailPart extends MailPart {
 	/**
 	 * Loads the referenced part<br>
 	 * This is a convenience method that invokes
-	 * {@link #loadReferencedPart(MailMessageParser, MailMessage)} with the
-	 * first parameter set to <code>null</code>
+	 * {@link #loadReferencedPart(MailMessageParser, MailMessage, Session)} with
+	 * the first parameter set to <code>null</code>
 	 * 
 	 * @param referencedMail
 	 *            The original mail containing the referenced part
