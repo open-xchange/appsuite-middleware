@@ -76,6 +76,6 @@ public interface GeneralControlMBean {
 
 	public void refresh();
 
-	public void close();
+	public List services();
 
 }

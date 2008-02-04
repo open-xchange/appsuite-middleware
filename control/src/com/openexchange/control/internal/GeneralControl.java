@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.control.internal;
 
 import java.util.ArrayList;
@@ -63,36 +61,38 @@ import javax.management.ObjectName;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
 public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
-	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(GeneralControl.class);
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(GeneralControl.class);
 
 	private MBeanServer server;
-	
+
 	private BundleContext bundleContext;
 
 	public GeneralControl(final BundleContext bundleContext) {
 		super();
 		this.bundleContext = bundleContext;
 	}
-	
+
 	public List<Map<String, String>> list() {
 		final List<Map<String, String>> arrayList = new ArrayList<Map<String, String>>();
 		final Bundle[] bundles = bundleContext.getBundles();
 		for (int a = 0; a < bundles.length; a++) {
-			final Map<String,String> map = new HashMap<String,String>();
+			final Map<String, String> map = new HashMap<String, String>();
 			map.put(bundles[a].getSymbolicName(), resolvState(bundles[a].getState()));
 			arrayList.add(map);
 		}
-		
+
 		return arrayList;
 	}
 
@@ -105,7 +105,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		}
 		LOG.info("control command: start package " + name);
 	}
-	
+
 	public void stop(final String name) {
 		final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
 		try {
@@ -115,7 +115,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		}
 		LOG.info("control command: stop package " + name);
 	}
-	
+
 	public void restart(final String name) {
 		stop(name);
 		start(name);
@@ -129,7 +129,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		}
 		LOG.info("install package: " + location);
 	}
-	
+
 	public void uninstall(final String name) {
 		final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
 		try {
@@ -141,27 +141,61 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 	}
 
 	public void update(final String name, final boolean autofresh) {
-	    final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
-        try {
-            bundle.update();
-            if (autofresh) {
-            	freshPackages(bundleContext);
-            }
-        } catch (BundleException exc) {
-            LOG.error("cannot update bundle: " + name, exc);
-        }
-        LOG.info("control command: update package: " + name);
+		final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
+		try {
+			bundle.update();
+			if (autofresh) {
+				freshPackages(bundleContext);
+			}
+		} catch (BundleException exc) {
+			LOG.error("cannot update bundle: " + name, exc);
+		}
+		LOG.info("control command: update package: " + name);
 	}
-	
+
 	public void refresh() {
 		freshPackages(bundleContext);
-        LOG.info("refreshing packages");
+		LOG.info("refreshing packages");
 	}
 
-	public void close() {
+	public List services() {
+		final List serviceList = new ArrayList();
 
+		ServiceReference[] services;
+		try {
+			services = bundleContext.getServiceReferences(null, null);
+			if (services != null) {
+				int size = services.length;
+				if (size > 0) {
+					for (int j = 0; j < size; j++) {
+						final HashMap<String, Object> hashMap = new HashMap<String, Object>();
+
+						ServiceReference service = services[j];
+
+						hashMap.put("service", service.toString());
+						hashMap.put("registered_bundle", service.getBundle().toString());
+
+						Bundle[] usedByBundles = (Bundle[]) service.getUsingBundles();
+						final List<Bundle> bundleList = new ArrayList();
+						if (usedByBundles != null) {
+							for (int a = 0; a < usedByBundles.length; a++) {
+								bundleList.add(usedByBundles[a]);
+							}
+						}
+
+						hashMap.put("bundles", bundleList.toString());
+
+						serviceList.add(hashMap);
+					}
+				}
+			}
+		} catch (InvalidSyntaxException exc) {
+			exc.printStackTrace();
+		}
+
+		return serviceList;
 	}
-	
+
 	private Bundle getBundleByName(final String name, final Bundle[] bundle) {
 		for (int a = 0; a < bundle.length; a++) {
 			if (bundle[a].getSymbolicName().equals(name)) {
@@ -171,11 +205,12 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		return null;
 	}
 
-	public ObjectName preRegister(final MBeanServer server, final ObjectName nameArg) throws Exception {
+	public ObjectName preRegister(final MBeanServer server, final ObjectName nameArg)
+			throws Exception {
 		ObjectName name = nameArg;
 		if (name == null) {
-			name = new ObjectName(new StringBuilder(server.getDefaultDomain()).append(":name=").append(
-					this.getClass().getName()).toString());
+			name = new ObjectName(new StringBuilder(server.getDefaultDomain()).append(":name=")
+					.append(this.getClass().getName()).toString());
 		}
 		this.server = server;
 		return name;
@@ -222,11 +257,12 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 			return "UNINSTALLED";
 		default:
 			return "UNKNOWN";
-		}			
+		}
 	}
-	
+
 	protected void freshPackages(BundleContext bundleContext) {
-		ServiceReference serviceReference = bundleContext.getServiceReference("org.osgi.service.packageadmin.PackageAdmin");
+		ServiceReference serviceReference = bundleContext
+				.getServiceReference("org.osgi.service.packageadmin.PackageAdmin");
 		PackageAdmin packageAdmin = (PackageAdmin) bundleContext.getService(serviceReference);
 		packageAdmin.refreshPackages(null);
 	}
