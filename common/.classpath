@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="lib/lib/jazzy-core.jar" sourcepath="lib/source/jazzy-0.5.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/lib/xerces.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/lib/activation.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/lib/chardet.jar" sourcepath="lib/source/chardet-1.0-sources.jar"/>
