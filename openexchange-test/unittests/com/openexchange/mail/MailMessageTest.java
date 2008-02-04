@@ -90,12 +90,9 @@ public final class MailMessageTest extends AbstractMailTest {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
 					new ContextImpl(getCid()), "mail-test-session");
-			final MailConnection mailConnection = MailConnection.getInstance(session);
-			mailConnection.setLogin(getLogin());
-			mailConnection.setMailServer(getServer());
-			mailConnection.setPassword(getPassword());
-			mailConnection.setMailServerPort(getPort());
-			mailConnection.connect();
+			final MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
+			final MailConnection<?, ?, ?> mailConnection = MailConnection.getInstance(session);
+			mailConnection.connect(mailConfig);
 			try {
 				final MailFolder inboxFolder = mailConnection.getFolderStorage().getFolder("INBOX");
 
@@ -117,8 +114,8 @@ public final class MailMessageTest extends AbstractMailTest {
 				{
 					final SmartLongArray sla = new SmartLongArray(msgs.length);
 					for (int i = 0; i < msgs.length; i++) {
-						assertTrue("Missing UID", msgs[i].containsUid());
-						sla.append(msgs[i].getUid());
+						assertTrue("Missing UID", msgs[i].getMailId() > 0);
+						sla.append(msgs[i].getMailId());
 						assertTrue("Missing Subject", msgs[i].containsSubject());
 						assertTrue("Missing Priority", msgs[i].containsPriority());
 						assertTrue("Missing To", msgs[i].containsTo());
@@ -135,7 +132,7 @@ public final class MailMessageTest extends AbstractMailTest {
 					/*
 					 * Test cache functionality
 					 */
-					MailMessage[] mails = mailConnection.getMessageStorage().getMessagesByUID(
+					final MailMessage[] mails = mailConnection.getMessageStorage().getMessagesByUID(
 							inboxFolder.getFullname(), uids, new MailListField[] { MailListField.SIZE }, false);
 					for (int i = 0; i < mails.length; i++) {
 						assertTrue("Cached message does not contain size!", mails[i].containsSize());
@@ -160,12 +157,9 @@ public final class MailMessageTest extends AbstractMailTest {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
 					new ContextImpl(getCid()), "mail-test-session");
-			final MailConnection mailConnection = MailConnection.getInstance(session);
-			mailConnection.setLogin(getLogin());
-			mailConnection.setMailServer(getServer());
-			mailConnection.setPassword(getPassword());
-			mailConnection.setMailServerPort(getPort());
-			mailConnection.connect();
+			final MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
+			final MailConnection<?, ?, ?> mailConnection = MailConnection.getInstance(session);
+			mailConnection.connect(mailConfig);
 			try {
 				final MailFolder inboxFolder = mailConnection.getFolderStorage().getFolder("INBOX");
 				checkSubfolders(inboxFolder, mailConnection);
@@ -179,7 +173,7 @@ public final class MailMessageTest extends AbstractMailTest {
 		}
 	}
 
-	private void checkSubfolders(final MailFolder parent, final MailConnection mailConnection) throws MailException {
+	private void checkSubfolders(final MailFolder parent, final MailConnection<?, ?, ?> mailConnection) throws MailException {
 		checkMessages(parent, mailConnection);
 		final MailFolder[] subfolders = mailConnection.getFolderStorage().getSubfolders(parent.getFullname(), true);
 		assertTrue("Has Subfolders is wrong!", parent.hasSubfolders() ? subfolders != null && subfolders.length > 0
@@ -191,7 +185,7 @@ public final class MailMessageTest extends AbstractMailTest {
 
 	private static final String TEMPL = "Missing field %s in message %d in folder %s";
 
-	private void checkMessages(final MailFolder folder, final MailConnection mailConnection) throws MailException {
+	private void checkMessages(final MailFolder folder, final MailConnection<?, ?, ?> mailConnection) {
 		MailMessage[] msgs = null;
 		try {
 			msgs = mailConnection.getMessageStorage().getMessages(folder.getFullname(), null,
@@ -209,16 +203,16 @@ public final class MailMessageTest extends AbstractMailTest {
 		assertTrue("No not all messages returned!", msgs.length == folder.getMessageCount());
 
 		for (int i = 0; i < msgs.length; i++) {
-			assertTrue(String.format(TEMPL, "UID", Long.valueOf(-1), folder.getFullname()), msgs[i].containsUid());
-			assertTrue(String.format(TEMPL, "Subject", Long.valueOf(msgs[i].getUid()), folder.getFullname()), msgs[i]
+			assertTrue(String.format(TEMPL, "UID", Long.valueOf(-1), folder.getFullname()), msgs[i].getMailId() > 0);
+			assertTrue(String.format(TEMPL, "Subject", Long.valueOf(msgs[i].getMailId()), folder.getFullname()), msgs[i]
 					.containsSubject());
-			assertTrue(String.format(TEMPL, "Priority", Long.valueOf(msgs[i].getUid()), folder.getFullname()), msgs[i]
+			assertTrue(String.format(TEMPL, "Priority", Long.valueOf(msgs[i].getMailId()), folder.getFullname()), msgs[i]
 					.containsPriority());
-			assertTrue(String.format(TEMPL, "To", Long.valueOf(msgs[i].getUid()), folder.getFullname()), msgs[i]
+			assertTrue(String.format(TEMPL, "To", Long.valueOf(msgs[i].getMailId()), folder.getFullname()), msgs[i]
 					.containsTo());
-			assertTrue(String.format(TEMPL, "Flags", Long.valueOf(msgs[i].getUid()), folder.getFullname()), msgs[i]
+			assertTrue(String.format(TEMPL, "Flags", Long.valueOf(msgs[i].getMailId()), folder.getFullname()), msgs[i]
 					.containsFlags());
-			assertTrue(String.format(TEMPL, "User Flags", Long.valueOf(msgs[i].getUid()), folder.getFullname()),
+			assertTrue(String.format(TEMPL, "User Flags", Long.valueOf(msgs[i].getMailId()), folder.getFullname()),
 					msgs[i].containsUserFlags());
 		}
 	}

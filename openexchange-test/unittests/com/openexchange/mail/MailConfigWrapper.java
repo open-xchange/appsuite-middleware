@@ -49,77 +49,59 @@
 
 package com.openexchange.mail;
 
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.config.MailConfig;
-import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
- * {@link MailFolderTest}
- *
+ * {@link MailConfigWrapper}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
-public class MailFolderTest extends AbstractMailTest {
+public final class MailConfigWrapper extends MailConfig {
+
+	private final int port;
+
+	private final String server;
 
 	/**
-	 * Default constructor
+	 * Initializes a new {@link MailConfigWrapper}
 	 */
-	public MailFolderTest() {
+	public MailConfigWrapper(final String login, final String password, final String server, final int port) {
 		super();
+		super.login = login;
+		super.password = password;
+		this.server = server;
+		this.port = port;
 	}
 
-	/**
-	 * @param name
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.config.MailConfig#getCapabilities()
 	 */
-	public MailFolderTest(final String name) {
-		super(name);
+	@Override
+	public int getCapabilities() {
+		return 0;
 	}
 
-	public void testGetINBOXFolder() {
-		try {
-			SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()), "mail-test-session");
-			MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
-			
-			MailConnection<?, ?, ?> mailConnection = MailConnection.getInstance(session);
-			mailConnection.connect(mailConfig);
-			try {
-				final MailFolder inboxFolder = mailConnection.getFolderStorage().getFolder("INBOX");
-				
-				assertTrue("No INBOX folder returned!", inboxFolder != null && inboxFolder.getName().equals("INBOX"));
-			} finally {
-				mailConnection.close(true);
-			}
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getLocalizedMessage());
-		}
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.config.MailConfig#getPort()
+	 */
+	@Override
+	public int getPort() {
+		return port;
 	}
-	
-	public void testGetSubfolders() {
-		try {
-			SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()), "mail-test-session");
-			MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
-			MailConnection<?, ?, ?> mailConnection = MailConnection.getInstance(session);
-			mailConnection.connect(mailConfig);
-			try {
-				final MailFolder[] flds = mailConnection.getFolderStorage().getSubfolders("default", true);
-				
-				assertTrue("No subfolders returned!", flds != null && flds.length > 0);
-				
-				for (int i = 0; i < flds.length; i++) {
-					System.out.println(flds[i].getFullname() + " Subscribed=" + flds[i].isSubscribed() + " Summary=" + flds[i].getSummary()
-							+ " HasSubfolders=" + flds[i].hasSubfolders() + " HasSUbscribedSubfodlers=" + flds[i].hasSubscribedSubfolders());
-				}
-				
-			} finally {
-				mailConnection.close(true);
-			}
-		} catch (final Exception e) {
-			e.printStackTrace();
-			fail(e.getLocalizedMessage());
-		}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.config.MailConfig#getServer()
+	 */
+	@Override
+	public String getServer() {
+		return server;
 	}
-	
+
 }
