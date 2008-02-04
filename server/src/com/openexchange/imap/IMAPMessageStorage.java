@@ -253,24 +253,28 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 		try {
 			final String fullname = prepareMailFolderParam(folder);
 			imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_ONLY);
-			Message[] msgs = null;
 			final Set<MailListField> usedFields = new HashSet<MailListField>();
 			/*
 			 * Shall a search be performed?
 			 */
 			final boolean search = (searchFields != null && searchFields.length > 0 && searchPatterns != null && searchPatterns.length > 0);
+			final int[] filter;
 			if (search) {
 				/*
 				 * Preselect message list according to given search pattern
 				 */
-				msgs = IMAPSearch.searchMessages(imapFolder, searchFields, searchPatterns, linkSearchTermsWithOR,
+				filter = IMAPSearch.searchMessages(imapFolder, searchFields, searchPatterns, linkSearchTermsWithOR,
 						fields, sortField, usedFields, imapConfig);
-				if (msgs == null || msgs.length == 0) {
+				if (filter == null || filter.length == 0) {
 					return EMPTY_RETVAL;
 				}
+			} else {
+				filter = null;
+
+				System.err.println("No search performed");
 			}
-			msgs = IMAPSort.sortMessages(imapFolder, msgs, fields, sortField, order, UserStorage.getStorageUser(
-					session.getUserId(), session.getContext()).getLocale(), usedFields, imapConfig);
+			Message[] msgs = IMAPSort.sortMessages(imapFolder, filter, fields, sortField, order, UserStorage
+					.getStorageUser(session.getUserId(), session.getContext()).getLocale(), usedFields, imapConfig);
 			if (fromToIndices != null && fromToIndices.length == 2) {
 				final int fromIndex = fromToIndices[0];
 				int toIndex = fromToIndices[1];
@@ -326,22 +330,25 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			}
 			final String fullname = prepareMailFolderParam(folder);
 			imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_ONLY);
-			Message[] msgs = null;
 			final Set<MailListField> usedFields = new HashSet<MailListField>();
 			/*
 			 * Shall a search be performed?
 			 */
 			final boolean search = (searchFields != null && searchFields.length > 0 && searchPatterns != null && searchPatterns.length > 0);
+			final int[] filter;
 			if (search) {
 				/*
 				 * Preselect message list according to given search pattern
 				 */
-				msgs = IMAPSearch.searchMessages(imapFolder, searchFields, searchPatterns, linkSearchTermsWithOR,
+				filter = IMAPSearch.searchMessages(imapFolder, searchFields, searchPatterns, linkSearchTermsWithOR,
 						fields, null, usedFields, imapConfig);
-				if (msgs == null || msgs.length == 0) {
+				if (filter == null || filter.length == 0) {
 					return EMPTY_RETVAL;
 				}
+			} else {
+				filter = null;
 			}
+			Message[] msgs = null;
 			final List<TreeNode> threadList;
 			{
 				/*
@@ -353,10 +360,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 					 * Define sequence of valid message numbers: e.g.:
 					 * 2,34,35,43,51
 					 */
-					sortRange = new StringBuilder(msgs.length * 2);
-					sortRange.append(msgs[0].getMessageNumber());
-					for (int i = 1; i < msgs.length; i++) {
-						sortRange.append(msgs[i].getMessageNumber()).append(',');
+					sortRange = new StringBuilder(filter.length * 2);
+					sortRange.append(filter[0]);
+					for (int i = 1; i < filter.length; i++) {
+						sortRange.append(filter[i]).append(',');
 					}
 				} else {
 					/*
@@ -717,8 +724,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 					} catch (final ProtocolException e1) {
 						throw new IMAPException(IMAPException.Code.MOVE_PARTIALLY_COMPLETED, e1,
 								com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(session, UserStorage
-										.getStorageUser(session.getUserId(), session.getContext())), Arrays.toString(msgUIDs),
-								imapFolder.getFullName(), e1.getMessage());
+										.getStorageUser(session.getUserId(), session.getContext())), Arrays
+										.toString(msgUIDs), imapFolder.getFullName(), e1.getMessage());
 					}
 				}
 				try {
