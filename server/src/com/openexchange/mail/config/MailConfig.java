@@ -159,9 +159,9 @@ public abstract class MailConfig {
 	/*
 	 * User-specific fields
 	 */
-	private String login;
+	protected String login;
 
-	private String password;
+	protected String password;
 
 	private AbstractOXException error;
 
