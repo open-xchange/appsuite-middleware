@@ -349,9 +349,9 @@ public final class IMAPSort {
 	 * 
 	 * @param imapFolder
 	 *            The IMAP folder
-	 * @param filteredMessages
-	 *            Pre-Selected messages to sort or <code>null</code> to sort
-	 *            all
+	 * @param filter
+	 *            Pre-Selected messages' sequence numbers to sort or
+	 *            <code>null</code> to sort all
 	 * @param fields
 	 *            The desired fields
 	 * @param sortFieldArg
@@ -365,39 +365,45 @@ public final class IMAPSort {
 	 * @return Sorted messages
 	 * @throws MessagingException
 	 */
-	public static Message[] sortMessages(final IMAPFolder imapFolder, final Message[] filteredMessages,
-			final MailListField[] fields, final MailListField sortFieldArg, final OrderDirection orderDir,
-			final Locale locale, final Set<MailListField> usedFields, final IMAPConfig imapConfig)
-			throws MessagingException {
+	public static Message[] sortMessages(final IMAPFolder imapFolder, final int[] filter, final MailListField[] fields,
+			final MailListField sortFieldArg, final OrderDirection orderDir, final Locale locale,
+			final Set<MailListField> usedFields, final IMAPConfig imapConfig) throws MessagingException {
 		boolean applicationSort = true;
 		Message[] msgs = null;
 		final MailListField sortField = sortFieldArg == null ? MailListField.RECEIVED_DATE : sortFieldArg;
 		if (imapConfig.isImapSort()) {
 			try {
-				if (filteredMessages == null) {
-					final long start = System.currentTimeMillis();
-					msgs = IMAPCommandsCollection.getServerSortList(imapFolder, getSortCritForIMAPCommand(sortField,
+				long start = System.currentTimeMillis();
+				final int[] seqNums;
+				if (filter == null) {
+					/*
+					 * Sort all
+					 */
+					seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, getSortCritForIMAPCommand(sortField,
 							orderDir == OrderDirection.DESC));
-					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-					if (msgs == null || msgs.length == 0) {
-						return EMPTY_MSGS;
-					}
-					final FetchProfile fetchProfile;
-					if (msgs.length < IMAPConfig.getMailFetchLimit()) {
-						fetchProfile = getCacheFetchProfile();
-						usedFields.addAll(getCacheFields());
-					} else {
-						fetchProfile = getFetchProfile(fields, sortField);
-						usedFields.addAll(Arrays.asList(fields));
-						usedFields.add(sortField);
-					}
-					msgs = new FetchIMAPCommand(imapFolder, msgs, fetchProfile, false, true).doCommand();
 				} else {
-					final long start = System.currentTimeMillis();
-					msgs = IMAPCommandsCollection.getServerSortList(imapFolder, getSortCritForIMAPCommand(sortField,
-							orderDir == OrderDirection.DESC), filteredMessages);
-					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+					/*
+					 * Only sort pre-selected messages
+					 */
+					seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, getSortCritForIMAPCommand(sortField,
+							orderDir == OrderDirection.DESC), filter);
 				}
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				if (seqNums == null || seqNums.length == 0) {
+					return EMPTY_MSGS;
+				}
+				final FetchProfile fetchProfile;
+				if (seqNums.length < IMAPConfig.getMailFetchLimit()) {
+					fetchProfile = getCacheFetchProfile();
+					usedFields.addAll(getCacheFields());
+				} else {
+					fetchProfile = getFetchProfile(fields, sortField);
+					usedFields.addAll(Arrays.asList(fields));
+					usedFields.add(sortField);
+				}
+				start = System.currentTimeMillis();
+				msgs = new FetchIMAPCommand(imapFolder, seqNums, fetchProfile, false, true).doCommand();
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				if (msgs == null || msgs.length == 0) {
 					return EMPTY_MSGS;
 				}
@@ -416,7 +422,7 @@ public final class IMAPSort {
 			 * Select all messages if user does not want a search being
 			 * performed
 			 */
-			if (filteredMessages == null) {
+			if (filter == null) {
 				final int allMsgCount = imapFolder.getMessageCount();
 				final FetchProfile fetchProfile;
 				if (allMsgCount < IMAPConfig.getMailFetchLimit()) {
@@ -429,7 +435,16 @@ public final class IMAPSort {
 				}
 				msgs = new FetchIMAPCommand(imapFolder, fetchProfile, allMsgCount).doCommand();
 			} else {
-				msgs = filteredMessages;
+				final FetchProfile fetchProfile;
+				if (filter.length < IMAPConfig.getMailFetchLimit()) {
+					fetchProfile = getCacheFetchProfile();
+					usedFields.addAll(getCacheFields());
+				} else {
+					fetchProfile = getFetchProfile(fields, sortField);
+					usedFields.addAll(Arrays.asList(fields));
+					usedFields.add(sortField);
+				}
+				msgs = new FetchIMAPCommand(imapFolder, filter, fetchProfile, false, false).doCommand();
 			}
 			if (msgs == null || msgs.length == 0) {
 				return EMPTY_MSGS;
@@ -441,6 +456,23 @@ public final class IMAPSort {
 		return msgs;
 	}
 
+	/**
+	 * Generates the sort criteria corresponding to specified sort field and
+	 * order direction.
+	 * <p>
+	 * Example:<br>
+	 * {@link MailListField#SENT_DATE} in descending order is turned to
+	 * <code>"REVERSE DATE"</code>.
+	 * 
+	 * @param sortField
+	 *            The sort field
+	 * @param descendingDirection
+	 *            The order direction
+	 * @return The sort criteria ready for being used inside IMAP's <i>SORT</i>
+	 *         command
+	 * @throws MessagingException
+	 *             If an unsupported sort field is specified
+	 */
 	private static String getSortCritForIMAPCommand(final MailListField sortField, final boolean descendingDirection)
 			throws MessagingException {
 		final StringBuilder imapSortCritBuilder = new StringBuilder(16).append(descendingDirection ? "REVERSE " : "");

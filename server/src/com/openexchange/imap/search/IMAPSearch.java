@@ -53,13 +53,10 @@ import static com.openexchange.mail.MailInterfaceImpl.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getCacheFetchProfile;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getCacheFields;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
-import static com.openexchange.mail.utils.StorageUtility.EMPTY_MSGS;
 import static com.openexchange.mail.utils.StorageUtility.getAllAddresses;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -85,6 +82,7 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.text.Html2TextConverter;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.tools.Collections.SmartIntArray;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
@@ -123,16 +121,14 @@ public final class IMAPSearch {
 	 *            The sort field
 	 * @param usedFields
 	 *            The set to fill with actually used fields
-	 * @return Filtered messages according to search criteria
+	 * @return Filtered messages' sequence numbers according to search criteria
 	 * @throws MessagingException
 	 * @throws MailException
 	 */
-	public static Message[] searchMessages(final IMAPFolder imapFolder, final MailListField[] searchFields,
+	public static int[] searchMessages(final IMAPFolder imapFolder, final MailListField[] searchFields,
 			final String[] searchPatterns, final boolean linkWithOR, final MailListField[] fields,
-			final MailListField sortFieldArg, final Set<MailListField> usedFields, final IMAPConfig imapConfig) throws MessagingException,
-			MailException {
-		boolean applicationSearch = true;
-		Message[] msgs = null;
+			final MailListField sortFieldArg, final Set<MailListField> usedFields, final IMAPConfig imapConfig)
+			throws MessagingException, MailException {
 		final MailListField sortField = sortFieldArg == null ? MailListField.RECEIVED_DATE : sortFieldArg;
 		if (imapConfig.isImapSearch()) {
 			try {
@@ -142,30 +138,26 @@ public final class IMAPSearch {
 				}
 				final SearchTerm searchTerm = getSearchTerm(searchFields, searchPatterns, linkWithOR);
 				final int[] matchSeqNums = imapFolder.getProtocol().search(searchTerm);
-				if (null == matchSeqNums || matchSeqNums.length == 0) {
-					return EMPTY_MSGS;
-				}
-				final FetchProfile fetchProfile;
+				/*
+				 * Remember used fields
+				 */
 				if (matchSeqNums.length < IMAPConfig.getMailFetchLimit()) {
-					fetchProfile = getCacheFetchProfile();
 					usedFields.addAll(getCacheFields());
 				} else {
-					fetchProfile = getFetchProfile(fields, sortField);
 					usedFields.addAll(Arrays.asList(fields));
 					usedFields.add(sortField);
 				}
-				msgs = new FetchIMAPCommand(imapFolder, matchSeqNums, fetchProfile, false, false).doCommand();
-				applicationSearch = false;
+				return matchSeqNums;
 			} catch (final Throwable t) {
 				if (LOG.isWarnEnabled()) {
 					final IMAPException imapException = new IMAPException(IMAPException.Code.IMAP_SEARCH_FAILED, t, t
 							.getMessage());
 					LOG.warn(imapException.getLocalizedMessage(), imapException);
 				}
-				applicationSearch = true;
 			}
 		}
-		if (applicationSearch) {
+		final Message[] allMsgs;
+		{
 			final int msgCount = imapFolder.getMessageCount();
 			final FetchProfile fetchProfile;
 			if (msgCount < IMAPConfig.getMailFetchLimit()) {
@@ -176,20 +168,19 @@ public final class IMAPSearch {
 				usedFields.addAll(Arrays.asList(fields));
 				usedFields.add(sortField);
 			}
-			final Message[] allMsgs = new FetchIMAPCommand(imapFolder, fetchProfile, msgCount).doCommand();
-			final List<Message> tmp = new ArrayList<Message>(allMsgs.length / 2);
 			final long start = System.currentTimeMillis();
-			for (int i = 0; i < allMsgs.length; i++) {
-				final Message currentMsg = allMsgs[i];
-				if (findPatternInField(searchFields, searchPatterns, linkWithOR, currentMsg)) {
-					tmp.add(currentMsg);
-				}
-			}
+			allMsgs = new FetchIMAPCommand(imapFolder, fetchProfile, msgCount).doCommand();
 			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-			msgs = new Message[tmp.size()];
-			tmp.toArray(msgs);
 		}
-		return msgs;
+		final SmartIntArray sia = new SmartIntArray(allMsgs.length / 2);
+		final FieldSearcher[] searchers = generateFieldSearchers(searchFields);
+		final MessageMatcher searchResult = linkWithOR ? ORSearchResult : ANDSearchResult;
+		for (int i = 0; i < allMsgs.length; i++) {
+			if (searchResult.matches(searchers, searchPatterns, allMsgs[i])) {
+				sia.append(allMsgs[i].getMessageNumber());
+			}
+		}
+		return sia.toArray();
 	}
 
 	/**
@@ -241,13 +232,41 @@ public final class IMAPSearch {
 		return linkWithOR ? new OrTerm(parentTerm, searchTerm) : new AndTerm(parentTerm, searchTerm);
 	}
 
+	private static interface MessageMatcher {
+		public boolean matches(FieldSearcher[] searchers, String[] searchPatterns, Message msg) throws MailException;
+	}
+
+	private static final MessageMatcher ORSearchResult = new MessageMatcher() {
+		public boolean matches(final FieldSearcher[] searchers, final String[] searchPatterns, final Message msg)
+				throws MailException {
+			boolean result = false;
+			for (int k = 0; k < searchers.length && !result; k++) {
+				if (searchers[k].find(msg, searchPatterns[k])) {
+					result = true;
+				}
+			}
+			return result;
+		}
+	};
+
+	private static final MessageMatcher ANDSearchResult = new MessageMatcher() {
+		public boolean matches(final FieldSearcher[] searchers, final String[] searchPatterns, final Message msg)
+				throws MailException {
+			boolean result = true;
+			for (int k = 0; k < searchers.length && result; k++) {
+				if (!searchers[k].find(msg, searchPatterns[k])) {
+					result = false;
+				}
+			}
+			return result;
+		}
+	};
+
 	private static interface FieldSearcher {
 		public boolean find(final Message msg, final String pattern) throws MailException;
 	}
 
-	private static boolean findPatternInField(final MailListField[] searchFields, final String[] searchPatterns,
-			final boolean linkWithOR, final Message msg) throws MailException {
-		boolean result = false;
+	private static FieldSearcher[] generateFieldSearchers(final MailListField[] searchFields) {
 		final FieldSearcher[] searchers = new FieldSearcher[searchFields.length];
 		for (int i = 0; i < searchFields.length; i++) {
 			switch (searchFields[i]) {
@@ -330,17 +349,7 @@ public final class IMAPSearch {
 				};
 			}
 		}
-		for (int i = 0; i < searchFields.length; i++) {
-			boolean foundInCurrentField = searchers[i].find(msg, searchPatterns[i]);
-			if (linkWithOR && foundInCurrentField) {
-				return true;
-			} else if (!linkWithOR && !foundInCurrentField) {
-				return false;
-			} else {
-				result = foundInCurrentField;
-			}
-		}
-		return result;
+		return searchers;
 	}
 
 	private static String getTextContent(final Message msg) throws MailException, MessagingException, IOException {

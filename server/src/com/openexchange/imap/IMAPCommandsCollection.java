@@ -54,7 +54,6 @@ import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfil
 import static javax.mail.internet.MimeUtility.unfold;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -112,6 +111,9 @@ public final class IMAPCommandsCollection {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(IMAPCommandsCollection.class);
 
+	/**
+	 * Server does not support %s command
+	 */
 	private static final String PROTOCOL_ERROR_TEMPL = "Server does not support %s command";
 
 	private static final String ERR_01 = "No matching messages";
@@ -389,13 +391,14 @@ public final class IMAPCommandsCollection {
 	 * @param sortCrit
 	 *            The IMAP sort criteria
 	 * @param toSort
-	 *            The messages to sort
-	 * @return sorted array of {@link Message} instances
+	 *            The messages' sequence numbers to sort
+	 * @return An array of <code>int</code> representing sorted messages'
+	 *         sequence numbers
 	 * @throws MessagingException
 	 */
-	public static Message[] getServerSortList(final IMAPFolder folder, final String sortCrit, final Message[] toSort)
+	public static int[] getServerSortList(final IMAPFolder folder, final String sortCrit, final int[] toSort)
 			throws MessagingException {
-		return getServerSortList(folder, sortCrit, IMAPNumArgSplitter.splitMessageArg(toSort, false));
+		return getServerSortList(folder, sortCrit, IMAPNumArgSplitter.splitSeqNumArg(toSort, false));
 	}
 
 	private static final String[] RANGE_ALL = { "ALL" };
@@ -408,18 +411,31 @@ public final class IMAPCommandsCollection {
 	 *            The IMAP folder
 	 * @param sortCrit
 	 *            The IMAP sort criteria
-	 * @return sorted array of {@link Message} instances
+	 * @return An array of <code>int</code> representing sorted messages'
+	 *         sequence numbers
 	 * @throws MessagingException
 	 */
-	public static Message[] getServerSortList(final IMAPFolder folder, final String sortCrit) throws MessagingException {
+	public static int[] getServerSortList(final IMAPFolder folder, final String sortCrit) throws MessagingException {
 		return getServerSortList(folder, sortCrit, RANGE_ALL);
 	}
 
 	/**
-	 * Get a server-side sorted list
+	 * Executes the IMAP <i>SORT</i> command parameterized with given sort
+	 * criteria and given sort range
+	 * 
+	 * @param imapFolder
+	 *            The IMAP folder in which the sort is performed
+	 * @param sortCrit
+	 *            The sort criteria
+	 * @param mdat
+	 *            The sort range
+	 * @return An array of <code>int</code> representing sorted messages'
+	 *         sequence numbers
+	 * @throws MessagingException
+	 *             If IMAP <i>SORT</i> command fails
 	 */
 	@SuppressWarnings("unchecked")
-	public static Message[] getServerSortList(final IMAPFolder imapFolder, final String sortCrit, final String[] mdat)
+	public static int[] getServerSortList(final IMAPFolder imapFolder, final String sortCrit, final String[] mdat)
 			throws MessagingException {
 		if (mdat == null || mdat.length == 0) {
 			throw new MessagingException("IMAP sort failed: Empty message num argument.");
@@ -432,31 +448,26 @@ public final class IMAPCommandsCollection {
 		 */
 		final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 			public Object doCommand(IMAPProtocol p) throws ProtocolException {
-				Response[] r = p.command(new StringBuilder(mdat[0].length() + 16).append("SORT (").append(sortCrit)
-						.append(") UTF-8 ").append(mdat[0]).toString(), null);
-				Response response = r[r.length - 1];
-				List<Message> list = new ArrayList<Message>();
+				final Response[] r = p.command(new StringBuilder(mdat[0].length() + 16).append("SORT (").append(
+						sortCrit).append(") UTF-8 ").append(mdat[0]).toString(), null);
+				final Response response = r[r.length - 1];
+				final SmartIntArray sia = new SmartIntArray(32);
 				try {
 					if (response.isOK()) {
 						for (int i = 0, len = r.length; i < len; i++) {
 							if (!(r[i] instanceof IMAPResponse)) {
 								continue;
 							}
-							IMAPResponse ir = (IMAPResponse) r[i];
+							final IMAPResponse ir = (IMAPResponse) r[i];
 							if (ir.keyEquals("SORT")) {
 								String num;
 								while ((num = ir.readAtomString()) != null) {
 									try {
-										Message msg = imapFolder.getMessage(Integer.parseInt(num));
-										list.add(msg);
-									} catch (NumberFormatException e) {
+										sia.append(Integer.parseInt(num));
+									} catch (final NumberFormatException e) {
 										LOG.error(e.getMessage(), e);
 										throw new ProtocolException("Invalid Message Number: " + num);
-									} catch (MessagingException e) {
-										LOG.error(e.getMessage(), e);
-										throw new ProtocolException(e.getMessage());
 									}
-									// list.add(num);
 								}
 							}
 							r[i] = null;
@@ -468,11 +479,10 @@ public final class IMAPCommandsCollection {
 					p.notifyResponseHandlers(r);
 					p.handleResult(response);
 				}
-				return list;
+				return sia.toArray();
 			}
 		});
-		final List<Message> l = ((List<Message>) val);
-		return l.toArray(new Message[l.size()]);
+		return ((int[]) val);
 	}
 
 	private static final String COMMAND_SEARCH_UNSEEN = "SEARCH UNSEEN";

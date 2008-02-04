@@ -270,8 +270,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 				}
 			} else {
 				filter = null;
-
-				System.err.println("No search performed");
 			}
 			Message[] msgs = IMAPSort.sortMessages(imapFolder, filter, fields, sortField, order, UserStorage
 					.getStorageUser(session.getUserId(), session.getContext()).getLocale(), usedFields, imapConfig);

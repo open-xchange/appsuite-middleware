@@ -1,3 +1,7 @@
+* 2008-02-04 - thorben.betten@open-xchange.com
+
+ - Bugfix #10886: Fixed NPE when searching mails
+
 * 2008-02-01 - thorben.betten@open-xchange.com
 
  - Bugfix #10880: Although version information should ensure that an update
