@@ -138,12 +138,14 @@ public abstract class MailProvider {
 	 * Gets the implementation-specific name of {@link MailPermission}
 	 * implementation.
 	 * <p>
-	 * Returns {@link DefaultMailPermission} class name if no specific header
-	 * loader is needed.
+	 * Returns {@link DefaultMailPermission} class name if mailing system does
+	 * not support permission(s).
 	 * 
 	 * @return The name of inheriting {@link MailPermission} implementation
 	 */
-	public abstract String getMailPermissionClass();
+	public String getMailPermissionClass() {
+		return DefaultMailPermission.class.getName();
+	}
 
 	/**
 	 * Gets the implementation-specific class name of inheriting
@@ -155,7 +157,9 @@ public abstract class MailProvider {
 	 * @return The class name of inheriting {@link MIMEHeaderLoader}
 	 *         implementation
 	 */
-	public abstract String getHeaderLoaderClass();
+	public String getHeaderLoaderClass() {
+		return DefaultHeaderLoader.class.getName();
+	}
 
 	/**
 	 * Gets the user-specific mail configuration with properly set login and
