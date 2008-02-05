@@ -85,6 +85,8 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.groupware.upload.impl.AJAXUploadFile;
 import com.openexchange.groupware.upload.impl.UploadException;
@@ -336,7 +338,8 @@ public final class AJAXFile extends PermissionServlet {
 				}
 				final Session sessionObj = getSessionObject(req);
 				final UploadQuotaChecker checker = UploadQuotaChecker.getUploadQuotaChecker(
-						getModuleInteger(moduleParam), sessionObj);
+						getModuleInteger(moduleParam), sessionObj, ContextStorage.getStorageContext(sessionObj
+								.getContextId()));
 				upload.setSizeMax(checker.getQuotaMax());
 				upload.setFileSizeMax(checker.getFileQuotaMax());
 				/*
@@ -418,6 +421,19 @@ public final class AJAXFile extends PermissionServlet {
 			throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
 					responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
 					JS_FRAGMENT_ACTION, action == null ? STR_NULL : action), e.getMessage(), e);
+		} catch (final ContextException e) {
+			final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e, new Object[0]);
+			JSONObject responseObj = null;
+			try {
+				final Response response = new Response();
+				response.setException(oje);
+				responseObj = response.getJSON();
+			} catch (final JSONException e1) {
+				LOG.error(e1.getMessage(), e1);
+			}
+			throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
+					responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
+					JS_FRAGMENT_ACTION, action == null ? STR_NULL : action), e.getMessage(), e);
 		}
 	}
 
@@ -471,7 +487,7 @@ public final class AJAXFile extends PermissionServlet {
 		session.putUploadedFile(id, uploadFile);
 		return id;
 	}
-	
+
 	private static final String ALG_MD5 = "MD5";
 
 	private static String plainStringToMD5(final String input) {

@@ -52,6 +52,7 @@ package com.openexchange.groupware.upload.quotachecker;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -72,10 +73,10 @@ public final class MailUploadQuotaChecker extends UploadQuotaChecker {
 
 	private final long uploadQuotaPerFile;
 
-	public MailUploadQuotaChecker(final Session session) {
+	public MailUploadQuotaChecker(final Session session, final Context ctx) {
 		super();
-		UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
-				session.getContext());
+		final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+				ctx);
 		if (settings.getUploadQuota() > 0) {
 			uploadQuota = settings.getUploadQuota();
 		} else if (settings.getUploadQuota() == 0) {

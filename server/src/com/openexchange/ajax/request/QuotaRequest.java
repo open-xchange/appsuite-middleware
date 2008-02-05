@@ -61,6 +61,8 @@ import org.json.JSONWriter;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.mail.MailException;
@@ -85,7 +87,8 @@ public class QuotaRequest extends CommonRequest {
 	public QuotaRequest(final Session sessionObj, final JSONWriter w) {
 		super(w);
 		try {
-			this.qfs = (QuotaFileStorage) FileStorage.getInstance(FilestoreStorage.createURI(sessionObj.getContext()),sessionObj.getContext(),new DBPoolProvider());
+			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+			this.qfs = (QuotaFileStorage) FileStorage.getInstance(FilestoreStorage.createURI(ctx),ctx,new DBPoolProvider());
 		} catch (final AbstractOXException e) {
 			this.fsException = e;
 		}

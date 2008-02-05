@@ -50,6 +50,7 @@
 package com.openexchange.groupware.upload.impl;
 
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.session.Session;
 
@@ -78,21 +79,21 @@ public abstract class UploadQuotaChecker {
 	public abstract long getFileQuotaMax();
 
 	/**
-	 * Gets the upload quota checker appropiate for given module
+	 * Gets the upload quota checker appropriate for given module
 	 * 
 	 * @param module
 	 *            The module for which the upload starts
 	 * @param session
 	 *            The current session
-	 * @return The upload quota checker appropiate for given module
+	 * @return The upload quota checker appropriate for given module
 	 * @throws UploadException
-	 *             If the module is unknwon
+	 *             If the module is unknown
 	 */
-	public static final UploadQuotaChecker getUploadQuotaChecker(final int module, final Session session)
-			throws UploadException {
+	public static final UploadQuotaChecker getUploadQuotaChecker(final int module, final Session session,
+			final Context ctx) throws UploadException {
 		switch (module) {
 		case FolderObject.MAIL:
-			return new MailUploadQuotaChecker(session);
+			return new MailUploadQuotaChecker(session, ctx);
 		default:
 			throw new UploadException(UploadException.UploadCode.UNKNOWN_MODULE, null, Integer.valueOf(module));
 		}
