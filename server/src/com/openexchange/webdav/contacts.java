@@ -73,6 +73,9 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
@@ -199,7 +202,13 @@ public final class contacts extends XmlServlet {
 	}
 	
 	protected boolean hasModulePermission(final Session sessionObj) {
-		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
+		Context ct = null;
+		try {
+			ct = ContextStorage.getStorageContext(sessionObj.getContextId());
+		} catch (ContextException e) {
+			//
+		}
+		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ct);
 		return (uc.hasWebDAVXML() && uc.hasContact());
 	}
 }
