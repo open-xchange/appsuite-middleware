@@ -121,9 +121,10 @@ public abstract class UploadFileMailPart extends MailPart {
 		 */
 		if (null == dataSource) {
 			try {
-				if (getContentType().getCharsetParameter() == null) {
+				if (getContentType().getCharsetParameter() == null
+						&& getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
 					/*
-					 * Guess charset
+					 * Guess charset for textual attachment
 					 */
 					getContentType().setCharsetParameter(detectCharset());
 				}
