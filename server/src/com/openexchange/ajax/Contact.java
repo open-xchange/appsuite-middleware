@@ -76,6 +76,8 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -149,8 +151,11 @@ public class Contact extends DataServlet {
 				
 				return;
 			}
+			
+			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+			
 			final OXJSONWriter sw = new OXJSONWriter();
-			final ContactRequest contactRequest = new ContactRequest(sessionObj);
+			final ContactRequest contactRequest = new ContactRequest(sessionObj, ctx);
 			final Object responseObj = contactRequest.action(action, jsonObj);
 			response.setTimestamp(contactRequest.getTimestamp());
 			response.setData(responseObj);
@@ -187,7 +192,9 @@ public class Contact extends DataServlet {
 					return;
 				}
 				
-				final ContactRequest contactRequest = new ContactRequest(sessionObj);
+				final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+				
+				final ContactRequest contactRequest = new ContactRequest(sessionObj, ctx);
 				
 				if (data.charAt(0) == '[') {
 					final JSONArray jsonDataArray = new JSONArray(data);
@@ -340,8 +347,8 @@ public class Contact extends DataServlet {
 		
 	}
 	
-	protected boolean hasModulePermission(final Session sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
 		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-				sessionObj.getContext()).hasContact();
+				ctx).hasContact();
 	}
 }

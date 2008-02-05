@@ -77,7 +77,6 @@ import com.openexchange.ajax.exceptions.InfostoreException2Message;
 import com.openexchange.ajax.parser.AttachmentParser;
 import com.openexchange.ajax.request.AttachmentRequest;
 import com.openexchange.ajax.request.ServletRequestAdapter;
-import com.openexchange.ajax.request.InfostoreRequest;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -99,13 +98,13 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Helper;
+import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
-import com.openexchange.tools.exceptions.LoggingLogic;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * Attachment
@@ -145,10 +144,10 @@ public class Attachment extends PermissionServlet {
     private long maxUploadSize = -2;
 	
 	@Override
-	protected boolean hasModulePermission(final Session session) {
+	protected boolean hasModulePermission(final Session session, final Context ctx) {
         try {
             ServerSession sessionObj = new ServerSessionAdapter(session);
-            return AttachmentRequest.hasPermission(UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
+            return AttachmentRequest.hasPermission(UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
         } catch (ContextException e) {
             LOG.error(e.getLocalizedMessage(), e);
             return false;

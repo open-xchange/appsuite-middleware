@@ -64,6 +64,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.ResourceRequest;
 import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -93,7 +96,8 @@ public class Resource extends DataServlet {
 	            return;
 			}
 
-			final ResourceRequest resourceRequest = new ResourceRequest(sessionObj); 
+			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+			final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, ctx); 
 			final Object responseObj = resourceRequest.action(action, jsonObj);
 			response.setTimestamp(resourceRequest.getTimestamp());
 			response.setData(responseObj);
@@ -115,6 +119,9 @@ public class Resource extends DataServlet {
 			LOG.error(_doGet, e);
             response.setException(e);
 		} catch (SearchIteratorException e) {
+			LOG.error(_doGet, e);
+            response.setException(e);
+		} catch (AbstractOXException e) {
 			LOG.error(_doGet, e);
             response.setException(e);
 		}
@@ -154,7 +161,8 @@ public class Resource extends DataServlet {
 
 				jsonObj.put(PARAMETER_DATA, jData);
 				
-				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj); 
+				final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, ctx); 
 				final Object responseObj = resourceRequest.action(action, jsonObj);
 				response.setTimestamp(resourceRequest.getTimestamp());
 				response.setData(responseObj);
@@ -173,7 +181,8 @@ public class Resource extends DataServlet {
 
 				jsonObj.put(PARAMETER_DATA, jData);
 				
-				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj);
+				final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, ctx);
 				final Object responseObj = resourceRequest.action(action, jsonObj);
 				response.setTimestamp(resourceRequest.getTimestamp());
 				response.setData(responseObj);
@@ -198,12 +207,15 @@ public class Resource extends DataServlet {
 		} catch (AjaxException e) {
 			LOG.error(_doPut, e);
             response.setException(e);
+		} catch (AbstractOXException e) {
+			LOG.error(_doGet, e);
+            response.setException(e);
 		}
 		
 		writeResponse(response, httpServletResponse);
 	}
 	
-	protected boolean hasModulePermission(final Session sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
 		return true;
 	}
 }

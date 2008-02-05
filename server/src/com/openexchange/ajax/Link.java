@@ -65,6 +65,9 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.LinkRequest;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
@@ -99,7 +102,9 @@ public class Link extends DataServlet {
 	            return;
 			}
 
-			final LinkRequest linkRequest = new LinkRequest(sessionObj, sw);
+			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+			
+			final LinkRequest linkRequest = new LinkRequest(sessionObj, sw, ctx);
 			linkRequest.action(action, jsonObj);
 
 			response.setData(new JSONArray(sw.toString()));
@@ -118,6 +123,9 @@ public class Link extends DataServlet {
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
 		} catch (AjaxException e) {
+			LOG.error(e.getMessage(), e);
+			response.setException(e);
+		} catch (AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		}
@@ -145,7 +153,9 @@ public class Link extends DataServlet {
 			final String data = getBody(httpServletRequest);
 			
 			if (data.length() > 0) {
-				final LinkRequest linkRequest = new LinkRequest(sessionObj, sw);
+				final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+				
+				final LinkRequest linkRequest = new LinkRequest(sessionObj, sw, ctx);
 
 				final JSONObject jsonDataObj = new JSONObject(data);
 				JSONObject jsonObj;
@@ -186,14 +196,17 @@ public class Link extends DataServlet {
 		} catch (AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
+		} catch (AbstractOXException e) {
+			LOG.error(e.getMessage(), e);
+			response.setException(e);
 		}
 		
 		writeResponse(response, httpServletResponse);
 	}
 	
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
 		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-				sessionObj.getContext()).hasContact();
+				ctx).hasContact();
 	}
 }

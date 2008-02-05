@@ -66,6 +66,9 @@ import com.openexchange.ajax.request.ReminderRequest;
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
@@ -96,7 +99,8 @@ public class Reminder extends DataServlet {
 	            return;
 			}
 
-			final ReminderRequest reminderRequest = new ReminderRequest(sessionObj);
+			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+			final ReminderRequest reminderRequest = new ReminderRequest(sessionObj, ctx);
 			final Object responseObj = reminderRequest.action(action, jsonObj);
 			response.setTimestamp(reminderRequest.getTimestamp());
 			response.setData(responseObj);
@@ -123,6 +127,9 @@ public class Reminder extends DataServlet {
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
+		} catch (AbstractOXException exc) {
+            LOG.error(exc.getMessage(), exc);
+            response.setException(exc);
 		}
 		
 		writeResponse(response, httpServletResponse);
@@ -146,7 +153,8 @@ public class Reminder extends DataServlet {
 	            return;
 			}
 
-			final ReminderRequest reminderRequest = new ReminderRequest(sessionObj);
+			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+			final ReminderRequest reminderRequest = new ReminderRequest(sessionObj, ctx);
 
 			if (data.charAt(0) == '[') {
 				final JSONArray jData = new JSONArray(data);
@@ -185,12 +193,15 @@ public class Reminder extends DataServlet {
 		} catch (AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
+		} catch (AbstractOXException exc) {
+            LOG.error(exc.getMessage(), exc);
+            response.setException(exc);
 		}
 		
 		writeResponse(response, httpServletResponse);
 	}
 	
-	protected boolean hasModulePermission(final Session sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
 		return true;
 	}
 }

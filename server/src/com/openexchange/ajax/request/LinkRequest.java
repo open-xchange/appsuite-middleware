@@ -65,6 +65,7 @@ import com.openexchange.api2.LinkSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbLinkSQLInterface;
 import com.openexchange.groupware.container.LinkObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
@@ -80,11 +81,14 @@ public class LinkRequest {
 	private final User user;
 	
 	final JSONWriter jsonWriter;
+	
+	private Context ctx;
 
-	public LinkRequest(final Session sessionObj, final Writer pw) {
+	public LinkRequest(final Session sessionObj, final Writer pw, final Context ctx) {
 		this.sessionObj = sessionObj;
 		this.jsonWriter = new JSONWriter(pw);
-		user = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
+		this.ctx = ctx;
+		user = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
 	}
 	
 	public void action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, AjaxException, OXJSONException {
@@ -164,7 +168,7 @@ public class LinkRequest {
 		if (jData.has("folder2")) {
 			lo.setSecondFolder(jData.getInt("folder2"));
 		}
-		lo.setContext(sessionObj.getContext().getContextId());
+		lo.setContext(ctx.getContextId());
 		
 		final LinkSQLInterface linksql = new RdbLinkSQLInterface();
 		linksql.saveLink(lo,user,group,sessionObj);
