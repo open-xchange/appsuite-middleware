@@ -76,6 +76,8 @@ import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.PermissionServlet;
@@ -219,6 +221,7 @@ public abstract class XmlServlet extends PermissionServlet {
 		
 		try {
 			final Session sessionObj = getSession(req);
+			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
 			
 			input_doc = getJDOMDocument(req);
 			os = resp.getOutputStream();
@@ -317,9 +320,9 @@ public abstract class XmlServlet extends PermissionServlet {
 				if (lastsync == null) {
 					lastsync = new Date(0);
 				}
-				startWriter(sessionObj, folder_id, bModified, bDeleted, bList, lastsync, resp.getOutputStream());
+				startWriter(sessionObj, ctx, folder_id, bModified, bDeleted, bList, lastsync, resp.getOutputStream());
 			} else {
-				startWriter(sessionObj, object_id, folder_id, resp.getOutputStream());
+				startWriter(sessionObj, ctx, object_id, folder_id, resp.getOutputStream());
 			}
 			
 			os.write(("</D:multistatus>").getBytes());
@@ -501,11 +504,11 @@ public abstract class XmlServlet extends PermissionServlet {
 	
 	protected abstract void parsePropChilds(HttpServletRequest req, HttpServletResponse resp, XmlPullParser parser) throws Exception;
 	
-	protected abstract void startWriter(Session sessionObj, int objectId, int folderId, OutputStream os) throws Exception;
+	protected abstract void startWriter(Session sessionObj, Context ctx, int objectId, int folderId, OutputStream os) throws Exception;
 	
-	protected abstract void startWriter(Session sessionObj, int folderId, boolean bModified, boolean bDelete, Date lastsync, OutputStream os) throws Exception;
+	protected abstract void startWriter(Session sessionObj, Context ctx, int folderId, boolean bModified, boolean bDelete, Date lastsync, OutputStream os) throws Exception;
 
-	protected abstract void startWriter(Session sessionObj, int folderId, boolean bModified, boolean bDelete, boolean bList, Date lastsync, OutputStream os) throws Exception;
+	protected abstract void startWriter(Session sessionObj, Context ctx, int folderId, boolean bModified, boolean bDelete, boolean bList, Date lastsync, OutputStream os) throws Exception;
 }
 
 

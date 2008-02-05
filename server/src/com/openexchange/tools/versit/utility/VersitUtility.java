@@ -133,7 +133,7 @@ public final class VersitUtility {
 		OXContainerConverter oxc = null;
 		try {
 			oxc = new OXContainerConverter(session);
-			final ContactSQLInterface contactInterface = new RdbContactSQLInterface(session);
+			final ContactSQLInterface contactInterface = new RdbContactSQLInterface(session, ctx);
 			final VersitObject vo = def.parse(r);
 			if (vo != null) {
 				final ContactObject contactObj = oxc.convertContact(vo);

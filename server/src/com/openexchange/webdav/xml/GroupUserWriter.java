@@ -66,6 +66,7 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
@@ -196,8 +197,8 @@ public class GroupUserWriter extends ContactWriter {
 	
 	private static final Log LOG = LogFactory.getLog(GroupUserWriter.class);
 	
-	public GroupUserWriter(Session sessionObj, Element parent) throws Exception {
-		super(sessionObj);
+	public GroupUserWriter(Session sessionObj, Context ctx, Element parent) throws Exception {
+		super(sessionObj, ctx);
 		this.parent = parent;
 		
 		init();
@@ -281,7 +282,7 @@ public class GroupUserWriter extends ContactWriter {
 		} else {
 			int userId = contactobject.getInternalUserId();
 			
-			User u = userStorage.getUser(userId, sessionObj.getContext());
+			User u = userStorage.getUser(userId, ctx);
 			
 			addElement("uid", userId, e);
             addElement(ContactFields.OBJECT_ID, contactobject.getObjectID(), e);
@@ -293,7 +294,7 @@ public class GroupUserWriter extends ContactWriter {
 			
 			if (userId == sessionObj.getUserId()) {
 				addElement("myidentity", true, e);
-				addElement("context_id", sessionObj.getContext().getContextId(), e);
+				addElement("context_id", sessionObj.getContextId(), e);
 			}
 			
 			writeContactElement(contactobject, e);

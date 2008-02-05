@@ -86,7 +86,6 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
-import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -211,7 +210,7 @@ public class CSVContactImporter extends AbstractImporter implements Importer {
 		//reading entries...
 		final List<ImportResult> results = new LinkedList<ImportResult>();
 		final ContactSwitcher conSet = getContactSwitcher();
-		final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessObj);
+		final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessObj, sessObj.getContext());
 		int lineNumber = 1;
 		while(iter.hasNext()){
 			//...and writing them

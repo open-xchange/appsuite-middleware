@@ -84,7 +84,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
@@ -92,7 +92,6 @@ import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.openexchange.tools.versit.filetokenizer.VCardFileToken;
 import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
-import com.openexchange.tools.session.ServerSession;
 
 @OXExceptionSource(
     classId=ImportExportExceptionClasses.VCARDIMPORTER,
@@ -213,7 +212,7 @@ import com.openexchange.tools.session.ServerSession;
 			}
 		}
 		
-		final ContactSQLInterface contactInterface = new RdbContactSQLInterface(sessObj);
+		final ContactSQLInterface contactInterface = new RdbContactSQLInterface(sessObj, sessObj.getContext());
 		OXContainerConverter oxContainerConverter = null;
 		
 		List<ImportResult> list = new ArrayList<ImportResult>();

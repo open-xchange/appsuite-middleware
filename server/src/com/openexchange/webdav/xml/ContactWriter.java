@@ -73,6 +73,7 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.LinkEntryObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -211,9 +212,10 @@ public class ContactWriter extends CommonWriter {
 		
 	}
 	
-	public ContactWriter(Session sessionObj) {
+	public ContactWriter(Session sessionObj, Context ctx) {
 		this.sessionObj = sessionObj;
-		contactsql = new RdbContactSQLInterface(sessionObj);
+		this.ctx = ctx;
+		contactsql = new RdbContactSQLInterface(sessionObj, ctx);
 	}
 	
 	public void startWriter(int objectId, int folderId, OutputStream os) throws Exception {

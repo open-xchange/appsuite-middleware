@@ -67,6 +67,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -96,13 +97,14 @@ public class FolderWriter extends FolderChildWriter {
 		this.userId = userId;
 	}
 	
-	public FolderWriter(final Session sessionObj) {
+	public FolderWriter(final Session sessionObj, final Context ctx) {
 		this.sessionObj = sessionObj;
+		this.ctx = ctx;
 		userId = sessionObj.getUserId();
 	}
 	
 	public void startWriter(final int objectId,  final OutputStream os) throws Exception {
-		final FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(sessionObj);
+		final FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(sessionObj, ctx);
 		
 		final Element eProp = new Element("prop", "D", "DAV:");
 		final XMLOutputter xo = new XMLOutputter();
@@ -119,7 +121,7 @@ public class FolderWriter extends FolderChildWriter {
 	}
 	
 	public void startWriter(final boolean modified, final boolean deleted, final boolean bList, Date lastsync, final OutputStream os) throws Exception {
-		final FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(sessionObj);
+		final FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(sessionObj, ctx);
 		
 		final XMLOutputter xo = new XMLOutputter();
 		

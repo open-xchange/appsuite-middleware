@@ -178,7 +178,7 @@ public final class groupuser extends PermissionServlet {
 			if (s_user != null) {
 				os.write(("<ox:users>").getBytes());
 				
-				final GroupUserWriter groupuserwriter = new GroupUserWriter(sessionObj, new Element("user", XmlServlet.NS));
+				final GroupUserWriter groupuserwriter = new GroupUserWriter(sessionObj, ctx, new Element("user", XmlServlet.NS));
 				
 				if ("*".equals(s_user)) {
 					groupuserwriter.startWriter(true, true, lastsync, os);

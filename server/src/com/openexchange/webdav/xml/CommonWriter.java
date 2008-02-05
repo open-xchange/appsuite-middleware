@@ -92,9 +92,9 @@ public abstract class CommonWriter extends FolderChildWriter {
 		try {
 			XmlServlet.attachmentBase.startTransaction();
 			final TimedResult tResult = XmlServlet.attachmentBase.getAttachments(commonobject.getParentFolderID(),
-					commonobject.getObjectID(), getModule(), sessionObj.getContext(), getUser(),
+					commonobject.getObjectID(), getModule(), ctx, getUser(),
 					UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-							sessionObj.getContext()));
+							ctx));
 			
 			it = tResult.results();
 			

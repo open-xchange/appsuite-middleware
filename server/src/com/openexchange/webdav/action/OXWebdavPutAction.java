@@ -61,7 +61,7 @@ public class OXWebdavPutAction extends WebdavPutAction {
 	public long getMaxSize() {
 		final long maxSize = InfostoreConfigUtils.determineRelevantUploadSizePerFile(UserSettingMailStorage
 				.getInstance().getUserSettingMail(sessionHolder.getSessionObject().getUserId(),
-						sessionHolder.getSessionObject().getContext()));
+						sessionHolder.getContext()));
 		if (maxSize < 1) {
 			return -1;
 		}

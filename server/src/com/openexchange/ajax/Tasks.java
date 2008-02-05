@@ -228,15 +228,10 @@ public class Tasks extends DataServlet {
 	}
 	
 	@Override
-    protected boolean hasModulePermission(final Session sessionObj) {
+    protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
         try {
-            final Context ctx = ContextStorage.getInstance().getContext(
-                sessionObj.getContextId());
     		return UserConfigurationStorage.getInstance().getUserConfiguration(
                 sessionObj.getUserId(), ctx).hasTask();
-        } catch (ContextException e) {
-            LOG.error(e.getMessage(), e);
-            return false;
         } catch (UserConfigurationException e) {
             LOG.error(e.getMessage(), e);
             return false;

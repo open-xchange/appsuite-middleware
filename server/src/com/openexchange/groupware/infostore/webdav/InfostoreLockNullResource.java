@@ -199,7 +199,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 
 	@Override
 	public void delete() throws WebdavException {
-		final Context ctx = sessionHolder.getSessionObject().getContext();
+		final Context ctx = sessionHolder.getContext();
 		Connection writeCon = null;
 		PreparedStatement stmt = null;
 		try {
@@ -385,7 +385,7 @@ public class InfostoreLockNullResource extends AbstractCollection implements OXW
 		if(exists) {
 			return;
 		}
-		final Context ctx = sessionHolder.getSessionObject().getContext();
+		final Context ctx = sessionHolder.getContext();
 		Connection writeCon = null;
 		PreparedStatement stmt = null;
 		try {

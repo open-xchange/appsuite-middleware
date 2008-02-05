@@ -50,7 +50,6 @@
 package com.openexchange.groupware.infostore;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -59,23 +58,24 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tx.ThreadLocalDBProvider;
-import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class InfostoreDelete implements DeleteListener {
 
 	private final ThreadLocalDBProvider provider = new ThreadLocalDBProvider();
-	
+
 	private final InfostoreFacade database = new InfostoreFacadeImpl(provider);
-	
-	public void deletePerformed(final DeleteEvent sqlDelEvent, final Connection readCon,
-			final Connection writeCon) throws DeleteFailedException {
-		if(sqlDelEvent.getType() != DeleteEvent.TYPE_USER) {
+
+	public void deletePerformed(final DeleteEvent sqlDelEvent, final Connection readCon, final Connection writeCon)
+			throws DeleteFailedException {
+		if (sqlDelEvent.getType() != DeleteEvent.TYPE_USER) {
 			return;
 		}
 		provider.setReadConnection(readCon);
 		provider.setWriteConnection(writeCon);
 		try {
-			database.removeUser(sqlDelEvent.getId(), sqlDelEvent.getContext(), sqlDelEvent.getSession());
+			database.removeUser(sqlDelEvent.getId(), sqlDelEvent.getContext(), new ServerSessionAdapter(sqlDelEvent
+					.getSession(), sqlDelEvent.getContext()));
 		} catch (final OXException e) {
 			throw new DeleteFailedException(e);
 		} catch (final LdapException e) {

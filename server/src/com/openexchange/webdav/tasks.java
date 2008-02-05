@@ -194,16 +194,19 @@ public final class tasks extends XmlServlet {
 		}
 	}
 	
-	protected void startWriter(final Session sessionObj, final int objectId, final int folderId, final OutputStream os) throws Exception {
+	@Override
+	protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId, final OutputStream os) throws Exception {
 		final TaskWriter taskwriter = new TaskWriter(sessionObj);
 		taskwriter.startWriter(objectId, folderId, os);
 	}
 	
-	protected void startWriter(final Session sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final Date lastsync, final OutputStream os) throws Exception {
-		startWriter(sessionObj, folderId, bModified, bDelete, false, lastsync, os);
+	@Override
+	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean bModified, final boolean bDelete, final Date lastsync, final OutputStream os) throws Exception {
+		startWriter(sessionObj, ctx, folderId, bModified, bDelete, false, lastsync, os);
 	}
 	
-	protected void startWriter(final Session sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
+	@Override
+	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
 		final TaskWriter taskwriter = new TaskWriter(sessionObj);
 		taskwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
 	}

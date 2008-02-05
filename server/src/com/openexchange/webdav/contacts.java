@@ -74,8 +74,6 @@ import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
@@ -187,22 +185,26 @@ public final class contacts extends XmlServlet {
 		}
 	}
 	
-	protected void startWriter(final Session sessionObj, final int objectId, final int folderId, final OutputStream os) throws Exception {
-		final ContactWriter contactwriter = new ContactWriter(sessionObj);
+	@Override
+	protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId, final OutputStream os) throws Exception {
+		final ContactWriter contactwriter = new ContactWriter(sessionObj, ctx);
 		contactwriter.startWriter(objectId, folderId, os);
 	}
 
-	protected void startWriter(final Session sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final Date lastsync, final OutputStream os) throws Exception {
-		startWriter(sessionObj, folderId, bModified, bDelete, false, lastsync, os);
+	@Override
+	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean bModified, final boolean bDelete, final Date lastsync, final OutputStream os) throws Exception {
+		startWriter(sessionObj, ctx, folderId, bModified, bDelete, false, lastsync, os);
 	}
 	
-	protected void startWriter(final Session sessionObj, final int folderId, final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
-		final ContactWriter contactwriter = new ContactWriter(sessionObj);
+	@Override
+	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
+		final ContactWriter contactwriter = new ContactWriter(sessionObj, ctx);
 		contactwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
 	}
 	
-	protected boolean hasModulePermission(final Session sessionObj, Context ct) {
-		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ct);
+	@Override
+	protected boolean hasModulePermission(final Session sessionObj, Context ctx) {
+		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx);
 		return (uc.hasWebDAVXML() && uc.hasContact());
 	}
 }
