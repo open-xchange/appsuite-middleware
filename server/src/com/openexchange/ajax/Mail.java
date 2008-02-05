@@ -101,6 +101,9 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -966,6 +969,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					/*
 					 * Save dependent on content type
 					 */
+					final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
 					final List<CommonObject> retvalList = new ArrayList<CommonObject>();
 					if (versitPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_X_VCARD)
 							|| versitPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_VCARD)) {
@@ -975,7 +979,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 						VersitUtility.saveVCard(versitPart.getInputStream(), versitPart.getContentType().getBaseType(),
 								versitPart.getContentType().containsCharsetParameter() ? versitPart.getContentType()
 										.getCharsetParameter() : MailConfig.getDefaultMimeCharset(), retvalList,
-								sessionObj);
+								sessionObj, ctx);
 					} else if (versitPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_X_VCALENDAR)
 							|| versitPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_CALENDAR)) {
 						/*
@@ -984,7 +988,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 						VersitUtility.saveICal(versitPart.getInputStream(), versitPart.getContentType().getBaseType(),
 								versitPart.getContentType().containsCharsetParameter() ? versitPart.getContentType()
 										.getCharsetParameter() : MailConfig.getDefaultMimeCharset(), retvalList,
-								sessionObj);
+								sessionObj, ctx);
 					} else {
 						throw new MailException(MailException.Code.UNSUPPORTED_VERSIT_ATTACHMENT, versitPart
 								.getContentType());
@@ -2017,8 +2021,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 			boolean closeMailInterface = false;
 			final InfostoreFacade db = Infostore.FACADE;
 			try {
-				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-						sessionObj.getContext()).hasInfostore()) {
+				final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx)
+						.hasInfostore()) {
 					throw new OXPermissionException(new MailException(MailException.Code.NO_MAIL_ACCESS));
 				}
 				if (mailInterface == null) {
@@ -2032,20 +2037,19 @@ public class Mail extends PermissionServlet implements UploadListener {
 				}
 				final int destFolderID = Integer.parseInt(destFolderIdentifier);
 				{
-					final FolderObject folderObj = new OXFolderAccess(sessionObj.getContext())
-							.getFolderObject(destFolderID);
+					final FolderObject folderObj = new OXFolderAccess(ctx).getFolderObject(destFolderID);
 					final EffectivePermission p = folderObj.getEffectiveUserPermission(sessionObj.getUserId(),
-							UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-									sessionObj.getContext()));
+							UserConfigurationStorage.getInstance()
+									.getUserConfigurationSafe(sessionObj.getUserId(), ctx));
 					if (!p.isFolderVisible()) {
-						throw new OXFolderException(FolderCode.NOT_VISIBLE, getFolderName(folderObj),
-								getUserName(sessionObj, UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj
-										.getContext())), Integer.valueOf(sessionObj.getContext().getContextId()));
+						throw new OXFolderException(FolderCode.NOT_VISIBLE, getFolderName(folderObj), getUserName(
+								sessionObj, UserStorage.getStorageUser(sessionObj.getUserId(), ctx)), Integer
+								.valueOf(ctx.getContextId()));
 					}
 					if (!p.canWriteOwnObjects()) {
 						throw new OXFolderException(FolderCode.NO_WRITE_PERMISSION, getUserName(sessionObj, UserStorage
-								.getStorageUser(sessionObj.getUserId(), sessionObj.getContext())),
-								getFolderName(folderObj), Integer.valueOf(sessionObj.getContext().getContextId()));
+								.getStorageUser(sessionObj.getUserId(), ctx)), getFolderName(folderObj), Integer
+								.valueOf(ctx.getContextId()));
 					}
 				}
 				/*
@@ -2204,9 +2208,10 @@ public class Mail extends PermissionServlet implements UploadListener {
 					/*
 					 * Append UploadListener instances
 					 */
+					final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
 					((UploadListener) this).getRegistry().addUploadListener(
 							new UploadQuotaChecker(UserSettingMailStorage.getInstance().getUserSettingMail(
-									sessionObj.getUserId(), sessionObj.getContext()), resp, actionStr));
+									sessionObj.getUserId(), ctx), resp, actionStr));
 					((UploadListener) this).getRegistry().addUploadListener(MAIL_SERVLET);
 					/*
 					 * Create and fire upload event
@@ -2240,6 +2245,19 @@ public class Mail extends PermissionServlet implements UploadListener {
 			throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
 					responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
 					JS_FRAGMENT_ACTION, e.getAction() == null ? STR_NULL : e.getAction()), e.getMessage(), e);
+		} catch (final ContextException e) {
+			LOG.error(e.getMessage(), e);
+			JSONObject responseObj = null;
+			try {
+				final Response response = new Response();
+				response.setException(e);
+				responseObj = response.getJSON();
+			} catch (final JSONException e1) {
+				LOG.error(e1.getMessage(), e1);
+			}
+			throw new UploadServletException(resp, JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
+					responseObj == null ? STR_NULL : Matcher.quoteReplacement(responseObj.toString())).replaceFirst(
+					JS_FRAGMENT_ACTION, actionStr == null ? STR_NULL : actionStr), e.getMessage(), e);
 		} catch (final MailException e) {
 			LOG.error(e.getMessage(), e);
 			JSONObject responseObj = null;
@@ -2341,8 +2359,13 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	@Override
 	protected boolean hasModulePermission(final Session sessionObj) {
-		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-				sessionObj.getContext()).hasWebMail();
+		try {
+			return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+					ContextStorage.getStorageContext(sessionObj.getContextId())).hasWebMail();
+		} catch (final ContextException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			return false;
+		}
 	}
 
 	private static class SmartLongArray implements Cloneable {
