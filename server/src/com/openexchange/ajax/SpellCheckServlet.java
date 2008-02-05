@@ -69,6 +69,7 @@ import com.openexchange.ajax.spellcheck.AJAXSpellCheck;
 import com.openexchange.ajax.spellcheck.AJAXUserDictionaryException;
 import com.openexchange.ajax.spellcheck.AJAXUserDictionaryException.DictionaryCode;
 import com.openexchange.api.OXConflictException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
 
@@ -88,6 +89,7 @@ public class SpellCheckServlet extends PermissionServlet {
 		super();
 	}
 	
+	@Override
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp)
 	throws ServletException, IOException {
 		String action = null;
@@ -146,7 +148,7 @@ public class SpellCheckServlet extends PermissionServlet {
 	}
 
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj) {
+	protected boolean hasModulePermission(final Session session, final Context ctx) {
 		return true;
 	}
 

@@ -146,6 +146,7 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.regex.RegexUtility;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.utility.VersitUtility;
 
@@ -2078,7 +2079,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 * Start writing to infostore folder
 				 */
 				db.startTransaction();
-				db.saveDocument(docMetaData, mailPart.getInputStream(), System.currentTimeMillis(), sessionObj);
+				db.saveDocument(docMetaData, mailPart.getInputStream(), System.currentTimeMillis(),
+						new ServerSessionAdapter(sessionObj, ctx));
 				db.commit();
 			} catch (final Exception e) {
 				db.rollback();
@@ -2358,14 +2360,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 	}
 
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj) {
-		try {
-			return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-					ContextStorage.getStorageContext(sessionObj.getContextId())).hasWebMail();
-		} catch (final ContextException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			return false;
-		}
+	protected boolean hasModulePermission(final Session session, final Context ctx) {
+		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx).hasWebMail();
 	}
 
 	private static class SmartLongArray implements Cloneable {

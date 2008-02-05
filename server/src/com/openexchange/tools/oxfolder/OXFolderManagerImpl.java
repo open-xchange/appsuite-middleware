@@ -96,6 +96,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * OXFolderManagerImpl implements interface
@@ -1267,7 +1268,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		db.setTransactional(true);
 		db.startTransaction();
 		try {
-			db.removeDocument(folderID, System.currentTimeMillis(), session);
+			db.removeDocument(folderID, System.currentTimeMillis(), new ServerSessionAdapter(session, ctx));
 			db.commit();
 		} catch (final OXException x) {
 			db.rollback();

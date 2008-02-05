@@ -77,7 +77,6 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailInterface;
@@ -116,14 +115,8 @@ public class SyncServlet extends PermissionServlet {
 	 * @see com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange.sessiond.Session)
 	 */
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj) {
-		try {
-			return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-					ContextStorage.getStorageContext(sessionObj.getContextId())).hasSyncML();
-		} catch (final ContextException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			return false;
-		}
+	protected boolean hasModulePermission(final Session session, final Context ctx) {
+		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx).hasSyncML();
 	}
 
 	/*
