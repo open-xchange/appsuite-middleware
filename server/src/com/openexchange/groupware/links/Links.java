@@ -123,7 +123,7 @@ public class Links {
 					return false;
 				}
 				try{
-					return CalendarCommonCollection.getReadPermission(oid,fid,so);
+					return CalendarCommonCollection.getReadPermission(oid, fid, so, ct);
 				}catch (OXException ox){
 					return false;
 				}
