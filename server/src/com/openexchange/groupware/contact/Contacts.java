@@ -88,6 +88,8 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
@@ -360,28 +362,34 @@ public class Contacts implements DeleteListener {
 		final ContactSql cs = new ContactMySql(so);
 		Connection writecon = null;
 		Connection readcon = null;
+		
+		Context ct = null;
+		
 		try{
-			readcon = DBPool.pickup(so.getContext());
+			
+			ct = ContextStorage.getStorageContext(so.getContextId());
+			
+			readcon = DBPool.pickup(ct);
 			validateEmailAddress(co);
 			
 			final int fid = co.getParentFolderID();
 			
-			final FolderObject contactFolder = new OXFolderAccess(readcon, so.getContext()).getFolderObject(fid);
+			final FolderObject contactFolder = new OXFolderAccess(readcon, ct).getFolderObject(fid);
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
-				throw EXCEPTIONS.createOXConflictException(3,  fid, so.getContext().getContextId(),user);
+				throw EXCEPTIONS.createOXConflictException(3,  fid, so.getContextId(),user);
 				//throw new OXException("saveContactObject() called with a non-Contact-Folder! cid="+so.getContext().getContextId()+" fid="+fid+" uid="+user);
 			}
 
-			final OXFolderAccess oxfs = new OXFolderAccess(readcon, so.getContext());
-			final EffectivePermission oclPerm = oxfs.getFolderPermission(fid, user, UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()));
+			final OXFolderAccess oxfs = new OXFolderAccess(readcon, ct);
+			final EffectivePermission oclPerm = oxfs.getFolderPermission(fid, user, UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct));
 			
 				//OXFolderTools.getEffectiveFolderOCL(fid, user,group, so.getContext(),so.getUserConfiguration(), readcon);
 			if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-				throw EXCEPTIONS.createOXPermissionException(4, fid, so.getContext().getContextId(), user);
+				throw EXCEPTIONS.createOXPermissionException(4, fid, so.getContextId(), user);
 				//throw new OXConflictException("NOT ALLOWED TO SAVE FOLDER OBJECTS CONTACT! cid="+so.getContext().getContextId()+" fid="+fid+" uid="+user);
 			}
 			if (!oclPerm.canCreateObjects()) {
-				throw EXCEPTIONS.createOXPermissionException(5, fid, so.getContext().getContextId(), user);
+				throw EXCEPTIONS.createOXPermissionException(5, fid, so.getContextId(), user);
 				//throw new OXConflictException("NOT ALLOWED TO SAVE FOLDER OBJECTS! cid="+so.getContext().getContextId()+" fid="+fid+" uid="+user);
 			}
 			
@@ -446,6 +454,8 @@ public class Contacts implements DeleteListener {
 					insert_values.append("?,");			
 				}			
 			}
+		} catch (final ContextException d){
+			throw new ContactException(d);
 		} catch (final DBPoolingException d){
 			throw EXCEPTIONS.create(51, d);
 		} catch (final OXConflictException oe){
@@ -456,7 +466,7 @@ public class Contacts implements DeleteListener {
 			//throw new OXException("ERROR: Unable to Insert Contacts! cid="+so.getContext().getContextId(),oe);
 		} finally {
 			try{
-				DBPool.closeReaderSilent(so.getContext(), readcon);
+				DBPool.closeReaderSilent(ct, readcon);
 			} catch (final Exception ex) {
 				LOG.error("Unable to close READ Connection");
 			}
@@ -468,10 +478,10 @@ public class Contacts implements DeleteListener {
 			/*
 			 * AutoCommit false for the IDGenerator! 
 			 */
-			writecon = DBPool.pickupWriteable(so.getContext());
+			writecon = DBPool.pickupWriteable(ct);
 			writecon.setAutoCommit(false);	
 			
-			final int id = IDGenerator.getId(so.getContext(), Types.CONTACT, writecon);
+			final int id = IDGenerator.getId(ct, Types.CONTACT, writecon);
 			if (LOG.isTraceEnabled()) {
 				LOG.trace("Got ID from Generator -> " + id);
 			}
@@ -483,7 +493,7 @@ public class Contacts implements DeleteListener {
 			
 			final long lmd = System.currentTimeMillis();
 			
-			final StringBuilder insert = cs.iFperformContactStorageInsert(insert_fields,insert_values,user,lmd,so.getContext().getContextId(),id);
+			final StringBuilder insert = cs.iFperformContactStorageInsert(insert_fields,insert_values,user,lmd,so.getContextId(),id);
 			
 			ps = writecon.prepareStatement(insert.toString());
 			int counter = 1;
@@ -497,16 +507,16 @@ public class Contacts implements DeleteListener {
 			co.setLastModified(ddd);
 			
 			if (LOG.isDebugEnabled()) {
-				LOG.debug(new StringBuilder("INFO: YOU WANT TO INSERT THIS: cid="+so.getContext().getContextId()+" oid="+co.getObjectID()+" -> "+ps.toString()));
+				LOG.debug(new StringBuilder("INFO: YOU WANT TO INSERT THIS: cid="+so.getContextId()+" oid="+co.getObjectID()+" -> "+ps.toString()));
 			}
 			
 			ps.execute();	
 
 			if(co.containsNumberOfDistributionLists() && co.getSizeOfDistributionListArray() > 0){
-				writeDistributionListArrayInsert(co.getDistributionList(), co.getObjectID(),so.getContext().getContextId(),writecon);						
+				writeDistributionListArrayInsert(co.getDistributionList(), co.getObjectID(),so.getContextId(),writecon);						
 			}				
 			if(co.containsNumberOfLinks() && co.getSizeOfLinks() > 0){
-				writeContactLinkArrayInsert(co.getLinks(), co.getObjectID(), so.getContext().getContextId(),writecon);						
+				writeContactLinkArrayInsert(co.getLinks(), co.getObjectID(), so.getContextId(),writecon);						
 			}
 			if(co.containsImage1()){
 				if (ContactConfig.getProperty("scale_images").equals("true")){
@@ -522,7 +532,7 @@ public class Contacts implements DeleteListener {
 						throw EXCEPTIONS.create(58,ex);
 					}
 				}
-				writeContactImage(co.getObjectID(), co.getImage1(), so.getContext().getContextId(), co.getImageContentType(), writecon);
+				writeContactImage(co.getObjectID(), co.getImage1(), so.getContextId(), co.getImageContentType(), writecon);
 			}
 			writecon.commit();
 		} catch (final OXException ox){
@@ -551,7 +561,7 @@ public class Contacts implements DeleteListener {
 				writecon.rollback();
 			} catch (final SQLException see){
 				LOG.error("Uable to rollback SQL Insert", see);
-			}			throw EXCEPTIONS.create(9,se, Integer.valueOf(so.getContext().getContextId()));
+			}			throw EXCEPTIONS.create(9,se, Integer.valueOf(so.getContextId()));
 		} finally {
 			try{
 				ps.close();
@@ -565,7 +575,7 @@ public class Contacts implements DeleteListener {
 			}
 			try{
 				if (writecon != null) {
-					DBPool.closeWriterSilent(so.getContext(), writecon);
+					DBPool.closeWriterSilent(ct, writecon);
 				}
 			} catch (final Exception ex) {
 				LOG.error("Unable to set setAutoCommit = true");
@@ -2183,17 +2193,21 @@ public class Contacts implements DeleteListener {
 		Connection readCon = null;
 		ResultSet rs = null;
 		Statement st = null;
+		Context ct = null;
 		try{
-			readCon = DBPool.pickup(so.getContext());
+			ct = ContextStorage.getStorageContext(so.getContextId());
+			readCon = DBPool.pickup(ct);
 			st = readCon.createStatement();
 			final ContactSql cs = new ContactMySql(null);
-			rs = st.executeQuery(cs.iFcontainsForeignObjectInFolder(fid,uid,so.getContext().getContextId()));
+			rs = st.executeQuery(cs.iFcontainsForeignObjectInFolder(fid,uid,so.getContextId()));
 			if (rs.next()){
 				return true;
 			}
 			return false;
+		} catch (final ContextException d){
+			throw new ContactException(d);
 		} catch (final SQLException se){
-			throw EXCEPTIONS.create(40, se, Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(fid));
+			throw EXCEPTIONS.create(40, se, Integer.valueOf(so.getContextId()), Integer.valueOf(fid));
 			//throw new OXException("UNABLE TO PERFORM ForeignObjectCheck");
 		} finally {
 			try{
@@ -2208,7 +2222,7 @@ public class Contacts implements DeleteListener {
 			}
 			try{
 				if (readCon != null){
-					DBPool.closeReaderSilent(so.getContext(), readCon);
+					DBPool.closeReaderSilent(ct, readCon);
 				}
 			} catch (final Exception e){
 				LOG.error("Unable to return Connection");
@@ -2287,18 +2301,21 @@ public class Contacts implements DeleteListener {
 			del = writecon.createStatement();
 					
 			try{
-				final FolderObject contactFolder = new OXFolderAccess(readcon, so.getContext()).getFolderObject(fid);
+				Context ct = ContextStorage.getStorageContext(so.getContextId());
+				final FolderObject contactFolder = new OXFolderAccess(readcon, ct).getFolderObject(fid);
 				if (contactFolder.getModule() != FolderObject.CONTACT) {
-					throw EXCEPTIONS.createOXConflictException(42, Integer.valueOf(fid), Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(so.getUserId()));
-					//throw new OXException("YOU TRY TO DELETE FROM A NON CONTACT FOLDER! cid="+so.getContext().getContextId()+" fid="+fid);
+					throw EXCEPTIONS.createOXConflictException(42, Integer.valueOf(fid), Integer.valueOf(so.getContextId()), Integer.valueOf(so.getUserId()));
+					//throw new OXException("YOU TRY TO DELETE FROM A NON CONTACT FOLDER! cid="+so.getContextId()+" fid="+fid);
 				}
 				if (contactFolder.getType() == FolderObject.PRIVATE){
 					delit = true;
 				}
+			} catch (final ContextException d){
+				throw new ContactException(d);
 			} catch (final OXException e){
 				throw e;
-				//throw EXCEPTIONS.create(43, fid, so.getContext().getContextId(), user);
-				//throw new OXException("NO PERMISSIONS TO DELETE IN THIS FOLDER cid="+so.getContext().getContextId()+" fid="+fid,e);
+				//throw EXCEPTIONS.create(43, fid, so.getContextId(), user);
+				//throw new OXException("NO PERMISSIONS TO DELETE IN THIS FOLDER cid="+so.getContextId()+" fid="+fid,e);
 			}			
 			
 			final ContactSql cs = new ContactMySql(so);
@@ -2319,24 +2336,24 @@ public class Contacts implements DeleteListener {
 
 				oid = rs.getInt(1);
 				if (rs.wasNull()){
-					throw EXCEPTIONS.create(44, Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(fid));
-					//throw new OXException("VERY BAD ERROR OCCURRED, OBJECT WITHOUT ID FOUND cid="+so.getContext().getContextId()+" fid="+fid);
+					throw EXCEPTIONS.create(44, Integer.valueOf(so.getContextId()), Integer.valueOf(fid));
+					//throw new OXException("VERY BAD ERROR OCCURRED, OBJECT WITHOUT ID FOUND cid="+so.getContextId()+" fid="+fid);
 				}
 				dlist = rs.getInt(2);
 				if (!rs.wasNull() && dlist > 0){
-					trashDistributionList(oid, so.getContext().getContextId(), writecon, delit);
+					trashDistributionList(oid, so.getContextId(), writecon, delit);
 				}
 				link = rs.getInt(3);
 				if (!rs.wasNull() && link > 0){
-					trashLinks(oid, so.getContext().getContextId(), writecon, delit);
+					trashLinks(oid, so.getContextId(), writecon, delit);
 				}
 				image = rs.getInt(4);
 				if (!rs.wasNull() && image > 0){
-					trashImage(oid, so.getContext().getContextId(), writecon, delit);
+					trashImage(oid, so.getContextId(), writecon, delit);
 				}
 				created_from = rs.getInt(6);
 
-				cs.iFtrashContactsFromFolder(delit,del,oid,so.getContext().getContextId());
+				cs.iFtrashContactsFromFolder(delit,del,oid,so.getContextId());
 				
 				final ContactObject co = new ContactObject();
 				co.setCreatedBy(created_from);
@@ -2347,16 +2364,15 @@ public class Contacts implements DeleteListener {
 			}
 			
 			if (LOG.isDebugEnabled()) {
-				LOG.debug(cs.iFtrashContactsFromFolderUpdateString(fid,so.getContext().getContextId()));
+				LOG.debug(cs.iFtrashContactsFromFolderUpdateString(fid,so.getContextId()));
 			}
-			del.execute(cs.iFtrashContactsFromFolderUpdateString(fid,so.getContext().getContextId()));
-
+			del.execute(cs.iFtrashContactsFromFolderUpdateString(fid,so.getContextId()));
 		} catch (final InvalidStateException is){
-			throw EXCEPTIONS.create(46,is, Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(fid));
-			//throw new OXException("UNABLE TO DELTE FOLDER OBJECTS cid="+so.getContext().getContextId()+" fid="+fid,se);
+			throw EXCEPTIONS.create(46,is, Integer.valueOf(so.getContextId()), Integer.valueOf(fid));
+			//throw new OXException("UNABLE TO DELTE FOLDER OBJECTS cid="+so.getContextId()+" fid="+fid,se);
 		} catch (final SQLException se) {
-			throw EXCEPTIONS.create(45,se, Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(fid));
-			//throw new OXException("UNABLE TO DELTE FOLDER OBJECTS cid="+so.getContext().getContextId()+" fid="+fid,se);
+			throw EXCEPTIONS.create(45,se, Integer.valueOf(so.getContextId()), Integer.valueOf(fid));
+			//throw new OXException("UNABLE TO DELTE FOLDER OBJECTS cid="+so.getContextId()+" fid="+fid,se);
 		} finally {
 			try{
 				if (rs != null){
@@ -2473,12 +2489,15 @@ public class Contacts implements DeleteListener {
 		final ContactSql cs = new ContactMySql(null);
 		
 		try {	
+			
+			Context ct = ContextStorage.getStorageContext(so.getContextId());
+			
 			read = readcon.createStatement();
 			del = writecon.createStatement();
 			
 			FolderObject contactFolder = null;
 
-			rs = read.executeQuery(cs.iFgetRightsSelectString(uid,so.getContext().getContextId()));
+			rs = read.executeQuery(cs.iFgetRightsSelectString(uid,so.getContextId()));
 			
 			int fid = 0;
 			int oid = 0;
@@ -2503,13 +2522,13 @@ public class Contacts implements DeleteListener {
 				
 				try{
 					if (FolderCacheManager.isEnabled()){
-						contactFolder = FolderCacheManager.getInstance().getFolderObject(fid, true, so.getContext(), readcon);
+						contactFolder = FolderCacheManager.getInstance().getFolderObject(fid, true, ct, readcon);
 					}else{
-						contactFolder = FolderObject.loadFolderObjectFromDB(fid, so.getContext(), readcon);
+						contactFolder = FolderObject.loadFolderObjectFromDB(fid, ct, readcon);
 					}
 					if (contactFolder.getModule() != FolderObject.CONTACT) {
-						throw EXCEPTIONS.create(52, Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(fid), Integer.valueOf(uid));
-						//throw new OXException("YOU TRY TO DELETE FROM A NON CONTACT FOLDER! cid="+so.getContext().getContextId()+" uid="+uid);
+						throw EXCEPTIONS.create(52, Integer.valueOf(so.getContextId()), Integer.valueOf(fid), Integer.valueOf(uid));
+						//throw new OXException("YOU TRY TO DELETE FROM A NON CONTACT FOLDER! cid="+so.getContextId()+" uid="+uid);
 					}
 					if (contactFolder.getType() == FolderObject.PRIVATE){
 						delete = true;
@@ -2518,7 +2537,7 @@ public class Contacts implements DeleteListener {
 					if (LOG.isWarnEnabled()){
 						LOG.warn("WARNING: During the delete process 'delete all contacts from one user', a contacts was found who has no folder."
 								+"This contact will be modified and can be found in the administrator address book." 
-								+"Context "+so.getContext().getContextId()+" Folder "+fid+" User"+uid+" Contact"+oid);
+								+"Context "+so.getContextId()+" Folder "+fid+" User"+uid+" Contact"+oid);
 					}
 					folder_error = true;
 					delete = true;
@@ -2526,8 +2545,8 @@ public class Contacts implements DeleteListener {
 				
 				if (folder_error && pflag == 0){
 					try{
-						int mailadmin = so.getContext().getMailadmin();
-						final OXFolderAccess oxfs = new OXFolderAccess(readcon, so.getContext());
+						int mailadmin = ct.getMailadmin();
+						final OXFolderAccess oxfs = new OXFolderAccess(readcon, ct);
 						FolderObject xx = oxfs.getDefaultFolder(mailadmin, FolderObject.CONTACT);
 						
 						int admin_folder = xx.getObjectID();
@@ -2536,7 +2555,7 @@ public class Contacts implements DeleteListener {
 						oxee.printStackTrace();
 						LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!."
 								+"This contact will be deleted." 
-								+"Context "+so.getContext().getContextId()+" Folder "+fid+" User"+uid+" Contact"+oid);
+								+"Context "+so.getContextId()+" Folder "+fid+" User"+uid+" Contact"+oid);
 						
 						folder_error = false;
 					}
@@ -2545,7 +2564,7 @@ public class Contacts implements DeleteListener {
 				}
 				
 				if (!folder_error){
-					cs.iFtrashAllUserContacts(delete,del,so.getContext().getContextId(),oid,uid,rs,so);
+					cs.iFtrashAllUserContacts(delete,del,so.getContextId(),oid,uid,rs,so);
 					final ContactObject co = new ContactObject();
 					co.setCreatedBy(created_from);
 					co.setParentFolderID(fid);
@@ -2553,14 +2572,16 @@ public class Contacts implements DeleteListener {
 					ec.delete(co);
 				}
 			}
-			if (uid == so.getContext().getMailadmin()){
-				cs.iFtrashAllUserContactsDeletedEntriesFromAdmin(del,so.getContext().getContextId(),uid);	
+			if (uid == ct.getMailadmin()){
+				cs.iFtrashAllUserContactsDeletedEntriesFromAdmin(del,so.getContextId(),uid);	
 			} else {
-				cs.iFtrashAllUserContactsDeletedEntries(del,so.getContext().getContextId(),uid,so);				
+				cs.iFtrashAllUserContactsDeletedEntries(del,so.getContextId(),uid,so);				
 			}
 			//writecon.commit();
+		} catch (final ContextException d){
+			throw new ContactException(d);
 		} catch (final InvalidStateException ox) {
-			throw EXCEPTIONS.create(57, Integer.valueOf(so.getContext().getContextId()),Integer.valueOf(uid));
+			throw EXCEPTIONS.create(57, Integer.valueOf(so.getContextId()),Integer.valueOf(uid));
 			/*
 		} catch (final OXException ox) {
 			throw ox;
@@ -2573,7 +2594,7 @@ public class Contacts implements DeleteListener {
 				LOG.error("Uable to rollback SQL DELETE", see);
 			}
 			*/
-			throw EXCEPTIONS.create(47,se, Integer.valueOf(so.getContext().getContextId()), Integer.valueOf(uid));
+			throw EXCEPTIONS.create(47,se, Integer.valueOf(so.getContextId()), Integer.valueOf(uid));
 		} finally {
 			try{
 				if (rs != null){
