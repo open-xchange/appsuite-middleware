@@ -64,11 +64,14 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.ServiceException;
@@ -130,7 +133,7 @@ public abstract class SessionServlet extends AJAXServlet {
 			final Session session = getSession(sessionId);
 			checkIP(session.getLocalIp(), req.getRemoteAddr());
 			rememberSession(req, session);
-			final Context ctx = session.getContext();
+			final Context ctx = ContextStorage.getStorageContext(session.getContextId());
 			if (!ctx.isEnabled()) {
 				final SessiondConnectorInterface sessiondCon = SessiondService.getInstance().getService();
 				try {
@@ -142,6 +145,18 @@ public abstract class SessionServlet extends AJAXServlet {
 			}
 			super.service(req, resp);
 		} catch (SessiondException e) {
+			LOG.debug(e.getMessage(), e);
+			final Response response = new Response();
+			response.setException(e);
+			resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+			Tools.deleteCookies(req, resp);
+			try {
+				Response.write(response, resp.getWriter());
+			} catch (JSONException e1) {
+				log(RESPONSE_ERROR, e1);
+				sendError(resp);
+			}
+		} catch (ContextException e) {
 			LOG.debug(e.getMessage(), e);
 			final Response response = new Response();
 			response.setException(e);
@@ -278,12 +293,14 @@ public abstract class SessionServlet extends AJAXServlet {
 			throw EXCEPTION.create(3, sessionId);
 		}
         try {
-            final Context context = retval.getContext();
+        	final Context context = ContextStorage.getStorageContext(retval.getContextId());
             final User user = UserStorage.getStorageUser(retval.getUserId(), context);
             if (!context.isEnabled() ||!user.isMailEnabled()) {
                 throw EXCEPTION.create(3, sessionId);
             }
         } catch (UndeclaredThrowableException e) {
+            throw EXCEPTION.create(3, sessionId);
+        } catch (AbstractOXException e) {
             throw EXCEPTION.create(3, sessionId);
         }
 		return retval;
