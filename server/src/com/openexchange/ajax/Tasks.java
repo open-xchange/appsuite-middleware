@@ -69,6 +69,10 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -102,8 +106,9 @@ public class Tasks extends DataServlet {
 	            writeResponse(response, httpServletResponse);
 	            return;
 			}
-
-			final TaskRequest taskRequest = new TaskRequest(sessionObj);
+            final Context ctx = ContextStorage.getInstance().getContext(
+                sessionObj.getContextId());
+			final TaskRequest taskRequest = new TaskRequest(sessionObj, ctx);
 			final Object responseObj = taskRequest.action(action, jsonObj);
 			response.setTimestamp(taskRequest.getTimestamp());
 			response.setData(responseObj);
@@ -136,15 +141,17 @@ public class Tasks extends DataServlet {
 		} catch (AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
+        } catch (final ContextException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
 		} catch (OXException e) {
 			if (e.getCategory() == Category.USER_INPUT) {
 				LOG.debug(e.getMessage(), e);
 			} else {
 				LOG.error(e.getMessage(), e);
 			}
-
 			response.setException(e);
-		}
+        }
 		
 		writeResponse(response, httpServletResponse);
 	}
@@ -158,7 +165,9 @@ public class Tasks extends DataServlet {
 			
 			final String data = getBody(httpServletRequest);
 			if (data.length() > 0) {
-				final TaskRequest taskRequest = new TaskRequest(sessionObj);
+                final Context ctx = ContextStorage.getInstance().getContext(
+                    sessionObj.getContextId());
+				final TaskRequest taskRequest = new TaskRequest(sessionObj, ctx);
 				final JSONObject jsonObj;
 
 				try {
@@ -204,21 +213,33 @@ public class Tasks extends DataServlet {
 		} catch (AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
+        } catch (final ContextException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
 		} catch (OXException e) {
 			if (e.getCategory() == Category.USER_INPUT) {
 				LOG.debug(e.getMessage(), e);
 			} else {
 				LOG.error(e.getMessage(), e);
 			}
-
 			response.setException(e);
 		}
-		
 		writeResponse(response, httpServletResponse);
 	}
 	
-	protected boolean hasModulePermission(final Session sessionObj) {
-		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-				sessionObj.getContext()).hasTask();
+	@Override
+    protected boolean hasModulePermission(final Session sessionObj) {
+        try {
+            final Context ctx = ContextStorage.getInstance().getContext(
+                sessionObj.getContextId());
+    		return UserConfigurationStorage.getInstance().getUserConfiguration(
+                sessionObj.getUserId(), ctx).hasTask();
+        } catch (ContextException e) {
+            LOG.error(e.getMessage(), e);
+            return false;
+        } catch (UserConfigurationException e) {
+            LOG.error(e.getMessage(), e);
+            return false;
+        }
 	}
 }
