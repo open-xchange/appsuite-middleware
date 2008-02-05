@@ -72,6 +72,8 @@ import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
 
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.Group;
 import com.openexchange.groupware.ldap.GroupStorage;
 import com.openexchange.groupware.ldap.Resource;
@@ -125,6 +127,7 @@ public final class groupuser extends PermissionServlet {
 		
 		try {
 			sessionObj = getSession(req);
+			final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
 			
 			input_doc = getJDOMDocument(req);
 			
@@ -187,11 +190,11 @@ public final class groupuser extends PermissionServlet {
 			}
 			
 			if (s_group != null) {
-				writeElementGroups(sessionObj, s_group, lastsync, os, xo);
+				writeElementGroups(sessionObj, s_group, lastsync, os, xo, ctx);
 			}
 			
 			if (s_resource != null) {
-				writeElementResources(sessionObj, s_resource, lastsync, os, xo);
+				writeElementResources(sessionObj, s_resource, lastsync, os, xo, ctx);
 			}
 			
 			os.write(("</D:prop></D:propstat>").getBytes());
@@ -213,7 +216,7 @@ public final class groupuser extends PermissionServlet {
 		}
 	}
 	
-	private void writeElementGroups(final Session sessionObj, final String s_groups, final Date lastsync, final OutputStream os, final XMLOutputter xo) throws Exception {
+	private void writeElementGroups(final Session sessionObj, final String s_groups, final Date lastsync, final OutputStream os, final XMLOutputter xo, final Context ctx) throws Exception {
 		os.write(("<ox:groups>").getBytes());
 		
 		final GroupStorage groupstorage = GroupStorage.getInstance();
@@ -221,12 +224,12 @@ public final class groupuser extends PermissionServlet {
 		
 		if (lastsync == null) {
 			if (s_groups == null || s_groups.equals("*")) {
-				group = groupstorage.getGroups(sessionObj.getContext());
+				group = groupstorage.getGroups(ctx);
 			} else {
-				group = groupstorage.searchGroups(s_groups, sessionObj.getContext());
+				group = groupstorage.searchGroups(s_groups, ctx);
 			}
 		} else {
-			group = groupstorage.listModifiedGroups(lastsync, sessionObj.getContext());
+			group = groupstorage.listModifiedGroups(lastsync, ctx);
 		}
 		
 		for (int a = 0; a < group.length; a++) {
@@ -237,9 +240,9 @@ public final class groupuser extends PermissionServlet {
 			Connection readCon = null;
 			PreparedStatement ps = null;
 			try {
-				readCon = DBPool.pickup(sessionObj.getContext());
+				readCon = DBPool.pickup(ctx);
 				ps = readCon.prepareStatement(DELETED_GROUP_SQL);
-				ps.setInt(1, sessionObj.getContext().getContextId());
+				ps.setInt(1, ctx.getContextId());
 				ps.setTimestamp(2, new Timestamp(lastsync.getTime()));
 				
 				final ResultSet rs = ps.executeQuery();
@@ -260,7 +263,7 @@ public final class groupuser extends PermissionServlet {
 					}
 				}
 				if (readCon != null) {
-					DBPool.closeReaderSilent(sessionObj.getContext(), readCon);
+					DBPool.closeReaderSilent(ctx, readCon);
 				}
 			}
 		}
@@ -302,16 +305,16 @@ public final class groupuser extends PermissionServlet {
 		DataWriter.addElement("memberuid", member, e_members);
 	}
 	
-	private void writeElementResources(final Session sessionObj, final String s_resources, final Date lastsync, final OutputStream os, final XMLOutputter xo) throws Exception {
+	private void writeElementResources(final Session sessionObj, final String s_resources, final Date lastsync, final OutputStream os, final XMLOutputter xo, final Context ctx) throws Exception {
 		os.write(("<ox:resources>").getBytes());
 		
 		final ResourceStorage resourcestorage = ResourceStorage.getInstance();
 		Resource[] resource = null;
 		
 		if (lastsync == null) {
-			resource = resourcestorage.searchResources(s_resources, sessionObj.getContext());
+			resource = resourcestorage.searchResources(s_resources, ctx);
 		} else {
-			resource = resourcestorage.listModified(lastsync, sessionObj.getContext());
+			resource = resourcestorage.listModified(lastsync, ctx);
 		}
 		
 		for (int a = 0; a < resource.length; a++) {
@@ -322,9 +325,9 @@ public final class groupuser extends PermissionServlet {
 			Connection readCon = null;
 			PreparedStatement ps = null;
 			try {
-				readCon = DBPool.pickup(sessionObj.getContext());
+				readCon = DBPool.pickup(ctx);
 				ps = readCon.prepareStatement(DELETED_RESOURCE_SQL);
-				ps.setInt(1, sessionObj.getContext().getContextId());
+				ps.setInt(1, ctx.getContextId());
 				ps.setLong(2, lastsync.getTime());
 				
 				final ResultSet rs = ps.executeQuery();
@@ -345,7 +348,7 @@ public final class groupuser extends PermissionServlet {
 					}
 				}
 				if (readCon != null) {
-					DBPool.closeReaderSilent(sessionObj.getContext(), readCon);
+					DBPool.closeReaderSilent(ctx, readCon);
 				}
 			}
 		}
@@ -396,8 +399,8 @@ public final class groupuser extends PermissionServlet {
 	}
 	
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
 		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-				sessionObj.getContext()).hasWebDAVXML();
+				ctx).hasWebDAVXML();
 	}
 }

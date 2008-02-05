@@ -86,6 +86,7 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
@@ -203,9 +204,9 @@ public final class ical extends PermissionServlet {
 		
 		final Session sessionObj = getSession(req);
 		
-		final Context context = sessionObj.getContext();
-		
 		try {
+			final Context context = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+			
 			user_agent = getUserAgent(req);
 			
 			principal = user_agent + '_' + sessionObj.getUserId();
@@ -382,7 +383,7 @@ public final class ical extends PermissionServlet {
 					
 					ps = writeCon.prepareStatement(SQL_PRINCIPAL_INSERT);
 					ps.setInt(1, principal_id);
-					ps.setLong(2, sessionObj.getContext().getContextId());
+					ps.setLong(2, context.getContextId());
 					ps.setString(3, principal);
 					ps.setInt(4, calendarfolder_id);
 					ps.setInt(5, taskfolder_id);
@@ -458,9 +459,9 @@ public final class ical extends PermissionServlet {
 		
 		final Session sessionObj = getSession(req);
 		
-		final Context context = sessionObj.getContext();
-		
-		try {			
+		try {
+			final Context context = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+			
 			user_agent = getUserAgent(req);
 			content_type = req.getContentType();
 			
@@ -901,8 +902,8 @@ public final class ical extends PermissionServlet {
 	}
 	
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj) {
-		final UserConfiguration uc =  UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
+	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
+		final UserConfiguration uc =  UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx);
 		return (uc.hasICal() && uc.hasCalendar() && uc.hasTask());
 	}
 }
