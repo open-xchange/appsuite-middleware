@@ -51,7 +51,6 @@ package com.openexchange.mail.mime.datasource;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -62,6 +61,7 @@ import javax.activation.DataSource;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -159,7 +159,7 @@ public final class MessageDataSource implements DataSource {
 		if (data == null) {
 			throw new IOException("no data");
 		}
-		return new ByteArrayInputStream(data);
+		return new UnsynchronizedByteArrayInputStream(data);
 	}
 
 	/**
