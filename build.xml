@@ -8,6 +8,7 @@
     <property file="META-INF/MANIFEST.MF"/>
     <property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
+	<!-- Dots are not allowed so we cannot use Bundle-SymbolicName here as it may contain some -->
 	<property name="composite.name" value="open-xchange-admin-plugin-hosting-${version}"/>
     <property name="project.name" value="open-xchange-admin-plugin-hosting" />
     <property name="test.xml.dir" value="test-results" />
