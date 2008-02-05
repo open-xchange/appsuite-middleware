@@ -66,6 +66,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.session.Session;
 import com.openexchange.spellcheck.SpellCheck;
@@ -219,8 +220,8 @@ public final class SpellCheckServlet extends PermissionServlet {
 		 */
 		jsonWriter.array();
 		try {
-			final List<String> userWords = SpellCheckImpl.newSpellCheck(session.getUserId(), session.getContext())
-					.getUserWords();
+			final List<String> userWords = SpellCheckImpl.newSpellCheck(session.getUserId(),
+					ContextStorage.getStorageContext(session.getContextId())).getUserWords();
 			for (final String userWord : userWords) {
 				jsonWriter.value(userWord);
 			}
@@ -261,8 +262,8 @@ public final class SpellCheckServlet extends PermissionServlet {
 			 */
 			final Set<String> misspeltWords;
 			{
-				final SpellCheck spellCheck = SpellCheckImpl.newSpellCheck(session.getUserId(), locale, session
-						.getContext());
+				final SpellCheck spellCheck = SpellCheckImpl.newSpellCheck(session.getUserId(), locale, ContextStorage
+						.getStorageContext(session.getContextId()));
 				final SpellCheckError[] errors = spellCheck
 						.checkSpelling(SpellCheckUtility.html2Document(getBody(req)));
 				misspeltWords = new HashSet<String>(errors.length);
@@ -309,8 +310,8 @@ public final class SpellCheckServlet extends PermissionServlet {
 			 */
 			final List<String> suggestions;
 			{
-				final SpellCheck spellCheck = SpellCheckImpl.newSpellCheck(session.getUserId(), locale, session
-						.getContext());
+				final SpellCheck spellCheck = SpellCheckImpl.newSpellCheck(session.getUserId(), locale, ContextStorage
+						.getStorageContext(session.getContextId()));
 				suggestions = spellCheck.getSuggestions(getBody(req), 0);
 			}
 			for (final String suggestion : suggestions) {
@@ -338,7 +339,8 @@ public final class SpellCheckServlet extends PermissionServlet {
 		final Response response = new Response();
 		final Session session = getSessionObject(req);
 		try {
-			final SpellCheck spellCheck = SpellCheckImpl.newSpellCheck(session.getUserId(), session.getContext());
+			final SpellCheck spellCheck = SpellCheckImpl.newSpellCheck(session.getUserId(), ContextStorage
+					.getStorageContext(session.getContextId()));
 			spellCheck.addWord(getBody(req));
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
@@ -360,7 +362,8 @@ public final class SpellCheckServlet extends PermissionServlet {
 		final Response response = new Response();
 		final Session session = getSessionObject(req);
 		try {
-			final SpellCheck spellCheck = SpellCheckImpl.newSpellCheck(session.getUserId(), session.getContext());
+			final SpellCheck spellCheck = SpellCheckImpl.newSpellCheck(session.getUserId(), ContextStorage
+					.getStorageContext(session.getContextId()));
 			spellCheck.removeWord(getBody(req));
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
