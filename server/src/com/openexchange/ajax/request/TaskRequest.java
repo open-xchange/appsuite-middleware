@@ -79,6 +79,7 @@ import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.Participants;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.TaskSearchObject;
@@ -127,8 +128,10 @@ public class TaskRequest {
 		Task.COLOR_LABEL
 	};
 	
-	private Session sessionObj;
-	
+	private final Session sessionObj;
+
+	private final Context ctx;
+
 	private final User userObj;
 	
 	private Date timestamp;
@@ -137,9 +140,10 @@ public class TaskRequest {
 	
 	private static final Log LOG = LogFactory.getLog(TaskRequest.class);
 	
-	public TaskRequest(Session sessionObj) {
+	public TaskRequest(final Session sessionObj, final Context ctx) {
 		this.sessionObj = sessionObj;
-		userObj = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
+		this.ctx = ctx;
+		userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
 		
 		final String sTimeZone = userObj.getTimeZone();
 		
@@ -156,7 +160,7 @@ public class TaskRequest {
 
 	public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXObjectNotFoundException, OXConflictException, OXPermissionException, OXFolderNotFoundException, SearchIteratorException, AjaxException, OXException, OXJSONException {
 		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-				sessionObj.getContext()).hasTask()) {
+				ctx).hasTask()) {
 			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "task");
 		}
 		

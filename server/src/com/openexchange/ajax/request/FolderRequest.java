@@ -55,6 +55,7 @@ import org.json.JSONWriter;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
@@ -62,14 +63,17 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 public class FolderRequest {
 	
 	private final Session session;
+
+	private final Context ctx;
 	
 	private final JSONWriter pw;
 	
 	private static final Folder FOLDER_SERVLET = new Folder();
 
-	public FolderRequest(Session session, JSONWriter pw) {
+	public FolderRequest(Session session, final Context ctx, JSONWriter pw) {
 		super();
 		this.session = session;
+		this.ctx = ctx;
 		this.pw = pw;
 	}
 	

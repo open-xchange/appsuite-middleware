@@ -63,6 +63,7 @@ import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.writer.ResourceWriter;
 import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.ResourceStorage;
 import com.openexchange.groupware.ldap.User;
@@ -75,14 +76,17 @@ import com.openexchange.tools.servlet.OXJSONException;
 
 public class ResourceRequest {
 	
-	private Session sessionObj;
+	private final Session sessionObj;
+	
+	private final Context ctx;
 	
 	private Date timestamp;
 	
 	private static final Log LOG = LogFactory.getLog(AppointmentRequest.class);
 	
-	public ResourceRequest(Session sessionObj) {
+	public ResourceRequest(Session sessionObj, final Context ctx) {
 		this.sessionObj = sessionObj;
+		this.ctx = ctx;
 	}
 	
 	public Date getTimestamp() {
@@ -118,7 +122,7 @@ public class ResourceRequest {
 			com.openexchange.groupware.ldap.Resource r = null;
 			
 			try {
-				r = resourceStorage.getResource(id, sessionObj.getContext());
+				r = resourceStorage.getResource(id, ctx);
 			} catch (LdapException exc) {
 				LOG.debug("resource not found try to find id in user table", exc);
 			}
@@ -128,7 +132,7 @@ public class ResourceRequest {
 					userStorage = UserStorage.getInstance();
 				}
 				
-				final User u = userStorage.getUser(id, sessionObj.getContext());
+				final User u = userStorage.getUser(id, ctx);
 				
 				r = new com.openexchange.groupware.ldap.Resource();
 				r.setIdentifier(u.getId());
@@ -156,7 +160,7 @@ public class ResourceRequest {
 		
 		final ResourceStorage resourceStorage = ResourceStorage.getInstance();
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
-		final com.openexchange.groupware.ldap.Resource r = resourceStorage.getResource(id, sessionObj.getContext());
+		final com.openexchange.groupware.ldap.Resource r = resourceStorage.getResource(id, ctx);
 		
 		final ResourceWriter resourceWriter = new ResourceWriter();
 		final JSONObject jsonResourceObj = new JSONObject();
@@ -184,7 +188,7 @@ public class ResourceRequest {
 
 			final ResourceStorage resourceStorage = ResourceStorage.getInstance();
 			final com.openexchange.groupware.ldap.Resource[] resources = resourceStorage.searchResources(searchpattern,
-					sessionObj.getContext());
+					ctx);
 
 			final ResourceWriter resourceWriter = new ResourceWriter();
 

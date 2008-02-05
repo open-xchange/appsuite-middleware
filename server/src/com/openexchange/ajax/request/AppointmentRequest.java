@@ -94,6 +94,7 @@ import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.Participants;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -143,6 +144,8 @@ public class AppointmentRequest {
 	};
 	
 	private Session sessionObj;
+
+	private Context ctx;
 	
 	private User user;
 	
@@ -152,10 +155,11 @@ public class AppointmentRequest {
 	
 	private static final Log LOG = LogFactory.getLog(AppointmentRequest.class);
 	
-	public AppointmentRequest(Session sessionObj) {
+	public AppointmentRequest(Session sessionObj, Context ctx) {
 		this.sessionObj = sessionObj;
+		this.ctx = ctx;
 		try {
-			user = UserStorage.getInstance().getUser(sessionObj.getUserId(), sessionObj.getContext());
+			user = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
 		} catch (LdapException e) {
 			/*
 			 * Cannot occur
@@ -177,7 +181,7 @@ public class AppointmentRequest {
 	}
 	
 	public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXConflictException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
-		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()).hasCalendar()) {
+		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasCalendar()) {
 			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "calendar");
 		}
 		
@@ -216,7 +220,7 @@ public class AppointmentRequest {
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		
 		final CalendarDataObject appointmentObj = new CalendarDataObject();
-		appointmentObj.setContext(sessionObj.getContext());
+		appointmentObj.setContext(ctx);
 		
 		final AppointmentParser appointmentParser = new AppointmentParser(timeZone);
 		appointmentParser.parse(appointmentObj, jData);
@@ -254,7 +258,7 @@ public class AppointmentRequest {
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		
 		final CalendarDataObject appointmentObj = new CalendarDataObject();
-		appointmentObj.setContext(sessionObj.getContext());
+		appointmentObj.setContext(ctx);
 		
 		final AppointmentParser appointmentParser = new AppointmentParser(timeZone);
 		appointmentParser.parse(appointmentObj, jData);
@@ -432,7 +436,7 @@ public class AppointmentRequest {
 			appointmentObj.setRecurrencePosition(DataParser.checkInt(jData, CalendarFields.RECURRENCE_POSITION));
 		}
 		
-		appointmentObj.setContext(sessionObj.getContext());
+		appointmentObj.setContext(ctx);
 		
 		final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
 		
@@ -705,7 +709,7 @@ public class AppointmentRequest {
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		
 		final CalendarDataObject appointmentObj = new CalendarDataObject();
-		appointmentObj.setContext(sessionObj.getContext());
+		appointmentObj.setContext(ctx);
 		
 		final AppointmentParser appointmentParser = new AppointmentParser(timeZone);
 		appointmentParser.parse(appointmentObj, jData);

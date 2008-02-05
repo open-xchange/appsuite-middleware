@@ -61,6 +61,7 @@ import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.writer.GroupWriter;
 import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.GroupStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.session.Session;
@@ -72,11 +73,14 @@ import com.openexchange.tools.servlet.OXJSONException;
 public class GroupRequest {
 	
 	private Session sessionObj;
+
+	private final Context ctx;
 	
 	private Date timestamp;
 	
-	public GroupRequest(Session sessionObj) {
+	public GroupRequest(Session sessionObj, final Context ctx) {
 		this.sessionObj = sessionObj;
+		this.ctx = ctx;
 	}
 	
 	public Date getTimestamp() {
@@ -108,7 +112,7 @@ public class GroupRequest {
 		for (int a = 0; a < jsonArray.length(); a++) {
 			final JSONObject jData = jsonArray.getJSONObject(a);
 			final com.openexchange.groupware.ldap.Group g = groupStorage.getGroup(DataParser.checkInt(jData,
-					DataFields.ID), sessionObj.getContext());
+					DataFields.ID), ctx);
 
 			final GroupWriter groupWriter = new GroupWriter();
 			final JSONObject jsonGroupObj = new JSONObject();
@@ -131,7 +135,7 @@ public class GroupRequest {
 		timestamp = new Date(0);
 		
 		final GroupStorage groupStorage = GroupStorage.getInstance(true);
-		final com.openexchange.groupware.ldap.Group g = groupStorage.getGroup(id, sessionObj.getContext());
+		final com.openexchange.groupware.ldap.Group g = groupStorage.getGroup(id, ctx);
 		
 		final GroupWriter groupWriter = new GroupWriter();
 		final JSONObject jsonGroupObj = new JSONObject();
@@ -161,9 +165,9 @@ public class GroupRequest {
 			com.openexchange.groupware.ldap.Group[] groups = null;
 			
 			if ("*".equals(searchpattern)) {
-				groups = groupStorage.getGroups(sessionObj.getContext());
+				groups = groupStorage.getGroups(ctx);
 			} else {
-				groups = groupStorage.searchGroups(searchpattern, sessionObj.getContext());
+				groups = groupStorage.searchGroups(searchpattern, ctx);
 			}
 			
 			final GroupWriter groupWriter = new GroupWriter();

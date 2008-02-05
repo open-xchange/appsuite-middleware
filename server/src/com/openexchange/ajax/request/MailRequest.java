@@ -62,6 +62,9 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api.OXPermissionException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
@@ -99,6 +102,8 @@ public final class MailRequest {
 
 	private final Session session;
 
+	private final Context ctx;
+
 	private final OXJSONWriter writer;
 
 	private CollectObject collectObj;
@@ -114,9 +119,10 @@ public final class MailRequest {
 	 *            the instance of <code>{@link OXJSONWriter}</code> to whom
 	 *            response data is written
 	 */
-	public MailRequest(final Session session, final OXJSONWriter writer) {
+	public MailRequest(final Session session, final Context ctx, final OXJSONWriter writer) {
 		super();
 		this.session = session;
+		this.ctx = ctx;
 		this.writer = writer;
 	}
 
@@ -134,7 +140,7 @@ public final class MailRequest {
 	 */
 	public void action(final String action, final JSONObject jsonObject, final MailInterface mailInterface)
 			throws SearchIteratorException, JSONException, MailException, OXPermissionException {
-		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext())
+		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)
 				.hasWebMail()) {
 			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "mail");
 		}
@@ -222,7 +228,7 @@ public final class MailRequest {
 	/**
 	 * Executes gathered actions and writes their response to the instance of
 	 * <code>{@link OXJSONWriter}</code> given through constructor
-	 * <code>{@link #MailRequest(Session, OXJSONWriter)}</code>
+	 * <code>{@link #MailRequest(Session, Context, OXJSONWriter)}</code>
 	 * 
 	 * @param mailInterface -
 	 *            the mail interface

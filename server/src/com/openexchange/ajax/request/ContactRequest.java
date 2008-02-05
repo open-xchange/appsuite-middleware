@@ -74,6 +74,7 @@ import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -88,6 +89,8 @@ public class ContactRequest {
 	
 	final Session sessionObj;
 	
+	final Context ctx;
+	
 	final TimeZone timeZone;
 	
 	private Date timestamp;
@@ -98,10 +101,11 @@ public class ContactRequest {
 		return timestamp;
 	}
 
-	public ContactRequest(Session sessionObj) {
+	public ContactRequest(final Session sessionObj, final Context ctx) {
 		this.sessionObj = sessionObj;
+		this.ctx = ctx;
 		
-		final String sTimeZone = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()).getTimeZone();
+		final String sTimeZone = UserStorage.getStorageUser(sessionObj.getUserId(), ctx).getTimeZone();
 		
 		timeZone = TimeZone.getTimeZone(sTimeZone);
 		if (LOG.isDebugEnabled()) {
@@ -111,7 +115,7 @@ public class ContactRequest {
 	}
 	
 	public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXConcurrentModificationException, SearchIteratorException, AjaxException, OXException, OXJSONException {
-		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()).hasContact()) {
+		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasContact()) {
 			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "contact");
 		}
 		

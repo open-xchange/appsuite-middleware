@@ -74,6 +74,7 @@ import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.reminder.EmptyReminderDeleteImpl;
@@ -92,6 +93,8 @@ import java.util.List;
 public class ReminderRequest {
     
     private Session sessionObj;
+
+    private Context ctx;
     
     private final User userObj;
     
@@ -103,9 +106,10 @@ public class ReminderRequest {
         return timestamp;
     }
     
-    public ReminderRequest(final Session sessionObj) {
+    public ReminderRequest(final Session sessionObj, final Context ctx) {
         this.sessionObj = sessionObj;
-        userObj = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
+        this.ctx = ctx;
+        userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
     }
     
     public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, OXException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
@@ -129,7 +133,7 @@ public class ReminderRequest {
         final JSONArray jsonArray = new JSONArray();
         
         try {
-            int uid = userObj.getId();
+            final int uid = userObj.getId();
             final ReminderObject reminder = reminderSql.loadReminder(id);
             final ReminderDeleteInterface reminderDeleteInterface;
             final int module = reminder.getModule();
@@ -158,9 +162,8 @@ public class ReminderRequest {
                         final JSONArray jsonResponseArray = new JSONArray();
                         jsonResponseArray.put(id);
                         return jsonResponseArray;
-                    } else {
-                        reminderSql.deleteReminder(id);
                     }
+                    reminderSql.deleteReminder(id);
                 } else {
                     reminderSql.deleteReminder(id);
                 }
@@ -173,9 +176,8 @@ public class ReminderRequest {
             if (oxe.getComponent().equals(Component.REMINDER) && oxe.getDetailNumber() == 9) {
                 jsonArray.put(id);
                 return jsonArray;
-            } else {
-                throw oxe;
             }
+            throw oxe;
         }
         
         return jsonArray;
@@ -208,7 +210,7 @@ public class ReminderRequest {
 //                    }
                 }
                 
-                if (hasModulePermission(sessionObj, reminderObj)) {
+                if (hasModulePermission(reminderObj)) {
                     final JSONObject jsonReminderObj = new JSONObject();
                     reminderWriter.writeObject(reminderObj, jsonReminderObj);
                     jsonResponseArray.put(jsonReminderObj);
@@ -250,13 +252,12 @@ public class ReminderRequest {
                     
                     if (latestReminder == null) {
                         continue;
-                    } else {
-                        reminderObj.setDate(latestReminder.getDate());
-                        reminderObj.setRecurrencePosition(latestReminder.getRecurrencePosition());
                     }
+                    reminderObj.setDate(latestReminder.getDate());
+                    reminderObj.setRecurrencePosition(latestReminder.getRecurrencePosition());
                 }
                 
-                if (hasModulePermission(sessionObj, reminderObj)) {
+                if (hasModulePermission(reminderObj)) {
                     final JSONObject jsonReminderObj = new JSONObject();
                     reminderWriter.writeObject(reminderObj, jsonReminderObj);
                     jsonResponseArray.put(jsonReminderObj);
@@ -273,14 +274,14 @@ public class ReminderRequest {
         }
     }
     
-    protected boolean hasModulePermission(Session sessionObj, ReminderObject reminderObj) {
+    protected boolean hasModulePermission(final ReminderObject reminderObj) {
 		switch (reminderObj.getModule()) {
 		case Types.APPOINTMENT:
 			return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-					sessionObj.getContext()).hasCalendar();
+					ctx).hasCalendar();
 		case Types.TASK:
 			return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-					sessionObj.getContext()).hasTask();
+					ctx).hasTask();
 		default:
 			return true;
 		}
