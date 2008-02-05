@@ -16,5 +16,5 @@ Import-Package: com.openexchange.config,
  com.openexchange.sessiond.exception,
  org.apache.commons.logging,
  org.osgi.framework;version="1.3.0",
- org.osgi.util.tracker;version="1.3.3"
+ org.osgi.util.tracker;version="1.3.2"
 Bundle-Activator: com.openexchange.sessiond.osgi.SessiondActivator

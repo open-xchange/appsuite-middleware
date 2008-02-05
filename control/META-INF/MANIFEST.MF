@@ -12,6 +12,6 @@ Import-Package: com.openexchange.groupware,
  javax.management,
  org.apache.commons.logging,
  org.osgi.framework;version="1.3.0",
- org.osgi.util.tracker;version="1.3.3",
- org.osgi.service.packageadmin
+ org.osgi.service.packageadmin,
+ org.osgi.util.tracker;version="1.3.2"
 Bundle-Vendor: Open-Xchange Inc.
