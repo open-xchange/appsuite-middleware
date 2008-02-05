@@ -67,6 +67,8 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.Group;
 import com.openexchange.groupware.ldap.GroupStorage;
 import com.openexchange.groupware.ldap.LdapException;
@@ -98,7 +100,8 @@ public class PushHandler implements AppointmentEvent, ContactEvent, TaskEvent, F
 		}
 		
 		try {
-			final PushObject pushObject = new PushObject(folderId, module, sessionObj.getContext().getContextId(), users, false);
+			final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+			final PushObject pushObject = new PushObject(folderId, module, ctx.getContextId(), users, false);
 			PushOutputQueue.add(pushObject);
 		} catch (Exception exc) {
 			LOG.error("event", exc);
@@ -173,7 +176,8 @@ public class PushHandler implements AppointmentEvent, ContactEvent, TaskEvent, F
 		try {
 			groupStorage = GroupStorage.getInstance(true);
 			
-			folderSql = new RdbFolderSQLInterface(sessionObj);
+			final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+			folderSql = new RdbFolderSQLInterface(sessionObj, ctx);
 			final FolderObject folderObj = folderSql.getFolderById(folderId); 
 			
 			final OCLPermission[] oclp = folderObj.getPermissionsAsArray();
@@ -181,7 +185,7 @@ public class PushHandler implements AppointmentEvent, ContactEvent, TaskEvent, F
 			for (int a = 0; a < oclp.length; a++) {
 				if (oclp[a].canReadOwnObjects() || oclp[a].canReadAllObjects()) {
 					if (oclp[a].isGroupPermission()) {
-						final Group g = groupStorage.getGroup(oclp[a].getEntity(), sessionObj.getContext());
+						final Group g = groupStorage.getGroup(oclp[a].getEntity(), ctx);
 						addMembers(g, hs);
 					} else {
 						hs.add(Integer.valueOf(oclp[a].getEntity()));
@@ -206,7 +210,8 @@ public class PushHandler implements AppointmentEvent, ContactEvent, TaskEvent, F
 			for (int a = 0; a < oclp.length; a++) {
 				if (oclp[a].isFolderVisible()) {
 					if (oclp[a].isGroupPermission()) {
-						final Group g = groupStorage.getGroup(oclp[a].getEntity(), sessionObj.getContext());
+						final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+						final Group g = groupStorage.getGroup(oclp[a].getEntity(), ctx);
 						addMembers(g, hs);
 					} else {
 						hs.add(Integer.valueOf(oclp[a].getEntity()));
@@ -215,7 +220,7 @@ public class PushHandler implements AppointmentEvent, ContactEvent, TaskEvent, F
 			}
 			
 			return hashSet2Array(hs);
-		} catch (LdapException exc) {
+		} catch (Exception exc) {
 			LOG.error("getAffectedUsers4Folder", exc);
 		}
 		
