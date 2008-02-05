@@ -209,4 +209,15 @@ public abstract class ContextStorage {
         impl = null;
         CachingContextStorage.stop();
     }
+
+    /**
+     * Convenience method for getting the context.
+     * @param contextId unique identifier of the context.
+     * @return the context data object.
+     * @throws ContextException if getting the context fails.
+     */
+    public static Context getStorageContext(final int contextId)
+        throws ContextException {
+        return getInstance().getContext(contextId);
+    }
 }
