@@ -49,9 +49,6 @@
 
 package com.openexchange.session;
 
-import java.util.Date;
-
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.ManagedUploadFile;
 
 /**
@@ -63,11 +60,9 @@ import com.openexchange.groupware.upload.ManagedUploadFile;
 public interface Session {
 	
 	/**
-	 * Gets the context
-	 * 
-	 * @return The context
+	 * @return the context identifier.
 	 */
-	public Context getContext();
+    int getContextId();
 
 	/**
 	 * Gets the local IP address
