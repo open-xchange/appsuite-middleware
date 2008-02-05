@@ -54,7 +54,6 @@ import com.openexchange.groupware.settings.tree.AbstractModules;
 import com.openexchange.groupware.settings.tree.Modules;
 import com.openexchange.groupware.settings.tree.modules.Calendar;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
 /**
  * Contains initialization for the modules configuration tree setting
@@ -91,7 +90,6 @@ public class CalendarConflict extends AbstractModules {
      */
     @Override
     protected boolean getModule(final UserConfiguration userConfig) {
-		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(userConfig.getUserId(),
-				userConfig.getContext()).hasConflictHandling();
+		return userConfig.hasConflictHandling();
 	}
 }
