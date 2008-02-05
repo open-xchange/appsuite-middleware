@@ -65,6 +65,8 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -117,9 +119,9 @@ public class ContactMySql implements ContactSql {
 	Context ctx;
 	Session so;
 	
-	public ContactMySql(final Session so) {
-		if (so != null){
-			this.ctx = so.getContext();
+	public ContactMySql(final Session so) throws ContextException {
+		if (so != null){			
+			this.ctx = ContextStorage.getStorageContext(so.getContextId());
 			this.so = so;
 			this.user = so.getUserId();
 		}
@@ -294,8 +296,9 @@ public class ContactMySql implements ContactSql {
 				}
 			}
 
-			/*********************** * search ranges * ***********************/ 
-			final String language = UserStorage.getStorageUser(so.getUserId(), so.getContext()).getLocale().getLanguage();
+			/*********************** * search ranges * ***********************/
+			
+			final String language = UserStorage.getStorageUser(so.getUserId(), ctx).getLocale().getLanguage();
 			
 			if(cso.getAnniversaryRange() != null && cso.getAnniversaryRange().length > 0){
 				final Date[] d = cso.getAnniversaryRange();
@@ -699,7 +702,7 @@ public class ContactMySql implements ContactSql {
 		
 		SearchIterator si;
 		try{
-			si = OXFolderTools.getAllVisibleFoldersIteratorOfModule(user, group, UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()).getAccessibleModules(), FolderObject.CONTACT, so.getContext());
+			si = OXFolderTools.getAllVisibleFoldersIteratorOfModule(user, group, UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx).getAccessibleModules(), FolderObject.CONTACT, ctx);
 		} catch (OXException e){
 			throw e;
 		}
@@ -714,7 +717,7 @@ public class ContactMySql implements ContactSql {
         
         while (si.hasNext()) {
             fo  = (FolderObject)si.next();
-            oclp = fo.getEffectiveUserPermission(user, UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()));            
+            oclp = fo.getEffectiveUserPermission(user, UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));            
            
             if (!oclp.canReadAllObjects() && oclp.canReadOwnObjects()){
             	tmp = new StringBuilder(Integer.toString(fo.getObjectID())).append(',');
@@ -921,8 +924,8 @@ public class ContactMySql implements ContactSql {
 		smt.execute(tmp.toString());
 	}
 	
-	public void iFgiveUserContacToAdmin(final Statement smt, final int oid, final Session so, final int admin_fid) throws SQLException {
-		final StringBuilder tmp = new StringBuilder("UPDATE prg_contacts SET changed_from = "+so.getContext().getMailadmin()+", created_from = "+so.getContext().getMailadmin()+", changing_date = "+System.currentTimeMillis()+", fid = "+admin_fid+" WHERE intfield01 = "+oid+" and cid = "+so.getContext().getContextId());
+	public void iFgiveUserContacToAdmin(final Statement smt, final int oid, final Session so, final int admin_fid, final Context ct) throws SQLException {
+		final StringBuilder tmp = new StringBuilder("UPDATE prg_contacts SET changed_from = "+ct.getMailadmin()+", created_from = "+ctx.getMailadmin()+", changing_date = "+System.currentTimeMillis()+", fid = "+admin_fid+" WHERE intfield01 = "+oid+" and cid = "+so.getContextId());
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(tmp.toString());
 		}
@@ -1019,7 +1022,7 @@ public class ContactMySql implements ContactSql {
 			del.execute(tmp.toString());
 			*/
 			
-			tmp = new StringBuilder("UPDATE prg_contacts SET changed_from = "+so.getContext().getMailadmin()+", created_from = "+so.getContext().getMailadmin()+", changing_date = "+System.currentTimeMillis()+" WHERE intfield01 = "+oid+" AND cid = "+cid);
+			tmp = new StringBuilder("UPDATE prg_contacts SET changed_from = "+ctx.getMailadmin()+", created_from = "+ctx.getMailadmin()+", changing_date = "+System.currentTimeMillis()+" WHERE intfield01 = "+oid+" AND cid = "+cid);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(tmp.toString());
 			}
@@ -1028,8 +1031,8 @@ public class ContactMySql implements ContactSql {
 		}
 	}
 	
-	public void iFtrashAllUserContactsDeletedEntries(final Statement del, final int cid, final int uid, final Session so) throws SQLException {
-		final StringBuilder tmp = new StringBuilder("UPDATE del_contacts SET changed_from = "+so.getContext().getMailadmin()+", created_from = "+so.getContext().getMailadmin()+", changing_date = "+System.currentTimeMillis()+" WHERE created_from = "+uid+" and cid = "+cid);
+	public void iFtrashAllUserContactsDeletedEntries(final Statement del, final int cid, final int uid, final Context ct) throws SQLException {
+		final StringBuilder tmp = new StringBuilder("UPDATE del_contacts SET changed_from = "+ctx.getMailadmin()+", created_from = "+ctx.getMailadmin()+", changing_date = "+System.currentTimeMillis()+" WHERE created_from = "+uid+" and cid = "+cid);
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(tmp.toString());
 		}

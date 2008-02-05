@@ -359,14 +359,14 @@ public class Contacts implements DeleteListener {
 		final StringBuilder insert_fields = new StringBuilder();
 		final StringBuilder insert_values = new StringBuilder();
 		
-		final ContactSql cs = new ContactMySql(so);
+		ContactSql cs = null;
 		Connection writecon = null;
 		Connection readcon = null;
 		
 		Context ct = null;
 		
 		try{
-			
+			cs = new ContactMySql(so);
 			ct = ContextStorage.getStorageContext(so.getContextId());
 			
 			readcon = DBPool.pickup(ct);
@@ -1103,6 +1103,8 @@ public class Contacts implements DeleteListener {
 			} else if (admin_delete == true){
 				cs.iFtrashTheAdmin(del,cid,id);
 			}
+		} catch (final ContextException d){
+			throw new ContactException(d);
 		} catch (final SQLException se) {
 			throw EXCEPTIONS.create(27,se,Integer.valueOf(cid),Integer.valueOf(id));
 			//throw new OXException("ERROR DURING CONTACT DELETE cid="+cid+" oid="+id, se);
@@ -1128,9 +1130,12 @@ public class Contacts implements DeleteListener {
 		Statement smt = null;
 		ResultSet rs = null;
 		DistributionListEntryObject[] r = null;
-		final ContactSql cs = new ContactMySql(null);
+		
 		
 		try{
+			
+			ContactSql cs = new ContactMySql(ctx, user);
+			
 			smt = readcon.createStatement();
 			rs = smt.executeQuery(cs.iFfillDistributionListArray(id, ctx.getContextId()));
 
@@ -1188,7 +1193,7 @@ public class Contacts implements DeleteListener {
 		    	cnt++;
 		    }
 			r = new DistributionListEntryObject[cnt];
-			System.arraycopy(dleos, 0, r, 0, cnt);   
+			System.arraycopy(dleos, 0, r, 0, cnt);
 		} catch (final SQLException se) {
 			throw EXCEPTIONS.create(28,se,Integer.valueOf(ctx.getContextId()),Integer.valueOf(id));
 			//throw new OXException("ERROR DURING DISTRIBUTION LIST LOAD cid="+ctx.getContextId()+" oid="+id, se);
@@ -1222,9 +1227,11 @@ public class Contacts implements DeleteListener {
 
 
 		DistributionListEntryObject dleo = null;
-		final ContactSql cs = new ContactMySql(null);
 		
 		try {	
+			
+			final ContactSql cs = new ContactMySql(null);
+			
 			for (int i=0;i<dleos.length;i++){
 				dleo = dleos[i];
 				PreparedStatement ps = null;
@@ -1284,6 +1291,8 @@ public class Contacts implements DeleteListener {
 					}
 				}
 			}
+		} catch (final ContextException d){
+			throw new ContactException(d);
 		} catch (final SQLException se) {
 			throw EXCEPTIONS.create(29,se,Integer.valueOf(cid),Integer.valueOf(id));
 			//throw new OXException("ERROR DURING DISTRIBUTION LIST SAVE, DLIST NOT SAVED cid="+cid+" oid="+id, se);
@@ -1381,7 +1390,7 @@ public class Contacts implements DeleteListener {
 		try{
 			deleteDistributionListEntriesByIds(id,deletecut,cid,writecon);
 			updateDistributionListEntriesByIds(id, updatecut ,cid,writecon);
-			writeDistributionListArrayInsert(insertcut,id,cid,writecon);
+			writeDistributionListArrayInsert(insertcut,id,cid,writecon);;
 		} catch (final OXException x){
 			throw x;
 			//throw new OXException("UNABLE TO UPDATE DISTRIBUTION LIST cid="+cid+" oid="+id,x);
@@ -1403,8 +1412,9 @@ public class Contacts implements DeleteListener {
 		if (dleos.length > 0) {
 
 			DistributionListEntryObject dleo = null;
-			final ContactSql cs = new ContactMySql(null);
+	
 			try{
+				final ContactSql cs = new ContactMySql(null);
 				for (int i=0;i<dleos.length;i++){
 					 dleo = dleos[i];
 
@@ -1470,7 +1480,9 @@ public class Contacts implements DeleteListener {
 								LOG.warn("Unable to close Connection", see);
 							}
 					 }
-				}				
+				}
+			} catch (final ContextException d){
+				throw new ContactException(d);
 			} catch (final SQLException se) {
 				throw EXCEPTIONS.create(30,se,Integer.valueOf(cid),Integer.valueOf(id));
 				//throw new OXException("ERROR DURING DISTRIBUTION LIST UPDATE, DLIST NOT UPDATED cid="+cid+" oid="+id, se);
@@ -1493,14 +1505,17 @@ public class Contacts implements DeleteListener {
 
 		PreparedStatement ps = null;
 		DistributionListEntryObject dleo = null;
-		final ContactSql cs = new ContactMySql(null);
+		ContactSql cs = null;
 		try {
+			cs = new ContactMySql(null);
 			ps = writecon.prepareStatement(cs.iFdeleteDistributionListEntriesByIds(cid));
 			ps.setInt(1, id);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(new StringBuilder("DELETE FROM DLIST ").append(ps.toString()));
 			}
 			ps.execute();
+		} catch (final ContextException d){
+			throw new ContactException(d);
 		} catch (final SQLException se) {
 			throw EXCEPTIONS.create(48,se,cid,id);
 			//throw new OXException("ERROR DURING DISTRIBUTION LIST deleteDistributionListEntriesByIds, DLIST NOT UPDATED cid="+cid+" oid="+id, se);
@@ -1560,7 +1575,8 @@ public class Contacts implements DeleteListener {
 		Statement smt = null;
 		ResultSet rs = null;
 		LinkEntryObject[] r = null;
-		final ContactSql cs = new ContactMySql(null);
+		final ContactSql cs = new ContactMySql(ctx, user);
+		
 		try{
 			final int id = co.getObjectID();
 			
@@ -1608,7 +1624,7 @@ public class Contacts implements DeleteListener {
 			}
 			
 			r = new LinkEntryObject[cnt];
-			System.arraycopy(leos, 0, r, 0, cnt);     
+			System.arraycopy(leos, 0, r, 0, cnt);
 		} catch (final SQLException se) {
 			throw EXCEPTIONS.create(32,se,ctx.getContextId(),co.getObjectID());
 			//throw new OXException("ERROR DURING fillLinkArray cid="+ctx.getContextId()+" oid="+co.getObjectID(), se);
@@ -1636,8 +1652,9 @@ public class Contacts implements DeleteListener {
 	)
 	public static void writeContactLinkArrayInsert(final LinkEntryObject[] leos, final int id, final int cid, final Connection writecon) throws OXException {
 		LinkEntryObject leo = null;
-		final ContactSql cs = new ContactMySql(null);
+
 		try{
+			final ContactSql cs = new ContactMySql(null);
 			for (int i=0;i<leos.length;i++){
 				PreparedStatement ps = null;
 				try {
@@ -1662,6 +1679,8 @@ public class Contacts implements DeleteListener {
 					}
 				}
 			}
+		} catch (final ContextException d){
+			throw new ContactException(d);
 		} catch (final SQLException se) {
 			throw EXCEPTIONS.create(33,se,cid,id);
 			//throw new OXException("ERROR DURING DISTRIBUTION LIST UPDATE, DLIST NOT UPDATED cid="+cid+" oid="+id, se);
@@ -1744,11 +1763,11 @@ public class Contacts implements DeleteListener {
 		if (leos.length > 0) {
 			LinkEntryObject leo = null;
 			try{
+				final ContactSql cs = new ContactMySql(null);
 				for (int i=0;i<leos.length;i++){
 					leo = leos[i];
 					PreparedStatement ps = null;
 					try {
-						final ContactSql cs = new ContactMySql(null);
 						ps = writecon.prepareStatement(cs.iFgetdeleteLinkEntriesByIdsString());
 						ps.setInt(1, id);
 						ps.setInt(2, leo.getLinkID());
@@ -1767,6 +1786,8 @@ public class Contacts implements DeleteListener {
 						}
 					}
 				}
+			} catch (final ContextException d){
+				throw new ContactException(d);
 			} catch (final SQLException se) {
 				throw EXCEPTIONS.create(34,se,Integer.valueOf(cid),Integer.valueOf(id));
 				//throw new OXException("ERROR DURING LINK LIST UPDATE, LINK NOT UPDATED cid="+cid+" oid="+id, se);
@@ -1774,7 +1795,7 @@ public class Contacts implements DeleteListener {
 		}
 	}
 	
-	public static Date getContactImageLastModified(final int id, final int cid, final Connection readcon) throws SQLException {
+	public static Date getContactImageLastModified(final int id, final int cid, final Connection readcon) throws SQLException, OXException {
 		Date last_mod = null;
 		Statement smt = null;
 		ResultSet rs = null;
@@ -1785,6 +1806,8 @@ public class Contacts implements DeleteListener {
 		    if (rs.next()){
 		    	last_mod = new Date(rs.getLong(1));
 		    }
+		} catch (final ContextException d){
+			throw new ContactException(d);
 		} catch (final SQLException sxe){
 			throw sxe;
 		} finally {
@@ -1827,6 +1850,8 @@ public class Contacts implements DeleteListener {
 				    co.setImageContentType(rs.getString(3));
 		    	}
 		    }
+		} catch (final ContextException d){
+			throw new ContactException(d);
 		} catch (final SQLException se) {
 			throw EXCEPTIONS.create(35,se,Integer.valueOf(cid),Integer.valueOf(contact_id));
 			//throw new OXException("ERROR DURING CONTACT IMAGE LOAD cid="+cid+" oid="+contact_id, se);
@@ -1873,6 +1898,8 @@ public class Contacts implements DeleteListener {
 				LOG.debug(new StringBuilder("INSERT IMAGE ").append(ps.toString()));
 			}
 			ps.execute();
+		} catch (final ContextException d){
+			throw new ContactException(d);
 		} catch (final SQLException se) {
 			throw EXCEPTIONS.create(37,se,Integer.valueOf(cid),Integer.valueOf(contact_id));
 			//throw new OXException("ERROR DURING CONTACT IMAGE SAVE cid="+cid+" oid="+contact_id, se);
@@ -1917,6 +1944,8 @@ public class Contacts implements DeleteListener {
 				LOG.debug(new StringBuilder("UPDATE IMAGE ").append(ps.toString()));
 			}
 			ps.execute();
+		} catch (final ContextException d){
+			throw new ContactException(d);
 		} catch (final SQLException se) {
 			throw EXCEPTIONS.create(39,se,Integer.valueOf(cid),Integer.valueOf(contact_id));
 			//throw new OXException("ERROR DURING CONTACT IMAGE UPDATE cid="+cid+" oid="+contact_id, se);
@@ -2243,6 +2272,8 @@ public class Contacts implements DeleteListener {
 				return true;
 			}
 			return false;
+		} catch (final ContextException d){
+			throw new ContactException(d);
 		} catch (final DBPoolingException se){
 			LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: "+cx.getContextId()+" Fid: "+fid+" Cause:"+se);
 			return false;
@@ -2367,6 +2398,8 @@ public class Contacts implements DeleteListener {
 				LOG.debug(cs.iFtrashContactsFromFolderUpdateString(fid,so.getContextId()));
 			}
 			del.execute(cs.iFtrashContactsFromFolderUpdateString(fid,so.getContextId()));
+		} catch (final ContextException d){
+			throw new ContactException(d);
 		} catch (final InvalidStateException is){
 			throw EXCEPTIONS.create(46,is, Integer.valueOf(so.getContextId()), Integer.valueOf(fid));
 			//throw new OXException("UNABLE TO DELTE FOLDER OBJECTS cid="+so.getContextId()+" fid="+fid,se);
@@ -2394,14 +2427,16 @@ public class Contacts implements DeleteListener {
 		}
 	}	
 	
-	public static void deleteDistributionList(final int id, final int cid, final Connection writecon) throws SQLException {
+	public static void deleteDistributionList(final int id, final int cid, final Connection writecon) throws SQLException, OXException {
 		trashDistributionList(id, cid, writecon, true);
 	}
-	public static void trashDistributionList(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException {
+	public static void trashDistributionList(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException, OXException {
 		final Statement smt = writecon.createStatement();
 		try{
 			final ContactSql cs = new ContactMySql(null);
 			cs.iFtrashDistributionList(delete,id,cid,smt);
+		} catch (final ContextException d){
+			throw new ContactException(d);
 		} catch (final SQLException sxe){
 			throw sxe;
 		} finally {
@@ -2415,14 +2450,16 @@ public class Contacts implements DeleteListener {
 		}
 	}
 	
-	public static void deleteLinks(final int id, final int cid, final Connection writecon) throws SQLException {
+	public static void deleteLinks(final int id, final int cid, final Connection writecon) throws SQLException, OXException{
 		trashLinks(id, cid, writecon, true);
 	}
-	public static void trashLinks(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException {
+	public static void trashLinks(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException, OXException {
 		final Statement smt = writecon.createStatement();
 		try {
 			final ContactSql cs = new ContactMySql(null);
 			cs.iFtrashLinks(delete,smt,id,cid);
+		} catch (final ContextException d){
+			throw new ContactException(d);
 		} catch (final SQLException sxe){
 			throw sxe;
 		} finally {
@@ -2436,14 +2473,16 @@ public class Contacts implements DeleteListener {
 		}
 	}
 	
-	public static void deleteImage(final int id, final int cid, final Connection writecon) throws SQLException {
+	public static void deleteImage(final int id, final int cid, final Connection writecon) throws SQLException, OXException {
 		trashImage(id,cid,writecon,true);
 	}
-	public static void trashImage(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException {
+	public static void trashImage(final int id, final int cid, final Connection writecon, final boolean delete) throws SQLException, OXException {
 		final Statement smt = writecon.createStatement();
 		try{ 
 			final ContactSql cs = new ContactMySql(null);
 			cs.iFtrashImage(delete,smt,id,cid);
+		} catch (final ContextException d){
+			throw new ContactException(d);
 		} catch (final SQLException sxe){
 			throw sxe;
 		} finally {
@@ -2486,10 +2525,10 @@ public class Contacts implements DeleteListener {
 		Statement read = null; 
 		Statement del = null;
 		ResultSet rs = null;
-		final ContactSql cs = new ContactMySql(null);
+
 		
 		try {	
-			
+			final ContactSql cs = new ContactMySql(null);
 			Context ct = ContextStorage.getStorageContext(so.getContextId());
 			
 			read = readcon.createStatement();
@@ -2550,7 +2589,7 @@ public class Contacts implements DeleteListener {
 						FolderObject xx = oxfs.getDefaultFolder(mailadmin, FolderObject.CONTACT);
 						
 						int admin_folder = xx.getObjectID();
-						cs.iFgiveUserContacToAdmin(del,oid,so, admin_folder);
+						cs.iFgiveUserContacToAdmin(del,oid,so, admin_folder, ct);
 					} catch (Exception oxee){
 						oxee.printStackTrace();
 						LOG.error("ERROR: It was not possible to move this contact (without paren folder) to the admin address book!."
@@ -2575,7 +2614,7 @@ public class Contacts implements DeleteListener {
 			if (uid == ct.getMailadmin()){
 				cs.iFtrashAllUserContactsDeletedEntriesFromAdmin(del,so.getContextId(),uid);	
 			} else {
-				cs.iFtrashAllUserContactsDeletedEntries(del,so.getContextId(),uid,so);				
+				cs.iFtrashAllUserContactsDeletedEntries(del,so.getContextId(),uid,ct);				
 			}
 			//writecon.commit();
 		} catch (final ContextException d){

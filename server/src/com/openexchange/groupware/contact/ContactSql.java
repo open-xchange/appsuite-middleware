@@ -57,6 +57,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
@@ -151,9 +153,9 @@ public interface ContactSql {
 	public void iFtrashDistributionList(boolean delete, int id, int cid, Statement smt) throws SQLException;
 	public void iFtrashLinks(boolean delete,Statement smt, int id, int cid) throws SQLException;
 	public void iFtrashImage(boolean delete, Statement smt, int id, int cid) throws SQLException;
-	public void iFgiveUserContacToAdmin(final Statement smt, final int oid, final Session so, final int admin_fid) throws SQLException;
+	public void iFgiveUserContacToAdmin(final Statement smt, final int oid, final Session so, final int admin_fid, final Context ct) throws SQLException;
 	public void iFtrashAllUserContacts(boolean delete, Statement del, int cid, int oid, int uid, ResultSet rs, Session so) throws SQLException;
-	public void iFtrashAllUserContactsDeletedEntries(Statement del, int cid, int uid, Session so) throws SQLException;
+	public void iFtrashAllUserContactsDeletedEntries(Statement del, int cid, int uid, final Context ct) throws SQLException;
 	public void iFtrashAllUserContactsDeletedEntriesFromAdmin(Statement del, int cid, int uid) throws SQLException;
 	
 	public void iFtrashTheAdmin(final Statement del, final int cid, final int uid) throws SQLException;

@@ -50,6 +50,7 @@
 package com.openexchange.groupware.contact;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 
 public class ContactException extends OXException {
@@ -68,6 +69,10 @@ public class ContactException extends OXException {
 		super(Component.CONTACT, category, id,message,cause,msgParams);
 	}
 
+	public ContactException(AbstractOXException cause){
+		super(cause);
+	}
+	
 	public ContactException(Category category, String message, int id, Object...msgParams){
 		this(category,id,message, null,msgParams);
 	}
