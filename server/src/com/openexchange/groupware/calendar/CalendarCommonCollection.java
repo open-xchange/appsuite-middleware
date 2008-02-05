@@ -158,7 +158,7 @@ public class CalendarCommonCollection {
     }
     
     
-    public static final boolean checkPermissions(final CalendarDataObject cdao, final Session so, final Connection readcon, final int action, final int inFolder) throws OXException {
+    public static final boolean checkPermissions(final CalendarDataObject cdao, final Session so, final Context ctx, final Connection readcon, final int action, final int inFolder) throws OXException {
         try {
             final OXFolderAccess access = new OXFolderAccess(readcon, cdao.getContext());
             cdao.setFolderType(access.getFolderType(inFolder, so.getUserId()));
@@ -167,7 +167,7 @@ public class CalendarCommonCollection {
             if (action == CalendarOperation.READ) {
                 if (cdao.getFolderType() != FolderObject.SHARED) {
                     EffectivePermission oclp = null;
-                    oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()));
+                    oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                     //oclp = OXFolderTools.getEffectiveFolderOCL(inFolder, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
                     if (oclp.canReadAllObjects()) {
                         return true;
@@ -183,7 +183,7 @@ public class CalendarCommonCollection {
                         return false;
                     }
                     EffectivePermission oclp = null;
-                    oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()));
+                    oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                     //oclp = OXFolderTools.getEffectiveFolderOCL(inFolder, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
                     if (oclp.canReadAllObjects()) {
                         return true;
@@ -195,7 +195,7 @@ public class CalendarCommonCollection {
                 }
             } else if (action == CalendarOperation.INSERT) {
                 EffectivePermission oclp = null;
-                oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()));
+                oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                 //oclp = OXFolderTools.getEffectiveFolderOCL(inFolder, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
                 if (cdao.getFolderType() == FolderObject.SHARED) {
                     cdao.setSharedFolderOwner(access.getFolderOwner(inFolder));
@@ -205,7 +205,7 @@ public class CalendarCommonCollection {
             } else if (action == CalendarOperation.UPDATE) {
                 if (cdao.getFolderType() != FolderObject.SHARED) {
                     EffectivePermission oclp = null;
-                    oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()));
+                    oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                     //oclp = OXFolderTools.getEffectiveFolderOCL(inFolder, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
                     if (oclp.canWriteAllObjects()) {
                         return true;
@@ -221,7 +221,7 @@ public class CalendarCommonCollection {
                         return false;
                     }
                     EffectivePermission oclp = null;
-                    oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()));
+                    oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                     //oclp = OXFolderTools.getEffectiveFolderOCL(inFolder, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
                     if (oclp.canWriteAllObjects()) {
                         return true;
@@ -234,7 +234,7 @@ public class CalendarCommonCollection {
             } else if (action == CalendarOperation.DELETE) {
                 if (cdao.getFolderType() != FolderObject.SHARED) {
                     EffectivePermission oclp = null;
-                    oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()));
+                    oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                     //oclp = OXFolderTools.getEffectiveFolderOCL(inFolder, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
                     if (oclp.canDeleteAllObjects()) {
                         return true;
@@ -250,7 +250,7 @@ public class CalendarCommonCollection {
                         return false;
                     }
                     EffectivePermission oclp = null;
-                    oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()));
+                    oclp = access.getFolderPermission(inFolder, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                     //oclp = OXFolderTools.getEffectiveFolderOCL(inFolder, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
                     if (oclp.canDeleteAllObjects()) {
                         return true;
@@ -268,59 +268,59 @@ public class CalendarCommonCollection {
         return false;
     }
     
-    public static final boolean getReadPermission(final int oid, final int fid, final Session so) throws OXException {
+    public static final boolean getReadPermission(final int oid, final int fid, final Session so, final Context ctx) throws OXException {
         try {
-            final OXFolderAccess access = new OXFolderAccess(so.getContext());
+            final OXFolderAccess access = new OXFolderAccess(ctx);
             final int type = access.getFolderType(fid, so.getUserId());
             //int type = OXFolderTools.getFolderType(fid, so.getUserObject().getId(), so.getContext());
             if (type != FolderObject.SHARED) {
                 EffectivePermission oclp = null;
-                oclp = access.getFolderPermission(fid, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()));
+                oclp = access.getFolderPermission(fid, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                 //oclp = OXFolderTools.getEffectiveFolderOCL(fid, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
                 if (oclp.canReadAllObjects()) {
                     return true;
                 }
-                return loadObjectAndCheckPermisions(oid, fid, so, CalendarOperation.READ);
+                return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.READ);
             }
-            return loadObjectAndCheckPermisions(oid, fid, so, CalendarOperation.READ);
+            return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.READ);
         } catch(final Exception ex) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, ex);
         }
     }
     
-    public static final boolean getWritePermission(final int oid, final int fid, final Session so) throws OXException {
+    public static final boolean getWritePermission(final int oid, final int fid, final Session so, Context ctx) throws OXException {
         try {
-            final OXFolderAccess access = new OXFolderAccess(so.getContext());
+            final OXFolderAccess access = new OXFolderAccess(ctx);
             final int type = access.getFolderType(fid, so.getUserId());
             //int type = OXFolderTools.getFolderType(fid, so.getUserObject().getId(), so.getContext());
             if (type != FolderObject.SHARED) {
                 EffectivePermission oclp = null;
-                oclp = access.getFolderPermission(fid, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()));
+                oclp = access.getFolderPermission(fid, so.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));
                 //oclp = OXFolderTools.getEffectiveFolderOCL(fid, so.getUserObject().getId(), so.getUserObject().getGroups(), so.getContext(), so.getUserConfiguration());
                 if (oclp.canWriteAllObjects()) {
                     return true;
                 }
-                return loadObjectAndCheckPermisions(oid, fid, so, CalendarOperation.UPDATE);
+                return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.UPDATE);
             }
-            return loadObjectAndCheckPermisions(oid, fid, so, CalendarOperation.UPDATE);
+            return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.UPDATE);
         } catch(final Exception ex) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, ex);
         }
     }
     
-    private static final boolean loadObjectAndCheckPermisions(final int oid, final int fid, final Session so, final int type) throws Exception {
+    private static final boolean loadObjectAndCheckPermisions(final int oid, final int fid, final Session so, Context ctx, final int type) throws Exception {
         Connection readcon = null;
         try {
-            readcon = DBPool.pickup(so.getContext());
+            readcon = DBPool.pickup(ctx);
             final CalendarSql csql = new CalendarSql(so);
             final CalendarDataObject cdao = csql.getObjectById(oid, fid);
-            return checkPermissions(cdao, so, readcon, type, fid);
+            return checkPermissions(cdao, so, ctx, readcon, type, fid);
         } catch(final DBPoolingException dbpe) {
             throw new OXException(dbpe);
         } finally {
             if (readcon != null) {
                 try {
-                    DBPool.push(so.getContext(), readcon);
+                    DBPool.push(ctx, readcon);
                 } catch (final DBPoolingException dbpe) {
                     LOG.error("error pushing readable connection", dbpe);
                 }

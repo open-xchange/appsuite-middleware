@@ -122,15 +122,15 @@ public interface CalendarSqlImp {
     
     public CalendarDataObject[] insertAppointment(CalendarDataObject cdao, Connection writecon, Session so) throws SQLException, LdapException, Exception;
     
-    public CalendarDataObject[] updateAppointment(CalendarDataObject cdao, CalendarDataObject edao, Connection writecon, Session so, int inFolder, Date clientLastModified) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException;
+    public CalendarDataObject[] updateAppointment(CalendarDataObject cdao, CalendarDataObject edao, Connection writecon, Session so, Context ctx, int inFolder, Date clientLastModified) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException;
     
-    public CalendarDataObject loadObjectForUpdate(CalendarDataObject cdao, Session so, int inFolder) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException;
+    public CalendarDataObject loadObjectForUpdate(CalendarDataObject cdao, Session so, Context ctx, int inFolder) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException;
     
-    public void deleteAppointment(int uid, CalendarDataObject cdao, Connection writecon, Session so, int inFolder, Date clientLastModified) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException;
+    public void deleteAppointment(int uid, CalendarDataObject cdao, Connection writecon, Session so, Context ctx, int inFolder, Date clientLastModified) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException;
     
-    public void deleteAppointmentsInFolder(Session so, ResultSet objects, Connection readcon, Connection writecon, int foldertype, int fid) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException;
+    public void deleteAppointmentsInFolder(Session so, Context ctx, ResultSet objects, Connection readcon, Connection writecon, int foldertype, int fid) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException;
     
-    public void setUserConfirmation(int oid, int uid, int confirm, String confirm_message, Session so) throws OXException;
+    public void setUserConfirmation(int oid, int uid, int confirm, String confirm_message, Session so, Context ctx) throws OXException;
     
     public boolean checkIfFolderContainsForeignObjects(int uid, int fid, Context c, Connection readcon, int foldertype) throws SQLException;
     

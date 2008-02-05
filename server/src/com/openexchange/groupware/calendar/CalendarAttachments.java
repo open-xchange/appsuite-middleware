@@ -86,7 +86,7 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
     public void checkMayAttach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
         try {
             Session so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, CalendarCommonCollection.getUniqueCalendarSessionName());
-            if (!CalendarCommonCollection.getWritePermission(objectId, folderId, so)) {
+            if (!CalendarCommonCollection.getWritePermission(objectId, folderId, so, ctx)) {
                 throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSIONS_TO_ATTACH_DETACH);
             }
         } catch (OXObjectNotFoundException oxonfe) {
@@ -106,7 +106,7 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
     public void checkMayReadAttachments(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
         try {
             Session so = SessionObjectWrapper.createSessionObject(user.getId(), ctx, CalendarCommonCollection.getUniqueCalendarSessionName());
-            if (!CalendarCommonCollection.getReadPermission(objectId, folderId, so)) {
+            if (!CalendarCommonCollection.getReadPermission(objectId, folderId, so, ctx)) {
                 throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSIONS_TO_READ);
             }
         } catch (OXObjectNotFoundException oxonfe) {

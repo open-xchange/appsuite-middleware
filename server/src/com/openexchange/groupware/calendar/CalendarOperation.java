@@ -127,7 +127,7 @@ public class CalendarOperation implements SearchIterator {
     protected final CalendarDataObject loadAppointment(final ResultSet load_resultset, final int oid, final int inFolder, final CalendarSqlImp cimp, final Connection readcon, final Session so, final int action, final int action_folder, final boolean check_permissions) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException {
         final CalendarDataObject cdao = new CalendarDataObject();
         cdao.setObjectID(oid);
-        cdao.setContext(so.getContext());
+        cdao.setContext(c);
         int check_special_action = action;
         if (action == UPDATE && inFolder != action_folder) { // We move and this means to create a new object
             check_special_action = INSERT;
@@ -141,7 +141,7 @@ public class CalendarOperation implements SearchIterator {
                 cdao.setModifiedBy(setInt(i++, load_resultset));
                 cdao.setGlobalFolderID(setInt(i++, load_resultset));
                 cdao.setPrivateFlag(setBooleanToInt(i++, load_resultset));
-                if (check_permissions && !CalendarCommonCollection.checkPermissions(cdao, so, readcon, check_special_action, action_folder)) {
+                if (check_permissions && !CalendarCommonCollection.checkPermissions(cdao, so, c, readcon, check_special_action, action_folder)) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 1 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserId(), ":",oid,":",inFolder,":",action }));
                     }
@@ -175,7 +175,7 @@ public class CalendarOperation implements SearchIterator {
                     }
                 }
                 if (check_permissions && action == UPDATE && inFolder != action_folder) {
-                    if (!CalendarCommonCollection.checkPermissions(cdao, so, readcon, DELETE, inFolder)) { // Move means to check delete
+                    if (!CalendarCommonCollection.checkPermissions(cdao, so, c, readcon, DELETE, inFolder)) { // Move means to check delete
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(StringCollection.convertArraytoString(new Object[] { "Permission Exception 4 (fid!inFolder) for user:oid:fid:inFolder ", so.getUserId(), ":",oid,":",inFolder,":",action }));
                         }
@@ -833,7 +833,7 @@ public class CalendarOperation implements SearchIterator {
                     throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT, "Object not found : uid:oid:fid:InFolder "+so.getUserId() + ":"+ cdao.getObjectID() + ":"+cdao.getParentFolderID()+":"+check_folder_id);
                 }
                 
-                if (!CalendarCommonCollection.checkPermissions(cdao, so, readcon, CalendarOperation.READ, check_folder_id)) {
+                if (!CalendarCommonCollection.checkPermissions(cdao, so, c, readcon, CalendarOperation.READ, check_folder_id)) {
                     StringBuffer colss = new StringBuffer();
                     for (int a = 0; a < cols.length; a++) {
                         String fn = CalendarCommonCollection.getFieldName(cols[a]);
@@ -861,12 +861,12 @@ public class CalendarOperation implements SearchIterator {
         return null;
     }
     
-    public final SearchIterator setResultSet(final ResultSet rs, final PreparedStatement prep, final int[] cols, final CalendarSqlImp cimp, final Connection readcon, final int from, final int to, final Session so) throws SQLException {
+    public final SearchIterator setResultSet(final ResultSet rs, final PreparedStatement prep, final int[] cols, final CalendarSqlImp cimp, final Connection readcon, final int from, final int to, final Session so, Context ctx) throws SQLException {
         this.co_rs = rs;
         this.prep = prep;
         this.cols = cols;
         this.cimp = cimp;
-        this.c = so.getContext();
+        this.c = ctx;
         this.readcon = readcon;
         this.from = from;
         this.to = to;

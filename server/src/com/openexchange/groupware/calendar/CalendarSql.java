@@ -113,32 +113,21 @@ public class CalendarSql implements AppointmentSQLInterface {
         this.session = session;
     }
     
-    private final UserConfiguration getUserConfiguration() {
-    	if (null == userconfiguration) {
-    		userconfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext());
-    	}
-    	return userconfiguration;
-    }
-    
-    private final User getUser() {
-    	if (null == user) {
-    		user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
-    	}
-    	return user;
-    }
-    
     public boolean[] hasAppointmentsBetween(Date d1, Date d2) throws OXException {
         if (session != null) {
+            final Context ctx = Tools.getContext(session);
+            final User user = Tools.getUser(session, ctx);
+            final UserConfiguration userConfiguration = Tools.getUserConfiguration(ctx, session.getUserId());
             Connection readcon = null;
             try {
-                readcon = DBPool.pickup(session.getContext());
-                return cimp.getUserActiveAppointmentsRangeSQL(session.getContext(), session.getUserId(), getUser().getGroups(), getUserConfiguration(), d1, d2, readcon);
+                readcon = DBPool.pickup(ctx);
+                return cimp.getUserActiveAppointmentsRangeSQL(ctx, session.getUserId(), user.getGroups(), userConfiguration, d1, d2, readcon);
             } catch(Exception e) {
                 throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
             } finally {
                 try {
                     if (readcon != null) {
-                        DBPool.push(session.getContext(), readcon);
+                        DBPool.push(ctx, readcon);
                     }
                 } catch (DBPoolingException dbpe) {
                     LOG.error(ERROR_PUSHING_DATABASE, dbpe);
@@ -159,68 +148,71 @@ public class CalendarSql implements AppointmentSQLInterface {
             PreparedStatement prep = null;
             ResultSet rs = null;
             boolean close_connection = true;
+            final Context ctx = Tools.getContext(session);
+            final User user = Tools.getUser(session, ctx);
+            final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
             try {
-                readcon = DBPool.pickup(session.getContext());
+                readcon = DBPool.pickup(ctx);
                 cols = CalendarCommonCollection.checkAndAlterCols(cols);
-                OXFolderAccess ofa = new OXFolderAccess(readcon, session.getContext());
+                OXFolderAccess ofa = new OXFolderAccess(readcon, ctx);
                 if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PRIVATE) {
                     CalendarOperation co = new CalendarOperation();
-                    EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), getUserConfiguration());
+                    EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), userConfig);
                     if (oclp.canReadAllObjects()) {
-                        prep = cimp.getPrivateFolderRangeSQL(session.getContext(), session.getUserId(), getUser().getGroups(), fid, start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), true, readcon, orderBy, orderDir);
+                        prep = cimp.getPrivateFolderRangeSQL(ctx, session.getUserId(), user.getGroups(), fid, start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), true, readcon, orderBy, orderDir);
                         rs = cimp.getResultSet(prep);
                         co.setRequestedFolder(fid);
-                        co.setResultSet(rs, prep, cols, cimp, readcon, from, to, session);
+                        co.setResultSet(rs, prep, cols, cimp, readcon, from, to, session, ctx);
                         close_connection = false;
-                        return new CachedCalendarIterator(co, session.getContext(), session.getUserId());
+                        return new CachedCalendarIterator(co, ctx, session.getUserId());
                     } else if (oclp.canReadOwnObjects()) {
-                        prep = cimp.getPrivateFolderRangeSQL(session.getContext(), session.getUserId(), getUser().getGroups(), fid, start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), false, readcon, orderBy, orderDir);
+                        prep = cimp.getPrivateFolderRangeSQL(ctx, session.getUserId(), user.getGroups(), fid, start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), false, readcon, orderBy, orderDir);
                         rs = cimp.getResultSet(prep);
                         co.setRequestedFolder(fid);
-                        co.setResultSet(rs, prep, cols, cimp, readcon, from, to, session);
+                        co.setResultSet(rs, prep, cols, cimp, readcon, from, to, session, ctx);
                         close_connection = false;
-                        return new CachedCalendarIterator(co, session.getContext(), session.getUserId());
+                        return new CachedCalendarIterator(co, ctx, session.getUserId());
                     } else {
                         throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSION);
                     }
                 } else if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PUBLIC) {
                     CalendarOperation co = new CalendarOperation();
-                    EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), getUserConfiguration());                    
+                    EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), userConfig);                    
                     if (oclp.canReadAllObjects()) {
-                        prep = cimp.getPublicFolderRangeSQL(session.getContext(), session.getUserId(), getUser().getGroups(), fid, start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), true, readcon, orderBy, orderDir);
+                        prep = cimp.getPublicFolderRangeSQL(ctx, session.getUserId(), user.getGroups(), fid, start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), true, readcon, orderBy, orderDir);
                         rs = cimp.getResultSet(prep);
                         co.setRequestedFolder(fid);
-                        co.setResultSet(rs, prep, cols, cimp, readcon, from, to, session);
+                        co.setResultSet(rs, prep, cols, cimp, readcon, from, to, session, ctx);
                         close_connection = false;
-                        return new CachedCalendarIterator(co, session.getContext(), session.getUserId());
+                        return new CachedCalendarIterator(co, ctx, session.getUserId());
                     } else if (oclp.canReadOwnObjects()) {
-                        prep = cimp.getPublicFolderRangeSQL(session.getContext(), session.getUserId(), getUser().getGroups(), fid, start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), false, readcon, orderBy, orderDir);
+                        prep = cimp.getPublicFolderRangeSQL(ctx, session.getUserId(), user.getGroups(), fid, start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), false, readcon, orderBy, orderDir);
                         rs = cimp.getResultSet(prep);
                         co.setRequestedFolder(fid);
-                        co.setResultSet(rs, prep, cols, cimp, readcon, from, to, session);
+                        co.setResultSet(rs, prep, cols, cimp, readcon, from, to, session, ctx);
                         close_connection = false;
-                        return new CachedCalendarIterator(co, session.getContext(), session.getUserId());
+                        return new CachedCalendarIterator(co, ctx, session.getUserId());
                     } else {
                         throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSION);
                     }
                 } else {
                     CalendarOperation co = new CalendarOperation();
-                    EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), getUserConfiguration());
+                    EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), userConfig);
                     int shared_folder_owner = ofa.getFolderOwner(fid);
                     if (oclp.canReadAllObjects()) {
-                        prep = cimp.getSharedFolderRangeSQL(session.getContext(), session.getUserId(), shared_folder_owner, getUser().getGroups(), fid, start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), true, readcon, orderBy, orderDir);
+                        prep = cimp.getSharedFolderRangeSQL(ctx, session.getUserId(), shared_folder_owner, user.getGroups(), fid, start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), true, readcon, orderBy, orderDir);
                         rs = cimp.getResultSet(prep);
                         co.setRequestedFolder(fid);
-                        co.setResultSet(rs, prep,cols, cimp, readcon, from, to, session);
+                        co.setResultSet(rs, prep,cols, cimp, readcon, from, to, session, ctx);
                         close_connection = false;
-                        return new CachedCalendarIterator(co, session.getContext(), session.getUserId());
+                        return new CachedCalendarIterator(co, ctx, session.getUserId());
                     } else if (oclp.canReadOwnObjects()) {
-                        prep = cimp.getSharedFolderRangeSQL(session.getContext(), session.getUserId(), shared_folder_owner, getUser().getGroups(), fid, start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), false, readcon, orderBy, orderDir);
+                        prep = cimp.getSharedFolderRangeSQL(ctx, session.getUserId(), shared_folder_owner, user.getGroups(), fid, start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), false, readcon, orderBy, orderDir);
                         rs = cimp.getResultSet(prep);
                         co.setRequestedFolder(fid);
-                        co.setResultSet(rs, prep, cols, cimp, readcon, from, to, session);
+                        co.setResultSet(rs, prep, cols, cimp, readcon, from, to, session, ctx);
                         close_connection = false;
-                        return new CachedCalendarIterator(co, session.getContext(), session.getUserId());
+                        return new CachedCalendarIterator(co, ctx, session.getUserId());
                     } else {
                         throw new OXCalendarException(OXCalendarException.Code.NO_PERMISSION);
                     }
@@ -244,7 +236,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 }
                 if (readcon != null && close_connection) {
                     try {
-                        DBPool.push(session.getContext(), readcon);
+                        DBPool.push(ctx, readcon);
                     } catch (DBPoolingException dbpe) {
                         LOG.error(ERROR_PUSHING_DATABASE, dbpe);
                     }
@@ -261,38 +253,41 @@ public class CalendarSql implements AppointmentSQLInterface {
             PreparedStatement prep = null;
             ResultSet rs = null;
             boolean close_connection = true;
+            final Context ctx = Tools.getContext(session);
+            final User user = Tools.getUser(session, ctx);
+            final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
             try {
-                readcon = DBPool.pickup(session.getContext());
+                readcon = DBPool.pickup(ctx);
                 cols = CalendarCommonCollection.checkAndAlterCols(cols);
-                OXFolderAccess ofa = new OXFolderAccess(readcon, session.getContext());
+                OXFolderAccess ofa = new OXFolderAccess(readcon, ctx);
                 if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PRIVATE) {
                     CalendarOperation co = new CalendarOperation();
-                    EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), getUserConfiguration());
-                    prep = cimp.getPrivateFolderModifiedSinceSQL(session.getContext(), session.getUserId(), getUser().getGroups(), fid, since, StringCollection.getSelect(cols, DATES_TABLE_NAME), oclp.canReadAllObjects(), readcon, start, end);
+                    EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), userConfig);
+                    prep = cimp.getPrivateFolderModifiedSinceSQL(ctx, session.getUserId(), user.getGroups(), fid, since, StringCollection.getSelect(cols, DATES_TABLE_NAME), oclp.canReadAllObjects(), readcon, start, end);
                     rs = cimp.getResultSet(prep);
                     co.setRequestedFolder(fid);
-                    co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session);
+                    co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
                     close_connection = false;
-                    return new CachedCalendarIterator(co, session.getContext(), session.getUserId());
+                    return new CachedCalendarIterator(co, ctx, session.getUserId());
                 } else if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PUBLIC) {
                     CalendarOperation co = new CalendarOperation();
-                    EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), getUserConfiguration());
-                    prep = cimp.getPublicFolderModifiedSinceSQL(session.getContext(), session.getUserId(), getUser().getGroups(), fid, since, StringCollection.getSelect(cols, DATES_TABLE_NAME), oclp.canReadAllObjects(), readcon, start, end);
+                    EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), userConfig);
+                    prep = cimp.getPublicFolderModifiedSinceSQL(ctx, session.getUserId(), user.getGroups(), fid, since, StringCollection.getSelect(cols, DATES_TABLE_NAME), oclp.canReadAllObjects(), readcon, start, end);
                     rs = cimp.getResultSet(prep);
                     co.setRequestedFolder(fid);
-                    co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session);
+                    co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
                     close_connection = false;
-                    return new CachedCalendarIterator(co, session.getContext(), session.getUserId());
+                    return new CachedCalendarIterator(co, ctx, session.getUserId());
                 } else {
                     CalendarOperation co = new CalendarOperation();
-                    EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), getUserConfiguration());
+                    EffectivePermission oclp = ofa.getFolderPermission(fid, session.getUserId(), userConfig);
                     int shared_folder_owner = ofa.getFolderOwner(fid);
-                    prep = cimp.getSharedFolderModifiedSinceSQL(session.getContext(), session.getUserId(), shared_folder_owner, getUser().getGroups(), fid, since, StringCollection.getSelect(cols, DATES_TABLE_NAME), oclp.canReadAllObjects(), readcon, start, end);
+                    prep = cimp.getSharedFolderModifiedSinceSQL(ctx, session.getUserId(), shared_folder_owner, user.getGroups(), fid, since, StringCollection.getSelect(cols, DATES_TABLE_NAME), oclp.canReadAllObjects(), readcon, start, end);
                     rs = cimp.getResultSet(prep);
                     co.setRequestedFolder(fid);
-                    co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session);
+                    co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
                     close_connection = false;
-                    return new CachedCalendarIterator(co, session.getContext(), session.getUserId());
+                    return new CachedCalendarIterator(co, ctx, session.getUserId());
                 }
             } catch (IndexOutOfBoundsException ioobe) {
                 throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ioobe, 21);
@@ -313,7 +308,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 }
                 if (readcon != null && close_connection) {
                     try {
-                        DBPool.push(session.getContext(), readcon);
+                        DBPool.push(ctx, readcon);
                     } catch (DBPoolingException dbpe) {
                         LOG.error(ERROR_PUSHING_DATABASE, dbpe);
                     }
@@ -334,35 +329,36 @@ public class CalendarSql implements AppointmentSQLInterface {
             PreparedStatement prep = null;
             ResultSet rs = null;
             boolean close_connection = true;
+            final Context ctx = Tools.getContext(session);
             try {
-                readcon = DBPool.pickup(session.getContext());
+                readcon = DBPool.pickup(ctx);
                 cols = CalendarCommonCollection.checkAndAlterCols(cols);
-                OXFolderAccess ofa = new OXFolderAccess(readcon, session.getContext());
+                OXFolderAccess ofa = new OXFolderAccess(readcon, ctx);
                 if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PRIVATE) {
                     CalendarOperation co = new CalendarOperation();
-                    prep = cimp.getPrivateFolderDeletedSinceSQL(session.getContext(), session.getUserId(), fid, since, StringCollection.getSelect(cols, "del_dates"), readcon);
+                    prep = cimp.getPrivateFolderDeletedSinceSQL(ctx, session.getUserId(), fid, since, StringCollection.getSelect(cols, "del_dates"), readcon);
                     rs = cimp.getResultSet(prep);
                     co.setRequestedFolder(fid);
-                    co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session);
+                    co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
                     close_connection = false;
-                    return new CachedCalendarIterator(co, session.getContext(), session.getUserId());
+                    return new CachedCalendarIterator(co, ctx, session.getUserId());
                 } else if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PUBLIC) {
                     CalendarOperation co = new CalendarOperation();
-                    prep = cimp.getPublicFolderDeletedSinceSQL(session.getContext(), session.getUserId(), fid, since, StringCollection.getSelect(cols, "del_dates"), readcon);
+                    prep = cimp.getPublicFolderDeletedSinceSQL(ctx, session.getUserId(), fid, since, StringCollection.getSelect(cols, "del_dates"), readcon);
                     rs = cimp.getResultSet(prep);
                     co.setRequestedFolder(fid);
-                    co.setResultSet(rs, prep,cols, cimp, readcon, 0, 0, session);
+                    co.setResultSet(rs, prep,cols, cimp, readcon, 0, 0, session, ctx);
                     close_connection = false;
-                    return new CachedCalendarIterator(co, session.getContext(), session.getUserId());
+                    return new CachedCalendarIterator(co, ctx, session.getUserId());
                 } else {
                     CalendarOperation co = new CalendarOperation();
                     int shared_folder_owner = ofa.getFolderOwner(fid);
-                    prep = cimp.getSharedFolderDeletedSinceSQL(session.getContext(), session.getUserId(), shared_folder_owner, fid, since, StringCollection.getSelect(cols, "del_dates"), readcon);
+                    prep = cimp.getSharedFolderDeletedSinceSQL(ctx, session.getUserId(), shared_folder_owner, fid, since, StringCollection.getSelect(cols, "del_dates"), readcon);
                     rs = cimp.getResultSet(prep);
                     co.setRequestedFolder(fid);
-                    co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session);
+                    co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
                     close_connection = false;
-                    return new CachedCalendarIterator(co, session.getContext(), session.getUserId());
+                    return new CachedCalendarIterator(co, ctx, session.getUserId());
                 }
             } catch (IndexOutOfBoundsException ioobe) {
                 throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, ioobe, 23);
@@ -383,7 +379,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 }
                 if (readcon != null && close_connection) {
                     try {
-                        DBPool.push(session.getContext(), readcon);
+                        DBPool.push(ctx, readcon);
                     } catch (DBPoolingException dbpe) {
                         LOG.error(ERROR_PUSHING_DATABASE, dbpe);
                     }
@@ -399,10 +395,11 @@ public class CalendarSql implements AppointmentSQLInterface {
             Connection readcon = null;
             PreparedStatement prep = null;
             ResultSet rs = null;
+            final Context ctx = Tools.getContext(session);
             try {
-                readcon = DBPool.pickup(session.getContext());
+                readcon = DBPool.pickup(ctx);
                 CalendarOperation co = new CalendarOperation();
-                prep = cimp.getPreparedStatement(readcon, cimp.loadAppointment(oid, session.getContext()));
+                prep = cimp.getPreparedStatement(readcon, cimp.loadAppointment(oid, ctx));
                 rs = cimp.getResultSet(prep);
                 CalendarDataObject cdao = co.loadAppointment(rs, oid, inFolder, cimp, readcon, session, CalendarOperation.READ, inFolder);
                 if (cdao.getRecurrenceType() != AppointmentObject.NO_RECURRENCE) {
@@ -431,7 +428,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 CalendarCommonCollection.closePreparedStatement(prep);
                 if (readcon != null) {
                     try {
-                        DBPool.push(session.getContext(), readcon);
+                        DBPool.push(ctx, readcon);
                     } catch (DBPoolingException dbpe) {
                         LOG.error(ERROR_PUSHING_DATABASE, dbpe);
                     }
@@ -445,19 +442,22 @@ public class CalendarSql implements AppointmentSQLInterface {
     public CalendarDataObject[] insertAppointmentObject(CalendarDataObject cdao) throws OXException, OXPermissionException {
         if (session != null) {
             Connection writecon = null;
+            final Context ctx = Tools.getContext(session);
+            final User user = Tools.getUser(session, ctx);
+            final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
             try {
                 CalendarOperation co = new CalendarOperation();
-                if (co.prepareUpdateAction(cdao, null, session.getUserId(), cdao.getParentFolderID(), getUser().getTimeZone())) {
+                if (co.prepareUpdateAction(cdao, null, session.getUserId(), cdao.getParentFolderID(), user.getTimeZone())) {
                     try {
-                        OXFolderAccess ofa = new OXFolderAccess(session.getContext());
-                        EffectivePermission oclp = ofa.getFolderPermission(cdao.getEffectiveFolderId(), session.getUserId(), getUserConfiguration());
+                        OXFolderAccess ofa = new OXFolderAccess(ctx);
+                        EffectivePermission oclp = ofa.getFolderPermission(cdao.getEffectiveFolderId(), session.getUserId(), userConfig);
                         if (oclp.canCreateObjects()) {
                         	CalendarCommonCollection.checkForInvalidCharacters(cdao);
                             cdao.setActionFolder(cdao.getParentFolderID());
                             ConflictHandler ch = new ConflictHandler(cdao, session, true);
                             CalendarDataObject conflicts[] = ch.getConflicts();
                             if (conflicts.length == 0) {
-                                writecon = DBPool.pickupWriteable(session.getContext());
+                                writecon = DBPool.pickupWriteable(ctx);
                                 writecon.setAutoCommit(false);
                                 return cimp.insertAppointment(cdao, writecon, session);
                             } else {
@@ -520,7 +520,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             } finally {
                 if (writecon != null) {
                     try {
-                        DBPool.pushWrite(session.getContext(), writecon);
+                        DBPool.pushWrite(ctx, writecon);
                     } catch (DBPoolingException dbpe) {
                         LOG.error(ERROR_PUSHING_WRITEABLE_CONNECTION, dbpe);
                     }
@@ -535,16 +535,18 @@ public class CalendarSql implements AppointmentSQLInterface {
     public CalendarDataObject[] updateAppointmentObject(CalendarDataObject cdao, int inFolder, Date clientLastModified) throws OXException, OXPermissionException, OXConcurrentModificationException, OXObjectNotFoundException {
         if (session != null) {
             Connection writecon = null;
+            final Context ctx = Tools.getContext(session);
+            final User user = Tools.getUser(session, ctx);
             try {
                 CalendarOperation co = new CalendarOperation();
-                CalendarDataObject edao = cimp.loadObjectForUpdate(cdao, session, inFolder);
-                if (!co.prepareUpdateAction(cdao, edao, session.getUserId(), inFolder, getUser().getTimeZone())) {
+                CalendarDataObject edao = cimp.loadObjectForUpdate(cdao, session, ctx, inFolder);
+                if (!co.prepareUpdateAction(cdao, edao, session.getUserId(), inFolder, user.getTimeZone())) {
                 	CalendarCommonCollection.checkForInvalidCharacters(cdao);
                     CalendarDataObject conflict_dao = CalendarCommonCollection.fillFieldsForConflictQuery(cdao, edao, false);
                     ConflictHandler ch = new ConflictHandler(conflict_dao, session, false);
                     CalendarDataObject conflicts[] = ch.getConflicts();
                     if (conflicts.length == 0) {
-                        writecon = DBPool.pickupWriteable(session.getContext());
+                        writecon = DBPool.pickupWriteable(ctx);
                         try {
                             writecon.setAutoCommit(false);
                             if (cdao.containsParentFolderID()) {
@@ -552,7 +554,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                             } else {
                                 cdao.setActionFolder(inFolder);
                             }
-                            return cimp.updateAppointment(cdao, edao, writecon, session, inFolder, clientLastModified);
+                            return cimp.updateAppointment(cdao, edao, writecon, session, ctx, inFolder, clientLastModified);
                         } catch(DataTruncation dt) {
                             String fields[] = DBUtils.parseTruncatedFields(dt);
                             int fid[] = new int[fields.length];
@@ -610,7 +612,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             } finally {
                 if (writecon != null) {
                     try {
-                        DBPool.pushWrite(session.getContext(), writecon);
+                        DBPool.pushWrite(ctx, writecon);
                     } catch (DBPoolingException dbpe) {
                         LOG.error(ERROR_PUSHING_WRITEABLE_CONNECTION, dbpe);
                     }
@@ -625,11 +627,12 @@ public class CalendarSql implements AppointmentSQLInterface {
     public void deleteAppointmentObject(CalendarDataObject cdao, int inFolder, Date clientLastModified) throws OXException, SQLException, OXPermissionException, OXConcurrentModificationException {
         if (session != null) {
             Connection writecon = null;
+            final Context ctx = Tools.getContext(session);
             try  {
-                writecon = DBPool.pickupWriteable(session.getContext());
+                writecon = DBPool.pickupWriteable(ctx);
                 try {
                     writecon.setAutoCommit(false);
-                    cimp.deleteAppointment(session.getUserId(), cdao, writecon, session, inFolder, clientLastModified);
+                    cimp.deleteAppointment(session.getUserId(), cdao, writecon, session, ctx, inFolder, clientLastModified);
                 } catch(SQLException sqle) {
                     try {
                         writecon.rollback();
@@ -659,7 +662,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             } finally {
                 if (writecon != null) {
                     try {
-                        DBPool.pushWrite(session.getContext(), writecon);
+                        DBPool.pushWrite(ctx, writecon);
                     } catch (DBPoolingException dbpe) {
                         LOG.error(ERROR_PUSHING_WRITEABLE_CONNECTION,  dbpe);
                     }
@@ -675,22 +678,23 @@ public class CalendarSql implements AppointmentSQLInterface {
             Connection readcon = null, writecon = null;
             PreparedStatement prep = null;
             ResultSet rs = null;
+            final Context ctx = Tools.getContext(session);
             try  {
-                readcon = DBPool.pickup(session.getContext());
+                readcon = DBPool.pickup(ctx);
                 try {
-                    OXFolderAccess ofa = new OXFolderAccess(readcon, session.getContext());
+                    OXFolderAccess ofa = new OXFolderAccess(readcon, ctx);
                     if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PRIVATE) {
-                        prep = cimp.getPrivateFolderObjects(fid, session.getContext(), readcon);
+                        prep = cimp.getPrivateFolderObjects(fid, ctx, readcon);
                         rs = cimp.getResultSet(prep);
-                        writecon = DBPool.pickupWriteable(session.getContext());
+                        writecon = DBPool.pickupWriteable(ctx);
                         writecon.setAutoCommit(false);
-                        cimp.deleteAppointmentsInFolder(session, rs, readcon, writecon, FolderObject.PRIVATE, fid);
+                        cimp.deleteAppointmentsInFolder(session, ctx, rs, readcon, writecon, FolderObject.PRIVATE, fid);
                     } else if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PUBLIC) {
-                        prep = cimp.getPublicFolderObjects(fid, session.getContext(), readcon);
+                        prep = cimp.getPublicFolderObjects(fid, ctx, readcon);
                         rs = cimp.getResultSet(prep);
-                        writecon = DBPool.pickupWriteable(session.getContext());
+                        writecon = DBPool.pickupWriteable(ctx);
                         writecon.setAutoCommit(false);
-                        cimp.deleteAppointmentsInFolder(session, rs, readcon, writecon, FolderObject.PUBLIC, fid);
+                        cimp.deleteAppointmentsInFolder(session, ctx, rs, readcon, writecon, FolderObject.PUBLIC, fid);
                     } else {
                         throw new OXCalendarException(OXCalendarException.Code.FOLDER_DELETE_INVALID_REQUEST);
                     }
@@ -721,14 +725,14 @@ public class CalendarSql implements AppointmentSQLInterface {
                 CalendarCommonCollection.closePreparedStatement(prep);
                 if (readcon != null) {
                     try {
-                        DBPool.push(session.getContext(), readcon);
+                        DBPool.push(ctx, readcon);
                     } catch (DBPoolingException dbpe) {
                         LOG.error(ERROR_PUSHING_DATABASE, dbpe);
                     }
                 }
                 if (writecon != null) {
                     try {
-                        DBPool.pushWrite(session.getContext(), writecon);
+                        DBPool.pushWrite(ctx, writecon);
                     } catch (DBPoolingException dbpe) {
                         LOG.error(ERROR_PUSHING_WRITEABLE_CONNECTION,  dbpe);
                     }
@@ -742,13 +746,14 @@ public class CalendarSql implements AppointmentSQLInterface {
     public boolean checkIfFolderContainsForeignObjects(int uid, int fid) throws OXException, SQLException {
         if (session != null) {
             Connection readcon = null;
+            final Context ctx = Tools.getContext(session);
             try {
-                readcon = DBPool.pickup(session.getContext());
-                OXFolderAccess ofa = new OXFolderAccess(readcon, session.getContext());
+                readcon = DBPool.pickup(ctx);
+                OXFolderAccess ofa = new OXFolderAccess(readcon, ctx);
                 if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PRIVATE) {
-                    return cimp.checkIfFolderContainsForeignObjects(uid, fid, session.getContext(), readcon, FolderObject.PRIVATE);
+                    return cimp.checkIfFolderContainsForeignObjects(uid, fid, ctx, readcon, FolderObject.PRIVATE);
                 } else if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PUBLIC) {
-                    return cimp.checkIfFolderContainsForeignObjects(uid, fid, session.getContext(), readcon, FolderObject.PUBLIC);
+                    return cimp.checkIfFolderContainsForeignObjects(uid, fid, ctx, readcon, FolderObject.PUBLIC);
                 } else {
                     throw new OXCalendarException(OXCalendarException.Code.FOLDER_FOREIGN_INVALID_REQUEST);
                 }
@@ -765,7 +770,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             } finally {
                 if (readcon != null) {
                     try {
-                        DBPool.push(session.getContext(), readcon);
+                        DBPool.push(ctx, readcon);
                     } catch (DBPoolingException dbpe) {
                         LOG.error(ERROR_PUSHING_DATABASE, dbpe);
                     }
@@ -779,13 +784,14 @@ public class CalendarSql implements AppointmentSQLInterface {
     public boolean isFolderEmpty(int uid, int fid) throws OXException, SQLException {
         if (session != null) {
             Connection readcon = null;
+            final Context ctx = Tools.getContext(session);
             try {
-                readcon = DBPool.pickup(session.getContext());
-                OXFolderAccess ofa = new OXFolderAccess(readcon, session.getContext());
+                readcon = DBPool.pickup(ctx);
+                OXFolderAccess ofa = new OXFolderAccess(readcon, ctx);
                 if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PRIVATE) {
-                    return cimp.checkIfFolderIsEmpty(uid, fid, session.getContext(), readcon, FolderObject.PRIVATE);
+                    return cimp.checkIfFolderIsEmpty(uid, fid, ctx, readcon, FolderObject.PRIVATE);
                 } else if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PUBLIC) { 
-                    return cimp.checkIfFolderIsEmpty(uid, fid, session.getContext(), readcon, FolderObject.PUBLIC);
+                    return cimp.checkIfFolderIsEmpty(uid, fid, ctx, readcon, FolderObject.PUBLIC);
                 } else {
                     throw new OXCalendarException(OXCalendarException.Code.FOLDER_IS_EMPTY_INVALID_REQUEST);
                 }
@@ -802,7 +808,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             } finally {
                 if (readcon != null) {
                     try {
-                        DBPool.push(session.getContext(), readcon);
+                        DBPool.push(ctx, readcon);
                     } catch (DBPoolingException dbpe) {
                         LOG.error(ERROR_PUSHING_DATABASE, dbpe);
                     }
@@ -816,6 +822,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     
     public void setUserConfirmation(int oid, int uid, int confirm, String confirm_message) throws OXException {
         if (session != null) {
+            final Context ctx = Tools.getContext(session);
         	if (confirm_message != null) {
         		String error = null;
         		error = Check.containsInvalidChars(confirm_message);
@@ -823,7 +830,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         			throw new OXCalendarException(OXCalendarException.Code.INVALID_CHARACTER, "Confirm Message", error);
         		}
         	}
-            cimp.setUserConfirmation(oid, uid, confirm, confirm_message, session);
+            cimp.setUserConfirmation(oid, uid, confirm, confirm_message, session, ctx);
         } else {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
@@ -836,16 +843,17 @@ public class CalendarSql implements AppointmentSQLInterface {
                 PreparedStatement prep = null;
                 ResultSet rs = null;
                 boolean close_connection = true;
+                final Context ctx = Tools.getContext(session);
                 try {
-                    readcon = DBPool.pickup(session.getContext());
+                    readcon = DBPool.pickup(ctx);
                     cols = CalendarCommonCollection.checkAndAlterCols(cols);
                     CalendarOperation co = new CalendarOperation();
-                    prep = cimp.getPreparedStatement(readcon, cimp.getObjectsByidSQL(oids, session.getContext().getContextId(), StringCollection.getSelect(cols, DATES_TABLE_NAME)));
+                    prep = cimp.getPreparedStatement(readcon, cimp.getObjectsByidSQL(oids, session.getContextId(), StringCollection.getSelect(cols, DATES_TABLE_NAME)));
                     rs = cimp.getResultSet(prep);
                     co.setOIDS(true, oids);
-                    co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session);
+                    co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
                     close_connection = false;
-                    return new CachedCalendarIterator(co, session.getContext(), session.getUserId(), oids);
+                    return new CachedCalendarIterator(co, ctx, session.getUserId(), oids);
                 } catch(SQLException sqle) {
                     throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
                 } catch(DBPoolingException dbpe) {
@@ -863,7 +871,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                         CalendarCommonCollection.closeResultSet(rs);
                         CalendarCommonCollection.closePreparedStatement(prep);
                         try {
-                            DBPool.push(session.getContext(), readcon);
+                            DBPool.push(ctx, readcon);
                         } catch (DBPoolingException dbpe) {
                             LOG.error(ERROR_PUSHING_DATABASE ,dbpe);
                         }
@@ -887,6 +895,9 @@ public class CalendarSql implements AppointmentSQLInterface {
             PreparedStatement prep = null;
             ResultSet rs = null;
             boolean close_connection = true;
+            final Context ctx = Tools.getContext(session);
+            final User user = Tools.getUser(session, ctx);
+            final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
             try {
                 CalendarOperation co = new CalendarOperation();
                 if (searchobject.getFolder() > 0) {
@@ -899,18 +910,18 @@ public class CalendarSql implements AppointmentSQLInterface {
                 cols = CalendarCommonCollection.checkAndAlterCols(cols);
                 CalendarFolderObject cfo = null;
                 try {
-                    cfo = CalendarCommonCollection.getVisibleAndReadableFolderObject(session.getUserId(), getUser().getGroups(), session.getContext(), getUserConfiguration(), readcon);
+                    cfo = CalendarCommonCollection.getVisibleAndReadableFolderObject(session.getUserId(), user.getGroups(), ctx, userConfig, readcon);
                 } catch (DBPoolingException dbpe) {
                     throw new OXException(dbpe);
                 } catch (SearchIteratorException sie) {
                     throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, sie, 1);
                 }
-                readcon = DBPool.pickup(session.getContext());
-                prep = cimp.getSearchQuery(StringCollection.getSelect(cols, DATES_TABLE_NAME), session.getUserId(), getUser().getGroups(), getUserConfiguration(), orderBy, orderDir, searchobject, session.getContext(), readcon, cfo);
+                readcon = DBPool.pickup(ctx);
+                prep = cimp.getSearchQuery(StringCollection.getSelect(cols, DATES_TABLE_NAME), session.getUserId(), user.getGroups(), userConfig, orderBy, orderDir, searchobject, ctx, readcon, cfo);
                 rs = cimp.getResultSet(prep);
-                co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session);
+                co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
                 close_connection = false;
-                return new CachedCalendarIterator(co, session.getContext(), session.getUserId());
+                return new CachedCalendarIterator(co, ctx, session.getUserId());
             } catch(SQLException sqle) {
                 throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
             } catch(DBPoolingException dbpe) {
@@ -930,7 +941,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 }
                 if (readcon != null && close_connection) {
                     try {
-                        DBPool.push(session.getContext(), readcon);
+                        DBPool.push(ctx, readcon);
                     } catch (DBPoolingException dbpe) {
                         LOG.error(ERROR_PUSHING_DATABASE ,dbpe);
                     }
@@ -962,23 +973,25 @@ public class CalendarSql implements AppointmentSQLInterface {
             PreparedStatement prep = null;
             ResultSet rs = null;
             boolean close_connection = true;
+            final Context ctx = Tools.getContext(session);
+            final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
             try {
-                if (!getUserConfiguration().hasFreeBusy()) {
+                if (!userConfig.hasFreeBusy()) {
                     return new CalendarOperation();
                 }
-                readcon = DBPool.pickup(session.getContext());
+                readcon = DBPool.pickup(ctx);
                 switch(type) {
                     case Participant.USER:
-                        prep = cimp.getFreeBusy(uid, session.getContext(), start, end, readcon);
+                        prep = cimp.getFreeBusy(uid, ctx, start, end, readcon);
                         break;
                     case Participant.RESOURCE:
-                        prep = cimp.getResourceFreeBusy(uid, session.getContext(), start, end, readcon);
+                        prep = cimp.getResourceFreeBusy(uid, ctx, start, end, readcon);
                         break;
                     default:
                         throw new OXCalendarException(OXCalendarException.Code.FREE_BUSY_UNSUPPOTED_TYPE, type);
                 }
                 rs = cimp.getResultSet(prep);
-                SearchIterator si = new FreeBusyResults(rs, prep, session.getContext(), readcon, start.getTime(), end.getTime());
+                SearchIterator si = new FreeBusyResults(rs, prep, ctx, readcon, start.getTime(), end.getTime());
                 close_connection = false;
                 return si;
             } catch(SQLException sqle) {
@@ -1000,7 +1013,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 }
                 if (readcon != null && close_connection) {
                     try {
-                        DBPool.push(session.getContext(), readcon);
+                        DBPool.push(ctx, readcon);
                     } catch (DBPoolingException dbpe) {
                         LOG.error(ERROR_PUSHING_DATABASE ,dbpe);
                     }
@@ -1016,15 +1029,16 @@ public class CalendarSql implements AppointmentSQLInterface {
             Connection readcon = null;
             PreparedStatement prep = null;
             boolean close_connection = true;
+            final Context ctx = Tools.getContext(session);
             try {
-                readcon = DBPool.pickup(session.getContext());
+                readcon = DBPool.pickup(ctx);
                 cols = CalendarCommonCollection.checkAndAlterCols(cols);
                 CalendarOperation co = new CalendarOperation();
-                prep = cimp.getActiveAppointments(session.getContext(), session.getUserId(), start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), readcon);
+                prep = cimp.getActiveAppointments(ctx, session.getUserId(), start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), readcon);
                 ResultSet rs = cimp.getResultSet(prep);
-                co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session);
+                co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
                 close_connection = false;
-                return new CachedCalendarIterator(co, session.getContext(), session.getUserId());
+                return new CachedCalendarIterator(co, ctx, session.getUserId());
             } catch(SQLException sqle) {
                 throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
             } catch(DBPoolingException dbpe) {
@@ -1040,7 +1054,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             } finally {
                 if (readcon != null && close_connection) {
                     try {
-                        DBPool.push(session.getContext(), readcon);
+                        DBPool.push(ctx, readcon);
                     } catch (DBPoolingException dbpe) {
                         LOG.error(ERROR_PUSHING_DATABASE ,dbpe);
                     }
@@ -1057,15 +1071,18 @@ public class CalendarSql implements AppointmentSQLInterface {
             PreparedStatement prep = null;
             ResultSet rs = null;
             boolean close_connection = true;
+            final Context ctx = Tools.getContext(session);
+            final User user = Tools.getUser(session, ctx);
+            final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
             try {
-                readcon = DBPool.pickup(session.getContext());
+                readcon = DBPool.pickup(ctx);
                 cols = CalendarCommonCollection.checkAndAlterCols(cols);
                 CalendarOperation co = new CalendarOperation();
-                prep = cimp.getAllAppointmentsForUser(session.getContext(), session.getUserId(), getUser().getGroups(), getUserConfiguration(), start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), readcon, since, orderBy, orderDir);
+                prep = cimp.getAllAppointmentsForUser(ctx, session.getUserId(), user.getGroups(), userConfig, start, end, StringCollection.getSelect(cols, DATES_TABLE_NAME), readcon, since, orderBy, orderDir);
                 rs = cimp.getResultSet(prep);
-                co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session);
+                co.setResultSet(rs, prep, cols, cimp, readcon, 0, 0, session, ctx);
                 close_connection = false;
-                return new CachedCalendarIterator(co, session.getContext(), session.getUserId());
+                return new CachedCalendarIterator(co, ctx, session.getUserId());
             } catch(OXPermissionException oxpe) {
                 throw oxpe;
             } catch(SQLException sqle) {
@@ -1085,7 +1102,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 }
                 if (readcon != null && close_connection) {
                     try {
-                        DBPool.push(session.getContext(), readcon);
+                        DBPool.push(ctx, readcon);
                     } catch (DBPoolingException dbpe) {
                         LOG.error(ERROR_PUSHING_DATABASE ,dbpe);
                     }

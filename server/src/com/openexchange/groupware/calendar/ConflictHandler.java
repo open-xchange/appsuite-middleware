@@ -60,8 +60,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
@@ -79,7 +79,6 @@ public class ConflictHandler {
     private Session so;
     private boolean action = true;
     private int current_results;
-    private User u;
     
     private Date rs;
     private Date re;
@@ -96,15 +95,9 @@ public class ConflictHandler {
         this.action = action;
     }
     
-    private final User getUser() {
-    	if (null == u) {
-    		u = UserStorage.getStorageUser(so.getUserId(), so.getContext());
-    	}
-    	return u;
-    }
-    
     public CalendarDataObject[] getConflicts() throws OXException {
-        if (cdao.getShownAs() == CalendarDataObject.FREE || !UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()).hasConflictHandling()) {
+        final Context ctx = Tools.getContext(so);
+        if (cdao.getShownAs() == CalendarDataObject.FREE || !UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx).hasConflictHandling()) {
             return NO_CONFLICTS; // According to bug #5267 and modularisation concept
         } else if (!action && !cdao.containsStartDate() && !cdao.containsEndDate() && !cdao.containsParticipants() && !cdao.containsRecurrenceType()) {
             if (LOG.isDebugEnabled()) {
@@ -184,17 +177,19 @@ public class ConflictHandler {
         PreparedStatement prep = null;
         PreparedStatement private_folder_information = null;
         boolean close_connection = true;
+        final Context ctx = Tools.getContext(so);
+        final User user = Tools.getUser(so, ctx);
         try {
-            readcon = DBPool.pickup(so.getContext());            
-            long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, getUser().getTimeZone());
-            long whole_day_end = CalendarCommonCollection.getUserTimeUTCDate(end, getUser().getTimeZone());
+            readcon = DBPool.pickup(ctx);            
+            long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, user.getTimeZone());
+            long whole_day_end = CalendarCommonCollection.getUserTimeUTCDate(end, user.getTimeZone());
             if (whole_day_end <= whole_day_start) {
                 whole_day_end = whole_day_start+CalendarRecurringCollection.MILLI_DAY;
             }
-            prep = calendarsqlimp.getConflicts(so.getContext(), start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in, true);
-            private_folder_information = calendarsqlimp.getConflicts(so.getContext(), start, end, null, null, readcon, sql_in, false);
+            prep = calendarsqlimp.getConflicts(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in, true);
+            private_folder_information = calendarsqlimp.getConflicts(ctx, start, end, null, null, readcon, sql_in, false);
             rs = calendarsqlimp.getResultSet(prep);
-            si = new FreeBusyResults(rs, prep, so.getContext(), getUser().getId(), getUser().getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()), readcon, true, cdao.getUsers(), private_folder_information);
+            si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx), readcon, true, cdao.getUsers(), private_folder_information);
             ArrayList<CalendarDataObject> li = null;
             while (si.hasNext()) {
                 final CalendarDataObject conflict_dao = (CalendarDataObject) si.next();
@@ -248,7 +243,7 @@ public class ConflictHandler {
             }
             if (close_connection && readcon != null) {
                 try {
-                    DBPool.push(so.getContext(), readcon);
+                    DBPool.push(ctx, readcon);
                 } catch (final DBPoolingException dbpe) {
                     LOG.error("error pushing readable connection" ,dbpe);
                 }
@@ -268,17 +263,19 @@ public class ConflictHandler {
         PreparedStatement prep  = null;
         PreparedStatement private_folder_information = null;
         boolean close_connection = true;
+        final Context ctx = Tools.getContext(so);
+        final User user = Tools.getUser(so, ctx);
         try {
-            readcon = DBPool.pickup(so.getContext());
-            long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, getUser().getTimeZone());
-            long whole_day_end = CalendarCommonCollection.getUserTimeUTCDate(end, getUser().getTimeZone());
+            readcon = DBPool.pickup(ctx);
+            long whole_day_start = CalendarCommonCollection.getUserTimeUTCDate(start, user.getTimeZone());
+            long whole_day_end = CalendarCommonCollection.getUserTimeUTCDate(end, user.getTimeZone());
             if (whole_day_end <= whole_day_start) {
                 whole_day_end = whole_day_start+CalendarRecurringCollection.MILLI_DAY;
             }
-            prep = calendarsqlimp.getResourceConflicts(so.getContext(), start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
-            private_folder_information = calendarsqlimp.getResourceConflictsPrivateFolderInformation(so.getContext(), start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
+            prep = calendarsqlimp.getResourceConflicts(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
+            private_folder_information = calendarsqlimp.getResourceConflictsPrivateFolderInformation(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in);
             rs = calendarsqlimp.getResultSet(prep);
-            si = new FreeBusyResults(rs, prep, so.getContext(), getUser().getId(), getUser().getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), so.getContext()), readcon, true, cdao.getParticipants(), private_folder_information);
+            si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx), readcon, true, cdao.getParticipants(), private_folder_information);
             ArrayList<CalendarDataObject> li = null;
             while (si.hasNext()) {
                 final CalendarDataObject conflict_dao = (CalendarDataObject)si.next();
@@ -342,7 +339,7 @@ public class ConflictHandler {
             }
             if (close_connection && readcon != null) {
                 try {
-                    DBPool.push(so.getContext(), readcon);
+                    DBPool.push(ctx, readcon);
                 } catch (final DBPoolingException dbpe) {
                     LOG.error("error pushing readable connection" ,dbpe);
                 }
