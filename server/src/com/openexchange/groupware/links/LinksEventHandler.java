@@ -66,6 +66,9 @@ import com.openexchange.event.TaskEvent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.impl.DBPool;
@@ -141,12 +144,19 @@ public class LinksEventHandler  implements AppointmentEvent, TaskEvent, ContactE
 		Connection writecon = null;
 		Statement del = null;
 		
+		Context ct = null;
+		try {
+			ct = ContextStorage.getStorageContext(so.getContextId());
+		} catch (ContextException e) {
+			//
+		}
+		
 		try{
-			writecon = DBPool.pickupWriteable(so.getContext());
+			writecon = DBPool.pickupWriteable(ct);
 			writecon.setAutoCommit(false);	
 			
 			del = writecon.createStatement();
-			del.execute("DELETE from prg_links WHERE (firstid = "+id+" AND firstmodule = "+type+" AND firstfolder = "+fid+") OR (secondid = "+id+" AND secondmodule = "+type+" AND secondfolder = "+fid+") AND cid = "+so.getContext().getContextId());
+			del.execute("DELETE from prg_links WHERE (firstid = "+id+" AND firstmodule = "+type+" AND firstfolder = "+fid+") OR (secondid = "+id+" AND secondmodule = "+type+" AND secondfolder = "+fid+") AND cid = "+so.getContextId());
 			
 			writecon.commit();
 		} catch (Exception se) {
@@ -155,7 +165,7 @@ public class LinksEventHandler  implements AppointmentEvent, TaskEvent, ContactE
 			} catch (SQLException see){
 				LOG.error("Uable to rollback Link Delete", see);
 			}
-			LOG.error("ERROR: Unable to Delete Links from Object! cid="+so.getContext().getContextId()+" oid="+id+" fid="+fid,se);
+			LOG.error("ERROR: Unable to Delete Links from Object! cid="+so.getContextId()+" oid="+id+" fid="+fid,se);
 		} finally {
 			try{
 				del.close();
@@ -168,7 +178,7 @@ public class LinksEventHandler  implements AppointmentEvent, TaskEvent, ContactE
 				LOG.error("Uable to close Writeconnection", see);
 			}
 			if (writecon != null) {
-				DBPool.closeWriterSilent(so.getContext(), writecon);
+				DBPool.closeWriterSilent(ct, writecon);
 			}
 		}		
 			
@@ -180,10 +190,17 @@ public class LinksEventHandler  implements AppointmentEvent, TaskEvent, ContactE
 		ResultSet rs = null;
 		boolean updater = false;
 		
+		Context ct = null;
+		try {
+			ct = ContextStorage.getStorageContext(so.getContextId());
+		} catch (ContextException e) {
+			//
+		}
+		
 		try{
-			readcon = DBPool.pickup(so.getContext());
+			readcon = DBPool.pickup(ct);
 			smt = readcon.createStatement();
-			rs = smt.executeQuery("SELECT firstid, firstfolder, secondid, secondfolder FROM prg_links WHERE ((firstid = "+id+" AND firstmodule = "+type+") OR (secondid = "+id+" AND secondmodule = "+type+")) AND cid = "+so.getContext().getContextId()+" LIMIT 1");
+			rs = smt.executeQuery("SELECT firstid, firstfolder, secondid, secondfolder FROM prg_links WHERE ((firstid = "+id+" AND firstmodule = "+type+") OR (secondid = "+id+" AND secondmodule = "+type+")) AND cid = "+so.getContextId()+" LIMIT 1");
 
 			if (rs.next()){
 				int tp = rs.getInt(1);
@@ -197,7 +214,7 @@ public class LinksEventHandler  implements AppointmentEvent, TaskEvent, ContactE
 				}
 			}		
 		} catch (Exception e){
-			LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid="+so.getContext().getContextId()+" uid="+id+" type="+type+" fid="+fid+')', e);
+			LOG.error("UNABLE TO LOAD LINK OBJECT FOR UPDATE (cid="+so.getContextId()+" uid="+id+" type="+type+" fid="+fid+')', e);
 		}  finally {
 			try{
 				if (rs != null) {
@@ -210,7 +227,7 @@ public class LinksEventHandler  implements AppointmentEvent, TaskEvent, ContactE
 				LOG.warn("Unable to close Statement", see);
 			}
 			if (readcon != null) {
-				DBPool.closeReaderSilent(so.getContext(), readcon);
+				DBPool.closeReaderSilent(ct, readcon);
 			}
 		}
 		
@@ -219,12 +236,12 @@ public class LinksEventHandler  implements AppointmentEvent, TaskEvent, ContactE
 		
 		if (updater){
 			try{
-				writecon = DBPool.pickupWriteable(so.getContext());
+				writecon = DBPool.pickupWriteable(ct);
 				writecon.setAutoCommit(false);	
 				
 				upd = writecon.createStatement();
-				upd.execute("UPDATE prg_links SET firstfolder = "+fid+" WHERE firstid = "+id+" AND firstmodule = "+type+" AND cid = "+so.getContext().getContextId());
-				upd.execute("UPDATE prg_links SET secondfolder = "+fid+" WHERE secondid = "+id+" AND secondmodule = "+type+" AND cid = "+so.getContext().getContextId());
+				upd.execute("UPDATE prg_links SET firstfolder = "+fid+" WHERE firstid = "+id+" AND firstmodule = "+type+" AND cid = "+so.getContextId());
+				upd.execute("UPDATE prg_links SET secondfolder = "+fid+" WHERE secondid = "+id+" AND secondmodule = "+type+" AND cid = "+so.getContextId());
 				
 				writecon.commit();
 			} catch (Exception se) {
@@ -233,7 +250,7 @@ public class LinksEventHandler  implements AppointmentEvent, TaskEvent, ContactE
 				} catch (SQLException see){
 					LOG.error("Uable to rollback Link Update", see);
 				}
-				LOG.error("ERROR: Unable to Update Links for Object! cid="+so.getContext().getContextId()+" oid="+id+" fid="+fid,se);
+				LOG.error("ERROR: Unable to Update Links for Object! cid="+so.getContextId()+" oid="+id+" fid="+fid,se);
 			} finally {
 				try{
 					upd.close();
@@ -246,7 +263,7 @@ public class LinksEventHandler  implements AppointmentEvent, TaskEvent, ContactE
 					LOG.error("Uable to close Writeconnection", see);
 				}
 				if (writecon != null) {
-					DBPool.closeWriterSilent(so.getContext(), writecon);
+					DBPool.closeWriterSilent(ct, writecon);
 				}
 			}
 		}
