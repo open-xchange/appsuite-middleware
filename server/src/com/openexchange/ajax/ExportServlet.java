@@ -61,6 +61,9 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.SizedInputStream;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * Servlet for doing exports of data like contacts in CSV format.
@@ -93,8 +96,9 @@ public class ExportServlet extends ImportExport {
 			if(format == null){
 				resp.sendError(HttpServletResponse.SC_CONFLICT, "unknown format");
 			}
-			
-			final SizedInputStream inputStream = importerExporter.exportData(getSessionObject(req), format, folder, fieldsToBeExported, req.getParameterMap());
+
+            ServerSession session = new ServerSessionAdapter(getSessionObject(req));
+            final SizedInputStream inputStream = importerExporter.exportData(session, format, folder, fieldsToBeExported, req.getParameterMap());
 			
 			final OutputStream outputStream = resp.getOutputStream();
 			resp.setContentLength((int) inputStream.getSize());
