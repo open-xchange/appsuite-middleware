@@ -50,6 +50,8 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
+import java.io.Writer;
+import java.io.StringWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -62,14 +64,20 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.QuotaRequest;
 import com.openexchange.ajax.request.ServletRequestAdapter;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tools.exceptions.LoggingLogic;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.AbstractOXException;
 
 public class Quota extends SessionServlet {
 
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(Quota.class);
 
-	private static final long serialVersionUID = 6477434510302882905L;
+    private static final transient LoggingLogic LL = LoggingLogic.getLoggingLogic(Quota.class, LOG);
+
+    private static final long serialVersionUID = 6477434510302882905L;
 
 	/*
 	 * (non-Javadoc)
@@ -80,15 +88,24 @@ public class Quota extends SessionServlet {
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse res) throws ServletException,
 			IOException {
-		final Session sessionObj = getSessionObject(req);
 
 		final String action = req.getParameter(PARAMETER_ACTION);
 		if (action == null) {
 			missingParameter(PARAMETER_ACTION, res, false, null);
 			return;
 		}
-		final OXJSONWriter writer = new OXJSONWriter();
-		final QuotaRequest fsReq = new QuotaRequest(sessionObj, writer);
+
+        final ServerSession session;
+        try {
+            session = new ServerSessionAdapter(getSessionObject(req));
+        } catch (ContextException e) {
+            handle(res, e, action, JS_FRAGMENT_POPUP);
+            return;
+        }
+
+
+        final OXJSONWriter writer = new OXJSONWriter();
+		final QuotaRequest fsReq = new QuotaRequest(session, writer);
 		if (!fsReq.action(action, new ServletRequestAdapter(req, res))) {
 			unknownAction("GET", action, res, false);
 			return;
@@ -97,6 +114,25 @@ public class Quota extends SessionServlet {
 			Response.write(new Response((JSONObject) writer.getObject()), res.getWriter());
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
+		}
+	}
+
+
+    private void handle(final HttpServletResponse res, final AbstractOXException t, final String action, final String fragmentOverride) {
+		LL.log(t);
+
+		final Response resp = new Response();
+		resp.setException(t);
+
+
+		try {
+			Writer writer = res.getWriter();
+			Response.write(resp, writer);
+
+		} catch (JSONException e) {
+			LOG.error("",t);
+		} catch (IOException e) {
+			LOG.error("",e);
 		}
 	}
 }

@@ -67,9 +67,11 @@ import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterface;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
+import com.openexchange.session.Session;
 
 /**
  * FIXME replace QuotaFileStorage FileStorage
@@ -82,9 +84,13 @@ public class QuotaRequest extends CommonRequest {
 	
 	private AbstractOXException fsException;
 
-	private final Session session;
+	private final ServerSession session;
 
-	public QuotaRequest(final Session sessionObj, final JSONWriter w) {
+    public QuotaRequest(Session session, Context ctx, JSONWriter w) {
+        this(new ServerSessionAdapter(session,ctx),w);
+    }
+
+    public QuotaRequest(final ServerSession sessionObj, final JSONWriter w) {
 		super(w);
 		try {
 			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());

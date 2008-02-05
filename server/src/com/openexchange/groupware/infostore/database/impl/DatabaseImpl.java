@@ -104,7 +104,7 @@ import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -1524,7 +1524,7 @@ public class DatabaseImpl extends DBService {
 	private static final List<String> tables = Arrays.asList("infostore",
 			"infostore_document");
 
-	public void removeUser(final int id, final Context ctx, final Session session, final EntityLockManager locks) throws OXException {
+	public void removeUser(final int id, final Context ctx, final ServerSession session, final EntityLockManager locks) throws OXException {
 		if(id != ctx.getMailadmin()) {
 			removePrivate(id,ctx,session);
 			assignToAdmin(id,ctx,session);
@@ -1564,7 +1564,7 @@ public class DatabaseImpl extends DBService {
 		}
 	}
 	
-	private void removeAll(final Context ctx, final Session session) throws OXException {
+	private void removeAll(final Context ctx, final ServerSession session) throws OXException {
 		try {
 			
 			final List<DocumentMetadata> documents = new ArrayList<DocumentMetadata>();
@@ -1643,7 +1643,7 @@ public class DatabaseImpl extends DBService {
 	}
 
 
-	private void removePrivate(final int id, final Context ctx, final Session session) throws OXException {
+	private void removePrivate(final int id, final Context ctx, final ServerSession session) throws OXException {
 		try {
 			final List<FolderObject> foldersWithPrivateItems = new DelUserFolderDiscoverer(getProvider()).discoverFolders(id, ctx);
 			if (foldersWithPrivateItems.size() == 0) {
@@ -1739,7 +1739,7 @@ public class DatabaseImpl extends DBService {
 	@OXThrows(category = Category.CODE_ERROR, desc = ERR_SQL_FAULT, exceptionId = 29, msg = MSG_INVALID_SQL_QUERY)
 	
 
-	private void assignToAdmin(final int id, final Context ctx, final Session session) throws OXException {		Connection writeCon = null;
+	private void assignToAdmin(final int id, final Context ctx, final ServerSession session) throws OXException {		Connection writeCon = null;
 		Statement stmt = null;
 		StringBuilder query = null;
 		try {

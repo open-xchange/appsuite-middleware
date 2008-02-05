@@ -54,6 +54,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.infostore.*;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.GetSwitch;
@@ -64,7 +65,8 @@ import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.*;
@@ -118,9 +120,10 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	private final LockHelper lockHelper;
 
 	private boolean metadataChanged;
+    private ServerSession session;
 
-	
-	public DocumentMetadataResource(final WebdavPath url, final InfostoreWebdavFactory factory) {
+
+    public DocumentMetadataResource(final WebdavPath url, final InfostoreWebdavFactory factory) {
 		this.factory = factory;
 		this.url = url;
 		this.sessionHolder = factory.getSessionHolder();
@@ -225,7 +228,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	}
 
 	public InputStream getBody() throws WebdavException {
-		final Session session = sessionHolder.getSessionObject();
+		final ServerSession session = getSession();
 		try {
 			return database.getDocument(id, InfostoreFacade.CURRENT_VERSION, session.getContext(), UserStorage.getStorageUser(
 					session.getUserId(), session.getContext()), UserConfigurationStorage.getInstance()
@@ -259,7 +262,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			} */
 			return null;
 		}
-		return String.format("http://www.open-xchange.com/webdav/etags/%d-%d-%d", Integer.valueOf(sessionHolder.getSessionObject().getContext().getContextId()), Integer.valueOf(metadata.getId()), Integer.valueOf(metadata.getVersion()));
+		return String.format("http://www.open-xchange.com/webdav/etags/%d-%d-%d", Integer.valueOf(getSession().getContext().getContextId()), Integer.valueOf(metadata.getId()), Integer.valueOf(metadata.getVersion()));
 	}
 
 	public String getLanguage() throws WebdavException {
@@ -328,7 +331,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		try {
 			dumpMetadataToDB();
             if(propertyHelper.mustWrite()) {
-                final Session session = sessionHolder.getSessionObject();
+                final ServerSession session = getSession();
                 EffectiveInfostorePermission perm = security.getInfostorePermission(getId(),session.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()),
 					UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
 							session.getContext()));
@@ -507,7 +510,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		loadedMetadata = true;
 		final Set<Metadata> toLoad = new HashSet<Metadata>(Metadata.VALUES);
 		toLoad.removeAll(setMetadata);
-		final Session session = sessionHolder.getSessionObject();
+		final ServerSession session = getSession();
 		
 		try {
 			final DocumentMetadata metadata = database.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session
@@ -560,7 +563,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			}
 		} else {
 			// UPDATE
-			final Session session = sessionHolder.getSessionObject();
+			final ServerSession session = getSession();
 			try {
 				database.startTransaction();
 				loadMetadata();
@@ -611,7 +614,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
             metadata.setFileSize(0);
         }
 
-        final Session session = sessionHolder.getSessionObject();
+        final ServerSession session = getSession();
 		metadata.setFolderId(parent.getId());
 		if(!exists && !existsInDB) {
 			metadata.setVersion(InfostoreFacade.NEW);
@@ -679,8 +682,8 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 			exceptionId=0,
 			msg="Could not delete DocumentMetadata %d. Please try again."
 	)
-	private void deleteMetadata() throws OXException, IllegalAccessException {
-		final Session session = sessionHolder.getSessionObject();
+	private void deleteMetadata() throws OXException, IllegalAccessException, WebdavException {
+		final ServerSession session = getSession();
 	 database.startTransaction();
         try {
             final int[] nd = database.removeDocument(new int[]{id}, Long.MAX_VALUE, session);
@@ -725,4 +728,16 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	public String toString(){
 		return super.toString()+" :"+id;
 	}
+
+    private ServerSession getSession() throws WebdavException {
+        if (session == null) {
+            try {
+                session = new ServerSessionAdapter(sessionHolder.getSessionObject());
+            } catch (ContextException e) {
+                LOG.error(e.getLocalizedMessage(), e);
+                throw new WebdavException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
+        }
+        return session;
+    }
 }

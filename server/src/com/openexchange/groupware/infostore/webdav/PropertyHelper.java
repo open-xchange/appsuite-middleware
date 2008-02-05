@@ -50,11 +50,14 @@
 package com.openexchange.groupware.infostore.webdav;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavException;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.infostore.InfostoreException;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
@@ -137,8 +140,8 @@ public class PropertyHelper {
 		if(loadedAllProps) {
 			return;
 		}
-		final Session session = sessionHolder.getSessionObject();
 		try {
+            final ServerSession session = getSession();
 			final List<WebdavProperty> list = propertyStore.loadProperties(id, Arrays.asList(new WebdavProperty(namespace,name)), session.getContext());
 			if(list.isEmpty()) {
 				return;
@@ -156,9 +159,9 @@ public class PropertyHelper {
 			return;
 		}
 		loadedAllProps = true;
-		final Session session = sessionHolder.getSessionObject();
 		try {
-			final List<WebdavProperty> list = propertyStore.loadAllProperties(id, session.getContext());
+            final ServerSession session = getSession();
+		    final List<WebdavProperty> list = propertyStore.loadAllProperties(id, session.getContext());
 			for(final WebdavProperty prop : list) {
 				properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 			}
@@ -172,7 +175,7 @@ public class PropertyHelper {
 			return;
 		}
 		changed = false;
-		final Session session = sessionHolder.getSessionObject();
+		final ServerSession session = getSession();
 		propertyStore.saveProperties(id, new ArrayList<WebdavProperty>(changedProps), session.getContext());
 		changedProps.clear();
 		propertyStore.removeProperties(id, new ArrayList<WebdavProperty>(removedProperties), session.getContext());
@@ -180,8 +183,16 @@ public class PropertyHelper {
 	}
 	
 	public void deleteProperties() throws OXException {
-		final Session session = sessionHolder.getSessionObject();
+		final ServerSession session = getSession();
 		propertyStore.removeAll(id, session.getContext());
 	}
+
+    private ServerSession getSession() throws OXException {
+        try {
+            return new ServerSessionAdapter(sessionHolder.getSessionObject());
+        } catch (ContextException e) {
+            throw new InfostoreException(e);
+        }
+    }
 	
 }

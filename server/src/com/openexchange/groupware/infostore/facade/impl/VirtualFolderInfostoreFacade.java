@@ -69,7 +69,7 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.results.TimedResultImpl;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 @OXExceptionSource(
@@ -162,53 +162,53 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 		return true;
 	}
 
-	public void lock(final int id, final long diff, final Session sessionObj)
+	public void lock(final int id, final long diff, final ServerSession sessionObj)
 			throws OXException {
 		virtualFolder();
 	}
 
 	public void removeDocument(final long folderId, final long date,
-			final Session sessionObj) throws OXException {
+			final ServerSession sessionObj) throws OXException {
 		virtualFolder();
 	}
 
-	public int[] removeDocument(final int[] id, final long date, final Session sessionObj)
+	public int[] removeDocument(final int[] id, final long date, final ServerSession sessionObj)
 			throws OXException {
 		return id;
 	}
 
-	public void removeUser(final int id, final Context context, final Session session) throws OXException {
+	public void removeUser(final int id, final Context context, final ServerSession session) throws OXException {
 		
 	}
 
-	public int[] removeVersion(final int id, final int[] versionId, final Session sessionObj)
+	public int[] removeVersion(final int id, final int[] versionId, final ServerSession sessionObj)
 			throws OXException {
 		return versionId;
 	}
 
 	public void saveDocument(final DocumentMetadata document, final InputStream data,
-			final long sequenceNumber, final Session sessionObj) throws OXException {
+			final long sequenceNumber, final ServerSession sessionObj) throws OXException {
 		virtualFolder();
 	}
 
 	public void saveDocument(final DocumentMetadata document, final InputStream data,
 			final long sequenceNumber, final Metadata[] modifiedColumns,
-			final Session sessionObj) throws OXException {
+			final ServerSession sessionObj) throws OXException {
 		virtualFolder();
 	}
 
 	public void saveDocumentMetadata(final DocumentMetadata document,
-			final long sequenceNumber, final Session sessionObj) throws OXException {
+			final long sequenceNumber, final ServerSession sessionObj) throws OXException {
 		virtualFolder();
 	}
 
 	public void saveDocumentMetadata(final DocumentMetadata document,
 			final long sequenceNumber, final Metadata[] modifiedColumns,
-			final Session sessionObj) throws OXException {
+			final ServerSession sessionObj) throws OXException {
 		virtualFolder();
 	}
 	
-	public void unlock(final int id, final Session sessionObj) throws OXException {
+	public void unlock(final int id, final ServerSession sessionObj) throws OXException {
 		
 	}
 

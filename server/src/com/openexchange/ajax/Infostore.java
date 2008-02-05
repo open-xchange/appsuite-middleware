@@ -78,6 +78,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.SearchEngine;
@@ -102,11 +103,13 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.session.Session;
 
 public class Infostore extends PermissionServlet {
 
@@ -146,17 +149,29 @@ public class Infostore extends PermissionServlet {
 	// TODO: Better error handling
 
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj) {
-		return InfostoreRequest.hasPermission(UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
+	protected boolean hasModulePermission(final Session session) {
+        try {
+            ServerSession sessionObj = new ServerSessionAdapter(session);
+            return InfostoreRequest.hasPermission(UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
+        } catch (ContextException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+            return false;
+        }
 	}
 
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse res) throws ServletException,
 			IOException {
 
-		final Session sessionObj = getSessionObject(req);
+        final ServerSession sessionObj;
+        try {
+            sessionObj = new ServerSessionAdapter(getSessionObject(req));
+        } catch (ContextException e) {
+            handleOXException(res, e, STR_ERROR, true, JS_FRAGMENT);
+            return;
+        }
 
-		final Context ctx = sessionObj.getContext();
+        final Context ctx = sessionObj.getContext();
 		final User user = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
 		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
 
@@ -215,7 +230,13 @@ public class Infostore extends PermissionServlet {
 	@Override
 	protected void doPut(final HttpServletRequest req, final HttpServletResponse res) throws ServletException,
 			IOException {
-		final Session sessionObj = getSessionObject(req);
+		final ServerSession sessionObj;
+        try {
+            sessionObj = new ServerSessionAdapter(getSessionObject(req));
+        } catch (ContextException e) {
+            handleOXException(res, e, STR_ERROR, true, JS_FRAGMENT);
+            return;
+        }
 
 		final String action = req.getParameter(PARAMETER_ACTION);
 		if (action == null) {
@@ -245,7 +266,13 @@ public class Infostore extends PermissionServlet {
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse res) throws ServletException,
 			IOException {
 
-		final Session sessionObj = getSessionObject(req);
+		final ServerSession sessionObj;
+        try {
+            sessionObj = new ServerSessionAdapter(getSessionObject(req));
+        } catch (ContextException e) {
+            handleOXException(res, e, STR_ERROR, true, JS_FRAGMENT);
+            return;
+        }
 
 		final Context ctx = sessionObj.getContext();
 		final User user = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
@@ -349,7 +376,7 @@ public class Infostore extends PermissionServlet {
 	// Handlers
 	protected void newDocument(final DocumentMetadata newDocument, final HttpServletResponse res,
 			final UploadFile upload, final Context ctx, final User user, final UserConfiguration userConfig,
-			final Session sessionObj) {
+			final ServerSession sessionObj) {
 		// System.out.println("------> "+newDocument.getFolderId());
 		res.setContentType(MIME_TEXT_HTML);
 
@@ -415,7 +442,7 @@ public class Infostore extends PermissionServlet {
 
 	protected void update(final HttpServletResponse res, final int id, DocumentMetadata updated, final long timestamp,
 			final Metadata[] presentFields, final UploadFile upload, final Context ctx, final User user,
-			final UserConfiguration userConfig, final Session sessionObj) {
+			final UserConfiguration userConfig, final ServerSession sessionObj) {
 
 		boolean version = false;
 		for (Metadata m : presentFields) {
@@ -476,7 +503,7 @@ public class Infostore extends PermissionServlet {
 
 	protected void copy(final HttpServletResponse res, final int id, final DocumentMetadata updated,
 			final long timestamp, final Metadata[] presentFields, final UploadFile upload, final Context ctx,
-			final User user, final UserConfiguration userConfig, final Session sessionObj) {
+			final User user, final UserConfiguration userConfig, final ServerSession sessionObj) {
 
 		res.setContentType(MIME_TEXT_HTML);
 

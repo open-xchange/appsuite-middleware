@@ -58,6 +58,7 @@ import com.openexchange.event.ContactEvent;
 import com.openexchange.event.TaskEvent;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
@@ -65,10 +66,12 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.session.Session;
 
 public class AttachmentCleaner implements AppointmentEvent, TaskEvent,
 		ContactEvent {
@@ -127,10 +130,11 @@ public class AttachmentCleaner implements AppointmentEvent, TaskEvent,
 
 	}
 	
-	private final void deleteAttachments(final int parentFolderID, final int objectID, final int type, final Session sessionObj) {
+	private final void deleteAttachments(final int parentFolderID, final int objectID, final int type, final Session session) {
 		SearchIterator iter = null;
 		try {
-			ATTACHMENT_BASE.startTransaction();
+            ServerSession sessionObj = new ServerSessionAdapter(session);
+            ATTACHMENT_BASE.startTransaction();
 			final TimedResult rs = ATTACHMENT_BASE.getAttachments(parentFolderID,objectID,type,new AttachmentField[]{AttachmentField.ID_LITERAL},AttachmentField.ID_LITERAL,AttachmentBase.ASC,sessionObj.getContext(), null, null);
 			final List<Integer> ids = new ArrayList<Integer>();
 			iter = rs.results();
@@ -156,7 +160,9 @@ public class AttachmentCleaner implements AppointmentEvent, TaskEvent,
 			rollback(e);
 		} catch (SearchIteratorException e) {
 			rollback(e);
-		} finally {
+		} catch (ContextException e) {
+            LL.log(e);
+        } finally {
 			if(iter != null) {
 				try {
 					iter.close();

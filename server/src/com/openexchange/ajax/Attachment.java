@@ -77,6 +77,7 @@ import com.openexchange.ajax.exceptions.InfostoreException2Message;
 import com.openexchange.ajax.parser.AttachmentParser;
 import com.openexchange.ajax.request.AttachmentRequest;
 import com.openexchange.ajax.request.ServletRequestAdapter;
+import com.openexchange.ajax.request.InfostoreRequest;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -85,6 +86,7 @@ import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.TransactionException;
@@ -97,11 +99,13 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.exceptions.LoggingLogic;
+import com.openexchange.session.Session;
 
 /**
  * Attachment
@@ -141,22 +145,35 @@ public class Attachment extends PermissionServlet {
     private long maxUploadSize = -2;
 	
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj) {
-		return AttachmentRequest.hasPermission(UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-				sessionObj.getUserId(), sessionObj.getContext()));
+	protected boolean hasModulePermission(final Session session) {
+        try {
+            ServerSession sessionObj = new ServerSessionAdapter(session);
+            return AttachmentRequest.hasPermission(UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
+        } catch (ContextException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+            return false;
+        }
 	}
 	
 	
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse res)
 	throws ServletException, IOException {
-		final Session session = getSessionObject(req);
-		
 		final String action = req.getParameter(PARAMETER_ACTION);
 		if(action == null) {
 			missingParameter(PARAMETER_ACTION,res, false, null);
 			return ;
 		}
+
+        final ServerSession session;
+        try {
+            session = new ServerSessionAdapter(getSessionObject(req));
+        } catch (ContextException e) {
+            handle(res, e, action, JS_FRAGMENT_POPUP);
+            return;
+        }
+		
+
 		
 		final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
 		final Context ctx = session.getContext();
@@ -202,13 +219,23 @@ public class Attachment extends PermissionServlet {
 	@Override
 	protected void doPut(final HttpServletRequest req, final HttpServletResponse res)
 	throws ServletException, IOException {
-		final Session session = getSessionObject(req);
-		
-		final String action = req.getParameter(PARAMETER_ACTION);
+
+
+        final String action = req.getParameter(PARAMETER_ACTION);
 		if(action == null) {
 			missingParameter(PARAMETER_ACTION,res, false, null);
 			return ;
 		}
+
+        final ServerSession session;
+        try {
+            session = new ServerSessionAdapter(getSessionObject(req));
+        } catch (ContextException e) {
+            handle(res, e, action, JS_FRAGMENT_POPUP);
+            return;
+        }
+        
+
 		final OXJSONWriter writer = new OXJSONWriter();
 		final AttachmentRequest attRequest = new AttachmentRequest(session,writer);
 		if(!attRequest.action(action,new ServletRequestAdapter(req,res))){
@@ -227,15 +254,23 @@ public class Attachment extends PermissionServlet {
 		
 		res.setContentType(MIME_TEXT_HTML);
 		
-		final Session session = getSessionObject(req);
 		
 		final String action = req.getParameter(PARAMETER_ACTION);
 		if(action == null) {
 			missingParameter(PARAMETER_ACTION,res, true, "attach");
 			return ;
 		}
-		
-		final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
+
+        final ServerSession session;
+        try {
+            session = new ServerSessionAdapter(getSessionObject(req));
+        } catch (ContextException e) {
+            handle(res, e, action, JS_FRAGMENT_POPUP);
+            return;
+        }
+
+
+        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
 		final Context ctx = session.getContext();
 		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
 				session.getUserId(), session.getContext());

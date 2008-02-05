@@ -78,6 +78,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.i18n.Notifications;
 import com.openexchange.groupware.ldap.Group;
 import com.openexchange.groupware.ldap.GroupStorage;
@@ -97,8 +98,10 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.exceptions.LoggingLogic;
+import com.openexchange.session.Session;
 
 public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	
@@ -113,7 +116,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	public ParticipantNotify() {
 	}
 
-	protected void sendMessage(final String messageTitle, final String message, final List<String> name, final Session session, final CalendarObject obj, int folderId, final State state, final boolean suppressOXReminderHeader) {
+	protected void sendMessage(final String messageTitle, final String message, final List<String> name, final ServerSession session, final CalendarObject obj, int folderId, final State state, final boolean suppressOXReminderHeader) {
 		if(LOG.isDebugEnabled()) {
 			LOG.debug("Sending message to: "+name);
 			LOG.debug("=====["+messageTitle+"]====\n\n");
@@ -211,14 +214,25 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		sendNotification(taskObj, sessionObj, Notifications.TASK_DELETE_MAIL,Notifications.TASK_DELETE_TITLE, new TaskState(),NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true);
 	}
 	
-	private void sendNotification(final CalendarObject obj, final Session sessionObj, final String msgKey, final String titleKey, final State state, final boolean forceNotifyOthers, final boolean suppressOXReminderHeader) {
-		if(!obj.getNotification() && obj.getCreatedBy() == sessionObj.getUserId() && !forceNotifyOthers) {
+	private void sendNotification(final CalendarObject obj, final Session session, final String msgKey, final String titleKey, final State state, final boolean forceNotifyOthers, final boolean suppressOXReminderHeader) {
+
+
+        final ServerSession sessionObj;
+        try {
+            sessionObj = new ServerSessionAdapter(session);
+        } catch (ContextException e) {
+            LOG.error(e.getLocalizedMessage(),e);
+            return;
+        }
+
+        if(!obj.getNotification() && obj.getCreatedBy() == sessionObj.getUserId() && !forceNotifyOthers) {
 			return;
 		}
 		if(obj.getParticipants() == null) {
 			return;
 		}
-		final SortedSet<String> participantSet = new TreeSet<String>();
+
+        final SortedSet<String> participantSet = new TreeSet<String>();
 		final SortedSet<String> resourceSet = new TreeSet<String>();
 		
 		final Map<Locale,List<EmailableParticipant>> receivers = new HashMap<Locale, List<EmailableParticipant>>();
@@ -339,7 +353,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		return retval;
     }
 	
-	private void sortExternalParticipantsAndResources(final Participant[] participants, final Set<String> participantSet, final Set<String> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final Session sessionObj,final Map<String,EmailableParticipant> all) {
+	private void sortExternalParticipantsAndResources(final Participant[] participants, final Set<String> participantSet, final Set<String> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession sessionObj,final Map<String,EmailableParticipant> all) {
 		if(participants == null) {
 			return ;
 		}
@@ -374,7 +388,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		}
 	}
 	
-	private void sortParticipants(final Participant[] participants, final Set<String> participantSet, final Set<String> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final Session sessionObj, final Map<String,EmailableParticipant> all) {
+	private void sortParticipants(final Participant[] participants, final Set<String> participantSet, final Set<String> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession sessionObj, final Map<String,EmailableParticipant> all) {
 		if(participants == null) {
 			return ;
 		}
@@ -542,7 +556,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		return null;
 	}
 
-	private void sortUserParticipants(final UserParticipant[] participants, final Set<String> participantSet, final Map<Locale, List<EmailableParticipant>> receivers, final Session sessionObj, final Map<String,EmailableParticipant> all) {
+	private void sortUserParticipants(final UserParticipant[] participants, final Set<String> participantSet, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession sessionObj, final Map<String,EmailableParticipant> all) {
 		if(participants == null) {
 			return ;
 		}
@@ -555,7 +569,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		}
 	}
 
-	private void addSingleParticipant(final EmailableParticipant participant, final Set<String> participantSet, final Session sessionObj, final Map<Locale,List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final boolean /* HACK */ resource) {
+	private void addSingleParticipant(final EmailableParticipant participant, final Set<String> participantSet, final ServerSession sessionObj, final Map<Locale,List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final boolean /* HACK */ resource) {
 		
 		boolean onlyAddToLocaleList = false;
 		

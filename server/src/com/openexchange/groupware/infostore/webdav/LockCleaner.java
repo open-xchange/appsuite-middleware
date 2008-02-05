@@ -59,6 +59,9 @@ import com.openexchange.groupware.impl.FolderLockManager;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.session.Session;
 
 public class LockCleaner implements FolderEvent, InfostoreEvent {
@@ -74,22 +77,28 @@ public class LockCleaner implements FolderEvent, InfostoreEvent {
 	}
 
 	
-	public void folderDeleted(FolderObject folderObj, Session sessionObj) {
+	public void folderDeleted(FolderObject folderObj, Session session) {
 		try {
-			folderLockManager.removeAll(folderObj.getObjectID(), sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
+            ServerSession sessionObj = new ServerSessionAdapter(session);
+            folderLockManager.removeAll(folderObj.getObjectID(), sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 		} catch (OXException e) {
-			LOG.fatal("Couldn't remove folder locks from folder "+folderObj.getObjectID()+" in context "+sessionObj.getContext().getContextId()+". Run the consistency tool.");
+			LOG.fatal("Couldn't remove folder locks from folder "+folderObj.getObjectID()+" in context "+session.getContextId()+". Run the consistency tool.");
+		} catch (ContextException e) {
+            LOG.fatal("Couldn't remove folder locks from folder "+folderObj.getObjectID()+" in context "+session.getContextId()+". Run the consistency tool.");
 		}
-	}
+    }
 
 	
-	public void infoitemDeleted(DocumentMetadata metadata, Session sessionObj) {
+	public void infoitemDeleted(DocumentMetadata metadata, Session session) {
 		try {
-			infoLockManager.removeAll(metadata.getId(), sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
+            ServerSession sessionObj = new ServerSessionAdapter(session);
+            infoLockManager.removeAll(metadata.getId(), sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 		} catch (OXException e) {
-			LOG.fatal("Couldn't remove locks from infoitem "+metadata.getId()+" in context "+sessionObj.getContext().getContextId()+". Run the consistency tool.");
-		}	
-	}
+			LOG.fatal("Couldn't remove locks from infoitem "+metadata.getId()+" in context "+session.getContextId()+". Run the consistency tool.");
+		} catch (ContextException e) {
+            LOG.fatal("Couldn't remove locks from infoitem "+metadata.getId()+" in context "+session.getContextId()+". Run the consistency tool.");
+        }
+    }
 
 	public void folderCreated(FolderObject folderObj, Session sessionObj) {
 		

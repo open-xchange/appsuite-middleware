@@ -75,9 +75,11 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.session.Session;
 
 public class AttachmentRequest extends CommonRequest {
 	
@@ -92,7 +94,11 @@ public class AttachmentRequest extends CommonRequest {
 	private final User user;
 	private Context ctx;
 
-	public AttachmentRequest(final Session session, final JSONWriter w) {
+    public AttachmentRequest(Session session, Context ctx, JSONWriter w) {
+        this(new ServerSessionAdapter(session,ctx),w);
+    }
+
+    public AttachmentRequest(final ServerSession session, final JSONWriter w) {
 		super(w);
 		this.ctx = session.getContext();
 		this.user = UserStorage.getStorageUser(session.getUserId(), session.getContext());

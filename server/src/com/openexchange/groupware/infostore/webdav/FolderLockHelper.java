@@ -54,7 +54,10 @@ import com.openexchange.groupware.impl.FolderLock;
 import com.openexchange.groupware.impl.FolderLockManager;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.session.Session;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.infostore.InfostoreException;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -88,16 +91,20 @@ public class FolderLockHelper extends LockHelper {
 	
 	@Override
 	protected int saveLock(WebdavLock lock) throws OXException {
-		Session session = sessionHolder.getSessionObject();
-		return lockManager.lock(id, 
-				(lock.getTimeout() == WebdavLock.NEVER) ? LockManager.INFINITE : lock.getTimeout(), //FIXME
-				lock.getScope().equals(WebdavLock.Scope.EXCLUSIVE_LITERAL) ? LockManager.Scope.EXCLUSIVE : LockManager.Scope.SHARED,
-				LockManager.Type.WRITE, 
-				lock.getDepth(), 
-				lock.getOwner(),
-				session.getContext(), 
-				UserStorage.getStorageUser(session.getUserId(), session.getContext()),
-				UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
+        try {
+            ServerSession session = getSession();
+            return lockManager.lock(id,
+                    (lock.getTimeout() == WebdavLock.NEVER) ? LockManager.INFINITE : lock.getTimeout(), //FIXME
+                    lock.getScope().equals(WebdavLock.Scope.EXCLUSIVE_LITERAL) ? LockManager.Scope.EXCLUSIVE : LockManager.Scope.SHARED,
+                    LockManager.Type.WRITE,
+                    lock.getDepth(),
+                    lock.getOwner(),
+                    session.getContext(),
+                    UserStorage.getStorageUser(session.getUserId(), session.getContext()),
+                    UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext()));
+        } catch (ContextException x) {
+            throw new InfostoreException(x);
+        }
 	}
 
 	@Override
@@ -117,6 +124,10 @@ public class FolderLockHelper extends LockHelper {
 		l.setTimeout(lock.getTimeout());
 		return l;
 	}
+
+    private ServerSession getSession() throws ContextException {
+        return new ServerSessionAdapter(sessionHolder.getSessionObject());
+    }
 
 	
 

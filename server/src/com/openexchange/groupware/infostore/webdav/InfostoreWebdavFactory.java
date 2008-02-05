@@ -53,11 +53,9 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.impl.FolderLockManager;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.groupware.infostore.PathResolver;
-import com.openexchange.groupware.infostore.Resolved;
+import com.openexchange.groupware.infostore.*;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -66,7 +64,8 @@ import com.openexchange.groupware.tx.DBProviderUser;
 import com.openexchange.groupware.tx.Service;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -282,8 +281,8 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 	
 	private OXWebdavResource tryLoad(final WebdavPath url, final OXWebdavResource def) throws OXException, WebdavException {
 		final State s = state.get();
-		final Context ctx = sessionHolder.getSessionObject().getContext();
-		final Session session = sessionHolder.getSessionObject();
+        final ServerSession session = getSession();
+		final Context ctx = session.getContext();
 		try {
 			final Resolved resolved = resolver.resolve(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, url, session
 					.getContext(), UserStorage.getStorageUser(session.getUserId(), session.getContext()), UserConfigurationStorage.getInstance()
@@ -459,7 +458,7 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 			return new ArrayList<OXWebdavResource>();
 		}
 		final State s = state.get();
-		final Session session = sessionHolder.getSessionObject();
+		final ServerSession session = getSession();
         EffectivePermission perm = collection.getEffectivePermission();
         if(!(perm.canReadAllObjects() || perm.canReadOwnObjects())) {
             return new ArrayList<OXWebdavResource>();
@@ -576,5 +575,13 @@ public class InfostoreWebdavFactory implements WebdavFactory, BulkLoader {
 		}
 		return url;
 	}
+
+    public ServerSession getSession() throws OXException {
+        try {
+            return new ServerSessionAdapter(sessionHolder.getSessionObject());
+        } catch (ContextException e) {
+            throw new InfostoreException(e);
+        }
+    }
 
 }

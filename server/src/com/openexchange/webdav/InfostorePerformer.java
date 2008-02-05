@@ -71,7 +71,7 @@ import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.tx.AlwaysWriteConnectionProvider;
 import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.webdav.action.AbstractAction;
 import com.openexchange.webdav.action.OXWebdavMaxUploadSizeAction;
@@ -136,7 +136,7 @@ public class InfostorePerformer implements SessionHolder {
 	
 	private Map<Action, WebdavAction> actions = new EnumMap<Action, WebdavAction>(Action.class);
 	
-	private ThreadLocal<Session> session = new ThreadLocal<Session>();
+	private ThreadLocal<ServerSession> session = new ThreadLocal<ServerSession>();
 	
 	private InfostorePerformer(){
 		
@@ -268,11 +268,11 @@ public class InfostorePerformer implements SessionHolder {
 		return lifeCycle;
 	}
 	
-	public Session getSessionObject() {
+	public ServerSession getSessionObject() {
 		return session.get();
 	}
 	
-	public final void doIt(HttpServletRequest req, HttpServletResponse resp, Action action, Session sess) throws ServletException, IOException {
+	public final void doIt(HttpServletRequest req, HttpServletResponse resp, Action action, ServerSession sess) throws ServletException, IOException {
 		try {
 			WebdavRequest webdavRequest = new ServletWebdavRequest(factory, req);
 			WebdavResponse webdavResponse = new ServletWebdavResponse(resp);
