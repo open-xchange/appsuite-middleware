@@ -97,8 +97,10 @@ public abstract class UploadFileMailPart extends MailPart {
 	private transient Object cachedContent;
 
 	/**
-	 * Constructor
+	 * Initializes a new {@link UploadFileMailPart}
 	 * 
+	 * @param uploadFile
+	 *            The upload file
 	 * @throws MailException
 	 *             If upload file's content type cannot be parsed
 	 */
