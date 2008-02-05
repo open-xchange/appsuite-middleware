@@ -120,11 +120,6 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 	
 	//private static final transient Log LOG = LogFactory.getLog(ReminderHandler.class);
 	
-	public ReminderHandler(final Session sessionObj) {
-		context = sessionObj.getContext();
-		reminderDeleteInterface = new EmptyReminderDeleteImpl();
-	}
-	
 	public ReminderHandler(final Context context) {
 		this.context = context;
 		reminderDeleteInterface = new EmptyReminderDeleteImpl();
