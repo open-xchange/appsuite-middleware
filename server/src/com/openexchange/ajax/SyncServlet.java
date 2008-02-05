@@ -76,6 +76,9 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailInterface;
 import com.openexchange.session.Session;
@@ -114,8 +117,13 @@ public class SyncServlet extends PermissionServlet {
 	 */
 	@Override
 	protected boolean hasModulePermission(final Session sessionObj) {
-		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-				sessionObj.getContext()).hasSyncML();
+		try {
+			return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
+					ContextStorage.getStorageContext(sessionObj.getContextId())).hasSyncML();
+		} catch (final ContextException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			return false;
+		}
 	}
 
 	/*
@@ -189,8 +197,8 @@ public class SyncServlet extends PermissionServlet {
 		}
 	}
 
-	private final void actionPutClearFolderContent(final Session sessionObj, final Writer writer,
-			final String body, final ParamContainer paramContainer) throws JSONException {
+	private final void actionPutClearFolderContent(final Session sessionObj, final Writer writer, final String body,
+			final ParamContainer paramContainer) throws JSONException {
 		/*
 		 * Some variables
 		 */
@@ -203,6 +211,7 @@ public class SyncServlet extends PermissionServlet {
 		 */
 		jsonWriter.array();
 		try {
+			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
 			Date timestamp = null;
 			final JSONArray jsonArr = new JSONArray(body);
 			final int length = jsonArr.length();
@@ -210,7 +219,7 @@ public class SyncServlet extends PermissionServlet {
 			MailInterface mailInterface = null;
 			try {
 				long lastModified = 0;
-				final OXFolderAccess access = new OXFolderAccess(sessionObj.getContext());
+				final OXFolderAccess access = new OXFolderAccess(ctx);
 				NextId: for (int i = 0; i < length; i++) {
 					final String deleteIdentifier = jsonArr.getString(i);
 					int delFolderId = -1;
@@ -220,7 +229,7 @@ public class SyncServlet extends PermissionServlet {
 							timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
 						}
 						if (folderSyncInterface == null) {
-							folderSyncInterface = new RdbFolderSyncInterface(sessionObj, access);
+							folderSyncInterface = new RdbFolderSyncInterface(sessionObj, ctx, access);
 						}
 						FolderObject delFolderObj;
 						try {
@@ -242,8 +251,8 @@ public class SyncServlet extends PermissionServlet {
 						folderSyncInterface.clearFolder(delFolderObj, timestamp);
 						lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
 					} else {
-						if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-								sessionObj.getContext()).hasWebMail()) {
+						if (UserConfigurationStorage.getInstance()
+								.getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasWebMail()) {
 							if (mailInterface == null) {
 								mailInterface = MailInterface.getInstance(sessionObj);
 							}

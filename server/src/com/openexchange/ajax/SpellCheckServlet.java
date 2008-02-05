@@ -69,6 +69,7 @@ import com.openexchange.ajax.spellcheck.AJAXSpellCheck;
 import com.openexchange.ajax.spellcheck.AJAXUserDictionaryException;
 import com.openexchange.ajax.spellcheck.AJAXUserDictionaryException.DictionaryCode;
 import com.openexchange.api.OXConflictException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
 
 /**
@@ -111,7 +112,7 @@ public class SpellCheckServlet extends PermissionServlet {
 				jw.object();
 				closeObject = true;
 				jw.key(Response.DATA);
-				final AJAXSpellCheck spellCheck = new AJAXSpellCheck(sessionObj);
+				final AJAXSpellCheck spellCheck = new AJAXSpellCheck(sessionObj, ContextStorage.getStorageContext(sessionObj.getContextId()));
 				final JSONArray ja = spellCheck.getSpellCheckResultsAsJSONArray(text);
 				jw.value(ja);
 				jw.endObject();

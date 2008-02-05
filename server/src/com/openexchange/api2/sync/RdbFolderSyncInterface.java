@@ -99,20 +99,19 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
 
 	private final UserConfiguration userConfiguration;
 
-	public RdbFolderSyncInterface(final Session sessionObj) {
-		this(sessionObj, null);
+	public RdbFolderSyncInterface(final Session sessionObj, final Context ctx) {
+		this(sessionObj, ctx, null);
 	}
 
-	public RdbFolderSyncInterface(final Session session, final OXFolderAccess oxfolderAccess) {
+	public RdbFolderSyncInterface(final Session session, final Context ctx, final OXFolderAccess oxfolderAccess) {
 		super();
 		this.session = session;
-		user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
+		user = UserStorage.getStorageUser(session.getUserId(), ctx);
 		this.userId = user.getId();
 		user.getGroups();
-		this.ctx = session.getContext();
+		this.ctx = ctx;
 		this.oxfolderAccess = oxfolderAccess == null ? new OXFolderAccess(ctx) : oxfolderAccess;
-		userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-				session.getContext());
+		userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
 	}
 
 	/*
