@@ -149,14 +149,9 @@ public class Infostore extends PermissionServlet {
 	// TODO: Better error handling
 
 	@Override
-	protected boolean hasModulePermission(final Session session) {
-        try {
-            ServerSession sessionObj = new ServerSessionAdapter(session);
-            return InfostoreRequest.hasPermission(UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
-        } catch (ContextException e) {
-            LOG.error(e.getLocalizedMessage(), e);
-            return false;
-        }
+	protected boolean hasModulePermission(final Session session, final Context ctx) {
+        ServerSession sessionObj = new ServerSessionAdapter(session, ctx);
+        return InfostoreRequest.hasPermission(UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 	}
 
 	@Override
