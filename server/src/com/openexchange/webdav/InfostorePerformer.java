@@ -63,6 +63,7 @@ import org.springframework.beans.factory.xml.XmlBeanFactory;
 import org.springframework.core.io.FileSystemResource;
 
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.FolderLockManagerImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.paths.impl.PathResolverImpl;
@@ -270,6 +271,10 @@ public class InfostorePerformer implements SessionHolder {
 	
 	public ServerSession getSessionObject() {
 		return session.get();
+	}
+
+	public Context getContext() {
+		return session.get().getContext();
 	}
 	
 	public final void doIt(HttpServletRequest req, HttpServletResponse resp, Action action, ServerSession sess) throws ServletException, IOException {

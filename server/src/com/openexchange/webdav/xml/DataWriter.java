@@ -59,6 +59,7 @@ import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
 
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
@@ -81,12 +82,14 @@ public class DataWriter {
 	public static final Namespace namespace = Namespace.getNamespace(XmlServlet.PREFIX, XmlServlet.NAMESPACE);
 	
 	protected Session sessionObj = null;
+
+	protected Context ctx = null;
 	
 	private User userObj = null;
 	
 	protected User getUser() {
 		if (null == userObj) {
-			userObj = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
+			userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
 		}
 		return userObj;
 	}
