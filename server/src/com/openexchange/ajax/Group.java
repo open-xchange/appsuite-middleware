@@ -64,6 +64,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.GroupRequest;
 import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -78,11 +81,12 @@ public class Group extends DataServlet {
 	private static final long serialVersionUID = 6699123983027304951L;
 	private static final Log LOG = LogFactory.getLog(Group.class);
 	
-	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
+	@Override
+    protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final Session sessionObj = getSessionObject(httpServletRequest);
+			final Session session = getSessionObject(httpServletRequest);
 			JSONObject jsonObj;
 			
 			try {	
@@ -93,8 +97,8 @@ public class Group extends DataServlet {
 	            writeResponse(response, httpServletResponse);
 	            return;
 			}
-			
-			final GroupRequest groupRequest = new GroupRequest(sessionObj);
+			final Context ctx = ContextStorage.getInstance().getContext(session);
+			final GroupRequest groupRequest = new GroupRequest(session, ctx);
 			final Object responseObj = groupRequest.action(action, jsonObj);
 			response.setTimestamp(groupRequest.getTimestamp());
 			response.setData(responseObj);
@@ -119,6 +123,9 @@ public class Group extends DataServlet {
 		} catch (AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
+        } catch (final ContextException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
 		}
 		
 		writeResponse(response, httpServletResponse);
@@ -128,7 +135,7 @@ public class Group extends DataServlet {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
-			final Session sessionObj = getSessionObject(httpServletRequest);
+			final Session session = getSessionObject(httpServletRequest);
 			
 			final String data = getBody(httpServletRequest);
 			JSONObject jsonObj;
@@ -141,8 +148,8 @@ public class Group extends DataServlet {
 	            writeResponse(response, httpServletResponse);
 	            return;
 			}
-
-			final GroupRequest groupRequest = new GroupRequest(sessionObj);
+			final Context ctx = ContextStorage.getInstance().getContext(session);
+			final GroupRequest groupRequest = new GroupRequest(session, ctx);
 			
 			if (data.charAt(0) == '[') {
 				final JSONArray jData = new JSONArray(data);
@@ -188,6 +195,9 @@ public class Group extends DataServlet {
 		} catch (AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
+        } catch (final ContextException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
 		}
 		
 		writeResponse(response, httpServletResponse);
