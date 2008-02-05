@@ -53,6 +53,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.user2acl.User2ACL;
 import com.openexchange.imap.user2acl.User2ACLArgs;
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -80,8 +81,10 @@ public final class ACLPermission extends MailPermission {
 	 * 
 	 * @param sessionUser
 	 *            The session user
+	 * @throws MailException
+	 *             If context loading fails
 	 */
-	public ACLPermission(final Session session) {
+	public ACLPermission(final Session session) throws MailException {
 		super(session);
 	}
 
@@ -275,9 +278,8 @@ public final class ACLPermission extends MailPermission {
 			return acl;
 		}
 		final Rights rights = permission2Rights(this);
-		return (acl = new ACL(User2ACL.getInstance(
-				UserStorage.getStorageUser(session.getUserId(), session.getContext())).getACLName(getEntity(),
-				session.getContext(), user2aclArgs), rights));
+		return (acl = new ACL(User2ACL.getInstance(UserStorage.getStorageUser(session.getUserId(), ctx)).getACLName(
+				getEntity(), ctx, user2aclArgs), rights));
 	}
 
 	/**
@@ -289,8 +291,8 @@ public final class ACLPermission extends MailPermission {
 	 * @throws AbstractOXException
 	 */
 	public void parseACL(final ACL acl, final User2ACLArgs user2aclArgs) throws AbstractOXException {
-		setEntity(User2ACL.getInstance(UserStorage.getStorageUser(session.getUserId(), session.getContext()))
-				.getUserID(acl.getName(), session.getContext(), user2aclArgs));
+		setEntity(User2ACL.getInstance(UserStorage.getStorageUser(session.getUserId(), ctx)).getUserID(acl.getName(),
+				ctx, user2aclArgs));
 		parseRights(acl.getRights());
 		this.acl = acl;
 	}

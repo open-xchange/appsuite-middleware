@@ -55,6 +55,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.mail.MessagingException;
 
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.IMAPCapabilities;
@@ -104,7 +106,12 @@ public final class IMAPConfig extends MailConfig {
 		/*
 		 * Fetch user object and create its IMAP properties
 		 */
-		final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
+		final User user;
+		try {
+			user= UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
+		} catch (final ContextException e) {
+			throw new MailConfigException(e);
+		}
 		fillLoginAndPassword(imapConf, session, user);
 		if (LoginType.GLOBAL.equals(getLoginType())) {
 			String imapServer = MailConfig.getMailServer();

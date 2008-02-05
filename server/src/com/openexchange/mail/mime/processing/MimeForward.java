@@ -66,6 +66,9 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
@@ -123,8 +126,9 @@ public final class MimeForward {
 			/*
 			 * New MIME message with a dummy session
 			 */
+			final Context ctx = ContextStorage.getStorageContext(session.getContextId());
 			final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
-					session.getContext());
+					ctx);
 			final MimeMessage forwardMsg = new MimeMessage(MIMEDefaultSession.getDefaultSession());
 			{
 				/*
@@ -132,8 +136,8 @@ public final class MimeForward {
 				 */
 				final String origSubject = MimeUtility.unfold(originalMsg.getHeader(MessageHeaders.HDR_SUBJECT, null));
 				if (origSubject != null) {
-					final String subjectPrefix = new StringHelper(UserStorage.getStorageUser(session.getUserId(),
-							session.getContext()).getLocale()).getString(MailStrings.FORWARD_SUBJECT_PREFIX);
+					final String subjectPrefix = new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx)
+							.getLocale()).getString(MailStrings.FORWARD_SUBJECT_PREFIX);
 					final String subject = MessageUtility.decodeMultiEncodedHeader(origSubject.regionMatches(true, 0,
 							subjectPrefix, 0, subjectPrefix.length()) ? origSubject : new StringBuilder().append(
 							subjectPrefix).append(origSubject).toString());
@@ -193,9 +197,8 @@ public final class MimeForward {
 					 */
 					final MimeBodyPart textPart = new MimeBodyPart();
 					textPart.setText(generateForwardText(firstSeenText, UserStorage.getStorageUser(session.getUserId(),
-							session.getContext()).getLocale(), originalMsg, contentType
-							.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)), contentType.getCharsetParameter(), contentType
-							.getSubType());
+							ctx).getLocale(), originalMsg, contentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)),
+							contentType.getCharsetParameter(), contentType.getSubType());
 					textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
 					textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType.toString());
 					multipart.addBodyPart(textPart);
@@ -216,7 +219,7 @@ public final class MimeForward {
 					originalContentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
 				}
 				forwardMsg.setText(generateForwardText(MessageUtility.readMimePart(originalMsg, originalContentType),
-						UserStorage.getStorageUser(session.getUserId(), session.getContext()).getLocale(), originalMsg,
+						UserStorage.getStorageUser(session.getUserId(), ctx).getLocale(), originalMsg,
 						originalContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)), originalContentType
 						.getCharsetParameter(), originalContentType.getSubType());
 				forwardMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -232,6 +235,8 @@ public final class MimeForward {
 			throw MIMEMailException.handleMessagingException(e);
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+		} catch (final ContextException e) {
+			throw new MailException(e);
 		}
 	}
 

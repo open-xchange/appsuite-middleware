@@ -64,6 +64,8 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterfaceImpl;
@@ -303,7 +305,7 @@ public final class MessageWriter {
 								if (mail.containsSentDate() && mail.getSentDate() != null) {
 									((JSONObject) jsonContainer).put(MailJSONField.SENT_DATE.getKey(), addUserTimezone(
 											mail.getSentDate().getTime(), TimeZone.getTimeZone(UserStorage.getStorageUser(
-													session.getUserId(), session.getContext()).getTimeZone())));
+													session.getUserId(), ContextStorage.getStorageContext(session.getContextId())).getTimeZone())));
 								} else {
 									((JSONObject) jsonContainer).put(MailJSONField.SENT_DATE.getKey(), JSONObject.NULL);
 								}
@@ -311,13 +313,15 @@ public final class MessageWriter {
 								if (mail.containsSentDate() && mail.getSentDate() != null) {
 									((JSONArray) jsonContainer).put(addUserTimezone(mail.getSentDate().getTime(),
 											TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(),
-													session.getContext()).getTimeZone())));
+													ContextStorage.getStorageContext(session.getContextId())).getTimeZone())));
 								} else {
 									((JSONArray) jsonContainer).put(JSONObject.NULL);
 								}
 							}
 						} catch (final JSONException e) {
 							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+						} catch (final ContextException e) {
+							throw new MailException(e);
 						}
 					}
 				};
@@ -332,7 +336,7 @@ public final class MessageWriter {
 									((JSONObject) jsonContainer).put(MailJSONField.RECEIVED_DATE.getKey(),
 											addUserTimezone(mail.getReceivedDate().getTime(), TimeZone
 													.getTimeZone(UserStorage.getStorageUser(session.getUserId(),
-															session.getContext()).getTimeZone())));
+															ContextStorage.getStorageContext(session.getContextId())).getTimeZone())));
 								} else {
 									((JSONObject) jsonContainer).put(MailJSONField.RECEIVED_DATE.getKey(),
 											JSONObject.NULL);
@@ -341,13 +345,15 @@ public final class MessageWriter {
 								if (mail.containsReceivedDate() && mail.getReceivedDate() != null) {
 									((JSONArray) jsonContainer).put(addUserTimezone(mail.getReceivedDate().getTime(),
 											TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(),
-													session.getContext()).getTimeZone())));
+													ContextStorage.getStorageContext(session.getContextId())).getTimeZone())));
 								} else {
 									((JSONArray) jsonContainer).put(JSONObject.NULL);
 								}
 							}
 						} catch (final JSONException e) {
 							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+						} catch (final ContextException e) {
+							throw new MailException(e);
 						}
 					}
 				};

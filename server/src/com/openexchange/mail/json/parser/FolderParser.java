@@ -58,6 +58,8 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.fields.FolderFields;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
@@ -129,7 +131,11 @@ public final class FolderParser {
 							entity = elem.getInt(FolderFields.ENTITY);
 						} catch (final JSONException e) {
 							final String entityStr = elem.getString(FolderFields.ENTITY);
-							entity = us.getUserId(entityStr, session.getContext());
+							try {
+								entity = us.getUserId(entityStr, ContextStorage.getStorageContext(session.getContextId()));
+							} catch (final ContextException e1) {
+								throw new MailException(e1);
+							}
 						}
 						final MailPermission mailPerm = MailPermission.newInstance(session);
 						mailPerm.setEntity(entity);

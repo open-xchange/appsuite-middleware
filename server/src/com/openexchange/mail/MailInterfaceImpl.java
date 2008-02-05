@@ -51,6 +51,9 @@ package com.openexchange.mail;
 
 import com.openexchange.api2.MailInterfaceMonitor;
 import com.openexchange.cache.OXCachingException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailStorageUtils.OrderDirection;
 import com.openexchange.mail.cache.MailMessageCache;
@@ -88,6 +91,8 @@ public final class MailInterfaceImpl extends MailInterface {
 
 	private Session session;
 
+	private Context ctx;
+
 	private boolean init;
 
 	/**
@@ -99,12 +104,15 @@ public final class MailInterfaceImpl extends MailInterface {
 	 */
 	protected MailInterfaceImpl(final Session session) throws MailException {
 		super();
-		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), session.getContext())
-				.hasWebMail()) {
+		try {
+			this.ctx = ContextStorage.getStorageContext(session.getContextId());
+		} catch (final ContextException e) {
+			throw new MailException(e);
+		}
+		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx).hasWebMail()) {
 			throw new MailException(MailException.Code.NO_MAIL_ACCESS);
-		} else if (/* IMAPProperties.noAdminMailbox() && */session.getUserId() == session.getContext().getMailadmin()) {
-			throw new MailException(MailException.Code.ACCOUNT_DOES_NOT_EXIST, Integer.valueOf(session.getContext()
-					.getContextId()));
+		} else if (/* IMAPProperties.noAdminMailbox() && */session.getUserId() == ctx.getMailadmin()) {
+			throw new MailException(MailException.Code.ACCOUNT_DOES_NOT_EXIST, Integer.valueOf(ctx.getContextId()));
 		}
 		this.session = session;
 	}
@@ -317,8 +325,8 @@ public final class MailInterfaceImpl extends MailInterface {
 		final String fullname = StorageUtility.prepareMailFolderParam(folder);
 		try {
 			final int userId = session.getUserId();
-			if (MailMessageCache.getInstance().containsFolderMessages(fullname, userId, session.getContext())) {
-				return MailMessageCache.getInstance().getMessages(uids, fullname, userId, session.getContext());
+			if (MailMessageCache.getInstance().containsFolderMessages(fullname, userId, ctx)) {
+				return MailMessageCache.getInstance().getMessages(uids, fullname, userId, ctx);
 			}
 		} catch (OXCachingException e) {
 			LOG.error(e.getLocalizedMessage(), e);

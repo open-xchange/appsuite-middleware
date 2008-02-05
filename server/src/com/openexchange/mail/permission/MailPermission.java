@@ -51,6 +51,9 @@ package com.openexchange.mail.permission;
 
 import java.lang.reflect.InvocationTargetException;
 
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -73,11 +76,21 @@ public abstract class MailPermission extends OCLPermission {
 
 	protected final Session session;
 
+	protected final Context ctx;
+
 	/**
 	 * No instance
+	 * 
+	 * @throws MailException
+	 *             If context laoding fails
 	 */
-	protected MailPermission(final Session session) {
+	protected MailPermission(final Session session) throws MailException {
 		super();
+		try {
+			this.ctx = ContextStorage.getStorageContext(session.getContextId());
+		} catch (final ContextException e) {
+			throw new MailException(e);
+		}
 		this.session = session;
 	}
 

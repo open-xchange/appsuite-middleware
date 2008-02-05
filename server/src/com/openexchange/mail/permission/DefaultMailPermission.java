@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.permission;
 
+import com.openexchange.mail.MailException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 
@@ -69,8 +70,10 @@ public final class DefaultMailPermission extends MailPermission {
 	 * 
 	 * @param session
 	 *            The session providing needed user data
+	 * @throws MailException
+	 *             If instantiation fails
 	 */
-	public DefaultMailPermission(final Session session) {
+	public DefaultMailPermission(final Session session) throws MailException {
 		super(session);
 		setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 				OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);

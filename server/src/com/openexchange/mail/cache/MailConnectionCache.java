@@ -65,6 +65,8 @@ import org.apache.jcs.engine.control.event.behavior.IElementEventHandler;
 import com.openexchange.cache.CacheKey;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.cache.eventhandler.MailConnectionEventHandler;
 import com.openexchange.session.Session;
@@ -182,7 +184,12 @@ public final class MailConnectionCache {
 	 *             If removing from cache fails
 	 */
 	public MailConnection<?, ?, ?> removeMailConnection(final Session session) throws OXCachingException {
-		final CacheKey key = getUserKey(session.getUserId(), session.getContext());
+		final CacheKey key;
+		try {
+			key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
+		} catch (final ContextException e1) {
+			throw new OXCachingException(e1);
+		}
 		final Lock readLock = getLock(key).readLock();
 		readLock.lock();
 		try {
@@ -241,7 +248,12 @@ public final class MailConnectionCache {
 	 */
 	public boolean putMailConnection(final Session session, final MailConnection<?, ?, ?> mailConnection)
 			throws OXCachingException {
-		final CacheKey key = getUserKey(session.getUserId(), session.getContext());
+		final CacheKey key;
+		try {
+			key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
+		} catch (final ContextException e1) {
+			throw new OXCachingException(e1);
+		}
 		final Lock readLock = getLock(key).readLock();
 		readLock.lock();
 		try {
@@ -292,9 +304,16 @@ public final class MailConnectionCache {
 	 *            The session
 	 * @return <code>true</code> if a user-bound mail connection is already
 	 *         present in cache; otherwise <code>false</code>
+	 * @throws OXCachingException
+	 *             If context loading fails
 	 */
-	public boolean containsMailConnection(final Session session) {
-		final CacheKey key = getUserKey(session.getUserId(), session.getContext());
+	public boolean containsMailConnection(final Session session) throws OXCachingException {
+		final CacheKey key;
+		try {
+			key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
+		} catch (ContextException e) {
+			throw new OXCachingException(e);
+		}
 		final Lock readLock = getLock(key).readLock();
 		readLock.lock();
 		try {

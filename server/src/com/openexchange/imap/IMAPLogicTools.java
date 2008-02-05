@@ -79,11 +79,20 @@ public final class IMAPLogicTools extends IMAPFolderWorker implements MailLogicT
 			.getLog(IMAPLogicTools.class);
 
 	/**
-	 * Constructor
+	 * Initializes a new {@link IMAPLogicTools}
+	 * 
+	 * @param imapStore
+	 *            The IMAP store
+	 * @param imapConnection
+	 *            The IMAP connection
+	 * @param session
+	 *            The session providing needed user data
+	 * @throws IMAPException
+	 *             If context loading fails
 	 */
-	public IMAPLogicTools(final IMAPStore imapStore, final IMAPConnection imapMailConnection,
-			final Session session) {
-		super(imapStore, imapMailConnection, session);
+	public IMAPLogicTools(final IMAPStore imapStore, final IMAPConnection imapConnection, final Session session)
+			throws IMAPException {
+		super(imapStore, imapConnection, session);
 	}
 
 	/*

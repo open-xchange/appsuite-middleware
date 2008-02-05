@@ -70,6 +70,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
@@ -106,6 +109,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
 	private final Session session;
 
+	private final Context ctx;
+
 	private TimeZone timeZone;
 
 	private final UserSettingMail usm;
@@ -140,11 +145,19 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 *            otherwise <code>false</code>
 	 * @param session
 	 *            The session
+	 * @throws MailException
+	 *             If context loading fails
 	 */
-	public JSONMessageHandler(final String mailPath, final boolean displayVersion, final Session session) {
+	public JSONMessageHandler(final String mailPath, final boolean displayVersion, final Session session)
+			throws MailException {
 		super();
 		this.session = session;
-		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContext());
+		try {
+			this.ctx = ContextStorage.getStorageContext(session.getContextId());
+		} catch (final ContextException e) {
+			throw new MailException(e);
+		}
+		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
 		this.displayVersion = displayVersion;
 		this.mailPath = mailPath;
 		jsonObject = new JSONObject();
@@ -167,7 +180,12 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			throws MailException {
 		super();
 		this.session = session;
-		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContext());
+		try {
+			this.ctx = ContextStorage.getStorageContext(session.getContextId());
+		} catch (final ContextException e) {
+			throw new MailException(e);
+		}
+		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
 		this.displayVersion = displayVersion;
 		this.mailPath = mailPath == MailPath.NULL ? "" : mailPath.toString();
 		jsonObject = new JSONObject();
@@ -205,8 +223,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
 	private TimeZone getTimeZone() {
 		if (timeZone == null) {
-			timeZone = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), session.getContext())
-					.getTimeZone());
+			timeZone = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
 		}
 		return timeZone;
 	}
@@ -295,6 +312,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+		} catch (final ContextException e) {
+			throw new MailException(e);
 		}
 	}
 
@@ -548,10 +567,12 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			return true;
 		} catch (final JSONException e) {
 			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+		} catch (final ContextException e) {
+			throw new MailException(e);
 		}
 	}
 
-	private String getHtmlVersion(final ContentType contentType, final String src) {
+	private String getHtmlVersion(final ContentType contentType, final String src) throws ContextException {
 		if (contentType.isMimeType(MIMETypes.MIME_TEXT_ENRICHED)
 				|| contentType.isMimeType(MIMETypes.MIME_TEXT_RICHTEXT)) {
 			return MessageUtility
@@ -579,7 +600,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			String contentType = MIMETypes.MIME_APPL_OCTET;
 			final String filename = part.getFileName();
 			try {
-				final Locale locale = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getLocale();
+				final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
 				contentType = MIMEType2ExtMap.getContentType(new File(filename.toLowerCase(locale)).getName())
 						.toLowerCase(locale);
 			} catch (final Exception e) {
@@ -901,6 +922,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			getAttachmentsArr().put(jsonObject);
 		} catch (final JSONException e) {
 			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+		} catch (final ContextException e) {
+			throw new MailException(e);
 		}
 	}
 
@@ -953,8 +976,9 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+		} catch (final ContextException e) {
+			throw new MailException(e);
 		}
-
 	}
 
 }

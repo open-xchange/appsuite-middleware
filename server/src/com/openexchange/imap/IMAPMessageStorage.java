@@ -73,7 +73,6 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 
 import com.openexchange.cache.OXCachingException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.cache.UserFlagsCache;
@@ -137,19 +136,22 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 	 */
 	private final transient int userId;
 
-	private final transient Context ctx;
-
 	/**
-	 * Constructor
+	 * Initializes a new {@link IMAPMessageStorage}
 	 * 
 	 * @param imapStore
-	 *            The <b>connected</b> IMAP store that provides access to IMAP
-	 *            server
+	 *            The IMAP store
+	 * @param imapConnection
+	 *            The IMAP connection
+	 * @param session
+	 *            The session providing needed user data
+	 * @throws IMAPException
+	 *             If context loading fails
 	 */
-	public IMAPMessageStorage(final IMAPStore imapStore, final IMAPConnection imapMailConnection, final Session session) {
-		super(imapStore, imapMailConnection, session);
+	public IMAPMessageStorage(final IMAPStore imapStore, final IMAPConnection imapConnection, final Session session)
+			throws IMAPException {
+		super(imapStore, imapConnection, session);
 		userId = session.getUserId();
-		ctx = session.getContext();
 	}
 
 	public MailMessage getMessage(final String folderArg, final long msgUID) throws MailException {
@@ -272,7 +274,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 				filter = null;
 			}
 			Message[] msgs = IMAPSort.sortMessages(imapFolder, filter, fields, sortField, order, UserStorage
-					.getStorageUser(session.getUserId(), session.getContext()).getLocale(), usedFields, imapConfig);
+					.getStorageUser(session.getUserId(), ctx).getLocale(), usedFields, imapConfig);
 			if (fromToIndices != null && fromToIndices.length == 2) {
 				final int fromIndex = fromToIndices[0];
 				int toIndex = fromToIndices[1];
@@ -474,7 +476,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			 */
 			final long start = System.currentTimeMillis();
 			final Message[] msgs = IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, order,
-					UserStorage.getStorageUser(session.getUserId(), session.getContext()).getLocale());
+					UserStorage.getStorageUser(session.getUserId(), ctx).getLocale());
 			MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (msgs == null) {
 				return EMPTY_RETVAL;
@@ -525,7 +527,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 					final long start = System.currentTimeMillis();
 					new CopyIMAPCommand(imapFolder, msgUIDs, trashFullname, false, true).doCommand();
 					if (LOG.isInfoEnabled()) {
-						LOG.info(new StringBuilder(100).append("\"Soft Delete\": ").append(msgUIDs.length).append(
+						LOG.info(new StringBuilder(128).append("\"Soft Delete\": ").append(msgUIDs.length).append(
 								" messages copied to default trash folder \"").append(trashFullname).append("\" in ")
 								.append((System.currentTimeMillis() - start)).append("msec").toString());
 					}
@@ -549,7 +551,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			long start = System.currentTimeMillis();
 			new FlagsIMAPCommand(imapFolder, msgUIDs, FLAGS_DELETED, true, false).doCommand();
 			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(100).append(msgUIDs.length).append(
+				LOG.info(new StringBuilder(128).append(msgUIDs.length).append(
 						" messages marked as deleted (through system flag \\DELETED) in ").append(
 						(System.currentTimeMillis() - start)).append("msec").toString());
 			}
@@ -561,7 +563,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 				IMAPCommandsCollection.fastExpunge(imapFolder);
 				MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				if (LOG.isInfoEnabled()) {
-					LOG.info(new StringBuilder(100).append("Folder ").append(imapFolder.getFullName()).append(
+					LOG.info(new StringBuilder(128).append("Folder ").append(imapFolder.getFullName()).append(
 							" expunged in ").append((System.currentTimeMillis() - start)).append("msec").toString());
 				}
 			} catch (final ProtocolException pex) {
@@ -643,7 +645,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			long start = System.currentTimeMillis();
 			long[] res = new CopyIMAPCommand(imapFolder, msgUIDs, destFullname, false, fast).doCommand();
 			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(100).append(msgUIDs.length).append(" messages copied in ").append(
+				LOG.info(new StringBuilder(128).append(msgUIDs.length).append(" messages copied in ").append(
 						(System.currentTimeMillis() - start)).append("msec").toString());
 			}
 			if (!fast && (res == null || noUIDsAssigned(res, msgUIDs.length))) {
@@ -673,7 +675,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 				start = System.currentTimeMillis();
 				new FlagsIMAPCommand(imapFolder, msgUIDs, FLAGS_DELETED, true, false).doCommand();
 				if (LOG.isInfoEnabled()) {
-					LOG.info(new StringBuilder(100).append(msgUIDs.length).append(
+					LOG.info(new StringBuilder(128).append(msgUIDs.length).append(
 							" messages marked as expunged (through system flag \\DELETED) in ").append(
 							(System.currentTimeMillis() - start)).append("msec").toString());
 				}
@@ -685,7 +687,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 					IMAPCommandsCollection.uidExpunge(imapFolder, msgUIDs);
 					MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					if (LOG.isInfoEnabled()) {
-						LOG.info(new StringBuilder(100).append(msgUIDs.length).append(" messages expunged in ").append(
+						LOG.info(new StringBuilder(128).append(msgUIDs.length).append(" messages expunged in ").append(
 								(System.currentTimeMillis() - start)).append("msec").toString());
 					}
 					/*
@@ -722,8 +724,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 					} catch (final ProtocolException e1) {
 						throw new IMAPException(IMAPException.Code.MOVE_PARTIALLY_COMPLETED, e1,
 								com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName(session, UserStorage
-										.getStorageUser(session.getUserId(), session.getContext())), Arrays
-										.toString(msgUIDs), imapFolder.getFullName(), e1.getMessage());
+										.getStorageUser(session.getUserId(), ctx)), Arrays.toString(msgUIDs),
+								imapFolder.getFullName(), e1.getMessage());
 					}
 				}
 				try {
@@ -862,7 +864,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 				final long start = System.currentTimeMillis();
 				new FlagsIMAPCommand(imapFolder, msgUIDs, affectedFlags, set, false).doCommand();
 				if (LOG.isInfoEnabled()) {
-					LOG.info(new StringBuilder(100).append("System Flags applied to ").append(msgUIDs.length).append(
+					LOG.info(new StringBuilder(128).append("System Flags applied to ").append(msgUIDs.length).append(
 							" messages in ").append((System.currentTimeMillis() - start)).append("msec").toString());
 				}
 			}
@@ -892,7 +894,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 						MailMessageCache.getInstance().updateCachedMessages(msgUIDs, fullname, userId, ctx,
 								FIELDS_FLAGS, new Object[] { Integer.valueOf(set ? flags : (flags * -1)) });
 						if (LOG.isInfoEnabled()) {
-							LOG.info(new StringBuilder(100).append(msgUIDs.length).append(
+							LOG.info(new StringBuilder(128).append(msgUIDs.length).append(
 									" cached messages updated in ").append((System.currentTimeMillis() - start))
 									.append("msec").toString());
 						}
@@ -950,14 +952,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			IMAPCommandsCollection.clearAllColorLabels(imapFolder, msgUIDs);
 			MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(100).append("All color flags cleared from ").append(msgUIDs.length).append(
+				LOG.info(new StringBuilder(128).append("All color flags cleared from ").append(msgUIDs.length).append(
 						" messages in ").append((System.currentTimeMillis() - start)).append("msec").toString());
 			}
 			start = System.currentTimeMillis();
 			IMAPCommandsCollection.setColorLabel(imapFolder, msgUIDs, MailMessage.getColorLabelStringValue(colorLabel));
 			MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(100).append("All color flags set in ").append(msgUIDs.length).append(
+				LOG.info(new StringBuilder(128).append("All color flags set in ").append(msgUIDs.length).append(
 						" messages in ").append((System.currentTimeMillis() - start)).append("msec").toString());
 			}
 			try {
@@ -969,7 +971,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 					MailMessageCache.getInstance().updateCachedMessages(msgUIDs, fullname, userId, ctx,
 							FIELDS_COLOR_LABEL, new Object[] { Integer.valueOf(colorLabel) });
 					if (LOG.isInfoEnabled()) {
-						LOG.info(new StringBuilder(100).append(msgUIDs.length).append(" cached messages updated in ")
+						LOG.info(new StringBuilder(128).append(msgUIDs.length).append(" cached messages updated in ")
 								.append((System.currentTimeMillis() - start)).append("msec").toString());
 					}
 				}

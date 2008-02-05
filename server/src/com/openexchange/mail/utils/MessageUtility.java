@@ -77,6 +77,8 @@ import javax.mail.internet.MimeUtility;
 
 import com.openexchange.ajax.Mail;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.config.MailConfig;
@@ -417,11 +419,13 @@ public final class MessageUtility {
 	 *            purpose; otherwise to prepare content for some kind of
 	 *            editable display
 	 * @return The formatted content
+	 * @throws ContextException
+	 *             If context cannot be loaded
 	 */
 	public static String formatContentForDisplay(final String content, final boolean isHtml, final Session session,
-			final String mailPath, final boolean displayVersion) {
+			final String mailPath, final boolean displayVersion) throws ContextException {
 		final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
-				session.getContext());
+				ContextStorage.getStorageContext(session.getContextId()));
 		String retval = content;
 		if (isHtml) {
 			/*

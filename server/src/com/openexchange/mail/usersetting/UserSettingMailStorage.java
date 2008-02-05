@@ -55,6 +55,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 
 /**
@@ -116,6 +118,27 @@ public abstract class UserSettingMailStorage {
 			} finally {
 				INIT_LOCK.unlock();
 			}
+		}
+	}
+
+	/**
+	 * A convenience method that returns
+	 * {@link #getUserSettingMail(int, Context, Connection)} with the connection
+	 * parameter set to <code>null</code>.
+	 * 
+	 * @param user
+	 *            The user ID
+	 * @param cid
+	 *            The context ID
+	 * @return The instance of {@link UserSettingMail} which matches given user
+	 *         ID and context or <code>null</code> on exception
+	 * @throws UserConfigurationException If context cannot be loaded
+	 */
+	public final UserSettingMail getUserSettingMail(final int user, final int cid) throws UserConfigurationException {
+		try {
+			return getUserSettingMail(user, ContextStorage.getStorageContext(cid), null);
+		} catch (final ContextException e) {
+			throw new UserConfigurationException(e);
 		}
 	}
 

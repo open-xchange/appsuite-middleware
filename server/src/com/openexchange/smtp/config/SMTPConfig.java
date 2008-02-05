@@ -49,6 +49,8 @@
 
 package com.openexchange.smtp.config;
 
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.config.GlobalTransportConfig;
@@ -93,7 +95,13 @@ public final class SMTPConfig extends TransportConfig {
 		/*
 		 * Fetch user object and create its IMAP properties
 		 */
-		final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
+		final User user;
+		try {
+			user = UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session
+					.getContextId()));
+		} catch (final ContextException e) {
+			throw new MailConfigException(e);
+		}
 		fillLoginAndPassword(smtpConf, session, user);
 		if (LoginType.GLOBAL.equals(getLoginType())) {
 			String smtpServer = MailConfig.getTransportServer();

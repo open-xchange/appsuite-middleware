@@ -76,6 +76,9 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -135,6 +138,8 @@ public final class SMTPTransport extends MailTransport {
 
 	private final Session session;
 
+	private final Context ctx;
+
 	private final UserSettingMail usm;
 
 	private MailConfig transportConfig;
@@ -144,6 +149,7 @@ public final class SMTPTransport extends MailTransport {
 		smtpSession = null;
 		mailConnection = null;
 		session = null;
+		ctx = null;
 		usm = null;
 	}
 
@@ -169,7 +175,12 @@ public final class SMTPTransport extends MailTransport {
 		smtpProps.put(MIMESessionPropertyNames.PROP_SMTPPORT, String.valueOf(transportConfig.getPort()));
 		this.smtpSession = javax.mail.Session.getInstance(smtpProps, null);
 		this.session = session;
-		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContext());
+		try {
+			this.ctx = ContextStorage.getStorageContext(session.getContextId());
+		} catch (final ContextException e) {
+			throw new SMTPException(e);
+		}
+		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
 	}
 
 	private void checkMailConnection() throws MailException {
@@ -200,7 +211,7 @@ public final class SMTPTransport extends MailTransport {
 						Long.valueOf(msgUID));
 			}
 			final SMTPMessage smtpMessage = new SMTPMessage(smtpSession);
-			final User u = UserStorage.getStorageUser(session.getUserId(), session.getContext());
+			final User u = UserStorage.getStorageUser(session.getUserId(), ctx);
 			/*
 			 * Set from
 			 */
@@ -224,7 +235,7 @@ public final class SMTPTransport extends MailTransport {
 			/*
 			 * Subject
 			 */
-			final Locale locale = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getLocale();
+			final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
 			final StringHelper strHelper = new StringHelper(locale);
 			smtpMessage.setSubject(strHelper.getString(MailStrings.ACK_SUBJECT));
 			/*
@@ -236,7 +247,7 @@ public final class SMTPTransport extends MailTransport {
 			/*
 			 * Set common headers
 			 */
-			SMTPMessageFiller.fillCommonHeaders(smtpMessage, session);
+			SMTPMessageFiller.fillCommonHeaders(smtpMessage, session, ctx);
 			/*
 			 * Compose body
 			 */
@@ -394,7 +405,7 @@ public final class SMTPTransport extends MailTransport {
 				/*
 				 * Fill message
 				 */
-				final SMTPMessageFiller filler = new SMTPMessageFiller(session);
+				final SMTPMessageFiller filler = new SMTPMessageFiller(session, ctx);
 				filler.fillMail((SMTPMailMessage) transportMail, smtpMessage);
 				smtpMessage.setFlag(Flags.Flag.DRAFT, true);
 				smtpMessage.saveChanges();
@@ -451,7 +462,7 @@ public final class SMTPTransport extends MailTransport {
 				/*
 				 * Fill message dependent on send type
 				 */
-				msgFiller = new SMTPMessageFiller(session);
+				msgFiller = new SMTPMessageFiller(session, ctx);
 				if (SendType.FORWARD.equals(sendType) && usm.isForwardAsAttachment()) {
 					msgFiller.fillMail((SMTPMailMessage) transportMail, smtpMessage, sendType, referencedMail);
 				} else {
@@ -528,8 +539,8 @@ public final class SMTPTransport extends MailTransport {
 				/*
 				 * Mark newly appended mail as seen
 				 */
-				mailConnection.getMessageStorage().updateMessageFlags(sentFullname, uidArr, MailMessage.FLAG_SEEN,
-						true);
+				mailConnection.getMessageStorage()
+						.updateMessageFlags(sentFullname, uidArr, MailMessage.FLAG_SEEN, true);
 			}
 			msgFiller.deleteReferencedUploadFiles();
 			for (String id : tempIds) {
@@ -602,8 +613,7 @@ public final class SMTPTransport extends MailTransport {
 		 */
 		final String subject;
 		if ((subject = newSMTPMsg.getSubject()) == null || subject.length() == 0) {
-			newSMTPMsg.setSubject(new StringHelper(UserStorage
-					.getStorageUser(session.getUserId(), session.getContext()).getLocale())
+			newSMTPMsg.setSubject(new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale())
 					.getString(MailStrings.DEFAULT_SUBJECT));
 		}
 	}

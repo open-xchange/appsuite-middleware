@@ -59,6 +59,9 @@ import javax.mail.MessagingException;
 import javax.mail.ReadOnlyFolderException;
 
 import com.openexchange.cache.OXCachingException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
@@ -105,6 +108,8 @@ public abstract class IMAPFolderWorker {
 
 	protected final Session session;
 
+	protected final Context ctx;
+
 	protected final IMAPConnection imapConnection;
 
 	protected final UserSettingMail usm;
@@ -118,14 +123,29 @@ public abstract class IMAPFolderWorker {
 	protected transient Message markAsSeen;
 
 	/**
-	 * Default constructor
+	 * Initializes a new {@link IMAPFolderWorker}
+	 * 
+	 * @param imapStore
+	 *            The IMAP store
+	 * @param imapConnection
+	 *            The IMAP connection
+	 * @param session
+	 *            The session providing needed user data
+	 * @throws IMAPException
+	 *             If context lading fails
 	 */
-	public IMAPFolderWorker(final IMAPStore imapStore, final IMAPConnection imapConnection, final Session session) {
+	public IMAPFolderWorker(final IMAPStore imapStore, final IMAPConnection imapConnection, final Session session)
+			throws IMAPException {
 		super();
 		this.imapStore = imapStore;
 		this.imapConnection = imapConnection;
 		this.session = session;
-		this.usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContext());
+		try {
+			this.ctx = ContextStorage.getStorageContext(session.getContextId());
+		} catch (final ContextException e) {
+			throw new IMAPException(e);
+		}
+		this.usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
 		this.imapConfig = (IMAPConfig) imapConnection.getMailConfig();
 	}
 
@@ -228,14 +248,14 @@ public abstract class IMAPFolderWorker {
 			markAsSeen.setFlags(FLAGS_SEEN, true);
 			try {
 				if (MailMessageCache.getInstance().containsFolderMessages(imapFolder.getFullName(),
-						session.getUserId(), session.getContext())) {
+						session.getUserId(), ctx)) {
 					/*
 					 * Update cache entry
 					 */
 					final long[] uid = new long[] { imapFolder.getUID(markAsSeen) };
 					final long start = System.currentTimeMillis();
 					MailMessageCache.getInstance().updateCachedMessages(uid, imapFolder.getFullName(),
-							session.getUserId(), session.getContext(), FIELDS_FLAGS,
+							session.getUserId(), ctx, FIELDS_FLAGS,
 							new Object[] { Integer.valueOf(MailMessage.FLAG_SEEN) });
 					if (LOG.isInfoEnabled()) {
 						LOG.info(new StringBuilder(100).append(uid.length).append(" cached message(s) updated in ")

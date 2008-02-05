@@ -65,6 +65,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFile;
@@ -197,8 +199,12 @@ public final class MessageParser {
 	 */
 	public static void parse(final JSONObject jsonObj, final MailMessage mail, final Session session)
 			throws MailException {
-		parse(jsonObj, mail, TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), session.getContext())
-				.getTimeZone()));
+		try {
+			parse(jsonObj, mail, TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()))
+					.getTimeZone()));
+		} catch (final ContextException e) {
+			throw new MailException(e);
+		}
 	}
 
 	/**

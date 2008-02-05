@@ -56,6 +56,8 @@ import javax.mail.MessagingException;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.imap.ACLPermission;
@@ -325,7 +327,7 @@ public final class IMAPFolderConverter {
 					mailFolder.setDefaulFolder(true);
 				} else if (isDefaultFoldersChecked(session)) {
 					final int len = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
-							session.getContext()).isSpamEnabled() ? 6 : 4;
+							ContextStorage.getStorageContext(session.getContextId())).isSpamEnabled() ? 6 : 4;
 					for (int i = 0; (i < len) && !mailFolder.isDefaulFolder(); i++) {
 						if (mailFolder.getFullname().equals(getDefaultMailFolder(i, session))) {
 							mailFolder.setDefaulFolder(true);
@@ -364,6 +366,8 @@ public final class IMAPFolderConverter {
 			return mailFolder;
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e);
+		} catch (final ContextException e) {
+			throw new IMAPException(e);
 		}
 	}
 
@@ -455,8 +459,11 @@ public final class IMAPFolderConverter {
 	 *            The mail folder to whom the ACL should be applied
 	 * @param ownRights
 	 *            The rights to add as an ACL
+	 * @throws MailException
+	 *             If own ACL cannot be created
 	 */
-	private static void addOwnACL(final Session session, final MailFolder mailFolder, final Rights ownRights) {
+	private static void addOwnACL(final Session session, final MailFolder mailFolder, final Rights ownRights)
+			throws MailException {
 		final ACLPermission aclPerm = new ACLPermission(session);
 		aclPerm.setEntity(session.getUserId());
 		aclPerm.parseRights(ownRights);

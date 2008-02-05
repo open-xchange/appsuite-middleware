@@ -72,6 +72,9 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
@@ -137,8 +140,9 @@ public final class MimeReply {
 	public static MailMessage getReplyMail(final MimeMessage originalMsg, final boolean replyAll,
 			final Session session, final javax.mail.Session mailSession) throws MailException {
 		try {
+			final Context ctx = ContextStorage.getStorageContext(session.getContextId());
 			final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
-					session.getContext());
+					ctx);
 			/*
 			 * New MIME message with a dummy session
 			 */
@@ -211,8 +215,7 @@ public final class MimeReply {
 				/*
 				 * Add user's aliases to filter
 				 */
-				final String[] userAddrs = UserStorage.getStorageUser(session.getUserId(), session.getContext())
-						.getAliases();
+				final String[] userAddrs = UserStorage.getStorageUser(session.getUserId(), ctx).getAliases();
 				if (userAddrs != null && userAddrs.length > 0) {
 					final StringBuilder addrBuilder = new StringBuilder();
 					addrBuilder.append(userAddrs[0]);
@@ -314,7 +317,7 @@ public final class MimeReply {
 			final String replyText;
 			{
 				final List<String> list = new ArrayList<String>();
-				final Locale locale = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getLocale();
+				final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
 				generateReplyText(originalMsg, retvalContentType, new StringHelper(locale), locale, usm, mailSession,
 						list);
 				final StringBuilder replyTextBuilder = new StringBuilder(8192 * 2);
@@ -366,6 +369,8 @@ public final class MimeReply {
 			throw MIMEMailException.handleMessagingException(e);
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+		} catch (final ContextException e) {
+			throw new MailException(e);
 		}
 
 	}

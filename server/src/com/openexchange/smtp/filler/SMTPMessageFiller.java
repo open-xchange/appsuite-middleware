@@ -49,10 +49,10 @@
 
 package com.openexchange.smtp.filler;
 
+import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
 import static com.openexchange.mail.utils.MessageUtility.formatHrefLinks;
 import static com.openexchange.mail.utils.MessageUtility.performLineFolding;
 import static com.openexchange.mail.utils.MessageUtility.replaceHTMLSimpleQuotesForDisplay;
-import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -85,6 +85,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.ManagedUploadFile;
@@ -152,6 +153,8 @@ public final class SMTPMessageFiller {
 	 */
 	private final Session session;
 
+	private final Context ctx;
+
 	private final UserSettingMail usm;
 
 	private Set<String> uploadFileIDs;
@@ -163,11 +166,14 @@ public final class SMTPMessageFiller {
 	 * 
 	 * @param session
 	 *            The session
+	 * @param ctx
+	 *            The context
 	 */
-	public SMTPMessageFiller(final Session session) {
+	public SMTPMessageFiller(final Session session, final Context ctx) {
 		super();
 		this.session = session;
-		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContext());
+		this.ctx = ctx;
+		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
 	}
 
 	private Html2TextConverter getConverter() {
@@ -332,8 +338,8 @@ public final class SMTPMessageFiller {
 			 */
 			AppendVCard: if (mail.isAppendVCard()) {
 				final String fileName = MimeUtility.encodeText(new StringBuilder(UserStorage.getStorageUser(
-						session.getUserId(), session.getContext()).getDisplayName().replaceAll(" +", ""))
-						.append(".vcf").toString(), SMTPConfig.getDefaultMimeCharset(), "Q");
+						session.getUserId(), ctx).getDisplayName().replaceAll(" +", "")).append(".vcf").toString(),
+						SMTPConfig.getDefaultMimeCharset(), "Q");
 				for (int i = 0; i < size; i++) {
 					final MailPart part = mail.getEnclosedMailPart(i);
 					if (fileName.equalsIgnoreCase(part.getFileName())) {
@@ -465,17 +471,17 @@ public final class SMTPMessageFiller {
 	}
 
 	private String getUserVCard() throws SMTPException {
-		final User userObj = UserStorage.getStorageUser(session.getUserId(), session.getContext());
+		final User userObj = UserStorage.getStorageUser(session.getUserId(), ctx);
 		final OXContainerConverter converter = new OXContainerConverter(session);
 		Connection readCon = null;
 		try {
 			try {
-				readCon = DBPool.pickup(session.getContext());
+				readCon = DBPool.pickup(ctx);
 				ContactObject contactObj = null;
 				try {
 					contactObj = Contacts.getContactById(userObj.getContactId(), userObj.getId(), userObj.getGroups(),
-							session.getContext(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-									session.getUserId(), session.getContext()), readCon);
+							ctx, UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
+									ctx), readCon);
 				} catch (final OXException oxExc) {
 					throw new SMTPException(oxExc);
 				} catch (final Exception e) {
@@ -491,7 +497,7 @@ public final class SMTPMessageFiller {
 				return new String(os.toByteArray(), SMTPConfig.getDefaultMimeCharset());
 			} finally {
 				if (readCon != null) {
-					DBPool.closeReaderSilent(session.getContext(), readCon);
+					DBPool.closeReaderSilent(ctx, readCon);
 					readCon = null;
 				}
 				converter.close();
@@ -717,7 +723,7 @@ public final class SMTPMessageFiller {
 		/*
 		 * Set common headers
 		 */
-		fillCommonHeaders(smtpMessage, session);
+		fillCommonHeaders(smtpMessage, session, ctx);
 		/*
 		 * Headers
 		 */
@@ -746,7 +752,7 @@ public final class SMTPMessageFiller {
 	 * @throws MessagingException
 	 *             If headers cannot be set
 	 */
-	public static void fillCommonHeaders(final SMTPMessage smtpMessage, final Session session)
+	public static void fillCommonHeaders(final SMTPMessage smtpMessage, final Session session, final Context ctx)
 			throws MessagingException {
 		/*
 		 * Set mailer
@@ -760,8 +766,7 @@ public final class SMTPMessageFiller {
 			 * Get context's admin contact object
 			 */
 			final ContactObject c = new RdbContactSQLInterface(session).getObjectById(UserStorage.getInstance()
-					.getUser(session.getContext().getMailadmin(), session.getContext()).getContactId(),
-					FolderObject.SYSTEM_LDAP_FOLDER_ID);
+					.getUser(ctx.getMailadmin(), ctx).getContactId(), FolderObject.SYSTEM_LDAP_FOLDER_ID);
 			if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
 				smtpMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, c.getCompany());
 			}
@@ -775,8 +780,7 @@ public final class SMTPMessageFiller {
 			/*
 			 * Set ENVELOPE-FROM in SMTP message to user's primary email address
 			 */
-			smtpMessage
-					.setEnvelopeFrom(UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail());
+			smtpMessage.setEnvelopeFrom(UserStorage.getStorageUser(session.getUserId(), ctx).getMail());
 		}
 	}
 
