@@ -201,9 +201,7 @@ public final class contacts extends XmlServlet {
 		contactwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
 	}
 	
-	protected boolean hasModulePermission(final Session sessionObj) throws ContextException{
-		Context ct = ContextStorage.getStorageContext(sessionObj.getContextId());
-
+	protected boolean hasModulePermission(final Session sessionObj, Context ct) {
 		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ct);
 		return (uc.hasWebDAVXML() && uc.hasContact());
 	}

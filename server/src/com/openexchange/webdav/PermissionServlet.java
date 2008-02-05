@@ -55,7 +55,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.webdav.OXServlet;
 
@@ -73,7 +75,8 @@ public abstract class PermissionServlet extends OXServlet {
         }
 		final Session sessionObj = getSession(req);
 		try{
-			if (sessionObj != null && !hasModulePermission(sessionObj)) {
+			Context ct = ContextStorage.getStorageContext(sessionObj.getContextId());
+			if (sessionObj != null && !hasModulePermission(sessionObj, ct)) {
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
 				return;
 			}
@@ -83,5 +86,5 @@ public abstract class PermissionServlet extends OXServlet {
         super.service(req, resp);
 	}
 	
-	protected abstract boolean hasModulePermission(Session sessionObj) throws ContextException;
+	protected abstract boolean hasModulePermission(Session sessionObj, Context ctx);
 }
