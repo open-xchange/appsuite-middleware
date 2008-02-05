@@ -313,14 +313,20 @@ public class Login extends AJAXServlet {
 				sessionObj = sessiondCon.getSessionByRandomToken(randomToken);
 				
 				try {
-					final Context context = sessionObj.getContext();
-					final User user = UserStorage.getStorageUser(sessionObj.getUserId(), context);
+					final Context context = ContextStorage.getInstance()
+                        .getContext(sessionObj.getContextId());
+					final User user = UserStorage.getInstance().getUser(
+                        sessionObj.getUserId(), context);
 					if (!context.isEnabled() ||!user.isMailEnabled()) {
 						resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 					}
 				} catch (UndeclaredThrowableException e) {
 					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-				}
+				} catch (ContextException e) {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                } catch (LdapException e) {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                }
 			} finally {
 				SessiondService.getInstance().ungetService(sessiondCon);
 			}
@@ -349,9 +355,12 @@ public class Login extends AJAXServlet {
 										.checkIP(sessionObj.getLocalIp(), req.getRemoteAddr());
 								
 								try {
-									final Context context = sessionObj.getContext();
-									final User user = UserStorage.getStorageUser(sessionObj.getUserId(), context);
-									if (!context.isEnabled() ||!user.isMailEnabled()) {
+									final Context ctx = ContextStorage
+                                        .getInstance().getContext(sessionObj
+                                        .getContextId());
+									final User user = UserStorage.getInstance()
+                                        .getUser(sessionObj.getUserId(), ctx);
+									if (!ctx.isEnabled() ||!user.isMailEnabled()) {
 										 throw new LoginException(LoginException.Code.INVALID_CREDENTIALS);
 									}
 								} catch (UndeclaredThrowableException e) {
@@ -385,6 +394,12 @@ public class Login extends AJAXServlet {
 						OXJSONException.Code.JSON_WRITE_ERROR, e);
 				LOG.error(oje.getMessage(), oje);
 				response.setException(oje);
+            } catch (final ContextException e) {
+                LOG.debug(e.getMessage(), e);
+                response.setException(e);
+            } catch (final LdapException e) {
+                LOG.debug(e.getMessage(), e);
+                response.setException(e);
 			} catch (LoginException e) {
 				if (LoginException.Source.USER == e.getSource()) {
 					LOG.debug(e.getMessage(), e);

@@ -67,6 +67,10 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -94,8 +98,8 @@ public class Appointment extends DataServlet {
 	            writeResponse(response, httpServletResponse);
 	            return;
 			}
-
-			final AppointmentRequest appointmentRequest = new AppointmentRequest(sessionObj);
+			final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+			final AppointmentRequest appointmentRequest = new AppointmentRequest(sessionObj, ctx);
 			final Object responseObj = appointmentRequest.action(action, jsonObj);
 			response.setTimestamp(appointmentRequest.getTimestamp());
 			response.setData(responseObj);
@@ -127,6 +131,9 @@ public class Appointment extends DataServlet {
 		} catch (OXJSONException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
+        } catch (final ContextException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
         }
 		
 		writeResponse(response, httpServletResponse);
@@ -152,20 +159,17 @@ public class Appointment extends DataServlet {
 		            writeResponse(response, httpServletResponse);
 		            return;
 				}
-
+                final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+                appointmentRequest = new AppointmentRequest(sessionObj, ctx);
 				if (data.charAt(0) == '[') {
 					final JSONArray jsonDataArray = new JSONArray(data);
 					jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataArray);
-					
-					appointmentRequest = new AppointmentRequest(sessionObj);
 					final Object responseObj = appointmentRequest.action(action, jsonObj);
 					response.setTimestamp(appointmentRequest.getTimestamp());
 					response.setData(responseObj);
 				} else if (data.charAt(0) == '{') {
 					final JSONObject jsonDataObject = new JSONObject(data);
 					jsonObj.put(AJAXServlet.PARAMETER_DATA, jsonDataObject);
-					
-					appointmentRequest = new AppointmentRequest(sessionObj);
 					final Object responseObj = appointmentRequest.action(action, jsonObj);
 					response.setTimestamp(appointmentRequest.getTimestamp());
 					response.setData(responseObj);
@@ -203,6 +207,9 @@ public class Appointment extends DataServlet {
         } catch (OXJSONException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
+        } catch (final ContextException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
 		}
 		
 		writeResponse(response, httpServletResponse);
@@ -210,7 +217,17 @@ public class Appointment extends DataServlet {
 	
 	@Override
 	protected boolean hasModulePermission(final Session sessionObj) {
-		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-				sessionObj.getContext()).hasCalendar();
+        try {
+            final Context ctx = ContextStorage.getInstance().getContext(
+                sessionObj.getContextId());
+            return UserConfigurationStorage.getInstance().getUserConfiguration(
+                sessionObj.getUserId(), ctx).hasCalendar();
+        } catch (ContextException e) {
+            LOG.error(e.getMessage(), e);
+            return false;
+        } catch (UserConfigurationException e) {
+            LOG.error(e.getMessage(), e);
+            return false;
+        }
 	}
 }
