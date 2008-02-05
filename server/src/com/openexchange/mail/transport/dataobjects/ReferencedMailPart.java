@@ -83,7 +83,6 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.session.Session;
-import com.openexchange.smtp.SMTPException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -145,7 +144,7 @@ public abstract class ReferencedMailPart extends MailPart {
 	 * 
 	 * @param referencedMail
 	 *            The original mail containing the referenced part
-	 * @throws SMTPException
+	 * @throws MailException
 	 *             If referenced part cannot be loaded
 	 */
 	public String loadReferencedPart(final MailMessage referencedMail, final Session session) throws MailException {
@@ -159,7 +158,7 @@ public abstract class ReferencedMailPart extends MailPart {
 	 *            The parser used to filter part
 	 * @param referencedMail
 	 *            The original mail containing the referenced part
-	 * @throws SMTPException
+	 * @throws MailException
 	 *             If referenced part cannot be loaded
 	 */
 	public String loadReferencedPart(final MailMessageParser parserArg, final MailMessage referencedMail,

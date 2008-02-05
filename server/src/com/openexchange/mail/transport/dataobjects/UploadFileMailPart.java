@@ -73,10 +73,9 @@ import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.smtp.dataobjects.SMTPFilePart;
 
 /**
- * {@link SMTPFilePart} - A {@link MailPart} implementation that keeps a
+ * {@link UploadFileMailPart} - A {@link MailPart} implementation that keeps a
  * reference to a temporary uploaded file that shall be added as an attachment
  * later
  * 
