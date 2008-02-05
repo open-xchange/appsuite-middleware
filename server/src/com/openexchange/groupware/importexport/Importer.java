@@ -55,6 +55,7 @@ import java.util.Map;
 
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * This interface defines an importer, meaning a class able to
@@ -74,7 +75,7 @@ public interface Importer {
 	 * @return true, if this importer can import this format for this module; false otherwise
 	 * @see com.openexchange.groupware.Types
 	 */
-	public abstract boolean canImport(Session sessObj, Format format, List<String> folders, Map<String, String[]> optionalParams) throws ImportExportException;
+	public abstract boolean canImport(ServerSession sessObj, Format format, List<String> folders, Map<String, String[]> optionalParams) throws ImportExportException;
 
 	/**
 	 * 
@@ -88,7 +89,7 @@ public interface Importer {
 	 * @see com.openexchange.groupware.Types
 	 */
 	public abstract List<ImportResult> importData(
-			Session sessObj,
+			ServerSession sessObj,
 			Format format,
 			InputStream is,
 			List<String> folders, 

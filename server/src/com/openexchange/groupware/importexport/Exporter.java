@@ -53,6 +53,7 @@ import java.util.Map;
 
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * Defines a class able to export a certain type of OX folder as a certain format
@@ -70,7 +71,7 @@ public interface Exporter {
 	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
 	 * @return true, if the given folders can be exported in the given format; false otherwise
 	 */
-	public abstract boolean canExport(Session sessObj, Format format, String folder, Map<String, String[]> optionalParams) throws ImportExportException;
+	public abstract boolean canExport(ServerSession sessObj, Format format, String folder, Map<String, String[]> optionalParams) throws ImportExportException;
 
 	/**
 	 * 
@@ -82,7 +83,7 @@ public interface Exporter {
 	 * @return InputStream in requested format.
 	 * @throws ImportExportException
 	 */
-	public abstract SizedInputStream exportData(Session sessObj, Format format, String folder, 
+	public abstract SizedInputStream exportData(ServerSession sessObj, Format format, String folder,
 			int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException;
 
 	/**
@@ -96,7 +97,7 @@ public interface Exporter {
 	 * @return InputStream in requested format.
 	 * @throws ImportExportException
 	 */
-	public abstract SizedInputStream exportData(Session sessObj, Format format, String folder, int objectId,
+	public abstract SizedInputStream exportData(ServerSession sessObj, Format format, String folder, int objectId,
 			int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException;
 
 }

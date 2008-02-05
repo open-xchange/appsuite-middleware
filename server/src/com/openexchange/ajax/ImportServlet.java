@@ -78,6 +78,9 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.session.Session;
 
 @OXExceptionSource(
     classId=ImportExportExceptionClasses.IMPORTSERVLET, 
@@ -162,10 +165,11 @@ public class ImportServlet extends ImportExport {
 					throw EXCEPTIONS.create(3);
 				}
 				//actual import
-				importResult = importerExporter.importData(getSessionObject(
-                    req), format, new FileInputStream(upload), folders,
+                ServerSession session = new ServerSessionAdapter(getSessionObject(
+                        req));
+                importResult = importerExporter.importData(session, format, new FileInputStream(upload), folders,
                     req.getParameterMap());
-			} finally {
+            } finally {
 				if (event != null) {
 					event.cleanUp();
 				}

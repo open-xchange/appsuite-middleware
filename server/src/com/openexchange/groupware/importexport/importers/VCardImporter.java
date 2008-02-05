@@ -92,6 +92,7 @@ import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.openexchange.tools.versit.filetokenizer.VCardFileToken;
 import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
+import com.openexchange.tools.session.ServerSession;
 
 @OXExceptionSource(
     classId=ImportExportExceptionClasses.VCARDIMPORTER,
@@ -138,7 +139,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 	
 	private static ImportExportExceptionFactory importExportExceptionFactory = new ImportExportExceptionFactory(VCardImporter.class);
 	
-	public boolean canImport(final Session sessObj, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
+	public boolean canImport(final ServerSession sessObj, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
 		if (!format.equals(Format.VCARD)) {
 			return false;
 		}
@@ -190,7 +191,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 		return false;
 	}
 	
-	public List<ImportResult> importData(final Session sessObj, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
+	public List<ImportResult> importData(final ServerSession sessObj, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
 		
 		int contactFolderId = -1;
 		
@@ -213,12 +214,13 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 		}
 		
 		final ContactSQLInterface contactInterface = new RdbContactSQLInterface(sessObj);
-		final OXContainerConverter oxContainerConverter = new OXContainerConverter(sessObj);
+		OXContainerConverter oxContainerConverter = null;
 		
 		List<ImportResult> list = new ArrayList<ImportResult>();
 		
 		try {
-			VCardTokenizer tokenizer = new VCardTokenizer(is);
+            oxContainerConverter = new OXContainerConverter(sessObj);
+            VCardTokenizer tokenizer = new VCardTokenizer(is);
 			List<VCardFileToken> chunks = tokenizer.split();
             if (0 == chunks.size()) {
                 throw importExportExceptionFactory.create(8);
@@ -268,8 +270,12 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 		} catch (IOException e) {
 			LOG.error(e);
 			throw importExportExceptionFactory.create(4, contactFolderId);
-		} finally {
-			oxContainerConverter.close();
+		} catch (ConverterException e) {
+            LOG.error(e);
+			throw importExportExceptionFactory.create(1, e);
+        } finally {
+            if(oxContainerConverter != null)
+                oxContainerConverter.close();
 		}
 		
 		return list;

@@ -82,6 +82,7 @@ import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
+import com.openexchange.tools.session.ServerSession;
 
 @OXExceptionSource(
 classId=ImportExportExceptionClasses.VCARDEXPORTER,
@@ -214,7 +215,7 @@ category={
 		ContactObject.DEFAULT_ADDRESS
 	};
 	
-	public boolean canExport(final Session sessObj, final Format format, final String folder, final Map<String, String[]> optionalParams) throws ImportExportException {
+	public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map<String, String[]> optionalParams) throws ImportExportException {
 		if (!format.equals(Format.VCARD)) {
 			return false;
 		}
@@ -251,7 +252,7 @@ category={
 		return false;
 	}
 	
-	public SizedInputStream exportData(Session sessObj, Format format, String folder, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
+	public SizedInputStream exportData(ServerSession sessObj, Format format, String folder, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		try {
 			if (fieldsToBeExported == null) {
@@ -283,7 +284,7 @@ category={
 				Format.VCARD);
 	}
 	
-	public SizedInputStream exportData(Session sessObj, Format format, String folder, int objectId, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
+	public SizedInputStream exportData(ServerSession sessObj, Format format, String folder, int objectId, int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws ImportExportException {
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		try {
 			final VersitDefinition contactDef = Versit.getDefinition("text/vcard");

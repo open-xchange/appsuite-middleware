@@ -94,6 +94,7 @@ import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.ConverterPrivacyException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
+import com.openexchange.tools.session.ServerSession;
 
 @OXExceptionSource(
     classId=ImportExportExceptionClasses.ICALIMPORTER, 
@@ -148,7 +149,7 @@ public class ICalImporter extends AbstractImporter implements Importer {
 	
 	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(ICalImporter.class);
 	
-	public boolean canImport(final Session sessObj, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException{
+	public boolean canImport(final ServerSession sessObj, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException{
 		if(!format.equals(Format.ICAL)){
 			return false;
 		}
@@ -202,7 +203,7 @@ public class ICalImporter extends AbstractImporter implements Importer {
 		return false;
 	}
 	
-	public List<ImportResult> importData(final Session sessObj, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
+	public List<ImportResult> importData(final ServerSession sessObj, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws ImportExportException {
 		int appointmentFolderId = -1;
 		int taskFolderId = -1;
 		
@@ -247,12 +248,13 @@ public class ICalImporter extends AbstractImporter implements Importer {
 			taskInterface = new TasksSQLInterfaceImpl(sessObj);
 		}
 		
-		final OXContainerConverter oxContainerConverter = new OXContainerConverter(sessObj);
+		OXContainerConverter oxContainerConverter = null;
 		
 		List<ImportResult> list = new ArrayList<ImportResult>();
 		
 		try {
-			final VersitDefinition def = ICalendar.definition;
+            oxContainerConverter = new OXContainerConverter(sessObj);
+            final VersitDefinition def = ICalendar.definition;
 			final VersitDefinition.Reader versitReader = def.getReader(is, "UTF-8");
 			final VersitObject rootVersitObject = def.parseBegin(versitReader);
 			if (null == rootVersitObject) {
@@ -358,8 +360,11 @@ public class ICalImporter extends AbstractImporter implements Importer {
 			}
 		} catch (IOException e) {
             throw EXCEPTIONS.create(3, e, e.getMessage());
+        } catch (ConverterException e) {
+            throw EXCEPTIONS.create(1, e);
         } finally {
-			oxContainerConverter.close();
+            if(oxContainerConverter != null)
+                oxContainerConverter.close();
 		}
 		
 		return list;

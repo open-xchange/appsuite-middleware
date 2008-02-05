@@ -91,6 +91,8 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.session.ServerSession;
+
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
@@ -226,7 +228,7 @@ public class CSVContactExporter implements Exporter {
 	private static final ImportExportExceptionFactory EXCEPTIONS = new ImportExportExceptionFactory(CSVContactExporter.class);
 	private static final Log LOG = LogFactory.getLog(CSVContactExporter.class);
 	
-	public boolean canExport(final Session sessObj, final Format format, final String folder, final Map <String, String[]> optionalParams)  throws ImportExportException {
+	public boolean canExport(final ServerSession sessObj, final Format format, final String folder, final Map <String, String[]> optionalParams)  throws ImportExportException {
 		if( !format.equals(Format.CSV) ){
 			return false;
 		}
@@ -253,7 +255,7 @@ public class CSVContactExporter implements Exporter {
 	}
 
 	
-	public SizedInputStream exportData(final Session sessObj, final Format format, final String folder, 
+	public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, 
 			final int[] fieldsToBeExported, final Map <String, String[]> optionalParams) throws ImportExportException {
 		if(! canExport(sessObj, format, folder, optionalParams)){
 			EXCEPTIONS.create(0, folder, format);
@@ -301,7 +303,7 @@ public class CSVContactExporter implements Exporter {
 	}
 
 	
-	public SizedInputStream exportData(final Session sessObj, final Format format, final String folder, 
+	public SizedInputStream exportData(final ServerSession sessObj, final Format format, final String folder, 
 			final int objectId,	final int[] fieldsToBeExported, final Map <String, String[]> optionalParams) throws ImportExportException {
 		if(! canExport(sessObj, format, folder, optionalParams)){
 			EXCEPTIONS.create(0, folder, format);
