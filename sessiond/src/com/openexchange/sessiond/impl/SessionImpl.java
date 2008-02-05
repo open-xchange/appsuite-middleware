@@ -70,7 +70,7 @@ public class SessionImpl implements Session {
 	
 	protected String password;
 	
-    protected Context context;
+    protected int contextId;
     
     protected int userId;
     
@@ -92,18 +92,19 @@ public class SessionImpl implements Session {
         this.userId = userId;
 		this.loginName = loginName;
 		this.password = password;
-        this.context = context;
         this.sessionId = sessionId;
         this.secret = secret;
         this.randomToken = randomToken;
         this.localIp = localIp;
         
+        contextId = context.getContextId();
+        
 		parameters = new ConcurrentHashMap<String, Object>();
 		ajaxUploadFiles = new ConcurrentHashMap<String, ManagedUploadFile>();
 	}
 
-    public Context getContext() {
-        return context;
+    public int getContextId() {
+        return contextId;
     }
 
     public Object getParameter(String name) {
