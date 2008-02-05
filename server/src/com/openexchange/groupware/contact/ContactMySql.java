@@ -131,7 +131,13 @@ public class ContactMySql implements ContactSql {
 		this.ctx = ctx;
 		this.user = userId;
 	}
-
+	
+	public ContactMySql(final Session so, final Context ct) {			
+		this.ctx = ct;
+		this.so = so;
+		this.user = so.getUserId();
+	}
+	
 	public String getWhere() {
 
 		StringBuilder sb = new StringBuilder(" WHERE co.cid = "+ctx.getContextId()+" AND ");
