@@ -186,19 +186,19 @@ public final class folders extends XmlServlet {
 	}
 	
 	@Override
-	protected void startWriter(final Session sessionObj, final int objectId, final int folderId, final OutputStream os) throws Exception {
-		final FolderWriter folderwriter = new FolderWriter(sessionObj);
+	protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId, final OutputStream os) throws Exception {
+		final FolderWriter folderwriter = new FolderWriter(sessionObj, ctx);
 		folderwriter.startWriter(objectId, os);
 	}
 
 	@Override
-	protected void startWriter(final Session sessionObj, final int folderId, final boolean modified, final boolean deleted, final Date lastsync, final OutputStream os) throws Exception {
-		startWriter(sessionObj, folderId, modified, deleted, false, lastsync, os);
+	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean modified, final boolean deleted, final Date lastsync, final OutputStream os) throws Exception {
+		startWriter(sessionObj, ctx, folderId, modified, deleted, false, lastsync, os);
 	}
 	
 	@Override
-	protected void startWriter(final Session sessionObj, final int folderId, final boolean modified, final boolean deleted, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
-		final FolderWriter folderwriter = new FolderWriter(sessionObj);
+	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean modified, final boolean deleted, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
+		final FolderWriter folderwriter = new FolderWriter(sessionObj, ctx);
 		folderwriter.startWriter(modified, deleted, bList, lastsync, os);
 	}
 	

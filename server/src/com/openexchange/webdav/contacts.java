@@ -187,7 +187,7 @@ public final class contacts extends XmlServlet {
 	
 	@Override
 	protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId, final OutputStream os) throws Exception {
-		final ContactWriter contactwriter = new ContactWriter(sessionObj, ctx);
+		final ContactWriter contactwriter = new ContactWriter(sessionObj);
 		contactwriter.startWriter(objectId, folderId, os);
 	}
 
@@ -198,7 +198,7 @@ public final class contacts extends XmlServlet {
 	
 	@Override
 	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
-		final ContactWriter contactwriter = new ContactWriter(sessionObj, ctx);
+		final ContactWriter contactwriter = new ContactWriter(sessionObj);
 		contactwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
 	}
 	
