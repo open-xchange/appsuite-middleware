@@ -67,6 +67,7 @@ import com.openexchange.ajax.writer.ReminderWriter;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -75,6 +76,7 @@ import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.reminder.EmptyReminderDeleteImpl;
@@ -129,10 +131,12 @@ public class ReminderRequest {
         final int id = DataParser.checkInt(jData, AJAXServlet.PARAMETER_ID);
         final int recurrencePosition = DataParser.parseInt(jData, CalendarFields.RECURRENCE_POSITION);
         
-        final ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
         final JSONArray jsonArray = new JSONArray();
         
         try {
+            final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+            final ReminderSQLInterface reminderSql = new ReminderHandler(ctx);
+        	
             final int uid = userObj.getId();
             final ReminderObject reminder = reminderSql.loadReminder(id);
             final ReminderDeleteInterface reminderDeleteInterface;
@@ -178,6 +182,8 @@ public class ReminderRequest {
                 return jsonArray;
             }
             throw oxe;
+        } catch(AbstractOXException exc) {
+            throw new OXException(exc);
         }
         
         return jsonArray;
@@ -186,11 +192,14 @@ public class ReminderRequest {
     private JSONArray actionUpdates(final JSONObject jsonObject) throws OXMandatoryFieldException, JSONException, OXException, SearchIteratorException, OXJSONException, AjaxException {
         timestamp = DataParser.checkDate(jsonObject, AJAXServlet.PARAMETER_TIMESTAMP);
         
-        final ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
-        final SearchIterator it = reminderSql.listModifiedReminder(userObj.getId(), timestamp);
-        
         final JSONArray jsonResponseArray = new JSONArray();
+        SearchIterator it = null;
+       
         try {
+        	final Context ctx = ContextStorage.getInstance().getContext(sessionObj);
+            final ReminderSQLInterface reminderSql = new ReminderHandler(ctx);
+            it = reminderSql.listModifiedReminder(userObj.getId(), timestamp);
+
             while (it.hasNext()) {
                 final ReminderWriter reminderWriter = new ReminderWriter(TimeZone.getTimeZone(userObj.getTimeZone()));
                 final ReminderObject reminderObj = (ReminderObject)it.next();
@@ -218,8 +227,8 @@ public class ReminderRequest {
             }
             
             return jsonResponseArray;
-//        } catch (SQLException e) {
-//            throw new OXException("SQLException occurred", e);
+        } catch (AbstractOXException e) {
+        	throw new OXException(e);
         } finally {
             if (null != it) {
                 it.close();
@@ -235,7 +244,8 @@ public class ReminderRequest {
         final JSONArray jsonResponseArray = new JSONArray();
         
         try {
-            final ReminderSQLInterface reminderSql = new ReminderHandler(sessionObj);
+        	final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+            final ReminderSQLInterface reminderSql = new ReminderHandler(ctx);
             it = reminderSql.listReminder(userObj.getId(), end);
             
             
@@ -267,6 +277,8 @@ public class ReminderRequest {
             return jsonResponseArray;
         } catch (SQLException e) {
             throw new OXException("SQLException occurred", e);
+        } catch (AbstractOXException e) {
+            throw new OXException(e);
         } finally {
             if (null != it) {
                 it.close();
