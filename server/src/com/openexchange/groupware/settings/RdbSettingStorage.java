@@ -225,7 +225,7 @@ public class RdbSettingStorage extends SettingStorage {
         if (null != reader) {
             if (reader.isAvailable(userConfig)) {
                 try {
-                    reader.getValue(session, ctx, user, null, setting);
+                    reader.getValue(session, ctx, user, userConfig, setting);
                 } catch (SettingException e) {
                     LOG.error("Problem while reading setting value.", e);
                 }
