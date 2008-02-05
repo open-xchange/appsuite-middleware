@@ -116,13 +116,18 @@ public class InfostoreRequest extends CommonRequest {
 
 	private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(InfostoreRequest.class);
 
-	public InfostoreRequest(final Session sessionObj, final Context ctx, final JSONWriter w) {
-		super(w);
-        this.ctx = ctx;
-        this.sessionObj = new ServerSessionAdapter(sessionObj, ctx);
+    public InfostoreRequest(final ServerSession session, final JSONWriter w) {
+        super(w);
+        this.ctx = session.getContext();
+        this.sessionObj = session;
 		userConfiguration = UserConfigurationStorage.getInstance()
 				.getUserConfigurationSafe(sessionObj.getUserId(), ctx);
 		user = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+    }
+
+    public InfostoreRequest(final Session sessionObj, final Context ctx, final JSONWriter w) {
+		this(new ServerSessionAdapter(sessionObj, ctx),w);
+
 	}
 
 	public static boolean hasPermission(UserConfiguration userConfig) {
