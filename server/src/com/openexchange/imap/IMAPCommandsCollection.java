@@ -958,7 +958,7 @@ public final class IMAPCommandsCollection {
 									throw new ProtocolException("No header item found in FETCH response");
 								}
 							}
-							final Enumeration e;
+							final Enumeration<?> e;
 							{
 								if (null == headerStream) {
 									headerStream = getHeaderStream(p.isREV1());
