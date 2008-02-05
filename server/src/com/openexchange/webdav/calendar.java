@@ -74,6 +74,8 @@ import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
@@ -103,6 +105,8 @@ public final class calendar extends XmlServlet {
 		final AppointmentSQLInterface appointmentsql = new CalendarSql(sessionObj);
 		
 		if (isTag(parser, "prop", "DAV:")) {
+			final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+			
 			String client_id = null;
 			
 			int method = 0;
@@ -116,7 +120,7 @@ public final class calendar extends XmlServlet {
 				
 				method = ap.getMethod();
 				
-				appointmentobject.setContext(sessionObj.getContext());
+				appointmentobject.setContext(ctx);
 				
 				final Date lastModified = appointmentobject.getLastModified();
 				appointmentobject.removeLastModified();
@@ -240,8 +244,8 @@ public final class calendar extends XmlServlet {
 	}
 	
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj) {
-		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
+	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
+		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx);
 		return (uc.hasWebDAVXML() && uc.hasCalendar());
 	}
 }

@@ -71,6 +71,8 @@ import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderTools;
@@ -98,7 +100,8 @@ public final class folders extends XmlServlet {
 		final XMLOutputter xo = new XMLOutputter();
 		
 		final FolderParser folderparser = new FolderParser(sessionObj);
-		final FolderSQLInterface foldersql = new RdbFolderSQLInterface(sessionObj);
+		final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+		final FolderSQLInterface foldersql = new RdbFolderSQLInterface(sessionObj, ctx);
 		
 		if (isTag(parser, "prop", "DAV:")) {
 			String client_id = null;
@@ -125,11 +128,11 @@ public final class folders extends XmlServlet {
 						if (folderobject.containsObjectID()) {
 							final int object_id = folderobject.getObjectID();
 							
-							if (object_id == OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserId(), sessionObj.getContext())) {
+							if (object_id == OXFolderTools.getCalendarDefaultFolder(sessionObj.getUserId(), ctx)) {
 								folderobject.removeFolderName();
-							} else if (object_id == OXFolderTools.getContactDefaultFolder(sessionObj.getUserId(), sessionObj.getContext())) {
+							} else if (object_id == OXFolderTools.getContactDefaultFolder(sessionObj.getUserId(), ctx)) {
 								folderobject.removeFolderName();
-							} else if (object_id == OXFolderTools.getTaskDefaultFolder(sessionObj.getUserId(), sessionObj.getContext())) {
+							} else if (object_id == OXFolderTools.getTaskDefaultFolder(sessionObj.getUserId(), ctx)) {
 								folderobject.removeFolderName();
 							}
 						} else {
@@ -200,8 +203,8 @@ public final class folders extends XmlServlet {
 	}
 	
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj) {
-		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()).hasWebDAVXML();
+	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
+		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasWebDAVXML();
 	}
 }
 
