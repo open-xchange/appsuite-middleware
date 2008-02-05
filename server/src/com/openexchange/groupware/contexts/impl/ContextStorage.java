@@ -58,6 +58,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.update.exception.UpdateException;
 import com.openexchange.server.impl.Starter;
+import com.openexchange.session.Session;
 
 /**
  * This class defines the methods for accessing the storage of contexts.
@@ -99,6 +100,11 @@ public abstract class ContextStorage {
      */
     public abstract int getContextId(String loginContextInfo)
         throws ContextException;
+
+    public final Context getContext(final Session session)
+        throws ContextException {
+        return getContext(session.getContextId());
+    }
 
     /**
      * Creates a context implementation for the given context unique identifier.
@@ -208,6 +214,11 @@ public abstract class ContextStorage {
         }
         impl = null;
         CachingContextStorage.stop();
+    }
+
+    public static Context getStorageContext(final Session session)
+        throws ContextException {
+        return getStorageContext(session.getContextId());
     }
 
     /**
