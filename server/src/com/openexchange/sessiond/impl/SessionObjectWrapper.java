@@ -52,7 +52,6 @@ package com.openexchange.sessiond.impl;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
 
 /**
  * SessionObjectWrapper
@@ -73,14 +72,12 @@ public class SessionObjectWrapper {
 	 * @param sessionobjectidentifier
 	 *            The session identifier
 	 * @return a dummy instance of {@link SessionObject}
-	 * @throws LdapException
-	 *             If user data could not be loaded
 	 * @throws ContextException
 	 *             If corresponding {@link Context} object could not be loaded
 	 *             from given <code>context_id</code>
 	 */
 	public static final SessionObject createSessionObject(final int user_id, final int context_id,
-			final String sessionobjectidentifier) throws LdapException, ContextException {
+			final String sessionobjectidentifier) throws ContextException {
 		final Context context = ContextStorage.getInstance().getContext(context_id);
 		return createSessionObject(user_id, context, sessionobjectidentifier);
 	}
@@ -96,13 +93,11 @@ public class SessionObjectWrapper {
 	 * @param sessionobjectidentifier
 	 *            The session identifier
 	 * @return a dummy instance of {@link SessionObject}
-	 * @throws LdapException
-	 *             If user data could not be loaded
 	 */
 	public static final SessionObject createSessionObject(final int user_id, final Context ctx,
-			final String sessionobjectidentifier) throws LdapException {
+			final String sessionobjectidentifier) {
 		final SessionObject so = new SessionObject(sessionobjectidentifier);
-		so.setContext(ctx);
+		so.setContextId(ctx.getContextId());
         so.setUsername(String.valueOf(user_id));
 		return so;
 	}

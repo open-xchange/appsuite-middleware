@@ -63,6 +63,7 @@ import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.session.Session;
@@ -107,6 +108,8 @@ public final class VersitUtility {
 	 *            {@link CommonObject} is added
 	 * @param session
 	 *            The session providing needed user data
+	 * @param ctx
+	 *            The context
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 * @throws ConverterException
@@ -116,8 +119,8 @@ public final class VersitUtility {
 	 *             contact folder
 	 */
 	public static void saveVCard(final InputStream vcardInputStream, final String baseContentType,
-			final String charset, final List<CommonObject> retvalList, final Session session) throws IOException,
-			ConverterException, OXException {
+			final String charset, final List<CommonObject> retvalList, final Session session, final Context ctx)
+			throws IOException, ConverterException, OXException {
 		/*
 		 * Define versit reader
 		 */
@@ -134,9 +137,9 @@ public final class VersitUtility {
 			final VersitObject vo = def.parse(r);
 			if (vo != null) {
 				final ContactObject contactObj = oxc.convertContact(vo);
-				contactObj.setParentFolderID(new OXFolderAccess(session.getContext()).getDefaultFolder(
-						session.getUserId(), FolderObject.CONTACT).getObjectID());
-				contactObj.setContextId(session.getContext().getContextId());
+				contactObj.setParentFolderID(new OXFolderAccess(ctx).getDefaultFolder(session.getUserId(),
+						FolderObject.CONTACT).getObjectID());
+				contactObj.setContextId(ctx.getContextId());
 				contactInterface.insertContactObject(contactObj);
 				/*
 				 * Add to list
@@ -171,6 +174,8 @@ public final class VersitUtility {
 	 *            {@link CommonObject} is added
 	 * @param session
 	 *            The session providing needed user data
+	 * @param ctx
+	 *            The context
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 * @throws ConverterException
@@ -180,8 +185,8 @@ public final class VersitUtility {
 	 *             contact folder
 	 */
 	public static void saveICal(final InputStream icalInputStream, final String baseContentType, final String charset,
-			final List<CommonObject> retvalList, final Session session) throws IOException, ConverterException,
-			OXException {
+			final List<CommonObject> retvalList, final Session session, final Context ctx) throws IOException,
+			ConverterException, OXException {
 		/*
 		 * Define versit reader
 		 */
@@ -200,14 +205,14 @@ public final class VersitUtility {
 			VersitObject vo = null;
 			int defaultCalendarFolder = -1;
 			int defaultTaskFolder = -1;
-			final OXFolderAccess access = new OXFolderAccess(session.getContext());
+			final OXFolderAccess access = new OXFolderAccess(ctx);
 			while ((vo = def.parseChild(r, rootVersitObj)) != null) {
 				if (VERSIT_VEVENT.equals(vo.name)) {
 					/*
 					 * An appointment
 					 */
 					final CalendarDataObject appointmentObj = oxc.convertAppointment(vo);
-					appointmentObj.setContext(session.getContext());
+					appointmentObj.setContext(ctx);
 					if (defaultCalendarFolder == -1) {
 						defaultCalendarFolder = access.getDefaultFolder(session.getUserId(), FolderObject.CALENDAR)
 								.getObjectID();

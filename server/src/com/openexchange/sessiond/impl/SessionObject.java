@@ -55,7 +55,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.mail.Session;
 
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.upload.ManagedUploadFile;
 
@@ -96,7 +95,7 @@ public class SessionObject implements com.openexchange.session.Session {
 
 	private String randomToken;
 
-	private Context context;
+	private int contextId;
 
 	private Credentials cred;
 
@@ -148,8 +147,8 @@ public class SessionObject implements com.openexchange.session.Session {
 		this.creationtime = (Date) creationtime.clone();
 	}
 
-	public void setContext(final Context context) {
-		this.context = context;
+	public void setContextId(final int contextId) {
+		this.contextId = contextId;
 	}
 
 	public String getSessionID() {
@@ -196,8 +195,8 @@ public class SessionObject implements com.openexchange.session.Session {
 		return creationtime;
 	}
 
-	public Context getContext() {
-		return context;
+	public int getContextId() {
+		return contextId;
 	}
 
 	public void setCredentials(final Credentials cred) {
