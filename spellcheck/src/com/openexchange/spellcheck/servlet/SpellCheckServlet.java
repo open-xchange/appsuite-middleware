@@ -66,6 +66,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.PermissionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.session.Session;
@@ -383,7 +384,7 @@ public final class SpellCheckServlet extends PermissionServlet {
 	 * @see com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange.session.Session)
 	 */
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
 		return true;
 	}
 
