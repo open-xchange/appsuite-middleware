@@ -77,6 +77,8 @@ import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.GroupStorage;
@@ -123,8 +125,11 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	/**
 	 * Constructor which only uses <code>Session</code>. Optional connections
 	 * are going to be set to <code>null</code>.
+	 * 
+	 * @throws OXFolderException
+	 *             If instantiation fails
 	 */
-	public OXFolderManagerImpl(final Session session) {
+	public OXFolderManagerImpl(final Session session) throws OXFolderException {
 		this(session, null, null);
 	}
 
@@ -132,16 +137,23 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	 * Constructor which only uses <code>Session</code> and
 	 * <code>OXFolderAccess</code>. Optional connection are going to be set
 	 * to <code>null</code>.
+	 * 
+	 * @throws OXFolderException
+	 *             If instantiation fails
 	 */
-	public OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess) {
+	public OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess) throws OXFolderException {
 		this(session, oxfolderAccess, null, null);
 	}
 
 	/**
 	 * Constructor which uses <code>Session</code> and also uses a readable
 	 * and a writable <code>Connection</code>.
+	 * 
+	 * @throws OXFolderException
+	 *             If instantiation fails
 	 */
-	public OXFolderManagerImpl(final Session session, final Connection readCon, final Connection writeCon) {
+	public OXFolderManagerImpl(final Session session, final Connection readCon, final Connection writeCon)
+			throws OXFolderException {
 		this(session, null, readCon, writeCon);
 	}
 
@@ -149,15 +161,21 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	 * Constructor which uses <code>Session</code>,
 	 * <code>OXFolderAccess</code> and also uses a readable and a writable
 	 * <code>Connection</code>.
+	 * 
+	 * @throws OXFolderException
+	 *             If instantiation fails
 	 */
 	public OXFolderManagerImpl(final Session session, final OXFolderAccess oxfolderAccess, final Connection readCon,
-			final Connection writeCon) {
+			final Connection writeCon) throws OXFolderException {
 		super();
 		this.session = session;
-		this.ctx = session.getContext();
-		this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-				session.getContext());
-		this.user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
+		try {
+			this.ctx = ContextStorage.getStorageContext(session.getContextId());
+		} catch (final ContextException e) {
+			throw new OXFolderException(e);
+		}
+		this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
+		this.user = UserStorage.getStorageUser(session.getUserId(), ctx);
 		this.readCon = readCon;
 		this.writeCon = writeCon;
 		this.oxfolderAccess = oxfolderAccess;
@@ -396,8 +414,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		if (checkPermissions) {
 			if (fo.containsType()
 					&& fo.getType() == FolderObject.PUBLIC
-					&& !UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-							session.getContext()).hasFullPublicFolderAccess()) {
+					&& !UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)
+							.hasFullPublicFolderAccess()) {
 				throw new OXFolderException(FolderCode.NO_PUBLIC_FOLDER_WRITE_ACCESS, getUserName(session, user),
 						getFolderName(fo), Integer.valueOf(ctx.getContextId()));
 			}
@@ -961,7 +979,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		/*
 		 * Check delete permission on folder's objects
 		 */
-		if (!getOXFolderAccess().canDeleteAllObjectsInFolder(fo, session)) {
+		if (!getOXFolderAccess().canDeleteAllObjectsInFolder(fo, session, ctx)) {
 			throw new OXFolderPermissionException(FolderCode.NOT_ALL_OBJECTS_DELETION, getUserName(user.getId(), ctx),
 					getFolderName(fo.getObjectID(), ctx), Integer.valueOf(ctx.getContextId()));
 		}
@@ -1322,7 +1340,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		/*
 		 * Check delete permission on folder's objects
 		 */
-		if (!getOXFolderAccess().canDeleteAllObjectsInFolder(delFolder, session)) {
+		if (!getOXFolderAccess().canDeleteAllObjectsInFolder(delFolder, session, ctx)) {
 			throw new OXFolderPermissionException(FolderCode.NOT_ALL_OBJECTS_DELETION, getUserName(userId, ctx),
 					getFolderName(folderID, ctx), Integer.valueOf(ctx.getContextId()));
 		}

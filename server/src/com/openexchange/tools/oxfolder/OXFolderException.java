@@ -50,6 +50,7 @@
 package com.openexchange.tools.oxfolder;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 
 /**
@@ -605,6 +606,10 @@ public class OXFolderException extends OXException {
 	}
 
 	private static final transient Object[] EMPTY_ARGS = new Object[0];
+
+	public OXFolderException(final AbstractOXException e) {
+		super(e);
+	}
 
 	public OXFolderException(final FolderCode folderCode) {
 		this(folderCode, (Throwable) null, EMPTY_ARGS);

@@ -70,6 +70,8 @@ import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
@@ -1603,9 +1605,14 @@ public class OXFolderTools {
 	public static boolean canDeleteAllObjectsInFolder(final FolderObject fo, final Session session,
 			final Connection readCon) throws OXException {
 		final int userId = session.getUserId();
-		final Context ctx = session.getContext();
+		final Context ctx;
+		try {
+			ctx = ContextStorage.getStorageContext(session.getContextId());
+		} catch (ContextException e1) {
+			throw new OXException(e1);
+		}
 		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-				session.getUserId(), session.getContext());
+				session.getUserId(), ctx);
 		try {
 			/*
 			 * Check user permission on folder
@@ -1641,8 +1648,8 @@ public class OXFolderTools {
 					break;
 				case FolderObject.INFOSTORE:
 					final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
-					return !db.hasFolderForeignObjects(fo.getObjectID(), ctx, UserStorage.getStorageUser(session.getUserId(),
-							session.getContext()), userConfig);
+					return !db.hasFolderForeignObjects(fo.getObjectID(), ctx, UserStorage.getStorageUser(session
+							.getUserId(), ctx), userConfig);
 				default:
 					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(fo.getModule()), Integer
 							.valueOf(ctx.getContextId()));
@@ -1654,17 +1661,17 @@ public class OXFolderTools {
 				switch (fo.getModule()) {
 				case FolderObject.TASK:
 					final Tasks tasks = Tasks.getInstance();
-					return tasks.isFolderEmpty(session.getContext(), fo.getObjectID());
+					return tasks.isFolderEmpty(ctx, fo.getObjectID());
 				case FolderObject.CALENDAR:
 					final CalendarSql calSql = new CalendarSql(session);
 					return calSql.isFolderEmpty(userId, fo.getObjectID());
 				case FolderObject.CONTACT:
-					return !Contacts.containsAnyObjectInFolder(fo.getObjectID(), session.getContext());
+					return !Contacts.containsAnyObjectInFolder(fo.getObjectID(), ctx);
 				case FolderObject.PROJECT:
 					break;
 				case FolderObject.INFOSTORE:
 					final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
-					return db.isFolderEmpty(fo.getObjectID(), session.getContext());
+					return db.isFolderEmpty(fo.getObjectID(), ctx);
 				default:
 					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(fo.getModule()), Integer
 							.valueOf(ctx.getContextId()));

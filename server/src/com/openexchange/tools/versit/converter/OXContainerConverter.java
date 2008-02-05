@@ -86,6 +86,9 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -107,8 +110,10 @@ import com.openexchange.tools.versit.values.RecurrenceValue;
  * If you want to translate more fields used in ICAL or VCard, you're at the
  * right place - but don't forget to do it in both directions.
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> (adapted Victor's parser for OX6)
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> (bugfixes: 7248, 7249, 7472, 7703, 7718, 7719, 8475)
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *         (adapted Victor's parser for OX6)
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ *         (bugfixes: 7248, 7249, 7472, 7703, 7718, 7719, 8475)
  * 
  */
 public class OXContainerConverter {
@@ -155,7 +160,8 @@ public class OXContainerConverter {
 		return getSetMethod(containerObjClass, methodName, float.class);
 	}
 
-	private static Method getSetMethod(final Class<?> containerObjClass, final String methodName, final Class<?> typeClass) {
+	private static Method getSetMethod(final Class<?> containerObjClass, final String methodName,
+			final Class<?> typeClass) {
 		try {
 			return containerObjClass.getMethod(methodName, new Class[] { typeClass });
 		} catch (final Exception e) {
@@ -462,6 +468,8 @@ public class OXContainerConverter {
 
 	private final Session session;
 
+	private final Context ctx;
+
 	private final TimeZone timezone;
 
 	private String organizerMailAddress;
@@ -475,13 +483,25 @@ public class OXContainerConverter {
 		this.timezone = timezone;
 		this.organizerMailAddress = organizerMailAddress;
 		session = null;
+		ctx = null;
 	}
 
-	public OXContainerConverter(final Session session) {
+	public OXContainerConverter(final Session session) throws ConverterException {
 		super();
 		this.session = session;
-		this.timezone = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), session.getContext())
-				.getTimeZone());
+		try {
+			this.ctx = ContextStorage.getStorageContext(session.getContextId());
+		} catch (final ContextException e) {
+			throw new ConverterException(e);
+		}
+		this.timezone = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
+	}
+
+	public OXContainerConverter(final Session session, final Context ctx) {
+		super();
+		this.session = session;
+		this.ctx = ctx;
+		this.timezone = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
 	}
 
 	public void close() {
@@ -519,7 +539,8 @@ public class OXContainerConverter {
 			// LOCATION is ignored
 			// ORGANIZER is ignored
 			// PERCENT-COMPLETE
-			IntegerProperty(taskContainer, object, "PERCENT-COMPLETE", SET_INT_METHODS.get(Integer.valueOf(Task.PERCENT_COMPLETED)));
+			IntegerProperty(taskContainer, object, "PERCENT-COMPLETE", SET_INT_METHODS.get(Integer
+					.valueOf(Task.PERCENT_COMPLETED)));
 			// PRIORITY
 			Property property = object.getProperty("PRIORITY");
 			if (property != null) {
@@ -563,7 +584,8 @@ public class OXContainerConverter {
 			// URL is ignored
 			// DUE and DURATION
 			if (!DateTimeProperty(taskContainer, object, "DUE", SET_DATE_METHODS.get(Integer.valueOf(Task.END_DATE)))) {
-				DurationProperty(taskContainer, object, "DURATION", "DTSTART", SET_DATE_METHODS.get(Integer.valueOf(Task.END_DATE)));
+				DurationProperty(taskContainer, object, "DURATION", "DTSTART", SET_DATE_METHODS.get(Integer
+						.valueOf(Task.END_DATE)));
 			}
 			// Multiple properties
 			final int count = object.getPropertyCount();
@@ -615,11 +637,12 @@ public class OXContainerConverter {
 
 	public CalendarDataObject convertAppointment(final VersitObject object) throws ConverterException {
 		final CalendarDataObject appContainer = new CalendarDataObject();
-		//CLASS
+		// CLASS
 		PrivacyProperty(appContainer, object, "CLASS", SET_BOOLEAN_METHODS.get(Integer.valueOf(Task.PRIVATE_FLAG)));
 		// CREATED is ignored
 		// DESCRIPTION
-		StringProperty(appContainer, object, "DESCRIPTION", SET_STRING_METHODS.get(Integer.valueOf(AppointmentObject.NOTE)));
+		StringProperty(appContainer, object, "DESCRIPTION", SET_STRING_METHODS.get(Integer
+				.valueOf(AppointmentObject.NOTE)));
 		// DTSTART
 		Property property = object.getProperty("DTSTART");
 		if (property != null) {
@@ -635,14 +658,16 @@ public class OXContainerConverter {
 		// GEO is ignored
 		// LAST-MODIFIED is ignored
 		// LOCATION
-		StringProperty(appContainer, object, "LOCATION", SET_STRING_METHODS.get(Integer.valueOf(AppointmentObject.LOCATION)));
+		StringProperty(appContainer, object, "LOCATION", SET_STRING_METHODS.get(Integer
+				.valueOf(AppointmentObject.LOCATION)));
 		// ORGANIZER is ignored
 		// PRIORITY is ignored
 		// DTSTAMP is ignored
 		// TODO SEQUENCE
 		// STATUS is ignored
 		// SUMMARY
-		StringProperty(appContainer, object, "SUMMARY", SET_STRING_METHODS.get(Integer.valueOf(AppointmentObject.TITLE)));
+		StringProperty(appContainer, object, "SUMMARY", SET_STRING_METHODS
+				.get(Integer.valueOf(AppointmentObject.TITLE)));
 		// TRANSP
 		property = object.getProperty("TRANSP");
 		if (property != null) {
@@ -666,10 +691,12 @@ public class OXContainerConverter {
 		// URL is ignored
 		// TODO RECURRENCE-ID
 		// DTEND and DURATION
-		if (!DateTimeProperty(appContainer, object, "DTEND", SET_DATE_METHODS.get(Integer.valueOf(AppointmentObject.END_DATE)))
-				&& !DurationProperty(appContainer, object, "DURATION", "DTSTART", SET_DATE_METHODS
-						.get(Integer.valueOf(AppointmentObject.END_DATE)))) {
-			DateTimeProperty(appContainer, object, "DSTART", SET_DATE_METHODS.get(Integer.valueOf(AppointmentObject.END_DATE)));
+		if (!DateTimeProperty(appContainer, object, "DTEND", SET_DATE_METHODS.get(Integer
+				.valueOf(AppointmentObject.END_DATE)))
+				&& !DurationProperty(appContainer, object, "DURATION", "DTSTART", SET_DATE_METHODS.get(Integer
+						.valueOf(AppointmentObject.END_DATE)))) {
+			DateTimeProperty(appContainer, object, "DSTART", SET_DATE_METHODS.get(Integer
+					.valueOf(AppointmentObject.END_DATE)));
 		}
 		// Multiple properties
 		final StringBuilder cats = new StringBuilder();
@@ -740,29 +767,33 @@ public class OXContainerConverter {
 		// NAME is ignored
 		// PROFILE is ignored
 		// FN
-		StringProperty(contactContainer, object, "FN", SET_STRING_METHODS.get(Integer.valueOf(ContactObject.DISPLAY_NAME)));
+		StringProperty(contactContainer, object, "FN", SET_STRING_METHODS.get(Integer
+				.valueOf(ContactObject.DISPLAY_NAME)));
 		// N
 		Property property = object.getProperty("N");
 		if (property != null) {
 			final ArrayList<?> N = (ArrayList<?>) property.getValue();
-			//fix for 7248
-			if(N != null){
-				for(int i = N.size(); i < 5; i++){
+			// fix for 7248
+			if (N != null) {
+				for (int i = N.size(); i < 5; i++) {
 					N.add(null);
 				}
 			}
-			//fix:end
+			// fix:end
 			if (N.size() != 5) {
 				throw new ConverterException("Invalid property N, has " + N.size() + " elements, not 5.");
 			}
 			ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.SUR_NAME)), N.get(0), " ");
-			ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.GIVEN_NAME)), N.get(1), " ");
-			ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.MIDDLE_NAME)), N.get(2), " ");
+			ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.GIVEN_NAME)), N.get(1),
+					" ");
+			ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.MIDDLE_NAME)), N.get(2),
+					" ");
 			ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.TITLE)), N.get(3), " ");
 			ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.SUFFIX)), N.get(4), " ");
 		}
 		// NICKNAME
-		StringProperty(contactContainer, object, "NICKNAME", SET_STRING_METHODS.get(Integer.valueOf(ContactObject.NICKNAME)));
+		StringProperty(contactContainer, object, "NICKNAME", SET_STRING_METHODS.get(Integer
+				.valueOf(ContactObject.NICKNAME)));
 		// PHOTO
 		property = object.getProperty("PHOTO");
 		if (property != null) {
@@ -785,14 +816,17 @@ public class OXContainerConverter {
 			}
 		}
 		// BDAY
-		DateTimeProperty(contactContainer, object, "BDAY", SET_DATE_METHODS.get(Integer.valueOf(ContactObject.BIRTHDAY)));
+		DateTimeProperty(contactContainer, object, "BDAY", SET_DATE_METHODS
+				.get(Integer.valueOf(ContactObject.BIRTHDAY)));
 		// MAILER is ignored
 		// TZ is ignored
 		// GEO is ignored
 		// TITLE
-		StringProperty(contactContainer, object, "TITLE", SET_STRING_METHODS.get(Integer.valueOf(ContactObject.EMPLOYEE_TYPE)));
+		StringProperty(contactContainer, object, "TITLE", SET_STRING_METHODS.get(Integer
+				.valueOf(ContactObject.EMPLOYEE_TYPE)));
 		// ROLE
-		StringProperty(contactContainer, object, "ROLE", SET_STRING_METHODS.get(Integer.valueOf(ContactObject.POSITION)));
+		StringProperty(contactContainer, object, "ROLE", SET_STRING_METHODS
+				.get(Integer.valueOf(ContactObject.POSITION)));
 		// LOGO is ignored
 		// TODO AGENT
 		// ORG
@@ -872,7 +906,8 @@ public class OXContainerConverter {
 				{ { 0 }, { 0 } }, { { 0 }, { 0 } }, { { 0 }, { 0 } } };
 
 		final Method[] emails = { SET_STRING_METHODS.get(Integer.valueOf(ContactObject.EMAIL1)),
-				SET_STRING_METHODS.get(Integer.valueOf(ContactObject.EMAIL2)), SET_STRING_METHODS.get(Integer.valueOf(ContactObject.EMAIL3)) };
+				SET_STRING_METHODS.get(Integer.valueOf(ContactObject.EMAIL2)),
+				SET_STRING_METHODS.get(Integer.valueOf(ContactObject.EMAIL3)) };
 
 		final int[] emailIndex = { 0 };
 
@@ -894,30 +929,39 @@ public class OXContainerConverter {
 					}
 				}
 				final ArrayList<?> A = (ArrayList<?>) property.getValue();
-				//fix for 7248
-				if(A != null){
-					for(int j = A.size(); j < 7; j++){
+				// fix for 7248
+				if (A != null) {
+					for (int j = A.size(); j < 7; j++) {
 						A.add(null);
 					}
 				}
-				//fix:end
+				// fix:end
 				if (A == null || A.size() != 7) {
 					throw new ConverterException("Invalid property ADR");
 				}
 				if (isWork) {
-					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.STREET_BUSINESS)), A.get(2), "\n");
-					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.CITY_BUSINESS)), A.get(3), "\n");
-					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.STATE_BUSINESS)), A.get(4), "\n");
-					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.POSTAL_CODE_BUSINESS)), A.get(5),
-							"\n");
-					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.COUNTRY_BUSINESS)), A.get(6), "\n");
+					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.STREET_BUSINESS)),
+							A.get(2), "\n");
+					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.CITY_BUSINESS)), A
+							.get(3), "\n");
+					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.STATE_BUSINESS)),
+							A.get(4), "\n");
+					ListValue(contactContainer, SET_STRING_METHODS.get(Integer
+							.valueOf(ContactObject.POSTAL_CODE_BUSINESS)), A.get(5), "\n");
+					ListValue(contactContainer,
+							SET_STRING_METHODS.get(Integer.valueOf(ContactObject.COUNTRY_BUSINESS)), A.get(6), "\n");
 				}
 				if (isHome) {
-					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.STREET_HOME)), A.get(2), "\n");
-					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.CITY_HOME)), A.get(3), "\n");
-					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.STATE_HOME)), A.get(4), "\n");
-					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.POSTAL_CODE_HOME)), A.get(5), "\n");
-					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.COUNTRY_HOME)), A.get(6), "\n");
+					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.STREET_HOME)), A
+							.get(2), "\n");
+					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.CITY_HOME)), A
+							.get(3), "\n");
+					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.STATE_HOME)), A
+							.get(4), "\n");
+					ListValue(contactContainer,
+							SET_STRING_METHODS.get(Integer.valueOf(ContactObject.POSTAL_CODE_HOME)), A.get(5), "\n");
+					ListValue(contactContainer, SET_STRING_METHODS.get(Integer.valueOf(ContactObject.COUNTRY_HOME)), A
+							.get(6), "\n");
 				}
 			}
 			// LABEL is ignored
@@ -966,28 +1010,28 @@ public class OXContainerConverter {
 			// EMAIL
 			else if (property.name.equals("EMAIL")) {
 				final String value = property.getValue().toString();
-				//fix for: 7249
+				// fix for: 7249
 				boolean isProperEmailAddress = value != null && value.length() > 0;
-				if(isProperEmailAddress){
+				if (isProperEmailAddress) {
 					try {
-						final InternetAddress  ia = new InternetAddress(value);
+						final InternetAddress ia = new InternetAddress(value);
 						ia.validate();
 					} catch (final AddressException e) {
 						isProperEmailAddress = false;
 					}
-				} 
-				//fix: end
+				}
+				// fix: end
 				if (isProperEmailAddress) {
 					ComplexProperty(contactContainer, emails, emailIndex, value);
-				}else {
-					//fix for: 7719
+				} else {
+					// fix for: 7719
 					final Parameter type = property.getParameter("TYPE");
-					if(type != null && type.getValue(0) != null && type.getValue(0).getText() != null){
-						if( "TLX".equals( type.getValue(0).getText() ) ){
-							contactContainer.setTelephoneTelex( property.getValue().toString() );
+					if (type != null && type.getValue(0) != null && type.getValue(0).getText() != null) {
+						if ("TLX".equals(type.getValue(0).getText())) {
+							contactContainer.setTelephoneTelex(property.getValue().toString());
 						}
 					}
-					//fix:end
+					// fix:end
 				}
 			}
 			// CATEGORIES
@@ -1042,24 +1086,24 @@ public class OXContainerConverter {
 				return false;
 			}
 			final String privacy = (String) property.getValue();
-			
+
 			boolean isPrivate = false;
-			if("PRIVATE".equals(privacy)){
+			if ("PRIVATE".equals(privacy)) {
 				isPrivate = true;
-			} 
-			if("CONFIDENTIAL".equals(privacy)){
+			}
+			if ("CONFIDENTIAL".equals(privacy)) {
 				throw new ConverterPrivacyException();
 			}
 			final Object[] args = { Boolean.valueOf(isPrivate) };
 			setPrivacyMethod.invoke(containerObj, args);
 			return false;
-		} catch (final ConverterPrivacyException e){
+		} catch (final ConverterPrivacyException e) {
 			throw e;
-		} catch (final Exception e){
+		} catch (final Exception e) {
 			throw new ConverterException(e);
 		}
 	}
-	
+
 	private boolean DateTimeProperty(final Object containerObj, final VersitObject object, final String VersitName,
 			final Method setDateMethod) throws ConverterException {
 		try {
@@ -1112,13 +1156,10 @@ public class OXContainerConverter {
 		try {
 			final String mail = ((URI) property.getValue()).getSchemeSpecificPart();
 			final Participant participant;
-			if(isInternalUser(mail)){
-				//fix for bug 8475
-				participant = new UserParticipant(
-						getInternalUser(mail).
-							getId()
-				);
-				//end:fix
+			if (isInternalUser(mail)) {
+				// fix for bug 8475
+				participant = new UserParticipant(getInternalUser(mail).getId());
+				// end:fix
 			} else {
 				participant = new ExternalUserParticipant(mail);
 				participant.setDisplayName(mail);
@@ -1130,31 +1171,31 @@ public class OXContainerConverter {
 	}
 
 	/**
-	 * Finds out whether a user is internal, since internal users get treated differently
-	 * when entering appointments or tasks.
+	 * Finds out whether a user is internal, since internal users get treated
+	 * differently when entering appointments or tasks.
 	 * 
-	 * @param mail - Mail address as string
+	 * @param mail -
+	 *            Mail address as string
 	 * @return true if is internal user, false otherwise
 	 */
 	public boolean isInternalUser(final String mail) {
 		try {
-			final User uo = UserStorage.getInstance().searchUser(mail, session.getContext());
+			final User uo = UserStorage.getInstance().searchUser(mail, ctx);
 			return uo != null;
-		} catch (final LdapException e){
+		} catch (final LdapException e) {
 			return false;
 		}
 	}
-	
+
 	/**
-	 * Finds an internal user by its e-mail address. Note that an e-mail
-	 * address is unique, but the identifier for an internal user is
-	 * its id.
+	 * Finds an internal user by its e-mail address. Note that an e-mail address
+	 * is unique, but the identifier for an internal user is its id.
 	 * 
-	 * Should only be called after using <code>isInternalUser</code> or
-	 * you have to live with the LdapException.
+	 * Should only be called after using <code>isInternalUser</code> or you
+	 * have to live with the LdapException.
 	 */
 	public User getInternalUser(final String mail) throws LdapException {
-		return UserStorage.getInstance().searchUser(mail, session.getContext());
+		return UserStorage.getInstance().searchUser(mail, ctx);
 	}
 
 	private static void RecurrenceProperty(final CalendarObject calContainerObj, final Property property,
@@ -1171,7 +1212,7 @@ public class OXContainerConverter {
 		}
 		if (recur.Count != -1) {
 			calContainerObj.setOccurrence(recur.Count);
-			//throw new ConverterException("COUNT is not supported.");
+			// throw new ConverterException("COUNT is not supported.");
 		}
 		calContainerObj.setInterval(recur.Interval);
 		switch (recur.Freq) {
@@ -1186,7 +1227,7 @@ public class OXContainerConverter {
 				month = cal.get(Calendar.MONTH);
 			}
 			calContainerObj.setMonth(month);
-		// no break
+			// no break
 		case RecurrenceValue.MONTHLY:
 			if (recur.ByMonthDay.length > 0) {
 				if (recur.ByDay.size() != 0) {
@@ -1211,11 +1252,12 @@ public class OXContainerConverter {
 						throw new ConverterException("Multiple weeks of month are not supported.");
 					}
 					week = wd.week;
-					if(week < 0) {
-						if(week == -1) {
+					if (week < 0) {
+						if (week == -1) {
 							week = 5;
 						} else {
-							throw new ConverterException("Only the last week of a month is supported. Counting from the end of the month above the first is not supported.");
+							throw new ConverterException(
+									"Only the last week of a month is supported. Counting from the end of the month above the first is not supported.");
 						}
 					}
 				}
@@ -1226,7 +1268,7 @@ public class OXContainerConverter {
 			}
 			break;
 		case RecurrenceValue.WEEKLY:
-		case RecurrenceValue.DAILY: //fix: 7703
+		case RecurrenceValue.DAILY: // fix: 7703
 			int days = 0;
 			final int size = recur.ByDay.size();
 			final Iterator<?> j = recur.ByDay.iterator();
@@ -1249,8 +1291,10 @@ public class OXContainerConverter {
 		for (int i = 0; i < count; i++) {
 			final VersitObject alarm = object.getChild(i);
 			Property property = alarm.getProperty("ACTION");
-			//if (property != null && property.getValue().toString().equalsIgnoreCase("EMAIL")) {
-			if (property != null && property.getValue().toString().equalsIgnoreCase("DISPLAY")) { //bugfix: 7473
+			// if (property != null &&
+			// property.getValue().toString().equalsIgnoreCase("EMAIL")) {
+			if (property != null && property.getValue().toString().equalsIgnoreCase("DISPLAY")) { // bugfix:
+				// 7473
 				property = alarm.getProperty("TRIGGER");
 				if (property != null) {
 					int time;
@@ -1260,18 +1304,19 @@ public class OXContainerConverter {
 							throw new ConverterException("Irregular durations not supported");
 						}
 						time = trigger.Minutes + (trigger.Hours + (trigger.Days + 7 * trigger.Weeks) * 24) * 60;
-						if (trigger.Negative) { //note: This does not make sense currently, because "NEGATIVE" is never set
+						if (trigger.Negative) { // note: This does not make
+							// sense currently, because
+							// "NEGATIVE" is never set
 							time = -time;
 						}
-						/*fix for 7473: 
-						 * TRIGGERs in ICAL are always negative 
-						 * (because they are _before_ the event), 
-						 * alarms in OX are always positive 
-						 * (because there is no reason for them to 
-						 * be _after_ the event).
+						/*
+						 * fix for 7473: TRIGGERs in ICAL are always negative
+						 * (because they are _before_ the event), alarms in OX
+						 * are always positive (because there is no reason for
+						 * them to be _after_ the event).
 						 */
 						time = -time;
-						//fix:end
+						// fix:end
 					} else {
 						final DateTimeValue trigger = (DateTimeValue) property.getValue();
 						property = object.getProperty("DTSTART");
@@ -1284,11 +1329,11 @@ public class OXContainerConverter {
 					if (calContainerObj instanceof AppointmentObject) {
 						final AppointmentObject appObj = (AppointmentObject) calContainerObj;
 						appObj.setAlarm(time);
-						appObj.setAlarmFlag(true); //bugfix: 7473
+						appObj.setAlarmFlag(true); // bugfix: 7473
 					} else if (calContainerObj instanceof Task) {
 						final Task taskObj = (Task) calContainerObj;
 						taskObj.setAlarm(new Date(taskObj.getStartDate().getTime() - (time * 60 * 1000)));
-						taskObj.setAlarmFlag(true); //bugfix: 7473
+						taskObj.setAlarmFlag(true); // bugfix: 7473
 					}
 				}
 			}
@@ -1428,7 +1473,7 @@ public class OXContainerConverter {
 	}
 
 	public VersitObject convertAppointment(final AppointmentObject app) throws ConverterException {
-	    modifyRecurring(app);
+		modifyRecurring(app);
 		final VersitObject object = new VersitObject("VEVENT");
 		// TODO CLASS
 		addProperty(object, "CLASS", "PUBLIC");
@@ -1538,23 +1583,23 @@ public class OXContainerConverter {
 	}
 
 	private static void modifyRecurring(final AppointmentObject app) throws ConverterException {
-	    if (app.getRecurrenceType() != CalendarObject.NONE) {
-	        RecurringResults result;
-            try {
-                result = CalendarRecurringCollection.calculateFirstRecurring(app);
-            } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
-                throw new ConverterException(e);
-            }
-            if (result.size() == 1) {
-                app.setStartDate(new Date(result.getRecurringResult(0).getStart()));
-                app.setEndDate(new Date(result.getRecurringResult(0).getEnd()));
-            } else {
-                throw new ConverterException("Unable to calculate first occurence of an appointment.");
-            }
-	    }
+		if (app.getRecurrenceType() != CalendarObject.NONE) {
+			RecurringResults result;
+			try {
+				result = CalendarRecurringCollection.calculateFirstRecurring(app);
+			} catch (OXException e) {
+				LOG.error(e.getMessage(), e);
+				throw new ConverterException(e);
+			}
+			if (result.size() == 1) {
+				app.setStartDate(new Date(result.getRecurringResult(0).getStart()));
+				app.setEndDate(new Date(result.getRecurringResult(0).getEnd()));
+			} else {
+				throw new ConverterException("Unable to calculate first occurence of an appointment.");
+			}
+		}
 	}
-	
+
 	public VersitObject convertContact(final ContactObject contact, final String version) throws ConverterException {
 		final VersitObject object = new VersitObject("VCARD");
 		// VERSION
@@ -1909,7 +1954,7 @@ public class OXContainerConverter {
 
 	private void addAddress(final VersitObject object, final String name, final int userId) throws ConverterException {
 		try {
-			final User userObj = UserStorage.getInstance().getUser(userId, session.getContext());
+			final User userObj = UserStorage.getInstance().getUser(userId, ctx);
 			if (userObj == null) {
 				return;
 			}
@@ -1948,7 +1993,7 @@ public class OXContainerConverter {
 			case CalendarObject.YEARLY:
 				final int[] byMonth = { oxobject.getMonth() - Calendar.JANUARY + 1 };
 				recur.ByMonth = byMonth;
-			// no break
+				// no break
 			case CalendarObject.MONTHLY:
 				final int monthDay = oxobject.getDayInMonth();
 				final int mdays = oxobject.getDays();
@@ -1971,8 +2016,7 @@ public class OXContainerConverter {
 					}
 				}
 			}
-			final int[] freqs = { RecurrenceValue.DAILY,
-					RecurrenceValue.WEEKLY, RecurrenceValue.MONTHLY,
+			final int[] freqs = { RecurrenceValue.DAILY, RecurrenceValue.WEEKLY, RecurrenceValue.MONTHLY,
 					RecurrenceValue.YEARLY };
 			recur.Freq = freqs[type - CalendarObject.DAILY];
 			addProperty(object, name, recur);

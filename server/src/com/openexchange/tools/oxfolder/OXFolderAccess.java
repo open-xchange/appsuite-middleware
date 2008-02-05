@@ -359,14 +359,16 @@ public class OXFolderAccess {
 	 *            the folder object
 	 * @param session -
 	 *            current user session
+	 * @param ctx -
+	 *            the context
 	 * @return
 	 * @throws OXException
 	 */
-	public final boolean canDeleteAllObjectsInFolder(final FolderObject fo, final Session session)
+	public final boolean canDeleteAllObjectsInFolder(final FolderObject fo, final Session session, final Context ctx)
 			throws OXException {
 		final int userId = session.getUserId();
 		final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-				session.getUserId(), session.getContext());
+				session.getUserId(), ctx);
 		try {
 			/*
 			 * Check user permission on folder
@@ -402,8 +404,8 @@ public class OXFolderAccess {
 					break;
 				case FolderObject.INFOSTORE:
 					final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
-					return !db.hasFolderForeignObjects(fo.getObjectID(), ctx, UserStorage.getStorageUser(session.getUserId(),
-							session.getContext()), userConfig);
+					return !db.hasFolderForeignObjects(fo.getObjectID(), ctx, UserStorage.getStorageUser(session
+							.getUserId(), ctx), userConfig);
 				default:
 					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(fo.getModule()), Integer
 							.valueOf(ctx.getContextId()));
@@ -415,17 +417,17 @@ public class OXFolderAccess {
 				switch (fo.getModule()) {
 				case FolderObject.TASK:
 					final Tasks tasks = Tasks.getInstance();
-					return tasks.isFolderEmpty(session.getContext(), fo.getObjectID());
+					return tasks.isFolderEmpty(ctx, fo.getObjectID());
 				case FolderObject.CALENDAR:
 					final CalendarSql calSql = new CalendarSql(session);
 					return calSql.isFolderEmpty(userId, fo.getObjectID());
 				case FolderObject.CONTACT:
-					return !Contacts.containsAnyObjectInFolder(fo.getObjectID(), session.getContext());
+					return !Contacts.containsAnyObjectInFolder(fo.getObjectID(), ctx);
 				case FolderObject.PROJECT:
 					break;
 				case FolderObject.INFOSTORE:
 					final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
-					return db.isFolderEmpty(fo.getObjectID(), session.getContext());
+					return db.isFolderEmpty(fo.getObjectID(), ctx);
 				default:
 					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(fo.getModule()), Integer
 							.valueOf(ctx.getContextId()));

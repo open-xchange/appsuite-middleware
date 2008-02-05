@@ -472,9 +472,9 @@ public final class SMTPMessageFiller {
 
 	private String getUserVCard() throws SMTPException {
 		final User userObj = UserStorage.getStorageUser(session.getUserId(), ctx);
-		final OXContainerConverter converter = new OXContainerConverter(session);
 		Connection readCon = null;
 		try {
+			final OXContainerConverter converter = new OXContainerConverter(session, ctx);
 			try {
 				readCon = DBPool.pickup(ctx);
 				ContactObject contactObj = null;
