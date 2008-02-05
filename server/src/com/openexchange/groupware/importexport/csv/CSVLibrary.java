@@ -71,6 +71,8 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionC
 import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.session.ServerSession;
+
 /**
  * This is a library with little helpers needed when preparing
  * the parsing of a CSV file.
@@ -111,7 +113,7 @@ public class CSVLibrary {
 	 * @return
 	 * @throws ImportExportException - if could not be loaded
 	 */
-	public static FolderObject getFolderObject(final Session sessObj, final String folder) throws ImportExportException {
+	public static FolderObject getFolderObject(final ServerSession sessObj, final String folder) throws ImportExportException {
 		final int folderId = getFolderId(folder);
 		FolderObject fo = null;
 		try {

@@ -52,7 +52,10 @@ package com.openexchange.groupware.infostore.webdav;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.sessiond.impl.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -98,7 +101,7 @@ public class EntityLockHelper extends LockHelper {
 
 	@Override
 	protected int saveLock(final WebdavLock lock) throws OXException {
-		final ServerSession session = sessionHolder.getSessionObject();
+		final ServerSession session = getSession();
 		return entityLockManager.lock(id,
 				(lock.getTimeout() == WebdavLock.NEVER) ? LockManager.INFINITE : lock.getTimeout(),
 						lock.getScope().equals(WebdavLock.Scope.EXCLUSIVE_LITERAL) ? LockManager.Scope.EXCLUSIVE : LockManager.Scope.SHARED,
@@ -111,7 +114,7 @@ public class EntityLockHelper extends LockHelper {
 
 	@Override
 	protected void relock(final WebdavLock lock) throws OXException {
-		final ServerSession session = sessionHolder.getSessionObject();
+		final ServerSession session = getSession();
 		final int lockId = getLockId(lock);
 		entityLockManager.relock(
 				lockId,
@@ -128,6 +131,14 @@ public class EntityLockHelper extends LockHelper {
 	private int getLockId(final WebdavLock lock) {
 		return Integer.parseInt(lock.getToken().substring(TOKEN_PREFIX_LENGTH));
 	}
+
+    private ServerSession getSession() throws InfostoreException {
+        try {
+            return new ServerSessionAdapter(sessionHolder.getSessionObject());
+        } catch (ContextException e) {
+            throw new InfostoreException(e);
+        }
+    }
 
 
 }
