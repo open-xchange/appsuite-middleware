@@ -70,7 +70,12 @@ import com.openexchange.session.Session;
  */
 public final class SessionMailCache {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	/**
+	 * Serial version UID
+	 */
+	private static final long serialVersionUID = -6647099584461813752L;
+
+	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SessionMailCache.class);
 
 	private final Lock lock;
@@ -91,8 +96,16 @@ public final class SessionMailCache {
 	 * @return The session-bound mail cache
 	 */
 	public static SessionMailCache getInstance(final Session session) {
-		SessionMailCache mailCache = (SessionMailCache) session
-				.getParameter(MailSessionParameterNames.PARAM_MAIL_CACHE);
+		SessionMailCache mailCache = null;
+		try {
+			mailCache = (SessionMailCache) session
+					.getParameter(MailSessionParameterNames.PARAM_MAIL_CACHE);
+		} catch (final ClassCastException e) {
+			/*
+			 * Class version does not match; just renew session cache.
+			 */
+			mailCache = null;
+		}
 		if (null == mailCache) {
 			mailCache = new SessionMailCache();
 			session.setParameter(MailSessionParameterNames.PARAM_MAIL_CACHE, mailCache);
