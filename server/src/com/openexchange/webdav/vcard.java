@@ -83,6 +83,7 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -220,9 +221,9 @@ public final class vcard extends PermissionServlet {
 		
 		final Session sessionObj = getSession(req);
 		
-		final Context context = sessionObj.getContext();
-		
 		try {
+			final Context context = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+			
 			resp.setStatus(HttpServletResponse.SC_OK);
 			
 			// get user-agent
@@ -392,9 +393,9 @@ public final class vcard extends PermissionServlet {
 		
 		final Session sessionObj = getSession(req);
 		
-		final Context context = sessionObj.getContext();
-		
 		try {
+			final Context context = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+			
 			resp.setStatus(HttpServletResponse.SC_OK);
 			
 			user_agent = getUserAgent(req);
@@ -725,8 +726,8 @@ public final class vcard extends PermissionServlet {
 	}
 	
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj) {
-		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
+	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
+		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx);
 		return (uc.hasVCard() && uc.hasContact());
 	}
 	

@@ -71,6 +71,7 @@ import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -208,8 +209,8 @@ public final class tasks extends XmlServlet {
 	}
 	
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj) {
-		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext());
+	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
+		final UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx);
 		return (uc.hasWebDAVXML() && uc.hasTask());
 	}
 }
