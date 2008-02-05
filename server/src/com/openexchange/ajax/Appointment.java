@@ -216,15 +216,9 @@ public class Appointment extends DataServlet {
 	}
 	
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
         try {
-            final Context ctx = ContextStorage.getInstance().getContext(
-                sessionObj.getContextId());
-            return UserConfigurationStorage.getInstance().getUserConfiguration(
-                sessionObj.getUserId(), ctx).hasCalendar();
-        } catch (ContextException e) {
-            LOG.error(e.getMessage(), e);
-            return false;
+            return UserConfigurationStorage.getInstance().getUserConfiguration(sessionObj.getUserId(), ctx).hasCalendar();
         } catch (UserConfigurationException e) {
             LOG.error(e.getMessage(), e);
             return false;

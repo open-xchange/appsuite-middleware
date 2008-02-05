@@ -203,7 +203,7 @@ public class Group extends DataServlet {
 		writeResponse(response, httpServletResponse);
 	}
 	
-	protected boolean hasModulePermission(final Session sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
 		return true;
 	}
 }
