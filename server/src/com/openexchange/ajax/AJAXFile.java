@@ -535,7 +535,7 @@ public final class AJAXFile extends PermissionServlet {
 	 * @see com.openexchange.ajax.PermissionServlet#hasModulePermission(com.openexchange.sessiond.Session)
 	 */
 	@Override
-	protected boolean hasModulePermission(final Session sessionObj) {
+	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
 		return true;
 	}
 

@@ -55,6 +55,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.session.Session;
 
 public abstract class PermissionServlet extends SessionServlet {
@@ -89,11 +92,20 @@ public abstract class PermissionServlet extends SessionServlet {
 
 		final Session sessionObj = getSessionObject(req);
 		
-		if (sessionObj != null && !hasModulePermission(sessionObj)) {
+		final Context ctx;
+		try {
+			ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+		} catch (ContextException exc) {
+			resp.sendError(HttpServletResponse.SC_CONFLICT, "Conflict");
+			return;
+		}
+		
+		
+		if (sessionObj != null && !hasModulePermission(sessionObj, ctx)) {
 			resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
 			return;
 		} 
 	}
 	
-	protected abstract boolean hasModulePermission(Session sessionObj);
+	protected abstract boolean hasModulePermission(final Session sessionObj, final Context ctx);
 }
