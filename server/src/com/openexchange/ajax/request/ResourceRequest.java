@@ -82,7 +82,7 @@ public class ResourceRequest {
 	
 	private Date timestamp;
 	
-	private static final Log LOG = LogFactory.getLog(AppointmentRequest.class);
+	private static final Log LOG = LogFactory.getLog(ResourceRequest.class);
 	
 	public ResourceRequest(Session sessionObj, final Context ctx) {
 		this.sessionObj = sessionObj;
