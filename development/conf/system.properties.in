@@ -10,12 +10,12 @@ TransportProperties=@oxgroupwaresysconfdir@/transport.properties
 JavaMailProperties=@oxgroupwaresysconfdir@/javamail.properties
 
 # Name of the class implementing the mail connection
-MailProtocol=com.openexchange.imap.IMAPConnection
+MailProvider=com.openexchange.imap.IMAPProvider
 # ... and its config
 IMAPProperties=@oxgroupwaresysconfdir@/imap.properties
 
 # Name of the class implementing the mail transport connection
-MailTransportProtocol=com.openexchange.smtp.SMTPTransport
+MailTransportProvider=com.openexchange.smtp.SMTPProvider
 # ... and its config
 SMTPProperties=@oxgroupwaresysconfdir@/smtp.properties
 
