@@ -293,7 +293,8 @@ public class Folder extends SessionServlet {
 			 */
 			final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
 			final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(sessionObj);
-			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj);
+			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj, ContextStorage
+					.getStorageContext(sessionObj.getContextId()));
 			final FolderFieldWriter[] writers = folderWriter.getFolderFieldWriter(columns);
 
 			final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getRootFolderForUser()).asQueue();
@@ -414,7 +415,7 @@ public class Folder extends SessionServlet {
 			if (ignore != null && "mailfolder".equalsIgnoreCase(ignore)) {
 				ignoreMailfolder = true;
 			}
-			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj);
+			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj, ctx);
 			int parentId = -1;
 			if ((parentId = getUnsignedInteger(parentIdentifier)) != -1) {
 				long lastModified = 0;
@@ -953,7 +954,7 @@ public class Folder extends SessionServlet {
 			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
 			final String folderIdentifier = paramContainer.checkStringParam(PARAMETER_ID);
 			final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
-			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj);
+			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj, ctx);
 			int folderId = -1;
 			if ((folderId = getUnsignedInteger(folderIdentifier)) != -1) {
 				folderId = FolderObject.mapVirtualID2SystemID(folderId);
@@ -1138,7 +1139,7 @@ public class Folder extends SessionServlet {
 			 */
 			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
 			final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
-			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj);
+			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj, ctx);
 			final Date timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
 			final boolean includeMailFolders = STRING_1.equals(paramContainer.getStringParam(PARAMETER_MAIL));
 			lastModified = Math.max(timestamp.getTime(), lastModified);
@@ -1372,7 +1373,8 @@ public class Folder extends SessionServlet {
 				final FolderObject fo = foldersqlinterface.getFolderById(folderId);
 				lastModifiedDate = fo.getLastModified();
 				jsonWriter = new OXJSONWriter();
-				new FolderWriter(jsonWriter, sessionObj).writeOXFolderFieldsAsObject(columns, fo);
+				new FolderWriter(jsonWriter, sessionObj, ContextStorage.getStorageContext(sessionObj.getContextId()))
+						.writeOXFolderFieldsAsObject(columns, fo);
 			} else {
 				MailInterface mailInterface = null;
 				try {

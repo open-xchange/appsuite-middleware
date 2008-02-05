@@ -63,6 +63,7 @@ import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.config.MailConfig;
@@ -80,16 +81,19 @@ import com.openexchange.tools.text.spelling.OXSpellCheckResult;
 @OXExceptionSource(classId = AJAXSpellCheckExceptionClasses.AJAX_SPELL_CHECK, component = Component.SPELLCHECK)
 public class AJAXSpellCheck {
 
-	private Session session;
+	private final Session session;
+
+	private final Context ctx;
 
 	private static final AJAXSpellCheckExceptionFactory EXCEPTIONS = new AJAXSpellCheckExceptionFactory(
 			AJAXSpellCheck.class);
 
 	private static final Object[] EMPTY_MSG_ARGS = new Object[0];
 
-	public AJAXSpellCheck(Session session) {
+	public AJAXSpellCheck(final Session session, final Context ctx) {
 		super();
 		this.session = session;
+		this.ctx = ctx;
 	}
 
 	@OXThrowsMultiple(category = { Category.SETUP_ERROR, Category.SETUP_ERROR, Category.SETUP_ERROR }, desc = { "", "",
@@ -97,7 +101,7 @@ public class AJAXSpellCheck {
 			"No dictionary could be found for language: %1$s.",
 			"Dictionary (id=%1$s) does not hold a command. Please specify a command in corresponding \"spellcheck.cfg\" file." })
 	private String getCommand() throws AbstractOXException {
-		final String lang = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getLocale().getLanguage().toUpperCase();
+		final String lang = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale().getLanguage().toUpperCase();
 		final SpellCheckConfig scc = MailConfig.getSpellCheckConfig();
 		if (scc == null) {
 			throw EXCEPTIONS.createException(1, EMPTY_MSG_ARGS);
@@ -125,7 +129,7 @@ public class AJAXSpellCheck {
 			}
 			final String command = getCommand();
 			final AJAXUserDictionary userDic = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-					session.getUserId(), session.getContext()).getUserDictionary();
+					session.getUserId(), ctx).getUserDictionary();
 			if (userDic == null) {
 				throw EXCEPTIONS.createException(5, EMPTY_MSG_ARGS);
 			}

@@ -91,6 +91,8 @@ import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.impl.UploadEvent;
@@ -119,7 +121,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static final String MODULE_CALENDAR = "calendar";
 
 	public static final String MODULE_CONTACT = "contacts";
-	
+
 	public static final String MODULE_UNBOUND = "unbound";
 
 	public static final String MODULE_MAIL = "mail";
@@ -134,7 +136,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static final String ACTION_APPEND = "append";
 
 	public static final String ACTION_NEW = "new";
-	
+
 	public static final String ACTION_UPLOAD = "upload";
 
 	public static final String ACTION_UPDATE = "update";
@@ -154,7 +156,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static final String ACTION_VIEW = "view";
 
 	public static final String ACTION_SEARCH = "search";
-	
+
 	public static final String ACTION_NEW_APPOINTMENTS = "newappointments";
 
 	public static final String ACTION_SEND = "send";
@@ -216,9 +218,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static final String ACTION_AUTOLOGIN = "autologin";
 
 	public static final String ACTION_SAVE_VERSIT = "saveVersit";
-	
+
 	public static final String ACTION_CLEAR = "clear";
-	
+
 	public static final String ACTION_KEEPALIVE = "keepalive";
 
 	/**
@@ -272,7 +274,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 * DESC (descending)
 	 */
 	public static final String PARAMETER_ORDER = "order";
-	
+
 	public static final String PARAMETER_HARDDELETE = "harddelete";
 
 	/**
@@ -316,7 +318,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static final String PARAMETER_IGNORE = "ignore";
 
 	public static final String PARAMETER_ALL = "all";
-	
+
 	public static final String PARAMETER_REPLY2ALL = "reply2all";
 
 	public static final String PARAMETER_ATTACHMENT = "attachment";
@@ -326,9 +328,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static final String PARAMETER_FILE = "file";
 
 	public static final String PARAMETER_CONTENT_TYPE = "content_type";
-	
+
 	public static final String PARAMETER_LIMIT = "limit";
-	
+
 	public static final String PARAMETER_TYPE = "type";
 
 	/**
@@ -337,12 +339,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 */
 	public static final String CONTENTTYPE_JAVASCRIPT = "text/javascript; charset=UTF-8";
 
-    /**
-     * The content type if the reponse body contains the html page include the
-     * response for uploads.
-     */
-    public static final String CONTENTTYPE_HTML = "text/html; charset=UTF-8";
-    
+	/**
+	 * The content type if the reponse body contains the html page include the
+	 * response for uploads.
+	 */
+	public static final String CONTENTTYPE_HTML = "text/html; charset=UTF-8";
+
 	/**
 	 * This is the error message if the session identifier isn't sent by the
 	 * client or the session timed out or no session can be found for the given
@@ -351,7 +353,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	protected static final String ERROR_SESSION_NOT_FOUND = "No valid session found.";
 
 	private static final String STR_EMPTY = "";
-	
+
 	private static final String STR_ERROR = "error";
 
 	private static final String STR_ERROR_PARAMS = "error_params";
@@ -367,10 +369,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			+ "  parent.callback_**action**(arg); " + '}' + "</script> " + "</head>" + "</html> ";
 
 	protected static final String JS_FRAGMENT_POPUP = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\""
-		+ "\"http://www.w3.org/TR/html4/strict.dtd\"> " + "<html> " + "<head>"
-		+ "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> "
-		+ "<script type=\"text/javascript\"> " + "callback (**json**);" + "function callback(arg) " + "{ "
-		+ "  window.opener.callback_**action**(arg); " + '}' + "</script> " + "</head>" + "</html> ";
+			+ "\"http://www.w3.org/TR/html4/strict.dtd\"> " + "<html> " + "<head>"
+			+ "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> "
+			+ "<script type=\"text/javascript\"> " + "callback (**json**);" + "function callback(arg) " + "{ "
+			+ "  window.opener.callback_**action**(arg); " + '}' + "</script> " + "</head>" + "</html> ";
 
 	protected static final String SAVE_AS_TYPE = "application/octet-stream";
 
@@ -388,26 +390,26 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	protected static final String RESPONSE_ERROR = "Error while writing response object.";
 
 	/**
-     * The service method of HttpServlet is extended to catch bad exceptions and
-     * keep the AJP socket alive. Otherwise apache things in a balancer
-     * environment this AJP container is temporarily dead and redirects requests
-     * to other AJP containers. This will kill the users session.
-     */
-    @Override
-    protected void service(final HttpServletRequest req,
-        final HttpServletResponse resp) throws ServletException, IOException {
-        try {
-            super.service(req, resp);
-        } catch (ServletException x) {
-            throw x;
-        } catch (Exception e) {
-        	final ServletException se = new ServletException(e.getLocalizedMessage());
-        	se.initCause(e);
-            throw se;
-        }
-    }
+	 * The service method of HttpServlet is extended to catch bad exceptions and
+	 * keep the AJP socket alive. Otherwise apache things in a balancer
+	 * environment this AJP container is temporarily dead and redirects requests
+	 * to other AJP containers. This will kill the users session.
+	 */
+	@Override
+	protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
+			IOException {
+		try {
+			super.service(req, resp);
+		} catch (ServletException x) {
+			throw x;
+		} catch (Exception e) {
+			final ServletException se = new ServletException(e.getLocalizedMessage());
+			se.initCause(e);
+			throw se;
+		}
+	}
 
-    public static boolean containsParameter(final HttpServletRequest req, final String name) {
+	public static boolean containsParameter(final HttpServletRequest req, final String name) {
 		return (req.getParameter(name) != null);
 	}
 
@@ -539,18 +541,17 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 				}
 			}
 		}
-		/*final InputStream input = req.getInputStream();
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream(input.available());
-		final byte[] buf = new byte[8192];
-		int length = -1;
-		while ((length = input.read(buf)) != -1) {
-			baos.write(buf, 0, length);
-		}
-		String characterEncoding = req.getCharacterEncoding();
-		if (null == characterEncoding) {
-			characterEncoding = ServerConfig.getProperty(Property.DefaultEncoding);//"UTF-8";
-		}
-		return new String(baos.toByteArray(), characterEncoding);*/
+		/*
+		 * final InputStream input = req.getInputStream(); final
+		 * ByteArrayOutputStream baos = new
+		 * ByteArrayOutputStream(input.available()); final byte[] buf = new
+		 * byte[8192]; int length = -1; while ((length = input.read(buf)) != -1) {
+		 * baos.write(buf, 0, length); } String characterEncoding =
+		 * req.getCharacterEncoding(); if (null == characterEncoding) {
+		 * characterEncoding =
+		 * ServerConfig.getProperty(Property.DefaultEncoding);//"UTF-8"; }
+		 * return new String(baos.toByteArray(), characterEncoding);
+		 */
 	}
 
 	/**
@@ -559,9 +560,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 * 
 	 * @param session
 	 * @return user's timezone
+	 * @throws ContextException
+	 *             If context cannot be loaded
 	 */
-	protected static TimeZone getUserTimeZone(final Session session) {
-		return TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), session.getContext()).getTimeZone());
+	protected static TimeZone getUserTimeZone(final Session session) throws ContextException {
+		return TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(),
+				ContextStorage.getStorageContext(session.getContextId())).getTimeZone());
 	}
 
 	/**
@@ -571,8 +575,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 *            the <code>java.util.Date</code> in GMT
 	 * @param session
 	 * @return a <code>long</code> value with added time zone offset
+	 * @throws ContextException
+	 *             If context cannot be loaded
 	 */
-	protected static long sendTime(final Date d, final Session session) {
+	protected static long sendTime(final Date d, final Session session) throws ContextException {
 		return d.getTime() + getUserTimeZone(session).getOffset(d.getTime());
 	}
 
@@ -585,8 +591,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 * @param session
 	 * @return a <code>java.util.Date</code> instance with subtracted time
 	 *         zone offset
+	 * @throws ContextException
+	 *             If context cannot be loaded
 	 */
-	protected static Date parseTime(final long time, final Session session) {
+	protected static Date parseTime(final long time, final Session session) throws ContextException {
 		return new Date(time - getUserTimeZone(session).getOffset(time));
 	}
 
@@ -614,8 +622,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		return uri;
 	}
 
-	protected static JSONObject getResponseObject(final Object data, final Timestamp serverTimestamp, final String errorMsg,
-			final String[] errorParams) throws JSONException {
+	protected static JSONObject getResponseObject(final Object data, final Timestamp serverTimestamp,
+			final String errorMsg, final String[] errorParams) throws JSONException {
 		final JSONObject retval = new JSONObject();
 		retval.put("data", data);
 		if (serverTimestamp != null) {
@@ -757,9 +765,14 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		for (int i = 0; i < substitutions.length; i++) {
 			final String key = substitutions[i];
 			String value = substitutions[++i];
-			value = value.replaceAll("\\\\", "\\\\\\\\"); //fix for 7583: replaces \ with \\, because \\ is later replaced with \ in String.replaceAll()
+			value = value.replaceAll("\\\\", "\\\\\\\\"); // fix for 7583:
+															// replaces \ with
+															// \\, because \\ is
+															// later replaced
+															// with \ in
+															// String.replaceAll()
 			value = value.replaceAll("\\$", "\\\\\\$"); // Escape-O-Rama. Turn
-														// all $ in \$
+			// all $ in \$
 			s = s.replaceAll("\\*\\*" + key + "\\*\\*", value);
 		}
 		return s;
@@ -884,7 +897,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.groupware.upload.UploadRegistry#addUploadListener(com.openexchange.groupware.upload.UploadListener)
 	 */
@@ -894,7 +908,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.groupware.upload.UploadRegistry#containsUploadListener(com.openexchange.groupware.upload.UploadListener)
 	 */
@@ -910,7 +925,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		return false;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.groupware.upload.UploadRegistry#fireUploadEvent(com.openexchange.groupware.upload.UploadEvent)
 	 */
@@ -924,8 +940,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 				try {
 					uploadListener.action(uploadEvent);
 				} catch (OXException e) {
-					LOG.error(errBuilder.append("ERROR: Upload method \"action()\" failed for UploadListener ")
-							.append(uploadListener.getClass()), e);
+					LOG.error(errBuilder.append("ERROR: Upload method \"action()\" failed for UploadListener ").append(
+							uploadListener.getClass()), e);
 					errBuilder.setLength(0);
 				}
 			}
@@ -996,9 +1012,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		 */
 	}
 
-	protected void writeResponse(final Response response,
-        final HttpServletResponse httpServletResponse) throws IOException {
-        httpServletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
+	protected void writeResponse(final Response response, final HttpServletResponse httpServletResponse)
+			throws IOException {
+		httpServletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
 		try {
 			Response.write(response, httpServletResponse.getWriter());
 		} catch (JSONException e) {
@@ -1006,12 +1022,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			sendError(httpServletResponse);
 		}
 	}
-	
-	protected final boolean isIE(final HttpServletRequest req){
+
+	protected final boolean isIE(final HttpServletRequest req) {
 		return req.getHeader("User-Agent").contains("MSIE");
 	}
-	
-	protected final boolean isIE7(final HttpServletRequest req){
+
+	protected final boolean isIE7(final HttpServletRequest req) {
 		return req.getHeader("User-Agent").contains("MSIE 7");
 	}
 
@@ -1054,7 +1070,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		}
 		return moduleStr;
 	}
-	
+
 	public static final int getModuleInteger(final String moduleStr) {
 		final int module;
 		if (MODULE_TASK.equalsIgnoreCase(moduleStr)) {

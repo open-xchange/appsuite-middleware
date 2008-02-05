@@ -107,13 +107,12 @@ public final class FolderWriter extends DataWriter {
 				SQLException;
 	}
 
-	public FolderWriter(final JSONWriter jw, final Session session) {
+	public FolderWriter(final JSONWriter jw, final Session session, final Context ctx) {
 		super();
 		this.jsonwriter = jw;
-		this.userObj = UserStorage.getStorageUser(session.getUserId(), session.getContext());
-		this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-				session.getContext());
-		this.ctx = session.getContext();
+		this.userObj = UserStorage.getStorageUser(session.getUserId(), ctx);
+		this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
+		this.ctx = ctx;
 	}
 
 	private UserConfigurationStorage getUserConfigurationStorage() {
