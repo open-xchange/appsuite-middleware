@@ -182,11 +182,11 @@ public class TasksDelete implements DeleteListener {
                     foldStor.deleteFolder(ctx, writeCon, taskId, folderId,
                         type);
                 } else if (ctx.getMailadmin() == userId) {
-                    TaskLogic.removeTask(session, writeCon, folderId, taskId,
-                        type);
+                    TaskLogic.removeTask(session, ctx, writeCon, folderId,
+                        taskId, type);
                 } else if (StorageType.DELETED == type) {
-                    TaskLogic.removeTask(session, writeCon, folderId, taskId,
-                        type);
+                    TaskLogic.removeTask(session, ctx, writeCon, folderId,
+                        taskId, type);
                 } else if (Tools.isFolderPublic(ctx, folderId)) {
                     foldStor.deleteFolder(ctx, writeCon, taskId, folderId,
                         type);
@@ -194,8 +194,8 @@ public class TasksDelete implements DeleteListener {
                         .getMailadmin());
                     foldStor.insertFolder(ctx, writeCon, taskId, folder, type);
                 } else if (Tools.isFolderPrivate(ctx, folderId)) {
-                    TaskLogic.removeTask(session, writeCon, folderId, taskId,
-                        type);
+                    TaskLogic.removeTask(session, ctx, writeCon, folderId,
+                        taskId, type);
                 } else {
                     throw new TaskException(Code.UNIMPLEMENTED);
                 }

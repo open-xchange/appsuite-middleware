@@ -64,12 +64,15 @@ import com.openexchange.event.EventClient;
 import com.openexchange.event.InvalidStateException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.mapping.Status;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
@@ -106,27 +109,26 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         this.session = session;
     }
 
-    private final UserConfiguration getUserConfiguration() {
-		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-				session.getContext());
-	}
-
     /**
      * {@inheritDoc}
      */
     public int getNumberOfTasks(final int folderId) throws OXException {
-        final Context ctx = session.getContext();
-        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
-        final int userId = user.getId();
-        FolderObject folder;
+        final Context ctx;
+        final int userId = session.getUserId();
+        final User user;
+        final UserConfiguration configuration;
+        final FolderObject folder;
         try {
-            folder = Tools.getFolder(session.getContext(), folderId);
+            ctx = Tools.getContext(session.getContextId());
+            user = Tools.getUser(ctx, userId);
+            configuration = Tools.getUserConfiguration(ctx, userId);
+            folder = Tools.getFolder(ctx, folderId);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
         boolean onlyOwn;
         try {
-            onlyOwn = Permission.canReadInFolder(ctx, user, getUserConfiguration(), folder);
+            onlyOwn = Permission.canReadInFolder(ctx, user, configuration, folder);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
@@ -144,21 +146,25 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
     /**
      * {@inheritDoc}
      */
-    public SearchIterator getTaskList(final int folderId, final int from,
+    public SearchIterator<Task> getTaskList(final int folderId, final int from,
         final int until, final int orderBy, final String orderDir,
         final int[] columns) throws OXException {
         boolean onlyOwn;
-        final Context ctx = session.getContext();
-        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
-        final int userId = user.getId();
-        FolderObject folder;
+        final Context ctx;
+        final int userId = session.getUserId();
+        final User user;
+        final UserConfiguration configuration;
+        final FolderObject folder;
         try {
+            ctx = Tools.getContext(session.getContextId());
+            user = Tools.getUser(ctx, userId);
+            configuration = Tools.getUserConfiguration(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
         try {
-            onlyOwn = Permission.canReadInFolder(ctx, user, getUserConfiguration(), folder);
+            onlyOwn = Permission.canReadInFolder(ctx, user, configuration, folder);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
@@ -176,12 +182,16 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
      */
     public Task getTaskById(final int taskId, final int folderId)
         throws OXException {
-        final Context ctx = session.getContext();
-        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
-        final UserConfiguration userConfig = getUserConfiguration();
-        final GetTask get = new GetTask(ctx, user, userConfig, folderId, taskId,
-            StorageType.ACTIVE);
+        final Context ctx;
+        final int userId = session.getUserId();
+        final User user;
+        final UserConfiguration userConfig;
         try {
+            ctx = Tools.getContext(session.getContextId());
+            user = Tools.getUser(ctx, userId);
+            userConfig = Tools.getUserConfiguration(ctx, userId);
+            final GetTask get = new GetTask(ctx, user, userConfig, folderId,
+                taskId, StorageType.ACTIVE);
             return get.loadAndCheck();
         } catch (TaskException e) {
             throw Tools.convert(e);
@@ -191,20 +201,24 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
     /**
      * {@inheritDoc}
      */
-    public SearchIterator getModifiedTasksInFolder(final int folderId,
+    public SearchIterator<Task> getModifiedTasksInFolder(final int folderId,
         final int[] columns, final Date since) throws OXException {
-        final Context ctx = session.getContext();
-        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
+        final Context ctx;
+        final User user;
         final int userId = session.getUserId();
+        final UserConfiguration userConfig;
         FolderObject folder;
         try {
+            ctx = Tools.getContext(session.getContextId());
+            user = Tools.getUser(ctx, userId);
+            userConfig = Tools.getUserConfiguration(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
         boolean onlyOwn;
         try {
-            onlyOwn = Permission.canReadInFolder(ctx, user, getUserConfiguration(), folder);
+            onlyOwn = Permission.canReadInFolder(ctx, user, userConfig, folder);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
@@ -222,18 +236,22 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
      */
     public SearchIterator getDeletedTasksInFolder(final int folderId,
         final int[] columns, final Date since) throws OXException {
-        final Context ctx = session.getContext();
-        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
-        final int userId = user.getId();
+        final Context ctx;
+        final User user;
+        final int userId = session.getUserId();
+        final UserConfiguration userConfig;
         FolderObject folder;
         try {
+            ctx = Tools.getContext(session.getContextId());
+            user = Tools.getUser(ctx, userId);
+            userConfig = Tools.getUserConfiguration(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
         boolean onlyOwn;
         try {
-            onlyOwn = Permission.canReadInFolder(ctx, user, getUserConfiguration(), folder);
+            onlyOwn = Permission.canReadInFolder(ctx, user, userConfig, folder);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
@@ -251,18 +269,18 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
      * {@inheritDoc}
      */
     public void insertTaskObject(final Task task) throws OXException {
-        final Context ctx = session.getContext();
+        final Context ctx;
         final Set<TaskParticipant> parts;
         try {
-            final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
-            final int userId = user.getId();
+            ctx = Tools.getContext(session.getContextId());
+            final int userId = session.getUserId();
+            final User user = Tools.getUser(ctx, userId);
+            final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, userId);
             parts = TaskLogic.createParticipants(ctx, task.getParticipants());
-            TaskLogic.checkNewTask(task, userId, getUserConfiguration(),
-                parts);
+            TaskLogic.checkNewTask(task, userId, userConfig, parts);
             // Check access rights
             final int folderId = task.getParentFolderID();
             final FolderObject folder = Tools.getFolder(ctx, folderId);
-            final UserConfiguration userConfig = getUserConfiguration();
             Permission.checkCreate(ctx, user, userConfig, folder);
             if (task.getPrivateFlag() && (Tools.isFolderPublic(folder)
                 || Tools.isFolderShared(folder, user))) {
@@ -305,11 +323,15 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
      */
     public void updateTaskObject(final Task task, final int folderId,
         final Date lastRead) throws OXException {
-        final Context ctx = session.getContext();
-        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
-        final UserConfiguration userConfig = getUserConfiguration();
+        final Context ctx;
+        final int userId = session.getUserId();
+        final User user;
+        final UserConfiguration userConfig;
         final FolderObject folder;
         try {
+            ctx = Tools.getContext(session.getContextId());
+            user = Tools.getUser(ctx, userId);
+            userConfig = Tools.getUserConfiguration(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
         } catch (TaskException e) {
             throw Tools.convert(e);
@@ -349,7 +371,8 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             if (Task.NO_RECURRENCE != updated.getRecurrenceType() && Task.DONE
                 == updated.getStatus() && Arrays.contains(update
                     .getModifiedFields(), Status.SINGLETON.getId())) {
-                insertNextRecurrence(updated, updatedParts, updatedFolder);
+                insertNextRecurrence(ctx, userId, userConfig, updated,
+                    updatedParts, updatedFolder);
             }
         } catch (TaskException e) {
             throw Tools.convert(e);
@@ -364,15 +387,13 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
      * @throws TaskException if creating the new task fails.
      * @throws OXException if sending an event about new task fails.
      */
-    private void insertNextRecurrence(final Task task,
+    private void insertNextRecurrence(final Context ctx, final int userId,
+        final UserConfiguration userConfig, final Task task,
         final Set<TaskParticipant> parts, final Set<Folder> folders)
-        throws TaskException,
-        OXException {
-        final Context ctx = session.getContext();
+        throws TaskException, OXException {
         final boolean next = TaskLogic.makeRecurrence(task);
         if (next) {
-            TaskLogic.checkNewTask(task, session.getUserId(),
-                getUserConfiguration(), parts);
+            TaskLogic.checkNewTask(task, userId, userConfig, parts);
             TaskLogic.insertTask(ctx, task, parts, folders);
             try {
                 new EventClient(session).create(task);
@@ -389,10 +410,15 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         final Date lastModified) throws OXException {
         final FolderStorage foldStor = FolderStorage.getInstance();
         final FolderObject folder;
-        final Context ctx = session.getContext();
-        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
+        final Context ctx;
+        final int userId = session.getUserId();
+        final User user;
+        final UserConfiguration userConfig;
         final Task task;
         try {
+            ctx = Tools.getContext(session.getContextId());
+            user = Tools.getUser(ctx, userId);
+            userConfig = Tools.getUserConfiguration(ctx, userId);
             // Check if folder exists
             folder = Tools.getFolder(ctx, folderId);
             // Check if folder is correct.
@@ -402,13 +428,12 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             task = GetTask.load(ctx, folderId, taskId, StorageType.ACTIVE);
             // TODO Switch to only delete the participant from task
             // Check delete permission
-            Permission.checkDelete(ctx, user, getUserConfiguration(),
-                folder, task);
+            Permission.checkDelete(ctx, user, userConfig, folder, task);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
         try {
-            TaskLogic.deleteTask(session, task, lastModified);
+            TaskLogic.deleteTask(session, ctx, userId, task, lastModified);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
@@ -421,8 +446,8 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
     public void setUserConfirmation(final int taskId, final int userId,
         final int confirm, final String message) throws OXException {
         try {
-            TaskLogic.setConfirmation(session.getContext(), taskId, userId,
-                confirm, message);
+            final Context ctx = Tools.getContext(session.getContextId());
+            TaskLogic.setConfirmation(ctx, taskId, userId, confirm, message);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
@@ -447,19 +472,22 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
     public SearchIterator getTasksByExtendedSearch(
         final TaskSearchObject search, final int orderBy, final String orderDir,
         final int[] columns) throws OXException {
-        final User user = UserStorage.getStorageUser(session.getUserId(), session.getContext());
         List<Integer> all = new ArrayList<Integer>();
         List<Integer> own = new ArrayList<Integer>();
         List<Integer> shared = new ArrayList<Integer>();
-        final Context ctx = session.getContext();
-        final UserConfiguration config = getUserConfiguration();
+        final Context ctx;
+        final int userId = session.getUserId();
+        final User user;
+        final UserConfiguration config;
         try {
-            final int userId = user.getId();
+            ctx = Tools.getContext(session.getContextId());
+            user = Tools.getUser(ctx, userId);
+            config = Tools.getUserConfiguration(ctx, userId);
             final int[] groups = user.getGroups();
             if (TaskSearchObject.NO_FOLDER == search.getFolder()) {
                 final SearchIterator iter = OXFolderTools
                     .getAllVisibleFoldersIteratorOfModule(userId,
-                        user.getGroups(), config.getAccessibleModules(),
+                        groups, config.getAccessibleModules(),
                         FolderObject.TASK, ctx);
                 while (iter.hasNext()) {
                     final FolderObject folder = (FolderObject) iter.next();
@@ -504,7 +532,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             retval = SearchIterator.EMPTY_ITERATOR;
         } else {
             try {
-                retval = TaskStorage.getInstance().search(session, search,
+                retval = TaskStorage.getInstance().search(ctx, userId, search,
                     orderBy, orderDir, columns, all, own, shared);
             } catch (TaskException e) {
                 throw Tools.convert(e);

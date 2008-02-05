@@ -230,11 +230,10 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    SearchIterator search(final Session session,
+    SearchIterator search(final Context ctx, final int userId,
         final TaskSearchObject search, final int orderBy, final String orderDir,
         final int[] columns, final List<Integer> all, final List<Integer> own,
         final List<Integer> shared) throws TaskException {
-        final int userId = session.getUserId();
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append(SQL.getFields(columns, true));
@@ -252,7 +251,6 @@ public class RdbTaskStorage extends TaskStorage {
             sql.append(patternCondition);
         }
         sql.append(SQL.getOrder(orderBy, orderDir));
-        final Context ctx = session.getContext();
         Connection con = null;
         try {
             con = DBPool.pickup(ctx);
@@ -510,14 +508,13 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    public boolean containsNotSelfCreatedTasks(final Session session,
-        final int folderId) throws TaskException {
+    public boolean containsNotSelfCreatedTasks(final Context ctx,
+        final int userId, final int folderId) throws TaskException {
         final String sql = "SELECT COUNT(id) FROM task JOIN task_folder "
             + "USING (cid,id) WHERE task.cid=? AND folder=? AND "
             + "created_from!=?";
         boolean retval = true;
         Connection con;
-        final Context ctx = session.getContext();
         try {
             con = DBPool.pickup(ctx);
         } catch (DBPoolingException e) {
@@ -528,7 +525,6 @@ public class RdbTaskStorage extends TaskStorage {
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, folderId);
-            final int userId = session.getUserId();
             stmt.setInt(pos++, userId);
             final ResultSet result = stmt.executeQuery();
             if (result.next()) {

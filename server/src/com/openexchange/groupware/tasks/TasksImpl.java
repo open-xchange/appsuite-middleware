@@ -94,8 +94,9 @@ final class TasksImpl extends Tasks {
     public boolean containsNotSelfCreatedTasks(final Session session,
         final int folderId) throws OXException {
         try {
-            return TaskStorage.getInstance().containsNotSelfCreatedTasks(
-                session, folderId);
+            final Context ctx = Tools.getContext(session.getContextId());
+            return TaskStorage.getInstance().containsNotSelfCreatedTasks(ctx,
+                session.getUserId(), folderId);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
@@ -119,12 +120,13 @@ final class TasksImpl extends Tasks {
         final TaskStorage storage = TaskStorage.getInstance();
         final ParticipantStorage partStor = ParticipantStorage.getInstance();
         final FolderStorage foldStor = FolderStorage.getInstance();
-        final Context ctx = session.getContext();
+        final Context ctx;
         final int userId = session.getUserId();
         final List<Integer> deleteTask = new ArrayList<Integer>();
         final List<UpdateData> removeParticipant = new ArrayList<UpdateData>();
         TaskIterator iter = null;
         try {
+            ctx = Tools.getContext(session.getContextId());
             iter = storage.list(ctx, folderId, 0, -1, 0,
                 null, new int[] { Task.OBJECT_ID }, false, userId, false);
             while (iter.hasNext()) {
@@ -187,7 +189,8 @@ final class TasksImpl extends Tasks {
             for (int taskId : deleteTask) {
                 final Task task = GetTask.load(ctx, folderId, taskId,
                     StorageType.ACTIVE);
-                TaskLogic.deleteTask(session, task, task.getLastModified());
+                TaskLogic.deleteTask(session, ctx, userId, task,
+                    task.getLastModified());
             }
             for (UpdateData data : removeParticipant) {
                 if (deleteTask.contains(data.taskId)) {

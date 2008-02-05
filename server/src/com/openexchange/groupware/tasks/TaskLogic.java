@@ -724,10 +724,9 @@ public final class TaskLogic {
      * @param lastModified last modification timestamp for concurrent conflicts.
      * @throws TaskException if an exception occurs.
      */
-    public static void deleteTask(final Session session, final Task task,
-        final Date lastModified) throws TaskException {
-        final Context ctx = session.getContext();
-        final int userId = session.getUserId();
+    public static void deleteTask(final Session session, final Context ctx,
+        final int userId, final Task task, final Date lastModified)
+        throws TaskException {
         Connection con;
         try {
             con = DBPool.pickupWriteable(ctx);
@@ -758,7 +757,7 @@ public final class TaskLogic {
             }
             DBPool.closeWriterSilent(ctx, con);
         }
-        informDelete(session, task);
+        informDelete(session, ctx, task);
     }
 
     private static void deleteParticipants(final Context ctx,
@@ -797,9 +796,9 @@ public final class TaskLogic {
      * @param task Task object.
      * @throws TaskException if an exception occurs.
      */
-    static void informDelete(final Session session, final Task task)
-        throws TaskException {
-        Reminder.deleteReminder(session.getContext(), task);
+    static void informDelete(final Session session, final Context ctx,
+        final Task task) throws TaskException {
+        Reminder.deleteReminder(ctx, task);
         try {
             new EventClient(session).delete(task);
         } catch (InvalidStateException e) {
@@ -817,10 +816,9 @@ public final class TaskLogic {
      * {@link StorageType#DELETED}).
      * @throws TaskException if an exception occurs.
      */
-    public static void removeTask(final Session session,
+    public static void removeTask(final Session session, final Context ctx,
         final Connection writeCon, final int folderId, final int taskId,
         final StorageType type) throws TaskException {
-        final Context ctx = session.getContext();
         // Load the task.
         final Task task = storage.selectTask(ctx, writeCon, taskId, type);
         task.setParentFolderID(folderId);
@@ -845,7 +843,7 @@ public final class TaskLogic {
         partStor.deleteExternal(ctx, writeCon, taskId, external, type, true);
         foldStor.deleteFolder(ctx, writeCon, taskId, folders, type);
         storage.delete(ctx, writeCon, taskId, task.getLastModified(), type);
-        informDelete(session, task);
+        informDelete(session, ctx, task);
     }
 
     static void setConfirmation(final Context ctx, final int taskId,

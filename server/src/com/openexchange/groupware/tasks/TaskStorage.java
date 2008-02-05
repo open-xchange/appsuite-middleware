@@ -187,7 +187,7 @@ abstract class TaskStorage {
      * @return an iterator for all found tasks.
      * @throws TaskException if an error occurs.
      */
-    abstract SearchIterator search(Session session,
+    abstract SearchIterator search(Context ctx, int userId,
         TaskSearchObject search, int orderBy, String orderDir, int[] columns,
         List<Integer> all, List<Integer> own, List<Integer> shared)
         throws TaskException;
@@ -227,7 +227,7 @@ abstract class TaskStorage {
         }
     }
 
-    public abstract boolean containsNotSelfCreatedTasks(Session session,
+    public abstract boolean containsNotSelfCreatedTasks(Context ctx, int userId,
         int folderId) throws TaskException;
 
 }

@@ -64,11 +64,19 @@ import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
@@ -236,6 +244,43 @@ public final class Tools {
                 }
                 internal.setFolderId(folder.getIdentifier());
             }
+        }
+    }
+
+    static Context getContext(final int contextId) throws TaskException {
+        try {
+            return ContextStorage.getStorageContext(contextId);
+        } catch (ContextException e) {
+            throw new TaskException(e);
+        }
+    }
+
+    static UserConfiguration getUserConfiguration(final Session session)
+        throws TaskException {
+        return getUserConfiguration(getContext(session.getContextId()), session
+            .getUserId());
+    }
+
+    static UserConfiguration getUserConfiguration(final Context ctx,
+        final int userId) throws TaskException {
+        try {
+            return UserConfigurationStorage.getInstance().getUserConfiguration(
+                userId, ctx);
+        } catch (UserConfigurationException e) {
+            throw new TaskException(e);
+        }
+    }
+    
+    static User getUser(final Session session) throws TaskException {
+        return getUser(getContext(session.getContextId()), session.getUserId());
+    }
+
+    static User getUser(final Context ctx, final int userId)
+        throws TaskException {
+        try {
+            return UserStorage.getInstance().getUser(userId, ctx);
+        } catch (LdapException e) {
+            throw new TaskException(e);
         }
     }
 
