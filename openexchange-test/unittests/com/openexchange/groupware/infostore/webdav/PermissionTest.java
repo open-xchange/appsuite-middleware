@@ -19,6 +19,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.oxfolder.*;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.api2.OXException;
@@ -237,7 +238,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
         // Verify that it has not doubled, but was overwritten (correctly)
         switchUser(user1);
 
-        TimedResult documents = factory.getDatabase().getDocuments(testFolder.getObjectID(),session.getContext(), user, userConfig);
+        TimedResult documents = factory.getDatabase().getDocuments(testFolder.getObjectID(), getContext(), user, userConfig);
 
         Map<String, Integer> counter =  new HashMap<String,Integer>();
         for(DocumentMetadata metadata : SearchIteratorAdapter.toIterable((SearchIterator<DocumentMetadata>)documents.results())) {
@@ -345,7 +346,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
             document.setFileName(fileName);
             document.setFolderId(testFolder.getObjectID());
             InputStream data = new ByteArrayInputStream(new byte[] {1});
-            infostore.saveDocument(document,data,System.currentTimeMillis(),session);
+            infostore.saveDocument(document,data,System.currentTimeMillis(), new ServerSessionAdapter(session, getContext()));
             return document;
         } catch (Exception x) {
             infostore.rollback();
@@ -379,5 +380,9 @@ public class PermissionTest extends TestCase implements SessionHolder {
 
     public Session getSessionObject() {
         return session;
+    }
+
+    public Context getContext() {
+    	return ctx;
     }
 }
