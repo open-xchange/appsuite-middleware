@@ -76,6 +76,8 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.TransactionException;
@@ -164,8 +166,10 @@ public final class attachments extends OXServlet {
 			attachmentMeta.setFilesize(fileSize);
 			attachmentMeta.setId((req.getHeader(DataFields.OBJECT_ID) != null) ? objectId : AttachmentBase.NEW);
 			
+			final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+			
 			attachmentBase.startTransaction();
-			attachmentBase.attachToObject(attachmentMeta, is, sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
+			attachmentBase.attachToObject(attachmentMeta, is, ctx, UserStorage.getStorageUser(sessionObj.getUserId(), ctx), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
 			attachmentBase.commit();
 			
 			objectId = attachmentMeta.getId();
@@ -304,9 +308,10 @@ public final class attachments extends OXServlet {
 			}
 			
 			attachmentBase.startTransaction();
-			final User u = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
-			final AttachmentMetadata attachmentMeta = attachmentBase.getAttachment(folder_id, target_id, module, object_id, sessionObj.getContext(), u, UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
-			final InputStream is = attachmentBase.getAttachedFile(folder_id, target_id, module, object_id, sessionObj.getContext(), u, UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
+			final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+			final User u = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+			final AttachmentMetadata attachmentMeta = attachmentBase.getAttachment(folder_id, target_id, module, object_id, ctx, u, UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
+			final InputStream is = attachmentBase.getAttachedFile(folder_id, target_id, module, object_id, ctx, u, UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
 			attachmentBase.commit();
 			resp.setContentType(attachmentMeta.getFileMIMEType());
 			
@@ -339,13 +344,15 @@ public final class attachments extends OXServlet {
 		try {
 			sessionObj = getSession(req);
 			
+			final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+			
 			final int objectId = req.getIntHeader(DataFields.OBJECT_ID);
 			final int module = req.getIntHeader(MODULE);
 			final int targetId = req.getIntHeader(TARGET_ID);
 			final int folderId = req.getIntHeader(TARGET_FOLDER_ID);
 			
 			attachmentBase.startTransaction();
-			attachmentBase.detachFromObject(folderId, targetId, module, new int[] { objectId }, sessionObj.getContext(), UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext()), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
+			attachmentBase.detachFromObject(folderId, targetId, module, new int[] { objectId }, ctx, UserStorage.getStorageUser(sessionObj.getUserId(), ctx), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
 			attachmentBase.commit();
 			resp.setStatus(HttpServletResponse.SC_OK);
 		} catch (OXConflictException exc) {
