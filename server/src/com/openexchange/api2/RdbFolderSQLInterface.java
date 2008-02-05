@@ -157,18 +157,18 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	/**
 	 * @param sessionObj
 	 */
-	public RdbFolderSQLInterface(final Session sessionObj) {
-		this(sessionObj, null);
+	public RdbFolderSQLInterface(final Session sessionObj, final Context ctx) {
+		this(sessionObj, ctx, null);
 	}
 
-	public RdbFolderSQLInterface(final Session sessionObj, final OXFolderAccess oxfolderAccess) {
+	public RdbFolderSQLInterface(final Session sessionObj, final Context ctx, final OXFolderAccess oxfolderAccess) {
 		this.sessionObj = sessionObj;
-		userConfiguration = UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
-				sessionObj.getContext());
-		user = UserStorage.getStorageUser(sessionObj.getUserId(), sessionObj.getContext());
+		this.ctx = ctx;
+		userConfiguration = UserConfigurationStorage.getInstance()
+				.getUserConfigurationSafe(sessionObj.getUserId(), ctx);
+		user = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
 		this.userId = user.getId();
 		this.groups = user.getGroups();
-		this.ctx = sessionObj.getContext();
 		this.oxfolderAccess = oxfolderAccess == null ? new OXFolderAccess(ctx) : oxfolderAccess;
 	}
 
@@ -398,17 +398,16 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 * @throws OXException
 	 *             If a caching error occurs
 	 */
-	private static final void loadNonTreeVisibleFoldersIntoQueryCache(final Session session,
+	private static final void loadNonTreeVisibleFoldersIntoQueryCache(final Session session, final Context ctx,
 			UserConfiguration userConfiguration) throws SearchIteratorException, OXException {
 		/*
 		 * Fetch queue from iterator (which implicitly puts referenced objects
 		 * into cache!)
 		 */
-		final Context ctx = session.getContext();
 		final int userId;
 		final int[] groups;
 		{
-			final User u = UserStorage.getStorageUser(session.getUserId(), session.getContext());
+			final User u = UserStorage.getStorageUser(session.getUserId(), ctx);
 			userId = u.getId();
 			groups = u.getGroups();
 		}
@@ -461,7 +460,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 			LinkedList<Integer> result;
 			if ((result = FolderQueryCacheManager.getInstance().getFolderQuery(
 					FolderQuery.NON_TREE_VISIBLE_CALENDAR.queryNum, sessionObj)) == null) {
-				loadNonTreeVisibleFoldersIntoQueryCache(sessionObj, userConfiguration);
+				loadNonTreeVisibleFoldersIntoQueryCache(sessionObj, ctx, userConfiguration);
 				result = FolderQueryCacheManager.getInstance().getFolderQuery(
 						FolderQuery.NON_TREE_VISIBLE_CALENDAR.queryNum, sessionObj);
 			}
@@ -487,7 +486,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 			LinkedList<Integer> result;
 			if ((result = FolderQueryCacheManager.getInstance().getFolderQuery(
 					FolderQuery.NON_TREE_VISIBLE_TASK.queryNum, sessionObj)) == null) {
-				loadNonTreeVisibleFoldersIntoQueryCache(sessionObj, userConfiguration);
+				loadNonTreeVisibleFoldersIntoQueryCache(sessionObj, ctx, userConfiguration);
 				result = FolderQueryCacheManager.getInstance().getFolderQuery(
 						FolderQuery.NON_TREE_VISIBLE_TASK.queryNum, sessionObj);
 			}
@@ -511,7 +510,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 			LinkedList<Integer> result;
 			if ((result = FolderQueryCacheManager.getInstance().getFolderQuery(
 					FolderQuery.NON_TREE_VISIBLE_CONTACT.queryNum, sessionObj)) == null) {
-				loadNonTreeVisibleFoldersIntoQueryCache(sessionObj, userConfiguration);
+				loadNonTreeVisibleFoldersIntoQueryCache(sessionObj, ctx, userConfiguration);
 				result = FolderQueryCacheManager.getInstance().getFolderQuery(
 						FolderQuery.NON_TREE_VISIBLE_CONTACT.queryNum, sessionObj);
 			}
@@ -535,7 +534,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 			LinkedList<Integer> result;
 			if ((result = FolderQueryCacheManager.getInstance().getFolderQuery(
 					FolderQuery.NON_TREE_VISIBLE_INFOSTORE.queryNum, sessionObj)) == null) {
-				loadNonTreeVisibleFoldersIntoQueryCache(sessionObj, userConfiguration);
+				loadNonTreeVisibleFoldersIntoQueryCache(sessionObj, ctx, userConfiguration);
 				result = FolderQueryCacheManager.getInstance().getFolderQuery(
 						FolderQuery.NON_TREE_VISIBLE_INFOSTORE.queryNum, sessionObj);
 			}
@@ -595,8 +594,8 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 			if (parentId == FolderObject.SYSTEM_SHARED_FOLDER_ID && !userConfiguration.hasFullSharedFolderAccess()) {
 				throw new OXFolderPermissionException(FolderCode.NO_SHARED_FOLDER_ACCESS,
 						getUserName(sessionObj, user), FolderObject.getFolderString(
-								FolderObject.SYSTEM_SHARED_FOLDER_ID, UserStorage.getStorageUser(sessionObj.getUserId(),
-										sessionObj.getContext()).getLocale()), Integer.valueOf(ctx.getContextId()));
+								FolderObject.SYSTEM_SHARED_FOLDER_ID, UserStorage.getStorageUser(
+										sessionObj.getUserId(), ctx).getLocale()), Integer.valueOf(ctx.getContextId()));
 			} else if (oxfolderAccess.isFolderShared(parentId, userId)) {
 				return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
 			}
@@ -637,8 +636,8 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 */
 	public SearchIterator<?> getPathToRoot(final int folderId) throws OXException {
 		try {
-			return OXFolderIteratorSQL.getFoldersOnPathToRoot(folderId, userId, userConfiguration, UserStorage.getStorageUser(
-					sessionObj.getUserId(), sessionObj.getContext()).getLocale(), ctx);
+			return OXFolderIteratorSQL.getFoldersOnPathToRoot(folderId, userId, userConfiguration, UserStorage
+					.getStorageUser(sessionObj.getUserId(), ctx).getLocale(), ctx);
 		} catch (final OXException e) {
 			throw e;
 		} catch (final SearchIteratorException e) {
