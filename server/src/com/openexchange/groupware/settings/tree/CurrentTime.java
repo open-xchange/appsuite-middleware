@@ -51,6 +51,7 @@ package com.openexchange.groupware.settings.tree;
 
 import java.util.TimeZone;
 
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -59,6 +60,7 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.SettingSetup;
 import com.openexchange.groupware.settings.SharedValue;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
 /**
@@ -101,25 +103,19 @@ public final class CurrentTime extends AbstractNode {
             /**
              * {@inheritDoc}
              */
-            public boolean isAvailable(final Session session) {
+            public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
             /**
              * {@inheritDoc}
              */
-            public void getValue(final Session session, final Setting setting)
-                throws SettingException {
-                try {
-                    final UserStorage stor = UserStorage.getInstance();
-                    final User user = stor.getUser(session.getUserId(), session
-                        .getContext());
-                    final TimeZone zone = TimeZone.getTimeZone(user.getTimeZone());
-                    long time = System.currentTimeMillis();
-                    time  += zone.getOffset(time);
-                    setting.setSingleValue(Long.valueOf(time));
-                } catch (LdapException e) {
-                    throw new SettingException(e);
-                }
+            public void getValue(final Session session, final Context ctx,
+                final User user, final UserConfiguration userConfig,
+                final Setting setting) throws SettingException {
+                final TimeZone zone = TimeZone.getTimeZone(user.getTimeZone());
+                long time = System.currentTimeMillis();
+                time  += zone.getOffset(time);
+                setting.setSingleValue(Long.valueOf(time));
             }
         };
     }

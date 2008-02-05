@@ -52,9 +52,13 @@ package com.openexchange.groupware.settings.tree;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.SettingSetup;
 import com.openexchange.groupware.settings.SharedValue;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
 /**
@@ -95,18 +99,19 @@ public final class ContextID extends AbstractNode {
     @Override
     public SharedValue getSharedValue() {
         return new SharedValue() {
-            public boolean isAvailable(final Session session) {
+            public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
-            public void getValue(final Session session, final Setting setting) {
-                setting.setSingleValue(Integer.valueOf(session.getContext()
-                    .getContextId()));
+            public void getValue(final Session session, final Context ctx,
+                final User user, final UserConfiguration userConfig,
+                final Setting setting) throws SettingException {
+                setting.setSingleValue(Integer.valueOf(ctx.getContextId()));
             }
             public boolean isWritable() {
                 return true;
             }
-            public void writeValue(final Session session,
-                final Setting setting) {
+            public void writeValue(final Context ctx,
+                User user, final Setting setting) {
                 LOG.warn(getName() + " written.");
             }
         };

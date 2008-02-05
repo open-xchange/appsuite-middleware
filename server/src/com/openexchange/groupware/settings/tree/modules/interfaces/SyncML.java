@@ -53,8 +53,8 @@ import com.openexchange.groupware.settings.SettingSetup;
 import com.openexchange.groupware.settings.tree.AbstractModules;
 import com.openexchange.groupware.settings.tree.Modules;
 import com.openexchange.groupware.settings.tree.modules.Interfaces;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.session.Session;
 
 /**
  * Contains initialization for the modules configuration tree setting syncml.
@@ -89,8 +89,8 @@ public class SyncML extends AbstractModules {
      * {@inheritDoc}
      */
     @Override
-    protected boolean getModule(final Session session) {
-		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-				session.getContext()).hasSyncML();
+    protected boolean getModule(final UserConfiguration userConfig) {
+		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(userConfig.getUserId(),
+				userConfig.getContext()).hasSyncML();
 	}
 }

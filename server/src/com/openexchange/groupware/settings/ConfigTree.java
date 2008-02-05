@@ -60,11 +60,13 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.SettingException.Code;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterface;
@@ -174,15 +176,12 @@ public final class ConfigTree {
         /**
          * {@inheritDoc}
          */
-        public void writeValue(final Session session,
-            final Setting setting) throws SettingException {
+        public void writeValue(final Context ctx,
+            User user, final Setting setting) throws SettingException {
             try {
-                final UserStorage storage = UserStorage.getInstance();
-                final User oldUser = storage.getUser(session.getUserId(),
-                    session.getContext());
-                final UserImpl user = new UserImpl(oldUser);
-                setValue(user, (String) setting.getSingleValue());
-                storage.updateUser(user, session.getContext());
+                final UserImpl newUser = new UserImpl(user);
+                setValue(newUser, (String) setting.getSingleValue());
+                UserStorage.getInstance().updateUser(newUser, ctx);
             } catch (LdapException e) {
                 throw new SettingException(e);
             }
@@ -352,142 +351,102 @@ public final class ConfigTree {
 
         final Map<String, SharedValue> tmp = new HashMap<String, SharedValue>();
         tmp.put(tasks.getPath(), new ReadOnlyValue() {
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasTask();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+				return userConfig.hasTask();
 			}
-            public void getValue(final Session session,
-                final Setting setting) throws SettingException {
-                final OXFolderAccess acc = new OXFolderAccess(session
-                    .getContext());
+            public void getValue(final Session session, final Context ctx,
+                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
+                final OXFolderAccess acc = new OXFolderAccess(ctx);
                 try {
-                    setting.setSingleValue(acc.getDefaultFolder(session
-                        .getUserId(), FolderObject.TASK)
-                        .getObjectID());
+                    setting.setSingleValue(acc.getDefaultFolder(user.getId(),
+                        FolderObject.TASK).getObjectID());
                 } catch (OXException e) {
                     throw new SettingException(e);
                 }
             }
         });
         tmp.put(calendar.getPath(), new ReadOnlyValue() {
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasCalendar();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasCalendar();
 			}
-            public void getValue(final Session session,
-                final Setting setting) throws SettingException {
-                final OXFolderAccess acc = new OXFolderAccess(session
-                    .getContext());
+            public void getValue(final Session session, final Context ctx,
+                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
+                final OXFolderAccess acc = new OXFolderAccess(ctx);
                 try {
-                    setting.setSingleValue(acc.getDefaultFolder(session
-                        .getUserId(), FolderObject.CALENDAR)
-                        .getObjectID());
+                    setting.setSingleValue(acc.getDefaultFolder(user.getId(),
+                        FolderObject.CALENDAR).getObjectID());
                 } catch (OXException e) {
                     throw new SettingException(e);
                 }
             }
         });
         tmp.put(contacts.getPath(), new ReadOnlyValue() {
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasContact();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasContact();
 			}
-            public void getValue(final Session session,
-                final Setting setting) throws SettingException {
-                final OXFolderAccess acc = new OXFolderAccess(session
-                    .getContext());
+            public void getValue(final Session session, final Context ctx,
+                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
+                final OXFolderAccess acc = new OXFolderAccess(ctx);
                 try {
-                    setting.setSingleValue(acc.getDefaultFolder(session
-                        .getUserId(), FolderObject.CONTACT)
-                        .getObjectID());
+                    setting.setSingleValue(acc.getDefaultFolder(user.getId(),
+                        FolderObject.CONTACT).getObjectID());
                 } catch (OXException e) {
                     throw new SettingException(e);
                 }
             }
         });
         tmp.put(infostore.getPath(), new ReadOnlyValue() {
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasInfostore();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasInfostore();
 			}
-            public void getValue(final Session session,
-                final Setting setting) throws SettingException {
-                final OXFolderAccess acc = new OXFolderAccess(session
-                    .getContext());
+            public void getValue(final Session session, final Context ctx,
+                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
+                final OXFolderAccess acc = new OXFolderAccess(ctx);
                 try {
-                    setting.setSingleValue(acc.getDefaultFolder(session
-                        .getUserId(), FolderObject.INFOSTORE)
-                        .getObjectID());
+                    setting.setSingleValue(acc.getDefaultFolder(user.getId(),
+                        FolderObject.INFOSTORE).getObjectID());
                 } catch (OXException e) {
                     throw new SettingException(e);
                 }
             }
         });
-        tmp.put(defaultaddress.getPath(), new AbstractUserFuncs() {
-            public void getValue(final Session session,
-                final Setting setting) {
-                setting.setSingleValue(UserStorage.getStorageUser(session.getUserId(), session.getContext()).getMail());
+        tmp.put(defaultaddress.getPath(), new ReadOnlyValue() {
+            public void getValue(final Session session, final Context ctx,
+                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
+                setting.setSingleValue(user.getMail());
             }
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasWebMail();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
 			}
-            public boolean isWritable() {
-                return false;
-            }
-            protected void setValue(final UserImpl user, final String value)
-                throws SettingException {
-                throw new SettingException(Code.NO_WRITE,
-                    defaultaddress.getPath());
-            }
         });
-        tmp.put(addresses.getPath(), new AbstractUserFuncs() {
-            public void getValue(final Session session,
-                final Setting setting) {
-                final String[] aliases = UserStorage.getStorageUser(session.getUserId(), session.getContext()).getAliases();
+        tmp.put(addresses.getPath(), new ReadOnlyValue() {
+            public void getValue(final Session session, final Context ctx,
+                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
+                final String[] aliases = user.getAliases();
                 if (null != aliases) {
-                    for (String alias : UserStorage.getStorageUser(session.getUserId(), session.getContext()).getAliases()) {
+                    for (String alias : aliases) {
                         setting.addMultiValue(alias);
                     }
                 }
             }
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasWebMail();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
 			}
-            public boolean isWritable() {
-                return false;
-            }
-            protected void setValue(final UserImpl user, final String value)
-                throws SettingException {
-                throw new SettingException(Code.NO_WRITE, addresses.getPath());
-            }
         });
         tmp.put(sendaddress.getPath(), new SharedValue() {
-			public void getValue(final Session session, final Setting setting) throws SettingException {
-				final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(
-						session.getUserId(), session.getContext());
+            public void getValue(final Session session, final Context ctx,
+                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
+				final UserSettingMail settings = UserSettingMailStorage
+                    .getInstance().getUserSettingMail(user.getId(), ctx);
 				setting.setSingleValue(settings.getSendAddr());
 			}
-
-			public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasWebMail();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
 			}
-
 			public boolean isWritable() {
 				return true;
 			}
-
-			public void writeValue(final Session session, final Setting setting) throws SettingException {
-			    final User user;
-			    try {
-    			    final UserStorage userStor = UserStorage.getInstance();
-    			    user = userStor.getUser(session.getUserId(), session
-    			        .getContext());
-			    } catch (LdapException e) {
-			        throw new SettingException(e);
-			    }
+			public void writeValue(final Context ctx, User user, final Setting setting) throws SettingException {
 			    final String newAlias = (String) setting.getSingleValue();
 			    final String[] aliases = user.getAliases();
 			    boolean found = false;
@@ -501,25 +460,24 @@ public final class ConfigTree {
 			        throw new SettingException(Code.INVALID_VALUE, newAlias,
 			            sendaddress.getPath());
 			    }
-			    final UserSettingMail settings = UserSettingMailStorage
-			        .getInstance().getUserSettingMail(session.getUserId(),
-		            session.getContext());
+                final UserSettingMailStorage storage = UserSettingMailStorage
+                    .getInstance();
+			    final UserSettingMail settings = storage.getUserSettingMail(
+                    user.getId(), ctx);
 			    settings.setSendAddr(newAlias);
 				try {
-					UserSettingMailStorage.getInstance().saveUserSettingMail(
-					    settings, session.getUserId(), session.getContext());
+					storage.saveUserSettingMail(settings, user.getId(), ctx);
 				} catch (OXException e) {
 					throw new SettingException(e);
 				}
 			}
 		});
         tmp.put(inbox.getPath(), new ReadOnlyValue() {
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasWebMail();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
 			}
-            public void getValue(final Session session,
-                final Setting setting) throws SettingException {
+            public void getValue(final Session session, final Context ctx,
+                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
                 MailInterface mail = null;
                 try {
                     mail = MailInterface.getInstance(session);
@@ -538,12 +496,11 @@ public final class ConfigTree {
             }
         });
         tmp.put(drafts.getPath(), new ReadOnlyValue() {
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasWebMail();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
 			}
-            public void getValue(final Session session,
-                final Setting setting) throws SettingException {
+            public void getValue(final Session session, final Context ctx,
+                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
                 MailInterface mail = null;
                 try {
                     mail = MailInterface.getInstance(session);
@@ -562,12 +519,11 @@ public final class ConfigTree {
             }
         });
         tmp.put(sent.getPath(), new ReadOnlyValue() {
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasWebMail();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
 			}
-            public void getValue(final Session session,
-                final Setting setting) throws SettingException {
+            public void getValue(final Session session, final Context ctx,
+                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
                 MailInterface mail = null;
                 try {
                     mail = MailInterface.getInstance(session);
@@ -586,12 +542,11 @@ public final class ConfigTree {
             }
         });
         tmp.put(spam.getPath(), new ReadOnlyValue() {
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasWebMail();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
 			}
-            public void getValue(final Session session,
-                final Setting setting) throws SettingException {
+            public void getValue(final Session session, final Context ctx,
+                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
                 MailInterface mail = null;
                 try {
                     mail = MailInterface.getInstance(session);
@@ -610,12 +565,11 @@ public final class ConfigTree {
             }
         });
         tmp.put(trash.getPath(), new ReadOnlyValue() {
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasWebMail();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
 			}
-            public void getValue(final Session session,
-                final Setting setting) throws SettingException {
+            public void getValue(final Session session, final Context ctx,
+                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
                 MailInterface mail = null;
                 try {
                     mail = MailInterface.getInstance(session);
@@ -634,52 +588,56 @@ public final class ConfigTree {
             }
         });
         tmp.put(colorquoted.getPath(), new AbstractMailFuncs() {
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasWebMail();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
 			}
+            @Override
             protected Boolean isSet(final UserSettingMail settings) {
                 return settings.isUseColorQuote();
             }
+            @Override
             protected void setValue(final UserSettingMail settings,
                 final String value) {
                 settings.setUseColorQuote(Boolean.parseBoolean(value));
             }
         });
         tmp.put(emoticons.getPath(), new AbstractMailFuncs() {
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasWebMail();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
 			}
+            @Override
             protected Boolean isSet(final UserSettingMail settings) {
                 return settings.isShowGraphicEmoticons();
             }
+            @Override
             protected void setValue(final UserSettingMail settings,
                 final String value) {
                 settings.setShowGraphicEmoticons(Boolean.parseBoolean(value));
             }
         });
         tmp.put(deletemail.getPath(), new AbstractMailFuncs() {
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasWebMail();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
 			}
+            @Override
             protected Boolean isSet(final UserSettingMail settings) {
                 return settings.isHardDeleteMsgs();
             }
+            @Override
             protected void setValue(final UserSettingMail settings,
                 final String value) {
                 settings.setHardDeleteMsgs(Boolean.parseBoolean(value));
             }
         });
         tmp.put(inlineattachments.getPath(), new AbstractMailFuncs() {
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasWebMail();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
 			}
+            @Override
             protected Boolean isSet(final UserSettingMail settings) {
                 return settings.isDisplayHtmlInlineContent();
             }
+            @Override
             protected void setValue(final UserSettingMail settings,
                 final String value) {
                 settings.setDisplayHtmlInlineContent(
@@ -687,13 +645,14 @@ public final class ConfigTree {
             }
         });
         tmp.put(appendmailtext.getPath(), new AbstractMailFuncs() {
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasWebMail();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
 			}
+            @Override
             protected Boolean isSet(final UserSettingMail settings) {
-                return !settings.isIgnoreOriginalMailTextOnReply();
+                return Boolean.valueOf(!settings.isIgnoreOriginalMailTextOnReply());
             }
+            @Override
             protected void setValue(final UserSettingMail settings,
                 final String value) {
                 settings.setIgnoreOriginalMailTextOnReply(
@@ -703,10 +662,10 @@ public final class ConfigTree {
         tmp.put(forwardmessage.getPath(), new AbstractMailFuncs() {
             private static final String INLINE = "Inline";
             private static final String ATTACHMENT = "Attachment";
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasWebMail();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
 			}
+            @Override
             protected Object isSet(final UserSettingMail settings) {
                 final String retval;
                 if (settings.isForwardAsAttachment()) {
@@ -716,34 +675,36 @@ public final class ConfigTree {
                 }
                 return retval;
             }
+            @Override
             protected void setValue(final UserSettingMail settings,
                 final String value) {
                 settings.setForwardAsAttachment(ATTACHMENT.equals(value));
             }
         });
         tmp.put(linewrap.getPath(), new SharedValue() {
-			public void getValue(final Session session, final Setting setting) throws SettingException {
-				final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(
-						session.getUserId(), session.getContext());
+            public void getValue(final Session session, final Context ctx,
+                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
+				final UserSettingMail settings = UserSettingMailStorage
+                    .getInstance().getUserSettingMail(session.getUserId(), ctx);
 				setting.setSingleValue(settings.getAutoLinebreak());
 			}
-
-			public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasWebMail();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
 			}
-
 			public boolean isWritable() {
 				return true;
 			}
-
-			public void writeValue(final Session session, final Setting setting) throws SettingException {
-				final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(
-						session.getUserId(), session.getContext());
+			public void writeValue(final Context ctx, final User user,
+                final Setting setting) throws SettingException {
+                final UserSettingMailStorage storage = UserSettingMailStorage
+                    .getInstance();
+				final UserSettingMail settings = storage.getUserSettingMail(
+						user.getId(), ctx);
 				try {
-					settings.setAutoLinebreak(Integer.parseInt((String) setting.getSingleValue()));
-					UserSettingMailStorage.getInstance().saveUserSettingMail(settings, session.getUserId(),
-							session.getContext());
+					settings.setAutoLinebreak(Integer.parseInt(
+                        (String) setting.getSingleValue()));
+					storage.saveUserSettingMail(settings, user.getId(),
+							ctx);
 				} catch (NumberFormatException e) {
 					throw new SettingException(Code.JSON_READ_ERROR, e);
 				} catch (OXException e) {
@@ -752,9 +713,8 @@ public final class ConfigTree {
 			}
 		});
         tmp.put(vcard.getPath(), new AbstractMailFuncs() {
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasWebMail();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
 			}
             protected Object isSet(final UserSettingMail settings) {
                 return settings.isAppendVCard();
@@ -765,14 +725,13 @@ public final class ConfigTree {
             }
         });
         tmp.put(spamButton.getPath(), new ReadOnlyValue() {
-            public boolean isAvailable(final Session session) {
-				return UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
-						session.getContext()).hasWebMail();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
 			}
-            public void getValue(final Session session,
-                final Setting setting) throws SettingException {
+            public void getValue(final Session session, final Context ctx,
+                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
 				final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(
-						session.getUserId(), session.getContext());
+						session.getUserId(), ctx);
 				try {
 					setting.setSingleValue(settings.isSpamEnabled());
 				} catch (final MailConfigException e) {

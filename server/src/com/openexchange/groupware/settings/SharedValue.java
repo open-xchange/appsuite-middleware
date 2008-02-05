@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.settings;
 
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
@@ -59,10 +61,11 @@ public interface SharedValue {
 
     /**
      * @param session Session.
+     * @param userConfig TODO
      * @param setting the value should be set in this setting object.
      * @throws SettingException if an error occurs.
      */
-    void getValue(Session session, Setting setting)
+    void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting)
         throws SettingException;
 
     /**
@@ -70,7 +73,7 @@ public interface SharedValue {
      * @return <code>true</code> if this setting is available due to
      * {@link UserConfiguration}.
      */
-    boolean isAvailable(Session session);
+    boolean isAvailable(final UserConfiguration userConfig);
 
     /**
      * @return <code>true</code> if the setting can be written by the GUI.
@@ -79,11 +82,12 @@ public interface SharedValue {
 
     /**
      * Write a new value to the setting.
-     * @param session Session.
+     * @param ctx Session.
+     * @param user TODO
      * @param setting contains the value for the setting.
      * @throws SettingException if the setting can't be written or an error
      * occurs while writing the value.
      */
-    void writeValue(Session session, Setting setting)
+    void writeValue(Context ctx, User user, Setting setting)
         throws SettingException;
 }

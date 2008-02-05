@@ -49,10 +49,13 @@
 
 package com.openexchange.groupware.settings.tree;
 
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.SharedValue;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
 /**
@@ -71,23 +74,25 @@ public abstract class AbstractModules extends AbstractNode {
     /**
      * {@inheritDoc}
      */
+    @Override
     public SharedValue getSharedValue() {
         return new ReadOnlyValue() {
             /**
              * {@inheritDoc}
              */
-            public void getValue(final Session session,
+            public void getValue(final Session session, final Context ctx,
+                final User user, UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
-                setting.setSingleValue(Boolean.valueOf(getModule(session)));
+                setting.setSingleValue(Boolean.valueOf(getModule(userConfig)));
             }
             /**
              * {@inheritDoc}
              */
-            public boolean isAvailable(final Session session) {
+            public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
         };
     }
 
-    protected abstract boolean getModule(final Session session);
+    protected abstract boolean getModule(final UserConfiguration userConfig);
 }

@@ -49,10 +49,14 @@
 
 package com.openexchange.groupware.settings.tree;
 
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.SettingSetup;
 import com.openexchange.groupware.settings.SharedValue;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
 /**
@@ -96,13 +100,15 @@ public final class ReloadTimes extends AbstractNode {
             /**
              * {@inheritDoc}
              */
-            public boolean isAvailable(final Session session) {
+            public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
             /**
              * {@inheritDoc}
              */
-            public void getValue(final Session session, final Setting setting) {
+            public void getValue(final Session session, final Context ctx,
+                final User user, final UserConfiguration userConfig,
+                final Setting setting) throws SettingException {
                 setting.addMultiValue(Integer.valueOf(0)); // Never
                 setting.addMultiValue(Integer.valueOf(5 * MINUTE));
                 setting.addMultiValue(Integer.valueOf(10 * MINUTE));

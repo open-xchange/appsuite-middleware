@@ -50,6 +50,8 @@
 package com.openexchange.groupware.settings.tree.participants;
 
 import com.openexchange.groupware.configuration.ParticipantConfig;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
@@ -99,13 +101,11 @@ public class ShowWithoutEmail extends AbstractNode {
     @Override
     public SharedValue getSharedValue() {
         return new ReadOnlyValue() {
-            public boolean isAvailable(final Session session) {
-                final UserConfiguration config = UserConfigurationStorage
-                    .getInstance().getUserConfigurationSafe(
-                        session.getUserId(), session.getContext());
-                return config.hasCalendar() || config.hasTask();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasCalendar() || userConfig.hasTask();
             }
-            public void getValue(final Session session,
+            public void getValue(final Session session, final Context ctx,
+                final User user, final UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
                 setting.setSingleValue(Boolean.valueOf(ParticipantConfig
                     .getProperty(ParticipantConfig.Property

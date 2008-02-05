@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings.tree;
 
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
@@ -58,6 +59,7 @@ import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.SettingSetup;
 import com.openexchange.groupware.settings.SharedValue;
 import com.openexchange.groupware.settings.ConfigTree.AbstractUserFuncs;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
 /**
@@ -96,18 +98,12 @@ public final class Language extends AbstractNode {
      */
     public SharedValue getSharedValue() {
         return  new AbstractUserFuncs() {
-            public void getValue(final Session session, final Setting setting)
-                throws SettingException {
-                try {
-                    final UserStorage stor = UserStorage.getInstance();
-                    final User user = stor.getUser(session.getUserId(), session
-                        .getContext());
-                    setting.setSingleValue(user.getPreferredLanguage());
-                } catch (LdapException e) {
-                    throw new SettingException(e);
-                }
+            public void getValue(final Session session, final Context ctx,
+                final User user, final UserConfiguration userConfig,
+                final Setting setting) throws SettingException {
+                setting.setSingleValue(user.getPreferredLanguage());
             }
-            public boolean isAvailable(final Session session) {
+            public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
             public boolean isWritable() {

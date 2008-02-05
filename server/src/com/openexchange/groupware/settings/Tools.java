@@ -47,73 +47,56 @@
  *
  */
 
-package com.openexchange.groupware.settings.tree;
+package com.openexchange.groupware.settings;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.groupware.settings.SharedValue;
-import com.openexchange.groupware.settings.Tools;
-import com.openexchange.groupware.settings.ConfigTree.AbstractUserFuncs;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.session.Session;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
 /**
- * Adds a configuration setting tree entry for the timezone of the user.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class TimeZone extends AbstractNode {
-
-    public static final String NAME = "timezone";
+public final class Tools {
 
     /**
-     * Default constructor.
+     * Prevent instanciation.
      */
-    public TimeZone() {
+    private Tools() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String getName() {
-        return NAME;
+    public static Context getContext(final int contextId)
+        throws SettingException {
+        try {
+            return ContextStorage.getInstance().getContext(contextId);
+        } catch (ContextException e) {
+            throw new SettingException(e);
+        }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected SettingSetup[] getParents() {
-        return new SettingSetup[0];
+    public static User getUser(final Context ctx, final int userId)
+        throws SettingException {
+        try {
+            return UserStorage.getInstance().getUser(userId, ctx);
+        } catch (LdapException e) {
+            throw new SettingException(e);
+        }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SharedValue getSharedValue() {
-        return new AbstractUserFuncs() {
-            public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
-                setting.setSingleValue(user.getTimeZone());
-            }
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return true;
-            }
-            public boolean isWritable() {
-                return true;
-            }
-            @Override
-            protected void setValue(final UserImpl user, final String value) {
-                user.setTimeZone(value);
-            }
-        };
+    public static UserConfiguration getUserConfiguration(final Context ctx,
+        final int userId) throws SettingException {
+        try {
+            return UserConfigurationStorage.getInstance().getUserConfiguration(
+                userId, ctx);
+        } catch (UserConfigurationException e) {
+            throw new SettingException(e);
+        }
     }
 }

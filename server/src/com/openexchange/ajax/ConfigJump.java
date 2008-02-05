@@ -106,10 +106,9 @@ public class ConfigJump extends SessionServlet {
             if (req.isSecure()) {
                 protocol = "https";
             }
-            final URL url = configJump.getLink(sessionObj.getContext()
-                .getContextId(), sessionObj.getUserlogin(), sessionObj
-                .getPassword(), protocol, req.getServerName(), req
-                .getServerPort(), req.getCookies());
+            final URL url = configJump.getLink(sessionObj.getContextId(),
+                sessionObj.getUserlogin(), sessionObj.getPassword(), protocol,
+                req.getServerName(), req.getServerPort(), req.getCookies());
             response.setData(url);
         } catch (ConfigJumpException e) {
             LOG.error(e.getMessage(), e);

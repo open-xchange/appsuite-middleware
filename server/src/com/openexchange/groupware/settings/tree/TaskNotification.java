@@ -90,14 +90,12 @@ public class TaskNotification implements SettingSetup {
      */
     public SharedValue getSharedValue() {
         return new AbstractMailFuncs() {
-            public boolean isAvailable(final Session session) {
-                final UserConfiguration config = UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-						session.getUserId(), session.getContext());
-				return config.hasWebMail() && config.hasTask();
+            public boolean isAvailable(final UserConfiguration userConfig) {
+				return userConfig.hasWebMail() && userConfig.hasTask();
             }
             @Override
-            protected Object isSet(final UserSettingMail settings) {
-                return settings.isNotifyTasks();
+            protected Boolean isSet(final UserSettingMail settings) {
+                return Boolean.valueOf(settings.isNotifyTasks());
             }
             @Override
             protected void setValue(final UserSettingMail settings,

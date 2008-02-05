@@ -107,17 +107,8 @@ public final class CalendarNotification extends AbstractNode {
             /**
              * {@inheritDoc}
              */
-            public boolean isAvailable(final Session session) {
-                try {
-                    final UserConfigurationStorage stor = UserConfigurationStorage
-                        .getInstance();
-                    final UserConfiguration config = stor.getUserConfiguration(
-                        session.getUserId(), session.getContext());
-                    return config.hasWebMail() && config.hasCalendar();
-                } catch (UserConfigurationException e) {
-                    LOG.error(e.getMessage(), e);
-                    return false;
-                }
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail() && userConfig.hasCalendar();
             }
             /**
              * {@inheritDoc}

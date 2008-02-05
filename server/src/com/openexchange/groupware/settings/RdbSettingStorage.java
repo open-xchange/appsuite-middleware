@@ -59,7 +59,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.SettingException.Code;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
@@ -109,6 +111,10 @@ public class RdbSettingStorage extends SettingStorage {
      */
     private final transient Context ctx;
 
+    private final User user;
+
+    private final UserConfiguration userConfig;
+
     /**
      * Default constructor.
      * @param session Session.
@@ -117,7 +123,9 @@ public class RdbSettingStorage extends SettingStorage {
     RdbSettingStorage(final Session session) throws SettingException {
         super();
         this.session = session;
-        this.ctx = session.getContext();
+        ctx = Tools.getContext(session.getContextId());
+        user = Tools.getUser(ctx, session.getUserId());
+        userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
     }
 
     /**
@@ -131,7 +139,7 @@ public class RdbSettingStorage extends SettingStorage {
         if (setting.isShared()) {
             final SharedValue value = ConfigTree.getSharedValue(setting);
             if (null != value && value.isWritable()) {
-                value.writeValue(session, setting);
+                value.writeValue(ctx, user, setting);
             } else {
                 throw new SettingException(Code.NO_WRITE, setting.getName());
             }
@@ -169,6 +177,7 @@ public class RdbSettingStorage extends SettingStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void readValues(final Setting setting) throws SettingException {
         if (!setting.isLeaf()) {
             readSubValues(setting);
@@ -214,9 +223,9 @@ public class RdbSettingStorage extends SettingStorage {
     private void readSharedValue(final Setting setting) {
         final SharedValue reader = ConfigTree.getSharedValue(setting);
         if (null != reader) {
-            if (reader.isAvailable(session)) {
+            if (reader.isAvailable(userConfig)) {
                 try {
-                    reader.getValue(session, setting);
+                    reader.getValue(session, ctx, user, null, setting);
                 } catch (SettingException e) {
                     LOG.error("Problem while reading setting value.", e);
                 }
