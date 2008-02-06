@@ -60,11 +60,9 @@ import java.util.Date;
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
-public class RegisterObject {
+public class RegisterObject extends AbstractPushObject {
 	
 	private int userId;
-	
-	private int contextId;
 	
 	private String hostAddress;
 	
@@ -73,8 +71,6 @@ public class RegisterObject {
 	private String userHash;
 	
 	private Date timestamp;
-	
-	private boolean isSync;
 	
 	public RegisterObject(int userId, int contextId, String hostAddress, int port, boolean isSync) {
 		this.userId = userId;
@@ -101,16 +97,8 @@ public class RegisterObject {
 		return userHash;
 	}
 
-	public boolean isSync() {
-		return isSync;
-	}
-
 	public Date getTimestamp() {
 		return timestamp;
-	}
-	
-	public int getContextId() {
-		return contextId;
 	}
 	
 	@Override

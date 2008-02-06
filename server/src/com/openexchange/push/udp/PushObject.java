@@ -51,6 +51,8 @@
 
 package com.openexchange.push.udp;
 
+import java.util.Date;
+
 import com.openexchange.tools.StringCollection;
 
 /**
@@ -59,17 +61,15 @@ import com.openexchange.tools.StringCollection;
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
-public class PushObject {
+public class PushObject extends AbstractPushObject {
 	
 	private int folderId;
 	
 	private int module;
 	
-	private int contextId;
-	
 	private int users[];
-	
-	private boolean isSync;
+		
+	private Date creationDate = new Date();
 	
 	public PushObject(int folderId, int module, int contextId, int[] users, boolean isSync) throws Exception {
 		this.folderId = folderId;
@@ -86,17 +86,13 @@ public class PushObject {
 	public int getModule() {
 		return module;
 	}
-
-	public int getContextId() {
-		return contextId;
-	}
 	
 	public int[] getUsers() {
 		return users;
 	}
-
-	public boolean isSync() {
-		return isSync;
+	
+	public Date getCreationDate() {
+		return creationDate;
 	}
 	
 	@Override
