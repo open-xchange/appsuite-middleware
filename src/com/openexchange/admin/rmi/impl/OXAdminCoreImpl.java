@@ -53,6 +53,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
@@ -61,6 +63,8 @@ import com.openexchange.admin.rmi.OXAdminCoreInterface;
 
 public class OXAdminCoreImpl implements OXAdminCoreInterface {
 
+    private static final Log log = LogFactory.getLog(OXAdminCoreImpl.class);
+    
     private BundleContext context = null;
     
     
@@ -81,7 +85,16 @@ public class OXAdminCoreImpl implements OXAdminCoreInterface {
         // in this type of list we make a new one...
         final List<Bundle> subList = allbundlelist.subList(1, allbundlelist.size());
         
-        return bundlelist.containsAll(subList);
+        final boolean containsAll = bundlelist.containsAll(subList);
+        if (containsAll) {
+            return true;
+        } else {
+            // We have to introduce a new list because a sublist can't be modified
+            final ArrayList<Bundle> arrayList = new ArrayList<Bundle>(subList);
+            arrayList.removeAll(bundlelist);
+            log.error("The following bundles aren't started: " + arrayList);
+            return false;
+        }
     }
 
 }
