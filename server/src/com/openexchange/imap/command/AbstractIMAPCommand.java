@@ -118,12 +118,14 @@ public abstract class AbstractIMAPCommand<T> {
 			for (int k = 0; k < args.length; k++) {
 				{
 					final String imapCmd = abstractIMAPCommand.getCommand(k);
+					final long start = System.currentTimeMillis();
+					r = protocol.command(imapCmd, null);
 					if (LOG.isDebugEnabled()) {
 						final String debugInfo = abstractIMAPCommand.getDebugInfo(k);
-						LOG.debug(new StringBuilder(imapCmd.length() + 21).append("Firing IMAP command:\n").append(
+						LOG.debug(new StringBuilder(imapCmd.length() + 32).append("Fired IMAP command in ").append(
+								System.currentTimeMillis() - start).append("msec:\n").append(
 								debugInfo == null ? imapCmd : debugInfo).toString());
 					}
-					r = protocol.command(imapCmd, null);
 				}
 				response = r[r.length - 1];
 				try {

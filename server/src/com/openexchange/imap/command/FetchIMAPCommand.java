@@ -327,7 +327,11 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 			final int pos = arg.indexOf(',');
 			if (pos != -1) {
 				sb.append(arg.substring(0, pos)).append(",...,").append(arg.substring(arg.lastIndexOf(',') + 1));
+			} else {
+				sb.append("...");
 			}
+		} else {
+			sb.append(arg);
 		}
 		sb.append(" (").append(command).append(')');
 		return sb.toString();
