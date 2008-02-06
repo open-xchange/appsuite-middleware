@@ -50,6 +50,7 @@
 package com.openexchange.ajax;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Enumeration;
 
@@ -150,8 +151,10 @@ public abstract class SessionServlet extends AJAXServlet {
 			response.setException(e);
 			resp.setContentType(CONTENTTYPE_JAVASCRIPT);
 			Tools.deleteCookies(req, resp);
+			final PrintWriter writer = resp.getWriter();
 			try {
-				Response.write(response, resp.getWriter());
+				Response.write(response, writer);
+				writer.flush();
 			} catch (JSONException e1) {
 				log(RESPONSE_ERROR, e1);
 				sendError(resp);
@@ -162,8 +165,10 @@ public abstract class SessionServlet extends AJAXServlet {
 			response.setException(e);
 			resp.setContentType(CONTENTTYPE_JAVASCRIPT);
 			Tools.deleteCookies(req, resp);
+			final PrintWriter writer = resp.getWriter();
 			try {
-				Response.write(response, resp.getWriter());
+				Response.write(response, writer);
+				writer.flush();
 			} catch (JSONException e1) {
 				log(RESPONSE_ERROR, e1);
 				sendError(resp);

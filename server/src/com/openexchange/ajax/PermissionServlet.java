@@ -91,20 +91,20 @@ public abstract class PermissionServlet extends SessionServlet {
 		super.service(req, resp);
 
 		final Session sessionObj = getSessionObject(req);
-		
-		final Context ctx;
-		try {
-			ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-		} catch (ContextException exc) {
-			resp.sendError(HttpServletResponse.SC_CONFLICT, "Conflict");
-			return;
+		if (null != sessionObj) {
+			final Context ctx;
+			try {
+				ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+			} catch (ContextException exc) {
+				resp.sendError(HttpServletResponse.SC_CONFLICT, "Conflict");
+				return;
+			}
+			
+			if (!hasModulePermission(sessionObj, ctx)) {
+				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
+				return;
+			}
 		}
-		
-		
-		if (sessionObj != null && !hasModulePermission(sessionObj, ctx)) {
-			resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
-			return;
-		} 
 	}
 	
 	protected abstract boolean hasModulePermission(final Session sessionObj, final Context ctx);
