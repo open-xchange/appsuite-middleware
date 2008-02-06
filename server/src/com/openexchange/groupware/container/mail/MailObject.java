@@ -52,14 +52,22 @@ package com.openexchange.groupware.container.mail;
 import static com.openexchange.mail.utils.MessageUtility.parseAddressList;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.TimeZone;
 
+import javax.activation.DataHandler;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Part;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimeUtility;
 
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -72,6 +80,10 @@ import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MIMEType2ExtMap;
+import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -110,6 +122,8 @@ public class MailObject {
 
 	private final int module;
 
+	private Multipart multipart;
+
 	public MailObject(final Session sessionObj, final int objectId, final int folderId, final int module) {
 		super();
 		this.session = sessionObj;
@@ -129,6 +143,73 @@ public class MailObject {
 			throw new MailException(MailException.Code.MISSING_FIELD, "Subject");
 		} else if (text == null) {
 			throw new MailException(MailException.Code.MISSING_FIELD, "Text");
+		}
+	}
+
+	/**
+	 * Adds a file attachment to this mail object
+	 * 
+	 * @param contentType
+	 *            The content type (incl. charset parameter)
+	 * @param fileName
+	 *            The attachment's file name
+	 * @param inputStream
+	 *            The attachment's data as an input stream
+	 * @throws MailException
+	 *             If file attachment cannot be added
+	 */
+	public void addFileAttachment(final ContentType contentType, final String fileName, final InputStream inputStream)
+			throws MailException {
+		/*
+		 * Determine proper content type
+		 */
+		final ContentType ct = new ContentType();
+		ct.setContentType(contentType);
+		if (ct.isMimeType(MIMETypes.MIME_APPL_OCTET) && fileName != null) {
+			/*
+			 * Try to determine MIME type
+			 */
+			final String ctStr = MIMEType2ExtMap.getContentType(fileName);
+			final int pos = ctStr.indexOf('/');
+			ct.setPrimaryType(ctStr.substring(0, pos));
+			ct.setSubType(ctStr.substring(pos + 1));
+		}
+		try {
+			/*
+			 * Generate body part
+			 */
+			final MimeBodyPart bodyPart = new MimeBodyPart();
+			bodyPart.setDataHandler(new DataHandler(new MessageDataSource(inputStream, getContentType())));
+			bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
+			/*
+			 * Filename
+			 */
+			if (fileName != null) {
+				try {
+					bodyPart.setFileName(MimeUtility.encodeText(fileName, "UTF-8", "Q"));
+				} catch (final UnsupportedEncodingException e) {
+					bodyPart.setFileName(fileName);
+				}
+			}
+			/*
+			 * Force base64 encoding to keep data as it is
+			 */
+			bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
+			/*
+			 * Disposition
+			 */
+			bodyPart.setDisposition(Part.ATTACHMENT);
+			/*
+			 * Add to multipart
+			 */
+			if (multipart == null) {
+				multipart = new MimeMultipart("mixed");
+			}
+			multipart.addBodyPart(bodyPart);
+		} catch (final IOException e) {
+			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+		} catch (final MessagingException e) {
+			throw MIMEMailException.handleMessagingException(e);
 		}
 	}
 
@@ -190,9 +271,15 @@ public class MailObject {
 			 */
 			msg.setSubject(subject, ct.getCharsetParameter());
 			/*
+			 * Examine message's content type
+			 */
+			if (!"text".equalsIgnoreCase(ct.getPrimaryType())) {
+				throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, ct.toString());
+			}
+			/*
 			 * Set content and its type
 			 */
-			if ("text".equalsIgnoreCase(ct.getPrimaryType())) {
+			if (multipart == null) {
 				if ("html".equalsIgnoreCase(ct.getSubType()) || "htm".equalsIgnoreCase(ct.getSubType())) {
 					msg.setContent(text, ct.toString());
 				} else if ("plain".equalsIgnoreCase(ct.getSubType()) || "enriched".equalsIgnoreCase(ct.getSubType())) {
@@ -205,7 +292,22 @@ public class MailObject {
 					throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, ct.toString());
 				}
 			} else {
-				throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, ct.toString());
+				final MimeBodyPart textPart = new MimeBodyPart();
+				if ("html".equalsIgnoreCase(ct.getSubType()) || "htm".equalsIgnoreCase(ct.getSubType())) {
+					textPart.setContent(text, ct.toString());
+				} else if ("plain".equalsIgnoreCase(ct.getSubType()) || "enriched".equalsIgnoreCase(ct.getSubType())) {
+					if (!ct.containsCharsetParameter()) {
+						textPart.setText(text);
+					} else {
+						textPart.setText(text, ct.getCharsetParameter());
+					}
+				} else {
+					throw new MailException(MailException.Code.UNSUPPORTED_MIME_TYPE, ct.toString());
+				}
+				textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+				textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
+				multipart.addBodyPart(textPart, 0);
+				msg.setContent(multipart);
 			}
 			/*
 			 * Disposition notification
