@@ -106,7 +106,7 @@ public class Executor extends Assert {
         } else {
             resp = conv.getResponse(req);
         }
-        final AbstractAJAXParser parser = request.getParser();
+        final AbstractAJAXParser<?> parser = request.getParser();
         parser.checkResponse(resp);
         return parser.parse(resp.getText());
     }

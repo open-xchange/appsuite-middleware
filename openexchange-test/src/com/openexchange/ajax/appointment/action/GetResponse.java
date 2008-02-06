@@ -51,13 +51,17 @@ package com.openexchange.ajax.appointment.action;
 
 import java.util.TimeZone;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.parser.AppointmentParser;
+import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * 
@@ -77,12 +81,18 @@ public class GetResponse extends AbstractAJAXResponse {
     /**
      * @return the appointment
      * @throws OXException parsing the appointment out of the response fails.
+     * @throws JSONException if parsing of some extra values fails. 
      */
-    public AppointmentObject getAppointment(final TimeZone timeZone) throws OXException {
+    public AppointmentObject getAppointment(final TimeZone timeZone)
+        throws OXException, JSONException {
         if (null == appointmentObj) {
             this.appointmentObj = new AppointmentObject();
-            new AppointmentParser(timeZone).parse(appointmentObj, (JSONObject) getResponse().getData());
-
+            final JSONObject json = (JSONObject) getResponse().getData();
+            new AppointmentParser(timeZone).parse(appointmentObj, json);
+            if (json.has(AppointmentFields.CREATION_DATE)) {
+                appointmentObj.setCreationDate(DataParser.parseTime(json,
+                    AppointmentFields.CREATION_DATE, timeZone));
+            }
         }
         return appointmentObj;
     }

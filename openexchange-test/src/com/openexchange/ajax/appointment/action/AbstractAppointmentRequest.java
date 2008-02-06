@@ -67,7 +67,7 @@ public abstract class AbstractAppointmentRequest implements AJAXRequest {
     /**
      * URL of the calendar AJAX interface.
      */
-    private static final String URL = "/ajax/calendar";
+    static final String URL = "/ajax/calendar";
 
     /**
      * Default constructor.

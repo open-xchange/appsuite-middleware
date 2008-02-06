@@ -76,6 +76,8 @@ public final class FunambolTest extends AbstractAJAXSession {
      */
     private static final Log LOG = LogFactory.getLog(FunambolTest.class);
 
+    private static final int MAX_DIFFERENCE = 1000; // 1 second
+
     /**
      * @param name
      */
@@ -100,8 +102,12 @@ public final class FunambolTest extends AbstractAJAXSession {
         final GetResponse getR = (GetResponse) Executor.execute(client,
             new GetRequest(folder, insertR));
         final AppointmentObject reload = getR.getAppointment(tz);
-        System.out.println("CreationDate: " + reload.getCreationDate());
+        final Date creationDate = reload.getCreationDate();
+        System.out.println("CreationDate: " + creationDate);
+        final long difference = Math.abs(serverTime.getTime() - creationDate.getTime());
+        LOG.info("Time difference: " + difference);
         Executor.execute(client, new DeleteRequest(folder, insertR.getId(), new Date()));
+        assertTrue("Too big time difference: ", difference < MAX_DIFFERENCE);
     }
 
     public static long getHour(final int diff) {
