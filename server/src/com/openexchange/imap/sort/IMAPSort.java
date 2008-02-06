@@ -371,7 +371,12 @@ public final class IMAPSort {
 		boolean applicationSort = true;
 		Message[] msgs = null;
 		final MailListField sortField = sortFieldArg == null ? MailListField.RECEIVED_DATE : sortFieldArg;
-		if (imapConfig.isImapSort()) {
+		final int size = filter == null ? imapFolder.getMessageCount() : filter.length;
+		/*
+		 * Perform an IMAP-based sort if IMAP sort is enabled through config or
+		 * number of messages to sort exceeds limit.
+		 */
+		if (imapConfig.isImapSort() || (size >= IMAPConfig.getMailFetchLimit())) {
 			try {
 				long start = System.currentTimeMillis();
 				final int[] seqNums;
@@ -389,6 +394,10 @@ public final class IMAPSort {
 							orderDir == OrderDirection.DESC), filter);
 				}
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder(128).append("IMAP sort took ").append(
+							(System.currentTimeMillis() - start)).append("msec").toString());
+				}
 				if (seqNums == null || seqNums.length == 0) {
 					return EMPTY_MSGS;
 				}
@@ -397,13 +406,16 @@ public final class IMAPSort {
 					fetchProfile = getCacheFetchProfile();
 					usedFields.addAll(getCacheFields());
 				} else {
-					fetchProfile = getFetchProfile(fields, sortField);
+					fetchProfile = getFetchProfile(fields, IMAPConfig.isFastFetch());
 					usedFields.addAll(Arrays.asList(fields));
-					usedFields.add(sortField);
 				}
 				start = System.currentTimeMillis();
 				msgs = new FetchIMAPCommand(imapFolder, seqNums, fetchProfile, false, true).doCommand();
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(seqNums.length).append(
+							" messages took ").append((System.currentTimeMillis() - start)).append("msec").toString());
+				}
 				if (msgs == null || msgs.length == 0) {
 					return EMPTY_MSGS;
 				}
@@ -423,28 +435,38 @@ public final class IMAPSort {
 			 * performed
 			 */
 			if (filter == null) {
-				final int allMsgCount = imapFolder.getMessageCount();
+				final int allMsgCount = size;
 				final FetchProfile fetchProfile;
 				if (allMsgCount < IMAPConfig.getMailFetchLimit()) {
 					fetchProfile = getCacheFetchProfile();
 					usedFields.addAll(getCacheFields());
 				} else {
-					fetchProfile = getFetchProfile(fields, sortField);
+					fetchProfile = getFetchProfile(fields, sortField, IMAPConfig.isFastFetch());
 					usedFields.addAll(Arrays.asList(fields));
 					usedFields.add(sortField);
 				}
+				final long start = System.currentTimeMillis();
 				msgs = new FetchIMAPCommand(imapFolder, fetchProfile, allMsgCount).doCommand();
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(allMsgCount).append(
+							" messages took ").append((System.currentTimeMillis() - start)).append("msec").toString());
+				}
 			} else {
 				final FetchProfile fetchProfile;
 				if (filter.length < IMAPConfig.getMailFetchLimit()) {
 					fetchProfile = getCacheFetchProfile();
 					usedFields.addAll(getCacheFields());
 				} else {
-					fetchProfile = getFetchProfile(fields, sortField);
+					fetchProfile = getFetchProfile(fields, sortField, IMAPConfig.isFastFetch());
 					usedFields.addAll(Arrays.asList(fields));
 					usedFields.add(sortField);
 				}
+				final long start = System.currentTimeMillis();
 				msgs = new FetchIMAPCommand(imapFolder, filter, fetchProfile, false, false).doCommand();
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(filter.length).append(
+							" messages took ").append((System.currentTimeMillis() - start)).append("msec").toString());
+				}
 			}
 			if (msgs == null || msgs.length == 0) {
 				return EMPTY_MSGS;
