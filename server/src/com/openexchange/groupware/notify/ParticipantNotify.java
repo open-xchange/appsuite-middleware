@@ -63,9 +63,12 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.event.AppointmentEvent;
@@ -95,12 +98,20 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.i18n.tools.StringTemplate;
 import com.openexchange.i18n.tools.Template;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.exceptions.LoggingLogic;
+import com.openexchange.tools.versit.VersitDefinition;
+import com.openexchange.tools.versit.Versit;
+import com.openexchange.tools.versit.VersitObject;
+import com.openexchange.tools.versit.converter.OXContainerConverter;
+import com.openexchange.tools.versit.converter.ConverterException;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.session.Session;
 
 public class ParticipantNotify implements AppointmentEvent, TaskEvent {
@@ -116,7 +127,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	public ParticipantNotify() {
 	}
 
-	protected void sendMessage(final String messageTitle, final String message, final List<String> name, final ServerSession session, final CalendarObject obj, int folderId, final State state, final boolean suppressOXReminderHeader) {
+	protected void sendMessage(final String messageTitle, final String message, final List<String> name, final ServerSession session, final CalendarObject obj, int folderId, final State state, final boolean suppressOXReminderHeader, boolean internal) {
 		if(LOG.isDebugEnabled()) {
 			LOG.debug("Sending message to: "+name);
 			LOG.debug("=====["+messageTitle+"]====\n\n");
@@ -137,16 +148,23 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		mail.setText(message);
 		mail.setSubject(messageTitle);
 		mail.setContentType("text/plain; charset=UTF-8");
-		
-		
-		//System.out.println(folderId);
+
+        
+        if(internal) {
+            state.modifyInternal(mail, obj, session);
+        } else {
+            state.modifyExternal(mail, obj, session);
+        }
+
+        //System.out.println(folderId);
 		try {
 			mail.send();
 		} catch (final MailException e) {
 			LL.log(e);
-		}
+            e.printStackTrace();
+        }
 	}
-	
+
 	// Override for testing
 	
 	protected User[] resolveUsers(final Context ctx, final int...ids) throws LdapException {
@@ -193,7 +211,8 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 
 	public void appointmentModified(final AppointmentObject appointmentObj,
 			final Session sessionObj) {
-		sendNotification(appointmentObj, sessionObj, Notifications.APPOINTMENT_UPDATE_MAIL,Notifications.APPOINTMENT_UPDATE_TITLE, new AppointmentState(), false, false);
+       
+        sendNotification(appointmentObj, sessionObj, Notifications.APPOINTMENT_UPDATE_MAIL,Notifications.APPOINTMENT_UPDATE_TITLE, new AppointmentState(), false, false);
 	}
 
 	public void appointmentDeleted(final AppointmentObject appointmentObj,
@@ -240,9 +259,9 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		final Map<String,EmailableParticipant> all = new HashMap<String,EmailableParticipant>();
 		final UserParticipant[] users = obj.getUsers();
 		if(null == users) {
-			sortParticipants(obj.getParticipants(), participantSet, resourceSet, receivers, sessionObj, all);
+            sortParticipants(obj.getParticipants(), participantSet, resourceSet, receivers, sessionObj, all);
 		} else {
-			sortUserParticipants(obj.getUsers(), participantSet, receivers, sessionObj,all);
+            sortUserParticipants(obj.getUsers(), participantSet, receivers, sessionObj,all);
 			sortExternalParticipantsAndResources(obj.getParticipants(),participantSet,resourceSet,receivers, sessionObj,all);
 		}
 		
@@ -261,8 +280,8 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			modifiedByDisplayName = e.toString();
 			LL.log(e);
 		}
-		
-		final List<MailMessage> messages = new ArrayList<MailMessage>();
+
+        final List<MailMessage> messages = new ArrayList<MailMessage>();
 		for(final Locale locale : receivers.keySet()) {
 			
 			final StringHelper strings = new StringHelper(locale);
@@ -274,8 +293,9 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			for(final EmailableParticipant p : participants) {
 				TimeZone tz = TimeZone.getDefault();
 				boolean sendMail = true;
-				
-				if(isUser(sessionObj.getContext(), p)) {
+
+               
+                if(isUser(sessionObj.getContext(), p)) {
 					try {
 						final UserSettingMail userSettingMail = getUserSettingMail(p.id, sessionObj.getContext());
 						sendMail = state.sendMail(userSettingMail) && obj.getModifiedBy() != p.id && (obj.getNotification() || p.id == obj.getCreatedBy() || forceNotifyOthers);
@@ -309,13 +329,14 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 					msg.title = strings.getString(titleKey)+": "+m.get("title");
 					msg.addresses.add(p.email);
 					msg.folderId = p.folderId;
-					messages.add(msg);
+                    msg.internal = p.type != Participant.EXTERNAL_USER;
+                    messages.add(msg);
 				}
 			}
 		}
 		
 		for(final MailMessage mmsg : messages) {
-			sendMessage(mmsg.title, mmsg.message, mmsg.addresses, sessionObj, obj, mmsg.folderId, state, suppressOXReminderHeader);
+			sendMessage(mmsg.title, mmsg.message, mmsg.addresses, sessionObj, obj, mmsg.folderId, state, suppressOXReminderHeader, mmsg.internal);
 		}
 		
 	}
@@ -453,7 +474,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 	}
 	
 	private EmailableParticipant getExternalParticipant(final Participant participant) {
-		if(null == participant.getEmailAddress()) {
+        if(null == participant.getEmailAddress()) {
 			return null;
 		}
 		return new EmailableParticipant(
@@ -665,15 +686,19 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 		public String title;
 		public List<String> addresses = new ArrayList<String>();
 		public int folderId;
-	}
+        public boolean internal;
+    }
 	
 	// Special handling for Appointments or Tasks goes here
-	static interface State {
+	public static interface State {
 		public boolean sendMail(UserSettingMail userSettingMail);
 		public DateFormat getDateFormat(Locale locale);
 		public void addSpecial(CalendarObject obj, Map<String,String> subst, EmailableParticipant p);
 		public int getModule();
-	}
+        public void modifyInternal(MailObject mail, CalendarObject obj, ServerSession sessObj);
+        public void modifyExternal(MailObject mail, CalendarObject obj, ServerSession sessObj);
+
+    }
 	
 	public static abstract class LinkableState implements State {
 		
@@ -745,7 +770,7 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			return Types.APPOINTMENT;
 		}
 
-		public DateFormat getDateFormat(Locale locale) {
+        public DateFormat getDateFormat(Locale locale) {
 			return tryAppendingTimeZone(DateFormat.getDateTimeInstance(DateFormat.DEFAULT,DateFormat.DEFAULT,locale));
 		}
 		
@@ -758,7 +783,51 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			return df;
 		}
 
-	}
+        public void modifyInternal(MailObject mail, CalendarObject obj, ServerSession sessObj) {
+            
+        }
+
+        public void modifyExternal(MailObject mail, CalendarObject obj, ServerSession sessObj) {
+            addICALAttachment(mail, (AppointmentObject) obj, sessObj);
+        }
+
+        private void addICALAttachment(MailObject mail, AppointmentObject obj, ServerSession sessObj) {
+            try {
+                final VersitDefinition versitDefinition = Versit.getDefinition("text/calendar");
+                UnsynchronizedByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
+                final VersitDefinition.Writer versitWriter = versitDefinition.getWriter(byteArrayOutputStream, "UTF-8");
+                final VersitObject versitObjectContainer = OXContainerConverter.newCalendar("2.0");
+                versitDefinition.writeProperties(versitWriter, versitObjectContainer);
+                final OXContainerConverter oxContainerConverter = new OXContainerConverter(sessObj, sessObj.getContext(), TimeZone.getDefault());
+                final VersitDefinition eventDef = versitDefinition.getChildDef("VEVENT");
+
+                final VersitObject versitObject = oxContainerConverter.convertAppointment(obj);
+                eventDef.write(versitWriter, versitObject);
+                versitDefinition.writeEnd(versitWriter, versitObjectContainer);
+                versitWriter.flush();
+
+                InputStream icalFile = new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray());
+
+                ContentType ct = new ContentType();
+                ct.setPrimaryType("text");
+                ct.setSubType("calendar");
+                ct.setCharsetParameter("utf-8");
+
+                String filename = "appointment.ics";
+
+                mail.addFileAttachment(ct, filename, icalFile);
+
+
+            } catch (IOException e) {
+                LOG.error("Can't convert appointment for notification mail.", e);
+            } catch (ConverterException e) {
+                LOG.error("Can't convert appointment for notification mail.", e);
+            } catch (MailException e) {
+                LOG.error("Can't add attachment",e);
+            }
+        }
+
+    }
 	
 	public static class TaskState extends LinkableState {
 
@@ -770,7 +839,15 @@ public class ParticipantNotify implements AppointmentEvent, TaskEvent {
 			return Types.TASK;
 		}
 
-		public DateFormat getDateFormat(Locale locale) {
+        public void modifyInternal(MailObject mail, CalendarObject obj, ServerSession sessObj) {
+
+        }
+
+        public void modifyExternal(MailObject mail, CalendarObject obj, ServerSession sessObj) {
+
+        }
+
+        public DateFormat getDateFormat(Locale locale) {
 			return DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
 		}
 		

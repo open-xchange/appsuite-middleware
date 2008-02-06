@@ -497,7 +497,21 @@ public class OXContainerConverter {
 		this.timezone = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
 	}
 
-	public void close() {
+	public OXContainerConverter(final Session session, final Context ctx) {
+		super();
+		this.session = session;
+		this.ctx = ctx;
+		this.timezone = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx).getTimeZone());
+	}
+
+    public OXContainerConverter(final Session session, final Context ctx, final TimeZone tz) {
+        super();
+        this.session = session;
+        this.ctx = ctx;
+        this.timezone = tz;
+    }
+
+    public void close() {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("OXContainerConverter.close()");
 		}
