@@ -60,7 +60,6 @@ import java.util.Set;
 import javax.mail.FetchProfile;
 import javax.mail.UIDFolder;
 
-import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.sun.mail.imap.IMAPFolder;
@@ -255,12 +254,30 @@ public final class MIMEStorageUtility {
 	 * 
 	 * @param fields
 	 *            The fields
-	 * @param sortField
-	 *            The sort field
+	 * @param preferEnvelope
+	 *            <code>true</code> to prefer ENVELOPE instead of single fetch
+	 *            items; otherwise <code>false</code>
 	 * @return The appropriate IMAP fetch profile
 	 */
-	public static FetchProfile getFetchProfile(final MailListField[] fields, final MailListField sortField) {
-		return getFetchProfile(fields, null, sortField);
+	public static FetchProfile getFetchProfile(final MailListField[] fields, final boolean preferEnvelope) {
+		return getFetchProfile(fields, null, preferEnvelope);
+	}
+
+	/**
+	 * Gets the appropriate IMAP fetch profile
+	 * 
+	 * @param fields
+	 *            The fields
+	 * @param sortField
+	 *            The sort field
+	 * @param preferEnvelope
+	 *            <code>true</code> to prefer ENVELOPE instead of single fetch
+	 *            items; otherwise <code>false</code>
+	 * @return The appropriate IMAP fetch profile
+	 */
+	public static FetchProfile getFetchProfile(final MailListField[] fields, final MailListField sortField,
+			final boolean preferEnvelope) {
+		return getFetchProfile(fields, null, sortField, preferEnvelope);
 	}
 
 	private static final Set<MailListField> ENV_FIELDS;
@@ -278,11 +295,11 @@ public final class MIMEStorageUtility {
 		ENV_FIELDS.add(MailListField.SUBJECT);
 		ENV_FIELDS.add(MailListField.SENT_DATE);
 		/*
-		 * Add the two extra fetch profile items contained in JavaMail's
-		 * ENVELOPE constant
+		 * Discard the two extra fetch profile items contained in JavaMail's
+		 * ENVELOPE constant: RFC822.SIZE and INTERNALDATE
 		 */
-		ENV_FIELDS.add(MailListField.RECEIVED_DATE);
-		ENV_FIELDS.add(MailListField.SIZE);
+		//ENV_FIELDS.add(MailListField.RECEIVED_DATE);
+		//ENV_FIELDS.add(MailListField.SIZE);
 	}
 
 	/**
@@ -294,10 +311,13 @@ public final class MIMEStorageUtility {
 	 *            The search fields
 	 * @param sortField
 	 *            The sort field
+	 * @param preferEnvelope
+	 *            <code>true</code> to prefer ENVELOPE instead of single fetch
+	 *            items; otherwise <code>false</code>
 	 * @return The appropriate IMAP fetch profile
 	 */
 	public static FetchProfile getFetchProfile(final MailListField[] fields, final MailListField[] searchFields,
-			final MailListField sortField) {
+			final MailListField sortField, final boolean preferEnvelope) {
 		final FetchProfile retval = new FetchProfile();
 		/*
 		 * Use a set to avoid duplicate entries
@@ -315,7 +335,7 @@ public final class MIMEStorageUtility {
 		/*
 		 * Check which fields are contained in fetch profile item "ENVELOPE"
 		 */
-		if (IMAPConfig.isFastFetch() && set.removeAll(ENV_FIELDS)) {
+		if (preferEnvelope && set.removeAll(ENV_FIELDS)) {
 			/*
 			 * Add ENVELOPE since set of fields has changed
 			 */
