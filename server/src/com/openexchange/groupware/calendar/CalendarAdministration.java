@@ -387,7 +387,7 @@ public class CalendarAdministration implements DeleteListener {
             rs = cimp.getResultSet(prep);
             CalendarDataObject cdao = null;
             try {
-                cdao = co.loadAppointment(rs, object_id, 0, cimp, readcon, so, CalendarOperation.READ, 0, false);
+                cdao = co.loadAppointment(rs, object_id, 0, cimp, readcon, so, context, CalendarOperation.READ, 0, false);
                 CalendarCommonCollection.triggerEvent(so, type, cdao);
             } catch (OXPermissionException ex) {
                 throw new DeleteFailedException(ex);

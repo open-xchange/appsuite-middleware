@@ -1551,7 +1551,7 @@ class CalendarMySQL implements CalendarSqlImp {
             }
             prep = getPreparedStatement(readcon, loadAppointment(cdao.getObjectID(), cdao.getContext()));
             rs = getResultSet(prep);
-            edao = co.loadAppointment(rs, cdao.getObjectID(), inFolder, this, readcon, so, CalendarOperation.UPDATE, action_folder);
+            edao = co.loadAppointment(rs, cdao.getObjectID(), inFolder, this, readcon, so, ctx, CalendarOperation.UPDATE, action_folder);
         } catch(final SQLException sqle) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
         } catch(final OXPermissionException oxpe ) {
@@ -2755,7 +2755,7 @@ class CalendarMySQL implements CalendarSqlImp {
             final CalendarOperation co = new CalendarOperation();
             prep = getPreparedStatement(readcon, loadAppointment(cdao.getObjectID(), cdao.getContext()));
             rs = getResultSet(prep);
-            edao = co.loadAppointment(rs, cdao.getObjectID(), inFolder, this, readcon, so, CalendarOperation.DELETE, inFolder);
+            edao = co.loadAppointment(rs, cdao.getObjectID(), inFolder, this, readcon, so, ctx, CalendarOperation.DELETE, inFolder);
         } catch(final SQLException sqle) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
         } catch(final OXPermissionException oxpe ) {
@@ -3238,7 +3238,7 @@ class CalendarMySQL implements CalendarSqlImp {
                 final CalendarOperation co = new CalendarOperation();
                 prep = getPreparedStatement(readcon, loadAppointment(oid, ctx));
                 rs = getResultSet(prep);
-                edao = co.loadAppointment(rs, oid, inFolder, this, readcon, so, CalendarOperation.DELETE, inFolder, false); // No permission checks at all!
+                edao = co.loadAppointment(rs, oid, inFolder, this, readcon, so, ctx, CalendarOperation.DELETE, inFolder, false); // No permission checks at all!
             } catch(final SQLException sqle) {
                 throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
             } catch(final OXPermissionException oxpe ) {
