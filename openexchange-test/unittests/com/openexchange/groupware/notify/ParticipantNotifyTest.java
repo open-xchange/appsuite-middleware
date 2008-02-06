@@ -4,8 +4,10 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.*;
+import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.*;
 import com.openexchange.groupware.notify.ParticipantNotify.EmailableParticipant;
 import com.openexchange.groupware.notify.ParticipantNotify.LinkableState;
@@ -14,12 +16,23 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringTemplate;
 import com.openexchange.i18n.tools.TemplateListResourceBundle;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.session.Session;
+import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.MailException;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tools.versit.converter.OXContainerConverter;
+import com.openexchange.tools.versit.VersitDefinition;
+import com.openexchange.tools.versit.ICalendar;
+import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.test.TestInit;
+import com.openexchange.session.Session;
 import junit.framework.TestCase;
 
 import java.io.File;
+import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.SQLException;
@@ -44,7 +57,7 @@ public class ParticipantNotifyTest extends TestCase{
 	
 	private Date start = new Date();
 	private Date end = new Date();
-	private SessionObject session = null;
+	private ServerSession session = null;
 
 
 
@@ -163,8 +176,10 @@ public class ParticipantNotifyTest extends TestCase{
 		assertLanguage( DE , msg );
 		assertNames( participantNames,"User 3" );
 		assertEquals(400, msg.folderId);
-		
-	}
+        assertTrue(msg.internal);
+
+
+    }
 	
 	public void testOnlyResources() throws Exception {
 		Participant[] participants = getParticipants(U(),G(),S(), R(1));
@@ -175,7 +190,8 @@ public class ParticipantNotifyTest extends TestCase{
 		Message msg = notify.getMessages().get(0);
 		
 		assertNames( msg.addresses, "resource_admin1@test.invalid" );
-		
+        assertTrue(msg.internal);
+
 	}
 	
 	public void testExternal() throws Exception{
@@ -189,8 +205,9 @@ public class ParticipantNotifyTest extends TestCase{
 		String[] participantNames = parseParticipants( msg );
 		
 		assertNames( msg.addresses, "don.external@external.invalid" );
-		assertNames( participantNames,"don.external@external.invalid" );	
-	}
+		assertNames( participantNames,"don.external@external.invalid" );
+        assertFalse(msg.internal);
+    }
 	
 	// Bug 6524
 	public void testAlphabetical() throws Exception {
@@ -270,8 +287,63 @@ public class ParticipantNotifyTest extends TestCase{
 		notify.taskCreated(t,session);
 		assertAddresses(notify.getMessages(), "user1@test.invalid","resource_admin1@test.invalid");
 	}
-	
-	public static final void assertLanguage(int lang, Message msg) {
+
+    public void testAddICalAttachment(){
+        ParticipantNotify.AppointmentState state = new ParticipantNotify.AppointmentState();
+        TestMailObject mailObject = new TestMailObject();
+        AppointmentObject obj = new AppointmentObject();
+
+        obj.setCreatedBy(5);
+        obj.setStartDate(new Date(0));
+        obj.setEndDate(new Date(2*3600000));
+        obj.setTitle("Test Appointment");
+
+        state.modifyExternal(mailObject, obj, session);
+
+        ContentType ct = mailObject.getTheContentType();
+
+        assertEquals(ct.getCharsetParameter(),"utf-8");
+        assertEquals(ct.getPrimaryType(), "text");
+        assertEquals(ct.getSubType(), "calendar");
+
+        assertEquals("appointment.ics", mailObject.getTheFilename());
+
+        try {
+
+            BufferedReader r = new BufferedReader(new InputStreamReader(mailObject.getTheInputStream()));
+            String line = null;
+            while((line = r.readLine()) != null) {
+                System.out.println(line);
+            }
+            
+
+            /*AppointmentObject obj2 = convertFromICal(mailObject.getTheInputStream());
+
+            assertEquals(obj.getStartDate().getTime(), obj2.getStartDate().getTime());
+            assertEquals(obj.getEndDate().getTime(), obj2.getEndDate().getTime());
+            assertEquals(obj.getTitle(), obj2.getTitle());*/
+        } catch (Exception x) {
+            x.printStackTrace();
+            fail(x.getMessage());
+        }
+
+    }
+
+    public AppointmentObject convertFromICal(InputStream icalFile) throws Exception{
+        OXContainerConverter oxContainerConverter = null;
+
+	    oxContainerConverter = new OXContainerConverter(session, session.getContext(), TimeZone.getDefault());
+        final VersitDefinition def = ICalendar.definition;
+		final VersitDefinition.Reader versitReader = def.getReader(icalFile, "UTF-8");
+		final VersitObject rootVersitObject = def.parseBegin(versitReader);
+        VersitObject versitObject = null;
+        versitObject = def.parseChild(versitReader, rootVersitObject);
+        return oxContainerConverter.convertAppointment(versitObject);
+    }
+
+
+
+    public static final void assertLanguage(int lang, Message msg) {
 		assertEquals(lang,guessLanguage(msg));
 	}
 	
@@ -294,9 +366,9 @@ public class ParticipantNotifyTest extends TestCase{
 		}
 		assertNames(collected,addresses);
 	}
-	
-	
-	public Task getTask(Participant[] participants) throws LdapException {
+
+
+    public Task getTask(Participant[] participants) throws LdapException {
 		Task task = new Task();
 		task.setStartDate(start);
 		task.setEndDate(end);
@@ -394,18 +466,22 @@ public class ParticipantNotifyTest extends TestCase{
 		
 		return participants;
 	}
-	
-	public void setUp() throws Exception {
+
+    public void setUp() throws Exception {
 		
 		Init.startServer();
         String templates = TestInit.getTestProperty("templatePath");
 		TemplateListResourceBundle.setTemplatePath(new File(templates));
 		
-		session = new SessionObject("my_fake_sessionid");
-		
-		session.setContext(new ContextImpl(1));
-		session.setUsername("1");  // getUserId parses this string. 
-		//session.setUserConfiguration(new UserConfigurationFactory().getConfiguration(1));
+
+        Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
+        SessionObject sessObj = new SessionObject("bla");
+        sessObj.setUsername("1");
+        sessObj.setContextId(ctx.getContextId());
+
+        session = new ServerSessionAdapter(sessObj,ctx);
+
+        //session.setUserConfiguration(new UserConfigurationFactory().getConfiguration(1));
 	}
 	
 	public void tearDown() throws Exception {
@@ -467,13 +543,15 @@ public class ParticipantNotifyTest extends TestCase{
 		public String message;
 		public List<String> addresses;
 		public int folderId;
-		
-		public Message(String messageTitle, String message, List<String>addresses, int folderId) {
+        private boolean internal;
+
+        public Message(String messageTitle, String message, List<String>addresses, int folderId, boolean internal) {
 			this.messageTitle = messageTitle;
 			this.message = message;
 			this.addresses = addresses;
 			this.folderId = folderId;
-		}
+            this.internal = internal;
+        }
 	}
 	
 	private static final class TestParticipantNotify extends ParticipantNotify {
@@ -514,8 +592,8 @@ public class ParticipantNotifyTest extends TestCase{
 		}
 
 		@Override
-		protected void sendMessage(final String messageTitle, final String message, final List<String> name, final Session session, final CalendarObject obj, int folderId, final State state, final boolean suppressOXReminderHeader) {
-			messageCollector.add(new Message(messageTitle,message,name, folderId));
+		protected void sendMessage(final String messageTitle, final String message, final List<String> name, final ServerSession session, final CalendarObject obj, int folderId, final State state, final boolean suppressOXReminderHeader, boolean internal) {
+			messageCollector.add(new Message(messageTitle,message,name, folderId, internal));
 		}
 
     }
@@ -531,7 +609,15 @@ public class ParticipantNotifyTest extends TestCase{
 			return module;
 		}
 
-		public boolean sendMail(final UserSettingMail userSettingMail) {
+        public void modifyInternal(MailObject mail, CalendarObject obj, ServerSession sess) {
+
+        }
+
+        public void modifyExternal(MailObject mail, CalendarObject obj, ServerSession sess) {
+            //To change body of implemented methods use File | Settings | File Templates.
+        }
+
+        public boolean sendMail(final UserSettingMail userSettingMail) {
 			// TODO Auto-generated method stub
 			return false;
 		}
@@ -551,4 +637,33 @@ public class ParticipantNotifyTest extends TestCase{
 		
 		
 	}
+
+    private static class TestMailObject extends MailObject{
+        private InputStream theInputStream;
+        private String theFilename;
+        private ContentType theContentType;
+
+        private TestMailObject() {
+            super(null, 0, 0, 0);
+        }
+
+
+        public void addFileAttachment(ContentType contentType, String fileName, InputStream inputStream) throws MailException {
+            this.theContentType = contentType;
+            this.theFilename = fileName;
+            this.theInputStream = inputStream;
+        }
+
+        public InputStream getTheInputStream() {
+            return theInputStream;
+        }
+
+        public String getTheFilename() {
+            return theFilename;
+        }
+
+        public ContentType getTheContentType() {
+            return theContentType;
+        }
+    }
 }
