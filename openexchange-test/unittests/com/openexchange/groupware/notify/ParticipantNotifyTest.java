@@ -310,18 +310,11 @@ public class ParticipantNotifyTest extends TestCase{
 
         try {
 
-            BufferedReader r = new BufferedReader(new InputStreamReader(mailObject.getTheInputStream()));
-            String line = null;
-            while((line = r.readLine()) != null) {
-                System.out.println(line);
-            }
-            
-
-            /*AppointmentObject obj2 = convertFromICal(mailObject.getTheInputStream());
+            AppointmentObject obj2 = convertFromICal(mailObject.getTheInputStream());
 
             assertEquals(obj.getStartDate().getTime(), obj2.getStartDate().getTime());
             assertEquals(obj.getEndDate().getTime(), obj2.getEndDate().getTime());
-            assertEquals(obj.getTitle(), obj2.getTitle());*/
+            assertEquals(obj.getTitle(), obj2.getTitle());
         } catch (Exception x) {
             x.printStackTrace();
             fail(x.getMessage());
