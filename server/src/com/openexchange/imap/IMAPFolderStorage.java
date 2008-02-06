@@ -72,6 +72,7 @@ import javax.mail.Quota;
 import javax.mail.ReadOnlyFolderException;
 import javax.mail.Quota.Resource;
 
+import com.openexchange.cache.OXCachingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -88,7 +89,9 @@ import com.openexchange.imap.user2acl.User2ACL;
 import com.openexchange.imap.user2acl.User2ACLArgs;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailFolderStorage;
+import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
@@ -882,16 +885,72 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 			f.open(Folder.READ_WRITE);
 			try {
 				final String trashFullname = prepareMailFolderParam(getTrashFolder());
-				if (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx)
-						.isHardDeleteMsgs()
-						&& !(f.getFullName().equals(trashFullname))) {
-					final IMAPFolder trashFolder = (IMAPFolder) imapStore.getFolder(trashFullname);
+				final boolean backup = (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+						ctx).isHardDeleteMsgs() && !(f.getFullName().equals(trashFullname)));
+				int msgCount = f.getMessageCount();
+				/*
+				 * Block-wise deletion
+				 */
+				final int blockSize = IMAPConfig.getBlockSize();
+				while (msgCount > blockSize) {
+					/*
+					 * Don't adapt sequence number since folder expunge already
+					 * resets message numbering
+					 */
+					final int startSeqNum = 1;
+					final int endSeqNum = blockSize;
+					if (backup) {
+						try {
+							final long start = System.currentTimeMillis();
+							new CopyIMAPCommand(f, startSeqNum, endSeqNum, trashFullname).doCommand();
+							if (LOG.isInfoEnabled()) {
+								LOG.info(new StringBuilder(128).append("\"Soft Clear\": ").append(
+										"Messages copied to default trash folder \"").append(trashFullname).append(
+										"\" in ").append((System.currentTimeMillis() - start)).append("msec")
+										.toString());
+							}
+						} catch (final MessagingException e) {
+							if (e.getNextException() instanceof CommandFailedException) {
+								final CommandFailedException exc = (CommandFailedException) e.getNextException();
+								if (exc.getMessage().indexOf("Over quota") > -1) {
+									/*
+									 * We face an Over-Quota-Exception
+									 */
+									throw new MailException(MailException.Code.DELETE_FAILED_OVER_QUOTA);
+								}
+							}
+							throw new IMAPException(IMAPException.Code.MOVE_ON_DELETE_FAILED);
+						}
+					}
+					/*
+					 * Delete through storing \Deleted flag...
+					 */
+					new FlagsIMAPCommand(f, startSeqNum, endSeqNum, FLAGS_DELETED, true).doCommand();
+					/*
+					 * ... and perform EXPUNGE
+					 */
+					try {
+						long[] uids = IMAPCommandsCollection.seqNums2UID(f, startSeqNum, endSeqNum);
+						if (uids.length == 0) {
+							System.err.println("No UIDs for seq nums: " + startSeqNum + ":" + endSeqNum);
+						}
+						uidExpungeWithFallback(f, uids);
+					} catch (final ProtocolException e) {
+						LOG.error(e.getLocalizedMessage(), e);
+						IMAPCommandsCollection.fastExpunge(f);
+					}
+					/*
+					 * Decrement
+					 */
+					msgCount -= blockSize;
+				}
+				if (backup) {
 					try {
 						final long start = System.currentTimeMillis();
 						new CopyIMAPCommand(f, trashFullname).doCommand();
 						if (LOG.isInfoEnabled()) {
-							LOG.info(new StringBuilder(100).append("\"Soft Clear\": All").append(
-									" messages copied to default trash folder \"").append(trashFolder.getFullName())
+							LOG.info(new StringBuilder(128).append("\"Soft Clear\": ").append(
+									"Messages copied to default trash folder \"").append(trashFullname)
 									.append("\" in ").append((System.currentTimeMillis() - start)).append("msec")
 									.toString());
 						}
@@ -909,7 +968,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					}
 				}
 				/*
-				 * Mark all messages as /DELETED
+				 * Delete through storing \Deleted flag...
 				 */
 				new FlagsIMAPCommand(f, FLAGS_DELETED, true).doCommand();
 				/*
@@ -920,20 +979,67 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					IMAPCommandsCollection.fastExpunge(f);
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 					if (LOG.isInfoEnabled()) {
-						LOG.info(new StringBuilder(100).append("Folder ").append(f.getFullName())
+						LOG.info(new StringBuilder(128).append("Folder ").append(f.getFullName())
 								.append(" cleared in ").append((System.currentTimeMillis() - start)).append("msec")
 								.toString());
 					}
 				} catch (final ProtocolException pex) {
 					throw new MessagingException(pex.getMessage(), pex);
 				}
+				try {
+					/*
+					 * Update message cache
+					 */
+					MailMessageCache.getInstance().removeFolderMessages(f.getFullName(), session.getUserId(), ctx);
+				} catch (final OXCachingException e) {
+					LOG.error(e.getLocalizedMessage(), e);
+				}
 			} finally {
 				f.close(false);
 			}
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapConnection);
+		} catch (final ProtocolException e) {
+			throw IMAPException.handleMessagingException(new MessagingException(e.getMessage(), e), imapConnection);
 		} catch (final AbstractOXException e) {
 			throw new IMAPException(e);
+		}
+	}
+
+	private static void uidExpungeWithFallback(final IMAPFolder imapFolder, final long[] msgUIDs)
+			throws MessagingException, IMAPException {
+		try {
+			final long start = System.currentTimeMillis();
+			IMAPCommandsCollection.uidExpunge(imapFolder, msgUIDs);
+			MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			if (LOG.isInfoEnabled()) {
+				LOG.info(new StringBuilder(128).append(msgUIDs.length).append(" messages expunged in ").append(
+						(System.currentTimeMillis() - start)).append("msec").toString());
+			}
+		} catch (final ProtocolException e) {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(new StringBuilder("UID EXPUNGE failed: ").append(e.getLocalizedMessage()).toString(), e);
+			}
+			/*
+			 * UID EXPUNGE did not work; perform fallback actions
+			 */
+			try {
+				final long[] excUIDs = IMAPCommandsCollection.getDeletedMessages(imapFolder, msgUIDs);
+				if (excUIDs.length > 0) {
+					/*
+					 * Temporary remove flag \Deleted, perform expunge & restore
+					 * flag \Deleted
+					 */
+					new FlagsIMAPCommand(imapFolder, excUIDs, FLAGS_DELETED, false, false).doCommand();
+					IMAPCommandsCollection.fastExpunge(imapFolder);
+					new FlagsIMAPCommand(imapFolder, excUIDs, FLAGS_DELETED, true, false).doCommand();
+				} else {
+					IMAPCommandsCollection.fastExpunge(imapFolder);
+				}
+			} catch (final ProtocolException e1) {
+				throw new IMAPException(IMAPException.Code.UID_EXPUNGE_FAILED, e1, Arrays.toString(msgUIDs), imapFolder
+						.getFullName(), e1.getMessage());
+			}
 		}
 	}
 

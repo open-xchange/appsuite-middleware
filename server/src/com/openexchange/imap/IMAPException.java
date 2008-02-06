@@ -256,11 +256,10 @@ public final class IMAPException extends MIMEMailException {
 		 */
 		UNKNOWN_FOLDER_MODE("Unknown folder open mode %d", Category.CODE_ERROR, 2038),
 		/**
-		 * Move partially completed. Source message(s) %s in folder %s could not
-		 * be deleted due to following error: %s
+		 * Message(s) %s in folder %s could not be deleted due to following
+		 * error: %s
 		 */
-		MOVE_PARTIALLY_COMPLETED(
-				"Move partially completed. Source message(s) %s in folder %s could not be deleted due to following error: %s",
+		UID_EXPUNGE_FAILED("Message(s) %s in folder %s could not be deleted due to following error: %s",
 				Category.INTERNAL_ERROR, 2039),
 		/**
 		 * Attachment %s not found inside message %s of mail folder %s
@@ -329,7 +328,7 @@ public final class IMAPException extends MIMEMailException {
 			this.detailNumber = code.getNumber();
 			this.category = code.getCategory();
 		}
-		
+
 		private Code(final MIMEMailException.Code code) {
 			this.message = code.getMessage();
 			this.detailNumber = code.getNumber();

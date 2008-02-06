@@ -101,6 +101,8 @@ public final class GlobalIMAPConfig extends GlobalMailConfig {
 
 	private boolean mboxEnabled;
 
+	private int blockSize = 500;
+
 	private final Map<String, Boolean> newACLExtMap = new ConcurrentHashMap<String, Boolean>();
 
 	/**
@@ -345,6 +347,16 @@ public final class GlobalIMAPConfig extends GlobalMailConfig {
 	 */
 	boolean isMBoxEnabled() {
 		return mboxEnabled;
+	}
+
+	/**
+	 * Gets the block size in which large IMAP commands' UIDs/sequence numbers
+	 * arguments get splitted
+	 * 
+	 * @return The block size
+	 */
+	int getBlockSize() {
+		return blockSize;
 	}
 
 	/**

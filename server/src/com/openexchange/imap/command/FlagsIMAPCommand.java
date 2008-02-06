@@ -58,8 +58,8 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
- * {@link FlagsIMAPCommand} - Enables/disables message's system flags e.g. \SEEN or
- * \DELETED
+ * {@link FlagsIMAPCommand} - Enables/disables message's system flags e.g. \SEEN
+ * or \DELETED
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -141,6 +141,44 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 			flagsStr = null;
 		} else {
 			final StringBuilder flagBuilder = new StringBuilder(200);
+			flagBuilder.append(getFlagString(systemFlags[0]));
+			for (int i = 1; i < systemFlags.length; i++) {
+				flagBuilder.append(' ').append(getFlagString(systemFlags[i]));
+			}
+			flagsStr = flagBuilder.toString();
+		}
+		this.enable = enable;
+		this.uid = false;
+	}
+
+	/**
+	 * Constructor to set system flags starting at message whose sequence number
+	 * matches specified <code>startSeqNum</code> and ending at message whose
+	 * sequence number matches specified <code>endSeqNum</code>
+	 * 
+	 * @param imapFolder -
+	 *            the imap folder
+	 * @param startSeqNum
+	 *            The start sequence number
+	 * @param endSeqNum
+	 *            The end sequence number
+	 * @param flags -
+	 *            the system flags
+	 * @param enable -
+	 *            whether to enable or disable affected system flags
+	 * @throws MessagingException -
+	 *             if an unknown system flag is used
+	 */
+	public FlagsIMAPCommand(final IMAPFolder imapFolder, final int startSeqNum, final int endSeqNum, final Flags flags,
+			final boolean enable) throws MessagingException {
+		super(imapFolder);
+		args = new String[] { new StringBuilder(16).append(startSeqNum).append(':').append(endSeqNum).toString() };
+		final Flag[] systemFlags;
+		if (flags == null || (systemFlags = flags.getSystemFlags()).length == 0) {
+			returnDefaultValue = true;
+			flagsStr = null;
+		} else {
+			final StringBuilder flagBuilder = new StringBuilder(256);
 			flagBuilder.append(getFlagString(systemFlags[0]));
 			for (int i = 1; i < systemFlags.length; i++) {
 				flagBuilder.append(' ').append(getFlagString(systemFlags[i]));

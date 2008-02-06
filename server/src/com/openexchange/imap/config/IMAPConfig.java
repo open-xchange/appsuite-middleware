@@ -108,7 +108,8 @@ public final class IMAPConfig extends MailConfig {
 		 */
 		final User user;
 		try {
-			user= UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
+			user = UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session
+					.getContextId()));
 		} catch (final ContextException e) {
 			throw new MailConfigException(e);
 		}
@@ -277,6 +278,16 @@ public final class IMAPConfig extends MailConfig {
 	 */
 	public static boolean isMBoxEnabled() {
 		return ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).isMBoxEnabled();
+	}
+
+	/**
+	 * Gets the block size in which large IMAP commands' UIDs/sequence numbers
+	 * arguments get splitted.
+	 * 
+	 * @return The block size
+	 */
+	public static int getBlockSize() {
+		return ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).getBlockSize();
 	}
 
 	/**

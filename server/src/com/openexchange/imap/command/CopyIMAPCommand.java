@@ -92,6 +92,57 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	private boolean proceed = true;
 
 	/**
+	 * Constructor using sequence numbers and performs a fast <code>COPY</code>
+	 * command; meaning optional <i>COPYUID</i> response is discarded.
+	 * 
+	 * @param imapFolder -
+	 *            the imap folder
+	 * @param startSeqNum -
+	 *            the starting sequence number of the messages that shall be
+	 *            copied
+	 * @param endSeqNum -
+	 *            the ending sequence number of the messages that shall be
+	 *            copied
+	 * @param destFolderName -
+	 *            the destination folder fullname
+	 */
+	public CopyIMAPCommand(final IMAPFolder imapFolder, final int startSeqNum, final int endSeqNum,
+			final String destFolderName) {
+		this(imapFolder, startend2long(startSeqNum, endSeqNum), destFolderName, true, true, false);
+	}
+
+	private static long[] startend2long(final int start, final int end) {
+		final long[] longArr = new long[2];
+		longArr[0] = start;
+		longArr[1] = end;
+		return longArr;
+	}
+
+	/**
+	 * Constructor using sequence numbers and performs a fast <code>COPY</code>
+	 * command; meaning optional <i>COPYUID</i> response is discarded.
+	 * 
+	 * @param imapFolder -
+	 *            the imap folder
+	 * @param seqNums -
+	 *            the sequence numbers of the messages that shall be copied
+	 * @param destFolderName -
+	 *            the destination folder fullname
+	 * @param isSequential -
+	 *            whether sequence numbers are sequential or not
+	 */
+	public CopyIMAPCommand(final IMAPFolder imapFolder, final int[] seqNums, final String destFolderName,
+			final boolean isSequential) {
+		this(imapFolder, int2long(seqNums), destFolderName, isSequential, true, false);
+	}
+
+	private static long[] int2long(final int[] intArr) {
+		final long[] longArr = new long[intArr.length];
+		System.arraycopy(intArr, 0, longArr, 0, intArr.length);
+		return longArr;
+	}
+
+	/**
 	 * Constructor using UIDs and consequently performs a <code>UID COPY</code>
 	 * command
 	 * 
@@ -109,16 +160,21 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 */
 	public CopyIMAPCommand(final IMAPFolder imapFolder, final long[] uids, final String destFolderName,
 			final boolean isSequential, final boolean fast) {
+		this(imapFolder, uids, destFolderName, isSequential, fast, true);
+	}
+
+	private CopyIMAPCommand(final IMAPFolder imapFolder, final long[] nums, final String destFolderName,
+			final boolean isSequential, final boolean fast, final boolean uid) {
 		super(imapFolder);
-		this.uids = uids == null ? DEFAULT_RETVAL : uids;
-		uid = true;
+		this.uids = nums == null ? DEFAULT_RETVAL : nums;
+		this.uid = uid;
 		returnDefaultValue = (this.uids.length == 0);
 		this.fast = fast;
 		this.destFolderName = prepareStringArgument(destFolderName);
 		length = this.uids.length;
 		args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new StringBuilder(64).append(this.uids[0])
-				.append(':').append(this.uids[this.uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
-				this.uids, false));
+				.append(':').append(this.uids[length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(this.uids,
+				false));
 		if (fast) {
 			retval = DEFAULT_RETVAL;
 		} else {

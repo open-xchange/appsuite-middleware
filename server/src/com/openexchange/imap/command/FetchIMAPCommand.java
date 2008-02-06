@@ -164,7 +164,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
 	private FetchItemHandler[] itemHandlers;
 
-	private final List<ContainerMessage> retval;
+	private List<ContainerMessage> retval;
 
 	/**
 	 * Constructor
@@ -216,12 +216,32 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	public FetchIMAPCommand(final IMAPFolder imapFolder, final Object arr, final FetchProfile fp,
 			final boolean isSequential, final boolean keepOrder) throws MessagingException {
 		super(imapFolder);
+		command = getFetchCommand(imapFolder, fp);
+		set(arr, isSequential, keepOrder);
+	}
+
+	/**
+	 * Apply a new numeric argument to this IMAP <i>FETCH</i> command
+	 * 
+	 * @param arr -
+	 *            the source array (either <code>long</code> UIDs,
+	 *            <code>int</code> SeqNums or instances of
+	 *            <code>Message</code>)
+	 * @param isSequential
+	 *            whether the source array values are sequential
+	 * @param keepOrder
+	 *            whether to keep or to ignore given order through parameter
+	 *            <code>arr</code>; only has effect if parameter
+	 *            <code>arr</code> is of type <code>Message[]</code> or
+	 *            <code>int[]</code>
+	 * @throws MessagingException
+	 */
+	public void set(final Object arr, final boolean isSequential, final boolean keepOrder) throws MessagingException {
 		if (null == arr) {
 			returnDefaultValue = true;
 		} else {
 			createArgs(arr, isSequential, keepOrder);
 		}
-		command = getFetchCommand(imapFolder, fp);
 		retval = new ArrayList<ContainerMessage>(length);
 		index = 0;
 	}
@@ -481,11 +501,11 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		ENV_FIELDS.add(Integer.valueOf(MailListField.SUBJECT.getField()));
 		ENV_FIELDS.add(Integer.valueOf(MailListField.SENT_DATE.getField()));
 		/*
-		 * Add the two extra fetch profile items contained in JavaMail's
-		 * ENVELOPE constant
+		 * Discard the two extra fetch profile items contained in JavaMail's
+		 * ENVELOPE constant: RFC822.SIZE and INTERNALDATE
 		 */
-		ENV_FIELDS.add(Integer.valueOf(MailListField.RECEIVED_DATE.getField()));
-		ENV_FIELDS.add(Integer.valueOf(MailListField.SIZE.getField()));
+		//ENV_FIELDS.add(Integer.valueOf(MailListField.RECEIVED_DATE.getField()));
+		//ENV_FIELDS.add(Integer.valueOf(MailListField.SIZE.getField()));
 	}
 
 	private static FetchProfile getFetchProfile(final int[] fields, final int sortField) {

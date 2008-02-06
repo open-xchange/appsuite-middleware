@@ -75,6 +75,7 @@ import javax.mail.internet.InternetHeaders;
 
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
+import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailStorageUtils.OrderDirection;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -571,8 +572,8 @@ public final class IMAPCommandsCollection {
 				 */
 				final Message[] newMsgs;
 				try {
-					newMsgs = new FetchIMAPCommand(folder, newMsgSeqNums, getFetchProfile(fields, sortField), false,
-							false).doCommand();
+					newMsgs = new FetchIMAPCommand(folder, newMsgSeqNums, getFetchProfile(fields, sortField, IMAPConfig
+							.isFastFetch()), false, false).doCommand();
 				} catch (final MessagingException e) {
 					throw new ProtocolException(e.getLocalizedMessage());
 				}
@@ -757,6 +758,84 @@ public final class IMAPCommandsCollection {
 				throw cfe;
 			}
 		}
+	}
+
+	private static final String TEMPL_FETCH_UID = "FETCH %s (UID)";
+
+	/**
+	 * Detects the corresponding UIDs to message range according to specified
+	 * starting/ending sequence numbers
+	 * 
+	 * @param imapFolder
+	 *            The IMAP folder
+	 * @param startSeqNum
+	 *            The starting sequence number
+	 * @param endSeqNum
+	 *            The ending sequence number
+	 * @return The corresponding UIDs
+	 * @throws ProtocolException
+	 *             If an error occurs in underlying protocol
+	 */
+	public static long[] seqNums2UID(final IMAPFolder imapFolder, final int startSeqNum, final int endSeqNum)
+			throws ProtocolException {
+		return _seqNums2UID(imapFolder, new String[] { new StringBuilder(16).append(startSeqNum).append(':').append(
+				endSeqNum).toString() }, endSeqNum - startSeqNum + 1);
+	}
+
+	/**
+	 * Detects the corresponding UIDs to message range according to specified
+	 * sequence numbers
+	 * 
+	 * @param imapFolder
+	 *            The IMAP folder
+	 * @param seqNums
+	 *            The sequence numbers
+	 * @return The corresponding UIDs
+	 * @throws ProtocolException
+	 *             If an error occurs in underlying protocol
+	 */
+	public static long[] seqNums2UID(final IMAPFolder imapFolder, final int[] seqNums) throws ProtocolException {
+		return _seqNums2UID(imapFolder, IMAPNumArgSplitter.splitSeqNumArg(seqNums, true), seqNums.length);
+	}
+
+	private static long[] _seqNums2UID(final IMAPFolder imapFolder, final String[] args, final int size)
+			throws ProtocolException {
+		final IMAPProtocol p = imapFolder.getProtocol();
+		Response[] r = null;
+		Response response = null;
+		int index = 0;
+		final long[] uids = new long[size];
+		for (int i = 0; i < args.length && index < size; i++) {
+			r = p.command(String.format(TEMPL_FETCH_UID, args[i]), null);
+			final int len = r.length - 1;
+			response = r[len];
+			try {
+				if (response.isOK()) {
+					for (int j = 0; j < len; j++) {
+						uids[index++] = ((UID) ((FetchResponse) r[j]).getItem(0)).uid;
+					}
+				}
+			} finally {
+				p.notifyResponseHandlers(r);
+				try {
+					p.handleResult(response);
+				} catch (final CommandFailedException cfe) {
+					if (cfe.getMessage().indexOf(ERR_01) != -1) {
+						/*
+						 * Obviously this folder is empty
+						 */
+						return new long[0];
+					}
+					throw cfe;
+				}
+			}
+		}
+		if (index < size) {
+			final long[] trim = new long[index];
+			System.arraycopy(uids, 0, trim, 0, trim.length);
+			return trim;
+		}
+		return uids;
 	}
 
 	private static final String TEMPL_UID_EXPUNGE = "UID EXPUNGE %s";

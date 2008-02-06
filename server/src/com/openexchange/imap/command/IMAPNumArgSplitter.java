@@ -215,9 +215,9 @@ public final class IMAPNumArgSplitter {
 	/**
 	 * <p>
 	 * Generates a number argument valid for IMAP commands expecting message's
-	 * sequence numbers or UIDs. That is continguous numbers may be abreviated
+	 * sequence numbers or UIDs. That is contiguous numbers may be abbreviated
 	 * as a sequence representation e.g. <code>5:24</code> meaning all numbers
-	 * beginning from 5 ending with 24. Non-continguous numbers must be
+	 * beginning from 5 ending with 24. Non-contiguous numbers must be
 	 * delimited using a comma.
 	 * <p>
 	 * <b>NOTE:</b> This routine does not take care if the resulting argument
@@ -235,27 +235,27 @@ public final class IMAPNumArgSplitter {
 		final int size = l.size();
 		final Iterator<? extends Number> iter = l.iterator();
 		long prev = iter.next().longValue();
-		boolean continguous = false;
+		boolean contiguous = false;
 		final StringBuilder sb = new StringBuilder(size * 4);
 		sb.append(prev);
 		for (int i = 1; i < size; i++) {
 			final long current = iter.next().longValue();
 			if (prev + 1 == current) {
 				prev++;
-				continguous = true;
-			} else if (continguous) {
+				contiguous = true;
+			} else if (contiguous) {
 				sb.append(':').append(prev);
 				sb.append(',');
 				sb.append(current);
 				prev = current;
-				continguous = false;
+				contiguous = false;
 			} else {
 				sb.append(',');
 				sb.append(current);
 				prev = current;
 			}
 		}
-		if (continguous) {
+		if (contiguous) {
 			sb.append(':').append(prev);
 		}
 		return sb.toString();
@@ -289,7 +289,7 @@ public final class IMAPNumArgSplitter {
 			int endPos = offset + maxLen;
 			if (endPos < len) {
 				char c = numArg.charAt(endPos);
-				while (c != ',') {
+				while (c != ',' && endPos > -1) {
 					c = numArg.charAt(--endPos);
 				}
 			} else {
