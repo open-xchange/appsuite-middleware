@@ -101,7 +101,7 @@ public final class GlobalIMAPConfig extends GlobalMailConfig {
 
 	private boolean mboxEnabled;
 
-	private int blockSize = 500;
+	private int blockSize;
 
 	private final Map<String, Boolean> newACLExtMap = new ConcurrentHashMap<String, Boolean>();
 
@@ -233,6 +233,18 @@ public final class GlobalIMAPConfig extends GlobalMailConfig {
 			final String mboxEnabledStr = imapProperties.getProperty("mboxEnabled", STR_FALSE).trim();
 			mboxEnabled = Boolean.parseBoolean(mboxEnabledStr);
 			logBuilder.append("\tMBox Enabled: ").append(mboxEnabled).append('\n');
+		}
+
+		{
+			final String blockSizeStr = imapProperties.getProperty("blockSize", "1000").trim();
+			try {
+				blockSize = Integer.parseInt(blockSizeStr);
+				logBuilder.append("\tBlock Size: ").append(blockSize).append('\n');
+			} catch (final NumberFormatException e) {
+				blockSize = 1000;
+				logBuilder.append("\tBlock Size: Invalid value \"").append(blockSizeStr).append(
+						"\". Setting to fallback: ").append(blockSize).append('\n');
+			}
 		}
 
 		logBuilder.append("Global IMAP properties successfully loaded!");
