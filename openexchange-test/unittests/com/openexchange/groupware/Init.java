@@ -126,7 +126,6 @@ public final class Init {
         if(running)
             return;
         running = true;
-        System.setProperty("openexchange.propfile", TestInit.getTestProperty("openexchange.propfile"));
         System.setProperty("openexchange.propdir", TestInit.getTestProperty("openexchange.propdir"));
 
         injectTestServices();

@@ -51,6 +51,7 @@ package com.openexchange.groupware.vcard;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.TimeZone;
 
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.tools.versit.Versit;
@@ -77,7 +78,7 @@ public class VCardTest extends TestCase {
 	}
 	
 	public void performTest(String testName, String vcard, String mime) throws ConverterException, IOException{
-		final OXContainerConverter oxContainerConverter = new OXContainerConverter(null, null);
+		final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 		final VersitDefinition def = Versit.getDefinition(mime);
 		final VersitDefinition.Reader versitReader = def.getReader(new ByteArrayInputStream(vcard.getBytes("UTF-8")), "UTF-8");
 		try {

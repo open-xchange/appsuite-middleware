@@ -51,22 +51,23 @@ public class FolderTest extends TestCase {
 	
 	private static boolean init = false;
 	
-	private static int resolveUser(String user) throws Exception {
+	private static int resolveUser(String user, Context ctx) throws Exception {
 		try {
 			int pos = -1;
 			user = (pos = user.indexOf('@')) > -1 ? user.substring(0, pos) : user; 
 	        final UserStorage uStorage = UserStorage.getInstance();
-	        return uStorage.getUserId(user, new ContextImpl(CONTEXT_ID));
+	        return uStorage.getUserId(user, ctx);
 		} catch (Throwable t) {
 			t.printStackTrace();
 			System.exit(1);
 			return -1;
 		}
     }
-	
-	
+
 	private SessionObject session;
-	
+
+	private Context ctx;
+
 	private int userId;
 
 	/* (non-Javadoc)
@@ -77,11 +78,11 @@ public class FolderTest extends TestCase {
 		if (!init) {
 			Init.startServer();
 		}
-		ContextStorage.init();
 		/*
 		 * Create session
 		 */
-		userId = resolveUser(AjaxInit.getAJAXProperty("login"));
+        ctx = new ContextImpl(CONTEXT_ID);
+		userId = resolveUser(AjaxInit.getAJAXProperty("login"), ctx);
 		// ComfireConfig.loadProperties("/opt/openexchange/conf/groupware/system.properties");
 		session = SessionObjectWrapper.createSessionObject(userId, CONTEXT_ID, "thorben_session_id");
 	}
@@ -97,7 +98,7 @@ public class FolderTest extends TestCase {
 		super.tearDown();
 	}
 
-	public void testFolderInsertSuccess() {
+	public void testFolderInsertSuccess() throws Throwable {
 		final int userId = session.getUserId();
 		//final OXFolderAction oxfa = new OXFolderAction(session);
 		final OXFolderManager oxma = new OXFolderManagerImpl(session);
@@ -133,7 +134,7 @@ public class FolderTest extends TestCase {
 			oxma.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
 			fuid = -1;
 			//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
-			final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
+			final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, ctx);
 			assertTrue(tmp == null);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -207,7 +208,7 @@ public class FolderTest extends TestCase {
 			 * ERROR: Define a second admin
 			 */
 			ocl = new OCLPermission();
-			ocl.setEntity(resolveUser(AjaxInit.getAJAXProperty("seconduser")));
+			ocl.setEntity(resolveUser(AjaxInit.getAJAXProperty("seconduser"), ctx));
 			ocl.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
 			ocl.setGroupPermission(false);
 			ocl.setFolderAdmin(true);
@@ -367,7 +368,7 @@ public class FolderTest extends TestCase {
 				 */
 				oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
 				//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
-				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
+				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, ctx);
 				assertTrue(tmp == null);
 			}
 		} catch (Exception e) {
@@ -409,7 +410,7 @@ public class FolderTest extends TestCase {
 				/*
 				 * Move folder
 				 */
-				final int stdCalFolder = OXFolderTools.getCalendarDefaultFolder(userId, session.getContext());
+				final int stdCalFolder = OXFolderTools.getCalendarDefaultFolder(userId, ctx);
 				fo.reset();
 				fo.setObjectID(fuid);
 				fo.setParentFolderID(stdCalFolder);
@@ -427,7 +428,7 @@ public class FolderTest extends TestCase {
 				 */
 				oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
 				//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
-				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
+				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, ctx);
 				assertTrue(tmp == null);
 			}
 		} catch (Exception e) {
@@ -469,7 +470,7 @@ public class FolderTest extends TestCase {
 				/*
 				 * Rename & Move folder
 				 */
-				final int stdCalFolder = OXFolderTools.getCalendarDefaultFolder(userId, session.getContext());
+				final int stdCalFolder = OXFolderTools.getCalendarDefaultFolder(userId, ctx);
 				fo.reset();
 				fo.setObjectID(fuid);
 				fo.setParentFolderID(stdCalFolder);
@@ -488,7 +489,7 @@ public class FolderTest extends TestCase {
 				 */
 				oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
 				//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
-				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
+				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, ctx);
 				assertTrue(tmp == null);
 			}
 		} catch (Exception e) {
@@ -531,8 +532,8 @@ public class FolderTest extends TestCase {
 				/*
 				 * Rename & Move folder
 				 */
-				final int stdCalFolder = OXFolderTools.getCalendarDefaultFolder(userId, session.getContext());
-				final int secondUserId = resolveUser(AjaxInit.getAJAXProperty("seconduser"));
+				final int stdCalFolder = OXFolderTools.getCalendarDefaultFolder(userId, ctx);
+				final int secondUserId = resolveUser(AjaxInit.getAJAXProperty("seconduser"), ctx);
 				fo.reset();
 				fo.setObjectID(fuid);
 				fo.setParentFolderID(stdCalFolder);
@@ -573,7 +574,7 @@ public class FolderTest extends TestCase {
 				 */
 				oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
 				//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
-				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
+				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, ctx);
 				assertTrue(tmp == null);
 			}
 		} catch (Exception e) {
@@ -688,12 +689,12 @@ public class FolderTest extends TestCase {
 				
 				fo.reset();
 				fo.setObjectID(fuid);
-				assertFalse(fo.exists(session.getContext()));
+				assertFalse(fo.exists(ctx));
 			} finally {
 				/*
 				 * Delete Test Folder...
 				 */
-				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
+				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, ctx);
 				if (tmp != null) {
 					oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
 					//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
@@ -745,7 +746,7 @@ public class FolderTest extends TestCase {
 				/*
 				 * Deny creation or modifications of public folders
 				 */
-				getUserConfiguration(session.getContext(), userId).setFullPublicFolderAccess(false);
+				getUserConfiguration(ctx, userId).setFullPublicFolderAccess(false);
 				/*
 				 * Try to edit a public folder
 				 */
@@ -760,11 +761,11 @@ public class FolderTest extends TestCase {
 				}
 				assertTrue(exc != null);
 			} finally {
-			    getUserConfiguration(session.getContext(), userId).setFullPublicFolderAccess(true);
+			    getUserConfiguration(ctx, userId).setFullPublicFolderAccess(true);
 				/*
 				 * Delete Test Folder...
 				 */
-				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
+				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, ctx);
 				if (tmp != null) {
 					oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
 					//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
@@ -803,7 +804,7 @@ public class FolderTest extends TestCase {
 				/*
 				 * Deny calendar module access
 				 */
-				getUserConfiguration(session.getContext(), userId).setCalendar(false);
+				getUserConfiguration(ctx, userId).setCalendar(false);
 				/*
 				 * Try to edit a public folder
 				 */
@@ -818,11 +819,11 @@ public class FolderTest extends TestCase {
 				}
 				assertTrue(exc != null);
 			} finally {
-			    getUserConfiguration(session.getContext(), userId).setCalendar(true);
+			    getUserConfiguration(ctx, userId).setCalendar(true);
 				/*
 				 * Delete Test Folder...
 				 */
-				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
+				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, ctx);
 				if (tmp != null) {
 					oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
 					//oxfa.deleteFolder(fuid, userId, groups, session.getUserConfiguration(), true, session.getContext(), null, null, System.currentTimeMillis());
@@ -863,7 +864,7 @@ public class FolderTest extends TestCase {
 				CalendarDataObject cdao = new CalendarDataObject();
 		        cdao.setTitle("testInsertAndAlarm - Step 1 - Insert");
 		        cdao.setParentFolderID(fuid);
-		        cdao.setContext(session.getContext());
+		        cdao.setContext(ctx);
 		        cdao.setIgnoreConflicts(true);
 		      
 		        UserParticipant up = new UserParticipant(session.getUserId());
@@ -877,7 +878,7 @@ public class FolderTest extends TestCase {
 		 
 		        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
 		        
-		        Participant p2 = new UserParticipant(resolveUser(user2));
+		        Participant p2 = new UserParticipant(resolveUser(user2, ctx));
 		        participants.add(p2);        
 		        
 		        cdao.setParticipants(participants.getList());        
@@ -902,7 +903,7 @@ public class FolderTest extends TestCase {
 				/*
 				 * Delete Test Folder...
 				 */
-				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, session.getContext());
+				final FolderObject tmp = FolderCacheManager.getInstance().getFolderObject(fuid, ctx);
 				if (tmp != null) {
 					oxfa.deleteFolder(new FolderObject(fuid), true, System.currentTimeMillis());
 				}
@@ -941,7 +942,7 @@ public class FolderTest extends TestCase {
 	
 	public void testGetSubfolders() {
 		try {
-			FolderSQLInterface folderSQLInterface = new RdbFolderSQLInterface(session);
+			FolderSQLInterface folderSQLInterface = new RdbFolderSQLInterface(session, ctx);
 			SearchIterator it = null;
 			try {
 				it = folderSQLInterface.getSubfolders(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, null);
@@ -973,8 +974,8 @@ public class FolderTest extends TestCase {
 	
 	public void testGetSubfoldersWithRestrictedAccess() {
 		try {
-		    getUserConfiguration(session.getContext(), session.getUserId()).setCalendar(false);
-			FolderSQLInterface folderSQLInterface = new RdbFolderSQLInterface(session);
+		    getUserConfiguration(ctx, session.getUserId()).setCalendar(false);
+			FolderSQLInterface folderSQLInterface = new RdbFolderSQLInterface(session, ctx);
 			SearchIterator it = null;
 			try {
 				it = folderSQLInterface.getSubfolders(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, null);
