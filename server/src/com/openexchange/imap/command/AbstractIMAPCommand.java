@@ -94,9 +94,9 @@ public abstract class AbstractIMAPCommand<T> {
 
 	private static final class AbstractIMAPProtocolCommand implements IMAPFolder.ProtocolCommand {
 
-		private final AbstractIMAPCommand abstractIMAPCommand;
+		private final AbstractIMAPCommand<?> abstractIMAPCommand;
 
-		public AbstractIMAPProtocolCommand(final AbstractIMAPCommand abstractIMAPCommand) {
+		public AbstractIMAPProtocolCommand(final AbstractIMAPCommand<?> abstractIMAPCommand) {
 			this.abstractIMAPCommand = abstractIMAPCommand;
 		}
 
@@ -119,8 +119,9 @@ public abstract class AbstractIMAPCommand<T> {
 				{
 					final String imapCmd = abstractIMAPCommand.getCommand(k);
 					if (LOG.isDebugEnabled()) {
+						final String debugInfo = abstractIMAPCommand.getDebugInfo(k);
 						LOG.debug(new StringBuilder(imapCmd.length() + 21).append("Firing IMAP command:\n").append(
-								imapCmd).toString());
+								debugInfo == null ? imapCmd : debugInfo).toString());
 					}
 					r = protocol.command(imapCmd, null);
 				}
@@ -182,6 +183,17 @@ public abstract class AbstractIMAPCommand<T> {
 		final Object obj = imapFolder.doCommand(protocolCommand);
 		mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 		return (T) obj;
+	}
+
+	/**
+	 * Returns the debug info
+	 * 
+	 * @param The
+	 *            argument index
+	 * @return The debug info
+	 */
+	protected String getDebugInfo(final int argsIndex) {
+		return null;
 	}
 
 	/**

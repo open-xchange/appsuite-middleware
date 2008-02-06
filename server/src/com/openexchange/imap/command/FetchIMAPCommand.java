@@ -315,6 +315,24 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		index = 0;
 	}
 
+	@Override
+	protected String getDebugInfo(final int argsIndex) {
+		final StringBuilder sb = new StringBuilder(command.length() + 64);
+		if (uid) {
+			sb.append("UID ");
+		}
+		sb.append("FETCH ");
+		final String arg = this.args[argsIndex];
+		if (arg.length() > 32) {
+			final int pos = arg.indexOf(',');
+			if (pos != -1) {
+				sb.append(arg.substring(0, pos)).append(",...,").append(arg.substring(arg.lastIndexOf(',') + 1));
+			}
+		}
+		sb.append(" (").append(command).append(')');
+		return sb.toString();
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -504,8 +522,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		 * Discard the two extra fetch profile items contained in JavaMail's
 		 * ENVELOPE constant: RFC822.SIZE and INTERNALDATE
 		 */
-		//ENV_FIELDS.add(Integer.valueOf(MailListField.RECEIVED_DATE.getField()));
-		//ENV_FIELDS.add(Integer.valueOf(MailListField.SIZE.getField()));
+		// ENV_FIELDS.add(Integer.valueOf(MailListField.RECEIVED_DATE.getField()));
+		// ENV_FIELDS.add(Integer.valueOf(MailListField.SIZE.getField()));
 	}
 
 	private static FetchProfile getFetchProfile(final int[] fields, final int sortField) {
