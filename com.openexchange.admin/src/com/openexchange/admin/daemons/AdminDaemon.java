@@ -92,7 +92,12 @@ public class AdminDaemon {
     private static PropertyHandler prop = null;
     private AdminCache cache = null;
     private static Registry registry = null;
-    private static ArrayList<Bundle> bundlelist = null;
+    /* 
+     * Write changes to this list cannot happen at the same time as the BundleListener
+     * delivers events in order and not concurrently. So there's no need to deal with
+     * concurrency here
+     */ 
+    private static ArrayList<Bundle> bundlelist = new ArrayList<Bundle>();
     
     private static com.openexchange.admin.rmi.impl.OXUser oxuser_v2 = null;
     private static com.openexchange.admin.rmi.impl.OXGroup oxgrp_v2 = null;
@@ -119,6 +124,25 @@ public class AdminDaemon {
         }
     }
 
+    /**
+     * This method is used for initialization of the list of current running bundles.
+     * The problem is that the listener itself will not get any events before this
+     * bundle is started, so if any bundles are started beforehand you won't notice
+     * this here. The consequence is that we have to build an initial list on startup
+     * 
+     * @param context
+     */
+    public void getCurrentBundleStatus(BundleContext context) {
+        for (final Bundle bundle : context.getBundles()) {
+            if (bundle.getState() == Bundle.ACTIVE) {
+                bundlelist.add(bundle);
+                if (log.isInfoEnabled()) {
+                    log.info(bundle.getSymbolicName() + " already started before admin.");
+                }
+            }
+        }
+    }
+
     public void registerBundleListener(final BundleContext context) {
         final BundleListener bl = new BundleListener() {
             public void bundleChanged(final BundleEvent event) {
@@ -127,8 +151,8 @@ public class AdminDaemon {
                 } else if (event.getType() == BundleEvent.STOPPED) {
                     bundlelist.remove(event.getBundle());
                 }
-                if(log.isInfoEnabled()){
-                log.info(event.getBundle().getSymbolicName() + " changed to " + event.getType());
+                if (log.isInfoEnabled()) {
+                    log.info(event.getBundle().getSymbolicName() + " changed to " + event.getType());
                 }
             }
         };
@@ -136,8 +160,6 @@ public class AdminDaemon {
     }
 
     public void initCache(final BundleContext context) throws ClassNotFoundException, OXGenericException {
-        bundlelist = new ArrayList<Bundle>();
-        
         this.cache = new AdminCache();
         
         this.cache.initCache();  

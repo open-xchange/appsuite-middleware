@@ -87,6 +87,7 @@ public class Activator implements BundleActivator {
 
         this.daemon = new AdminDaemon();
         log.info("Starting Admindaemon...");
+        this.daemon.getCurrentBundleStatus(context);
         this.daemon.registerBundleListener(context);
         this.daemon.initCache(context);
         this.daemon.initAccessCombinationsInCache(); // EXTRA INIT BECAUSE WE NEED TO GET THE EXCEPTIONS TO FAIL ON STARTUP
