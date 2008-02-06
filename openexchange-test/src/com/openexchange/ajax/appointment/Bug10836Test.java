@@ -50,63 +50,67 @@
 package com.openexchange.ajax.appointment;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.appointment.action.DeleteRequest;
-import com.openexchange.ajax.appointment.action.GetRequest;
-import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.InsertResponse;
+import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.AppointmentObject;
 
 /**
- * This class contains test methods of calendar problems described by Funambol.
+ * Checks if the calendar has a vulnerability in the list request.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class FunambolTest extends AbstractAJAXSession {
+public final class Bug10836Test extends AbstractAJAXSession {
+
+    private static final Log LOG = LogFactory.getLog(Bug10836Test.class);
 
     /**
-     * Logger.
+     * Default constructor.
+     * @param name Name of the test.
      */
-    private static final Log LOG = LogFactory.getLog(FunambolTest.class);
-
-    private static final int MAX_DIFFERENCE = 1000; // 1 second
-
-    /**
-     * @param name
-     */
-    public FunambolTest(final String name) {
+    public Bug10836Test(final String name) {
         super(name);
     }
 
-    public void testAppointmentCreationTime() throws Throwable {
-        final AJAXClient client = getClient();
-        final int folder = client.getValues().getPrivateAppointmentFolder();
-        final TimeZone tz = client.getValues().getTimeZone();
+    /**
+     * Creates a private appointment with user A and tries to read it with user
+     * B through a list request.
+     * @throws Throwable if some exception occurs.
+     */
+    public void testVulnerability() throws Throwable {
+        final AJAXClient clientA = getClient();
+        final AJAXClient clientB = new AJAXClient(User.User2);
+        final int folderA = clientA.getValues().getPrivateAppointmentFolder();
+        final int folderB = clientB.getValues().getPrivateAppointmentFolder();
+        final TimeZone tz = clientA.getValues().getTimeZone();
         final AppointmentObject app = new AppointmentObject();
-        app.setParentFolderID(folder);
-        app.setTitle("TestCreationTime");
+        app.setParentFolderID(folderA);
+        app.setTitle("Bug10836Test");
         app.setStartDate(new Date(Tools.getHour(0)));
         app.setEndDate(new Date(Tools.getHour(1)));
         app.setIgnoreConflicts(true);
-        final Date serverTime = client.getValues().getServerTime();
-        System.out.println("ServerTime: " + serverTime);
         final InsertResponse insertR = (InsertResponse) Executor.execute(
-            client, new InsertRequest(app, tz));
-        final GetResponse getR = (GetResponse) Executor.execute(client,
-            new GetRequest(folder, insertR));
-        final AppointmentObject reload = getR.getAppointment(tz);
-        final Date creationDate = reload.getCreationDate();
-        System.out.println("CreationDate: " + creationDate);
-        final long difference = Math.abs(serverTime.getTime() - creationDate.getTime());
-        LOG.info("Time difference: " + difference);
-        Executor.execute(client, new DeleteRequest(folder, insertR.getId(), new Date()));
-        assertTrue("Too big time difference: ", difference < MAX_DIFFERENCE);
+            clientA, new InsertRequest(app, tz));
+        final CommonListResponse listR = (CommonListResponse) Executor.execute(
+            clientB, new ListRequest(new int[][] {{folderB, insertR.getId()}},
+            new int[] {AppointmentObject.TITLE}));
+        Executor.execute(clientA, new DeleteRequest(folderA, insertR.getId(),
+            new Date()));
+        for (Object[] obj1 : listR) {
+            for (Object obj2 : obj1) {
+                assertNull(obj2);
+            }
+        }
     }
 }
