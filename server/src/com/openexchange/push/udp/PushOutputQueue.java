@@ -47,251 +47,255 @@
  *
  */
 
-
-
 package com.openexchange.push.udp;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.event.InvalidStateException;
-import com.openexchange.server.impl.ServerTimer;
 import com.openexchange.tools.StringCollection;
 
 /**
  * PushOutputQueue
- *
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
-public class PushOutputQueue extends TimerTask {
-	
+public class PushOutputQueue implements Runnable {
+
 	private static PushConfigInterface pushConfigInterface;
-	
-	private static boolean isFirst = true;
-	
+
 	private static boolean isInit;
-	
-	private static List<Object> queue1 = new ArrayList<Object>();
-	
-	private static List<Object> queue2 = new ArrayList<Object>();
-	
-	private static int delay = 60000;
-	
+
+	private static DelayQueue<PushDelayedObject> queue = new DelayQueue<PushDelayedObject>();
+
+	private static long delay = 60000;
+
 	private static int remoteHostTimeOut = 3600000;
-	
+
 	private static Set<RemoteHostObject> remoteHost;
-	
-	private static InetAddress senderAddress = null;
-	
+
 	private static boolean isEnabled;
 	
+	private boolean isRunning = false;
+
 	private static final Log LOG = LogFactory.getLog(PushOutputQueue.class);
 	
+	private static HashMap<PushObject, PushDelayedObject> existingPushObjects = new HashMap<PushObject, PushDelayedObject>();
+
 	public PushOutputQueue(PushConfigInterface pushConfigInterface) {
-		this.pushConfigInterface = pushConfigInterface;
-		
+		PushOutputQueue.pushConfigInterface = pushConfigInterface;
+
 		remoteHost = pushConfigInterface.getRemoteHost();
-		
+
 		if (pushConfigInterface.isPushEnabled()) {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Starting PushOutputQueue");
 			}
-			
+
 			remoteHost = pushConfigInterface.getRemoteHost();
-			
-			delay = pushConfigInterface.getOutputQueueDelay();
-			
+
+			delay = (long) pushConfigInterface.getOutputQueueDelay();
+
 			remoteHostTimeOut = pushConfigInterface.getRemoteHostTimeOut();
-			
-			final Timer t = ServerTimer.getTimer();
-			t.schedule(this, delay, delay);
-			
+
 			isEnabled = true;
+			
+			isRunning = true;
+
+			final Thread th = new Thread(this);
+			th.start();
 		} else {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("PushOutputQueue is disabled");
 			}
 		}
-		
+
 		isInit = true;
 	}
-	
+
 	public static void addRemoteHostObject(final RemoteHostObject remoteHostObject) {
 		remoteHost.add(remoteHostObject);
 	}
-	
+
 	public static void add(final PushObject pushObject) throws InvalidStateException {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("add PushObject: " + pushObject);
 		}
-		
+
 		if (!isEnabled) {
-			return ;
+			return;
 		}
-		
+
 		if (!isInit) {
 			throw new InvalidStateException("PushOutputQueue not initialisiert!");
 		}
 		
-		if (isFirst) {
-			queue1.add(pushObject);
+		final PushDelayedObject pushDelayedObject;
+		if (existingPushObjects.containsKey(pushObject)) {
+			pushDelayedObject = existingPushObjects.get(pushObject);
+			pushDelayedObject.updateTime();
 		} else {
-			queue2.add(pushObject);
+			pushDelayedObject = new PushDelayedObject(delay, pushObject);
 		}
+		
+		existingPushObjects.put(pushObject, pushDelayedObject);
+		queue.add(pushDelayedObject);
 	}
-	
+
 	public static void add(final RegisterObject registerObject) throws InvalidStateException {
 		add(registerObject, false);
 	}
-	
-	public static void add(final RegisterObject registerObject, final boolean noDelay) throws InvalidStateException {
+
+	public static void add(final RegisterObject registerObject, final boolean noDelay)
+			throws InvalidStateException {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("add RegisterObject: " + registerObject);
 		}
-		
+
 		if (!isEnabled) {
-			return ;
+			return;
 		}
-		
+
 		if (!isInit) {
 			throw new InvalidStateException("PushOutputQueue not initialisiert!");
 		}
-		
+
 		if (noDelay) {
-			createRegisterPackage(registerObject);
+			final PushDelayedObject pushDelayObject = new PushDelayedObject(0, registerObject);
+			queue.add(pushDelayObject);
 		} else {
-			if (isFirst) {
-				queue1.add(registerObject);
-			} else {
-				queue2.add(registerObject);
-			}
+			final PushDelayedObject pushDelayObject = new PushDelayedObject(delay, registerObject);
+			queue.add(pushDelayObject);
 		}
-		
 	}
-	
-	/* (non-Javadoc)
-	 * 
-	 * @see java.util.TimerTask#run()
-	 */
-	@Override
+
 	public void run() {
-		try {
-			if (isFirst) {
-				isFirst = false;
-				action(queue1);
-			} else {
-				isFirst = true;
-				action(queue2);
+		while (isRunning) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("get push objects from queue: " + queue.size());
 			}
-		} catch (final Exception exc) {
-			LOG.error(exc.getMessage(), exc);
+
+			try {
+				final PushDelayedObject pushDelayedObject = queue.poll(10000, TimeUnit.MILLISECONDS);
+				if (pushDelayedObject != null) {
+					action(pushDelayedObject);
+				}
+			} catch (final Exception exc) {
+				LOG.error(exc.getMessage(), exc);
+			}
 		}
 	}
-	
-	protected static void action(final List<Object> al) {
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("get push objects from queue: " + al.size());
-		}
-		
-		for (int a = 0; a < al.size(); a++) {
-			final Object o = al.get(a);
+
+	protected static void action(final PushDelayedObject pushDelayedObject) {
+		final AbstractPushObject abstractPushObject = pushDelayedObject.getPushObject();
+
+		if (abstractPushObject instanceof PushObject) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Send Push Object");
+			}
 			
-			if (o instanceof PushObject) {
-				createPushPackage((PushObject)o);
-			} else if (o instanceof RegisterObject) {
-				createRegisterPackage((RegisterObject)o);
+			final PushObject pushObject =(PushObject) abstractPushObject; 
+			existingPushObjects.remove(pushObject);
+			
+			createPushPackage(pushObject);
+		} else if (abstractPushObject instanceof RegisterObject) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Send Register Object");
 			}
+
+			createRegisterPackage((RegisterObject) abstractPushObject);
 		}
-		
-		al.clear();
 	}
-	
+
 	protected static void createPushPackage(final PushObject pushObject) {
 		final int users[] = pushObject.getUsers();
 		for (int a = 0; a < users.length; a++) {
 			final int contextId = pushObject.getContextId();
-			
+
 			if (RegisterHandler.isRegistered(users[a], contextId)) {
-				final RegisterObject registerObj = RegisterHandler.getRegisterObject(users[a], contextId);
+				final RegisterObject registerObj = RegisterHandler.getRegisterObject(users[a],
+						contextId);
 				final StringBuilder sb = new StringBuilder();
 				sb.append(pushObject.getFolderId());
 				sb.append('\1');
 				try {
-					makePackage(sb.toString().getBytes(), registerObj.getHostAddress(), registerObj.getPort());
+					makePackage(sb.toString().getBytes(), registerObj.getHostAddress(), registerObj
+							.getPort());
 				} catch (Exception exc) {
 					LOG.error("createPushPackage", exc);
 				}
 			}
 		}
-		
+
 		if (pushConfigInterface.isEventDistributionEnabled() && !pushObject.isSync()) {
 			// if (!pushObject.isSync()) {
-				for (RemoteHostObject remoteHostObject : remoteHost) {
-					try {
-						final StringBuilder sb = new StringBuilder();
-						sb.append(PushRequest.MAGIC);
-						sb.append('\1');
-						
-						final StringBuilder data = new StringBuilder();
-						data.append(PushRequest.PUSH_SYNC);
-						data.append('\1');
-						data.append(pushObject.getFolderId());
-						data.append('\1');
-						data.append(pushObject.getModule());
-						data.append('\1');
-						data.append(pushObject.getContextId());
-						data.append('\1');
-						data.append(StringCollection.convertArray2String(pushObject.getUsers()));
-						
-						sb.append(data.length());
-						sb.append('\1');
-						sb.append(data);
-						
-						final byte b[] = sb.toString().getBytes();
-						
-						if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime()+remoteHostTimeOut)) {
-							makePackage(b, remoteHostObject.getHost(), remoteHostObject.getPort());
-						} else {
-							if (LOG.isTraceEnabled()) {
-								LOG.trace("remote host object is timed out");
-							}
+			for (RemoteHostObject remoteHostObject : remoteHost) {
+				try {
+					final StringBuilder sb = new StringBuilder();
+					sb.append(PushRequest.MAGIC);
+					sb.append('\1');
+
+					final StringBuilder data = new StringBuilder();
+					data.append(PushRequest.PUSH_SYNC);
+					data.append('\1');
+					data.append(pushObject.getFolderId());
+					data.append('\1');
+					data.append(pushObject.getModule());
+					data.append('\1');
+					data.append(pushObject.getContextId());
+					data.append('\1');
+					data.append(StringCollection.convertArray2String(pushObject.getUsers()));
+
+					sb.append(data.length());
+					sb.append('\1');
+					sb.append(data);
+
+					final byte b[] = sb.toString().getBytes();
+
+					if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime() + remoteHostTimeOut)) {
+						makePackage(b, remoteHostObject.getHost(), remoteHostObject.getPort());
+					} else {
+						if (LOG.isTraceEnabled()) {
+							LOG.trace("remote host object is timed out");
 						}
-					} catch (Exception exc) {
-						LOG.error("createPushPackage", exc);
 					}
+				} catch (Exception exc) {
+					LOG.error("createPushPackage", exc);
 				}
+			}
 			// }
 		}
 	}
-	
+
 	protected static void createRegisterPackage(final RegisterObject registerObject) {
 		if (!registerObject.isSync()) {
 			final StringBuilder sb = new StringBuilder();
 			sb.append("OK\1");
 			try {
-				makePackage(sb.toString().getBytes(), registerObject.getHostAddress(), registerObject.getPort());
+				makePackage(sb.toString().getBytes(), registerObject.getHostAddress(),
+						registerObject.getPort());
 			} catch (Exception exc) {
 				LOG.error("createRegisterPackage", exc);
 			}
 		}
-		
+
 		if (pushConfigInterface.isRegisterDistributionEnabled()) {
 			for (RemoteHostObject remoteHostObject : remoteHost) {
 				try {
 					final StringBuilder sb = new StringBuilder();
 					sb.append(PushRequest.MAGIC);
 					sb.append('\1');
-					
+
 					final StringBuilder data = new StringBuilder();
 					data.append(PushRequest.REGISTER_SYNC);
 					data.append('\1');
@@ -305,13 +309,13 @@ public class PushOutputQueue extends TimerTask {
 					data.append('\1');
 					data.append(registerObject.isSync());
 					data.append('\1');
-					
+
 					sb.append(data.length());
 					sb.append('\1');
 					sb.append(data);
-					
+
 					final byte b[] = sb.toString().getBytes();
-					if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime()+remoteHostTimeOut)) {
+					if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime() + remoteHostTimeOut)) {
 						makePackage(b, remoteHostObject.getHost(), remoteHostObject.getPort());
 					} else {
 						if (LOG.isTraceEnabled()) {
@@ -324,36 +328,20 @@ public class PushOutputQueue extends TimerTask {
 			}
 		}
 	}
-	
-	protected static void makePackage(final byte[] b, final String host, final int port) throws Exception {
+
+	protected static void makePackage(final byte[] b, final String host, final int port)
+			throws Exception {
 		makePackage(b, InetAddress.getByName(host), port);
 	}
-	
-	protected static void makePackage(final byte[] b, final InetAddress host, final int port) throws Exception {
+
+	protected static void makePackage(final byte[] b, final InetAddress host, final int port)
+			throws Exception {
 		final DatagramSocket datagramSocket = PushSocket.getPushDatagramSocket();
 		final DatagramPacket datagramPackage = new DatagramPacket(b, b.length, host, port);
 		datagramSocket.send(datagramPackage);
 	}
 	
-	public static int getQueueSize() {
-		if (isFirst) {
-			return queue1.size();
-		}
-		return queue2.size();
+	public void close() {
+		isRunning = false;
 	}
-
-    public void close() {
-        cancel();
-        // empty both queues
-        try {
-            action(queue1);
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-        try {
-            action(queue2);
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
 }
