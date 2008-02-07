@@ -57,6 +57,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.GlobalTransportConfig;
 import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.TransportMailMessage;
 import com.openexchange.mail.transport.dataobjects.InfostoreDocumentMailPart;
@@ -281,13 +282,11 @@ public abstract class MailTransport {
 	 * 
 	 * @param asciiBytes
 	 *            The raw ascii bytes
-	 * @return The mail's unique path in mailbox if stored; meaning either a
-	 *         draft message has been "sent" or a message copy has been appended
-	 *         to <i>Sent</i> folder. If no local copy is available,
-	 *         {@link MailPath#NULL} is returned
+	 * @return The sent mail message
 	 * @throws MailException
+	 *             If sending fails
 	 */
-	public abstract MailPath sendRawMessage(byte[] asciiBytes) throws MailException;
+	public abstract MailMessage sendRawMessage(byte[] asciiBytes) throws MailException;
 
 	/**
 	 * Sends a receipt acknowledgement for the message located in given folder

@@ -54,7 +54,6 @@ import static com.openexchange.mail.utils.MessageUtility.parseAddressList;
 import static com.openexchange.mail.utils.MessageUtility.performLineFolding;
 import static java.util.regex.Matcher.quoteReplacement;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
@@ -115,6 +114,7 @@ import com.openexchange.smtp.dataobjects.SMTPMailMessage;
 import com.openexchange.smtp.dataobjects.SMTPMailPart;
 import com.openexchange.smtp.dataobjects.SMTPReferencedPart;
 import com.openexchange.smtp.filler.SMTPMessageFiller;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.sun.mail.smtp.SMTPMessage;
 
 /**
@@ -308,10 +308,10 @@ public final class SMTPTransport extends MailTransport {
 	}
 
 	@Override
-	public MailPath sendRawMessage(final byte[] asciiBytes) throws MailException {
+	public MailMessage sendRawMessage(final byte[] asciiBytes) throws MailException {
 		try {
 			final SMTPMessage smtpMessage = new SMTPMessage(javax.mail.Session.getInstance(SMTPSessionProperties
-					.getDefaultSessionProperties(), null), new ByteArrayInputStream(asciiBytes));
+					.getDefaultSessionProperties(), null), new UnsynchronizedByteArrayInputStream(asciiBytes));
 			/*
 			 * Check recipients
 			 */
@@ -339,33 +339,7 @@ public final class SMTPTransport extends MailTransport {
 			} catch (final MessagingException e) {
 				throw SMTPException.handleMessagingException(e, mailConnection);
 			}
-			if (usm.isNoCopyIntoStandardSentFolder()) {
-				/*
-				 * No copy in sent folder
-				 */
-				return MailPath.NULL;
-			}
-			/*
-			 * Append message to folder "SENT"
-			 */
-			final long startTransport = System.currentTimeMillis();
-			final String sentFullname = mailConnection.getFolderStorage().getSentFolder();
-			long uid = -1L;
-			try {
-				uid = mailConnection.getMessageStorage().appendMessages(sentFullname,
-						new MailMessage[] { MIMEMessageConverter.convertMessage(smtpMessage) })[0];
-			} catch (final SMTPException e) {
-				throw e;
-			} catch (final MailException e) {
-				throw new SMTPException(SMTPException.Code.COPY_TO_SENT_FOLDER_FAILED, e, new Object[0]);
-			}
-			final MailPath retval = new MailPath(sentFullname, uid);
-			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(128).append("Mail copy (").append(retval.toString())
-						.append(") appended in ").append(System.currentTimeMillis() - startTransport).append("msec")
-						.toString());
-			}
-			return retval;
+			return MIMEMessageConverter.convertMessage(smtpMessage);
 		} catch (final MessagingException e) {
 			throw SMTPException.handleMessagingException(e, mailConnection);
 		}

@@ -1,3 +1,7 @@
+* 2008-02-07 - thorben.betten@open-xchange.com
+
+ - Bugfix #10890: No copy into 'Sent' folder when sending raw message data
+
 * 2008-02-06 - thorben.betten@open-xchange.com
 
  - Bugfix #10902: Performing IMAP operation on a large number of messages
