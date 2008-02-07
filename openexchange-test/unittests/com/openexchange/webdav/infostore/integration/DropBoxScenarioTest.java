@@ -3,6 +3,7 @@ package com.openexchange.webdav.infostore.integration;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.ldap.LdapException;
@@ -124,10 +125,10 @@ public class DropBoxScenarioTest extends TestCase{
 		factory.beginRequest();
 	}
 	
-	private void createDropBox() throws OXException, WebdavException{
+	private void createDropBox() throws OXException, WebdavException, ContextException {
 		Session session = factory.getSessionHolder().getSessionObject();
 		OXFolderManager mgr = new OXFolderManagerImpl(session);
-		OXFolderAccess acc = new OXFolderAccess(session.getContext());
+		OXFolderAccess acc = new OXFolderAccess(ContextStorage.getInstance().getContext(session.getContextId()));
 		
 		FolderObject fo = acc.getDefaultFolder(session.getUserId(), FolderObject.INFOSTORE);
 		

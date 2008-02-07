@@ -524,7 +524,7 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setParentFolderID(CalendarTest.getCalendarDefaultFolderForUser(userid, context));
         
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setIgnoreConflicts(true);
         CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
@@ -594,7 +594,7 @@ public class CalendarRecurringTests extends TestCase {
         
         cdao.setParticipants(p.getList());
         
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setIgnoreConflicts(true);
         CalendarSql csql = new CalendarSql(so);
         csql.insertAppointmentObject(cdao);
@@ -618,7 +618,7 @@ public class CalendarRecurringTests extends TestCase {
         assertEquals("Testing size ", rss.size(), 11);
         
         CalendarDataObject delete_owner = new CalendarDataObject();
-        delete_owner.setContext(so.getContext());
+        delete_owner.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         delete_owner.setRecurrencePosition(3);
         delete_owner.setObjectID(object_id);
         csql.deleteAppointmentObject(delete_owner, folder_id, new Date(SUPER_END));
@@ -634,7 +634,7 @@ public class CalendarRecurringTests extends TestCase {
         
         CalendarSql csql2 = new CalendarSql(so2);
         CalendarDataObject test_delete_not_owner = new CalendarDataObject();
-        test_delete_not_owner.setContext(so.getContext());
+        test_delete_not_owner.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         test_delete_not_owner.setObjectID(object_id);
         test_delete_not_owner.setRecurrencePosition(5);
         csql2.deleteAppointmentObject(test_delete_not_owner, folder_id2, new Date(SUPER_END));
@@ -672,7 +672,7 @@ public class CalendarRecurringTests extends TestCase {
         
         // delete whole sequence incl. all exceptions
         CalendarDataObject delete_all = new CalendarDataObject();
-        delete_all.setContext(so.getContext());
+        delete_all.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         delete_all.setObjectID(object_id);
         csql.deleteAppointmentObject(delete_all, folder_id, new Date(SUPER_END));
         
@@ -692,7 +692,7 @@ public class CalendarRecurringTests extends TestCase {
         int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(folder_id);
         
         CalendarTest.fillDatesInDao(cdao);
@@ -716,7 +716,7 @@ public class CalendarRecurringTests extends TestCase {
         String rec_string = CalendarRecurringCollection.createDSString(testobject);
         
         CalendarDataObject update = new CalendarDataObject();
-        update.setContext(so.getContext());
+        update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update.setTitle("testRecurringSimpleUpdate - Step 2 - Update");
         update.setObjectID(object_id);
         update.setIgnoreConflicts(true);
@@ -735,7 +735,7 @@ public class CalendarRecurringTests extends TestCase {
         
         CalendarDataObject update_with_times = new CalendarDataObject();
         
-        update_with_times.setContext(so.getContext());
+        update_with_times.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update_with_times.setTitle("testRecurringSimpleUpdate - Step 3 - Update");
         update_with_times.setObjectID(object_id);
         update_with_times.setStartDate(new Date(rs.getStart()));
@@ -752,7 +752,7 @@ public class CalendarRecurringTests extends TestCase {
         
         CalendarDataObject update_with_changed_times = new CalendarDataObject();
         
-        update_with_changed_times.setContext(so.getContext());
+        update_with_changed_times.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update_with_changed_times.setTitle("testRecurringSimpleUpdate - Step 4 - Update");
         update_with_changed_times.setObjectID(object_id);
         update_with_changed_times.setStartDate(new Date(rs.getStart()+3600000));
@@ -776,7 +776,7 @@ public class CalendarRecurringTests extends TestCase {
         int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(folder_id);
         
         CalendarTest.fillDatesInDao(cdao);
@@ -789,7 +789,7 @@ public class CalendarRecurringTests extends TestCase {
         int object_id = cdao.getObjectID();
         
         CalendarDataObject update = new CalendarDataObject();
-        update.setContext(so.getContext());
+        update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update.setTitle("testUpdateSimpleAppointmentToRecurring - Step 2 - Update - Recurring");
         update.setObjectID(object_id);
         update.setRecurrenceType(CalendarObject.DAILY);
@@ -815,7 +815,7 @@ public class CalendarRecurringTests extends TestCase {
         }
         
         CalendarDataObject update_normal = new CalendarDataObject();
-        update_normal.setContext(so.getContext());
+        update_normal.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update_normal.setTitle("testUpdateSimpleAppointmentToRecurring - Step 3 - Update - Normal");
         update_normal.setObjectID(object_id);
         update_normal.setRecurrenceType(CalendarObject.NO_RECURRENCE);
@@ -838,7 +838,7 @@ public class CalendarRecurringTests extends TestCase {
         int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(folder_id);
         
         CalendarTest.fillDatesInDao(cdao);
@@ -857,7 +857,7 @@ public class CalendarRecurringTests extends TestCase {
         Date last = cdao.getLastModified();
         
         CalendarDataObject update = new CalendarDataObject();
-        update.setContext(so.getContext());
+        update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update.setObjectID(object_id);
         update.setIgnoreConflicts(true);
         
@@ -956,7 +956,7 @@ public class CalendarRecurringTests extends TestCase {
         int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(folder_id);
         
         CalendarTest.fillDatesInDao(cdao);
@@ -981,7 +981,7 @@ public class CalendarRecurringTests extends TestCase {
         Date last = cdao.getLastModified();
         
         CalendarDataObject update = new CalendarDataObject();
-        update.setContext(so.getContext());
+        update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update.setObjectID(object_id);
         update.setIgnoreConflicts(true);
         
@@ -1225,7 +1225,7 @@ public class CalendarRecurringTests extends TestCase {
         CalendarDataObject testobject = csql.getObjectById(object_id, folder_id);
         
         CalendarDataObject update = new CalendarDataObject();
-        update.setContext(so.getContext());
+        update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update.setIgnoreConflicts(true);
         update.setTitle("testComplexOccurrence - Step 2");
         update.setOccurrence(5);
@@ -1454,7 +1454,7 @@ public class CalendarRecurringTests extends TestCase {
             test_folder = fo.getObjectID();       
             
             CalendarDataObject cdao = new CalendarDataObject();
-            cdao.setContext(so.getContext());
+            cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             cdao.setParentFolderID(fid);
         
             CalendarTest.fillDatesInDao(cdao);
@@ -1471,7 +1471,7 @@ public class CalendarRecurringTests extends TestCase {
             int object_id = cdao.getObjectID();            
  
             CalendarDataObject exception = new CalendarDataObject();
-            exception.setContext(so.getContext());
+            exception.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             exception.setObjectID(object_id);
             exception.setIgnoreConflicts(true);            
             exception.setTitle("testMoveExceptionToDifferentFolerAndSetPrivateFlag - Update (create exception)");
@@ -1483,7 +1483,7 @@ public class CalendarRecurringTests extends TestCase {
             assertTrue("Got a new object_id" , object_id != exception_id);
             
             CalendarDataObject test_move_folder = new CalendarDataObject();
-            test_move_folder.setContext(so.getContext());
+            test_move_folder.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             test_move_folder.setObjectID(exception_id);
             test_move_folder.setParentFolderID(test_folder);
             test_move_folder.setIgnoreConflicts(true);
@@ -1496,7 +1496,7 @@ public class CalendarRecurringTests extends TestCase {
             }
             
             CalendarDataObject test_private_flag = new CalendarDataObject();
-            test_private_flag.setContext(so.getContext());
+            test_private_flag.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             test_private_flag.setObjectID(exception_id);
             test_private_flag.setParentFolderID(fid);
             test_private_flag.setPrivateFlag(true);
@@ -1535,7 +1535,7 @@ public class CalendarRecurringTests extends TestCase {
         int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(folder_id);
         
         CalendarTest.fillDatesInDao(cdao);
@@ -1554,7 +1554,7 @@ public class CalendarRecurringTests extends TestCase {
         Date last = cdao.getLastModified();
         
         CalendarDataObject update = new CalendarDataObject();
-        update.setContext(so.getContext());
+        update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update.setObjectID(object_id);
         update.setIgnoreConflicts(true);
         
@@ -1587,7 +1587,7 @@ public class CalendarRecurringTests extends TestCase {
         
         
         CalendarDataObject delete = new CalendarDataObject();
-        delete.setContext(so.getContext());
+        delete.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         delete.setObjectID(object_id);
         delete.setIgnoreConflicts(true);        
         Date changed_exceptions[] = testobject.getChangeException();

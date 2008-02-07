@@ -14,6 +14,7 @@ import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.sessiond.impl.SessionObject;
@@ -92,7 +93,7 @@ public class CalendarDeleteTest extends TestCase {
         Connection writecon = DBPool.pickupWriteable(context);
         SessionObject so = SessionObjectWrapper.createSessionObject(deleteuserid, context.getContextId(), "deleteAllUserApps");
         
-        DeleteEvent delEvent = new DeleteEvent(this, so.getUserId(), DeleteEvent.TYPE_USER, so.getContext());
+        DeleteEvent delEvent = new DeleteEvent(this, so.getUserId(), DeleteEvent.TYPE_USER, ContextStorage.getInstance().getContext(so.getContextId()));
 
         CalendarAdministration ca = new CalendarAdministration();
         ca.deletePerformed(delEvent, readcon, writecon);
@@ -125,7 +126,7 @@ public class CalendarDeleteTest extends TestCase {
         Connection writecon = DBPool.pickupWriteable(context);
         SessionObject so = SessionObjectWrapper.createSessionObject(deleteuserid, context.getContextId(), "deleteAllUserApps");
         
-        DeleteEvent delEvent = new DeleteEvent(this, groupid, DeleteEvent.TYPE_GROUP, so.getContext());
+        DeleteEvent delEvent = new DeleteEvent(this, groupid, DeleteEvent.TYPE_GROUP, ContextStorage.getInstance().getContext(so.getContextId()));
 
         CalendarAdministration ca = new CalendarAdministration();
         ca.deletePerformed(delEvent, readcon, writecon);
@@ -146,7 +147,7 @@ public class CalendarDeleteTest extends TestCase {
         Connection writecon = DBPool.pickupWriteable(context);
         SessionObject so = SessionObjectWrapper.createSessionObject(deleteuserid, context.getContextId(), "deleteAllUserApps");
         
-        DeleteEvent delEvent = new DeleteEvent(this, resourceid, DeleteEvent.TYPE_RESOURCE, so.getContext());
+        DeleteEvent delEvent = new DeleteEvent(this, resourceid, DeleteEvent.TYPE_RESOURCE, ContextStorage.getInstance().getContext(so.getContextId()));
 
         CalendarAdministration ca = new CalendarAdministration();
         ca.deletePerformed(delEvent, readcon, writecon);

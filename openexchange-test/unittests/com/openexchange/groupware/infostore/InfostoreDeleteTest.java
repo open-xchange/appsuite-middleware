@@ -43,20 +43,20 @@ public class InfostoreDeleteTest extends TestCase {
 	
 	public void testDeleteUser() throws Exception {
 		DocumentMetadata metadata = createMetadata();
-		DeleteEvent delEvent = new DeleteEvent(this, session.getUserId(), DeleteEvent.TYPE_USER,session.getContext());
+		DeleteEvent delEvent = new DeleteEvent(this, session.getUserId(), DeleteEvent.TYPE_USER,ContextStorage.getInstance().getContext(session.getContextId()));
 		
 		Connection con = null;
 		try {
-			con = provider.getWriteConnection(session.getContext());
+			con = provider.getWriteConnection(ContextStorage.getInstance().getContext(session.getContextId()));
 			new InfostoreDelete().deletePerformed(delEvent, con, con);
 		} finally {
 			if(con != null)
-				provider.releaseWriteConnection(session.getContext(), con);
+				provider.releaseWriteConnection(ContextStorage.getInstance().getContext(session.getContextId()), con);
 		}
         UserStorage userStorage = UserStorage.getInstance();
         UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
         
-        assertFalse(database.exists(metadata.getId(), InfostoreFacade.CURRENT_VERSION, session.getContext(), userStorage.getUser(session.getUserId(), ctx), userConfigStorage.getUserConfiguration(session.getUserId(),ctx)));
+        assertFalse(database.exists(metadata.getId(), InfostoreFacade.CURRENT_VERSION, ContextStorage.getInstance().getContext(session.getContextId()), userStorage.getUser(session.getUserId(), ctx), userConfigStorage.getUserConfiguration(session.getUserId(),ctx)));
 	
 	}
 

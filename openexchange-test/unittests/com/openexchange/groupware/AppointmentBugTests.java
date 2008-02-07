@@ -151,7 +151,7 @@ public class AppointmentBugTests extends TestCase {
         
         RecurringResults m = null;
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setTimezone(TIMEZONE);
         cdao.setParentFolderID(fid);
         CalendarTest.fillDatesInDao(cdao);
@@ -224,7 +224,7 @@ public class AppointmentBugTests extends TestCase {
         SessionObject so2 = SessionObjectWrapper.createSessionObject(userid2, getContext().getContextId(), "myTestIdentifier");
         
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(fid);
         cdao.setTitle("testBug4497");
         cdao.setIgnoreConflicts(true);
@@ -241,7 +241,7 @@ public class AppointmentBugTests extends TestCase {
         int object_id = cdao.getObjectID();
         
         CalendarDataObject delete = new CalendarDataObject();
-        delete.setContext(so2.getContext());
+        delete.setContext(ContextStorage.getInstance().getContext(so2.getContextId()));
         delete.setObjectID(object_id);
         
         CalendarSql csql2 = new CalendarSql(so2);        
@@ -277,7 +277,7 @@ public class AppointmentBugTests extends TestCase {
         SessionObject so2 = SessionObjectWrapper.createSessionObject(userid2, getContext().getContextId(), "myTestIdentifier");
         
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(fid);
         cdao.setTitle("testBug4497");
         cdao.setIgnoreConflicts(true);
@@ -294,7 +294,7 @@ public class AppointmentBugTests extends TestCase {
         int object_id = cdao.getObjectID();
         
         CalendarDataObject update = new CalendarDataObject();
-        update.setContext(so.getContext());
+        update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update.setObjectID(object_id);
         update.setRecurrenceType(AppointmentObject.WEEKLY);
         update.setInterval(1);
@@ -324,7 +324,7 @@ public class AppointmentBugTests extends TestCase {
         SessionObject so2 = SessionObjectWrapper.createSessionObject(userid2, getContext().getContextId(), "myTestIdentifier");
         
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(fid);
         cdao.setTitle("testBug4497");
         cdao.setIgnoreConflicts(true);
@@ -341,7 +341,7 @@ public class AppointmentBugTests extends TestCase {
         int object_id = cdao.getObjectID();
         
         CalendarDataObject update = new CalendarDataObject();
-        update.setContext(so.getContext());
+        update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update.setObjectID(object_id);
         
         Participants p = new Participants();
@@ -442,7 +442,7 @@ public class AppointmentBugTests extends TestCase {
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(fid);
         CalendarTest.fillDatesInDao(cdao);
         cdao.removeUntil();
@@ -513,7 +513,7 @@ public class AppointmentBugTests extends TestCase {
             
             CalendarSql csql2 = new CalendarSql(so2);
             CalendarDataObject cdao = new CalendarDataObject();
-            cdao.setContext(so.getContext());
+            cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             cdao.setParentFolderID(shared_folder_id);
             CalendarTest.fillDatesInDao(cdao);
             cdao.setTitle("testBug4717 - created by "+user2);
@@ -525,7 +525,7 @@ public class AppointmentBugTests extends TestCase {
             CalendarDataObject original_object = csql2.getObjectById(object_id, shared_folder_id);
             
             CalendarDataObject udao = new CalendarDataObject();
-            udao.setContext(so.getContext());
+            udao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             udao.setObjectID(object_id);
             Date check_start_date = new Date(cdao.getStartDate().getTime()+3600000); // move 1 h
             Date check_end_date = new Date(cdao.getEndDate().getTime()+3600000); // move 1 h
@@ -553,7 +553,7 @@ public class AppointmentBugTests extends TestCase {
             assertEquals("Check end date" , check_end_date, testobject.getEndDate());
             
             CalendarDataObject second_update = new CalendarDataObject();
-            second_update.setContext(so.getContext());
+            second_update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             second_update.setObjectID(object_id);
             second_update.setStartDate(original_object.getStartDate()); // back to origin time
             second_update.setEndDate(original_object.getEndDate()); // back to origin time
@@ -597,7 +597,7 @@ public class AppointmentBugTests extends TestCase {
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(fid);
         CalendarTest.fillDatesInDao(cdao);
         cdao.removeUntil();
@@ -644,7 +644,7 @@ public class AppointmentBugTests extends TestCase {
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(fid);
         CalendarTest.fillDatesInDao(cdao);
         cdao.setTitle("testBug5010");
@@ -662,7 +662,7 @@ public class AppointmentBugTests extends TestCase {
         assertEquals("Check rec type ", CalendarDataObject.WEEKLY, testobject.getRecurrenceType());
         
         CalendarDataObject update = new CalendarDataObject();
-        update.setContext(so.getContext());
+        update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update.setObjectID(object_id);
         update.setRecurrenceType(CalendarDataObject.DAILY);
         update.setInterval(1);
@@ -689,7 +689,7 @@ public class AppointmentBugTests extends TestCase {
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(fid);
         CalendarTest.fillDatesInDao(cdao);
         cdao.setTitle("testBug5012");
@@ -706,7 +706,7 @@ public class AppointmentBugTests extends TestCase {
         
         
         CalendarDataObject update = new CalendarDataObject();
-        update.setContext(so.getContext());
+        update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update.setObjectID(object_id);
         update.setStartDate(cdao.getStartDate());
         update.setEndDate(cdao.getEndDate());
@@ -722,7 +722,7 @@ public class AppointmentBugTests extends TestCase {
         
 
         CalendarDataObject update2 = new CalendarDataObject();
-        update2.setContext(so.getContext());
+        update2.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update2.setObjectID(object_id);
         update2.setStartDate(cdao.getStartDate());
         update2.setEndDate(cdao.getEndDate());
@@ -788,7 +788,7 @@ public class AppointmentBugTests extends TestCase {
             
             CalendarSql csql2 = new CalendarSql(so2);
             CalendarDataObject cdao = new CalendarDataObject();
-            cdao.setContext(so.getContext());
+            cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             cdao.setParentFolderID(shared_folder_id);
             CalendarTest.fillDatesInDao(cdao);
             cdao.setTitle("testBug4717 - created by "+user2);
@@ -840,7 +840,7 @@ public class AppointmentBugTests extends TestCase {
         SessionObject so2 = SessionObjectWrapper.createSessionObject(userid2, getContext().getContextId(), "myTestIdentifier");
         
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(fid);
         cdao.setTitle("testBug5144");
         cdao.setIgnoreConflicts(true);
@@ -858,7 +858,7 @@ public class AppointmentBugTests extends TestCase {
         int object_id = cdao.getObjectID();        
         
         CalendarDataObject delete = new CalendarDataObject();
-        delete.setContext(so2.getContext());
+        delete.setContext(ContextStorage.getInstance().getContext(so2.getContextId()));
         delete.setObjectID(object_id);
           
         csql2.deleteAppointmentObject(delete, fid2, new Date(CalendarTest.SUPER_END));
@@ -891,7 +891,7 @@ public class AppointmentBugTests extends TestCase {
         
         CalendarDataObject cdao = new CalendarDataObject();
         cdao.setTimezone(TIMEZONE);
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(fid);
         CalendarTest.fillDatesInDao(cdao);
         cdao.removeUntil();
@@ -990,7 +990,7 @@ public class AppointmentBugTests extends TestCase {
             CalendarSql csql2 = new CalendarSql(so2);
             
             CalendarDataObject cdao = new CalendarDataObject();
-            cdao.setContext(so.getContext());
+            cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             cdao.setParentFolderID(shared_folder_id);
             CalendarTest.fillDatesInDao(cdao);
             cdao.setTitle("testBug5194 - created by "+user2);
@@ -1005,7 +1005,7 @@ public class AppointmentBugTests extends TestCase {
             assertEquals("Check that only user 1 is participant", userid, up[0].getIdentifier());
             
             CalendarDataObject update = new CalendarDataObject();
-            update.setContext(so2.getContext());
+            update.setContext(ContextStorage.getInstance().getContext(so2.getContextId()));
             update.setObjectID(object_id);
             update.setTitle("testBug5194 - updated by "+user2);
             
@@ -1058,7 +1058,7 @@ public class AppointmentBugTests extends TestCase {
         int fid = getPrivateFolder(userid);
         
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(fid);
         cdao.setTitle("testBug5171");
         cdao.setStartDate(new Date(1168426800000L)); // 01.2007 12:00
@@ -1095,7 +1095,7 @@ public class AppointmentBugTests extends TestCase {
         
         
         CalendarDataObject cdao2 = new CalendarDataObject();
-        cdao2.setContext(so.getContext());
+        cdao2.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao2.setParentFolderID(fid);
         cdao2.setTitle("testBug5222");
         CalendarTest.fillDatesInDao(cdao2);
@@ -1142,7 +1142,7 @@ public class AppointmentBugTests extends TestCase {
         CalendarSql csql = new CalendarSql(so);
         
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(fid);
         CalendarTest.fillDatesInDao(cdao);
         long start = cdao.getStartDate().getTime();
@@ -1188,7 +1188,7 @@ public class AppointmentBugTests extends TestCase {
         CalendarSql csql = new CalendarSql(so);
         
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(fid);
         CalendarTest.fillDatesInDao(cdao);
         cdao.setRecurrenceType(CalendarObject.DAILY);
@@ -1292,7 +1292,7 @@ public class AppointmentBugTests extends TestCase {
             CalendarSql csql2 = new CalendarSql(so2);
             
             CalendarDataObject cdao = new CalendarDataObject();
-            cdao.setContext(so.getContext());
+            cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             cdao.setParentFolderID(fid);
             CalendarTest.fillDatesInDao(cdao);
             cdao.setTitle("testBug6910 - Step 1");
@@ -1306,7 +1306,7 @@ public class AppointmentBugTests extends TestCase {
             assertTrue("up > 0", up.length > 0);
             
             CalendarDataObject update = new CalendarDataObject();
-            update.setContext(so.getContext());
+            update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             update.setObjectID(object_id);
             update.setParentFolderID(shared_folder_id);
             update.setIgnoreConflicts(true);
@@ -1409,7 +1409,7 @@ public class AppointmentBugTests extends TestCase {
 
             
             CalendarDataObject cdao = new CalendarDataObject();
-            cdao.setContext(so.getContext());
+            cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             cdao.setParentFolderID(subfolder_id);
             CalendarTest.fillDatesInDao(cdao);
             cdao.setTitle("testBug6400 - Step 1");
@@ -1428,7 +1428,7 @@ public class AppointmentBugTests extends TestCase {
             
         
             CalendarDataObject update = new CalendarDataObject();
-            update.setContext(so.getContext());
+            update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             update.setTitle("testBug6400 - Step 2");
             update.setObjectID(object_id);
             update.setRecurrencePosition(1);
@@ -1518,7 +1518,7 @@ public class AppointmentBugTests extends TestCase {
 
             
             CalendarDataObject cdao = new CalendarDataObject();
-            cdao.setContext(so.getContext());
+            cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             cdao.setParentFolderID(fid);
             CalendarTest.fillDatesInDao(cdao);
             cdao.setTitle("testBug6214 - Step 1");
@@ -1576,7 +1576,7 @@ public class AppointmentBugTests extends TestCase {
         int fid = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(fid);
         
         CalendarTest.fillDatesInDao(cdao);
@@ -1601,7 +1601,7 @@ public class AppointmentBugTests extends TestCase {
         assertEquals("Check confirm status", CalendarObject.ACCEPT, up1[0].getConfirm());
         
         CalendarDataObject update = new CalendarDataObject();
-        update.setContext(so.getContext());
+        update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update.setObjectID(object_id);
         update.setParentFolderID(fid);
         update.setRecurrencePosition(1);
@@ -1639,7 +1639,7 @@ public class AppointmentBugTests extends TestCase {
         int folder_id = CalendarTest.getCalendarDefaultFolderForUser(userid, context);
         
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(folder_id);
         
         CalendarTest.fillDatesInDao(cdao);
@@ -1657,7 +1657,7 @@ public class AppointmentBugTests extends TestCase {
         Date last = cdao.getLastModified();
         
         CalendarDataObject update = new CalendarDataObject();
-        update.setContext(so.getContext());
+        update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update.setObjectID(object_id);
         update.setIgnoreConflicts(true);
         
@@ -1683,7 +1683,7 @@ public class AppointmentBugTests extends TestCase {
         csql.updateAppointmentObject(update, folder_id, new Date(SUPER_END));
  
         CalendarDataObject testdelete = new CalendarDataObject();
-        testdelete.setContext(so.getContext());
+        testdelete.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         testdelete.setObjectID(update.getObjectID());
         csql.deleteAppointmentObject(testdelete, folder_id, new Date(SUPER_END));
         
@@ -1716,7 +1716,7 @@ public class AppointmentBugTests extends TestCase {
         SessionObject so2 = SessionObjectWrapper.createSessionObject(userid2, getContext().getContextId(), "myTestIdentifier");
         
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(fid);
         cdao.setTitle("testBug7883");
         cdao.setIgnoreConflicts(true);
@@ -1766,7 +1766,7 @@ public class AppointmentBugTests extends TestCase {
         assertTrue("Found our object (userB)", found);        
         
         CalendarDataObject cdao_update = new CalendarDataObject();
-        cdao_update.setContext(so.getContext());
+        cdao_update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao_update.setTitle("testBug7883-update");
         cdao_update.setObjectID(object_id);
         userA = new UserParticipant(userid);
@@ -1828,7 +1828,7 @@ public class AppointmentBugTests extends TestCase {
         CalendarSql csql = new CalendarSql(so);
         
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setTitle("testBug7646 - #1");
         cdao.setParentFolderID(fid);
         CalendarTest.fillDatesInDao(cdao);
@@ -1845,7 +1845,7 @@ public class AppointmentBugTests extends TestCase {
         assertTrue("Got an object id", object_id > 0);
         
         CalendarDataObject cdao_conflict_test = new CalendarDataObject();
-        cdao_conflict_test.setContext(so.getContext());
+        cdao_conflict_test.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao_conflict_test.setTitle("testBug7646 - #2");
         cdao_conflict_test.setParentFolderID(fid);        
         CalendarTest.fillDatesInDao(cdao_conflict_test);
@@ -2196,7 +2196,7 @@ public class AppointmentBugTests extends TestCase {
             shared_folder_id = fo.getObjectID();       
             
             CalendarDataObject cdao = new CalendarDataObject();
-            cdao.setContext(so.getContext());
+            cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             cdao.setParentFolderID(shared_folder_id);
             CalendarTest.fillDatesInDao(cdao);
             cdao.setIgnoreConflicts(true);
@@ -2212,7 +2212,7 @@ public class AppointmentBugTests extends TestCase {
             int object_id = cdao.getObjectID();
             
             CalendarDataObject update = new CalendarDataObject();
-            update.setContext(so2.getContext());
+            update.setContext(ContextStorage.getInstance().getContext(so2.getContextId()));
             update.setObjectID(object_id);
             update.setTimezone("testBug8490- update (user2)");
             update.setIgnoreConflicts(true);
@@ -2314,7 +2314,7 @@ public class AppointmentBugTests extends TestCase {
             shared_folder_id = fo.getObjectID();       
             
             CalendarDataObject cdao = new CalendarDataObject();
-            cdao.setContext(so.getContext());
+            cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             cdao.setTitle("testBug8482");
             CalendarTest.fillDatesInDao(cdao);
             cdao.setPrivateFlag(true);
@@ -2325,7 +2325,7 @@ public class AppointmentBugTests extends TestCase {
             int object_id = cdao.getObjectID();
             
             CalendarDataObject move = new CalendarDataObject();
-            move.setContext(so.getContext());
+            move.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             move.setObjectID(object_id);
             move.setParentFolderID(shared_folder_id);
             
@@ -2512,7 +2512,7 @@ public class AppointmentBugTests extends TestCase {
             shared_folder_id = fo.getObjectID();       
             
             CalendarDataObject cdao = new CalendarDataObject();
-            cdao.setContext(so.getContext());
+            cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             cdao.setTitle("testBug8495");
             CalendarTest.fillDatesInDao(cdao);
             cdao.setParentFolderID(fid);
@@ -2525,7 +2525,7 @@ public class AppointmentBugTests extends TestCase {
             CalendarDataObject load = csql2.getObjectById(object_id, shared_folder_id);
             
             CalendarDataObject move = new CalendarDataObject();
-            move.setContext(so2.getContext());
+            move.setContext(ContextStorage.getInstance().getContext(so2.getContextId()));
             move.setObjectID(object_id);
             move.setParentFolderID(fid2);
             
@@ -2641,7 +2641,7 @@ public class AppointmentBugTests extends TestCase {
         SessionObject so2 = SessionObjectWrapper.createSessionObject(userid2, getContext().getContextId(), "myTestIdentifier");
        
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(fid);
         cdao.setTitle("testBug7273");
         cdao.setIgnoreConflicts(true);
@@ -2670,7 +2670,7 @@ public class AppointmentBugTests extends TestCase {
         
         CalendarDataObject update = new CalendarDataObject();
         update.setObjectID(object_id);
-        update.setContext(so2.getContext());
+        update.setContext(ContextStorage.getInstance().getContext(so2.getContextId()));
         update.setTimezone(TIMEZONE);
         update.setLocation("UPDATE");
         for (int a = 0; a < up.length; a++) {
@@ -2690,7 +2690,7 @@ public class AppointmentBugTests extends TestCase {
         
         CalendarDataObject update_with_time_change = new CalendarDataObject();
         update_with_time_change.setObjectID(object_id);
-        update_with_time_change.setContext(so.getContext());
+        update_with_time_change.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update_with_time_change.setTimezone(TIMEZONE);
         update_with_time_change.setNote("UPDATE WITH TIME CHANGE");
         update_with_time_change.setStartDate(new Date(cdao.getStartDate().getTime() - 3600000L));
@@ -2749,7 +2749,7 @@ public class AppointmentBugTests extends TestCase {
             public_folder_id = fo.getObjectID();
             
             CalendarDataObject cdao = new CalendarDataObject();
-            cdao.setContext(so.getContext());
+            cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             cdao.setTitle("testBug9089");
             CalendarTest.fillDatesInDao(cdao);
             cdao.setParentFolderID(public_folder_id);
@@ -2760,7 +2760,7 @@ public class AppointmentBugTests extends TestCase {
             assertTrue("Object was created", object_id > 0);            
             
             CalendarDataObject update = new CalendarDataObject();
-            update.setContext(so.getContext());
+            update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
             update.setNote("Mark as private should not worl!");
             update.setObjectID(object_id);
             update.setIgnoreConflicts(true);
@@ -2813,7 +2813,7 @@ public class AppointmentBugTests extends TestCase {
         int fid = AppointmentBugTests.getPrivateFolder(userid);
 
         CalendarDataObject cdao = new CalendarDataObject();
-        cdao.setContext(so.getContext());
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         cdao.setParentFolderID(fid);
         cdao.setTitle("testBug9599");
         cdao.setIgnoreConflicts(true);
@@ -2850,7 +2850,7 @@ public class AppointmentBugTests extends TestCase {
         participants.add(p3);
         
         CalendarDataObject update = new CalendarDataObject();
-        update.setContext(so.getContext());
+        update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         update.setParticipants(participants.getList());
         update.setIgnoreConflicts(true);
         update.setObjectID(object_id);

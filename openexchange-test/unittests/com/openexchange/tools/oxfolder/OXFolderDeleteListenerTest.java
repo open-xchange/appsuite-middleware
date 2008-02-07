@@ -11,6 +11,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
@@ -60,7 +61,7 @@ public class OXFolderDeleteListenerTest extends TestCase {
 	}
 	
 	// Bug 7503
-	public void testPublicFolderTransferPermissionsToAdmin() throws OXException, LdapException, DBPoolingException, DeleteFailedException, SQLException{
+	public void testPublicFolderTransferPermissionsToAdmin() throws OXException, LdapException, DBPoolingException, DeleteFailedException, SQLException, ContextException{
 		
 		FolderObject testFolder = createPublicInfostoreSubfolderWithAdmin(myInfostoreFolder, userWhichWillBeDeletedId);
 		clean.add(testFolder);
@@ -84,15 +85,15 @@ public class OXFolderDeleteListenerTest extends TestCase {
 		fail("Can't find permission for user "+user+" for folder "+fo.getFolderName()+" ("+fo.getObjectID()+")");
 	}
 
-	public void simulateUserDelete(int deleteMe) throws LdapException, DBPoolingException, DeleteFailedException, SQLException {
-		DeleteEvent delEvent = new DeleteEvent(this, deleteMe, DeleteEvent.TYPE_USER,session.getContext());
+	public void simulateUserDelete(int deleteMe) throws LdapException, DBPoolingException, DeleteFailedException, SQLException, ContextException {
+		DeleteEvent delEvent = new DeleteEvent(this, deleteMe, DeleteEvent.TYPE_USER, ContextStorage.getInstance().getContext(session.getContextId()));
 		
 		Connection con = null;
 		try {
-			con = DBPool.pickupWriteable(session.getContext());
+			con = DBPool.pickupWriteable(ContextStorage.getInstance().getContext(session.getContextId()));
 			new OXFolderDeleteListener().deletePerformed(delEvent, con, con);
 		} finally {
-			DBPool.closeWriterSilent(session.getContext(), con);
+			DBPool.closeWriterSilent(ContextStorage.getInstance().getContext(session.getContextId()), con);
 		}
 		
 	}
