@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.server;
 
 import java.util.Timer;
@@ -61,11 +59,16 @@ import java.util.Timer;
  */
 
 public class ServerTimer {
-	
-	private static final String name = "OXTimer";
-	
-	private static Timer t = new Timer(name);
 
+	private static final String name = "OXTimer";
+
+	private static final Timer t = new Timer(name);
+
+	/**
+	 * Returns the server's singleton instance of {@link Timer}
+	 * 
+	 * @return The server's singleton instance of {@link Timer}
+	 */
 	public static Timer getTimer() {
 		return t;
 	}
