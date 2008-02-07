@@ -1,7 +1,13 @@
+* 2008-02-06 - thorben.betten@open-xchange.com
+
+ - Bugfix #10902: Performing IMAP operation on a large number of messages
+   in blocks to avoid the risk of an IMAP timeout
+
 * 2008-02-06 - francisco.laguna@open-xchange.com
 
  - Attach iCal file to invitation emails to external participants.
 
+>>>>>>> 1.54
 * 2008-02-05 - marcus.klein@open-xchange.com
 
  - Bugfix #10887: Removed context object from session interface to be able to
