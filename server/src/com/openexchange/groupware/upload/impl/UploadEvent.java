@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.groupware.upload.impl;
 
 import java.io.File;
@@ -66,39 +64,39 @@ import java.util.Map;
  * 
  */
 public class UploadEvent {
-	
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-		.getLog(UploadEvent.class);
-	
+			.getLog(UploadEvent.class);
+
 	public static final int MAIL_UPLOAD = 1;
-	
+
 	public static final int APPOINTMENT_UPLOAD = 2;
-	
+
 	public static final int TASK_UPLOAD = 3;
-	
+
 	public static final int CONTACT_UPLOAD = 4;
-	
+
 	public static final int DOCUMENT_UPLOAD = 5;
-	
+
 	private int affiliationId = -1;
 
 	private final Map<String, UploadFile> uploadFiles;
 
 	private final Map<String, String> formFields;
-	
+
 	private String action;
-	
-	private final Map<String,Object> parameters;
-	
+
+	private final Map<String, Object> parameters;
+
 	private List<UploadFile> sequentialList;
 
 	public UploadEvent() {
 		super();
 		this.uploadFiles = new HashMap<String, UploadFile>();
 		this.formFields = new HashMap<String, String>();
-		this.parameters = new HashMap<String,Object>();
+		this.parameters = new HashMap<String, Object>();
 	}
-	
+
 	public final int getAffiliationId() {
 		return affiliationId;
 	}
@@ -106,7 +104,7 @@ public class UploadEvent {
 	public final void setAffiliationId(final int affiliationId) {
 		this.affiliationId = affiliationId;
 	}
-	
+
 	public final void addUploadFile(final UploadFile uploadFile) {
 		if (sequentialList != null) {
 			/*
@@ -124,7 +122,7 @@ public class UploadEvent {
 			uploadFiles.put(uploadFile.getFileName(), uploadFile);
 		}
 	}
-	
+
 	public final void removeUploadFile(final String fileName) {
 		if (sequentialList != null) {
 			/*
@@ -146,14 +144,14 @@ public class UploadEvent {
 			uploadFile = uploadFile.getHomonymous();
 		}
 	}
-	
+
 	public final UploadFile getUploadFile(final String fileName) {
 		return uploadFiles.get(fileName);
 	}
-	
+
 	public final UploadFile getUploadFileByFieldName(final String fieldName) {
 		final int size = uploadFiles.size();
-		final Iterator<Map.Entry<String,UploadFile>> iter = uploadFiles.entrySet().iterator();
+		final Iterator<Map.Entry<String, UploadFile>> iter = uploadFiles.entrySet().iterator();
 		for (int i = 0; i < size; i++) {
 			UploadFile uf = iter.next().getValue();
 			while (uf != null) {
@@ -165,23 +163,23 @@ public class UploadEvent {
 		}
 		return null;
 	}
-	
+
 	public final void clearUploadFiles() {
 		cleanUp();
 	}
-	
+
 	public final int getNumberOfUploadFiles() {
 		return createList().size();
 	}
-	
+
 	public final Iterator<UploadFile> getUploadFilesIterator() {
 		return createList().iterator();
 	}
-	
+
 	public final List<UploadFile> getUploadFiles() {
 		return createList();
 	}
-	
+
 	private final List<UploadFile> createList() {
 		if (sequentialList != null) {
 			/*
@@ -194,7 +192,7 @@ public class UploadEvent {
 			return new ArrayList<UploadFile>(0);
 		}
 		sequentialList = new ArrayList<UploadFile>(size);
-		final Iterator<Map.Entry<String,UploadFile>> iter = uploadFiles.entrySet().iterator();
+		final Iterator<Map.Entry<String, UploadFile>> iter = uploadFiles.entrySet().iterator();
 		for (int i = 0; i < size; i++) {
 			UploadFile uf = iter.next().getValue();
 			while (uf != null) {
@@ -242,13 +240,13 @@ public class UploadEvent {
 			parameters.put(name, value);
 		}
 	}
-	
+
 	public final void removeParameter(final String name) {
 		if (name != null) {
 			parameters.remove(name);
 		}
 	}
-	
+
 	private static final String ERR_PREFIX = "Temporary upload file could not be deleted: ";
 
 	/**
@@ -275,6 +273,15 @@ public class UploadEvent {
 		uploadFiles.clear();
 	}
 
+	/**
+	 * Strips off heading path informations from specified file path by looking
+	 * for last occurrence of a common file separator character like
+	 * <code>'/'</code> or <code>'\'</code> to only return sole file name.
+	 * 
+	 * @param filePath
+	 *            The file path
+	 * @return The sole file name.
+	 */
 	public static final String getFileName(final String filePath) {
 		String retval = filePath;
 		int pos;
