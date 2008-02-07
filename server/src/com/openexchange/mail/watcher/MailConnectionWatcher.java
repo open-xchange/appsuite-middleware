@@ -62,7 +62,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.config.MailConfig;
-import com.openexchange.server.impl.ServerTimer;
+import com.openexchange.server.ServerTimer;
 
 /**
  * {@link MailConnectionWatcher} - Keeps track of established mail connections

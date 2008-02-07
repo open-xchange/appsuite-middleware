@@ -70,8 +70,8 @@ import org.jdom.JDOMException;
 import com.openexchange.configuration.ConfigDB;
 import com.openexchange.configuration.ConfigDB.Property;
 import com.openexchange.management.ManagementAgent;
+import com.openexchange.server.ServerTimer;
 import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.server.impl.ServerTimer;
 import com.openexchange.server.impl.DBPoolingException.Code;
 import com.openexchange.server.services.ManagementService;
 

@@ -59,7 +59,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpSession;
 
-import com.openexchange.server.impl.ServerTimer;
+import com.openexchange.server.ServerTimer;
 
 /**
  * {@link HttpSessionManagement} - Management for HTTP sessions

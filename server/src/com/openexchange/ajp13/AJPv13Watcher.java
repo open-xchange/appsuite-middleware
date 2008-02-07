@@ -56,7 +56,7 @@ import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.openexchange.server.impl.ServerTimer;
+import com.openexchange.server.ServerTimer;
 
 /**
  * AJPv13Watcher
@@ -196,13 +196,13 @@ public class AJPv13Watcher {
 					if (LOG.isTraceEnabled()) {
 						final String delimStr = "\n+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 						LOG.trace(new StringBuilder(300).append(delimStr).append("AJP-Watcher's run done: ").append(
-								"    Waiting=").append(countWaiting).append("    Running=").append(
-								countProcessing).append("    Exceeded=").append(countExceeded).append(
-								"    Total=").append(size).append(delimStr).toString());
+								"    Waiting=").append(countWaiting).append("    Running=").append(countProcessing)
+								.append("    Exceeded=").append(countExceeded).append("    Total=").append(size)
+								.append(delimStr).toString());
 					}
 				}
 			} catch (final Exception e) {
-			    LOG.error(e.getMessage(), e);
+				LOG.error(e.getMessage(), e);
 			} finally {
 				LOCK.unlock();
 			}

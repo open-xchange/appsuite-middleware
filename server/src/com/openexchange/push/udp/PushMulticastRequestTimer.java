@@ -47,11 +47,7 @@
  *
  */
 
-
-
 package com.openexchange.push.udp;
-
-import com.openexchange.server.impl.ServerTimer;
 
 import java.io.StringWriter;
 import java.net.DatagramPacket;
@@ -61,8 +57,11 @@ import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.server.ServerTimer;
 
 /**
  * PushOutputQueue
