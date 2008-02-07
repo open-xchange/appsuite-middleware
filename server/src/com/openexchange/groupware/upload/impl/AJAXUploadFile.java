@@ -287,7 +287,7 @@ public final class AJAXUploadFile implements ManagedUploadFile {
 	}
 
 	/**
-	 * Setter for file name. Implicitely invokes
+	 * Setter for file name. Implicitly invokes
 	 * <code>{@link UploadEvent#getFileName(String)}</code>.
 	 * 
 	 * @param fileName
