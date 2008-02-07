@@ -219,7 +219,7 @@ public class UploadEvent {
 		formFields.clear();
 	}
 
-	public final Iterator getFormFieldNames() {
+	public final Iterator<String> getFormFieldNames() {
 		return formFields.keySet().iterator();
 	}
 
