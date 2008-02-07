@@ -54,7 +54,7 @@ import java.util.TimerTask;
 
 /**
  * {@link ServerTimer} - Provides a singleton instance of {@link Timer} that
- * should be used throughout the server to schedule indiviual instances of
+ * should be used throughout the server to schedule individual instances of
  * {@link TimerTask}.
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
