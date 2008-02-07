@@ -74,7 +74,7 @@ public final class AJAXUploadFile implements ManagedUploadFile {
 
 		private final AJAXUploadFile file;
 
-		private final Map<String, ? extends ManagedUploadFile> ajaxUploadFiles;
+		private final Map<String, ? extends ManagedUploadFile> managedUploadFiles;
 
 		private final String id;
 
@@ -82,9 +82,9 @@ public final class AJAXUploadFile implements ManagedUploadFile {
 		 * Constructor
 		 */
 		public AJAXUploadFileTimerTask(final AJAXUploadFile file, final String id,
-				final Map<String, ? extends ManagedUploadFile> ajaxUploadFiles) {
+				final Map<String, ? extends ManagedUploadFile> managedUploadFiles) {
 			this.file = file;
-			this.ajaxUploadFiles = ajaxUploadFiles;
+			this.managedUploadFiles = managedUploadFiles;
 			this.id = id;
 		}
 
@@ -98,7 +98,7 @@ public final class AJAXUploadFile implements ManagedUploadFile {
 		    try {
 			if (file != null && !file.isDeleted() && !file.isBlockedForTimer()
 					&& ((System.currentTimeMillis() - file.getLastAccess()) >= IDLE_TIME_MILLIS)) {
-				ajaxUploadFiles.remove(id);
+				managedUploadFiles.remove(id);
 				final String fileName = file.getFile().getName();
 				file.delete();
 				if (LOG.isInfoEnabled()) {
@@ -218,15 +218,15 @@ public final class AJAXUploadFile implements ManagedUploadFile {
 	 * 
 	 * @param id
 	 *            The upload file's ID
-	 * @param ajaxUploadFiles
+	 * @param managedUploadFiles
 	 *            Session's map where the upload file is kept
 	 */
-	public void startTimerTask(final String id, final Map<String, ? extends ManagedUploadFile> ajaxUploadFiles) {
+	public void startTimerTask(final String id, final Map<String, ? extends ManagedUploadFile> managedUploadFiles) {
 		if (!timerTaskStarted.get()) {
 			timerTaskLock.lock();
 			try {
 				if (timerTask == null) {
-					timerTask = new AJAXUploadFileTimerTask(this, id, ajaxUploadFiles);
+					timerTask = new AJAXUploadFileTimerTask(this, id, managedUploadFiles);
 					/*
 					 * Start timer task
 					 */
