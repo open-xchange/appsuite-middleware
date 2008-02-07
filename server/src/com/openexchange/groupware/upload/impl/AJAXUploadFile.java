@@ -54,8 +54,6 @@ import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
@@ -149,8 +147,6 @@ public final class AJAXUploadFile implements ManagedUploadFile {
 
 	private final AtomicBoolean timerTaskStarted = new AtomicBoolean();
 
-	private final Lock timerTaskLock = new ReentrantLock();
-
 	private final AtomicBoolean blockedForTimer;
 
 	private String fileName;
@@ -222,20 +218,12 @@ public final class AJAXUploadFile implements ManagedUploadFile {
 	 *            Session's map where the upload file is kept
 	 */
 	public void startTimerTask(final String id, final Map<String, ? extends ManagedUploadFile> managedUploadFiles) {
-		if (!timerTaskStarted.get()) {
-			timerTaskLock.lock();
-			try {
-				if (timerTask == null) {
-					timerTask = new AJAXUploadFileTimerTask(this, id, managedUploadFiles);
-					/*
-					 * Start timer task
-					 */
-					ServerTimer.getTimer().schedule(timerTask, 1000/* 1sec */, IDLE_TIME_MILLIS / 5);
-					timerTaskStarted.set(true);
-				}
-			} finally {
-				timerTaskLock.unlock();
-			}
+		if (timerTaskStarted.compareAndSet(false, true) && timerTask == null) {
+			timerTask = new AJAXUploadFileTimerTask(this, id, managedUploadFiles);
+			/*
+			 * Start timer task
+			 */
+			ServerTimer.getTimer().schedule(timerTask, 1000/* 1sec */, IDLE_TIME_MILLIS / 5);
 		}
 	}
 
