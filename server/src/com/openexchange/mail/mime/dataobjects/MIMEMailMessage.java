@@ -92,7 +92,7 @@ public final class MIMEMailMessage extends MailMessage {
 	 */
 	public MIMEMailMessage(final MimeMessage msg) throws MailException {
 		super();
-		this.mailPart = (MIMEMailPart) MIMEMessageConverter.convertPart(msg);
+		this.mailPart = MIMEMessageConverter.convertPart(msg);
 	}
 
 	/*

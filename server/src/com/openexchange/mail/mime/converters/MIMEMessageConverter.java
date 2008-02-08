@@ -960,17 +960,20 @@ public final class MIMEMessageConverter {
 		}
 	}
 
+	/**
+	 * "base64"
+	 */
 	private static final String ENC_BASE64 = "base64";
 
 	/**
-	 * Creates a mail part object from given MIME part
+	 * Creates a MIME mail part object from given MIME part
 	 * 
 	 * @param part
 	 *            The part
 	 * @return an instance of <code>{@link MailPart}</code> containing the
 	 *         attributes from given part
 	 */
-	public static MailPart convertPart(final Part part) throws MailException {
+	public static MIMEMailPart convertPart(final Part part) throws MailException {
 		try {
 			/*
 			 * Create with reference to content
@@ -1038,10 +1041,18 @@ public final class MIMEMessageConverter {
 	}
 
 	private static int estimateSize(final InputStream in, final String tansferEnc) throws IOException {
-		if (ENC_BASE64.equalsIgnoreCase(tansferEnc)) {
-			return (int) (in.available() * 0.65);
+		try {
+			if (ENC_BASE64.equalsIgnoreCase(tansferEnc)) {
+				return (int) (in.available() * 0.65);
+			}
+			return in.available();
+		} finally {
+			try {
+				in.close();
+			} catch (final IOException e) {
+				LOG.error(e.getLocalizedMessage(), e);
+			}
 		}
-		return in.available();
 	}
 
 	private static final String[] EMPTY_STRS = new String[0];
