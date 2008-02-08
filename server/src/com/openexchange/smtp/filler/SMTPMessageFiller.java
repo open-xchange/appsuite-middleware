@@ -112,8 +112,29 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
 	 *            The source mail
 	 * @param smtpMessage
 	 *            The SMTP message to fill
-	 * @param sendType
-	 *            The send type
+	 * @param type
+	 *            The compose type
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 * @throws MailException
+	 *             If a mail error occurs
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 */
+	public void fillMail(final SMTPMailMessage mail, final SMTPMessage smtpMessage, final ComposeType type)
+			throws MessagingException, MailException, IOException {
+		fillMail(mail, smtpMessage, type, null);
+	}
+
+	/**
+	 * Fills given instance of {@link SMTPMessage}
+	 * 
+	 * @param mail
+	 *            The source mail
+	 * @param smtpMessage
+	 *            The SMTP message to fill
+	 * @param type
+	 *            The compose type
 	 * @param originalMail
 	 *            The referenced mail (on forward/reply)
 	 * @throws MessagingException
@@ -123,8 +144,14 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
-	public void fillMail(final SMTPMailMessage mail, final SMTPMessage smtpMessage, final ComposeType sendType,
+	public void fillMail(final SMTPMailMessage mail, final SMTPMessage smtpMessage, final ComposeType type,
 			final MailMessage originalMail) throws MessagingException, MailException, IOException {
+		/*
+		 * Check for reply
+		 */
+		if (mail.getReferencedMail() != null && ComposeType.REPLY.equals(type)) {
+			setReplyHeaders(mail.getReferencedMail(), smtpMessage);
+		}
 		/*
 		 * Set headers
 		 */
@@ -136,7 +163,7 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
 		/*
 		 * Fill body
 		 */
-		fillMailBody(mail, smtpMessage, sendType, originalMail);
+		fillMailBody(mail, smtpMessage, type, originalMail);
 	}
 
 	@Override

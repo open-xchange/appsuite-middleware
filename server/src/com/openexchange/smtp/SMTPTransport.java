@@ -136,7 +136,7 @@ public final class SMTPTransport extends MailTransport {
 
 	private MailConfig transportConfig;
 
-	private SMTPMessageFiller msgFiller;
+	private SMTPMessageFiller smtpFiller;
 
 	private List<String> tempIds;
 
@@ -178,9 +178,9 @@ public final class SMTPTransport extends MailTransport {
 	}
 
 	private void clearUp() {
-		if (msgFiller != null) {
-			msgFiller.deleteReferencedUploadFiles();
-			msgFiller = null;
+		if (smtpFiller != null) {
+			smtpFiller.deleteReferencedUploadFiles();
+			smtpFiller = null;
 		}
 		if (tempIds != null) {
 			for (final String id : tempIds) {
@@ -362,23 +362,20 @@ public final class SMTPTransport extends MailTransport {
 			throws MailException {
 		try {
 			clearUp();
-			final long startTransport = System.currentTimeMillis();
 			final SMTPMessage smtpMessage = new SMTPMessage(smtpSession);
 			/*
 			 * Fill message dependent on send type
 			 */
-			msgFiller = new SMTPMessageFiller(session, ctx);
+			final long startPrep = System.currentTimeMillis();
+			smtpFiller = new SMTPMessageFiller(session, ctx);
 			if (composedMail.getReferencedMail() != null) {
 				tempIds = ReferencedMailPart.loadReferencedParts(composedMail, session);
-				if (ComposeType.REPLY.equals(sendType)) {
-					setReplyHeaders(composedMail.getReferencedMail(), smtpMessage);
-				}
 			}
 			if (ComposeType.FORWARD.equals(sendType) && usm.isForwardAsAttachment()) {
-				msgFiller.fillMail((SMTPMailMessage) composedMail, smtpMessage, sendType, composedMail
+				smtpFiller.fillMail((SMTPMailMessage) composedMail, smtpMessage, sendType, composedMail
 						.getReferencedMail());
 			} else {
-				msgFiller.fillMail((SMTPMailMessage) composedMail, smtpMessage);
+				smtpFiller.fillMail((SMTPMailMessage) composedMail, smtpMessage, sendType);
 			}
 			/*
 			 * Check recipients
@@ -390,7 +387,7 @@ public final class SMTPTransport extends MailTransport {
 			setSendHeaders((SMTPMailMessage) composedMail, smtpMessage);
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(128).append("SMTP mail prepared for transport in ").append(
-						System.currentTimeMillis() - startTransport).append("msec").toString());
+						System.currentTimeMillis() - startPrep).append("msec").toString());
 			}
 			try {
 				final long start = System.currentTimeMillis();
@@ -459,65 +456,6 @@ public final class SMTPTransport extends MailTransport {
 		if ((subject = newSMTPMsg.getSubject()) == null || subject.length() == 0) {
 			newSMTPMsg.setSubject(new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale())
 					.getString(MailStrings.DEFAULT_SUBJECT));
-		}
-	}
-
-	/**
-	 * Sets the appropriate headers <code>In-Reply-To</code> and
-	 * <code>References</code>
-	 * 
-	 * @param referencedMail
-	 *            The referenced mail
-	 * @param smtpMessage
-	 *            The SMTP message
-	 * @throws MessagingException
-	 *             If setting the reply headers fails
-	 */
-	private void setReplyHeaders(final MailMessage referencedMail, final SMTPMessage smtpMessage)
-			throws MessagingException {
-		/*
-		 * A reply! Set appropriate message headers
-		 */
-		final String pMsgId = referencedMail.getHeader(MessageHeaders.HDR_MESSAGE_ID);
-		if (pMsgId != null) {
-			smtpMessage.setHeader(MessageHeaders.HDR_IN_REPLY_TO, pMsgId);
-		}
-		/*
-		 * Set References header field
-		 */
-		final String pReferences = referencedMail.getHeader(MessageHeaders.HDR_REFERENCES);
-		final String pInReplyTo = referencedMail.getHeader(MessageHeaders.HDR_IN_REPLY_TO);
-		final StringBuilder refBuilder = new StringBuilder();
-		if (pReferences != null) {
-			/*
-			 * The "References:" field will contain the contents of the parent's
-			 * "References:" field (if any) followed by the contents of the
-			 * parent's "Message-ID:" field (if any).
-			 */
-			refBuilder.append(pReferences);
-		} else if (pInReplyTo != null) {
-			/*
-			 * If the parent message does not contain a "References:" field but
-			 * does have an "In-Reply-To:" field containing a single message
-			 * identifier, then the "References:" field will contain the
-			 * contents of the parent's "In-Reply-To:" field followed by the
-			 * contents of the parent's "Message-ID:" field (if any).
-			 */
-			refBuilder.append(pInReplyTo);
-		}
-		if (pMsgId != null) {
-			if (refBuilder.length() > 0) {
-				refBuilder.append(' ');
-			}
-			refBuilder.append(pMsgId);
-		}
-		if (refBuilder.length() > 0) {
-			/*
-			 * If the parent has none of the "References:", "In-Reply-To:", or
-			 * "Message-ID:" fields, then the new message will have no
-			 * "References:" field.
-			 */
-			smtpMessage.setHeader(MessageHeaders.HDR_REFERENCES, refBuilder.toString());
 		}
 	}
 

@@ -244,6 +244,65 @@ public class MIMEMessageFiller {
 	}
 
 	/**
+	 * Sets the appropriate headers <code>In-Reply-To</code> and
+	 * <code>References</code> in specified MIME message.
+	 * 
+	 * @param referencedMail
+	 *            The referenced mail
+	 * @param mimeMessage
+	 *            The MIME message
+	 * @throws MessagingException
+	 *             If setting the reply headers fails
+	 */
+	public void setReplyHeaders(final MailMessage referencedMail, final MimeMessage mimeMessage)
+			throws MessagingException {
+		/*
+		 * A reply! Set appropriate message headers
+		 */
+		final String pMsgId = referencedMail.getHeader(MessageHeaders.HDR_MESSAGE_ID);
+		if (pMsgId != null) {
+			mimeMessage.setHeader(MessageHeaders.HDR_IN_REPLY_TO, pMsgId);
+		}
+		/*
+		 * Set References header field
+		 */
+		final String pReferences = referencedMail.getHeader(MessageHeaders.HDR_REFERENCES);
+		final String pInReplyTo = referencedMail.getHeader(MessageHeaders.HDR_IN_REPLY_TO);
+		final StringBuilder refBuilder = new StringBuilder();
+		if (pReferences != null) {
+			/*
+			 * The "References:" field will contain the contents of the parent's
+			 * "References:" field (if any) followed by the contents of the
+			 * parent's "Message-ID:" field (if any).
+			 */
+			refBuilder.append(pReferences);
+		} else if (pInReplyTo != null) {
+			/*
+			 * If the parent message does not contain a "References:" field but
+			 * does have an "In-Reply-To:" field containing a single message
+			 * identifier, then the "References:" field will contain the
+			 * contents of the parent's "In-Reply-To:" field followed by the
+			 * contents of the parent's "Message-ID:" field (if any).
+			 */
+			refBuilder.append(pInReplyTo);
+		}
+		if (pMsgId != null) {
+			if (refBuilder.length() > 0) {
+				refBuilder.append(' ');
+			}
+			refBuilder.append(pMsgId);
+		}
+		if (refBuilder.length() > 0) {
+			/*
+			 * If the parent has none of the "References:", "In-Reply-To:", or
+			 * "Message-ID:" fields, then the new message will have no
+			 * "References:" field.
+			 */
+			mimeMessage.setHeader(MessageHeaders.HDR_REFERENCES, refBuilder.toString());
+		}
+	}
+
+	/**
 	 * Fills the body of given instance of {@link MimeMessage} with the contents
 	 * specified through given instance of {@link ComposedMailMessage}.
 	 * 
