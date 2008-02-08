@@ -284,8 +284,7 @@ public abstract class MailTransport {
 	public abstract MailMessage sendRawMessage(byte[] asciiBytes) throws MailException;
 
 	/**
-	 * Sends a receipt acknowledgment for the message located in given folder
-	 * with given UID.
+	 * Sends a receipt acknowledgment for the specified message.
 	 * 
 	 * @param srcMail
 	 *            The source mail
