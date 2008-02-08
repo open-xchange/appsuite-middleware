@@ -47,28 +47,50 @@
  *
  */
 
-package com.openexchange.mail.dataobjects;
+package com.openexchange.mail.dataobjects.compose;
 
-import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
 
 /**
- * {@link TransportMailMessage} - Subclass of {@link MailPart} designed for
- * composing a transport mail.
+ * {@link ComposedMailMessage} - Subclass of {@link MailPart} designed for
+ * composing a mail.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class TransportMailMessage extends MailMessage {
+public abstract class ComposedMailMessage extends MailMessage {
+
+	private MailMessage referencedMail;
 
 	/**
 	 * Default constructor
 	 */
-	protected TransportMailMessage() {
+	protected ComposedMailMessage() {
 		super();
 	}
 
 	/**
-	 * Sets this transport message's body part
+	 * Gets the referenced mail of this composed mail
+	 * 
+	 * @return The referenced mail
+	 */
+	public MailMessage getReferencedMail() {
+		return referencedMail;
+	}
+
+	/**
+	 * Sets the referenced mail of this composed mail
+	 * 
+	 * @param referencedMail
+	 *            The referenced mail
+	 */
+	public void setReferencedMail(final MailMessage referencedMail) {
+		this.referencedMail = referencedMail;
+	}
+
+	/**
+	 * Sets this composed message's body part
 	 * 
 	 * @param mailPart
 	 *            The body part

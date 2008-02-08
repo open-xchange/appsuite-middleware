@@ -81,7 +81,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.config.MailConfig;
-import com.openexchange.mail.dataobjects.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -348,11 +348,11 @@ public final class MimeReply {
 				}
 				replyMsg.setContent(multiRelated);
 				replyMsg.saveChanges();
-				replyMail = new ComposedMailMessage(MIMEMessageConverter.convertMessage(replyMsg));
+				replyMail = new CompositeMailMessage(MIMEMessageConverter.convertMessage(replyMsg));
 				/*
 				 * Append inline content
 				 */
-				appendInlineContent(originalMsg, (ComposedMailMessage) replyMail, MIMEMessageUtility
+				appendInlineContent(originalMsg, (CompositeMailMessage) replyMail, MIMEMessageUtility
 						.getContentIDs(replyText));
 			} else {
 				/*
@@ -375,7 +375,7 @@ public final class MimeReply {
 
 	}
 
-	private static void appendInlineContent(final MimeMessage originalMsg, final ComposedMailMessage replyMail,
+	private static void appendInlineContent(final MimeMessage originalMsg, final CompositeMailMessage replyMail,
 			final List<String> cids) throws MailException {
 		final MailMessage originalMail = MIMEMessageConverter.convertMessage(originalMsg);
 		final InlineContentHandler handler = new InlineContentHandler(cids);

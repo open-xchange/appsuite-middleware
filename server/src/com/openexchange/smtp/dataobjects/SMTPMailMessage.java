@@ -57,18 +57,18 @@ import javax.activation.DataHandler;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.dataobjects.TransportMailMessage;
-import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 
 /**
- * {@link SMTPMailMessage} - Extends the {@link TransportMailMessage} class by
+ * {@link SMTPMailMessage} - Extends the {@link ComposedMailMessage} class by
  * references to enclosed parts that should be added as attachments on message
  * transport
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SMTPMailMessage extends TransportMailMessage {
+public final class SMTPMailMessage extends ComposedMailMessage {
 
 	private static final long serialVersionUID = 9031153888416594901L;
 

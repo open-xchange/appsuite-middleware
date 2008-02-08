@@ -52,18 +52,17 @@ package com.openexchange.mail.transport;
 import java.lang.reflect.InvocationTargetException;
 
 import com.openexchange.groupware.upload.impl.UploadFile;
-import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.GlobalTransportConfig;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.dataobjects.TransportMailMessage;
-import com.openexchange.mail.transport.dataobjects.InfostoreDocumentMailPart;
-import com.openexchange.mail.transport.dataobjects.ReferencedMailPart;
-import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
-import com.openexchange.mail.transport.dataobjects.UploadFileMailPart;
+import com.openexchange.mail.dataobjects.compose.ComposeType;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
+import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
+import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
+import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
 import com.openexchange.session.Session;
 
 /**
@@ -104,7 +103,7 @@ public abstract class MailTransport {
 		}
 	}
 
-	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { Session.class, MailConnection.class };
+	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { Session.class };
 
 	/**
 	 * Gets the proper instance of {@link MailTransport} parameterized with
@@ -116,13 +115,12 @@ public abstract class MailTransport {
 	 * @throws MailException
 	 *             If instantiation fails
 	 */
-	public static final MailTransport getInstance(final Session session, final MailConnection<?, ?, ?> mailConnection)
-			throws MailException {
+	public static final MailTransport getInstance(final Session session) throws MailException {
 		/*
 		 * Create a new mail transport
 		 */
 		try {
-			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { session, mailConnection });
+			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { session });
 		} catch (final SecurityException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
 		} catch (final NoSuchMethodException e) {
@@ -148,11 +146,11 @@ public abstract class MailTransport {
 	}
 
 	/**
-	 * Gets a new instance of {@link TransportMailMessage}
+	 * Gets a new instance of {@link ComposedMailMessage}
 	 * 
-	 * @return A new instance of {@link TransportMailMessage}
+	 * @return A new instance of {@link ComposedMailMessage}
 	 */
-	public static final TransportMailMessage getNewTransportMailMessage() {
+	public static final ComposedMailMessage getNewTransportMailMessage() {
 		try {
 			return internalInstance.getNewTransportMailMessageInternal();
 		} catch (final MailException e) {
@@ -265,14 +263,11 @@ public abstract class MailTransport {
 	 *            body)
 	 * @param sendType
 	 *            The send type
-	 * @return The mail's unique path in mailbox if stored; meaning either a
-	 *         draft message has been "sent" or a message copy has been appended
-	 *         to <i>Sent</i> folder. If no local copy is available,
-	 *         {@link MailPath#NULL} is returned
+	 * @return The sent mail message
 	 * @throws MailException
 	 *             If transport fails
 	 */
-	public abstract MailPath sendMailMessage(TransportMailMessage transportMail, SendType sendType)
+	public abstract MailMessage sendMailMessage(ComposedMailMessage transportMail, ComposeType sendType)
 			throws MailException;
 
 	/**
@@ -289,13 +284,11 @@ public abstract class MailTransport {
 	public abstract MailMessage sendRawMessage(byte[] asciiBytes) throws MailException;
 
 	/**
-	 * Sends a receipt acknowledgement for the message located in given folder
+	 * Sends a receipt acknowledgment for the message located in given folder
 	 * with given UID.
 	 * 
-	 * @param fullname
-	 *            The folder fullname
-	 * @param msgUID
-	 *            The message UID
+	 * @param srcMail
+	 *            The source mail
 	 * @param fromAddr
 	 *            The from address (as unicode string). If set to
 	 *            <code>null</code>, user's default email address is used as
@@ -303,7 +296,15 @@ public abstract class MailTransport {
 	 * @throws MailException
 	 *             If transport fails
 	 */
-	public abstract void sendReceiptAck(String fullname, long msgUID, String fromAddr) throws MailException;
+	public abstract void sendReceiptAck(MailMessage srcMail, String fromAddr) throws MailException;
+
+	/**
+	 * Closes this mail transport
+	 * 
+	 * @throws MailException
+	 *             If closing fails
+	 */
+	public abstract void close() throws MailException;
 
 	/**
 	 * Gets the name of {@link GlobalTransportConfig} implementation
@@ -313,12 +314,12 @@ public abstract class MailTransport {
 	protected abstract String getGlobalTransportConfigClassInternal();
 
 	/**
-	 * Gets a new instance of {@link TransportMailMessage}
+	 * Gets a new instance of {@link ComposedMailMessage}
 	 * 
-	 * @return A new instance of {@link TransportMailMessage}
+	 * @return A new instance of {@link ComposedMailMessage}
 	 * @throws MailException
 	 */
-	protected abstract TransportMailMessage getNewTransportMailMessageInternal() throws MailException;
+	protected abstract ComposedMailMessage getNewTransportMailMessageInternal() throws MailException;
 
 	/**
 	 * Gets a new instance of {@link UploadFileMailPart}

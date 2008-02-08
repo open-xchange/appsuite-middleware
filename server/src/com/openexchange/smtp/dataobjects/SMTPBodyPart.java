@@ -49,7 +49,8 @@
 
 package com.openexchange.smtp.dataobjects;
 
-import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
+import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
+import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 
 /**
  * {@link SMTPBodyPart}
@@ -57,7 +58,7 @@ import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SMTPBodyPart extends TextBodyMailPart implements SMTPMailPart {
+public final class SMTPBodyPart extends TextBodyMailPart {
 
 	/**
 	 * Serial version UID
@@ -72,15 +73,6 @@ public final class SMTPBodyPart extends TextBodyMailPart implements SMTPMailPart
 	 */
 	public SMTPBodyPart(final String mailBody) {
 		super(mailBody);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
-	 */
-	public SMTPPartType getType() {
-		return SMTPMailPart.SMTPPartType.BODY;
 	}
 
 }

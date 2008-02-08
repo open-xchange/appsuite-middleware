@@ -52,6 +52,7 @@ package com.openexchange.mail;
 import com.openexchange.mail.MailStorageUtils.OrderDirection;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 
 /**
  * {@link MailMessageStorage} - Offers basic access methods to mail message(s)
@@ -381,6 +382,16 @@ public interface MailMessageStorage {
 	 *             given <code>cid</code>.
 	 */
 	public MailPart getImageAttachment(String folder, long mailId, String cid) throws MailException;
+
+	/**
+	 * Saves given draft mail to default drafts folder.
+	 * 
+	 * @param draftMail
+	 *            The draft mail as a composed mail
+	 * @return The stored draft mail
+	 * @throws MailException
+	 */
+	public MailMessage saveDraft(ComposedMailMessage draftMail) throws MailException;
 
 	/**
 	 * Releases all resources used by this message storage when closing parental

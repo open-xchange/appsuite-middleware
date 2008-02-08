@@ -61,14 +61,14 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.MIMETypes;
 
 /**
- * {@link ComposedMailMessage} - Extends the common {@link MailMessage} class by
+ * {@link CompositeMailMessage} - Extends the common {@link MailMessage} class by
  * the possibility to add extra parts to an existing {@link MailMessage}
  * instance whose MIME type is <code>multipart/*</code>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ComposedMailMessage extends MailMessage {
+public final class CompositeMailMessage extends MailMessage {
 
 	private static final long serialVersionUID = -3153633514125635904L;
 
@@ -86,7 +86,7 @@ public final class ComposedMailMessage extends MailMessage {
 	 * @throws MailException
 	 *             If invocation of {@link MailMessage#getEnclosedCount()} fails
 	 */
-	public ComposedMailMessage(final MailMessage delegate) throws MailException {
+	public CompositeMailMessage(final MailMessage delegate) throws MailException {
 		super();
 		if (!delegate.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
 			throw new IllegalArgumentException("Specified delegate mail must be of MIME type multipart/*");

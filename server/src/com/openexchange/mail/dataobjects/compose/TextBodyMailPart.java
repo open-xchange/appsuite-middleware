@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.transport.dataobjects;
+package com.openexchange.mail.dataobjects.compose;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,7 +67,7 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class TextBodyMailPart extends MailPart {
+public abstract class TextBodyMailPart extends MailPart implements ComposedMailPart {
 
 	private final String mailBody;
 
@@ -158,4 +158,12 @@ public abstract class TextBodyMailPart extends MailPart {
 	public void prepareForCaching() {
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
+	 */
+	public ComposedPartType getType() {
+		return ComposedMailPart.ComposedPartType.BODY;
+	}
 }

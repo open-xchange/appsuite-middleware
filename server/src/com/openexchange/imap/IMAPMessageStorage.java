@@ -56,6 +56,7 @@ import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getCacheFields
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 import static com.openexchange.mail.utils.StorageUtility.prepareMailFolderParam;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -71,6 +72,7 @@ import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -92,9 +94,13 @@ import com.openexchange.mail.MailStorageUtils.OrderDirection;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.compose.ComposeType;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.mime.ContainerMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.mime.spam.SpamHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.ImageMessageHandler;
@@ -1061,6 +1067,74 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 		}
 	}
 
+	public MailMessage saveDraft(final ComposedMailMessage composedMail) throws MailException {
+		try {
+			final MimeMessage mimeMessage = new MimeMessage(imapConnection.getSession());
+			/*
+			 * Check for edit-draft operation
+			 */
+			final List<String> tempIds;
+			if (composedMail.getMsgref() != null) {
+				/*
+				 * Load referenced mail parts from original message
+				 */
+				tempIds = ReferencedMailPart.loadReferencedParts(composedMail, session);
+			} else {
+				tempIds = null;
+			}
+			/*
+			 * Fill message
+			 */
+			final MIMEMessageFiller filler = new MIMEMessageFiller(session, ctx);
+			/*
+			 * Set headers
+			 */
+			filler.setMessageHeaders(composedMail, mimeMessage);
+			/*
+			 * Set common headers
+			 */
+			filler.setCommonHeaders(mimeMessage);
+			/*
+			 * Fill body
+			 */
+			filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW, null);
+			mimeMessage.setFlag(Flags.Flag.DRAFT, true);
+			mimeMessage.saveChanges();
+			/*
+			 * Append message to draft folder
+			 */
+			final MailMessage retval;
+			{
+				final String draftFullname = imapConnection.getFolderStorage().getDraftsFolder();
+				final long uid = appendMessages(draftFullname, new MailMessage[] { MIMEMessageConverter
+						.convertMessage(mimeMessage) })[0];
+				filler.deleteReferencedUploadFiles();
+				if (null != tempIds) {
+					for (final String id : tempIds) {
+						session.removeUploadedFile(id);
+					}
+				}
+				updateMessageFlags(draftFullname, new long[] { uid }, MailMessage.FLAG_SEEN, true);
+				retval = getMessage(draftFullname, uid);
+			}
+			/*
+			 * Check for draft-edit operation: Delete old version
+			 */
+			if (composedMail.getReferencedMail() != null) {
+				if (composedMail.getReferencedMail().isDraft()) {
+					deleteMessages(composedMail.getReferencedMail().getFolder(), new long[] { composedMail
+							.getReferencedMail().getMailId() }, true);
+				}
+				composedMail.setMsgref(null);
+			}
+			return retval;
+		} catch (final MessagingException e) {
+			throw IMAPException.handleMessagingException(e, imapConnection);
+		} catch (final IOException e) {
+			throw new IMAPException(IMAPException.Code.IO_ERROR, e, e.getLocalizedMessage());
+		}
+	}
+
 	public void releaseResources() throws IMAPException {
 		if (null != imapFolder) {
 			keepSeen();
@@ -1291,4 +1365,5 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 		}
 		return resultString.toString();
 	}
+
 }

@@ -74,7 +74,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
-import com.openexchange.mail.dataobjects.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -205,11 +205,11 @@ public final class MimeForward {
 					forwardMsg.setContent(multipart);
 					forwardMsg.saveChanges();
 				}
-				forwardMail = new ComposedMailMessage(MIMEMessageConverter.convertMessage(forwardMsg));
+				forwardMail = new CompositeMailMessage(MIMEMessageConverter.convertMessage(forwardMsg));
 				/*
 				 * Add all non-inline parts
 				 */
-				addNonInlineParts(originalMsg, (ComposedMailMessage) forwardMail);
+				addNonInlineParts(originalMsg, (CompositeMailMessage) forwardMail);
 			} else if (originalContentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
 				/*
 				 * Original message is a simple text mail: Add message body
@@ -374,7 +374,7 @@ public final class MimeForward {
 				doubleBreak).append(firstSeenText).toString();
 	}
 
-	private static void addNonInlineParts(final MimeMessage originalMsg, final ComposedMailMessage forwardMail)
+	private static void addNonInlineParts(final MimeMessage originalMsg, final CompositeMailMessage forwardMail)
 			throws MailException {
 		final MailMessage originalMail = MIMEMessageConverter.convertMessage(originalMsg);
 		final NonInlinePartHandler handler = new NonInlinePartHandler();

@@ -160,7 +160,7 @@ public class MailException extends AbstractOXException {
 		/**
 		 * Versit error: %s
 		 */
-		VRESIT_ERROR("Versit error: %s", Category.CODE_ERROR, 23),
+		VERSIT_ERROR("Versit error: %s", Category.CODE_ERROR, 23),
 		/**
 		 * No attachment was found with id %s in message
 		 */
@@ -233,7 +233,21 @@ public class MailException extends AbstractOXException {
 		/**
 		 * No content available in mail part
 		 */
-		NO_CONTENT("No content available in mail part", Category.CODE_ERROR, 41);
+		NO_CONTENT("No content available in mail part", Category.CODE_ERROR, 41),
+		/**
+		 * Message has been successfully sent, but a copy could not be placed in
+		 * your sent folder due to exceeded quota.
+		 */
+		COPY_TO_SENT_FOLDER_FAILED_QUOTA(
+				"Message has been successfully sent, but a copy could not be placed in your sent folder due to exceeded quota.",
+				Category.EXTERNAL_RESOURCE_FULL, 42),
+		/**
+		 * Message has been successfully sent, but a copy could not be placed in
+		 * your sent folder
+		 */
+		COPY_TO_SENT_FOLDER_FAILED(
+				"Message has been successfully sent, but a copy could not be placed in your sent folder.",
+				Category.EXTERNAL_RESOURCE_FULL, 43);
 
 		private final String message;
 

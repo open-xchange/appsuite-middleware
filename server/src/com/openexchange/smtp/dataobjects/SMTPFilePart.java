@@ -52,7 +52,7 @@ package com.openexchange.smtp.dataobjects;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.transport.dataobjects.UploadFileMailPart;
+import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
 
 /**
  * {@link SMTPFilePart} - A {@link MailPart} implementation that keeps a
@@ -62,7 +62,7 @@ import com.openexchange.mail.transport.dataobjects.UploadFileMailPart;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SMTPFilePart extends UploadFileMailPart implements SMTPMailPart {
+public final class SMTPFilePart extends UploadFileMailPart {
 
 	private static final long serialVersionUID = -3267699308710097989L;
 
@@ -76,12 +76,4 @@ public final class SMTPFilePart extends UploadFileMailPart implements SMTPMailPa
 		super(uploadFile);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
-	 */
-	public SMTPPartType getType() {
-		return SMTPMailPart.SMTPPartType.FILE;
-	}
 }

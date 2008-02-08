@@ -98,14 +98,12 @@ public final class SMTPException extends MIMEMailException {
 		 * Message has been successfully sent, but a copy could not be placed in
 		 * your sent folder
 		 */
-		COPY_TO_SENT_FOLDER_FAILED(
-				"Message has been successfully sent, but a copy could not be placed in your sent folder.",
-				Category.EXTERNAL_RESOURCE_FULL, 3007),
+		COPY_TO_SENT_FOLDER_FAILED(MailException.Code.COPY_TO_SENT_FOLDER_FAILED),
 		/**
-		 * Receipt acknowledgement cannot be sent: missing header %s in message
+		 * Receipt acknowledgment cannot be sent: missing header %s in message
 		 * %s
 		 */
-		MISSING_NOTIFICATION_HEADER("Receipt acknowledgement cannot be sent: missing header %s in message %s",
+		MISSING_NOTIFICATION_HEADER("Receipt acknowledgment cannot be sent: missing header %s in message %s",
 				Category.CODE_ERROR, 3008),
 		/**
 		 * No send address could be found in user configuration
@@ -119,9 +117,7 @@ public final class SMTPException extends MIMEMailException {
 		 * Message has been successfully sent, but a copy could not be placed in
 		 * your sent folder due to exceeded quota.
 		 */
-		COPY_TO_SENT_FOLDER_FAILED_QUOTA(
-				"Message has been successfully sent, but a copy could not be placed in your sent folder due to exceeded quota.",
-				Category.EXTERNAL_RESOURCE_FULL, 3011),
+		COPY_TO_SENT_FOLDER_FAILED_QUOTA(MailException.Code.COPY_TO_SENT_FOLDER_FAILED_QUOTA),
 		/**
 		 * No storage access because mail connection is not connected
 		 */

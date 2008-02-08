@@ -125,14 +125,14 @@ import com.openexchange.mail.MailStorageUtils.OrderDirection;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.dataobjects.TransportMailMessage;
+import com.openexchange.mail.dataobjects.compose.ComposeType;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
-import com.openexchange.mail.transport.SendType;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.impl.EffectivePermission;
@@ -2306,16 +2306,24 @@ public class Mail extends PermissionServlet implements UploadListener {
 						/*
 						 * Parse
 						 */
-						final TransportMailMessage transportMessage = MessageParser.parse(jsonMailObj, uploadEvent,
+						final ComposedMailMessage composedMail = MessageParser.parse(jsonMailObj, uploadEvent,
 								(Session) uploadEvent.getParameter(UPLOAD_PARAM_SESSION));
-						/*
-						 * ... and send message
-						 */
-						final SendType sendType = jsonMailObj.has(PARAMETER_SEND_TYPE)
-								&& !jsonMailObj.isNull(PARAMETER_SEND_TYPE) ? SendType.getSendType(jsonMailObj
-								.getInt(PARAMETER_SEND_TYPE)) : SendType.NEW;
-						msgIdentifier = ((MailInterface) uploadEvent.getParameter(UPLOAD_PARAM_MAILINTERFACE))
-								.sendMessage(transportMessage, sendType);
+						if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT) {
+							/*
+							 * ... and save draft
+							 */
+							msgIdentifier = ((MailInterface) uploadEvent.getParameter(UPLOAD_PARAM_MAILINTERFACE))
+									.saveDraft(composedMail);
+						} else {
+							/*
+							 * ... and send message
+							 */
+							final ComposeType sendType = jsonMailObj.has(PARAMETER_SEND_TYPE)
+									&& !jsonMailObj.isNull(PARAMETER_SEND_TYPE) ? ComposeType.getType(jsonMailObj
+									.getInt(PARAMETER_SEND_TYPE)) : ComposeType.NEW;
+							msgIdentifier = ((MailInterface) uploadEvent.getParameter(UPLOAD_PARAM_MAILINTERFACE))
+									.sendMessage(composedMail, sendType);
+						}
 					}
 					if (msgIdentifier == null) {
 						throw new MailException(MailException.Code.SEND_FAILED_UNKNOWN);

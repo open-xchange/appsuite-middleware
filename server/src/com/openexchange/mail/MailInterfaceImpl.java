@@ -61,9 +61,10 @@ import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.dataobjects.TransportMailMessage;
+import com.openexchange.mail.dataobjects.compose.ComposeType;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.transport.MailTransport;
-import com.openexchange.mail.transport.SendType;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -462,17 +463,87 @@ public final class MailInterfaceImpl extends MailInterface {
 	}
 
 	@Override
-	public String sendMessage(final TransportMailMessage transportMail, final SendType sendType) throws MailException {
+	public String saveDraft(final ComposedMailMessage draftMail) throws MailException {
 		initConnection();
-		final MailTransport transport = MailTransport.getInstance(session, mailConnection);
-		return transport.sendMailMessage(transportMail, sendType).toString();
+		if (draftMail.getMsgref() != null) {
+			final MailPath path = new MailPath(draftMail.getMsgref());
+			draftMail.setReferencedMail(mailConnection.getMessageStorage().getMessage(path.getFolder(),
+					path.getUid()));
+		}
+		return mailConnection.getMessageStorage().saveDraft(draftMail).getMailPath().toString();
+	}
+
+	@Override
+	public String sendMessage(final ComposedMailMessage composedMail, final ComposeType type) throws MailException {
+		initConnection();
+		final MailTransport transport = MailTransport.getInstance(session);
+		final MailMessage sentMail;
+		try {
+			final MailPath path;
+			if (composedMail.getMsgref() != null) {
+				path = new MailPath(composedMail.getMsgref());
+				composedMail.setReferencedMail(mailConnection.getMessageStorage().getMessage(path.getFolder(),
+						path.getUid()));
+			} else {
+				path = null;
+			}
+			sentMail = transport.sendMailMessage(composedMail, type);
+			if (path != null && ComposeType.REPLY.equals(type)) {
+				/*
+				 * Mark referenced mail as answered
+				 */
+				mailConnection.getMessageStorage().updateMessageFlags(path.getFolder(), new long[] { path.getUid() },
+						MailMessage.FLAG_ANSWERED, true);
+			}
+			if (UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx)
+					.isNoCopyIntoStandardSentFolder()) {
+				/*
+				 * No copy in sent folder
+				 */
+				return null;
+			}
+			/*
+			 * Append to Sent folder
+			 */
+			final long start = System.currentTimeMillis();
+			final String sentFullname = mailConnection.getFolderStorage().getSentFolder();
+			final long[] uidArr;
+			try {
+				uidArr = mailConnection.getMessageStorage()
+						.appendMessages(sentFullname, new MailMessage[] { sentMail });
+			} catch (final MailException e) {
+				if (e.getMessage().indexOf("quota") != -1) {
+					throw new MailException(MailException.Code.COPY_TO_SENT_FOLDER_FAILED_QUOTA, e, new Object[0]);
+				}
+				throw new MailException(MailException.Code.COPY_TO_SENT_FOLDER_FAILED, e, new Object[0]);
+			}
+			if (uidArr != null && uidArr[0] != -1) {
+				/*
+				 * Mark appended sent mail as seen
+				 */
+				mailConnection.getMessageStorage()
+						.updateMessageFlags(sentFullname, uidArr, MailMessage.FLAG_SEEN, true);
+			}
+			final MailPath retval = new MailPath(sentFullname, uidArr[0]);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(new StringBuilder(128).append("Mail copy (").append(retval.toString()).append(
+						") appended in ").append(System.currentTimeMillis() - start).append("msec").toString());
+			}
+			return retval.toString();
+		} finally {
+			transport.close();
+		}
 	}
 
 	@Override
 	public void sendReceiptAck(final String folder, final long msgUID, final String fromAddr) throws MailException {
 		initConnection();
-		final MailTransport transport = MailTransport.getInstance(session, mailConnection);
-		transport.sendReceiptAck(folder, msgUID, fromAddr);
+		final MailTransport transport = MailTransport.getInstance(session);
+		try {
+			transport.sendReceiptAck(mailConnection.getMessageStorage().getMessage(folder, msgUID), fromAddr);
+		} finally {
+			transport.close();
+		}
 	}
 
 	@Override

@@ -53,8 +53,8 @@ import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.dataobjects.TransportMailMessage;
-import com.openexchange.mail.transport.SendType;
+import com.openexchange.mail.dataobjects.compose.ComposeType;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -217,6 +217,20 @@ public abstract class MailInterface {
 	public abstract MailPart getMessageImage(String folder, long msgUID, String cid) throws MailException;
 
 	/**
+	 * Saves specified draft mail.
+	 * <p>
+	 * If specified draft mail holds a reference to an existing draft mail -
+	 * {@link MailMessage#getMsgref()} is not <code>null</code> - then the
+	 * referenced draft mail shall be replaced.
+	 * 
+	 * @param draftMail
+	 *            The draft mail
+	 * @return The stored draft's mail path
+	 * @throws MailException
+	 */
+	public abstract String saveDraft(ComposedMailMessage draftMail) throws MailException;
+
+	/**
 	 * Sends a read acknowledgement to given message
 	 */
 	public abstract void sendReceiptAck(String folder, long msgUID, String fromAddr) throws MailException;
@@ -226,7 +240,7 @@ public abstract class MailInterface {
 	 * and its possible file attachments contained in given instance of
 	 * <code>uploadEvent</code>.
 	 */
-	public abstract String sendMessage(TransportMailMessage transportMail, SendType sendType) throws MailException;
+	public abstract String sendMessage(ComposedMailMessage transportMail, ComposeType sendType) throws MailException;
 
 	/**
 	 * Creates an instance of <code>JSONMessageObject</code> which contains

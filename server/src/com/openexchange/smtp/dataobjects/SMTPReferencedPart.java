@@ -51,7 +51,7 @@ package com.openexchange.smtp.dataobjects;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.transport.dataobjects.ReferencedMailPart;
+import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.session.Session;
 
 /**
@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SMTPReferencedPart extends ReferencedMailPart implements SMTPMailPart {
+public final class SMTPReferencedPart extends ReferencedMailPart {
 
 	private static final long serialVersionUID = -1507249923428057041L;
 
@@ -82,15 +82,6 @@ public final class SMTPReferencedPart extends ReferencedMailPart implements SMTP
 	 */
 	public SMTPReferencedPart(final String sequenceId) {
 		super(sequenceId);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
-	 */
-	public SMTPPartType getType() {
-		return SMTPMailPart.SMTPPartType.REFERENCE;
 	}
 
 }

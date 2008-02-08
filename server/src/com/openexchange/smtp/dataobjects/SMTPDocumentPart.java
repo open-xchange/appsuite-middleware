@@ -50,7 +50,7 @@
 package com.openexchange.smtp.dataobjects;
 
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.transport.dataobjects.InfostoreDocumentMailPart;
+import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
 import com.openexchange.session.Session;
 
 /**
@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SMTPDocumentPart extends InfostoreDocumentMailPart implements SMTPMailPart {
+public final class SMTPDocumentPart extends InfostoreDocumentMailPart {
 
 	private static final long serialVersionUID = -2267358414476951363L;
 
@@ -75,15 +75,6 @@ public final class SMTPDocumentPart extends InfostoreDocumentMailPart implements
 	 */
 	public SMTPDocumentPart(final int documentId, final Session session) throws MailException {
 		super(documentId, session);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
-	 */
-	public SMTPPartType getType() {
-		return SMTPMailPart.SMTPPartType.DOCUMENT;
 	}
 
 }

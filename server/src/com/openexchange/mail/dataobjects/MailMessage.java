@@ -61,6 +61,7 @@ import java.util.Set;
 import javax.mail.internet.InternetAddress;
 
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.HeaderName;
 
 /**
@@ -1214,6 +1215,15 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	public void setSeparator(final char separator) {
 		this.separator = separator;
 		b_separator = true;
+	}
+
+	/**
+	 * Gets the mail path
+	 * 
+	 * @return The mail path
+	 */
+	public MailPath getMailPath() {
+		return new MailPath(getFolder(), getMailId());
 	}
 
 	/**

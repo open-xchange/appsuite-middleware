@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.transport.dataobjects;
+package com.openexchange.mail.dataobjects.compose;
 
 import static com.openexchange.mail.utils.MessageUtility.readStream;
 
@@ -82,7 +82,7 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class UploadFileMailPart extends MailPart {
+public abstract class UploadFileMailPart extends MailPart implements ComposedMailPart {
 
 	private static final String STR_US_ASCII = "US-ASCII";
 
@@ -326,5 +326,14 @@ public abstract class UploadFileMailPart extends MailPart {
 		public String getCharset() {
 			return charset;
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
+	 */
+	public ComposedPartType getType() {
+		return ComposedMailPart.ComposedPartType.FILE;
 	}
 }

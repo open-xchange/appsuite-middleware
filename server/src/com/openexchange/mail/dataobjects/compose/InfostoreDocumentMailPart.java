@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.transport.dataobjects;
+package com.openexchange.mail.dataobjects.compose;
 
 import static com.openexchange.mail.utils.MessageUtility.readStream;
 
@@ -73,6 +73,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.session.Session;
@@ -84,7 +85,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class InfostoreDocumentMailPart extends MailPart {
+public abstract class InfostoreDocumentMailPart extends MailPart implements ComposedMailPart {
 
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(InfostoreDocumentMailPart.class);
@@ -241,4 +242,12 @@ public abstract class InfostoreDocumentMailPart extends MailPart {
 	public void prepareForCaching() {
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
+	 */
+	public ComposedPartType getType() {
+		return ComposedMailPart.ComposedPartType.DOCUMENT;
+	}
 }

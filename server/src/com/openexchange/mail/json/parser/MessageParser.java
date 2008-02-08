@@ -74,11 +74,11 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.dataobjects.TransportMailMessage;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.transport.MailTransport;
-import com.openexchange.mail.transport.dataobjects.TextBodyMailPart;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
 
@@ -105,7 +105,7 @@ public final class MessageParser {
 
 	/**
 	 * Completely parses given instance of {@link JSONObject} and given instance
-	 * of {@link UploadEvent} to a corresponding {@link TransportMailMessage}
+	 * of {@link UploadEvent} to a corresponding {@link ComposedMailMessage}
 	 * object
 	 * 
 	 * @param jsonObj
@@ -114,17 +114,17 @@ public final class MessageParser {
 	 *            The upload event containing the uploaded files to attach
 	 * @param session
 	 *            The session
-	 * @return A corresponding instance of {@link TransportMailMessage}
+	 * @return A corresponding instance of {@link ComposedMailMessage}
 	 * @throws MailException
 	 *             If parsing fails
 	 */
-	public static TransportMailMessage parse(final JSONObject jsonObj, final UploadEvent uploadEvent,
+	public static ComposedMailMessage parse(final JSONObject jsonObj, final UploadEvent uploadEvent,
 			final Session session) throws MailException {
 		try {
 			/*
 			 * Parse transport message plus its text body
 			 */
-			final TransportMailMessage transportMail = parse(jsonObj, session);
+			final ComposedMailMessage composedMail = parse(jsonObj, session);
 			{
 				/*
 				 * Uploaded files
@@ -138,7 +138,7 @@ public final class MessageParser {
 					 */
 					final UploadFile uf = uploadEvent.getUploadFileByFieldName(getFieldName(attachmentCounter++));
 					if (uf != null) {
-						transportMail.addEnclosedPart(MailTransport.getNewFilePart(uf));
+						composedMail.addEnclosedPart(MailTransport.getNewFilePart(uf));
 						addedAttachments++;
 					}
 				}
@@ -151,10 +151,10 @@ public final class MessageParser {
 				final JSONArray ja = jsonObj.getJSONArray(MailJSONField.INFOSTORE_IDS.getKey());
 				final int length = ja.length();
 				for (int i = 0; i < length; i++) {
-					transportMail.addEnclosedPart(MailTransport.getNewDocumentPart(ja.getInt(i), session));
+					composedMail.addEnclosedPart(MailTransport.getNewDocumentPart(ja.getInt(i), session));
 				}
 			}
-			return transportMail;
+			return composedMail;
 		} catch (final JSONException e) {
 			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
 		}
@@ -168,18 +168,18 @@ public final class MessageParser {
 
 	/**
 	 * Parses given instance of {@link JSONObject} on send operation and
-	 * generates a corresponding instance of {@link TransportMailMessage}
+	 * generates a corresponding instance of {@link ComposedMailMessage}
 	 * 
 	 * @param jsonObj
 	 *            The JSON object
 	 * @param session
 	 *            The session
-	 * @return A corresponding instance of {@link TransportMailMessage}
+	 * @return A corresponding instance of {@link ComposedMailMessage}
 	 * @throws MailException
 	 *             If parsing fails
 	 */
-	public static TransportMailMessage parse(final JSONObject jsonObj, final Session session) throws MailException {
-		final TransportMailMessage transportMail = MailTransport.getNewTransportMailMessage();
+	public static ComposedMailMessage parse(final JSONObject jsonObj, final Session session) throws MailException {
+		final ComposedMailMessage transportMail = MailTransport.getNewTransportMailMessage();
 		parse(jsonObj, transportMail, session);
 		return transportMail;
 	}
@@ -361,8 +361,8 @@ public final class MessageParser {
 			/*
 			 * Parse attachments
 			 */
-			if (mail instanceof TransportMailMessage) {
-				final TransportMailMessage transportMail = (TransportMailMessage) mail;
+			if (mail instanceof ComposedMailMessage) {
+				final ComposedMailMessage transportMail = (ComposedMailMessage) mail;
 				if (jsonObj.has(MailJSONField.ATTACHMENTS.getKey())
 						&& !jsonObj.isNull(MailJSONField.ATTACHMENTS.getKey())) {
 					final JSONArray ja = jsonObj.getJSONArray(MailJSONField.ATTACHMENTS.getKey());

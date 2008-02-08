@@ -47,46 +47,46 @@
  *
  */
 
-package com.openexchange.mail.transport;
+package com.openexchange.mail.dataobjects.compose;
+
 
 /**
- * {@link SendType} - The send type of a message
+ * {@link ComposedMailPart}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public enum SendType {
+public interface ComposedMailPart {
 
 	/**
-	 * New send type
-	 */
-	NEW,
-	/**
-	 * Forward send type
-	 */
-	FORWARD,
-	/**
-	 * Reply send type
-	 */
-	REPLY;
-
-	/**
-	 * Gets the corresponding {@link SendType}
+	 * {@link ComposedPartType} - The different SMTP parts
 	 * 
-	 * @param sendType
-	 *            The send type as <code>int</code>
-	 * @return The corresponding {@link SendType}
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 * 
 	 */
-	public static final SendType getSendType(final int sendType) {
-		switch (sendType) {
-		case 0:
-			return NEW;
-		case 1:
-			return REPLY;
-		case 2:
-			return FORWARD;
-		default:
-			return null;
-		}
+	public static enum ComposedPartType {
+
+		/**
+		 * The mail body text
+		 */
+		BODY,
+		/**
+		 * An uploaded file
+		 */
+		FILE,
+		/**
+		 * An infostore document
+		 */
+		DOCUMENT,
+		/**
+		 * A referenced mail part
+		 */
+		REFERENCE;
 	}
+
+	/**
+	 * @return This SMTP part's type as a {@link ComposedPartType} enumeration type
+	 */
+	public abstract ComposedPartType getType();
+
 }

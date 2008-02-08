@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.transport.dataobjects;
+package com.openexchange.mail.dataobjects.compose;
 
 import static com.openexchange.mail.utils.MessageUtility.readStream;
 
@@ -64,7 +64,9 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.activation.DataHandler;
@@ -87,12 +89,18 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link ReferencedMailPart} - A {@link MailPart} implementation that points to
- * a referenced part in original mail
+ * a referenced part in original mail.
+ * <p>
+ * Since a mail part causes troubles when its input stream is read multiple
+ * times, corresponding data is either stored in an internal byte array or
+ * copied as a temporary file to disk (depending on
+ * {@link TransportConfig#getReferencedPartLimit()}). Therefore this part needs
+ * special handling to ensure removal of temporary file when it is dispatched.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class ReferencedMailPart extends MailPart {
+public abstract class ReferencedMailPart extends MailPart implements ComposedMailPart {
 
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ReferencedMailPart.class);
@@ -112,8 +120,12 @@ public abstract class ReferencedMailPart extends MailPart {
 	private String fileId;
 
 	/**
-	 * Constructor
+	 * Initializes a new {@link ReferencedMailPart}
 	 * 
+	 * @param referencedPart
+	 *            The referenced part
+	 * @param session
+	 *            The session
 	 * @throws MailException
 	 *             If a mail error occurs
 	 */
@@ -164,6 +176,9 @@ public abstract class ReferencedMailPart extends MailPart {
 	public String loadReferencedPart(final MailMessageParser parserArg, final MailMessage referencedMail,
 			final Session session) throws MailException {
 		if (null != data || null != file) {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn("Content already present. Loading aborted.");
+			}
 			return null;
 		}
 		try {
@@ -186,6 +201,41 @@ public abstract class ReferencedMailPart extends MailPart {
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}
+	}
+
+	/**
+	 * Convenience method that loads all referenced mail parts contained in
+	 * specified composed mail.
+	 * 
+	 * @param mail
+	 *            The composed mail
+	 * @param session
+	 *            The session
+	 * @return A list of {@link String} containing the IDs of loaded referenced
+	 *         parts
+	 * @throws MailException
+	 *             If referenced parts cannot be loaded
+	 */
+	public static final List<String> loadReferencedParts(final ComposedMailMessage mail, final Session session)
+			throws MailException {
+		/*
+		 * Load referenced parts
+		 */
+		final MailMessageParser parser = new MailMessageParser();
+		final int count = mail.getEnclosedCount();
+		final List<String> tempIds = new ArrayList<String>(4);
+		for (int i = 0; i < count; i++) {
+			final ComposedMailPart composedMailPart = (ComposedMailPart) mail.getEnclosedMailPart(i);
+			if (ComposedMailPart.ComposedPartType.REFERENCE.equals(composedMailPart.getType())) {
+				final String id = ((ReferencedMailPart) composedMailPart).loadReferencedPart(parser, mail
+						.getReferencedMail(), session);
+				parser.reset();
+				if (id != null) {
+					tempIds.add(id);
+				}
+			}
+		}
+		return tempIds;
 	}
 
 	private String handleReferencedPart(final MailPart referencedPart, final Session session) throws MailException,
@@ -472,4 +522,12 @@ public abstract class ReferencedMailPart extends MailPart {
 		return resultString.toString();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
+	 */
+	public ComposedPartType getType() {
+		return ComposedMailPart.ComposedPartType.REFERENCE;
+	}
 }
