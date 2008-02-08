@@ -61,123 +61,128 @@ import com.openexchange.session.Session;
 
 /**
  * SessionImpl
- *
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 public class SessionImpl implements Session {
-	
+
 	protected String loginName;
-	
+
 	protected String password;
-	
-    protected int contextId;
-    
-    protected int userId;
-    
-    protected String sessionId;
-    
-    protected String secret;
-    
-    protected String randomToken;
-    
-    protected String localIp;
-    
+
+	protected int contextId;
+
+	protected int userId;
+
+	protected String sessionId;
+
+	protected String secret;
+
+	protected String randomToken;
+
+	protected String localIp;
+
 	private static final Log LOG = LogFactory.getLog(SessionImpl.class);
-	
+
 	private final transient Map<String, ManagedUploadFile> ajaxUploadFiles;
 
 	private final Map<String, Object> parameters;
 
-	public SessionImpl(int userId, String loginName, String password, Context context, String sessionId, String secret, String randomToken, String localIp) {
-        this.userId = userId;
+	public SessionImpl(int userId, String loginName, String password, Context context, String sessionId, String secret,
+			String randomToken, String localIp) {
+		this.userId = userId;
 		this.loginName = loginName;
 		this.password = password;
-        this.sessionId = sessionId;
-        this.secret = secret;
-        this.randomToken = randomToken;
-        this.localIp = localIp;
-        
-        contextId = context.getContextId();
-        
+		this.sessionId = sessionId;
+		this.secret = secret;
+		this.randomToken = randomToken;
+		this.localIp = localIp;
+
+		contextId = context.getContextId();
+
 		parameters = new ConcurrentHashMap<String, Object>();
 		ajaxUploadFiles = new ConcurrentHashMap<String, ManagedUploadFile>();
 	}
 
-    public int getContextId() {
-        return contextId;
-    }
+	public int getContextId() {
+		return contextId;
+	}
 
-    public Object getParameter(String name) {
-        return parameters.get(name);
-    }
+	public Object getParameter(String name) {
+		return parameters.get(name);
+	}
 
-    public String getRandomToken() {
-        return randomToken;
-    }
+	public String getRandomToken() {
+		return randomToken;
+	}
 
-    public String getSecret() {
-        return secret;
-    }
+	public String getSecret() {
+		return secret;
+	}
 
-    public String getSessionID() {
-        return sessionId;
-    }
+	public String getSessionID() {
+		return sessionId;
+	}
 
-    public ManagedUploadFile getUploadedFile(String id) {
+	public ManagedUploadFile getUploadedFile(String id) {
 		final ManagedUploadFile uploadFile = ajaxUploadFiles.get(id);
 		if (null != uploadFile) {
 			uploadFile.touch();
 		}
 		return uploadFile;
-    }
+	}
 
-    public int getUserID() {
-        return userId;
-    }
+	public int getUserID() {
+		return userId;
+	}
 
-    public void putUploadedFile(String id, ManagedUploadFile uploadFile) {
+	public void putUploadedFile(String id, ManagedUploadFile uploadFile) {
 		ajaxUploadFiles.put(id, uploadFile);
 		uploadFile.startTimerTask(id, ajaxUploadFiles);
 		if (LOG.isInfoEnabled()) {
 			LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
 					.append(id).append(" added to session and timer task started").toString());
 		}
-    }
+	}
 
-    public ManagedUploadFile removeUploadedFile(String id) {
+	public ManagedUploadFile removeUploadedFile(String id) {
 		final ManagedUploadFile uploadFile = ajaxUploadFiles.remove(id);
 		if (null != uploadFile) {
 			/*
 			 * Cancel timer task
 			 */
 			uploadFile.cancelTimerTask();
+			if (!uploadFile.getFile().delete()) {
+				LOG.warn(new StringBuilder(256).append("Temporary uploaded file \"").append(
+						uploadFile.getFile().getName()).append("\" could not be deleted"));
+			}
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
 						.append(id).append(" removed from session and timer task canceled").toString());
 			}
 		}
 		return uploadFile;
-    }
+	}
 
-    public void removeUploadedFileOnly(String id) {
-    }
+	public void removeUploadedFileOnly(String id) {
+	}
 
-    public void setParameter(String name, Object value) {
-        parameters.put(name, value);
-    }
+	public void setParameter(String name, Object value) {
+		parameters.put(name, value);
+	}
 
-    public boolean touchUploadedFile(String id) {
+	public boolean touchUploadedFile(String id) {
 		final ManagedUploadFile uploadFile = ajaxUploadFiles.get(id);
 		if (null != uploadFile) {
 			uploadFile.touch();
 			return true;
 		}
 		return false;
-    }
+	}
 
-    public void removeRandomToken() {
-        randomToken = null;
-    }
+	public void removeRandomToken() {
+		randomToken = null;
+	}
 
 	public String getLocalIp() {
 		return localIp;
@@ -194,7 +199,7 @@ public class SessionImpl implements Session {
 	public String getUserlogin() {
 		return loginName;
 	}
-	
+
 	public String getPassword() {
 		return password;
 	}
