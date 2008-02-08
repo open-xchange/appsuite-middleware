@@ -58,20 +58,11 @@ import java.net.URL;
  */
 public abstract class SetupLink {
 
-    private static SetupLink singleton;
-
     /**
      * Default constructor.
      */
     protected SetupLink() {
         super();
-    }
-
-    /**
-     * @return the singleton instance.
-     */
-    public static SetupLink getInstance() {
-        return singleton;
     }
 
     /**
@@ -99,12 +90,5 @@ public abstract class SetupLink {
 
     protected String getPassword(final Object... values) {
         return (String) values[2];
-    }
-
-    /**
-     * @param singleton the singleton to set
-     */
-    static void setSingleton(SetupLink singleton) {
-        SetupLink.singleton = singleton;
     }
 }

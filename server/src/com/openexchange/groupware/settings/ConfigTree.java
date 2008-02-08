@@ -67,7 +67,6 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.SettingException.Code;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterface;
 import com.openexchange.mail.config.MailConfigException;
@@ -358,8 +357,8 @@ public final class ConfigTree {
                 final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
                 final OXFolderAccess acc = new OXFolderAccess(ctx);
                 try {
-                    setting.setSingleValue(acc.getDefaultFolder(user.getId(),
-                        FolderObject.TASK).getObjectID());
+                    setting.setSingleValue(Integer.valueOf(acc.getDefaultFolder(
+                        user.getId(), FolderObject.TASK).getObjectID()));
                 } catch (OXException e) {
                     throw new SettingException(e);
                 }
@@ -373,8 +372,8 @@ public final class ConfigTree {
                 final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
                 final OXFolderAccess acc = new OXFolderAccess(ctx);
                 try {
-                    setting.setSingleValue(acc.getDefaultFolder(user.getId(),
-                        FolderObject.CALENDAR).getObjectID());
+                    setting.setSingleValue(Integer.valueOf(acc.getDefaultFolder(
+                        user.getId(), FolderObject.CALENDAR).getObjectID()));
                 } catch (OXException e) {
                     throw new SettingException(e);
                 }
@@ -388,8 +387,8 @@ public final class ConfigTree {
                 final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
                 final OXFolderAccess acc = new OXFolderAccess(ctx);
                 try {
-                    setting.setSingleValue(acc.getDefaultFolder(user.getId(),
-                        FolderObject.CONTACT).getObjectID());
+                    setting.setSingleValue(Integer.valueOf(acc.getDefaultFolder(
+                        user.getId(), FolderObject.CONTACT).getObjectID()));
                 } catch (OXException e) {
                     throw new SettingException(e);
                 }
@@ -403,8 +402,8 @@ public final class ConfigTree {
                 final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
                 final OXFolderAccess acc = new OXFolderAccess(ctx);
                 try {
-                    setting.setSingleValue(acc.getDefaultFolder(user.getId(),
-                        FolderObject.INFOSTORE).getObjectID());
+                    setting.setSingleValue(Integer.valueOf(acc.getDefaultFolder(
+                        user.getId(), FolderObject.INFOSTORE).getObjectID()));
                 } catch (OXException e) {
                     throw new SettingException(e);
                 }
@@ -435,7 +434,8 @@ public final class ConfigTree {
         });
         tmp.put(sendaddress.getPath(), new SharedValue() {
             public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
+                final User user, UserConfiguration userConfig,
+                final Setting setting) throws SettingException {
 				final UserSettingMail settings = UserSettingMailStorage
                     .getInstance().getUserSettingMail(user.getId(), ctx);
 				setting.setSingleValue(settings.getSendAddr());
@@ -569,7 +569,8 @@ public final class ConfigTree {
                 return userConfig.hasWebMail();
 			}
             public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
+                final User user, UserConfiguration userConfig,
+                final Setting setting) throws SettingException {
                 MailInterface mail = null;
                 try {
                     mail = MailInterface.getInstance(session);
@@ -593,7 +594,7 @@ public final class ConfigTree {
 			}
             @Override
             protected Boolean isSet(final UserSettingMail settings) {
-                return settings.isUseColorQuote();
+                return Boolean.valueOf(settings.isUseColorQuote());
             }
             @Override
             protected void setValue(final UserSettingMail settings,
@@ -607,7 +608,7 @@ public final class ConfigTree {
 			}
             @Override
             protected Boolean isSet(final UserSettingMail settings) {
-                return settings.isShowGraphicEmoticons();
+                return Boolean.valueOf(settings.isShowGraphicEmoticons());
             }
             @Override
             protected void setValue(final UserSettingMail settings,
@@ -621,7 +622,7 @@ public final class ConfigTree {
 			}
             @Override
             protected Boolean isSet(final UserSettingMail settings) {
-                return settings.isHardDeleteMsgs();
+                return Boolean.valueOf(settings.isHardDeleteMsgs());
             }
             @Override
             protected void setValue(final UserSettingMail settings,
@@ -635,7 +636,7 @@ public final class ConfigTree {
 			}
             @Override
             protected Boolean isSet(final UserSettingMail settings) {
-                return settings.isDisplayHtmlInlineContent();
+                return Boolean.valueOf(settings.isDisplayHtmlInlineContent());
             }
             @Override
             protected void setValue(final UserSettingMail settings,
@@ -683,10 +684,12 @@ public final class ConfigTree {
         });
         tmp.put(linewrap.getPath(), new SharedValue() {
             public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
+                final User user, UserConfiguration userConfig,
+                final Setting setting) throws SettingException {
 				final UserSettingMail settings = UserSettingMailStorage
                     .getInstance().getUserSettingMail(session.getUserId(), ctx);
-				setting.setSingleValue(settings.getAutoLinebreak());
+				setting.setSingleValue(Integer.valueOf(settings
+				    .getAutoLinebreak()));
 			}
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
@@ -716,9 +719,11 @@ public final class ConfigTree {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
 			}
-            protected Object isSet(final UserSettingMail settings) {
-                return settings.isAppendVCard();
+            @Override
+            protected Boolean isSet(final UserSettingMail settings) {
+                return Boolean.valueOf(settings.isAppendVCard());
             }
+            @Override
             protected void setValue(final UserSettingMail settings,
                 final String value) {
                 settings.setAppendVCard(Boolean.parseBoolean(value));
@@ -729,11 +734,13 @@ public final class ConfigTree {
                 return userConfig.hasWebMail();
 			}
             public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
-				final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(
-						session.getUserId(), ctx);
+                final User user, UserConfiguration userConfig,
+                final Setting setting) throws SettingException {
+				final UserSettingMail settings = UserSettingMailStorage
+				    .getInstance().getUserSettingMail(session.getUserId(), ctx);
 				try {
-					setting.setSingleValue(settings.isSpamEnabled());
+					setting.setSingleValue(Boolean.valueOf(settings
+					    .isSpamEnabled()));
 				} catch (final MailConfigException e) {
 					throw new SettingException(e);
 				}

@@ -177,11 +177,6 @@ public final class SystemConfig extends AbstractConfig implements
          */
         CONFIGDB("configDB"),
         /**
-         * Class implementing the SetupLink.
-         * TODO Remove due to OSGi Service.
-         */
-        SETUP_LINK("SetupLink"),
-        /**
          * Properties file for LDAP.
          */
         LDAP("LDAP"),
@@ -213,11 +208,6 @@ public final class SystemConfig extends AbstractConfig implements
          * notification.properties.
          */
         NOTIFICATION("Notification"),
-        /**
-         * configjump.properties.
-         * TODO Remove due to OSGi service.
-         */
-        ConfigJumpConf("ConfigJumpConf"),
         /**
          * participant.properties.
          */

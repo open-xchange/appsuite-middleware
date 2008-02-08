@@ -164,11 +164,10 @@ public class ExpressImpl extends SetupLink {
      */
     private void loadProperties() throws SetupLinkException {
         props = new Properties();
-        final String fileName = SystemConfig.getProperty(Property
-            .ConfigJumpConf);
+        final String fileName = "configjump.properties";
         if (null == fileName) {
             throw new SetupLinkException(SetupLinkException.Code
-                .MISSING_SETTING, Property.ConfigJumpConf.getPropertyName());
+                .MISSING_SETTING, "configjump.properties");
         }
         final File file = new File(fileName);
         if (!file.exists()) {

@@ -69,12 +69,6 @@ public class GenericImplConfig extends AbstractConfig {
     private static final Lock LOCK = new ReentrantLock();
 
     /**
-     * Property key in the system.properties file.
-     */
-    private static final SystemConfig.Property KEY = SystemConfig.Property
-        .ConfigJumpConf;
-
-    /**
      * Singleton instance.
      */
     private static final GenericImplConfig SINGLETON = new GenericImplConfig();
@@ -91,12 +85,7 @@ public class GenericImplConfig extends AbstractConfig {
      */
     @Override
     protected String getPropertyFileName() throws ConfigurationException {
-        final String filename = SystemConfig.getProperty(KEY);
-        if (null == filename) {
-            throw new ConfigurationException(Code.PROPERTY_MISSING, KEY
-                .getPropertyName());
-        }
-        return filename;
+        return "configjump.properties";
     }
 
     /**
