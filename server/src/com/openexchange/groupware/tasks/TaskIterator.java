@@ -164,21 +164,35 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
         this.userId = userId;
         this.result = result;
         this.folderId = folderId;
-        List<Integer> tmp1 = new ArrayList<Integer>(attributes.length);
-        List<Integer> tmp2 = new ArrayList<Integer>(attributes.length);
+        final List<Integer> tmp1 = new ArrayList<Integer>(attributes.length);
+        final List<Integer> tmp2 = new ArrayList<Integer>(attributes.length);
         for (int column : attributes) {
             if (null == Mapping.getMapping(column)
                 && Task.FOLDER_ID != column) {
-                tmp2.add(column);
+                tmp2.add(Integer.valueOf(column));
             } else {
-                tmp1.add(column);
+                tmp1.add(Integer.valueOf(column));
             }
         }
         this.taskAttributes = Collections.toArray(tmp1);
+        modifyAdditionalAttributes(tmp2);
         this.additionalAttributes = Collections.toArray(tmp2);
         this.type = type;
         runner = new Thread(this);
         runner.start();
+    }
+
+    private void modifyAdditionalAttributes(final List<Integer> additional) {
+        // If participants are requested we also add users automatically. Users
+        // are calculated from participants.
+        if (additional.contains(Integer.valueOf(Task.USERS))) {
+            if (!additional.contains(Integer.valueOf(Task.PARTICIPANTS))) {
+                additional.add(Integer.valueOf(Task.PARTICIPANTS));
+            }
+            // Not removed users will give SearchIteratorException in code
+            // below.
+            additional.remove(Integer.valueOf(Task.USERS));
+        }
     }
 
     /**
@@ -216,7 +230,7 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
                 final Map<Integer, Task> tasks = new HashMap<Integer, Task>();
                 for (Task task : preread.take(
                     additionalAttributes.length > 0)) {
-                    tasks.put(task.getObjectID(), task);
+                    tasks.put(Integer.valueOf(task.getObjectID()), task);
                 }
                 for (int attribute : additionalAttributes) {
                     switch (attribute) {
@@ -236,7 +250,8 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
                         break;
                     default:
                         throw new SearchIteratorException(new TaskException(
-                            TaskException.Code.UNKNOWN_ATTRIBUTE, attribute));
+                            TaskException.Code.UNKNOWN_ATTRIBUTE, Integer
+                            .valueOf(attribute)));
                     }
                 }
                 ready.addAll(tasks.values());
@@ -258,8 +273,10 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
         final Map<Integer, Set<TaskParticipant>> parts = partStor
             .selectParticipants(ctx, Collections.toArray(tasks.keySet()), type);
         for (Entry<Integer, Set<TaskParticipant>> entry : parts.entrySet()) {
-            tasks.get(entry.getKey()).setParticipants(TaskLogic
-                .createParticipants(entry.getValue()));
+            final Task task = tasks.get(entry.getKey());
+            final Set<TaskParticipant> participants = entry.getValue();
+            task.setParticipants(TaskLogic.createParticipants(participants));
+            task.setUsers(TaskLogic.createUserParticipants(participants));
         }
     }
 
@@ -279,7 +296,7 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
                 Task task = new Task();
                 int pos = 1;
                 for (int taskField : taskAttributes) {
-                    final Mapper mapper = Mapping.getMapping(taskField);
+                    final Mapper<?> mapper = Mapping.getMapping(taskField);
                     if (Task.FOLDER_ID == taskField) {
                         if (-1 == folderId) {
                             task.setParentFolderID(result.getInt(pos++));
@@ -411,18 +428,16 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
         public boolean hasNext() {
             lock.lock();
             try {
-                while (true) {
-                    if (!preReaderFinished && elements.isEmpty()) {
-                        LOG.debug("Waiting for state.");
-                        try {
-                            waitForPreReader.await();
-                        } catch (InterruptedException e) {
-                            // Nothing to do. Continue with normal work.
-                            LOG.debug(e.getMessage(), e);
-                        }
+                while (!preReaderFinished && elements.isEmpty()) {
+                    LOG.debug("Waiting for state.");
+                    try {
+                        waitForPreReader.await();
+                    } catch (InterruptedException e) {
+                        // Nothing to do. Continue with normal work.
+                        LOG.debug(e.getMessage(), e);
                     }
-                    return !elements.isEmpty() || !preReaderFinished;
                 }
+                return !elements.isEmpty();
             } finally {
                 lock.unlock();
             }

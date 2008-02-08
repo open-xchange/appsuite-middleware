@@ -71,7 +71,6 @@ import com.openexchange.groupware.tasks.Mapping.Mapper;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -123,7 +122,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    protected SearchIterator load(final Context ctx, final int[] taskIds,
+    protected SearchIterator<Task> load(final Context ctx, final int[] taskIds,
         final int[] columns) throws TaskException {
         Connection con;
         try {
@@ -148,6 +147,7 @@ public class RdbTaskStorage extends TaskStorage {
      * @param type ACTIVE or DELETED.
      * @throws TaskException if the task has been changed in the meantime.
      */
+    @Override
     void delete(final Context ctx, final Connection con,
         final int taskId, final Date lastRead, final StorageType type)
         throws TaskException {
@@ -230,7 +230,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    SearchIterator search(final Context ctx, final int userId,
+    SearchIterator<Task> search(final Context ctx, final int userId,
         final TaskSearchObject search, final int orderBy, final String orderDir,
         final int[] columns, final List<Integer> all, final List<Integer> own,
         final List<Integer> shared) throws TaskException {
@@ -358,7 +358,7 @@ public class RdbTaskStorage extends TaskStorage {
         insert.append(SQL.TASK_TABLES.get(type));
         insert.append(" (");
         int values = 0;
-        for (Mapper mapper : Mapping.MAPPERS) {
+        for (Mapper<?> mapper : Mapping.MAPPERS) {
             if (mapper.isSet(task)) {
                 insert.append(mapper.getDBColumnName());
                 insert.append(',');
@@ -414,7 +414,7 @@ public class RdbTaskStorage extends TaskStorage {
             if (result.next()) {
                 task = new Task();
                 int pos = 1;
-                for (Mapper mapper : Mapping.MAPPERS) {
+                for (Mapper<?> mapper : Mapping.MAPPERS) {
                     mapper.fromDB(result, pos++, task);
                 }
                 task.setObjectID(taskId);
@@ -425,8 +425,8 @@ public class RdbTaskStorage extends TaskStorage {
             closeSQLStuff(result, stmt);
         }
         if (null == task) {
-            throw new TaskException(Code.TASK_NOT_FOUND, taskId,
-                ctx.getContextId());
+            throw new TaskException(Code.TASK_NOT_FOUND, Integer.valueOf(taskId),
+                Integer.valueOf(ctx.getContextId()));
         }
         return task;
     }

@@ -58,7 +58,6 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
