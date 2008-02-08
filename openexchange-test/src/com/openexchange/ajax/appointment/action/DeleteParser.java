@@ -53,12 +53,11 @@ import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class DeleteParser extends AbstractAJAXParser {
+public class DeleteParser extends AbstractAJAXParser<DeleteResponse> {
 
     /**
      * Default constructor.
@@ -78,7 +77,7 @@ public class DeleteParser extends AbstractAJAXParser {
      * {@inheritDoc}
      */
     @Override
-    protected AbstractAJAXResponse createResponse(final Response response)
+    protected DeleteResponse createResponse(final Response response)
         throws JSONException {
         return new DeleteResponse(response);
     }
