@@ -104,10 +104,6 @@ public final class Init {
 	 */
 	com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
 	/**
-	 * Setup of SetupLink for Config Jump.
-	 */
-	com.openexchange.groupware.integration.SetupLinkInit.getInstance(),
-	/**
 	 * Notification Configuration
 	 */
 	com.openexchange.groupware.notify.NotificationConfig.getInstance(),
@@ -152,8 +148,12 @@ public final class Init {
         String directory_name = config.getProperty("i18n.language.path");
 		File dir = new File(directory_name);
         I18nServices i18nServices = I18nServices.getInstance();
-        for (ResourceBundle rc : new ResourceBundleDiscoverer(dir).getResourceBundles()) {
-            i18nServices.addService(rc.getLocale(), new I18nImpl(rc));    
+        try {
+            for (ResourceBundle rc : new ResourceBundleDiscoverer(dir).getResourceBundles()) {
+                i18nServices.addService(rc.getLocale(), new I18nImpl(rc));    
+            }
+        } catch (final NullPointerException e) {
+            e.printStackTrace();
         }
     }
 
