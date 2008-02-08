@@ -26,10 +26,6 @@ MimeTypeFile=@oxgroupwaresysconfdir@/mime.types
 # Currenlty known aliases: Caching, DB
 UserConfigurationStorage=Caching
 
-# Location of the configuration file for the user specific configuration jump.
-# The content of this file depends on the implementation of the SetupLink.
-ConfigJumpConf=@oxgroupwaresysconfdir@/configjump.properties
-
 # Switch for enabling caching in the groupware. Normally this should be set to
 # true or the database will get a lot more load.
 Cache=true
