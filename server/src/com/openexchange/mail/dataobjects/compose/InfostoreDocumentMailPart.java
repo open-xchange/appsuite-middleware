@@ -73,7 +73,6 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.session.Session;
