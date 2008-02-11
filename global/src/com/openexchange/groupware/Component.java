@@ -250,6 +250,10 @@ public enum Component {
     /**
      * Spell Check
      */
+    PUSHUDP("PUSHUDP"),
+    /**
+     * Spell Check
+     */
     SPELLCHECK("SPC"),
     /**
      * ACL related error
