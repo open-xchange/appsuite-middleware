@@ -72,6 +72,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.importers.OutlookCSVContactImporter;
+import com.openexchange.groupware.contexts.impl.ContextException;
 
 public class OutlookCSVContactImportTest extends AbstractContactTest{
 	public String IMPORT_HEADERS = ContactField.GIVEN_NAME.getEnglishOutlookName()+","+ContactField.EMAIL1.getEnglishOutlookName()+","+ContactField.BIRTHDAY.getEnglishOutlookName()+"\n";
@@ -89,7 +90,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 		return new JUnit4TestAdapter(OutlookCSVContactImportTest.class);
 	}
 
-	protected void checkFirstResult(int objectID ) throws OXException{
+	protected void checkFirstResult(int objectID ) throws OXException, ContextException {
 		final ContactObject co = new RdbContactSQLInterface(sessObj).getObjectById(objectID, folderId);
 		assertEquals("Checking name" ,  NAME1 , co.getGivenName());
 		assertEquals("Checking e-Mail" ,  EMAIL1 , co.getEmail1());
@@ -174,7 +175,7 @@ public class OutlookCSVContactImportTest extends AbstractContactTest{
 	/*
 	 * "private" flag is being set
 	 */
-	@Test public void bug7710() throws UnsupportedEncodingException, NumberFormatException, OXException{
+	@Test public void bug7710() throws UnsupportedEncodingException, NumberFormatException, OXException, ContextException {
 		String file = ContactField.SUR_NAME.getGermanOutlookName() + ", " + ContactField.PRIVATE_FLAG.getGermanOutlookName() + "\nTobias Prinz,PRIVAT";
 		List<ImportResult> results = importStuff(file);
 		assertEquals("Only one result", 1, results.size());

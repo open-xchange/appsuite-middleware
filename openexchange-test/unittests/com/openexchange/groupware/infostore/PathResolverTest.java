@@ -19,6 +19,8 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.oxfolder.*;
+import com.openexchange.tools.sessions.ServerSessionFactory;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.webdav.protocol.WebdavPath;
 import junit.framework.TestCase;
 
@@ -47,7 +49,7 @@ public class PathResolverTest extends TestCase {
 	
 	private int type = FolderObject.PUBLIC;
 	
-	SessionObject session;
+	ServerSession session;
 	private Context ctx = null;
 	private User user;
 	private UserConfiguration userConfig;
@@ -60,7 +62,7 @@ public class PathResolverTest extends TestCase {
         UserStorage userStorage = UserStorage.getInstance();
         UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();
 
-        session = SessionObjectWrapper.createSessionObject(userStorage.getUserId(getUsername(), ctx), ctx, "gnitzelgnatzel");
+        session = ServerSessionFactory.createServerSession(userStorage.getUserId(getUsername(), ctx), ctx, "gnitzelgnatzel");
 		user = userStorage.getUser(session.getUserId(), ctx);
 		userConfig = userConfigStorage.getUserConfiguration(session.getUserId(), ctx);
 		

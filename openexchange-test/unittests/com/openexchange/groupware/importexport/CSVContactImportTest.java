@@ -72,6 +72,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.importexport.importers.CSVContactImporter;
+import com.openexchange.groupware.contexts.impl.ContextException;
 
 /**
  * 
@@ -246,7 +247,7 @@ public class CSVContactImportTest extends AbstractContactTest {
 	/*
 	 * Counting the TIMEZONE element? 
 	 */
-	@Test public void bug7109() throws ImportExportException, UnsupportedEncodingException{
+	@Test public void bug7109() throws ImportExportException, UnsupportedEncodingException, ContextException {
 		List<ImportResult> results1 = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , "+ "Tobias Prinz , "+System.currentTimeMillis());
 		List<ImportResult> results2 = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.BIRTHDAY.getReadableName() + "\n" + "Tobias Prinz , "+ "Tobias Prinz , 1981/04/01");
 		List<ImportResult> results3 = importStuff(ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + "stupidColumnName\n" + "Tobias Prinz , "+ "Tobias Prinz , 1981/04/01");
@@ -299,7 +300,7 @@ public class CSVContactImportTest extends AbstractContactTest {
 	/*
 	 * "private" flag is being set
 	 */
-	@Test public void bug7710() throws UnsupportedEncodingException, NumberFormatException, OXException{
+	@Test public void bug7710() throws UnsupportedEncodingException, NumberFormatException, OXException, ContextException {
 		final String file = ContactField.DISPLAY_NAME.getReadableName()+", "+ContactField.GIVEN_NAME.getReadableName() + " , " + ContactField.PRIVATE_FLAG.getReadableName() + "\nTobias Prinz, Tobias Prinz,true";
 		final List<ImportResult> results = importStuff(file);
 		assertEquals("Only one result", 1, results.size());
@@ -309,7 +310,7 @@ public class CSVContactImportTest extends AbstractContactTest {
 	}
 	
 	
-	protected void checkFirstResult(int objectID ) throws OXException{
+	protected void checkFirstResult(int objectID ) throws OXException, ContextException {
 		final ContactObject co = new RdbContactSQLInterface(sessObj).getObjectById(objectID, folderId);
 		assertEquals("Checking name" ,  NAME1 , co.getGivenName());
 		assertEquals("Checking e-Mail" ,  EMAIL1 , co.getEmail1());

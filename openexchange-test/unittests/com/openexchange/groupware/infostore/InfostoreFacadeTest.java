@@ -19,6 +19,8 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.sessions.ServerSessionFactory;
 import com.openexchange.test.TestInit;
 import junit.framework.TestCase;
 
@@ -40,8 +42,8 @@ public class InfostoreFacadeTest extends TestCase {
 	private int folderId;
 	private int folderId2;
 
-	private SessionObject session;
-	private SessionObject session2;
+	private ServerSession session;
+	private ServerSession session2;
 
 	private List<DocumentMetadata> clean;
 	private List<FolderObject> cleanFolders = null;
@@ -66,8 +68,8 @@ public class InfostoreFacadeTest extends TestCase {
 		user2 = UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId("francisco", ctx), ctx); //FIXME
 		
 		
-		session = SessionObjectWrapper.createSessionObject(user.getId(), ctx, "blupp");
-		session2 = SessionObjectWrapper.createSessionObject(user2.getId(), ctx, "blupp2");
+		session = ServerSessionFactory.createServerSession(user.getId(), ctx, "blupp");
+		session2 = ServerSessionFactory.createServerSession(user2.getId(), ctx, "blupp2");
 		
 		userConfig = userConfigStorage.getUserConfiguration(session.getUserId(), ctx);
 		userConfig2 =  userConfigStorage.getUserConfiguration(session2.getUserId(), ctx);;
@@ -80,7 +82,7 @@ public class InfostoreFacadeTest extends TestCase {
 		
 	}
 	
-	public int _getPrivateInfostoreFolder(final Context context, final User usr, final SessionObject sess) throws OXException {
+	public int _getPrivateInfostoreFolder(final Context context, final User usr, final ServerSession sess) throws OXException {
 		final OXFolderAccess oxfa = new OXFolderAccess(context);
 		return oxfa.getDefaultFolder(usr.getId(), FolderObject.INFOSTORE).getObjectID();
 	}

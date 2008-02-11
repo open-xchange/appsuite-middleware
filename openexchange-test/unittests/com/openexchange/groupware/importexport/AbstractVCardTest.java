@@ -58,6 +58,7 @@ import com.openexchange.groupware.importexport.importers.VCardImporter;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.test.AjaxInit;
+import com.openexchange.tools.sessions.ServerSessionFactory;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -81,7 +82,7 @@ public class AbstractVCardTest extends AbstractContactTest {
 		final UserStorage uStorage = UserStorage.getInstance();
         ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
         userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), ctx);
-	    sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "vcard-tests");
+	    sessObj = ServerSessionFactory.createServerSession(userId, 1, "vcard-tests");
 		userId = sessObj.getUserId();
 	}
 

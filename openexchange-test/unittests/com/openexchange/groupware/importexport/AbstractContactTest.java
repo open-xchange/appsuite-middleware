@@ -80,6 +80,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.ldap.User;
@@ -91,6 +92,9 @@ import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
+import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.sessions.ServerSessionFactory;
 import com.openexchange.test.AjaxInit;
 
 /**
@@ -120,8 +124,8 @@ public class AbstractContactTest {
 		public boolean equals(Object obj) {
 			return delegateSessionObject.equals(obj);
 		}
-		public Context getContext() {
-			return delegateSessionObject.getContext();
+		public int getContextId() {
+			return delegateSessionObject.getContextId();
 		}
 		public Date getCreationtime() {
 			return delegateSessionObject.getCreationtime();
@@ -174,8 +178,8 @@ public class AbstractContactTest {
 		public int hashCode() {
 			return delegateSessionObject.hashCode();
 		}
-		public void setContext(Context context) {
-			delegateSessionObject.setContext(context);
+		public void setContextId(int id) {
+			delegateSessionObject.setContextId(id);
 		}
 		public void setCreationtime(Date creationtime) {
 			delegateSessionObject.setCreationtime(creationtime);
@@ -334,7 +338,7 @@ public class AbstractContactTest {
 			ContactObject.USERFIELD20,
 			ContactObject.DEFAULT_ADDRESS};
 
-	public static SessionObject sessObj;
+	public static ServerSession sessObj;
 	public static int userId;
 	public static int contextId;
 	public static int folderId;
@@ -347,7 +351,7 @@ public class AbstractContactTest {
 	public static Importer imp;
 	public Format defaultFormat;
 
-	public static int createTestFolder(int type, SessionObject sessObj,Context ctx, String folderTitle) throws DBPoolingException, SQLException, LdapException {
+	public static int createTestFolder(int type, ServerSession sessObj,Context ctx, String folderTitle) throws DBPoolingException, SQLException, LdapException, OXFolderException {
 		final User user = UserStorage.getInstance().getUser(sessObj.getUserId(), ctx);
 		FolderObject fo = new FolderObject();
 		fo.setFolderName(folderTitle);
@@ -399,7 +403,7 @@ public class AbstractContactTest {
 		final UserStorage uStorage = UserStorage.getInstance();
         Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
         userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), ctx);
-	    sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-tests");
+	    sessObj = ServerSessionFactory.createServerSession(userId, 1, "csv-tests");
 		userId = sessObj.getUserId();
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj, ctx, "csvContactTestFolder");
 	}
@@ -419,7 +423,7 @@ public class AbstractContactTest {
 		return imp.importData(sessObj, defaultFormat, is, _folders(), null);
 	}
 	
-	protected boolean existsEntry(int entryNumber){
+	protected boolean existsEntry(int entryNumber) throws ContextException {
 		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
 		try {
 			ContactObject co = contactSql.getObjectById(entryNumber, folderId);
@@ -429,7 +433,7 @@ public class AbstractContactTest {
 		}
 	}
 	
-	protected ContactObject getEntry(int entryNumber) throws OXException{
+	protected ContactObject getEntry(int entryNumber) throws OXException, ContextException {
 		final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
 		return contactSql.getObjectById(entryNumber, folderId);
 	}
@@ -453,7 +457,7 @@ public class AbstractContactTest {
 	 * @throws ImportExportException
 	 * @throws UnsupportedEncodingException
 	 */
-	protected ImportResult performOneEntryCheck(String file, Format format, int folderObjectType, String foldername,Context ctx, boolean errorExpected) throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException, LdapException {
+	protected ImportResult performOneEntryCheck(String file, Format format, int folderObjectType, String foldername,Context ctx, boolean errorExpected) throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException, LdapException, OXFolderException {
 		return performMultipleEntryImport(file, format, folderObjectType, foldername, ctx, errorExpected).get(0);
 	}
 	
@@ -471,7 +475,7 @@ public class AbstractContactTest {
 	 * @throws ImportExportException
 	 * @throws UnsupportedEncodingException
 	 */
-	protected List<ImportResult> performMultipleEntryImport(String file, Format format, int folderObjectType, String foldername, Context ctx, Boolean... expectedErrors) throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException, LdapException {
+	protected List<ImportResult> performMultipleEntryImport(String file, Format format, int folderObjectType, String foldername, Context ctx, Boolean... expectedErrors) throws DBPoolingException, SQLException, ImportExportException, UnsupportedEncodingException, LdapException, OXFolderException {
 		folderId = createTestFolder(folderObjectType, sessObj,ctx, foldername);
 
 		assertTrue("Can import?" ,  imp.canImport(sessObj, format, _folders(), null));

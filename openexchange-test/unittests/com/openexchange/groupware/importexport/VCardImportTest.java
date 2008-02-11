@@ -72,6 +72,7 @@ import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.importexport.exceptions.ImportExportException;
 import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.server.impl.DBPoolingException;
 
 public class VCardImportTest extends AbstractVCardTest {
@@ -98,7 +99,7 @@ public class VCardImportTest extends AbstractVCardTest {
 	/*
 	 * TELEX is not read.
 	 */
-	@Test public void test7719() throws DBPoolingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, UnsupportedEncodingException, LdapException {
+	@Test public void test7719() throws DBPoolingException, SQLException, OXObjectNotFoundException, NumberFormatException, OXException, UnsupportedEncodingException, LdapException, ContextException {
 		//setup
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj,ctx, "vcard7719Folder");
 		final String telex = "7787987897897897897";
@@ -116,7 +117,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		assertEquals("Has telex" , telex , co.getTelephoneTelex());
 	}
 	
-	@Test public void testEmpty() throws DBPoolingException, SQLException, UnsupportedEncodingException, NumberFormatException, OXException, LdapException {
+	@Test public void testEmpty() throws DBPoolingException, SQLException, UnsupportedEncodingException, NumberFormatException, OXException, LdapException, ContextException {
 		folderId = createTestFolder(FolderObject.CONTACT, sessObj,ctx, "vcard7719Folder");
 		final String vcard = "BEGIN:VCARD\nVERSION:2.1\nN:;;;;\nEND:VCARD\n";
 		final List <String> folders = Arrays.asList( Integer.toString(folderId) );

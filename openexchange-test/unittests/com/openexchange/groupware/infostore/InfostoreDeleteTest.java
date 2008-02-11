@@ -14,13 +14,15 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.sessions.ServerSessionFactory;
 import junit.framework.TestCase;
 
 import java.sql.Connection;
 
 public class InfostoreDeleteTest extends TestCase {
 	
-	SessionObject session = null;
+	ServerSession session = null;
 	DBProvider provider = new DBPoolProvider();
 	InfostoreFacade database;
 	int myFolder = 0;
@@ -29,7 +31,7 @@ public class InfostoreDeleteTest extends TestCase {
     public void setUp() throws Exception {
 		Init.startServer();
 		ctx = ContextStorage.getInstance().getContext(1);
-		session = SessionObjectWrapper.createSessionObject(UserStorage.getInstance().getUserId("francisco", ctx), ctx, "Blubb");
+		session = ServerSessionFactory.createServerSession(UserStorage.getInstance().getUserId("francisco", ctx), ctx, "Blubb");
 		database = new InfostoreFacadeImpl(provider);
 		database.setTransactional(true);
 		
