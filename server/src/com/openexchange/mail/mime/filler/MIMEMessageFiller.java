@@ -690,7 +690,7 @@ public class MIMEMessageFiller {
 			final List<String> cidList = MIMEMessageUtility.getContentIDs(mailBody);
 			NextImg: for (String cid : cidList) {
 				/*
-				 * Get & remove inline image (to prevent it from be sent twice)
+				 * Get & remove inline image (to prevent being sent twice)
 				 */
 				final MailPart imgPart = getAndRemoveImageAttachment(cid, mail);
 				if (imgPart == null) {
