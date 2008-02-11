@@ -64,8 +64,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.event.EventClient;
-import com.openexchange.event.InvalidStateException;
+import com.openexchange.event.impl.EventClient;
+import com.openexchange.event.impl.InvalidStateException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
@@ -154,6 +154,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			*/
 		}catch (InvalidStateException ise){
 			throw EXCEPTIONS.create(0,ise);
+		}catch (ContextException ise){
+			throw EXCEPTIONS.create(0,ise);
 		}catch (OXConflictException ce){
             LOG.debug("Unable to insert contact", ce);
 			throw ce;
@@ -178,6 +180,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		}catch (ContactException ise){
 			throw ise;
 		}catch (InvalidStateException ise){
+			throw EXCEPTIONS.create(1,ise);
+		}catch (ContextException ise){
 			throw EXCEPTIONS.create(1,ise);
 		}catch (OXConcurrentModificationException cme){
 			throw cme;
@@ -1022,6 +1026,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			final EventClient ec = new EventClient(session);
 			ec.delete(co);
 		} catch (InvalidStateException ise){
+			throw EXCEPTIONS.create(56,ise);
+		} catch (ContextException ise){
 			throw EXCEPTIONS.create(56,ise);
 		} catch (DBPoolingException xe){
 			throw EXCEPTIONS.create(45,xe);
