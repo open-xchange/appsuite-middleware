@@ -49,22 +49,94 @@
 
 
 
-package com.openexchange.event;
+package com.openexchange.event.impl;
+
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.session.Session;
+
+import java.util.Date;
 
 /**
- * EventConfig
+ * EventObject
  * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
-public interface EventConfig {
+public class EventObject {
 	
-	public boolean isEventQueueEnabled();
+	private int module;
 	
-	public void setEventQueueEnabled(boolean isEventQueueEnabled);
+	private int action;
 	
-	public int getEventQueueDelay();
+	private Object obj;
 	
-	public void setEventQueueDelay(int eventQueueDelay);	
-}
+	private Session session;
+	
+	private Date creationDate;
+	
+	public EventObject(final AppointmentObject obj, final int action, final Session session) {
+		init(obj, Types.APPOINTMENT, action, session);
+	}
+	
+	public EventObject(final Task obj, final int action, final Session session) {
+		init(obj, Types.TASK, action, session);
+	}
+	
+	public EventObject(final ContactObject obj, final int action, final Session session) {
+		init(obj, Types.CONTACT, action, session);
+	}
+	
+	public EventObject(final FolderObject obj, final int action, final Session session) {
+		init(obj, Types.FOLDER, action, session);
+	}
+	
+	public EventObject(final DocumentMetadata obj, final int action, final Session session) {
+		init(obj, Types.INFOSTORE, action, session);
+	}
+	
+	private void init(final Object obj, final int module, final int action, final Session session) {
+		this.obj = obj;
+		this.module = module;
+		this.action = action;
+		this.session = session;
+		creationDate = new Date();
+	}
+	
+	public int getModule() {
+		return module;
+	}
+	
+	public int getAction() {
+		return action;
+	}
+	
+	public Object getObject() {
+		return obj;
+	}
 
+	public Session getSessionObject() {
+		return session;
+	}
+
+	public Date getCreationDate() {
+		return creationDate;
+	}
+	
+	/* (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return new StringBuilder()
+		.append("MODULE=")
+		.append(module)
+		.append(",ACTION=")
+		.append(action).toString();
+	}
+}

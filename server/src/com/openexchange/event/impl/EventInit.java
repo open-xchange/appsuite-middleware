@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.event;
+package com.openexchange.event.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -80,11 +80,6 @@ public class EventInit implements Initialization {
 
     public EventInit() {
 		super();
-	}
-
-    @Deprecated
-    public static void init() {
-
 	}
 
     public void start() throws AbstractOXException {

@@ -49,24 +49,24 @@
 
 
 
-package com.openexchange.event;
+package com.openexchange.event.impl;
 
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.session.Session;
 
 /**
- * ContactEvent
+ * AppointmentEvent
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
 
-public interface ContactEvent {
+public interface AppointmentEventInterface {
 	
-    public void contactCreated(ContactObject contactObj, Session sessionObj);
+    public void appointmentCreated(AppointmentObject appointmentObj, Session sessionObj);
 	
-    public void contactModified(ContactObject contactObj, Session sessionObj);
+    public void appointmentModified(AppointmentObject appointmentObj, Session sessionObj);
 		
-    public void contactDeleted(ContactObject contactObj, Session sessionObj);
+    public void appointmentDeleted(AppointmentObject appointmentObj, Session sessionObj);
 	
 }
 

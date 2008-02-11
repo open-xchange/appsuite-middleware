@@ -49,28 +49,31 @@
 
 
 
-package com.openexchange.event;
-
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.session.Session;
+package com.openexchange.event.impl;
 
 /**
- * TaskEvent
- * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * OXConflictException
+ * TODO Error codes
+ * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
+public class InvalidStateException extends Exception
+{
 
-public interface TaskEvent {
+	private static final long serialVersionUID = -222137092481203634L;
+
+	public InvalidStateException() {
+		super();
+	}
 	
-    public void taskCreated(Task taskObj, Session sessionObj);
+	public InvalidStateException(String message) {
+		super(message);
+	}
 	
-    public void taskModified(Task taskObj, Session sessionObj);
-		
-    public void taskDeleted(Task taskObj, Session sessionObj);
+	public InvalidStateException(String message, Exception exc) {
+		super(message, exc);
+	}
 	
+	public InvalidStateException(Exception exc) {
+		super(exc);
+	}
 }
-
-
-
-
-

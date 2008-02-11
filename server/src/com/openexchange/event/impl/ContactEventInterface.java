@@ -47,17 +47,30 @@
  *
  */
 
-package com.openexchange.event;
 
-import com.openexchange.groupware.infostore.DocumentMetadata;
+
+package com.openexchange.event.impl;
+
+import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.session.Session;
 
-public interface InfostoreEvent {
+/**
+ * ContactEvent
+ * 
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ */
 
-	public void infoitemCreated(DocumentMetadata metadata, Session sessionObject);
-
-	public void infoitemModified(DocumentMetadata metadata, Session sessionObject);
-
-	public void infoitemDeleted(DocumentMetadata metadata, Session sessionObject);
+public interface ContactEventInterface {
+	
+    public void contactCreated(ContactObject contactObj, Session sessionObj);
+	
+    public void contactModified(ContactObject contactObj, Session sessionObj);
+		
+    public void contactDeleted(ContactObject contactObj, Session sessionObj);
 	
 }
+
+
+
+
+

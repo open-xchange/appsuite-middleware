@@ -49,31 +49,22 @@
 
 
 
-package com.openexchange.event;
+package com.openexchange.event.impl;
 
 /**
- * OXConflictException
- * TODO Error codes
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * EventConfig
+ * 
+ * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class InvalidStateException extends Exception
-{
 
-	private static final long serialVersionUID = -222137092481203634L;
-
-	public InvalidStateException() {
-		super();
-	}
+public interface EventConfig {
 	
-	public InvalidStateException(String message) {
-		super(message);
-	}
+	public boolean isEventQueueEnabled();
 	
-	public InvalidStateException(String message, Exception exc) {
-		super(message, exc);
-	}
+	public void setEventQueueEnabled(boolean isEventQueueEnabled);
 	
-	public InvalidStateException(Exception exc) {
-		super(exc);
-	}
+	public int getEventQueueDelay();
+	
+	public void setEventQueueDelay(int eventQueueDelay);	
 }
+

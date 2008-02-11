@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.event;
+package com.openexchange.event.impl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,15 +92,15 @@ public class EventQueue extends TimerTask {
 
 	private static final Log LOG = LogFactory.getLog(EventQueue.class);
 
-	private static List<AppointmentEvent> appointmentEventList = new ArrayList<AppointmentEvent>();
+	private static List<AppointmentEventInterface> appointmentEventList = new ArrayList<AppointmentEventInterface>();
 
-	private static List<TaskEvent> taskEventList = new ArrayList<TaskEvent>();
+	private static List<TaskEventInterface> taskEventList = new ArrayList<TaskEventInterface>();
 
-	private static List<ContactEvent> contactEventList = new ArrayList<ContactEvent>();
+	private static List<ContactEventInterface> contactEventList = new ArrayList<ContactEventInterface>();
 
-	private static List<FolderEvent> folderEventList = new ArrayList<FolderEvent>();
+	private static List<FolderEventInterface> folderEventList = new ArrayList<FolderEventInterface>();
 
-	private static List<InfostoreEvent> infostoreEventList = new ArrayList<InfostoreEvent>();
+	private static List<InfostoreEventInterface> infostoreEventList = new ArrayList<InfostoreEventInterface>();
 
 	private static boolean shuttingDown;
 
@@ -414,43 +414,43 @@ public class EventQueue extends TimerTask {
 		}
 	}
 
-	public static void addAppointmentEvent(final AppointmentEvent event) {
+	public static void addAppointmentEvent(final AppointmentEventInterface event) {
 		appointmentEventList.add(event);
 	}
 
-	public static void addTaskEvent(final TaskEvent event) {
+	public static void addTaskEvent(final TaskEventInterface event) {
 		taskEventList.add(event);
 	}
 
-	public static void addContactEvent(final ContactEvent event) {
+	public static void addContactEvent(final ContactEventInterface event) {
 		contactEventList.add(event);
 	}
 
-	public static void addFolderEvent(final FolderEvent event) {
+	public static void addFolderEvent(final FolderEventInterface event) {
 		folderEventList.add(event);
 	}
 
-	public static void addInfostoreEvent(final InfostoreEvent event) {
+	public static void addInfostoreEvent(final InfostoreEventInterface event) {
 		infostoreEventList.add(event);
 	}
 
-	public static void removeAppointmentEvent(final AppointmentEvent event) {
+	public static void removeAppointmentEvent(final AppointmentEventInterface event) {
 		appointmentEventList.remove(event);
 	}
 
-	public static void removeTaskEvent(final TaskEvent event) {
+	public static void removeTaskEvent(final TaskEventInterface event) {
 		taskEventList.remove(event);
 	}
 
-	public static void removeContactEvent(final ContactEvent event) {
+	public static void removeContactEvent(final ContactEventInterface event) {
 		contactEventList.remove(event);
 	}
 
-	public static void removeFolderEvent(final FolderEvent event) {
+	public static void removeFolderEvent(final FolderEventInterface event) {
 		folderEventList.remove(event);
 	}
 
-	public static void removeInfostoreEvent(final InfostoreEvent event) {
+	public static void removeInfostoreEvent(final InfostoreEventInterface event) {
 		infostoreEventList.remove(event);
 	}
 

@@ -47,30 +47,17 @@
  *
  */
 
+package com.openexchange.event.impl;
 
-
-package com.openexchange.event;
-
-import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.session.Session;
 
-/**
- * AppointmentEvent
- * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
- */
+public interface InfostoreEventInterface {
 
-public interface AppointmentEvent {
-	
-    public void appointmentCreated(AppointmentObject appointmentObj, Session sessionObj);
-	
-    public void appointmentModified(AppointmentObject appointmentObj, Session sessionObj);
-		
-    public void appointmentDeleted(AppointmentObject appointmentObj, Session sessionObj);
+	public void infoitemCreated(DocumentMetadata metadata, Session sessionObject);
+
+	public void infoitemModified(DocumentMetadata metadata, Session sessionObject);
+
+	public void infoitemDeleted(DocumentMetadata metadata, Session sessionObject);
 	
 }
-
-
-
-
-
