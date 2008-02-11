@@ -65,6 +65,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.api.OXPermissionException;
 import com.openexchange.groupware.container.AppointmentObject;
 
 /**
@@ -73,44 +74,52 @@ import com.openexchange.groupware.container.AppointmentObject;
  */
 public final class Bug10836Test extends AbstractAJAXSession {
 
-    private static final Log LOG = LogFactory.getLog(Bug10836Test.class);
+	private static final Log LOG = LogFactory.getLog(Bug10836Test.class);
 
-    /**
-     * Default constructor.
-     * @param name Name of the test.
-     */
-    public Bug10836Test(final String name) {
-        super(name);
-    }
+	/**
+	 * Default constructor.
+	 * @param name Name of the test.
+	 */
+	public Bug10836Test(final String name) {
+		super(name);
+	}
 
-    /**
-     * Creates a private appointment with user A and tries to read it with user
-     * B through a list request.
-     * @throws Throwable if some exception occurs.
-     */
-    public void testVulnerability() throws Throwable {
-        final AJAXClient clientA = getClient();
-        final AJAXClient clientB = new AJAXClient(User.User2);
-        final int folderA = clientA.getValues().getPrivateAppointmentFolder();
-        final int folderB = clientB.getValues().getPrivateAppointmentFolder();
-        final TimeZone tz = clientA.getValues().getTimeZone();
-        final AppointmentObject app = new AppointmentObject();
-        app.setParentFolderID(folderA);
-        app.setTitle("Bug10836Test");
-        app.setStartDate(new Date(Tools.getHour(0)));
-        app.setEndDate(new Date(Tools.getHour(1)));
-        app.setIgnoreConflicts(true);
-        final InsertResponse insertR = (InsertResponse) Executor.execute(
-            clientA, new InsertRequest(app, tz));
-        final CommonListResponse listR = (CommonListResponse) Executor.execute(
-            clientB, new ListRequest(new int[][] {{folderB, insertR.getId()}},
-            new int[] {AppointmentObject.TITLE}));
-        Executor.execute(clientA, new DeleteRequest(folderA, insertR.getId(),
-            new Date()));
-        for (Object[] obj1 : listR) {
-            for (Object obj2 : obj1) {
-                assertNull(obj2);
-            }
-        }
-    }
+	/**
+	 * Creates a private appointment with user A and tries to read it with user
+	 * B through a list request.
+	 * @throws Throwable if some exception occurs.
+	 */
+	public void testVulnerability() throws Throwable {
+		final AJAXClient clientA = getClient();
+		final AJAXClient clientB = new AJAXClient(User.User2);
+		final int folderA = clientA.getValues().getPrivateAppointmentFolder();
+		final int folderB = clientB.getValues().getPrivateAppointmentFolder();
+		final TimeZone tz = clientA.getValues().getTimeZone();
+		final AppointmentObject app = new AppointmentObject();
+		app.setParentFolderID(folderA);
+		app.setTitle("Bug10836Test");
+		app.setStartDate(new Date(Tools.getHour(0)));
+		app.setEndDate(new Date(Tools.getHour(1)));
+		app.setIgnoreConflicts(true);
+		final InsertResponse insertR = (InsertResponse) Executor.execute(
+				clientA, new InsertRequest(app, tz));
+		try {
+			final CommonListResponse listR = (CommonListResponse) Executor
+					.execute(clientB, new ListRequest(new int[][] { { folderB,
+							insertR.getId() } },
+							new int[] { AppointmentObject.TITLE }, false));
+
+			assertTrue(listR.hasError());
+			/*
+			for (Object[] obj1 : listR) {
+				for (Object obj2 : obj1) {
+					assertNull(obj2);
+				}
+			}
+			*/
+		} finally {
+			Executor.execute(clientA, new DeleteRequest(folderA, insertR
+					.getId(), new Date()));
+		}
+	}
 }
