@@ -125,6 +125,12 @@ public class AppointmentWriter extends CalendarWriter {
 	
 	private static final Log LOG = LogFactory.getLog(AppointmentWriter.class);
 	
+	public AppointmentWriter() {
+		 userObj = null;
+		 ctx = null;
+		 sessionObj = null;
+	}
+	
 	public AppointmentWriter(final User userObj, final Context ctx, final Session sessionObj) {
 		this.userObj = userObj;
 		this.ctx = ctx;
