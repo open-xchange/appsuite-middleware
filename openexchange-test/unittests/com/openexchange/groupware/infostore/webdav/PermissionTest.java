@@ -213,7 +213,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
         }
     }
 
-    //Bug 10706
+    //Bug 10706 
     public void testDontDulicateDocumentsWithCreateAndWritePermissions() throws Exception {
         FolderObject testFolder = createFolder(root, "test"+ System.currentTimeMillis(),
                 adminPermission(user1),
@@ -269,6 +269,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
 
         resource.putBodyAndGuessLength(new ByteArrayInputStream(new byte[0]));
         resource.create();
+
 
         switchUser(user2);
 
