@@ -60,7 +60,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.event.impl.InvalidStateException;
+import com.openexchange.event.EventException;
 import com.openexchange.tools.StringCollection;
 
 /**
@@ -126,7 +126,7 @@ public class PushOutputQueue implements Runnable {
 		remoteHost.add(remoteHostObject);
 	}
 
-	public static void add(final PushObject pushObject) throws InvalidStateException {
+	public static void add(final PushObject pushObject) throws EventException {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("add PushObject: " + pushObject);
 		}
@@ -136,7 +136,7 @@ public class PushOutputQueue implements Runnable {
 		}
 
 		if (!isInit) {
-			throw new InvalidStateException("PushOutputQueue not initialisiert!");
+			throw new EventException("PushOutputQueue not initialisiert!");
 		}
 		
 		final PushDelayedObject pushDelayedObject;
@@ -151,12 +151,12 @@ public class PushOutputQueue implements Runnable {
 		queue.add(pushDelayedObject);
 	}
 
-	public static void add(final RegisterObject registerObject) throws InvalidStateException {
+	public static void add(final RegisterObject registerObject) throws EventException {
 		add(registerObject, false);
 	}
 
 	public static void add(final RegisterObject registerObject, final boolean noDelay)
-			throws InvalidStateException {
+			throws EventException {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("add RegisterObject: " + registerObject);
 		}
@@ -166,7 +166,7 @@ public class PushOutputQueue implements Runnable {
 		}
 
 		if (!isInit) {
-			throw new InvalidStateException("PushOutputQueue not initialisiert!");
+			throw new EventException("PushOutputQueue not initialisiert!");
 		}
 
 		if (noDelay) {

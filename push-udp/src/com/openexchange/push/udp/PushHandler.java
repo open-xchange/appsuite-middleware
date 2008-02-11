@@ -58,12 +58,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
 import com.openexchange.api2.FolderSQLInterface;
-import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.event.CommonEvent;
-import com.openexchange.event.impl.AppointmentEventInterface;
-import com.openexchange.event.impl.ContactEventInterface;
-import com.openexchange.event.impl.FolderEventInterface;
-import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
@@ -75,7 +70,6 @@ import com.openexchange.groupware.ldap.Group;
 import com.openexchange.groupware.ldap.GroupStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.session.Session;
 
 /**
  * PushHandler
@@ -192,7 +186,7 @@ public class PushHandler implements EventHandler {
 			LOG.error("getAffectedUser4Object", exc);
 		}
 
-		return null;
+		return new int[] { };
 	}
 
 	protected int[] getAffectedUsers4Folder(final FolderObject folderObj, final Set<Integer> hs,
@@ -218,7 +212,7 @@ public class PushHandler implements EventHandler {
 			LOG.error("getAffectedUsers4Folder", exc);
 		}
 
-		return null;
+		return new int[] { };
 	}
 
 	protected void addMembers(final Group g, final Set<Integer> hs) {
