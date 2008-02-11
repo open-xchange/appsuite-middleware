@@ -66,104 +66,111 @@ import javax.net.ssl.TrustManager;
  * This ssl socket factory creates a ssl context that trusts all certificates
  * and uses then this context to create a ssl socket factory that will trust all
  * certificates.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class TrustAllSSLSocketFactory extends SSLSocketFactory {
 
-    /**
-     * This factory will trust all certificates.
-     */
-    private SSLSocketFactory factory;
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(TrustAllSSLSocketFactory.class);
 
-    /**
-     * This constructor creates a ssl context with the TrustAllManager and uses
-     * the ssl socket factory from this ssl context.
-     */
-    protected TrustAllSSLSocketFactory() {
-        super();
-        try {
-            SSLContext context = SSLContext.getInstance("TLS");
-            context.init(null, new TrustManager[] {new TrustAllManager()},
-                new SecureRandom());
-            factory = context.getSocketFactory();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (KeyManagementException e) {
-            e.printStackTrace();
-        }
-    }
+	/**
+	 * This factory will trust all certificates.
+	 */
+	private SSLSocketFactory factory;
 
-    /**
-     * @see javax.net.ssl.SSLSocketFactory#getDefault()
-     */
-    public static SocketFactory getDefault() {
-        return new TrustAllSSLSocketFactory();
-    }
+	/**
+	 * This constructor creates a ssl context with the TrustAllManager and uses
+	 * the ssl socket factory from this ssl context.
+	 */
+	protected TrustAllSSLSocketFactory() {
+		super();
+		try {
+			final SSLContext context = SSLContext.getInstance("TLS");
+			context.init(null, new TrustManager[] { new TrustAllManager() }, new SecureRandom());
+			factory = context.getSocketFactory();
+		} catch (final NoSuchAlgorithmException e) {
+			LOG.error(e.getMessage(), e);
+		} catch (final KeyManagementException e) {
+			LOG.error(e.getMessage(), e);
+		}
+	}
 
-    /**
-     * @see javax.net.ssl.SSLSocketFactory#getDefaultCipherSuites()
-     */
-    public String[] getDefaultCipherSuites() {
-        return factory.getDefaultCipherSuites();
-    }
+	/**
+	 * @see javax.net.ssl.SSLSocketFactory#getDefault()
+	 */
+	public static SocketFactory getDefault() {
+		return new TrustAllSSLSocketFactory();
+	}
 
-    /**
-     * @see javax.net.ssl.SSLSocketFactory#getSupportedCipherSuites()
-     */
-    public String[] getSupportedCipherSuites() {
-        return factory.getSupportedCipherSuites();
-    }
+	/**
+	 * @see javax.net.ssl.SSLSocketFactory#getDefaultCipherSuites()
+	 */
+	@Override
+	public String[] getDefaultCipherSuites() {
+		return factory.getDefaultCipherSuites();
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Socket createSocket() throws IOException {
-        return factory.createSocket();
-    }
+	/**
+	 * @see javax.net.ssl.SSLSocketFactory#getSupportedCipherSuites()
+	 */
+	@Override
+	public String[] getSupportedCipherSuites() {
+		return factory.getSupportedCipherSuites();
+	}
 
-    /**
-     * @see javax.net.ssl.SSLSocketFactory#createSocket(java.net.Socket,
-     *        java.lang.String, int, boolean)
-     */
-    public Socket createSocket(final Socket s, final String host, final int port,
-        final boolean autoClose) throws IOException {
-        return factory.createSocket(s, host, port, autoClose);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Socket createSocket() throws IOException {
+		return factory.createSocket();
+	}
 
-    /**
-     * @see javax.net.SocketFactory#createSocket(java.lang.String, int)
-     */
-    public Socket createSocket(final String host, final int port)
-        throws IOException, UnknownHostException {
-        return factory.createSocket(host, port);
-    }
+	/**
+	 * @see javax.net.ssl.SSLSocketFactory#createSocket(java.net.Socket,
+	 *      java.lang.String, int, boolean)
+	 */
+	@Override
+	public Socket createSocket(final Socket s, final String host, final int port, final boolean autoClose)
+			throws IOException {
+		return factory.createSocket(s, host, port, autoClose);
+	}
 
-    /**
-     * @see javax.net.SocketFactory#createSocket(java.lang.String, int,
-     *        java.net.InetAddress, int)
-     */
-    public Socket createSocket(final String host, final int port,
-        final InetAddress localAddress, final int localPort) throws IOException,
-        UnknownHostException {
-        return factory.createSocket(host, port, localAddress, localPort);
-    }
+	/**
+	 * @see javax.net.SocketFactory#createSocket(java.lang.String, int)
+	 */
+	@Override
+	public Socket createSocket(final String host, final int port) throws IOException, UnknownHostException {
+		return factory.createSocket(host, port);
+	}
 
-    /**
-     * @see javax.net.SocketFactory#createSocket(java.net.InetAddress, int)
-     */
-    public Socket createSocket(final InetAddress host, final int port)
-        throws IOException {
-        return factory.createSocket(host, port);
-    }
+	/**
+	 * @see javax.net.SocketFactory#createSocket(java.lang.String, int,
+	 *      java.net.InetAddress, int)
+	 */
+	@Override
+	public Socket createSocket(final String host, final int port, final InetAddress localAddress, final int localPort)
+			throws IOException, UnknownHostException {
+		return factory.createSocket(host, port, localAddress, localPort);
+	}
 
-    /**
-     * @see javax.net.SocketFactory#createSocket(java.net.InetAddress, int,
-     *        java.net.InetAddress, int)
-     */
-    public Socket createSocket(final InetAddress address, final int port,
-        final InetAddress localAddress, final int localPort) throws IOException {
-        return factory.createSocket(address, port, localAddress, localPort);
-    }
+	/**
+	 * @see javax.net.SocketFactory#createSocket(java.net.InetAddress, int)
+	 */
+	@Override
+	public Socket createSocket(final InetAddress host, final int port) throws IOException {
+		return factory.createSocket(host, port);
+	}
+
+	/**
+	 * @see javax.net.SocketFactory#createSocket(java.net.InetAddress, int,
+	 *      java.net.InetAddress, int)
+	 */
+	@Override
+	public Socket createSocket(final InetAddress address, final int port, final InetAddress localAddress,
+			final int localPort) throws IOException {
+		return factory.createSocket(address, port, localAddress, localPort);
+	}
 
 }
