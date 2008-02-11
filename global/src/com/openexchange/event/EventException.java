@@ -52,7 +52,7 @@
 package com.openexchange.event;
 
 /**
- * OXConflictException
+ * EventException
  * TODO Error codes
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
