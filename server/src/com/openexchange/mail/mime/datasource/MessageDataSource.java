@@ -50,7 +50,6 @@
 package com.openexchange.mail.mime.datasource;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -183,12 +182,10 @@ public final class MessageDataSource implements DataSource {
 		return name;
 	}
 
-	protected static int copyStream(final InputStream inputStreamArg, final OutputStream outputStreamArg)
+	protected static int copyStream(final InputStream inputStreamArg, final UnsynchronizedByteArrayOutputStream outputStream)
 			throws IOException {
 		final InputStream inputStream = inputStreamArg instanceof BufferedInputStream ? (BufferedInputStream) inputStreamArg
 				: new BufferedInputStream(inputStreamArg);
-		final OutputStream outputStream = outputStreamArg instanceof BufferedOutputStream ? (BufferedOutputStream) outputStreamArg
-				: new BufferedOutputStream(outputStreamArg);
 		try {
 			final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
 			int len;
