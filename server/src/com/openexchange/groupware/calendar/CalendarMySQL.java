@@ -58,6 +58,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1135,7 +1136,7 @@ class CalendarMySQL implements CalendarSqlImp {
             }
         }
     }
-    
+        
     private final void insertUserParticipants(final CalendarDataObject cdao, final Connection writecon, final int uid) throws SQLException, Exception {
         final UserParticipant up[] = cdao.getUsers();
         Arrays.sort(up);
@@ -2824,13 +2825,25 @@ class CalendarMySQL implements CalendarSqlImp {
                         edao.setRecurrenceDatePosition(cdao.getRecurrenceDatePosition());
                         CalendarRecurringCollection.setRecurrencePositionOrDateInDAO(edao);
                         
+                        CalendarDataObject temp = (CalendarDataObject) edao.clone();
+                        final RecurringResults rss = CalendarRecurringCollection.calculateRecurring(temp, 0, 0, edao.getRecurrencePosition());
+                        if (rss != null) {
+                            RecurringResult rs = rss.getRecurringResult(0);
+                            if (rss != null) {
+                                edao.setStartDate(new Date(rs.getStart()));
+                                edao.setEndDate(new Date(rs.getEnd()));
+                                
+                            }
+                        }                        
+                        
                         final java.util.Date deleted_exceptions[] = edao.getDeleteException();
                         final java.util.Date changed_exceptions[] = edao.getChangeException();
                         final java.util.Date calculated_exception = edao.getRecurrenceDatePosition();
-                        
                         edao.removeDeleteExceptions();
                         edao.removeChangeExceptions();
+                        edao.setChangeExceptions(new java.util.Date[] { calculated_exception });
                         CalendarCommonCollection.removeParticipant(edao, uid);
+                        CalendarCommonCollection.removeUserParticipant(edao, uid);
                         edao.setModifiedBy(uid);
                         edao.setRecurrenceID(edao.getObjectID());
                         edao.removeObjectID();

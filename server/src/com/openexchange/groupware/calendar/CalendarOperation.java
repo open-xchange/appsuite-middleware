@@ -531,7 +531,7 @@ public class CalendarOperation implements SearchIterator {
         return new Date(until+mod);
     }
     
-    private final void calculateAndSetRealRecurringStartAndEndDate(final CalendarDataObject cdao, final CalendarDataObject edao) {
+    final void calculateAndSetRealRecurringStartAndEndDate(final CalendarDataObject cdao, final CalendarDataObject edao) {
         long start_date = edao.getRecurringStart();
         if (start_date == 0) {
             start_date = edao.getStartDate().getTime();

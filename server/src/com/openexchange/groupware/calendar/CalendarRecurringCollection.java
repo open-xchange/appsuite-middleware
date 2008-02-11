@@ -669,6 +669,8 @@ public final class CalendarRecurringCollection {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_DAY, re.getValue());
             } else if (re.getCode() == RecurringException.RECURRING_MISSING_YEARLY_TYPE) {
                 throw new OXCalendarException(OXCalendarException.Code.RECURRING_MISSING_YEARLY_TYPE, re.getValue());
+            } else if (re.getCode() == RecurringException.UNEXPECTED_ERROR) {
+            	throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, re, re.getValue());
             }
             
         }

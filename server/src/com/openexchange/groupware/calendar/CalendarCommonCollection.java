@@ -449,6 +449,26 @@ public class CalendarCommonCollection {
         }
     }
     
+    static final void removeUserParticipant(final CalendarDataObject cdao, final int uid) throws OXException {
+    	        final Participant check[] = cdao.getParticipants();
+    	        if (check != null && check.length > 0) {
+    	            final Participant ret[] = new Participant[check.length-1];
+    	            int x = 0;
+    	            for (int a = 0; a < check.length; a++)  {
+    	                if (check[a].getIdentifier() != uid) {
+    	                    if (x < ret.length) {
+    	                        ret[x++] = check[a];
+    	                    } else {
+    	                        throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_REMOVE_PARTICIPANT, uid);
+    	                    }
+    	                }
+    	                cdao.setParticipants(ret);
+    	            }
+    	        } else {
+    	            throw new OXCalendarException(OXCalendarException.Code.UNABLE_TO_REMOVE_PARTICIPANT_2);
+    	        }
+    }        
+    
     public static final Date getNextReminderDate(final int oid, final int fid, final Session so) throws OXException, SQLException {
         return getNextReminderDate(oid, fid, so, 0L);
     }
