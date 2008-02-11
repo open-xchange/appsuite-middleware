@@ -930,10 +930,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					 * ... and perform EXPUNGE
 					 */
 					try {
-						long[] uids = IMAPCommandsCollection.seqNums2UID(f, startSeqNum, endSeqNum);
-						if (uids.length == 0) {
-							System.err.println("No UIDs for seq nums: " + startSeqNum + ":" + endSeqNum);
-						}
+						final long[] uids = IMAPCommandsCollection.seqNums2UID(f, startSeqNum, endSeqNum);
 						uidExpungeWithFallback(f, uids);
 					} catch (final ProtocolException e) {
 						LOG.error(e.getLocalizedMessage(), e);
