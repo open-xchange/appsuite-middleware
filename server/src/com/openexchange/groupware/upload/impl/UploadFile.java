@@ -121,10 +121,11 @@ public class UploadFile {
 			/*
 			 * Try guessing the filename separator
 			 */
-			if (preparedFileName.indexOf('\\') != -1) {
-				preparedFileName = preparedFileName.substring(preparedFileName.lastIndexOf('\\') + 1);
-			} else if (preparedFileName.indexOf('/') != -1) {
-				preparedFileName = preparedFileName.substring(preparedFileName.lastIndexOf('/') + 1);
+			int pos = -1;
+			if ((pos = preparedFileName.indexOf('\\')) != -1) {
+				preparedFileName = preparedFileName.substring(pos + 1);
+			} else if ((pos = preparedFileName.indexOf('/')) != -1) {
+				preparedFileName = preparedFileName.substring(pos + 1);
 			}
 		}
 		return preparedFileName;
