@@ -107,6 +107,7 @@ import com.openexchange.mail.parser.handlers.ImageMessageHandler;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.CommandFailedException;
+import com.sun.mail.iap.ConnectionException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.AppendUID;
 import com.sun.mail.imap.IMAPFolder;
@@ -629,6 +630,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 		 */
 		try {
 			IMAPCommandsCollection.uidExpungeWithFallback(imapFolder, tmp);
+		} catch (final ConnectionException e) {
+			/*
+			 * Connection is broken. Not possible to retry.
+			 */
+			throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapConnection.getMailConfig().getServer(),
+					imapConnection.getMailConfig().getLogin());
 		} catch (final ProtocolException e) {
 			throw new IMAPException(IMAPException.Code.UID_EXPUNGE_FAILED, e, Arrays.toString(tmp), imapFolder
 					.getFullName(), e.getMessage());
@@ -779,6 +786,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			}
 			try {
 				IMAPCommandsCollection.uidExpungeWithFallback(imapFolder, tmp);
+			} catch (final ConnectionException e) {
+				/*
+				 * Connection is broken. Not possible to retry.
+				 */
+				throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapConnection.getMailConfig()
+						.getServer(), imapConnection.getMailConfig().getLogin());
 			} catch (final ProtocolException e) {
 				throw new IMAPException(IMAPException.Code.UID_EXPUNGE_FAILED, e, Arrays.toString(tmp), imapFolder
 						.getFullName(), e.getMessage());

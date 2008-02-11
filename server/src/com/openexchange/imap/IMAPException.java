@@ -309,7 +309,12 @@ public final class IMAPException extends MIMEMailException {
 		/**
 		 * An attempt was made to open a read-only folder with read-write: %s
 		 */
-		READ_ONLY_FOLDER(MIMEMailException.Code.READ_ONLY_FOLDER);
+		READ_ONLY_FOLDER(MIMEMailException.Code.READ_ONLY_FOLDER),
+		/**
+		 * Connection was refused or timed out while attempting to connect to
+		 * remote server %s for user %s
+		 */
+		CONNECTION_ERROR(MIMEMailException.Code.CONNECT_ERROR);
 
 		private final String message;
 

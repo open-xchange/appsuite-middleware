@@ -97,6 +97,7 @@ import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.CommandFailedException;
+import com.sun.mail.iap.ConnectionException;
 import com.sun.mail.iap.ParsingException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.ACL;
@@ -932,6 +933,12 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					try {
 						IMAPCommandsCollection.uidExpungeWithFallback(f, IMAPCommandsCollection.seqNums2UID(f,
 								startSeqNum, endSeqNum));
+					} catch (final ConnectionException e) {
+						/*
+						 * Connection is broken. Not possible to retry.
+						 */
+						throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapConnection.getMailConfig()
+								.getServer(), imapConnection.getMailConfig().getLogin());
 					} catch (final ProtocolException e) {
 						LOG.error(e.getLocalizedMessage(), e);
 						IMAPCommandsCollection.fastExpunge(f);
