@@ -132,7 +132,7 @@ public class EventClient {
 	}
 
 	public void modify(final AppointmentObject oldAppointmentObj, AppointmentObject newAppointmentObj, FolderObject folderObj) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.UPDATE, Types.APPOINTMENT, newAppointmentObj, oldAppointmentObj, folderObj, null);
+		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.UPDATE, Types.APPOINTMENT, oldAppointmentObj, newAppointmentObj, folderObj, null);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -140,7 +140,7 @@ public class EventClient {
 		final Event event = new Event("com/openexchange/groupware/appointment/update", ht);
 		sendEvent(event);
 
-		final EventObject eventObject = new EventObject(newAppointmentObj, CHANGED, session);
+		final EventObject eventObject = new EventObject(oldAppointmentObj, CHANGED, session);
 		EventQueue.add(eventObject);
 	}
 
