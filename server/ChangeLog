@@ -1,5 +1,10 @@
 * 2008-02-11 - martin.kauss@open-xchange.com
 
+ - Fixed bug #10865. The time of the created exception was set to the
+   recurring start/end time instead of the exception start/end time.
+   Furthermore, the participant was only removed from the users list
+   and not from the participant list. This has been fixed.
+
  - Fixed bug #10836. A user was able to setup a list request to see any
    object in any private folder. This has been fixed.
 
