@@ -54,12 +54,16 @@ package com.openexchange.webdav.xml;
 import java.io.OutputStream;
 import java.util.Date;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
 
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.session.Session;
@@ -81,18 +85,11 @@ public class DataWriter {
 	
 	public static final Namespace namespace = Namespace.getNamespace(XmlServlet.PREFIX, XmlServlet.NAMESPACE);
 	
-	protected Session sessionObj = null;
+	protected Session sessionObj;
 
-	protected Context ctx = null;
+	protected Context ctx;
 	
-	private User userObj = null;
-	
-	protected User getUser() {
-		if (null == userObj) {
-			userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
-		}
-		return userObj;
-	}
+	protected User userObj;
 	
 	protected void writeResponseElement(Element e_prop, int object_id, int status, String description, XMLOutputter xo, OutputStream os) throws Exception {
 		Element e_response = new Element("response", dav);
