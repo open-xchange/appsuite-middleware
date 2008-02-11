@@ -147,11 +147,7 @@ public class Starter implements Initialization {
 	/**
 	 * Responsible for starting and stopping the EventQueue
 	 */
-	new com.openexchange.event.EventInit(),
-	/**
-	 * Initializes the push component.
-	 */
-	com.openexchange.push.PushInit.getInstance() };
+	new com.openexchange.event.impl.EventInit() };
 
 	/**
 	 * This contains the components that must be started if the admin uses APIs
