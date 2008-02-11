@@ -865,6 +865,8 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 
 	private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
 
+	private static final int INT_1 = 1;
+
 	public void clearFolder(final String fullnameArg) throws MailException {
 		try {
 			final String fullname = prepareMailFolderParam(fullnameArg);
@@ -898,12 +900,10 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					 * Don't adapt sequence number since folder expunge already
 					 * resets message numbering
 					 */
-					final int startSeqNum = 1;
-					final int endSeqNum = blockSize;
 					if (backup) {
 						try {
 							final long start = System.currentTimeMillis();
-							new CopyIMAPCommand(f, startSeqNum, endSeqNum, trashFullname).doCommand();
+							new CopyIMAPCommand(f, INT_1, blockSize, trashFullname).doCommand();
 							if (LOG.isDebugEnabled()) {
 								LOG.debug(new StringBuilder(128).append("\"Soft Clear\": ").append(
 										"Messages copied to default trash folder \"").append(trashFullname).append(
@@ -926,13 +926,13 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					/*
 					 * Delete through storing \Deleted flag...
 					 */
-					new FlagsIMAPCommand(f, startSeqNum, endSeqNum, FLAGS_DELETED, true).doCommand();
+					new FlagsIMAPCommand(f, INT_1, blockSize, FLAGS_DELETED, true).doCommand();
 					/*
 					 * ... and perform EXPUNGE
 					 */
 					try {
-						IMAPCommandsCollection.uidExpungeWithFallback(f, IMAPCommandsCollection.seqNums2UID(f,
-								startSeqNum, endSeqNum));
+						IMAPCommandsCollection.uidExpungeWithFallback(f, IMAPCommandsCollection.seqNums2UID(f, INT_1,
+								blockSize));
 					} catch (final ConnectionException e) {
 						/*
 						 * Connection is broken. Not possible to retry.
