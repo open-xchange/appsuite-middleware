@@ -1,3 +1,8 @@
+* 2008-02-11 - martin.kauss@open-xchange.com
+
+ - Fixed bug #10836. A user was able to setup a list request to see any
+   object in any private folder. This has been fixed.
+
 * 2008-02-07 - thorben.betten@open-xchange.com
 
  - Bugfix #10890: No copy into 'Sent' folder when sending raw message data
