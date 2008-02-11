@@ -200,7 +200,7 @@ public final class ConfigurationImpl implements Configuration {
 			final FileWatcher fileWatcher = FileWatcher.getFileWatcher(new File(propertiesFiles.get(name)));
 			fileWatcher.addFileListener(pw);
 			fileWatcher.startFileWatcher(10000);
-			properties.get(name);
+			return properties.get(name);
 		}
 		return null;
 	}
@@ -218,7 +218,7 @@ public final class ConfigurationImpl implements Configuration {
 			final FileWatcher fileWatcher = FileWatcher.getFileWatcher(new File(propertiesFiles.get(name)));
 			fileWatcher.addFileListener(pw);
 			fileWatcher.startFileWatcher(10000);
-			properties.get(name);
+			return properties.get(name);
 		}
 		return defaultValue;
 	}
