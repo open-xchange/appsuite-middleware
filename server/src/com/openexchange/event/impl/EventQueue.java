@@ -59,6 +59,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.event.EventException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
@@ -138,10 +139,10 @@ public class EventQueue extends TimerTask {
 		isInit = true;
 	}
 
-	public static void add(final EventObject eventObj) throws InvalidStateException {
+	public static void add(final EventObject eventObj) throws EventException {
 		if (shuttingDown) {
 			LOG.info("Shutting down event system, so no events are accepted. Throwing Invalid State Exception");
-			throw new InvalidStateException("Event system is being shut down and therefore does not accept new events.");
+			throw new EventException("Event system is being shut down and therefore does not accept new events.");
 		}
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(new StringBuilder("add EventObject: ").append(eventObj));
@@ -152,7 +153,7 @@ public class EventQueue extends TimerTask {
 		}
 
 		if (!isInit) {
-			throw new InvalidStateException("EventQueue not initialisiert!");
+			throw new EventException("EventQueue not initialisiert!");
 		}
 
 		if (!noDelay) {

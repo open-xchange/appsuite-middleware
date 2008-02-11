@@ -65,8 +65,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
-import com.openexchange.event.impl.InvalidStateException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.RecurringResult;
@@ -802,7 +802,7 @@ public final class TaskLogic {
         Reminder.deleteReminder(ctx, task);
         try {
             new EventClient(session).delete(task);
-        } catch (InvalidStateException e) {
+        } catch (EventException e) {
             throw new TaskException(Code.EVENT, e);
         } catch (ContextException e) {
             throw new TaskException(Code.EVENT, e);

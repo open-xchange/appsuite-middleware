@@ -58,6 +58,7 @@ import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.event.CommonEvent;
+import com.openexchange.event.EventException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
@@ -95,7 +96,7 @@ public class EventClient {
 		contextId = session.getContextId();
 	}
 
-	public void create(final AppointmentObject appointmentObj) throws InvalidStateException, OXException, ContextException {
+	public void create(final AppointmentObject appointmentObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
 		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
@@ -106,7 +107,7 @@ public class EventClient {
 		}
 	}
 		
-	public void create(final AppointmentObject appointmentObj, final FolderObject folderObj) throws InvalidStateException {
+	public void create(final AppointmentObject appointmentObj, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.INSERT, Types.APPOINTMENT, appointmentObj, null, folderObj, null);
 
 		final Hashtable ht = new Hashtable();
@@ -119,7 +120,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 	
-	public void modify(final AppointmentObject appointmentObj) throws InvalidStateException, OXException, ContextException {
+	public void modify(final AppointmentObject appointmentObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
 		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
@@ -130,7 +131,7 @@ public class EventClient {
 		}
 	}
 
-	public void modify(final AppointmentObject oldAppointmentObj, AppointmentObject newAppointmentObj, FolderObject folderObj) throws InvalidStateException {
+	public void modify(final AppointmentObject oldAppointmentObj, AppointmentObject newAppointmentObj, FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.UPDATE, Types.APPOINTMENT, newAppointmentObj, oldAppointmentObj, folderObj, null);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -143,7 +144,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 
-	public void delete(final AppointmentObject appointmentObj) throws InvalidStateException, OXException, ContextException {
+	public void delete(final AppointmentObject appointmentObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
 		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
@@ -154,7 +155,7 @@ public class EventClient {
 		}
 	}
 	
-	public void delete(final AppointmentObject appointmentObj, final FolderObject folderObj) throws InvalidStateException {
+	public void delete(final AppointmentObject appointmentObj, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.DELETE, Types.APPOINTMENT, appointmentObj, null, null, null);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -167,7 +168,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 
-	public void move(final AppointmentObject appointmentObj, FolderObject sourceFolder, FolderObject destinationFolder) throws InvalidStateException {
+	public void move(final AppointmentObject appointmentObj, FolderObject sourceFolder, FolderObject destinationFolder) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.MOVE, Types.APPOINTMENT, appointmentObj, null, sourceFolder, destinationFolder);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -180,7 +181,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 
-	public void create(final Task taskObj) throws InvalidStateException, OXException, ContextException {
+	public void create(final Task taskObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
 		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
@@ -191,7 +192,7 @@ public class EventClient {
 		}
 	}
 		
-	public void create(final Task taskObj, final FolderObject folderObj) throws InvalidStateException {
+	public void create(final Task taskObj, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.INSERT, Types.TASK, taskObj, null, folderObj, null);
 
 		final Hashtable ht = new Hashtable();
@@ -204,7 +205,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 
-    public void modify(final Task taskObj) throws InvalidStateException, OXException, ContextException {
+    public void modify(final Task taskObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
 		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
@@ -215,7 +216,7 @@ public class EventClient {
 		}
 	}
     
-	public void modify(final Task taskObj, final FolderObject folderObj) throws InvalidStateException {
+	public void modify(final Task taskObj, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.UPDATE, Types.TASK, taskObj, null, folderObj, null);
 
 		final Hashtable ht = new Hashtable();
@@ -228,7 +229,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 
-    public void delete(final Task taskObj) throws InvalidStateException, OXException, ContextException {
+    public void delete(final Task taskObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
 		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
@@ -239,7 +240,7 @@ public class EventClient {
 		}
 	}
     
-	public void delete(final Task taskObj, final FolderObject folderObj) throws InvalidStateException {
+	public void delete(final Task taskObj, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.DELETE, Types.TASK, taskObj, null, folderObj, null);
 
 		final Hashtable ht = new Hashtable();
@@ -252,7 +253,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 	
-	public void move(final Task taskObj, FolderObject sourceFolder, FolderObject destinationFolder) throws InvalidStateException {
+	public void move(final Task taskObj, FolderObject sourceFolder, FolderObject destinationFolder) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.MOVE, Types.TASK, taskObj, null, sourceFolder, destinationFolder);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -265,7 +266,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 
-	public void create(final ContactObject contactObj) throws InvalidStateException, OXException, ContextException {
+	public void create(final ContactObject contactObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
 		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
@@ -276,7 +277,7 @@ public class EventClient {
 		}
 	}
 		
-	public void create(final ContactObject contactObj, final FolderObject folderObj) throws InvalidStateException {
+	public void create(final ContactObject contactObj, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.INSERT, Types.CONTACT, contactObj, null, folderObj, null);
 
 		final Hashtable ht = new Hashtable();
@@ -289,7 +290,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 
-	public void modify(final ContactObject contactObj) throws InvalidStateException, OXException, ContextException {
+	public void modify(final ContactObject contactObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
 		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
@@ -300,7 +301,7 @@ public class EventClient {
 		}
 	}
 	
-	public void modify(final ContactObject contactObj, final FolderObject folderObj) throws InvalidStateException {
+	public void modify(final ContactObject contactObj, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.UPDATE, Types.CONTACT, contactObj, null, folderObj, null);
 
 		final Hashtable ht = new Hashtable();
@@ -313,7 +314,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}	
 
-	public void delete(final ContactObject contactObj) throws InvalidStateException, OXException, ContextException {
+	public void delete(final ContactObject contactObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
 		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
@@ -324,7 +325,7 @@ public class EventClient {
 		}
 	}
 	
-	public void delete(final ContactObject contactObj, final FolderObject folderObj) throws InvalidStateException {
+	public void delete(final ContactObject contactObj, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.DELETE, Types.CONTACT, contactObj, null, folderObj, null);
 
 		final Hashtable ht = new Hashtable();
@@ -337,7 +338,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 	
-	public void move(final ContactObject contactObj, final FolderObject folderObj) throws InvalidStateException {
+	public void move(final ContactObject contactObj, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.MOVE, Types.CONTACT, contactObj, null, folderObj, null);
 
 		final Hashtable ht = new Hashtable();
@@ -350,7 +351,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 	
-	public void create(final FolderObject folderObj) throws InvalidStateException, OXException, ContextException {
+	public void create(final FolderObject folderObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
 		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
@@ -361,7 +362,7 @@ public class EventClient {
 		}
 	}
 		
-	public void create(final FolderObject folderObj, final FolderObject parentFolder) throws InvalidStateException {
+	public void create(final FolderObject folderObj, final FolderObject parentFolder) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.INSERT, Types.FOLDER, folderObj, null, parentFolder, null);
 
 		final Hashtable ht = new Hashtable();
@@ -374,7 +375,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 
-	public void modify(final FolderObject folderObj) throws InvalidStateException, OXException, ContextException {
+	public void modify(final FolderObject folderObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
 		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
@@ -385,7 +386,7 @@ public class EventClient {
 		}
 	}
 	
-	public void modify(final FolderObject folderObj, final FolderObject parentFolder) throws InvalidStateException {
+	public void modify(final FolderObject folderObj, final FolderObject parentFolder) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.UPDATE, Types.FOLDER, folderObj, null, parentFolder, null);
 
 		final Hashtable ht = new Hashtable();
@@ -398,7 +399,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 
-	public void delete(final FolderObject folderObj) throws InvalidStateException, OXException, ContextException {
+	public void delete(final FolderObject folderObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
 		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
@@ -409,7 +410,7 @@ public class EventClient {
 		}
 	}
 	
-	public void delete(final FolderObject folderObj, final FolderObject parentFolder) throws InvalidStateException {
+	public void delete(final FolderObject folderObj, final FolderObject parentFolder) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.DELETE, Types.FOLDER, folderObj, null, parentFolder, null);
 
 		final Hashtable ht = new Hashtable();
@@ -422,7 +423,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 
-	public void create(final DocumentMetadata document) throws InvalidStateException, OXException, ContextException {
+	public void create(final DocumentMetadata document) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
 		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
@@ -433,7 +434,7 @@ public class EventClient {
 		}	
 	}
 	
-	public void create(final DocumentMetadata document, final FolderObject parentFolder) throws InvalidStateException {
+	public void create(final DocumentMetadata document, final FolderObject parentFolder) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.INSERT, Types.INFOSTORE, document, null, parentFolder, null);
 
 		final Hashtable ht = new Hashtable();
@@ -446,7 +447,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 
-	public void modify(final DocumentMetadata document) throws InvalidStateException, OXException, ContextException {
+	public void modify(final DocumentMetadata document) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
 		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
@@ -457,7 +458,7 @@ public class EventClient {
 		}
 	}
 	
-	public void modify(final DocumentMetadata document, final FolderObject parentFolder) throws InvalidStateException {
+	public void modify(final DocumentMetadata document, final FolderObject parentFolder) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.UPDATE, Types.INFOSTORE, document, null, parentFolder, null);
 
 		final Hashtable ht = new Hashtable();
@@ -470,7 +471,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 
-	public void delete(final DocumentMetadata document) throws InvalidStateException, OXException, ContextException {
+	public void delete(final DocumentMetadata document) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
 		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
@@ -481,7 +482,7 @@ public class EventClient {
 		}
 	}
 	
-	public void delete(final DocumentMetadata document, final FolderObject parentFolder) throws InvalidStateException {
+	public void delete(final DocumentMetadata document, final FolderObject parentFolder) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.DELETE, Types.INFOSTORE, document, null, parentFolder, null);
 
 		final Hashtable ht = new Hashtable();
@@ -494,7 +495,7 @@ public class EventClient {
 		EventQueue.add(eventObject);
 	}
 	
-	public void move(final DocumentMetadata document, FolderObject sourceFolder, FolderObject destinationFolder) throws InvalidStateException {
+	public void move(final DocumentMetadata document, FolderObject sourceFolder, FolderObject destinationFolder) throws EventException {
 		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.MOVE, Types.INFOSTORE, document, null, sourceFolder, destinationFolder);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
@@ -512,7 +513,7 @@ public class EventClient {
 		EventAdmin eventAdmin = null;
 		try {
 			eventAdmin = eventAdminService.getService();
-			eventAdmin.sendEvent(event);
+			eventAdmin.postEvent(event);
 		} finally {
 			if (eventAdmin != null) {
 				eventAdminService.ungetService(eventAdmin);

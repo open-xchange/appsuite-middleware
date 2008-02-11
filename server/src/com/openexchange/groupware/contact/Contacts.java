@@ -75,8 +75,8 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
-import com.openexchange.event.impl.InvalidStateException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
@@ -2400,7 +2400,7 @@ public class Contacts implements DeleteListener {
 			del.execute(cs.iFtrashContactsFromFolderUpdateString(fid,so.getContextId()));
 		} catch (final ContextException d){
 			throw new ContactException(d);
-		} catch (final InvalidStateException is){
+		} catch (final EventException is){
 			throw EXCEPTIONS.create(46,is, Integer.valueOf(so.getContextId()), Integer.valueOf(fid));
 			//throw new OXException("UNABLE TO DELTE FOLDER OBJECTS cid="+so.getContextId()+" fid="+fid,se);
 		} catch (final SQLException se) {
@@ -2619,7 +2619,7 @@ public class Contacts implements DeleteListener {
 			//writecon.commit();
 		} catch (final ContextException d){
 			throw new ContactException(d);
-		} catch (final InvalidStateException ox) {
+		} catch (final EventException ox) {
 			throw EXCEPTIONS.create(57, Integer.valueOf(so.getContextId()),Integer.valueOf(uid));
 			/*
 		} catch (final OXException ox) {

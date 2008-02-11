@@ -64,8 +64,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
-import com.openexchange.event.impl.InvalidStateException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
@@ -152,7 +152,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			ContactSQLInterface csql = new RdbContactSQLInterface(sessionobject);
 			csql.insertContactObject(coo);
 			*/
-		}catch (InvalidStateException ise){
+		}catch (EventException ise){
 			throw EXCEPTIONS.create(0,ise);
 		}catch (ContextException ise){
 			throw EXCEPTIONS.create(0,ise);
@@ -179,7 +179,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			ec.modify(co);
 		}catch (ContactException ise){
 			throw ise;
-		}catch (InvalidStateException ise){
+		}catch (EventException ise){
 			throw EXCEPTIONS.create(1,ise);
 		}catch (ContextException ise){
 			throw EXCEPTIONS.create(1,ise);
@@ -1025,7 +1025,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			}
 			final EventClient ec = new EventClient(session);
 			ec.delete(co);
-		} catch (InvalidStateException ise){
+		} catch (EventException ise){
 			throw EXCEPTIONS.create(56,ise);
 		} catch (ContextException ise){
 			throw EXCEPTIONS.create(56,ise);

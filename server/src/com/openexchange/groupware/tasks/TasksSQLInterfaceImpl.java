@@ -60,8 +60,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
-import com.openexchange.event.impl.InvalidStateException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -309,7 +309,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         task.setUsers(TaskLogic.createUserParticipants(parts));
         try {
             new EventClient(session).create(task);
-        } catch (InvalidStateException e) {
+        } catch (EventException e) {
             throw Tools.convert(new TaskException(Code.EVENT, e));
         } catch (ContextException e) {
             throw Tools.convert(new TaskException(Code.EVENT, e));
@@ -356,7 +356,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         }
         try {
             new EventClient(session).modify(updated);
-        } catch (InvalidStateException e) {
+        } catch (EventException e) {
             throw Tools.convert(new TaskException(Code.EVENT, e));
         } catch (ContextException e) {
             throw Tools.convert(new TaskException(Code.EVENT, e));
@@ -397,7 +397,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             TaskLogic.insertTask(ctx, task, parts, folders);
             try {
                 new EventClient(session).create(task);
-            } catch (InvalidStateException e) {
+            } catch (EventException e) {
                 throw Tools.convert(new TaskException(Code.EVENT, e));
             } catch (ContextException e) {
                 throw Tools.convert(new TaskException(Code.EVENT, e));
