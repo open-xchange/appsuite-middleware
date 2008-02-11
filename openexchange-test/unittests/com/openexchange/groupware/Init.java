@@ -1,21 +1,27 @@
 package com.openexchange.groupware;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+
 import com.openexchange.config.Configuration;
 import com.openexchange.config.internal.ConfigurationImpl;
-import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.i18n.impl.I18nImpl;
+import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.i18n.tools.I18nServices;
 import com.openexchange.monitoring.services.MonitoringConfiguration;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.services.EventAdminService;
 import com.openexchange.server.services.SessiondService;
 import com.openexchange.sessiond.impl.ConfigurationService;
 import com.openexchange.sessiond.impl.SessiondConnectorImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.test.TestInit;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.*;
+import com.openexchange.tools.events.TestEventAdmin;
 
 /**
  * This class contains methods for initialising tests.
@@ -142,6 +148,7 @@ public final class Init {
         startAndInjectI18NBundle();
         startAndInjectMonitoringBundle();
         startAndInjectSessiondBundle();
+        startAndInjectPushUDPBundle();
     }
 
     private static void startAndInjectI18NBundle() throws FileNotFoundException {
@@ -173,10 +180,15 @@ public final class Init {
         SessiondService.getInstance().setService(new SessiondConnectorImpl());
     }
 
-
+    private static void startAndInjectPushUDPBundle() throws Exception {
+        EventAdminService.getInstance().setService(new TestEventAdmin());
+        // SessiondService.getInstance().setService(new SessiondConnectorImpl());
+    }
 
     public static void stopServer() throws AbstractOXException {
         //for(Initialization init: started) { init.stop(); }
     }
+    
+    
 
 }
