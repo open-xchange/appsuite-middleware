@@ -65,8 +65,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.event.EventClient;
-import com.openexchange.event.InvalidStateException;
+import com.openexchange.event.impl.EventClient;
+import com.openexchange.event.impl.InvalidStateException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.RecurringResult;
@@ -76,6 +76,7 @@ import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.GroupStorage;
@@ -802,6 +803,10 @@ public final class TaskLogic {
         try {
             new EventClient(session).delete(task);
         } catch (InvalidStateException e) {
+            throw new TaskException(Code.EVENT, e);
+        } catch (ContextException e) {
+            throw new TaskException(Code.EVENT, e);
+        } catch (OXException e) {
             throw new TaskException(Code.EVENT, e);
         }
     }

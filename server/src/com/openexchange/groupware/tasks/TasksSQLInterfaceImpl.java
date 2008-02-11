@@ -60,10 +60,11 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
-import com.openexchange.event.EventClient;
-import com.openexchange.event.InvalidStateException;
+import com.openexchange.event.impl.EventClient;
+import com.openexchange.event.impl.InvalidStateException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
@@ -310,6 +311,8 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             new EventClient(session).create(task);
         } catch (InvalidStateException e) {
             throw Tools.convert(new TaskException(Code.EVENT, e));
+        } catch (ContextException e) {
+            throw Tools.convert(new TaskException(Code.EVENT, e));
         }
     }
 
@@ -355,6 +358,8 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             new EventClient(session).modify(updated);
         } catch (InvalidStateException e) {
             throw Tools.convert(new TaskException(Code.EVENT, e));
+        } catch (ContextException e) {
+            throw Tools.convert(new TaskException(Code.EVENT, e));
         }
         if (updated.containsAlarm()) {
             Reminder.updateAlarm(ctx, updated, user);
@@ -393,6 +398,8 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             try {
                 new EventClient(session).create(task);
             } catch (InvalidStateException e) {
+                throw Tools.convert(new TaskException(Code.EVENT, e));
+            } catch (ContextException e) {
                 throw Tools.convert(new TaskException(Code.EVENT, e));
             }
         }
