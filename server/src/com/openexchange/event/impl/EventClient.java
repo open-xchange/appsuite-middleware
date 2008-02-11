@@ -114,7 +114,7 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/appointment/insert", ht);
-		sendEvent(event);
+		triggerEvent(event);
 		
 		final EventObject eventObject = new EventObject(appointmentObj, CREATED, session);
 		EventQueue.add(eventObject);
@@ -138,7 +138,7 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 
 		final Event event = new Event("com/openexchange/groupware/appointment/update", ht);
-		sendEvent(event);
+		triggerEvent(event);
 
 		final EventObject eventObject = new EventObject(oldAppointmentObj, CHANGED, session);
 		EventQueue.add(eventObject);
@@ -162,7 +162,7 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 
 		final Event event = new Event("com/openexchange/groupware/appointment/delete", ht);
-		sendEvent(event);
+		triggerEvent(event);
 		
 		final EventObject eventObject = new EventObject(appointmentObj, DELETED, session);
 		EventQueue.add(eventObject);
@@ -175,7 +175,7 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/appointment/move", ht);
-		sendEvent(event);
+		triggerEvent(event);
 
 		final EventObject eventObject = new EventObject(appointmentObj, DELETED, session);
 		EventQueue.add(eventObject);
@@ -199,7 +199,7 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/task/insert", ht);
-		sendEvent(event);
+		triggerEvent(event);
 		
 		final EventObject eventObject = new EventObject(taskObj, CREATED, session);
 		EventQueue.add(eventObject);
@@ -223,7 +223,7 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/task/update", ht);
-		sendEvent(event);
+		triggerEvent(event);
 		
 		final EventObject eventObject = new EventObject(taskObj, CHANGED, session);
 		EventQueue.add(eventObject);
@@ -247,7 +247,7 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/task/delete", ht);
-		sendEvent(event);
+		triggerEvent(event);
 		
 		final EventObject eventObject = new EventObject(taskObj, DELETED, session);
 		EventQueue.add(eventObject);
@@ -260,7 +260,7 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/task/move", ht);
-		sendEvent(event);
+		triggerEvent(event);
 
 		final EventObject eventObject = new EventObject(taskObj, DELETED, session);
 		EventQueue.add(eventObject);
@@ -284,7 +284,7 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/contact/insert", ht);
-		sendEvent(event);
+		triggerEvent(event);
 		
 		final EventObject eventObject = new EventObject(contactObj, CREATED, session);
 		EventQueue.add(eventObject);
@@ -308,7 +308,7 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/contact/update", ht);
-		sendEvent(event);
+		triggerEvent(event);
 		
 		final EventObject eventObject = new EventObject(contactObj, CHANGED, session);
 		EventQueue.add(eventObject);
@@ -332,7 +332,7 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/contact/delete", ht);
-		sendEvent(event);
+		triggerEvent(event);
 		
 		final EventObject eventObject = new EventObject(contactObj, DELETED, session);
 		EventQueue.add(eventObject);
@@ -345,7 +345,7 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/contact/move", ht);
-		sendEvent(event);
+		triggerEvent(event);
 		
 		final EventObject eventObject = new EventObject(contactObj, MOVED, session);
 		EventQueue.add(eventObject);
@@ -369,7 +369,7 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/folder/insert", ht);
-		sendEvent(event);
+		triggerEvent(event);
 		
 		final EventObject eventObject = new EventObject(folderObj, CREATED, session);
 		EventQueue.add(eventObject);
@@ -393,7 +393,7 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/folder/update", ht);
-		sendEvent(event);
+		triggerEvent(event);
 		
 		final EventObject eventObject = new EventObject(folderObj, CHANGED, session);
 		EventQueue.add(eventObject);
@@ -417,7 +417,7 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/folder/delete", ht);
-		sendEvent(event);
+		triggerEvent(event);
 		
 		final EventObject eventObject = new EventObject(folderObj, DELETED, session);
 		EventQueue.add(eventObject);
@@ -441,7 +441,7 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/infostore/insert", ht);
-		sendEvent(event);
+		triggerEvent(event);
 		
 		final EventObject eventObject = new EventObject(document, CREATED, session);
 		EventQueue.add(eventObject);
@@ -465,7 +465,7 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/infostore/update", ht);
-		sendEvent(event);
+		triggerEvent(event);
 		
 		final EventObject eventObject = new EventObject(document, CHANGED, session);
 		EventQueue.add(eventObject);
@@ -489,7 +489,7 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/infostore/delete", ht);
-		sendEvent(event);
+		triggerEvent(event);
 		
 		final EventObject eventObject = new EventObject(document, DELETED, session);
 		EventQueue.add(eventObject);
@@ -502,18 +502,22 @@ public class EventClient {
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/infostore/move", ht);
-		sendEvent(event);
+		triggerEvent(event);
 
 		final EventObject eventObject = new EventObject(document, MOVED, session);
 		EventQueue.add(eventObject);
 	}
 	
-	protected void sendEvent(Event event) {
+	protected void triggerEvent(Event event) throws EventException {
 		final EventAdminService eventAdminService = EventAdminService.getInstance();
 		EventAdmin eventAdmin = null;
 		try {
 			eventAdmin = eventAdminService.getService();
-			eventAdmin.postEvent(event);
+			if (eventAdmin != null) {
+				eventAdmin.postEvent(event);
+			} else {
+				throw new EventException("event service not available");
+			}
 		} finally {
 			if (eventAdmin != null) {
 				eventAdminService.ungetService(eventAdmin);
