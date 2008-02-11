@@ -891,6 +891,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 				/*
 				 * Block-wise deletion
 				 */
+				final long startClear = System.currentTimeMillis();
 				final int blockSize = IMAPConfig.getBlockSize();
 				while (msgCount > blockSize) {
 					/*
@@ -903,8 +904,8 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 						try {
 							final long start = System.currentTimeMillis();
 							new CopyIMAPCommand(f, startSeqNum, endSeqNum, trashFullname).doCommand();
-							if (LOG.isInfoEnabled()) {
-								LOG.info(new StringBuilder(128).append("\"Soft Clear\": ").append(
+							if (LOG.isDebugEnabled()) {
+								LOG.debug(new StringBuilder(128).append("\"Soft Clear\": ").append(
 										"Messages copied to default trash folder \"").append(trashFullname).append(
 										"\" in ").append((System.currentTimeMillis() - start)).append("msec")
 										.toString());
@@ -945,8 +946,8 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					try {
 						final long start = System.currentTimeMillis();
 						new CopyIMAPCommand(f, trashFullname).doCommand();
-						if (LOG.isInfoEnabled()) {
-							LOG.info(new StringBuilder(128).append("\"Soft Clear\": ").append(
+						if (LOG.isDebugEnabled()) {
+							LOG.debug(new StringBuilder(128).append("\"Soft Clear\": ").append(
 									"Messages copied to default trash folder \"").append(trashFullname)
 									.append("\" in ").append((System.currentTimeMillis() - start)).append("msec")
 									.toString());
@@ -975,13 +976,16 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					final long start = System.currentTimeMillis();
 					IMAPCommandsCollection.fastExpunge(f);
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-					if (LOG.isInfoEnabled()) {
-						LOG.info(new StringBuilder(128).append("Folder ").append(f.getFullName())
-								.append(" cleared in ").append((System.currentTimeMillis() - start)).append("msec")
-								.toString());
+					if (LOG.isDebugEnabled()) {
+						LOG.debug(new StringBuilder(128).append("Folder ").append(f.getFullName()).append(
+								" cleared in ").append((System.currentTimeMillis() - start)).append("msec").toString());
 					}
 				} catch (final ProtocolException pex) {
 					throw new MessagingException(pex.getMessage(), pex);
+				}
+				if (LOG.isInfoEnabled()) {
+					LOG.info(new StringBuilder(128).append("Folder '").append(fullname).append("' cleared in ").append(
+							System.currentTimeMillis() - startClear).append("msec"));
 				}
 				try {
 					/*
