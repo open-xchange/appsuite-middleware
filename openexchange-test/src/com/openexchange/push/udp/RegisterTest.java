@@ -4,9 +4,20 @@ package com.openexchange.push.udp;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+
 import junit.framework.TestCase;
 
 public class RegisterTest extends TestCase {
+	
+	public static final int MAGIC = 1337;
+	
+	public static final int REGISTER = 1;
+	
+	public static final int REGISTER_SYNC = 2;
+	
+	public static final int PUSH_SYNC = 3;
+	
+	public static final int REMOTE_HOST_REGISTER = 4;
 	
 	private static String host = "localhost";
 	
@@ -39,14 +50,14 @@ public class RegisterTest extends TestCase {
 	
 	public static void register(DatagramSocket datagramSocket, int userId, int contextId, String host, int port) throws Exception {
 		StringBuffer body = new StringBuffer();
-		body.append(PushRequest.REGISTER);
+		body.append(REGISTER);
 		body.append('\1');
 		body.append(userId);
 		body.append('\1');
 		body.append(contextId);
 		
 		StringBuffer requestData = new StringBuffer();
-		requestData.append("1337");
+		requestData.append(MAGIC);
 		requestData.append('\1');
 		requestData.append(body.length());
 		requestData.append('\1');
