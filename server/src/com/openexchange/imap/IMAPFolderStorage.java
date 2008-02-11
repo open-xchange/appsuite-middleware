@@ -89,7 +89,6 @@ import com.openexchange.imap.user2acl.User2ACL;
 import com.openexchange.imap.user2acl.User2ACLArgs;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailFolderStorage;
-import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -931,8 +930,8 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					 * ... and perform EXPUNGE
 					 */
 					try {
-						final long[] uids = IMAPCommandsCollection.seqNums2UID(f, startSeqNum, endSeqNum);
-						uidExpungeWithFallback(f, uids);
+						IMAPCommandsCollection.uidExpungeWithFallback(f, IMAPCommandsCollection.seqNums2UID(f,
+								startSeqNum, endSeqNum));
 					} catch (final ProtocolException e) {
 						LOG.error(e.getLocalizedMessage(), e);
 						IMAPCommandsCollection.fastExpunge(f);
@@ -1004,43 +1003,6 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 			throw IMAPException.handleMessagingException(new MessagingException(e.getMessage(), e), imapConnection);
 		} catch (final AbstractOXException e) {
 			throw new IMAPException(e);
-		}
-	}
-
-	private static void uidExpungeWithFallback(final IMAPFolder imapFolder, final long[] msgUIDs)
-			throws MessagingException, IMAPException {
-		try {
-			final long start = System.currentTimeMillis();
-			IMAPCommandsCollection.uidExpunge(imapFolder, msgUIDs);
-			MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(128).append(msgUIDs.length).append(" messages expunged in ").append(
-						(System.currentTimeMillis() - start)).append("msec").toString());
-			}
-		} catch (final ProtocolException e) {
-			if (LOG.isWarnEnabled()) {
-				LOG.warn(new StringBuilder("UID EXPUNGE failed: ").append(e.getLocalizedMessage()).toString(), e);
-			}
-			/*
-			 * UID EXPUNGE did not work; perform fallback actions
-			 */
-			try {
-				final long[] excUIDs = IMAPCommandsCollection.getDeletedMessages(imapFolder, msgUIDs);
-				if (excUIDs.length > 0) {
-					/*
-					 * Temporary remove flag \Deleted, perform expunge & restore
-					 * flag \Deleted
-					 */
-					new FlagsIMAPCommand(imapFolder, excUIDs, FLAGS_DELETED, false, false).doCommand();
-					IMAPCommandsCollection.fastExpunge(imapFolder);
-					new FlagsIMAPCommand(imapFolder, excUIDs, FLAGS_DELETED, true, false).doCommand();
-				} else {
-					IMAPCommandsCollection.fastExpunge(imapFolder);
-				}
-			} catch (final ProtocolException e1) {
-				throw new IMAPException(IMAPException.Code.UID_EXPUNGE_FAILED, e1, Arrays.toString(msgUIDs), imapFolder
-						.getFullName(), e1.getMessage());
-			}
 		}
 	}
 
