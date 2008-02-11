@@ -51,6 +51,7 @@ package com.openexchange.mail.mime.filler;
 
 import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
 import static com.openexchange.mail.utils.MessageUtility.formatHrefLinks;
+import static com.openexchange.mail.utils.MessageUtility.parseAddressList;
 import static com.openexchange.mail.utils.MessageUtility.performLineFolding;
 import static com.openexchange.mail.utils.MessageUtility.replaceHTMLSimpleQuotesForDisplay;
 
@@ -58,6 +59,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -74,6 +76,8 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.Message.RecipientType;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
@@ -86,10 +90,12 @@ import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -108,11 +114,13 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
+import com.openexchange.smtp.dataobjects.SMTPMailMessage;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
+import com.sun.mail.smtp.SMTPMessage;
 
 /**
  * {@link MIMEMessageFiller} - Provides basic methods to fills an instance of
@@ -169,10 +177,25 @@ public class MIMEMessageFiller {
 	 *            The context
 	 */
 	public MIMEMessageFiller(final Session session, final Context ctx) {
+		this(session, ctx, null);
+	}
+
+	/**
+	 * Initializes a new {@link MIMEMessageFiller}
+	 * 
+	 * @param session
+	 *            The session providing user data
+	 * @param ctx
+	 *            The context
+	 * @param usm
+	 *            The user's mail settings
+	 */
+	public MIMEMessageFiller(final Session session, final Context ctx, final UserSettingMail usm) {
 		super();
 		this.session = session;
 		this.ctx = ctx;
-		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
+		this.usm = usm == null ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx)
+				: usm;
 	}
 
 	protected final Html2TextConverter getConverter() {
@@ -299,6 +322,45 @@ public class MIMEMessageFiller {
 			 * "References:" field.
 			 */
 			mimeMessage.setHeader(MessageHeaders.HDR_REFERENCES, refBuilder.toString());
+		}
+	}
+
+	/**
+	 * Sets the appropriate headers before message's transport:
+	 * <code>Reply-To</code>, <code>Date</code>, and <code>Subject</code>
+	 * 
+	 * @param mail
+	 *            The source mail
+	 * @param newSMTPMsg
+	 *            The SMTP message
+	 * @throws AddressException
+	 * @throws MessagingException
+	 */
+	public void setSendHeaders(final SMTPMailMessage mail, final SMTPMessage newSMTPMsg) throws AddressException,
+			MessagingException {
+		/*
+		 * Set the Reply-To header for future replies to this new message
+		 */
+		final InternetAddress[] ia;
+		if (usm.getReplyToAddr() == null) {
+			ia = mail.getFrom();
+		} else {
+			ia = parseAddressList(usm.getReplyToAddr(), false);
+		}
+		newSMTPMsg.setReplyTo(ia);
+		/*
+		 * Set sent date if not done, yet
+		 */
+		if (newSMTPMsg.getSentDate() == null) {
+			newSMTPMsg.setSentDate(new Date());
+		}
+		/*
+		 * Set default subject if none set
+		 */
+		final String subject;
+		if ((subject = newSMTPMsg.getSubject()) == null || subject.length() == 0) {
+			newSMTPMsg.setSubject(new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale())
+					.getString(MailStrings.DEFAULT_SUBJECT));
 		}
 	}
 

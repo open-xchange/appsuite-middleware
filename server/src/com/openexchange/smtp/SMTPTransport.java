@@ -68,7 +68,6 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Transport;
 import javax.mail.Message.RecipientType;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
@@ -252,7 +251,7 @@ public final class SMTPTransport extends MailTransport {
 			/*
 			 * Set common headers
 			 */
-			new SMTPMessageFiller(session, ctx).setCommonHeaders(smtpMessage);
+			new SMTPMessageFiller(session, ctx, usm).setCommonHeaders(smtpMessage);
 			/*
 			 * Compose body
 			 */
@@ -367,7 +366,7 @@ public final class SMTPTransport extends MailTransport {
 			 * Fill message dependent on send type
 			 */
 			final long startPrep = System.currentTimeMillis();
-			smtpFiller = new SMTPMessageFiller(session, ctx);
+			smtpFiller = new SMTPMessageFiller(session, ctx, usm);
 			if (composedMail.getReferencedMail() != null) {
 				tempIds = ReferencedMailPart.loadReferencedParts(composedMail, session);
 			}
@@ -384,7 +383,7 @@ public final class SMTPTransport extends MailTransport {
 			if (allRecipients == null || allRecipients.length == 0) {
 				throw new SMTPException(SMTPException.Code.MISSING_RECIPIENTS);
 			}
-			setSendHeaders((SMTPMailMessage) composedMail, smtpMessage);
+			smtpFiller.setSendHeaders((SMTPMailMessage) composedMail, smtpMessage);
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(128).append("SMTP mail prepared for transport in ").append(
 						System.currentTimeMillis() - startPrep).append("msec").toString());
@@ -417,45 +416,6 @@ public final class SMTPTransport extends MailTransport {
 			throw SMTPException.handleMessagingException(e);
 		} catch (final IOException e) {
 			throw new SMTPException(SMTPException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		}
-	}
-
-	/**
-	 * Sets the appropriate headers before message's transport:
-	 * <code>Reply-To</code>, <code>Date</code>, and <code>Subject</code>
-	 * 
-	 * @param mail
-	 *            The source mail
-	 * @param newSMTPMsg
-	 *            The SMTP message
-	 * @throws AddressException
-	 * @throws MessagingException
-	 */
-	private void setSendHeaders(final SMTPMailMessage mail, final SMTPMessage newSMTPMsg) throws AddressException,
-			MessagingException {
-		/*
-		 * Set the Reply-To header for future replies to this new message
-		 */
-		final InternetAddress[] ia;
-		if (usm.getReplyToAddr() == null) {
-			ia = mail.getFrom();
-		} else {
-			ia = parseAddressList(usm.getReplyToAddr(), false);
-		}
-		newSMTPMsg.setReplyTo(ia);
-		/*
-		 * Set sent date if not done, yet
-		 */
-		if (newSMTPMsg.getSentDate() == null) {
-			newSMTPMsg.setSentDate(new Date());
-		}
-		/*
-		 * Set default subject if none set
-		 */
-		final String subject;
-		if ((subject = newSMTPMsg.getSubject()) == null || subject.length() == 0) {
-			newSMTPMsg.setSubject(new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale())
-					.getString(MailStrings.DEFAULT_SUBJECT));
 		}
 	}
 

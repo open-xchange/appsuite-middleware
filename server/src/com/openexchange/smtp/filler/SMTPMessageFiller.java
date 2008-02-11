@@ -60,6 +60,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.dataobjects.SMTPMailMessage;
@@ -84,6 +85,20 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
 	 */
 	public SMTPMessageFiller(final Session session, final Context ctx) {
 		super(session, ctx);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param session
+	 *            The session
+	 * @param ctx
+	 *            The context
+	 * @param usm
+	 *            The user's mail settings
+	 */
+	public SMTPMessageFiller(final Session session, final Context ctx, final UserSettingMail usm) {
+		super(session, ctx, usm);
 	}
 
 	/**
