@@ -51,12 +51,18 @@ package com.openexchange.server.osgi;
 
 import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -72,6 +78,7 @@ import com.openexchange.monitoring.MonitorInterface;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.server.services.ConfigJumpService;
+import com.openexchange.server.services.EventAdminService;
 import com.openexchange.server.services.MonitorService;
 import com.openexchange.server.services.SessiondService;
 import com.openexchange.sessiond.SessiondConnectorInterface;
@@ -83,7 +90,7 @@ import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator implements BundleActivator {
+public class Activator implements BundleActivator, EventHandler {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(Activator.class);
@@ -93,6 +100,8 @@ public class Activator implements BundleActivator {
 	private final CharsetProvider charsetProvider = new AliasCharsetProvider();
 
 	private final HttpService httpService = new HttpServiceImpl();
+	
+	private ServiceRegistration eventServiceRegistration = null;
 
 	private final List<ServiceRegistration> registrationList = new ArrayList<ServiceRegistration>();
 
@@ -115,6 +124,11 @@ public class Activator implements BundleActivator {
 			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
 					new BundleServiceTracker<Configuration>(context, ConfigurationService.getInstance(),
 							Configuration.class)));
+			
+		    // event service is always needed.
+			serviceTrackerList.add(new ServiceTracker(context, EventAdmin.class.getName(),
+					new BundleServiceTracker<EventAdmin>(context, EventAdminService.getInstance(),
+							EventAdmin.class)));
 			
 			// I18n service load
 			serviceTrackerList.add(new ServiceTracker(context, I18nTools.class.getName(), new I18nServiceListener(context)));
@@ -159,7 +173,7 @@ public class Activator implements BundleActivator {
 			 */
 			// Register server's services
 			registrationList.add(context.registerService(CharsetProvider.class.getName(), charsetProvider, null));
-			registrationList.add(context.registerService(HttpService.class.getName(), httpService, null));	
+			registrationList.add(context.registerService(HttpService.class.getName(), httpService, null));
 		} catch (final Throwable t) {
 			LOG.error("Server Activator: start: ", t);
 			// Try to stop what already has been started.
@@ -216,5 +230,10 @@ public class Activator implements BundleActivator {
 			}
 		}
 		return false;
-	}	
+	}
+
+	public void handleEvent(Event event) {
+		System.out.println("Event detected");
+		
+	}
 }
