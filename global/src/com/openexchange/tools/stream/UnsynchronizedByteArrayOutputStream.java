@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.stream;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -73,17 +74,7 @@ import java.io.UnsupportedEncodingException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
-
-	/**
-	 * The buffer where data is stored.
-	 */
-	private byte buf[];
-
-	/**
-	 * The number of valid bytes in the buffer.
-	 */
-	private int count;
+public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputStream {
 
 	/**
 	 * Creates a new byte array output stream. The buffer capacity is initially
@@ -103,10 +94,7 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
 	 *                if size is negative.
 	 */
 	public UnsynchronizedByteArrayOutputStream(final int size) {
-		if (size < 0) {
-			throw new IllegalArgumentException("Negative initial size: " + size);
-		}
-		buf = new byte[size];
+		super(size);
 	}
 
 	/**
@@ -165,6 +153,7 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
 	 * @exception IOException
 	 *                if an I/O error occurs.
 	 */
+	@Override
 	public void writeTo(final OutputStream out) throws IOException {
 		out.write(buf, 0, count);
 	}
@@ -177,6 +166,7 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
 	 * 
 	 * @see java.io.ByteArrayInputStream#count
 	 */
+	@Override
 	public void reset() {
 		count = 0;
 	}
@@ -209,6 +199,7 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
 	 * 
 	 * @return the current contents of this output stream, as a byte array.
 	 */
+	@Override
 	public byte toByteArray()[] {
 		final byte newbuf[] = new byte[count];
 		System.arraycopy(buf, 0, newbuf, 0, count);
@@ -244,6 +235,7 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
 	 *         of valid bytes in this output stream.
 	 * @see java.io.ByteArrayOutputStream#count
 	 */
+	@Override
 	public int size() {
 		return count;
 	}
@@ -271,6 +263,7 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
 	 *             If the named encoding is not supported.
 	 * @since JDK1.1
 	 */
+	@Override
 	public String toString(final String enc) throws UnsupportedEncodingException {
 		return new String(buf, 0, count, enc);
 	}
@@ -301,6 +294,7 @@ public final class UnsynchronizedByteArrayOutputStream extends OutputStream {
 	 * @see java.io.ByteArrayOutputStream#toString(String)
 	 * @see java.io.ByteArrayOutputStream#toString()
 	 */
+	@Override
 	@Deprecated
 	public String toString(final int hibyte) {
 		return new String(buf, hibyte, 0, count);
