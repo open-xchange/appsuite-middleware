@@ -53,9 +53,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.event.AppointmentEvent;
-import com.openexchange.event.ContactEvent;
-import com.openexchange.event.TaskEvent;
+import com.openexchange.event.impl.AppointmentEventInterface;
+import com.openexchange.event.impl.ContactEventInterface;
+import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -73,8 +73,8 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.session.Session;
 
-public class AttachmentCleaner implements AppointmentEvent, TaskEvent,
-		ContactEvent {
+public class AttachmentCleaner implements AppointmentEventInterface, TaskEventInterface,
+		ContactEventInterface {
 	
 	private static final AttachmentBase ATTACHMENT_BASE = new AttachmentBaseImpl(new DBPoolProvider()); // No notifications, no permission check.
 

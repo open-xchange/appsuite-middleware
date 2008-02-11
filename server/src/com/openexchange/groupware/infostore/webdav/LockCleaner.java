@@ -52,8 +52,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.event.FolderEvent;
-import com.openexchange.event.InfostoreEvent;
+import com.openexchange.event.impl.FolderEventInterface;
+import com.openexchange.event.impl.InfostoreEventInterface;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.impl.FolderLockManager;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.session.Session;
 
-public class LockCleaner implements FolderEvent, InfostoreEvent {
+public class LockCleaner implements FolderEventInterface, InfostoreEventInterface {
 
 	private static final Log LOG = LogFactory.getLog(LockCleaner.class);
 	

@@ -69,8 +69,8 @@ import com.openexchange.api2.OXException;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
-import com.openexchange.event.EventClient;
-import com.openexchange.event.InvalidStateException;
+import com.openexchange.event.impl.EventClient;
+import com.openexchange.event.impl.InvalidStateException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.calendar.CalendarSql;
@@ -389,6 +389,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 					new EventClient(session).create(folderObj);
 				} catch (final InvalidStateException e) {
 					LOG.warn("Create event could not be enqueued", e);
+				} catch (final ContextException e) {
+					LOG.warn("Create event could not be enqueued", e);
 				}
 				return folderObj;
 			} finally {
@@ -485,6 +487,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 				try {
 					new EventClient(session).modify(fo);
 				} catch (final InvalidStateException e) {
+					LOG.warn("Update event could not be enqueued", e);
+				} catch (final ContextException e) {
 					LOG.warn("Update event could not be enqueued", e);
 				}
 				return fo;
@@ -1123,6 +1127,8 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 				try {
 					new EventClient(session).delete(fo);
 				} catch (final InvalidStateException e) {
+					LOG.warn("Delete event could not be enqueued", e);
+				} catch (final ContextException e) {
 					LOG.warn("Delete event could not be enqueued", e);
 				}
 				return fo;

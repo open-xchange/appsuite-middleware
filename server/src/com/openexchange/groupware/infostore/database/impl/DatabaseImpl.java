@@ -74,7 +74,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.event.EventClient;
+import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;

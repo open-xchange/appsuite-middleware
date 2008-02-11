@@ -66,7 +66,7 @@ import org.apache.jcs.access.exception.CacheException;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
-import com.openexchange.event.EventClient;
+import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;

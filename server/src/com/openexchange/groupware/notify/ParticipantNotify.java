@@ -71,8 +71,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.event.AppointmentEvent;
-import com.openexchange.event.TaskEvent;
+import com.openexchange.event.impl.AppointmentEventInterface;
+import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -114,7 +114,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.session.Session;
 
-public class ParticipantNotify implements AppointmentEvent, TaskEvent {
+public class ParticipantNotify implements AppointmentEventInterface, TaskEventInterface {
 	
 	//TODO: Signatur?
 	//TODO: Abgesagt / Zugesagt

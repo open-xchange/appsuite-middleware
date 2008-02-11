@@ -59,10 +59,10 @@ import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.event.AppointmentEvent;
-import com.openexchange.event.ContactEvent;
-import com.openexchange.event.InfostoreEvent;
-import com.openexchange.event.TaskEvent;
+import com.openexchange.event.impl.AppointmentEventInterface;
+import com.openexchange.event.impl.ContactEventInterface;
+import com.openexchange.event.impl.InfostoreEventInterface;
+import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
@@ -82,7 +82,7 @@ import com.openexchange.session.Session;
  */
 	
 	
-public class LinksEventHandler  implements AppointmentEvent, TaskEvent, ContactEvent, InfostoreEvent{
+public class LinksEventHandler  implements AppointmentEventInterface, TaskEventInterface, ContactEventInterface, InfostoreEventInterface{
 	
 	private static final Log LOG = LogFactory.getLog(LinksEventHandler.class);
 	

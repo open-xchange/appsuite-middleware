@@ -53,8 +53,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.event.FolderEvent;
-import com.openexchange.event.InfostoreEvent;
+import com.openexchange.event.impl.FolderEventInterface;
+import com.openexchange.event.impl.InfostoreEventInterface;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.container.FolderObject;
@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.session.Session;
 
-public class PropertyCleaner implements FolderEvent, InfostoreEvent {
+public class PropertyCleaner implements FolderEventInterface, InfostoreEventInterface {
 	
 	private PropertyStore infoProperties;
 	private PropertyStore folderProperties;
