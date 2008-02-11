@@ -975,10 +975,6 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					final long start = System.currentTimeMillis();
 					IMAPCommandsCollection.fastExpunge(f);
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-					if (LOG.isDebugEnabled()) {
-						LOG.debug(new StringBuilder(128).append("Folder ").append(f.getFullName()).append(
-								" cleared in ").append((System.currentTimeMillis() - start)).append("msec").toString());
-					}
 				} catch (final ProtocolException pex) {
 					throw new MessagingException(pex.getMessage(), pex);
 				}

@@ -66,6 +66,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.mail.Flags;
 import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -73,8 +74,10 @@ import javax.mail.Store;
 import javax.mail.internet.InternetHeaders;
 
 import com.openexchange.imap.command.FetchIMAPCommand;
+import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailStorageUtils.OrderDirection;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -642,6 +645,60 @@ public final class IMAPCommandsCollection {
 		}
 	}
 
+	private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
+
+	/**
+	 * Performs a <i>UID EXPUNGE</i> on specified UIDs on first try. If <i>UID
+	 * EXPUNGE</i> fails the fallback action as proposed in RFC 3501 is done:
+	 * <ol>
+	 * <li>Remember all messages which are marked as \Deleted by now</li>
+	 * <li>Temporary remove the \Deleted flags from these messages </li>
+	 * <li>Set \Deleted flag on messages referenced by given UIDs and perform a
+	 * normal <i>EXPUNGE</i> on folder</li>
+	 * <li>Restore the \Deleted flags on remaining messages</li>
+	 * </ol>
+	 * 
+	 * @param imapFolder
+	 *            The IMAP folder
+	 * @param uids
+	 *            The UIDs
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 * @throws ProtocolException
+	 *             If a protocol error occurs
+	 */
+	public static void uidExpungeWithFallback(final IMAPFolder imapFolder, final long[] uids)
+			throws MessagingException, ProtocolException {
+		try {
+			final long start = System.currentTimeMillis();
+			IMAPCommandsCollection.uidExpunge(imapFolder, uids);
+			MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			if (LOG.isInfoEnabled()) {
+				LOG.info(new StringBuilder(128).append(uids.length).append(" messages expunged in ").append(
+						(System.currentTimeMillis() - start)).append("msec").toString());
+			}
+		} catch (final ProtocolException e) {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(new StringBuilder("UID EXPUNGE failed: ").append(e.getLocalizedMessage()).toString(), e);
+			}
+			/*
+			 * UID EXPUNGE did not work; perform fallback actions
+			 */
+			final long[] excUIDs = IMAPCommandsCollection.getDeletedMessages(imapFolder, uids);
+			if (excUIDs.length > 0) {
+				/*
+				 * Temporary remove flag \Deleted, perform expunge & restore
+				 * flag \Deleted
+				 */
+				new FlagsIMAPCommand(imapFolder, excUIDs, FLAGS_DELETED, false, false).doCommand();
+				IMAPCommandsCollection.fastExpunge(imapFolder);
+				new FlagsIMAPCommand(imapFolder, excUIDs, FLAGS_DELETED, true, false).doCommand();
+			} else {
+				IMAPCommandsCollection.fastExpunge(imapFolder);
+			}
+		}
+	}
+
 	/**
 	 * Determines if given folder is marked as read-only when performing a
 	 * <code>SELECT</code> command on it.
@@ -705,7 +762,7 @@ public final class IMAPCommandsCollection {
 	 * @throws ProtocolException
 	 *             If a protocol error occurs
 	 */
-	public static long[] getDeletedMessages(final IMAPFolder imapFolder, final long[] filter) throws ProtocolException {
+	private static long[] getDeletedMessages(final IMAPFolder imapFolder, final long[] filter) throws ProtocolException {
 		final IMAPProtocol p = imapFolder.getProtocol();
 		final Response[] r = p.command(FETCH_FLAGS, null);
 		final Response response = r[r.length - 1];
