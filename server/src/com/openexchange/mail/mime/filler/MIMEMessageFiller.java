@@ -493,7 +493,7 @@ public class MIMEMessageFiller {
 					primaryMultipart = new MimeMultipart();
 				}
 				try {
-					final String userVCard = getUserVCard();
+					final String userVCard = getUserVCard(MailConfig.getDefaultMimeCharset());
 					/*
 					 * Create a body part for vcard
 					 */
@@ -501,8 +501,10 @@ public class MIMEMessageFiller {
 					/*
 					 * Define content
 					 */
-					vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard,
-							MIMETypes.MIME_TEXT_X_VCARD)));
+					final ContentType ct = new ContentType(MIMETypes.MIME_TEXT_X_VCARD);
+					ct.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+					vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard, ct)));
+					vcardPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
 					vcardPart.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
 					vcardPart.setFileName(fileName);
 					/*
@@ -610,7 +612,7 @@ public class MIMEMessageFiller {
 		}
 	}
 
-	protected final String getUserVCard() throws MailException {
+	protected final String getUserVCard(final String charset) throws MailException {
 		final User userObj = UserStorage.getStorageUser(session.getUserId(), ctx);
 		Connection readCon = null;
 		try {
@@ -634,7 +636,7 @@ public class MIMEMessageFiller {
 				def.write(w, versitObj);
 				w.flush();
 				os.flush();
-				return new String(os.toByteArray(), MailConfig.getDefaultMimeCharset());
+				return new String(os.toByteArray(), charset);
 			} finally {
 				if (readCon != null) {
 					DBPool.closeReaderSilent(ctx, readCon);
