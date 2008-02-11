@@ -58,7 +58,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -296,7 +295,7 @@ public final class IMAPCommandsCollection {
 
 	/**
 	 * Applies the given color flag as an user flag to the messages
-	 * correpsonding to given UIDS
+	 * corresponding to given UIDS
 	 * 
 	 * @param imapFolder -
 	 *            the imap folder
@@ -350,7 +349,7 @@ public final class IMAPCommandsCollection {
 	private static final String COMMAND_NOOP = "NOOP";
 
 	/**
-	 * Force to send a NOOP command to IMAP server that is explicitely <b>not</b>
+	 * Force to send a NOOP command to IMAP server that is explicitly <b>not</b>
 	 * handled by JavaMail API. It really does not matter if this command
 	 * succeeds or breaks up in a <code>MessagingException</code>. Therefore
 	 * neither a return value is defined nor any exception is thrown
@@ -474,7 +473,9 @@ public final class IMAPCommandsCollection {
 							r[i] = null;
 						}
 					} else {
-						throw new ProtocolException(String.format(PROTOCOL_ERROR_TEMPL, "SORT"));
+						throw new ProtocolException(new StringBuilder(String.format(PROTOCOL_ERROR_TEMPL, "SORT"))
+								.append(": ").append(getResponseType(response)).append(' ').append(response.getRest())
+								.toString());
 					}
 				} finally {
 					p.notifyResponseHandlers(r);
@@ -553,7 +554,9 @@ public final class IMAPCommandsCollection {
 								r[i] = null;
 							}
 						} else {
-							throw new ProtocolException(String.format(PROTOCOL_ERROR_TEMPL, COMMAND_SEARCH));
+							throw new ProtocolException(new StringBuilder(String.format(PROTOCOL_ERROR_TEMPL,
+									COMMAND_SEARCH)).append(": ").append(getResponseType(response)).append(' ').append(
+									response.getRest()).toString());
 						}
 					} finally {
 						p.notifyResponseHandlers(r);
@@ -689,8 +692,6 @@ public final class IMAPCommandsCollection {
 
 	private static final String FETCH_FLAGS = "FETCH 1:* (FLAGS UID)";
 
-	private static final Pattern PATTERN_UID = Pattern.compile("uid\\s([0-9]+)");
-
 	/**
 	 * Gets all messages marked as deleted in given IMAP folder
 	 * 
@@ -711,26 +712,27 @@ public final class IMAPCommandsCollection {
 		try {
 			if (response.isOK()) {
 				final Set<Long> set = new TreeSet<Long>();
-				for (int i = 0, len = r.length - 1; i < len; i++) {
-					if (!(r[i] instanceof IMAPResponse)) {
+				final int mlen = r.length - 1;
+				for (int i = 0; i < mlen; i++) {
+					if (!(r[i] instanceof FetchResponse)) {
 						continue;
 					}
-					final IMAPResponse ir = (IMAPResponse) r[i];
-					String rest = null;
-					if (ir.keyEquals("FETCH") && (rest = ir.toString().toLowerCase()).indexOf("\\deleted") != -1) {
-						final Matcher m = PATTERN_UID.matcher(rest);
-						if (m.find()) {
-							set.add(Long.valueOf(m.group(1)));
+					final Long uid;
+					{
+						final FetchResponse fr = (FetchResponse) r[0];
+						Item item = fr.getItem(1);
+						if (!(item instanceof UID)) {
+							item = fr.getItem(0);
 						}
+						uid = Long.valueOf(((UID) item).uid);
 					}
+					set.add(uid);
 					r[i] = null;
 				}
 				if (filter != null && filter.length > 0) {
-					final Set<Long> tmp = new HashSet<Long>();
 					for (int i = 0; i < filter.length; i++) {
-						tmp.add(Long.valueOf(filter[i]));
+						set.remove(Long.valueOf(filter[i]));
 					}
-					set.removeAll(tmp);
 				}
 				final long[] retval = new long[set.size()];
 				int i = 0;
@@ -739,7 +741,8 @@ public final class IMAPCommandsCollection {
 				}
 				return retval;
 			}
-			throw new ProtocolException("FETCH command failed");
+			throw new ProtocolException(new StringBuilder("FETCH command failed: ").append(getResponseType(response))
+					.append(' ').append(response.getRest()).toString());
 		} finally {
 			/*
 			 * No invocation of notifyResponseHandlers() to avoid sequential (by
@@ -758,6 +761,22 @@ public final class IMAPCommandsCollection {
 				throw cfe;
 			}
 		}
+	}
+
+	private static String getResponseType(final Response response) {
+		if (response.isBAD()) {
+			return "BAD";
+		}
+		if (response.isBYE()) {
+			return "BYE";
+		}
+		if (response.isNO()) {
+			return "NO";
+		}
+		if (response.isOK()) {
+			return "OK";
+		}
+		return "UNKNOWN";
 	}
 
 	private static final String TEMPL_FETCH_UID = "FETCH %s (UID)";
