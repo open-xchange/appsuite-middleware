@@ -49,8 +49,8 @@
 
 package com.openexchange.tools.stream;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * {@link UnsynchronizedByteArrayInputStream} - A simple unsynchronized byte
@@ -59,46 +59,7 @@ import java.io.InputStream;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class UnsynchronizedByteArrayInputStream extends InputStream {
-
-	/**
-	 * An array of bytes that was provided by the creator of the stream.
-	 * Elements <code>buf[0]</code> through <code>buf[count-1]</code> are
-	 * the only bytes that can ever be read from the stream; element
-	 * <code>buf[pos]</code> is the next byte to be read.
-	 */
-	protected byte buf[];
-
-	/**
-	 * The index of the next character to read from the input stream buffer.
-	 * This value should always be nonnegative and not larger than the value of
-	 * <code>count</code>. The next byte to be read from the input stream
-	 * buffer will be <code>buf[pos]</code>.
-	 */
-	protected int pos;
-
-	/**
-	 * The currently marked position in the stream. ByteArrayInputStream objects
-	 * are marked at position zero by default when constructed. They may be
-	 * marked at another position within the buffer by the <code>mark()</code>
-	 * method. The current buffer position is set to this point by the
-	 * <code>reset()</code> method.
-	 * <p>
-	 * If no mark has been set, then the value of mark is the offset passed to
-	 * the constructor (or 0 if the offset was not supplied).
-	 * 
-	 * @since JDK1.1
-	 */
-	protected int mark = 0;
-
-	/**
-	 * The index one greater than the last valid character in the input stream
-	 * buffer. This value should always be nonnegative and not larger than the
-	 * length of <code>buf</code>. It is one greater than the position of the
-	 * last byte within <code>buf</code> that can ever be read from the input
-	 * stream buffer.
-	 */
-	protected int count;
+public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStream {
 
 	/**
 	 * Creates a <code>ByteArrayInputStream</code> so that it uses
@@ -110,9 +71,7 @@ public final class UnsynchronizedByteArrayInputStream extends InputStream {
 	 *            the input buffer.
 	 */
 	public UnsynchronizedByteArrayInputStream(final byte buf[]) {
-		this.buf = buf;
-		this.pos = 0;
-		this.count = buf.length;
+		super(buf);
 	}
 
 	/**
@@ -131,10 +90,7 @@ public final class UnsynchronizedByteArrayInputStream extends InputStream {
 	 *            the maximum number of bytes to read from the buffer.
 	 */
 	public UnsynchronizedByteArrayInputStream(final byte buf[], final int offset, final int length) {
-		this.buf = buf;
-		this.pos = offset;
-		this.count = Math.min(offset + length, buf.length);
-		this.mark = offset;
+		super(buf, offset, length);
 	}
 
 	/**
