@@ -50,10 +50,13 @@
 package com.openexchange.groupware.calendar;
 
 import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participants;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
@@ -229,6 +232,21 @@ public class CachedCalendarIterator implements SearchIterator {
             
             if (cdao.fillFolderID()) {
                 cdao.setGlobalFolderID(cdao.getEffectiveFolderId());
+            }
+            
+            // Security check for bug 10836 
+            if (cdao.getFolderType() == FolderObject.PRIVATE || cdao.getFolderType() == FolderObject.SHARED) {
+            	UserParticipant up[] = cdao.getUsers();
+            	boolean found = false;
+            	for (int a = 0; a < up.length; a++) {
+            		if (up[a].getPersonalFolderId() == cdao.getParentFolderID()) {
+            			found = true;
+            			break;
+            		}
+            	}
+            	if (!found) {
+            		throw new OXPermissionException(new OXCalendarException(OXCalendarException.Code.LOAD_PERMISSION_EXCEPTION_5));
+            	}
             }
             
         } finally {

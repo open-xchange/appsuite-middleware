@@ -829,8 +829,10 @@ public class CalendarOperation implements SearchIterator {
                     System.out.println("\n\n");
                 }
                  */
-                if (check_folder_id != cdao.getParentFolderID()) {
+                if (check_folder_id != cdao.getParentFolderID()) {                
                     throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT, "Object not found : uid:oid:fid:InFolder "+so.getUserId() + ":"+ cdao.getObjectID() + ":"+cdao.getParentFolderID()+":"+check_folder_id);
+                } else {
+                	cdao.setActionFolder(check_folder_id);
                 }
                 
                 if (!CalendarCommonCollection.checkPermissions(cdao, so, c, readcon, CalendarOperation.READ, check_folder_id)) {

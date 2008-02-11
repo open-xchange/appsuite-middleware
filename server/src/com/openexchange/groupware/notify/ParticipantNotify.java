@@ -628,7 +628,6 @@ public class ParticipantNotify implements AppointmentEventInterface, TaskEventIn
 			return;
 		}
 		participantSet.add(participant.displayName);
-		
 	}
 	
 	public static final class EmailableParticipant {
