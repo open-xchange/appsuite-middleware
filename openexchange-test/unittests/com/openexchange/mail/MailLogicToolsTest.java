@@ -52,7 +52,6 @@ package com.openexchange.mail;
 import java.util.Arrays;
 
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.mail.MailStorageUtils.OrderDirection;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -207,9 +206,6 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 		} catch (final MailException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
-		} catch (final LdapException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
 		}
 	}
 
@@ -254,9 +250,6 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 		} catch (final MailException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
-		} catch (final LdapException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
 		}
 	}
 
@@ -274,9 +267,6 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 				mailConnection.close(true);
 			}
 		} catch (final MailException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final LdapException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}

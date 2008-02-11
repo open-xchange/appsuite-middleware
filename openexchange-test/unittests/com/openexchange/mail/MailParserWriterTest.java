@@ -118,9 +118,6 @@ public final class MailParserWriterTest extends AbstractMailTest {
 		} catch (final MailException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
-		} catch (final LdapException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
 		}
 	}
 	
@@ -141,9 +138,6 @@ public final class MailParserWriterTest extends AbstractMailTest {
 				mailConnection.close(true);
 			}
 		} catch (final MailException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final LdapException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
