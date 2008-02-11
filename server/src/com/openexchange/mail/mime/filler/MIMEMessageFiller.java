@@ -115,6 +115,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.dataobjects.SMTPMailMessage;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
@@ -525,7 +526,7 @@ public class MIMEMessageFiller {
 					 */
 					final DataSource dataSource;
 					{
-						final ByteArrayOutputStream out = new ByteArrayOutputStream();
+						final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
 						originalMail.writeTo(out);
 						dataSource = new MessageDataSource(out.toByteArray(), MIMETypes.MIME_MESSAGE_RFC822);
 					}
@@ -627,7 +628,7 @@ public class MIMEMessageFiller {
 					throw new MailException(MailException.Code.VERSIT_ERROR, e, e.getMessage());
 				}
 				final VersitObject versitObj = converter.convertContact(contactObj, "2.1");
-				final ByteArrayOutputStream os = new ByteArrayOutputStream();
+				final ByteArrayOutputStream os = new UnsynchronizedByteArrayOutputStream();
 				final VersitDefinition def = Versit.getDefinition(MIMETypes.MIME_TEXT_X_VCARD);
 				final VersitDefinition.Writer w = def.getWriter(os, MailConfig.getDefaultMimeCharset());
 				def.write(w, versitObj);
