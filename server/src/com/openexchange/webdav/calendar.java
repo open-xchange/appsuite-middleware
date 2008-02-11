@@ -76,6 +76,8 @@ import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
@@ -228,7 +230,8 @@ public final class calendar extends XmlServlet {
 	
 	@Override
 	protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId, final OutputStream os) throws Exception {
-		final AppointmentWriter appointmentwriter = new AppointmentWriter(sessionObj);
+		final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx); 
+		final AppointmentWriter appointmentwriter = new AppointmentWriter(userObj, ctx, sessionObj);
 		appointmentwriter.startWriter(objectId, folderId, os);
 	}
 	
@@ -239,7 +242,8 @@ public final class calendar extends XmlServlet {
 	
 	@Override
 	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
-		final AppointmentWriter appointmentwriter = new AppointmentWriter(sessionObj);
+		final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx); 
+		final AppointmentWriter appointmentwriter = new AppointmentWriter(userObj, ctx, sessionObj);
 		appointmentwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
 	}
 	

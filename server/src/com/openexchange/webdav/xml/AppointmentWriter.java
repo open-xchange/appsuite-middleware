@@ -73,6 +73,8 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.webdav.xml.fields.AppointmentFields;
@@ -123,11 +125,9 @@ public class AppointmentWriter extends CalendarWriter {
 	
 	private static final Log LOG = LogFactory.getLog(AppointmentWriter.class);
 	
-	public AppointmentWriter() {
-		
-	}
-	
-	public AppointmentWriter(Session sessionObj) {
+	public AppointmentWriter(final User userObj, final Context ctx, final Session sessionObj) {
+		this.userObj = userObj;
+		this.ctx = ctx;
 		this.sessionObj = sessionObj;
 	}
 	
