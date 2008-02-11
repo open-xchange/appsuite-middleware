@@ -2,8 +2,6 @@
 package com.openexchange.groupware;
 
 
-import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,7 +15,7 @@ import junit.framework.TestCase;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
-import com.openexchange.event.EventConfigImpl;
+import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarOperation;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
@@ -25,6 +23,7 @@ import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.calendar.CalendarSqlImp;
 import com.openexchange.groupware.calendar.ConflictHandler;
 import com.openexchange.groupware.calendar.FreeBusyResults;
+import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
@@ -46,10 +45,11 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
-import com.openexchange.test.AjaxInit;
 
 public class CalendarTest extends TestCase {
     

@@ -1,9 +1,5 @@
 package com.openexchange.groupware;
 
-import com.openexchange.groupware.calendar.OXCalendarException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.reminder.ReminderHandler;
-import com.openexchange.groupware.reminder.ReminderObject;
 import java.sql.Connection;
 import java.util.Calendar;
 import java.util.Date;
@@ -13,12 +9,13 @@ import junit.framework.TestCase;
 
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
-import com.openexchange.event.EventConfigImpl;
+import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarOperation;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
 import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.groupware.calendar.OXCalendarException;
 import com.openexchange.groupware.calendar.RecurringResult;
 import com.openexchange.groupware.calendar.RecurringResults;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
@@ -31,15 +28,18 @@ import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.reminder.ReminderHandler;
+import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
-import com.openexchange.test.AjaxInit;
 
 
 public class AppointmentBugTests extends TestCase {

@@ -114,7 +114,8 @@ public final class Init {
 	/**
 	 * Responsible for starting and stopping the EventQueue
 	 */
-	new com.openexchange.event.EventInit(),
+ 
+	new com.openexchange.event.impl.EventInit(),
 
     SessiondInit.getInstance()};
 

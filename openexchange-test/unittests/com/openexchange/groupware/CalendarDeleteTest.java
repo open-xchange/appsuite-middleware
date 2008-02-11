@@ -1,7 +1,5 @@
 package com.openexchange.groupware;
 
-import com.openexchange.groupware.calendar.CalendarAdministration;
-import com.openexchange.groupware.delete.DeleteEvent;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -9,12 +7,14 @@ import java.util.Properties;
 
 import junit.framework.TestCase;
 
-import com.openexchange.event.EventConfigImpl;
+import com.openexchange.event.impl.EventConfigImpl;
+import com.openexchange.groupware.calendar.CalendarAdministration;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.sessiond.impl.SessionObject;
