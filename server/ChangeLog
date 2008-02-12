@@ -1,3 +1,8 @@
+* 2008-02-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #10926: No HTML validation when an empty html body is going to be
+   sent
+
 * 2008-02-11 - martin.kauss@open-xchange.com
 
  - Fixed bug #10865. The time of the created exception was set to the

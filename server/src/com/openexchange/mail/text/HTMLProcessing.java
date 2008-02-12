@@ -90,6 +90,12 @@ public final class HTMLProcessing {
 	 * @return The HTML content conform to W3C standards
 	 */
 	public static String getConformHTML(final String htmlContentArg, final ContentType contentType) {
+		if (htmlContentArg == null || htmlContentArg.length() == 0) {
+			/*
+			 * Nothing to do...
+			 */
+			return htmlContentArg;
+		}
 		/*
 		 * Validate with JTidy library
 		 */
@@ -110,11 +116,13 @@ public final class HTMLProcessing {
 		 * documents content type. Add if missing.
 		 */
 		final int start = htmlContent.indexOf(TAG_S_HEAD) + 6;
-		final Matcher m = PAT_META_CT.matcher(htmlContent.substring(start, htmlContent.indexOf(TAG_E_HEAD)));
-		if (!m.find()) {
-			final StringBuilder sb = new StringBuilder(htmlContent);
-			sb.insert(start, HTML_META_TEMPLATE.replaceFirst("#CT#", contentType.toString()));
-			return sb.toString();
+		if (start >= 6) {
+			final Matcher m = PAT_META_CT.matcher(htmlContent.substring(start, htmlContent.indexOf(TAG_E_HEAD)));
+			if (!m.find()) {
+				final StringBuilder sb = new StringBuilder(htmlContent);
+				sb.insert(start, HTML_META_TEMPLATE.replaceFirst("#CT#", contentType.toString()));
+				return sb.toString();
+			}
 		}
 		return htmlContent;
 	}
