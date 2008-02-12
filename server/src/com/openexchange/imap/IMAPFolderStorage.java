@@ -894,6 +894,12 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 				 */
 				final long startClear = System.currentTimeMillis();
 				final int blockSize = IMAPConfig.getBlockSize();
+				final StringBuilder debug;
+				if (LOG.isDebugEnabled()) {
+					debug = new StringBuilder(128);
+				} else {
+					debug = null;
+				}
 				while (msgCount > blockSize) {
 					/*
 					 * Don't adapt sequence number since folder expunge already
@@ -904,7 +910,8 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 							final long start = System.currentTimeMillis();
 							new CopyIMAPCommand(f, INT_1, blockSize, trashFullname).doCommand();
 							if (LOG.isDebugEnabled()) {
-								LOG.debug(new StringBuilder(128).append("\"Soft Clear\": ").append(
+								debug.setLength(0);
+								LOG.debug(debug.append("\"Soft Clear\": ").append(
 										"Messages copied to default trash folder \"").append(trashFullname).append(
 										"\" in ").append((System.currentTimeMillis() - start)).append("msec")
 										.toString());
@@ -929,18 +936,26 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					/*
 					 * ... and perform EXPUNGE
 					 */
+					final long startExpunge = System.currentTimeMillis();
 					try {
-						IMAPCommandsCollection.uidExpungeWithFallback(f, IMAPCommandsCollection.seqNums2UID(f, INT_1,
-								blockSize));
+						IMAPCommandsCollection.fastExpunge(f);
+						if (LOG.isDebugEnabled()) {
+							debug.setLength(0);
+							LOG.debug(debug.append("EXPUNGE command executed on \"").append(f.getFullName()).append(
+									"\" in ").append((System.currentTimeMillis() - startExpunge)).append("msec")
+									.toString());
+						}
 					} catch (final ConnectionException e) {
 						/*
 						 * Connection is broken. Not possible to retry.
 						 */
+						if (LOG.isDebugEnabled()) {
+							debug.setLength(0);
+							LOG.debug(debug.append("EXPUNGE command timed out in ").append(
+									(System.currentTimeMillis() - startExpunge)).append("msec").toString());
+						}
 						throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapConnection.getMailConfig()
 								.getServer(), imapConnection.getMailConfig().getLogin());
-					} catch (final ProtocolException e) {
-						LOG.error(e.getLocalizedMessage(), e);
-						IMAPCommandsCollection.fastExpunge(f);
 					}
 					/*
 					 * Decrement
@@ -952,7 +967,8 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 						final long start = System.currentTimeMillis();
 						new CopyIMAPCommand(f, trashFullname).doCommand();
 						if (LOG.isDebugEnabled()) {
-							LOG.debug(new StringBuilder(128).append("\"Soft Clear\": ").append(
+							debug.setLength(0);
+							LOG.debug(debug.append("\"Soft Clear\": ").append(
 									"Messages copied to default trash folder \"").append(trashFullname)
 									.append("\" in ").append((System.currentTimeMillis() - start)).append("msec")
 									.toString());
@@ -984,8 +1000,9 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 				} catch (final ProtocolException pex) {
 					throw new MessagingException(pex.getMessage(), pex);
 				}
-				if (LOG.isInfoEnabled()) {
-					LOG.info(new StringBuilder(128).append("Folder '").append(fullname).append("' cleared in ").append(
+				if (LOG.isDebugEnabled()) {
+					debug.setLength(0);
+					LOG.info(debug.append("Folder '").append(fullname).append("' cleared in ").append(
 							System.currentTimeMillis() - startClear).append("msec"));
 				}
 				try {

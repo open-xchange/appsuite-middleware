@@ -558,6 +558,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 				throw new IMAPException(IMAPException.Code.MISSING_DEFAULT_FOLDER_NAME, "trash");
 			}
 			final boolean backup = (!usm.isHardDeleteMsgs() && !hardDelete && !(folder.equals(trashFullname)));
+			final StringBuilder debug;
+			if (LOG.isDebugEnabled()) {
+				debug = new StringBuilder(128);
+			} else {
+				debug = null;
+			}
 			final long[] remain;
 			final int blockSize = IMAPConfig.getBlockSize();
 			if (msgUIDs.length > blockSize) {
@@ -569,14 +575,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 				for (int len = msgUIDs.length; len > blockSize; len -= blockSize) {
 					System.arraycopy(msgUIDs, offset, tmp, 0, tmp.length);
 					offset += blockSize;
-					deleteByUIDs(trashFullname, backup, tmp);
+					deleteByUIDs(trashFullname, backup, tmp, debug);
 				}
 				remain = new long[msgUIDs.length - offset];
 				System.arraycopy(msgUIDs, offset, remain, 0, remain.length);
 			} else {
 				remain = msgUIDs;
 			}
-			deleteByUIDs(trashFullname, backup, remain);
+			deleteByUIDs(trashFullname, backup, remain, debug);
 			/*
 			 * Close folder to force JavaMail-internal message cache update
 			 */
@@ -588,8 +594,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 		}
 	}
 
-	private void deleteByUIDs(final String trashFullname, final boolean backup, final long[] tmp) throws MailException,
-			IMAPException, MessagingException {
+	private void deleteByUIDs(final String trashFullname, final boolean backup, final long[] tmp, final StringBuilder sb)
+			throws MailException, IMAPException, MessagingException {
 		if (backup) {
 			/*
 			 * Copy messages to folder "TRASH"
@@ -597,8 +603,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			try {
 				final long start = System.currentTimeMillis();
 				new CopyIMAPCommand(imapFolder, tmp, trashFullname, false, true).doCommand();
-				if (LOG.isInfoEnabled()) {
-					LOG.info(new StringBuilder(128).append("\"Soft Delete\": ").append(tmp.length).append(
+				if (LOG.isDebugEnabled()) {
+					sb.setLength(0);
+					LOG.debug(sb.append("\"Soft Delete\": ").append(tmp.length).append(
 							" messages copied to default trash folder \"").append(trashFullname).append("\" in ")
 							.append((System.currentTimeMillis() - start)).append("msec").toString());
 				}
@@ -620,10 +627,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 		 */
 		final long start = System.currentTimeMillis();
 		new FlagsIMAPCommand(imapFolder, tmp, FLAGS_DELETED, true, false).doCommand();
-		if (LOG.isInfoEnabled()) {
-			LOG.info(new StringBuilder(128).append(tmp.length).append(
-					" messages marked as deleted (through system flag \\DELETED) in ").append(
-					(System.currentTimeMillis() - start)).append("msec").toString());
+		if (LOG.isDebugEnabled()) {
+			sb.setLength(0);
+			LOG.debug(sb.append(tmp.length).append(" messages marked as deleted (through system flag \\DELETED) in ")
+					.append((System.currentTimeMillis() - start)).append("msec").toString());
 		}
 		/*
 		 * ... and perform EXPUNGE
@@ -717,6 +724,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			 */
 			final long[] result = new long[msgUIDs.length];
 			final int blockSize = IMAPConfig.getBlockSize();
+			final StringBuilder debug;
+			if (LOG.isDebugEnabled()) {
+				debug = new StringBuilder(128);
+			} else {
+				debug = null;
+			}
+
 			int offset = 0;
 			final long[] remain;
 			if (msgUIDs.length > blockSize) {
@@ -726,7 +740,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 				final long[] tmp = new long[blockSize];
 				for (int len = msgUIDs.length; len > blockSize; len -= blockSize) {
 					System.arraycopy(msgUIDs, offset, tmp, 0, tmp.length);
-					final long[] uids = copyByUID(move, fast, destFullname, spamAction, tmp);
+					final long[] uids = copyByUID(move, fast, destFullname, spamAction, tmp, debug);
 					/*
 					 * Append UIDs
 					 */
@@ -738,7 +752,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			} else {
 				remain = msgUIDs;
 			}
-			final long[] uids = copyByUID(move, fast, destFullname, spamAction, remain);
+			final long[] uids = copyByUID(move, fast, destFullname, spamAction, remain, debug);
 			System.arraycopy(uids, 0, result, offset, uids.length);
 			if (move) {
 				/*
@@ -754,12 +768,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 	}
 
 	private long[] copyByUID(final boolean move, final boolean fast, final String destFullname, final int spamAction,
-			final long[] tmp) throws MessagingException, MailException, IMAPException {
+			final long[] tmp, final StringBuilder sb) throws MessagingException, MailException, IMAPException {
 		long start = System.currentTimeMillis();
 		long[] uids = new CopyIMAPCommand(imapFolder, tmp, destFullname, false, fast).doCommand();
-		if (LOG.isInfoEnabled()) {
-			LOG.info(new StringBuilder(128).append(tmp.length).append(" messages copied in ").append(
-					(System.currentTimeMillis() - start)).append("msec").toString());
+		if (LOG.isDebugEnabled()) {
+			sb.setLength(0);
+			LOG.debug(sb.append(tmp.length).append(" messages copied in ").append((System.currentTimeMillis() - start))
+					.append("msec").toString());
 		}
 		if (!fast && (uids == null || noUIDsAssigned(uids, tmp.length))) {
 			/*
@@ -779,8 +794,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 		if (move) {
 			start = System.currentTimeMillis();
 			new FlagsIMAPCommand(imapFolder, tmp, FLAGS_DELETED, true, false).doCommand();
-			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(128).append(tmp.length).append(
+			if (LOG.isDebugEnabled()) {
+				sb.setLength(0);
+				LOG.debug(sb.append(tmp.length).append(
 						" messages marked as expunged (through system flag \\DELETED) in ").append(
 						(System.currentTimeMillis() - start)).append("msec").toString());
 			}
@@ -928,8 +944,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			if (affectedFlags.getSystemFlags().length > 0) {
 				final long start = System.currentTimeMillis();
 				new FlagsIMAPCommand(imapFolder, msgUIDs, affectedFlags, set, false).doCommand();
-				if (LOG.isInfoEnabled()) {
-					LOG.info(new StringBuilder(128).append("System Flags applied to ").append(msgUIDs.length).append(
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder(128).append("System Flags applied to ").append(msgUIDs.length).append(
 							" messages in ").append((System.currentTimeMillis() - start)).append("msec").toString());
 				}
 			}
@@ -958,8 +974,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 						final long start = System.currentTimeMillis();
 						MailMessageCache.getInstance().updateCachedMessages(msgUIDs, fullname, userId, ctx,
 								FIELDS_FLAGS, new Object[] { Integer.valueOf(set ? flags : (flags * -1)) });
-						if (LOG.isInfoEnabled()) {
-							LOG.info(new StringBuilder(128).append(msgUIDs.length).append(
+						if (LOG.isDebugEnabled()) {
+							LOG.debug(new StringBuilder(128).append(msgUIDs.length).append(
 									" cached messages updated in ").append((System.currentTimeMillis() - start))
 									.append("msec").toString());
 						}
@@ -1016,15 +1032,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			long start = System.currentTimeMillis();
 			IMAPCommandsCollection.clearAllColorLabels(imapFolder, msgUIDs);
 			MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(128).append("All color flags cleared from ").append(msgUIDs.length).append(
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(new StringBuilder(128).append("All color flags cleared from ").append(msgUIDs.length).append(
 						" messages in ").append((System.currentTimeMillis() - start)).append("msec").toString());
 			}
 			start = System.currentTimeMillis();
 			IMAPCommandsCollection.setColorLabel(imapFolder, msgUIDs, MailMessage.getColorLabelStringValue(colorLabel));
 			MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(128).append("All color flags set in ").append(msgUIDs.length).append(
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(new StringBuilder(128).append("All color flags set in ").append(msgUIDs.length).append(
 						" messages in ").append((System.currentTimeMillis() - start)).append("msec").toString());
 			}
 			try {
@@ -1035,8 +1051,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 					start = System.currentTimeMillis();
 					MailMessageCache.getInstance().updateCachedMessages(msgUIDs, fullname, userId, ctx,
 							FIELDS_COLOR_LABEL, new Object[] { Integer.valueOf(colorLabel) });
-					if (LOG.isInfoEnabled()) {
-						LOG.info(new StringBuilder(128).append(msgUIDs.length).append(" cached messages updated in ")
+					if (LOG.isDebugEnabled()) {
+						LOG.debug(new StringBuilder(128).append(msgUIDs.length).append(" cached messages updated in ")
 								.append((System.currentTimeMillis() - start)).append("msec").toString());
 					}
 				}
@@ -1345,7 +1361,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 		 * Here comes the hash
 		 */
 		final byte[] byteHash = md.digest();
-		final StringBuilder resultString = new StringBuilder();
+		final StringBuilder resultString = new StringBuilder(16);
 		for (int i = 0; i < byteHash.length; i++) {
 			resultString.append(Integer.toHexString(0xF0 & byteHash[i]).charAt(0));
 		}

@@ -433,6 +433,12 @@ public final class IMAPFolderConverter {
 			try {
 				final User2ACLArgs args = new MyUser2ACLArgs(session.getUserId(), imapFolder.getFullName(), imapFolder
 						.getSeparator());
+				final StringBuilder debugBuilder;
+				if (LOG.isDebugEnabled()) {
+					debugBuilder = new StringBuilder(128);
+				} else {
+					debugBuilder = null;
+				}
 				for (int j = 0; j < acls.length; j++) {
 					final ACLPermission aclPerm = new ACLPermission(imapConfig, ctx);
 					try {
@@ -441,8 +447,9 @@ public final class IMAPFolderConverter {
 					} catch (final AbstractOXException e) {
 						if (isUnknownEntityError(e)) {
 							if (LOG.isDebugEnabled()) {
-								LOG.debug(new StringBuilder(128).append("Cannot map ACL entity named \"").append(
-										acls[j].getName()).append("\" to a system user").toString(), e);
+								debugBuilder.setLength(0);
+								LOG.debug(debugBuilder.append("Cannot map ACL entity named \"").append(
+										acls[j].getName()).append("\" to a system user").toString());
 							}
 						} else {
 							throw e;
