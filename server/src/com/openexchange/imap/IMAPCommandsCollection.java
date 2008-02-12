@@ -84,6 +84,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.CommandFailedException;
+import com.sun.mail.iap.ConnectionException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -677,6 +678,11 @@ public final class IMAPCommandsCollection {
 				LOG.info(new StringBuilder(128).append(uids.length).append(" messages expunged in ").append(
 						(System.currentTimeMillis() - start)).append("msec").toString());
 			}
+		} catch (final ConnectionException e) {
+			/*
+			 * Not possible to retry since connection is broken
+			 */
+			throw e;
 		} catch (final ProtocolException e) {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(new StringBuilder("UID EXPUNGE failed: ").append(e.getLocalizedMessage()).toString(), e);
