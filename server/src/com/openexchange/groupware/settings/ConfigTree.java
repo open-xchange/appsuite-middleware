@@ -438,7 +438,9 @@ public final class ConfigTree {
                 final Setting setting) throws SettingException {
 				final UserSettingMail settings = UserSettingMailStorage
                     .getInstance().getUserSettingMail(user.getId(), ctx);
-				setting.setSingleValue(settings.getSendAddr());
+				if (null != settings) {
+				    setting.setSingleValue(settings.getSendAddr());
+				}
 			}
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
@@ -464,12 +466,14 @@ public final class ConfigTree {
                     .getInstance();
 			    final UserSettingMail settings = storage.getUserSettingMail(
                     user.getId(), ctx);
-			    settings.setSendAddr(newAlias);
-				try {
-					storage.saveUserSettingMail(settings, user.getId(), ctx);
-				} catch (OXException e) {
-					throw new SettingException(e);
-				}
+			    if (null != settings) {
+    			    settings.setSendAddr(newAlias);
+    				try {
+    					storage.saveUserSettingMail(settings, user.getId(), ctx);
+    				} catch (OXException e) {
+    					throw new SettingException(e);
+    				}
+			    }
 			}
 		});
         tmp.put(inbox.getPath(), new ReadOnlyValue() {
@@ -688,8 +692,10 @@ public final class ConfigTree {
                 final Setting setting) throws SettingException {
 				final UserSettingMail settings = UserSettingMailStorage
                     .getInstance().getUserSettingMail(session.getUserId(), ctx);
-				setting.setSingleValue(Integer.valueOf(settings
-				    .getAutoLinebreak()));
+				if (null != settings) {
+    				setting.setSingleValue(Integer.valueOf(settings
+    				    .getAutoLinebreak()));
+				}
 			}
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
@@ -703,15 +709,17 @@ public final class ConfigTree {
                     .getInstance();
 				final UserSettingMail settings = storage.getUserSettingMail(
 						user.getId(), ctx);
-				try {
-					settings.setAutoLinebreak(Integer.parseInt(
-                        (String) setting.getSingleValue()));
-					storage.saveUserSettingMail(settings, user.getId(),
-							ctx);
-				} catch (NumberFormatException e) {
-					throw new SettingException(Code.JSON_READ_ERROR, e);
-				} catch (OXException e) {
-					throw new SettingException(e);
+				if (null != settings) {
+    				try {
+    					settings.setAutoLinebreak(Integer.parseInt(
+                            (String) setting.getSingleValue()));
+    					storage.saveUserSettingMail(settings, user.getId(),
+    							ctx);
+    				} catch (NumberFormatException e) {
+    					throw new SettingException(Code.JSON_READ_ERROR, e);
+    				} catch (OXException e) {
+    					throw new SettingException(e);
+    				}
 				}
 			}
 		});

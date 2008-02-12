@@ -49,17 +49,11 @@
 
 package com.openexchange.groupware.settings.tree;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.settings.AbstractMailFuncs;
 import com.openexchange.groupware.settings.SettingSetup;
 import com.openexchange.groupware.settings.SharedValue;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.session.Session;
 
 /**
  * Adds a configuration setting tree entry for the calendar notification of the
@@ -69,11 +63,6 @@ import com.openexchange.session.Session;
 public final class CalendarNotification extends AbstractNode {
 
     public static final String NAME = "calendarnotification";
-
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(CalendarNotification.class);
 
     /**
      * Default constructor.
