@@ -23,7 +23,6 @@ Export-Package: com.openexchange.authentication,
  com.openexchange.sessiond.exception,
  com.openexchange.spellcheck,
  com.openexchange.tools.arrays,
- com.openexchange.tools.ssl,
  com.openexchange.tools.stream
 Import-Package: javax.management,
  org.apache.commons.logging,

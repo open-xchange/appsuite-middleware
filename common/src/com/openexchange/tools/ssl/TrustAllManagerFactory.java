@@ -47,49 +47,52 @@
  *
  */
 
-
-
 package com.openexchange.tools.ssl;
 
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.ManagerFactoryParameters;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactorySpi;
 
 /**
- * This trust manager simply trusts all certificates.
+ * Implementation of the trust manager factory service provider interface for
+ * the trust manager that trusts all certificates.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TrustAllManager implements X509TrustManager {
+public final class TrustAllManagerFactory extends TrustManagerFactorySpi {
 
-   /**
-    * Friendly constructor to allow instantiation only for the
-    * TrustAllSSLSocketFactory.
-    */
-   TrustAllManager() {
-   }
+    /**
+     * Default constructor.
+     */
+    public TrustAllManagerFactory() {
+        super();
+    }
 
-   /**
-    * @see javax.net.ssl.X509TrustManager#checkClientTrusted(
-    *      java.security.cert.X509Certificate[], java.lang.String)
-    */
-   public void checkClientTrusted(final X509Certificate[] chain,
-      final String authType) throws CertificateException {
-   }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected TrustManager[] engineGetTrustManagers() {
+        return new TrustManager[] { new TrustAllManager() };
+    }
 
-   /**
-    * @see javax.net.ssl.X509TrustManager#checkServerTrusted(
-    *      java.security.cert.X509Certificate[], java.lang.String)
-    */
-   public void checkServerTrusted(final X509Certificate[] chain,
-      final String authType) throws CertificateException {
-   }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void engineInit(final KeyStore ks) throws KeyStoreException {
+        // Nothing to initialize.
+    }
 
-   /**
-    * @see javax.net.ssl.X509TrustManager#getAcceptedIssuers()
-    */
-   public X509Certificate[] getAcceptedIssuers() {
-      return new X509Certificate[0];
-   }
-
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void engineInit(final ManagerFactoryParameters params)
+        throws InvalidAlgorithmParameterException {
+        // Nothing to initialize.
+    }
 }
