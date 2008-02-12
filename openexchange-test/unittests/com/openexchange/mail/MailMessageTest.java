@@ -51,7 +51,6 @@ package com.openexchange.mail;
 
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.mail.MailStorageUtils.OrderDirection;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;

@@ -52,7 +52,6 @@ package com.openexchange.mail;
 import java.util.Arrays;
 
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.mail.MailStorageUtils.OrderDirection;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.parser.MailMessageParser;
