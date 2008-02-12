@@ -48,7 +48,20 @@
 #
 #
 
-PREFIX=/opt/open-xchange
-LIBDIR=$PREFIX/lib
+OXFUNCTIONS=@oxfunctions@
+OXPREFIX=@prefix@
 
-java -classpath $LIBDIR/com.openexchange.control.jar com.openexchange.control.console.UninstallBundle "$@"
+test -f $OXFUNCTIONS || {
+	echo "missing common shell functions file"
+	exit 1
+}
+
+. $OXFUNCTIONS
+
+OXLIBDIR=$OXPREFIX/lib
+
+CLASSPATH="-classpath $OXLIBDIR/com.openexchange.control.jar"
+
+JAVA_OPTS="-Djava.awt.headless=true"
+
+$JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.control.console.UninstallBundle "$@"
