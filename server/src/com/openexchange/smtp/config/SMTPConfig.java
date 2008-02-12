@@ -53,10 +53,10 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.mail.config.GlobalTransportConfig;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
-import com.openexchange.mail.config.TransportConfig;
+import com.openexchange.mail.transport.config.GlobalTransportConfig;
+import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.session.Session;
 
 /**

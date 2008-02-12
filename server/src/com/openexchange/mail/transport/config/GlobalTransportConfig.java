@@ -47,13 +47,15 @@
  *
  */
 
-package com.openexchange.mail.config;
+package com.openexchange.mail.transport.config;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.config.GlobalMailConfig;
+import com.openexchange.mail.config.MailConfigException;
 
 /**
  * {@link GlobalTransportConfig} - Global transport properties

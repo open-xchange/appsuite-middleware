@@ -50,13 +50,12 @@
 package com.openexchange.imap;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.user2acl.User2ACL;
 import com.openexchange.imap.user2acl.User2ACLArgs;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.session.Session;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.Rights;
 
@@ -76,16 +75,20 @@ public final class ACLPermission extends MailPermission {
 
 	private transient ACL acl;
 
+	private final transient Context ctx;
+
+	private final transient IMAPConfig imapConfig;
+
 	/**
 	 * Constructor
 	 * 
-	 * @param sessionUser
+	 * @param imapConfig
 	 *            The session user
-	 * @throws MailException
-	 *             If context loading fails
 	 */
-	public ACLPermission(final Session session) throws MailException {
-		super(session);
+	public ACLPermission(final IMAPConfig imapConfig, final Context ctx) {
+		super();
+		this.ctx = ctx;
+		this.imapConfig = imapConfig;
 	}
 
 	/*
@@ -278,8 +281,7 @@ public final class ACLPermission extends MailPermission {
 			return acl;
 		}
 		final Rights rights = permission2Rights(this);
-		return (acl = new ACL(User2ACL.getInstance(UserStorage.getStorageUser(session.getUserId(), ctx)).getACLName(
-				getEntity(), ctx, user2aclArgs), rights));
+		return (acl = new ACL(User2ACL.getInstance(imapConfig).getACLName(getEntity(), ctx, user2aclArgs), rights));
 	}
 
 	/**
@@ -291,8 +293,7 @@ public final class ACLPermission extends MailPermission {
 	 * @throws AbstractOXException
 	 */
 	public void parseACL(final ACL acl, final User2ACLArgs user2aclArgs) throws AbstractOXException {
-		setEntity(User2ACL.getInstance(UserStorage.getStorageUser(session.getUserId(), ctx)).getUserID(acl.getName(),
-				ctx, user2aclArgs));
+		setEntity(User2ACL.getInstance(imapConfig).getUserID(acl.getName(), ctx, user2aclArgs));
 		parseRights(acl.getRights());
 		this.acl = acl;
 	}

@@ -47,32 +47,85 @@
  *
  */
 
-package com.openexchange.mail.config;
+package com.openexchange.mail.transport.config;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.transport.MailTransportProvider;
+import com.openexchange.server.Initialization;
 
 /**
- * {@link TransportConfig} - The user-specific transport configuration
- * <p>
- * Provides access to global transport properties.
+ * {@link GlobalTransportConfigInit} - Initializes global mail configuration
+ * implementation for transport system.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class TransportConfig extends MailConfig {
+public final class GlobalTransportConfigInit implements Initialization {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(GlobalTransportConfigInit.class);
+
+	private final AtomicBoolean started = new AtomicBoolean();
+
+	private final AtomicBoolean initializedTransport = new AtomicBoolean();
+
+	private static final GlobalTransportConfigInit instance = new GlobalTransportConfigInit();
 
 	/**
-	 * Default constructor
+	 * No instantiation
 	 */
-	protected TransportConfig() {
+	private GlobalTransportConfigInit() {
 		super();
 	}
 
 	/**
-	 * Gets the referencedPartLimit
-	 * 
-	 * @return The referencedPartLimit
+	 * @return The singleton instance
 	 */
-	public static int getReferencedPartLimit() {
-		return GlobalTransportConfig.getTransportInstance().getReferencedPartLimit();
+	public static GlobalTransportConfigInit getInstance() {
+		return instance;
+	}
+
+	private void initGlobalTransportConfigClass() throws MailException {
+		if (!initializedTransport.get()) {
+			synchronized (initializedTransport) {
+				if (!initializedTransport.get()) {
+					final String className = MailTransportProvider.getInstance().getGlobalTransportConfigClass();
+					try {
+						if (className == null) {
+							throw new MailConfigException("Missing global transport config class");
+						}
+						final Class<? extends GlobalTransportConfig> clazz = Class.forName(className).asSubclass(
+								GlobalTransportConfig.class);
+						GlobalTransportConfig.initializeGlobalTransportConfig(clazz);
+						initializedTransport.set(true);
+					} catch (final ClassNotFoundException e) {
+						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
+					}
+				}
+			}
+		}
+	}
+
+	public void start() throws AbstractOXException {
+		if (started.get()) {
+			LOG.error(this.getClass().getName() + " already started");
+			return;
+		}
+		initGlobalTransportConfigClass();
+		started.set(true);
+	}
+
+	public void stop() throws AbstractOXException {
+		if (!started.get()) {
+			LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
+			return;
+		}
+		initializedTransport.set(false);
+		started.set(false);
 	}
 
 }

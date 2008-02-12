@@ -49,92 +49,58 @@
 
 package com.openexchange.mail.transport;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.MailException;
+import com.openexchange.mail.transport.config.GlobalTransportConfigInit;
 import com.openexchange.server.Initialization;
 
 /**
- * {@link MailTransportInit} - Initializes the mail transport implementation.
+ * {@link TransportInitialization} - Initializes whole transport implementation
+ * and therefore provides a central point for starting/stopping transport
+ * implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailTransportInit implements Initialization {
+public final class TransportInitialization implements Initialization {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailTransportInit.class);
-
-	private static final MailTransportInit instance = new MailTransportInit();
-
-	private final AtomicBoolean started = new AtomicBoolean();
-
-	private final AtomicBoolean initialized = new AtomicBoolean();
+	private static final TransportInitialization instance = new TransportInitialization();
 
 	/**
-	 * No instantiation
+	 * @return The singleton instance of {@link TransportInitialization}
 	 */
-	private MailTransportInit() {
-		super();
-	}
-
-	static MailTransportInit getInstance() {
+	public static TransportInitialization getInstance() {
 		return instance;
 	}
 
 	/**
-	 * Initializes the mail transport class
-	 * 
-	 * @throws MailException
-	 *             If implementing class cannot be found
+	 * Initializes a new {@link TransportInitialization}
 	 */
-	private void initMailTransportClass() throws MailException {
-		if (!initialized.get()) {
-			synchronized (initialized) {
-				if (!initialized.get()) {
-					final String className = MailTransportProvider.getInstance().getMailTransportClass();
-					try {
-						if (className == null) {
-							/*
-							 * Fallback
-							 */
-							if (LOG.isWarnEnabled()) {
-								LOG.warn("Using fallback \"com.openexchange.smtp.SMTPTransport\"");
-							}
-							final Class<? extends MailTransport> clazz = Class.forName(
-									"com.openexchange.smtp.SMTPTransport").asSubclass(MailTransport.class);
-							MailTransport.setImplementingClass(clazz);
-							initialized.set(true);
-							return;
-						}
-						final Class<? extends MailTransport> clazz = Class.forName(className).asSubclass(
-								MailTransport.class);
-						MailTransport.setImplementingClass(clazz);
-					} catch (final ClassNotFoundException e) {
-						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
-					}
-					initialized.set(true);
-				}
-			}
-		}
+	private TransportInitialization() {
+		super();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.Initialization#start()
+	 */
 	public void start() throws AbstractOXException {
-		if (started.get()) {
-			LOG.error(this.getClass().getName() + " already started");
-			return;
-		}
-		initMailTransportClass();
-		started.set(true);
+		MailTransportProvider.initTransportProvider();
+		MailTransportInit.getInstance().start();
+		GlobalTransportConfigInit.getInstance().start();
+		MailTransport.startup();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.Initialization#stop()
+	 */
 	public void stop() throws AbstractOXException {
-		if (!started.get()) {
-			LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
-			return;
-		}
-		initialized.set(false);
-		started.set(false);
+		MailTransport.shutdown();
+		GlobalTransportConfigInit.getInstance().stop();
+		MailTransportInit.getInstance().stop();
+		MailTransportProvider.resetTransportProvider();
 	}
+
 }

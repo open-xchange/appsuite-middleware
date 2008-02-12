@@ -53,8 +53,8 @@ import java.nio.charset.Charset;
 import java.util.Properties;
 
 import com.openexchange.configuration.SystemConfig;
-import com.openexchange.mail.config.GlobalTransportConfig;
 import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.transport.config.GlobalTransportConfig;
 
 /**
  * {@link GlobalSMTPConfig}

@@ -78,7 +78,10 @@ public final class MailConnectionInit implements Initialization {
 		super();
 	}
 
-	public static MailConnectionInit getInstance() {
+	/**
+	 * @return The singleton instance of {@link MailConnectionInit}
+	 */
+	static MailConnectionInit getInstance() {
 		return instance;
 	}
 

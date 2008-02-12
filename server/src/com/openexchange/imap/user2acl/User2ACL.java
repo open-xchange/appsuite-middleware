@@ -54,10 +54,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.mail.config.MailConfig;
-import com.openexchange.mail.config.MailConfig.LoginType;
+import com.openexchange.imap.config.IMAPConfig;
 
 /**
  * {@link User2ACL} - Maps numeric entity IDs to corresponding IMAP login name
@@ -198,8 +197,6 @@ public abstract class User2ACL {
 		}
 	}
 
-	private static final Object[] EMPTY_ARGS = new Object[0];
-
 	private static final AtomicBoolean instancialized = new AtomicBoolean();
 
 	/**
@@ -208,47 +205,27 @@ public abstract class User2ACL {
 	private static User2ACL singleton;
 
 	/**
-	 * @return IP/Hostname of IMAP server and its port
-	 */
-	private static final Object[] getIMAPServer(final User sessionUser) {
-		final String imapServer;
-		if (LoginType.GLOBAL.equals(MailConfig.getLoginType())) {
-			imapServer = MailConfig.getMailServer();
-		} else if (LoginType.USER.equals(MailConfig.getLoginType())) {
-			imapServer = sessionUser.getImapServer();
-		} else if (LoginType.ANONYMOUS.equals(MailConfig.getLoginType())) {
-			imapServer = sessionUser.getImapServer();
-		} else {
-			return EMPTY_ARGS;
-		}
-		final int pos = imapServer.indexOf(':');
-		if (pos > -1) {
-			return new Object[] { imapServer.substring(0, pos), Integer.valueOf(imapServer.substring(pos + 1)) };
-		}
-		return new Object[] { imapServer, Integer.valueOf(143) };
-	}
-
-	/**
 	 * Creates a new instance implementing the {@link User2ACL} interface.
 	 * 
+	 * @param imapConfig
+	 *            The user's IMAP config
 	 * @return an instance implementing the {@link User2ACL} interface.
 	 * @throws User2ACLException
 	 *             if the instance can't be created.
 	 */
-	public static final User2ACL getInstance(final User sessionUser) throws User2ACLException {
+	public static final User2ACL getInstance(final IMAPConfig imapConfig) throws User2ACLException {
 		if (!instancialized.get()) {
 			/*
 			 * Auto-detect dependent on user's IMAP settings
 			 */
-			return getUser2ACLImpl(sessionUser);
+			return getUser2ACLImpl(imapConfig.getServer(), imapConfig.getPort());
 		}
 		return singleton;
 	}
 
-	private static final User2ACL getUser2ACLImpl(final User sessionUser) throws User2ACLException {
+	private static final User2ACL getUser2ACLImpl(final String imapServer, final int port) throws User2ACLException {
 		try {
-			final Object[] args = getIMAPServer(sessionUser);
-			return User2ACLAutoDetector.getUser2ACLImpl((String) args[0], ((Integer) args[1]).intValue());
+			return User2ACLAutoDetector.getUser2ACLImpl(imapServer, port);
 		} catch (final IOException e) {
 			throw new User2ACLException(User2ACLException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}

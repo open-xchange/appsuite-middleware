@@ -97,7 +97,7 @@ public abstract class MailTransport {
 	 * 
 	 * @throws MailException
 	 */
-	public static final void startup() throws MailException {
+	static final void startup() throws MailException {
 		internalInstance.startupInternal();
 	}
 
@@ -106,7 +106,7 @@ public abstract class MailTransport {
 	 * 
 	 * @throws MailException
 	 */
-	public static final void shutdown() throws MailException {
+	static final void shutdown() throws MailException {
 		internalInstance.shutdownInternal();
 	}
 

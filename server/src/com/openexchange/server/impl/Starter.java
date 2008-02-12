@@ -121,6 +121,10 @@ public class Starter implements Initialization {
 	 */
 	com.openexchange.mail.MailInitialization.getInstance(),
 	/**
+	 * Transport initialization
+	 */
+	com.openexchange.mail.transport.TransportInitialization.getInstance(),
+	/**
 	 * Infostore Configuration
 	 */
 	com.openexchange.groupware.infostore.InfostoreConfig.getInstance(),
@@ -162,10 +166,10 @@ public class Starter implements Initialization {
 	 * Reads configdb.properties.
 	 */
 	com.openexchange.configuration.ConfigDB.getInstance(),
-        /**
-         * Read in update tasks
-         */
-        com.openexchange.groupware.update.UpdateTaskCollectionInit.getInstance(),
+	/**
+	 * Read in update tasks
+	 */
+	com.openexchange.groupware.update.UpdateTaskCollectionInit.getInstance(),
 	/**
 	 * Sets the caching system JCS up.
 	 */
@@ -178,11 +182,11 @@ public class Starter implements Initialization {
 	 * Setup of ContextStorage and LoginInfo.
 	 */
 	com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
-    /**
+	/**
 	 * User configuration init
 	 */
 	com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
-    /**
+	/**
 	 * Notification Configuration
 	 */
 	com.openexchange.groupware.notify.NotificationConfig.getInstance() };

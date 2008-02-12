@@ -77,7 +77,6 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.cache.UserFlagsCache;
@@ -179,18 +178,18 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		try {
 			final String fullname = prepareMailFolderParam(fullnameArg);
 			if (DEFAULT_FOLDER_ID.equals(fullname)) {
-				return IMAPFolderConverter
-						.convertFolder((IMAPFolder) imapStore.getDefaultFolder(), session, imapConfig);
+				return IMAPFolderConverter.convertFolder((IMAPFolder) imapStore.getDefaultFolder(), session,
+						imapConfig, ctx);
 			}
 			IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullname);
 			if (f.exists()) {
-				return IMAPFolderConverter.convertFolder(f, session, imapConfig);
+				return IMAPFolderConverter.convertFolder(f, session, imapConfig, ctx);
 			}
 			f = checkForNamespaceFolder(fullname);
 			if (null == f) {
 				throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, fullname);
 			}
-			return IMAPFolderConverter.convertFolder(f, session, imapConfig);
+			return IMAPFolderConverter.convertFolder(f, session, imapConfig, ctx);
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapConnection);
 		}
@@ -244,8 +243,8 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 				 */
 				final List<MailFolder> list = new ArrayList<MailFolder>(subfolders.size());
 				for (Folder subfolder : subfolders) {
-					final MailFolder mo = IMAPFolderConverter
-							.convertFolder((IMAPFolder) subfolder, session, imapConfig);
+					final MailFolder mo = IMAPFolderConverter.convertFolder((IMAPFolder) subfolder, session,
+							imapConfig, ctx);
 					list.add(mo);
 				}
 				return list.toArray(new MailFolder[list.size()]);
@@ -289,7 +288,8 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		}
 		final List<MailFolder> list = new ArrayList<MailFolder>(subfolders.length);
 		for (int i = 0; i < subfolders.length; i++) {
-			final MailFolder mo = IMAPFolderConverter.convertFolder((IMAPFolder) subfolders[i], session, imapConfig);
+			final MailFolder mo = IMAPFolderConverter.convertFolder((IMAPFolder) subfolders[i], session, imapConfig,
+					ctx);
 			if (mo.exists()) {
 				list.add(mo);
 			}
@@ -370,7 +370,8 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 
 	public MailFolder getRootFolder() throws MailException {
 		try {
-			return IMAPFolderConverter.convertFolder((IMAPFolder) imapStore.getDefaultFolder(), session, imapConfig);
+			return IMAPFolderConverter.convertFolder((IMAPFolder) imapStore.getDefaultFolder(), session, imapConfig,
+					ctx);
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapConnection);
 		}
@@ -551,8 +552,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 						 */
 						final ACL[] removedACLs = getRemovedACLs(newACLs, initialACLs);
 						if (removedACLs.length > 0) {
-							final User2ACL user2ACL = User2ACL.getInstance(UserStorage.getStorageUser(session
-									.getUserId(), ctx));
+							final User2ACL user2ACL = User2ACL.getInstance(imapConfig);
 							final User2ACLArgs user2ACLArgs = IMAPFolderConverter.getUser2AclArgs(session, createMe);
 							for (int i = 0; i < removedACLs.length; i++) {
 								if (isKnownEntity(removedACLs[i].getName(), user2ACL, ctx, user2ACLArgs)) {
@@ -733,7 +733,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 						 * holds full rights
 						 */
 						if (isDefaultFolder(updateMe.getFullName())
-								&& !stillHoldsFullRights(updateMe, newACLs, session, ctx)) {
+								&& !stillHoldsFullRights(updateMe, newACLs, imapConfig, session, ctx)) {
 							throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
 						} else if (!RightsCache.getCachedRights(updateMe, true, session).contains(
 								Rights.Right.ADMINISTER)) {
@@ -759,8 +759,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 						 */
 						final ACL[] removedACLs = getRemovedACLs(newACLs, oldACLs);
 						if (removedACLs.length > 0) {
-							final User2ACL user2ACL = User2ACL.getInstance(UserStorage.getStorageUser(session
-									.getUserId(), ctx));
+							final User2ACL user2ACL = User2ACL.getInstance(imapConfig);
 							final User2ACLArgs user2ACLArgs = IMAPFolderConverter.getUser2AclArgs(session, updateMe);
 							for (int i = 0; i < removedACLs.length; i++) {
 								if (isKnownEntity(removedACLs[i].getName(), user2ACL, ctx, user2ACLArgs)) {
@@ -1036,7 +1035,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 			final List<MailFolder> list = new ArrayList<MailFolder>();
 			final String defaultFolder = imapStore.getDefaultFolder().getFullName();
 			while (!f.getFullName().equals(defaultFolder)) {
-				list.add(IMAPFolderConverter.convertFolder(f, session, imapConfig));
+				list.add(IMAPFolderConverter.convertFolder(f, session, imapConfig, ctx));
 				f = (IMAPFolder) f.getParent();
 			}
 			return list.toArray(new MailFolder[list.size()]);
@@ -1249,12 +1248,13 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 	private static final transient Rights FULL_RIGHTS = new Rights("lrswipcda");
 
 	private static boolean stillHoldsFullRights(final IMAPFolder defaultFolder, final ACL[] newACLs,
-			final Session session, final Context ctx) throws AbstractOXException, MessagingException {
+			final IMAPConfig imapConfig, final Session session, final Context ctx) throws AbstractOXException,
+			MessagingException {
 		/*
 		 * Ensure that owner still holds full rights
 		 */
-		final String ownerACLName = User2ACL.getInstance(UserStorage.getStorageUser(session.getUserId(), ctx))
-				.getACLName(session.getUserId(), ctx, IMAPFolderConverter.getUser2AclArgs(session, defaultFolder));
+		final String ownerACLName = User2ACL.getInstance(imapConfig).getACLName(session.getUserId(), ctx,
+				IMAPFolderConverter.getUser2AclArgs(session, defaultFolder));
 		for (int i = 0; i < newACLs.length; i++) {
 			if (newACLs[i].getName().equals(ownerACLName) && newACLs[i].getRights().contains(FULL_RIGHTS)) {
 				return true;

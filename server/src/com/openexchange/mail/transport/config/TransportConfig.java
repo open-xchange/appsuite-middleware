@@ -47,70 +47,34 @@
  *
  */
 
-package com.openexchange.mail.permission;
+package com.openexchange.mail.transport.config;
 
-import java.lang.reflect.InvocationTargetException;
-
-import com.openexchange.mail.MailException;
-import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.session.Session;
+import com.openexchange.mail.config.MailConfig;
 
 /**
- * {@link MailPermission} - The mail permission defining a set of access rights
- * on a mail folder for a certain entity.
+ * {@link TransportConfig} - The user-specific transport configuration
  * <p>
- * This depends on if mailing system supports any kind of access control for
- * entities; e.g. for IMAP it is the ACL capability. If no access control is
- * defined by mailing system, {@link DefaultMailPermission} is used which grants
- * full access and therefore bypasses access control.
+ * Provides access to global transport properties.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MailPermission extends OCLPermission {
-
-	private static Class<? extends MailPermission> clazz;
+public abstract class TransportConfig extends MailConfig {
 
 	/**
-	 * Initializes a new {@link MailPermission}
+	 * Default constructor
 	 */
-	protected MailPermission() {
+	protected TransportConfig() {
 		super();
 	}
 
-	static void initialzeMailPermission(final Class<? extends MailPermission> clazz) {
-		MailPermission.clazz = clazz;
-	}
-
-	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { Session.class };
-
 	/**
-	 * Gets the proper mail permission implementation
+	 * Gets the referencedPartLimit
 	 * 
-	 * @param session
-	 *            The session
-	 * @return The proper mail permission implementation
-	 * @throws MailException
-	 *             If instantiation fails
+	 * @return The referencedPartLimit
 	 */
-	public static MailPermission newInstance(final Session session) throws MailException {
-		/*
-		 * Create a new mail permission
-		 */
-		try {
-			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { session });
-		} catch (final SecurityException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final NoSuchMethodException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalArgumentException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InstantiationException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalAccessException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InvocationTargetException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		}
+	public static int getReferencedPartLimit() {
+		return GlobalTransportConfig.getTransportInstance().getReferencedPartLimit();
 	}
+
 }

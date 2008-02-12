@@ -54,7 +54,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.config.GlobalTransportConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -62,6 +61,7 @@ import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
+import com.openexchange.mail.transport.config.GlobalTransportConfig;
 import com.openexchange.session.Session;
 
 /**
@@ -82,7 +82,7 @@ public abstract class MailTransportProvider {
 	 * @throws MailException
 	 *             If initialization of transport provider fails
 	 */
-	public static void initTransportProvider() throws MailException {
+	static void initTransportProvider() throws MailException {
 		if (!initialized.get()) {
 			synchronized (initialized) {
 				if (!initialized.get()) {
@@ -117,7 +117,7 @@ public abstract class MailTransportProvider {
 	/**
 	 * Resets the transport provider
 	 */
-	public static void resetTransportProvider() {
+	static void resetTransportProvider() {
 		initialized.set(false);
 	}
 
