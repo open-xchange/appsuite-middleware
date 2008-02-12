@@ -348,9 +348,9 @@ public class StatisticTools extends BasicCommandlineOptions {
         if (admin) {
             showStats(mbc, "com.openexchange.admin.tools.monitoring.Monitor");
         } else {
-            showStats(mbc, "com.openexchange.tools.ajp13.monitoring.AJPv13ServerThreadsMonitor");
-            showStats(mbc, "com.openexchange.tools.ajp13.monitoring.AJPv13ListenerMonitor");
-            showStats(mbc, "com.openexchange.monitoring.GeneralMonitor");
+            showStats(mbc, "com.openexchange.ajp13.monitoring.AJPv13ServerThreadsMonitor");
+            showStats(mbc, "com.openexchange.ajp13.monitoring.AJPv13ListenerMonitor");
+            showStats(mbc, "com.openexchange.monitoring.internal.GeneralMonitor");
             showStats(mbc, "com.openexchange.api2.MailInterfaceMonitor");
             showStats(mbc, "com.openexchange.database.ConnectionPool");
         }
