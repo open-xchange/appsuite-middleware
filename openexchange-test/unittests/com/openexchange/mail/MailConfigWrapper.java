@@ -62,17 +62,19 @@ public final class MailConfigWrapper extends MailConfig {
 	private final int port;
 
 	private final String server;
+    private boolean secure;
 
-	/**
+    /**
 	 * Initializes a new {@link MailConfigWrapper}
 	 */
-	public MailConfigWrapper(final String login, final String password, final String server, final int port) {
+	public MailConfigWrapper(final String login, final String password, final String server, final int port, final boolean secure) {
 		super();
 		super.login = login;
 		super.password = password;
 		this.server = server;
 		this.port = port;
-	}
+        this.secure = secure;
+    }
 
 	/*
 	 * (non-Javadoc)
@@ -94,11 +96,15 @@ public final class MailConfigWrapper extends MailConfig {
 		return port;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.config.MailConfig#getServer()
-	 */
+    public boolean isSecure() {
+        return secure;
+    }
+
+    /*
+      * (non-Javadoc)
+      *
+      * @see com.openexchange.mail.config.MailConfig#getServer()
+      */
 	@Override
 	public String getServer() {
 		return server;

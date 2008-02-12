@@ -14,13 +14,11 @@ import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.sessions.ServerSessionFactory;
+import com.openexchange.tools.session.ServerSessionFactory;
 import com.openexchange.test.TestInit;
 import junit.framework.TestCase;
 

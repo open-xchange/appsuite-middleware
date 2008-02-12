@@ -11,11 +11,9 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.sessions.ServerSessionFactory;
+import com.openexchange.tools.session.ServerSessionFactory;
 import junit.framework.TestCase;
 
 import java.sql.Connection;

@@ -53,8 +53,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
@@ -89,12 +87,11 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
-import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.sessions.ServerSessionFactory;
+import com.openexchange.tools.session.ServerSessionFactory;
 import com.openexchange.test.AjaxInit;
 
 /**
