@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.writer;
 
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.utils.StorageUtility.prepareFullname;
 
 import java.io.UnsupportedEncodingException;
@@ -68,7 +69,6 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailServletInterfaceImpl;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
@@ -271,8 +271,8 @@ public final class MessageWriter {
 								((JSONObject) jsonContainer).put(MailJSONField.SUBJECT.getKey(), MessageUtility
 										.decodeMultiEncodedHeader(mail.getSubject()));
 							} else {
-								((JSONArray) jsonContainer).put(MessageUtility
-										.decodeMultiEncodedHeader(mail.getSubject()));
+								((JSONArray) jsonContainer).put(MessageUtility.decodeMultiEncodedHeader(mail
+										.getSubject()));
 							}
 						} catch (final JSONException e) {
 							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
@@ -304,8 +304,10 @@ public final class MessageWriter {
 							if (withKey) {
 								if (mail.containsSentDate() && mail.getSentDate() != null) {
 									((JSONObject) jsonContainer).put(MailJSONField.SENT_DATE.getKey(), addUserTimezone(
-											mail.getSentDate().getTime(), TimeZone.getTimeZone(UserStorage.getStorageUser(
-													session.getUserId(), ContextStorage.getStorageContext(session.getContextId())).getTimeZone())));
+											mail.getSentDate().getTime(), TimeZone.getTimeZone(UserStorage
+													.getStorageUser(session.getUserId(),
+															ContextStorage.getStorageContext(session.getContextId()))
+													.getTimeZone())));
 								} else {
 									((JSONObject) jsonContainer).put(MailJSONField.SENT_DATE.getKey(), JSONObject.NULL);
 								}
@@ -313,7 +315,8 @@ public final class MessageWriter {
 								if (mail.containsSentDate() && mail.getSentDate() != null) {
 									((JSONArray) jsonContainer).put(addUserTimezone(mail.getSentDate().getTime(),
 											TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(),
-													ContextStorage.getStorageContext(session.getContextId())).getTimeZone())));
+													ContextStorage.getStorageContext(session.getContextId()))
+													.getTimeZone())));
 								} else {
 									((JSONArray) jsonContainer).put(JSONObject.NULL);
 								}
@@ -336,7 +339,8 @@ public final class MessageWriter {
 									((JSONObject) jsonContainer).put(MailJSONField.RECEIVED_DATE.getKey(),
 											addUserTimezone(mail.getReceivedDate().getTime(), TimeZone
 													.getTimeZone(UserStorage.getStorageUser(session.getUserId(),
-															ContextStorage.getStorageContext(session.getContextId())).getTimeZone())));
+															ContextStorage.getStorageContext(session.getContextId()))
+															.getTimeZone())));
 								} else {
 									((JSONObject) jsonContainer).put(MailJSONField.RECEIVED_DATE.getKey(),
 											JSONObject.NULL);
@@ -345,7 +349,8 @@ public final class MessageWriter {
 								if (mail.containsReceivedDate() && mail.getReceivedDate() != null) {
 									((JSONArray) jsonContainer).put(addUserTimezone(mail.getReceivedDate().getTime(),
 											TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(),
-													ContextStorage.getStorageContext(session.getContextId())).getTimeZone())));
+													ContextStorage.getStorageContext(session.getContextId()))
+													.getTimeZone())));
 								} else {
 									((JSONArray) jsonContainer).put(JSONObject.NULL);
 								}
@@ -635,7 +640,7 @@ public final class MessageWriter {
 			return decoded;
 		} catch (final UnsupportedEncodingException e) {
 			LOG.error("Unsupported encoding in a message detected and monitored.", e);
-			MailServletInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+			mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 			return MessageUtility.decodeMultiEncodedHeader(address);
 		}
 	}

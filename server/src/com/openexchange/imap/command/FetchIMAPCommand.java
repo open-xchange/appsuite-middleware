@@ -79,7 +79,7 @@ import javax.mail.internet.MimeUtility;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailServletInterfaceImpl;
+import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.mime.ContainerMessage;
 import com.openexchange.mail.mime.ContentType;
@@ -701,7 +701,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 								decVal = MimeUtility.decodeText(MimeUtility.unfold(hdrValue));
 							} catch (final UnsupportedEncodingException e) {
 								LOG.error("Unsupported encoding in a message detected and monitored.", e);
-								MailServletInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+								MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 								decVal = hdrValue;
 							}
 						}
@@ -802,7 +802,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 							msg.setSubject(env.subject == null ? "" : MimeUtility.decodeText(env.subject));
 						} catch (final UnsupportedEncodingException e) {
 							LOG.error("Unsupported encoding in a message detected and monitored.", e);
-							MailServletInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+							MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 							msg.setSubject(MessageUtility.decodeMultiEncodedHeader(env.subject));
 						}
 						msg.setSentDate(env.date);

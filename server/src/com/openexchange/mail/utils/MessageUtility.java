@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.utils;
 
-import static com.openexchange.mail.MailServletInterfaceImpl.mailInterfaceMonitor;
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,7 +80,6 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailServletInterfaceImpl;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -248,7 +247,7 @@ public final class MessageUtility {
 					lastMatch = m.end();
 				} catch (final UnsupportedEncodingException e) {
 					LOG.error("Unsupported encoding in a message detected and monitored.", e);
-					MailServletInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+					mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 					sb.append(hdrVal.substring(lastMatch));
 					return sb.toString();
 				}

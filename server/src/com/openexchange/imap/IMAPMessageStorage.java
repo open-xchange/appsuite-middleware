@@ -49,7 +49,7 @@
 
 package com.openexchange.imap;
 
-import static com.openexchange.mail.MailServletInterfaceImpl.mailInterfaceMonitor;
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getCacheFetchProfile;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getCacheFields;
@@ -87,7 +87,6 @@ import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
 import com.openexchange.imap.threadsort.TreeNode;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailServletInterfaceImpl;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailMessageStorage;
 import com.openexchange.mail.OrderDirection;
@@ -207,7 +206,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			}
 			final long start = System.currentTimeMillis();
 			final IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
-			MailServletInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (msg == null) {
 				throw new MailException(MailException.Code.MAIL_NOT_FOUND, String.valueOf(msgUID), imapFolder
 						.toString());
@@ -519,7 +518,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			final long start = System.currentTimeMillis();
 			final Message[] msgs = IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, order,
 					UserStorage.getStorageUser(session.getUserId(), ctx).getLocale());
-			MailServletInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (msgs == null) {
 				return EMPTY_RETVAL;
 			} else if (limit > 0) {
@@ -1031,14 +1030,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			 */
 			long start = System.currentTimeMillis();
 			IMAPCommandsCollection.clearAllColorLabels(imapFolder, msgUIDs);
-			MailServletInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(new StringBuilder(128).append("All color flags cleared from ").append(msgUIDs.length).append(
 						" messages in ").append((System.currentTimeMillis() - start)).append("msec").toString());
 			}
 			start = System.currentTimeMillis();
 			IMAPCommandsCollection.setColorLabel(imapFolder, msgUIDs, MailMessage.getColorLabelStringValue(colorLabel));
-			MailServletInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(new StringBuilder(128).append("All color flags set in ").append(msgUIDs.length).append(
 						" messages in ").append((System.currentTimeMillis() - start)).append("msec").toString());

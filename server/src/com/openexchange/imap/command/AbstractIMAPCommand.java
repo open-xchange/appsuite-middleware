@@ -49,7 +49,7 @@
 
 package com.openexchange.imap.command;
 
-import static com.openexchange.mail.MailServletInterfaceImpl.mailInterfaceMonitor;
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 
 import javax.mail.MessagingException;
 

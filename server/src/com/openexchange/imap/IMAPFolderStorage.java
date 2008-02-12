@@ -49,7 +49,7 @@
 
 package com.openexchange.imap;
 
-import static com.openexchange.mail.MailServletInterfaceImpl.mailInterfaceMonitor;
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.utils.StorageUtility.getDefaultFolderNames;
 import static com.openexchange.mail.utils.StorageUtility.prepareFullname;

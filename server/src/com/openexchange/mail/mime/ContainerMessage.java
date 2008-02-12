@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.mime;
 
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -74,7 +76,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailServletInterfaceImpl;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.utils.MessageUtility;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
@@ -168,7 +169,7 @@ public final class ContainerMessage extends Message implements Serializable {
 	private boolean expunged;
 
 	private boolean hasAttachment;
-	
+
 	private BODYSTRUCTURE bodystructure;
 
 	private ContainerMessage() {
@@ -351,7 +352,7 @@ public final class ContainerMessage extends Message implements Serializable {
 					.decodeText(headers.get(MessageHeaders.HDR_SUBJECT)) : null;
 		} catch (final UnsupportedEncodingException e) {
 			LOG.error("Unsupported encoding in a message detected and monitored.", e);
-			MailServletInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+			mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 			return headers.containsKey(MessageHeaders.HDR_SUBJECT) ? MessageUtility.decodeMultiEncodedHeader(headers
 					.get(MessageHeaders.HDR_SUBJECT)) : null;
 		}
@@ -379,7 +380,7 @@ public final class ContainerMessage extends Message implements Serializable {
 	public void setHasAttachment(final boolean hasAttachment) {
 		this.hasAttachment = hasAttachment;
 	}
-	
+
 	private static final MailDateFormat MDF = new MailDateFormat();
 
 	@Override
@@ -678,9 +679,9 @@ public final class ContainerMessage extends Message implements Serializable {
 
 	/**
 	 * {@link DummyAddress} - extends {@link InternetAddress}
-	 *
+	 * 
 	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
-	 *
+	 * 
 	 */
 	public static final class DummyAddress extends InternetAddress {
 
@@ -689,7 +690,7 @@ public final class ContainerMessage extends Message implements Serializable {
 		private static final String TYPE = "rfc822";
 
 		private final String address;
-		
+
 		private final int hashCode;
 
 		public DummyAddress(final String address) {
@@ -734,7 +735,7 @@ public final class ContainerMessage extends Message implements Serializable {
 
 	/**
 	 * Gets the bodystructure
-	 *
+	 * 
 	 * @return the bodystructure
 	 */
 	public BODYSTRUCTURE getBodystructure() {
@@ -743,8 +744,9 @@ public final class ContainerMessage extends Message implements Serializable {
 
 	/**
 	 * Sets the bodystructure
-	 *
-	 * @param bodystructure the bodystructure to set
+	 * 
+	 * @param bodystructure
+	 *            the bodystructure to set
 	 */
 	public void setBodystructure(BODYSTRUCTURE bodystructure) {
 		this.bodystructure = bodystructure;

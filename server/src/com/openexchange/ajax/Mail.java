@@ -116,11 +116,10 @@ import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailServletInterface;
-import com.openexchange.mail.MailServletInterfaceImpl;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -1196,7 +1195,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				tmp.append(Helper.encodeFilename(fileName, STR_UTF8, internetExplorer));
 			} catch (final UnsupportedEncodingException e) {
 				LOG.error("Unsupported encoding in a message detected and monitored.", e);
-				MailServletInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+				MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 				return fileName;
 			}
 		}

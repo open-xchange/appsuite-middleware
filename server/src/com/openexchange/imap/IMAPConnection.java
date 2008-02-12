@@ -63,7 +63,7 @@ import com.openexchange.imap.user2acl.User2ACLInit;
 import com.openexchange.imap.user2acl.User2ACL.User2ACLException;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailServletInterfaceImpl;
+import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
@@ -172,7 +172,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 				/*
 				 * Decrease counters
 				 */
-				MailServletInterfaceImpl.mailInterfaceMonitor.changeNumActive(false);
+				MailServletInterface.mailInterfaceMonitor.changeNumActive(false);
 				MonitoringInfo.decrementNumberOfConnections(MonitoringInfo.IMAP);
 				decrementCounter();
 			}
@@ -245,7 +245,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 			/*
 			 * Increase counter
 			 */
-			MailServletInterfaceImpl.mailInterfaceMonitor.changeNumActive(true);
+			MailServletInterface.mailInterfaceMonitor.changeNumActive(true);
 			MonitoringInfo.incrementNumberOfConnections(MonitoringInfo.IMAP);
 			incrementCounter();
 			/*

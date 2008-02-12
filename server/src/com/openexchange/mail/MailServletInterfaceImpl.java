@@ -49,7 +49,6 @@
 
 package com.openexchange.mail;
 
-import com.openexchange.api2.MailInterfaceMonitor;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -75,12 +74,10 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailServletInterfaceImpl extends MailServletInterface {
+final class MailServletInterfaceImpl extends MailServletInterface {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailServletInterfaceImpl.class);
-
-	public static final MailInterfaceMonitor mailInterfaceMonitor = new MailInterfaceMonitor();
 
 	/*
 	 * Fields
@@ -136,11 +133,11 @@ public final class MailServletInterfaceImpl extends MailServletInterface {
 			final long start = System.currentTimeMillis();
 			try {
 				mailConnection.connect(mailConfig);
-				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-				mailInterfaceMonitor.changeNumSuccessfulLogins(true);
+				MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				MailServletInterface.mailInterfaceMonitor.changeNumSuccessfulLogins(true);
 			} catch (final MailException e) {
 				if (e.getDetailNumber() == 2) {
-					mailInterfaceMonitor.changeNumFailedLogins(true);
+					MailServletInterface.mailInterfaceMonitor.changeNumFailedLogins(true);
 				}
 				throw e;
 			}

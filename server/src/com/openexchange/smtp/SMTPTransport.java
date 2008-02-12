@@ -49,7 +49,7 @@
 
 package com.openexchange.smtp;
 
-import static com.openexchange.mail.MailServletInterfaceImpl.mailInterfaceMonitor;
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.utils.MessageUtility.parseAddressList;
 import static com.openexchange.mail.utils.MessageUtility.performLineFolding;
 import static java.util.regex.Matcher.quoteReplacement;

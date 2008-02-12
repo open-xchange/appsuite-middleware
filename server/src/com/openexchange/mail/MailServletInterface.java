@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import com.openexchange.api2.MailInterfaceMonitor;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -92,6 +93,8 @@ public abstract class MailServletInterface {
 	public static final MailServletInterface getInstance(final Session session) throws MailException {
 		return new MailServletInterfaceImpl(session);
 	}
+
+	public static final MailInterfaceMonitor mailInterfaceMonitor = new MailInterfaceMonitor();
 
 	/**
 	 * Returns all message counts in specified folder in an <code>int</code>

@@ -49,6 +49,7 @@
 
 package com.openexchange.server.osgi;
 
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.monitoring.MonitorUtility.getObjectName;
 
 import javax.management.MalformedObjectNameException;
@@ -57,7 +58,6 @@ import org.osgi.framework.BundleContext;
 
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.database.Pools;
-import com.openexchange.mail.MailServletInterfaceImpl;
 import com.openexchange.management.ManagementAgent;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.server.services.ManagementService;
@@ -89,14 +89,12 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
 			/*
 			 * Add all mbeans since monitoring service is now available
 			 */
-			managementAgent.registerMBean(
-					getObjectName(AJPv13Server.ajpv13ServerThreadsMonitor.getClass().getName(), true),
-					AJPv13Server.ajpv13ServerThreadsMonitor);
+			managementAgent.registerMBean(getObjectName(AJPv13Server.ajpv13ServerThreadsMonitor.getClass().getName(),
+					true), AJPv13Server.ajpv13ServerThreadsMonitor);
 			managementAgent.registerMBean(getObjectName(AJPv13Server.ajpv13ListenerMonitor.getClass().getName(), true),
 					AJPv13Server.ajpv13ListenerMonitor);
-			managementAgent.registerMBean(
-					getObjectName(MailServletInterfaceImpl.mailInterfaceMonitor.getClass().getName(), true),
-					MailServletInterfaceImpl.mailInterfaceMonitor);
+			managementAgent.registerMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true),
+					mailInterfaceMonitor);
 			Pools.getInstance().registerMBeans();
 		} catch (final MalformedObjectNameException e) {
 			LOG.error(e.getLocalizedMessage(), e);
