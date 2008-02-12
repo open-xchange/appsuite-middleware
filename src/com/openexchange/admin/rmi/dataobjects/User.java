@@ -58,6 +58,8 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.rmi.extensions.OXUserExtensionInterface;
@@ -74,6 +76,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * For serialization
      */
     private static final long serialVersionUID = -4492376747507390066L;
+    
+    private static final Pattern URL_PATTERN = Pattern.compile("^(.*?://)?(.*?)(:(.*?))?$");
 
     private boolean contextadmin = false;
 
@@ -2154,10 +2158,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     final public int getImapPort() {
         // we should be open to the future and accept values like
         // hostname:port
-        if (this.imapServer != null && this.imapServer.contains(":")) {
-            final String[] sp = imapServer.split(":");
-            if (sp.length > 1 && sp[1].trim().length() > 0) {
-                return Integer.parseInt(sp[1]);
+        if (this.imapServer != null) {
+            final Matcher matcher = URL_PATTERN.matcher(this.imapServer);
+            if (matcher.matches() && null != matcher.group(4)) {
+                return Integer.parseInt(matcher.group(4));
             }
         }
         return 143;
@@ -2171,14 +2175,13 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     final public String getImapServer() {
         // we should be open to the future and accept values like
         // hostname:port
-        if (this.imapServer == null) {
-            return null;
+        if (this.imapServer != null) {
+            final Matcher matcher = URL_PATTERN.matcher(this.imapServer);
+            if (matcher.matches() && null != matcher.group(2)) {
+                return matcher.group(2);
+            }
         }
-        if (this.imapServer.contains(":")) {
-            return this.imapServer.split(":")[0];
-        } else {
-            return imapServer;
-        }
+        return null;
     }
     
     /**
