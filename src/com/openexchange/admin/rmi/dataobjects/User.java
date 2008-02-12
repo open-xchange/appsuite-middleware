@@ -2230,14 +2230,13 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     final public String getSmtpServer() {
         // we should be open to the future and accept values like
         // hostname:port
-        if (this.smtpServer == null) {
-            return null;
+        if (this.smtpServer != null) {
+            final Matcher matcher = URL_PATTERN.matcher(this.smtpServer);
+            if (matcher.matches() && null != matcher.group(2)) {
+                return matcher.group(2);
+            }
         }
-        if (this.smtpServer.contains(":")) {
-            return this.smtpServer.split(":")[0];
-        } else {
-            return smtpServer;
-        }
+        return null;
     }
 
     /**
@@ -2265,10 +2264,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     final public int getSmtpPort() {
         // we should be open to the future and accept values like
         // hostname:port
-        if (this.smtpServer != null && this.smtpServer.contains(":")) {
-            final String[] sp = smtpServer.split(":");
-            if (sp.length > 1 && sp[1].trim().length() > 0) {
-                return Integer.parseInt(sp[1]);
+        if (this.smtpServer != null) {
+            final Matcher matcher = URL_PATTERN.matcher(this.smtpServer);
+            if (matcher.matches() && null != matcher.group(4)) {
+                return Integer.parseInt(matcher.group(4));
             }
         }
         return 25;
