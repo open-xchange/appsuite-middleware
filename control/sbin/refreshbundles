@@ -58,10 +58,12 @@ test -f $OXFUNCTIONS || {
 
 . $OXFUNCTIONS
 
-OXLIBDIR=$OXPREFIX/lib
+OXLIBDIR=$OXPREFIX/bundles
 
 CLASSPATH="-classpath $OXLIBDIR/com.openexchange.control.jar"
 
-JAVA_OPTS="-Djava.awt.headless=true"
+JAVA_OPTS=""
+
+ox_set_JAVA_BIN
 
 $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.control.console.RefreshBundles "$@"
