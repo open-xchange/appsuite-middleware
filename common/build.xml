@@ -5,9 +5,10 @@
     <property name="prefix" value="/opt/open-xchange"/>
 
     <!-- Constants -->
-    <property name="tmpdir" value="tmp"/>
+    <property name="tmp.dir" value="tmp"/>
 
     <property file="META-INF/MANIFEST.MF"/>
+    <property file="build.properties"/>
 
 	<property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}"/>
@@ -35,6 +36,24 @@
     <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
     <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
 
+    <!-- Compile -->
+    <target name="prepare">
+        <mkdir dir="${output..}"/>
+        <mkdir dir="${tmp.dir}"/>
+    </target>
+
+    <target name="compile" depends="prepare">
+        <javac srcdir="${source..}" destdir="${output..}" debug="true"
+            encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+        </javac>
+    </target>
+
+    <target name="jar" depends="prepare,compile">
+        <jar jarfile="${tmp.dir}/common.jar">
+            <fileset dir="${output..}"/>
+        </jar>
+    </target>
+
     <!-- Install targets -->
     <target name="install" depends="installJars,installConfig"/>
 
@@ -47,6 +66,8 @@
         </copy>
         <!-- Common Bundle -->
         <property name="commondir" value="${bundlesdestdir}/${bundle.name}"/>
+        <mkdir dir="${commondir}"/>
+        <copy todir="${commondir}" file="${tmp.dir}/common.jar"/>
         <mkdir dir="${commondir}/lib"/>
         <copy todir="${commondir}/lib">
             <fileset refid="jarfiles"/>
@@ -119,7 +140,7 @@
     <!-- Clean -->
     <target name="clean">
         <delete file="${disttar}"/>
-        <delete dir="${tmpdir}"/>
+        <delete dir="${tmp.dir}"/>
     </target>
 
 </project>
