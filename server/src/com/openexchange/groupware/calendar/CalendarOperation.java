@@ -404,6 +404,9 @@ public class CalendarOperation implements SearchIterator {
                     handleFullTime(cdao);
                     if (cdao.isSequence()) {
                         cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/CalendarRecurringCollection.MILLI_DAY)));
+                        if (!cdao.containsTimezone()) {
+                        	cdao.setTimezone(timezone);
+                        }                        
                         CalendarRecurringCollection.fillDAO(cdao);
                     }
                     prepareInsert(cdao);

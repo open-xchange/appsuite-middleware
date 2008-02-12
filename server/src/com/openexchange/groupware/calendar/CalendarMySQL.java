@@ -2841,7 +2841,6 @@ class CalendarMySQL implements CalendarSqlImp {
                         final java.util.Date calculated_exception = edao.getRecurrenceDatePosition();
                         edao.removeDeleteExceptions();
                         edao.removeChangeExceptions();
-                        edao.setChangeExceptions(new java.util.Date[] { calculated_exception });
                         CalendarCommonCollection.removeParticipant(edao, uid);
                         CalendarCommonCollection.removeUserParticipant(edao, uid);
                         edao.setModifiedBy(uid);
