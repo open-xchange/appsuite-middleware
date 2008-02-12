@@ -120,8 +120,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	private final LockHelper lockHelper;
 
 	private boolean metadataChanged;
-    private ServerSession session;
-
+ 
 
     public DocumentMetadataResource(final WebdavPath url, final InfostoreWebdavFactory factory) {
 		this.factory = factory;
@@ -730,14 +729,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	}
 
     private ServerSession getSession() throws WebdavException {
-        if (session == null) {
-            try {
-                session = new ServerSessionAdapter(sessionHolder.getSessionObject());
-            } catch (ContextException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-                throw new WebdavException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            }
-        }
-        return session;
+       return new ServerSessionAdapter(sessionHolder.getSessionObject(), sessionHolder.getContext());
+
     }
 }

@@ -100,8 +100,7 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 	private boolean loadedChildren;
 	private ArrayList<OCLPermission> overrideNewACL;
     private InfostoreSecurity security;
-    private ServerSession session;
-
+    
     public FolderCollection(final WebdavPath url, final InfostoreWebdavFactory factory) {
 		this(url,factory,null);
 	}
@@ -703,14 +702,6 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
     }
 
      private ServerSession getSession() throws WebdavException {
-        if (session == null) {
-            try {
-                session = new ServerSessionAdapter(sessionHolder.getSessionObject());
-            } catch (ContextException e) {
-                LOG.error(e.getLocalizedMessage(), e);
-                throw new WebdavException(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            }
-        }
-        return session;
+        return new ServerSessionAdapter(sessionHolder.getSessionObject(), sessionHolder.getContext());
     }
 }
