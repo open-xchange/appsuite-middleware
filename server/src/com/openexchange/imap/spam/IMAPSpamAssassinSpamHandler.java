@@ -65,7 +65,7 @@ import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailInterfaceImpl;
+import com.openexchange.mail.MailServletInterfaceImpl;
 import com.openexchange.mail.mime.ContainerMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.spam.SpamHandler;
@@ -173,7 +173,7 @@ public final class IMAPSpamAssassinSpamHandler extends SpamHandler {
 			 */
 			start = System.currentTimeMillis();
 			AppendUID[] appendUIDs = confirmedHamFld.appendUIDMessages(nestedMsgs);
-			MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			MailServletInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(100).append("Nested SPAM messages appended to ")
 						.append(confirmedHamFullname).append(" in ").append((System.currentTimeMillis() - start))
@@ -196,7 +196,7 @@ public final class IMAPSpamAssassinSpamHandler extends SpamHandler {
 				new FlagsIMAPCommand(spamFolder, msgUIDs, FLAGS_DELETED, true, false).doCommand();
 				start = System.currentTimeMillis();
 				spamFolder.getProtocol().uidexpunge(toUIDSet(msgUIDs));
-				MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+				MailServletInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				if (LOG.isInfoEnabled()) {
 					LOG.info(new StringBuilder(100).append("Original spam messages expunged in ").append(
 							(System.currentTimeMillis() - start)).append(STR_MSEC).toString());

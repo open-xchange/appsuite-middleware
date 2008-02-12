@@ -68,7 +68,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.SettingException.Code;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailInterface;
+import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -482,9 +482,9 @@ public final class ConfigTree {
 			}
             public void getValue(final Session session, final Context ctx,
                 final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
-                MailInterface mail = null;
+                MailServletInterface mail = null;
                 try {
-                    mail = MailInterface.getInstance(session);
+                    mail = MailServletInterface.getInstance(session);
                     setting.setSingleValue(mail.getInboxFolder());
                 } catch (MailException e) {
                     throw new SettingException(e);
@@ -505,9 +505,9 @@ public final class ConfigTree {
 			}
             public void getValue(final Session session, final Context ctx,
                 final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
-                MailInterface mail = null;
+                MailServletInterface mail = null;
                 try {
-                    mail = MailInterface.getInstance(session);
+                    mail = MailServletInterface.getInstance(session);
                     setting.setSingleValue(mail.getDraftsFolder());
                 } catch (MailException e) {
                     throw new SettingException(e);
@@ -528,9 +528,9 @@ public final class ConfigTree {
 			}
             public void getValue(final Session session, final Context ctx,
                 final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
-                MailInterface mail = null;
+                MailServletInterface mail = null;
                 try {
-                    mail = MailInterface.getInstance(session);
+                    mail = MailServletInterface.getInstance(session);
                     setting.setSingleValue(mail.getSentFolder());
                 } catch (MailException e) {
                     throw new SettingException(e);
@@ -551,9 +551,9 @@ public final class ConfigTree {
 			}
             public void getValue(final Session session, final Context ctx,
                 final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
-                MailInterface mail = null;
+                MailServletInterface mail = null;
                 try {
-                    mail = MailInterface.getInstance(session);
+                    mail = MailServletInterface.getInstance(session);
                     setting.setSingleValue(mail.getSpamFolder());
                 } catch (MailException e) {
                     throw new SettingException(e);
@@ -575,9 +575,9 @@ public final class ConfigTree {
             public void getValue(final Session session, final Context ctx,
                 final User user, UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
-                MailInterface mail = null;
+                MailServletInterface mail = null;
                 try {
-                    mail = MailInterface.getInstance(session);
+                    mail = MailServletInterface.getInstance(session);
                     setting.setSingleValue(mail.getTrashFolder());
                 } catch (MailException e) {
                     throw new SettingException(e);

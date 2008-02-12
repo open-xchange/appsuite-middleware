@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link MailInterface} - The mail interface which invokes the mail layer
+ * {@link MailServletInterface} - The mail interface which invokes the mail layer
  * methods.
  * <p>
  * This interface's purpose is to be conform to other interfaces used in other
@@ -68,10 +68,10 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MailInterface {
+public abstract class MailServletInterface {
 
 	/**
-	 * Gets a proper implementation of {@link MailInterface}
+	 * Gets a proper implementation of {@link MailServletInterface}
 	 * <p>
 	 * <b>NOTE:</b> Don't forget to invoke {@link #close(boolean)} after usage
 	 * 
@@ -86,11 +86,11 @@ public abstract class MailInterface {
 	 * 
 	 * @param session
 	 *            The session
-	 * @return An instance of {@link MailInterface}
+	 * @return An instance of {@link MailServletInterface}
 	 * @throws MailException
 	 */
-	public static final MailInterface getInstance(final Session session) throws MailException {
-		return new MailInterfaceImpl(session);
+	public static final MailServletInterface getInstance(final Session session) throws MailException {
+		return new MailServletInterfaceImpl(session);
 	}
 
 	/**

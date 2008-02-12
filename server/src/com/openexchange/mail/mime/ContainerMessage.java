@@ -74,7 +74,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailInterfaceImpl;
+import com.openexchange.mail.MailServletInterfaceImpl;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.utils.MessageUtility;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
@@ -351,7 +351,7 @@ public final class ContainerMessage extends Message implements Serializable {
 					.decodeText(headers.get(MessageHeaders.HDR_SUBJECT)) : null;
 		} catch (final UnsupportedEncodingException e) {
 			LOG.error("Unsupported encoding in a message detected and monitored.", e);
-			MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+			MailServletInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 			return headers.containsKey(MessageHeaders.HDR_SUBJECT) ? MessageUtility.decodeMultiEncodedHeader(headers
 					.get(MessageHeaders.HDR_SUBJECT)) : null;
 		}

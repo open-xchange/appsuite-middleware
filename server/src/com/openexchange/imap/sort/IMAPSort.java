@@ -49,7 +49,7 @@
 
 package com.openexchange.imap.sort;
 
-import static com.openexchange.mail.MailInterfaceImpl.mailInterfaceMonitor;
+import static com.openexchange.mail.MailServletInterfaceImpl.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getCacheFetchProfile;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getCacheFields;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;

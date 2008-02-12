@@ -68,7 +68,7 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailInterfaceImpl;
+import com.openexchange.mail.MailServletInterfaceImpl;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
@@ -635,7 +635,7 @@ public final class MessageWriter {
 			return decoded;
 		} catch (final UnsupportedEncodingException e) {
 			LOG.error("Unsupported encoding in a message detected and monitored.", e);
-			MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+			MailServletInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 			return MessageUtility.decodeMultiEncodedHeader(address);
 		}
 	}

@@ -86,7 +86,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailInterface;
+import com.openexchange.mail.MailServletInterface;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderException;
@@ -157,7 +157,7 @@ public class Multiple extends SessionServlet {
 			log(RESPONSE_ERROR, e);
 			sendError(resp);
 		} finally {
-			final MailInterface mi = (MailInterface) req.getAttribute(ATTRIBUTE_MAIL_INTERFACE);
+			final MailServletInterface mi = (MailServletInterface) req.getAttribute(ATTRIBUTE_MAIL_INTERFACE);
 			if (mi != null) {
 				try {
 					mi.close(true);
@@ -205,7 +205,7 @@ public class Multiple extends SessionServlet {
 				/*
 				 * Write withheld mail response first
 				 */
-				mailReq.performMultiple((MailInterface) req.getAttribute(ATTRIBUTE_MAIL_INTERFACE));
+				mailReq.performMultiple((MailServletInterface) req.getAttribute(ATTRIBUTE_MAIL_INTERFACE));
 			} finally {
 				/*
 				 * Remove mail request object
@@ -619,13 +619,13 @@ public class Multiple extends SessionServlet {
 					/*
 					 * Fetch or create mail interface object
 					 */
-					final MailInterface mi;
+					final MailServletInterface mi;
 					tmp = req.getAttribute(ATTRIBUTE_MAIL_INTERFACE);
 					if (tmp == null) {
-						mi = MailInterface.getInstance(sessionObj);
+						mi = MailServletInterface.getInstance(sessionObj);
 						req.setAttribute(ATTRIBUTE_MAIL_INTERFACE, mi);
 					} else {
-						mi = ((MailInterface) tmp);
+						mi = ((MailServletInterface) tmp);
 					}
 					mailrequest.action(action, jsonObj, mi);
 					if (mailrequest.isContinuousCollect()) {

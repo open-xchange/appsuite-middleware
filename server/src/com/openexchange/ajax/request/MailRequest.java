@@ -68,7 +68,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailInterface;
+import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -135,10 +135,10 @@ public final class MailRequest {
 	 *            the instance of <code>{@link JSONObject}</code> keeping
 	 *            request's data
 	 * @param mailInterface -
-	 *            the instance of <code>{@link MailInterface}</code> to access
+	 *            the instance of <code>{@link MailServletInterface}</code> to access
 	 *            mail module
 	 */
-	public void action(final String action, final JSONObject jsonObject, final MailInterface mailInterface)
+	public void action(final String action, final JSONObject jsonObject, final MailServletInterface mailInterface)
 			throws SearchIteratorException, JSONException, MailException, OXPermissionException {
 		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)
 				.hasWebMail()) {
@@ -190,7 +190,7 @@ public final class MailRequest {
 		}
 	}
 
-	private void handleMultiple(final JSONObject jsonObject, final MailInterface mailInterface,
+	private void handleMultiple(final JSONObject jsonObject, final MailServletInterface mailInterface,
 			final CollectableOperation op) throws JSONException {
 		if (collectObj != null) {
 			if (collectObj.collectable(jsonObject, op)) {
@@ -235,14 +235,14 @@ public final class MailRequest {
 	 * @throws JSONException -
 	 *             if writing fails
 	 */
-	public void performMultiple(final MailInterface mailInterface) throws JSONException {
+	public void performMultiple(final MailServletInterface mailInterface) throws JSONException {
 		if (collectObj != null) {
 			performMultipleInternal(mailInterface);
 			collectObj = null;
 		}
 	}
 
-	private void performMultipleInternal(final MailInterface mailInterface) throws JSONException {
+	private void performMultipleInternal(final MailServletInterface mailInterface) throws JSONException {
 		final long start = System.currentTimeMillis();
 		switch (collectObj.getOperation()) {
 		case MOVE:

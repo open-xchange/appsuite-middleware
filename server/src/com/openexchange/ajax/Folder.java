@@ -99,7 +99,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailInterface;
+import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.json.writer.FolderWriter.MailFolderFieldWriter;
@@ -626,10 +626,10 @@ public class Folder extends SessionServlet {
 						if (UserConfigurationStorage.getInstance()
 								.getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasWebMail()
 								&& !ignoreMailfolder) {
-							MailInterface mailInterface = null;
+							MailServletInterface mailInterface = null;
 							SearchIterator<?> it = null;
 							try {
-								mailInterface = MailInterface.getInstance(sessionObj);
+								mailInterface = MailServletInterface.getInstance(sessionObj);
 								it = mailInterface.getRootFolders();
 								final int size = it.size();
 								final MailFolderFieldWriter[] mailFolderWriters = com.openexchange.mail.json.writer.FolderWriter
@@ -848,9 +848,9 @@ public class Folder extends SessionServlet {
 				 */
 				final boolean all = (STRING_1.equals(paramContainer.getStringParam(PARAMETER_ALL)));
 				SearchIterator<?> it = null;
-				MailInterface mailInterface = null;
+				MailServletInterface mailInterface = null;
 				try {
-					mailInterface = MailInterface.getInstance(sessionObj);
+					mailInterface = MailServletInterface.getInstance(sessionObj);
 					/*
 					 * E-Mail folder
 					 */
@@ -1011,10 +1011,10 @@ public class Folder extends SessionServlet {
 					}
 				}
 			} else {
-				MailInterface mailInterface = null;
+				MailServletInterface mailInterface = null;
 				SearchIterator<?> it = null;
 				try {
-					mailInterface = MailInterface.getInstance(sessionObj);
+					mailInterface = MailServletInterface.getInstance(sessionObj);
 					/*
 					 * Pre-Select field writers
 					 */
@@ -1279,10 +1279,10 @@ public class Folder extends SessionServlet {
 				/*
 				 * Append mail folders
 				 */
-				MailInterface mailInterface = null;
+				MailServletInterface mailInterface = null;
 				SearchIterator<?> it = null;
 				try {
-					mailInterface = MailInterface.getInstance(sessionObj);
+					mailInterface = MailServletInterface.getInstance(sessionObj);
 					it = mailInterface.getRootFolders();
 					final int size2 = it.size();
 					final MailFolderFieldWriter[] mailFolderFieldWriters = com.openexchange.mail.json.writer.FolderWriter
@@ -1376,9 +1376,9 @@ public class Folder extends SessionServlet {
 				new FolderWriter(jsonWriter, sessionObj, ContextStorage.getStorageContext(sessionObj.getContextId()))
 						.writeOXFolderFieldsAsObject(columns, fo);
 			} else {
-				MailInterface mailInterface = null;
+				MailServletInterface mailInterface = null;
 				try {
-					mailInterface = MailInterface.getInstance(sessionObj);
+					mailInterface = MailServletInterface.getInstance(sessionObj);
 					final MailFolder f = mailInterface.getFolder(folderIdentifier, true);
 					final MailFolderFieldWriter[] writers = com.openexchange.mail.json.writer.FolderWriter
 							.getMailFolderFieldWriter(columns, mailInterface.getMailConfig());
@@ -1460,7 +1460,7 @@ public class Folder extends SessionServlet {
 				retval = String.valueOf(fo.getObjectID());
 				lastModifiedDate = fo.getLastModified();
 			} else {
-				final MailInterface mailInterface = MailInterface.getInstance(sessionObj);
+				final MailServletInterface mailInterface = MailServletInterface.getInstance(sessionObj);
 				try {
 					final MailFolder updateFolder = mailInterface.getFolder(folderIdentifier, true);
 					if (updateFolder != null) {
@@ -1541,7 +1541,7 @@ public class Folder extends SessionServlet {
 				retval = String.valueOf(fo.getObjectID());
 				lastModifiedDate = fo.getLastModified();
 			} else {
-				final MailInterface mailInterface = MailInterface.getInstance(sessionObj);
+				final MailServletInterface mailInterface = MailServletInterface.getInstance(sessionObj);
 				try {
 					final MailFolder mf = new MailFolder();
 					mf.setParentFullname(parentFolder);
@@ -1605,7 +1605,7 @@ public class Folder extends SessionServlet {
 			Date timestamp = null;
 			final JSONArray jsonArr = new JSONArray(body);
 			FolderSQLInterface foldersqlinterface = null;
-			MailInterface mailInterface = null;
+			MailServletInterface mailInterface = null;
 			try {
 				long lastModified = 0;
 				final int arrayLength = jsonArr.length();
@@ -1642,7 +1642,7 @@ public class Folder extends SessionServlet {
 						if (UserConfigurationStorage.getInstance()
 								.getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasWebMail()) {
 							if (mailInterface == null) {
-								mailInterface = MailInterface.getInstance(sessionObj);
+								mailInterface = MailServletInterface.getInstance(sessionObj);
 							}
 							mailInterface.deleteFolder(deleteIdentifier);
 						} else {

@@ -79,7 +79,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.mail.MailInterface;
+import com.openexchange.mail.MailServletInterface;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderException;
@@ -209,7 +209,7 @@ public class SyncServlet extends PermissionServlet {
 			final JSONArray jsonArr = new JSONArray(body);
 			final int length = jsonArr.length();
 			FolderSyncInterface folderSyncInterface = null;
-			MailInterface mailInterface = null;
+			MailServletInterface mailInterface = null;
 			try {
 				long lastModified = 0;
 				final OXFolderAccess access = new OXFolderAccess(ctx);
@@ -247,7 +247,7 @@ public class SyncServlet extends PermissionServlet {
 						if (UserConfigurationStorage.getInstance()
 								.getUserConfigurationSafe(sessionObj.getUserId(), ctx).hasWebMail()) {
 							if (mailInterface == null) {
-								mailInterface = MailInterface.getInstance(sessionObj);
+								mailInterface = MailServletInterface.getInstance(sessionObj);
 							}
 							mailInterface.clearFolder(deleteIdentifier);
 						} else {

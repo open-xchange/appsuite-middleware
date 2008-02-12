@@ -66,7 +66,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailInterface;
+import com.openexchange.mail.MailServletInterface;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.file.FileStorage;
@@ -151,11 +151,11 @@ public class QuotaRequest extends CommonRequest {
 	}
 	
 	private void mail() {
-		MailInterface mi = null;
+		MailServletInterface mi = null;
 		try {
 			long[] quotaInfo = null;
 			try {
-				mi = MailInterface.getInstance(this.session);
+				mi = MailServletInterface.getInstance(this.session);
 				quotaInfo = mi.getQuota();
 			} catch (final MailException e) {
 				quotaInfo = new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };

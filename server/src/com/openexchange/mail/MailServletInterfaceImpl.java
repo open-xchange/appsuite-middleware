@@ -70,15 +70,15 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
- * {@link MailInterfaceImpl} - The mail interface implementation.
+ * {@link MailServletInterfaceImpl} - The mail servlet interface implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailInterfaceImpl extends MailInterface {
+public final class MailServletInterfaceImpl extends MailServletInterface {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailInterfaceImpl.class);
+			.getLog(MailServletInterfaceImpl.class);
 
 	public static final MailInterfaceMonitor mailInterfaceMonitor = new MailInterfaceMonitor();
 
@@ -102,7 +102,7 @@ public final class MailInterfaceImpl extends MailInterface {
 	 *             If user has no mail access or properties cannot be
 	 *             successfully loaded
 	 */
-	protected MailInterfaceImpl(final Session session) throws MailException {
+	protected MailServletInterfaceImpl(final Session session) throws MailException {
 		super();
 		try {
 			this.ctx = ContextStorage.getStorageContext(session.getContextId());

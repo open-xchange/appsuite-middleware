@@ -77,7 +77,7 @@ import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.mail.MailInterfaceImpl;
+import com.openexchange.mail.MailServletInterfaceImpl;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -673,7 +673,7 @@ public final class IMAPCommandsCollection {
 		try {
 			final long start = System.currentTimeMillis();
 			IMAPCommandsCollection.uidExpunge(imapFolder, uids);
-			MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+			MailServletInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(128).append(uids.length).append(" messages expunged in ").append(
 						(System.currentTimeMillis() - start)).append("msec").toString());

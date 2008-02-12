@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.mime;
 
-import static com.openexchange.mail.MailInterfaceImpl.mailInterfaceMonitor;
+import static com.openexchange.mail.MailServletInterfaceImpl.mailInterfaceMonitor;
 
 import java.net.BindException;
 import java.net.ConnectException;

@@ -57,7 +57,7 @@ import org.osgi.framework.BundleContext;
 
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.database.Pools;
-import com.openexchange.mail.MailInterfaceImpl;
+import com.openexchange.mail.MailServletInterfaceImpl;
 import com.openexchange.management.ManagementAgent;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.server.services.ManagementService;
@@ -95,8 +95,8 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
 			managementAgent.registerMBean(getObjectName(AJPv13Server.ajpv13ListenerMonitor.getClass().getName(), true),
 					AJPv13Server.ajpv13ListenerMonitor);
 			managementAgent.registerMBean(
-					getObjectName(MailInterfaceImpl.mailInterfaceMonitor.getClass().getName(), true),
-					MailInterfaceImpl.mailInterfaceMonitor);
+					getObjectName(MailServletInterfaceImpl.mailInterfaceMonitor.getClass().getName(), true),
+					MailServletInterfaceImpl.mailInterfaceMonitor);
 			Pools.getInstance().registerMBeans();
 		} catch (final MalformedObjectNameException e) {
 			LOG.error(e.getLocalizedMessage(), e);

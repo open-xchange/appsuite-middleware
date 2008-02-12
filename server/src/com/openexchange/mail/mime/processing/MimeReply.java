@@ -79,7 +79,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailInterfaceImpl;
+import com.openexchange.mail.MailServletInterfaceImpl;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -164,7 +164,7 @@ public final class MimeReply {
 				replyMsg.setSubject(newSubject, MailConfig.getDefaultMimeCharset());
 			} catch (final UnsupportedEncodingException e) {
 				LOG.error("Unsupported encoding in a message detected and monitored.", e);
-				MailInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+				MailServletInterfaceImpl.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
 				/*
 				 * Handle raw value: setting prefix to raw subject value still
 				 * leaves a valid and correct encoded header
