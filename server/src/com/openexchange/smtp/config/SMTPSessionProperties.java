@@ -49,13 +49,9 @@
 
 package com.openexchange.smtp.config;
 
-import java.security.Security;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 
@@ -69,8 +65,6 @@ import com.openexchange.mail.mime.MIMESessionPropertyNames;
 public final class SMTPSessionProperties {
 
 	private static Properties sessionProperties;
-
-	private static final Lock LOCK = new ReentrantLock();
 
 	private static final AtomicBoolean initialized = new AtomicBoolean();
 
@@ -89,32 +83,37 @@ public final class SMTPSessionProperties {
 	 * Creates a <b>cloned</b> version of default SMTP session properties
 	 * 
 	 * @return a cloned version of default SMTP session properties
-	 * @throws MailConfigException
-	 *             If gloabl SMTP session properties could not be initialized
 	 */
-	public static Properties getDefaultSessionProperties() throws MailConfigException {
+	public static Properties getDefaultSessionProperties() {
 		if (!initialized.get()) {
-			LOCK.lock();
-			try {
+			synchronized (initialized) {
 				if (null == sessionProperties) {
-					initializeIMAPProperties();
+					initializeSMTPProperties();
 					initialized.set(true);
 				}
-			} finally {
-				LOCK.unlock();
 			}
 		}
 		return (Properties) sessionProperties.clone();
 	}
 
-	private static final String STR_SECURITY_PROVIDER = "ssl.SocketFactory.provider";
-
-	private static final String STR_SECURITY_FACTORY = "com.openexchange.tools.ssl.TrustAllSSLSocketFactory";
+	/**
+	 * Resets default SMTP session properties
+	 */
+	public static void resetDefaultSessionProperties() {
+		if (initialized.get()) {
+			synchronized (initialized) {
+				if (null != sessionProperties) {
+					sessionProperties = null;
+					initialized.set(false);
+				}
+			}
+		}
+	}
 
 	/**
 	 * This method can only be exclusively accessed
 	 */
-	private static void initializeIMAPProperties() {
+	private static void initializeSMTPProperties() {
 		/*
 		 * Define imap properties
 		 */
@@ -143,20 +142,6 @@ public final class SMTPSessionProperties {
 			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, SMTPConfig.getDefaultMimeCharset());
 			System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
 					SMTPConfig.getDefaultMimeCharset());
-		}
-		/*
-		 * Following properties define if SMTPS should be enabled
-		 */
-		if (SMTPConfig.isSmtpsEnabled()) {
-			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS, STR_SECURITY_FACTORY);
-			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_PORT, String
-					.valueOf(SMTPConfig.getSmtpsPort()));
-			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK, STR_FALSE);
-			sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_STARTTLS_ENABLE, STR_TRUE);
-			/*
-			 * Needed for JavaMail >= 1.4
-			 */
-			Security.setProperty(STR_SECURITY_PROVIDER, STR_SECURITY_FACTORY);
 		}
 		if (SMTPConfig.getSmtpLocalhost() != null) {
 			sessionProperties.put(MIMESessionPropertyNames.PROP_SMTPLOCALHOST, SMTPConfig.getSmtpLocalhost());

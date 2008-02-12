@@ -99,7 +99,9 @@ public abstract class IMAPFolderWorker {
 
 	protected static final Flags FLAGS_SEEN = new Flags(Flags.Flag.SEEN);
 
-	static final MailListField[] FIELDS_FLAGS = new MailListField[] { MailListField.FLAGS };
+	protected static final MailListField[] FIELDS_FLAGS = new MailListField[] { MailListField.FLAGS };
+
+	protected static final Object[] ARGS_FLAG_SEEN = new Object[] { Integer.valueOf(MailMessage.FLAG_SEEN) };
 
 	/*
 	 * Fields
@@ -255,10 +257,9 @@ public abstract class IMAPFolderWorker {
 					final long[] uid = new long[] { imapFolder.getUID(markAsSeen) };
 					final long start = System.currentTimeMillis();
 					MailMessageCache.getInstance().updateCachedMessages(uid, imapFolder.getFullName(),
-							session.getUserId(), ctx, FIELDS_FLAGS,
-							new Object[] { Integer.valueOf(MailMessage.FLAG_SEEN) });
-					if (LOG.isInfoEnabled()) {
-						LOG.info(new StringBuilder(100).append(uid.length).append(" cached message(s) updated in ")
+							session.getUserId(), ctx, FIELDS_FLAGS, ARGS_FLAG_SEEN);
+					if (LOG.isDebugEnabled()) {
+						LOG.debug(new StringBuilder(128).append(uid.length).append(" cached message(s) updated in ")
 								.append((System.currentTimeMillis() - start)).append("msec").toString());
 					}
 

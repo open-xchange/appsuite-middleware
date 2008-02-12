@@ -56,6 +56,7 @@ import static java.util.regex.Matcher.quoteReplacement;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.security.Security;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
@@ -78,18 +79,13 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
-import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
-import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -98,14 +94,9 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
-import com.openexchange.smtp.config.GlobalSMTPConfig;
 import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;
-import com.openexchange.smtp.dataobjects.SMTPBodyPart;
-import com.openexchange.smtp.dataobjects.SMTPDocumentPart;
-import com.openexchange.smtp.dataobjects.SMTPFilePart;
 import com.openexchange.smtp.dataobjects.SMTPMailMessage;
-import com.openexchange.smtp.dataobjects.SMTPReferencedPart;
 import com.openexchange.smtp.filler.SMTPMessageFiller;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.sun.mail.smtp.SMTPMessage;
@@ -133,7 +124,7 @@ public final class SMTPTransport extends MailTransport {
 
 	private final UserSettingMail usm;
 
-	private MailConfig transportConfig;
+	private SMTPConfig smtpConfig;
 
 	private SMTPMessageFiller smtpFiller;
 
@@ -146,6 +137,10 @@ public final class SMTPTransport extends MailTransport {
 		ctx = null;
 		usm = null;
 	}
+
+	private static final String PROPERTY_SECURITY_PROVIDER = "ssl.SocketFactory.provider";
+
+	private static final String CLASSNAME_SECURITY_FACTORY = "com.openexchange.tools.ssl.TrustAllSSLSocketFactory";
 
 	/**
 	 * Constructor
@@ -160,12 +155,29 @@ public final class SMTPTransport extends MailTransport {
 	public SMTPTransport(final Session session) throws MailException {
 		super();
 		final Properties smtpProps = SMTPSessionProperties.getDefaultSessionProperties();
-		final MailConfig transportConfig = getTransportConfig(session);
-		if (transportConfig.getError() != null) {
-			throw new SMTPException(transportConfig.getError());
+		final SMTPConfig smtpConfig = getTransportConfig(session);
+		if (smtpConfig.getError() != null) {
+			throw new SMTPException(smtpConfig.getError());
 		}
-		smtpProps.put(MIMESessionPropertyNames.PROP_SMTPHOST, transportConfig.getServer());
-		smtpProps.put(MIMESessionPropertyNames.PROP_SMTPPORT, String.valueOf(transportConfig.getPort()));
+		/*
+		 * Check if a secure SMTP connection should be established
+		 */
+		if (smtpConfig.isSecure()) {
+			smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS, CLASSNAME_SECURITY_FACTORY);
+			smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_PORT, String.valueOf(smtpConfig
+					.getPort()));
+			smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK, "false");
+			smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_STARTTLS_ENABLE, "true");
+			/*
+			 * Needed for JavaMail >= 1.4
+			 */
+			Security.setProperty(PROPERTY_SECURITY_PROVIDER, CLASSNAME_SECURITY_FACTORY);
+		}
+		/*
+		 * Apply host & port to SMTP session
+		 */
+		smtpProps.put(MIMESessionPropertyNames.PROP_SMTPHOST, smtpConfig.getServer());
+		smtpProps.put(MIMESessionPropertyNames.PROP_SMTPPORT, String.valueOf(smtpConfig.getPort()));
 		this.smtpSession = javax.mail.Session.getInstance(smtpProps, null);
 		this.session = session;
 		try {
@@ -194,12 +206,11 @@ public final class SMTPTransport extends MailTransport {
 		clearUp();
 	}
 
-	@Override
-	public MailConfig getTransportConfig(final Session session) throws MailException {
-		if (transportConfig == null) {
-			transportConfig = SMTPConfig.getSmtpConfig(session);
+	private SMTPConfig getTransportConfig(final Session session) throws MailException {
+		if (smtpConfig == null) {
+			smtpConfig = SMTPConfig.getSmtpConfig(session);
 		}
-		return transportConfig;
+		return smtpConfig;
 	}
 
 	private static final String ACK_TEXT = "Reporting-UA: OPEN-XCHANGE - WebMail\r\nFinal-Recipient: rfc822; #FROM#\r\n"
@@ -293,7 +304,7 @@ public final class SMTPTransport extends MailTransport {
 			final long start = System.currentTimeMillis();
 			final Transport transport = smtpSession.getTransport(PROTOCOL_SMTP);
 			if (SMTPConfig.isSmtpAuth()) {
-				final MailConfig config = getTransportConfig(session);
+				final SMTPConfig config = getTransportConfig(session);
 				transport.connect(config.getServer(), config.getPort(), config.getLogin(), encodePassword(config
 						.getPassword()));
 			} else {
@@ -328,7 +339,7 @@ public final class SMTPTransport extends MailTransport {
 				final long start = System.currentTimeMillis();
 				final Transport transport = smtpSession.getTransport(PROTOCOL_SMTP);
 				if (SMTPConfig.isSmtpAuth()) {
-					final MailConfig config = getTransportConfig(session);
+					final SMTPConfig config = getTransportConfig(session);
 					transport.connect(config.getServer(), config.getPort(), config.getLogin(), encodePassword(config
 							.getPassword()));
 				} else {
@@ -392,7 +403,7 @@ public final class SMTPTransport extends MailTransport {
 				final long start = System.currentTimeMillis();
 				final Transport transport = smtpSession.getTransport(PROTOCOL_SMTP);
 				if (SMTPConfig.isSmtpAuth()) {
-					final MailConfig config = getTransportConfig(session);
+					final SMTPConfig config = getTransportConfig(session);
 					transport.connect(config.getServer(), config.getPort(), config.getLogin(), encodePassword(config
 							.getPassword()));
 				} else {
@@ -433,39 +444,11 @@ public final class SMTPTransport extends MailTransport {
 	}
 
 	@Override
-	protected ComposedMailMessage getNewTransportMailMessageInternal() throws MailException {
-		return new SMTPMailMessage();
+	protected void shutdownInternal() throws MailException {
+		SMTPSessionProperties.resetDefaultSessionProperties();
 	}
 
 	@Override
-	protected UploadFileMailPart getNewFilePartInternal(final UploadFile uploadFile) throws MailException {
-		return new SMTPFilePart(uploadFile);
-	}
-
-	@Override
-	protected InfostoreDocumentMailPart getNewDocumentPartInternal(final int documentId, final Session session)
-			throws MailException {
-		return new SMTPDocumentPart(documentId, session);
-	}
-
-	@Override
-	protected ReferencedMailPart getNewReferencedPartInternal(final MailPart referencedPart, final Session session)
-			throws MailException {
-		return new SMTPReferencedPart(referencedPart, session);
-	}
-
-	@Override
-	protected ReferencedMailPart getNewReferencedPartInternal(final String sequenceId) throws MailException {
-		return new SMTPReferencedPart(sequenceId);
-	}
-
-	@Override
-	protected TextBodyMailPart getNewTextBodyPartInternal(final String textBody) throws MailException {
-		return new SMTPBodyPart(textBody);
-	}
-
-	@Override
-	protected String getGlobalTransportConfigClassInternal() {
-		return GlobalSMTPConfig.class.getName();
+	protected void startupInternal() throws MailException {
 	}
 }

@@ -53,6 +53,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.cache.MailCacheConfiguration;
 import com.openexchange.mail.config.GlobalConfigInit;
 import com.openexchange.mail.permission.MailPermissionInit;
+import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.MailTransportInit;
 import com.openexchange.mail.transport.MailTransportProvider;
 import com.openexchange.server.Initialization;
@@ -84,27 +85,29 @@ public final class MailInitialization implements Initialization {
 	 */
 	public void start() throws AbstractOXException {
 		MailProvider.initMailProvider();
-		MailTransportProvider.initMailProvider();
+		MailTransportProvider.initTransportProvider();
 		MailConnectionInit.getInstance().start();
 		MailTransportInit.getInstance().start();
 		GlobalConfigInit.getInstance().start();
 		MailPermissionInit.getInstance().start();
 		MailCacheConfiguration.getInstance().start();
 		MailConnection.startup();
+		MailTransport.startup();
 	}
 
 	/*
 	 * @see com.openexchange.server.Initialization#stop()
 	 */
 	public void stop() throws AbstractOXException {
+		MailTransport.shutdown();
 		MailConnection.shutdown();
 		MailCacheConfiguration.getInstance().stop();
 		MailPermissionInit.getInstance().stop();
 		GlobalConfigInit.getInstance().stop();
 		MailTransportInit.getInstance().stop();
 		MailConnectionInit.getInstance().stop();
-		MailTransportProvider.resetInitMailProvider();
-		MailProvider.resetInitMailProvider();
+		MailTransportProvider.resetTransportProvider();
+		MailProvider.resetMailProvider();
 	}
 
 }

@@ -74,6 +74,8 @@ public final class SMTPConfig extends TransportConfig {
 
 	private int smtpPort;
 
+	private boolean secure;
+
 	/**
 	 * Constructor
 	 */
@@ -82,13 +84,13 @@ public final class SMTPConfig extends TransportConfig {
 	}
 
 	/**
-	 * Gets the user-specific IMAP configuration
+	 * Gets the user-specific SMTP configuration
 	 * 
 	 * @param session
 	 *            The session providing needed user data
-	 * @return The user-specific IMAP configuration
+	 * @return The user-specific SMTP configuration
 	 * @throws MailConfigException
-	 *             If user-specific IMAP configuration cannot be determined
+	 *             If user-specific SMTP configuration cannot be determined
 	 */
 	public static SMTPConfig getSmtpConfig(final Session session) throws MailConfigException {
 		final SMTPConfig smtpConf = new SMTPConfig();
@@ -109,8 +111,21 @@ public final class SMTPConfig extends TransportConfig {
 				throw new MailConfigException(new StringBuilder(128).append("Property \"").append("transportServer")
 						.append("\" not set in mail properties").toString());
 			}
+			{
+				final int lastPos = smtpServer.length() - 1;
+				if (smtpServer.charAt(lastPos) == '/') {
+					smtpServer = smtpServer.substring(0, lastPos);
+				}
+			}
 			int smtpPort = 25;
 			{
+				final String[] parsed = parseProtocol(smtpServer);
+				if (parsed != null) {
+					smtpConf.secure = "smtps".equals(parsed[0]);
+					smtpServer = parsed[1];
+				} else {
+					smtpConf.secure = false;
+				}
 				final int pos = smtpServer.indexOf(':');
 				if (pos > -1) {
 					smtpPort = Integer.parseInt(smtpServer.substring(pos + 1));
@@ -126,8 +141,21 @@ public final class SMTPConfig extends TransportConfig {
 			smtpConf.smtpPort = smtpPort;
 		} else if (LoginType.USER.equals(getLoginType())) {
 			String smtpServer = user.getSmtpServer();
+			{
+				final int lastPos = smtpServer.length() - 1;
+				if (smtpServer.charAt(lastPos) == '/') {
+					smtpServer = smtpServer.substring(0, lastPos);
+				}
+			}
 			int smtpPort = 25;
 			{
+				final String[] parsed = parseProtocol(smtpServer);
+				if (parsed != null) {
+					smtpConf.secure = "smtps".equals(parsed[0]);
+					smtpServer = parsed[1];
+				} else {
+					smtpConf.secure = false;
+				}
 				final int pos = smtpServer.indexOf(':');
 				if (pos > -1) {
 					smtpPort = Integer.parseInt(smtpServer.substring(pos + 1));
@@ -138,8 +166,21 @@ public final class SMTPConfig extends TransportConfig {
 			smtpConf.smtpPort = smtpPort;
 		} else if (LoginType.ANONYMOUS.equals(getLoginType())) {
 			String smtpServer = user.getSmtpServer();
+			{
+				final int lastPos = smtpServer.length() - 1;
+				if (smtpServer.charAt(lastPos) == '/') {
+					smtpServer = smtpServer.substring(0, lastPos);
+				}
+			}
 			int smtpPort = 25;
 			{
+				final String[] parsed = parseProtocol(smtpServer);
+				if (parsed != null) {
+					smtpConf.secure = "smtps".equals(parsed[0]);
+					smtpServer = parsed[1];
+				} else {
+					smtpConf.secure = false;
+				}
 				final int pos = smtpServer.indexOf(':');
 				if (pos > -1) {
 					smtpPort = Integer.parseInt(smtpServer.substring(pos + 1));
@@ -189,24 +230,6 @@ public final class SMTPConfig extends TransportConfig {
 	}
 
 	/**
-	 * Gets the smtpsEnabled
-	 * 
-	 * @return the smtpsEnabled
-	 */
-	public static boolean isSmtpsEnabled() {
-		return ((GlobalSMTPConfig) GlobalTransportConfig.getTransportInstance()).isSmtpsEnabled();
-	}
-
-	/**
-	 * Gets the smtpsPort
-	 * 
-	 * @return the smtpsPort
-	 */
-	public static int getSmtpsPort() {
-		return ((GlobalSMTPConfig) GlobalTransportConfig.getTransportInstance()).getSmtpsPort();
-	}
-
-	/**
 	 * Gets the smtpConnectionTimeout
 	 * 
 	 * @return the smtpConnectionTimeout
@@ -242,6 +265,11 @@ public final class SMTPConfig extends TransportConfig {
 	@Override
 	public String getServer() {
 		return smtpServer;
+	}
+
+	@Override
+	public boolean isSecure() {
+		return secure;
 	}
 
 	/*

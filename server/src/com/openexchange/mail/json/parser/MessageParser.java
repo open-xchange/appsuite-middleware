@@ -78,7 +78,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
-import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.MailTransportProvider;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
 
@@ -138,7 +138,7 @@ public final class MessageParser {
 					 */
 					final UploadFile uf = uploadEvent.getUploadFileByFieldName(getFieldName(attachmentCounter++));
 					if (uf != null) {
-						composedMail.addEnclosedPart(MailTransport.getNewFilePart(uf));
+						composedMail.addEnclosedPart(MailTransportProvider.getInstance().getNewFilePart(uf));
 						addedAttachments++;
 					}
 				}
@@ -151,7 +151,8 @@ public final class MessageParser {
 				final JSONArray ja = jsonObj.getJSONArray(MailJSONField.INFOSTORE_IDS.getKey());
 				final int length = ja.length();
 				for (int i = 0; i < length; i++) {
-					composedMail.addEnclosedPart(MailTransport.getNewDocumentPart(ja.getInt(i), session));
+					composedMail.addEnclosedPart(MailTransportProvider.getInstance().getNewDocumentPart(ja.getInt(i),
+							session));
 				}
 			}
 			return composedMail;
@@ -179,7 +180,7 @@ public final class MessageParser {
 	 *             If parsing fails
 	 */
 	public static ComposedMailMessage parse(final JSONObject jsonObj, final Session session) throws MailException {
-		final ComposedMailMessage transportMail = MailTransport.getNewTransportMailMessage();
+		final ComposedMailMessage transportMail = MailTransportProvider.getInstance().getNewComposedMailMessage();
 		parse(jsonObj, transportMail, session);
 		return transportMail;
 	}
@@ -200,8 +201,8 @@ public final class MessageParser {
 	public static void parse(final JSONObject jsonObj, final MailMessage mail, final Session session)
 			throws MailException {
 		try {
-			parse(jsonObj, mail, TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()))
-					.getTimeZone()));
+			parse(jsonObj, mail, TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(),
+					ContextStorage.getStorageContext(session.getContextId())).getTimeZone()));
 		} catch (final ContextException e) {
 			throw new MailException(e);
 		}
@@ -370,8 +371,8 @@ public final class MessageParser {
 					 * Parse body text
 					 */
 					final JSONObject tmp = ja.getJSONObject(0);
-					final TextBodyMailPart part = MailTransport.getNewTextBodyPart(tmp.getString(MailJSONField.CONTENT
-							.getKey()));
+					final TextBodyMailPart part = MailTransportProvider.getInstance().getNewTextBodyPart(
+							tmp.getString(MailJSONField.CONTENT.getKey()));
 					part.setContentType(parseContentType(tmp.getString(MailJSONField.CONTENT_TYPE.getKey())));
 					mail.setContentType(part.getContentType());
 					transportMail.setBodyPart(part);
@@ -381,12 +382,12 @@ public final class MessageParser {
 					final int len = ja.length();
 					if (len > 1 && transportMail.getMsgref() != null) {
 						for (int i = 1; i < len; i++) {
-							transportMail.addEnclosedPart(MailTransport.getNewReferencedPart(ja.getJSONObject(i)
-									.getString(MailListField.ID.getKey())));
+							transportMail.addEnclosedPart(MailTransportProvider.getInstance().getNewReferencedPart(
+									ja.getJSONObject(i).getString(MailListField.ID.getKey())));
 						}
 					}
 				} else {
-					final TextBodyMailPart part = MailTransport.getNewTextBodyPart("");
+					final TextBodyMailPart part = MailTransportProvider.getInstance().getNewTextBodyPart("");
 					part.setContentType(MIMETypes.MIME_DEFAULT);
 					mail.setContentType(part.getContentType());
 					transportMail.setBodyPart(part);

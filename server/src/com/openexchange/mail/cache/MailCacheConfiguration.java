@@ -54,8 +54,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.jcs.engine.control.CompositeCacheManager;
 
@@ -87,8 +85,6 @@ public final class MailCacheConfiguration implements Initialization {
 	 */
 	private CompositeCacheManager ccmInstance;
 
-	private static final Lock LOCK = new ReentrantLock();
-
 	/**
 	 * No instantiation
 	 */
@@ -103,14 +99,11 @@ public final class MailCacheConfiguration implements Initialization {
 	 */
 	public static MailCacheConfiguration getInstance() {
 		if (!initialized.get()) {
-			LOCK.lock();
-			try {
+			synchronized (initialized) {
 				if (null == instance) {
 					instance = new MailCacheConfiguration();
 					initialized.set(true);
 				}
-			} finally {
-				LOCK.unlock();
 			}
 		}
 		return instance;
@@ -177,7 +170,7 @@ public final class MailCacheConfiguration implements Initialization {
 		}
 		ccmInstance.freeCache(cacheName);
 	}
-	
+
 	/*
 	 * @see com.openexchange.server.Initialization#start()
 	 */

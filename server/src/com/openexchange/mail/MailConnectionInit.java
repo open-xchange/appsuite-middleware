@@ -50,10 +50,7 @@
 package com.openexchange.mail;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
@@ -73,8 +70,6 @@ public final class MailConnectionInit implements Initialization {
 	private final AtomicBoolean started = new AtomicBoolean();
 
 	private final AtomicBoolean initialized = new AtomicBoolean();
-
-	private final Lock initLock = new ReentrantLock();
 
 	/**
 	 * No instantiation
@@ -96,8 +91,7 @@ public final class MailConnectionInit implements Initialization {
 	@SuppressWarnings("unchecked")
 	private void initMailConnectionClass() throws MailException {
 		if (!initialized.get()) {
-			initLock.lock();
-			try {
+			synchronized (initialized) {
 				if (!initialized.get()) {
 					final String className = MailProvider.getInstance().getMailConnectionClass();
 					try {
@@ -123,8 +117,6 @@ public final class MailConnectionInit implements Initialization {
 					}
 					initialized.set(true);
 				}
-			} finally {
-				initLock.unlock();
 			}
 		}
 	}

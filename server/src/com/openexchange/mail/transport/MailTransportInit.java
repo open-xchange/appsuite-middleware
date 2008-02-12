@@ -50,8 +50,6 @@
 package com.openexchange.mail.transport;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailException;
@@ -74,8 +72,6 @@ public final class MailTransportInit implements Initialization {
 
 	private final AtomicBoolean initialized = new AtomicBoolean();
 
-	private final Lock initLock = new ReentrantLock();
-
 	/**
 	 * No instantiation
 	 */
@@ -95,8 +91,7 @@ public final class MailTransportInit implements Initialization {
 	 */
 	private void initMailTransportClass() throws MailException {
 		if (!initialized.get()) {
-			initLock.lock();
-			try {
+			synchronized (initialized) {
 				if (!initialized.get()) {
 					final String className = MailTransportProvider.getInstance().getMailTransportClass();
 					try {
@@ -121,8 +116,6 @@ public final class MailTransportInit implements Initialization {
 					}
 					initialized.set(true);
 				}
-			} finally {
-				initLock.unlock();
 			}
 		}
 	}

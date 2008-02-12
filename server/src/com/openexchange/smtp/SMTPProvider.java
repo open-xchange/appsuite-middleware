@@ -49,7 +49,22 @@
 
 package com.openexchange.smtp;
 
+import com.openexchange.groupware.upload.impl.UploadFile;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
+import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
+import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
+import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
 import com.openexchange.mail.transport.MailTransportProvider;
+import com.openexchange.session.Session;
+import com.openexchange.smtp.config.GlobalSMTPConfig;
+import com.openexchange.smtp.dataobjects.SMTPBodyPart;
+import com.openexchange.smtp.dataobjects.SMTPDocumentPart;
+import com.openexchange.smtp.dataobjects.SMTPFilePart;
+import com.openexchange.smtp.dataobjects.SMTPMailMessage;
+import com.openexchange.smtp.dataobjects.SMTPReferencedPart;
 
 /**
  * {@link SMTPProvider}
@@ -76,4 +91,45 @@ public final class SMTPProvider extends MailTransportProvider {
 		return SMTPTransport.class.getName();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.transport.MailTransportProvider#getGlobalTransportConfigClass()
+	 */
+	@Override
+	public String getGlobalTransportConfigClass() {
+		return GlobalSMTPConfig.class.getName();
+	}
+
+	@Override
+	public ComposedMailMessage getNewComposedMailMessage() throws MailException {
+		return new SMTPMailMessage();
+	}
+
+	@Override
+	public UploadFileMailPart getNewFilePart(final UploadFile uploadFile) throws MailException {
+		return new SMTPFilePart(uploadFile);
+	}
+
+	@Override
+	public InfostoreDocumentMailPart getNewDocumentPart(final int documentId, final Session session)
+			throws MailException {
+		return new SMTPDocumentPart(documentId, session);
+	}
+
+	@Override
+	public ReferencedMailPart getNewReferencedPart(final MailPart referencedPart, final Session session)
+			throws MailException {
+		return new SMTPReferencedPart(referencedPart, session);
+	}
+
+	@Override
+	public ReferencedMailPart getNewReferencedPart(final String sequenceId) throws MailException {
+		return new SMTPReferencedPart(sequenceId);
+	}
+
+	@Override
+	public TextBodyMailPart getNewTextBodyPart(final String textBody) throws MailException {
+		return new SMTPBodyPart(textBody);
+	}
 }

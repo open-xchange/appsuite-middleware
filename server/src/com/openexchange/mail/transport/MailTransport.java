@@ -51,18 +51,10 @@ package com.openexchange.mail.transport;
 
 import java.lang.reflect.InvocationTargetException;
 
-import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.config.GlobalTransportConfig;
-import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
-import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
-import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
-import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
 import com.openexchange.session.Session;
 
 /**
@@ -73,9 +65,6 @@ import com.openexchange.session.Session;
  * 
  */
 public abstract class MailTransport {
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailTransport.class);
 
 	private static Class<? extends MailTransport> clazz;
 
@@ -101,6 +90,24 @@ public abstract class MailTransport {
 		} catch (final InvocationTargetException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
 		}
+	}
+
+	/**
+	 * Triggers all implementation-specific startup actions
+	 * 
+	 * @throws MailException
+	 */
+	public static final void startup() throws MailException {
+		internalInstance.startupInternal();
+	}
+
+	/**
+	 * Triggers all implementation-specific shutdown actions
+	 * 
+	 * @throws MailException
+	 */
+	public static final void shutdown() throws MailException {
+		internalInstance.shutdownInternal();
 	}
 
 	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { Session.class };
@@ -135,125 +142,6 @@ public abstract class MailTransport {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
 		}
 	}
-
-	/**
-	 * Gets the class name of {@link GlobalTransportConfig} implementation
-	 * 
-	 * @return The class name of {@link GlobalTransportConfig} implementation
-	 */
-	public static final String getGlobalTransportConfigClass() {
-		return internalInstance.getGlobalTransportConfigClassInternal();
-	}
-
-	/**
-	 * Gets a new instance of {@link ComposedMailMessage}
-	 * 
-	 * @return A new instance of {@link ComposedMailMessage}
-	 */
-	public static final ComposedMailMessage getNewTransportMailMessage() {
-		try {
-			return internalInstance.getNewTransportMailMessageInternal();
-		} catch (final MailException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			return null;
-		}
-	}
-
-	/**
-	 * Gets a new instance of {@link UploadFileMailPart}
-	 * 
-	 * @param uploadFile
-	 *            The upload file
-	 * @return A new instance of {@link UploadFileMailPart}
-	 */
-	public static final UploadFileMailPart getNewFilePart(final UploadFile uploadFile) {
-		try {
-			return internalInstance.getNewFilePartInternal(uploadFile);
-		} catch (final MailException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			return null;
-		}
-	}
-
-	/**
-	 * Gets a new instance of {@link InfostoreDocumentMailPart}
-	 * 
-	 * @param documentId
-	 *            The infostore document's unique ID
-	 * @param session
-	 *            The session providing needed user data
-	 * @return A new instance of {@link InfostoreDocumentMailPart}
-	 */
-	public static final InfostoreDocumentMailPart getNewDocumentPart(final int documentId, final Session session) {
-		try {
-			return internalInstance.getNewDocumentPartInternal(documentId, session);
-		} catch (final MailException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			return null;
-		}
-	}
-
-	/**
-	 * Gets a new instance of {@link TextBodyMailPart}
-	 * 
-	 * @param textBody
-	 *            The text body
-	 * @return A new instance of {@link TextBodyMailPart}
-	 */
-	public static final TextBodyMailPart getNewTextBodyPart(final String textBody) {
-		try {
-			return internalInstance.getNewTextBodyPartInternal(textBody);
-		} catch (final MailException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			return null;
-		}
-	}
-
-	/**
-	 * Gets a new instance of {@link ReferencedMailPart}
-	 * 
-	 * @param referencedPart
-	 *            The referenced part
-	 * @param session
-	 *            The session providing user data
-	 * @return A new instance of {@link ReferencedMailPart}
-	 */
-	public static final ReferencedMailPart getNewReferencedPart(final MailPart referencedPart, final Session session) {
-		try {
-			return internalInstance.getNewReferencedPartInternal(referencedPart, session);
-		} catch (final MailException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			return null;
-		}
-	}
-
-	/**
-	 * Gets a new instance of {@link ReferencedMailPart}
-	 * 
-	 * @param sequenceId
-	 *            The sequence ID in referenced mail
-	 * @return A new instance of {@link ReferencedMailPart}
-	 */
-	public static final ReferencedMailPart getNewReferencedPart(final String sequenceId) {
-		try {
-			return internalInstance.getNewReferencedPartInternal(sequenceId);
-		} catch (final MailException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			return null;
-		}
-	}
-
-	/**
-	 * Gets user-specific transport configuration with properly set login and
-	 * password
-	 * 
-	 * @param session
-	 *            The session providing needed user data
-	 * @return User-specific transport configuration
-	 * @throws MailException
-	 *             If transport configuration cannot be determined
-	 */
-	public abstract MailConfig getTransportConfig(Session session) throws MailException;
 
 	/**
 	 * Sends a mail message
@@ -306,74 +194,18 @@ public abstract class MailTransport {
 	public abstract void close() throws MailException;
 
 	/**
-	 * Gets the name of {@link GlobalTransportConfig} implementation
+	 * Trigger all necessary startup actions
 	 * 
-	 * @return The name of {@link GlobalTransportConfig} implementation
+	 * @throws MailException
+	 *             If startup actions fail
 	 */
-	protected abstract String getGlobalTransportConfigClassInternal();
+	protected abstract void startupInternal() throws MailException;
 
 	/**
-	 * Gets a new instance of {@link ComposedMailMessage}
+	 * Trigger all necessary shutdown actions
 	 * 
-	 * @return A new instance of {@link ComposedMailMessage}
 	 * @throws MailException
+	 *             If shutdown actions fail
 	 */
-	protected abstract ComposedMailMessage getNewTransportMailMessageInternal() throws MailException;
-
-	/**
-	 * Gets a new instance of {@link UploadFileMailPart}
-	 * 
-	 * @param uploadFile
-	 *            The upload file
-	 * @return A new instance of {@link UploadFileMailPart}
-	 * @throws MailException
-	 */
-	protected abstract UploadFileMailPart getNewFilePartInternal(UploadFile uploadFile) throws MailException;
-
-	/**
-	 * Gets a new instance of {@link InfostoreDocumentMailPart}
-	 * 
-	 * @param documentId
-	 *            The infostore document's unique ID
-	 * @param session
-	 *            The session providing needed user data
-	 * @return A new instance of {@link InfostoreDocumentMailPart}
-	 * @throws MailException
-	 */
-	protected abstract InfostoreDocumentMailPart getNewDocumentPartInternal(int documentId, Session session)
-			throws MailException;
-
-	/**
-	 * Gets a new instance of {@link TextBodyMailPart}
-	 * 
-	 * @param textBody
-	 *            The text body
-	 * @return A new instance of {@link TextBodyMailPart}
-	 * @throws MailException
-	 */
-	protected abstract TextBodyMailPart getNewTextBodyPartInternal(String textBody) throws MailException;
-
-	/**
-	 * Gets a new instance of {@link ReferencedMailPart}
-	 * 
-	 * @param referencedPart
-	 *            The referenced part
-	 * @param session
-	 *            The session providing user data
-	 * @return A new instance of {@link ReferencedMailPart}
-	 * @throws MailException
-	 */
-	protected abstract ReferencedMailPart getNewReferencedPartInternal(MailPart referencedPart, Session session)
-			throws MailException;
-
-	/**
-	 * Gets a new instance of {@link ReferencedMailPart}
-	 * 
-	 * @param sequenceId
-	 *            The sequence ID in referenced mail
-	 * @return A new instance of {@link ReferencedMailPart}
-	 * @throws MailException
-	 */
-	protected abstract ReferencedMailPart getNewReferencedPartInternal(String sequenceId) throws MailException;
-
+	protected abstract void shutdownInternal() throws MailException;
 }

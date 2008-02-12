@@ -50,14 +50,11 @@
 package com.openexchange.mail.config;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProvider;
-import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.MailTransportProvider;
 import com.openexchange.server.Initialization;
 
 /**
@@ -78,8 +75,6 @@ public final class GlobalConfigInit implements Initialization {
 
 	private final AtomicBoolean initializedTransport = new AtomicBoolean();
 
-	private final Lock initLock = new ReentrantLock();
-
 	private static final GlobalConfigInit instance = new GlobalConfigInit();
 
 	/**
@@ -98,8 +93,7 @@ public final class GlobalConfigInit implements Initialization {
 
 	private void initGlobalMailConfigClass() throws MailException {
 		if (!initialized.get()) {
-			initLock.lock();
-			try {
+			synchronized (initialized) {
 				if (!initialized.get()) {
 					final String className = MailProvider.getInstance().getGlobalMailConfigClass();
 					try {
@@ -114,21 +108,18 @@ public final class GlobalConfigInit implements Initialization {
 						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
 					}
 				}
-			} finally {
-				initLock.unlock();
 			}
 		}
 	}
 
 	private void initGlobalTransportConfigClass() throws MailException {
 		if (!initializedTransport.get()) {
-			initLock.lock();
-			try {
+			synchronized (initializedTransport) {
 				if (!initializedTransport.get()) {
-					final String className = MailTransport.getGlobalTransportConfigClass();
+					final String className = MailTransportProvider.getInstance().getGlobalTransportConfigClass();
 					try {
 						if (className == null) {
-							throw new MailConfigException("Missing global mail config class");
+							throw new MailConfigException("Missing global transport config class");
 						}
 						final Class<? extends GlobalTransportConfig> clazz = Class.forName(className).asSubclass(
 								GlobalTransportConfig.class);
@@ -138,8 +129,6 @@ public final class GlobalConfigInit implements Initialization {
 						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
 					}
 				}
-			} finally {
-				initLock.unlock();
 			}
 		}
 	}

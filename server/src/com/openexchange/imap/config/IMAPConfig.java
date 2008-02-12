@@ -81,6 +81,8 @@ public final class IMAPConfig extends MailConfig {
 
 	private int imapPort;
 
+	private boolean secure;
+
 	private final AtomicBoolean capabilitiesLoaded = new AtomicBoolean();
 
 	private IMAPCapabilities imapCapabilities;
@@ -120,8 +122,21 @@ public final class IMAPConfig extends MailConfig {
 				throw new MailConfigException(new StringBuilder(128).append("Property \"").append("mailServer").append(
 						"\" not set in mail properties").toString());
 			}
+			{
+				final int lastPos = imapServer.length() - 1;
+				if (imapServer.charAt(lastPos) == '/') {
+					imapServer = imapServer.substring(0, lastPos);
+				}
+			}
 			int imapPort = 143;
 			{
+				final String[] parsed = parseProtocol(imapServer);
+				if (parsed != null) {
+					imapConf.secure = "imaps".equals(parsed[0]);
+					imapServer = parsed[1];
+				} else {
+					imapConf.secure = false;
+				}
 				final int pos = imapServer.indexOf(':');
 				if (pos > -1) {
 					imapPort = Integer.parseInt(imapServer.substring(pos + 1));
@@ -137,8 +152,21 @@ public final class IMAPConfig extends MailConfig {
 			imapConf.imapPort = imapPort;
 		} else if (LoginType.USER.equals(getLoginType())) {
 			String imapServer = user.getImapServer();
+			{
+				final int lastPos = imapServer.length() - 1;
+				if (imapServer.charAt(lastPos) == '/') {
+					imapServer = imapServer.substring(0, lastPos);
+				}
+			}
 			int imapPort = 143;
 			{
+				final String[] parsed = parseProtocol(imapServer);
+				if (parsed != null) {
+					imapConf.secure = "imaps".equals(parsed[0]);
+					imapServer = parsed[1];
+				} else {
+					imapConf.secure = false;
+				}
 				final int pos = imapServer.indexOf(':');
 				if (pos > -1) {
 					imapPort = Integer.parseInt(imapServer.substring(pos + 1));
@@ -149,8 +177,21 @@ public final class IMAPConfig extends MailConfig {
 			imapConf.imapPort = imapPort;
 		} else if (LoginType.ANONYMOUS.equals(getLoginType())) {
 			String imapServer = user.getImapServer();
+			{
+				final int lastPos = imapServer.length() - 1;
+				if (imapServer.charAt(lastPos) == '/') {
+					imapServer = imapServer.substring(0, lastPos);
+				}
+			}
 			int imapPort = 143;
 			{
+				final String[] parsed = parseProtocol(imapServer);
+				if (parsed != null) {
+					imapConf.secure = "imaps".equals(parsed[0]);
+					imapServer = parsed[1];
+				} else {
+					imapConf.secure = false;
+				}
 				final int pos = imapServer.indexOf(':');
 				if (pos > -1) {
 					imapPort = Integer.parseInt(imapServer.substring(pos + 1));
@@ -213,15 +254,6 @@ public final class IMAPConfig extends MailConfig {
 	}
 
 	/**
-	 * Gets the imapsEnabled
-	 * 
-	 * @return the imapsEnabled
-	 */
-	public static boolean isImapsEnabled() {
-		return ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).isImapsEnabled();
-	}
-
-	/**
 	 * Gets the imapSort
 	 * 
 	 * @return the imapSort
@@ -232,15 +264,6 @@ public final class IMAPConfig extends MailConfig {
 			return (imapSort && imapCapabilities.hasSort());
 		}
 		return imapSort;
-	}
-
-	/**
-	 * Gets the imapsPort
-	 * 
-	 * @return the imapsPort
-	 */
-	public static int getImapsPort() {
-		return ((GlobalIMAPConfig) GlobalMailConfig.getInstance()).getImapsPort();
 	}
 
 	/**
@@ -399,6 +422,11 @@ public final class IMAPConfig extends MailConfig {
 	@Override
 	public String getServer() {
 		return imapServer;
+	}
+
+	@Override
+	public boolean isSecure() {
+		return secure;
 	}
 
 	/**

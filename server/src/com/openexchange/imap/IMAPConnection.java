@@ -51,6 +51,7 @@ package com.openexchange.imap;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.security.Security;
 import java.util.Properties;
 
 import javax.mail.MessagingException;
@@ -182,6 +183,10 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 		}
 	}
 
+	private static final String PROPERTY_SECURITY_PROVIDER = "ssl.SocketFactory.provider";
+
+	private static final String CLASSNAME_SECURITY_FACTORY = "com.openexchange.tools.ssl.TrustAllSSLSocketFactory";
+
 	@Override
 	protected void connectInternal() throws MailException {
 		if (imapStore != null && imapStore.isConnected()) {
@@ -194,9 +199,24 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 			if (null != getMailProperties() && !getMailProperties().isEmpty()) {
 				imapProps.putAll(getMailProperties());
 			}
-			if (imapSession == null) {
-				imapSession = javax.mail.Session.getInstance(imapProps, null);
+			/*
+			 * Check if a secure IMAP connection should be established
+			 */
+			if (getMailConfig().isSecure()) {
+				imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_CLASS, CLASSNAME_SECURITY_FACTORY);
+				imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_PORT, String
+						.valueOf(getMailConfig().getPort()));
+				imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_FALLBACK, "false");
+				imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_STARTTLS_ENABLE, "true");
+				/*
+				 * Needed for JavaMail >= 1.4
+				 */
+				Security.setProperty(PROPERTY_SECURITY_PROVIDER, CLASSNAME_SECURITY_FACTORY);
 			}
+			/*
+			 * Apply properties to IMAP session
+			 */
+			imapSession = javax.mail.Session.getInstance(imapProps, null);
 			/*
 			 * Check if debug should be enabled
 			 */
@@ -216,7 +236,8 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 					LOG.error(e.getMessage(), e);
 				}
 			}
-			imapStore.connect(getMailConfig().getServer(), getMailConfig().getPort(), getMailConfig().getLogin(), tmpPass);
+			imapStore.connect(getMailConfig().getServer(), getMailConfig().getPort(), getMailConfig().getLogin(),
+					tmpPass);
 			connected = true;
 			/*
 			 * Add server's capabilities
@@ -342,6 +363,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 		} catch (final AbstractOXException e) {
 			throw new MailException(e);
 		}
+		IMAPSessionProperties.resetDefaultSessionProperties();
 	}
 
 	/*

@@ -474,6 +474,12 @@ public abstract class MailConfig {
 	public abstract int getPort();
 
 	/**
+	 * @return <code>true</code> if a secure connection should be established;
+	 *         otherwise <code>false</code>
+	 */
+	public abstract boolean isSecure();
+
+	/**
 	 * @return Gets the encoded capabilities
 	 */
 	public abstract int getCapabilities();
@@ -555,6 +561,54 @@ public abstract class MailConfig {
 			}
 		} else if (!getServer().equals(other.getServer())) {
 			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Parses protocol out of specified server string according to URL
+	 * specification; e.g. <i>mailprotocol://dev.myhost.com:1234</i>
+	 * 
+	 * @param server
+	 *            The server string
+	 * @return An array of {@link String} with length <code>2</code>. The
+	 *         first element is the protocol and the second the server. If no
+	 *         protocol pattern could be found <code>null</code> is returned;
+	 *         meaning no protocol is present in specified server string.
+	 */
+	protected final static String[] parseProtocol(final String server) {
+		final int len = server.length();
+		char c = '\0';
+		for (int i = 0; i < len && ((c = server.charAt(i)) != '/'); i++) {
+			if (c == ':') {
+				final String s = server.substring(0, i).toLowerCase();
+				if (isValidProtocol(s)) {
+					int start = i + 1;
+					while (server.charAt(start) == '/') {
+						start++;
+					}
+					return new String[] { s, server.substring(start) };
+				}
+				break;
+			}
+		}
+		return null;
+	}
+
+	private final static boolean isValidProtocol(final String protocol) {
+		final int len = protocol.length();
+		if (len < 1) {
+			return false;
+		}
+		char c = protocol.charAt(0);
+		if (!Character.isLetter(c)) {
+			return false;
+		}
+		for (int i = 1; i < len; i++) {
+			c = protocol.charAt(i);
+			if (!Character.isLetterOrDigit(c) && c != '.' && c != '+' && c != '-') {
+				return false;
+			}
 		}
 		return true;
 	}

@@ -75,6 +75,12 @@ public abstract class MailProvider {
 
 	private static MailProvider instance;
 
+	/**
+	 * Initializes the mail provider
+	 * 
+	 * @throws MailException
+	 *             If initialization of mail provider fails
+	 */
 	static void initMailProvider() throws MailException {
 		if (!initialized.get()) {
 			synchronized (initialized) {
@@ -98,7 +104,10 @@ public abstract class MailProvider {
 		}
 	}
 
-	static void resetInitMailProvider() {
+	/**
+	 * Resets the mail provider
+	 */
+	static void resetMailProvider() {
 		initialized.set(false);
 	}
 

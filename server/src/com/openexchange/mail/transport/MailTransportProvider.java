@@ -52,8 +52,17 @@ package com.openexchange.mail.transport;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.config.GlobalTransportConfig;
 import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
+import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
+import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
+import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
+import com.openexchange.session.Session;
 
 /**
  * {@link MailTransportProvider} - Provider for mail transport
@@ -67,7 +76,13 @@ public abstract class MailTransportProvider {
 
 	private static MailTransportProvider instance;
 
-	public static void initMailProvider() throws MailException {
+	/**
+	 * Initializes the transport provider
+	 * 
+	 * @throws MailException
+	 *             If initialization of transport provider fails
+	 */
+	public static void initTransportProvider() throws MailException {
 		if (!initialized.get()) {
 			synchronized (initialized) {
 				if (!initialized.get()) {
@@ -99,7 +114,10 @@ public abstract class MailTransportProvider {
 		return instance;
 	}
 
-	public static void resetInitMailProvider() {
+	/**
+	 * Resets the transport provider
+	 */
+	public static void resetTransportProvider() {
 		initialized.set(false);
 	}
 
@@ -116,4 +134,86 @@ public abstract class MailTransportProvider {
 	 * @return The name of the class implementing {@link MailTransport}
 	 */
 	public abstract String getMailTransportClass();
+
+	/**
+	 * Gets the name of {@link GlobalTransportConfig} implementation
+	 * 
+	 * @return The name of {@link GlobalTransportConfig} implementation
+	 */
+	public abstract String getGlobalTransportConfigClass();
+
+	/**
+	 * Gets a new instance of {@link ComposedMailMessage}
+	 * 
+	 * @return A new instance of {@link ComposedMailMessage}
+	 * @throws MailException
+	 *             If a new instance of {@link ComposedMailMessage} cannot be
+	 *             created
+	 */
+	public abstract ComposedMailMessage getNewComposedMailMessage() throws MailException;
+
+	/**
+	 * Gets a new instance of {@link UploadFileMailPart}
+	 * 
+	 * @param uploadFile
+	 *            The upload file
+	 * @return A new instance of {@link UploadFileMailPart}
+	 * @throws MailException
+	 *             If a new instance of {@link UploadFileMailPart} cannot be
+	 *             created
+	 */
+	public abstract UploadFileMailPart getNewFilePart(UploadFile uploadFile) throws MailException;
+
+	/**
+	 * Gets a new instance of {@link InfostoreDocumentMailPart}
+	 * 
+	 * @param documentId
+	 *            The infostore document's unique ID
+	 * @param session
+	 *            The session providing needed user data
+	 * @return A new instance of {@link InfostoreDocumentMailPart}
+	 * @throws MailException
+	 *             If a new instance of {@link InfostoreDocumentMailPart} cannot
+	 *             be created
+	 */
+	public abstract InfostoreDocumentMailPart getNewDocumentPart(int documentId, Session session) throws MailException;
+
+	/**
+	 * Gets a new instance of {@link TextBodyMailPart}
+	 * 
+	 * @param textBody
+	 *            The text body
+	 * @return A new instance of {@link TextBodyMailPart}
+	 * @throws MailException
+	 *             If a new instance of {@link TextBodyMailPart} cannot be
+	 *             created
+	 */
+	public abstract TextBodyMailPart getNewTextBodyPart(String textBody) throws MailException;
+
+	/**
+	 * Gets a new instance of {@link ReferencedMailPart}
+	 * 
+	 * @param referencedPart
+	 *            The referenced part
+	 * @param session
+	 *            The session providing user data
+	 * @return A new instance of {@link ReferencedMailPart}
+	 * @throws MailException
+	 *             If a new instance of {@link ReferencedMailPart} cannot be
+	 *             created
+	 */
+	public abstract ReferencedMailPart getNewReferencedPart(MailPart referencedPart, Session session)
+			throws MailException;
+
+	/**
+	 * Gets a new instance of {@link ReferencedMailPart}
+	 * 
+	 * @param sequenceId
+	 *            The sequence ID in referenced mail
+	 * @return A new instance of {@link ReferencedMailPart}
+	 * @throws MailException
+	 *             If a new instance of {@link ReferencedMailPart} cannot be
+	 *             created
+	 */
+	public abstract ReferencedMailPart getNewReferencedPart(String sequenceId) throws MailException;
 }

@@ -72,10 +72,6 @@ public final class GlobalSMTPConfig extends GlobalTransportConfig {
 	 */
 	private String smtpLocalhost;
 
-	private boolean smtpsEnabled;
-
-	private int smtpsPort;
-
 	private boolean smtpAuth;
 
 	private boolean smtpEnvelopeFrom;
@@ -121,24 +117,6 @@ public final class GlobalSMTPConfig extends GlobalTransportConfig {
 			smtpLocalhost = smtpLocalhostStr == null || smtpLocalhostStr.length() == 0
 					|| "null".equalsIgnoreCase(smtpLocalhostStr) ? null : smtpLocalhostStr;
 			logBuilder.append("\tSMTP Localhost: ").append(smtpLocalhost).append('\n');
-		}
-
-		{
-			final String smtpsEnStr = smtpProperties.getProperty("smtps", "false").trim();
-			smtpsEnabled = Boolean.parseBoolean(smtpsEnStr);
-			logBuilder.append("\tSMTP/S enabled: ").append(smtpsEnabled).append('\n');
-		}
-
-		{
-			final String smtpsPortStr = smtpProperties.getProperty("smtpsPort", "465").trim();
-			try {
-				smtpsPort = Integer.parseInt(smtpsPortStr);
-				logBuilder.append("\tSMTP/S port: ").append(smtpsPort).append('\n');
-			} catch (final NumberFormatException e) {
-				smtpsPort = 465;
-				logBuilder.append("\tSMTP/S port: Invalid value \"").append(smtpsPortStr).append(
-						"\". Setting to fallback ").append(smtpsPort).append('\n');
-			}
 		}
 
 		{
@@ -240,24 +218,6 @@ public final class GlobalSMTPConfig extends GlobalTransportConfig {
 	 */
 	String getSmtpLocalhost() {
 		return smtpLocalhost;
-	}
-
-	/**
-	 * Gets the smtpsEnabled
-	 * 
-	 * @return the smtpsEnabled
-	 */
-	boolean isSmtpsEnabled() {
-		return smtpsEnabled;
-	}
-
-	/**
-	 * Gets the smtpsPort
-	 * 
-	 * @return the smtpsPort
-	 */
-	int getSmtpsPort() {
-		return smtpsPort;
 	}
 
 	/**

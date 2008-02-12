@@ -83,10 +83,6 @@ public final class GlobalIMAPConfig extends GlobalMailConfig {
 
 	private boolean fastFetch;
 
-	private boolean imapsEnabled;
-
-	private int imapsPort;
-
 	private BoolCapVal supportsACLs;
 
 	private int imapTimeout;
@@ -148,24 +144,6 @@ public final class GlobalIMAPConfig extends GlobalMailConfig {
 			final String fastFetchStr = imapProperties.getProperty("imapFastFetch", STR_TRUE).trim();
 			fastFetch = Boolean.parseBoolean(fastFetchStr);
 			logBuilder.append("\tFast Fetch Enabled: ").append(fastFetch).append('\n');
-		}
-
-		{
-			final String imapSecStr = imapProperties.getProperty("imaps", STR_FALSE).trim();
-			imapsEnabled = Boolean.parseBoolean(imapSecStr);
-			logBuilder.append("\tIMAP/S enabled: ").append(imapsEnabled).append('\n');
-		}
-
-		{
-			final String imapSecPortStr = imapProperties.getProperty("imapsPort", "993").trim();
-			try {
-				imapsPort = Integer.parseInt(imapSecPortStr);
-				logBuilder.append("\tIMAP/S port: ").append(imapsPort).append('\n');
-			} catch (final NumberFormatException e) {
-				imapsPort = 993;
-				logBuilder.append("\tIMAP/S port: Invalid value \"").append(imapSecPortStr).append(
-						"\". Setting to fallback: ").append(imapsPort).append('\n');
-			}
 		}
 
 		{
@@ -299,30 +277,12 @@ public final class GlobalIMAPConfig extends GlobalMailConfig {
 	}
 
 	/**
-	 * Gets the imapsEnabled
-	 * 
-	 * @return the imapsEnabled
-	 */
-	boolean isImapsEnabled() {
-		return imapsEnabled;
-	}
-
-	/**
 	 * Gets the imapSort
 	 * 
 	 * @return the imapSort
 	 */
 	boolean isImapSort() {
 		return imapSort;
-	}
-
-	/**
-	 * Gets the imapsPort
-	 * 
-	 * @return the imapsPort
-	 */
-	int getImapsPort() {
-		return imapsPort;
 	}
 
 	/**

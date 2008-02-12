@@ -61,9 +61,8 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 
 /**
- * {@link SMTPMailMessage} - Extends the {@link ComposedMailMessage} class by
- * references to enclosed parts that should be added as attachments on message
- * transport
+ * {@link SMTPMailMessage} - Extends the {@link ComposedMailMessage} class to
+ * compose SMTP messages.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
