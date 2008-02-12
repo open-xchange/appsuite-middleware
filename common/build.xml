@@ -36,8 +36,13 @@
     <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
     <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
 
+    <!-- JAR names for classpath -->
+    <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
+
     <!-- Classpath -->
-    <path id="project.classpath" refid="framework"/>
+    <path id="project.classpath">
+        <pathelement location="lib/jars/${commonsloggingjar}"/>
+    </path>
 
     <!-- Compile -->
     <target name="prepare">
@@ -93,6 +98,8 @@
         <mkdir dir="${destdir}/${gwbundle.d}"/>
         <echo file="${destdir}/${gwbundle.d}/org.eclipse.osgi.services.ini"
             message="${bundlesdir}/org.eclipse.osgi.services_3.1.200.v20070605.jar${line.separator}"/>
+        <echo file="${destdir}/${gwbundle.d}/org.eclipse.osgi.services.ini"
+            message="${bundlesdir}/org.eclipse.equinox.event_1.0.100.v20070516.jar${line.separator}"/>
         <echo file="${destdir}/${gwbundle.d}/org.apache.commons.logging.ini"
             message="${bundlesdir}/org.apache.commons.logging_1.0.4.v200706111724.jar${line.separator}"/>
         <echo file="${destdir}/${gwbundle.d}/javax.servlet.ini"
