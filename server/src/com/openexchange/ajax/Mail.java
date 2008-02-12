@@ -121,7 +121,7 @@ import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
-import com.openexchange.mail.MailStorageUtils.OrderDirection;
+import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;

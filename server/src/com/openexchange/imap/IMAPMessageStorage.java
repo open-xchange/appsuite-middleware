@@ -90,7 +90,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailMessageStorage;
-import com.openexchange.mail.MailStorageUtils.OrderDirection;
+import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;

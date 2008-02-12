@@ -49,61 +49,44 @@
 
 package com.openexchange.mail;
 
-/**
- * MailStorageUtils - Mail storage utilities.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
- */
-public final class MailStorageUtils {
+public enum OrderDirection {
 
 	/**
-	 * Prevent instantiation
+	 * Ascending order
 	 */
-	private MailStorageUtils() {
-		super();
+	ASC(1),
+	/**
+	 * Descending order
+	 */
+	DESC(2);
+
+	private final int order;
+
+	private OrderDirection(final int order) {
+		this.order = order;
 	}
 
-	public static enum OrderDirection {
+	/**
+	 * @return The order direction's <code>int</code> value
+	 */
+	public int getOrder() {
+		return order;
+	}
 
-		/**
-		 * Ascending order
-		 */
-		ASC(1),
-		/**
-		 * Descending order
-		 */
-		DESC(2);
-
-		private final int order;
-
-		private OrderDirection(final int order) {
-			this.order = order;
-		}
-
-		/**
-		 * @return The order direction's <code>int</code> value
-		 */
-		public int getOrder() {
-			return order;
-		}
-
-		/**
-		 * Get the corresponding order direction
-		 * 
-		 * @param order
-		 *            The order <code>int</code> value
-		 * @return The corresponding order direction
-		 */
-		public static final OrderDirection getOrderDirection(final int order) {
-			final OrderDirection[] orderDirections = OrderDirection.values();
-			for (OrderDirection direction : orderDirections) {
-				if (direction.order == order) {
-					return direction;
-				}
+	/**
+	 * Get the corresponding order direction
+	 * 
+	 * @param order
+	 *            The order <code>int</code> value
+	 * @return The corresponding order direction
+	 */
+	public static final OrderDirection getOrderDirection(final int order) {
+		final OrderDirection[] orderDirections = OrderDirection.values();
+		for (OrderDirection direction : orderDirections) {
+			if (direction.order == order) {
+				return direction;
 			}
-			return null;
 		}
+		return null;
 	}
-
 }

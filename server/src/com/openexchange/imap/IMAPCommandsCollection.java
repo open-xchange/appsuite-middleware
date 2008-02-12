@@ -79,7 +79,7 @@ import com.openexchange.imap.command.IMAPNumArgSplitter;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailInterfaceImpl;
 import com.openexchange.mail.MailListField;
-import com.openexchange.mail.MailStorageUtils.OrderDirection;
+import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.sun.mail.iap.Argument;

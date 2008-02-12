@@ -55,7 +55,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.mail.MailStorageUtils.OrderDirection;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;

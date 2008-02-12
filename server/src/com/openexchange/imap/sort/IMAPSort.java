@@ -76,7 +76,7 @@ import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailListField;
-import com.openexchange.mail.MailStorageUtils.OrderDirection;
+import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.utils.StorageUtility.DummyAddress;
 import com.sun.mail.imap.IMAPFolder;

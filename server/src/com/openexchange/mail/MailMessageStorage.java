@@ -49,7 +49,6 @@
 
 package com.openexchange.mail;
 
-import com.openexchange.mail.MailStorageUtils.OrderDirection;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
