@@ -191,7 +191,6 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	protected void connectInternal() throws MailException {
 		if (imapStore != null && imapStore.isConnected()) {
 			connected = true;
-			applyNewThread();
 			return;
 		}
 		try {
@@ -253,7 +252,6 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 			 * Remember to decrement
 			 */
 			decrement = true;
-			applyNewThread();
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, this);
 		}

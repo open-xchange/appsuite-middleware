@@ -63,7 +63,6 @@ import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.spam.SpamHandler;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtilityInit;
-import com.openexchange.mail.watcher.MailConnectionWatcher;
 import com.openexchange.session.Session;
 
 /**
@@ -348,16 +347,12 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 		if (mailConfig == null) {
 			throw new IllegalArgumentException("mail config is null");
 		}
-		if (!isConnectedUnsafe()) {
-			checkFieldsBeforeConnect(mailConfig);
-			this.mailConfig = mailConfig;
-			connectInternal();
-			MailConnectionWatcher.addMailConnection(this);
-		} else {
+		if (isConnected()) {
 			if (mailConfig.equals(this.mailConfig)) {
 				/*
 				 * Already connected with equal config
 				 */
+				applyNewThread();
 				return;
 			}
 			/*
@@ -366,11 +361,12 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 			releaseResources();
 			closeInternal();
 			MailConnectionWatcher.removeMailConnection(this);
-			checkFieldsBeforeConnect(mailConfig);
-			this.mailConfig = mailConfig;
-			connectInternal();
-			MailConnectionWatcher.addMailConnection(this);
 		}
+		applyNewThread();
+		checkFieldsBeforeConnect(mailConfig);
+		this.mailConfig = mailConfig;
+		connectInternal();
+		MailConnectionWatcher.addMailConnection(this);
 	}
 
 	/**
@@ -417,10 +413,10 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 				 * Cache connection if desired/possible anymore
 				 */
 				if (put2Cache && MailConnectionCache.getInstance().putMailConnection(session, this)) {
-					signalAvailableConnection();
 					/*
-					 * Remove from watcher as long as cached
+					 * Successfully cached: signal & return
 					 */
+					signalAvailableConnection();
 					return;
 				}
 			} catch (final OXCachingException e) {
@@ -499,7 +495,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	/**
 	 * Apply new thread's trace informations
 	 */
-	protected final void applyNewThread() {
+	private final void applyNewThread() {
 		usingThread = Thread.currentThread();
 		trace = usingThread.getStackTrace();
 	}

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.watcher;
+package com.openexchange.mail;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -60,7 +60,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.server.ServerTimer;
 
@@ -71,7 +70,7 @@ import com.openexchange.server.ServerTimer;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailConnectionWatcher {
+final class MailConnectionWatcher {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailConnectionWatcher.class);
@@ -87,7 +86,7 @@ public final class MailConnectionWatcher {
 	/**
 	 * Initializes and starts mail connection watcher if not done, yet
 	 */
-	public static void init() {
+	static void init() {
 		if (!initialized.get()) {
 			LOCK.lock();
 			try {
@@ -114,7 +113,7 @@ public final class MailConnectionWatcher {
 	/**
 	 * Stops mail connection watcher if currently running
 	 */
-	public static void stop() {
+	static void stop() {
 		if (initialized.get()) {
 			LOCK.lock();
 			try {
@@ -152,7 +151,7 @@ public final class MailConnectionWatcher {
 	 * @param mailConnection
 	 *            The mail connection to add
 	 */
-	public static void addMailConnection(final MailConnection<?, ?, ?> mailConnection) {
+	static void addMailConnection(final MailConnection<?, ?, ?> mailConnection) {
 		if (!initialized.get()) {
 			LOG.error("Mail connection watcher is not running. Aborting addMailConnection()");
 			return;
@@ -169,7 +168,7 @@ public final class MailConnectionWatcher {
 	 * @param mailConnection
 	 *            The mail connection to remove
 	 */
-	public static void removeMailConnection(final MailConnection<?, ?, ?> mailConnection) {
+	static void removeMailConnection(final MailConnection<?, ?, ?> mailConnection) {
 		if (!initialized.get()) {
 			LOG.error("Mail connection watcher is not running. Aborting removeMailConnection()");
 			return;

@@ -61,7 +61,7 @@ import com.openexchange.server.Initialization;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailTransportInit implements Initialization {
+final class MailTransportInit implements Initialization {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailTransportInit.class);
