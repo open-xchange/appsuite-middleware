@@ -76,7 +76,11 @@ public final class MailConfigWrapper extends MailConfig {
         this.secure = secure;
     }
 
-	/*
+    public MailConfigWrapper(final String login, final String password, final String server, final int port) {
+        this(login,password,server,port,false);
+    }
+
+    /*
 	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.mail.config.MailConfig#getCapabilities()
