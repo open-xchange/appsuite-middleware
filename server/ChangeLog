@@ -2,6 +2,10 @@
 
  - Bugfix #10926: No HTML validation when an empty html body is going to be
    sent
+ - Bugfix #10924: No reference to possibly unknown class
+   "sun.net.ConnectionResetException". Lookup by class name instead.
+   Moreover affected routine is made safer to ensure a thrown messaging
+   error finds its way to GUI.
 
 * 2008-02-11 - martin.kauss@open-xchange.com
 
