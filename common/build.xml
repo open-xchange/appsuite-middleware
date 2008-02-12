@@ -36,6 +36,9 @@
     <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
     <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
 
+    <!-- Classpath -->
+    <path id="project.classpath" refid="framework"/>
+
     <!-- Compile -->
     <target name="prepare">
         <mkdir dir="${output..}"/>
@@ -45,6 +48,7 @@
     <target name="compile" depends="prepare">
         <javac srcdir="${source..}" destdir="${output..}" debug="true"
             encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+            <classpath refid="project.classpath" />
         </javac>
     </target>
 
