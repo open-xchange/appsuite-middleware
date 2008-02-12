@@ -36,6 +36,14 @@
     <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
     <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
 
+    <!-- JAR names for classpath -->
+    <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
+
+    <!-- Classpath -->
+    <path id="project.classpath">
+        <pathelement location="lib/jars/${commonsloggingjar}"/>
+    </path>
+
     <!-- Compile -->
     <target name="prepare">
         <mkdir dir="${output..}"/>
@@ -45,6 +53,7 @@
     <target name="compile" depends="prepare">
         <javac srcdir="${source..}" destdir="${output..}" debug="true"
             encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+            <classpath refid="project.classpath" />
         </javac>
     </target>
 
@@ -57,7 +66,7 @@
     <!-- Install targets -->
     <target name="install" depends="installJars,installConfig"/>
 
-    <target name="installJars">
+    <target name="installJars" depends="jar">
         <property name="bundlesdestdir" value="${destdir}${bundlesdir}"/>
         <!-- Framework -->
         <mkdir dir="${bundlesdestdir}"/>
