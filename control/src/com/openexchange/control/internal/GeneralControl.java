@@ -85,81 +85,100 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 	}
 
 	public List<Map<String, String>> list() {
+		LOG.info("control command: list");
 		final List<Map<String, String>> arrayList = new ArrayList<Map<String, String>>();
 		final Bundle[] bundles = bundleContext.getBundles();
 		for (int a = 0; a < bundles.length; a++) {
 			final Map<String, String> map = new HashMap<String, String>();
-			map.put(bundles[a].getSymbolicName(), resolvState(bundles[a].getState()));
+			map.put("bundlename", bundles[a].getSymbolicName());
+			map.put("status", resolvState(bundles[a].getState()));
 			arrayList.add(map);
 		}
 
 		return arrayList;
 	}
 
-	public void start(final String name) {
+	public void start(final String name) throws BundleNotFoundException {
+		LOG.info("control command: start package " + name);
 		final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
 		try {
-			bundle.start();
+			if (bundle != null) {
+				bundle.start();
+			} else {
+				throw new BundleNotFoundException("bundle " + name + " not found");
+			}
 		} catch (BundleException exc) {
 			LOG.error("cannot start bundle: " + name, exc);
 		}
-		LOG.info("control command: start package " + name);
 	}
 
-	public void stop(final String name) {
+	public void stop(final String name) throws BundleNotFoundException {
+		LOG.info("control command: stop package " + name);
 		final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
 		try {
-			bundle.stop();
+			if (bundle != null) {
+				bundle.stop();
+			} else {
+				throw new BundleNotFoundException("bundle " + name + " not found");
+			}
 		} catch (BundleException exc) {
 			LOG.error("cannot stop bundle: " + name, exc);
 		}
-		LOG.info("control command: stop package " + name);
 	}
 
-	public void restart(final String name) {
+	public void restart(final String name) throws BundleNotFoundException {
 		stop(name);
 		start(name);
 	}
 
 	public void install(final String location) {
+		LOG.info("install package: " + location);
 		try {
 			bundleContext.installBundle(location);
 		} catch (BundleException exc) {
 			LOG.error("cannot install bundle: " + location, exc);
 		}
-		LOG.info("install package: " + location);
 	}
 
-	public void uninstall(final String name) {
+	public void uninstall(final String name) throws BundleNotFoundException {
+		LOG.info("uninstall package");
 		final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
 		try {
-			bundle.uninstall();
+			if (bundle != null) {
+				bundle.uninstall();
+			} else {
+				throw new BundleNotFoundException("bundle " + name + " not found");
+			}
 		} catch (BundleException exc) {
 			LOG.error("cannot uninstall bundle: " + name, exc);
 		}
-		LOG.info("uninstall package");
 	}
 
-	public void update(final String name, final boolean autofresh) {
+	public void update(final String name, final boolean autofresh) throws BundleNotFoundException {
+		LOG.info("control command: update package: " + name);
 		final Bundle bundle = getBundleByName(name, bundleContext.getBundles());
 		try {
-			bundle.update();
-			if (autofresh) {
-				freshPackages(bundleContext);
+			if (bundle != null) {
+				bundle.update();
+				if (autofresh) {
+					freshPackages(bundleContext);
+				}
+			} else {
+				throw new BundleNotFoundException("bundle " + name + " not found");
 			}
 		} catch (BundleException exc) {
 			LOG.error("cannot update bundle: " + name, exc);
 		}
-		LOG.info("control command: update package: " + name);
 	}
 
 	public void refresh() {
+		LOG.info("control command: refresh");
 		freshPackages(bundleContext);
-		LOG.info("refreshing packages");
 	}
 
-	public List services() {
-		final List serviceList = new ArrayList();
+	public List<Map <String, Object>> services() {
+		LOG.info("control command: services");
+		final List<Map <String, Object>> serviceList = new ArrayList<Map <String, Object>>();
 
 		ServiceReference[] services;
 		try {
@@ -168,22 +187,27 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 				int size = services.length;
 				if (size > 0) {
 					for (int j = 0; j < size; j++) {
-						final HashMap<String, Object> hashMap = new HashMap<String, Object>();
+						final Map<String, Object> hashMap = new HashMap<String, Object>();
 
 						ServiceReference service = services[j];
 
 						hashMap.put("service", service.toString());
-						hashMap.put("registered_bundle", service.getBundle().toString());
+						hashMap.put("registered_by", service.getBundle().toString());
 
 						Bundle[] usedByBundles = (Bundle[]) service.getUsingBundles();
-						final List<Bundle> bundleList = new ArrayList();
+						final List<String> bundleList = new ArrayList<String>();
 						if (usedByBundles != null) {
 							for (int a = 0; a < usedByBundles.length; a++) {
-								bundleList.add(usedByBundles[a]);
+								final String bundleName = usedByBundles[a].getSymbolicName();
+								if (bundleName != null) {
+									bundleList.add(bundleName);
+								}
 							}
 						}
 
-						hashMap.put("bundles", bundleList.toString());
+						if (bundleList.size() > 0) {
+							hashMap.put("bundles", bundleList);
+						}
 
 						serviceList.add(hashMap);
 					}

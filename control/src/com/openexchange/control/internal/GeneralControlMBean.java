@@ -52,6 +52,7 @@
 package com.openexchange.control.internal;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -60,19 +61,19 @@ import java.util.List;
  */
 public interface GeneralControlMBean {
 	
-	public List list();
+	public List<Map<String, String>> list();
 
-	public void start(final String name) ;
+	public void start(final String name) throws BundleNotFoundException;
 	
-	public void stop(final String name);
+	public void stop(final String name) throws BundleNotFoundException;
 	
-	public void restart(final String name);
+	public void restart(final String name) throws BundleNotFoundException;
 
 	public void install(final String local);
 	
-	public void uninstall(final String name);
+	public void uninstall(final String name) throws BundleNotFoundException;
 
-	public void update(final String name, final boolean autorefresh);
+	public void update(final String name, final boolean autorefresh) throws BundleNotFoundException;
 
 	public void refresh();
 
