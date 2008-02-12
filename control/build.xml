@@ -18,6 +18,10 @@
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="gwbundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
     <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
+	<property name="sbindir" value="${prefix}/sbin"/>
+	
+	<!-- Replacements -->
+	<property name="conf.install.dir" value="${prefix}/etc/groupware"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
@@ -54,7 +58,7 @@
     </target>
 
     <!-- Install targets -->
-    <target name="install" depends="installJar,installConfig"/>
+    <target name="install" depends="installJar,installConfig, installSbin"/>
 
     <target name="installConfig">
         <mkdir dir="${destdir}/${gwbundle.d}"/>
@@ -72,6 +76,17 @@
                 <include name="${bundle.name}"/>
             </fileset>
         </copy>
+    </target>
+	
+    <target name="installSbin">
+        <mkdir dir="${destdir}/${sbindir}"/>
+        <copy todir="${destdir}/${sbindir}">
+            <fileset dir="sbin"/>
+        </copy>
+        <replace dir="${destdir}/${sbindir}">
+            <replacefilter token="@oxfunctions@" value="${conf.install.dir}/oxfunctions.sh"/>
+            <replacefilter token="@prefix@" value="${prefix}"/>
+        </replace>
     </target>
 
     <!-- Dist -->
