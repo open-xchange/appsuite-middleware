@@ -558,7 +558,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	}
 
 	/**
-	 * @param folderId
+	 * @param folderIdArg
 	 * @return
 	 */
 	private final int getFolderType(final int folderIdArg) throws OXException {
