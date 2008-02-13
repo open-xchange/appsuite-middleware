@@ -54,7 +54,6 @@ import java.util.EventObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
@@ -165,16 +164,12 @@ public class DeleteEvent extends EventObject {
 	}
 
 	/**
-	 * Getter for the instance of {@link Session} belonging to context's
-	 * mailadmin
+	 * Getter for the instance of {@link Session} belonging to context's admin
 	 * 
 	 * 
-	 * @return an instance of {@link Session} belonging to context's
-	 *         mailadmin
-	 * @throws LdapException
-	 *             if mailadmin's user data could not be loaded
+	 * @return an instance of {@link Session} belonging to context's admin
 	 */
-	public Session getSession() throws LdapException {
+	public Session getSession() {
 		if (session == null) {
 			session = SessionObjectWrapper.createSessionObject(ctx.getMailadmin(), ctx, "DeleteEventSessionObject");
 		}
