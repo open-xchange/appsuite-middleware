@@ -49,7 +49,6 @@
 
 package com.openexchange.smtp.dataobjects;
 
-import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 
 /**
