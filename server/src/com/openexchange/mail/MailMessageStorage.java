@@ -192,14 +192,14 @@ public interface MailMessageStorage {
 	 * @param fields
 	 *            The fields to pre-fill in returned instances of
 	 *            {@link MailMessage}
-	 * @param tryFromCache
+	 * @param fromCache
 	 *            <code>true</code> to try to fetch result from cache;
 	 *            otherwise <code>false</code>
 	 * @return The desired, pre-filled instances of {@link MailMessage}
 	 * @throws MailException
 	 *             If messages cannot be returned.
 	 */
-	public MailMessage[] getMessagesByUID(String folder, long[] mailIds, MailListField[] fields, boolean tryFromCache)
+	public MailMessage[] getMessagesByUID(String folder, long[] mailIds, MailListField[] fields, boolean fromCache)
 			throws MailException;
 
 	/**

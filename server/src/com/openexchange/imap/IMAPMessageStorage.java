@@ -452,10 +452,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 	}
 
 	public MailMessage[] getMessagesByUID(final String folderArg, final long[] msgUIDs, final MailListField[] fields,
-			final boolean tryFromCache) throws MailException {
+			final boolean fromCache) throws MailException {
 		try {
 			final String fullname = prepareMailFolderParam(folderArg);
-			if (tryFromCache) {
+			if (fromCache) {
 				try {
 					if (MailMessageCache.getInstance().containsFolderMessages(fullname, userId, ctx)) {
 						return MailMessageCache.getInstance().getMessages(msgUIDs, fullname, userId, ctx);
