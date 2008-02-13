@@ -27,6 +27,7 @@
 
     <fileset dir="lib/jars" id="framework">
         <include name="org.eclipse.osgi*"/>
+        <include name="org.eclipse.equinox*"/>
         <include name="javax.servlet*"/>
         <include name="org.apache.commons.logging*"/>
     </fileset>
