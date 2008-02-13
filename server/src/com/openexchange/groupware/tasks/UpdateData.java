@@ -347,19 +347,20 @@ class UpdateData {
             Permission.checkCreate(ctx, user, userConfig, getDestFolder());
             // move out of a shared folder is not allowed.
             if (Tools.isFolderShared(folder, user)) {
-                throw new TaskException(Code.NO_SHARED_MOVE,
-                    folder.getFolderName(), getFolderId());
+                throw new TaskException(Code.NO_SHARED_MOVE, folder
+                    .getFolderName(), Integer.valueOf(getFolderId()));
             }
             // move into a shared folder is not allowed.
             if (Tools.isFolderShared(getDestFolder(), user)) {
-                throw new TaskException(Code.NO_SHARED_MOVE,
-                    getDestFolder().getFolderName(), getDestFolderId());
+                throw new TaskException(Code.NO_SHARED_MOVE, getDestFolder()
+                    .getFolderName(), Integer.valueOf(getDestFolderId()));
             }
             // moving private tasks to a public folder isn't allowed.
             if (getOrigTask().getPrivateFlag()
                 && Tools.isFolderPublic(getDestFolder())) {
                 throw new TaskException(Code.NO_PRIVATE_MOVE_TO_PUBLIC,
-                    getDestFolder().getFolderName(), getDestFolderId());
+                    getDestFolder().getFolderName(), Integer.valueOf(
+                    getDestFolderId()));
             }
         } else {
             Permission.checkWriteInFolder(ctx, user, userConfig, folder,
@@ -367,13 +368,15 @@ class UpdateData {
             // Check if task appears in folder.
             if (null == FolderStorage.getFolder(getOrigFolder(),
                 getFolderId())) {
-                throw new TaskException(Code.FOLDER_NOT_FOUND, getFolderId(),
-                    getTaskId(), getUserId(), ctx.getContextId());
+                throw new TaskException(Code.NO_PERMISSION, Integer.valueOf(
+                    getTaskId()), folder.getFolderName(), Integer.valueOf(
+                    getFolderId()));
             }
-            if (Tools.isFolderShared(folder, user)
-                && getOrigTask().getPrivateFlag()) {
-                throw new TaskException(Code.NO_PRIVATE_PERMISSION,
-                    folder.getFolderName(), getFolderId());
+            if (Tools.isFolderShared(folder, user) && getOrigTask()
+                .getPrivateFlag()) {
+                throw new TaskException(Code.NO_PERMISSION, Integer.valueOf(
+                    getTaskId()), folder.getFolderName(), Integer.valueOf(
+                        getFolderId()));
             }
         }
     }

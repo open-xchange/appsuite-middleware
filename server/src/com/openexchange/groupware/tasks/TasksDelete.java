@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.util.Date;
 import java.util.Set;
 
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
@@ -172,12 +173,14 @@ public class TasksDelete implements DeleteListener {
                 userId, type);
             for (int[] folderAndTask : result) {
                 final int folderId = folderAndTask[0];
+                final FolderObject folder = Tools.getFolder(ctx, folderId);
                 final int taskId = folderAndTask[1];
                 final Set<Folder> folders = foldStor.selectFolder(ctx, writeCon,
                     taskId, type);
                 if (folders.size() == 0) {
-                    throw new TaskException(TaskException.Code.FOLDER_NOT_FOUND,
-                        folderId, taskId, userId, ctx.getContextId());
+                    throw new TaskException(TaskException.Code.NO_PERMISSION,
+                        Integer.valueOf(taskId), folder.getFolderName(), Integer
+                        .valueOf(folderId));
                 } else if (folders.size() > 1) {
                     foldStor.deleteFolder(ctx, writeCon, taskId, folderId,
                         type);
@@ -187,13 +190,13 @@ public class TasksDelete implements DeleteListener {
                 } else if (StorageType.DELETED == type) {
                     TaskLogic.removeTask(session, ctx, writeCon, folderId,
                         taskId, type);
-                } else if (Tools.isFolderPublic(ctx, folderId)) {
+                } else if (Tools.isFolderPublic(folder)) {
                     foldStor.deleteFolder(ctx, writeCon, taskId, folderId,
                         type);
-                    final Folder folder = new Folder(folderId, ctx
+                    final Folder aFolder = new Folder(folderId, ctx
                         .getMailadmin());
-                    foldStor.insertFolder(ctx, writeCon, taskId, folder, type);
-                } else if (Tools.isFolderPrivate(ctx, folderId)) {
+                    foldStor.insertFolder(ctx, writeCon, taskId, aFolder, type);
+                } else if (Tools.isFolderPrivate(folder)) {
                     TaskLogic.removeTask(session, ctx, writeCon, folderId,
                         taskId, type);
                 } else {

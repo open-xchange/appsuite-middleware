@@ -233,12 +233,6 @@ public class TaskException extends AbstractOXException {
             + "%2$d were deleted.", Category.CODE_ERROR, Detail.OTHER,
             16),
         /**
-         * Folder %d for task %d cannot be found. User %d, Context %d.
-         * @deprecated use {@link Code#NO_PERMISSION}.
-         */
-        FOLDER_NOT_FOUND("Folder %d for task %d cannot be found. User %d, "
-            + "Context %d.", Category.CODE_ERROR, Detail.NOT_FOUND, 17),
-        /**
          * Participant %d for task %d is not found.
          */
         PARTICIPANT_NOT_FOUND("Participant %d for task %d is not found.",
@@ -321,14 +315,6 @@ public class TaskException extends AbstractOXException {
          */
         NO_SHARED_MOVE("Moving items from or into shared folder %1$s (%2$d) is "
             + "not allowed.", Category.PERMISSION, Detail.PERMISSION, 34),
-        /**
-         * You are not allowed to see a private task in shared folder %1$s
-         * (%2$d).
-         * @deprecated Use {@link Code#NO_PERMISSION}.
-         */
-        NO_PRIVATE_PERMISSION("You are not allowed to see a private task in "
-            + "shared folder %1$s (%2$d).", Category.PERMISSION,
-            Detail.PERMISSION, 35),
         /**
          * Unknown recurrence type %d.
          */

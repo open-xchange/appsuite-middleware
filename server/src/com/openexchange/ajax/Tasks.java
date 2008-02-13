@@ -133,7 +133,7 @@ public class Tasks extends DataServlet {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (OXPermissionException e) {
-			LOG.error(e.getMessage(), e);
+			LOG.info(e.getMessage(), e);
 			response.setException(e);
 		} catch (SearchIteratorException e) {
 			LOG.error(e.getMessage(), e);

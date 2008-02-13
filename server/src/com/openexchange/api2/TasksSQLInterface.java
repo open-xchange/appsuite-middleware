@@ -47,10 +47,7 @@
  *
  */
 
-
-
 package com.openexchange.api2;
-
 
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
@@ -100,7 +97,7 @@ public interface TasksSQLInterface {
 	 * @return A SearchIterator contains Task objects
 	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
 	 */	 
-	public SearchIterator getTaskList(int folderId, int from,
+	public SearchIterator<Task> getTaskList(int folderId, int from,
 			int to, int orderBy, String orderDir, int cols[]) throws OXException;
 	
 	/**
@@ -112,7 +109,7 @@ public interface TasksSQLInterface {
 	 * @return A SearchIterator contains Task
 	 * @throws OXException
 	 */
-	public SearchIterator getTasksByExtendedSearch(TaskSearchObject searchObj, int orderBy, String orderDir, int[] cols) throws OXException;
+	public SearchIterator<Task> getTasksByExtendedSearch(TaskSearchObject searchObj, int orderBy, String orderDir, int[] cols) throws OXException;
 
 	/**
 	 * Loads one tasks by the given ID
@@ -134,7 +131,7 @@ public interface TasksSQLInterface {
 	 * @return A SearchIterator contains Task objects
 	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
 	 */	 
-	public SearchIterator getModifiedTasksInFolder(int folderId, int[] cols, Date since) throws OXException;
+	public SearchIterator<Task> getModifiedTasksInFolder(int folderId, int[] cols, Date since) throws OXException;
 	
 	/**
 	 * Lists all deleted objects in a folder
@@ -145,7 +142,7 @@ public interface TasksSQLInterface {
 	 * @return A SearchIterator contains Task objects
 	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
 	 */	
-	public SearchIterator getDeletedTasksInFolder(int folderId, int[] cols, Date since) throws OXException;
+	public SearchIterator<Task> getDeletedTasksInFolder(int folderId, int[] cols, Date since) throws OXException;
 	
 	/**
 	 * Loads a range of tasks by the given IDs
@@ -158,7 +155,7 @@ public interface TasksSQLInterface {
 	 * @return A SearchIterator contains Task objects
 	 * @throws OXException
 	 */	
-	public SearchIterator getObjectsById(int[][] objectIdAndInFolder, int cols[]) throws OXException;
+	public SearchIterator<Task> getObjectsById(int[][] objectIdAndInFolder, int cols[]) throws OXException;
 	
 	/**
 	 * Insert the task

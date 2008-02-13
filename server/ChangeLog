@@ -1,3 +1,8 @@
+* 2008-02-13 - marcus.klein@open-xchange.com
+
+ - Bugfix #9999: Changed loglevel of permission exceptions for tasks to level
+   info.
+
 * 2008-02-12 - marcus.klein@open-xchange.com
 
  - Bugfix #10237: Checking for not getable mail settings for some user.

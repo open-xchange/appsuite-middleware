@@ -326,7 +326,7 @@ public class TaskRequest {
 		System.arraycopy(columns, 0, internalColumns, 0, columns.length);
 		internalColumns[columns.length] = DataObject.LAST_MODIFIED;
 
-		SearchIterator it = null;
+		SearchIterator<Task> it = null;
 		
 		final JSONArray jsonResponseArray = new JSONArray();
 		
@@ -336,7 +336,7 @@ public class TaskRequest {
 			it = taskssql.getObjectsById(objectIdAndFolderId, internalColumns);
 			
 			while (it.hasNext()) {
-				final Task taskobject = (Task)it.next();
+				final Task taskobject = it.next();
 				taskwriter.writeArray(taskobject, columns, jsonResponseArray);
 				
 				lastModified = taskobject.getLastModified();
