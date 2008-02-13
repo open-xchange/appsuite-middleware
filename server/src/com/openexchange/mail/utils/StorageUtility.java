@@ -67,7 +67,7 @@ import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.usersetting.UserSettingMail;
 
 /**
- * {@link StorageUtility} - Offers general methods for both folder and message
+ * {@link StorageUtility} - Offers utility methods for both folder and message
  * storage
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
