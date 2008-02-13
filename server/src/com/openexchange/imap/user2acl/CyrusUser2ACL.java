@@ -59,7 +59,7 @@ import com.openexchange.server.impl.OCLPermission;
 /**
  * {@link CyrusUser2ACL} - Handles the ACL entities used by Cyrus IMAP server.
  * <p>
- * The current supported identifers are:
+ * The current supported identifiers are:
  * <ul>
  * <li><i>anyone</i> which refers to all users, including the anonymous user</li>
  * </ul>
