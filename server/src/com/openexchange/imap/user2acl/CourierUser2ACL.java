@@ -56,23 +56,34 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.imap.user2acl.User2ACLInit.IMAPServer;
 import com.openexchange.mail.config.MailConfig.CredSrc;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
- * <p>
  * {@link CourierUser2ACL} - Handles the ACL entities used by Courier IMAP
- * server. The current supported identifers are: <i>owner</i> & <i>anyone</i>.
- * Missing handling for identifiers: <i>anonymous</i> (This is a synonym from
- * <i>anyone</i>), <i>user=loginid</i> (Rights or negative rights for IMAP
- * account "loginid"), <i>group=name</i> (Rights or negative rights for account
- * group "name") & <i>administrators</i> (This is an alias for
- * <i>group=administrators</i>).
+ * server.
+ * <p>
+ * The current supported identifers are:
+ * <ul>
+ * <li><i>owner</i></li>
+ * <li><i>anyone</i></li>
+ * </ul>
+ * <p>
+ * Missing handling for identifiers:
+ * 
+ * <ul>
+ * <li><i>anonymous</i> (This is a synonym from <i>anyone</i>)</li>
+ * <li><i>user=loginid</i> (Rights or negative rights for IMAP account
+ * "loginid")</li>
+ * <li><i>group=name</i> (Rights or negative rights for account group "name")</li>
+ * <li><i>administrators</i> (This is an alias for <i>group=administrators</i>)</li>
+ * </ul>
  * <p>
  * The complete implementation should be able to handle an ACL like this one:
- * <i>owner aceilrstwx anyone lr user=john w -user=mary r administrators
- * aceilrstwx</i>
+ * 
+ * <pre>
+ * owner aceilrstwx anyone lr user=john w -user=mary r administrators aceilrstwx
+ * </pre>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

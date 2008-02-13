@@ -68,9 +68,9 @@ import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.user2acl.IMAPServer;
 import com.openexchange.imap.user2acl.User2ACLArgs;
 import com.openexchange.imap.user2acl.User2ACLException;
-import com.openexchange.imap.user2acl.User2ACLInit.IMAPServer;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -105,6 +105,16 @@ public final class IMAPFolderConverter {
 
 		private final char separator;
 
+		/**
+		 * Initializes a new {@link _User2ACLArgs}
+		 * 
+		 * @param sessionUser
+		 *            The session user ID
+		 * @param fullname
+		 *            The IMAP folder's fullname
+		 * @param separator
+		 *            The separator character
+		 */
 		public _User2ACLArgs(final int sessionUser, final String fullname, final char separator) {
 			this.sessionUser = sessionUser;
 			this.fullname = fullname;
@@ -119,8 +129,7 @@ public final class IMAPFolderConverter {
 			} else if (IMAPServer.COURIER.equals(imapServer)) {
 				return new Object[] { Integer.valueOf(sessionUser), fullname, Character.valueOf(separator) };
 			}
-			throw new User2ACLException(User2ACLException.Code.UNKNOWN_IMAP_SERVER, imapServer
-					.getName());
+			throw new User2ACLException(User2ACLException.Code.UNKNOWN_IMAP_SERVER, imapServer.getName());
 
 		}
 	}

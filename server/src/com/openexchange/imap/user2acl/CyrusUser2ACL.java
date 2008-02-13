@@ -57,14 +57,17 @@ import com.openexchange.mail.config.MailConfig.CredSrc;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
- * <p>
  * {@link CyrusUser2ACL} - Handles the ACL entities used by Cyrus IMAP server.
- * The current supported identifers are: <i>anyone</i>. Missing handling for
- * identifiers: <i>anonymous</i>
  * <p>
- * The identifier <i>anonymous</i> refers to the anonymous, or unauthenticated
- * user. The identifier <i>anyone</i> refers to all users, including the
- * anonymous user.
+ * The current supported identifers are:
+ * <ul>
+ * <li><i>anyone</i> which refers to all users, including the anonymous user</li>
+ * </ul>
+ * <p>
+ * Missing handling for identifiers:
+ * <ul>
+ * <li><i>anonymous</i> which refers to the anonymous, or unauthenticated user</li>
+ * </ul>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

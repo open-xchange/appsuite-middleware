@@ -49,25 +49,49 @@
 
 package com.openexchange.imap.user2acl;
 
-import com.openexchange.groupware.AbstractOXException;
+public enum IMAPServer {
+	/**
+	 * Courier: <code>com.openexchange.imap.user2acl.CourierUser2ACL</code>
+	 */
+	COURIER("Courier", "com.openexchange.imap.user2acl.CourierUser2ACL"),
+	/**
+	 * Cyrus: <code>com.openexchange.imap.user2acl.CyrusUser2ACL</code>
+	 */
+	CYRUS("Cyrus", "com.openexchange.imap.user2acl.CyrusUser2ACL");
 
-/**
- * {@link User2ACLArgs} - Offers implementation-specific arguments for proper
- * mapping of user IDs to their mail login
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
- */
-public interface User2ACLArgs {
+	private final String impl;
+
+	private final String name;
+
+	private IMAPServer(final String name, final String impl) {
+		this.name = name;
+		this.impl = impl;
+	}
+
+	public String getImpl() {
+		return impl;
+	}
+
+	public String getName() {
+		return name;
+	}
 
 	/**
-	 * Provides necessary arguments needed by {@link User2ACL} implementation.
+	 * Gets the class name of {@link User2ACL} implementation that corresponds
+	 * to specified name.
 	 * 
-	 * @param imapServer
-	 *            The current IMAP server
-	 * @return An array of {@link Object}
-	 * @throws AbstractOXException
+	 * @param name
+	 *            The IMAP server name
+	 * @return The class name of {@link User2ACL} implementation or
+	 *         <code>null</code> if none matches.
 	 */
-	public Object[] getArguments(IMAPServer imapServer) throws AbstractOXException;
-
+	public static final String getIMAPServerImpl(final String name) {
+		final IMAPServer[] imapServers = IMAPServer.values();
+		for (int i = 0; i < imapServers.length; i++) {
+			if (imapServers[i].getName().equalsIgnoreCase(name)) {
+				return imapServers[i].getImpl();
+			}
+		}
+		return null;
+	}
 }

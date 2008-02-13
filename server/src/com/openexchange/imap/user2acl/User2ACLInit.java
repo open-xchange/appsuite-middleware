@@ -65,50 +65,12 @@ import com.openexchange.server.Initialization;
  */
 public final class User2ACLInit implements Initialization {
 
-	public static enum IMAPServer {
-		/**
-		 * Courier: <code>com.openexchange.imap.user2acl.CourierUser2ACL</code>
-		 */
-		COURIER("Courier", "com.openexchange.imap.user2acl.CourierUser2ACL"),
-		/**
-		 * Cyrus: <code>com.openexchange.imap.user2acl.CyrusUser2ACL</code>
-		 */
-		CYRUS("Cyrus", "com.openexchange.imap.user2acl.CyrusUser2ACL");
-
-		private final String impl;
-
-		private final String name;
-
-		private IMAPServer(final String name, final String impl) {
-			this.name = name;
-			this.impl = impl;
-		}
-
-		public String getImpl() {
-			return impl;
-		}
-
-		public String getName() {
-			return name;
-		}
-	}
-
 	private static final Object[] EMPTY_ARGS = new Object[0];
 
 	private static User2ACLInit instance = new User2ACLInit();
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(User2ACLInit.class);
-
-	private static String getIMAPServerImpl(final String name) {
-		final IMAPServer[] imapServers = IMAPServer.values();
-		for (int i = 0; i < imapServers.length; i++) {
-			if (imapServers[i].getName().equalsIgnoreCase(name)) {
-				return imapServers[i].impl;
-			}
-		}
-		return null;
-	}
 
 	/**
 	 * @return The singleton instance of {@link User2ACLInit}
@@ -153,7 +115,7 @@ public final class User2ACLInit implements Initialization {
 					implementingClass = null;
 					return;
 				}
-				final String className = getIMAPServerImpl(classNameProp);
+				final String className = IMAPServer.getIMAPServerImpl(classNameProp);
 				implementingClass = className == null ? Class.forName(classNameProp).asSubclass(User2ACL.class) : Class
 						.forName(className).asSubclass(User2ACL.class);
 				if (LOG.isInfoEnabled()) {
