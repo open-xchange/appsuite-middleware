@@ -53,11 +53,11 @@ public enum IMAPServer {
 	/**
 	 * Courier: <code>com.openexchange.imap.user2acl.CourierUser2ACL</code>
 	 */
-	COURIER("Courier", "com.openexchange.imap.user2acl.CourierUser2ACL"),
+	COURIER("Courier", CourierUser2ACL.class.getName()),
 	/**
 	 * Cyrus: <code>com.openexchange.imap.user2acl.CyrusUser2ACL</code>
 	 */
-	CYRUS("Cyrus", "com.openexchange.imap.user2acl.CyrusUser2ACL");
+	CYRUS("Cyrus", CyrusUser2ACL.class.getName());
 
 	private final String impl;
 
