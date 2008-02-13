@@ -151,7 +151,7 @@ public final class IMAPFolderConverter {
 	 *            The session
 	 * @param imapFolder
 	 *            The IMAP folder
-	 * @return An appropiate implementation of {@link User2ACLArgs}
+	 * @return An appropriate implementation of {@link User2ACLArgs}
 	 * @throws MessagingException
 	 *             If IMAP folder's attributes cannot be accessed
 	 */
