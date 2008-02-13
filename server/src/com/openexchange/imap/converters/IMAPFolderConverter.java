@@ -68,8 +68,8 @@ import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.imap.user2acl.User2ACL;
 import com.openexchange.imap.user2acl.User2ACLArgs;
+import com.openexchange.imap.user2acl.User2ACLException;
 import com.openexchange.imap.user2acl.User2ACLInit.IMAPServer;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -119,7 +119,7 @@ public final class IMAPFolderConverter {
 			} else if (IMAPServer.COURIER.equals(imapServer)) {
 				return new Object[] { Integer.valueOf(sessionUser), fullname, Character.valueOf(separator) };
 			}
-			throw new User2ACL.User2ACLException(User2ACL.User2ACLException.Code.UNKNOWN_IMAP_SERVER, imapServer
+			throw new User2ACLException(User2ACLException.Code.UNKNOWN_IMAP_SERVER, imapServer
 					.getName());
 
 		}
