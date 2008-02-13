@@ -49,9 +49,6 @@
 
 package com.openexchange.mail.partmodifier;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -64,8 +61,6 @@ import com.openexchange.mail.parser.MailMessageParser;
  * 
  */
 public abstract class PartModifier {
-
-	private static final Lock LOCK = new ReentrantLock();
 
 	private static PartModifier instance;
 
@@ -89,8 +84,7 @@ public abstract class PartModifier {
 	 *             If part modifier cannot be initialized
 	 */
 	public static final void init(final String className) throws MailException {
-		LOCK.lock();
-		try {
+		synchronized (PartModifier.class) {
 			if (null == instance) {
 				try {
 					instance = (PartModifier) Class.forName(className).newInstance();
@@ -104,8 +98,6 @@ public abstract class PartModifier {
 					throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
 				}
 			}
-		} finally {
-			LOCK.unlock();
 		}
 	}
 
