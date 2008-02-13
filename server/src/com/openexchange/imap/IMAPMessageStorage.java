@@ -86,6 +86,7 @@ import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
 import com.openexchange.imap.threadsort.TreeNode;
+import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailMessageStorage;
@@ -248,14 +249,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 		}
 	}
 
-	public MailMessage[] getAllMessages(final String folder, final int[] fromToIndices, final MailListField sortField,
+	public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailListField sortField,
 			final OrderDirection order, final MailListField[] fields) throws MailException {
-		return getMessages(folder, fromToIndices, sortField, order, null, null, false, fields);
+		return getMessages(folder, indexRange, sortField, order, null, null, false, fields);
 	}
 
 	private static final transient MailMessage[] EMPTY_RETVAL = new MailMessage[0];
 
-	public MailMessage[] getMessages(final String folder, final int[] fromToIndices, final MailListField sortField,
+	public MailMessage[] getMessages(final String folder, final IndexRange indexRange, final MailListField sortField,
 			final OrderDirection order, final MailListField[] searchFields, final String[] searchPatterns,
 			final boolean linkSearchTermsWithOR, final MailListField[] fields) throws MailException {
 		try {
@@ -281,9 +282,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			final Set<MailListField> usedFields = new HashSet<MailListField>();
 			Message[] msgs = IMAPSort.sortMessages(imapFolder, filter, fields, sortField, order, UserStorage
 					.getStorageUser(session.getUserId(), ctx).getLocale(), usedFields, imapConfig);
-			if (fromToIndices != null && fromToIndices.length == 2) {
-				final int fromIndex = fromToIndices[0];
-				int toIndex = fromToIndices[1];
+			if (indexRange != null) {
+				final int fromIndex = indexRange.start;
+				int toIndex = indexRange.end;
 				if (msgs == null || msgs.length == 0) {
 					return EMPTY_RETVAL;
 				}
@@ -327,7 +328,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 	}
 
 	@SuppressWarnings("null")
-	public MailMessage[] getThreadSortedMessages(final String folder, final int[] fromToIndices,
+	public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange,
 			final MailListField[] searchFields, final String[] searchPatterns, final boolean linkSearchTermsWithOR,
 			final MailListField[] fields) throws MailException {
 		try {
@@ -406,9 +407,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			/*
 			 * ... and return
 			 */
-			if (fromToIndices != null && fromToIndices.length == 2) {
-				final int fromIndex = fromToIndices[0];
-				int toIndex = fromToIndices[1];
+			if (indexRange != null) {
+				final int fromIndex = indexRange.start;
+				int toIndex = indexRange.end;
 				if (msgs == null || msgs.length == 0) {
 					return EMPTY_RETVAL;
 				}

@@ -88,10 +88,9 @@ public interface MailMessageStorage {
 	 * 
 	 * @param folder
 	 *            The folder fullname
-	 * @param fromToIndices
+	 * @param indexRange
 	 *            The indices range specifying the desired sub-list in sorted
-	 *            list; may be <code>null</code> or must have a length of
-	 *            <code>2</code>
+	 *            list; may be <code>null</code> to obtain complete list
 	 * @param sortField
 	 *            The sort field
 	 * @param order
@@ -102,7 +101,7 @@ public interface MailMessageStorage {
 	 * @return The desired, pre-filled instances of {@link MailMessage}
 	 * @throws MailException
 	 */
-	public MailMessage[] getAllMessages(String folder, int[] fromToIndices, MailListField sortField,
+	public MailMessage[] getAllMessages(String folder, IndexRange indexRange, MailListField sortField,
 			OrderDirection order, MailListField[] fields) throws MailException;
 
 	/**
@@ -120,10 +119,9 @@ public interface MailMessageStorage {
 	 * 
 	 * @param folder
 	 *            The folder fullname
-	 * @param fromToIndices
+	 * @param indexRange
 	 *            The indices range specifying the desired sub-list in sorted
-	 *            list; may be <code>null</code> or must have a length of
-	 *            <code>2</code>
+	 *            list; may be <code>null</code> to obtain complete list
 	 * @param sortField
 	 *            The sort field
 	 * @param order
@@ -143,9 +141,9 @@ public interface MailMessageStorage {
 	 * @return The desired, pre-filled instances of {@link MailMessage}
 	 * @throws MailException
 	 */
-	public MailMessage[] getMessages(String folder, int[] fromToIndices, MailListField sortField, OrderDirection order,
-			MailListField[] searchFields, String[] searchPatterns, boolean linkSearchTermsWithOR, MailListField[] fields)
-			throws MailException;
+	public MailMessage[] getMessages(String folder, IndexRange indexRange, MailListField sortField,
+			OrderDirection order, MailListField[] searchFields, String[] searchPatterns, boolean linkSearchTermsWithOR,
+			MailListField[] fields) throws MailException;
 
 	/**
 	 * An <b>optional</b> method that gets the messages located in given folder
@@ -159,10 +157,9 @@ public interface MailMessageStorage {
 	 * 
 	 * @param folder
 	 *            The folder fullname
-	 * @param fromToIndices
+	 * @param indexRange
 	 *            The indices range specifying the desired sub-list in sorted
-	 *            list; may be <code>null</code> or must have a length of
-	 *            <code>2</code>
+	 *            list; may be <code>null</code> to obtain complete list
 	 * @param searchFields
 	 *            The search fields
 	 * @param searchPatterns
@@ -179,7 +176,7 @@ public interface MailMessageStorage {
 	 *         {@link MailMessage} if SORT is not supported by mail server
 	 * @throws MailException
 	 */
-	public MailMessage[] getThreadSortedMessages(String folder, int[] fromToIndices, MailListField[] searchFields,
+	public MailMessage[] getThreadSortedMessages(String folder, IndexRange indexRange, MailListField[] searchFields,
 			String[] searchPatterns, boolean linkSearchTermsWithOR, MailListField[] fields) throws MailException;
 
 	/**

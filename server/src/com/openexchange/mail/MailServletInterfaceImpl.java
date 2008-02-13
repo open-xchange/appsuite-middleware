@@ -340,7 +340,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			final boolean linkSearchTermsWithOR, final int[] fields) throws MailException {
 		initConnection();
 		return SearchIteratorAdapter.createArrayIterator(mailConnection.getMessageStorage().getMessages(folder,
-				fromToIndices, MailListField.getField(sortCol), OrderDirection.getOrderDirection(order),
+				fromToIndices == null ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
+				MailListField.getField(sortCol), OrderDirection.getOrderDirection(order),
 				MailListField.getFields(searchCols), searchPatterns, linkSearchTermsWithOR,
 				MailListField.getFields(fields)));
 	}
@@ -423,7 +424,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			final int[] fields) throws MailException {
 		initConnection();
 		return SearchIteratorAdapter.createArrayIterator(mailConnection.getMessageStorage().getThreadSortedMessages(
-				folder, fromToIndices, MailListField.getFields(searchCols), searchPatterns, linkSearchTermsWithOR,
+				folder, fromToIndices == null ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
+				MailListField.getFields(searchCols), searchPatterns, linkSearchTermsWithOR,
 				MailListField.getFields(fields)));
 	}
 
