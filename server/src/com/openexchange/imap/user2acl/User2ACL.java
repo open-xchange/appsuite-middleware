@@ -54,7 +54,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.config.IMAPConfig;
 
