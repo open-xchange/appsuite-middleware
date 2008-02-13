@@ -97,7 +97,7 @@ import com.sun.mail.imap.protocol.ListInfo;
  */
 public final class IMAPFolderConverter {
 
-	private static final class MyUser2ACLArgs implements User2ACLArgs {
+	private static final class _User2ACLArgs implements User2ACLArgs {
 
 		private final int sessionUser;
 
@@ -105,7 +105,7 @@ public final class IMAPFolderConverter {
 
 		private final char separator;
 
-		public MyUser2ACLArgs(final int sessionUser, final String fullname, final char separator) {
+		public _User2ACLArgs(final int sessionUser, final String fullname, final char separator) {
 			this.sessionUser = sessionUser;
 			this.fullname = fullname;
 			this.separator = separator;
@@ -157,7 +157,7 @@ public final class IMAPFolderConverter {
 	 */
 	public static User2ACLArgs getUser2AclArgs(final Session session, final IMAPFolder imapFolder)
 			throws MessagingException {
-		return new MyUser2ACLArgs(session.getUserId(), imapFolder.getFullName(), imapFolder.getSeparator());
+		return new _User2ACLArgs(session.getUserId(), imapFolder.getFullName(), imapFolder.getSeparator());
 	}
 
 	private static final String STR_INBOX = "INBOX";
@@ -431,7 +431,7 @@ public final class IMAPFolderConverter {
 				throw MIMEMailException.handleMessagingException(e);
 			}
 			try {
-				final User2ACLArgs args = new MyUser2ACLArgs(session.getUserId(), imapFolder.getFullName(), imapFolder
+				final User2ACLArgs args = new _User2ACLArgs(session.getUserId(), imapFolder.getFullName(), imapFolder
 						.getSeparator());
 				final StringBuilder debugBuilder;
 				if (LOG.isDebugEnabled()) {
