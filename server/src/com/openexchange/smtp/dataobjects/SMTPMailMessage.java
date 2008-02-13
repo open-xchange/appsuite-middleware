@@ -49,6 +49,7 @@
 
 package com.openexchange.smtp.dataobjects;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +76,7 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 
 	private long uid = -1L;
 
-	private final transient List<MailPart> enclosedParts;
+	private transient List<MailPart> enclosedParts;
 
 	/**
 	 * Constructor
@@ -83,6 +84,21 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 	public SMTPMailMessage(final String mailBody) {
 		super();
 		this.mailPart = new SMTPBodyPart(mailBody);
+		enclosedParts = new ArrayList<MailPart>();
+	}
+
+	/**
+	 * Reconstitutes this object from a stream (i.e., deserialize it).
+	 * 
+	 * @param in
+	 *            The object input stream
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 * @throws ClassNotFoundException
+	 *             If a class cast error occurs
+	 */
+	private void readObject(final java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
 		enclosedParts = new ArrayList<MailPart>();
 	}
 
