@@ -57,7 +57,6 @@ import java.util.Random;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.partmodifier.PartModifier;
-import com.openexchange.mail.spellcheck.SpellCheckConfig;
 import com.openexchange.session.Session;
 
 /**
@@ -371,15 +370,6 @@ public abstract class MailConfig {
 	 */
 	public static final boolean isSpamEnabled() {
 		return GlobalMailConfig.getInstance().isSpamEnabled();
-	}
-
-	/**
-	 * Gets the spellCheckConfig
-	 * 
-	 * @return the spellCheckConfig
-	 */
-	public static final SpellCheckConfig getSpellCheckConfig() {
-		return GlobalMailConfig.getInstance().getSpellCheckConfig();
 	}
 
 	/**

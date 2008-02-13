@@ -2504,8 +2504,6 @@ public class Contacts implements DeleteListener {
 			}
 		}catch (final OXException ox){
 			throw new DeleteFailedException(ox);
-		} catch (final LdapException e) {
-			throw new DeleteFailedException(e);
 		}
 	}
 	

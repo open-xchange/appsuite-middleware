@@ -58,7 +58,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.session.Session;
 
@@ -209,17 +208,9 @@ public class TasksDelete implements DeleteListener {
     /**
      * @param event Event.
      * @return the session object.
-     * @throws TaskException if getting the session object fails.
      */
-    private Session getSession(final DeleteEvent event)
-        throws TaskException {
-        final Session session;
-        try {
-            session = event.getSession();
-        } catch (LdapException e) {
-            throw new TaskException(e);
-        }
-        return session;
+    private Session getSession(final DeleteEvent event) {
+    	return event.getSession();
     }
 
     /**

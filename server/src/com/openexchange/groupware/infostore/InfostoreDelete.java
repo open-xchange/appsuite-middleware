@@ -56,7 +56,6 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tx.ThreadLocalDBProvider;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -77,8 +76,6 @@ public class InfostoreDelete implements DeleteListener {
 			database.removeUser(sqlDelEvent.getId(), sqlDelEvent.getContext(), new ServerSessionAdapter(sqlDelEvent
 					.getSession(), sqlDelEvent.getContext()));
 		} catch (final OXException e) {
-			throw new DeleteFailedException(e);
-		} catch (final LdapException e) {
 			throw new DeleteFailedException(e);
 		} finally {
 			provider.reset();

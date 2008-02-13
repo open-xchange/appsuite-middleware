@@ -65,8 +65,6 @@ import com.openexchange.mail.config.MailConfig.CredSrc;
 import com.openexchange.mail.config.MailConfig.LoginType;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
-import com.openexchange.mail.spellcheck.SpellCheckConfig;
-import com.openexchange.mail.spellcheck.SpellCheckConfigParser;
 
 /**
  * {@link GlobalMailConfig} - Global mail properties read from configuration
@@ -120,8 +118,6 @@ public abstract class GlobalMailConfig {
 	private int maxNumOfConnections;
 
 	private String[] quoteLineColors;
-
-	private SpellCheckConfig spellCheckConfig;
 
 	private Properties javaMailProperties;
 
@@ -416,24 +412,6 @@ public abstract class GlobalMailConfig {
 			logBuilder.append("\tSpam Handler Class: ").append(spamHandlerClass).append('\n');
 		}
 
-		/*
-		 * Load & parse spell check config
-		 */
-		{
-			String spellCheckConfigStr = SystemConfig.getProperty("SPELLCHECKCFG");
-			if (spellCheckConfigStr == null) {
-				throw new MailConfigException("Property \"SPELLCHECKCFG\" is not defined in system.properties");
-			}
-			spellCheckConfigStr = spellCheckConfigStr.trim();
-			try {
-				spellCheckConfig = new SpellCheckConfigParser().parseSpellCheckConfig(spellCheckConfigStr);
-				logBuilder.append("\tSpellCheck Config File: ").append(spellCheckConfigStr).append('\n');
-			} catch (final Exception e) {
-				LOG.error("SpellCheck config file \"" + spellCheckConfigStr
-						+ "\" could not be properly loaded & parsed:\n" + e.getMessage(), e);
-			}
-		}
-
 		{
 			String javaMailPropertiesStr = SystemConfig.getProperty("JavaMailProperties");
 			if (null != javaMailPropertiesStr) {
@@ -622,15 +600,6 @@ public abstract class GlobalMailConfig {
 	 */
 	final boolean isSpamEnabled() {
 		return spamEnabled;
-	}
-
-	/**
-	 * Gets the spellCheckConfig
-	 * 
-	 * @return the spellCheckConfig
-	 */
-	final SpellCheckConfig getSpellCheckConfig() {
-		return spellCheckConfig;
 	}
 
 	/**

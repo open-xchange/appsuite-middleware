@@ -49,8 +49,17 @@
 
 package com.openexchange.groupware.delete;
 
-import com.openexchange.ajax.spellcheck.AJAXUserDictionary;
-import com.openexchange.configuration.SystemConfig;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import com.openexchange.groupware.attach.impl.AttachmentContextDelete;
 import com.openexchange.groupware.attach.impl.AttachmentDelDelete;
 import com.openexchange.groupware.calendar.CalendarAdministration;
@@ -65,15 +74,11 @@ import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.file.QuotaUsageDelete;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 /**
- * DeleteRegistry
+ * {@link DeleteRegistry} - A registry for instances of {@link DeleteListener}
+ * whose
+ * {@link DeleteListener#deletePerformed(DeleteEvent, Connection, Connection)}
+ * methods are executed in the order added to this registry.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -82,23 +87,27 @@ public final class DeleteRegistry {
 
 	private static DeleteRegistry instance;
 
-	private final Set<Class> classes;
+	/**
+	 * The class set to detect duplicate listeners
+	 */
+	private final Set<Class<? extends DeleteListener>> classes;
 
+	/**
+	 * The listener list to keep the order
+	 */
 	private final List<DeleteListener> listeners;
 
 	private final Lock registryLock = new ReentrantLock();
-
-	private static final Lock INIT_LOCK = new ReentrantLock();
 
 	private static final AtomicBoolean initialized = new AtomicBoolean();
 
 	private DeleteRegistry() {
 		super();
 		listeners = new ArrayList<DeleteListener>(10);
-		classes = new HashSet<Class>();
+		classes = new HashSet<Class<? extends DeleteListener>>();
 	}
 
-	private void init() throws Exception {
+	private void init() {
 		/*
 		 * Insert module delete listener
 		 */
@@ -109,12 +118,11 @@ public final class DeleteRegistry {
 		/*
 		 * Delete user configuration & settings
 		 */
-		registerDeleteListener(new AJAXUserDictionary());
 		registerDeleteListener(new UserConfiguration());
 		registerDeleteListener(new UserSettingMail());
 		registerDeleteListener(new QuotaUsageDelete());
-        registerDeleteListener(new AttachmentContextDelete());
-        registerDeleteListener(new AttachmentDelDelete());
+		registerDeleteListener(new AttachmentContextDelete());
+		registerDeleteListener(new AttachmentDelDelete());
 		/*
 		 * At last insert folder delete listener
 		 */
@@ -124,25 +132,18 @@ public final class DeleteRegistry {
 	}
 
 	/**
-	 * Factory method
+	 * Gets the singleton instance of {@link DeleteRegistry}
 	 * 
-	 * @return the singleton instance of <code>{@link DeleteRegistry}</code>
+	 * @return The singleton instance of {@link DeleteRegistry}
 	 */
 	public static DeleteRegistry getInstance() {
 		if (!initialized.get()) {
-			INIT_LOCK.lock();
-			try {
+			synchronized (initialized) {
 				if (instance == null) {
 					instance = new DeleteRegistry();
-					try {
-						instance.init();
-						initialized.set(true);
-					} catch (Exception e) {
-						instance = null;
-					}
+					instance.init();
+					initialized.set(true);
 				}
-			} finally {
-				INIT_LOCK.unlock();
 			}
 		}
 		return instance;
@@ -156,15 +157,18 @@ public final class DeleteRegistry {
 	 * 
 	 * @param listener
 	 *            the listener to register
+	 * @return <code>true</code> if specified delete listener has been added
+	 *         to registry; otherwise <code>false</code>
 	 */
-	public void registerDeleteListener(final DeleteListener listener) {
+	public boolean registerDeleteListener(final DeleteListener listener) {
 		registryLock.lock();
 		try {
 			if (classes.contains(listener.getClass())) {
-				return;
+				return false;
 			}
 			listeners.add(listener);
 			classes.add(listener.getClass());
+			return true;
 		} finally {
 			registryLock.unlock();
 		}
@@ -195,13 +199,13 @@ public final class DeleteRegistry {
 	 * @param readCon
 	 *            a readable connection
 	 * @param writeCon
-	 *            a writeable connection
+	 *            a writable connection
 	 * @throws DeleteFailedException
 	 *             if delete event could not be performed
 	 * @throws LdapException
 	 *             if any user/group data could not be determined
 	 * @throws SQLException
-	 *             if an SQL error occured
+	 *             if an SQL error occurred
 	 * @throws DBPoolingException
 	 *             if no connection could be fetched from pool
 	 */

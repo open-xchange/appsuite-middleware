@@ -57,31 +57,18 @@ import java.util.Arrays;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.ajax.spellcheck.AJAXUserDictionary;
-import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCode;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.Collections.SmartIntArray;
 
 /**
- * <ul>
- * <li>All members of a certain context MUST have the same version; neither
- * standard or premium</li>
- * <li>A user who obtained the standard version has no group functionality such
- * as participants, sharing of folders. Moreover he is not allowed to "see"
- * public folders and may only see the public root folder "public"</li>
- * <li>A user who loses premium version functionalties will only has read and
- * delete access to public folder's objects. Furthermore shared folders will no
- * longer be visible. <i>Note: NO data will be deleted through a downgrade!</i></li>
- * <li>A user with the premium version has no quota limitations</li>
- * </ul>
+ * {@link UserConfiguration} - Represents a user's module access configuration
  * 
- * @author Thorben Betten
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserConfiguration implements Serializable, DeleteListener, Cloneable {
 
@@ -136,12 +123,13 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 
 	private final transient Context ctx;
 
-	private transient AJAXUserDictionary userDictionary;
-
 	private int[] accessibleModules;
 
 	private boolean accessibleModulesComputed;
 
+	/**
+	 * Initializes a new {@link UserConfiguration}
+	 */
 	public UserConfiguration() {
 		super();
 		userId = -1;
@@ -149,6 +137,18 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 		groups = null;
 	}
 
+	/**
+	 * Initializes a new {@link UserConfiguration}
+	 * 
+	 * @param permissionBits
+	 *            The permissions' bit mask
+	 * @param userId
+	 *            The user ID
+	 * @param groups
+	 *            The user's group IDs
+	 * @param ctx
+	 *            The context
+	 */
 	public UserConfiguration(final int permissionBits, final int userId, final int[] groups, final Context ctx) {
 		super();
 		this.permissionBits = permissionBits;
@@ -229,9 +229,6 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 			 * if (userSettingMail != null) { clone.userSettingMail =
 			 * (UserSettingMail) userSettingMail.clone(); }
 			 */
-			if (userDictionary != null) {
-				clone.userDictionary = (AJAXUserDictionary) userDictionary.clone();
-			}
 			return clone;
 		} catch (final CloneNotSupportedException e) {
 			LOG.error(e.getMessage(), e);
@@ -672,6 +669,11 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 		return hasPermission(EDIT_PUBLIC_FOLDERS);
 	}
 
+	/**
+	 * Set enableFullPublicFolderAccess
+	 * 
+	 * @param enableFullPublicFolderAccess
+	 */
 	public void setFullPublicFolderAccess(final boolean enableFullPublicFolderAccess) {
 		setPermission(enableFullPublicFolderAccess, EDIT_PUBLIC_FOLDERS);
 	}
@@ -688,14 +690,28 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 		return hasPermission(READ_CREATE_SHARED_FOLDERS);
 	}
 
+	/**
+	 * Set enableFullSharedFolderAccess
+	 * 
+	 * @param enableFullSharedFolderAccess
+	 */
 	public void setFullSharedFolderAccess(final boolean enableFullSharedFolderAccess) {
 		setPermission(enableFullSharedFolderAccess, READ_CREATE_SHARED_FOLDERS);
 	}
 
+	/**
+	 * @return <code>true</code> if user can delegate tasks; otherwise
+	 *         <code>false</code>
+	 */
 	public boolean canDelegateTasks() {
 		return hasPermission(DELEGATE_TASKS);
 	}
 
+	/**
+	 * Sets enableDelegateTasks
+	 * 
+	 * @param enableDelegateTasks
+	 */
 	public void setDelegateTasks(final boolean enableDelegateTasks) {
 		setPermission(enableDelegateTasks, DELEGATE_TASKS);
 	}
@@ -713,6 +729,9 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 				&& hasPermission(permission) ? (permissionBits ^ permission) : permissionBits);
 	}
 
+	/**
+	 * @return The user ID
+	 */
 	public int getUserId() {
 		return userId;
 	}
@@ -726,48 +745,11 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 		return clone;
 	}
 
+	/**
+	 * @return The context
+	 */
 	public Context getContext() {
 		return ctx;
-	}
-
-	public AJAXUserDictionary getUserDictionary() throws OXException {
-		try {
-			if (userDictionary == null) {
-				userDictionary = new AJAXUserDictionary(userId, ctx);
-				if (!userDictionary.loadUserDictionary()) {
-					userDictionary.saveUserDictionary();
-				}
-			}
-			return userDictionary;
-		} catch (final DBPoolingException e) {
-			throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
-		} catch (final SQLException e) {
-			throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
-		}
-	}
-
-	public void setUserDictionary(final AJAXUserDictionary userDictionary) {
-		try {
-			setUserDictionary(userDictionary, false);
-		} catch (final OXException e) {
-			/*
-			 * Cannot occur since we call with save set to false
-			 */
-			LOG.error(e.getMessage(), e);
-		}
-	}
-
-	public void setUserDictionary(final AJAXUserDictionary userDictionary, final boolean save) throws OXException {
-		this.userDictionary = userDictionary;
-		if (save && this.userDictionary != null) {
-			try {
-				this.userDictionary.saveUserDictionary();
-			} catch (final SQLException e) {
-				throw new UserConfigurationException(UserConfigurationCode.SQL_ERROR, e, new Object[0]);
-			} catch (final DBPoolingException e) {
-				throw new UserConfigurationException(UserConfigurationCode.DBPOOL_ERROR, e, new Object[0]);
-			}
-		}
 	}
 
 	/*
