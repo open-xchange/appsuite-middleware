@@ -92,7 +92,7 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 			returnDefaultValue = true;
 		}
 		this.command = command;
-		args = IMAPNumArgSplitter.splitUIDArg(uids, true);
+		args = uids == null ? ARGS_EMPTY : IMAPNumArgSplitter.splitUIDArg(uids, true);
 		this.performNotifyResponseHandlers = performNotifyResponseHandlers;
 	}
 
@@ -125,7 +125,7 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	protected String getCommand(final int argsIndex) {
 		final StringBuilder sb = new StringBuilder(args[argsIndex].length() + 64);
 		sb.append(command);
-		if (java.util.Arrays.equals(ARGS_EMPTY, args)) {
+		if (!java.util.Arrays.equals(ARGS_EMPTY, args)) {
 			sb.append(args[argsIndex]);
 		}
 		return sb.toString();
