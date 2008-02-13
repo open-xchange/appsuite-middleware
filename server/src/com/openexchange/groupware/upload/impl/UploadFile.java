@@ -122,9 +122,9 @@ public class UploadFile {
 			 * Try guessing the filename separator
 			 */
 			int pos = -1;
-			if ((pos = preparedFileName.indexOf('\\')) != -1) {
+			if ((pos = preparedFileName.lastIndexOf('\\')) != -1) {
 				preparedFileName = preparedFileName.substring(pos + 1);
-			} else if ((pos = preparedFileName.indexOf('/')) != -1) {
+			} else if ((pos = preparedFileName.lastIndexOf('/')) != -1) {
 				preparedFileName = preparedFileName.substring(pos + 1);
 			}
 		}
