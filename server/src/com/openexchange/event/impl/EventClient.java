@@ -51,6 +51,8 @@ package com.openexchange.event.impl;
 
 import java.util.Hashtable;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
@@ -70,6 +72,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.services.EventAdminService;
 import com.openexchange.session.Session;
+import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 
 /**
  * EventClient
@@ -77,6 +80,8 @@ import com.openexchange.session.Session;
  */
 
 public class EventClient {
+	
+	private static final Log LOG = LogFactory.getLog(EventClient.class);
 	
 	public static final int CREATED = 5;
 	public static final int CHANGED = 6;
@@ -382,7 +387,7 @@ public class EventClient {
 		final int folderId = folderObj.getParentFolderID();
 		if (folderId > 0) {
 			FolderObject parentFolderObj = folderSql.getFolderById(folderId);
-			create(folderObj, parentFolderObj);
+			modify(folderObj, parentFolderObj);
 		}
 	}
 	
@@ -405,8 +410,13 @@ public class EventClient {
 		
 		final int folderId = folderObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject parentFolderObj = folderSql.getFolderById(folderId);
-			create(folderObj, parentFolderObj);
+			FolderObject parentFolderObj = null;
+			try {
+				parentFolderObj = folderSql.getFolderById(folderId); 
+			} catch (OXFolderPermissionException exc) {
+				LOG.error("cannot load folder", exc);
+			}
+			delete(folderObj, parentFolderObj);
 		}
 	}
 	
