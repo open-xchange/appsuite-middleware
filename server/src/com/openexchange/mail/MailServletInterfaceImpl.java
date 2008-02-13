@@ -321,9 +321,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		 */
 		final String fullname = StorageUtility.prepareMailFolderParam(folder);
 		try {
-			final int userId = session.getUserId();
-			if (MailMessageCache.getInstance().containsFolderMessages(fullname, userId, ctx)) {
-				return MailMessageCache.getInstance().getMessages(uids, fullname, userId, ctx);
+			final MailMessage[] mails = MailMessageCache.getInstance().getMessages(uids, fullname, session.getUserId(),
+					ctx);
+			if (null != mails) {
+				return mails;
 			}
 		} catch (OXCachingException e) {
 			LOG.error(e.getLocalizedMessage(), e);
@@ -463,8 +464,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		initConnection();
 		if (draftMail.getMsgref() != null) {
 			final MailPath path = new MailPath(draftMail.getMsgref());
-			draftMail.setReferencedMail(mailConnection.getMessageStorage().getMessage(path.getFolder(),
-					path.getUid()));
+			draftMail.setReferencedMail(mailConnection.getMessageStorage().getMessage(path.getFolder(), path.getUid()));
 		}
 		return mailConnection.getMessageStorage().saveDraft(draftMail).getMailPath().toString();
 	}
