@@ -50,8 +50,6 @@
 package com.openexchange.mail.permission;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailException;
@@ -74,8 +72,6 @@ public final class MailPermissionInit implements Initialization {
 	private final AtomicBoolean started = new AtomicBoolean();
 
 	private final AtomicBoolean initialized = new AtomicBoolean();
-
-	private final Lock initLock = new ReentrantLock();
 
 	/**
 	 * No instantiation
@@ -117,8 +113,7 @@ public final class MailPermissionInit implements Initialization {
 	 */
 	private void init() throws MailException {
 		if (!initialized.get()) {
-			initLock.lock();
-			try {
+			synchronized (initialized) {
 				if (!initialized.get()) {
 					final String className = MailProvider.getInstance().getMailPermissionClass();
 					try {
@@ -143,8 +138,6 @@ public final class MailPermissionInit implements Initialization {
 						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
 					}
 				}
-			} finally {
-				initLock.unlock();
 			}
 		}
 	}
