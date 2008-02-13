@@ -51,6 +51,8 @@ package com.openexchange.imap;
 
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 
+import java.io.Serializable;
+
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
@@ -84,9 +86,9 @@ import com.sun.mail.imap.Rights.Right;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class IMAPFolderWorker {
+public abstract class IMAPFolderWorker implements Serializable {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(IMAPFolderWorker.class);
 
 	protected static final String WARN_FLD_ALREADY_CLOSED = "Invoked close() on a closed folder";
@@ -101,24 +103,24 @@ public abstract class IMAPFolderWorker {
 
 	protected static final MailListField[] FIELDS_FLAGS = new MailListField[] { MailListField.FLAGS };
 
-	protected static final Object[] ARGS_FLAG_SEEN = new Object[] { Integer.valueOf(MailMessage.FLAG_SEEN) };
+	protected static final transient Object[] ARGS_FLAG_SEEN = new Object[] { Integer.valueOf(MailMessage.FLAG_SEEN) };
 
 	/*
 	 * Fields
 	 */
 	protected final transient IMAPStore imapStore;
 
-	protected final Session session;
+	protected final transient Session session;
 
-	protected final Context ctx;
+	protected final transient Context ctx;
 
 	protected final IMAPConnection imapConnection;
 
 	protected final UserSettingMail usm;
 
-	protected final IMAPConfig imapConfig;
+	protected final transient IMAPConfig imapConfig;
 
-	protected IMAPFolder imapFolder;
+	protected transient IMAPFolder imapFolder;
 
 	protected int holdsMessages = -1;
 

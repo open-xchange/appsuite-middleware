@@ -141,7 +141,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 	/*
 	 * Fields
 	 */
-	private final transient int userId;
+	private final int userId;
 
 	/**
 	 * Initializes a new {@link IMAPMessageStorage}
