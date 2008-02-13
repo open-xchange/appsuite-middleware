@@ -76,6 +76,7 @@ public abstract class PartModifier {
 	 *            The mail part to modify
 	 * @return The modified mail part
 	 * @throws MailException
+	 *             If a mail error occurs
 	 */
 	public abstract MailPart modifyPart(final MailPart mailPart) throws MailException;
 

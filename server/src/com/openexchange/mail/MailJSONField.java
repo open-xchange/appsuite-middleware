@@ -52,7 +52,9 @@ package com.openexchange.mail;
 import com.openexchange.ajax.fields.CommonFields;
 
 /**
- * MailJSONField
+ * {@link MailJSONField} - An enumeration of mail JSON fields as defined in <a
+ * href="http://www.open-xchange.com/wiki/index.php?title=HTTP_API#Module_.22mail.22">HTTP
+ * API's mail section</a>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
