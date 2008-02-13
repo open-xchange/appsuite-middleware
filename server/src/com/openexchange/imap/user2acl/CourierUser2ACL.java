@@ -63,7 +63,7 @@ import com.openexchange.server.impl.OCLPermission;
  * {@link CourierUser2ACL} - Handles the ACL entities used by Courier IMAP
  * server.
  * <p>
- * The current supported identifers are:
+ * The current supported identifiers are:
  * <ul>
  * <li><i>owner</i></li>
  * <li><i>anyone</i></li>
