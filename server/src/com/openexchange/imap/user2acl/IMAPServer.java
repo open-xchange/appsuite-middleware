@@ -68,10 +68,20 @@ public enum IMAPServer {
 		this.impl = impl;
 	}
 
+	/**
+	 * Gets the class name of {@link User2ACL} implementation
+	 * 
+	 * @return The class name of {@link User2ACL} implementation
+	 */
 	public String getImpl() {
 		return impl;
 	}
 
+	/**
+	 * Gets the IMAP server's alias name
+	 * 
+	 * @return The IMAP server's alias name
+	 */
 	public String getName() {
 		return name;
 	}
