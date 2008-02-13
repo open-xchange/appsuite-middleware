@@ -79,13 +79,6 @@ public final class CyrusUser2ACL extends User2ACL {
 		super();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.user2acl.User2ACL#getACLName(int,
-	 *      com.openexchange.groupware.ldap.UserStorage,
-	 *      com.openexchange.imap.user2acl.User2ACLArgs)
-	 */
 	@Override
 	public String getACLName(final int userId, final Context ctx, final User2ACLArgs user2AclArgs)
 			throws AbstractOXException {
@@ -97,13 +90,6 @@ public final class CyrusUser2ACL extends User2ACL {
 		return UserStorage.getInstance().getUser(userId, ctx).getLoginInfo();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.imap.user2acl.User2ACL#getUserID(java.lang.String,
-	 *      com.openexchange.groupware.ldap.UserStorage,
-	 *      com.openexchange.imap.user2acl.User2ACLArgs)
-	 */
 	@Override
 	public int getUserID(final String pattern, final Context ctx, final User2ACLArgs user2AclArgs)
 			throws AbstractOXException {
