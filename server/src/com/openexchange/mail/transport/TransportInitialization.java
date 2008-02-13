@@ -85,7 +85,7 @@ public final class TransportInitialization implements Initialization {
 	 * @see com.openexchange.server.Initialization#start()
 	 */
 	public void start() throws AbstractOXException {
-		MailTransportProvider.initTransportProvider();
+		TransportProvider.initTransportProvider();
 		MailTransportInit.getInstance().start();
 		GlobalTransportConfigInit.getInstance().start();
 		MailTransport.startup();
@@ -100,7 +100,7 @@ public final class TransportInitialization implements Initialization {
 		MailTransport.shutdown();
 		GlobalTransportConfigInit.getInstance().stop();
 		MailTransportInit.getInstance().stop();
-		MailTransportProvider.resetTransportProvider();
+		TransportProvider.resetTransportProvider();
 	}
 
 }

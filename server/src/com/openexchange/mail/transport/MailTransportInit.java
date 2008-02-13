@@ -93,7 +93,7 @@ final class MailTransportInit implements Initialization {
 		if (!initialized.get()) {
 			synchronized (initialized) {
 				if (!initialized.get()) {
-					final String className = MailTransportProvider.getInstance().getMailTransportClass();
+					final String className = TransportProvider.getInstance().getMailTransportClass();
 					try {
 						if (className == null) {
 							/*

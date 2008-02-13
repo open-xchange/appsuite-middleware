@@ -65,16 +65,16 @@ import com.openexchange.mail.transport.config.GlobalTransportConfig;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailTransportProvider} - Provider for mail transport
+ * {@link TransportProvider} - Provider for mail transport
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MailTransportProvider {
+public abstract class TransportProvider {
 
 	private static final AtomicBoolean initialized = new AtomicBoolean();
 
-	private static MailTransportProvider instance;
+	private static TransportProvider instance;
 
 	/**
 	 * Initializes the transport provider
@@ -86,12 +86,12 @@ public abstract class MailTransportProvider {
 		if (!initialized.get()) {
 			synchronized (initialized) {
 				if (!initialized.get()) {
-					final String className = SystemConfig.getProperty(SystemConfig.Property.MailTransportProvider);
+					final String className = SystemConfig.getProperty(SystemConfig.Property.TransportProvider);
 					try {
 						if (className == null) {
-							throw new MailConfigException("Missing mail transport provider");
+							throw new MailConfigException("Missing transport provider");
 						}
-						instance = Class.forName(className).asSubclass(MailTransportProvider.class).newInstance();
+						instance = Class.forName(className).asSubclass(TransportProvider.class).newInstance();
 						initialized.set(true);
 					} catch (final ClassNotFoundException e) {
 						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
@@ -110,7 +110,7 @@ public abstract class MailTransportProvider {
 	 * 
 	 * @return The singleton instance of mail provider
 	 */
-	public static final MailTransportProvider getInstance() {
+	public static final TransportProvider getInstance() {
 		return instance;
 	}
 
@@ -122,9 +122,9 @@ public abstract class MailTransportProvider {
 	}
 
 	/**
-	 * Initializes a new {@link MailTransportProvider}
+	 * Initializes a new {@link TransportProvider}
 	 */
-	protected MailTransportProvider() {
+	protected TransportProvider() {
 		super();
 	}
 

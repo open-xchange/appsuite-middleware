@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfigException;
-import com.openexchange.mail.transport.MailTransportProvider;
+import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.server.Initialization;
 
 /**
@@ -93,7 +93,7 @@ public final class GlobalTransportConfigInit implements Initialization {
 		if (!initializedTransport.get()) {
 			synchronized (initializedTransport) {
 				if (!initializedTransport.get()) {
-					final String className = MailTransportProvider.getInstance().getGlobalTransportConfigClass();
+					final String className = TransportProvider.getInstance().getGlobalTransportConfigClass();
 					try {
 						if (className == null) {
 							throw new MailConfigException("Missing global transport config class");

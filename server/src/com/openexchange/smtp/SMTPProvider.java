@@ -57,7 +57,7 @@ import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
-import com.openexchange.mail.transport.MailTransportProvider;
+import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.GlobalSMTPConfig;
 import com.openexchange.smtp.dataobjects.SMTPBodyPart;
@@ -72,7 +72,7 @@ import com.openexchange.smtp.dataobjects.SMTPReferencedPart;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SMTPProvider extends MailTransportProvider {
+public final class SMTPProvider extends TransportProvider {
 
 	/**
 	 * Initializes a new {@link SMTPProvider}

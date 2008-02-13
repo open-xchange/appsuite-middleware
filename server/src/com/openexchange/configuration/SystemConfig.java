@@ -239,7 +239,7 @@ public final class SystemConfig extends AbstractConfig implements
         /**
          * The mail transport provider
          */
-        MailTransportProvider("MailTransportProvider"),
+        TransportProvider("MailTransportProvider"),
         /**
          * Mail cache configuration file.
          */
