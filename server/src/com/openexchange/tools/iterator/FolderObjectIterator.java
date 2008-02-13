@@ -83,38 +83,41 @@ import com.openexchange.tools.oxfolder.OXFolderProperties;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class FolderObjectIterator implements SearchIterator {
+public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(FolderObjectIterator.class);
-	
+
+	/**
+	 * The empty folder iterator
+	 */
 	public static final FolderObjectIterator EMPTY_FOLDER_ITERATOR = new FolderObjectIterator() {
 
-        @Override
+		@Override
 		public boolean hasNext() {
-            return false;
-        }
+			return false;
+		}
 
-        @Override
-		public Object next() throws SearchIteratorException {
-            return null;
-        }
+		@Override
+		public FolderObject next() throws SearchIteratorException {
+			return null;
+		}
 
-        @Override
+		@Override
 		public void close() throws SearchIteratorException {
-        }
+		}
 
-        @Override
+		@Override
 		public int size() {
-        	return 0;
-        }
+			return 0;
+		}
 
-        @Override
+		@Override
 		public boolean hasSize() {
-            return true;
-        }
+			return true;
+		}
 
-    };
+	};
 
 	private static final boolean prefetchEnabled = ServerConfig.getBoolean(Property.PrefetchEnabled);
 
@@ -126,7 +129,7 @@ public class FolderObjectIterator implements SearchIterator {
 
 	private final Set<Integer> folderIds;
 
-	private Object next;
+	private FolderObject next;
 
 	private Statement stmt;
 
@@ -167,7 +170,7 @@ public class FolderObjectIterator implements SearchIterator {
 		}
 		return fields.toString();
 	}
-	
+
 	/**
 	 * Default constructor
 	 */
@@ -437,12 +440,12 @@ public class FolderObjectIterator implements SearchIterator {
 	 * 
 	 * @see com.openexchange.tools.iterator.SearchIterator#next()
 	 */
-	public Object next() throws SearchIteratorException {
+	public FolderObject next() throws SearchIteratorException {
 		if (isClosed) {
 			throw new SearchIteratorException(SearchIteratorCode.CLOSED, Component.FOLDER);
 		}
 		try {
-			final Object retval = next;
+			final FolderObject retval = next;
 			next = null;
 			if (prefetchQueue != null) {
 				/*
@@ -535,7 +538,7 @@ public class FolderObjectIterator implements SearchIterator {
 			if (next == null) {
 				return retval;
 			}
-			retval.offer((FolderObject) next);
+			retval.offer(next);
 			if (prefetchQueue != null) {
 				retval.addAll(prefetchQueue);
 				return retval;
