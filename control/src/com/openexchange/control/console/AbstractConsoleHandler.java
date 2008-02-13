@@ -105,9 +105,9 @@ public abstract class AbstractConsoleHandler {
 				final ValuePairObject[] valuePairObjects = valueParser.getValuePairObjects();
 				for (int a = 0; a < valuePairObjects.length; a++) {
 					if (valuePairObjects[a].getName().equals("-h")) {
-						jmxHost = valuePairObjects[a].getName();
+						jmxHost = valuePairObjects[a].getValue();
 					} else if (valuePairObjects[a].getName().equals("-p")) {
-						jmxPort = Integer.parseInt(valuePairObjects[a].getName());
+						jmxPort = Integer.parseInt(valuePairObjects[a].getValue());
 					}
 				}
 
