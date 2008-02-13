@@ -167,7 +167,7 @@ public class PushUDPActivator implements BundleActivator {
 			ConfigurationService.getInstance().addServiceHolderListener(configurationListener);
 			EventAdminService.getInstance().addServiceHolderListener(eventAdminListener);
 		} catch (final Throwable e) {
-			LOG.error("SessiondActivator: start: ", e);
+			LOG.error("PushUDPActivator: start: ", e);
 			// Try to stop what already has been started.
 			if (null != PushInit.getInstance()) {
 				PushInit.getInstance().stop();
@@ -193,11 +193,6 @@ public class PushUDPActivator implements BundleActivator {
 			}
 
 			/*
-			 * unregister service
-			 */
-			eventHandlerRegistration.unregister();
-
-			/*
 			 * Close service trackers
 			 */
 			for (ServiceTracker tracker : serviceTrackerList) {
@@ -205,7 +200,7 @@ public class PushUDPActivator implements BundleActivator {
 			}
 			serviceTrackerList.clear();
 		} catch (final Throwable e) {
-			LOG.error("SessiondActivator: start: ", e);
+			LOG.error("PushUDPActivator: start: ", e);
 			throw e instanceof Exception ? (Exception) e : new Exception(e);
 		}
 	}
