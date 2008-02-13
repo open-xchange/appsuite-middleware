@@ -136,6 +136,19 @@ public abstract class TransportProvider {
 	public abstract String getProtocol();
 
 	/**
+	 * Checks if this transport provider supports the given protocol (which is
+	 * in either secure or non-secure notation).
+	 * <p>
+	 * Usually the secure protocol notation simply has the <code>'s'</code>
+	 * character appended; e.g. <i>smtps</i>
+	 * 
+	 * @param protocol
+	 *            The protocol
+	 * @return <code>true</code> if supported; otherwise <code>false</code>
+	 */
+	public abstract boolean supportsProtocol(String protocol);
+
+	/**
 	 * Gets the name of the class implementing {@link MailTransport}
 	 * 
 	 * @return The name of the class implementing {@link MailTransport}

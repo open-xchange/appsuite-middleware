@@ -133,10 +133,23 @@ public final class SMTPProvider extends TransportProvider {
 		return new SMTPBodyPart(textBody);
 	}
 
-	static final String PROTOCOL_SMTP = "smtp";
+	/**
+	 * The SMTP protocol: <code>smtp</code>
+	 */
+	public static final String PROTOCOL_SMTP = "smtp";
 
 	@Override
 	public String getProtocol() {
 		return PROTOCOL_SMTP;
+	}
+
+	/**
+	 * The secure SMTP protocol: <code>smtp</code>
+	 */
+	public static final String PROTOCOL_SMTP_SECURE = "smtps";
+
+	@Override
+	public boolean supportsProtocol(final String protocol) {
+		return PROTOCOL_SMTP.equalsIgnoreCase(protocol) || PROTOCOL_SMTP_SECURE.equalsIgnoreCase(protocol);
 	}
 }

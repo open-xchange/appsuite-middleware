@@ -60,6 +60,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.IMAPCapabilities;
+import com.openexchange.imap.IMAPProvider;
 import com.openexchange.mail.config.GlobalMailConfig;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
@@ -132,7 +133,7 @@ public final class IMAPConfig extends MailConfig {
 			{
 				final String[] parsed = parseProtocol(imapServer);
 				if (parsed != null) {
-					imapConf.secure = "imaps".equals(parsed[0]);
+					imapConf.secure = IMAPProvider.PROTOCOL_IMAP_SECURE.equals(parsed[0]);
 					imapServer = parsed[1];
 				} else {
 					imapConf.secure = false;
@@ -162,7 +163,7 @@ public final class IMAPConfig extends MailConfig {
 			{
 				final String[] parsed = parseProtocol(imapServer);
 				if (parsed != null) {
-					imapConf.secure = "imaps".equals(parsed[0]);
+					imapConf.secure = IMAPProvider.PROTOCOL_IMAP_SECURE.equals(parsed[0]);
 					imapServer = parsed[1];
 				} else {
 					imapConf.secure = false;
@@ -187,7 +188,7 @@ public final class IMAPConfig extends MailConfig {
 			{
 				final String[] parsed = parseProtocol(imapServer);
 				if (parsed != null) {
-					imapConf.secure = "imaps".equals(parsed[0]);
+					imapConf.secure = IMAPProvider.PROTOCOL_IMAP_SECURE.equals(parsed[0]);
 					imapServer = parsed[1];
 				} else {
 					imapConf.secure = false;

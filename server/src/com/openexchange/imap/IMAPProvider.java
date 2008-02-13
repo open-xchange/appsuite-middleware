@@ -121,11 +121,24 @@ public final class IMAPProvider extends MailProvider {
 		return IMAPConfig.getImapConfig(session);
 	}
 
-	final static String PROTOCOL_IMAP = "imap";
+	/**
+	 * The IMAP protocol: <code>imap</code>
+	 */
+	public final static String PROTOCOL_IMAP = "imap";
 
 	@Override
 	public String getProtocol() {
 		return PROTOCOL_IMAP;
+	}
+
+	/**
+	 * The secure IMAP protocol: <code>imaps</code>
+	 */
+	public static final String PROTOCOL_IMAP_SECURE = "imaps";
+
+	@Override
+	public boolean supportsProtocol(final String protocol) {
+		return PROTOCOL_IMAP.equalsIgnoreCase(protocol) || PROTOCOL_IMAP_SECURE.equalsIgnoreCase(protocol);
 	}
 
 }

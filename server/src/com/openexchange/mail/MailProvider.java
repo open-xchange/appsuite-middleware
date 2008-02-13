@@ -135,6 +135,19 @@ public abstract class MailProvider {
 	public abstract String getProtocol();
 
 	/**
+	 * Checks if this mail provider supports the given protocol (which is in
+	 * either secure or non-secure notation).
+	 * <p>
+	 * Usually the secure protocol notation simply has the <code>'s'</code>
+	 * character appended; e.g. <i>imaps</i>
+	 * 
+	 * @param protocol
+	 *            The protocol
+	 * @return <code>true</code> if supported; otherwise <code>false</code>
+	 */
+	public abstract boolean supportsProtocol(String protocol);
+
+	/**
 	 * Gets the name of the class implementing {@link MailConnection}
 	 * 
 	 * @return The name of the class implementing {@link MailConnection}

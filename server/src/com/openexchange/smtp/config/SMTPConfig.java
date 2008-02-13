@@ -49,8 +49,7 @@
 
 package com.openexchange.smtp.config;
 
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.config.MailConfig;
@@ -58,6 +57,7 @@ import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.transport.config.GlobalTransportConfig;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.session.Session;
+import com.openexchange.smtp.SMTPProvider;
 
 /**
  * {@link SMTPConfig}
@@ -92,18 +92,12 @@ public final class SMTPConfig extends TransportConfig {
 	 * @throws MailConfigException
 	 *             If user-specific SMTP configuration cannot be determined
 	 */
-	public static SMTPConfig getSmtpConfig(final Session session) throws MailConfigException {
+	public static SMTPConfig getSmtpConfig(final Session session, final Context ctx) throws MailConfigException {
 		final SMTPConfig smtpConf = new SMTPConfig();
 		/*
 		 * Fetch user object and create its IMAP properties
 		 */
-		final User user;
-		try {
-			user = UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session
-					.getContextId()));
-		} catch (final ContextException e) {
-			throw new MailConfigException(e);
-		}
+		final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
 		fillLoginAndPassword(smtpConf, session, user);
 		if (LoginType.GLOBAL.equals(getLoginType())) {
 			String smtpServer = MailConfig.getTransportServer();
@@ -121,7 +115,7 @@ public final class SMTPConfig extends TransportConfig {
 			{
 				final String[] parsed = parseProtocol(smtpServer);
 				if (parsed != null) {
-					smtpConf.secure = "smtps".equals(parsed[0]);
+					smtpConf.secure = SMTPProvider.PROTOCOL_SMTP_SECURE.equals(parsed[0]);
 					smtpServer = parsed[1];
 				} else {
 					smtpConf.secure = false;
@@ -151,7 +145,7 @@ public final class SMTPConfig extends TransportConfig {
 			{
 				final String[] parsed = parseProtocol(smtpServer);
 				if (parsed != null) {
-					smtpConf.secure = "smtps".equals(parsed[0]);
+					smtpConf.secure = SMTPProvider.PROTOCOL_SMTP_SECURE.equals(parsed[0]);
 					smtpServer = parsed[1];
 				} else {
 					smtpConf.secure = false;
@@ -176,7 +170,7 @@ public final class SMTPConfig extends TransportConfig {
 			{
 				final String[] parsed = parseProtocol(smtpServer);
 				if (parsed != null) {
-					smtpConf.secure = "smtps".equals(parsed[0]);
+					smtpConf.secure = SMTPProvider.PROTOCOL_SMTP_SECURE.equals(parsed[0]);
 					smtpServer = parsed[1];
 				} else {
 					smtpConf.secure = false;
