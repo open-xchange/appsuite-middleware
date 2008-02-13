@@ -114,8 +114,6 @@ public final class SMTPTransport extends MailTransport {
 
 	private static final String CHARENC_ISO_8859_1 = "ISO-8859-1";
 
-	private static final String PROTOCOL_SMTP = "smtp";
-
 	private final javax.mail.Session smtpSession;
 
 	private final Session session;
@@ -302,7 +300,7 @@ public final class SMTPTransport extends MailTransport {
 			 * Transport message
 			 */
 			final long start = System.currentTimeMillis();
-			final Transport transport = smtpSession.getTransport(PROTOCOL_SMTP);
+			final Transport transport = smtpSession.getTransport(SMTPProvider.PROTOCOL_SMTP);
 			if (SMTPConfig.isSmtpAuth()) {
 				final SMTPConfig config = getTransportConfig(session);
 				transport.connect(config.getServer(), config.getPort(), config.getLogin(), encodePassword(config
@@ -337,7 +335,7 @@ public final class SMTPTransport extends MailTransport {
 			}
 			try {
 				final long start = System.currentTimeMillis();
-				final Transport transport = smtpSession.getTransport(PROTOCOL_SMTP);
+				final Transport transport = smtpSession.getTransport(SMTPProvider.PROTOCOL_SMTP);
 				if (SMTPConfig.isSmtpAuth()) {
 					final SMTPConfig config = getTransportConfig(session);
 					transport.connect(config.getServer(), config.getPort(), config.getLogin(), encodePassword(config
@@ -401,7 +399,7 @@ public final class SMTPTransport extends MailTransport {
 			}
 			try {
 				final long start = System.currentTimeMillis();
-				final Transport transport = smtpSession.getTransport(PROTOCOL_SMTP);
+				final Transport transport = smtpSession.getTransport(SMTPProvider.PROTOCOL_SMTP);
 				if (SMTPConfig.isSmtpAuth()) {
 					final SMTPConfig config = getTransportConfig(session);
 					transport.connect(config.getServer(), config.getPort(), config.getLogin(), encodePassword(config

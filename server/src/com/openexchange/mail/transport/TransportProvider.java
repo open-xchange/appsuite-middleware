@@ -129,6 +129,13 @@ public abstract class TransportProvider {
 	}
 
 	/**
+	 * Gets this transport provider's protocol
+	 * 
+	 * @return The protocol
+	 */
+	public abstract String getProtocol();
+
+	/**
 	 * Gets the name of the class implementing {@link MailTransport}
 	 * 
 	 * @return The name of the class implementing {@link MailTransport}

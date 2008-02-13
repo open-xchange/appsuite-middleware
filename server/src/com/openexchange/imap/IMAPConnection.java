@@ -87,8 +87,6 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(IMAPConnection.class);
 
-	private static final String PROTOCOL_IMAP = "imap";
-
 	private static final String CHARENC_ISO8859 = "ISO-8859-1";
 
 	private IMAPFolderStorage folderStorage;
@@ -226,7 +224,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 			/*
 			 * Get store
 			 */
-			imapStore = (IMAPStore) imapSession.getStore(PROTOCOL_IMAP);
+			imapStore = (IMAPStore) imapSession.getStore(IMAPProvider.PROTOCOL_IMAP);
 			String tmpPass = getMailConfig().getPassword();
 			if (tmpPass != null) {
 				try {

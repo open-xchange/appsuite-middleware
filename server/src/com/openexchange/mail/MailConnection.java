@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -77,16 +78,17 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MailConnection<T extends MailFolderStorage, E extends MailMessageStorage, L extends MailLogicTools> {
+public abstract class MailConnection<T extends MailFolderStorage, E extends MailMessageStorage, L extends MailLogicTools>
+		implements Serializable {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailConnection.class);
 
 	private static final AtomicInteger COUNTER = new AtomicInteger();
 
-	private static final Lock LOCK_CON = new ReentrantLock();
+	private static final transient Lock LOCK_CON = new ReentrantLock();
 
-	private static final Condition LOCK_CON_CONDITION = LOCK_CON.newCondition();
+	private static final transient Condition LOCK_CON_CONDITION = LOCK_CON.newCondition();
 
 	private static Class<? extends MailConnection<?, ?, ?>> clazz;
 
@@ -96,7 +98,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 */
 	private static MailConnection<?, ?, ?> internalInstance;
 
-	protected final Session session;
+	protected final transient Session session;
 
 	private Properties mailProperties;
 
@@ -104,7 +106,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 
 	private StackTraceElement[] trace;
 
-	private MailConfig mailConfig;
+	private transient MailConfig mailConfig;
 
 	/**
 	 * Friendly instantiation

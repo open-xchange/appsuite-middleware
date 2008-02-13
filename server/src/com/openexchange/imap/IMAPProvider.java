@@ -121,4 +121,11 @@ public final class IMAPProvider extends MailProvider {
 		return IMAPConfig.getImapConfig(session);
 	}
 
+	final static String PROTOCOL_IMAP = "imap";
+
+	@Override
+	public String getProtocol() {
+		return PROTOCOL_IMAP;
+	}
+
 }

@@ -132,4 +132,11 @@ public final class SMTPProvider extends TransportProvider {
 	public TextBodyMailPart getNewTextBodyPart(final String textBody) throws MailException {
 		return new SMTPBodyPart(textBody);
 	}
+
+	static final String PROTOCOL_SMTP = "smtp";
+
+	@Override
+	public String getProtocol() {
+		return PROTOCOL_SMTP;
+	}
 }

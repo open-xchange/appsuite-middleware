@@ -15,7 +15,7 @@ MailProvider=com.openexchange.imap.IMAPProvider
 IMAPProperties=@oxgroupwaresysconfdir@/imap.properties
 
 # Name of the class implementing the mail transport connection
-MailTransportProvider=com.openexchange.smtp.SMTPProvider
+TransportProvider=com.openexchange.smtp.SMTPProvider
 # ... and its config
 SMTPProperties=@oxgroupwaresysconfdir@/smtp.properties
 

@@ -128,6 +128,13 @@ public abstract class MailProvider {
 	}
 
 	/**
+	 * Gets this mail provider's protocol
+	 * 
+	 * @return The protocol
+	 */
+	public abstract String getProtocol();
+
+	/**
 	 * Gets the name of the class implementing {@link MailConnection}
 	 * 
 	 * @return The name of the class implementing {@link MailConnection}
