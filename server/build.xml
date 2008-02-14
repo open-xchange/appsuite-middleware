@@ -18,6 +18,7 @@
     <property name="conf.dir" value="conf/groupware"/>
     <property name="i18n.dir" location="i18n"/>
     <property name="bin.dir" value="sbin"/>
+    <property name="etc.dir" value="etc"/>
 
     <property name="buildnumber" value="${pversion}"/>
 
@@ -188,7 +189,6 @@
         <copy todir="${conf.install.copy.dir}" overwrite="true">
             <fileset dir="${patch.conf.dir}">
             	<include name="**" />
-                <exclude name="oxfunctions.sh"/>
                 <exclude name="*.in"/>
                 <exclude name="CVS"/>
                 <exclude name="osgi/**"/>
@@ -212,7 +212,6 @@
         <mkdir dir="${conf.install.copy.dir}"/>
         <copy todir="${conf.install.copy.dir}" overwrite="true">
             <fileset dir="${patch.conf.dir}">
-                <include name="oxfunctions.sh"/>
                 <include name="osgi/**"/>
             </fileset>
         </copy>
@@ -438,7 +437,7 @@
     <target name="patchConsistencyStart">
         <move tofile="${patch.bin.dir}/checkconsistency" file="${patch.bin.dir}/checkconsistency.in" overwrite="true"/>
         <replace file="${patch.bin.dir}/checkconsistency">
-            <replacefilter token="@oxfunctions@" value="${conf.subst.patch}/oxfunctions.sh"/>
+            <replacefilter token="@oxfunctions@" value="${etc.dir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@" value="${conf.subst.patch}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
             <replacefilter token="@consolelogfile@" value= "${log.install.dir}/open-xchange-console.log"/>
@@ -466,7 +465,7 @@
     <target name="patchGroupwareStart">
         <move tofile="${patch.bin.dir}/open-xchange-groupware" file="${patch.bin.dir}/open-xchange-groupware.in" overwrite="true"/>
         <replace file="${patch.bin.dir}/open-xchange-groupware">
-            <replacefilter token="@oxfunctions@" value="${conf.subst.patch}/oxfunctions.sh"/>
+            <replacefilter token="@oxfunctions@" value="${etc.dir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@"    value="${conf.subst.patch}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
             <replacefilter token="@consolelogfile@" value= "${log.install.dir}/open-xchange-console.log"/>
