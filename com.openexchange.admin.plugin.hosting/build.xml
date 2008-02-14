@@ -23,6 +23,7 @@
 
 	<!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
+    <property name="etcdir" value="etc"/>
 
 	<!-- required osgi bundles -->
     <property name="osgibundle"           value="org.eclipse.osgi_3.3.0.v20070530.jar"/>
@@ -51,7 +52,7 @@
     </path>
 
 	<filterset id="pathsubst">
-        <filter token="oxfunctions"       value="${prefix}/${oxconfdir}/oxfunctions.sh"/>
+        <filter token="oxfunctions"       value="${prefix}/${etcdir}/oxfunctions.sh"/>
         <filter token="oxscriptconf"      value="${prefix}/${oxconfdir}/ox-admin-scriptconf.sh"/>
         <filter token="absoxconfdir"      value="${prefix}/${oxconfdir}"/>
         <filter token="absserverconfdir"  value="${prefix}/${serverconfdir}"/>
