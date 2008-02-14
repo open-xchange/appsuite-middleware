@@ -56,6 +56,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UnixCrypt;
 
 /**
@@ -297,6 +299,25 @@ public abstract class UserStorage {
 		try {
 			return getInstance().getUser(uid, context);
 		} catch (final LdapException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			return null;
+		}
+	}
+
+    /**
+     * Reads the data from a user from the underlying persistent data storage.
+     * 
+     * @param uid User identifier.
+     * @param contextId Context ID.
+     * @return a user object or <code>null</code> on exception.
+     */
+    public static User getStorageUser(final int uid, final int contextId) {
+		try {
+			return getInstance().getUser(uid, ContextStorage.getStorageContext(contextId));
+		} catch (final LdapException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			return null;
+		} catch (final ContextException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 			return null;
 		}
