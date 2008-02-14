@@ -52,9 +52,7 @@ package com.openexchange.ajax.task;
 import java.util.TimeZone;
 
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.task.actions.DeleteRequest;
-import com.openexchange.ajax.task.actions.DeleteResponse;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
@@ -66,8 +64,6 @@ import com.openexchange.groupware.tasks.Task;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class InsertTest extends AbstractTaskTest {
-
-    private AJAXClient client;
     
     /**
      * @param name
@@ -77,30 +73,20 @@ public class InsertTest extends AbstractTaskTest {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        client = getClient();
-    }
-
-    /**
      * Tests inserting a private task.
      * @throws Throwable if an error occurs.
      */
     public void testInsertPrivateTask() throws Throwable {
+        final AJAXClient client = getClient();
         final int folderId = client.getValues().getPrivateTaskFolder();
-        final AJAXSession session = client.getSession();
         final TimeZone timeZone = client.getValues().getTimeZone();
         final Task task = Create.createTask();
         task.setParentFolderID(folderId);
-        final InsertResponse insertR = TaskTools.insert(session,
+        final InsertResponse insertR = TaskTools.insert(client,
             new InsertRequest(task, timeZone));
-        final GetResponse getR = TaskTools.get(session, new GetRequest(insertR));
+        final GetResponse getR = TaskTools.get(client, new GetRequest(insertR));
         final Task reload = getR.getTask(timeZone);
         TaskTools.compareAttributes(task, reload);
-        final DeleteResponse deleteR = TaskTools.delete(session,
-            new DeleteRequest(reload));
+        TaskTools.delete(client, new DeleteRequest(reload));
     }
 }

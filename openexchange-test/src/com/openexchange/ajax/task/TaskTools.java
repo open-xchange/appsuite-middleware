@@ -288,45 +288,27 @@ public final class TaskTools extends Assert {
      * @throws IOException if the communication with the server fails.
      * @deprecated use {@link #delete(AJAXSession, DeleteRequest)}
      */
+    @Deprecated
     public static void deleteTask(final WebConversation conversation,
         final String hostName, final String sessionId, final Date lastUpdate,
         final int folder, final int task) throws IOException, SAXException,
         JSONException {
         LOG.trace("Deleting tasks.");
-        final JSONObject json = new JSONObject();
-        json.put(AJAXServlet.PARAMETER_ID, task);
-        json.put(AJAXServlet.PARAMETER_INFOLDER, folder);
-        final ByteArrayInputStream bais = new ByteArrayInputStream(json
-            .toString().getBytes(ENCODING));
-        final URLParameter parameter = new URLParameter();
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
-            AJAXServlet.ACTION_DELETE);
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP,
-            String.valueOf(lastUpdate.getTime()));
-        final WebRequest req = new PutMethodWebRequest(AbstractAJAXTest.PROTOCOL
-            + hostName + TASKS_URL + parameter.getURLParameters(), bais,
-            AJAXServlet.CONTENTTYPE_JAVASCRIPT);
-        final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
-            resp.getResponseCode());
-        final Response response = Response.parse(resp.getText());
-        assertFalse(response.getErrorMessage(), response.hasError());
-    }
-
-    /**
-     * @deprecated use {@link #delete(AJAXClient, DeleteRequest)}
-     */
-    public static DeleteResponse delete(final AJAXSession session,
-        final DeleteRequest request) throws AjaxException, IOException,
-        SAXException, JSONException {
-        return (DeleteResponse) Executor.execute(session, request);
+        final AJAXSession session = new AJAXSession(conversation, sessionId);
+        final AJAXClient client = new AJAXClient(session);
+        final DeleteRequest request = new DeleteRequest(folder, task,
+            lastUpdate);
+        try {
+            TaskTools.delete(client, request);
+        } catch (AjaxException e) {
+            throw new JSONException(e);
+        }
     }
 
     public static DeleteResponse delete(final AJAXClient client,
         final DeleteRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return delete(client.getSession(), request);
+        return (DeleteResponse) Executor.execute(client, request);
     }
 
     /**

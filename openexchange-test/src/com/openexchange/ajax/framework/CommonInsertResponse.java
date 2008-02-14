@@ -67,7 +67,9 @@ public class CommonInsertResponse extends AbstractAJAXResponse {
     }
 
     /**
-     * @return the id
+     * Every new object gets a new identifier. With this method this identifier
+     * can be read.
+     * @return the new identifier of the new object.
      */
     public int getId() {
         return id;

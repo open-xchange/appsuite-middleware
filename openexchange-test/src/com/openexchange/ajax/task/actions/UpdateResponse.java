@@ -53,7 +53,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * 
+ * Data object for the response of a task update request.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class UpdateResponse extends AbstractAJAXResponse {

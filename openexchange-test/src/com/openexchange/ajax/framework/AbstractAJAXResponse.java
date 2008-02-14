@@ -77,6 +77,11 @@ public abstract class AbstractAJAXResponse extends Assert {
         return response.getData();
     }
 
+    /**
+     * If the server response contains an overall timestamp, it can be get with
+     * this method.
+     * @return the timestamp from the response.
+     */
     public Date getTimestamp() {
         return response.getTimestamp();
     }

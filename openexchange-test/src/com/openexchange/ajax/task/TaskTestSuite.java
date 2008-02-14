@@ -79,6 +79,7 @@ public final class TaskTestSuite {
         tests.addTestSuite(Bug8935Test.class);
         tests.addTestSuite(Bug9252Test.class);
         tests.addTestSuite(Bug10119Test.class);
+        tests.addTestSuite(Bug10400Test.class);
         tests.addTestSuite(TruncationTest.class);
         tests.addTestSuite(InsertTest.class);
         tests.addTestSuite(CharsetTest.class);
