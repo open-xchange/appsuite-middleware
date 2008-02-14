@@ -1,3 +1,8 @@
+* 2008-02-14 - marcus.klein@open-xchange.com
+
+ - Bugfix #10400: Fixed bad handling of folder mapping when adding/removing
+   participants.
+
 * 2008-02-13 - marcus.klein@open-xchange.com
 
  - Bugfix #9999: Changed loglevel of permission exceptions for tasks to level
