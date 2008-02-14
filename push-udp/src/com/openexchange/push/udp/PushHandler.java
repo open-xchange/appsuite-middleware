@@ -107,10 +107,13 @@ public class PushHandler implements EventHandler {
 			return;
 		}
 
-		final int action = genericEvent.getAction();
 		final int module = genericEvent.getModule();
 
 		FolderObject parentFolder = (FolderObject) genericEvent.getSourceFolder();
+		if (parentFolder == null) {
+			LOG.warn("folder object in event is null");
+			return;
+		}
 
 		final Set<Integer> usersSet = new HashSet<Integer>();
 
