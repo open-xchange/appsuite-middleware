@@ -123,11 +123,4 @@ public interface SessiondConnectorInterface {
 	 */
     public int getNumberOfActiveSessions();
 
-	/**
-	 * An array with the number of active sessions in a container
-	 * 
-	 * @return Return the number of active sessions in a container
-	 */
-    public int[] getNumberOfSessionsInContainer();
-
 } 
