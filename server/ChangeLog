@@ -4,6 +4,9 @@
    all participants except the owner of the shared folder are removed.
    This has been fixed.
 
+ - Fixed the exception handling shown in bug #7141. An unexpected exception
+   is shown instead of an object not found exception.
+
 * 2008-02-14 - marcus.klein@open-xchange.com
 
  - Bugfix #10400: Fixed bad handling of folder mapping when adding/removing
