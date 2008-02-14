@@ -15,7 +15,7 @@ MailProtocol=com.openexchange.imap.IMAPConnection
 IMAPProperties=@oxgroupwaresysconfdir@/imap.properties
 
 # Name of the class implementing the mail transport connection
-MailTransportProtocol=com.openexchange.smtp.SMTPTransport
+TransportProtocol=com.openexchange.smtp.SMTPTransport
 # ... and its config
 SMTPProperties=@oxgroupwaresysconfdir@/smtp.properties
 
@@ -76,7 +76,6 @@ EVENTPROPERTIES:@oxgroupwaresysconfdir@/event.properties
 PUSHPROPERTIES:@oxgroupwaresysconfdir@/push.properties
 configDB=@oxgroupwaresysconfdir@/configdb.properties
 FOLDERCACHEPROPERTIES=@oxgroupwaresysconfdir@/foldercache.properties
-SPELLCHECKCFG=@oxgroupwaresysconfdir@/spellcheck.cfg
 
 UPDATETASKSCFG=@oxgroupwaresysconfdir@/updatetasks.cfg
 
