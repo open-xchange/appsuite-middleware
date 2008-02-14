@@ -17,10 +17,11 @@
     <property name="test.xml.dir" value="test-results" />
     <property name="client.jar" value="ox_admin_rmiclient.jar"/>
     <property name="logdir"  value="/var/log/open-xchange"/>
+    <property name="etcdir"  value="etc"/>
     <property name="distribution" value="debian"/>
-	<property name="oxconfdir" value="etc/admindaemon"/>
-	<property name="serverconfdir" value="etc/groupware"/>
-	<property name="masterauthfile" value="mpasswd"/>
+    <property name="oxconfdir" value="etc/admindaemon"/>
+    <property name="serverconfdir" value="etc/groupware"/>
+    <property name="masterauthfile" value="mpasswd"/>
     <property name="bundle.d" value="${prefix}/${oxconfdir}/osgi/bundle.d"/>
 
     <!-- Bundle dependencies -->
@@ -75,7 +76,7 @@
 
     <filterset id="pathsubst">
         <filter token="oxprefix"          value="${prefix}"/>
-        <filter token="oxfunctions"       value="${prefix}/${oxconfdir}/oxfunctions.sh"/>
+        <filter token="oxfunctions"       value="${prefix}/${etcdir}/oxfunctions.sh"/>
         <filter token="oxscriptconf"      value="${prefix}/${oxconfdir}/ox-admin-scriptconf.sh"/>
         <filter token="systemproperties"  value="${prefix}/${oxconfdir}/system.properties"/>
         <filter token="loggingproperties" value="${prefix}/${oxconfdir}/file-logging.properties"/>
