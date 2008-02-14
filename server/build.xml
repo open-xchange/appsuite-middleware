@@ -16,9 +16,7 @@
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
     <property name="conf.dir" value="conf/groupware"/>
-    <property name="i18n.dir" location="i18n"/>
     <property name="bin.dir" value="sbin"/>
-    <property name="etc.dir" value="etc"/>
 
     <property name="buildnumber" value="${pversion}"/>
 
@@ -41,7 +39,8 @@
 
     <!-- Replacements -->
     <property name="bundles.install.dir" value="${destdir}${bundlesdir}"/>
-    <property name="conf.install.dir" value="${prefix}/etc/groupware"/>
+    <property name="common.conf.install.dir" value="${prefix}/etc"/>
+    <property name="conf.install.dir" value="${common.conf.install.dir}/groupware"/>
     <property name="conf.install.copy.dir" location="${destdir}${conf.install.dir}"/>
     <property name="log.install.copy.dir" location="${destdir}${log.install.dir}"/>
     <property name="bin.install.dir" value="${prefix}/sbin/"/>
@@ -127,9 +126,6 @@
         <include name="com/openexchange/groupware/i18n/*.java"/>
     </fileset>
     <property name="msgfmt" value="msgfmt"/>
-    <fileset id="i18n.pos" dir="${i18n.dir}">
-        <include name="**/*.po"/>
-    </fileset>
     <property name="java_apt" value="apt"/>
 	<property name="msgcmp" value="msgcmp"/>
 
@@ -203,6 +199,7 @@
             <fileset dir="${bin.dir}"/>
         </copy>
         <antcall target="patchBinFiles">
+            <param name="common.conf.subst.patch" value="${conf.install.dir}"/>
             <param name="conf.subst.patch" value="${conf.install.dir}"/>
             <param name="lib.subst.patch" value="${lib.install.dir}"/>
         </antcall>
@@ -261,109 +258,6 @@
          	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
     	<delete dir="${dist-package}"/>
     </target>
-
-
-    <!-- I18N Stuff -->
-
-    <!-- TODO -->
-    <!--
-    <target name="all-i18n" depends="check-pot,create-codes-csv,create-lang-jar" />
-
-    <target name="create-lang-jar" depends="check-msgfmt-executable,prepare" if="exists_msgfmt">
-        <exec executable="${msgfmt}" dir="${basedir}">
-            <arg line="- -java2 -d ${output..} -r com.openexchange.groupware.i18n.ServerMessages -l de_DE ${i18n.dir}/de_DE/server.de_DE.po" />
-        </exec>
-        <exec executable="${msgfmt}" dir="${basedir}">
-            <arg line="- -java2 -d ${output..} -r com.openexchange.groupware.i18n.ServerMessages -l de ${i18n.dir}/de_DE/server.de_DE.po" />
-        </exec>
-    	<exec executable="${msgfmt}" dir="${basedir}">
-            <arg line="- -java2 -d ${output..} -r com.openexchange.groupware.i18n.ServerMessages -l fr_FR ${i18n.dir}/fr_FR/server.fr_FR.po" />
-        </exec>
-        <exec executable="${msgfmt}" dir="${basedir}">
-            <arg line="- -java2 -d ${output..} -r com.openexchange.groupware.i18n.ServerMessages -l fr ${i18n.dir}/fr_FR/server.fr_FR.po" />
-        </exec>
-        <jar jarfile="${tmp.dir}/${Bundle-SymbolicName}_languages.jar" basedir="${output..}"
-            includes="com/openexchange/groupware/i18n/ServerMessages*" />
-    </target>
-
-	<target name="check-pot" depends="create-pot">
-	    <antcall target="check-lang-pot">
-	    	<param name="lang" value="de_DE"/>
-	    </antcall>
-	    <antcall target="check-lang-pot">
-	    	<param name="lang" value="fr_FR"/>
-	    </antcall>
-	</target>
-
-    <target name="check-lang-pot" if="lang">
-        <exec executable="${msgcmp}" dir="${i18n.dir}" failonerror="false" failifexecutionfails="false" resultproperty="translation-return-1" outputproperty="translation-result-1">
-            <arg value="${lang}/server.${lang}.po"/>
-        	<arg value="server.pot"/>
-        </exec>
-		<antcall target="check-pot-warning" inheritAll="false">
-			<param name="translation-success" value="${translation-return-1}" />
-			<param name="translation-step" value="${lang} server texts" />
-			<param name="translation-message" value="${translation-result-1}"/>
-		</antcall>
-
-        <exec executable="${msgcmp}" dir="${i18n.dir}" failonerror="false" failifexecutionfails="false" resultproperty="translation-return-2" outputproperty="translation-result-2">
-            <arg value="${lang}/errors.${lang}.po"/>
-        	<arg value="errors.pot"/>
-        </exec>
-		<antcall target="check-pot-warning" inheritAll="false">
-			<param name="translation-success" value="${translation-return-2}" />
-			<param name="translation-step" value="${lang} error texts" />
-			<param name="translation-message" value="${translation-result-2}"/>
-		</antcall>
-    </target>
-
-	<target name="check-pot-warning">
-		<condition property="translation-warning-needed">
-            <not>
-            	<equals arg1="0" arg2="${translation-success}" />
-            </not>
-        </condition>
-		<antcall target="show-pot-warning">
-			<param name="translation-step" value="${translation-step}" />
-			<param name="translation-message" value="${translation-message}"/>
-		</antcall>
-	</target>
-
-	<target name="show-pot-warning" if="translation-warning-needed" >
-		<echo message="Warnings for ${translation-step}:" />
-		<echo message="${translation-message}" />
-	</target>		
-
-    <target name="create-codes-csv" depends="create-ser">
-        <echo message="Creating ${i18n.dir}/codes.csv" />
-        <java classname="ProcessErrorCodes">
-            <classpath>
-                <pathelement location="${output..}" />
-                <path refid="project.classpath"/>
-            </classpath>
-            <sysproperty key="errorCodeProcessor" value="com.openexchange.tools.exceptions.CSVProcessor" />
-            <sysproperty key="com.openexchange.tools.exceptions.CSVProcessor.file" value="${i18n.dir}/codes.csv" />
-            <arg value="${i18n.dir}/codes.ser" />
-            <arg value="${i18n.dir}/codesAnnotation.ser" />
-        </java>
-    </target>
-
-    <target name="create-gui-js" depends="compile,create-ser">
-        <echo message="Creating ${i18n.dir}/codes.js" />
-        <java classname="ProcessErrorCodes">
-            <classpath>
-                <pathelement location="${output..}" />
-                <path refid="project.classpath" />
-            </classpath>
-            <sysproperty key="errorCodeProcessor" value="com.openexchange.tools.exceptions.JSProcessor" />
-            <sysproperty key="filename" value="${i18n.dir}/codes" />
-            <sysproperty key="includeCategories" value="user_input, permission, external_resource_full, user_configuration, try_again, truncated, concurrent_modification" />
-            <arg value="${i18n.dir}/codes.ser" />
-            <arg value="${i18n.dir}/codesAnnotation.ser" />
-        </java>
-    </target>
-    -->
-    <!-- Replacing in templates -->
 
     <target name="patchVersionJava">
         <copy file="${source..}/com/openexchange/server/impl/Version.java.in"
@@ -437,7 +331,7 @@
     <target name="patchConsistencyStart">
         <move tofile="${patch.bin.dir}/checkconsistency" file="${patch.bin.dir}/checkconsistency.in" overwrite="true"/>
         <replace file="${patch.bin.dir}/checkconsistency">
-            <replacefilter token="@oxfunctions@" value="${etc.dir}/oxfunctions.sh"/>
+            <replacefilter token="@oxfunctions@" value="${common.conf.install.dir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@" value="${conf.subst.patch}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
             <replacefilter token="@consolelogfile@" value= "${log.install.dir}/open-xchange-console.log"/>
@@ -465,7 +359,7 @@
     <target name="patchGroupwareStart">
         <move tofile="${patch.bin.dir}/open-xchange-groupware" file="${patch.bin.dir}/open-xchange-groupware.in" overwrite="true"/>
         <replace file="${patch.bin.dir}/open-xchange-groupware">
-            <replacefilter token="@oxfunctions@" value="${etc.dir}/oxfunctions.sh"/>
+            <replacefilter token="@oxfunctions@" value="${common.conf.install.dir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@"    value="${conf.subst.patch}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
             <replacefilter token="@consolelogfile@" value= "${log.install.dir}/open-xchange-console.log"/>
