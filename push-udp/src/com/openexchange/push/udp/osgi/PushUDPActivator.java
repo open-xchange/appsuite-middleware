@@ -101,7 +101,7 @@ public class PushUDPActivator implements BundleActivator {
 
 		try {
 			/*
-			 * Init service trackersto check availibility for services
+			 * Init service tracker check availibility for services
 			 */
 			serviceTrackerList.add(new ServiceTracker(context, EventAdmin.class.getName(),
 					new BundleServiceTracker<EventAdmin>(context, EventAdminService.getInstance(),
