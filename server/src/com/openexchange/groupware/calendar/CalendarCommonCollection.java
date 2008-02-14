@@ -306,6 +306,8 @@ public class CalendarCommonCollection {
                 return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.UPDATE);
             }
             return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.UPDATE);
+        } catch(OXObjectNotFoundException onfe) {
+        	throw onfe;            
         } catch(final Exception ex) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, ex);
         }
