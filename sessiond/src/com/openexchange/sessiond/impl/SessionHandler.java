@@ -89,8 +89,6 @@ public class SessionHandler {
 
 	private static boolean isInit = false;
 
-	private static int[] numberOfSessionsInContainer;
-
 	private static final Log LOG = LogFactory.getLog(SessionHandler.class);
 	
 	private static AtomicInteger numberOfActiveSessions = new AtomicInteger();
@@ -115,8 +113,6 @@ public class SessionHandler {
 				prependContainer();
 			}
 		}
-
-		numberOfSessionsInContainer = new int[numberOfSessionContainers];
 
 		noLimit = (config.getMaxSessions() == 0);
 
@@ -282,7 +278,7 @@ public class SessionHandler {
 			if (sessions.containsKey(sessionid)) {
 				SessionControlObject sessionControlObject = sessions.get(sessionid);
 
-				if (isValid(sessionControlObject)) {
+				if (sessionControlObject != null && isValid(sessionControlObject)) {
 					sessionControlObject.updateTimestamp();
 
 					sessionList.get(0).put(sessionid, sessionControlObject);
@@ -309,14 +305,8 @@ public class SessionHandler {
 			}
 		}
 		prependContainer();
-		// MonitoringInfo.decrementNumberOfActiveSessions(sessionList.getLast().size());
+		decrementNumberOfActiveSessions(sessionList.getLast().size());
 		removeContainer();
-
-		for (int a = 0; a < sessionList.size(); a++) {
-			numberOfSessionsInContainer[a] = sessionList.get(a).size();
-		}
-
-		LOG.warn("TODO: MonitoringInfo still missing");
 	}
 
 	/**
@@ -344,14 +334,15 @@ public class SessionHandler {
 		config = null;
 		noLimit = false;
 		isInit = false;
-		numberOfSessionsInContainer = null;
 	}
 
 	public static int getNumberOfActiveSessions() {
 		return numberOfActiveSessions.get();
 	}
 	
-	public static int[] getNumberOfSessionsInContainer() {
-		return numberOfSessionsInContainer;
+	protected static void decrementNumberOfActiveSessions(int amount) {
+		for (int a = 0; a < amount; a++) {
+			numberOfActiveSessions.decrementAndGet();
+		}
 	}
 }

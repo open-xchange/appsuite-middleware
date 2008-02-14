@@ -97,10 +97,6 @@ public class SessiondConnectorImpl implements SessiondConnectorInterface {
     public int getNumberOfActiveSessions() {
         return SessionHandler.getNumberOfActiveSessions();
     }
-
-	public int[] getNumberOfSessionsInContainer() {
-		return SessionHandler.getNumberOfSessionsInContainer();
-	}
 }
 
 
