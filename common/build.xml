@@ -6,7 +6,8 @@
 
     <!-- Constants -->
     <property name="tmp.dir" value="tmp"/>
-
+	<property name="etcdir"  value="etc"/>
+	
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
 
@@ -65,7 +66,7 @@
     </target>
 
     <!-- Install targets -->
-    <target name="install" depends="installJars,installConfig"/>
+    <target name="install" depends="installJars,installConfig,installScripts"/>
 
     <target name="installJars" depends="jar">
         <property name="bundlesdestdir" value="${destdir}${bundlesdir}"/>
@@ -119,7 +120,17 @@
             message="${bundlesdir}/${bundle.name}${line.separator}"/>
     </target>
 
-    <target name="installDist">
+	<target name="installScripts">
+        <mkdir dir="${destdir}/${prefix}/${oxconfdir}"/>
+		<copy todir="${destdir}/${prefix}/${etcdir}">
+            <fileset dir="etc">
+                <include name="*"/>
+                <exclude name="CVS"/>
+            </fileset>
+		</copy>			
+	</target>
+		
+	<target name="installDist">
         <property name="3rdpartydir" value="${destdir}/3rdparty"/>
         <copy todir="${3rdpartydir}">
             <fileset dir="lib/dist">
