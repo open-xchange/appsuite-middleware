@@ -2,6 +2,8 @@
 
  - Bugfix #10400: Fixed bad handling of folder mapping when adding/removing
    participants.
+ - Bugfix #9173: Removing .lock file in filestore if it is older than 100 times
+   of timeout. This prevents stale .lock files.
 
 * 2008-02-13 - marcus.klein@open-xchange.com
 

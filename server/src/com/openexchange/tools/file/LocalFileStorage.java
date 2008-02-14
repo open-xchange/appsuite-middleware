@@ -70,8 +70,11 @@ import com.openexchange.tools.file.FileStorageException.Code;
  */
 public class LocalFileStorage extends FileStorage {
 
-	
+	/**
+	 * Logger.
+	 */
 	private static final Log LOG = LogFactory.getLog(LocalFileStorage.class);
+
     /**
      * This time will be waited between iterations of getting the lock.
      */
@@ -249,6 +252,12 @@ public class LocalFileStorage extends FileStorage {
     @Override
 	protected void lock(final long timeout) throws FileStorageException {
         final File lock = new File(storage, LOCK_FILENAME);
+        final long maxLifeTime = 100 * timeout;
+        final long lastModified = lock.lastModified();
+        if (lock.exists()
+            && lastModified + maxLifeTime < System.currentTimeMillis()) {
+            lock.delete();
+        }
         final long failTime = System.currentTimeMillis() + timeout;
         boolean created = false;
         do {
