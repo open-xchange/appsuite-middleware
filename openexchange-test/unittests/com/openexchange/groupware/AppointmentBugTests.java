@@ -1,6 +1,8 @@
 package com.openexchange.groupware;
 
+import java.sql.Array;
 import java.sql.Connection;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
@@ -2869,6 +2871,130 @@ public class AppointmentBugTests extends TestCase {
                 assertEquals("Check confirm message for user "+up[a].getIdentifier(), confirm_message, up[a].getConfirmMessage());                
             }
         }
+    }
+    
+    /*
+    Similar to bug #10061
+	Steps to Reproduce:
+	1. As User A, having the required access rights, create a new appointment in
+	User B's personal calendar
+	2. As User B, add one or more participants
+	3. As User A, access the shared calendar and shift the appointment one hour
+	earlier
+	Actual Results:
+	The participants are removed from the appointment!	
+    */
+    public void testBug10154() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");
+        
+        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");        
+        int uid2 = resolveUser(user2);        
+        SessionObject so2 = SessionObjectWrapper.createSessionObject(uid2, context.getContextId(), "myTestIdentifier");
+        
+        String user3 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant1", "");
+        int userid3 = resolveUser(user3);        
+        
+        Participant p1 = new UserParticipant(userid);
+        Participant p2 = new UserParticipant(uid2);
+        Participant p3 = new UserParticipant(userid3);        
+        
+        Connection readcon = DBPool.pickup(context);
+        Connection writecon = DBPool.pickupWriteable(context);        
+        
+        int fid = getPrivateFolder(userid);
+        final OXFolderManager oxma = new OXFolderManagerImpl(so, readcon, writecon);
+        FolderObject fo = new FolderObject();
+        
+        OCLPermission oclp1 = new OCLPermission();
+        oclp1.setEntity(userid);
+        oclp1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        oclp1.setFolderAdmin(true);
+        OCLPermission oclp2 = new OCLPermission();
+        oclp2.setEntity(uid2);
+        oclp2.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+        fo.setFolderName("testSharedFolder10154");
+        fo.setParentFolderID(fid);
+        fo.setModule(FolderObject.CALENDAR);
+        fo.setType(FolderObject.PRIVATE);
+        fo.setPermissionsAsArray(new OCLPermission[] { oclp1, oclp2 });       
+        
+        int shared_folder_id = 0;
+        try {
+            fo = oxma.createFolder(fo, true, System.currentTimeMillis());
+            shared_folder_id = fo.getObjectID();       
+            
+            CalendarSql csql = new CalendarSql(so);
+            CalendarSql csql2 = new CalendarSql(so2);
+
+            CalendarDataObject cdao = new CalendarDataObject();
+            cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+            cdao.setParentFolderID(shared_folder_id);
+            CalendarTest.fillDatesInDao(cdao);
+            cdao.setTitle("testBug10154 - step 1");
+            cdao.setIgnoreConflicts(true);
+            
+            csql2.insertAppointmentObject(cdao);        
+            int object_id = cdao.getObjectID();
+            assertTrue("Object was created", object_id > 0);            
+            
+            CalendarDataObject update = new CalendarDataObject();
+            update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+            Participants participants = new Participants();
+            participants.add(p1);
+            participants.add(p2);
+            participants.add(p3);            
+            update.setParticipants(participants.getList());
+            update.setIgnoreConflicts(true);
+            update.setObjectID(object_id);
+            update.setTitle("testBug10154 - step 2");
+
+            csql.updateAppointmentObject(update, shared_folder_id, new Date(SUPER_END));            
+            
+            
+            CalendarDataObject update2 = new CalendarDataObject();
+            update2.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+            update2.setObjectID(object_id);
+            Date check_start_date = new Date(cdao.getStartDate().getTime()+3600000); // move 1 h
+            Date check_end_date = new Date(cdao.getEndDate().getTime()+3600000); // move 1 h
+            update2.setStartDate(check_start_date); 
+            update2.setEndDate(check_end_date); 
+            update2.setTitle("testBug10154 - step 3");
+            
+            csql2.updateAppointmentObject(update2, shared_folder_id, new Date(SUPER_END));
+            
+            CalendarDataObject temp = csql.getObjectById(object_id, shared_folder_id);
+            UserParticipant up[] = temp.getUsers();
+            int check[] = { userid, uid2, userid3 } ;
+            assertEquals("Check participants", 3, check.length);
+            
+            Arrays.sort(up);
+            Arrays.sort(check);
+                        
+            for (int a = 0; a < check.length; a++) {
+            	int x = Arrays.binarySearch(check, up[a].getIdentifier());
+            	if (x < 0) {
+            		fail("User "+up[a].getIdentifier() + " not found!");
+            	}
+            }
+            
+        } finally {
+            try {
+                if (shared_folder_id > 0) {
+                    oxma.deleteFolder(new FolderObject(shared_folder_id), true, SUPER_END);
+                } 
+            } catch(Exception e) {
+                e.printStackTrace();
+                fail("Error deleting folder object.");
+            }
+        }
+        try {
+            DBPool.push(context, readcon);
+            DBPool.pushWrite(context, writecon);        
+        } catch(Exception ignore) { 
+            ignore.printStackTrace();
+        }                
+    
     }
     
 }
