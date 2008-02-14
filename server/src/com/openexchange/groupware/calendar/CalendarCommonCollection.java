@@ -64,6 +64,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.jcs.access.exception.CacheException;
 
+import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.event.impl.EventClient;
@@ -283,6 +284,8 @@ public class CalendarCommonCollection {
                 return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.READ);
             }
             return loadObjectAndCheckPermisions(oid, fid, so, ctx, CalendarOperation.READ);
+        } catch(OXObjectNotFoundException onfe) {
+        	throw onfe;
         } catch(final Exception ex) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, ex);
         }
