@@ -7,7 +7,7 @@ STARTSCRIPT=/opt/open-xchange/sbin/open-xchange-admindaemon
 NAME=open-xchange-admin
 DESC="Open-Xchange Admin Daemon"
 DEFAULTS=/etc/default/open-xchange-admin
-OXFUNCTIONS=/opt/open-xchange/etc/admindaemon/oxfunctions.sh
+OXFUNCTIONS=/opt/open-xchange/etc/oxfunctions.sh
 
 # Defaults - don't touch, edit /etc/default/open-xchange-admin
 ENABLED=0
