@@ -84,7 +84,7 @@ public class PushInit implements Initialization {
 	private PushSocket input;
 
 	private PushConfigInterface config;
-	
+
 	private final AtomicBoolean started = new AtomicBoolean();
 
 	/**
@@ -109,30 +109,31 @@ public class PushInit implements Initialization {
 			LOG.error("Duplicate push initialization.");
 			return;
 		}
-		
-		final Configuration conf = ConfigurationService.getInstance().getService();
-		if (conf != null) {
-			try {
-				config = new PushConfigInterfaceImpl(conf);
-			} finally  {
-				ConfigurationService.getInstance().ungetService(conf);
-			}
 
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Starting Push UDP");
+		Configuration conf = null;
+		try {
+			conf = ConfigurationService.getInstance().getService();
+			if (conf != null) {
+				config = new PushConfigInterfaceImpl(conf);
 			}
-			
-			if (config != null) {
-		        input = new PushSocket(config);
-		        output = new PushOutputQueue(config);
-				
-				multicast = new PushMulticastSocket(config);
-				requestTimer = new PushMulticastRequestTimer(config);
-				
-				started.set(true);
-			} else {
-				throw new PushUDPException(PushUDPException.Code.PUSH_UDP_EXCEPTION);
-			}
+		} finally {
+			ConfigurationService.getInstance().ungetService(conf);
+		}
+
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Starting Push UDP");
+		}
+
+		if (config != null) {
+			input = new PushSocket(config);
+			output = new PushOutputQueue(config);
+
+			multicast = new PushMulticastSocket(config);
+			requestTimer = new PushMulticastRequestTimer(config);
+
+			started.set(true);
+		} else {
+			throw new PushUDPException(PushUDPException.Code.PUSH_UDP_EXCEPTION);
 		}
 	}
 
@@ -152,10 +153,10 @@ public class PushInit implements Initialization {
 		output = null;
 		input.close();
 		input = null;
-		
+
 		started.set(true);
 	}
-	
+
 	public boolean isStarted() {
 		return started.get();
 	}
