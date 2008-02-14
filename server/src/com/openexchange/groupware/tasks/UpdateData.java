@@ -261,6 +261,10 @@ class UpdateData {
         return origFolders;
     }
 
+    /**
+     * @return the set of folder that will be in the database after the update.
+     * @throws TaskException if some problem occurs.
+     */
     Set<Folder> getUpdatedFolder() throws TaskException {
         if (null == updatedFolders) {
             updatedFolders = getOrigFolder();
@@ -334,6 +338,19 @@ class UpdateData {
                 removedFolder.addAll(TaskLogic.createFolderMapping(
                     ParticipantStorage.extractInternal(removed)));
             }
+        }
+        // If the creator is added as participant its folder mapping must be
+        // removed.
+        addedFolder.removeAll(origFolders);
+        // Check if updated folders will be empty - last participant has been
+        // removed.
+        final Set<Folder> updated = getUpdatedFolder();
+        if (updated.isEmpty()) {
+            // add creators folder mapping.
+            final int creator = origTask.getCreatedBy();
+            addedFolder.add(new Folder(Tools.getUserTaskStandardFolder(ctx,
+                creator), creator));
+            updatedFolders = null;
         }
         preparedFolder = true;
     }
@@ -491,6 +508,9 @@ class UpdateData {
         return folder.getObjectID();
     }
 
+    /**
+     * @return the identifier of the updating user.
+     */
     private int getUserId() {
         return user.getId();
     }
