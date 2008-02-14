@@ -1,3 +1,9 @@
+* 2008-02-14 - martin.kauss@open-xchange.com
+
+ - Fixed bug #10154,  If a user changes an appointment in a shared folder
+   all participants except the owner of the shared folder are removed.
+   This has been fixed.
+
 * 2008-02-14 - marcus.klein@open-xchange.com
 
  - Bugfix #10400: Fixed bad handling of folder mapping when adding/removing
