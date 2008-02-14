@@ -121,7 +121,7 @@
     </target>
 
 	<target name="installScripts">
-        <mkdir dir="${destdir}/${prefix}/${oxconfdir}"/>
+        <mkdir dir="${destdir}/${prefix}/${etcdir}"/>
 		<copy todir="${destdir}/${prefix}/${etcdir}">
             <fileset dir="etc">
                 <include name="*"/>
