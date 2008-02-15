@@ -1527,7 +1527,7 @@ public class CalendarRecurringTests extends TestCase {
         }                        
         
     }
-
+    
     public void testCreateAndDeleteException() throws Throwable {
         Context context = new ContextImpl(contextid);
         SessionObject so = SessionObjectWrapper.createSessionObject(userid, context.getContextId(), "myTestIdentifier");
@@ -1582,6 +1582,10 @@ public class CalendarRecurringTests extends TestCase {
         CalendarDataObject testobject = csql.getObjectById(exception_object_id, folder_id);
         assertTrue("Got correct exception", 3 == testobject.getRecurrencePosition());
         
+        assertTrue("Check if recurring_id is set", testobject.containsRecurrenceID());
+        assertTrue("Check if recurring_id ("+testobject.getRecurrenceID()+") > 0 ", testobject.getRecurrenceID() > 0);
+        assertEquals("Check if object is still a recurring event", true, testobject.isSequence());        
+        
         // Now delete the existing exception with the global recurring instead
         // with the direct delete command
         
@@ -1590,11 +1594,18 @@ public class CalendarRecurringTests extends TestCase {
         delete.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
         delete.setObjectID(object_id);
         delete.setIgnoreConflicts(true);        
+        delete.setTitle("testCreateAndDeleteException - delete single exception and change title");
         Date changed_exceptions[] = testobject.getChangeException();
         assertTrue("Got changed exceptions", changed_exceptions != null);
         delete.setDeleteExceptions(new Date[] { changed_exceptions[0] });
         
         csql.updateAppointmentObject(delete, folder_id, new Date(SUPER_END));
+        
+        CalendarDataObject test_dao = csql.getObjectById(object_id, folder_id);
+        assertTrue("Check if recurring_id is set", test_dao.containsRecurrenceID());
+        assertTrue("Check if recurring_id ("+test_dao.getRecurrenceID()+") > 0 ", test_dao.getRecurrenceID() > 0);
+        assertEquals("Check if object is still a recurring event", true, test_dao.isSequence());
+        
         
         try {
         	CalendarDataObject check_object = csql.getObjectById(exception_object_id, folder_id);
