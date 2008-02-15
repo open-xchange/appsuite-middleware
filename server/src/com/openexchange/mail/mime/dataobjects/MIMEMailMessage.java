@@ -75,6 +75,8 @@ public final class MIMEMailMessage extends MailMessage {
 
 	private long uid = -1L;
 
+	private int unreadMessages;
+
 	/**
 	 * Constructor - Constructs an empty mail message
 	 */
@@ -189,6 +191,21 @@ public final class MIMEMailMessage extends MailMessage {
 	@Override
 	public void prepareForCaching() {
 		mailPart.prepareForCaching();
+	}
+
+	/**
+	 * Sets the number of unread messages
+	 * 
+	 * @param unreadMessages
+	 *            The number of unread messages
+	 */
+	public void setUnreadMessages(final int unreadMessages) {
+		this.unreadMessages = unreadMessages;
+	}
+
+	@Override
+	public int getUnreadMessages() {
+		return unreadMessages;
 	}
 
 }

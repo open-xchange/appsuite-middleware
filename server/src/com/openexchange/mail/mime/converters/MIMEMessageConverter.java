@@ -954,6 +954,10 @@ public final class MIMEMessageConverter {
 			}
 			mail.setSize(msg.getSize());
 			mail.setSubject(msg.getSubject());
+			if (msg.getFolder() != null) {
+				mail.setUnreadMessages(mail.isSeen() ? msg.getFolder().getUnreadMessageCount() : msg.getFolder()
+						.getUnreadMessageCount() - 1);
+			}
 			return mail;
 		} catch (final MessagingException e) {
 			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());

@@ -1244,4 +1244,11 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	 *            The mail ID
 	 */
 	public abstract void setMailId(final long id);
+
+	/**
+	 * Gets the number of unread messages
+	 * 
+	 * @return The number of unread messages
+	 */
+	public abstract int getUnreadMessages();
 }

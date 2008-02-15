@@ -61,8 +61,8 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.MIMETypes;
 
 /**
- * {@link CompositeMailMessage} - Extends the common {@link MailMessage} class by
- * the possibility to add extra parts to an existing {@link MailMessage}
+ * {@link CompositeMailMessage} - Extends the common {@link MailMessage} class
+ * by the possibility to add extra parts to an existing {@link MailMessage}
  * instance whose MIME type is <code>multipart/*</code>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -285,6 +285,11 @@ public final class CompositeMailMessage extends MailMessage {
 	@Override
 	public void setMailId(final long id) {
 		delegate.setMailId(id);
+	}
+
+	@Override
+	public int getUnreadMessages() {
+		return delegate.getUnreadMessages();
 	}
 
 }

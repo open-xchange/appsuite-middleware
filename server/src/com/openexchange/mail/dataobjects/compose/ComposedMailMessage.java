@@ -70,6 +70,11 @@ public abstract class ComposedMailMessage extends MailMessage {
 		super();
 	}
 
+	@Override
+	public int getUnreadMessages() {
+		throw new UnsupportedOperationException("ComposedMailMessage.getUnreadMessages() not supported");
+	}
+
 	/**
 	 * Gets the referenced mail of this composed mail
 	 * 

@@ -122,7 +122,13 @@ public final class MessageWriter {
 		}
 		final JSONMessageHandler handler = new JSONMessageHandler(mailPath, displayVersion, session);
 		new MailMessageParser().parseMailMessage(mail, handler);
-		return handler.getJSONObject();
+		final JSONObject jObject = handler.getJSONObject();
+		try {
+			jObject.put(MailJSONField.UNREAD.getKey(), mail.getUnreadMessages());
+		} catch (final JSONException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		return jObject;
 	}
 
 	public static interface MailFieldWriter {
@@ -516,9 +522,9 @@ public final class MessageWriter {
 							 * TODO: Total, New, Unread, and Deleted count
 							 */
 							if (withKey) {
-								((JSONObject) jsonContainer).put(MailJSONField.UNREAD.getKey(), JSONObject.NULL);
+								((JSONObject) jsonContainer).put(MailJSONField.UNREAD.getKey(), mail.getUnreadMessages());
 							} else {
-								((JSONArray) jsonContainer).put(JSONObject.NULL);
+								((JSONArray) jsonContainer).put(mail.getUnreadMessages());
 							}
 						} catch (final JSONException e) {
 							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
