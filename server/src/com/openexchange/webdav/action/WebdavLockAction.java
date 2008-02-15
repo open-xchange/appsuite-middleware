@@ -80,8 +80,7 @@ public class WebdavLockAction extends AbstractAction {
 			throws WebdavException {
 		final WebdavLock lock = new WebdavLock();
 		
-		
-		lock.setTimeout(getTimeout(req.getHeader("Timeout")) * 1000);
+		lock.setTimeout(getTimeout(req.getHeader("Timeout")));
 		lock.setDepth(getDepth(req.getHeader("Depth")));
 		
 		try {
@@ -152,7 +151,7 @@ public class WebdavLockAction extends AbstractAction {
 
 	private long getTimeout(String header) {
 		if(null == header) {
-			return 600;
+			return 600 * 1000;
 		}
 		if(header.indexOf(',') != -1) {
 			header = header.substring(0,header.indexOf(',')).trim();
@@ -161,7 +160,7 @@ public class WebdavLockAction extends AbstractAction {
 			return WebdavLock.NEVER;
 		}
 		
-		return Long.parseLong(header.substring(7));
+		return Long.parseLong(header.substring(7)) * 1000;
 	}
 
 }
