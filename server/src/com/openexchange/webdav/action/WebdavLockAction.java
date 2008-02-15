@@ -81,7 +81,7 @@ public class WebdavLockAction extends AbstractAction {
 		final WebdavLock lock = new WebdavLock();
 		
 		
-		lock.setTimeout(getTimeout(req.getHeader("Timeout")));
+		lock.setTimeout(getTimeout(req.getHeader("Timeout")) * 1000);
 		lock.setDepth(getDepth(req.getHeader("Depth")));
 		
 		try {
