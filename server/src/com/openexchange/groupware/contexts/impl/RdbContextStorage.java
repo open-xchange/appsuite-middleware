@@ -248,10 +248,8 @@ public class RdbContextStorage extends ContextStorage {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(con);
         }
-        if (null != context) {
-            context.setMailadmin(getMailadmin(context));
-            context.setLoginInfo(getLoginInfos(context));
-        }
+        context.setMailadmin(getMailadmin(context));
+        context.setLoginInfo(getLoginInfos(context));
         return context;
     }
 

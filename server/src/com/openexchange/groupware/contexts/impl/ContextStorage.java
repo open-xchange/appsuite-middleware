@@ -55,8 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.update.Updater;
-import com.openexchange.groupware.update.exception.UpdateException;
+import com.openexchange.groupware.contexts.impl.ContextException.Code;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.session.Session;
 
@@ -115,20 +114,9 @@ public abstract class ContextStorage {
      */
     public Context getContext(final int contextId) throws ContextException {
         final Context retval = loadContext(contextId);
-        // Check for update.
-        try {
-            final Updater updater = Updater.getInstance();
-            if (updater.toUpdate(retval)) {
-                updater.startUpdate(retval);
-                throw new ContextException(ContextException.Code.UPDATE);
-            }
-            if (updater.isLocked(retval)) {
-                throw new ContextException(ContextException.Code.UPDATE);
-            }
-        } catch (UpdateException e) {
-            throw new ContextException(e);
+        if (retval.isUpdating()) {
+            throw new ContextException(Code.UPDATE);
         }
-        // Lock context.
         return retval;
     }
 
@@ -144,6 +132,7 @@ public abstract class ContextStorage {
     /**
      * Invalidates the context object in cache(s).
      * @param contextId unique identifier of the context to invalidate
+     * @throws ContextException 
      * @throws ContextException if invalidating the context fails
      */
     public void invalidateContext(final int contextId) throws ContextException {
@@ -156,10 +145,10 @@ public abstract class ContextStorage {
     /**
      * Invalidates a login information in the cache.
      * @param loginContextInfo login information to invalidate.
+     * @throws ContextException 
      * @throws ContextException if invalidating the login information fails.
      */
-    public void invalidateLoginInfo(final String loginContextInfo)
-        throws ContextException {
+    public void invalidateLoginInfo(final String loginContextInfo) throws ContextException {
         if (LOG.isTraceEnabled()) {
             LOG.trace("invalidateLoginInfo not implemented in " + this
                 .getClass().getCanonicalName());

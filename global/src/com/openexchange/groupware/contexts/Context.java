@@ -109,6 +109,13 @@ public interface Context {
     boolean isEnabled();
 
     /**
+     * Returns if a context is being updated. This will be <code>true</code> if
+     * the schema is being updated the context is stored in. 
+     * @return <code>true</code> if an update takes place. 
+     */
+    boolean isUpdating();
+
+    /**
      * @return the context specific location inside the filestore.
      */
     String getFilestoreName();

@@ -103,6 +103,11 @@ public class ContextImpl implements ContextExtended, Serializable {
     private boolean enabled = true;
 
     /**
+     * Is the context being updated.
+     */
+    private boolean updating = false;
+
+    /**
      * Default constructor.
      * @param contextId Unique identifier.
      */
@@ -240,5 +245,19 @@ public class ContextImpl implements ContextExtended, Serializable {
      */
     protected void setLoginInfo(final String[] loginInfo) {
         this.loginInfo = loginInfo.clone();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setUpdating(final boolean updating) {
+        this.updating = updating;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isUpdating() {
+        return updating;
     }
 }

@@ -59,13 +59,13 @@ import com.openexchange.groupware.contexts.Context;
  *
  */
 public interface ContextExtended extends Context {
-	
+
 	/**
-	 * Sets context's enabled status. This causes sessions that belong to a disabled
-	 * context to die as fast as possible to be able to maintain these
+	 * Sets context's update status. This causes sessions that belong to a
+	 * updating context to die as fast as possible to be able to maintain these
 	 * contexts.
-	 * @param enabled - the sontext's enabled status
+	 * @param updating - the context's update status
 	 */
-	void setEnabled(boolean enabled);
-	
+	void setUpdating(boolean updating);
+
 }

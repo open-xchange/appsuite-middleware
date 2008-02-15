@@ -63,6 +63,7 @@ import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.impl.ContextException.Code;
 import com.openexchange.groupware.update.Updater;
+import com.openexchange.groupware.update.exception.UpdateException;
 
 /**
  * This class implements a caching for the context storage. It provides a proxy
@@ -122,7 +123,7 @@ public class CachingContextStorage extends ContextStorage {
             	LOG.trace("Cache MISS. Login info: " + loginInfo);
             }
             contextId = Integer.valueOf(persistantImpl.getContextId(loginInfo));
-            if (NOT_FOUND != contextId) {
+            if (NOT_FOUND != contextId.intValue()) {
                 try {
                     cache.put(loginInfo, contextId);
                 } catch (CacheException e) {
@@ -151,7 +152,10 @@ public class CachingContextStorage extends ContextStorage {
                     contextId);
                 final Updater updater = Updater.getInstance();
                 if (updater.isLocked(retval)) {
-                    retval.setEnabled(false);
+                    retval.setUpdating(true);
+                } else if (updater.toUpdate(retval)) {
+                    updater.startUpdate(retval);
+                    retval.setUpdating(true);
                 }
                 return retval;
             }
@@ -159,8 +163,15 @@ public class CachingContextStorage extends ContextStorage {
                 return CACHE_LOCK;
             }
         };
+        // Initial check if context exists.
         if (null == cache.get(factory.getKey())) {
-            persistantImpl.loadContext(contextId);
+            try {
+                cache.put(factory.getKey(), factory.load());
+            } catch (CacheException e) {
+                throw new ContextException(Code.CACHE_PUT, e);
+            } catch (AbstractOXException e) {
+                throw new ContextException(e);
+            }
         }
     	return CacheProxy.getCacheProxy(factory, cache, ContextExtended.class);
     }
@@ -232,6 +243,7 @@ public class CachingContextStorage extends ContextStorage {
     public void invalidateLoginInfo(final String loginContextInfo)
         throws ContextException {
         if (null == cache) {
+            // Cache not initialized, yet.
             return;
         }
         CACHE_LOCK.lock();
