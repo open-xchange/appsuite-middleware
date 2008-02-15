@@ -64,6 +64,18 @@ ox_set_JAVA_BIN() {
     test -x $JAVA_BIN || die "$0: unable to get path to java vm"
 }
 
+DEBIAN=1
+LSB=2
+ox_system_type() {
+    if [ -f /etc/debian_version ]; then
+	return 1
+    elif [ -f /etc/SuSE-release ]; then
+	return 2
+    else
+	return 0
+    fi
+}
+
 # init script stuff
 
 ox_start_daemon() {
@@ -77,9 +89,21 @@ ox_start_daemon() {
     test -n "$user"   && runasuser="--chuid $user"
     local runasgroup=
     test -n "$group"  && runasgroup="--group $group"
-    start-stop-daemon $runasuser $runasgroup \
-    	--background --start --oknodo --startas $path \
-	--make-pidfile --pidfile /var/run/${name}.pid
+    ox_system_type
+    local type=$?
+    if [ $type -eq $DEBIAN ]; then
+	start-stop-daemon $runasuser $runasgroup \
+	    --background --start --oknodo --startas $path \
+	    --make-pidfile --pidfile /var/run/${name}.pid
+    elif [ $type -eq $LSB ]; then
+	if [ -n "$user" ] && [ "$user" != "root" ]; then
+	    su -c $path & echo $! > /var/run/${name}.pid
+	else
+	    $path & echo $! > /var/run/${name}.pid
+	fi
+    else
+	die "Unable to handle unknown system type"
+    fi
 }
 
 ox_stop_daemon() {
@@ -88,10 +112,22 @@ ox_stop_daemon() {
     test -z "$path" && die "ox_stop_daemon: missing path argument (arg 1)"
     test -z "$name" && die "ox_stop_daemon: missing name argument (arg 2)"
     test -x $path ||   die "ox_stop_daemon: $path is not executable"
-    #FIXME: --retry results into annoying warnings
-    #start-stop-daemon --stop --oknodo --pidfile /var/run/${name}.pid --retry 5
-    start-stop-daemon --stop --oknodo --pidfile /var/run/${name}.pid
-    rm -f /var/run/${name}.pid
+    ox_system_type
+    local type=$?
+    if [ $type -eq $DEBIAN ] ; then
+	start-stop-daemon --stop --oknodo --pidfile /var/run/${name}.pid
+	rm -f /var/run/${name}.pid
+    elif [ $type -eq $LSB ]; then
+	read PID < /var/run/${name}.pid
+	test -z "$PID" && { echo "unable to read pid"; return 1; }
+	if ! ps $PID > /dev/null; then
+	    # LSB not running
+	    return 7
+	fi
+	kill -TERM $PID
+    else
+	die "Unable to handle unknown system type"
+    fi
 }
 
 ox_restart_daemon() {
