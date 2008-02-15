@@ -254,9 +254,12 @@ public class LocalFileStorage extends FileStorage {
         final File lock = new File(storage, LOCK_FILENAME);
         final long maxLifeTime = 100 * timeout;
         final long lastModified = lock.lastModified();
-        if (lock.exists()
+        if (lastModified > 0 
             && lastModified + maxLifeTime < System.currentTimeMillis()) {
             lock.delete();
+            LOG.error("Deleting a very old stale lock file here "
+                + lock.getAbsolutePath() + ". Assuming it has not been removed "
+                + "by a crashed/restartet application.");
         }
         final long failTime = System.currentTimeMillis() + timeout;
         boolean created = false;
@@ -281,7 +284,9 @@ public class LocalFileStorage extends FileStorage {
             }
         } while (!created && System.currentTimeMillis() < failTime);
         if (!created) {
-        	LOG.error("Cannot create Lock file. Either there is a stale .lock file here "+lock.getAbsolutePath()+" or the filestore was used too long.");
+        	LOG.error("Cannot create lock file. Either there is a stale .lock "
+        	    + "file here " + lock.getAbsolutePath()
+        	    + " or the filestore was used too long.");
             throw new FileStorageException(FileStorageException.Code.LOCK);
         }
     }
