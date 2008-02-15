@@ -72,7 +72,7 @@ public class I18nServiceListener implements ServiceTrackerCustomizer{
         this.context = context;
 	}
 	
-	public Object addingService(ServiceReference reference) {
+	public Object addingService(final ServiceReference reference) {
         final I18nTools i18n = (I18nTools)context.getService(reference); 
         
         LOG.info("Adding Service Bundle I18nTools "+i18n.getLocale());
@@ -82,17 +82,21 @@ public class I18nServiceListener implements ServiceTrackerCustomizer{
 		return i18n;
 	}
 
-	public void modifiedService(ServiceReference reference, Object service) {
+	public void modifiedService(final ServiceReference reference, final Object service) {
 		// TODO Auto-generated method stub
 		
 	}
 
-	public void removedService(ServiceReference reference, Object service) {
-        final I18nTools i18n = (I18nTools)context.getService(reference);
-        
-        LOG.info("Removing Service Bundle I18nTools "+i18n.getLocale());
-        
-        services.removeService(i18n.getLocale(), i18n); 
+	public void removedService(final ServiceReference reference, final Object service) {
+        try {
+			final I18nTools i18n = (I18nTools)context.getService(reference);
+	        
+	        LOG.info("Removing Service Bundle I18nTools "+i18n.getLocale());
+	        
+	        services.removeService(i18n.getLocale(), i18n);
+        } finally {
+        	context.ungetService(reference);
+        }
 	}
 
 }

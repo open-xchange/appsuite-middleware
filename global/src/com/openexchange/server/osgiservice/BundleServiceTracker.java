@@ -157,20 +157,23 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer {
 	 *      java.lang.Object)
 	 */
 	public final void removedService(final ServiceReference reference, final Object service) {
-		if (serviceClass.isInstance(service)) {
-			try {
-				if (serviceHolder != null) {
-					serviceHolder.removeService();
+		try {
+			if (serviceClass.isInstance(service)) {
+				try {
+					if (serviceHolder != null) {
+						serviceHolder.removeService();
+					}
+					removedServiceInternal();
+				} catch (final Exception e) {
+					LOG.error(e.getLocalizedMessage(), e);
 				}
-				removedServiceInternal();
-			} catch (final Exception e) {
-				LOG.error(e.getLocalizedMessage(), e);
 			}
+		} finally {
+			/*
+			 * Release service
+			 */
+			context.ungetService(reference);
 		}
-		/*
-		 * Release service
-		 */
-		context.ungetService(reference);
 	}
 
 	/**
