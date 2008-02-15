@@ -87,6 +87,7 @@
             <replacefilter token="@oxfunctions@" value="${conf.install.dir}/oxfunctions.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
         </replace>
+    	<chmod perm="755" dir="${destdir}/${sbindir}" includes="*"/>
     </target>
 
     <!-- Dist -->
