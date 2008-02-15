@@ -114,7 +114,7 @@ public final class SMTPTransport extends MailTransport {
 
 	private static final String CHARENC_ISO_8859_1 = "ISO-8859-1";
 
-	private final javax.mail.Session smtpSession;
+	private javax.mail.Session smtpSession;
 
 	private final Session session;
 
@@ -153,37 +153,20 @@ public final class SMTPTransport extends MailTransport {
 	public SMTPTransport(final Session session) throws MailException {
 		super();
 		this.session = session;
-		final Properties smtpProps = SMTPSessionProperties.getDefaultSessionProperties();
-		final SMTPConfig smtpConfig = getTransportConfig();
-		if (smtpConfig.getError() != null) {
-			throw new SMTPException(smtpConfig.getError());
-		}
-		/*
-		 * Check if a secure SMTP connection should be established
-		 */
-		if (smtpConfig.isSecure()) {
-			smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS, CLASSNAME_SECURITY_FACTORY);
-			smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_PORT, String.valueOf(smtpConfig
-					.getPort()));
-			smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK, "false");
-			smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_STARTTLS_ENABLE, "true");
+		if (session == null) {
 			/*
-			 * Needed for JavaMail >= 1.4
+			 * Dummy instance
 			 */
-			Security.setProperty(PROPERTY_SECURITY_PROVIDER, CLASSNAME_SECURITY_FACTORY);
+			this.ctx = null;
+			usm = null;
+		} else {
+			try {
+				this.ctx = ContextStorage.getStorageContext(session.getContextId());
+			} catch (final ContextException e) {
+				throw new SMTPException(e);
+			}
+			usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
 		}
-		/*
-		 * Apply host & port to SMTP session
-		 */
-		smtpProps.put(MIMESessionPropertyNames.PROP_SMTPHOST, smtpConfig.getServer());
-		smtpProps.put(MIMESessionPropertyNames.PROP_SMTPPORT, String.valueOf(smtpConfig.getPort()));
-		this.smtpSession = javax.mail.Session.getInstance(smtpProps, null);
-		try {
-			this.ctx = ContextStorage.getStorageContext(session.getContextId());
-		} catch (final ContextException e) {
-			throw new SMTPException(e);
-		}
-		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
 	}
 
 	private void clearUp() {
@@ -202,6 +185,34 @@ public final class SMTPTransport extends MailTransport {
 	@Override
 	public void close() {
 		clearUp();
+	}
+
+	private javax.mail.Session getSMTPSession() throws MailException {
+		if (null == smtpSession) {
+			final Properties smtpProps = SMTPSessionProperties.getDefaultSessionProperties();
+			final SMTPConfig smtpConfig = getTransportConfig();
+			/*
+			 * Check if a secure SMTP connection should be established
+			 */
+			if (smtpConfig.isSecure()) {
+				smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS, CLASSNAME_SECURITY_FACTORY);
+				smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_PORT, String.valueOf(smtpConfig
+						.getPort()));
+				smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK, "false");
+				smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_STARTTLS_ENABLE, "true");
+				/*
+				 * Needed for JavaMail >= 1.4
+				 */
+				Security.setProperty(PROPERTY_SECURITY_PROVIDER, CLASSNAME_SECURITY_FACTORY);
+			}
+			/*
+			 * Apply host & port to SMTP session
+			 */
+			smtpProps.put(MIMESessionPropertyNames.PROP_SMTPHOST, smtpConfig.getServer());
+			smtpProps.put(MIMESessionPropertyNames.PROP_SMTPPORT, String.valueOf(smtpConfig.getPort()));
+			smtpSession = javax.mail.Session.getInstance(smtpProps, null);
+		}
+		return smtpSession;
 	}
 
 	private SMTPConfig getTransportConfig() throws MailException {
@@ -223,7 +234,7 @@ public final class SMTPTransport extends MailTransport {
 				throw new SMTPException(SMTPException.Code.MISSING_NOTIFICATION_HEADER, MessageHeaders.HDR_DISP_TO,
 						Long.valueOf(srcMail.getMailId()));
 			}
-			final SMTPMessage smtpMessage = new SMTPMessage(smtpSession);
+			final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession());
 			final User u = UserStorage.getStorageUser(session.getUserId(), ctx);
 			/*
 			 * Set from
@@ -300,7 +311,7 @@ public final class SMTPTransport extends MailTransport {
 			 * Transport message
 			 */
 			final long start = System.currentTimeMillis();
-			final Transport transport = smtpSession.getTransport(SMTPProvider.PROTOCOL_SMTP);
+			final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP);
 			if (SMTPConfig.isSmtpAuth()) {
 				final SMTPConfig config = getTransportConfig();
 				transport.connect(config.getServer(), config.getPort(), config.getLogin(), encodePassword(config
@@ -335,7 +346,7 @@ public final class SMTPTransport extends MailTransport {
 			}
 			try {
 				final long start = System.currentTimeMillis();
-				final Transport transport = smtpSession.getTransport(SMTPProvider.PROTOCOL_SMTP);
+				final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP);
 				if (SMTPConfig.isSmtpAuth()) {
 					final SMTPConfig config = getTransportConfig();
 					transport.connect(config.getServer(), config.getPort(), config.getLogin(), encodePassword(config
@@ -370,7 +381,7 @@ public final class SMTPTransport extends MailTransport {
 			throws MailException {
 		try {
 			clearUp();
-			final SMTPMessage smtpMessage = new SMTPMessage(smtpSession);
+			final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession());
 			/*
 			 * Fill message dependent on send type
 			 */
@@ -399,7 +410,7 @@ public final class SMTPTransport extends MailTransport {
 			}
 			try {
 				final long start = System.currentTimeMillis();
-				final Transport transport = smtpSession.getTransport(SMTPProvider.PROTOCOL_SMTP);
+				final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP);
 				if (SMTPConfig.isSmtpAuth()) {
 					final SMTPConfig config = getTransportConfig();
 					transport.connect(config.getServer(), config.getPort(), config.getLogin(), encodePassword(config
