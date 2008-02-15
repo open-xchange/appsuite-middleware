@@ -1,3 +1,9 @@
+* 2008-02-15 - martin.kauss@open-xchange.com
+
+ - Fixed bug #10077. Deleting an existing exception by providing the
+   exception date in the deleted_exception field does not delete the
+   exception. This has been fixed.
+
 * 2008-02-14 - martin.kauss@open-xchange.com
 
  - Fixed bug #10154,  If a user changes an appointment in a shared folder
