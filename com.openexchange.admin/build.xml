@@ -110,6 +110,7 @@
     	<filter token="servletbundle"		   value="${bundlesdir}/${servletbundle}"/>
        	<filter token="loggingbundle"		   value="${bundlesdir}/${commonsloggingbundle}"/>
        	<filter token="osgiservicesbundle"	   value="${bundlesdir}/${osgiservicesbundle}"/>
+       	<filter token="oxcommonbundlelib"	   value="${bundlesdir}/${commonBundle}/lib"/>
     </filterset>
 
     <property name="test.xml.dir" location="test-results" />
