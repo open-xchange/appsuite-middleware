@@ -871,7 +871,11 @@ public final class MIMEMessageConverter {
 			 */
 			final MIMEMailMessage mail = new MIMEMailMessage(msg);
 			/*
-			 * Set all cacheable data
+			 * Parse flags
+			 */
+			parseFlags(msg.getFlags(), mail);
+			/*
+			 * Set folder data
 			 */
 			if (msg.getFolder() != null) {
 				/*
@@ -881,6 +885,7 @@ public final class MIMEMessageConverter {
 				mail.setFolder(f.getFullName());
 				mail.setSeparator(f.getSeparator());
 				mail.setMailId(((UIDFolder) f).getUID(msg));
+				mail.setUnreadMessages(mail.isSeen() ? f.getUnreadMessageCount() : f.getUnreadMessageCount() - 1);
 			}
 			setHeaders(msg, mail);
 			try {
@@ -943,7 +948,6 @@ public final class MIMEMessageConverter {
 				}
 			}
 			mail.setFileName(filename);
-			parseFlags(msg.getFlags(), mail);
 			parsePriority(mail.getHeader(MessageHeaders.HDR_X_PRIORITY), mail);
 			mail.removeHeader(MessageHeaders.HDR_X_PRIORITY);
 			if (msg.getReceivedDate() != null) {
@@ -954,10 +958,6 @@ public final class MIMEMessageConverter {
 			}
 			mail.setSize(msg.getSize());
 			mail.setSubject(msg.getSubject());
-			if (msg.getFolder() != null) {
-				mail.setUnreadMessages(mail.isSeen() ? msg.getFolder().getUnreadMessageCount() : msg.getFolder()
-						.getUnreadMessageCount() - 1);
-			}
 			return mail;
 		} catch (final MessagingException e) {
 			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
