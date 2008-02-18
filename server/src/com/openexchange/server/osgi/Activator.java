@@ -51,17 +51,14 @@ package com.openexchange.server.osgi;
 
 import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -73,8 +70,13 @@ import com.openexchange.config.Configuration;
 import com.openexchange.config.services.ConfigurationService;
 import com.openexchange.configjump.ConfigJumpInterface;
 import com.openexchange.i18n.I18nTools;
+import com.openexchange.mail.MailProvider;
+import com.openexchange.mail.osgi.MailProviderServiceTracker;
+import com.openexchange.mail.osgi.TransportProviderServiceTracker;
+import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.management.ManagementAgent;
 import com.openexchange.monitoring.MonitorInterface;
+import com.openexchange.server.ServiceHolderListener;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.server.services.ConfigJumpService;
@@ -106,6 +108,8 @@ public class Activator implements BundleActivator, EventHandler {
 	private final List<ServiceRegistration> registrationList = new ArrayList<ServiceRegistration>();
 
 	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
+
+	private ServiceHolderListener listener;
 	
 	/**
 	 * Bundle ID of admin.<br>
@@ -125,6 +129,27 @@ public class Activator implements BundleActivator, EventHandler {
 					new BundleServiceTracker<Configuration>(context, ConfigurationService.getInstance(),
 							Configuration.class)));
 			
+			// TODO: Remove when mail is bundled
+			ConfigurationService.getInstance().addServiceHolderListener((listener = new ServiceHolderListener<Configuration>() {
+
+				public void onServiceAvailable(final Configuration service) throws Exception {
+					/**
+					 * Mail initialization
+					 */
+					com.openexchange.mail.MailInitialization.getInstance().start();
+					/**
+					 * Transport initialization
+					 */
+					com.openexchange.mail.transport.TransportInitialization.getInstance().start();
+					
+				}
+
+				public void onServiceRelease() throws Exception {
+					// TODO Auto-generated method stub
+					
+				}
+			}));
+			
 		    // event service is always needed.
 			serviceTrackerList.add(new ServiceTracker(context, EventAdmin.class.getName(),
 					new BundleServiceTracker<EventAdmin>(context, EventAdminService.getInstance(),
@@ -132,6 +157,12 @@ public class Activator implements BundleActivator, EventHandler {
 			
 			// I18n service load
 			serviceTrackerList.add(new ServiceTracker(context, I18nTools.class.getName(), new I18nServiceListener(context)));
+		
+			// Mail provider service tracker
+			serviceTrackerList.add(new ServiceTracker(context, MailProvider.class.getName(), new MailProviderServiceTracker(context)));
+
+			// Transport provider service tracker
+			serviceTrackerList.add(new ServiceTracker(context, TransportProvider.class.getName(), new TransportProviderServiceTracker(context)));
 			
 			/*
 			 * Start server
@@ -199,6 +230,10 @@ public class Activator implements BundleActivator, EventHandler {
 					registration.unregister();
 				}
 				registrationList.clear();
+				
+				ConfigurationService.getInstance().removeServiceHolderListenerByRef(listener);
+				listener = null;
+				
 				/*
 				 * Close service trackers
 				 */
