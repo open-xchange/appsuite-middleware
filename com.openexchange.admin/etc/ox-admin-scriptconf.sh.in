@@ -3,6 +3,7 @@ OSGIBUNDLE=@oxosgibundle@
 SYSTEMPROPERTIES=@systemproperties@
 LOGGINGPROPERTIES=@loggingproperties@
 OSGIPATH=@oxprefix@/@oxconfdir@/osgi
+BUNDLELIBPATH=@oxcommonbundlelib@
 
 # when log4j should be used, these options should work:
 #
