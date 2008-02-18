@@ -3,6 +3,6 @@ PROPERTIESDIR=@propertiesdir@
 LOGGINGPROPERTIES=@loggingproperties@
 OSGIPATH=@oxgroupwaresysconfdir@/osgi
 
-JAVA_XTRAOPTS="-Xms193M -Xmx512M -XX:+AggressiveHeap"
+JAVA_XTRAOPTS="-Xms193M -Xmx512M -XX:+UseConcMarkSweepGC"
 
 NRFILES="8192"
