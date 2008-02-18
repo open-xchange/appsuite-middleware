@@ -6,9 +6,6 @@ MailProperties=@oxgroupwaresysconfdir@/mail.properties
 # General transport config
 TransportProperties=@oxgroupwaresysconfdir@/transport.properties
 
-# JavaMail Properties
-JavaMailProperties=@oxgroupwaresysconfdir@/javamail.properties
-
 # Name of the class implementing the mail connection
 MailProvider=com.openexchange.imap.IMAPProvider
 # ... and its config
