@@ -69,6 +69,7 @@ import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.Configuration;
 import com.openexchange.config.services.ConfigurationService;
 import com.openexchange.configjump.ConfigJumpInterface;
+import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.mail.MailProvider;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
@@ -163,6 +164,9 @@ public class Activator implements BundleActivator, EventHandler {
 
 			// Transport provider service tracker
 			serviceTrackerList.add(new ServiceTracker(context, TransportProvider.class.getName(), new TransportProviderServiceTracker(context)));
+			
+            // contacts
+			serviceTrackerList.add(new ServiceTracker(context, ContactInterface.class.getName(), new ContactServiceListener(context)));
 			
 			/*
 			 * Start server
