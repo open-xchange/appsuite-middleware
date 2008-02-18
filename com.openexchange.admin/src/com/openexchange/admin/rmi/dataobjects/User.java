@@ -433,7 +433,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
 
     private boolean telephone_telexset = false;
 
-    private TimeZone timezone;
+    private String timezone;
 
     private boolean timezoneset = false;
 
@@ -3249,7 +3249,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * @return A {@link String} containing the timezone
      */
     final public TimeZone getTimezone() {
-        return timezone;
+        return TimeZone.getTimeZone(timezone);
     }
 
     /**
@@ -3261,7 +3261,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         if (null == timezone) {
             this.timezoneset = true;
         }
-        this.timezone = timezone;
+        this.timezone = timezone.getID();
     }
 
     /**
@@ -4000,10 +4000,6 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         }
         if (null != this.language) {
             object.language = (Locale) this.language.clone();
-        }
-        if (null != this.timezone) {
-            // object.default_group
-            object.timezone = (TimeZone) this.timezone.clone();
         }
         return object;
     }
