@@ -233,14 +233,6 @@ public final class SystemConfig extends AbstractConfig implements
          */
         MimeTypeFile("MimeTypeFile"),
         /**
-         * The mail provider
-         */
-        MailProvider("MailProvider"),
-        /**
-         * The mail transport provider
-         */
-        TransportProvider("TransportProvider"),
-        /**
          * Mail cache configuration file.
          */
         MailCacheConfig("MailCacheConfig"),
