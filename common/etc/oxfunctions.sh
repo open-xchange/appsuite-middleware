@@ -97,9 +97,9 @@ ox_start_daemon() {
 	    --make-pidfile --pidfile /var/run/${name}.pid
     elif [ $type -eq $LSB ]; then
 	if [ -n "$user" ] && [ "$user" != "root" ]; then
-	    su -c $path & echo $! > /var/run/${name}.pid
+	    su -s /bin/bash $user -c $path > /dev/null 2>&1 & echo $! > /var/run/${name}.pid
 	else
-	    $path & echo $! > /var/run/${name}.pid
+	    $path > /dev/null 2>&1 & echo $! > /var/run/${name}.pid
 	fi
     else
 	die "Unable to handle unknown system type"
