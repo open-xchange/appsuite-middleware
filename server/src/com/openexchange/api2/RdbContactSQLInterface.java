@@ -75,6 +75,7 @@ import com.openexchange.groupware.contact.Classes;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionFactory;
+import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.contact.Contacts;
@@ -102,7 +103,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 		component=Component.CONTACT
 	)
 	
-public class RdbContactSQLInterface implements ContactSQLInterface {
+public class RdbContactSQLInterface implements ContactSQLInterface, ContactInterface {
 
 	private static final String ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D = "Unable to load objects. Context %1$d User %2$d";
 	private final int userId;
@@ -1298,6 +1299,10 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 		public boolean hasSize() {
 			return false;
 		}
+	}
+	
+	public int getFolderId() {
+		return 0;
 	}
 
 }
