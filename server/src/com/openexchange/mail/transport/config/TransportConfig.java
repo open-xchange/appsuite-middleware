@@ -49,7 +49,10 @@
 
 package com.openexchange.mail.transport.config;
 
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.config.MailConfig;
+import com.openexchange.session.Session;
 
 /**
  * {@link TransportConfig} - The user-specific transport configuration
@@ -69,12 +72,41 @@ public abstract class TransportConfig extends MailConfig {
 	}
 
 	/**
+	 * Gets the transport server URL appropriate to configured login type
+	 * 
+	 * @param user
+	 *            The user
+	 * @return The appropriate transport server URL or <code>null</code>
+	 */
+	public static String getTransportServerURL(final User user) {
+		if (LoginType.GLOBAL.equals(getLoginType())) {
+			return MailConfig.getTransportServer();
+		} else if (LoginType.USER.equals(getLoginType())) {
+			return user.getSmtpServer();
+		} else if (LoginType.ANONYMOUS.equals(getLoginType())) {
+			return user.getSmtpServer();
+		}
+		return null;
+	}
+
+	/**
+	 * Gets the transport server URL appropriate to configured login type
+	 * 
+	 * @param session
+	 *            The user session
+	 * @return The appropriate transport server URL or <code>null</code>
+	 */
+	public static String getTransportServerURL(final Session session) {
+		return getTransportServerURL(UserStorage.getStorageUser(session.getUserId(), session.getContextId()));
+	}
+
+	/**
 	 * Gets the referencedPartLimit
 	 * 
 	 * @return The referencedPartLimit
 	 */
 	public static int getReferencedPartLimit() {
-		return GlobalTransportConfig.getTransportInstance().getReferencedPartLimit();
+		return TransportProperties.getInstance().getReferencedPartLimit();
 	}
 
 }

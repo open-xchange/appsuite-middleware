@@ -114,7 +114,6 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
-import com.openexchange.smtp.dataobjects.SMTPMailMessage;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -337,7 +336,7 @@ public class MIMEMessageFiller {
 	 * @throws AddressException
 	 * @throws MessagingException
 	 */
-	public void setSendHeaders(final SMTPMailMessage mail, final SMTPMessage newSMTPMsg) throws AddressException,
+	public void setSendHeaders(final ComposedMailMessage mail, final SMTPMessage newSMTPMsg) throws AddressException,
 			MessagingException {
 		/*
 		 * Set the Reply-To header for future replies to this new message

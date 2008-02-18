@@ -55,7 +55,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.Message;
 
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailProvider;
 
 /**
  * {@link MIMEHeaderLoader} - Implementation-specific header loader.
@@ -65,9 +64,39 @@ import com.openexchange.mail.MailProvider;
  */
 public abstract class MIMEHeaderLoader {
 
+	/**
+	 * Remember initialization status
+	 */
 	private static final AtomicBoolean initialized = new AtomicBoolean();
 
+	private static Class<? extends MIMEHeaderLoader> clazz;
+
 	private static MIMEHeaderLoader instance;
+
+	/**
+	 * Sets the header loader class as indicated by mail provider
+	 * 
+	 * @param clazz
+	 *            The header loader class
+	 */
+	public static final void setClass(final Class<? extends MIMEHeaderLoader> clazz) {
+		MIMEHeaderLoader.clazz = clazz;
+	}
+
+	/**
+	 * Resets the header loader on mail shut-down
+	 */
+	public static final void resetClass() {
+		if (initialized.get()) {
+			synchronized (initialized) {
+				if (initialized.get()) {
+					instance = null;
+					initialized.set(false);
+				}
+			}
+		}
+		MIMEHeaderLoader.clazz = null;
+	}
 
 	/**
 	 * Gets the singleton instance of {@link MIMEHeaderLoader}
@@ -78,18 +107,19 @@ public abstract class MIMEHeaderLoader {
 	public static final MIMEHeaderLoader getInstance() throws MailException {
 		if (!initialized.get()) {
 			synchronized (initialized) {
-				try {
-					if (null == instance) {
-						instance = Class.forName(MailProvider.getInstance().getHeaderLoaderClass()).asSubclass(
-								MIMEHeaderLoader.class).newInstance();
+				if (!initialized.get()) {
+					try {
+						instance = clazz.asSubclass(MIMEHeaderLoader.class).newInstance();
 						initialized.set(true);
+					} catch (final InstantiationException e) {
+						instance = null;
+						initialized.set(false);
+						throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+					} catch (final IllegalAccessException e) {
+						instance = null;
+						initialized.set(false);
+						throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
 					}
-				} catch (final InstantiationException e) {
-					throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, e.getLocalizedMessage());
-				} catch (final IllegalAccessException e) {
-					throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, e.getLocalizedMessage());
-				} catch (final ClassNotFoundException e) {
-					throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, e.getLocalizedMessage());
 				}
 			}
 		}

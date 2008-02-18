@@ -47,99 +47,79 @@
  *
  */
 
-package com.openexchange.mail.permission;
+package com.openexchange.mail.config;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailProvider;
-import com.openexchange.server.Initialization;
-
 /**
- * {@link MailPermissionInit} - Initializes the mail permission implementation.
+ * {@link AbstractProtocolProperties} - Super class of protocol-specific global
+ * properties
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailPermissionInit implements Initialization {
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailPermissionInit.class);
-
-	private static final MailPermissionInit instance = new MailPermissionInit();
-
-	private final AtomicBoolean started = new AtomicBoolean();
-
-	private final AtomicBoolean initialized = new AtomicBoolean();
+public abstract class AbstractProtocolProperties {
 
 	/**
-	 * No instantiation
+	 * <code>"true"</code>
 	 */
-	private MailPermissionInit() {
+	protected static final String STR_TRUE = "true";
+
+	/**
+	 * <code>"false"</code>
+	 */
+	protected static final String STR_FALSE = "false";
+
+	private final AtomicBoolean loaded;
+
+	/**
+	 * Initializes a new {@link AbstractProtocolProperties}
+	 */
+	protected AbstractProtocolProperties() {
 		super();
+		loaded = new AtomicBoolean();
 	}
 
 	/**
-	 * @return The singleton instance of {@link MailPermissionInit}
-	 */
-	public static MailPermissionInit getInstance() {
-		return instance;
-	}
-
-	public void start() throws AbstractOXException {
-		if (started.get()) {
-			LOG.error(this.getClass().getName() + " already started");
-			return;
-		}
-		init();
-		started.set(true);
-	}
-
-	public void stop() throws AbstractOXException {
-		if (!started.get()) {
-			LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
-			return;
-		}
-		initialized.set(false);
-		started.set(false);
-	}
-
-	/**
-	 * Initializes the mail permission
+	 * Exclusively loads protocol's global properties
 	 * 
-	 * @throws MailException
-	 *             If implementing class cannot be found
+	 * @throws MailConfigException
+	 *             If loading of protocol's global properties fails
 	 */
-	private void init() throws MailException {
-		if (!initialized.get()) {
-			synchronized (initialized) {
-				if (!initialized.get()) {
-					final String className = MailProvider.getInstance().getMailPermissionClass();
-					try {
-						if (className == null) {
-							/*
-							 * Fallback
-							 */
-							if (LOG.isWarnEnabled()) {
-								LOG.warn(new StringBuilder("Using fallback \"").append(
-										DefaultMailPermission.class.getName()).append('"').toString());
-							}
-							final Class<? extends MailPermission> clazz = DefaultMailPermission.class;
-							MailPermission.initialzeMailPermission(clazz);
-							initialized.set(true);
-							return;
-						}
-						final Class<? extends MailPermission> clazz = Class.forName(className).asSubclass(
-								MailPermission.class);
-						MailPermission.initialzeMailPermission(clazz);
-						initialized.set(true);
-					} catch (final ClassNotFoundException e) {
-						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
-					}
+	public void loadProperties() throws MailConfigException {
+		if (!loaded.get()) {
+			synchronized (loaded) {
+				if (!loaded.get()) {
+					loadProperties0();
+					loaded.set(true);
 				}
 			}
 		}
 	}
 
+	/**
+	 * Exclusively resets protocol's global properties
+	 */
+	public void resetProperties() {
+		if (loaded.get()) {
+			synchronized (loaded) {
+				if (loaded.get()) {
+					resetFields();
+					loaded.set(false);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Loads protocol's global properties
+	 * 
+	 * @throws MailConfigException
+	 */
+	protected abstract void loadProperties0() throws MailConfigException;
+
+	/**
+	 * Resets protocol's global properties' fields
+	 */
+	protected abstract void resetFields();
 }

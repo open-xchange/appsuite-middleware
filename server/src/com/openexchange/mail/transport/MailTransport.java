@@ -58,56 +58,31 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailTransport} - Provides various operations related to a mail
- * transport.
+ * {@link MailTransport} - Provides operations related to a mail transport.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public abstract class MailTransport {
 
-	private static Class<? extends MailTransport> clazz;
-
-	private static MailTransport internalInstance;
-
-	static void setImplementingClass(final Class<? extends MailTransport> clazz) throws MailException {
-		MailTransport.clazz = clazz;
-		/*
-		 * Create internal instance
-		 */
-		try {
-			internalInstance = clazz.getConstructor(new Class[0]).newInstance(new Object[0]);
-		} catch (final SecurityException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final NoSuchMethodException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalArgumentException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InstantiationException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalAccessException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InvocationTargetException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		}
-	}
-
 	/**
-	 * Triggers all implementation-specific startup actions
+	 * Triggers all implementation-specific startup actions; especially its
+	 * configuration initialization
 	 * 
 	 * @throws MailException
 	 */
-	static final void startup() throws MailException {
-		internalInstance.startupInternal();
+	static final void startupImpl(final Class<? extends MailTransport> clazz) throws MailException {
+		createNewInstance(clazz, null).startup();
 	}
 
 	/**
-	 * Triggers all implementation-specific shutdown actions
+	 * Triggers all implementation-specific shutdown actions; especially its
+	 * configuration shut-down
 	 * 
 	 * @throws MailException
 	 */
-	static final void shutdown() throws MailException {
-		internalInstance.shutdownInternal();
+	static final void shutdownImpl(final Class<? extends MailTransport> clazz) throws MailException {
+		createNewInstance(clazz, null).shutdown();
 	}
 
 	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { Session.class };
@@ -123,6 +98,15 @@ public abstract class MailTransport {
 	 *             If instantiation fails
 	 */
 	public static final MailTransport getInstance(final Session session) throws MailException {
+		/*
+		 * Create a new mail transport through user's transport provider
+		 */
+		return createNewInstance(TransportProviderRegistry.getTransportProviderBySession(session)
+				.getMailTransportClass(), session);
+	}
+
+	private static final MailTransport createNewInstance(final Class<? extends MailTransport> clazz,
+			final Session session) throws MailException {
 		/*
 		 * Create a new mail transport
 		 */
@@ -194,18 +178,19 @@ public abstract class MailTransport {
 	public abstract void close() throws MailException;
 
 	/**
-	 * Trigger all necessary startup actions
+	 * Trigger all necessary startup actions; especially configuration start-up
 	 * 
 	 * @throws MailException
 	 *             If startup actions fail
 	 */
-	protected abstract void startupInternal() throws MailException;
+	protected abstract void startup() throws MailException;
 
 	/**
-	 * Trigger all necessary shutdown actions
+	 * Trigger all necessary shutdown actions; especially configuration
+	 * shut-down
 	 * 
 	 * @throws MailException
 	 *             If shutdown actions fail
 	 */
-	protected abstract void shutdownInternal() throws MailException;
+	protected abstract void shutdown() throws MailException;
 }

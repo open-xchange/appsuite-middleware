@@ -79,6 +79,7 @@ import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.transport.TransportProvider;
+import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
 
@@ -121,10 +122,11 @@ public final class MessageParser {
 	public static ComposedMailMessage parse(final JSONObject jsonObj, final UploadEvent uploadEvent,
 			final Session session) throws MailException {
 		try {
+			final TransportProvider provider = TransportProviderRegistry.getTransportProviderBySession(session);
 			/*
 			 * Parse transport message plus its text body
 			 */
-			final ComposedMailMessage composedMail = parse(jsonObj, session);
+			final ComposedMailMessage composedMail = parse(jsonObj, session, provider);
 			{
 				/*
 				 * Uploaded files
@@ -138,7 +140,7 @@ public final class MessageParser {
 					 */
 					final UploadFile uf = uploadEvent.getUploadFileByFieldName(getFieldName(attachmentCounter++));
 					if (uf != null) {
-						composedMail.addEnclosedPart(TransportProvider.getInstance().getNewFilePart(uf));
+						composedMail.addEnclosedPart(provider.getNewFilePart(uf));
 						addedAttachments++;
 					}
 				}
@@ -151,8 +153,7 @@ public final class MessageParser {
 				final JSONArray ja = jsonObj.getJSONArray(MailJSONField.INFOSTORE_IDS.getKey());
 				final int length = ja.length();
 				for (int i = 0; i < length; i++) {
-					composedMail.addEnclosedPart(TransportProvider.getInstance().getNewDocumentPart(ja.getInt(i),
-							session));
+					composedMail.addEnclosedPart(provider.getNewDocumentPart(ja.getInt(i), session));
 				}
 			}
 			return composedMail;
@@ -180,8 +181,20 @@ public final class MessageParser {
 	 *             If parsing fails
 	 */
 	public static ComposedMailMessage parse(final JSONObject jsonObj, final Session session) throws MailException {
-		final ComposedMailMessage transportMail = TransportProvider.getInstance().getNewComposedMailMessage();
-		parse(jsonObj, transportMail, session);
+		return parse(jsonObj, session, null);
+	}
+
+	private static ComposedMailMessage parse(final JSONObject jsonObj, final Session session,
+			final TransportProvider provider) throws MailException {
+		final TransportProvider tp = provider == null ? TransportProviderRegistry
+				.getTransportProviderBySession(session) : provider;
+		final ComposedMailMessage transportMail = tp.getNewComposedMailMessage();
+		try {
+			parse(jsonObj, transportMail, TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(),
+					ContextStorage.getStorageContext(session.getContextId())).getTimeZone()), tp);
+		} catch (final ContextException e) {
+			throw new MailException(e);
+		}
 		return transportMail;
 	}
 
@@ -202,7 +215,7 @@ public final class MessageParser {
 			throws MailException {
 		try {
 			parse(jsonObj, mail, TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(),
-					ContextStorage.getStorageContext(session.getContextId())).getTimeZone()));
+					ContextStorage.getStorageContext(session.getContextId())).getTimeZone()), session);
 		} catch (final ContextException e) {
 			throw new MailException(e);
 		}
@@ -218,11 +231,18 @@ public final class MessageParser {
 	 *            The mail(target), which should be empty
 	 * @param timeZone
 	 *            The user time zone
+	 * @param session
+	 *            The session
 	 * @throws MailException
 	 *             If parsing fails
 	 */
-	public static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone)
-			throws MailException {
+	public static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone,
+			final Session session) throws MailException {
+		parse(jsonObj, mail, timeZone, TransportProviderRegistry.getTransportProviderBySession(session));
+	}
+
+	private static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone,
+			final TransportProvider provider) throws MailException {
 		try {
 			/*
 			 * System flags
@@ -371,8 +391,8 @@ public final class MessageParser {
 					 * Parse body text
 					 */
 					final JSONObject tmp = ja.getJSONObject(0);
-					final TextBodyMailPart part = TransportProvider.getInstance().getNewTextBodyPart(
-							tmp.getString(MailJSONField.CONTENT.getKey()));
+					final TextBodyMailPart part = provider.getNewTextBodyPart(tmp.getString(MailJSONField.CONTENT
+							.getKey()));
 					part.setContentType(parseContentType(tmp.getString(MailJSONField.CONTENT_TYPE.getKey())));
 					mail.setContentType(part.getContentType());
 					transportMail.setBodyPart(part);
@@ -382,12 +402,12 @@ public final class MessageParser {
 					final int len = ja.length();
 					if (len > 1 && transportMail.getMsgref() != null) {
 						for (int i = 1; i < len; i++) {
-							transportMail.addEnclosedPart(TransportProvider.getInstance().getNewReferencedPart(
-									ja.getJSONObject(i).getString(MailListField.ID.getKey())));
+							transportMail.addEnclosedPart(provider.getNewReferencedPart(ja.getJSONObject(i).getString(
+									MailListField.ID.getKey())));
 						}
 					}
 				} else {
-					final TextBodyMailPart part = TransportProvider.getInstance().getNewTextBodyPart("");
+					final TextBodyMailPart part = provider.getNewTextBodyPart("");
 					part.setContentType(MIMETypes.MIME_DEFAULT);
 					mail.setContentType(part.getContentType());
 					transportMail.setBodyPart(part);

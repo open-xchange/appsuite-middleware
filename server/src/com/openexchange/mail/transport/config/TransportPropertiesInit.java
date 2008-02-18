@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail;
+package com.openexchange.mail.transport.config;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -55,96 +55,50 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
 /**
- * {@link MailConnectionInit} - Initializes the mail connection implementation.
+ * {@link TransportPropertiesInit} - Initializes global configuration
+ * implementation for transport system.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-final class MailConnectionInit implements Initialization {
+public final class TransportPropertiesInit implements Initialization {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailConnectionInit.class);
-
-	private static final MailConnectionInit instance = new MailConnectionInit();
+			.getLog(TransportPropertiesInit.class);
 
 	private final AtomicBoolean started = new AtomicBoolean();
 
-	private final AtomicBoolean initialized = new AtomicBoolean();
+	private static final TransportPropertiesInit instance = new TransportPropertiesInit();
 
 	/**
 	 * No instantiation
 	 */
-	private MailConnectionInit() {
+	private TransportPropertiesInit() {
 		super();
 	}
 
 	/**
-	 * @return The singleton instance of {@link MailConnectionInit}
+	 * @return The singleton instance
 	 */
-	static MailConnectionInit getInstance() {
+	public static TransportPropertiesInit getInstance() {
 		return instance;
 	}
 
-	/**
-	 * Initializes the mail connection class
-	 * 
-	 * @throws MailException
-	 *             If implementing class cannot be found
-	 */
-	@SuppressWarnings("unchecked")
-	private void initMailConnectionClass() throws MailException {
-		if (!initialized.get()) {
-			synchronized (initialized) {
-				if (!initialized.get()) {
-					final String className = MailProvider.getInstance().getMailConnectionClass();
-					try {
-						if (className == null) {
-							/*
-							 * Fallback
-							 */
-							if (LOG.isWarnEnabled()) {
-								LOG.warn("Using fallback \"com.openexchange.imap.IMAPConnection\"");
-							}
-
-							final Class<? extends MailConnection<?, ?, ?>> clazz = (Class<? extends MailConnection<?, ?, ?>>) Class
-									.forName("com.openexchange.imap.IMAPConnection").asSubclass(MailConnection.class);
-							MailConnection.initializeMailConnection(clazz);
-							initialized.set(true);
-							return;
-						}
-						final Class<? extends MailConnection<?, ?, ?>> clazz = (Class<? extends MailConnection<?, ?, ?>>) Class
-								.forName(className).asSubclass(MailConnection.class);
-						MailConnection.initializeMailConnection(clazz);
-					} catch (final ClassNotFoundException e) {
-						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
-					}
-					initialized.set(true);
-				}
-			}
-		}
-	}
-
-	/*
-	 * @see com.openexchange.server.Initialization#start()
-	 */
 	public void start() throws AbstractOXException {
 		if (started.get()) {
 			LOG.error(this.getClass().getName() + " already started");
 			return;
 		}
-		initMailConnectionClass();
+		TransportProperties.getInstance().loadProperties();
 		started.set(true);
 	}
 
-	/*
-	 * @see com.openexchange.server.Initialization#stop()
-	 */
 	public void stop() throws AbstractOXException {
 		if (!started.get()) {
 			LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
 			return;
 		}
-		initialized.set(false);
+		TransportProperties.getInstance().resetProperties();
 		started.set(false);
 	}
 

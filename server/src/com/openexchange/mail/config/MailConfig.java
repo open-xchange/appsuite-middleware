@@ -54,8 +54,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.session.Session;
 
@@ -162,7 +162,34 @@ public abstract class MailConfig {
 
 	protected String password;
 
-	private AbstractOXException error;
+	/**
+	 * Gets the mail server URL appropriate to configured login type
+	 * 
+	 * @param user
+	 *            The user
+	 * @return The appropriate mail server URL or <code>null</code>
+	 */
+	public static final String getMailServerURL(final User user) {
+		if (LoginType.GLOBAL.equals(getLoginType())) {
+			return MailConfig.getMailServer();
+		} else if (LoginType.USER.equals(getLoginType())) {
+			return user.getImapServer();
+		} else if (LoginType.ANONYMOUS.equals(getLoginType())) {
+			return user.getImapServer();
+		}
+		return null;
+	}
+
+	/**
+	 * Gets the mail server URL appropriate to configured login type
+	 * 
+	 * @param session
+	 *            The user session
+	 * @return The appropriate mail server URL or <code>null</code>
+	 */
+	public static final String getMailServerURL(final Session session) {
+		return getMailServerURL(UserStorage.getStorageUser(session.getUserId(), session.getContextId()));
+	}
 
 	/**
 	 * Fills login and password in specified instance of {@link MailConfig}
@@ -179,7 +206,7 @@ public abstract class MailConfig {
 		 * Fetch user object and create its mail properties
 		 */
 		if (LoginType.GLOBAL.equals(getLoginType())) {
-			final String masterPw = GlobalMailConfig.getInstance().getMasterPassword();
+			final String masterPw = MailProperties.getInstance().getMasterPassword();
 			if (masterPw == null) {
 				throw new MailConfigException(new StringBuilder().append("Property \"").append("masterPassword")
 						.append("\" not set").toString());
@@ -234,7 +261,7 @@ public abstract class MailConfig {
 	 * @return the loginType
 	 */
 	public static final LoginType getLoginType() {
-		return GlobalMailConfig.getInstance().getLoginType();
+		return MailProperties.getInstance().getLoginType();
 	}
 
 	/**
@@ -243,7 +270,7 @@ public abstract class MailConfig {
 	 * @return the allowNestedDefaultFolderOnAltNamespace
 	 */
 	public static final boolean isAllowNestedDefaultFolderOnAltNamespace() {
-		return GlobalMailConfig.getInstance().isAllowNestedDefaultFolderOnAltNamespace();
+		return MailProperties.getInstance().isAllowNestedDefaultFolderOnAltNamespace();
 	}
 
 	/**
@@ -252,7 +279,7 @@ public abstract class MailConfig {
 	 * @return the attachDisplaySize
 	 */
 	public static final int getAttachDisplaySize() {
-		return GlobalMailConfig.getInstance().getAttachDisplaySize();
+		return MailProperties.getInstance().getAttachDisplaySize();
 	}
 
 	/**
@@ -261,7 +288,7 @@ public abstract class MailConfig {
 	 * @return the credSrc
 	 */
 	public static final CredSrc getCredSrc() {
-		return GlobalMailConfig.getInstance().getCredSrc();
+		return MailProperties.getInstance().getCredSrc();
 	}
 
 	/**
@@ -270,7 +297,7 @@ public abstract class MailConfig {
 	 * @return the mailServer
 	 */
 	public static final String getMailServer() {
-		return GlobalMailConfig.getInstance().getMailServer();
+		return MailProperties.getInstance().getMailServer();
 	}
 
 	/**
@@ -279,7 +306,7 @@ public abstract class MailConfig {
 	 * @return the transportServer
 	 */
 	public static final String getTransportServer() {
-		return GlobalMailConfig.getInstance().getTransportServer();
+		return MailProperties.getInstance().getTransportServer();
 	}
 
 	/**
@@ -288,7 +315,7 @@ public abstract class MailConfig {
 	 * @return the masterPassword
 	 */
 	public static final String getMasterPassword() {
-		return GlobalMailConfig.getInstance().getMasterPassword();
+		return MailProperties.getInstance().getMasterPassword();
 	}
 
 	/**
@@ -297,7 +324,7 @@ public abstract class MailConfig {
 	 * @return the defaultMimeCharset
 	 */
 	public static final String getDefaultMimeCharset() {
-		return GlobalMailConfig.getInstance().getDefaultMimeCharset();
+		return MailProperties.getInstance().getDefaultMimeCharset();
 	}
 
 	/**
@@ -306,7 +333,7 @@ public abstract class MailConfig {
 	 * @return the defaultSeparator
 	 */
 	public static final char getDefaultSeparator() {
-		return GlobalMailConfig.getInstance().getDefaultSeparator();
+		return MailProperties.getInstance().getDefaultSeparator();
 	}
 
 	/**
@@ -315,7 +342,7 @@ public abstract class MailConfig {
 	 * @return the maxNumOfConnections
 	 */
 	public static final int getMaxNumOfConnections() {
-		return GlobalMailConfig.getInstance().getMaxNumOfConnections();
+		return MailProperties.getInstance().getMaxNumOfConnections();
 	}
 
 	/**
@@ -324,7 +351,7 @@ public abstract class MailConfig {
 	 * @return the ignoreSubscription
 	 */
 	public static final boolean isIgnoreSubscription() {
-		return GlobalMailConfig.getInstance().isIgnoreSubscription();
+		return MailProperties.getInstance().isIgnoreSubscription();
 	}
 
 	/**
@@ -333,7 +360,7 @@ public abstract class MailConfig {
 	 * @return the supportSubscription
 	 */
 	public static final boolean isSupportSubscription() {
-		return GlobalMailConfig.getInstance().isSupportSubscription();
+		return MailProperties.getInstance().isSupportSubscription();
 	}
 
 	/**
@@ -342,7 +369,7 @@ public abstract class MailConfig {
 	 * @return the mailFetchLimit
 	 */
 	public static final int getMailFetchLimit() {
-		return GlobalMailConfig.getInstance().getMailFetchLimit();
+		return MailProperties.getInstance().getMailFetchLimit();
 	}
 
 	/**
@@ -360,7 +387,7 @@ public abstract class MailConfig {
 	 * @return the quoteLineColors
 	 */
 	public static final String[] getQuoteLineColors() {
-		return GlobalMailConfig.getInstance().getQuoteLineColors();
+		return MailProperties.getInstance().getQuoteLineColors();
 	}
 
 	/**
@@ -369,7 +396,7 @@ public abstract class MailConfig {
 	 * @return the spamEnabled
 	 */
 	public static final boolean isSpamEnabled() {
-		return GlobalMailConfig.getInstance().isSpamEnabled();
+		return MailProperties.getInstance().isSpamEnabled();
 	}
 
 	/**
@@ -378,7 +405,7 @@ public abstract class MailConfig {
 	 * @return the userFlagsEnabled
 	 */
 	public static final boolean isUserFlagsEnabled() {
-		return GlobalMailConfig.getInstance().isUserFlagsEnabled();
+		return MailProperties.getInstance().isUserFlagsEnabled();
 	}
 
 	/**
@@ -387,7 +414,7 @@ public abstract class MailConfig {
 	 * @return the javaMailProperties
 	 */
 	public static Properties getJavaMailProperties() {
-		return GlobalMailConfig.getInstance().getJavaMailProperties();
+		return MailProperties.getInstance().getJavaMailProperties();
 	}
 
 	/**
@@ -396,7 +423,7 @@ public abstract class MailConfig {
 	 * @return the watcherEnabled
 	 */
 	public static boolean isWatcherEnabled() {
-		return GlobalMailConfig.getInstance().isWatcherEnabled();
+		return MailProperties.getInstance().isWatcherEnabled();
 	}
 
 	/**
@@ -405,7 +432,7 @@ public abstract class MailConfig {
 	 * @return the watcherFrequency
 	 */
 	public static int getWatcherFrequency() {
-		return GlobalMailConfig.getInstance().getWatcherFrequency();
+		return MailProperties.getInstance().getWatcherFrequency();
 	}
 
 	/**
@@ -414,7 +441,7 @@ public abstract class MailConfig {
 	 * @return the watcherShallClose
 	 */
 	public static boolean isWatcherShallClose() {
-		return GlobalMailConfig.getInstance().isWatcherShallClose();
+		return MailProperties.getInstance().isWatcherShallClose();
 	}
 
 	/**
@@ -423,7 +450,7 @@ public abstract class MailConfig {
 	 * @return the watcherTime
 	 */
 	public static int getWatcherTime() {
-		return GlobalMailConfig.getInstance().getWatcherTime();
+		return MailProperties.getInstance().getWatcherTime();
 	}
 
 	/**
@@ -432,7 +459,7 @@ public abstract class MailConfig {
 	 * @return the spamHandlerClass
 	 */
 	public static String getSpamHandlerClass() {
-		return GlobalMailConfig.getInstance().getSpamHandlerClass();
+		return MailProperties.getInstance().getSpamHandlerClass();
 	}
 
 	/**
@@ -473,15 +500,6 @@ public abstract class MailConfig {
 	 * @return Gets the encoded capabilities
 	 */
 	public abstract int getCapabilities();
-
-	/**
-	 * Gets occurred error
-	 * 
-	 * @return the error (if any) or <code>null</code>
-	 */
-	public AbstractOXException getError() {
-		return error;
-	}
 
 	/*
 	 * TEST TEST TEST TEST TEST

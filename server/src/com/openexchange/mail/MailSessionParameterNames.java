@@ -68,15 +68,26 @@ public final class MailSessionParameterNames {
 	/**
 	 * Default folder flag
 	 */
-	public static final String PARAM_DEF_FLD_FLAG = "mail.deffldflag";
+	public static final String PARAM_DEF_FLD_FLAG = "com.openexchange.mail.deffldflag";
 
 	/**
 	 * Default folder array
 	 */
-	public static final String PARAM_DEF_FLD_ARR = "mail.deffldarr";
+	public static final String PARAM_DEF_FLD_ARR = "com.openexchange.mail.deffldarr";
 
 	/**
 	 * Session mail cache
 	 */
-	public static final String PARAM_MAIL_CACHE = "mail.mailcache";
+	public static final String PARAM_MAIL_CACHE = "com.openexchange.mail.mailcache";
+
+	/**
+	 * Session mail cache
+	 */
+	public static final String PARAM_MAIL_PROVIDER = "com.openexchange.mail.mailprovider";
+
+	/**
+	 * Session mail cache
+	 */
+	public static final String PARAM_TRANSPORT_PROVIDER = "com.openexchange.mail.mailtansport";
+
 }

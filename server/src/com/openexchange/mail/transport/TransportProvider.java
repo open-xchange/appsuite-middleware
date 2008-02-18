@@ -49,19 +49,16 @@
 
 package com.openexchange.mail.transport;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.Protocol;
+import com.openexchange.mail.config.AbstractProtocolProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
-import com.openexchange.mail.transport.config.GlobalTransportConfig;
 import com.openexchange.session.Session;
 
 /**
@@ -72,60 +69,91 @@ import com.openexchange.session.Session;
  */
 public abstract class TransportProvider {
 
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
-	private static TransportProvider instance;
-
 	/**
-	 * Initializes the transport provider
-	 * 
-	 * @throws MailException
-	 *             If initialization of transport provider fails
+	 * The protocol fallback if URL does not contain a protocol
+	 * <p>
+	 * TODO: Make configurable
 	 */
-	static void initTransportProvider() throws MailException {
-		if (!initialized.get()) {
-			synchronized (initialized) {
-				if (!initialized.get()) {
-					final String className = SystemConfig.getProperty(SystemConfig.Property.TransportProvider);
-					try {
-						if (className == null) {
-							throw new MailConfigException("Missing transport provider");
-						}
-						instance = Class.forName(className).asSubclass(TransportProvider.class).newInstance();
-						initialized.set(true);
-					} catch (final ClassNotFoundException e) {
-						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
-					} catch (final InstantiationException e) {
-						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
-					} catch (final IllegalAccessException e) {
-						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
-					}
-				}
-			}
-		}
-	}
+	public static final String PROTOCOL_FALLBACK = "smtp";
 
-	/**
-	 * Returns the singleton instance of mail provider
-	 * 
-	 * @return The singleton instance of mail provider
-	 */
-	public static final TransportProvider getInstance() {
-		return instance;
-	}
+	private final int hashCode;
 
-	/**
-	 * Resets the transport provider
-	 */
-	static void resetTransportProvider() {
-		initialized.set(false);
-	}
+	private boolean deprecated;
 
 	/**
 	 * Initializes a new {@link TransportProvider}
 	 */
 	protected TransportProvider() {
 		super();
+		hashCode = getProtocol().hashCode();
+	}
+
+	@Override
+	public final boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		} else if (obj == null) {
+			return false;
+		} else if (!(obj instanceof TransportProvider)) {
+			return false;
+		}
+		final TransportProvider other = (TransportProvider) obj;
+		if (getProtocol() == null) {
+			if (other.getProtocol() != null) {
+				return false;
+			}
+		} else if (!getProtocol().equals(other.getProtocol())) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public final int hashCode() {
+		return hashCode;
+	}
+
+	/**
+	 * Checks if this provider is deprecated; any cached references should be
+	 * discarded
+	 * 
+	 * @return <code>true</code> if deprecated; otherwise <code>false</code>
+	 */
+	public boolean isDeprecated() {
+		return deprecated;
+	}
+
+	/**
+	 * Sets the deprecated flag
+	 * 
+	 * @param deprecated
+	 *            <code>true</code> if deprecated; otherwise
+	 *            <code>false</code>
+	 */
+	void setDeprecated(final boolean deprecated) {
+		this.deprecated = deprecated;
+	}
+
+	/**
+	 * Performs provider's start-up
+	 * 
+	 * @throws MailException
+	 *             If start-up fails
+	 */
+	protected final void startUp() throws MailException {
+		getProtocolProperties().loadProperties();
+		MailTransport.startupImpl(getMailTransportClass());
+	}
+
+	/**
+	 * Performs provider's shut-down
+	 * 
+	 * @throws MailException
+	 *             if shut-down fails
+	 */
+	protected final void shutDown() throws MailException {
+		MailTransport.shutdownImpl(getMailTransportClass());
+		getProtocolProperties().resetProperties();
 	}
 
 	/**
@@ -133,34 +161,36 @@ public abstract class TransportProvider {
 	 * 
 	 * @return The protocol
 	 */
-	public abstract String getProtocol();
+	public abstract Protocol getProtocol();
 
 	/**
 	 * Checks if this transport provider supports the given protocol (which is
 	 * in either secure or non-secure notation).
 	 * <p>
-	 * Usually the secure protocol notation simply has the <code>'s'</code>
-	 * character appended; e.g. <i>smtps</i>
+	 * This is a convenience method that invokes
+	 * {@link Protocol#isSupported(String)}
 	 * 
 	 * @param protocol
 	 *            The protocol
 	 * @return <code>true</code> if supported; otherwise <code>false</code>
 	 */
-	public abstract boolean supportsProtocol(String protocol);
+	public final boolean supportsProtocol(final String protocol) {
+		return getProtocol().isSupported(protocol);
+	}
 
 	/**
 	 * Gets the name of the class implementing {@link MailTransport}
 	 * 
 	 * @return The name of the class implementing {@link MailTransport}
 	 */
-	public abstract String getMailTransportClass();
+	public abstract Class<? extends MailTransport> getMailTransportClass();
 
 	/**
-	 * Gets the name of {@link GlobalTransportConfig} implementation
+	 * Gets the protocol properties
 	 * 
-	 * @return The name of {@link GlobalTransportConfig} implementation
+	 * @return The protocol properties
 	 */
-	public abstract String getGlobalTransportConfigClass();
+	protected abstract AbstractProtocolProperties getProtocolProperties();
 
 	/**
 	 * Gets a new instance of {@link ComposedMailMessage}

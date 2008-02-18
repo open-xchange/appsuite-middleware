@@ -52,61 +52,36 @@ package com.openexchange.mail.config;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailProvider;
 import com.openexchange.server.Initialization;
 
 /**
- * {@link GlobalMailConfigInit} - Initializes global mail configuration
+ * {@link MailPropertiesInit} - Initializes global mail configuration
  * implementation for mailing system.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class GlobalMailConfigInit implements Initialization {
+public final class MailPropertiesInit implements Initialization {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(GlobalMailConfigInit.class);
+			.getLog(MailPropertiesInit.class);
 
 	private final AtomicBoolean started = new AtomicBoolean();
 
-	private final AtomicBoolean initialized = new AtomicBoolean();
-
-	private static final GlobalMailConfigInit instance = new GlobalMailConfigInit();
+	private static final MailPropertiesInit instance = new MailPropertiesInit();
 
 	/**
 	 * No instantiation
 	 */
-	private GlobalMailConfigInit() {
+	private MailPropertiesInit() {
 		super();
 	}
 
 	/**
 	 * @return The singleton instance
 	 */
-	public static GlobalMailConfigInit getInstance() {
+	public static MailPropertiesInit getInstance() {
 		return instance;
-	}
-
-	private void initGlobalMailConfigClass() throws MailException {
-		if (!initialized.get()) {
-			synchronized (initialized) {
-				if (!initialized.get()) {
-					final String className = MailProvider.getInstance().getGlobalMailConfigClass();
-					try {
-						if (className == null) {
-							throw new MailConfigException("Missing global mail config class");
-						}
-						final Class<? extends GlobalMailConfig> clazz = Class.forName(className).asSubclass(
-								GlobalMailConfig.class);
-						GlobalMailConfig.initializeGlobalMailConfig(clazz);
-						initialized.set(true);
-					} catch (final ClassNotFoundException e) {
-						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
-					}
-				}
-			}
-		}
 	}
 
 	public void start() throws AbstractOXException {
@@ -114,7 +89,7 @@ public final class GlobalMailConfigInit implements Initialization {
 			LOG.error(this.getClass().getName() + " already started");
 			return;
 		}
-		initGlobalMailConfigClass();
+		MailProperties.getInstance().loadProperties();
 		started.set(true);
 	}
 
@@ -123,7 +98,7 @@ public final class GlobalMailConfigInit implements Initialization {
 			LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
 			return;
 		}
-		initialized.set(false);
+		MailProperties.getInstance().resetProperties();
 		started.set(false);
 	}
 

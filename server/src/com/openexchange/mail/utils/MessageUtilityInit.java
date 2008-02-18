@@ -63,7 +63,8 @@ import com.openexchange.mail.MailException;
 import com.openexchange.server.Initialization;
 
 /**
- * {@link MessageUtilityInit}
+ * {@link MessageUtilityInit} - Initialization implementation for
+ * {@link MessageUtility} class
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

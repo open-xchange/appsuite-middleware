@@ -51,81 +51,114 @@ package com.openexchange.mail.transport.config;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.MailException;
-import com.openexchange.mail.config.MailConfigException;
-import com.openexchange.mail.transport.TransportProvider;
-import com.openexchange.server.Initialization;
+import com.openexchange.config.Configuration;
+import com.openexchange.mail.osgi.services.ConfigurationService;
 
 /**
- * {@link GlobalTransportConfigInit} - Initializes global mail configuration
- * implementation for transport system.
+ * {@link TransportProperties}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class GlobalTransportConfigInit implements Initialization {
+public final class TransportProperties {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(GlobalTransportConfigInit.class);
+			.getLog(TransportProperties.class);
 
-	private final AtomicBoolean started = new AtomicBoolean();
-
-	private final AtomicBoolean initializedTransport = new AtomicBoolean();
-
-	private static final GlobalTransportConfigInit instance = new GlobalTransportConfigInit();
+	private static final TransportProperties instance = new TransportProperties();
 
 	/**
-	 * No instantiation
+	 * Gets the singleton instance of {@link TransportProperties}
+	 * 
+	 * @return The singleton instance of {@link TransportProperties}
 	 */
-	private GlobalTransportConfigInit() {
-		super();
-	}
-
-	/**
-	 * @return The singleton instance
-	 */
-	public static GlobalTransportConfigInit getInstance() {
+	public static TransportProperties getInstance() {
 		return instance;
 	}
 
-	private void initGlobalTransportConfigClass() throws MailException {
-		if (!initializedTransport.get()) {
-			synchronized (initializedTransport) {
-				if (!initializedTransport.get()) {
-					final String className = TransportProvider.getInstance().getGlobalTransportConfigClass();
-					try {
-						if (className == null) {
-							throw new MailConfigException("Missing global transport config class");
-						}
-						final Class<? extends GlobalTransportConfig> clazz = Class.forName(className).asSubclass(
-								GlobalTransportConfig.class);
-						GlobalTransportConfig.initializeGlobalTransportConfig(clazz);
-						initializedTransport.set(true);
-					} catch (final ClassNotFoundException e) {
-						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
-					}
+	private final AtomicBoolean loaded;
+
+	/*
+	 * Fields for global properties
+	 */
+	private int referencedPartLimit;
+
+	/**
+	 * Initializes a new {@link TransportProperties}
+	 */
+	private TransportProperties() {
+		super();
+		loaded = new AtomicBoolean();
+	}
+
+	/**
+	 * Exclusively loads the global transport properties
+	 */
+	void loadProperties() {
+		if (!loaded.get()) {
+			synchronized (loaded) {
+				if (!loaded.get()) {
+					loadProperties0();
+					loaded.set(true);
 				}
 			}
 		}
 	}
 
-	public void start() throws AbstractOXException {
-		if (started.get()) {
-			LOG.error(this.getClass().getName() + " already started");
-			return;
+	/**
+	 * Exclusively resets the global transport properties
+	 */
+	void resetProperties() {
+		if (loaded.get()) {
+			synchronized (loaded) {
+				if (loaded.get()) {
+					resetFields();
+					loaded.set(false);
+				}
+			}
 		}
-		initGlobalTransportConfigClass();
-		started.set(true);
 	}
 
-	public void stop() throws AbstractOXException {
-		if (!started.get()) {
-			LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
-			return;
-		}
-		initializedTransport.set(false);
-		started.set(false);
+	private void resetFields() {
+		referencedPartLimit = 0;
 	}
 
+	private void loadProperties0() {
+		final StringBuilder logBuilder = new StringBuilder(1024);
+		logBuilder.append("\nLoading global transport properties...\n");
+		
+		final Configuration configuration = ConfigurationService.getInstance().getService();
+		try {
+	
+			{
+				final String referencedPartLimitStr = configuration.getProperty("com.openexchange.mail.transport.referencedPartLimit", "1048576")
+						.trim();
+				try {
+					referencedPartLimit = Integer.parseInt(referencedPartLimitStr);
+					logBuilder.append("\tReferenced Part Limit: ").append(referencedPartLimit).append('\n');
+				} catch (final NumberFormatException e) {
+					referencedPartLimit = 1048576;
+					logBuilder.append("\tReferenced Part Limit: Invalid value \"").append(referencedPartLimitStr).append(
+							"\". Setting to fallback ").append(referencedPartLimit).append('\n');
+	
+				}
+			}
+		} finally {
+			ConfigurationService.getInstance().ungetService(configuration);
+		}
+
+		logBuilder.append("Global transport properties successfully loaded!");
+		if (LOG.isInfoEnabled()) {
+			LOG.info(logBuilder.toString());
+		}
+	}
+
+	/**
+	 * Gets the referencedPartLimit
+	 * 
+	 * @return the referencedPartLimit
+	 */
+	int getReferencedPartLimit() {
+		return referencedPartLimit;
+	}
 }

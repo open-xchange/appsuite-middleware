@@ -78,8 +78,21 @@ public abstract class MailPermission extends OCLPermission {
 		super();
 	}
 
-	static void initialzeMailPermission(final Class<? extends MailPermission> clazz) {
+	/**
+	 * Sets the permission class as indicated by mail provider
+	 * 
+	 * @param clazz
+	 *            The permission class
+	 */
+	public static void setClass(final Class<? extends MailPermission> clazz) {
 		MailPermission.clazz = clazz;
+	}
+
+	/**
+	 * Resets the permission class
+	 */
+	public static void resetClass() {
+		MailPermission.clazz = null;
 	}
 
 	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { Session.class };

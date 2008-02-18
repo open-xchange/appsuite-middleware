@@ -47,94 +47,69 @@
  *
  */
 
-package com.openexchange.mail.transport;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.MailException;
-import com.openexchange.server.Initialization;
+package com.openexchange.mail.utils;
 
 /**
- * {@link MailTransportInit} - Initializes the mail transport implementation.
+ * {@link ProviderUtility}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-final class MailTransportInit implements Initialization {
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailTransportInit.class);
-
-	private static final MailTransportInit instance = new MailTransportInit();
-
-	private final AtomicBoolean started = new AtomicBoolean();
-
-	private final AtomicBoolean initialized = new AtomicBoolean();
+public final class ProviderUtility {
 
 	/**
-	 * No instantiation
+	 * Initializes a new {@link ProviderUtility}
 	 */
-	private MailTransportInit() {
+	private ProviderUtility() {
 		super();
 	}
 
-	static MailTransportInit getInstance() {
-		return instance;
-	}
-
 	/**
-	 * Initializes the mail transport class
+	 * Extracts the protocol from specified server URL
 	 * 
-	 * @throws MailException
-	 *             If implementing class cannot be found
+	 * @param serverUrl
+	 *            The server URL
+	 * @param fallback
+	 *            The fallback protocol if URL does not contain a protocol
+	 * @return Extracted protocol or <code>fallback</code> parameter
 	 */
-	private void initMailTransportClass() throws MailException {
-		if (!initialized.get()) {
-			synchronized (initialized) {
-				if (!initialized.get()) {
-					final String className = TransportProvider.getInstance().getMailTransportClass();
-					try {
-						if (className == null) {
-							/*
-							 * Fallback
-							 */
-							if (LOG.isWarnEnabled()) {
-								LOG.warn("Using fallback \"com.openexchange.smtp.SMTPTransport\"");
-							}
-							final Class<? extends MailTransport> clazz = Class.forName(
-									"com.openexchange.smtp.SMTPTransport").asSubclass(MailTransport.class);
-							MailTransport.setImplementingClass(clazz);
-							initialized.set(true);
-							return;
-						}
-						final Class<? extends MailTransport> clazz = Class.forName(className).asSubclass(
-								MailTransport.class);
-						MailTransport.setImplementingClass(clazz);
-					} catch (final ClassNotFoundException e) {
-						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
-					}
-					initialized.set(true);
+	public static String extractProtocol(final String serverUrl, final String fallback) {
+		final int len = serverUrl.length();
+		char c = '\0';
+		String protocol = null;
+		/*
+		 * Parse protocol out of URL
+		 */
+		for (int i = 0; i < len && ((c = serverUrl.charAt(i)) != '/'); i++) {
+			if (c == ':') {
+				final String s = serverUrl.substring(0, i).toLowerCase();
+				if (isValidProtocol(s)) {
+					protocol = s;
 				}
+				break;
 			}
 		}
+		if (null == protocol) {
+			return fallback;
+		}
+		return protocol;
 	}
 
-	public void start() throws AbstractOXException {
-		if (started.get()) {
-			LOG.error(this.getClass().getName() + " already started");
-			return;
+	private static boolean isValidProtocol(final String protocol) {
+		final int len = protocol.length();
+		if (len < 1) {
+			return false;
 		}
-		initMailTransportClass();
-		started.set(true);
-	}
-
-	public void stop() throws AbstractOXException {
-		if (!started.get()) {
-			LOG.error(this.getClass().getName() + " cannot be stopped since it has not been started before");
-			return;
+		char c = protocol.charAt(0);
+		if (!Character.isLetter(c)) {
+			return false;
 		}
-		initialized.set(false);
-		started.set(false);
+		for (int i = 1; i < len; i++) {
+			c = protocol.charAt(i);
+			if (!Character.isLetterOrDigit(c) && c != '.' && c != '+' && c != '-') {
+				return false;
+			}
+		}
+		return true;
 	}
 }

@@ -126,13 +126,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			/*
 			 * Get new mail configuration
 			 */
-			getMailConfig(true);
-			if (mailConfig.getError() != null) {
-				throw new MailException(mailConfig.getError());
-			}
 			final long start = System.currentTimeMillis();
 			try {
-				mailConnection.connect(mailConfig);
+				mailConnection.connect();
 				MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				MailServletInterface.mailInterfaceMonitor.changeNumSuccessfulLogins(true);
 			} catch (final MailException e) {
@@ -141,12 +137,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 				}
 				throw e;
 			}
-		} else {
-			/*
-			 * Get mail configuration
-			 */
-			mailConfig = mailConnection.getMailConfig();
 		}
+		mailConfig = mailConnection.getMailConfig();
 		mailConnection.getFolderStorage().checkDefaultFolders();
 		init = true;
 	}
@@ -560,16 +552,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
 	@Override
 	public MailConfig getMailConfig() throws MailException {
-		return getMailConfig(false);
-		// initConnection();
-		// return mailConnection.getMailConfig();
-	}
-
-	private MailConfig getMailConfig(final boolean create) throws MailException {
-		if (create) {
-			mailConfig = MailProvider.getInstance().getMailConfig(session);
-		}
 		return mailConfig;
 	}
-
 }

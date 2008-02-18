@@ -49,17 +49,11 @@
 
 package com.openexchange.mail;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.mail.config.GlobalMailConfig;
-import com.openexchange.mail.config.MailConfig;
-import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.config.AbstractProtocolProperties;
 import com.openexchange.mail.mime.DefaultHeaderLoader;
 import com.openexchange.mail.mime.MIMEHeaderLoader;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
-import com.openexchange.session.Session;
 
 /**
  * {@link MailProvider} - The main intention of the provider class is to make
@@ -71,60 +65,119 @@ import com.openexchange.session.Session;
  */
 public abstract class MailProvider {
 
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
-	private static MailProvider instance;
-
 	/**
-	 * Initializes the mail provider
-	 * 
-	 * @throws MailException
-	 *             If initialization of mail provider fails
+	 * The protocol fallback if URL does not contain a protocol
+	 * <p>
+	 * TODO: Make configurable
 	 */
-	static void initMailProvider() throws MailException {
-		if (!initialized.get()) {
-			synchronized (initialized) {
-				if (!initialized.get()) {
-					final String className = SystemConfig.getProperty(SystemConfig.Property.MailProvider);
-					try {
-						if (className == null) {
-							throw new MailConfigException("Missing mail provider");
-						}
-						instance = Class.forName(className).asSubclass(MailProvider.class).newInstance();
-						initialized.set(true);
-					} catch (final ClassNotFoundException e) {
-						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
-					} catch (final InstantiationException e) {
-						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
-					} catch (final IllegalAccessException e) {
-						throw new MailException(MailException.Code.INITIALIZATION_PROBLEM, e, new Object[0]);
-					}
-				}
-			}
-		}
-	}
+	public static final String PROTOCOL_FALLBACK = "imap";
 
-	/**
-	 * Resets the mail provider
-	 */
-	static void resetMailProvider() {
-		initialized.set(false);
-	}
+	private final int hashCode;
 
-	/**
-	 * Returns the singleton instance of mail provider
-	 * 
-	 * @return The singleton instance of mail provider
-	 */
-	public static final MailProvider getInstance() {
-		return instance;
-	}
+	private boolean deprecated;
 
 	/**
 	 * Initializes a new {@link MailProvider}
 	 */
 	protected MailProvider() {
 		super();
+		hashCode = getProtocol().hashCode();
+	}
+
+	@Override
+	public final boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		} else if (obj == null) {
+			return false;
+		} else if (!(obj instanceof MailProvider)) {
+			return false;
+		}
+		final MailProvider other = (MailProvider) obj;
+		if (getProtocol() == null) {
+			if (other.getProtocol() != null) {
+				return false;
+			}
+		} else if (!getProtocol().equals(other.getProtocol())) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public final int hashCode() {
+		return hashCode;
+	}
+
+	/**
+	 * Checks if this provider is deprecated; any cached references should be
+	 * discarded
+	 * 
+	 * @return <code>true</code> if deprecated; otherwise <code>false</code>
+	 */
+	public boolean isDeprecated() {
+		return deprecated;
+	}
+
+	/**
+	 * Sets the deprecated flag
+	 * 
+	 * @param deprecated
+	 *            <code>true</code> if deprecated; otherwise
+	 *            <code>false</code>
+	 */
+	void setDeprecated(final boolean deprecated) {
+		this.deprecated = deprecated;
+	}
+
+	/**
+	 * Performs provider's start-up
+	 * 
+	 * @throws MailException
+	 *             If start-up fails
+	 */
+	protected void startUp() throws MailException {
+		getProtocolProperties().loadProperties();
+		MailPermission.setClass(getMailPermissionClass());
+		MIMEHeaderLoader.setClass(getHeaderLoader());
+		MailConnection.startupImpl(getMailConnectionClass());
+	}
+
+	/**
+	 * Performs provider's shut-down
+	 * 
+	 * @throws MailException
+	 *             if shut-down fails
+	 */
+	protected void shutDown() throws MailException {
+		MailConnection.shutdownImpl(getMailConnectionClass());
+		MIMEHeaderLoader.resetClass();
+		MailPermission.resetClass();
+		getProtocolProperties().resetProperties();
+	}
+
+	/**
+	 * Gets the implementation-specific class of {@link MailPermission}.
+	 * <p>
+	 * Returns {@link DefaultMailPermission} class if mailing system does not
+	 * support permission(s). Overwrite if needed.
+	 * 
+	 * @return The class of {@link MailPermission} implementation
+	 */
+	protected Class<? extends MailPermission> getMailPermissionClass() {
+		return DefaultMailPermission.class;
+	}
+
+	/**
+	 * Gets the implementation-specific class of {@link MIMEHeaderLoader}.
+	 * <p>
+	 * By default {@link DefaultHeaderLoader} class is returned. Overwrite if
+	 * needed.
+	 * 
+	 * @return The class {@link MIMEHeaderLoader} implementation
+	 */
+	protected Class<? extends MIMEHeaderLoader> getHeaderLoader() {
+		return DefaultHeaderLoader.class;
 	}
 
 	/**
@@ -132,74 +185,35 @@ public abstract class MailProvider {
 	 * 
 	 * @return The protocol
 	 */
-	public abstract String getProtocol();
+	public abstract Protocol getProtocol();
 
 	/**
 	 * Checks if this mail provider supports the given protocol (which is in
 	 * either secure or non-secure notation).
 	 * <p>
-	 * Usually the secure protocol notation simply has the <code>'s'</code>
-	 * character appended; e.g. <i>imaps</i>
+	 * This is a convenience method that invokes
+	 * {@link Protocol#isSupported(String)}
 	 * 
 	 * @param protocol
 	 *            The protocol
 	 * @return <code>true</code> if supported; otherwise <code>false</code>
 	 */
-	public abstract boolean supportsProtocol(String protocol);
-
-	/**
-	 * Gets the name of the class implementing {@link MailConnection}
-	 * 
-	 * @return The name of the class implementing {@link MailConnection}
-	 */
-	public abstract String getMailConnectionClass();
-
-	/**
-	 * Gets the implementation-specific class name of inheriting
-	 * {@link GlobalMailConfig} class.
-	 * 
-	 * @return The class name of inheriting {@link GlobalMailConfig}
-	 *         implementation
-	 */
-	public abstract String getGlobalMailConfigClass();
-
-	/**
-	 * Gets the implementation-specific name of {@link MailPermission}
-	 * implementation.
-	 * <p>
-	 * Returns {@link DefaultMailPermission} class name if mailing system does
-	 * not support permission(s).
-	 * 
-	 * @return The name of inheriting {@link MailPermission} implementation
-	 */
-	public String getMailPermissionClass() {
-		return DefaultMailPermission.class.getName();
+	public final boolean supportsProtocol(final String protocol) {
+		return getProtocol().isSupported(protocol);
 	}
 
 	/**
-	 * Gets the implementation-specific class name of inheriting
-	 * {@link MIMEHeaderLoader} class.
-	 * <p>
-	 * Returns {@link DefaultHeaderLoader} class name if no specific header
-	 * loader is needed.
+	 * Gets the class implementing {@link MailConnection}
 	 * 
-	 * @return The class name of inheriting {@link MIMEHeaderLoader}
-	 *         implementation
+	 * @return The class implementing {@link MailConnection}
 	 */
-	public String getHeaderLoaderClass() {
-		return DefaultHeaderLoader.class.getName();
-	}
+	public abstract Class<? extends MailConnection<?, ?, ?>> getMailConnectionClass();
 
 	/**
-	 * Gets the user-specific mail configuration with properly set login and
-	 * password
+	 * Gets the protocol properties
 	 * 
-	 * @param session
-	 *            The session providing needed user data
-	 * @throws MailException
-	 *             If user-specific mail configuration cannot be obtained
-	 * @return The user-specific mail configuration with properly set login and
-	 *         password
+	 * @return The protocol properties
 	 */
-	public abstract MailConfig getMailConfig(Session session) throws MailException;
+	protected abstract AbstractProtocolProperties getProtocolProperties();
+
 }

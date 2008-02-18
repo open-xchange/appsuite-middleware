@@ -50,7 +50,7 @@
 package com.openexchange.mail.transport;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.transport.config.GlobalTransportConfigInit;
+import com.openexchange.mail.transport.config.TransportPropertiesInit;
 import com.openexchange.server.Initialization;
 
 /**
@@ -85,10 +85,15 @@ public final class TransportInitialization implements Initialization {
 	 * @see com.openexchange.server.Initialization#start()
 	 */
 	public void start() throws AbstractOXException {
-		TransportProvider.initTransportProvider();
-		MailTransportInit.getInstance().start();
-		GlobalTransportConfigInit.getInstance().start();
-		MailTransport.startup();
+		/*
+		 * Start global transport system
+		 */
+		TransportPropertiesInit.getInstance().start();
+		/*
+		 * TODO: Remove
+		 * Simulate bundle availability
+		 */
+		//TransportProvider.initTransportProvider();
 	}
 
 	/*
@@ -97,10 +102,15 @@ public final class TransportInitialization implements Initialization {
 	 * @see com.openexchange.server.Initialization#stop()
 	 */
 	public void stop() throws AbstractOXException {
-		MailTransport.shutdown();
-		GlobalTransportConfigInit.getInstance().stop();
-		MailTransportInit.getInstance().stop();
-		TransportProvider.resetTransportProvider();
+		/*
+		 * TODO: Remove
+		 * Simulate bundle disappearance
+		 */
+		//TransportProvider.resetTransportProvider();
+		/*
+		 * Stop global transport system
+		 */
+		TransportPropertiesInit.getInstance().stop();
 	}
 
 }
