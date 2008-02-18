@@ -119,11 +119,11 @@ public class Starter implements Initialization {
 	/**
 	 * Mail initialization
 	 */
-	com.openexchange.mail.MailInitialization.getInstance(),
+	//com.openexchange.mail.MailInitialization.getInstance(),
 	/**
 	 * Transport initialization
 	 */
-	com.openexchange.mail.transport.TransportInitialization.getInstance(),
+	//com.openexchange.mail.transport.TransportInitialization.getInstance(),
 	/**
 	 * Infostore Configuration
 	 */
