@@ -1,24 +1,5 @@
 # System Properties
 
-# General mail config
-MailProperties=@oxgroupwaresysconfdir@/mail.properties
-
-# General transport config
-TransportProperties=@oxgroupwaresysconfdir@/transport.properties
-
-# JavaMail Properties
-JavaMailProperties=@oxgroupwaresysconfdir@/javamail.properties
-
-# Name of the class implementing the mail connection
-MailProvider=com.openexchange.imap.IMAPProvider
-# ... and its config
-IMAPProperties=@oxgroupwaresysconfdir@/imap.properties
-
-# Name of the class implementing the mail transport connection
-TransportProvider=com.openexchange.smtp.SMTPProvider
-# ... and its config
-SMTPProperties=@oxgroupwaresysconfdir@/smtp.properties
-
 # Location of the MIME type file
 MimeTypeFile=@oxgroupwaresysconfdir@/mime.types
 
@@ -73,6 +54,7 @@ EVENTPROPERTIES:@oxgroupwaresysconfdir@/event.properties
 PUSHPROPERTIES:@oxgroupwaresysconfdir@/push.properties
 configDB=@oxgroupwaresysconfdir@/configdb.properties
 FOLDERCACHEPROPERTIES=@oxgroupwaresysconfdir@/foldercache.properties
+SPELLCHECKCFG=@oxgroupwaresysconfdir@/spellcheck.cfg
 
 UPDATETASKSCFG=@oxgroupwaresysconfdir@/updatetasks.cfg
 
@@ -91,4 +73,4 @@ TidyMessages=@oxgroupwaresysconfdir@/TidyMessages.properties
 # Location of tidy configuration file
 TidyConfiguration=@oxgroupwaresysconfdir@/TidyConfiguration.properties
 
-SERVER_NAME=dev-prototyp
+SERVER_NAME=local
