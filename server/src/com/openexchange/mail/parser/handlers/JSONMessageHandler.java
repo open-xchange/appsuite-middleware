@@ -117,7 +117,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
 	private final boolean displayVersion;
 
-	private final String mailPath;
+	private final MailPath mailPath;
 
 	private final JSONObject jsonObject;
 
@@ -159,7 +159,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		}
 		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
 		this.displayVersion = displayVersion;
-		this.mailPath = mailPath;
+		this.mailPath = new MailPath(mailPath);
 		jsonObject = new JSONObject();
 	}
 
@@ -187,7 +187,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		}
 		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
 		this.displayVersion = displayVersion;
-		this.mailPath = mailPath == MailPath.NULL ? "" : mailPath.toString();
+		this.mailPath = mailPath;
 		jsonObject = new JSONObject();
 		if (!displayVersion) {
 			try {

@@ -68,6 +68,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.session.Session;
@@ -135,13 +136,12 @@ public final class MailRequest {
 	 *            the instance of <code>{@link JSONObject}</code> keeping
 	 *            request's data
 	 * @param mailInterface -
-	 *            the instance of <code>{@link MailServletInterface}</code> to access
-	 *            mail module
+	 *            the instance of <code>{@link MailServletInterface}</code> to
+	 *            access mail module
 	 */
 	public void action(final String action, final JSONObject jsonObject, final MailServletInterface mailInterface)
 			throws SearchIteratorException, JSONException, MailException, OXPermissionException {
-		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)
-				.hasWebMail()) {
+		if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx).hasWebMail()) {
 			throw new OXPermissionException(OXPermissionException.Code.NoPermissionForModul, "mail");
 		}
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
@@ -194,7 +194,8 @@ public final class MailRequest {
 			final CollectableOperation op) throws JSONException {
 		if (collectObj != null) {
 			if (collectObj.collectable(jsonObject, op)) {
-				collectObj.addMailID(jsonObject.getString(AJAXServlet.PARAMETER_ID));
+				collectObj.addMailID(new MailPath(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID), jsonObject
+						.getLong(AJAXServlet.PARAMETER_ID)));
 				contCollecting = true;
 			} else {
 				performMultipleInternal(mailInterface);
@@ -202,7 +203,8 @@ public final class MailRequest {
 				 * Start new collect
 				 */
 				collectObj = new CollectObject(jsonObject, op);
-				collectObj.addMailID(jsonObject.getString(AJAXServlet.PARAMETER_ID));
+				collectObj.addMailID(new MailPath(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID), jsonObject
+						.getLong(AJAXServlet.PARAMETER_ID)));
 				contCollecting = false;
 			}
 		} else {
@@ -210,7 +212,8 @@ public final class MailRequest {
 			 * Collect
 			 */
 			collectObj = new CollectObject(jsonObject, op);
-			collectObj.addMailID(jsonObject.getString(AJAXServlet.PARAMETER_ID));
+			collectObj.addMailID(new MailPath(jsonObject.getString(AJAXServlet.PARAMETER_FOLDERID), jsonObject
+					.getLong(AJAXServlet.PARAMETER_ID)));
 			contCollecting = true;
 		}
 	}
@@ -293,7 +296,7 @@ public final class MailRequest {
 
 		private final String destFld;
 
-		private final List<String> mailIDs;
+		private final List<MailPath> mailIDs;
 
 		private final CollectableOperation op;
 
@@ -319,14 +322,14 @@ public final class MailRequest {
 			} else {
 				throw new InternalError("Unknown collectable operation: " + op);
 			}
-			this.mailIDs = new ArrayList<String>();
+			this.mailIDs = new ArrayList<MailPath>();
 			this.op = op;
 		}
 
 		public CollectObject(final String srcFld, final String destFld, final CollectableOperation op) {
 			this.srcFld = srcFld;
 			this.destFld = destFld;
-			this.mailIDs = new ArrayList<String>();
+			this.mailIDs = new ArrayList<MailPath>();
 			this.op = op;
 			flagInt = -1;
 			flagValue = false;
@@ -356,12 +359,12 @@ public final class MailRequest {
 			return destFld;
 		}
 
-		public void addMailID(final String mailID) {
+		public void addMailID(final MailPath mailID) {
 			mailIDs.add(mailID);
 		}
 
-		public String[] getMailIDs() {
-			return mailIDs.toArray(new String[mailIDs.size()]);
+		public MailPath[] getMailIDs() {
+			return mailIDs.toArray(new MailPath[mailIDs.size()]);
 		}
 
 		public String getSrcFld() {

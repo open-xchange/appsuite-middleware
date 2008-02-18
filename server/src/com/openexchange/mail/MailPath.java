@@ -251,13 +251,11 @@ public final class MailPath implements Cloneable {
 	 * @param mailPaths
 	 *            The mail IDs
 	 * @return The extracted UIDs
-	 * @throws MailException
-	 *             If UIDs cannot be determined
 	 */
-	public static long[] getUIDs(final String[] mailPaths) throws MailException {
+	public static long[] getUIDs(final MailPath[] mailPaths) {
 		final long[] retval = new long[mailPaths.length];
 		for (int i = 0; i < mailPaths.length; i++) {
-			retval[i] = new MailPath(mailPaths[i]).uid;
+			retval[i] = mailPaths[i].uid;
 		}
 		return retval;
 	}

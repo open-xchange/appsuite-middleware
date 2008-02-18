@@ -154,11 +154,9 @@ public final class MessageWriter {
 							throws MailException {
 						try {
 							if (withKey) {
-								((JSONObject) jsonContainer).put(DataFields.ID, new MailPath(mail.getFolder(), mail
-										.getMailId()).toString());
+								((JSONObject) jsonContainer).put(DataFields.ID, mail.getMailId());
 							} else {
-								((JSONArray) jsonContainer).put(new MailPath(mail.getFolder(), mail.getMailId())
-										.toString());
+								((JSONArray) jsonContainer).put(mail.getMailId());
 							}
 						} catch (final JSONException e) {
 							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());

@@ -80,6 +80,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -422,7 +423,7 @@ public final class MessageUtility {
 	 *             If context cannot be loaded
 	 */
 	public static String formatContentForDisplay(final String content, final boolean isHtml, final Session session,
-			final String mailPath, final boolean displayVersion) throws ContextException {
+			final MailPath mailPath, final boolean displayVersion) throws ContextException {
 		final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
 				ContextStorage.getStorageContext(session.getContextId()));
 		String retval = content;
@@ -565,7 +566,7 @@ public final class MessageUtility {
 	 *            The message's unique path in mailbox
 	 * @return The html content with all inline images replaced with valid links
 	 */
-	public static String filterInlineImages(final String content, final Session session, final String msgUID) {
+	public static String filterInlineImages(final String content, final Session session, final MailPath msgUID) {
 		String reval = content;
 		try {
 			final Matcher imgMatcher = IMG_PATTERN.matcher(reval);
@@ -585,8 +586,9 @@ public final class MessageUtility {
 							final String filename = m.group(1);
 							linkBuilder.append("src=").append(STR_AJAX_MAIL).append(Mail.PARAMETER_SESSION).append('=')
 									.append(session.getSecret()).append('&').append(Mail.PARAMETER_ACTION).append('=')
-									.append(Mail.ACTION_MATTACH).append('&').append(Mail.PARAMETER_ID).append('=')
-									.append(urlEncodeSafe(msgUID, CHARSET_ISO8859)).append('&').append(
+									.append(Mail.ACTION_MATTACH).append('&').append(Mail.PARAMETER_FOLDERID)
+									.append('=').append(urlEncodeSafe(msgUID.getFolder(), CHARSET_ISO8859)).append('&')
+									.append(Mail.PARAMETER_ID).append('=').append(msgUID.getUid()).append('&').append(
 											Mail.PARAMETER_MAILCID).append('=').append(filename).append('"');
 							m.appendReplacement(cidBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
 						}
@@ -604,7 +606,7 @@ public final class MessageUtility {
 		return reval;
 	}
 
-	private static boolean replaceImgSrc(final Session session, final String msgUID, final String imgTag,
+	private static boolean replaceImgSrc(final Session session, final MailPath msgUID, final String imgTag,
 			final StringBuffer cidBuffer) {
 		boolean retval = false;
 		final Matcher cidMatcher = CID_PATTERN.matcher(imgTag);
@@ -616,9 +618,10 @@ public final class MessageUtility {
 				linkBuilder.setLength(0);
 				linkBuilder.append(STR_AJAX_MAIL).append(Mail.PARAMETER_SESSION).append('=')
 						.append(session.getSecret()).append('&').append(Mail.PARAMETER_ACTION).append('=').append(
-								Mail.ACTION_MATTACH).append('&').append(Mail.PARAMETER_ID).append('=').append(
-								urlEncodeSafe(msgUID, CHARSET_ISO8859)).append('&').append(Mail.PARAMETER_MAILCID)
-						.append('=').append(cid).append('"');
+								Mail.ACTION_MATTACH).append('&').append(Mail.PARAMETER_FOLDERID).append('=').append(
+								urlEncodeSafe(msgUID.getFolder(), CHARSET_ISO8859)).append('&').append(
+								Mail.PARAMETER_ID).append('=').append(msgUID.getUid()).append('&').append(
+								Mail.PARAMETER_MAILCID).append('=').append(cid).append('"');
 				cidMatcher.appendReplacement(cidBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
 			} while (cidMatcher.find());
 		}
