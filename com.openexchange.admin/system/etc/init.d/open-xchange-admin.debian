@@ -1,7 +1,6 @@
 #! /bin/bash
 
 # Open-Xchange Admin Daemon Initscript
-set -e
 
 STARTSCRIPT=/opt/open-xchange/sbin/open-xchange-admindaemon
 NAME=open-xchange-admin
