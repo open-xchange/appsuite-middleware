@@ -112,9 +112,9 @@ public class MailException extends AbstractOXException {
 		 */
 		INSTANTIATION_PROBLEM("Cannot instantiate class %s.", Category.SETUP_ERROR, 11),
 		/**
-		 * Cannot initialize the mail connection
+		 * Cannot initialize
 		 */
-		INITIALIZATION_PROBLEM("Cannot initialize the mail connection", Category.SETUP_ERROR, 12),
+		INITIALIZATION_PROBLEM("Cannot initialize", Category.SETUP_ERROR, 12),
 		/**
 		 * No mail module access permitted
 		 */
@@ -247,7 +247,19 @@ public class MailException extends AbstractOXException {
 		 */
 		COPY_TO_SENT_FOLDER_FAILED(
 				"Message has been successfully sent, but a copy could not be placed in your sent folder.",
-				Category.EXTERNAL_RESOURCE_FULL, 43);
+				Category.EXTERNAL_RESOURCE_FULL, 43),
+		/**
+		 * No provider could be found for protocol/URL "%s"
+		 */
+		UNKNOWN_PROTOCOL("No provider could be found for protocol/URL \"%s\"", Category.SETUP_ERROR, 44),
+		/**
+		 * Protocol cannot be parsed: %s
+		 */
+		PROTOCOL_PARSE_ERROR("Protocol cannot be parsed: %s", Category.CODE_ERROR, 45),
+		/**
+		 * Bad value %s in parameter %s
+		 */
+		BAD_PARAM_VALUE("Bad value %s in parameter %s", Category.USER_INPUT, 46);
 
 		private final String message;
 
