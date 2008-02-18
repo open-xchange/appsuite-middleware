@@ -1,0 +1,37 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange SMTP
+Bundle-SymbolicName: com.openexchange.smtp
+Bundle-Version: 6.5.0
+Bundle-Vendor: Open-Xchange Inc.
+Import-Package: com.openexchange.api2,
+ com.openexchange.config,
+ com.openexchange.config.services,
+ com.openexchange.groupware,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.contexts.impl,
+ com.openexchange.groupware.i18n,
+ com.openexchange.groupware.ldap,
+ com.openexchange.groupware.upload.impl,
+ com.openexchange.i18n.tools,
+ com.openexchange.mail,
+ com.openexchange.mail.config,
+ com.openexchange.mail.dataobjects,
+ com.openexchange.mail.dataobjects.compose,
+ com.openexchange.mail.mime,
+ com.openexchange.mail.mime.converters,
+ com.openexchange.mail.mime.filler,
+ com.openexchange.mail.transport,
+ com.openexchange.mail.transport.config,
+ com.openexchange.mail.usersetting,
+ com.openexchange.mail.utils,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.stream,
+ com.sun.mail.smtp,
+ javax.mail,
+ javax.mail.internet,
+ org.apache.commons.logging;version="1.0.4",
+ org.apache.commons.logging.impl;version="1.0.4",
+ org.osgi.framework;version="1.3.0"
+Bundle-Activator: com.openexchange.smtp.osgi.SMTPActivator
