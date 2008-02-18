@@ -72,6 +72,8 @@ import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactServices;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -312,11 +314,13 @@ public class ContactRequest {
 			final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
 			final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
 			final JSONArray jData = DataParser.checkJSONArray(jsonObj, AJAXServlet.PARAMETER_DATA);
+			int folderId = 0;
 			int[][] objectIdAndFolderId = new int[jData.length()][2];
 			for (int a = 0; a < objectIdAndFolderId.length; a++) {
 				final JSONObject jObject = jData.getJSONObject(a);
 				objectIdAndFolderId[a][0] = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_ID);
 				objectIdAndFolderId[a][1] = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_FOLDERID);
+				folderId = objectIdAndFolderId[0][1];
 			}
 			
 			int[] internalColumns = new int[columns.length+1];
@@ -330,11 +334,14 @@ public class ContactRequest {
 				new ContactException(ct);
 			}
 			
-			final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj, ctx);
+			ContactInterface contactInterface = ContactServices.getInstance().getService(folderId);
+			if (contactInterface == null) {
+				contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+			}
 			final ContactWriter contactwriter = new ContactWriter(timeZone);
 			
 			try {
-				it = contactsql.getObjectsById(objectIdAndFolderId, internalColumns);
+				it = contactInterface.getObjectsById(objectIdAndFolderId, internalColumns);
 				
 				while (it.hasNext()) {
 					final ContactObject contactObj = (ContactObject)it.next();
@@ -387,9 +394,13 @@ public class ContactRequest {
 				new ContactException(ct);
 			}
 			
-			final ContactSQLInterface contactsql = new RdbContactSQLInterface(sessionObj, ctx);
+			ContactInterface contactInterface = ContactServices.getInstance().getService(folderId);
+			if (contactInterface == null) {
+				contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+			}
+
 			final ContactWriter contactwriter = new ContactWriter(timeZone);
-			it = contactsql.getContactsInFolder(folderId, 0, 50000, orderBy, orderDir, internalColumns);
+			it = contactInterface.getContactsInFolder(folderId, 0, 50000, orderBy, orderDir, internalColumns);
 			
 			while (it.hasNext()) {
 				final ContactObject contactObj = (ContactObject)it.next();
@@ -423,11 +434,14 @@ public class ContactRequest {
 			new ContactException(ct);
 		}
 		
-		final ContactSQLInterface sqlinterface = new RdbContactSQLInterface(sessionObj, ctx);
+		ContactInterface contactInterface = ContactServices.getInstance().getService(inFolder);
+		if (contactInterface == null) {
+			contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+		}
 		
 		timestamp = new Date(0);
-		
-		final ContactObject contactObj = sqlinterface.getObjectById(id, inFolder);
+
+		final ContactObject contactObj = contactInterface.getObjectById(id, inFolder);
 		final ContactWriter contactwriter = new ContactWriter(timeZone);
 		
 		final JSONObject jsonResponseObject = new JSONObject();
