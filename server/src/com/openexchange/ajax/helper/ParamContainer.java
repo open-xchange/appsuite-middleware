@@ -60,7 +60,6 @@ import org.json.JSONObject;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.imap.OXMailException.MailCode;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
@@ -114,27 +113,27 @@ public abstract class ParamContainer {
 
 	private static final ErrorInfo MAIL_ERR_INFO = new ErrorInfo() {
 		public Category getBadParamCategory() {
-			return MailCode.BAD_PARAM_VALUE.getCategory();
+			return com.openexchange.mail.MailException.Code.BAD_PARAM_VALUE.getCategory();
 		}
 
 		public String getBadParamMsg() {
-			return MailCode.BAD_PARAM_VALUE.getMessage();
+			return com.openexchange.mail.MailException.Code.BAD_PARAM_VALUE.getMessage();
 		}
 
 		public int getBadParamNum() {
-			return MailCode.BAD_PARAM_VALUE.getNumber();
+			return com.openexchange.mail.MailException.Code.BAD_PARAM_VALUE.getNumber();
 		}
 
 		public Category getMissingParamCategory() {
-			return MailCode.MISSING_PARAM.getCategory();
+			return com.openexchange.mail.MailException.Code.MISSING_PARAM.getCategory();
 		}
 
 		public String getMissingParamMsg() {
-			return MailCode.MISSING_PARAM.getMessage();
+			return com.openexchange.mail.MailException.Code.MISSING_PARAM.getMessage();
 		}
 
 		public int getMissingParamNum() {
-			return MailCode.MISSING_PARAM.getNumber();
+			return com.openexchange.mail.MailException.Code.MISSING_PARAM.getNumber();
 		}
 	};
 

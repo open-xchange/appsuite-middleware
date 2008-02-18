@@ -55,10 +55,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.imap.OXMailException;
-import com.openexchange.imap.OXMailException.MailCode;
-
 /**
  * CommandExecutor - executes given command in a separate process and supports
  * possibility to additionally send data to running process and reading its
@@ -82,9 +78,9 @@ public final class CommandExecutor {
 	/**
 	 * Creates and starts a process that executes given command
 	 */
-	public CommandExecutor(final String cmd) throws IOException, OXException {
+	public CommandExecutor(final String cmd) throws IOException {
 		if (cmd == null) {
-			throw new OXMailException(MailCode.SPAMASSASSIN_NOT_FOUND);
+			throw new IllegalArgumentException("command is null");
 		}
 		this.process = Runtime.getRuntime().exec(cmd);
 		errSucker = new InputStreamSucker(process.getErrorStream());
