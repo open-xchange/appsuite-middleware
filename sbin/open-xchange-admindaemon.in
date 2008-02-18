@@ -88,6 +88,6 @@ exec $JAVA_BIN $JAVA_XTRAOPTS \
 	-Dconfigdir=$OXPREFIX/$OXCONFIGDIR \
 	-Djava.util.logging.config.file=$LOGGINGPROPERTIES \
 	-Duser.timezone=GMT \
-	-Dlibdir=$LIBPATH \
+	-Dlibdir=$BUNDLELIBPATH \
 	-jar $OSGIBUNDLE \
 	-configuration file:$OSGIPATH/ $OPTOUTPUT
