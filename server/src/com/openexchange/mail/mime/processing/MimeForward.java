@@ -387,7 +387,7 @@ public final class MimeForward {
 		final NonInlinePartHandler handler = new NonInlinePartHandler();
 		new MailMessageParser().parseMailMessage(originalMail, handler);
 		final List<MailPart> nonInlineParts = handler.getNonInlineParts();
-		for (MailPart mailPart : nonInlineParts) {
+		for (final MailPart mailPart : nonInlineParts) {
 			forwardMail.addAdditionalParts(mailPart);
 		}
 	}
