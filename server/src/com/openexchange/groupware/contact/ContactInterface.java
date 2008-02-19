@@ -49,8 +49,11 @@
 
 package com.openexchange.groupware.contact;
 
+import java.util.Date;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -59,6 +62,8 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public interface ContactInterface {
+	
+	public static final String OVERRIDE_FOLDER_ATTRIBUTE = "override_folder";
 	
 	/**
 	 * Determines the number of contacts a certain
@@ -95,6 +100,31 @@ public interface ContactInterface {
 	public SearchIterator getContactsInFolder(int folderId, int from, int to, int orderBy, String orderDir, int[] cols) throws OXException;
 
 	/**
+	 * Lists all contacts that match the given search
+	 * @param searchObject
+	 * The SearchObject
+	 * @param cols
+	 * fields that will be added to the data object
+	 * @return A SearchIterator contains ContactObject
+	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
+	 */	
+	public SearchIterator getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, String orderDir, int[] cols) throws OXException;
+	
+	/**
+	 * Lists all contacts where the firstname, lastname or the displayname match the given searchpattern
+	 * @param searchpattern
+	 * The searchpattern
+	 * @param folderId
+	 * folder id where to search	 
+	 * @param cols
+	 * fields that will be added to the data object
+	 * @return A SearchIterator contains ContactObject
+	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
+	 */	
+	public SearchIterator searchContacts(String searchpattern, boolean startletter, int folderId, int orderBy, String orderDir, int[] cols) throws OXException;
+	
+	
+	/**
 	 * Loads one contact by the given ID
 	 * @param objectId
 	 * The Object ID
@@ -104,6 +134,28 @@ public interface ContactInterface {
 	 */
 	public ContactObject getObjectById(int objectId, int inFolder) throws OXException;
 
+	/**
+	 * Lists all modified objects in a folder
+	 * @param folderID
+	 * The Folder ID
+	 * @param since
+	 * all modification >= since
+	 * @return A SearchIterator contains AppointmentObject
+	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
+	 */	 
+	public SearchIterator getModifiedContactsInFolder(int folderId, int[] cols, Date since) throws OXException;
+	
+	/**
+	 * Lists all deleted objects in a folder
+	 * @param folderID
+	 * The Folder ID
+	 * @param since
+	 * all modification >= since
+	 * @return A SearchIterator contains AppointmentObject
+	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
+	 */	
+	public SearchIterator getDeletedContactsInFolder(int folderId, int[] cols, Date since) throws OXException;
+	
 	/**
 	 * Loads a range of contacts by the given IDs
 	 * @param objectIdAndInFolder[]
@@ -116,6 +168,4 @@ public interface ContactInterface {
 	 * @throws OXException
 	 */	
 	public SearchIterator getObjectsById(int[][] objectIdAndInFolder, int cols[]) throws OXException, Exception;
-	
-	public int getFolderId();
 }
