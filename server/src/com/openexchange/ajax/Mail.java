@@ -1076,6 +1076,21 @@ public class Mail extends PermissionServlet implements UploadListener {
 					if (mailPart == null) {
 						throw new MailException(MailException.Code.NO_ATTACHMENT_FOUND, sequenceId);
 					}
+					/**
+					 * TODO: Does not work, yet.
+					 * <pre>
+					 * 
+					 * if (!saveToDisk &amp;&amp; mailPart.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+					 * 	// Treat as a mail get
+					 * 	final MailMessage mail = (MailMessage) mailPart.getContent();
+					 * 	final Response response = new Response();
+					 * 	response.setData(MessageWriter.writeMailMessage(mail, true, sessionObj));
+					 * 	response.setTimestamp(null);
+					 * 	Response.write(response, resp.getWriter());
+					 * 	return;
+					 * }
+					 * </pre>
+					 */
 				} else {
 					mailPart = mailInterface.getMessageImage(folderPath, uid, imageContentId);
 					if (mailPart == null) {
