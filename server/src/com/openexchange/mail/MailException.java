@@ -259,7 +259,11 @@ public class MailException extends AbstractOXException {
 		/**
 		 * Bad value %s in parameter %s
 		 */
-		BAD_PARAM_VALUE("Bad value %s in parameter %s", Category.USER_INPUT, 46);
+		BAD_PARAM_VALUE("Bad value %s in parameter %s", Category.USER_INPUT, 46),
+		/**
+		 * No reply on multiple message possible
+		 */
+		NO_MULTIPLE_REPLY("No reply on multiple message possible", Category.USER_INPUT, 47);
 
 		private final String message;
 

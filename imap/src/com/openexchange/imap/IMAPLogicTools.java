@@ -103,16 +103,29 @@ public final class IMAPLogicTools extends IMAPFolderWorker implements MailLogicT
 	 * @see com.openexchange.mail.MailTools#getFowardMessage(long,
 	 *      java.lang.String)
 	 */
-	public MailMessage getFowardMessage(final long originalUID, final String folder) throws MailException {
+	public MailMessage getFowardMessage(final long[] originalUIDs, final String folder) throws MailException {
 		try {
 			final String fullname = prepareMailFolderParam(folder);
 			imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_ONLY);
 			/*
-			 * Fetch original message
+			 * Fetch original messages
 			 */
-			final MailMessage forwardMail = MimeForward.getFowardMail((MimeMessage) imapFolder
-					.getMessageByUID(originalUID), session);
-			forwardMail.setMsgref(MailPath.getMailPath(fullname, originalUID));
+			final MimeMessage[] msgs = new MimeMessage[originalUIDs.length];
+			for (int i = 0; i < originalUIDs.length; i++) {
+				msgs[i] = (MimeMessage) imapFolder.getMessageByUID(originalUIDs[i]);
+				if (msgs[i] == null) {
+					throw new MailException(MailException.Code.MAIL_NOT_FOUND, Long.valueOf(originalUIDs[i]), imapFolder.getFullName());
+				}
+			}
+			final MailMessage forwardMail = MimeForward.getFowardMail(msgs, session);
+			{
+				final StringBuilder sb = new StringBuilder(msgs.length * 16);
+				sb.append(MailPath.getMailPath(fullname, originalUIDs[0]));
+				for (int i = 1; i < originalUIDs.length; i++) {
+					sb.append(',').append(MailPath.getMailPath(fullname, originalUIDs[i]));
+				}
+				forwardMail.setMsgref(sb.toString());
+			}
 			return forwardMail;
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapConnection);

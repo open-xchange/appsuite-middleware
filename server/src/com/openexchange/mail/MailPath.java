@@ -227,6 +227,20 @@ public final class MailPath implements Cloneable {
 	}
 
 	/**
+	 * Returns the mail paths for given comma-separated mail IDs each conform to
+	 * pattern &lt;folder-path&gt;&lt;value-of-{@link #SEPERATOR}&gt;&lt;mail-ID&gt;
+	 * 
+	 * @param mailPaths
+	 *            The comma-separated mail IDs
+	 * @return The corresponding mail paths
+	 * @throws MailException
+	 *             If mail paths cannot be generated
+	 */
+	public static MailPath[] getMailPaths(final String mailPaths) throws MailException {
+		return getMailPaths(mailPaths.split(" *, *"));
+	}
+
+	/**
 	 * Returns the mail paths for given mail IDs each conform to pattern
 	 * &lt;folder-path&gt;&lt;value-of-{@link #SEPERATOR}&gt;&lt;mail-ID&gt;
 	 * 
@@ -245,8 +259,7 @@ public final class MailPath implements Cloneable {
 	}
 
 	/**
-	 * Extracts the UIDs from given mail IDs each conform to pattern
-	 * &lt;folder-path&gt;&lt;value-of-{@link #SEPERATOR}&gt;&lt;mail-ID&gt;
+	 * Extracts the UIDs from given mail paths
 	 * 
 	 * @param mailPaths
 	 *            The mail IDs

@@ -667,8 +667,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 					mailInterface = MailServletInterface.getInstance(sessionObj);
 					closeMailInterface = true;
 				}
-				data = MessageWriter.writeMailMessage(mailInterface.getForwardMessageForDisplay(folderPath, uid),
-						false, sessionObj);
+				data = MessageWriter.writeMailMessage(mailInterface.getForwardMessageForDisplay(folderPath,
+						new long[] { uid }), false, sessionObj);
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);

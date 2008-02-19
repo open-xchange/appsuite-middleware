@@ -387,12 +387,12 @@ public final class SMTPTransport extends MailTransport {
 			 */
 			final long startPrep = System.currentTimeMillis();
 			smtpFiller = new SMTPMessageFiller(session, ctx, usm);
-			if (composedMail.getReferencedMail() != null) {
+			if (composedMail.getReferencedMailsSize() == 1) {
 				tempIds = ReferencedMailPart.loadReferencedParts(composedMail, session);
 			}
-			if (ComposeType.FORWARD.equals(sendType) && usm.isForwardAsAttachment()) {
+			if (ComposeType.FORWARD.equals(sendType) && (usm.isForwardAsAttachment() || composedMail.getReferencedMailsSize() > 1)) {
 				smtpFiller.fillMail((SMTPMailMessage) composedMail, smtpMessage, sendType, composedMail
-						.getReferencedMail());
+						.getReferencedMails());
 			} else {
 				smtpFiller.fillMail((SMTPMailMessage) composedMail, smtpMessage, sendType);
 			}

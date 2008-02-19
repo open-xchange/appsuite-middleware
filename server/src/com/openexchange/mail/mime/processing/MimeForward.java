@@ -109,11 +109,14 @@ public final class MimeForward {
 	}
 
 	/**
-	 * Composes a forward message from specified original message based on MIME
+	 * Composes a forward message from specified original messages based on MIME
 	 * objects from <code>JavaMail</code> API
+	 * <p>
+	 * If multiple messages are given these messages are forwarded as
+	 * attachments
 	 * 
-	 * @param originalMsg
-	 *            The referenced original message
+	 * @param originalMsgs
+	 *            The referenced original messages
 	 * @param session
 	 *            The session containing needed user data
 	 * @return An instance of {@link MailMessage} representing an user-editable
@@ -121,7 +124,8 @@ public final class MimeForward {
 	 * @throws MailException
 	 *             If forward mail cannot be composed
 	 */
-	public static MailMessage getFowardMail(final MimeMessage originalMsg, final Session session) throws MailException {
+	public static MailMessage getFowardMail(final MimeMessage[] originalMsgs, final Session session)
+			throws MailException {
 		try {
 			/*
 			 * New MIME message with a dummy session
@@ -132,9 +136,11 @@ public final class MimeForward {
 			final MimeMessage forwardMsg = new MimeMessage(MIMEDefaultSession.getDefaultSession());
 			{
 				/*
-				 * Set its headers. Start with subject.
+				 * Set its headers. Start with subject constructed from first
+				 * message.
 				 */
-				final String origSubject = MimeUtility.unfold(originalMsg.getHeader(MessageHeaders.HDR_SUBJECT, null));
+				final String origSubject = MimeUtility.unfold(originalMsgs[0].getHeader(MessageHeaders.HDR_SUBJECT,
+						null));
 				if (origSubject != null) {
 					final String subjectPrefix = new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx)
 							.getLocale()).getString(MailStrings.FORWARD_SUBJECT_PREFIX);
@@ -150,7 +156,7 @@ public final class MimeForward {
 			if (usm.getSendAddr() != null) {
 				forwardMsg.setFrom(new InternetAddress(usm.getSendAddr(), true));
 			}
-			if (usm.isForwardAsAttachment()) {
+			if (usm.isForwardAsAttachment() || originalMsgs.length > 1) {
 				final Multipart multipart = new MimeMultipart();
 				{
 					/*
@@ -163,10 +169,10 @@ public final class MimeForward {
 							"#CS#", MailConfig.getDefaultMimeCharset()));
 					multipart.addBodyPart(textPart);
 				}
-				{
-					/*
-					 * Attach original message
-					 */
+				/*
+				 * Attach messages
+				 */
+				for (final MimeMessage originalMsg : originalMsgs) {
 					final MimeBodyPart bodyPart = new MimeBodyPart();
 					bodyPart.setContent(originalMsg, MIMETypes.MIME_MESSAGE_RFC822);
 					multipart.addBodyPart(bodyPart);
@@ -178,7 +184,7 @@ public final class MimeForward {
 				forwardMsg.saveChanges();
 				return MIMEMessageConverter.convertMessage(forwardMsg);
 			}
-			final ContentType originalContentType = new ContentType(originalMsg.getContentType());
+			final ContentType originalContentType = new ContentType(originalMsgs[0].getContentType());
 			final MailMessage forwardMail;
 			if (originalContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
 				final Multipart multipart = new MimeMultipart();
@@ -187,8 +193,8 @@ public final class MimeForward {
 					 * Grab first seen text from original message
 					 */
 					final ContentType contentType = new ContentType();
-					final String firstSeenText = getFirstSeenText((Multipart) originalMsg.getContent(), contentType,
-							usm);
+					final String firstSeenText = getFirstSeenText((Multipart) originalMsgs[0].getContent(),
+							contentType, usm);
 					if (contentType.getCharsetParameter() == null) {
 						contentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
 					}
@@ -197,7 +203,7 @@ public final class MimeForward {
 					 */
 					final MimeBodyPart textPart = new MimeBodyPart();
 					textPart.setText(generateForwardText(firstSeenText, UserStorage.getStorageUser(session.getUserId(),
-							ctx).getLocale(), originalMsg, contentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)),
+							ctx).getLocale(), originalMsgs[0], contentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)),
 							contentType.getCharsetParameter(), contentType.getSubType());
 					textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
 					textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType.toString());
@@ -209,7 +215,7 @@ public final class MimeForward {
 				/*
 				 * Add all non-inline parts
 				 */
-				addNonInlineParts(originalMsg, (CompositeMailMessage) forwardMail);
+				addNonInlineParts(originalMsgs[0], (CompositeMailMessage) forwardMail);
 			} else if (originalContentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
 				/*
 				 * Original message is a simple text mail: Add message body
@@ -218,10 +224,11 @@ public final class MimeForward {
 				if (originalContentType.getCharsetParameter() == null) {
 					originalContentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
 				}
-				forwardMsg.setText(generateForwardText(MessageUtility.readMimePart(originalMsg, originalContentType),
-						UserStorage.getStorageUser(session.getUserId(), ctx).getLocale(), originalMsg,
-						originalContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)), originalContentType
-						.getCharsetParameter(), originalContentType.getSubType());
+				forwardMsg.setText(generateForwardText(MessageUtility
+						.readMimePart(originalMsgs[0], originalContentType), UserStorage.getStorageUser(
+						session.getUserId(), ctx).getLocale(), originalMsgs[0], originalContentType
+						.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)), originalContentType.getCharsetParameter(),
+						originalContentType.getSubType());
 				forwardMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
 				forwardMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, originalContentType.toString());
 				forwardMsg.saveChanges();

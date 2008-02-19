@@ -263,7 +263,7 @@ public abstract class MailServletInterface {
 	 * support Open-Xchange GUI's display onyl and does not really send the
 	 * forward.
 	 */
-	public abstract MailMessage getForwardMessageForDisplay(String folder, long fowardMsgUID) throws MailException;
+	public abstract MailMessage getForwardMessageForDisplay(String folder, long[] fowardMsgUIDs) throws MailException;
 
 	/**
 	 * Deletes the message located in given folder corresponding to given

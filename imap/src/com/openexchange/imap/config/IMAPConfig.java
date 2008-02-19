@@ -117,91 +117,41 @@ public final class IMAPConfig extends MailConfig {
 			throw new MailConfigException(e);
 		}
 		fillLoginAndPassword(imapConf, session, user);
-		if (LoginType.GLOBAL.equals(getLoginType())) {
-			String imapServer = MailConfig.getMailServer();
-			if (imapServer == null) {
+		String imapServer = MailConfig.getMailServerURL(user);
+		if (imapServer == null) {
+			if (LoginType.GLOBAL.equals(getLoginType())) {
 				throw new MailConfigException(new StringBuilder(128).append("Property \"").append("mailServer").append(
 						"\" not set in mail properties").toString());
 			}
-			{
-				final int lastPos = imapServer.length() - 1;
-				if (imapServer.charAt(lastPos) == '/') {
-					imapServer = imapServer.substring(0, lastPos);
-				}
-			}
-			int imapPort = 143;
-			{
-				final String[] parsed = parseProtocol(imapServer);
-				if (parsed != null) {
-					imapConf.secure = PROTOCOL_IMAP_SECURE.equals(parsed[0]);
-					imapServer = parsed[1];
-				} else {
-					imapConf.secure = false;
-				}
-				final int pos = imapServer.indexOf(':');
-				if (pos > -1) {
-					imapPort = Integer.parseInt(imapServer.substring(pos + 1));
-					imapServer = imapServer.substring(0, pos);
-				}
-			}
-			final String masterPw = MailConfig.getMasterPassword();
-			if (masterPw == null) {
-				throw new MailConfigException(new StringBuilder().append("Property \"").append("masterPassword")
-						.append("\" not set in mail properties").toString());
-			}
-			imapConf.imapServer = imapServer;
-			imapConf.imapPort = imapPort;
-		} else if (LoginType.USER.equals(getLoginType())) {
-			String imapServer = user.getImapServer();
-			{
-				final int lastPos = imapServer.length() - 1;
-				if (imapServer.charAt(lastPos) == '/') {
-					imapServer = imapServer.substring(0, lastPos);
-				}
-			}
-			int imapPort = 143;
-			{
-				final String[] parsed = parseProtocol(imapServer);
-				if (parsed != null) {
-					imapConf.secure = PROTOCOL_IMAP_SECURE.equals(parsed[0]);
-					imapServer = parsed[1];
-				} else {
-					imapConf.secure = false;
-				}
-				final int pos = imapServer.indexOf(':');
-				if (pos > -1) {
-					imapPort = Integer.parseInt(imapServer.substring(pos + 1));
-					imapServer = imapServer.substring(0, pos);
-				}
-			}
-			imapConf.imapServer = imapServer;
-			imapConf.imapPort = imapPort;
-		} else if (LoginType.ANONYMOUS.equals(getLoginType())) {
-			String imapServer = user.getImapServer();
-			{
-				final int lastPos = imapServer.length() - 1;
-				if (imapServer.charAt(lastPos) == '/') {
-					imapServer = imapServer.substring(0, lastPos);
-				}
-			}
-			int imapPort = 143;
-			{
-				final String[] parsed = parseProtocol(imapServer);
-				if (parsed != null) {
-					imapConf.secure = PROTOCOL_IMAP_SECURE.equals(parsed[0]);
-					imapServer = parsed[1];
-				} else {
-					imapConf.secure = false;
-				}
-				final int pos = imapServer.indexOf(':');
-				if (pos > -1) {
-					imapPort = Integer.parseInt(imapServer.substring(pos + 1));
-					imapServer = imapServer.substring(0, pos);
-				}
-			}
-			imapConf.imapServer = imapServer;
-			imapConf.imapPort = imapPort;
+			throw new MailConfigException(new StringBuilder(128).append("Cannot determine mail server URL for user ")
+					.append(session.getUserId()).append(" in context ").append(session.getContextId()).toString());
 		}
+		{
+			/*
+			 * Remove ending '/' character
+			 */
+			final int lastPos = imapServer.length() - 1;
+			if (imapServer.charAt(lastPos) == '/') {
+				imapServer = imapServer.substring(0, lastPos);
+			}
+		}
+		int imapPort = 143;
+		{
+			final String[] parsed = parseProtocol(imapServer);
+			if (parsed != null) {
+				imapConf.secure = PROTOCOL_IMAP_SECURE.equals(parsed[0]);
+				imapServer = parsed[1];
+			} else {
+				imapConf.secure = false;
+			}
+			final int pos = imapServer.indexOf(':');
+			if (pos > -1) {
+				imapPort = Integer.parseInt(imapServer.substring(pos + 1));
+				imapServer = imapServer.substring(0, pos);
+			}
+		}
+		imapConf.imapServer = imapServer;
+		imapConf.imapPort = imapPort;
 		return imapConf;
 	}
 
@@ -340,8 +290,7 @@ public final class IMAPConfig extends MailConfig {
 	 *            Whether newer ACL extension is supported or not
 	 */
 	public static void setNewACLExt(final String imapServer, final boolean newACLExt) {
-		IMAPProperties.getInstance().getNewACLExtMap().put(imapServer,
-				Boolean.valueOf(newACLExt));
+		IMAPProperties.getInstance().getNewACLExtMap().put(imapServer, Boolean.valueOf(newACLExt));
 	}
 
 	/**
@@ -436,11 +385,9 @@ public final class IMAPConfig extends MailConfig {
 	 * @return the supportsACLs
 	 */
 	public boolean isSupportsACLs() {
-		if (capabilitiesLoaded.get()
-				&& BoolCapVal.AUTO.equals(IMAPProperties.getInstance().getSupportsACLs())) {
+		if (capabilitiesLoaded.get() && BoolCapVal.AUTO.equals(IMAPProperties.getInstance().getSupportsACLs())) {
 			return imapCapabilities.hasACL();
 		}
-		return BoolCapVal.TRUE.equals(IMAPProperties.getInstance().getSupportsACLs()) ? true
-				: false;
+		return BoolCapVal.TRUE.equals(IMAPProperties.getInstance().getSupportsACLs()) ? true : false;
 	}
 }

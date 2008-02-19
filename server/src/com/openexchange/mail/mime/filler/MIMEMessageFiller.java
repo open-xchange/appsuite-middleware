@@ -68,7 +68,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 
 import javax.activation.DataHandler;
-import javax.activation.DataSource;
 import javax.activation.FileDataSource;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
@@ -267,8 +266,151 @@ public class MIMEMessageFiller {
 	}
 
 	/**
+	 * Sets necessary headers in specified MIME message: <code>From</code>/<code>Sender</code>,
+	 * <code>To</code>, <code>Cc</code>, <code>Bcc</code>,
+	 * <code>Reply-To</code>, <code>Subject</code>, etc.
+	 * 
+	 * @param mail
+	 *            The composed mail
+	 * @param mimeMessage
+	 *            The MIME message
+	 * @throws MessagingException
+	 *             If headers cannot be set
+	 */
+	public void setMessageHeaders(final ComposedMailMessage mail, final MimeMessage mimeMessage)
+			throws MessagingException {
+		/*
+		 * Set from/sender
+		 */
+		if (mail.containsFrom()) {
+			InternetAddress sender = null;
+			if (usm.getSendAddr() != null && usm.getSendAddr().length() > 0) {
+				try {
+					sender = new InternetAddress(usm.getSendAddr(), true);
+				} catch (final AddressException e) {
+					LOG.error("Default send address cannot be parsed", e);
+					sender = null;
+				}
+			}
+			final InternetAddress from = mail.getFrom()[0];
+			mimeMessage.setFrom(from);
+			/*
+			 * Taken from RFC 822 section 4.4.2: In particular, the "Sender"
+			 * field MUST be present if it is NOT the same as the "From" Field.
+			 */
+			if (sender != null && !from.equals(sender)) {
+				mimeMessage.setSender(sender);
+			}
+		}
+		/*
+		 * Set to
+		 */
+		if (mail.containsTo()) {
+			mimeMessage.setRecipients(RecipientType.TO, mail.getTo());
+		}
+		/*
+		 * Set cc
+		 */
+		if (mail.containsCc()) {
+			mimeMessage.setRecipients(RecipientType.CC, mail.getCc());
+		}
+		/*
+		 * Bcc
+		 */
+		if (mail.containsBcc()) {
+			mimeMessage.setRecipients(RecipientType.BCC, mail.getBcc());
+		}
+		/*
+		 * Reply-To
+		 */
+		if (usm.getReplyToAddr() == null || usm.getReplyToAddr().length() == 0) {
+			if (mail.containsFrom()) {
+				mimeMessage.setReplyTo(mail.getFrom());
+			}
+		} else {
+			try {
+				mimeMessage.setReplyTo(InternetAddress.parse(usm.getReplyToAddr(), true));
+			} catch (final AddressException e) {
+				LOG.error("Default Reply-To address cannot be parsed", e);
+				try {
+					mimeMessage.setHeader(MessageHeaders.HDR_REPLY_TO, MimeUtility.encodeWord(usm.getReplyToAddr(),
+							MailConfig.getDefaultMimeCharset(), "Q"));
+				} catch (final UnsupportedEncodingException e1) {
+					/*
+					 * Cannot occur since default mime charset is supported by
+					 * JVM
+					 */
+					LOG.error(e1.getMessage(), e1);
+				}
+			}
+		}
+		/*
+		 * Set subject
+		 */
+		if (mail.containsSubject()) {
+			mimeMessage.setSubject(mail.getSubject(), MailConfig.getDefaultMimeCharset());
+		}
+		/*
+		 * Set sent date
+		 */
+		if (mail.containsSentDate()) {
+			mimeMessage.setSentDate(mail.getSentDate());
+		}
+		/*
+		 * Set flags
+		 */
+		final Flags msgFlags = new Flags();
+		if (mail.isAnswered()) {
+			msgFlags.add(Flags.Flag.ANSWERED);
+		}
+		if (mail.isDeleted()) {
+			msgFlags.add(Flags.Flag.DELETED);
+		}
+		if (mail.isDraft()) {
+			msgFlags.add(Flags.Flag.DRAFT);
+		}
+		if (mail.isFlagged()) {
+			msgFlags.add(Flags.Flag.FLAGGED);
+		}
+		if (mail.isRecent()) {
+			msgFlags.add(Flags.Flag.RECENT);
+		}
+		if (mail.isSeen()) {
+			msgFlags.add(Flags.Flag.SEEN);
+		}
+		if (mail.isUser()) {
+			msgFlags.add(Flags.Flag.USER);
+		}
+		/*
+		 * Finally, apply flags to message
+		 */
+		mimeMessage.setFlags(msgFlags, true);
+		/*
+		 * Set disposition notification
+		 */
+		if (mail.getDispositionNotification() != null) {
+			mimeMessage.setHeader(MessageHeaders.HDR_DISP_TO, mail.getDispositionNotification().toString());
+		}
+		/*
+		 * Set priority
+		 */
+		mimeMessage.setHeader(MessageHeaders.HDR_X_PRIORITY, String.valueOf(mail.getPriority()));
+		/*
+		 * Headers
+		 */
+		final int size = mail.getHeadersSize();
+		final Iterator<Map.Entry<String, String>> iter = mail.getHeadersIterator();
+		for (int i = 0; i < size; i++) {
+			final Map.Entry<String, String> entry = iter.next();
+			mimeMessage.addHeader(entry.getKey(), entry.getValue());
+		}
+	}
+
+	/**
 	 * Sets the appropriate headers <code>In-Reply-To</code> and
 	 * <code>References</code> in specified MIME message.
+	 * <p>
+	 * Moreover the <code>Reply-To</code> header is set.
 	 * 
 	 * @param referencedMail
 	 *            The referenced mail
@@ -279,9 +421,6 @@ public class MIMEMessageFiller {
 	 */
 	public void setReplyHeaders(final MailMessage referencedMail, final MimeMessage mimeMessage)
 			throws MessagingException {
-		/*
-		 * A reply! Set appropriate message headers
-		 */
 		final String pMsgId = referencedMail.getHeader(MessageHeaders.HDR_MESSAGE_ID);
 		if (pMsgId != null) {
 			mimeMessage.setHeader(MessageHeaders.HDR_IN_REPLY_TO, pMsgId);
@@ -374,8 +513,8 @@ public class MIMEMessageFiller {
 	 *            The MIME message to fill
 	 * @param type
 	 *            The compose type
-	 * @param originalMail
-	 *            The original mail (needed if type is
+	 * @param originalMails
+	 *            The original mails (needed if type is
 	 *            {@link ComposeType#FORWARD} and user wants to compose forward
 	 *            mails non-inline)
 	 * @throws MessagingException
@@ -386,7 +525,7 @@ public class MIMEMessageFiller {
 	 *             If an I/O error occurs
 	 */
 	public void fillMailBody(final ComposedMailMessage mail, final MimeMessage mimeMessage, final ComposeType type,
-			final MailMessage originalMail) throws MessagingException, MailException, IOException {
+			final MailMessage[] originalMails) throws MessagingException, MailException, IOException {
 		/*
 		 * Store some flags
 		 */
@@ -397,8 +536,8 @@ public class MIMEMessageFiller {
 		/*
 		 * A non-inline forward message
 		 */
-		final boolean isNonInlineForward = (mail.getMsgref() != null && (ComposeType.FORWARD.equals(type)) && usm
-				.isForwardAsAttachment());
+		final boolean isAttachmentForward = ((ComposeType.FORWARD.equals(type)) && (mail.getReferencedMailsSize() >= 1 || usm
+				.isForwardAsAttachment()));
 		/*
 		 * Initialize primary multipart
 		 */
@@ -406,7 +545,7 @@ public class MIMEMessageFiller {
 		/*
 		 * Detect if primary multipart is of type multipart/mixed
 		 */
-		if (hasNestedMessages || hasAttachments || mail.isAppendVCard() || isNonInlineForward) {
+		if (hasNestedMessages || hasAttachments || mail.isAppendVCard() || isAttachmentForward) {
 			primaryMultipart = new MimeMultipart();
 		}
 		/*
@@ -434,7 +573,7 @@ public class MIMEMessageFiller {
 		/*
 		 * Compose message
 		 */
-		if (hasAttachments || sendMultipartAlternative || isNonInlineForward || mail.isAppendVCard() || embeddedImages) {
+		if (hasAttachments || sendMultipartAlternative || isAttachmentForward || mail.isAppendVCard() || embeddedImages) {
 			/*
 			 * If any condition is true, we ought to create a multipart/*
 			 * message
@@ -468,7 +607,7 @@ public class MIMEMessageFiller {
 					primaryMultipart.addBodyPart(createHtmlBodyPart((String) mail.getContent()));
 				}
 			}
-			final int size = mail.getEnclosedCount();
+			final int size = isAttachmentForward ? 0 : mail.getEnclosedCount();
 			for (int i = 0; i < size; i++) {
 				addMessageBodyPart(primaryMultipart, mail.getEnclosedMailPart(i), false);
 			}
@@ -515,27 +654,28 @@ public class MIMEMessageFiller {
 				}
 			}
 			/*
-			 * Append original message
+			 * Attach forwarded messages
 			 */
-			if (isNonInlineForward) {
+			if (isAttachmentForward) {
 				if (primaryMultipart == null) {
 					primaryMultipart = new MimeMultipart();
 				}
-				try {
-					/*
-					 * Create a body part for original message
-					 */
-					final DataSource dataSource;
-					{
-						final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
-						originalMail.writeTo(out);
-						dataSource = new MessageDataSource(out.toByteArray(), MIMETypes.MIME_MESSAGE_RFC822);
+				final MailMessage[] refMails = mail.getReferencedMails();
+				final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
+				for (final MailMessage refMail : refMails) {
+					try {
+						/*
+						 * Create a body part for original message
+						 */
+						out.reset();
+						refMail.writeTo(out);
+						final MimeBodyPart origMsgPart = new MimeBodyPart();
+						origMsgPart.setDataHandler(new DataHandler(new MessageDataSource(out.toByteArray(),
+								MIMETypes.MIME_MESSAGE_RFC822)));
+						primaryMultipart.addBodyPart(origMsgPart);
+					} catch (final MessagingException e) {
+						LOG.error("Error while attaching message on non-inline forward", e);
 					}
-					final MimeBodyPart origMsgPart = new MimeBodyPart();
-					origMsgPart.setDataHandler(new DataHandler(dataSource));
-					primaryMultipart.addBodyPart(origMsgPart);
-				} catch (final MessagingException e) {
-					LOG.error("Error while appending original message on forward", e);
 				}
 			}
 			/*
@@ -775,94 +915,6 @@ public class MIMEMessageFiller {
 		 * Add to parental multipart
 		 */
 		mp.addBodyPart(messageBodyPart);
-	}
-
-	public void setMessageHeaders(final ComposedMailMessage mail, final MimeMessage mimeMessage)
-			throws MessagingException {
-		/*
-		 * Set from
-		 */
-		if (mail.containsFrom()) {
-			mimeMessage.setFrom(mail.getFrom()[0]);
-		}
-		/*
-		 * Set to
-		 */
-		if (mail.containsTo()) {
-			mimeMessage.setRecipients(RecipientType.TO, mail.getTo());
-		}
-		/*
-		 * Set cc
-		 */
-		if (mail.containsCc()) {
-			mimeMessage.setRecipients(RecipientType.CC, mail.getCc());
-		}
-		/*
-		 * Bcc
-		 */
-		if (mail.containsBcc()) {
-			mimeMessage.setRecipients(RecipientType.BCC, mail.getBcc());
-		}
-		/*
-		 * Set subject
-		 */
-		if (mail.containsSubject()) {
-			mimeMessage.setSubject(mail.getSubject(), MailConfig.getDefaultMimeCharset());
-		}
-		/*
-		 * Set sent date
-		 */
-		if (mail.containsSentDate()) {
-			mimeMessage.setSentDate(mail.getSentDate());
-		}
-		/*
-		 * Set flags
-		 */
-		final Flags msgFlags = new Flags();
-		if (mail.isAnswered()) {
-			msgFlags.add(Flags.Flag.ANSWERED);
-		}
-		if (mail.isDeleted()) {
-			msgFlags.add(Flags.Flag.DELETED);
-		}
-		if (mail.isDraft()) {
-			msgFlags.add(Flags.Flag.DRAFT);
-		}
-		if (mail.isFlagged()) {
-			msgFlags.add(Flags.Flag.FLAGGED);
-		}
-		if (mail.isRecent()) {
-			msgFlags.add(Flags.Flag.RECENT);
-		}
-		if (mail.isSeen()) {
-			msgFlags.add(Flags.Flag.SEEN);
-		}
-		if (mail.isUser()) {
-			msgFlags.add(Flags.Flag.USER);
-		}
-		/*
-		 * Finally, apply flags to message
-		 */
-		mimeMessage.setFlags(msgFlags, true);
-		/*
-		 * Set disposition notification
-		 */
-		if (mail.getDispositionNotification() != null) {
-			mimeMessage.setHeader(MessageHeaders.HDR_DISP_TO, mail.getDispositionNotification().toString());
-		}
-		/*
-		 * Set priority
-		 */
-		mimeMessage.setHeader(MessageHeaders.HDR_X_PRIORITY, String.valueOf(mail.getPriority()));
-		/*
-		 * Headers
-		 */
-		final int size = mail.getHeadersSize();
-		final Iterator<Map.Entry<String, String>> iter = mail.getHeadersIterator();
-		for (int i = 0; i < size; i++) {
-			final Map.Entry<String, String> entry = iter.next();
-			mimeMessage.addHeader(entry.getKey(), entry.getValue());
-		}
 	}
 
 	/*

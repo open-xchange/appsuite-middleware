@@ -61,7 +61,7 @@ import com.openexchange.mail.dataobjects.MailPart;
  */
 public abstract class ComposedMailMessage extends MailMessage {
 
-	private MailMessage referencedMail;
+	private MailMessage[] referencedMails;
 
 	/**
 	 * Default constructor
@@ -76,12 +76,45 @@ public abstract class ComposedMailMessage extends MailMessage {
 	}
 
 	/**
+	 * Checks if this composed mail contains referenced mails
+	 * 
+	 * @return <code>true</code> if this composed mail contains referenced
+	 *         mails; otherwise <code>false</code>
+	 */
+	public boolean containsReferencedMails() {
+		return referencedMails != null && referencedMails.length > 0;
+	}
+
+	/**
+	 * Gets the number of referenced mails
+	 * 
+	 * @return The number of referenced mails
+	 */
+	public int getReferencedMailsSize() {
+		return referencedMails == null ? 0 : referencedMails.length;
+	}
+
+	/**
 	 * Gets the referenced mail of this composed mail
 	 * 
 	 * @return The referenced mail
 	 */
 	public MailMessage getReferencedMail() {
-		return referencedMail;
+		return referencedMails == null ? null : referencedMails[0];
+	}
+
+	/**
+	 * Gets the referenced mails of this composed mail
+	 * 
+	 * @return The referenced mails
+	 */
+	public MailMessage[] getReferencedMails() {
+		if (referencedMails == null) {
+			return null;
+		}
+		final MailMessage[] retval = new MailMessage[referencedMails.length];
+		System.arraycopy(referencedMails, 0, retval, 0, referencedMails.length);
+		return retval;
 	}
 
 	/**
@@ -91,7 +124,19 @@ public abstract class ComposedMailMessage extends MailMessage {
 	 *            The referenced mail
 	 */
 	public void setReferencedMail(final MailMessage referencedMail) {
-		this.referencedMail = referencedMail;
+		this.referencedMails = new MailMessage[1];
+		referencedMails[0] = referencedMail;
+	}
+
+	/**
+	 * Sets the referenced mails of this composed mail
+	 * 
+	 * @param referencedMails
+	 *            The referenced mails
+	 */
+	public void setReferencedMails(final MailMessage[] referencedMails) {
+		this.referencedMails = new MailMessage[referencedMails.length];
+		System.arraycopy(referencedMails, 0, this.referencedMails, 0, referencedMails.length);
 	}
 
 	/**

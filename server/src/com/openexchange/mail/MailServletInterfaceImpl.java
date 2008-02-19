@@ -264,9 +264,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	}
 
 	@Override
-	public MailMessage getForwardMessageForDisplay(final String folder, final long fowardMsgUID) throws MailException {
+	public MailMessage getForwardMessageForDisplay(final String folder, final long[] fowardMsgUIDs)
+			throws MailException {
 		initConnection();
-		return mailConnection.getLogicTools().getFowardMessage(fowardMsgUID, folder);
+		return mailConnection.getLogicTools().getFowardMessage(fowardMsgUIDs, folder);
 	}
 
 	private static final String INBOX_ID = "INBOX";
@@ -469,21 +470,31 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		final MailTransport transport = MailTransport.getInstance(session);
 		final MailMessage sentMail;
 		try {
-			final MailPath path;
+			final MailPath[] paths;
 			if (composedMail.getMsgref() != null) {
-				path = new MailPath(composedMail.getMsgref());
-				composedMail.setReferencedMail(mailConnection.getMessageStorage().getMessage(path.getFolder(),
-						path.getUid()));
+				paths = MailPath.getMailPaths(composedMail.getMsgref());
+				if (ComposeType.REPLY.equals(type) && paths.length > 1) {
+					/*
+					 * No reply on multiple messages
+					 */
+					throw new MailException(MailException.Code.NO_MULTIPLE_REPLY);
+				}
+				final MailMessage[] referencedMails = new MailMessage[paths.length];
+				for (int i = 0; i < paths.length; i++) {
+					referencedMails[i] = mailConnection.getMessageStorage().getMessage(paths[i].getFolder(),
+							paths[i].getUid());
+				}
+				composedMail.setReferencedMails(referencedMails);
 			} else {
-				path = null;
+				paths = null;
 			}
 			sentMail = transport.sendMailMessage(composedMail, type);
-			if (path != null && ComposeType.REPLY.equals(type)) {
+			if (paths != null && ComposeType.REPLY.equals(type)) {
 				/*
 				 * Mark referenced mail as answered
 				 */
-				mailConnection.getMessageStorage().updateMessageFlags(path.getFolder(), new long[] { path.getUid() },
-						MailMessage.FLAG_ANSWERED, true);
+				mailConnection.getMessageStorage().updateMessageFlags(paths[0].getFolder(),
+						new long[] { paths[0].getUid() }, MailMessage.FLAG_ANSWERED, true);
 			}
 			if (UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx)
 					.isNoCopyIntoStandardSentFolder()) {

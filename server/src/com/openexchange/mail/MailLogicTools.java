@@ -84,15 +84,17 @@ public interface MailLogicTools {
 	public MailMessage getReplyMessage(long originalUID, String folder, boolean replyAll) throws MailException;
 
 	/**
-	 * Creates a forward message for the message specified by given original UID
-	 * which is located in given folder.
+	 * Creates a forward message for the messages specified by given original
+	 * UIDs which are located in given folder. If multiple messages are
+	 * specified then these messages are forwarded as <b>attachment</b> since
+	 * no inline forward is possible.
 	 * <p>
 	 * If mailing system deals with common RFC822 messages, this method only
 	 * delegates its request to
 	 * {@link MimeForward#getFowardMail(javax.mail.internet.MimeMessage, com.openexchange.session.Session)}.
 	 * 
-	 * @param originalUID
-	 *            The original message's UID
+	 * @param originalUIDs
+	 *            The original messages' UIDs which should be forwarded.
 	 * @param folder
 	 *            The folder fullname
 	 * @return An instance of {@link MailMessage} representing the forward
@@ -100,7 +102,7 @@ public interface MailLogicTools {
 	 * @throws MailException
 	 *             If forward message cannot be generated
 	 */
-	public MailMessage getFowardMessage(long originalUID, String folder) throws MailException;
+	public MailMessage getFowardMessage(long[] originalUIDs, String folder) throws MailException;
 
 	/**
 	 * Releases all resources when closing parental {@link MailConnection}

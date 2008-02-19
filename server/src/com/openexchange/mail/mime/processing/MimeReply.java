@@ -174,7 +174,10 @@ public final class MimeReply {
 						rawSubject).toString());
 			}
 			/*
-			 * Set the appropriate recipients
+			 * Set the appropriate recipients. Taken from RFC 822 section 4.4.4:
+			 * If the "Reply-To" field exists, then the reply should go to the
+			 * addresses indicated in that field and not to the address(es)
+			 * indicated in the "From" field.
 			 */
 			final InternetAddress[] recipientAddrs;
 			if (originalMsg.getHeader(MessageHeaders.HDR_REPLY_TO) == null) {

@@ -150,8 +150,9 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
 	 *            The SMTP message to fill
 	 * @param type
 	 *            The compose type
-	 * @param originalMail
-	 *            The referenced mail (on forward/reply)
+	 * @param originalMails
+	 *            The referenced mails (multiple allowed on forward/just one
+	 *            allowed on reply)
 	 * @throws MessagingException
 	 *             If a messaging error occurs
 	 * @throws MailException
@@ -160,11 +161,11 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
 	 *             If an I/O error occurs
 	 */
 	public void fillMail(final SMTPMailMessage mail, final SMTPMessage smtpMessage, final ComposeType type,
-			final MailMessage originalMail) throws MessagingException, MailException, IOException {
+			final MailMessage[] originalMails) throws MessagingException, MailException, IOException {
 		/*
 		 * Check for reply
 		 */
-		if (mail.getReferencedMail() != null && ComposeType.REPLY.equals(type)) {
+		if (mail.getReferencedMailsSize() == 1 && ComposeType.REPLY.equals(type)) {
 			setReplyHeaders(mail.getReferencedMail(), smtpMessage);
 		}
 		/*
@@ -178,7 +179,7 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
 		/*
 		 * Fill body
 		 */
-		fillMailBody(mail, smtpMessage, type, originalMail);
+		fillMailBody(mail, smtpMessage, type, originalMails);
 	}
 
 	@Override

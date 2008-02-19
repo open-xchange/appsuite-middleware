@@ -52,7 +52,6 @@ package com.openexchange.smtp.config;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.session.Session;
@@ -99,91 +98,42 @@ public final class SMTPConfig extends TransportConfig {
 		 */
 		final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
 		fillLoginAndPassword(smtpConf, session, user);
-		if (LoginType.GLOBAL.equals(getLoginType())) {
-			String smtpServer = MailConfig.getTransportServer();
-			if (smtpServer == null) {
+		String smtpServer = TransportConfig.getTransportServerURL(user);
+		if (smtpServer == null) {
+			if (LoginType.GLOBAL.equals(getLoginType())) {
 				throw new MailConfigException(new StringBuilder(128).append("Property \"").append("transportServer")
 						.append("\" not set in mail properties").toString());
 			}
-			{
-				final int lastPos = smtpServer.length() - 1;
-				if (smtpServer.charAt(lastPos) == '/') {
-					smtpServer = smtpServer.substring(0, lastPos);
-				}
-			}
-			int smtpPort = 25;
-			{
-				final String[] parsed = parseProtocol(smtpServer);
-				if (parsed != null) {
-					smtpConf.secure = PROTOCOL_SMTP_SECURE.equals(parsed[0]);
-					smtpServer = parsed[1];
-				} else {
-					smtpConf.secure = false;
-				}
-				final int pos = smtpServer.indexOf(':');
-				if (pos > -1) {
-					smtpPort = Integer.parseInt(smtpServer.substring(pos + 1));
-					smtpServer = smtpServer.substring(0, pos);
-				}
-			}
-			final String masterPw = MailConfig.getMasterPassword();
-			if (masterPw == null) {
-				throw new MailConfigException(new StringBuilder().append("Property \"").append("masterPassword")
-						.append("\" not set in mail properties").toString());
-			}
-			smtpConf.smtpServer = smtpServer;
-			smtpConf.smtpPort = smtpPort;
-		} else if (LoginType.USER.equals(getLoginType())) {
-			String smtpServer = user.getSmtpServer();
-			{
-				final int lastPos = smtpServer.length() - 1;
-				if (smtpServer.charAt(lastPos) == '/') {
-					smtpServer = smtpServer.substring(0, lastPos);
-				}
-			}
-			int smtpPort = 25;
-			{
-				final String[] parsed = parseProtocol(smtpServer);
-				if (parsed != null) {
-					smtpConf.secure = PROTOCOL_SMTP_SECURE.equals(parsed[0]);
-					smtpServer = parsed[1];
-				} else {
-					smtpConf.secure = false;
-				}
-				final int pos = smtpServer.indexOf(':');
-				if (pos > -1) {
-					smtpPort = Integer.parseInt(smtpServer.substring(pos + 1));
-					smtpServer = smtpServer.substring(0, pos);
-				}
-			}
-			smtpConf.smtpServer = smtpServer;
-			smtpConf.smtpPort = smtpPort;
-		} else if (LoginType.ANONYMOUS.equals(getLoginType())) {
-			String smtpServer = user.getSmtpServer();
-			{
-				final int lastPos = smtpServer.length() - 1;
-				if (smtpServer.charAt(lastPos) == '/') {
-					smtpServer = smtpServer.substring(0, lastPos);
-				}
-			}
-			int smtpPort = 25;
-			{
-				final String[] parsed = parseProtocol(smtpServer);
-				if (parsed != null) {
-					smtpConf.secure = PROTOCOL_SMTP_SECURE.equals(parsed[0]);
-					smtpServer = parsed[1];
-				} else {
-					smtpConf.secure = false;
-				}
-				final int pos = smtpServer.indexOf(':');
-				if (pos > -1) {
-					smtpPort = Integer.parseInt(smtpServer.substring(pos + 1));
-					smtpServer = smtpServer.substring(0, pos);
-				}
-			}
-			smtpConf.smtpServer = smtpServer;
-			smtpConf.smtpPort = smtpPort;
+			throw new MailConfigException(new StringBuilder(128).append(
+					"Cannot determine transport server URL for user ").append(session.getUserId()).append(
+					" in context ").append(session.getContextId()).toString());
 		}
+		{
+			/*
+			 * Remove ending '/' character
+			 */
+			final int lastPos = smtpServer.length() - 1;
+			if (smtpServer.charAt(lastPos) == '/') {
+				smtpServer = smtpServer.substring(0, lastPos);
+			}
+		}
+		int smtpPort = 25;
+		{
+			final String[] parsed = parseProtocol(smtpServer);
+			if (parsed != null) {
+				smtpConf.secure = PROTOCOL_SMTP_SECURE.equals(parsed[0]);
+				smtpServer = parsed[1];
+			} else {
+				smtpConf.secure = false;
+			}
+			final int pos = smtpServer.indexOf(':');
+			if (pos > -1) {
+				smtpPort = Integer.parseInt(smtpServer.substring(pos + 1));
+				smtpServer = smtpServer.substring(0, pos);
+			}
+		}
+		smtpConf.smtpServer = smtpServer;
+		smtpConf.smtpPort = smtpPort;
 		return smtpConf;
 	}
 
