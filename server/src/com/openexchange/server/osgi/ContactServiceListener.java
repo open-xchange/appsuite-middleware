@@ -75,28 +75,29 @@ public class ContactServiceListener implements ServiceTrackerCustomizer{
 	
 	public Object addingService(final ServiceReference reference) {
         final ContactInterface contactInterface = (ContactInterface)context.getService(reference); 
-        final int folderId = contactInterface.getFolderId(); 
+        int[] overRiding = (int[])reference.getProperty(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE);
         
-        LOG.info("Adding Service Bundle Contact Interface "+folderId);
-        
-        services.addService(folderId, contactInterface);
+        for (int a = 0; a < overRiding.length; a++) {
+        	LOG.info("Adding Service Bundle Contact Interface: " + reference.getBundle().getSymbolicName() + " for folder: "+overRiding[a]);
+        	services.addService(overRiding[a], contactInterface);
+        }
         
 		return contactInterface;
 	}
 
 	public void modifiedService(final ServiceReference reference, final Object service) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void removedService(final ServiceReference reference, final Object service) {
         try {
-            final ContactInterface contactInterface = (ContactInterface)context.getService(reference); 
-            final int folderId = contactInterface.getFolderId(); 
-	        
-	        LOG.info("Removing Service Bundle I18nTools "+folderId);
-	        
-	        services.removeService(folderId, contactInterface);
+            final ContactInterface contactInterface = (ContactInterface)context.getService(reference);
+            int[] overRiding = (int[])reference.getProperty(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE);
+            
+	        for (int a = 0; a < overRiding.length; a++) {
+	        	LOG.info("Removing Service Bundle Contact Interface: " + reference.getBundle().getSymbolicName() + " for folder: "+overRiding[a]);
+	        	services.removeService(overRiding[a], contactInterface);
+	        }
         } finally {
         	context.ungetService(reference);
         }
