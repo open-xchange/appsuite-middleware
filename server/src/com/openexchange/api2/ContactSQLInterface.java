@@ -49,122 +49,17 @@
 
 package com.openexchange.api2;
 
-import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.tools.iterator.SearchIterator;
-
 import java.util.Date;
+
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.container.ContactObject;
 
 /**
  * ContactSQLInterface
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public interface ContactSQLInterface {
-	
-	/**
-	 * Determines the number of contacts a certain
-	 * private or public folder.
-	 * 
-	 * @param folderId -
-	 *            The Folder ID
-	 * @param readCon -
-	 *            The Readable Connection To DB
-	 * @return Amount of contacts as an <code>int</code>
-	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
-	 */
-	public int getNumberOfContacts(int folderId) throws OXException;
-	
-	/**
-	 * List contacts in a folder
-	 * @param folderId
-	 * The Folder ID
-	 * @param from
-	 * Start position in list
-	 * @param to 
-	 * End position in list
-	 * @param orderBy
-	 * Column id to sort. 0 if no order by is used
-	 * @param orderDir
-	 * Order direction (asc or desc)
-	 * @param cols
-	 * The columns filled to the dataobject
-	 * @param readcon 
-	 * The readable Database Connection
-	 * @return A SearchIterator contains Task objects
-	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
-	 */	 
-	public SearchIterator getContactsInFolder(int folderId, int from, int to, int orderBy, String orderDir, int[] cols) throws OXException;
-
-	/**
-	 * Lists all contacts that match the given search
-	 * @param searchObject
-	 * The SearchObject
-	 * @param cols
-	 * fields that will be added to the data object
-	 * @return A SearchIterator contains ContactObject
-	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
-	 */	
-	public SearchIterator getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, String orderDir, int[] cols) throws OXException;
-	
-	/**
-	 * Lists all contacts where the firstname, lastname or the displayname match the given searchpattern
-	 * @param searchpattern
-	 * The searchpattern
-	 * @param folderId
-	 * folder id where to search	 
-	 * @param cols
-	 * fields that will be added to the data object
-	 * @return A SearchIterator contains ContactObject
-	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
-	 */	
-	public SearchIterator searchContacts(String searchpattern, boolean startletter, int folderId, int orderBy, String orderDir, int[] cols) throws OXException;
-	
-	
-	/**
-	 * Loads one contact by the given ID
-	 * @param objectId
-	 * The Object ID
-	 * @return 
-	 * return the ContactObject
-	 * @throws OXException, OXPermissionException
-	 */
-	public ContactObject getObjectById(int objectId, int inFolder) throws OXException;
-
-	/**
-	 * Lists all modified objects in a folder
-	 * @param folderID
-	 * The Folder ID
-	 * @param since
-	 * all modification >= since
-	 * @return A SearchIterator contains AppointmentObject
-	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
-	 */	 
-	public SearchIterator getModifiedContactsInFolder(int folderId, int[] cols, Date since) throws OXException;
-	
-	/**
-	 * Lists all deleted objects in a folder
-	 * @param folderID
-	 * The Folder ID
-	 * @param since
-	 * all modification >= since
-	 * @return A SearchIterator contains AppointmentObject
-	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
-	 */	
-	public SearchIterator getDeletedContactsInFolder(int folderId, int[] cols, Date since) throws OXException;
-	
-	/**
-	 * Loads a range of contacts by the given IDs
-	 * @param objectIdAndInFolder[]
-	 * array with two dimensions. First dimension contains a seond array with two values.
-	 * 1. value is object_id
-	 * 2. value if folder_id
-	 * @param cols
-	 * The columns filled to the dataobject
-	 * @return A SearchIterator contains ContactObjects
-	 * @throws OXException
-	 */	
-	public SearchIterator getObjectsById(int[][] objectIdAndInFolder, int cols[]) throws OXException, Exception;
+public interface ContactSQLInterface extends ContactInterface {
 	
 	/**
 	 * insert the contact
