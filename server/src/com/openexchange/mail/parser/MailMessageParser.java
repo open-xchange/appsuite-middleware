@@ -162,7 +162,8 @@ public final class MailMessageParser {
 		 * Set part infos
 		 */
 		int partCount = partCountArg;
-		final String disposition = mailPart.containsContentDisposition() ? mailPart.getContentDisposition().getDisposition() : null;
+		final String disposition = mailPart.containsContentDisposition() ? mailPart.getContentDisposition()
+				.getDisposition() : null;
 		final long size = mailPart.getSize();
 		final String filename = MailMessageParser.getFileName(mailPart.getFileName(), MailMessageParser.getSequenceId(
 				prefix, partCount), mailPart.getContentType().getBaseType());
