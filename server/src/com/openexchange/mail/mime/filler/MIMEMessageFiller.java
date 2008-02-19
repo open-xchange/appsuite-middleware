@@ -536,7 +536,7 @@ public class MIMEMessageFiller {
 		/*
 		 * A non-inline forward message
 		 */
-		final boolean isAttachmentForward = ((ComposeType.FORWARD.equals(type)) && (mail.getReferencedMailsSize() >= 1 || usm
+		final boolean isAttachmentForward = ((ComposeType.FORWARD.equals(type)) && (mail.getReferencedMailsSize() > 1 || usm
 				.isForwardAsAttachment()));
 		/*
 		 * Initialize primary multipart
@@ -661,21 +661,14 @@ public class MIMEMessageFiller {
 					primaryMultipart = new MimeMultipart();
 				}
 				final MailMessage[] refMails = mail.getReferencedMails();
+				final StringBuilder sb = new StringBuilder(32);
 				final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
 				for (final MailMessage refMail : refMails) {
-					try {
-						/*
-						 * Create a body part for original message
-						 */
-						out.reset();
-						refMail.writeTo(out);
-						final MimeBodyPart origMsgPart = new MimeBodyPart();
-						origMsgPart.setDataHandler(new DataHandler(new MessageDataSource(out.toByteArray(),
-								MIMETypes.MIME_MESSAGE_RFC822)));
-						primaryMultipart.addBodyPart(origMsgPart);
-					} catch (final MessagingException e) {
-						LOG.error("Error while attaching message on non-inline forward", e);
-					}
+					out.reset();
+					sb.setLength(0);
+					addNestedMessage(primaryMultipart, new DataHandler(new MessageDataSource(out.toByteArray(),
+							MIMETypes.MIME_MESSAGE_RFC822)), sb.append(
+							refMail.getSubject().replaceAll("\\p{Blank}+", "_")).append(".eml").toString());
 				}
 			}
 			/*
@@ -879,6 +872,9 @@ public class MIMEMessageFiller {
 			final int pos = ct.indexOf('/');
 			part.getContentType().setPrimaryType(ct.substring(0, pos));
 			part.getContentType().setSubType(ct.substring(pos + 1));
+		} else if (part.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+			addNestedMessage(mp, part.getDataHandler(), part.getFileName());
+			return;
 		}
 		messageBodyPart.setDataHandler(part.getDataHandler());
 		messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, part.getContentType().toString());
@@ -915,6 +911,38 @@ public class MIMEMessageFiller {
 		 * Add to parental multipart
 		 */
 		mp.addBodyPart(messageBodyPart);
+	}
+
+	protected final void addNestedMessage(final Multipart mp, final DataHandler dataHandler, final String filename)
+			throws MessagingException {
+		/*
+		 * Create a body part for original message
+		 */
+		final MimeBodyPart origMsgPart = new MimeBodyPart();
+		/*
+		 * Set data handler
+		 */
+		origMsgPart.setDataHandler(dataHandler);
+		/*
+		 * Set content type
+		 */
+		origMsgPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_MESSAGE_RFC822);
+		/*
+		 * Set content disposition
+		 */
+		origMsgPart.setDisposition(Part.INLINE);
+		/*
+		 * Determine nested message's filename
+		 */
+		try {
+			origMsgPart.setFileName(MimeUtility.encodeText(filename, MailConfig.getDefaultMimeCharset(), "Q"));
+		} catch (final UnsupportedEncodingException e) {
+			/*
+			 * Cannot occur
+			 */
+			origMsgPart.setFileName(filename);
+		}
+		mp.addBodyPart(origMsgPart);
 	}
 
 	/*
