@@ -1211,6 +1211,18 @@ public class CalendarCommonCollection {
     static final void fillEventInformation(final CalendarDataObject cdao, final CalendarDataObject edao, UserParticipant up_event[], final UserParticipant[] new_userparticipants, final UserParticipant[] deleted_userparticipants, Participant p_event[], final Participant new_participants[], final Participant deleted_participants[]) {
         final Participants pu = new Participants();
         final Participants p = new Participants();
+        UserParticipant oup[] = edao.getUsers();
+        Participant op[] = edao.getParticipants();
+        if (oup != null && oup.length > 0) {
+	        for (int a = 0; a < oup.length; a++) {
+	        	pu.add(oup[a]);
+	        }
+        }
+        if (op != null && op.length > 0) {
+	        for (int a = 0; a < op.length; a++) {
+	        	p.add(op[a]);
+	        }
+        }        
         for (int a = 0; a < up_event.length; a++) {
             pu.add(up_event[a]);
         }
@@ -1227,8 +1239,8 @@ public class CalendarCommonCollection {
                 p.add(new_participants[a]);
             }
         }
+        up_event = pu.getUsers();
         if (deleted_userparticipants != null && deleted_userparticipants.length > 0) {
-            up_event = pu.getUsers();
             Arrays.sort(up_event);
             for (int a  = 0; a < deleted_userparticipants.length; a++) {
                 final int x =  Arrays.binarySearch(up_event, deleted_userparticipants[a]);
@@ -1236,11 +1248,12 @@ public class CalendarCommonCollection {
                     final UserParticipant temp[] = new UserParticipant[up_event.length-1];
                     System.arraycopy(up_event, 0, temp, 0, x);
                     System.arraycopy(up_event, x+1, temp, x, ((up_event.length-1)-x));
+                    up_event = temp;
                 }
             }
         }
+        p_event = p.getList();
         if (deleted_participants != null && deleted_participants.length > 0) {
-            p_event = p.getList();
             Arrays.sort(p_event);
             for (int a  = 0; a < deleted_participants.length; a++) {
                 final int x =  Arrays.binarySearch(p_event, deleted_participants[a]);
@@ -1248,6 +1261,7 @@ public class CalendarCommonCollection {
                     final Participant temp[] = new Participant[p_event.length-1];
                     System.arraycopy(p_event, 0, temp, 0, x);
                     System.arraycopy(p_event, x+1, temp, x, ((p_event.length-1)-x));
+                    p_event = temp;
                 }
             }
         }
@@ -1287,8 +1301,8 @@ public class CalendarCommonCollection {
         return null;
     }
     
-    static boolean checkForSoloReminderUpdate(final CalendarDataObject cdao, final int uc, final boolean cup) {
-        if (uc > 2 || cup) {
+    static boolean checkForSoloReminderUpdate(final CalendarDataObject cdao, final int uc, final MBoolean cup) {
+        if (uc > 2 || cup.getMBoolean()) {
             return false;
         } else if (CalendarConfig.getSoloReminderTriggerEvent() && cdao.containsAlarm()) {
             return true;
@@ -1373,4 +1387,6 @@ public class CalendarCommonCollection {
 		}		
 	}
     
+	
+	
 }
