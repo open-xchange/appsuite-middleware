@@ -124,6 +124,8 @@ public final class MessageWriter {
 		new MailMessageParser().parseMailMessage(mail, handler);
 		final JSONObject jObject = handler.getJSONObject();
 		try {
+			jObject.put(FolderChildFields.FOLDER_ID, mailPath.getFolder());
+			jObject.put(DataFields.ID, mailPath.getUid());
 			jObject.put(MailJSONField.UNREAD.getKey(), mail.getUnreadMessages());
 		} catch (final JSONException e) {
 			LOG.error(e.getMessage(), e);
