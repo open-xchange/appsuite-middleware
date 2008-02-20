@@ -69,54 +69,67 @@ public class Executor extends Assert {
 	public static AbstractAJAXResponse execute(final AJAXSession session,
         final AJAXRequest request, final String protocol, final String hostname) throws AjaxException, IOException,
         SAXException, JSONException {
-		
-		final String urlString = protocol + "://" + hostname + request.getServletPath();
-        final WebRequest req;
-        switch (request.getMethod()) {
-        case GET:
-            req = new GetMethodWebRequest(urlString);
-            addParameter(req, session, request);
-            break;
-        case POST:
-            req = new PostMethodWebRequest(urlString);
-            addParameter(req, session, request);
-            break;
-        case UPLOAD:
-            final PostMethodWebRequest post = new PostMethodWebRequest(urlString
-                + getPUTParameter(session, request));
-            post.setMimeEncoded(true);
-            req = post;
-            addFieldParameter(post, request);
-            addFileParameter(post, request);
-            break;
-        case PUT:
-            req = new PutMethodWebRequest(urlString + getPUTParameter(session,
-                request), createBody(request.getBody()), AJAXServlet
-                .CONTENTTYPE_JAVASCRIPT);
-            break;
-        default:
-            throw new AjaxException(AjaxException.Code.InvalidParameter, request
-                .getMethod().name());
-        }
-        final WebConversation conv = session.getConversation();
-        final WebResponse resp;
-        // The upload returns a web page that should not be interpreted.
-        if (Method.UPLOAD == request.getMethod()) {
-            resp = conv.getResource(req);
-        } else {
-            resp = conv.getResponse(req);
-        }
-        final AbstractAJAXParser<?> parser = request.getParser();
-        parser.checkResponse(resp);
-        return parser.parse(resp.getText());
+		return execute(session, request, protocol, hostname, false);
     }
+
+	public static AbstractAJAXResponse execute(final AJAXSession session,
+	        final AJAXRequest request, final String protocol, final String hostname,
+	        final boolean trackDuration) throws AjaxException, IOException,
+	        SAXException, JSONException {
+			
+			final String urlString = protocol + "://" + hostname + request.getServletPath();
+	        final WebRequest req;
+	        switch (request.getMethod()) {
+	        case GET:
+	            req = new GetMethodWebRequest(urlString);
+	            addParameter(req, session, request);
+	            break;
+	        case POST:
+	            req = new PostMethodWebRequest(urlString);
+	            addParameter(req, session, request);
+	            break;
+	        case UPLOAD:
+	            final PostMethodWebRequest post = new PostMethodWebRequest(urlString
+	                + getPUTParameter(session, request));
+	            post.setMimeEncoded(true);
+	            req = post;
+	            addFieldParameter(post, request);
+	            addFileParameter(post, request);
+	            break;
+	        case PUT:
+	            req = new PutMethodWebRequest(urlString + getPUTParameter(session,
+	                request), createBody(request.getBody()), AJAXServlet
+	                .CONTENTTYPE_JAVASCRIPT);
+	            break;
+	        default:
+	            throw new AjaxException(AjaxException.Code.InvalidParameter, request
+	                .getMethod().name());
+	        }
+	        final WebConversation conv = session.getConversation();
+	        final WebResponse resp;
+	        // The upload returns a web page that should not be interpreted.
+	        final long startRequest = System.currentTimeMillis();
+	        if (Method.UPLOAD == request.getMethod()) {
+	            resp = conv.getResource(req);
+	        } else {
+	            resp = conv.getResponse(req);
+	        }
+	        final long duration = System.currentTimeMillis() - startRequest;
+	        final AbstractAJAXParser<?> parser = request.getParser();
+	        parser.checkResponse(resp);
+	        final AbstractAJAXResponse retval = parser.parse(resp.getText());
+	        if (trackDuration) {
+	        	retval.setDuration(duration);
+	        }
+	        return retval;
+	    }
 
     private static void addParameter(final WebRequest req,
         final AJAXSession session, final AJAXRequest request) {
         if (null != session.getId()) {
             req.setParameter(AJAXServlet.PARAMETER_SESSION, session.getId());
         }
-        for (Parameter param : request.getParameters()) {
+        for (final Parameter param : request.getParameters()) {
             if (!(param instanceof FileParameter)) {
                 req.setParameter(param.getName(), param.getValue());
             }
@@ -124,7 +137,7 @@ public class Executor extends Assert {
     }
 
     private static void addFieldParameter(final PostMethodWebRequest post, final AJAXRequest request) {
-		for (Parameter param : request.getParameters()) {
+		for (final Parameter param : request.getParameters()) {
 			if (param instanceof FieldParameter) {
 				final FieldParameter fparam = (FieldParameter) param;
 				post.setParameter(fparam.getFieldName(), fparam.getFieldContent());
@@ -134,7 +147,7 @@ public class Executor extends Assert {
 
     private static void addFileParameter(final PostMethodWebRequest post,
         final AJAXRequest request) {
-        for (Parameter param : request.getParameters()) {
+        for (final Parameter param : request.getParameters()) {
             if (param instanceof FileParameter) {
                 final FileParameter fparam = (FileParameter) param;
                 post.selectFile(fparam.getName(), fparam.getFileName(),
@@ -150,7 +163,7 @@ public class Executor extends Assert {
             parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session
                 .getId());
         }
-        for (Parameter param : request.getParameters()) {
+        for (final Parameter param : request.getParameters()) {
             if (!(param instanceof FileParameter) && !(param instanceof FieldParameter)) {
                 parameter.setParameter(param.getName(), param.getValue());
             }
