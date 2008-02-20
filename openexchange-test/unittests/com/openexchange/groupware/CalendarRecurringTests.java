@@ -1,10 +1,20 @@
 
 package com.openexchange.groupware;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.LineNumberReader;
+import java.io.Reader;
 import java.sql.Connection;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Properties;
+import java.util.StringTokenizer;
 import java.util.TimeZone;
 
 import junit.framework.TestCase;
@@ -1616,6 +1626,5 @@ public class CalendarRecurringTests extends TestCase {
         }
         
     }    
-    
     
 }
