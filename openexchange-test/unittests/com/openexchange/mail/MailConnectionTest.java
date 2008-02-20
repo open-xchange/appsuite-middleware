@@ -82,7 +82,7 @@ public final class MailConnectionTest extends AbstractMailTest {
 					new ContextImpl(getCid()), "mail-test-session");
 			MailConnection<?, ?, ?> mailConnection = MailConnection.getInstance(session);
 			MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
-			mailConnection.connect(mailConfig);
+			mailConnection.connect();
 			System.out.println("Active connections: " + MailConnection.getCounter());
 			/*
 			 * close
@@ -91,7 +91,7 @@ public final class MailConnectionTest extends AbstractMailTest {
 
 			mailConnection = MailConnection.getInstance(session);
 			mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
-			mailConnection.connect(mailConfig);
+			mailConnection.connect();
 			System.out.println("Active connections: " + MailConnection.getCounter());
 			/*
 			 * close
@@ -103,7 +103,7 @@ public final class MailConnectionTest extends AbstractMailTest {
 			 * Should fail
 			 */
 			try {
-				mailConnection.connect(null);
+				mailConnection.connect();
 				assertTrue("Connect invocation should fail", false);
 			} catch (final Exception e) {
 				assertTrue(true);
@@ -111,7 +111,7 @@ public final class MailConnectionTest extends AbstractMailTest {
 			System.out.println("Active connections: " + MailConnection.getCounter());
 			
 			mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
-			mailConnection.connect(mailConfig);
+			mailConnection.connect();
 			System.out.println("Active connections: " + MailConnection.getCounter());
 			mailConnection.getMessageStorage().getAllMessages("default.INBOX", null, null, null,
 					new MailListField[] { MailListField.ID });
@@ -179,7 +179,7 @@ public final class MailConnectionTest extends AbstractMailTest {
 						new ContextImpl(testRef.getCid()), "mail-test-session");
 				MailConnection<?, ?, ?> mailConnection = MailConnection.getInstance(session);
 				MailConfig mailConfig = new MailConfigWrapper(testRef.getLogin(), testRef.getPassword(), testRef.getServer(), testRef.getPort());
-				mailConnection.connect(mailConfig);
+				mailConnection.connect();
 				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailConnection.getCounter());
 				/*
 				 * close
@@ -188,7 +188,7 @@ public final class MailConnectionTest extends AbstractMailTest {
 	
 				mailConnection = MailConnection.getInstance(session);
 				mailConfig = new MailConfigWrapper(testRef.getLogin(), testRef.getPassword(), testRef.getServer(), testRef.getPort());
-				mailConnection.connect(mailConfig);
+				mailConnection.connect();
 				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailConnection.getCounter());
 				/*
 				 * close
@@ -200,7 +200,7 @@ public final class MailConnectionTest extends AbstractMailTest {
 				 * Should fail
 				 */
 				try {
-					mailConnection.connect(null);
+					mailConnection.connect();
 					assertTrue("Connect invocation should fail", false);
 				} catch (final Exception e) {
 					assertTrue(true);
@@ -208,7 +208,7 @@ public final class MailConnectionTest extends AbstractMailTest {
 				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailConnection.getCounter());
 				
 				mailConfig = new MailConfigWrapper(testRef.getLogin(), testRef.getPassword(), testRef.getServer(), testRef.getPort());
-				mailConnection.connect(mailConfig);
+				mailConnection.connect();
 				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailConnection.getCounter());
 				mailConnection.getMessageStorage().getAllMessages("default.INBOX", null, null, null,
 						new MailListField[] { MailListField.ID });
