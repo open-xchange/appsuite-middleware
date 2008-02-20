@@ -1,3 +1,10 @@
+* 2008-02-20 - martin.kauss@open-xchange.com
+
+ - Fixed bug #10717. If a participant was added to an appointment no
+   notification mail was sent to this participant because the event
+   object only contained only the original participants. This has been
+   fixed.
+
 * 2008-02-15 - martin.kauss@open-xchange.com
 
  - Fixed bug #10077. Deleting an existing exception by providing the
