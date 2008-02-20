@@ -64,12 +64,22 @@ public abstract class AbstractAJAXResponse extends Assert {
 
     private final Response response;
 
+    private long duration;
+
     protected AbstractAJAXResponse(final Response response) {
         super();
         this.response = response;
     }
 
-    public Response getResponse() {
+    public long getDuration() {
+		return duration;
+	}
+
+    public void setDuration(long duration) {
+		this.duration = duration;
+	}
+
+	public Response getResponse() {
         return response;
     }
 
