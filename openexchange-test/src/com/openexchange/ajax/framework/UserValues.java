@@ -72,6 +72,8 @@ public class UserValues {
     private final AJAXClient client;
 
     private String inboxFolder;
+    private String sentFolder;
+    private String trashFolder;
     private Locale locale;
     private int privateAppointmentFolder = -1;
     private int privateContactFolder = -1;
@@ -97,6 +99,24 @@ public class UserValues {
         }
         return inboxFolder;
     }
+
+    public String getSentFolder() throws AjaxException, IOException,
+	    SAXException, JSONException {
+	    if (null == sentFolder) {
+	    	sentFolder = ConfigTools.get(client,
+	            new GetRequest(Tree.SentFolder)).getString();
+	    }
+	    return sentFolder;
+	}
+
+    public String getTrashFolder() throws AjaxException, IOException,
+    SAXException, JSONException {
+	    if (null == trashFolder) {
+	    	trashFolder = ConfigTools.get(client,
+	            new GetRequest(Tree.TrashFolder)).getString();
+	    }
+	    return trashFolder;
+	}
 
     public Locale getLocale() throws AjaxException, IOException, SAXException,
         JSONException {

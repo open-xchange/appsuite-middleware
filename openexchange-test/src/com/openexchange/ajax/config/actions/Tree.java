@@ -79,7 +79,11 @@ public enum Tree {
 
     SendAddress("/mail/sendaddress"),
     
-    InboxFolder("/mail/folder/inbox");
+    InboxFolder("/mail/folder/inbox"),
+    
+    SentFolder("/mail/folder/sent"),
+    
+    TrashFolder("/mail/folder/trash");
 
     private final String path;
 
