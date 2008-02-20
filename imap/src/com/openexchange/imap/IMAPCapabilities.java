@@ -49,75 +49,101 @@
 
 package com.openexchange.imap;
 
-
 /**
- * IMAPCapabilities
+ * {@link IMAPCapabilities}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class IMAPCapabilities {
-	
+
 	/*
 	 * String Constants
 	 */
+	/**
+	 * ACL
+	 */
 	public static final String CAP_ACL = "ACL";
-	
+
+	/**
+	 * THREAD=REFERENCES
+	 */
 	public static final String CAP_THREAD_REFERENCES = "THREAD=REFERENCES";
-	
+
+	/**
+	 * THREAD=ORDEREDSUBJECT
+	 */
 	public static final String CAP_THREAD_ORDEREDSUBJECT = "THREAD=ORDEREDSUBJECT";
-	
+
+	/**
+	 * QUOTA
+	 */
 	public static final String CAP_QUOTA = "QUOTA";
-	
+
+	/**
+	 * IMAP4
+	 */
 	public static final String CAP_IMAP4 = "IMAP4";
-	
+
+	/**
+	 * IMAP4rev1
+	 */
 	public static final String CAP_IMAP4_REV1 = "IMAP4rev1";
-	
+
+	/**
+	 * UIDPLUS
+	 */
 	public static final String CAP_UIDPLUS = "UIDPLUS";
-	
+
+	/**
+	 * SORT
+	 */
 	public static final String CAP_SORT = "SORT";
-	
+
 	/*
 	 * Bit Constants
 	 */
-	public static final int BIT_ACL = 1;
-	
-	public static final int BIT_THREAD_REFERENCES = 2;
-	
-	public static final int BIT_THREAD_ORDEREDSUBJECT = 4;
-	
-	public static final int BIT_QUOTA = 8;
-	
-	public static final int BIT_IMAP4 = 16;
-	
-	public static final int BIT_IMAP4_REV1 = 32;
-	
-	public static final int BIT_UIDPLUS = 64;
-	
-	public static final int BIT_SORT = 128;
-	
-	public static final int BIT_SUBSCRIPTION = 256;
-	
+	private static final int BIT_ACL = 1;
+
+	private static final int BIT_THREAD_REFERENCES = 2;
+
+	private static final int BIT_THREAD_ORDEREDSUBJECT = 4;
+
+	private static final int BIT_QUOTA = 8;
+
+	private static final int BIT_IMAP4 = 16;
+
+	private static final int BIT_IMAP4_REV1 = 32;
+
+	private static final int BIT_UIDPLUS = 64;
+
+	private static final int BIT_SORT = 128;
+
+	private static final int BIT_SUBSCRIPTION = 256;
+
 	/*
 	 * Members
 	 */
 	private boolean hasACL;
-	
+
 	private boolean hasQuota;
-	
+
 	private boolean hasThreadReferences;
-	
+
 	private boolean hasThreadOrderedSubject;
-	
+
 	private boolean hasSort;
-	
+
 	private boolean hasIMAP4;
-	
+
 	private boolean hasIMAP4rev1;
-	
+
 	private boolean hasUIDPlus;
-	
+
 	private boolean hasSubscription;
 
+	/**
+	 * Initializes a new {@link IMAPCapabilities}
+	 */
 	public IMAPCapabilities() {
 		super();
 	}
@@ -126,11 +152,6 @@ public class IMAPCapabilities {
 		return hasACL;
 	}
 
-	/**
-	 * Sets ACL support to given value
-	 * 
-	 * @param hasACL
-	 */
 	public void setACL(final boolean hasACL) {
 		this.hasACL = hasACL;
 	}
@@ -190,7 +211,7 @@ public class IMAPCapabilities {
 	public void setUIDPlus(final boolean hasUIDPlus) {
 		this.hasUIDPlus = hasUIDPlus;
 	}
-	
+
 	public boolean hasSubscription() {
 		return hasSubscription;
 	}
@@ -212,7 +233,7 @@ public class IMAPCapabilities {
 		retval |= hasSubscription ? BIT_SUBSCRIPTION : 0;
 		return retval;
 	}
-	
+
 	public final void parseCapabilities(final int caps) {
 		hasACL = ((caps & BIT_ACL) > 0);
 		hasIMAP4 = ((caps & BIT_IMAP4) > 0);

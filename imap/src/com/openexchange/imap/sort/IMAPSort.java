@@ -373,10 +373,12 @@ public final class IMAPSort {
 		final MailListField sortField = sortFieldArg == null ? MailListField.RECEIVED_DATE : sortFieldArg;
 		final int size = filter == null ? imapFolder.getMessageCount() : filter.length;
 		/*
-		 * Perform an IMAP-based sort if IMAP sort is enabled through config or
-		 * number of messages to sort exceeds limit.
+		 * Perform an IMAP-based sort provided that SORT capability is supported
+		 * and IMAP sort is enabled through config or number of messages to sort
+		 * exceeds limit.
 		 */
-		if (imapConfig.isImapSort() || (size >= IMAPConfig.getMailFetchLimit())) {
+		if (imapConfig.getImapCapabilities().hasSort()
+				&& (imapConfig.isImapSort() || (size >= IMAPConfig.getMailFetchLimit()))) {
 			try {
 				long start = System.currentTimeMillis();
 				final int[] seqNums;

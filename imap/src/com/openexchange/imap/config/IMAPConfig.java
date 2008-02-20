@@ -312,8 +312,6 @@ public final class IMAPConfig extends MailConfig {
 		return imapCapabilities;
 	}
 
-	private final transient Lock lockCaps = new ReentrantLock();
-
 	/**
 	 * Initializes IMAP server's capabilities if not done, yet
 	 * 
@@ -324,27 +322,27 @@ public final class IMAPConfig extends MailConfig {
 	 */
 	public void initializeCapabilities(final IMAPStore imapStore) throws MailConfigException {
 		if (!capabilitiesLoaded.get()) {
-			lockCaps.lock();
-			try {
+			synchronized (capabilitiesLoaded) {
 				if (capabilitiesLoaded.get()) {
 					return;
 				}
-				final IMAPCapabilities imapCaps = new IMAPCapabilities();
-				imapCaps.setACL(imapStore.hasCapability(IMAPCapabilities.CAP_ACL));
-				imapCaps.setThreadReferences(imapStore.hasCapability(IMAPCapabilities.CAP_THREAD_REFERENCES));
-				imapCaps.setThreadOrderedSubject(imapStore.hasCapability(IMAPCapabilities.CAP_THREAD_ORDEREDSUBJECT));
-				imapCaps.setQuota(imapStore.hasCapability(IMAPCapabilities.CAP_QUOTA));
-				imapCaps.setSort(imapStore.hasCapability(IMAPCapabilities.CAP_SORT));
-				imapCaps.setIMAP4(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4));
-				imapCaps.setIMAP4rev1(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4_REV1));
-				imapCaps.setUIDPlus(imapStore.hasCapability(IMAPCapabilities.CAP_UIDPLUS));
-				imapCaps.setHasSubscription(!IMAPConfig.isIgnoreSubscription());
-				imapCapabilities = imapCaps;
-				capabilitiesLoaded.set(true);
-			} catch (final MessagingException e) {
-				throw new MailConfigException(e);
-			} finally {
-				lockCaps.unlock();
+				try {
+					final IMAPCapabilities imapCaps = new IMAPCapabilities();
+					imapCaps.setACL(imapStore.hasCapability(IMAPCapabilities.CAP_ACL));
+					imapCaps.setThreadReferences(imapStore.hasCapability(IMAPCapabilities.CAP_THREAD_REFERENCES));
+					imapCaps.setThreadOrderedSubject(imapStore
+							.hasCapability(IMAPCapabilities.CAP_THREAD_ORDEREDSUBJECT));
+					imapCaps.setQuota(imapStore.hasCapability(IMAPCapabilities.CAP_QUOTA));
+					imapCaps.setSort(imapStore.hasCapability(IMAPCapabilities.CAP_SORT));
+					imapCaps.setIMAP4(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4));
+					imapCaps.setIMAP4rev1(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4_REV1));
+					imapCaps.setUIDPlus(imapStore.hasCapability(IMAPCapabilities.CAP_UIDPLUS));
+					imapCaps.setHasSubscription(!IMAPConfig.isIgnoreSubscription());
+					imapCapabilities = imapCaps;
+					capabilitiesLoaded.set(true);
+				} catch (final MessagingException e) {
+					throw new MailConfigException(e);
+				}
 			}
 		}
 	}
