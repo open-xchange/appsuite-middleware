@@ -428,7 +428,8 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	}
 
 	/**
-	 * Returns the mail configuration
+	 * Returns the mail configuration appropriate for current user. It provides
+	 * needed connection and login informations.
 	 * 
 	 * @return The mail configuration
 	 */
