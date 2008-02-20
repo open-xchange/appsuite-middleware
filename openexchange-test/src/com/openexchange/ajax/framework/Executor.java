@@ -65,6 +65,14 @@ public class Executor extends Assert {
             AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL),
             AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME));
 	}
+
+    public static AbstractAJAXResponse execute(final AJAXSession session,
+        final AJAXRequest request, final boolean trackDuration) throws AjaxException, IOException,
+        SAXException, JSONException {
+		return execute(session, request,
+            AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL),
+            AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME), trackDuration);
+	}
 	
 	public static AbstractAJAXResponse execute(final AJAXSession session,
         final AJAXRequest request, final String protocol, final String hostname) throws AjaxException, IOException,
