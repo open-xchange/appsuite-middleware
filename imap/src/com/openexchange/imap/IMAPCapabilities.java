@@ -99,6 +99,16 @@ public class IMAPCapabilities {
 	 */
 	public static final String CAP_SORT = "SORT";
 
+	/**
+	 * NAMESPACE
+	 */
+	public static final String CAP_NAMESPACE = "NAMESPACE";
+
+	/**
+	 * IDLE
+	 */
+	public static final String CAP_IDLE = "IDLE";
+
 	/*
 	 * Bit Constants
 	 */
@@ -120,6 +130,10 @@ public class IMAPCapabilities {
 
 	private static final int BIT_SUBSCRIPTION = 256;
 
+	private static final int BIT_NAMESPACE = 512;
+
+	private static final int BIT_IDLE = 1024;
+
 	/*
 	 * Members
 	 */
@@ -140,6 +154,10 @@ public class IMAPCapabilities {
 	private boolean hasUIDPlus;
 
 	private boolean hasSubscription;
+
+	private boolean hasNamespace;
+
+	private boolean hasIdle;
 
 	/**
 	 * Initializes a new {@link IMAPCapabilities}
@@ -220,6 +238,22 @@ public class IMAPCapabilities {
 		this.hasSubscription = hasSubscription;
 	}
 
+	public boolean hasNamespace() {
+		return hasNamespace;
+	}
+
+	public void setNamespace(final boolean hasNamespace) {
+		this.hasNamespace = hasNamespace;
+	}
+
+	public boolean hasIdle() {
+		return hasIdle;
+	}
+
+	public void setIdle(final boolean hasIdle) {
+		this.hasIdle = hasIdle;
+	}
+
 	public final int getCapabilities() {
 		int retval = 0;
 		retval |= hasACL ? BIT_ACL : 0;
@@ -231,6 +265,8 @@ public class IMAPCapabilities {
 		retval |= hasThreadReferences ? BIT_THREAD_REFERENCES : 0;
 		retval |= hasUIDPlus ? BIT_UIDPLUS : 0;
 		retval |= hasSubscription ? BIT_SUBSCRIPTION : 0;
+		retval |= hasNamespace ? BIT_NAMESPACE : 0;
+		retval |= hasIdle ? BIT_IDLE : 0;
 		return retval;
 	}
 
@@ -244,6 +280,8 @@ public class IMAPCapabilities {
 		hasThreadReferences = ((caps & BIT_THREAD_REFERENCES) > 0);
 		hasUIDPlus = ((caps & BIT_UIDPLUS) > 0);
 		hasSubscription = ((caps & BIT_SUBSCRIPTION) > 0);
+		hasNamespace = ((caps & BIT_NAMESPACE) > 0);
+		hasIdle = ((caps & BIT_IDLE) > 0);
 	}
 
 }

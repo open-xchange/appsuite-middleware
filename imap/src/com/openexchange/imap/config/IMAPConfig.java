@@ -335,6 +335,8 @@ public final class IMAPConfig extends MailConfig {
 					imapCaps.setIMAP4(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4));
 					imapCaps.setIMAP4rev1(imapStore.hasCapability(IMAPCapabilities.CAP_IMAP4_REV1));
 					imapCaps.setUIDPlus(imapStore.hasCapability(IMAPCapabilities.CAP_UIDPLUS));
+					imapCaps.setNamespace(imapStore.hasCapability(IMAPCapabilities.CAP_NAMESPACE));
+					imapCaps.setIdle(imapStore.hasCapability(IMAPCapabilities.CAP_IDLE));
 					imapCaps.setHasSubscription(!IMAPConfig.isIgnoreSubscription());
 					imapCapabilities = imapCaps;
 					capabilitiesLoaded.set(true);
