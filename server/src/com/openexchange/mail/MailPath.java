@@ -50,7 +50,6 @@
 package com.openexchange.mail;
 
 import java.util.Comparator;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,9 +64,16 @@ import java.util.regex.Pattern;
  */
 public final class MailPath implements Cloneable {
 
-	private static Comparator<MailPath> comparator;
-
-	private static final AtomicBoolean INITIALIZED = new AtomicBoolean();
+	/**
+	 * Gets an appropriate instance of {@link Comparator} to sort instances of
+	 * {@link MailPath}
+	 */
+	public static final Comparator<MailPath> COMPARATOR = new Comparator<MailPath>() {
+		public int compare(final MailPath mi1, final MailPath mi2) {
+			final int folderComp = mi1.folder.compareTo(mi2.folder);
+			return folderComp == 0 ? Long.valueOf(mi1.uid).compareTo(Long.valueOf(mi2.uid)) : folderComp;
+		}
+	};
 
 	/**
 	 * A <code>null</code> {@link MailPath}
@@ -94,33 +100,6 @@ public final class MailPath implements Cloneable {
 	 */
 	public static String getMailPath(final String folder, final long uid) {
 		return new StringBuilder(folder).append(SEPERATOR).append(uid).toString();
-	}
-
-	/**
-	 * Returns an appropriate {@link Comparator} implementation for
-	 * {@link MailPath} instances
-	 * 
-	 * @return A {@link Comparator} implementation for {@link MailPath}
-	 *         instances
-	 */
-	public static Comparator<MailPath> getMailPathComparator() {
-		if (!INITIALIZED.get()) {
-			synchronized (INITIALIZED) {
-				if (comparator == null) {
-					comparator = new Comparator<MailPath>() {
-						public int compare(final MailPath mi1, final MailPath mi2) {
-							final int res = mi1.folder.compareTo(mi2.folder);
-							if (res != 0) {
-								return res;
-							}
-							return Long.valueOf(mi1.uid).compareTo(Long.valueOf(mi2.uid));
-						}
-					};
-					INITIALIZED.set(true);
-				}
-			}
-		}
-		return comparator;
 	}
 
 	/**

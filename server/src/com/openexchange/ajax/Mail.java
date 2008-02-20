@@ -1637,7 +1637,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 						final JSONObject obj = jsonIDs.getJSONObject(i);
 						l.add(new MailPath(obj.getString(PARAMETER_FOLDERID), obj.getLong(PARAMETER_ID)));
 					}
-					Collections.sort(l, MailPath.getMailPathComparator());
+					Collections.sort(l, MailPath.COMPARATOR);
 					String lastFld = l.get(0).getFolder();
 					final SmartLongArray arr = new SmartLongArray(length);
 					for (int i = 0; i < length; i++) {
