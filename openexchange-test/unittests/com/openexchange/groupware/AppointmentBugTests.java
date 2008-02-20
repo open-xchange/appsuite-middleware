@@ -2997,4 +2997,71 @@ public class AppointmentBugTests extends TestCase {
     
     }
     
+    /*
+	When the notification subsystem creates a mail, mysteriously only the old
+	participants are listed in the mail.
+	
+	1. Create an appointment with one participant. 
+	2. Update the appointment and add one more participant.
+	3. Check if the cdao contains both participants
+	4. Delete on participant 
+	5. Check if the cdao contains only one participant
+    */
+    public void testBug10717() throws Throwable {
+        Context context = new ContextImpl(contextid);
+        SessionObject so = SessionObjectWrapper.createSessionObject(userid, getContext().getContextId(), "myTestSearch");      
+        int fid = AppointmentBugTests.getPrivateFolder(userid);
+
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+        cdao.setParentFolderID(fid);
+        cdao.setTitle("testBug10717");
+        cdao.setIgnoreConflicts(true);
+        CalendarTest.fillDatesInDao(cdao);        
+        
+        CalendarSql csql = new CalendarSql(so);
+        csql.insertAppointmentObject(cdao);
+        int object_id = cdao.getObjectID();
+        assertTrue("Object was created", object_id > 0);            
+
+        
+        CalendarDataObject update = new CalendarDataObject();
+        update.setContext(ContextStorage.getInstance().getContext(so.getContextId()));
+
+        Participants participants = new Participants();
+        String user2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
+        int userid2 = resolveUser(user2);
+        
+        Participant p1 = new UserParticipant(userid);
+        participants.add(p1);
+        
+        Participant p2 = new UserParticipant(userid2);
+        participants.add(p2);
+        
+        update.setParticipants(participants.getList());
+        update.setIgnoreConflicts(true);
+        update.setObjectID(object_id);
+        update.setTitle("testBug10154 - step 2");
+
+        csql.updateAppointmentObject(update, fid, new Date(SUPER_END));        
+        assertEquals("Check participants length", 2, update.getParticipants().length);
+        
+        CalendarDataObject update_user_delete = new CalendarDataObject();
+        update_user_delete.setContext(ContextStorage.getInstance().getContext(so.getContextId()));;
+        
+        participants = new Participants();
+        participants.add(p1);
+
+        update_user_delete.setParticipants(participants.getList());
+        update_user_delete.setIgnoreConflicts(true);
+        update_user_delete.setObjectID(object_id);
+        update_user_delete.setTitle("testBug10154 - step 2");
+
+        csql.updateAppointmentObject(update_user_delete, fid, new Date(SUPER_END));        
+        assertEquals("Check participants length", 1, update_user_delete.getParticipants().length);        
+        
+        
+    }
+    
+    
 }
