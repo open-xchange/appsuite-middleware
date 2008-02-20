@@ -930,7 +930,11 @@ public class CalendarRecurringTests extends TestCase {
             CalendarDataObject tcdao = (CalendarDataObject)si.next();
             if (tcdao.getRecurrenceID() == object_id) {
                 counter ++;
+            } else if (tcdao.getRecurrenceID() == object_id && tcdao.getRecurrencePosition() == 3) {
+                java.util.Date check_exception[] = tcdao.getChangeException();
+                assertTrue("Got exceptions", check_exception != null);            	
             }
+ 
         }
         si.close();
         assertEquals("Check correct number of results" , 2 , counter);
