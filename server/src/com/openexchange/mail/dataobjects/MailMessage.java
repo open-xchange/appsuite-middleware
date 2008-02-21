@@ -689,6 +689,36 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	}
 
 	/**
+	 * Sets a system flag
+	 * 
+	 * @param flag
+	 *            The system flag to set
+	 * @throws MailException
+	 *             If an illegal flag argument is specified
+	 */
+	public void setFlag(final int flag) throws MailException {
+		if ((flag % 2) != 0) {
+			throw new MailException(MailException.Code.ILLEGAL_FLAG_ARGUMENT, Integer.valueOf(flag));
+		}
+		flags = (flags | flag);
+	}
+
+	/**
+	 * Removes a system flag
+	 * 
+	 * @param flag
+	 *            The system flag to remove
+	 * @throws MailException
+	 *             If an illegal flag argument is specified
+	 */
+	public void removeFlag(final int flag) throws MailException {
+		if ((flag % 2) != 0) {
+			throw new MailException(MailException.Code.ILLEGAL_FLAG_ARGUMENT, Integer.valueOf(flag));
+		}
+		flags = (flags & ~flag);
+	}
+
+	/**
 	 * Gets the threadLevel
 	 * 
 	 * @return the threadLevel
