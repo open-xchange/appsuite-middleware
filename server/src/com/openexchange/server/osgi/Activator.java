@@ -130,6 +130,27 @@ public class Activator implements BundleActivator, EventHandler {
 					new BundleServiceTracker<Configuration>(context, ConfigurationService.getInstance(),
 							Configuration.class)));
 			
+			// TODO: Remove when mail is bundled
+			ConfigurationService.getInstance().addServiceHolderListener((listener = new ServiceHolderListener<Configuration>() {
+
+				public void onServiceAvailable(final Configuration service) throws Exception {
+					/**
+					 * Mail initialization
+					 */
+					com.openexchange.mail.MailInitialization.getInstance().start();
+					/**
+					 * Transport initialization
+					 */
+					com.openexchange.mail.transport.TransportInitialization.getInstance().start();
+					
+				}
+
+				public void onServiceRelease() throws Exception {
+					// TODO Auto-generated method stub
+					
+				}
+			}));
+			
 		    // event service is always needed.
 			serviceTrackerList.add(new ServiceTracker(context, EventAdmin.class.getName(),
 					new BundleServiceTracker<EventAdmin>(context, EventAdminService.getInstance(),
