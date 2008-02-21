@@ -263,7 +263,12 @@ public class MailException extends AbstractOXException {
 		/**
 		 * No reply on multiple message possible
 		 */
-		NO_MULTIPLE_REPLY("No reply on multiple message possible", Category.USER_INPUT, 47);
+		NO_MULTIPLE_REPLY("No reply on multiple message possible", Category.USER_INPUT, 47),
+		/**
+		 * legal system flag argument %s. Flag must be to the power of 2
+		 */
+		ILLEGAL_FLAG_ARGUMENT("Illegal system flag argument %s. Flag must be to the power of 2", Category.CODE_ERROR,
+				48);
 
 		private final String message;
 
