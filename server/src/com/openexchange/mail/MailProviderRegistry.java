@@ -174,16 +174,23 @@ public final class MailProviderRegistry {
 		if (providers.containsKey(p)) {
 			return false;
 		}
-		/*
-		 * Startup
-		 */
-		provider.startUp();
-		provider.setDeprecated(false);
-		/*
-		 * Add to registry
-		 */
-		providers.put(p, provider);
-		return true;
+		try {
+			/*
+			 * Startup
+			 */
+			provider.startUp();
+			provider.setDeprecated(false);
+			/*
+			 * Add to registry
+			 */
+			providers.put(p, provider);
+			return true;
+		} catch (final MailException e) {
+			throw e;
+		} catch (final RuntimeException t) {
+			LOG.error(t.getMessage(), t);
+			return false;
+		}
 	}
 
 	/**
@@ -200,6 +207,8 @@ public final class MailProviderRegistry {
 				provider.shutDown();
 			} catch (final MailException e) {
 				LOG.error("Mail connection implementation could not be shut down", e);
+			} catch (final RuntimeException t) {
+				LOG.error("Mail connection implementation could not be shut down", t);
 			}
 		}
 		/*
@@ -228,9 +237,16 @@ public final class MailProviderRegistry {
 		/*
 		 * Perform shutdown
 		 */
-		removed.setDeprecated(true);
-		removed.shutDown();
-		return removed;
+		try {
+			removed.setDeprecated(true);
+			removed.shutDown();
+			return removed;
+		} catch (final MailException e) {
+			throw e;
+		} catch (final RuntimeException t) {
+			LOG.error(t.getMessage(), t);
+			return removed;
+		}
 	}
 
 	/**
