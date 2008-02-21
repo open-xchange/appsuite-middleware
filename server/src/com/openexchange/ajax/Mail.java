@@ -1540,9 +1540,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 		return response;
 	}
 
-	private static final String idRegex = "\"id\":([0-9]+?)";
+	private static final String idRegex = "\"id\":([0-9]+)";
 
-	private static final String fldRegex = "\"folder\":\"(.+?)\"";
+	private static final String fldRegex = "\"folder\":\"([^\"]+)\"";
 
 	private static final String commaRegex = "\\p{Blank}*,\\p{Blank}*";
 
