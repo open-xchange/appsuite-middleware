@@ -244,9 +244,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 				}
 			}
 			final MailMessage mail = MIMEMessageConverter.convertMessage(msg);
-			if (markSeen) {
+			if (!mail.isSeen()) {
 				handleSeen = msg;
-				mail.setFlag(MailMessage.FLAG_SEEN, markSeen);
+				if (markSeen) {
+					this.seen = true;
+					mail.setFlag(MailMessage.FLAG_SEEN, true);
+				} else {
+					this.seen = false;
+				}
 			}
 			return mail;
 		} catch (final MessagingException e) {
