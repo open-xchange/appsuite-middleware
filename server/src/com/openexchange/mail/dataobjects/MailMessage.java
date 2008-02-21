@@ -693,29 +693,16 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	 * 
 	 * @param flag
 	 *            The system flag to set
+	 * @param enable
+	 *            <code>true</code> to enable; otherwise <code>false</code>
 	 * @throws MailException
 	 *             If an illegal flag argument is specified
 	 */
-	public void setFlag(final int flag) throws MailException {
-		if ((flag % 2) != 0) {
+	public void setFlag(final int flag, final boolean enable) throws MailException {
+		if (flag == 1 || (flag % 2) != 0) {
 			throw new MailException(MailException.Code.ILLEGAL_FLAG_ARGUMENT, Integer.valueOf(flag));
 		}
-		flags = (flags | flag);
-	}
-
-	/**
-	 * Removes a system flag
-	 * 
-	 * @param flag
-	 *            The system flag to remove
-	 * @throws MailException
-	 *             If an illegal flag argument is specified
-	 */
-	public void removeFlag(final int flag) throws MailException {
-		if ((flag % 2) != 0) {
-			throw new MailException(MailException.Code.ILLEGAL_FLAG_ARGUMENT, Integer.valueOf(flag));
-		}
-		flags = (flags & ~flag);
+		flags = enable ? (flags | flag) : (flags & ~flag);
 	}
 
 	/**
