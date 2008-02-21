@@ -125,14 +125,19 @@ public final class MessageWriter {
 		new MailMessageParser().parseMailMessage(mail, handler);
 		final JSONObject jObject = handler.getJSONObject();
 		try {
-			if (mailPath != MailPath.NULL) {
-				jObject.put(FolderChildFields.FOLDER_ID, mailPath.getFolder());
-				jObject.put(DataFields.ID, mailPath.getUid());
+			/*
+			 * Add missing fields
+			 */
+			if (mail.containsFolder() && mail.getMailId() > 0) {
+				jObject.put(FolderChildFields.FOLDER_ID, prepareFullname(mail.getFolder(), mail.getSeparator()));
+				jObject.put(DataFields.ID, mail.getMailId());
 			}
 			jObject.put(MailJSONField.UNREAD.getKey(), mail.getUnreadMessages());
 			jObject.put(MailJSONField.HAS_ATTACHMENTS.getKey(), mail.getContentType().isMimeType(
 					MIMETypes.MIME_MULTIPART_MIXED));
 			jObject.put(MailJSONField.CONTENT_TYPE.getKey(), mail.getContentType().getBaseType());
+			jObject.put(MailJSONField.SIZE.getKey(), mail.getSize());
+			jObject.put(MailJSONField.THREAD_LEVEL.getKey(), mail.getThreadLevel());
 		} catch (final JSONException e) {
 			LOG.error(e.getMessage(), e);
 		}
