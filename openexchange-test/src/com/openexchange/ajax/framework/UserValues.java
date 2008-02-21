@@ -74,6 +74,7 @@ public class UserValues {
     private String inboxFolder;
     private String sentFolder;
     private String trashFolder;
+    private String sendAddress;
     private Locale locale;
     private int privateAppointmentFolder = -1;
     private int privateContactFolder = -1;
@@ -117,6 +118,15 @@ public class UserValues {
 	    }
 	    return trashFolder;
 	}
+
+    public String getSendAddress() throws AjaxException, IOException,
+    SAXException, JSONException {
+    	 if (null == sendAddress) {
+    		 sendAddress = ConfigTools.get(client,
+ 	            new GetRequest(Tree.SendAddress)).getString();
+ 	    }
+ 	    return sendAddress;
+    }
 
     public Locale getLocale() throws AjaxException, IOException, SAXException,
         JSONException {
