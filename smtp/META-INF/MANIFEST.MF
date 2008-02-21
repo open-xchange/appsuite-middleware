@@ -34,5 +34,6 @@ Import-Package: com.openexchange.api2,
  javax.mail.internet,
  org.apache.commons.logging;version="1.0.4",
  org.apache.commons.logging.impl;version="1.0.4",
- org.osgi.framework;version="1.3.0"
+ org.osgi.framework;version="1.3.0",
+ org.osgi.util.tracker;version="1.3.3"
 Bundle-Activator: com.openexchange.smtp.osgi.SMTPActivator

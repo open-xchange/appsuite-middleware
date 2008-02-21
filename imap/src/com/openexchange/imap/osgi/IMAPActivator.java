@@ -54,8 +54,12 @@ import java.util.Hashtable;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import com.openexchange.config.Configuration;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.mail.MailProvider;
 
@@ -72,6 +76,8 @@ public final class IMAPActivator implements BundleActivator {
 
 	private final Dictionary<String, String> dictionary;
 
+	private ServiceTracker tracker;
+
 	private ServiceRegistration imapServiceRegistration;
 
 	/**
@@ -83,6 +89,8 @@ public final class IMAPActivator implements BundleActivator {
 		dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
 	}
 
+	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -90,8 +98,25 @@ public final class IMAPActivator implements BundleActivator {
 	 */
 	public void start(final BundleContext context) throws Exception {
 		try {
-			imapServiceRegistration = context.registerService(MailProvider.class.getName(), new IMAPProvider(),
-					dictionary);
+			tracker = new ServiceTracker(context, Configuration.class.getName(), new ServiceTrackerCustomizer() {
+
+				public Object addingService(final ServiceReference reference) {
+					final Object addedService = context.getService(reference);
+					if (addedService instanceof Configuration) {
+						imapServiceRegistration = context.registerService(MailProvider.class.getName(), new IMAPProvider(),
+								dictionary);
+					}
+					return addedService;
+				}
+
+				public void modifiedService(ServiceReference reference, Object service) {
+				}
+
+				public void removedService(ServiceReference reference, Object service) {
+					// TODO Unregister IMAP bundle if config down???
+				}
+			});
+			tracker.open();
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -106,11 +131,18 @@ public final class IMAPActivator implements BundleActivator {
 	 */
 	public void stop(final BundleContext context) throws Exception {
 		try {
-			imapServiceRegistration.unregister();
-			imapServiceRegistration = null;
+			if (null != imapServiceRegistration) {
+				imapServiceRegistration.unregister();
+				imapServiceRegistration = null;
+			}
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
+		} finally {
+			if (null != tracker) {
+				tracker.close();
+				tracker = null;
+			}
 		}
 	}
 

@@ -54,8 +54,12 @@ import java.util.Hashtable;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import com.openexchange.config.Configuration;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.smtp.SMTPProvider;
 
@@ -74,6 +78,8 @@ public final class SMTPActivator implements BundleActivator {
 
 	private ServiceRegistration smtpServiceRegistration;
 
+	private ServiceTracker tracker;
+
 	/**
 	 * Initializes a new {@link SMTPActivator}
 	 */
@@ -90,8 +96,25 @@ public final class SMTPActivator implements BundleActivator {
 	 */
 	public void start(final BundleContext context) throws Exception {
 		try {
-			smtpServiceRegistration = context.registerService(TransportProvider.class.getName(), new SMTPProvider(),
-					dictionary);
+			tracker = new ServiceTracker(context, Configuration.class.getName(), new ServiceTrackerCustomizer() {
+
+				public Object addingService(final ServiceReference reference) {
+					final Object addedService = context.getService(reference);
+					if (addedService instanceof Configuration) {
+						smtpServiceRegistration = context.registerService(TransportProvider.class.getName(),
+								new SMTPProvider(), dictionary);
+					}
+					return addedService;
+				}
+
+				public void modifiedService(ServiceReference reference, Object service) {
+				}
+
+				public void removedService(ServiceReference reference, Object service) {
+					// TODO Unregister SMTP bundle if config down???
+				}
+			});
+			tracker.open();
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -106,11 +129,18 @@ public final class SMTPActivator implements BundleActivator {
 	 */
 	public void stop(final BundleContext context) throws Exception {
 		try {
-			smtpServiceRegistration.unregister();
-			smtpServiceRegistration = null;
+			if (null != smtpServiceRegistration) {
+				smtpServiceRegistration.unregister();
+				smtpServiceRegistration = null;
+			}
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
+		} finally {
+			if (null != tracker) {
+				tracker.close();
+				tracker = null;
+			}
 		}
 	}
 
