@@ -83,6 +83,14 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 		return getClient().getValues().getInboxFolder();
 	}
 
+	protected String getSentFolder() throws AjaxException, IOException, SAXException, JSONException {
+		return getClient().getValues().getSentFolder();
+	}
+
+	protected String getTrashFolder() throws AjaxException, IOException, SAXException, JSONException {
+		return getClient().getValues().getTrashFolder();
+	}
+
 	protected String getSendAddress() throws AjaxException, IOException, SAXException, JSONException {
 		return ConfigTools.get(getClient(), new GetRequest(Tree.SendAddress)).getString();
 	}
