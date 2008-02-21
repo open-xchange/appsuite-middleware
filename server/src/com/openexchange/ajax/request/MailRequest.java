@@ -63,14 +63,12 @@ import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
-import com.openexchange.mail.MailJSONField;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
