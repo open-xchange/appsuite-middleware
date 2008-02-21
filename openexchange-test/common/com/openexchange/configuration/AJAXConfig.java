@@ -67,7 +67,11 @@ public class AJAXConfig extends AbstractConfig {
         /**
          * Second user login.
          */
-        SECONDUSER("seconduser");
+        SECONDUSER("seconduser"),
+        /**
+         * Whether SP3 or SP4 data
+         */
+        IS_SP3("isSP3");
 
         /**
          * Name of the property in the ajax.properties file.
