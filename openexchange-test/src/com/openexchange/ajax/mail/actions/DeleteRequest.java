@@ -48,79 +48,73 @@
  */
 package com.openexchange.ajax.mail.actions;
 
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.DataFields;
-import org.json.JSONException;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-import java.util.Date;
-
+/**
+ * {@link DeleteRequest}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
 public class DeleteRequest extends AbstractMailRequest {
 
-    private String[][] folderAndMailIds = null;
-    private Date lastModified = new Date();
-    private boolean failOnError = true;
+	private final String[][] folderAndMailIds;
 
-    public DeleteRequest(String[][] folderAndMailIds) {
-        this.folderAndMailIds = folderAndMailIds;
-    }
+	private final boolean hardDelete;
 
-    public DeleteRequest(String[][] folderAndMailIds, Date lastModified) {
-        this.folderAndMailIds = folderAndMailIds;
-        this.lastModified = lastModified;
-    }
+	private boolean failOnError = true;
 
+	public DeleteRequest(final String[][] folderAndMailIds) {
+		this(folderAndMailIds, false);
+	}
 
-    public Method getMethod() {
-        return Method.PUT;
-    }
+	public DeleteRequest(final String[][] folderAndMailIds, final boolean hardDelete) {
+		this.folderAndMailIds = folderAndMailIds;
+		this.hardDelete = hardDelete;
+	}
 
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_DELETE),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP,
-                String.valueOf(lastModified.getTime()))
-        };
-    }
+	public Method getMethod() {
+		return Method.PUT;
+	}
 
-    public AbstractAJAXParser getParser() {
-        return new AbstractAJAXParser(failOnError) {
-            protected AbstractAJAXResponse createResponse(Response response) throws JSONException {
-                return new DeleteResponse(response);
-            }
-        };
-    }
+	public Parameter[] getParameters() {
+		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
+				new Parameter("harddelete", hardDelete ? "1" : "0") };
+	}
 
-    public Object getBody() throws JSONException {
-        final JSONArray array = new JSONArray();
-        for (String[] folderAndObject : folderAndMailIds) {
-            final JSONObject json = new JSONObject();
-            json.put(AJAXServlet.PARAMETER_INFOLDER, folderAndObject[0]);
-            json.put(DataFields.ID, folderAndObject[1]);
-            array.put(json);
-        }
-        return array;
-    }
+	public AbstractAJAXParser<DeleteResponse> getParser() {
+		return new AbstractAJAXParser<DeleteResponse>(failOnError) {
+			@Override
+			protected DeleteResponse createResponse(Response response) throws JSONException {
+				return new DeleteResponse(response);
+			}
+		};
+	}
 
-    public String[][] getFolderAndMailIds() {
-        return folderAndMailIds;
-    }
+	public Object getBody() throws JSONException {
+		final JSONArray array = new JSONArray();
+		for (final String[] folderAndObject : folderAndMailIds) {
+			final JSONObject json = new JSONObject();
+			json.put(AJAXServlet.PARAMETER_INFOLDER, folderAndObject[0]);
+			json.put(DataFields.ID, folderAndObject[1]);
+			array.put(json);
+		}
+		return array;
+	}
 
-    public void setFolderAndMailIds(String[][] folderAndMailIds) {
-        this.folderAndMailIds = folderAndMailIds;
-    }
+	public void ignoreError() {
+		failOnError = false;
+	}
 
-    public void ignoreError() {
-        failOnError = false;
-    }
-
-    public void failOnError() {
-        failOnError = true;
-    }
+	public void failOnError() {
+		failOnError = true;
+	}
 }

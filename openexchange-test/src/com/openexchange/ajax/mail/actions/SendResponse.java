@@ -51,6 +51,9 @@ package com.openexchange.ajax.mail.actions;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailPath;
 
 /**
  * {@link SendResponse}
@@ -60,6 +63,11 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public final class SendResponse extends AbstractAJAXResponse {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(SendResponse.class);
+
+	private String[] folderAndID;
+
 	/**
 	 * @param response
 	 */
@@ -67,4 +75,28 @@ public final class SendResponse extends AbstractAJAXResponse {
 		super(response);
 	}
 
+	/**
+	 * @return Folder and ID of sent mail which is located in default "Sent"
+	 *         folder
+	 */
+	public String[] getFolderAndID() {
+		if (null == folderAndID) {
+			final String str;
+			if (getData() == null || (str = getData().toString()).length() == 0) {
+				return null;
+			}
+			try {
+				final MailPath mp = new MailPath(str);
+				if (Boolean.parseBoolean(AJAXConfig.getProperty(AJAXConfig.Property.IS_SP3))) {
+					return new String[] { mp.getFolder(), mp.toString() };
+				}
+				return new String[] { mp.getFolder(), String.valueOf(mp.getUid()) };
+			} catch (final MailException e) {
+				LOG.error(e.getMessage(), e);
+				return null;
+			}
+
+		}
+		return folderAndID;
+	}
 }

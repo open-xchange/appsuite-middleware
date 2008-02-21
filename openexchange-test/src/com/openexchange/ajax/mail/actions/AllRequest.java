@@ -78,4 +78,5 @@ public class AllRequest extends CommonAllRequest {
         super(AbstractMailRequest.MAIL_URL, folderPath, columns, sort, order,
             true);
     }
+
 }

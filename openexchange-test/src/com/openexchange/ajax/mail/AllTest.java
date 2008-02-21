@@ -49,14 +49,10 @@
 
 package com.openexchange.ajax.mail;
 
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Locale;
-
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.actions.AllRequest;
-import com.openexchange.mail.MailListField;
+import com.openexchange.ajax.mail.actions.SendRequest;
 
 /**
  * {@link AllTest}
@@ -79,9 +75,6 @@ public final class AllTest extends AbstractMailTest {
 		super(name);
 	}
 
-	private final static String[] fields = { "ID: ", "Folder ID: ", "Subject: ", "Size: ", "Sent Date: ",
-			"Received Date: " };
-
 	/**
 	 * Tests the <code>action=all</code> request on INBOX folder
 	 * 
@@ -89,38 +82,37 @@ public final class AllTest extends AbstractMailTest {
 	 */
 	public void testAll() throws Throwable {
 		/*
-		 * TODO: Insert mails
+		 * Clean everything
 		 */
-		final int[] columns = new int[] { MailListField.ID.getField(), MailListField.FOLDER_ID.getField(),
-				MailListField.SUBJECT.getField(), MailListField.SIZE.getField(), MailListField.SENT_DATE.getField(),
-				MailListField.RECEIVED_DATE.getField() };
-		final CommonAllResponse allR = (CommonAllResponse) Executor.execute(getSession(), new AllRequest(
-				getInboxFolder(), columns, 0, null));
-		final Object[][] array = allR.getArray();
-		final StringBuilder strBuilder = new StringBuilder(256);
-		final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.FULL, Locale.ENGLISH);
-		final Date date = new Date();
-		for (int i = 0; i < array.length; i++) {
-			strBuilder.setLength(0);
-			for (int j = 0; j < array[i].length; j++) {
-				strBuilder.append(fields[j]);
-				if (j == 4 || j == 5) {
-					final String dateStr = array[i][j].toString();
-					if (null == dateStr || "null".equalsIgnoreCase(dateStr)) {
-						strBuilder.append("[null]");
-					} else {
-						date.setTime(Long.parseLong(dateStr));
-						strBuilder.append(dateFormat.format(date));
-					}
-				} else {
-					strBuilder.append(array[i][j].toString());
-				}
-				strBuilder.append('\n');
-			}
-			LOG.trace(strBuilder.toString());
+		clearFolder(getInboxFolder());
+		clearFolder(getSentFolder());
+		clearFolder(getTrashFolder());
+		/*
+		 * Create JSON mail object
+		 */
+		final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
+		/*
+		 * Insert <numOfMails> mails through a send request
+		 */
+		final int numOfMails = 25;
+		LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
+		for (int i = 0; i < numOfMails; i++) {
+			Executor.execute(getSession(), new SendRequest(mailObject_25kb));
+			LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
 		}
 		/*
-		 * TODO: Delete previously inserted mails
+		 * Perform all request
 		 */
+		final CommonAllResponse allR = (CommonAllResponse) Executor.execute(getSession(), new AllRequest(
+				getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null));
+		final Object[][] array = allR.getArray();
+		assertTrue("All request failed", array != null && array.length == numOfMails
+				&& array[0].length == COLUMNS_DEFAULT_LIST.length);
+		/*
+		 * Clean everything
+		 */
+		clearFolder(getInboxFolder());
+		clearFolder(getSentFolder());
+		clearFolder(getTrashFolder());
 	}
 }

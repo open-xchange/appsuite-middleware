@@ -49,16 +49,10 @@
 
 package com.openexchange.ajax.mail;
 
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.Locale;
-
-import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.ListRequest;
-import com.openexchange.mail.MailListField;
+import com.openexchange.ajax.mail.actions.SendRequest;
 
 /**
  * {@link ListTest}
@@ -81,12 +75,6 @@ public final class ListTest extends AbstractMailTest {
 		super(name);
 	}
 
-	private static final int[] listAttributes = new int[] { MailListField.ID.getField(),
-			MailListField.FOLDER_ID.getField(), MailListField.THREAD_LEVEL.getField(),
-			MailListField.ATTACHMENT.getField(), MailListField.FROM.getField(), MailListField.SUBJECT.getField(),
-			MailListField.RECEIVED_DATE.getField(), MailListField.SIZE.getField(), MailListField.FLAGS.getField(),
-			MailListField.PRIORITY.getField(), MailListField.COLOR_LABEL.getField() };
-
 	/**
 	 * Tests the <code>action=list</code> request on INBOX folder
 	 * 
@@ -94,43 +82,39 @@ public final class ListTest extends AbstractMailTest {
 	 */
 	public void testList() throws Throwable {
 		/*
-		 * TODO: Insert mails
+		 * Clean everything
 		 */
-		int[] columns = new int[] { MailListField.FOLDER_ID.getField(), MailListField.ID.getField() };
-		final CommonAllResponse allR = (CommonAllResponse) Executor.execute(getSession(), new AllRequest(
-				getInboxFolder(), columns, 0, null));
-		final Object[][] allArray = allR.getArray();
-		final String[][] folderAndMailIds = new String[allArray.length][];
-		for (int i = 0; i < folderAndMailIds.length; i++) {
-			folderAndMailIds[i] = new String[allArray[i].length];
-			for (int j = 0; j < folderAndMailIds[i].length; j++) {
-				folderAndMailIds[i][j] = allArray[i][j].toString();
-			}
-		}
-		columns = listAttributes;
-		final CommonListResponse listR = (CommonListResponse) Executor.execute(getSession(), new ListRequest(
-				folderAndMailIds, columns));
-		final Object[][] listArray = listR.getArray();
-		final StringBuilder strBuilder = new StringBuilder(256);
-		final DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.FULL, Locale.ENGLISH);
-		final Date date = new Date();
-		for (int i = 0; i < listArray.length; i++) {
-			strBuilder.setLength(0);
-			strBuilder.append('\n');
-			for (int j = 0; j < listArray[i].length; j++) {
-				strBuilder.append(String.valueOf(j + 1)).append(".\t");
-				if (j == 6) {
-					date.setTime(Long.parseLong(listArray[i][j].toString()));
-					strBuilder.append(dateFormat.format(date));
-				} else {
-					strBuilder.append(listArray[i][j].toString());
-				}
-				strBuilder.append('\n');
-			}
-			LOG.trace(strBuilder.toString());
+		clearFolder(getInboxFolder());
+		clearFolder(getSentFolder());
+		clearFolder(getTrashFolder());
+		/*
+		 * Create JSON mail object
+		 */
+		final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
+		/*
+		 * Insert 100 mails through a send request
+		 */
+		final int numOfMails = 25;
+		LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
+		for (int i = 0; i < numOfMails; i++) {
+			Executor.execute(getSession(), new SendRequest(mailObject_25kb));
+			LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
 		}
 		/*
-		 * TODO: Delete previously inserted mails
+		 * Get their folder and IDs
 		 */
+		final String[][] folderAndIDs = getFolderAndIDs(getInboxFolder());
+		/*
+		 * Perform list request
+		 */
+		final CommonListResponse response = (CommonListResponse) Executor.execute(getSession(), new ListRequest(
+				folderAndIDs, COLUMNS_DEFAULT_LIST));
+		assertTrue("List request failed", response.getArray() != null && response.getArray().length == numOfMails);
+		/*
+		 * Clean everything
+		 */
+		clearFolder(getInboxFolder());
+		clearFolder(getSentFolder());
+		clearFolder(getTrashFolder());
 	}
 }

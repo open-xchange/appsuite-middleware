@@ -47,108 +47,27 @@
  *
  */
 
-package com.openexchange.ajax.mail.actions;
-
-import org.json.JSONException;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+package com.openexchange.ajax.mail.netsol;
 
 /**
- * {@link GetRequest}
+ * {@link FolderAndID}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class GetRequest extends AbstractMailRequest {
+public final class FolderAndID {
 
-	class GetParser extends AbstractAJAXParser<GetResponse> {
+	public final String folderId;
 
-		/**
-		 * Default constructor.
-		 */
-		GetParser(final boolean failOnError) {
-			super(failOnError);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected GetResponse createResponse(final Response response) throws JSONException {
-			return new GetResponse(response);
-		}
-	}
+	public final String id;
 
 	/**
-	 * Unique identifier
+	 * Initializes a new {@link FolderAndID}
 	 */
-	private final String[] folderAndID;
-
-	private final boolean failOnError;
-
-	public GetRequest(final String folder, final String ID) {
-		this(new String[] { folder, ID }, true);
-	}
-
-	/**
-	 * Initializes a new {@link GetRequest}
-	 * 
-	 * @param mailPath
-	 */
-	public GetRequest(final String[] folderAndID) {
-		this(folderAndID, true);
-	}
-
-	/**
-	 * Initializes a new {@link GetRequest}
-	 * 
-	 * @param mailPath
-	 * @param failOnError
-	 */
-	public GetRequest(final String[] folderAndID, final boolean failOnError) {
+	public FolderAndID(final String folderId, final String id) {
 		super();
-		this.folderAndID = folderAndID;
-		this.failOnError = failOnError;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	public Object getBody() throws JSONException {
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	public Method getMethod() {
-		return Method.GET;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	public Parameter[] getParameters() {
-		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-				new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderAndID[0]),
-				new Parameter(AJAXServlet.PARAMETER_ID, folderAndID[1]) };
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	public AbstractAJAXParser<?> getParser() {
-		return new GetParser(failOnError);
+		this.folderId = folderId;
+		this.id = id;
 	}
 
 }

@@ -47,108 +47,130 @@
  *
  */
 
-package com.openexchange.ajax.mail.actions;
+package com.openexchange.ajax.mail.netsol.actions;
+
+import java.io.InputStream;
 
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AbstractUploadParser;
 
 /**
- * {@link GetRequest}
+ * {@link NetsolSendRequest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class GetRequest extends AbstractMailRequest {
+public class NetsolSendRequest implements AJAXRequest {
 
-	class GetParser extends AbstractAJAXParser<GetResponse> {
-
-		/**
-		 * Default constructor.
-		 */
-		GetParser(final boolean failOnError) {
-			super(failOnError);
+	public static enum BodyContentType {
+		PLAIN_TEXT("text/plain"),
+		HTML("text/html"),
+		ALTERNATIVE("ALTERNATIVE");
+		
+		private final String str;
+		
+		private BodyContentType(final String str) {
+			this.str = str;
 		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected GetResponse createResponse(final Response response) throws JSONException {
-			return new GetResponse(response);
+		
+		public String getStr() {
+			return str;
 		}
 	}
-
+	
 	/**
-	 * Unique identifier
+	 * URL of the tasks AJAX interface.
 	 */
-	private final String[] folderAndID;
+	public static final String MAIL_URL = "/ajax/mail";
 
-	private final boolean failOnError;
+	private final String mailStr;
 
-	public GetRequest(final String folder, final String ID) {
-		this(new String[] { folder, ID }, true);
-	}
-
-	/**
-	 * Initializes a new {@link GetRequest}
-	 * 
-	 * @param mailPath
-	 */
-	public GetRequest(final String[] folderAndID) {
-		this(folderAndID, true);
-	}
-
-	/**
-	 * Initializes a new {@link GetRequest}
-	 * 
-	 * @param mailPath
-	 * @param failOnError
-	 */
-	public GetRequest(final String[] folderAndID, final boolean failOnError) {
-		super();
-		this.folderAndID = folderAndID;
-		this.failOnError = failOnError;
-	}
-
+	private final InputStream upload;
+	
 	/*
-	 * (non-Javadoc)
+	 * Mail object settings
+	 */
+	private BodyContentType contentType = BodyContentType.ALTERNATIVE;
+	
+	private String recipientTo;
+
+	/**
+	 * Initializes a new {@link NetsolSendRequest}
 	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+	 * @param mailStr
+	 *            The mail string (JSON)
+	 */
+	public NetsolSendRequest(final String mailStr) {
+		this(mailStr, null);
+	}
+
+	/**
+	 * Initializes a new {@link NetsolSendRequest}
+	 * 
+	 * @param mailStr
+	 *            The mail string (JSON)
+	 * @param upload
+	 *            The upload input stream
+	 */
+	public NetsolSendRequest(final String mailStr, final InputStream upload) {
+		super();
+		this.mailStr = mailStr;
+		this.upload = upload;
+	}
+
+	/**
+	 * {@inheritDoc}
 	 */
 	public Object getBody() throws JSONException {
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+	/**
+	 * {@inheritDoc}
 	 */
 	public Method getMethod() {
-		return Method.GET;
+		return Method.UPLOAD;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+	/**
+	 * {@inheritDoc}
 	 */
 	public Parameter[] getParameters() {
-		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-				new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderAndID[0]),
-				new Parameter(AJAXServlet.PARAMETER_ID, folderAndID[1]) };
+		final Parameter[] retval = new Parameter[upload == null ? 2 : 3];
+		retval[0] = new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
+		retval[1] = new FieldParameter("json_0", mailStr);
+		if (upload != null) {
+			retval[2] = new FileParameter("file_0", "text.txt", upload, "text/plain; charset=us-ascii");
+		}
+		return retval;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+	/**
+	 * {@inheritDoc}
 	 */
-	public AbstractAJAXParser<?> getParser() {
-		return new GetParser(failOnError);
+	public String getServletPath() {
+		return MAIL_URL;
 	}
 
+	public AbstractAJAXParser<?> getParser() {
+		return new SendParser(true);
+	}
+
+	class SendParser extends AbstractUploadParser<NetsolSendResponse> {
+
+		public SendParser(final boolean failOnError) {
+			super(failOnError);
+		}
+
+		@Override
+		protected NetsolSendResponse createResponse(Response response) throws JSONException {
+			return new NetsolSendResponse(response);
+		}
+
+	}
 }

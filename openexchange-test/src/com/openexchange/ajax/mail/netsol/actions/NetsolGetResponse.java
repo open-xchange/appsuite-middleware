@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.mail.actions;
+package com.openexchange.ajax.mail.netsol.actions;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -74,19 +74,19 @@ import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.utils.MessageUtility;
 
 /**
- * {@link GetResponse}
+ * {@link NetsolGetResponse}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class GetResponse extends AbstractAJAXResponse {
+public class NetsolGetResponse extends AbstractAJAXResponse {
 
 	private MailMessage mail;
 
 	/**
 	 * @param response
 	 */
-	GetResponse(final Response response) {
+	public NetsolGetResponse(final Response response) {
 		super(response);
 	}
 
@@ -103,10 +103,10 @@ public class GetResponse extends AbstractAJAXResponse {
 		if (null == mail) {
 			final MailMessage parsed = new MIMEMailMessage();
 			final JSONObject jsonObject;
-			if (getResponse().getData() instanceof JSONObject) {
-				jsonObject = (JSONObject) getResponse().getData();
+			if (getData() instanceof JSONObject) {
+				jsonObject = (JSONObject) getData();
 			} else {
-				jsonObject = new JSONObject(getResponse().getData().toString());
+				jsonObject = new JSONObject(getData().toString());
 			}
 			parse(jsonObject, parsed, timeZone);
 			mail = parsed;

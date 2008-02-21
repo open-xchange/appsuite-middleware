@@ -47,108 +47,82 @@
  *
  */
 
-package com.openexchange.ajax.mail.actions;
-
-import org.json.JSONException;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+package com.openexchange.ajax.mail.netsol;
 
 /**
- * {@link GetRequest}
+ * {@link DurationTracker}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class GetRequest extends AbstractMailRequest {
+public final class DurationTracker {
 
-	class GetParser extends AbstractAJAXParser<GetResponse> {
+	private final long[] durations;
 
-		/**
-		 * Default constructor.
-		 */
-		GetParser(final boolean failOnError) {
-			super(failOnError);
-		}
+	private int pointer;
 
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected GetResponse createResponse(final Response response) throws JSONException {
-			return new GetResponse(response);
-		}
-	}
+	private long maxDuration = Long.MIN_VALUE;
+
+	private long minDuration = Long.MAX_VALUE;
 
 	/**
-	 * Unique identifier
+	 * Initializes a new {@link DurationTracker}
 	 */
-	private final String[] folderAndID;
-
-	private final boolean failOnError;
-
-	public GetRequest(final String folder, final String ID) {
-		this(new String[] { folder, ID }, true);
-	}
-
-	/**
-	 * Initializes a new {@link GetRequest}
-	 * 
-	 * @param mailPath
-	 */
-	public GetRequest(final String[] folderAndID) {
-		this(folderAndID, true);
-	}
-
-	/**
-	 * Initializes a new {@link GetRequest}
-	 * 
-	 * @param mailPath
-	 * @param failOnError
-	 */
-	public GetRequest(final String[] folderAndID, final boolean failOnError) {
+	public DurationTracker(final int length) {
 		super();
-		this.folderAndID = folderAndID;
-		this.failOnError = failOnError;
+		durations = new long[length];
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Adds a duration time to this duration tracker
 	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
+	 * @param duration
+	 *            The duration time
 	 */
-	public Object getBody() throws JSONException {
-		return null;
+	public void addDuration(final long duration) {
+		maxDuration = Math.max(duration, maxDuration);
+		minDuration = Math.min(duration, minDuration);
+		durations[pointer++] = duration;
+		pointer %= durations.length;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Get max. duration
 	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
+	 * @return Max. duration
 	 */
-	public Method getMethod() {
-		return Method.GET;
+	public long getMaxDuration() {
+		return maxDuration;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Get min. duration
 	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
+	 * @return Min. duration
 	 */
-	public Parameter[] getParameters() {
-		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-				new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderAndID[0]),
-				new Parameter(AJAXServlet.PARAMETER_ID, folderAndID[1]) };
+	public long getMinDuration() {
+		return minDuration;
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Compute the average duration
 	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
+	 * @return The average duration
 	 */
-	public AbstractAJAXParser<?> getParser() {
-		return new GetParser(failOnError);
+	public double computeAvgDuration() {
+		long avgDuration = 0;
+		final int len = pointer == 0 ? durations.length : pointer;
+		for (int i = 0; i < len; i++) {
+			avgDuration += durations[i];
+		}
+		return (avgDuration / (double) len);
 	}
 
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder(64);
+		sb.append("Max. duration=").append(maxDuration).append("msec, Min. duration=").append(minDuration);
+		sb.append("msec, Avg. duration=").append(computeAvgDuration()).append("msec");
+		return sb.toString();
+	}
 }

@@ -49,13 +49,11 @@
 
 package com.openexchange.ajax.mail;
 
-import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.ajax.mail.actions.AllRequest;
 import com.openexchange.ajax.mail.actions.GetRequest;
 import com.openexchange.ajax.mail.actions.GetResponse;
-import com.openexchange.mail.MailListField;
-import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.ajax.mail.actions.SendRequest;
+import com.openexchange.ajax.mail.actions.SendResponse;
 
 /**
  * {@link GetTest}
@@ -64,9 +62,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
  * 
  */
 public final class GetTest extends AbstractMailTest {
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(GetTest.class);
 
 	/**
 	 * Default constructor.
@@ -85,22 +80,31 @@ public final class GetTest extends AbstractMailTest {
 	 */
 	public void testGet() throws Throwable {
 		/*
-		 * TODO: Insert mail
+		 * Clean everything
 		 */
-		final int[] columns = new int[] { MailListField.ID.getField() };
-		final CommonAllResponse allR = (CommonAllResponse) Executor.execute(getSession(), new AllRequest(
-				getInboxFolder(), columns, 0, null));
-		final Object[][] array = allR.getArray();
-		for (int i = 0; i < array.length; i++) {
-			for (int j = 0; j < array[i].length; j++) {
-				GetResponse response = (GetResponse) Executor.execute(getSession(), new GetRequest(array[i][j]
-						.toString()));
-				final MailMessage mail = response.getMail(getTimeZone());
-				LOG.trace("Parsed mail's subject: " + mail.getSubject());
-			}
-		}
+		clearFolder(getInboxFolder());
+		clearFolder(getSentFolder());
+		clearFolder(getTrashFolder());
 		/*
-		 * TODO: Delete previously inserted mail
+		 * Create JSON mail object
 		 */
+		final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
+		/*
+		 * Insert mail through a send request
+		 */
+		final String[] folderAndID = ((SendResponse) Executor.execute(getSession(), new SendRequest(mailObject_25kb)))
+				.getFolderAndID();
+		/*
+		 * Perform action=get
+		 */
+		final GetResponse response = (GetResponse) Executor.execute(getSession(), new GetRequest(folderAndID[0],
+				folderAndID[1]));
+		assertTrue("", response.getMail(getTimeZone()) != null);
+		/*
+		 * Clean everything
+		 */
+		clearFolder(getInboxFolder());
+		clearFolder(getSentFolder());
+		clearFolder(getTrashFolder());
 	}
 }

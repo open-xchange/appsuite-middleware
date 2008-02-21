@@ -47,28 +47,30 @@
  *
  */
 
-package com.openexchange.ajax.mail.actions;
+package com.openexchange.ajax.mail.netsol.actions;
 
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.mail.actions.AbstractMailRequest;
+import com.openexchange.ajax.mail.netsol.FolderAndID;
 
 /**
- * {@link GetRequest}
+ * {@link NetsolGetRequest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class GetRequest extends AbstractMailRequest {
+public final class NetsolGetRequest extends AbstractMailRequest {
 
-	class GetParser extends AbstractAJAXParser<GetResponse> {
+	final static class NetsolGetParser extends AbstractAJAXParser<NetsolGetResponse> {
 
 		/**
 		 * Default constructor.
 		 */
-		GetParser(final boolean failOnError) {
+		NetsolGetParser(final boolean failOnError) {
 			super(failOnError);
 		}
 
@@ -76,40 +78,36 @@ public final class GetRequest extends AbstractMailRequest {
 		 * {@inheritDoc}
 		 */
 		@Override
-		protected GetResponse createResponse(final Response response) throws JSONException {
-			return new GetResponse(response);
+		protected NetsolGetResponse createResponse(final Response response) throws JSONException {
+			return new NetsolGetResponse(response);
 		}
 	}
 
 	/**
 	 * Unique identifier
 	 */
-	private final String[] folderAndID;
+	private final FolderAndID mailPath;
 
 	private final boolean failOnError;
 
-	public GetRequest(final String folder, final String ID) {
-		this(new String[] { folder, ID }, true);
-	}
-
 	/**
-	 * Initializes a new {@link GetRequest}
+	 * Initializes a new {@link NetsolGetRequest}
 	 * 
 	 * @param mailPath
 	 */
-	public GetRequest(final String[] folderAndID) {
-		this(folderAndID, true);
+	public NetsolGetRequest(final FolderAndID mailPath) {
+		this(mailPath, true);
 	}
 
 	/**
-	 * Initializes a new {@link GetRequest}
+	 * Initializes a new {@link NetsolGetRequest}
 	 * 
 	 * @param mailPath
 	 * @param failOnError
 	 */
-	public GetRequest(final String[] folderAndID, final boolean failOnError) {
+	public NetsolGetRequest(final FolderAndID mailPath, final boolean failOnError) {
 		super();
-		this.folderAndID = folderAndID;
+		this.mailPath = mailPath;
 		this.failOnError = failOnError;
 	}
 
@@ -138,8 +136,8 @@ public final class GetRequest extends AbstractMailRequest {
 	 */
 	public Parameter[] getParameters() {
 		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-				new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderAndID[0]),
-				new Parameter(AJAXServlet.PARAMETER_ID, folderAndID[1]) };
+				new Parameter(AJAXServlet.PARAMETER_FOLDERID, mailPath.folderId),
+				new Parameter(AJAXServlet.PARAMETER_ID, mailPath.id) };
 	}
 
 	/*
@@ -147,8 +145,8 @@ public final class GetRequest extends AbstractMailRequest {
 	 * 
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
 	 */
-	public AbstractAJAXParser<?> getParser() {
-		return new GetParser(failOnError);
+	public AbstractAJAXParser<NetsolGetResponse> getParser() {
+		return new NetsolGetParser(failOnError);
 	}
 
 }

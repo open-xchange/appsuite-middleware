@@ -47,108 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.mail.actions;
+package com.openexchange.ajax.mail.netsol.actions;
 
-import org.json.JSONException;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.CommonAllRequest;
+import com.openexchange.ajax.mail.actions.AbstractMailRequest;
+import com.openexchange.groupware.search.Order;
+import com.openexchange.mail.MailListField;
 
 /**
- * {@link GetRequest}
- * 
+ * {@link NetsolAllRequest}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
-public final class GetRequest extends AbstractMailRequest {
+public class NetsolAllRequest extends CommonAllRequest {
 
-	class GetParser extends AbstractAJAXParser<GetResponse> {
+    public static final int[] GUI_COLUMNS = new int[] {
+    	MailListField.ID.getField(),
+        MailListField.FOLDER_ID.getField()
+    };
 
-		/**
-		 * Default constructor.
-		 */
-		GetParser(final boolean failOnError) {
-			super(failOnError);
-		}
+    public static final int GUI_SORT = MailListField.RECEIVED_DATE.getField();
 
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected GetResponse createResponse(final Response response) throws JSONException {
-			return new GetResponse(response);
-		}
-	}
+    public static final Order GUI_ORDER = Order.DESCENDING;
 
-	/**
-	 * Unique identifier
-	 */
-	private final String[] folderAndID;
-
-	private final boolean failOnError;
-
-	public GetRequest(final String folder, final String ID) {
-		this(new String[] { folder, ID }, true);
-	}
-
-	/**
-	 * Initializes a new {@link GetRequest}
-	 * 
-	 * @param mailPath
-	 */
-	public GetRequest(final String[] folderAndID) {
-		this(folderAndID, true);
-	}
-
-	/**
-	 * Initializes a new {@link GetRequest}
-	 * 
-	 * @param mailPath
-	 * @param failOnError
-	 */
-	public GetRequest(final String[] folderAndID, final boolean failOnError) {
-		super();
-		this.folderAndID = folderAndID;
-		this.failOnError = failOnError;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	public Object getBody() throws JSONException {
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	public Method getMethod() {
-		return Method.GET;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	public Parameter[] getParameters() {
-		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-				new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderAndID[0]),
-				new Parameter(AJAXServlet.PARAMETER_ID, folderAndID[1]) };
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	public AbstractAJAXParser<?> getParser() {
-		return new GetParser(failOnError);
-	}
-
+    /**
+     * Default constructor.
+     */
+    public NetsolAllRequest(final String folderPath, final int[] columns, final int sort,
+        final Order order) {
+        super(AbstractMailRequest.MAIL_URL, folderPath, columns, sort, order,
+            true);
+    }
 }

@@ -47,108 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.mail.actions;
+package com.openexchange.ajax.mail.netsol;
 
-import org.json.JSONException;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
- * {@link GetRequest}
+ * {@link NetsolMailTestSuite}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class GetRequest extends AbstractMailRequest {
-
-	class GetParser extends AbstractAJAXParser<GetResponse> {
-
-		/**
-		 * Default constructor.
-		 */
-		GetParser(final boolean failOnError) {
-			super(failOnError);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		protected GetResponse createResponse(final Response response) throws JSONException {
-			return new GetResponse(response);
-		}
-	}
+public final class NetsolMailTestSuite extends TestSuite {
 
 	/**
-	 * Unique identifier
+	 * Initializes a new {@link NetsolMailTestSuite}
 	 */
-	private final String[] folderAndID;
-
-	private final boolean failOnError;
-
-	public GetRequest(final String folder, final String ID) {
-		this(new String[] { folder, ID }, true);
-	}
-
-	/**
-	 * Initializes a new {@link GetRequest}
-	 * 
-	 * @param mailPath
-	 */
-	public GetRequest(final String[] folderAndID) {
-		this(folderAndID, true);
-	}
-
-	/**
-	 * Initializes a new {@link GetRequest}
-	 * 
-	 * @param mailPath
-	 * @param failOnError
-	 */
-	public GetRequest(final String[] folderAndID, final boolean failOnError) {
+	public NetsolMailTestSuite() {
 		super();
-		this.folderAndID = folderAndID;
-		this.failOnError = failOnError;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
-	 */
-	public Object getBody() throws JSONException {
-		return null;
-	}
+	public static Test suite() {
+		final TestSuite mailSuite = new TestSuite();
+		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailMessageDelete.class);
+		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailMessageOpen.class);
+		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailInbox.class);
+		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestEmptyTrash.class);
+		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailMessageSend.class);
+		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailInboxSort.class);
+		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailMessageSendAttachment.class);
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
-	 */
-	public Method getMethod() {
-		return Method.GET;
+		return mailSuite;
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
-	 */
-	public Parameter[] getParameters() {
-		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
-				new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderAndID[0]),
-				new Parameter(AJAXServlet.PARAMETER_ID, folderAndID[1]) };
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
-	 */
-	public AbstractAJAXParser<?> getParser() {
-		return new GetParser(failOnError);
-	}
-
 }
