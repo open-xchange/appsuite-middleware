@@ -765,7 +765,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 */
 	public boolean handleReceivedDate(final Date receivedDate) throws MailException {
 		try {
-			jsonObject.put(MailJSONField.SENT_DATE.getKey(), receivedDate == null ? JSONObject.NULL : Long
+			jsonObject.put(MailJSONField.RECEIVED_DATE.getKey(), receivedDate == null ? JSONObject.NULL : Long
 					.valueOf(MessageWriter.addUserTimezone(receivedDate.getTime(), getTimeZone())));
 			return true;
 		} catch (final JSONException e) {
@@ -780,7 +780,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 */
 	public boolean handleSentDate(final Date sentDate) throws MailException {
 		try {
-			jsonObject.put(MailJSONField.RECEIVED_DATE.getKey(), sentDate == null ? JSONObject.NULL : Long
+			jsonObject.put(MailJSONField.SENT_DATE.getKey(), sentDate == null ? JSONObject.NULL : Long
 					.valueOf(MessageWriter.addUserTimezone(sentDate.getTime(), getTimeZone())));
 			return true;
 		} catch (final JSONException e) {

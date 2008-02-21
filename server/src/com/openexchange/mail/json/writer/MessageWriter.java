@@ -74,6 +74,7 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.utils.MessageUtility;
@@ -129,6 +130,9 @@ public final class MessageWriter {
 				jObject.put(DataFields.ID, mailPath.getUid());
 			}
 			jObject.put(MailJSONField.UNREAD.getKey(), mail.getUnreadMessages());
+			jObject.put(MailJSONField.HAS_ATTACHMENTS.getKey(), mail.getContentType().isMimeType(
+					MIMETypes.MIME_MULTIPART_MIXED));
+			jObject.put(MailJSONField.CONTENT_TYPE.getKey(), mail.getContentType().getBaseType());
 		} catch (final JSONException e) {
 			LOG.error(e.getMessage(), e);
 		}
@@ -524,7 +528,8 @@ public final class MessageWriter {
 							 * TODO: Total, New, Unread, and Deleted count
 							 */
 							if (withKey) {
-								((JSONObject) jsonContainer).put(MailJSONField.UNREAD.getKey(), mail.getUnreadMessages());
+								((JSONObject) jsonContainer).put(MailJSONField.UNREAD.getKey(), mail
+										.getUnreadMessages());
 							} else {
 								((JSONArray) jsonContainer).put(mail.getUnreadMessages());
 							}
