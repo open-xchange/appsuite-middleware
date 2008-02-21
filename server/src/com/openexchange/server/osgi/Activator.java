@@ -263,7 +263,7 @@ public class Activator implements BundleActivator, EventHandler {
 	 *         <code>false</code>
 	 */
 	private static final boolean isAdminBundleInstalled(final BundleContext context) {
-		for (Bundle bundle : context.getBundles()) {
+		for (final Bundle bundle : context.getBundles()) {
 			if (BUNDLE_ID_ADMIN.equals(bundle.getSymbolicName())) {
 				return true;
 			}
