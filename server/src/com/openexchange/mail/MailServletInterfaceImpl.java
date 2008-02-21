@@ -281,7 +281,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	@Override
 	public MailMessage getMessage(final String folder, final long msgUID) throws MailException {
 		initConnection();
-		return mailConnection.getMessageStorage().getMessage(folder, msgUID);
+		return mailConnection.getMessageStorage().getMessage(folder, msgUID, true);
 	}
 
 	@Override
@@ -459,7 +459,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		initConnection();
 		if (draftMail.getMsgref() != null) {
 			final MailPath path = new MailPath(draftMail.getMsgref());
-			draftMail.setReferencedMail(mailConnection.getMessageStorage().getMessage(path.getFolder(), path.getUid()));
+			draftMail.setReferencedMail(mailConnection.getMessageStorage().getMessage(path.getFolder(), path.getUid(),
+					false));
 		}
 		return mailConnection.getMessageStorage().saveDraft(draftMail).getMailPath().toString();
 	}
@@ -482,7 +483,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 				final MailMessage[] referencedMails = new MailMessage[paths.length];
 				for (int i = 0; i < paths.length; i++) {
 					referencedMails[i] = mailConnection.getMessageStorage().getMessage(paths[i].getFolder(),
-							paths[i].getUid());
+							paths[i].getUid(), false);
 				}
 				composedMail.setReferencedMails(referencedMails);
 			} else {
@@ -541,7 +542,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		initConnection();
 		final MailTransport transport = MailTransport.getInstance(session);
 		try {
-			transport.sendReceiptAck(mailConnection.getMessageStorage().getMessage(folder, msgUID), fromAddr);
+			transport.sendReceiptAck(mailConnection.getMessageStorage().getMessage(folder, msgUID, false), fromAddr);
 		} finally {
 			transport.close();
 		}

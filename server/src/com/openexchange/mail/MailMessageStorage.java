@@ -62,8 +62,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 public interface MailMessageStorage {
 
 	/**
-	 * Gets the message located in given folder whose mail ID matches specified
-	 * ID.
+	 * Gets the mail located in given folder whose mail ID matches specified ID.
 	 * <p>
 	 * The returned instance of {@link MailMessage} is completely pre-filled
 	 * including content references.
@@ -72,11 +71,15 @@ public interface MailMessageStorage {
 	 *            The folder fullname
 	 * @param mailId
 	 *            The mail ID
+	 * @param markSeen
+	 *            <code>true</code> to explicitly mark corresponding mail as
+	 *            seen (setting system flag <i>\Seen</i>); otherwise
+	 *            <code>false</code> to leave as-is
 	 * @return Corresponding message
 	 * @throws MailException
 	 *             If message could not be returned
 	 */
-	public MailMessage getMessage(String folder, long mailId) throws MailException;
+	public MailMessage getMessage(String folder, long mailId, boolean markSeen) throws MailException;
 
 	/**
 	 * A convenience method that delivers all messages contained in given

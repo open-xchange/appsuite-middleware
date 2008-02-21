@@ -103,7 +103,8 @@ public abstract class IMAPFolderWorker implements Serializable {
 
 	protected static final MailListField[] FIELDS_FLAGS = new MailListField[] { MailListField.FLAGS };
 
-	protected static final transient Object[] ARGS_FLAG_SEEN = new Object[] { Integer.valueOf(MailMessage.FLAG_SEEN) };
+	protected static final transient Object[] ARGS_FLAG_SEEN_SET = new Object[] { Integer
+			.valueOf(MailMessage.FLAG_SEEN) };
 
 	/*
 	 * Fields
@@ -124,7 +125,7 @@ public abstract class IMAPFolderWorker implements Serializable {
 
 	protected int holdsMessages = -1;
 
-	protected transient Message markAsSeen;
+	protected transient Message handleSeen;
 
 	/**
 	 * Initializes a new {@link IMAPFolderWorker}
@@ -183,13 +184,13 @@ public abstract class IMAPFolderWorker implements Serializable {
 	}
 
 	/**
-	 * Marks the message referenced by field {@link #markAsSeen} as seen by
+	 * Marks the message referenced by field {@link #handleSeen} as seen by
 	 * setting system flag \SEEN.
 	 * <p>
-	 * If {@link #markAsSeen} is <code>null</code>, nothing happens.
+	 * If {@link #handleSeen} is <code>null</code>, nothing happens.
 	 */
 	protected final void keepSeen() {
-		if (markAsSeen == null) {
+		if (handleSeen == null) {
 			return;
 		} else if (imapFolder == null) {
 			return;
@@ -202,9 +203,9 @@ public abstract class IMAPFolderWorker implements Serializable {
 				 * exist".
 				 */
 				return;
-			} else if (markAsSeen.isSet(Flags.Flag.SEEN)) {
+			} else if (handleSeen.isSet(Flags.Flag.SEEN)) {
 				/*
-				 * Already marked as SEEN
+				 * Already appropriately marked
 				 */
 				return;
 			} else if (imapConfig.isSupportsACLs()) {
@@ -249,17 +250,17 @@ public abstract class IMAPFolderWorker implements Serializable {
 					return;
 				}
 			}
-			markAsSeen.setFlags(FLAGS_SEEN, true);
+			handleSeen.setFlags(FLAGS_SEEN, true);
 			try {
 				if (MailMessageCache.getInstance().containsFolderMessages(imapFolder.getFullName(),
 						session.getUserId(), ctx)) {
 					/*
 					 * Update cache entry
 					 */
-					final long[] uid = new long[] { imapFolder.getUID(markAsSeen) };
+					final long[] uid = new long[] { imapFolder.getUID(handleSeen) };
 					final long start = System.currentTimeMillis();
 					MailMessageCache.getInstance().updateCachedMessages(uid, imapFolder.getFullName(),
-							session.getUserId(), ctx, FIELDS_FLAGS, ARGS_FLAG_SEEN);
+							session.getUserId(), ctx, FIELDS_FLAGS, ARGS_FLAG_SEEN_SET);
 					if (LOG.isDebugEnabled()) {
 						LOG.debug(new StringBuilder(128).append(uid.length).append(" cached message(s) updated in ")
 								.append((System.currentTimeMillis() - start)).append("msec").toString());
@@ -280,7 +281,7 @@ public abstract class IMAPFolderWorker implements Serializable {
 			}
 			return;
 		} finally {
-			markAsSeen = null;
+			handleSeen = null;
 		}
 	}
 
@@ -342,7 +343,7 @@ public abstract class IMAPFolderWorker implements Serializable {
 				/*
 				 * Folder is open, check \SEEN flag and close folder
 				 */
-				if (markAsSeen != null) {
+				if (handleSeen != null) {
 					/*
 					 * Mark stored message as seen
 					 */

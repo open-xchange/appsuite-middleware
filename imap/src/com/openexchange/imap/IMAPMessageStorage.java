@@ -161,7 +161,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 		userId = session.getUserId();
 	}
 
-	public MailMessage getMessage(final String folderArg, final long msgUID) throws MailException {
+	public MailMessage getMessage(final String folderArg, final long msgUID, final boolean markSeen)
+			throws MailException {
 		try {
 			final String folder = prepareMailFolderParam(folderArg);
 			if (DEFAULT_FOLDER_ID.equals(folder)) {
@@ -178,7 +179,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 				 * Another folder than previous one
 				 */
 				if (imapFolder.isOpen()) {
-					if (markAsSeen != null) {
+					if (handleSeen != null) {
 						/*
 						 * Mark stored message as seen
 						 */
@@ -199,7 +200,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 			 */
 			if (!imapFolder.isOpen()) {
 				imapFolder.open(Folder.READ_WRITE);
-			} else if (markAsSeen != null) {
+			} else if (handleSeen != null) {
 				/*
 				 * Folder is already open, mark stored message as seen
 				 */
@@ -242,15 +243,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 					}
 				}
 			}
-			markAsSeen = msg;
-			return MIMEMessageConverter.convertMessage(msg);
+			final MailMessage mail = MIMEMessageConverter.convertMessage(msg);
+			if (markSeen) {
+				handleSeen = msg;
+				mail.setFlag(MailMessage.FLAG_SEEN, markSeen);
+			}
+			return mail;
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapConnection);
 		}
 	}
 
-	public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailListField sortField,
-			final OrderDirection order, final MailListField[] fields) throws MailException {
+	public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange,
+			final MailListField sortField, final OrderDirection order, final MailListField[] fields)
+			throws MailException {
 		return getMessages(folder, indexRange, sortField, order, null, null, false, fields);
 	}
 
@@ -1153,8 +1159,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 						session.removeUploadedFile(id);
 					}
 				}
-				updateMessageFlags(draftFullname, new long[] { uid }, MailMessage.FLAG_SEEN, true);
-				retval = getMessage(draftFullname, uid);
+				retval = getMessage(draftFullname, uid, true);
 			}
 			/*
 			 * Check for draft-edit operation: Delete old version
