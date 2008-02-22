@@ -50,7 +50,8 @@
 package com.openexchange.ajax.mail.netsol;
 
 /**
- * {@link DurationTracker}
+ * {@link DurationTracker} - Tracks execution times and provides maximum,
+ * minimum, and average times.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
