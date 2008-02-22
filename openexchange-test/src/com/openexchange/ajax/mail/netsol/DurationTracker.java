@@ -60,6 +60,8 @@ public final class DurationTracker {
 
 	private final long[] durations;
 
+	private boolean full;
+
 	private int pointer;
 
 	private long maxDuration = Long.MIN_VALUE;
@@ -85,6 +87,9 @@ public final class DurationTracker {
 		minDuration = Math.min(duration, minDuration);
 		durations[pointer++] = duration;
 		pointer %= durations.length;
+		if (!full && (pointer == 0)) {
+			full = true;
+		}
 	}
 
 	/**
@@ -112,7 +117,7 @@ public final class DurationTracker {
 	 */
 	public double computeAvgDuration() {
 		long avgDuration = 0;
-		final int len = pointer == 0 ? durations.length : pointer;
+		final int len = full ? durations.length : pointer;
 		for (int i = 0; i < len; i++) {
 			avgDuration += durations[i];
 		}
