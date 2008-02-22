@@ -65,6 +65,8 @@ public final class NetsolTestConstants {
 		super();
 	}
 
+	public static final int RUNS = 10;
+
 	/**
 	 * Random mail text body
 	 */

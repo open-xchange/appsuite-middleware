@@ -47,54 +47,48 @@
  *
  */
 
-package com.openexchange.ajax.mail.netsol;
+package com.openexchange.ajax.mail.netsol.actions;
 
-import java.io.IOException;
-
+import org.json.JSONArray;
 import org.json.JSONException;
-import org.xml.sax.SAXException;
 
-import com.openexchange.ajax.framework.CommonAllResponse;
-import com.openexchange.ajax.framework.Executor;
-import com.openexchange.ajax.mail.AbstractMailTest;
-import com.openexchange.ajax.mail.netsol.actions.NetsolAllRequest;
-import com.openexchange.ajax.mail.netsol.actions.NetsolDeleteRequest;
-import com.openexchange.mail.MailListField;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link AbstractNetsolTest}
- * 
+ * {@link NetsolFolderResponse}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
+ *
  */
-public abstract class AbstractNetsolTest extends AbstractMailTest {
+public final class NetsolFolderResponse extends AbstractAJAXResponse {
+
+	private Object[][] array;
 
 	/**
-	 * Initializes a new {@link AbstractNetsolTest}
-	 * 
-	 * @param name
+	 * Initializes a new {@link NetsolFolderResponse}
+	 * @param response
 	 */
-	protected AbstractNetsolTest(final String name) {
-		super(name);
+	public NetsolFolderResponse(Response response) {
+		super(response);
 	}
 
-	protected static final int[] COLUMNS_ID = new int[] { MailListField.FOLDER_ID.getField(), MailListField.ID.getField() };
-
-	protected final void netsolClearFolder(final String folder) throws AjaxException, IOException, SAXException,
-			JSONException {
-		Executor.execute(getSession(), new NetsolDeleteRequest(getIDs(folder), true));
-	}
-
-	protected final FolderAndID[] getIDs(final String folder) throws AjaxException, IOException, SAXException,
-			JSONException {
-		final CommonAllResponse allR = (CommonAllResponse) Executor.execute(getSession(), new NetsolAllRequest(folder,
-				COLUMNS_ID, 0, null));
-		final Object[][] array = allR.getArray();
-		final FolderAndID[] paths = new FolderAndID[array.length];
-		for (int i = 0; i < array.length; i++) {
-			paths[i] = new FolderAndID(array[i][0].toString(), array[i][1].toString());
+	public Object[][] getArray() throws JSONException {
+		if (null == array) {
+			final JSONArray array = (JSONArray) getData();
+			final int len = array.length();
+			final Object[][] retval = new Object[len][];
+			for (int i = 0; i < len; i++) {
+				final JSONArray iArray = array.getJSONArray(i);
+				final int iLen = iArray.length();
+				retval[i] = new Object[iLen];
+				for (int k = 0; k < len; k++) {
+					retval[i][k] = iArray.get(k);
+				}
+			}
+			this.array = retval;
 		}
-		return paths;
+		return array;
 	}
+
 }

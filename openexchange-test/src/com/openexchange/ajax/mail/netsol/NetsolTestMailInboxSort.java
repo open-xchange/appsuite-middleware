@@ -77,7 +77,8 @@ public final class NetsolTestMailInboxSort extends AbstractNetsolTest {
 		super(name);
 	}
 
-	protected static final int[] COLUMNS_FOLDER_ID = new int[] { MailListField.FOLDER_ID.getField(), MailListField.ID.getField() };
+	protected static final int[] COLUMNS_FOLDER_ID = new int[] { MailListField.FOLDER_ID.getField(),
+			MailListField.ID.getField() };
 
 	public void testMailInboxSort() throws Throwable {
 		netsolClearFolder(getInboxFolder());
@@ -116,18 +117,22 @@ public final class NetsolTestMailInboxSort extends AbstractNetsolTest {
 			Executor.execute(getSession(), new NetsolSendRequest(mailObject_25kb.toString()));
 		}
 		System.out.println(inboxSize + " mails put into INBOX with random subject");
-		
-		final int runs = 10;
-		final DurationTracker durationTracker = new DurationTracker(runs);
+
+		final int runs = NetsolTestConstants.RUNS;
+		final DurationTracker requestTracker = new DurationTracker(runs);
+		final DurationTracker parseTracker = new DurationTracker(runs);
 		System.out.println("Starting test runs...");
 		for (int i = 0; i < runs; i++) {
-			final CommonAllResponse response = (CommonAllResponse) Executor.execute(getSession(), new NetsolAllRequest(getInboxFolder(), COLUMNS_FOLDER_ID, MailListField.SUBJECT.getField(), Order.ASCENDING), true);
+			final CommonAllResponse response = (CommonAllResponse) Executor.execute(getSession(), new NetsolAllRequest(
+					getInboxFolder(), COLUMNS_FOLDER_ID, MailListField.SUBJECT.getField(), Order.ASCENDING));
 			assertTrue("Sort failed", response.getArray() != null && response.getArray().length > 0);
-			assertTrue("Duration corrupt", response.getDuration() > 0);
-			durationTracker.addDuration(response.getDuration());
+			assertTrue("Duration corrupt", response.getRequestDuration() > 0);
+			requestTracker.addDuration(response.getRequestDuration());
+			parseTracker.addDuration(response.getParseDuration());
 		}
 		System.out.println("Mail Inbox Sort: Test runs finished");
-		System.out.println(durationTracker.toString());
+		System.out.println("Request results: " + requestTracker.toString());
+		System.out.println("Parse results: " + parseTracker.toString());
 		/*
 		 * Clean everything
 		 */

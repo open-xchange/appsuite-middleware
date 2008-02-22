@@ -76,6 +76,7 @@ public final class NetsolMailTestSuite extends TestSuite {
 		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailMessageSend.class);
 		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailInboxSort.class);
 		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestMailMessageSendAttachment.class);
+		mailSuite.addTestSuite(com.openexchange.ajax.mail.netsol.NetsolTestViewFolders.class);
 
 		return mailSuite;
 	}

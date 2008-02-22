@@ -49,76 +49,72 @@
 
 package com.openexchange.ajax.mail.netsol;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import com.openexchange.ajax.framework.Executor;
-import com.openexchange.ajax.mail.netsol.actions.NetsolSendRequest;
-import com.openexchange.ajax.mail.netsol.actions.NetsolSendResponse;
-import com.openexchange.mail.MailJSONField;
+import com.openexchange.ajax.mail.netsol.actions.NetsolFolderRequest;
+import com.openexchange.ajax.mail.netsol.actions.NetsolFolderResponse;
 
 /**
- * {@link NetsolTestMailMessageSend}
+ * {@link NetsolTestViewFolders}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class NetsolTestMailMessageSend extends AbstractNetsolTest {
+public final class NetsolTestViewFolders extends AbstractNetsolTest {
 
 	/**
-	 * Initializes a new {@link NetsolTestMailMessageSend}
+	 * Initializes a new {@link NetsolTestViewFolders}
 	 * 
 	 * @param name
 	 */
-	public NetsolTestMailMessageSend(String name) {
+	public NetsolTestViewFolders(String name) {
 		super(name);
 	}
 
-	public void testMailSend() throws Throwable {
+	public void testViewFolders() throws Throwable {
 		netsolClearFolder(getInboxFolder());
 		netsolClearFolder(getSentFolder());
 		netsolClearFolder(getTrashFolder());
-		/*
-		 * Create JSON mail object
-		 */
-		final JSONObject mailObject_25kb = new JSONObject();
-		{
-			mailObject_25kb.put(MailJSONField.FROM.getKey(), getSendAddress());
-			mailObject_25kb.put(MailJSONField.RECIPIENT_TO.getKey(), getSendAddress());
-			mailObject_25kb.put(MailJSONField.RECIPIENT_CC.getKey(), "");
-			mailObject_25kb.put(MailJSONField.RECIPIENT_BCC.getKey(), "");
-			mailObject_25kb.put(MailJSONField.SUBJECT.getKey(), "The mail subject");
-			mailObject_25kb.put(MailJSONField.PRIORITY.getKey(), "3");
-
-			final JSONObject bodyObject = new JSONObject();
-			bodyObject.put(MailJSONField.CONTENT_TYPE.getKey(), "ALTERNATIVE");
-			bodyObject.put(MailJSONField.CONTENT.getKey(), NetsolTestConstants.MAIL_TEXT_BODY + "<br />"
-					+ NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />"
-					+ NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />"
-					+ NetsolTestConstants.MAIL_TEXT_BODY + "<br />" + NetsolTestConstants.MAIL_TEXT_BODY + "<br />");
-
-			final JSONArray attachments = new JSONArray();
-			attachments.put(bodyObject);
-
-			mailObject_25kb.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
-		}
+		System.out.println("INBOX, Sent & Trash cleared");
 
 		final int runs = NetsolTestConstants.RUNS;
-		final DurationTracker requestTracker = new DurationTracker(runs);
-		final DurationTracker parseTracker = new DurationTracker(runs);
+		final DurationTracker requestTracker = new DurationTracker(runs * 3);
+		final DurationTracker parseTracker = new DurationTracker(runs * 3);
 		System.out.println("Starting test runs...");
 		for (int i = 0; i < runs; i++) {
 			/*
-			 * Perform send
+			 * Get private folders
 			 */
-			final NetsolSendResponse response = (NetsolSendResponse) Executor.execute(getSession(),
-					new NetsolSendRequest(mailObject_25kb.toString()));
-			assertTrue("Send failed", response.getFolderAndID() != null);
+			final NetsolFolderResponse response = (NetsolFolderResponse) Executor.execute(getSession(), new NetsolFolderRequest("1"));
+			assertTrue("Folder List failed", response.getArray() != null && response.getArray().length > 0);
 			assertTrue("Duration corrupt", response.getRequestDuration() > 0);
 			requestTracker.addDuration(response.getRequestDuration());
 			parseTracker.addDuration(response.getParseDuration());
 		}
-		System.out.println("Mail Message Send: Test runs finished");
+		
+		for (int i = 0; i < runs; i++) {
+			/*
+			 * Get first level folders
+			 */
+			final NetsolFolderResponse response = (NetsolFolderResponse) Executor.execute(getSession(), new NetsolFolderRequest("default"));
+			assertTrue("Folder List failed", response.getArray() != null && response.getArray().length > 0);
+			assertTrue("Duration corrupt", response.getRequestDuration() > 0);
+			requestTracker.addDuration(response.getRequestDuration());
+			parseTracker.addDuration(response.getParseDuration());
+		}
+		
+		for (int i = 0; i < runs; i++) {
+			/*
+			 * Get INBOX subfolders
+			 */
+			final NetsolFolderResponse response = (NetsolFolderResponse) Executor.execute(getSession(), new NetsolFolderRequest("default.INBOX"));
+			assertTrue("Folder List failed", response.getArray() != null && response.getArray().length > 0);
+			assertTrue("Duration corrupt", response.getRequestDuration() > 0);
+			requestTracker.addDuration(response.getRequestDuration());
+			parseTracker.addDuration(response.getParseDuration());
+		}
+		
+		
+		System.out.println("View Folders: Test runs finished");
 		System.out.println("Request results: " + requestTracker.toString());
 		System.out.println("Parse results: " + parseTracker.toString());
 		/*

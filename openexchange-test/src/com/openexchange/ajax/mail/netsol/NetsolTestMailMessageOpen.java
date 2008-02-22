@@ -113,21 +113,24 @@ public final class NetsolTestMailMessageOpen extends AbstractNetsolTest {
 				mailObject_25kb.toString()));
 		final FolderAndID mailPath = new FolderAndID(response.getFolderAndID()[0], response.getFolderAndID()[1]);
 
-		final int runs = 10;
-		final DurationTracker durationTracker = new DurationTracker(runs);
+		final int runs = NetsolTestConstants.RUNS;
+		final DurationTracker requestTracker = new DurationTracker(runs);
+		final DurationTracker parseTracker = new DurationTracker(runs);
 		System.out.println("Starting test runs...");
 		for (int i = 0; i < runs; i++) {
 			/*
 			 * "Open" 25kb mail
 			 */
 			NetsolGetResponse resp = ((NetsolGetResponse) Executor.execute(getSession(),
-					new NetsolGetRequest(mailPath), true));
+					new NetsolGetRequest(mailPath)));
 			assertTrue("Get failed", resp.getMail(getTimeZone()) != null);
-			assertTrue("Duration corrupt", resp.getDuration() > 0);
-			durationTracker.addDuration(resp.getDuration());
+			assertTrue("Duration corrupt", resp.getRequestDuration() > 0);
+			requestTracker.addDuration(resp.getRequestDuration());
+			parseTracker.addDuration(resp.getParseDuration());
 		}
-		System.out.println("Mail Open: Test runs finished");
-		System.out.println(durationTracker.toString());
+		System.out.println("Mail Message Open: Test runs finished");
+		System.out.println("Request results: " + requestTracker.toString());
+		System.out.println("Parse results: " + parseTracker.toString());
 		/*
 		 * Clean everything
 		 */

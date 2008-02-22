@@ -105,8 +105,9 @@ public final class NetsolTestMailMessageDelete extends AbstractNetsolTest {
 			mailObject_25kb.put(MailJSONField.ATTACHMENTS.getKey(), attachments);
 		}
 
-		final int runs = 10;
-		final DurationTracker durationTracker = new DurationTracker(runs);
+		final int runs = NetsolTestConstants.RUNS;
+		final DurationTracker requestTracker = new DurationTracker(runs);
+		final DurationTracker parseTracker = new DurationTracker(runs);
 		System.out.println("Starting test runs...");
 		for (int i = 0; i < runs; i++) {
 			/*
@@ -119,13 +120,15 @@ public final class NetsolTestMailMessageDelete extends AbstractNetsolTest {
 			 * Delete previously added mail
 			 */
 			final NetsolDeleteRequest.NetsolDeleteResponse delResponse = (NetsolDeleteResponse) Executor.execute(
-					getSession(), new NetsolDeleteRequest(new FolderAndID[] { mailPath }, false), true);
+					getSession(), new NetsolDeleteRequest(new FolderAndID[] { mailPath }, false));
 			assertTrue("Delete failed", delResponse.getFailed().length() == 0);
-			assertTrue("Duration corrupt", delResponse.getDuration() > 0);
-			durationTracker.addDuration(delResponse.getDuration());
+			assertTrue("Duration corrupt", delResponse.getRequestDuration() > 0);
+			requestTracker.addDuration(delResponse.getRequestDuration());
+			parseTracker.addDuration(delResponse.getParseDuration());
 		}
 		System.out.println("Mail Message Delete: Test runs finished");
-		System.out.println(durationTracker.toString());
+		System.out.println("Request results: " + requestTracker.toString());
+		System.out.println("Parse results: " + parseTracker.toString());
 		/*
 		 * Clean everything
 		 */

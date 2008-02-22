@@ -145,8 +145,9 @@ public final class NetsolTestMailMessageSendAttachment extends AbstractNetsolTes
 		 */
 		final File fileAttachment = create200kbTempFile();
 
-		final int runs = 10;
-		final DurationTracker durationTracker = new DurationTracker(runs);
+		final int runs = NetsolTestConstants.RUNS;
+		final DurationTracker requestTracker = new DurationTracker(runs);
+		final DurationTracker parseTracker = new DurationTracker(runs);
 		System.out.println("Starting test runs...");
 		for (int i = 0; i < runs; i++) {
 			BufferedInputStream in = null;
@@ -156,18 +157,20 @@ public final class NetsolTestMailMessageSendAttachment extends AbstractNetsolTes
 				 * Perform send
 				 */
 				final NetsolSendResponse response = (NetsolSendResponse) Executor.execute(getSession(),
-						new NetsolSendRequest(mailObject_25kb.toString(), in), true);
+						new NetsolSendRequest(mailObject_25kb.toString(), in));
 				assertTrue("Send failed", response.getFolderAndID() != null);
-				assertTrue("Duration corrupt", response.getDuration() > 0);
-				durationTracker.addDuration(response.getDuration());
+				assertTrue("Duration corrupt", response.getRequestDuration() > 0);
+				requestTracker.addDuration(response.getRequestDuration());
+				parseTracker.addDuration(response.getParseDuration());
 			} finally {
 				if (null != in) {
 					in.close();
 				}
 			}
 		}
-		System.out.println("Mail Message Send with 200kb attachment: Test runs finished");
-		System.out.println(durationTracker.toString());
+		System.out.println("Attachment Upload: Test runs finished");
+		System.out.println("Request results: " + requestTracker.toString());
+		System.out.println("Parse results: " + parseTracker.toString());
 		/*
 		 * Clean everything
 		 */

@@ -122,21 +122,23 @@ public final class NetsolTestMailInbox extends AbstractNetsolTest {
 		 */
 		final FolderAndID[] paths = getIDs(getInboxFolder());
 
-		final int runs = 10;
-		final DurationTracker durationTracker = new DurationTracker(runs);
+		final int runs = NetsolTestConstants.RUNS;
+		final DurationTracker requestTracker = new DurationTracker(runs);
+		final DurationTracker parseTracker = new DurationTracker(runs);
 		System.out.println("Starting test runs...");
 		for (int i = 0; i < runs; i++) {
 			/*
 			 * Fetch INBOX mails
 			 */
-			CommonListResponse resp = (CommonListResponse) Executor.execute(getSession(), new NetsolListRequest(paths),
-					true);
+			CommonListResponse resp = (CommonListResponse) Executor.execute(getSession(), new NetsolListRequest(paths));
 			assertTrue("List failed", resp.getArray() != null && resp.getArray().length > 0);
-			assertTrue("Duration corrupt", resp.getDuration() > 0);
-			durationTracker.addDuration(resp.getDuration());
+			assertTrue("Duration corrupt", resp.getRequestDuration() > 0);
+			requestTracker.addDuration(resp.getRequestDuration());
+			parseTracker.addDuration(resp.getParseDuration());
 		}
 		System.out.println("Mail Inbox: Test runs finished");
-		System.out.println(durationTracker.toString());
+		System.out.println("Request results: " + requestTracker.toString());
+		System.out.println("Parse results: " + parseTracker.toString());
 		/*
 		 * Clean everything
 		 */
