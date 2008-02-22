@@ -137,6 +137,10 @@ public abstract class DeferredActivator implements BundleActivator {
 		super();
 		serviceTrackers = new ConcurrentHashMap<Class<?>, ServiceTracker>(getNeededServices().length);
 		availability = new ArrayList<Boolean>(getNeededServices().length);
+		for (int i = getNeededServices().length; i > 0; i--) {
+			availability.add(Boolean.FALSE);
+		}
+		
 	}
 
 	/**
@@ -205,7 +209,7 @@ public abstract class DeferredActivator implements BundleActivator {
 	 *            The class' index
 	 */
 	private final void signalAvailability(final int index) {
-		availability.add(index, Boolean.TRUE);
+		availability.set(index, Boolean.TRUE);
 		for (final Boolean b : availability) {
 			if (b == Boolean.FALSE) {
 				return;
@@ -230,7 +234,7 @@ public abstract class DeferredActivator implements BundleActivator {
 	 *            The class' index
 	 */
 	private final void signalUnavailability(final int index) {
-		availability.add(index, Boolean.FALSE);
+		availability.set(index, Boolean.FALSE);
 	}
 
 	/*
