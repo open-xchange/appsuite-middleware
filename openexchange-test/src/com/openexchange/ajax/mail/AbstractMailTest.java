@@ -169,7 +169,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
 	 */
 	protected final void clearFolder(final String folder) throws AjaxException, IOException, SAXException,
 			JSONException {
-		Executor.execute(getSession(), new DeleteRequest(getFolderAndIDs(folder), true), false);
+		Executor.execute(getSession(), new DeleteRequest(getFolderAndIDs(folder), true));
 	}
 
 	/**
