@@ -1078,6 +1078,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					}
 					/**
 					 * TODO: Does not work, yet.
+					 * 
 					 * <pre>
 					 * 
 					 * if (!saveToDisk &amp;&amp; mailPart.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
@@ -1908,18 +1909,22 @@ public class Mail extends PermissionServlet implements UploadListener {
 			}
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
-			final Response response = new Response();
-			response.setException(e);
-			response.setData(JSONObject.NULL);
-			response.setTimestamp(null);
-			Response.write(response, writer);
+			for (int k = 0; k < mailIDs.length; k++) {
+				final Response response = new Response();
+				response.setException(e);
+				response.setData(JSONObject.NULL);
+				response.setTimestamp(null);
+				Response.write(response, writer);
+			}
 		} catch (final Exception e) {
 			LOG.error("actionPutMailMultiple", e);
-			final Response response = new Response();
-			response.setException(getWrappingOXException(e));
-			response.setData(JSONObject.NULL);
-			response.setTimestamp(null);
-			Response.write(response, writer);
+			for (int k = 0; k < mailIDs.length; k++) {
+				final Response response = new Response();
+				response.setException(getWrappingOXException(e));
+				response.setData(JSONObject.NULL);
+				response.setTimestamp(null);
+				Response.write(response, writer);
+			}
 		}
 	}
 
@@ -1935,6 +1940,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 					closeMailInterface = true;
 				}
 				mailInterface.updateMessageFlags(folder, MailPath.getUIDs(mailIDs), flagsBits, flagValue);
+				for (int i = 0; i < mailIDs.length; i++) {
+					final Response response = new Response();
+					response.setData(new JSONArray());
+					response.setTimestamp(null);
+					Response.write(response, writer);
+				}
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
@@ -1942,18 +1953,22 @@ public class Mail extends PermissionServlet implements UploadListener {
 			}
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
-			final Response response = new Response();
-			response.setException(e);
-			response.setData(JSONObject.NULL);
-			response.setTimestamp(null);
-			Response.write(response, writer);
+			for (int i = 0; i < mailIDs.length; i++) {
+				final Response response = new Response();
+				response.setException(e);
+				response.setData(JSONObject.NULL);
+				response.setTimestamp(null);
+				Response.write(response, writer);
+			}
 		} catch (final Exception e) {
 			LOG.error("actionPutStoreFlagsMultiple", e);
-			final Response response = new Response();
-			response.setException(getWrappingOXException(e));
-			response.setData(JSONObject.NULL);
-			response.setTimestamp(null);
-			Response.write(response, writer);
+			for (int i = 0; i < mailIDs.length; i++) {
+				final Response response = new Response();
+				response.setException(getWrappingOXException(e));
+				response.setData(JSONObject.NULL);
+				response.setTimestamp(null);
+				Response.write(response, writer);
+			}
 		}
 	}
 
@@ -1969,6 +1984,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 					closeMailInterface = true;
 				}
 				mailInterface.updateMessageColorLabel(folder, MailPath.getUIDs(mailIDs), colorLabel);
+				for (int i = 0; i < mailIDs.length; i++) {
+					final Response response = new Response();
+					response.setData(new JSONArray());
+					response.setTimestamp(null);
+					Response.write(response, writer);
+				}
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
@@ -1976,18 +1997,22 @@ public class Mail extends PermissionServlet implements UploadListener {
 			}
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
-			final Response response = new Response();
-			response.setException(e);
-			response.setData(JSONObject.NULL);
-			response.setTimestamp(null);
-			Response.write(response, writer);
+			for (int i = 0; i < mailIDs.length; i++) {
+				final Response response = new Response();
+				response.setException(e);
+				response.setData(JSONObject.NULL);
+				response.setTimestamp(null);
+				Response.write(response, writer);
+			}
 		} catch (final Exception e) {
 			LOG.error("actionPutColorLabelMultiple", e);
-			final Response response = new Response();
-			response.setException(getWrappingOXException(e));
-			response.setData(JSONObject.NULL);
-			response.setTimestamp(null);
-			Response.write(response, writer);
+			for (int i = 0; i < mailIDs.length; i++) {
+				final Response response = new Response();
+				response.setException(getWrappingOXException(e));
+				response.setData(JSONObject.NULL);
+				response.setTimestamp(null);
+				Response.write(response, writer);
+			}
 		}
 	}
 
