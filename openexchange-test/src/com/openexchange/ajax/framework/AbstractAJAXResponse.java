@@ -58,53 +58,96 @@ import com.openexchange.groupware.AbstractOXException;
 
 /**
  * This class implements inheritable methods for AJAX responses.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AbstractAJAXResponse extends Assert {
 
-    private final Response response;
+	private final Response response;
 
-    private long duration;
+	private long requestDuration;
 
-    protected AbstractAJAXResponse(final Response response) {
-        super();
-        this.response = response;
-    }
+	private long parseDuration;
 
-    public long getDuration() {
-		return duration;
+	protected AbstractAJAXResponse(final Response response) {
+		super();
+		this.response = response;
 	}
 
-    public void setDuration(long duration) {
-		this.duration = duration;
+	/**
+	 * Gets the sole request's duration in milliseconds
+	 * 
+	 * @return The sole request's duration in milliseconds
+	 */
+	public long getRequestDuration() {
+		return requestDuration;
+	}
+
+	/**
+	 * Sets the sole request's duration in milliseconds
+	 * 
+	 * @param duration
+	 *            The sole request's duration in milliseconds
+	 */
+	void setRequestDuration(final long duration) {
+		this.requestDuration = duration;
+	}
+
+	/**
+	 * Gets the parse duration of request's JSON data in milliseconds
+	 * 
+	 * @return The parse duration of request's JSON data in milliseconds
+	 */
+	public long getParseDuration() {
+		return parseDuration;
+	}
+
+	/**
+	 * Sets the parse duration of request's JSON data in milliseconds
+	 * 
+	 * @param parseDuration
+	 *            The parse duration of request's JSON data in milliseconds
+	 */
+	void setParseDuration(final long parseDuration) {
+		this.parseDuration = parseDuration;
+	}
+
+	/**
+	 * Gets the total duration (request + parse duration)
+	 * 
+	 * @return The total duration
+	 */
+	public long getTotalDuration() {
+		return (requestDuration + parseDuration);
 	}
 
 	public Response getResponse() {
-        return response;
-    }
+		return response;
+	}
 
-    public Object getData() {
-        return response.getData();
-    }
+	public Object getData() {
+		return response.getData();
+	}
 
-    /**
-     * If the server response contains an overall timestamp, it can be get with
-     * this method.
-     * @return the timestamp from the response.
-     */
-    public Date getTimestamp() {
-        return response.getTimestamp();
-    }
+	/**
+	 * If the server response contains an overall timestamp, it can be get with
+	 * this method.
+	 * 
+	 * @return the timestamp from the response.
+	 */
+	public Date getTimestamp() {
+		return response.getTimestamp();
+	}
 
-    public boolean hasError() {
-        return response.hasError();
-    }
+	public boolean hasError() {
+		return response.hasError();
+	}
 
-    public AbstractOXException getException() {
-        return response.getException();
-    }
-    
-    public int[] getTruncatedIds() {
-        return response.getException().getTruncatedIds();
-    }
+	public AbstractOXException getException() {
+		return response.getException();
+	}
+
+	public int[] getTruncatedIds() {
+		return response.getException().getTruncatedIds();
+	}
 }

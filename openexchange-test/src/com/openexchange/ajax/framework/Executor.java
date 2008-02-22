@@ -66,71 +66,54 @@ public class Executor extends Assert {
             AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME));
 	}
 
-    public static AbstractAJAXResponse execute(final AJAXSession session,
-        final AJAXRequest request, final boolean trackDuration) throws AjaxException, IOException,
-        SAXException, JSONException {
-		return execute(session, request,
-            AJAXConfig.getProperty(AJAXConfig.Property.PROTOCOL),
-            AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME), trackDuration);
-	}
-	
-	public static AbstractAJAXResponse execute(final AJAXSession session,
-        final AJAXRequest request, final String protocol, final String hostname) throws AjaxException, IOException,
-        SAXException, JSONException {
-		return execute(session, request, protocol, hostname, false);
-    }
+	public static AbstractAJAXResponse execute(final AJAXSession session, final AJAXRequest request,
+			final String protocol, final String hostname) throws AjaxException, IOException, SAXException,
+			JSONException {
 
-	public static AbstractAJAXResponse execute(final AJAXSession session,
-	        final AJAXRequest request, final String protocol, final String hostname,
-	        final boolean trackDuration) throws AjaxException, IOException,
-	        SAXException, JSONException {
-			
-			final String urlString = protocol + "://" + hostname + request.getServletPath();
-	        final WebRequest req;
-	        switch (request.getMethod()) {
-	        case GET:
-	            req = new GetMethodWebRequest(urlString);
-	            addParameter(req, session, request);
-	            break;
-	        case POST:
-	            req = new PostMethodWebRequest(urlString);
-	            addParameter(req, session, request);
-	            break;
-	        case UPLOAD:
-	            final PostMethodWebRequest post = new PostMethodWebRequest(urlString
-	                + getPUTParameter(session, request));
-	            post.setMimeEncoded(true);
-	            req = post;
-	            addFieldParameter(post, request);
-	            addFileParameter(post, request);
-	            break;
-	        case PUT:
-	            req = new PutMethodWebRequest(urlString + getPUTParameter(session,
-	                request), createBody(request.getBody()), AJAXServlet
-	                .CONTENTTYPE_JAVASCRIPT);
-	            break;
-	        default:
-	            throw new AjaxException(AjaxException.Code.InvalidParameter, request
-	                .getMethod().name());
-	        }
-	        final WebConversation conv = session.getConversation();
-	        final WebResponse resp;
-	        // The upload returns a web page that should not be interpreted.
-	        final long startRequest = System.currentTimeMillis();
-	        if (Method.UPLOAD == request.getMethod()) {
-	            resp = conv.getResource(req);
-	        } else {
-	            resp = conv.getResponse(req);
-	        }
-	        final long duration = System.currentTimeMillis() - startRequest;
-	        final AbstractAJAXParser<?> parser = request.getParser();
-	        parser.checkResponse(resp);
-	        final AbstractAJAXResponse retval = parser.parse(resp.getText());
-	        if (trackDuration) {
-	        	retval.setDuration(duration);
-	        }
-	        return retval;
-	    }
+		final String urlString = protocol + "://" + hostname + request.getServletPath();
+		final WebRequest req;
+		switch (request.getMethod()) {
+		case GET:
+			req = new GetMethodWebRequest(urlString);
+			addParameter(req, session, request);
+			break;
+		case POST:
+			req = new PostMethodWebRequest(urlString);
+			addParameter(req, session, request);
+			break;
+		case UPLOAD:
+			final PostMethodWebRequest post = new PostMethodWebRequest(urlString + getPUTParameter(session, request));
+			post.setMimeEncoded(true);
+			req = post;
+			addFieldParameter(post, request);
+			addFileParameter(post, request);
+			break;
+		case PUT:
+			req = new PutMethodWebRequest(urlString + getPUTParameter(session, request), createBody(request.getBody()),
+					AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+			break;
+		default:
+			throw new AjaxException(AjaxException.Code.InvalidParameter, request.getMethod().name());
+		}
+		final WebConversation conv = session.getConversation();
+		final WebResponse resp;
+		// The upload returns a web page that should not be interpreted.
+		final long startRequest = System.currentTimeMillis();
+		if (Method.UPLOAD == request.getMethod()) {
+			resp = conv.getResource(req);
+		} else {
+			resp = conv.getResponse(req);
+		}
+		final long requestDuration = System.currentTimeMillis() - startRequest;
+		final AbstractAJAXParser<?> parser = request.getParser();
+		parser.checkResponse(resp);
+		final long startParse = System.currentTimeMillis();
+		final AbstractAJAXResponse retval = parser.parse(resp.getText());
+		final long parseDuration = System.currentTimeMillis() - startParse;
+		retval.setRequestDuration(requestDuration);
+		retval.setParseDuration(parseDuration);
+		return retval;
+	}
 
     private static void addParameter(final WebRequest req,
         final AJAXSession session, final AJAXRequest request) {
