@@ -52,53 +52,75 @@ package com.openexchange.database;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.management.ManagementServiceHolder;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * This class contains the initialization for the database system.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class DatabaseInit implements Initialization {
 
-    private static final DatabaseInit singleton = new DatabaseInit();
+	private static final DatabaseInit singleton = new DatabaseInit();
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(DatabaseInit.class);
+	/**
+	 * Logger.
+	 */
+	private static final Log LOG = LogFactory.getLog(DatabaseInit.class);
 
-    /**
-     * Prevent instantiation
-     */
-    private DatabaseInit() {
-        super();
-    }
+	private ManagementServiceHolder msh;
 
-    /**
-     * @return the singleton instance.
-     */
-    public static DatabaseInit getInstance() {
-        return singleton;
-    }
+	/**
+	 * Prevent instantiation
+	 */
+	private DatabaseInit() {
+		super();
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public void start() throws DBPoolingException {
-        Pools.getInstance().start();
-        AssignmentStorage.getInstance().start();
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Resolved server name \"" + Server.getServerName()
-                + "\" to identifier " + Server.getServerId());
-        }
-    }
+	/**
+	 * Sets the management service holder
+	 * 
+	 * @param msh
+	 *            The management service holder
+	 */
+	public void setManagementServiceHolder(final ManagementServiceHolder msh) {
+		this.msh = msh;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public void stop() {
-        AssignmentStorage.getInstance().stop();
-        Pools.getInstance().stop();
-    }
+	/**
+	 * Gets the management service holder
+	 * 
+	 * @return The management service holder
+	 */
+	public ManagementServiceHolder getManagementServiceHolder() {
+		return msh;
+	}
+
+	/**
+	 * @return the singleton instance.
+	 */
+	public static DatabaseInit getInstance() {
+		return singleton;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void start() throws DBPoolingException {
+		Pools.getInstance().start();
+		AssignmentStorage.getInstance().start();
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Resolved server name \"" + Server.getServerName() + "\" to identifier " + Server.getServerId());
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void stop() {
+		AssignmentStorage.getInstance().stop();
+		Pools.getInstance().stop();
+	}
 }

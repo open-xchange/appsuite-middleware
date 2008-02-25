@@ -59,8 +59,8 @@ import org.osgi.framework.BundleContext;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.database.Pools;
 import com.openexchange.management.ManagementAgent;
+import com.openexchange.management.ManagementServiceHolder;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
-import com.openexchange.server.services.ManagementService;
 
 /**
  * {@link ManagementServiceTracker}
@@ -79,8 +79,8 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
 	 * @param context
 	 *            The bundle context
 	 */
-	public ManagementServiceTracker(final BundleContext context) {
-		super(context, ManagementService.getInstance(), ManagementAgent.class);
+	public ManagementServiceTracker(final BundleContext context, final ManagementServiceHolder msh) {
+		super(context, msh, ManagementAgent.class);
 	}
 
 	@Override

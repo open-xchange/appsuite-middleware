@@ -73,7 +73,6 @@ import com.openexchange.management.ManagementAgent;
 import com.openexchange.server.ServerTimer;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.DBPoolingException.Code;
-import com.openexchange.server.services.ManagementService;
 
 /**
  * This class stores all connection pools. It also removes pools that are empty.
@@ -244,13 +243,12 @@ public final class Pools implements Runnable {
         try {
             final ObjectName objName = new ObjectName(ConnectionPoolMBean
                 .DOMAIN, "name", name);
-            final ManagementService service = ManagementService.getInstance();
-            final ManagementAgent management = service.getService();
+            final ManagementAgent management = DatabaseInit.getInstance().getManagementServiceHolder().getService();
             if (null != management) {
                 try {
                     management.unregisterMBean(objName);
                 } finally {
-                    service.ungetService(management);
+                	DatabaseInit.getInstance().getManagementServiceHolder().ungetService(management);
                 }
             }
         } catch (MalformedObjectNameException e) {
@@ -276,13 +274,12 @@ public final class Pools implements Runnable {
         try {
             final ObjectName objName = new ObjectName(ConnectionPoolMBean
                 .DOMAIN, "name", name);
-            final ManagementService service = ManagementService.getInstance();
-            final ManagementAgent management = service.getService();
+            final ManagementAgent management = DatabaseInit.getInstance().getManagementServiceHolder().getService();
             if (null != management) {
                 try {
                     management.registerMBean(objName, pool);
                 } finally {
-                    service.ungetService(management);
+                	DatabaseInit.getInstance().getManagementServiceHolder().ungetService(management);
                 }
             }
         } catch (MalformedObjectNameException e) {

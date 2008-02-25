@@ -69,6 +69,7 @@ import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.configjump.ConfigJumpInterface;
+import com.openexchange.database.DatabaseInit;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.mail.MailProvider;
@@ -76,6 +77,7 @@ import com.openexchange.mail.osgi.MailProviderServiceTracker;
 import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.management.ManagementAgent;
+import com.openexchange.management.ManagementServiceHolder;
 import com.openexchange.monitoring.MonitorInterface;
 import com.openexchange.server.ServiceHolderListener;
 import com.openexchange.server.impl.Starter;
@@ -109,6 +111,8 @@ public class Activator implements BundleActivator, EventHandler {
 	private final List<ServiceRegistration> registrationList = new ArrayList<ServiceRegistration>();
 
 	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
+
+	private ManagementServiceHolder msh;
 
 	private ConfigurationServiceHolder configurationServiceHolder;
 
@@ -184,6 +188,8 @@ public class Activator implements BundleActivator, EventHandler {
 				// Start up server to only fit admin needs.
 				starter.adminStart();
 			} else {
+				msh = ManagementServiceHolder.newInstance();
+				DatabaseInit.getInstance().setManagementServiceHolder(msh);
 				// SessionD is only needed for groupware.
 				serviceTrackerList.add(new ServiceTracker(context, SessiondConnectorInterface.class.getName(),
 						new BundleServiceTracker<SessiondConnectorInterface>(context, SessiondService.getInstance(),
@@ -194,7 +200,7 @@ public class Activator implements BundleActivator, EventHandler {
 								ConfigJumpInterface.class)));
 				// Management is only needed for groupware.
 				serviceTrackerList.add(new ServiceTracker(context, ManagementAgent.class.getName(),
-						new ManagementServiceTracker(context)));
+						new ManagementServiceTracker(context, msh)));
 				serviceTrackerList.add(new ServiceTracker(context, MonitorInterface.class.getName(),
 						new BundleServiceTracker<MonitorInterface>(context, MonitorService.getInstance(),
 								MonitorInterface.class)));
@@ -206,7 +212,7 @@ public class Activator implements BundleActivator, EventHandler {
 				starter.start();
 			}
 			// Open service trackers
-			for (ServiceTracker tracker : serviceTrackerList) {
+			for (final ServiceTracker tracker : serviceTrackerList) {
 				tracker.open();
 			}
 			/**
@@ -237,11 +243,12 @@ public class Activator implements BundleActivator, EventHandler {
 		try {
 			try {
 				starter.stop();
+				msh = null;
 			} finally {
 				/*
 				 * Unregister server's services
 				 */
-				for (ServiceRegistration registration : registrationList) {
+				for (final ServiceRegistration registration : registrationList) {
 					registration.unregister();
 				}
 				registrationList.clear();
