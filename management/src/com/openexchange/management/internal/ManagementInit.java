@@ -55,7 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.services.ConfigurationServiceHolder;
+import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 

@@ -47,35 +47,47 @@
  *
  */
 
-package com.openexchange.management.services;
+package com.openexchange.management;
 
-import com.openexchange.management.ManagementAgent;
-import com.openexchange.server.ServiceHolder;
+import javax.management.ObjectName;
 
 /**
- * {@link ManagementService}
+ * {@link ManagementAgent}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ManagementService extends ServiceHolder<ManagementAgent> {
-
-	private static final ManagementService instance = new ManagementService();
+public interface ManagementAgent {
 
 	/**
-	 * Gets the management service instance.
+	 * Registers a new MBean
 	 * 
-	 * @return The management service instance.
+	 * @param objectName
+	 *            The bean's object name
+	 * @param mbean
+	 *            The bean to register
+	 * @throws Exception
+	 *             If registration fails
 	 */
-	public static ManagementService getInstance() {
-		return instance;
-	}
+	public void registerMBean(ObjectName objectName, Object mbean) throws Exception;
 
 	/**
-	 * Default constructor
+	 * Unregisters the MBean corresponding to given name
+	 * 
+	 * @param name
+	 *            The bean name
+	 * @throws Exception
+	 *             If bean cannot be unregistered
 	 */
-	private ManagementService() {
-		super();
-	}
+	public void unregisterMBean(String name) throws Exception;
 
+	/**
+	 * Unregisters the MBean corresponding to given object name
+	 * 
+	 * @param objectName
+	 *            The bean's object name
+	 * @throws Exception
+	 *             If bean cannot be unregistered
+	 */
+	public void unregisterMBean(ObjectName objectName) throws Exception;
 }

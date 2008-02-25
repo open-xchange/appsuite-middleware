@@ -49,7 +49,7 @@
 
 package com.openexchange.mail;
 
-import com.openexchange.config.services.ConfigurationServiceHolder;
+import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.cache.MailCacheConfiguration;
 import com.openexchange.mail.config.MailPropertiesInit;

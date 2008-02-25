@@ -6,9 +6,7 @@ Bundle-Version: 6.5.0
 Bundle-Activator: com.openexchange.management.osgi.ManagementActivator
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.config,
- com.openexchange.config.services,
  com.openexchange.groupware,
- com.openexchange.management,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
  javax.management,
@@ -18,5 +16,5 @@ Import-Package: com.openexchange.config,
  org.apache.commons.logging.impl,
  org.osgi.framework;version="1.3.0",
  org.osgi.util.tracker;version="1.3.2"
-Export-Package: com.openexchange.management.services
+Export-Package: com.openexchange.management
 Bundle-Vendor: Open-Xchange Inc.

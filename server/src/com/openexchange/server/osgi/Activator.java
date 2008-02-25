@@ -67,7 +67,7 @@ import com.openexchange.authentication.Authentication;
 import com.openexchange.authentication.service.AuthenticationService;
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.services.ConfigurationServiceHolder;
+import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.configjump.ConfigJumpInterface;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.i18n.I18nTools;

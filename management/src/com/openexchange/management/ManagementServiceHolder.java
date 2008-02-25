@@ -47,90 +47,32 @@
  *
  */
 
-package com.openexchange.mail.transport;
+package com.openexchange.management;
 
-import com.openexchange.config.ConfigurationServiceHolder;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.transport.config.TransportPropertiesInit;
-import com.openexchange.server.Initialization;
+import com.openexchange.server.ServiceHolder;
 
 /**
- * {@link TransportInitialization} - Initializes whole transport implementation
- * and therefore provides a central point for starting/stopping transport
- * implementation.
+ * {@link ManagementServiceHolder}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class TransportInitialization implements Initialization {
-
-	private static final TransportInitialization instance = new TransportInitialization();
-
-	private ConfigurationServiceHolder configurationServiceHolder;
+public final class ManagementServiceHolder extends ServiceHolder<ManagementAgent> {
 
 	/**
-	 * @return The singleton instance of {@link TransportInitialization}
+	 * Gets the management service instance.
+	 * 
+	 * @return The management service instance.
 	 */
-	public static TransportInitialization getInstance() {
-		return instance;
+	public static ManagementServiceHolder newInstance() {
+		return new ManagementServiceHolder();
 	}
 
 	/**
-	 * Initializes a new {@link TransportInitialization}
+	 * Default constructor
 	 */
-	private TransportInitialization() {
+	private ManagementServiceHolder() {
 		super();
-	}
-
-	/**
-	 * Gets the configuration service holder
-	 * 
-	 * @return The configuration service holder
-	 */
-	public ConfigurationServiceHolder getConfigurationServiceHolder() {
-		return configurationServiceHolder;
-	}
-
-	/**
-	 * Sets the configuration service holder
-	 * 
-	 * @param configurationServiceHolder
-	 *            The configuration service holder
-	 */
-	public void setConfigurationServiceHolder(final ConfigurationServiceHolder configurationServiceHolder) {
-		this.configurationServiceHolder = configurationServiceHolder;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.Initialization#start()
-	 */
-	public void start() throws AbstractOXException {
-		/*
-		 * Start global transport system
-		 */
-		TransportPropertiesInit.getInstance().start();
-		/*
-		 * TODO: Remove Simulate bundle availability
-		 */
-		// TransportProvider.initTransportProvider();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.Initialization#stop()
-	 */
-	public void stop() throws AbstractOXException {
-		/*
-		 * TODO: Remove Simulate bundle disappearance
-		 */
-		// TransportProvider.resetTransportProvider();
-		/*
-		 * Stop global transport system
-		 */
-		TransportPropertiesInit.getInstance().stop();
 	}
 
 }
