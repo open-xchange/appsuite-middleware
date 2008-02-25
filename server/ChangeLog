@@ -1,3 +1,8 @@
+* 2008-02-25 - thorben.betten@open-xchange.com
+
+ - Bugfix #9910: Added mechanism to ensure folder data consistency after a
+   user/group deletion operation
+
 * 2008-02-20 - martin.kauss@open-xchange.com
 
  - Fixed bug #10717. If a participant was added to an appointment no
