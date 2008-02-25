@@ -55,6 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.config.Configuration;
+import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
@@ -87,6 +88,8 @@ public class PushInit implements Initialization {
 
 	private final AtomicBoolean started = new AtomicBoolean();
 
+	private ConfigurationServiceHolder csh;
+
 	/**
 	 * Prevent instantiation.
 	 */
@@ -102,6 +105,16 @@ public class PushInit implements Initialization {
 	}
 
 	/**
+	 * Sets the configuration service holder
+	 * 
+	 * @param csh
+	 *            The configuration service holder
+	 */
+	public void setConfigurationServiceHolder(final ConfigurationServiceHolder csh) {
+		this.csh = csh;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	public void start() throws AbstractOXException {
@@ -110,14 +123,13 @@ public class PushInit implements Initialization {
 			return;
 		}
 
-		Configuration conf = null;
+		final Configuration conf = csh.getService();
 		try {
-			conf = ConfigurationService.getInstance().getService();
 			if (conf != null) {
 				config = new PushConfigInterfaceImpl(conf);
 			}
 		} finally {
-			ConfigurationService.getInstance().ungetService(conf);
+			csh.ungetService(conf);
 		}
 
 		if (LOG.isInfoEnabled()) {

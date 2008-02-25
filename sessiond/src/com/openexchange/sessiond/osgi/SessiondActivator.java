@@ -60,11 +60,11 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.config.Configuration;
+import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.ServiceHolderListener;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.sessiond.SessiondConnectorInterface;
-import com.openexchange.sessiond.impl.ConfigurationService;
 import com.openexchange.sessiond.impl.SessiondConnectorImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 
@@ -83,6 +83,8 @@ public class SessiondActivator implements BundleActivator {
 
 	private ServiceRegistration serviceRegister = null;
 
+	private ConfigurationServiceHolder csh;
+
 	private ServiceHolderListener<Configuration> listener;
 
 	/**
@@ -94,12 +96,13 @@ public class SessiondActivator implements BundleActivator {
 		SessiondInit sessiondInit = null;
 
 		try {
+			csh = ConfigurationServiceHolder.newInstance();
+			SessiondInit.getInstance().setConfigurationServiceHolder(csh);
 			/*
 			 * Init service trackers
 			 */
 			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
-					new BundleServiceTracker<Configuration>(context, ConfigurationService.getInstance(),
-							Configuration.class)));
+					new BundleServiceTracker<Configuration>(context, csh, Configuration.class)));
 			/*
 			 * Open service trackers
 			 */
@@ -126,7 +129,7 @@ public class SessiondActivator implements BundleActivator {
 
 				}
 			};
-			ConfigurationService.getInstance().addServiceHolderListener(listener);
+			csh.addServiceHolderListener(listener);
 
 			// sessiondInit = SessiondInit.getInstance();
 			// sessiondInit.start();
@@ -150,7 +153,8 @@ public class SessiondActivator implements BundleActivator {
 		LOG.info("stopping bundle: com.openexchange.sessiond");
 
 		try {
-			ConfigurationService.getInstance().removeServiceHolderListenerByName(listener.getClass().getName());
+			csh.removeServiceHolderListenerByName(listener.getClass().getName());
+			csh = null;
 			
 			if (SessiondInit.getInstance().isStarted()) {
 				SessiondInit.getInstance().stop();

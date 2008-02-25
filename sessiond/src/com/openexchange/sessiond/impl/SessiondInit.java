@@ -55,6 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.config.Configuration;
+import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.sessiond.exception.SessiondException;
@@ -74,8 +75,20 @@ public class SessiondInit implements Initialization {
 
 	private static final SessiondInit singleton = new SessiondInit();
 
+	private ConfigurationServiceHolder csh;
+
 	public static SessiondInit getInstance() {
 		return singleton;
+	}
+
+	/**
+	 * Sets the configuration service holder
+	 * 
+	 * @param csh
+	 *            The configuration service holder
+	 */
+	public void setConfigurationServiceHolder(final ConfigurationServiceHolder csh) {
+		this.csh = csh;
 	}
 
 	public void start() throws AbstractOXException {
@@ -87,17 +100,17 @@ public class SessiondInit implements Initialization {
 			LOG.info("Parse Sessiond properties");
 		}
 
-		final Configuration conf = ConfigurationService.getInstance().getService();
+		final Configuration conf = csh.getService();
 		if (conf != null) {
 			try {
 				config = new SessiondConfigImpl(conf);
-			} finally  {
-				ConfigurationService.getInstance().ungetService(conf);
+			} finally {
+				csh.ungetService(conf);
 			}
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Starting Sessiond");
 			}
-			
+
 			if (config != null) {
 				final Sessiond sessiond = Sessiond.getInstance(config);
 				sessiond.start();

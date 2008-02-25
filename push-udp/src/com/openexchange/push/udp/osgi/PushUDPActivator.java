@@ -64,8 +64,8 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.config.Configuration;
+import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.push.udp.ConfigurationService;
 import com.openexchange.push.udp.EventAdminService;
 import com.openexchange.push.udp.PushHandler;
 import com.openexchange.push.udp.PushInit;
@@ -85,6 +85,8 @@ public class PushUDPActivator implements BundleActivator {
 
 	private ServiceRegistration eventHandlerRegistration;
 
+	private ConfigurationServiceHolder csh;
+
 	private ServiceHolderListener<Configuration> configurationListener;
 
 	private ServiceHolderListener<EventAdmin> eventAdminListener;
@@ -100,6 +102,8 @@ public class PushUDPActivator implements BundleActivator {
 		LOG.info("starting bundle: com.openexchange.push.udp");
 
 		try {
+			csh = ConfigurationServiceHolder.newInstance();
+			PushInit.getInstance().setConfigurationServiceHolder(csh);
 			/*
 			 * Init service tracker check availibility for services
 			 */
@@ -107,12 +111,11 @@ public class PushUDPActivator implements BundleActivator {
 					new BundleServiceTracker<EventAdmin>(context, EventAdminService.getInstance(),
 							EventAdmin.class)));
 			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
-					new BundleServiceTracker<Configuration>(context, ConfigurationService
-							.getInstance(), Configuration.class)));
+					new BundleServiceTracker<Configuration>(context, csh, Configuration.class)));
 			/*
 			 * Open service trackers
 			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
+			for (final ServiceTracker tracker : serviceTrackerList) {
 				tracker.open();
 			}
 			/*
@@ -164,7 +167,7 @@ public class PushUDPActivator implements BundleActivator {
 				}
 			};
 
-			ConfigurationService.getInstance().addServiceHolderListener(configurationListener);
+			csh.addServiceHolderListener(configurationListener);
 			EventAdminService.getInstance().addServiceHolderListener(eventAdminListener);
 		} catch (final Throwable e) {
 			LOG.error("PushUDPActivator: start: ", e);
@@ -183,8 +186,10 @@ public class PushUDPActivator implements BundleActivator {
 		LOG.info("stopping bundle: com.openexchange.sessiond");
 
 		try {
-			ConfigurationService.getInstance().removeServiceHolderListenerByName(
+			
+			csh.removeServiceHolderListenerByName(
 					configurationListener.getClass().getName());
+			csh = null;
 			EventAdminService.getInstance().removeServiceHolderListenerByName(
 					eventAdminListener.getClass().getName());
 
@@ -195,7 +200,7 @@ public class PushUDPActivator implements BundleActivator {
 			/*
 			 * Close service trackers
 			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
+			for (final ServiceTracker tracker : serviceTrackerList) {
 				tracker.close();
 			}
 			serviceTrackerList.clear();
