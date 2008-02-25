@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
@@ -100,7 +100,7 @@ public class SessiondInit implements Initialization {
 			LOG.info("Parse Sessiond properties");
 		}
 
-		final Configuration conf = csh.getService();
+		final ConfigurationService conf = csh.getService();
 		if (conf != null) {
 			try {
 				config = new SessiondConfigImpl(conf);

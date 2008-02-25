@@ -49,7 +49,7 @@
 
 package com.openexchange.monitoring.services;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.ServiceHolder;
 
 /**
@@ -58,7 +58,7 @@ import com.openexchange.server.ServiceHolder;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MonitoringConfiguration extends ServiceHolder<Configuration> {
+public final class MonitoringConfiguration extends ServiceHolder<ConfigurationService> {
 
 	private static final MonitoringConfiguration instance = new MonitoringConfiguration();
 

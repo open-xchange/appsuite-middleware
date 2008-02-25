@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
@@ -109,7 +109,7 @@ public final class ManagementInit implements Initialization {
 			return;
 		}
 		final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();
-		final Configuration c = csh.getService();
+		final ConfigurationService c = csh.getService();
 		try {
 			String bindAddress = c.getProperty("MonitorJMXBindAddress", "localhost");
 			if (bindAddress == null) {

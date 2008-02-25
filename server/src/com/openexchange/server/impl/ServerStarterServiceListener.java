@@ -49,7 +49,7 @@
 
 package com.openexchange.server.impl;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.ServiceHolderListener;
 
@@ -59,7 +59,7 @@ import com.openexchange.server.ServiceHolderListener;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ServerStarterServiceListener implements ServiceHolderListener<Configuration> {
+public final class ServerStarterServiceListener implements ServiceHolderListener<ConfigurationService> {
 
 	private final boolean adminStart;
 
@@ -79,7 +79,7 @@ public final class ServerStarterServiceListener implements ServiceHolderListener
 	 * 
 	 * @see com.openexchange.server.ServiceProxyListener#onServiceAvailable(java.lang.Object)
 	 */
-	public void onServiceAvailable(final Configuration service) throws AbstractOXException {
+	public void onServiceAvailable(final ConfigurationService service) throws AbstractOXException {
 		/*
 		 * Start server
 		 */

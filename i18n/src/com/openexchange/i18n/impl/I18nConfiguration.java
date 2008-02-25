@@ -49,7 +49,7 @@
 
 package com.openexchange.i18n.impl;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.ServiceHolder;
 
 
@@ -58,7 +58,7 @@ import com.openexchange.server.ServiceHolder;
  * @author <a href="mailto:ben.pahne@open-xchange">Ben Pahne</a>
  */
 
-public class I18nConfiguration extends ServiceHolder<Configuration>{
+public class I18nConfiguration extends ServiceHolder<ConfigurationService>{
 	
     private static final I18nConfiguration singleton = new I18nConfiguration();
     

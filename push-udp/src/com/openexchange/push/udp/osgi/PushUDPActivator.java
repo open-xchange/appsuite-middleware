@@ -63,7 +63,7 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.push.udp.EventAdminService;
@@ -87,7 +87,7 @@ public class PushUDPActivator implements BundleActivator {
 
 	private ConfigurationServiceHolder csh;
 
-	private ServiceHolderListener<Configuration> configurationListener;
+	private ServiceHolderListener<ConfigurationService> configurationListener;
 
 	private ServiceHolderListener<EventAdmin> eventAdminListener;
 
@@ -110,8 +110,8 @@ public class PushUDPActivator implements BundleActivator {
 			serviceTrackerList.add(new ServiceTracker(context, EventAdmin.class.getName(),
 					new BundleServiceTracker<EventAdmin>(context, EventAdminService.getInstance(),
 							EventAdmin.class)));
-			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
-					new BundleServiceTracker<Configuration>(context, csh, Configuration.class)));
+			serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(),
+					new BundleServiceTracker<ConfigurationService>(context, csh, ConfigurationService.class)));
 			/*
 			 * Open service trackers
 			 */
@@ -121,9 +121,9 @@ public class PushUDPActivator implements BundleActivator {
 			/*
 			 * Start push udp when configuration service is available
 			 */
-			configurationListener = new ServiceHolderListener<Configuration>() {
+			configurationListener = new ServiceHolderListener<ConfigurationService>() {
 
-				public void onServiceAvailable(final Configuration service)
+				public void onServiceAvailable(final ConfigurationService service)
 						throws AbstractOXException {
 					try {
 						if (eventAdminAvailable && !PushInit.getInstance().isStarted()) {

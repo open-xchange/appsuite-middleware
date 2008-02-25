@@ -52,7 +52,7 @@ package com.openexchange.sessiond.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 
 /**
  * SessionConfig
@@ -101,11 +101,11 @@ public class SessiondConfigImpl extends AbstractConfigWrapper implements
 
 	private static final Log LOG = LogFactory.getLog(SessiondConfigImpl.class);
 	
-	public SessiondConfigImpl(final Configuration conf) {
+	public SessiondConfigImpl(final ConfigurationService conf) {
 		this(conf, false);
 	}
 
-	public SessiondConfigImpl(final Configuration conf, final boolean ignoreIsInit) {
+	public SessiondConfigImpl(final ConfigurationService conf, final boolean ignoreIsInit) {
 		if (!ignoreIsInit && isInit) {
 			return;
 		}

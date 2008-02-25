@@ -66,7 +66,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.authentication.Authentication;
 import com.openexchange.authentication.service.AuthenticationService;
 import com.openexchange.charset.AliasCharsetProvider;
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.configjump.ConfigJumpInterface;
 import com.openexchange.groupware.contact.ContactInterface;
@@ -112,7 +112,7 @@ public class Activator implements BundleActivator, EventHandler {
 
 	private ConfigurationServiceHolder configurationServiceHolder;
 
-	private ServiceHolderListener<Configuration> listener;
+	private ServiceHolderListener<ConfigurationService> listener;
 
 	/**
 	 * Bundle ID of admin.<br>
@@ -129,13 +129,13 @@ public class Activator implements BundleActivator, EventHandler {
 		try {
 			// Configuration service is always needed.
 			configurationServiceHolder = ConfigurationServiceHolder.newInstance();
-			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
-					new BundleServiceTracker<Configuration>(context, configurationServiceHolder, Configuration.class)));
+			serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(),
+					new BundleServiceTracker<ConfigurationService>(context, configurationServiceHolder, ConfigurationService.class)));
 
 			// TODO: Remove when mail is bundled
-			configurationServiceHolder.addServiceHolderListener((listener = new ServiceHolderListener<Configuration>() {
+			configurationServiceHolder.addServiceHolderListener((listener = new ServiceHolderListener<ConfigurationService>() {
 
-				public void onServiceAvailable(final Configuration service) throws Exception {
+				public void onServiceAvailable(final ConfigurationService service) throws Exception {
 					/**
 					 * Mail initialization
 					 */

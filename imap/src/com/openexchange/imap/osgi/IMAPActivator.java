@@ -59,7 +59,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.config.IMAPProperties;
@@ -98,16 +98,16 @@ public final class IMAPActivator implements BundleActivator {
 	 */
 	public void start(final BundleContext context) throws Exception {
 		try {
-			tracker = new ServiceTracker(context, Configuration.class.getName(), new ServiceTrackerCustomizer() {
+			tracker = new ServiceTracker(context, ConfigurationService.class.getName(), new ServiceTrackerCustomizer() {
 
 				private final ConfigurationServiceHolder csh = ConfigurationServiceHolder.newInstance();
 
 				public Object addingService(final ServiceReference reference) {
 					final Object addedService = context.getService(reference);
-					if (addedService instanceof Configuration) {
+					if (addedService instanceof ConfigurationService) {
 						IMAPProperties.getInstance().setConfigurationServiceHolder(csh);
 						try {
-							csh.setService((Configuration) addedService);
+							csh.setService((ConfigurationService) addedService);
 						} catch (final Exception e) {
 							LOG.error(e.getMessage(), e);
 						}

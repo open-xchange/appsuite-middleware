@@ -57,7 +57,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.management.ManagementAgent;
@@ -85,7 +85,7 @@ public final class ManagementActivator implements BundleActivator {
 
 	private ConfigurationServiceHolder csh;
 
-	private ServiceHolderListener<Configuration> listener;
+	private ServiceHolderListener<ConfigurationService> listener;
 
 	/**
 	 * Initializes a new {@link ManagementActivator}
@@ -109,14 +109,14 @@ public final class ManagementActivator implements BundleActivator {
 			/*
 			 * Init service trackers
 			 */
-			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
-					new BundleServiceTracker<Configuration>(context, csh, Configuration.class)));
+			serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(),
+					new BundleServiceTracker<ConfigurationService>(context, csh, ConfigurationService.class)));
 			/*
 			 * Start management when configuration service is available
 			 */
-			listener = new ServiceHolderListener<Configuration>() {
+			listener = new ServiceHolderListener<ConfigurationService>() {
 
-				public void onServiceAvailable(final Configuration service) throws AbstractOXException {
+				public void onServiceAvailable(final ConfigurationService service) throws AbstractOXException {
 					try {
 						stopInternal();
 						startInternal();
@@ -133,7 +133,7 @@ public final class ManagementActivator implements BundleActivator {
 			/*
 			 * Open service trackers
 			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
+			for (final ServiceTracker tracker : serviceTrackerList) {
 				tracker.open();
 			}
 		} catch (final Throwable t) {
@@ -174,7 +174,7 @@ public final class ManagementActivator implements BundleActivator {
 			/*
 			 * Close service trackers
 			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
+			for (final ServiceTracker tracker : serviceTrackerList) {
 				tracker.close();
 			}
 			serviceTrackerList.clear();

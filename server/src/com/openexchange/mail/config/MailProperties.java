@@ -58,7 +58,7 @@ import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.config.MailConfig.CredSrc;
@@ -210,7 +210,7 @@ public final class MailProperties {
 		final StringBuilder logBuilder = new StringBuilder(1024);
 		logBuilder.append("\nLoading global mail properties...\n");
 
-		final Configuration configuration = MailInitialization.getInstance().getConfigurationServiceHolder()
+		final ConfigurationService configuration = MailInitialization.getInstance().getConfigurationServiceHolder()
 				.getService();
 		try {
 

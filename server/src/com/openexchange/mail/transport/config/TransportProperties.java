@@ -51,7 +51,7 @@ package com.openexchange.mail.transport.config;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.transport.TransportInitialization;
 
 /**
@@ -127,7 +127,7 @@ public final class TransportProperties {
 		final StringBuilder logBuilder = new StringBuilder(1024);
 		logBuilder.append("\nLoading global transport properties...\n");
 
-		final Configuration configuration = TransportInitialization.getInstance().getConfigurationServiceHolder()
+		final ConfigurationService configuration = TransportInitialization.getInstance().getConfigurationServiceHolder()
 				.getService();
 		try {
 

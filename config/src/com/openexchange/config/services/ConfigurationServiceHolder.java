@@ -49,7 +49,7 @@
 
 package com.openexchange.config.services;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.ServiceHolder;
 
 /**
@@ -59,7 +59,7 @@ import com.openexchange.server.ServiceHolder;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ConfigurationServiceHolder extends ServiceHolder<Configuration> {
+public final class ConfigurationServiceHolder extends ServiceHolder<ConfigurationService> {
 
 	/**
 	 * Gets the configuration service instance.

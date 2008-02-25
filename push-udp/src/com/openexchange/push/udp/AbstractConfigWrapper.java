@@ -54,7 +54,7 @@ package com.openexchange.push.udp;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 
 /**
  * AbstractConfigWrapper
@@ -66,7 +66,7 @@ public abstract class AbstractConfigWrapper {
 	
 	private static final Log LOG = LogFactory.getLog(AbstractConfigWrapper.class);
 	
-	public static String parseProperty(final Configuration prop, final String name, final String value) {
+	public static String parseProperty(final ConfigurationService prop, final String name, final String value) {
 		final String tmp = prop.getProperty(name, "");
 		if (tmp.trim().length() > 0) {
 			return tmp;
@@ -74,7 +74,7 @@ public abstract class AbstractConfigWrapper {
 		return value;
 	}
 	
-	public static int parseProperty(final Configuration prop, final String name, final int value) {
+	public static int parseProperty(final ConfigurationService prop, final String name, final int value) {
 		final String tmp = prop.getProperty(name, "");
 		if (tmp.trim().length() > 0) {
 			try {
@@ -86,7 +86,7 @@ public abstract class AbstractConfigWrapper {
 		return value;
 	}
 	
-	public static boolean parseProperty(final Configuration prop, final String name, final boolean value) {
+	public static boolean parseProperty(final ConfigurationService prop, final String name, final boolean value) {
 		final String tmp = prop.getProperty(name, "");
 		if (tmp.trim().length() > 0) {
 			return Boolean.parseBoolean(tmp);
@@ -94,7 +94,7 @@ public abstract class AbstractConfigWrapper {
 		return value;
 	}
 	
-	public static int[] parseProperty(final Configuration prop, final String name, final int[] value) {
+	public static int[] parseProperty(final ConfigurationService prop, final String name, final int[] value) {
 		final String tmp = prop.getProperty(name, "");
 		if (tmp.trim().length() > 0) {
 			final String s[] = tmp.split(",");
@@ -114,7 +114,7 @@ public abstract class AbstractConfigWrapper {
 		return value;
 	}
 	
-	public static String[] parseProperty(final Configuration prop, final String name, final String[] value) {
+	public static String[] parseProperty(final ConfigurationService prop, final String name, final String[] value) {
 		final String tmp = prop.getProperty(name, "");
 		if (tmp.trim().length() > 0) {
 			return tmp.split(",");

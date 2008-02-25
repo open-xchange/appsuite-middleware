@@ -53,7 +53,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.internal.ConfigurationImpl;
 
 /**
@@ -68,7 +68,7 @@ public final class ConfigActivator implements BundleActivator {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ConfigActivator.class);
 
-	private Configuration configuration;
+	private ConfigurationService configuration;
 
 	private ServiceRegistration registration;
 
@@ -89,7 +89,7 @@ public final class ConfigActivator implements BundleActivator {
 		
 		try {
 			configuration = new ConfigurationImpl();
-			registration = context.registerService(Configuration.class.getName(), configuration, null);
+			registration = context.registerService(ConfigurationService.class.getName(), configuration, null);
 		} catch (final Throwable t) {
 			LOG.error(t.getLocalizedMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);

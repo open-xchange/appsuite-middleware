@@ -59,7 +59,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 
 /**
  * PushConfigInterface
@@ -101,11 +101,11 @@ public class PushConfigInterfaceImpl extends AbstractConfigWrapper implements Pu
 	
 	private static final Log LOG = LogFactory.getLog(PushConfigInterfaceImpl.class);
 	
-	public PushConfigInterfaceImpl(final Configuration conf) {
+	public PushConfigInterfaceImpl(final ConfigurationService conf) {
 		this(conf, false);
 	}
 
-	public PushConfigInterfaceImpl(final Configuration conf, final boolean ignoreIsInit) {
+	public PushConfigInterfaceImpl(final ConfigurationService conf, final boolean ignoreIsInit) {
 		if (!ignoreIsInit && isInit) {
 			return;
 		}

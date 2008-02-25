@@ -53,12 +53,12 @@ import java.util.Iterator;
 import java.util.Properties;
 
 /**
- * {@link Configuration}
+ * {@link ConfigurationService}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public interface Configuration {
+public interface ConfigurationService {
 
 	/**
 	 * Searches for the property with the specified name in this property list.

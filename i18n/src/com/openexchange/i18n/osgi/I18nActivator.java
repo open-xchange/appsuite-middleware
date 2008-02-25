@@ -63,7 +63,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.i18n.impl.I18nConfiguration;
 import com.openexchange.i18n.impl.I18nImpl;
@@ -78,7 +78,7 @@ public class I18nActivator implements BundleActivator {
 	 * defined through property <code>"i18n.language.path"</code> when
 	 * configuration service is available
 	 */
-	private static final class I18nServiceHolderListener implements ServiceHolderListener<Configuration> {
+	private static final class I18nServiceHolderListener implements ServiceHolderListener<ConfigurationService> {
 
 		private final BundleContext context;
 
@@ -89,7 +89,7 @@ public class I18nActivator implements BundleActivator {
 			this.context = context;
 		}
 
-		public void onServiceAvailable(final Configuration service) throws Exception {
+		public void onServiceAvailable(final ConfigurationService service) throws Exception {
 			unregisterAll();
 			serviceRegistrations = initI18nServices(context);
 		}
@@ -137,7 +137,7 @@ public class I18nActivator implements BundleActivator {
 
 		final File dir;
 		{
-			final Configuration conf = I18nConfiguration.getInstance().getService();
+			final ConfigurationService conf = I18nConfiguration.getInstance().getService();
 			try {
 				dir = new File(conf.getProperty("i18n.language.path"));
 			} finally {
@@ -171,9 +171,9 @@ public class I18nActivator implements BundleActivator {
 			LOG.debug("I18n Starting");
 
 		try {
-			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
-					new BundleServiceTracker<Configuration>(context, I18nConfiguration.getInstance(),
-							Configuration.class)));
+			serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(),
+					new BundleServiceTracker<ConfigurationService>(context, I18nConfiguration.getInstance(),
+							ConfigurationService.class)));
 
 			for (final ServiceTracker tracker : serviceTrackerList) {
 				tracker.open();

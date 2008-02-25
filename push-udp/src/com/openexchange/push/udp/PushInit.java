@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
@@ -123,7 +123,7 @@ public class PushInit implements Initialization {
 			return;
 		}
 
-		final Configuration conf = csh.getService();
+		final ConfigurationService conf = csh.getService();
 		try {
 			if (conf != null) {
 				config = new PushConfigInterfaceImpl(conf);

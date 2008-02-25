@@ -63,7 +63,7 @@ import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
 
@@ -73,7 +73,7 @@ import com.openexchange.config.internal.filewatcher.FileWatcher;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ConfigurationImpl implements Configuration {
+public final class ConfigurationImpl implements ConfigurationService {
 
 	private static final Log LOG = LogFactory.getLog(ConfigurationImpl.class);
 
