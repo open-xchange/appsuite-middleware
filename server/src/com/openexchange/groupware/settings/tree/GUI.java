@@ -49,14 +49,18 @@
 
 package com.openexchange.groupware.settings.tree;
 
-import com.openexchange.groupware.settings.SettingSetup;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.SharedNode;
+import com.openexchange.groupware.settings.IValueHandler;
 
 /**
  * Setup for the setting that stores the GUI configuration as one string in the
  * database.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class GUI extends AbstractNode {
+public final class GUI implements PreferencesItemService {
+
+    private static final String NAME = "gui";
 
     /**
      * Default constructor.
@@ -68,32 +72,14 @@ public final class GUI extends AbstractNode {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected SettingSetup[] getParents() {
-        return new SettingSetup[0];
+    public String[] getPath() {
+        return new String[] { NAME };
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected String getName() {
-        return "gui";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected int getIdentifier() {
-        return 1;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean isShared() {
-        return false;
+    public IValueHandler getSharedValue() {
+        return new SharedNode(NAME, 1);
     }
 }

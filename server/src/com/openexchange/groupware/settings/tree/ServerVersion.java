@@ -54,8 +54,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.groupware.settings.SharedValue;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
@@ -64,7 +64,7 @@ import com.openexchange.session.Session;
  * Adds the configuration setting tree entry for the server version.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ServerVersion extends AbstractNode {
+public final class ServerVersion implements PreferencesItemService {
 
     public static final String NAME = "serverVersion";
 
@@ -78,24 +78,14 @@ public final class ServerVersion extends AbstractNode {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected String getName() {
-        return NAME;
+    public String[] getPath() {
+        return new String[] { NAME };
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected SettingSetup[] getParents() {
-        return new SettingSetup[0];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SharedValue getSharedValue() {
+    public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
             /**
              * {@inheritDoc}

@@ -50,15 +50,13 @@
 package com.openexchange.groupware.settings.tree;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
-import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.settings.AbstractUserFuncs;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.groupware.settings.SharedValue;
-import com.openexchange.groupware.settings.ConfigTree.AbstractUserFuncs;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
@@ -66,7 +64,7 @@ import com.openexchange.session.Session;
  * Configuration tree entry for the language of the user.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Language extends AbstractNode {
+public final class Language implements PreferencesItemService {
 
     public static final String NAME = "language";
 
@@ -80,23 +78,14 @@ public final class Language extends AbstractNode {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected SettingSetup[] getParents() {
-        return new SettingSetup[0];
+    public String[] getPath() {
+        return new String[] { NAME };
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected String getName() {
-        return NAME;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public SharedValue getSharedValue() {
+    public IValueHandler getSharedValue() {
         return  new AbstractUserFuncs() {
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
@@ -109,6 +98,7 @@ public final class Language extends AbstractNode {
             public boolean isWritable() {
                 return true;
             }
+            @Override
             protected void setValue(final UserImpl user, final String value) {
                 user.setPreferredLanguage(value);
             }

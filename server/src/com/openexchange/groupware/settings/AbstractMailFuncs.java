@@ -61,7 +61,7 @@ import com.openexchange.session.Session;
 /**
  * This class contains the shared, same functions for all mail bit settings.
  */
-public abstract class AbstractMailFuncs implements SharedValue {
+public abstract class AbstractMailFuncs implements IValueHandler {
 
     /**
      * Default constructor.
@@ -131,4 +131,11 @@ public abstract class AbstractMailFuncs implements SharedValue {
 	 */
     protected abstract void setValue(UserSettingMail settings,
         String value);
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getId() {
+        return -1;
+    }
 }

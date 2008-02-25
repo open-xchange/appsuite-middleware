@@ -58,7 +58,7 @@ import java.util.Map;
  * This class represents a single setting.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Setting implements Cloneable {
+public class Setting {
 
     /**
      * Separator for pathes.
@@ -68,7 +68,7 @@ public class Setting implements Cloneable {
     /**
      * Unique identifier of this setting.
      */
-    private int id;
+    private final int id;
 
     /**
      * Reference to the parent Setting.
@@ -76,10 +76,9 @@ public class Setting implements Cloneable {
     private Setting parent;
 
     /**
-     * States if this setting is a gui only setting or a setting that is shared
-     * between server and gui.
+     * Reference to shared value reader.
      */
-    private final boolean shared;
+    private final IValueHandler shared;
 
     /**
      * Name of this setting.
@@ -102,29 +101,33 @@ public class Setting implements Cloneable {
     private Map<String, Setting> elements;
 
     /**
-     * Default constructor.
+     * Constructor for initializing especially shared values.
      * @param name Name.
-     * @param shared <code>true</code> if this setting is used in server and gui
-     * and <code>false</code> if the setting is only used in gui.
+     * @param shared shared value reader.
+     * @param id for shared values normally <code>-1</code>.
      */
-    public Setting(final String name, final boolean shared) {
+    public Setting(final String name, final int id, final IValueHandler shared) {
         super();
         this.name = name;
         this.shared = shared;
+        this.id = id;
     }
 
     /**
-     * Constructor for initializing especially shared values.
-     * @param name Name.
-     * @param shared <code>true</code> if this setting is used in server and gui
-     * and <code>false</code> if the setting is only used in gui.
-     * @param id for shared values normally <code>-1</code>.
+     * Copy constructor.
+     * @param toCopy object to copy.
      */
-    public Setting(final String name, final int id, final boolean shared) {
-        this(name, shared);
-        this.id = id;
+    public Setting(final Setting toCopy) {
+        this(toCopy.name, toCopy.id, toCopy.shared);
+        parent = toCopy.parent;
+        if (null != toCopy.elements) {
+            elements = new HashMap<String, Setting>(toCopy.elements.size());
+            for (Setting element : toCopy.elements.values()) {
+                addElement(new Setting(element));
+            }
+        }
     }
-    
+
     /**
      * @return the multi value.
      */
@@ -176,26 +179,6 @@ public class Setting implements Cloneable {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public Object clone() throws CloneNotSupportedException {
-        final Setting setting = (Setting) super.clone();
-        
-        setting.singleValue = singleValue;
-        if (null != multiValue) {
-            setting.multiValue = new ArrayList<Object>(multiValue.size());
-            setting.multiValue.addAll(multiValue);
-        }
-        if (null != elements) {
-            setting.elements = new HashMap<String, Setting>(elements.size());
-            for (Setting element : elements.values()) {
-                setting.addElement((Setting) element.clone());
-            }
-        }
-        return setting;
-    }
-
-    /**
      * Returns the sub setting that has the given name.
      * @param subName Name of the sub setting.
      * @return the sub setting or <code>null</code> if it doesn't exist.
@@ -213,13 +196,6 @@ public class Setting implements Cloneable {
      */
     public int getId() {
         return id;
-    }
-
-    /**
-     * @param id The id to set.
-     */
-    public void setId(final int id) {
-        this.id = id;
     }
 
     /**
@@ -254,6 +230,7 @@ public class Setting implements Cloneable {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String toString() {
         final StringBuilder out = new StringBuilder();
         out.append(name);
@@ -266,7 +243,7 @@ public class Setting implements Cloneable {
             }
         } else {
             out.append('(');
-            final Iterator iter = elements.values().iterator();
+            final Iterator<Setting> iter = elements.values().iterator();
             while (iter.hasNext()) {
                 out.append(iter.next().toString());
                 if (iter.hasNext()) {
@@ -296,7 +273,7 @@ public class Setting implements Cloneable {
      * <code>false</code> if the setting is only used in gui.
      */
     public boolean isShared() {
-        return shared;
+        return -1 == shared.getId();
     }
 
     /**
@@ -335,8 +312,8 @@ public class Setting implements Cloneable {
         if (multiValue != null) {
             retval ^= multiValue.hashCode();
         }
-        if (shared) {
-            retval ^= Boolean.valueOf(shared).hashCode();
+        if (isShared()) {
+            retval ^= Boolean.valueOf(isShared()).hashCode();
         }
         return retval;
     }
@@ -366,5 +343,12 @@ public class Setting implements Cloneable {
      */
     Setting getParent() {
         return parent;
+    }
+
+    /**
+     * @return the shared
+     */
+    IValueHandler getShared() {
+        return shared;
     }
 }

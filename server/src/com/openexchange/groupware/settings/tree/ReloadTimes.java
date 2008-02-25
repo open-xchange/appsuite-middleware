@@ -54,8 +54,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.groupware.settings.SharedValue;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
@@ -63,7 +63,7 @@ import com.openexchange.session.Session;
  * Adds the configuration tree entry for the possible reload times of the GUI.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ReloadTimes extends AbstractNode {
+public final class ReloadTimes implements PreferencesItemService {
 
     public static final String NAME = "reloadtimes";
 
@@ -77,24 +77,14 @@ public final class ReloadTimes extends AbstractNode {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected String getName() {
-        return NAME;
+    public String[] getPath() {
+        return new String[] { NAME };
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected SettingSetup[] getParents() {
-        return new SettingSetup[0];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SharedValue getSharedValue() {
+    public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
             private static final int MINUTE = 60 * 1000;
             /**

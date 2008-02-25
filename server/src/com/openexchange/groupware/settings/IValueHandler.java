@@ -49,24 +49,54 @@
 
 package com.openexchange.groupware.settings;
 
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
+
 /**
- * Interface for dynamically adding settings into the configuration tree.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * Interface for settings that are shared between GUI and server.
  */
-public interface SettingSetup {
+public interface IValueHandler {
 
     /**
-     * @return the path to the configuration option.
+     * @param session Session.
+     * @param userConfig user configuration.
+     * @param setting the value should be set in this setting object.
+     * @throws SettingException if an error occurs.
      */
-    String getPath();
+    void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting)
+        throws SettingException;
 
     /**
-     * @return the setting object.
+     * @param session Session.
+     * @return <code>true</code> if this setting is available due to
+     * {@link UserConfiguration}.
      */
-    Setting getSetting();
+    boolean isAvailable(final UserConfiguration userConfig);
 
     /**
-     * @return the sharedvalue object.
+     * @return <code>true</code> if the setting can be written by the GUI.
      */
-    SharedValue getSharedValue();
+    boolean isWritable();
+
+    /**
+     * Write a new value to the setting.
+     * @param ctx Session.
+     * @param user user object.
+     * @param setting contains the value for the setting.
+     * @throws SettingException if the setting can't be written or an error
+     * occurs while writing the value.
+     */
+    void writeValue(Context ctx, User user, Setting setting)
+        throws SettingException;
+
+    /**
+     * If the value should be written simply to the database and read from there
+     * a unique identifier must be returned instead of implementing methods
+     * {@link #getValue(Session, Context, User, UserConfiguration, Setting)} and
+     * {@link #writeValue(Context, User, Setting)}.
+     * @return the unique identifier of the value in the database.
+     */
+    int getId();
 }

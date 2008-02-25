@@ -47,80 +47,71 @@
  *
  */
 
-package com.openexchange.groupware.settings.tree;
+package com.openexchange.groupware.settings;
 
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.groupware.settings.SharedValue;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 
 /**
- * Abstract class with setup methods for inner config tree nodes.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractNode implements SettingSetup {
+public final class SharedNode implements IValueHandler {
+
+    private final String name;
+
+    private final int id;
 
     /**
      * Default constructor.
      */
-    protected AbstractNode() {
+    public SharedNode(final String name) {
+        this(name, -1);
+    }
+
+    public SharedNode(final String name, final int id) {
         super();
+        this.name = name;
+        this.id = id;
     }
 
     /**
      * {@inheritDoc}
      */
-    public String getPath() {
-        final StringBuilder path = new StringBuilder();
-        boolean removeLastSlash = false;
-        for (SettingSetup setup : getParents()) {
-            path.append(setup.getSetting().getName());
-            path.append('/');
-            removeLastSlash = true;
-        }
-        if (removeLastSlash) {
-            path.setLength(path.length() - 1);
-        }
-        return path.toString();
+    public void getValue(final Session session, final Context ctx,
+        final User user, final UserConfiguration userConfig,
+        final Setting setting) throws SettingException {
+        throw new SettingException(SettingException.Code.NOT_LEAF, name);
     }
-
-    protected abstract SettingSetup[] getParents();
 
     /**
      * {@inheritDoc}
      */
-    public Setting getSetting() {
-        return new Setting(getName(), getIdentifier(), isShared());
-    }
-
-    /**
-     * @return the name of the config tree setting.
-     */
-    protected abstract String getName();
-
-    /**
-     * Returns the identifier of the config tree setting. This is by default
-     * <code>-1</code> for shared values. This method must be overwritten for
-     * not shared values stored in the database. These database entries need
-     * unique identifiers.
-     * @return the identifier of the config tree setting.
-     */
-    protected int getIdentifier() {
-        return -1;
-    }
-
-    /**
-     * Returns <code>true</code> if this config tree setting is a shared value.
-     * This method must be overwritten for not shared values.
-     * @return <code>true</code> if this config tree setting is a shared value.
-     */
-    protected boolean isShared() {
+    public boolean isAvailable(final UserConfiguration userConfig) {
         return true;
     }
 
     /**
      * {@inheritDoc}
      */
-    public SharedValue getSharedValue() {
-        return null;
+    public boolean isWritable() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void writeValue(final Context ctx, final User user,
+        final Setting setting) throws SettingException {
+        throw new SettingException(SettingException.Code.NO_WRITE, name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getId() {
+        return id;
     }
 }

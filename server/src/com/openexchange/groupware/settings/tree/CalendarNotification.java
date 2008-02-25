@@ -50,8 +50,8 @@
 package com.openexchange.groupware.settings.tree;
 
 import com.openexchange.groupware.settings.AbstractMailFuncs;
-import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.groupware.settings.SharedValue;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.usersetting.UserSettingMail;
 
@@ -60,7 +60,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
  * user.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class CalendarNotification extends AbstractNode {
+public final class CalendarNotification implements PreferencesItemService {
 
     public static final String NAME = "calendarnotification";
 
@@ -74,24 +74,14 @@ public final class CalendarNotification extends AbstractNode {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected String getName() {
-        return NAME;
+    public String[] getPath() {
+        return new String[] { NAME };
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected SettingSetup[] getParents() {
-        return new SettingSetup[0];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SharedValue getSharedValue() {
+    public IValueHandler getSharedValue() {
         return new AbstractMailFuncs() {
             /**
              * {@inheritDoc}

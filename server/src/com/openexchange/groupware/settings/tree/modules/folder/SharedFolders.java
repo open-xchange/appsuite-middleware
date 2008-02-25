@@ -49,10 +49,7 @@
 
 package com.openexchange.groupware.settings.tree.modules.folder;
 
-import com.openexchange.groupware.settings.SettingSetup;
 import com.openexchange.groupware.settings.tree.AbstractModules;
-import com.openexchange.groupware.settings.tree.Modules;
-import com.openexchange.groupware.settings.tree.modules.Folder;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 /**
@@ -72,17 +69,8 @@ public class SharedFolders extends AbstractModules {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected SettingSetup[] getParents() {
-        return new SettingSetup[] { new Modules(), new Folder() };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String getName() {
-        return "read_create_shared_folders";
+    public String[] getPath() {
+        return new String[] { "modules", "folder", "read_create_shared_folders" };
     }
 
     /**

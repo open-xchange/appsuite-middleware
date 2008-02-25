@@ -47,40 +47,21 @@
  *
  */
 
-package com.openexchange.groupware.settings.tree.modules;
-
-import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.groupware.settings.tree.AbstractNode;
-import com.openexchange.groupware.settings.tree.Modules;
+package com.openexchange.groupware.settings;
 
 /**
- * Contains initialization for the modules infostore configuration setting tree.
+ * Interface for dynamically adding settings into the configuration tree.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Infostore extends AbstractNode {
-
-    public static final String NAME = "infostore";
-    
-    /**
-     * Default constructor.
-     */
-    public Infostore() {
-        super();
-    }
+public interface PreferencesItemService {
 
     /**
-     * {@inheritDoc}
+     * @return the path to the configuration option.
      */
-    @Override
-    protected SettingSetup[] getParents() {
-        return new SettingSetup[] { new Modules() };
-    }
+    String[] getPath();
 
     /**
-     * {@inheritDoc}
+     * @return the sharedvalue object.
      */
-    @Override
-    protected String getName() {
-        return NAME;
-    }
+    IValueHandler getSharedValue();
 }

@@ -56,8 +56,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.groupware.settings.SharedValue;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
@@ -66,7 +66,9 @@ import com.openexchange.session.Session;
  * identifier.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ContextID extends AbstractNode {
+public final class ContextID implements PreferencesItemService {
+
+    private static final String NAME = "context_id";
 
     private static final Log LOG = LogFactory.getLog(ContextID.class);
 
@@ -80,25 +82,15 @@ public final class ContextID extends AbstractNode {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected SettingSetup[] getParents() {
-        return new SettingSetup[0];
+    public String[] getPath() {
+        return new String[] { NAME };
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected String getName() {
-        return "context_id";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SharedValue getSharedValue() {
-        return new SharedValue() {
+    public IValueHandler getSharedValue() {
+        return new IValueHandler() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
@@ -112,7 +104,10 @@ public final class ContextID extends AbstractNode {
             }
             public void writeValue(final Context ctx,
                 User user, final Setting setting) {
-                LOG.warn(getName() + " written.");
+                LOG.warn(NAME + " written.");
+            }
+            public int getId() {
+                return -1;
             }
         };
     }

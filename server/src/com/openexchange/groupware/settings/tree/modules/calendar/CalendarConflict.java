@@ -49,10 +49,7 @@
 
 package com.openexchange.groupware.settings.tree.modules.calendar;
 
-import com.openexchange.groupware.settings.SettingSetup;
 import com.openexchange.groupware.settings.tree.AbstractModules;
-import com.openexchange.groupware.settings.tree.Modules;
-import com.openexchange.groupware.settings.tree.modules.Calendar;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 /**
@@ -72,17 +69,8 @@ public class CalendarConflict extends AbstractModules {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected SettingSetup[] getParents() {
-        return new SettingSetup[] { new Modules(), new Calendar() };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String getName() {
-        return "calendar_conflict";
+    public String[] getPath() {
+        return new String[] { "modules", "calendar", "calendar_conflict" };
     }
 
     /**

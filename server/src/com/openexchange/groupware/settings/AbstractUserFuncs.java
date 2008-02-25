@@ -47,40 +47,45 @@
  *
  */
 
-package com.openexchange.groupware.settings.tree.modules;
+package com.openexchange.groupware.settings;
 
-import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.groupware.settings.tree.AbstractNode;
-import com.openexchange.groupware.settings.tree.Modules;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.groupware.ldap.UserStorage;
 
 /**
- * Contains initialization for the modules mail configuration setting tree.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * This class contains the shared functions for all user settings.
  */
-public class Mail extends AbstractNode {
-
-    public static final String NAME = "mail";
+public abstract class AbstractUserFuncs implements IValueHandler {
 
     /**
-     * Default constructor.
+     * {@inheritDoc}
      */
-    public Mail() {
-        super();
+    public void writeValue(final Context ctx, final User user,
+        final Setting setting) throws SettingException {
+        try {
+            final UserImpl newUser = new UserImpl(user);
+            setValue(newUser, (String) setting.getSingleValue());
+            UserStorage.getInstance().updateUser(newUser, ctx);
+        } catch (LdapException e) {
+            throw new SettingException(e);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected SettingSetup[] getParents() {
-        return new SettingSetup[] { new Modules() };
+    public int getId() {
+        return -1;
     }
 
     /**
-     * {@inheritDoc}
+     * @param user in this user object the value should be set.
+     * @param value the value to set.
+     * @throws SettingException if writing of the value fails.
      */
-    @Override
-    protected String getName() {
-        return NAME;
-    }
+    protected abstract void setValue(UserImpl user, String value)
+        throws SettingException;
 }

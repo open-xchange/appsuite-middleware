@@ -55,12 +55,9 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.groupware.settings.SharedValue;
-import com.openexchange.groupware.settings.tree.AbstractNode;
-import com.openexchange.groupware.settings.tree.Participants;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
 
 /**
@@ -68,7 +65,7 @@ import com.openexchange.session.Session;
  * email addresses should be shown in grey color or not.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ShowWithoutEmail extends AbstractNode {
+public class ShowWithoutEmail implements PreferencesItemService {
 
     public static final String NAME = "showWithoutEmail";
 
@@ -82,24 +79,14 @@ public class ShowWithoutEmail extends AbstractNode {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected String getName() {
-        return NAME;
+    public String[] getPath() {
+        return new String[] { "participants", NAME };
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected SettingSetup[] getParents() {
-        return new SettingSetup[] { new Participants() };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SharedValue getSharedValue() {
+    public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasCalendar() || userConfig.hasTask();

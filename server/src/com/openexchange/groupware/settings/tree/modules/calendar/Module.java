@@ -49,10 +49,7 @@
 
 package com.openexchange.groupware.settings.tree.modules.calendar;
 
-import com.openexchange.groupware.settings.SettingSetup;
 import com.openexchange.groupware.settings.tree.AbstractModules;
-import com.openexchange.groupware.settings.tree.Modules;
-import com.openexchange.groupware.settings.tree.modules.Calendar;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 /**
@@ -71,17 +68,8 @@ public class Module extends AbstractModules {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected SettingSetup[] getParents() {
-        return new SettingSetup[] { new Modules(), new Calendar() };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String getName() {
-        return "module";
+    public String[] getPath() {
+        return new String[] { "modules", "calendar", "module" };
     }
 
     /**

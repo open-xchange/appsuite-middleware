@@ -55,7 +55,7 @@ import com.openexchange.groupware.ldap.User;
 /**
  * This class contains shared functions for all setting that are read only.
  */
-public abstract class ReadOnlyValue implements SharedValue {
+public abstract class ReadOnlyValue implements IValueHandler {
 
     /**
      * Default constructor.
@@ -78,5 +78,12 @@ public abstract class ReadOnlyValue implements SharedValue {
         User user, final Setting setting) throws SettingException {
         throw new SettingException(SettingException.Code.NO_WRITE, setting
             .getName());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getId() {
+        return -1;
     }
 }

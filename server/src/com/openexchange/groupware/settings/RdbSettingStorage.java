@@ -137,7 +137,7 @@ public class RdbSettingStorage extends SettingStorage {
             throw new SettingException(Code.NOT_LEAF, setting.getName());
         }
         if (setting.isShared()) {
-            final SharedValue value = ConfigTree.getSharedValue(setting);
+            final IValueHandler value = ConfigTree.getSharedValue(setting);
             if (null != value && value.isWritable()) {
                 value.writeValue(ctx, user, setting);
             } else {
@@ -221,7 +221,7 @@ public class RdbSettingStorage extends SettingStorage {
      * @param setting setting Setting.
      */
     private void readSharedValue(final Setting setting) {
-        final SharedValue reader = ConfigTree.getSharedValue(setting);
+        final IValueHandler reader = ConfigTree.getSharedValue(setting);
         if (null != reader) {
             if (reader.isAvailable(userConfig)) {
                 try {

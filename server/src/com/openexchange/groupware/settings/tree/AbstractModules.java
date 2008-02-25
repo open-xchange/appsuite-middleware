@@ -51,10 +51,11 @@ package com.openexchange.groupware.settings.tree;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.SharedValue;
+import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 
@@ -62,7 +63,7 @@ import com.openexchange.session.Session;
  * Contains initialization for the modules configuration tree setting webmail.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractModules extends AbstractNode {
+public abstract class AbstractModules implements PreferencesItemService {
 
     /**
      * Default constructor.
@@ -74,8 +75,7 @@ public abstract class AbstractModules extends AbstractNode {
     /**
      * {@inheritDoc}
      */
-    @Override
-    public SharedValue getSharedValue() {
+    public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
             /**
              * {@inheritDoc}

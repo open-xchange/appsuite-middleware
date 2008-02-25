@@ -51,8 +51,8 @@ package com.openexchange.groupware.settings.tree;
 
 import com.openexchange.groupware.settings.AbstractMailFuncs;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingSetup;
-import com.openexchange.groupware.settings.SharedValue;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.usersetting.UserSettingMail;
 
@@ -60,7 +60,9 @@ import com.openexchange.mail.usersetting.UserSettingMail;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TaskNotification implements SettingSetup {
+public class TaskNotification implements PreferencesItemService {
+
+    private static final String NAME = "tasknotification";
 
     /**
      * Default constructor.
@@ -72,21 +74,14 @@ public class TaskNotification implements SettingSetup {
     /**
      * {@inheritDoc}
      */
-    public String getPath() {
-        return "";
+    public String[] getPath() {
+        return new String[] { NAME };
     }
 
     /**
      * {@inheritDoc}
      */
-    public Setting getSetting() {
-        return new Setting("tasknotification", -1, true);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public SharedValue getSharedValue() {
+    public IValueHandler getSharedValue() {
         return new AbstractMailFuncs() {
             public boolean isAvailable(final UserConfiguration userConfig) {
 				return userConfig.hasWebMail() && userConfig.hasTask();

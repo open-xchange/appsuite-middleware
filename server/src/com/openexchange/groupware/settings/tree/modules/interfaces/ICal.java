@@ -49,10 +49,7 @@
 
 package com.openexchange.groupware.settings.tree.modules.interfaces;
 
-import com.openexchange.groupware.settings.SettingSetup;
 import com.openexchange.groupware.settings.tree.AbstractModules;
-import com.openexchange.groupware.settings.tree.Modules;
-import com.openexchange.groupware.settings.tree.modules.Interfaces;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 /**
@@ -71,17 +68,8 @@ public class ICal extends AbstractModules {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected SettingSetup[] getParents() {
-        return new SettingSetup[] { new Modules(), new Interfaces() };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String getName() {
-        return "ical";
+    public String[] getPath() {
+        return new String[] { "modules", "interfaces", "ical" };
     }
 
     /**

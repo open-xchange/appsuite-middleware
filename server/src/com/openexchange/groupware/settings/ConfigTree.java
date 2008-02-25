@@ -49,22 +49,13 @@
 
 package com.openexchange.groupware.settings;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserImpl;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.SettingException.Code;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.MailException;
@@ -92,11 +83,6 @@ public final class ConfigTree {
     private static Setting tree;
 
     /**
-     * A map for the readers for shared settings.
-     */
-    private static Map<String, SharedValue> readers;
-
-    /**
      * Prevent instantiation
      */
     private ConfigTree() {
@@ -112,14 +98,7 @@ public final class ConfigTree {
      */
     public static Setting getSettingByPath(final String path)
         throws SettingException {
-        Setting retval = tree;
-        retval = getSettingByPath(retval, path);
-        try {
-            retval = (Setting) retval.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new SettingException(SettingException.Code.CLONE, e);
-        }
-        return retval;
+        return new Setting(getSettingByPath(tree, path));
     }
 
     /**
@@ -159,43 +138,34 @@ public final class ConfigTree {
      * @param setting shared setting.
      * @return the reader for the shared setting.
      */
-    static SharedValue getSharedValue(final Setting setting) {
-        SharedValue retval = null;
+    static IValueHandler getSharedValue(final Setting setting) {
+        IValueHandler retval = null;
         if (setting.isLeaf()) {
-            retval = readers.get(setting.getPath());
+            retval = setting.getShared();
         }
         return retval;
     }
 
-    /**
-     * This class contains the shared functions for all user settings.
-     */
-    public abstract static class AbstractUserFuncs implements SharedValue {
-
-        /**
-         * {@inheritDoc}
-         */
-        public void writeValue(final Context ctx,
-            User user, final Setting setting) throws SettingException {
-            try {
-                final UserImpl newUser = new UserImpl(user);
-                setValue(newUser, (String) setting.getSingleValue());
-                UserStorage.getInstance().updateUser(newUser, ctx);
-            } catch (LdapException e) {
-                throw new SettingException(e);
+    static void addSharedValue(final Setting actual, final String[] path,
+        final IValueHandler shared) {
+        if (null == actual) {
+            addSharedValue(tree, path, shared);
+        } else if (1 == path.length) {
+            actual.addElement(new Setting(path[0], shared.getId(), shared));
+        } else {
+            Setting sub = actual.getElement(path[0]);
+            if (null == sub) {
+                final IValueHandler node = new SharedNode(path[0]);
+                sub = new Setting(path[0], node.getId(), node);
+                actual.addElement(sub);
             }
+            final String[] subPath = new String[path.length - 1];
+            System.arraycopy(path, 1, subPath, 0, subPath.length);
+            addSharedValue(sub, subPath, shared);
         }
-
-        /**
-         * @param user in this user object the value should be set.
-         * @param value the value to set.
-         * @throws SettingException if writing of the value fails.
-         */
-        protected abstract void setValue(UserImpl user, String value)
-            throws SettingException;
     }
 
-    private static Class< ? extends SettingSetup>[] getClasses() {
+    private static Class< ? extends PreferencesItemService>[] getClasses() {
         return new Class[] {
             com.openexchange.groupware.settings.tree.CalendarNotification.class,
             com.openexchange.groupware.settings.tree.ContactID.class,
@@ -206,31 +176,21 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.Identifier.class,
             com.openexchange.groupware.settings.tree.Language.class,
             com.openexchange.groupware.settings.tree.MaxUploadIdleTimeout.class,
-            com.openexchange.groupware.settings.tree.Modules.class,
-            com.openexchange.groupware.settings.tree.modules.Calendar.class,
             com.openexchange.groupware.settings.tree.modules.calendar.Module.class,
             com.openexchange.groupware.settings.tree.modules.calendar.CalendarConflict.class,
             com.openexchange.groupware.settings.tree.modules.calendar.CalendarFreeBusy.class,
             com.openexchange.groupware.settings.tree.modules.calendar.CalendarTeamView.class,
-            com.openexchange.groupware.settings.tree.modules.Contacts.class,
             com.openexchange.groupware.settings.tree.modules.contacts.Module.class,
-            com.openexchange.groupware.settings.tree.modules.Folder.class,
             com.openexchange.groupware.settings.tree.modules.folder.PublicFolders.class,
             com.openexchange.groupware.settings.tree.modules.folder.SharedFolders.class,
-            com.openexchange.groupware.settings.tree.modules.Infostore.class,
             com.openexchange.groupware.settings.tree.modules.infostore.Module.class,
-            com.openexchange.groupware.settings.tree.modules.Interfaces.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.ICal.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.SyncML.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.VCard.class,
-            com.openexchange.groupware.settings.tree.modules.Mail.class,
             com.openexchange.groupware.settings.tree.modules.mail.Module.class,
-            com.openexchange.groupware.settings.tree.modules.Portal.class,
             com.openexchange.groupware.settings.tree.modules.portal.Module.class,
-            com.openexchange.groupware.settings.tree.modules.Tasks.class,
             com.openexchange.groupware.settings.tree.modules.tasks.Module.class,
             com.openexchange.groupware.settings.tree.modules.tasks.DelegateTasks.class,
-            com.openexchange.groupware.settings.tree.Participants.class,
             com.openexchange.groupware.settings.tree.participants.ShowWithoutEmail.class,
             com.openexchange.groupware.settings.tree.ReloadTimes.class,
             com.openexchange.groupware.settings.tree.ServerVersion.class,
@@ -248,113 +208,19 @@ public final class ConfigTree {
             LOG.error("Duplicate initialization of configuration tree.");
             return;
         }
-        tree = new Setting("", true);
-        tree.setId(-1);
+        tree = new Setting("", -1, new SharedNode(""));
 
-        final Setting folder = new Setting("folder", true);
-        folder.setId(-1);
+        final Setting folder = new Setting("folder", -1,
+            new SharedNode("folder"));
         tree.addElement(folder);
 
-        final Setting tasks = new Setting("tasks", true);
-        tasks.setId(-1);
-        folder.addElement(tasks);
-
-        final Setting calendar = new Setting("calendar", true);
-        calendar.setId(-1);
-        folder.addElement(calendar);
-
-        final Setting contacts = new Setting("contacts", true);
-        contacts.setId(-1);
-        folder.addElement(contacts);
-
-        final Setting infostore = new Setting("infostore", true);
-        infostore.setId(-1);
-        folder.addElement(infostore);
-
-        final Setting mail = new Setting("mail", true);
-        mail.setId(-1);
-        tree.addElement(mail);
-
-        final Setting defaultaddress = new Setting("defaultaddress", true);
-        defaultaddress.setId(-1);
-        mail.addElement(defaultaddress);
-
-        final Setting addresses = new Setting("addresses", true);
-        addresses.setId(-1);
-        mail.addElement(addresses);
-
-        final Setting sendaddress = new Setting("sendaddress", true);
-        sendaddress.setId(-1);
-        mail.addElement(sendaddress);
-
-        final Setting mailfolder = new Setting("folder", true);
-        mailfolder.setId(-1);
-        mail.addElement(mailfolder);
-
-        final Setting inbox = new Setting("inbox", true);
-        inbox.setId(-1);
-        mailfolder.addElement(inbox);
-
-        final Setting drafts = new Setting("drafts", true);
-        drafts.setId(-1);
-        mailfolder.addElement(drafts);
-
-        final Setting sent = new Setting("sent", true);
-        sent.setId(-1);
-        mailfolder.addElement(sent);
-
-        final Setting spam = new Setting("spam", true);
-        spam.setId(-1);
-        mailfolder.addElement(spam);
-
-        final Setting trash = new Setting("trash", true);
-        trash.setId(-1);
-        mailfolder.addElement(trash);
-
-        final Setting colorquoted = new Setting("colorquoted", true);
-        colorquoted.setId(-1);
-        mail.addElement(colorquoted);
-
-        final Setting emoticons = new Setting("emoticons", true);
-        emoticons.setId(-1);
-        mail.addElement(emoticons);
-
-        final Setting deletemail = new Setting("deletemail", true);
-        deletemail.setId(-1);
-        mail.addElement(deletemail);
-
-        final Setting inlineattachments = new Setting("inlineattachments",
-            true);
-        inlineattachments.setId(-1);
-        mail.addElement(inlineattachments);
-
-        final Setting appendmailtext = new Setting("appendmailtext", true);
-        appendmailtext.setId(-1);
-        mail.addElement(appendmailtext);
-
-        final Setting forwardmessage = new Setting("forwardmessage", true);
-        forwardmessage.setId(-1);
-        mail.addElement(forwardmessage);
-
-        final Setting linewrap = new Setting("linewrap", true);
-        linewrap.setId(-1);
-        mail.addElement(linewrap);
-
-        final Setting vcard = new Setting("vcard", true);
-        vcard.setId(-1);
-        mail.addElement(vcard);
-
-        final Setting spamButton = new Setting("spambutton", true);
-        spamButton.setId(-1);
-        mail.addElement(spamButton);
-
-        final Map<String, SharedValue> tmp = new HashMap<String, SharedValue>();
-        tmp.put(tasks.getPath(), new ReadOnlyValue() {
+        folder.addElement(new Setting("tasks", -1, new ReadOnlyValue() {
             public boolean isAvailable(final UserConfiguration userConfig) {
-				return userConfig.hasTask();
-			}
+                return userConfig.hasTask();
+            }
             public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
+                final User user, UserConfiguration userConfig,
+                final Setting setting) throws SettingException {
                 final OXFolderAccess acc = new OXFolderAccess(ctx);
                 try {
                     setting.setSingleValue(Integer.valueOf(acc.getDefaultFolder(
@@ -363,13 +229,15 @@ public final class ConfigTree {
                     throw new SettingException(e);
                 }
             }
-        });
-        tmp.put(calendar.getPath(), new ReadOnlyValue() {
+        }));
+
+        folder.addElement(new Setting("calendar", -1, new ReadOnlyValue() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasCalendar();
-			}
+            }
             public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
+                final User user, UserConfiguration userConfig,
+                final Setting setting) throws SettingException {
                 final OXFolderAccess acc = new OXFolderAccess(ctx);
                 try {
                     setting.setSingleValue(Integer.valueOf(acc.getDefaultFolder(
@@ -378,11 +246,12 @@ public final class ConfigTree {
                     throw new SettingException(e);
                 }
             }
-        });
-        tmp.put(contacts.getPath(), new ReadOnlyValue() {
+        }));
+
+        folder.addElement(new Setting("contacts", -1, new ReadOnlyValue() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasContact();
-			}
+            }
             public void getValue(final Session session, final Context ctx,
                 final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
                 final OXFolderAccess acc = new OXFolderAccess(ctx);
@@ -393,11 +262,12 @@ public final class ConfigTree {
                     throw new SettingException(e);
                 }
             }
-        });
-        tmp.put(infostore.getPath(), new ReadOnlyValue() {
+        }));
+
+        folder.addElement(new Setting("infostore", -1, new ReadOnlyValue() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasInfostore();
-			}
+            }
             public void getValue(final Session session, final Context ctx,
                 final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
                 final OXFolderAccess acc = new OXFolderAccess(ctx);
@@ -408,17 +278,22 @@ public final class ConfigTree {
                     throw new SettingException(e);
                 }
             }
-        });
-        tmp.put(defaultaddress.getPath(), new ReadOnlyValue() {
+        }));
+
+        final Setting mail = new Setting("mail", -1, new SharedNode("mail"));
+        tree.addElement(mail);
+
+        mail.addElement(new Setting("defaultaddress", -1, new ReadOnlyValue() {
             public void getValue(final Session session, final Context ctx,
                 final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
                 setting.setSingleValue(user.getMail());
             }
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
-			}
-        });
-        tmp.put(addresses.getPath(), new ReadOnlyValue() {
+            }
+        }));
+
+        mail.addElement(new Setting("addresses", -1, new ReadOnlyValue() {
             public void getValue(final Session session, final Context ctx,
                 final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
                 final String[] aliases = user.getAliases();
@@ -430,56 +305,65 @@ public final class ConfigTree {
             }
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
-			}
-        });
-        tmp.put(sendaddress.getPath(), new SharedValue() {
+            }
+        }));
+
+        mail.addElement(new Setting("sendaddress", -1, new IValueHandler() {
             public void getValue(final Session session, final Context ctx,
                 final User user, UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
-				final UserSettingMail settings = UserSettingMailStorage
+                final UserSettingMail settings = UserSettingMailStorage
                     .getInstance().getUserSettingMail(user.getId(), ctx);
-				if (null != settings) {
-				    setting.setSingleValue(settings.getSendAddr());
-				}
-			}
+                if (null != settings) {
+                    setting.setSingleValue(settings.getSendAddr());
+                }
+            }
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
-			}
-			public boolean isWritable() {
-				return true;
-			}
-			public void writeValue(final Context ctx, User user, final Setting setting) throws SettingException {
-			    final String newAlias = (String) setting.getSingleValue();
-			    final String[] aliases = user.getAliases();
-			    boolean found = false;
-			    for (int i = 0; aliases != null && i < aliases.length && !found; i++) {
-			        found = aliases[i].equals(newAlias);
-		        }
-			    if (user.getMail().equals(newAlias)) {
-			        found = true;
-			    }
-			    if (!found) {
-			        throw new SettingException(Code.INVALID_VALUE, newAlias,
-			            sendaddress.getPath());
-			    }
+            }
+            public boolean isWritable() {
+                return true;
+            }
+            public void writeValue(final Context ctx, User user, final Setting setting) throws SettingException {
+                final String newAlias = (String) setting.getSingleValue();
+                final String[] aliases = user.getAliases();
+                boolean found = false;
+                for (int i = 0; aliases != null && i < aliases.length && !found; i++) {
+                    found = aliases[i].equals(newAlias);
+                }
+                if (user.getMail().equals(newAlias)) {
+                    found = true;
+                }
+                if (!found) {
+                    throw new SettingException(Code.INVALID_VALUE, newAlias,
+                        "sendaddress");
+                }
                 final UserSettingMailStorage storage = UserSettingMailStorage
                     .getInstance();
-			    final UserSettingMail settings = storage.getUserSettingMail(
+                final UserSettingMail settings = storage.getUserSettingMail(
                     user.getId(), ctx);
-			    if (null != settings) {
-    			    settings.setSendAddr(newAlias);
-    				try {
-    					storage.saveUserSettingMail(settings, user.getId(), ctx);
-    				} catch (OXException e) {
-    					throw new SettingException(e);
-    				}
-			    }
-			}
-		});
-        tmp.put(inbox.getPath(), new ReadOnlyValue() {
+                if (null != settings) {
+                    settings.setSendAddr(newAlias);
+                    try {
+                        storage.saveUserSettingMail(settings, user.getId(), ctx);
+                    } catch (OXException e) {
+                        throw new SettingException(e);
+                    }
+                }
+            }
+            public int getId() {
+                return -1;
+            }
+        }));
+
+        final Setting mailfolder = new Setting("folder", -1,
+            new SharedNode("folder"));
+        mail.addElement(mailfolder);
+
+        mailfolder.addElement(new Setting("inbox", -1, new ReadOnlyValue() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
-			}
+            }
             public void getValue(final Session session, final Context ctx,
                 final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
                 MailServletInterface mail = null;
@@ -498,11 +382,12 @@ public final class ConfigTree {
                     }
                 }
             }
-        });
-        tmp.put(drafts.getPath(), new ReadOnlyValue() {
+        }));
+
+        mailfolder.addElement(new Setting("drafts", -1, new ReadOnlyValue() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
-			}
+            }
             public void getValue(final Session session, final Context ctx,
                 final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
                 MailServletInterface mail = null;
@@ -521,11 +406,12 @@ public final class ConfigTree {
                     }
                 }
             }
-        });
-        tmp.put(sent.getPath(), new ReadOnlyValue() {
+        }));
+
+        mailfolder.addElement(new Setting("sent", -1, new ReadOnlyValue() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
-			}
+            }
             public void getValue(final Session session, final Context ctx,
                 final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
                 MailServletInterface mail = null;
@@ -544,11 +430,12 @@ public final class ConfigTree {
                     }
                 }
             }
-        });
-        tmp.put(spam.getPath(), new ReadOnlyValue() {
+        }));
+
+        mailfolder.addElement(new Setting("spam", -1, new ReadOnlyValue() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
-			}
+            }
             public void getValue(final Session session, final Context ctx,
                 final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
                 MailServletInterface mail = null;
@@ -567,11 +454,12 @@ public final class ConfigTree {
                     }
                 }
             }
-        });
-        tmp.put(trash.getPath(), new ReadOnlyValue() {
+        }));
+
+        mailfolder.addElement(new Setting("trash", -1, new ReadOnlyValue() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
-			}
+            }
             public void getValue(final Session session, final Context ctx,
                 final User user, UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
@@ -591,11 +479,12 @@ public final class ConfigTree {
                     }
                 }
             }
-        });
-        tmp.put(colorquoted.getPath(), new AbstractMailFuncs() {
+        }));
+
+        mail.addElement(new Setting("colorquoted", -1, new AbstractMailFuncs() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
-			}
+            }
             @Override
             protected Boolean isSet(final UserSettingMail settings) {
                 return Boolean.valueOf(settings.isUseColorQuote());
@@ -605,11 +494,12 @@ public final class ConfigTree {
                 final String value) {
                 settings.setUseColorQuote(Boolean.parseBoolean(value));
             }
-        });
-        tmp.put(emoticons.getPath(), new AbstractMailFuncs() {
+        }));
+
+        mail.addElement(new Setting("emoticons", -1, new AbstractMailFuncs() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
-			}
+            }
             @Override
             protected Boolean isSet(final UserSettingMail settings) {
                 return Boolean.valueOf(settings.isShowGraphicEmoticons());
@@ -619,11 +509,12 @@ public final class ConfigTree {
                 final String value) {
                 settings.setShowGraphicEmoticons(Boolean.parseBoolean(value));
             }
-        });
-        tmp.put(deletemail.getPath(), new AbstractMailFuncs() {
+        }));
+
+        mail.addElement(new Setting("deletemail", -1, new AbstractMailFuncs() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
-			}
+            }
             @Override
             protected Boolean isSet(final UserSettingMail settings) {
                 return Boolean.valueOf(settings.isHardDeleteMsgs());
@@ -633,11 +524,13 @@ public final class ConfigTree {
                 final String value) {
                 settings.setHardDeleteMsgs(Boolean.parseBoolean(value));
             }
-        });
-        tmp.put(inlineattachments.getPath(), new AbstractMailFuncs() {
+        }));
+
+        mail.addElement(new Setting("inlineattachments", -1,
+            new AbstractMailFuncs() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
-			}
+            }
             @Override
             protected Boolean isSet(final UserSettingMail settings) {
                 return Boolean.valueOf(settings.isDisplayHtmlInlineContent());
@@ -648,11 +541,12 @@ public final class ConfigTree {
                 settings.setDisplayHtmlInlineContent(
                     Boolean.parseBoolean(value));
             }
-        });
-        tmp.put(appendmailtext.getPath(), new AbstractMailFuncs() {
+        }));
+
+        mail.addElement(new Setting("appendmailtext", -1, new AbstractMailFuncs() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
-			}
+            }
             @Override
             protected Boolean isSet(final UserSettingMail settings) {
                 return Boolean.valueOf(!settings.isIgnoreOriginalMailTextOnReply());
@@ -663,13 +557,14 @@ public final class ConfigTree {
                 settings.setIgnoreOriginalMailTextOnReply(
                     !Boolean.parseBoolean(value));
             }
-        });
-        tmp.put(forwardmessage.getPath(), new AbstractMailFuncs() {
+        }));
+
+        mail.addElement(new Setting("forwardmessage", -1, new AbstractMailFuncs() {
             private static final String INLINE = "Inline";
             private static final String ATTACHMENT = "Attachment";
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
-			}
+            }
             @Override
             protected Object isSet(final UserSettingMail settings) {
                 final String retval;
@@ -685,48 +580,53 @@ public final class ConfigTree {
                 final String value) {
                 settings.setForwardAsAttachment(ATTACHMENT.equals(value));
             }
-        });
-        tmp.put(linewrap.getPath(), new SharedValue() {
+        }));
+
+        mail.addElement(new Setting("linewrap", -1, new IValueHandler() {
             public void getValue(final Session session, final Context ctx,
                 final User user, UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
-				final UserSettingMail settings = UserSettingMailStorage
+                final UserSettingMail settings = UserSettingMailStorage
                     .getInstance().getUserSettingMail(session.getUserId(), ctx);
-				if (null != settings) {
-    				setting.setSingleValue(Integer.valueOf(settings
-    				    .getAutoLinebreak()));
-				}
-			}
+                if (null != settings) {
+                    setting.setSingleValue(Integer.valueOf(settings
+                        .getAutoLinebreak()));
+                }
+            }
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
-			}
-			public boolean isWritable() {
-				return true;
-			}
-			public void writeValue(final Context ctx, final User user,
+            }
+            public boolean isWritable() {
+                return true;
+            }
+            public void writeValue(final Context ctx, final User user,
                 final Setting setting) throws SettingException {
                 final UserSettingMailStorage storage = UserSettingMailStorage
                     .getInstance();
-				final UserSettingMail settings = storage.getUserSettingMail(
-						user.getId(), ctx);
-				if (null != settings) {
-    				try {
-    					settings.setAutoLinebreak(Integer.parseInt(
+                final UserSettingMail settings = storage.getUserSettingMail(
+                        user.getId(), ctx);
+                if (null != settings) {
+                    try {
+                        settings.setAutoLinebreak(Integer.parseInt(
                             (String) setting.getSingleValue()));
-    					storage.saveUserSettingMail(settings, user.getId(),
-    							ctx);
-    				} catch (NumberFormatException e) {
-    					throw new SettingException(Code.JSON_READ_ERROR, e);
-    				} catch (OXException e) {
-    					throw new SettingException(e);
-    				}
-				}
-			}
-		});
-        tmp.put(vcard.getPath(), new AbstractMailFuncs() {
+                        storage.saveUserSettingMail(settings, user.getId(),
+                                ctx);
+                    } catch (NumberFormatException e) {
+                        throw new SettingException(Code.JSON_READ_ERROR, e);
+                    } catch (OXException e) {
+                        throw new SettingException(e);
+                    }
+                }
+            }
+            public int getId() {
+                return -1;
+            }
+        }));
+
+        mail.addElement(new Setting("vcard", -1, new AbstractMailFuncs() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
-			}
+            }
             @Override
             protected Boolean isSet(final UserSettingMail settings) {
                 return Boolean.valueOf(settings.isAppendVCard());
@@ -736,58 +636,40 @@ public final class ConfigTree {
                 final String value) {
                 settings.setAppendVCard(Boolean.parseBoolean(value));
             }
-        });
-        tmp.put(spamButton.getPath(), new ReadOnlyValue() {
+        }));
+
+        mail.addElement(new Setting("spambutton", -1, new ReadOnlyValue() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
-			}
+            }
             public void getValue(final Session session, final Context ctx,
                 final User user, UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
-				final UserSettingMail settings = UserSettingMailStorage
-				    .getInstance().getUserSettingMail(session.getUserId(), ctx);
-				try {
-					setting.setSingleValue(Boolean.valueOf(settings
-					    .isSpamEnabled()));
-				} catch (final MailConfigException e) {
-					throw new SettingException(e);
-				}
-			}
-        });
-        
+                final UserSettingMail settings = UserSettingMailStorage
+                    .getInstance().getUserSettingMail(session.getUserId(), ctx);
+                try {
+                    setting.setSingleValue(Boolean.valueOf(settings
+                        .isSpamEnabled()));
+                } catch (final MailConfigException e) {
+                    throw new SettingException(e);
+                }
+            }
+        }));
+
         try {
-            final Class< ? extends SettingSetup>[] clazzes = getClasses();
-            final SettingSetup[] setups = new SettingSetup[clazzes.length];
+            final Class< ? extends PreferencesItemService>[] clazzes = getClasses();
+            final PreferencesItemService[] setups = new PreferencesItemService[clazzes.length];
             for (int i = 0; i < clazzes.length; i++) {
                 setups[i] = clazzes[i].newInstance();
             }
-            Arrays.sort(setups, new Comparator<SettingSetup>() {
-                public int compare(final SettingSetup o1,
-                    final SettingSetup o2) {
-                    return o1.getPath().compareTo(o2.getPath());
-                }
-            });
-            for (SettingSetup setup : setups) {
-                // Define parent.
-                final Setting setting = getSettingByPath(tree, setup.getPath());
-                final Setting subSetting = setup.getSetting();
-                // Connect tree.
-                setting.addElement(subSetting);
-                // Map shared value.
-                final SharedValue shared = setup.getSharedValue();
-                if (null != shared) {
-                    tmp.put(subSetting.getPath(), shared);
-                }
+            for (PreferencesItemService setup : setups) {
+                addSharedValue(null, setup.getPath(), setup.getSharedValue());
             }
         } catch (InstantiationException e) {
             throw new SettingException(Code.INIT, e);
         } catch (IllegalAccessException e) {
             throw new SettingException(Code.INIT, e);
-        } catch (SettingException e) {
-            throw new SettingException(Code.INIT, e);
         }
-        
-        readers = Collections.unmodifiableMap(tmp);
     }
 
     static void stop() {
@@ -795,7 +677,6 @@ public final class ConfigTree {
             LOG.error("Duplicate shutdown of configuration tree.");
             return;
         }
-        readers = null;
         tree = null;
     }
 }
