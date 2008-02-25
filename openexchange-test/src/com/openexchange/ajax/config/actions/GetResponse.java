@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.config.actions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
@@ -86,5 +89,15 @@ public class GetResponse extends AbstractAJAXResponse {
     public long getLong() {
         fetchValue();
         return ((Long) value).longValue();
+    }
+
+    public Object[] getArray() throws JSONException {
+        fetchValue();
+        final JSONArray array = (JSONArray) value;
+        final Object[] retval = new Object[array.length()];
+        for (int i = 0; i < array.length(); i++) {
+            retval[i] = array.get(i);
+        }
+        return retval;
     }
 }

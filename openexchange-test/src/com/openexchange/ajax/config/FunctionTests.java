@@ -55,9 +55,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.config.actions.GetResponse;
+import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.tools.RandomString;
 
 /**
  * This class contains tests for added funtionalities of the configuration tree. 
@@ -120,5 +123,42 @@ public class FunctionTests extends AbstractAJAXSession {
         LOG.info("Context identifier: " + value);
         assertTrue("Got no value for the contextID configuration parameter.",
             value > 0);
+    }
+
+    /**
+     * Tests if the GUI value can be written and read correctly.
+     */
+    public void testGUI() throws Throwable {
+        final AJAXClient client = getClient();
+        final GetResponse origGet = ConfigTools.get(client, new GetRequest(Tree
+            .GUI));
+        final String testValue = RandomString.generateLetter(20);
+        try {
+            ConfigTools.set(client, new SetRequest(Tree.GUI, testValue));
+            final GetResponse testGet = ConfigTools.get(client, new GetRequest(
+                Tree.GUI));
+            assertEquals("Written GUI value differs from read one.", testValue,
+                testGet.getString());
+        } finally {
+            ConfigTools.set(client, new SetRequest(Tree.GUI, origGet
+                .getData()));
+        }
+    }
+
+    /**
+     * Checks if the new preferences entry availableModules works.
+     */
+    public void testAvailableModules() throws Throwable {
+        final AJAXClient client = getClient();
+        final GetResponse get = ConfigTools.get(client, new GetRequest(Tree
+            .AvailableModules));
+        final Object[] modules = get.getArray();
+        assertTrue("Can't get available modules.", modules.length > 0);
+        final StringBuffer sb = new StringBuffer("Modules: ");
+        for (int i = 0; i < modules.length; i++) {
+            sb.append(modules[i]);
+            sb.append(", ");
+        }
+        LOG.info(sb.toString());
     }
 }
