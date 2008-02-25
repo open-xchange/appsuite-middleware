@@ -47,9 +47,8 @@
  *
  */
 
-package com.openexchange.config.services;
+package com.openexchange.config;
 
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.ServiceHolder;
 
 /**

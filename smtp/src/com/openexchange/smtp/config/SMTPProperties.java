@@ -52,7 +52,7 @@ package com.openexchange.smtp.config;
 import java.nio.charset.Charset;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.services.ConfigurationServiceHolder;
+import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.mail.config.AbstractProtocolProperties;
 import com.openexchange.mail.config.MailConfigException;
 

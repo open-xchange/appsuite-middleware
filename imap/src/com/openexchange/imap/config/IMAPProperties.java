@@ -54,7 +54,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.services.ConfigurationServiceHolder;
+import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.mail.config.AbstractProtocolProperties;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailConfig.BoolCapVal;

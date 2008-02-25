@@ -60,7 +60,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.services.ConfigurationServiceHolder;
+import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.smtp.SMTPProvider;
 import com.openexchange.smtp.config.SMTPProperties;
