@@ -133,7 +133,7 @@ public final class ManagementActivator implements BundleActivator {
 			/*
 			 * Open service trackers
 			 */
-			for (final ServiceTracker tracker : serviceTrackerList) {
+			for (ServiceTracker tracker : serviceTrackerList) {
 				tracker.open();
 			}
 		} catch (final Throwable t) {
@@ -174,7 +174,7 @@ public final class ManagementActivator implements BundleActivator {
 			/*
 			 * Close service trackers
 			 */
-			for (final ServiceTracker tracker : serviceTrackerList) {
+			for (ServiceTracker tracker : serviceTrackerList) {
 				tracker.close();
 			}
 			serviceTrackerList.clear();
