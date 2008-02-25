@@ -73,4 +73,4 @@ TidyMessages=@oxgroupwaresysconfdir@/TidyMessages.properties
 # Location of tidy configuration file
 TidyConfiguration=@oxgroupwaresysconfdir@/TidyConfiguration.properties
 
-SERVER_NAME=local
+SERVER_NAME=dev-prototyp
