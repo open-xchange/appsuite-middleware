@@ -78,13 +78,12 @@ import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.ManagementServiceHolder;
-import com.openexchange.monitoring.MonitorInterface;
+import com.openexchange.monitoring.MonitorService;
 import com.openexchange.server.ServiceHolderListener;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.server.services.ConfigJumpService;
 import com.openexchange.server.services.EventAdminService;
-import com.openexchange.server.services.MonitorService;
 import com.openexchange.server.services.SessiondService;
 import com.openexchange.sessiond.SessiondConnectorInterface;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
@@ -201,9 +200,14 @@ public class Activator implements BundleActivator, EventHandler {
 				// Management is only needed for groupware.
 				serviceTrackerList.add(new ServiceTracker(context, ManagementService.class.getName(),
 						new ManagementServiceTracker(context, msh)));
-				serviceTrackerList.add(new ServiceTracker(context, MonitorInterface.class.getName(),
-						new BundleServiceTracker<MonitorInterface>(context, MonitorService.getInstance(),
-								MonitorInterface.class)));
+				// TODO:
+				/**
+				 * <pre>
+				 * serviceTrackerList.add(new ServiceTracker(context, MonitorService.class.getName(),
+				 * 		new BundleServiceTracker&lt;MonitorService&gt;(context, MonitorService.getInstance(), MonitorService.class)));
+				 * </pre>
+				 */
+				
 				// Authentication is only needed for groupware.
 				serviceTrackerList.add(new ServiceTracker(context, Authentication.class.getName(),
 						new BundleServiceTracker<Authentication>(context, AuthenticationService.getInstance(),
