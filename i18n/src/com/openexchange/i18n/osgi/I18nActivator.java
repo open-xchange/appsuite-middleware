@@ -64,8 +64,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.i18n.I18nTools;
-import com.openexchange.i18n.impl.I18nConfiguration;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.server.ServiceHolderListener;
@@ -82,16 +82,24 @@ public class I18nActivator implements BundleActivator {
 
 		private final BundleContext context;
 
+		private final ConfigurationServiceHolder csh;
+
 		private ServiceRegistration[] serviceRegistrations;
 
-		public I18nServiceHolderListener(final BundleContext context) {
+		public I18nServiceHolderListener(final BundleContext context, final ConfigurationServiceHolder csh) {
 			super();
 			this.context = context;
+			this.csh = csh;
 		}
 
 		public void onServiceAvailable(final ConfigurationService service) throws Exception {
 			unregisterAll();
-			serviceRegistrations = initI18nServices(context);
+			final ConfigurationService config = csh.getService();
+			try {
+				serviceRegistrations = initI18nServices(context, config);
+			} finally {
+				csh.ungetService(config);
+			}
 		}
 
 		public void onServiceRelease() throws Exception {
@@ -131,19 +139,12 @@ public class I18nActivator implements BundleActivator {
 	 *             If directory referenced by <code>"i18n.language.path"</code>
 	 *             does not exist
 	 */
-	private static ServiceRegistration[] initI18nServices(final BundleContext context) throws FileNotFoundException {
+	private static ServiceRegistration[] initI18nServices(final BundleContext context, final ConfigurationService config)
+			throws FileNotFoundException {
 
 		// File dir = new File("/home/fred/i18n/osgi/");
 
-		final File dir;
-		{
-			final ConfigurationService conf = I18nConfiguration.getInstance().getService();
-			try {
-				dir = new File(conf.getProperty("i18n.language.path"));
-			} finally {
-				I18nConfiguration.getInstance().ungetService(conf);
-			}
-		}
+		final File dir = new File(config.getProperty("i18n.language.path"));
 
 		final List<ResourceBundle> resourceBundles = new ResourceBundleDiscoverer(dir).getResourceBundles();
 		final List<ServiceRegistration> serviceRegistrations = new ArrayList<ServiceRegistration>();
@@ -161,6 +162,8 @@ public class I18nActivator implements BundleActivator {
 		return serviceRegistrations.toArray(new ServiceRegistration[serviceRegistrations.size()]);
 	}
 
+	private ConfigurationServiceHolder csh;
+
 	private I18nServiceHolderListener listener;
 
 	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
@@ -171,16 +174,17 @@ public class I18nActivator implements BundleActivator {
 			LOG.debug("I18n Starting");
 
 		try {
+			csh = ConfigurationServiceHolder.newInstance();
+
 			serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(),
-					new BundleServiceTracker<ConfigurationService>(context, I18nConfiguration.getInstance(),
-							ConfigurationService.class)));
+					new BundleServiceTracker<ConfigurationService>(context, csh, ConfigurationService.class)));
 
 			for (final ServiceTracker tracker : serviceTrackerList) {
 				tracker.open();
 			}
 
-			listener = new I18nServiceHolderListener(context);
-			I18nConfiguration.getInstance().addServiceHolderListener(listener);
+			listener = new I18nServiceHolderListener(context, csh);
+			csh.addServiceHolderListener(listener);
 
 		} catch (final Throwable e) {
 			throw e instanceof Exception ? (Exception) e : new Exception(e);
@@ -195,7 +199,7 @@ public class I18nActivator implements BundleActivator {
 			LOG.debug("Stopping I18n");
 
 		try {
-			I18nConfiguration.getInstance().removeServiceHolderListenerByName(listener.getClass().getName());
+			csh.removeServiceHolderListenerByName(listener.getClass().getName());
 			/*
 			 * Unregister through listener
 			 */
@@ -203,10 +207,11 @@ public class I18nActivator implements BundleActivator {
 				listener.unregisterAll();
 				listener = null;
 			}
+			csh = null;
 			/*
 			 * Close service trackers
 			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
+			for (final ServiceTracker tracker : serviceTrackerList) {
 				tracker.close();
 			}
 			serviceTrackerList.clear();
