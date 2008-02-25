@@ -54,7 +54,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.openexchange.config.Configuration;
-import com.openexchange.config.services.ConfigurationService;
+import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.mail.config.AbstractProtocolProperties;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailConfig.BoolCapVal;
@@ -126,7 +126,7 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 		final StringBuilder logBuilder = new StringBuilder(1024);
 		logBuilder.append("\nLoading global IMAP properties...\n");
 
-		final Configuration configuration = ConfigurationService.getInstance().getService();
+		final Configuration configuration = ConfigurationServiceHolder.getInstance().getService();
 		try {
 			{
 				final String imapSortStr = configuration.getProperty("com.openexchange.imap.imapSort", "application")
@@ -236,7 +236,7 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 				}
 			}
 		} finally {
-			ConfigurationService.getInstance().ungetService(configuration);
+			ConfigurationServiceHolder.getInstance().ungetService(configuration);
 		}
 
 		logBuilder.append("Global IMAP properties successfully loaded!");

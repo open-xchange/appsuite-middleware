@@ -104,7 +104,7 @@ public interface Configuration {
 	 * @return The value in this property list with the specified key value or
 	 *         <code>null</code>.
 	 */
-	public String getProperty(String name, PropertyListener listener);
+	//public String getProperty(String name, PropertyListener listener);
 
 	/**
 	 * Searches for the property with the specified name in this property list.
@@ -124,7 +124,7 @@ public interface Configuration {
 	 * @return The value in this property list with the specified key value or
 	 *         given default value argument.
 	 */
-	public String getProperty(String name, String defaultValue, PropertyListener listener);
+	//public String getProperty(String name, String defaultValue, PropertyListener listener);
 
     /**
      * Returns all properties defined in a specific properties file. The
@@ -149,7 +149,7 @@ public interface Configuration {
 	 * @return the properties from that file or an empty properties if that file
 	 * was not read.
 	 */
-	public Properties getFile(String filename, PropertyListener listener);
+	//public Properties getFile(String filename, PropertyListener listener);
 
 	/**
 	 * Searches for the property with the specified name in this property list.

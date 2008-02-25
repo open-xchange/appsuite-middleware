@@ -8,7 +8,6 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: com.openexchange.authentication,
  com.openexchange.cache,
  com.openexchange.cache.dynamic,
- com.openexchange.config,
  com.openexchange.configjump,
  com.openexchange.event,
  com.openexchange.groupware,
