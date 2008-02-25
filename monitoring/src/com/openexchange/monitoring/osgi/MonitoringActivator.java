@@ -59,8 +59,8 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.management.ManagementAgent;
+import com.openexchange.management.ManagementServiceHolder;
 import com.openexchange.monitoring.MonitorInterface;
-import com.openexchange.monitoring.internal.ManagementService;
 import com.openexchange.monitoring.internal.MonitorImpl;
 import com.openexchange.monitoring.internal.MonitoringInit;
 import com.openexchange.server.ServiceHolderListener;
@@ -81,6 +81,8 @@ public final class MonitoringActivator implements BundleActivator {
 
 	private ServiceRegistration serviceRegistration;
 
+	private ManagementServiceHolder msh;
+
 	private ServiceHolderListener<ManagementAgent> listener;
 
 	/**
@@ -99,16 +101,17 @@ public final class MonitoringActivator implements BundleActivator {
 		LOG.info("starting bundle: com.openexchange.monitoring");
 		
 		try {
+			msh = ManagementServiceHolder.newInstance();
+			MonitoringInit.getInstance().setManagementServiceHolder(msh);
 			/*
 			 * Init service trackers
 			 */
 			serviceTrackerList.add(new ServiceTracker(context, ManagementAgent.class.getName(),
-					new BundleServiceTracker<ManagementAgent>(context, ManagementService.getInstance(),
-							ManagementAgent.class)));
+					new BundleServiceTracker<ManagementAgent>(context, msh, ManagementAgent.class)));
 			/*
 			 * Open service trackers
 			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
+			for (final ServiceTracker tracker : serviceTrackerList) {
 				tracker.open();
 			}
 			/*
@@ -139,7 +142,7 @@ public final class MonitoringActivator implements BundleActivator {
 				}
 			};
 
-			ManagementService.getInstance().addServiceHolderListener(listener);
+			msh.addServiceHolderListener(listener);
 		} catch (final Throwable t) {
 			LOG.error(t.getLocalizedMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -155,18 +158,18 @@ public final class MonitoringActivator implements BundleActivator {
 		LOG.info("stopping bundle: com.openexchange.monitoring");
 		
 		try {
-			ManagementService.getInstance().removeServiceHolderListenerByName(listener.getClass().getName());
-
+			msh.removeServiceHolderListenerByName(listener.getClass().getName());
 			if (MonitoringInit.getInstance().isStarted()) {
 				MonitoringInit.getInstance().stop();
 			}
+			msh = null;
 
 			serviceRegistration.unregister();
 			serviceRegistration = null;
 			/*
 			 * Close service trackers
 			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
+			for (final ServiceTracker tracker : serviceTrackerList) {
 				tracker.close();
 			}
 			serviceTrackerList.clear();

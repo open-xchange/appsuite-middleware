@@ -51,7 +51,6 @@ package com.openexchange.control.internal;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
 import org.apache.commons.logging.Log;
@@ -60,6 +59,7 @@ import org.osgi.framework.BundleContext;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.management.ManagementAgent;
+import com.openexchange.management.ManagementServiceHolder;
 import com.openexchange.server.Initialization;
 
 /**
@@ -71,7 +71,7 @@ public final class ControlInit implements Initialization {
 	private static final AtomicBoolean started = new AtomicBoolean();
 
 	private static final ControlInit singleton = new ControlInit();
-	
+
 	private BundleContext bundleContext = null;
 
 	/**
@@ -79,11 +79,23 @@ public final class ControlInit implements Initialization {
 	 */
 	private static final Log LOG = LogFactory.getLog(ControlInit.class);
 
+	private ManagementServiceHolder msh;
+
 	/**
 	 * Prevent instantiation.
 	 */
 	private ControlInit() {
 		super();
+	}
+
+	/**
+	 * Sets the management service holder
+	 * 
+	 * @param msh
+	 *            The management service holder
+	 */
+	public void setManagementServiceHolder(final ManagementServiceHolder msh) {
+		this.msh = msh;
 	}
 
 	/**
@@ -101,20 +113,21 @@ public final class ControlInit implements Initialization {
 			LOG.error(ControlInit.class.getName() + " already started");
 			return;
 		}
-		
+
 		/*
 		 * Create Beans and register them
 		 */
-		final ManagementAgent managementAgent = ManagementService.getInstance().getService();
+		final ManagementAgent managementAgent = msh.getService();
 		try {
-		    final GeneralControl generalControlBean = new GeneralControl(bundleContext);
-			managementAgent.registerMBean( new ObjectName("com.openexchange.control", "name", "Control"), generalControlBean);
+			final GeneralControl generalControlBean = new GeneralControl(bundleContext);
+			managementAgent.registerMBean(new ObjectName("com.openexchange.control", "name", "Control"),
+					generalControlBean);
 		} catch (Exception exc) {
 			LOG.error("cannot register mbean", exc);
 		} finally {
-		    ManagementService.getInstance().ungetService(managementAgent);
+			msh.ungetService(managementAgent);
 		}
-		
+
 		if (LOG.isInfoEnabled()) {
 			LOG.info("JMX control applied");
 		}
@@ -129,14 +142,14 @@ public final class ControlInit implements Initialization {
 			LOG.error(ControlInit.class.getName() + " has not been started");
 			return;
 		}
-		
-		final ManagementAgent managementAgent = ManagementService.getInstance().getService();
+
+		final ManagementAgent managementAgent = msh.getService();
 		try {
 			managementAgent.unregisterMBean(new ObjectName("com.openexchange.control", "name", "Control"));
 		} catch (Exception exc) {
 			LOG.error("cannot unregister mbean", exc);
 		} finally {
-		    ManagementService.getInstance().ungetService(managementAgent);
+			msh.ungetService(managementAgent);
 		}
 
 		removeBundleContext();
@@ -150,11 +163,11 @@ public final class ControlInit implements Initialization {
 	public boolean isStarted() {
 		return started.get();
 	}
-	
+
 	public void setBundleContext(final BundleContext bundleContext) {
 		this.bundleContext = bundleContext;
 	}
-	
+
 	public void removeBundleContext() {
 		bundleContext = null;
 	}

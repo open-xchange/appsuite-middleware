@@ -59,6 +59,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.management.ManagementAgent;
+import com.openexchange.management.ManagementServiceHolder;
 import com.openexchange.server.Initialization;
 
 /**
@@ -73,6 +74,8 @@ public final class MonitoringInit implements Initialization {
 
 	private ObjectName objectName;
 
+	private ManagementServiceHolder msh;
+
 	/**
 	 * Logger.
 	 */
@@ -83,6 +86,16 @@ public final class MonitoringInit implements Initialization {
 	 */
 	private MonitoringInit() {
 		super();
+	}
+
+	/**
+	 * Set the management service holder
+	 * 
+	 * @param msh
+	 *            The management service holder
+	 */
+	public void setManagementServiceHolder(final ManagementServiceHolder msh) {
+		this.msh = msh;
 	}
 
 	private ObjectName getObjectName() throws MalformedObjectNameException, NullPointerException {
@@ -110,7 +123,7 @@ public final class MonitoringInit implements Initialization {
 		/*
 		 * Create Beans and register them
 		 */
-		final ManagementAgent managementAgent = ManagementService.getInstance().getService();
+		final ManagementAgent managementAgent = msh.getService();
 		try {
 			final GeneralMonitor generalMonitorBean = new GeneralMonitor();
 			try {
@@ -126,7 +139,7 @@ public final class MonitoringInit implements Initialization {
 				LOG.info("JMX Monitor applied");
 			}
 		} finally {
-			ManagementService.getInstance().ungetService(managementAgent);
+			msh.ungetService(managementAgent);
 		}
 		started.set(true);
 	}
@@ -139,7 +152,7 @@ public final class MonitoringInit implements Initialization {
 			LOG.error(MonitoringInit.class.getName() + " has not been started");
 			return;
 		}
-		final ManagementAgent managementAgent = ManagementService.getInstance().getService();
+		final ManagementAgent managementAgent = msh.getService();
 		if (managementAgent != null) {
 			try {
 				try {
@@ -155,7 +168,7 @@ public final class MonitoringInit implements Initialization {
 					LOG.info("JMX Monitor removed");
 				}
 			} finally {
-				ManagementService.getInstance().ungetService(managementAgent);
+				msh.ungetService(managementAgent);
 			}
 		}
 		started.set(false);

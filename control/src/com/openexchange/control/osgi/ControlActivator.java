@@ -51,18 +51,15 @@ package com.openexchange.control.osgi;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
-
-import javax.management.ObjectName;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.control.internal.ControlInit;
-import com.openexchange.control.internal.ManagementService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.management.ManagementAgent;
+import com.openexchange.management.ManagementServiceHolder;
 import com.openexchange.server.ServiceHolderListener;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 
@@ -78,6 +75,8 @@ public final class ControlActivator implements BundleActivator {
 			.getLog(ControlActivator.class);
 
 	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
+
+	private ManagementServiceHolder msh;
 
 	private ServiceHolderListener<ManagementAgent> listener;
 
@@ -97,16 +96,17 @@ public final class ControlActivator implements BundleActivator {
 		LOG.info("starting bundle: com.openexchange.control");
 		
 		try {
+			msh = ManagementServiceHolder.newInstance();
+			ControlInit.getInstance().setManagementServiceHolder(msh);
 			/*
 			 * Init service trackers
 			 */
 			serviceTrackerList.add(new ServiceTracker(context, ManagementAgent.class.getName(),
-					new BundleServiceTracker<ManagementAgent>(context, ManagementService.getInstance(),
-							ManagementAgent.class)));
+					new BundleServiceTracker<ManagementAgent>(context, msh, ManagementAgent.class)));
 			/*
 			 * Open service trackers
 			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
+			for (final ServiceTracker tracker : serviceTrackerList) {
 				tracker.open();
 			}
 			/*
@@ -133,7 +133,7 @@ public final class ControlActivator implements BundleActivator {
 				}
 			};
 
-			ManagementService.getInstance().addServiceHolderListener(listener);
+			msh.addServiceHolderListener(listener);
 		} catch (final Throwable t) {
 			LOG.error(t.getLocalizedMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -149,14 +149,15 @@ public final class ControlActivator implements BundleActivator {
 		LOG.info("stopping bundle: com.openexchange.control");
 		
 		try {
-			ManagementService.getInstance().removeServiceHolderListenerByName(listener.getClass().getName());
+			msh.removeServiceHolderListenerByName(listener.getClass().getName());
 			if (ControlInit.getInstance().isStarted()) {
 				ControlInit.getInstance().stop();
 			}
+			msh = null;
 			/*
 			 * Close service trackers
 			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
+			for (final ServiceTracker tracker : serviceTrackerList) {
 				tracker.close();
 			}
 			serviceTrackerList.clear();
