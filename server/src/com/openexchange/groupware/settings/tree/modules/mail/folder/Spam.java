@@ -47,43 +47,75 @@
  *
  */
 
-package com.openexchange.groupware.settings;
+package com.openexchange.groupware.settings.tree.modules.mail.folder;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailServletInterface;
+import com.openexchange.session.Session;
 
 /**
- * This class contains shared functions for all setting that are read only.
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class ReadOnlyValue implements IValueHandler {
+public class Spam implements PreferencesItemService {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(Spam.class);
 
     /**
      * Default constructor.
      */
-    protected ReadOnlyValue() {
+    public Spam() {
         super();
     }
 
     /**
      * {@inheritDoc}
      */
-    public final boolean isWritable() {
-        return false;
+    public String[] getPath() {
+        return new String[] { "modules", "mail", "defaultFolder", "spam" };
     }
 
     /**
      * {@inheritDoc}
      */
-    public final void writeValue(final Context ctx,
-        User user, final Setting setting) throws SettingException {
-        throw new SettingException(SettingException.Code.NO_WRITE, setting
-            .getName());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public int getId() {
-        return -1;
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
+            }
+            public void getValue(final Session session, final Context ctx,
+                final User user, final UserConfiguration userConfig,
+                final Setting setting) throws SettingException {
+                MailServletInterface mail = null;
+                try {
+                    mail = MailServletInterface.getInstance(session);
+                    setting.setSingleValue(mail.getSpamFolder());
+                } catch (MailException e) {
+                    throw new SettingException(e);
+                } finally {
+                    if (mail != null) {
+                        try {
+                            mail.close(true);
+                        } catch (MailException e) {
+                            LOG.error(e.getMessage(), e);
+                        }
+                    }
+                }
+            }
+        };
     }
 }

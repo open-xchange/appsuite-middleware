@@ -47,43 +47,28 @@
  *
  */
 
-package com.openexchange.groupware.settings;
+package com.openexchange.groupware.settings.tree.mail.folder;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.tree.modules.mail.folder.Inbox;
 
 /**
- * This class contains shared functions for all setting that are read only.
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class ReadOnlyValue implements IValueHandler {
+public class InboxSP3 extends Inbox {
 
     /**
      * Default constructor.
      */
-    protected ReadOnlyValue() {
+    public InboxSP3() {
         super();
     }
 
     /**
      * {@inheritDoc}
      */
-    public final boolean isWritable() {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public final void writeValue(final Context ctx,
-        User user, final Setting setting) throws SettingException {
-        throw new SettingException(SettingException.Code.NO_WRITE, setting
-            .getName());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public int getId() {
-        return -1;
+    @Override
+    public String[] getPath() {
+        return new String[] { "mail", "folder", "inbox" };
     }
 }

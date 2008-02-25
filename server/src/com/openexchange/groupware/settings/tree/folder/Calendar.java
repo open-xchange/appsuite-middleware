@@ -47,43 +47,60 @@
  *
  */
 
-package com.openexchange.groupware.settings;
+package com.openexchange.groupware.settings.tree.folder;
 
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
- * This class contains shared functions for all setting that are read only.
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class ReadOnlyValue implements IValueHandler {
+public class Calendar implements PreferencesItemService {
 
     /**
      * Default constructor.
      */
-    protected ReadOnlyValue() {
+    public Calendar() {
         super();
     }
 
     /**
      * {@inheritDoc}
      */
-    public final boolean isWritable() {
-        return false;
+    public String[] getPath() {
+        return new String[] { "folder", "calendar" };
     }
 
     /**
      * {@inheritDoc}
      */
-    public final void writeValue(final Context ctx,
-        User user, final Setting setting) throws SettingException {
-        throw new SettingException(SettingException.Code.NO_WRITE, setting
-            .getName());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public int getId() {
-        return -1;
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasCalendar();
+            }
+            public void getValue(final Session session, final Context ctx,
+                final User user, UserConfiguration userConfig,
+                final Setting setting) throws SettingException {
+                final OXFolderAccess acc = new OXFolderAccess(ctx);
+                try {
+                    setting.setSingleValue(Integer.valueOf(acc.getDefaultFolder(
+                        user.getId(), FolderObject.CALENDAR).getObjectID()));
+                } catch (OXException e) {
+                    throw new SettingException(e);
+                }
+            }
+        };
     }
 }

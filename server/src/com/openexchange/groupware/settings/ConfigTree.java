@@ -53,7 +53,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.SettingException.Code;
@@ -64,7 +63,6 @@ import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * This class is a container for the settings tree.
@@ -167,14 +165,24 @@ public final class ConfigTree {
 
     private static Class< ? extends PreferencesItemService>[] getClasses() {
         return new Class[] {
+            com.openexchange.groupware.settings.tree.AvailableModules.class,
             com.openexchange.groupware.settings.tree.CalendarNotification.class,
             com.openexchange.groupware.settings.tree.ContactID.class,
             com.openexchange.groupware.settings.tree.ContextID.class,
             com.openexchange.groupware.settings.tree.CurrentTime.class,
             com.openexchange.groupware.settings.tree.FastGUI.class,
+            com.openexchange.groupware.settings.tree.folder.Calendar.class,
+            com.openexchange.groupware.settings.tree.folder.Contacts.class,
+            com.openexchange.groupware.settings.tree.folder.Infostore.class,
+            com.openexchange.groupware.settings.tree.folder.Tasks.class,
             com.openexchange.groupware.settings.tree.GUI.class,
             com.openexchange.groupware.settings.tree.Identifier.class,
             com.openexchange.groupware.settings.tree.Language.class,
+            com.openexchange.groupware.settings.tree.mail.folder.DraftsSP3.class,
+            com.openexchange.groupware.settings.tree.mail.folder.InboxSP3.class,
+            com.openexchange.groupware.settings.tree.mail.folder.SentSP3.class,
+            com.openexchange.groupware.settings.tree.mail.folder.SpamSP3.class,
+            com.openexchange.groupware.settings.tree.mail.folder.TrashSP3.class,
             com.openexchange.groupware.settings.tree.MaxUploadIdleTimeout.class,
             com.openexchange.groupware.settings.tree.modules.calendar.Module.class,
             com.openexchange.groupware.settings.tree.modules.calendar.CalendarConflict.class,
@@ -187,6 +195,11 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.interfaces.ICal.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.SyncML.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.VCard.class,
+            com.openexchange.groupware.settings.tree.modules.mail.folder.Drafts.class,
+            com.openexchange.groupware.settings.tree.modules.mail.folder.Inbox.class,
+            com.openexchange.groupware.settings.tree.modules.mail.folder.Sent.class,
+            com.openexchange.groupware.settings.tree.modules.mail.folder.Spam.class,
+            com.openexchange.groupware.settings.tree.modules.mail.folder.Trash.class,
             com.openexchange.groupware.settings.tree.modules.mail.Module.class,
             com.openexchange.groupware.settings.tree.modules.portal.Module.class,
             com.openexchange.groupware.settings.tree.modules.tasks.Module.class,
@@ -209,76 +222,6 @@ public final class ConfigTree {
             return;
         }
         tree = new Setting("", -1, new SharedNode(""));
-
-        final Setting folder = new Setting("folder", -1,
-            new SharedNode("folder"));
-        tree.addElement(folder);
-
-        folder.addElement(new Setting("tasks", -1, new ReadOnlyValue() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasTask();
-            }
-            public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
-                final OXFolderAccess acc = new OXFolderAccess(ctx);
-                try {
-                    setting.setSingleValue(Integer.valueOf(acc.getDefaultFolder(
-                        user.getId(), FolderObject.TASK).getObjectID()));
-                } catch (OXException e) {
-                    throw new SettingException(e);
-                }
-            }
-        }));
-
-        folder.addElement(new Setting("calendar", -1, new ReadOnlyValue() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasCalendar();
-            }
-            public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
-                final OXFolderAccess acc = new OXFolderAccess(ctx);
-                try {
-                    setting.setSingleValue(Integer.valueOf(acc.getDefaultFolder(
-                        user.getId(), FolderObject.CALENDAR).getObjectID()));
-                } catch (OXException e) {
-                    throw new SettingException(e);
-                }
-            }
-        }));
-
-        folder.addElement(new Setting("contacts", -1, new ReadOnlyValue() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasContact();
-            }
-            public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
-                final OXFolderAccess acc = new OXFolderAccess(ctx);
-                try {
-                    setting.setSingleValue(Integer.valueOf(acc.getDefaultFolder(
-                        user.getId(), FolderObject.CONTACT).getObjectID()));
-                } catch (OXException e) {
-                    throw new SettingException(e);
-                }
-            }
-        }));
-
-        folder.addElement(new Setting("infostore", -1, new ReadOnlyValue() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasInfostore();
-            }
-            public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
-                final OXFolderAccess acc = new OXFolderAccess(ctx);
-                try {
-                    setting.setSingleValue(Integer.valueOf(acc.getDefaultFolder(
-                        user.getId(), FolderObject.INFOSTORE).getObjectID()));
-                } catch (OXException e) {
-                    throw new SettingException(e);
-                }
-            }
-        }));
 
         final Setting mail = new Setting("mail", -1, new SharedNode("mail"));
         tree.addElement(mail);
@@ -336,7 +279,7 @@ public final class ConfigTree {
                 }
                 if (!found) {
                     throw new SettingException(Code.INVALID_VALUE, newAlias,
-                        "sendaddress");
+                        setting.getName());
                 }
                 final UserSettingMailStorage storage = UserSettingMailStorage
                     .getInstance();
@@ -353,131 +296,6 @@ public final class ConfigTree {
             }
             public int getId() {
                 return -1;
-            }
-        }));
-
-        final Setting mailfolder = new Setting("folder", -1,
-            new SharedNode("folder"));
-        mail.addElement(mailfolder);
-
-        mailfolder.addElement(new Setting("inbox", -1, new ReadOnlyValue() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-            public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
-                MailServletInterface mail = null;
-                try {
-                    mail = MailServletInterface.getInstance(session);
-                    setting.setSingleValue(mail.getInboxFolder());
-                } catch (MailException e) {
-                    throw new SettingException(e);
-                } finally {
-                    if (mail != null) {
-                        try {
-                            mail.close(true);
-                        } catch (MailException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
-                    }
-                }
-            }
-        }));
-
-        mailfolder.addElement(new Setting("drafts", -1, new ReadOnlyValue() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-            public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
-                MailServletInterface mail = null;
-                try {
-                    mail = MailServletInterface.getInstance(session);
-                    setting.setSingleValue(mail.getDraftsFolder());
-                } catch (MailException e) {
-                    throw new SettingException(e);
-                } finally {
-                    if (mail != null) {
-                        try {
-                            mail.close(true);
-                        } catch (MailException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
-                    }
-                }
-            }
-        }));
-
-        mailfolder.addElement(new Setting("sent", -1, new ReadOnlyValue() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-            public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
-                MailServletInterface mail = null;
-                try {
-                    mail = MailServletInterface.getInstance(session);
-                    setting.setSingleValue(mail.getSentFolder());
-                } catch (MailException e) {
-                    throw new SettingException(e);
-                } finally {
-                    if (mail != null) {
-                        try {
-                            mail.close(true);
-                        } catch (MailException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
-                    }
-                }
-            }
-        }));
-
-        mailfolder.addElement(new Setting("spam", -1, new ReadOnlyValue() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-            public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
-                MailServletInterface mail = null;
-                try {
-                    mail = MailServletInterface.getInstance(session);
-                    setting.setSingleValue(mail.getSpamFolder());
-                } catch (MailException e) {
-                    throw new SettingException(e);
-                } finally {
-                    if (mail != null) {
-                        try {
-                            mail.close(true);
-                        } catch (MailException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
-                    }
-                }
-            }
-        }));
-
-        mailfolder.addElement(new Setting("trash", -1, new ReadOnlyValue() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-            public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
-                MailServletInterface mail = null;
-                try {
-                    mail = MailServletInterface.getInstance(session);
-                    setting.setSingleValue(mail.getTrashFolder());
-                } catch (MailException e) {
-                    throw new SettingException(e);
-                } finally {
-                    if (mail != null) {
-                        try {
-                            mail.close(true);
-                        } catch (MailException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
-                    }
-                }
             }
         }));
 
