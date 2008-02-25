@@ -47,95 +47,51 @@
  *
  */
 
-package com.openexchange.groupware.settings;
+package com.openexchange.groupware.settings.tree.modules.mail;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.AbstractMailFuncs;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.session.Session;
 
 /**
- * This class contains the shared, same functions for all mail bit settings.
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractMailFuncs implements IValueHandler {
+public class VCard implements PreferencesItemService {
 
     /**
      * Default constructor.
      */
-    protected AbstractMailFuncs() {
+    public VCard() {
         super();
     }
 
     /**
      * {@inheritDoc}
      */
-    public void getValue(final Session session, final Context ctx,
-        final User user, final UserConfiguration userConfig,
-        final Setting setting) throws SettingException {
-        final UserSettingMail settings;
-        try {
-            settings = UserSettingMailStorage.getInstance().loadUserSettingMail(
-                session.getUserId(), ctx);
-        } catch (final UserConfigurationException e) {
-            throw new SettingException(e);
-        }
-		if (userConfig.hasWebMail()) {
-			setting.setSingleValue(isSet(settings));
-		}
-	}
-
-    /**
-	 * @param settings
-	 *            in this mail settings the bit will be requested.
-	 * @return the value of the bit.
-	 */
-    protected abstract Object isSet(UserSettingMail settings);
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean isWritable() {
-        return true;
+    public String[] getPath() {
+        return new String[] { "modules", "mail", "vcard" };
     }
 
     /**
-	 * {@inheritDoc}
-	 */
-	public void writeValue(final Context ctx, final User user,
-	    final Setting setting) throws SettingException {
-        final UserSettingMailStorage storage = UserSettingMailStorage
-            .getInstance();
-		final UserSettingMail settings;
-        try {
-            settings = storage.loadUserSettingMail(user.getId(), ctx);
-        } catch (final UserConfigurationException e) {
-            throw new SettingException(e);
-        }
-		setValue(settings, (String) setting.getSingleValue());
-		try {
-			storage.saveUserSettingMail(settings, user.getId(), ctx);
-		} catch (OXException e) {
-			throw new SettingException(e);
-		}
-	}
-
-	/**
-	 * @param settings
-	 *            in this mail settings the bit will be set.
-	 * @param value
-	 *            value of the bit that should be set.
-	 */
-    protected abstract void setValue(UserSettingMail settings,
-        String value);
-
-    /**
      * {@inheritDoc}
      */
-    public int getId() {
-        return -1;
+    public IValueHandler getSharedValue() {
+        return new AbstractMailFuncs() {
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return userConfig.hasWebMail();
+            }
+            @Override
+            protected Boolean isSet(final UserSettingMail settings) {
+                return Boolean.valueOf(settings.isAppendVCard());
+            }
+            @Override
+            protected void setValue(final UserSettingMail settings,
+                final String value) {
+                settings.setAppendVCard(Boolean.parseBoolean(value));
+            }
+        };
     }
 }

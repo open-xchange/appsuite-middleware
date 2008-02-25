@@ -52,17 +52,7 @@ package com.openexchange.groupware.settings;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.SettingException.Code;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailServletInterface;
-import com.openexchange.mail.config.MailConfigException;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.session.Session;
 
 /**
  * This class is a container for the settings tree.
@@ -178,11 +168,23 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.GUI.class,
             com.openexchange.groupware.settings.tree.Identifier.class,
             com.openexchange.groupware.settings.tree.Language.class,
+            com.openexchange.groupware.settings.tree.mail.AppendMailTextSP3.class,
+            com.openexchange.groupware.settings.tree.mail.AddressesSP3.class,
+            com.openexchange.groupware.settings.tree.mail.ColorquotedSP3.class,
+            com.openexchange.groupware.settings.tree.mail.DefaultAddressSP3.class,
+            com.openexchange.groupware.settings.tree.mail.DeleteMailSP3.class,
+            com.openexchange.groupware.settings.tree.mail.EmoticonsSP3.class,
             com.openexchange.groupware.settings.tree.mail.folder.DraftsSP3.class,
             com.openexchange.groupware.settings.tree.mail.folder.InboxSP3.class,
             com.openexchange.groupware.settings.tree.mail.folder.SentSP3.class,
             com.openexchange.groupware.settings.tree.mail.folder.SpamSP3.class,
             com.openexchange.groupware.settings.tree.mail.folder.TrashSP3.class,
+            com.openexchange.groupware.settings.tree.mail.ForwardMessageSP3.class,
+            com.openexchange.groupware.settings.tree.mail.InlineAttachmentsSP3.class,
+            com.openexchange.groupware.settings.tree.mail.LineWrapSP3.class,
+            com.openexchange.groupware.settings.tree.mail.SendAddressSP3.class,
+            com.openexchange.groupware.settings.tree.mail.SpamButtonSP3.class,
+            com.openexchange.groupware.settings.tree.mail.VCardSP3.class,
             com.openexchange.groupware.settings.tree.MaxUploadIdleTimeout.class,
             com.openexchange.groupware.settings.tree.modules.calendar.Module.class,
             com.openexchange.groupware.settings.tree.modules.calendar.CalendarConflict.class,
@@ -195,12 +197,24 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.interfaces.ICal.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.SyncML.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.VCard.class,
+            com.openexchange.groupware.settings.tree.modules.mail.Addresses.class,
+            com.openexchange.groupware.settings.tree.modules.mail.AppendMailText.class,
+            com.openexchange.groupware.settings.tree.modules.mail.Colorquoted.class,
+            com.openexchange.groupware.settings.tree.modules.mail.DefaultAddress.class,
+            com.openexchange.groupware.settings.tree.modules.mail.DeleteMail.class,
+            com.openexchange.groupware.settings.tree.modules.mail.Emoticons.class,
             com.openexchange.groupware.settings.tree.modules.mail.folder.Drafts.class,
             com.openexchange.groupware.settings.tree.modules.mail.folder.Inbox.class,
             com.openexchange.groupware.settings.tree.modules.mail.folder.Sent.class,
             com.openexchange.groupware.settings.tree.modules.mail.folder.Spam.class,
             com.openexchange.groupware.settings.tree.modules.mail.folder.Trash.class,
+            com.openexchange.groupware.settings.tree.modules.mail.ForwardMessage.class,
+            com.openexchange.groupware.settings.tree.modules.mail.InlineAttachments.class,
+            com.openexchange.groupware.settings.tree.modules.mail.LineWrap.class,
             com.openexchange.groupware.settings.tree.modules.mail.Module.class,
+            com.openexchange.groupware.settings.tree.modules.mail.SendAddress.class,
+            com.openexchange.groupware.settings.tree.modules.mail.SpamButton.class,
+            com.openexchange.groupware.settings.tree.modules.mail.VCard.class,
             com.openexchange.groupware.settings.tree.modules.portal.Module.class,
             com.openexchange.groupware.settings.tree.modules.tasks.Module.class,
             com.openexchange.groupware.settings.tree.modules.tasks.DelegateTasks.class,
@@ -222,257 +236,6 @@ public final class ConfigTree {
             return;
         }
         tree = new Setting("", -1, new SharedNode(""));
-
-        final Setting mail = new Setting("mail", -1, new SharedNode("mail"));
-        tree.addElement(mail);
-
-        mail.addElement(new Setting("defaultaddress", -1, new ReadOnlyValue() {
-            public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
-                setting.setSingleValue(user.getMail());
-            }
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-        }));
-
-        mail.addElement(new Setting("addresses", -1, new ReadOnlyValue() {
-            public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig, final Setting setting) throws SettingException {
-                final String[] aliases = user.getAliases();
-                if (null != aliases) {
-                    for (String alias : aliases) {
-                        setting.addMultiValue(alias);
-                    }
-                }
-            }
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-        }));
-
-        mail.addElement(new Setting("sendaddress", -1, new IValueHandler() {
-            public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
-                final UserSettingMail settings = UserSettingMailStorage
-                    .getInstance().getUserSettingMail(user.getId(), ctx);
-                if (null != settings) {
-                    setting.setSingleValue(settings.getSendAddr());
-                }
-            }
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-            public boolean isWritable() {
-                return true;
-            }
-            public void writeValue(final Context ctx, User user, final Setting setting) throws SettingException {
-                final String newAlias = (String) setting.getSingleValue();
-                final String[] aliases = user.getAliases();
-                boolean found = false;
-                for (int i = 0; aliases != null && i < aliases.length && !found; i++) {
-                    found = aliases[i].equals(newAlias);
-                }
-                if (user.getMail().equals(newAlias)) {
-                    found = true;
-                }
-                if (!found) {
-                    throw new SettingException(Code.INVALID_VALUE, newAlias,
-                        setting.getName());
-                }
-                final UserSettingMailStorage storage = UserSettingMailStorage
-                    .getInstance();
-                final UserSettingMail settings = storage.getUserSettingMail(
-                    user.getId(), ctx);
-                if (null != settings) {
-                    settings.setSendAddr(newAlias);
-                    try {
-                        storage.saveUserSettingMail(settings, user.getId(), ctx);
-                    } catch (OXException e) {
-                        throw new SettingException(e);
-                    }
-                }
-            }
-            public int getId() {
-                return -1;
-            }
-        }));
-
-        mail.addElement(new Setting("colorquoted", -1, new AbstractMailFuncs() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-            @Override
-            protected Boolean isSet(final UserSettingMail settings) {
-                return Boolean.valueOf(settings.isUseColorQuote());
-            }
-            @Override
-            protected void setValue(final UserSettingMail settings,
-                final String value) {
-                settings.setUseColorQuote(Boolean.parseBoolean(value));
-            }
-        }));
-
-        mail.addElement(new Setting("emoticons", -1, new AbstractMailFuncs() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-            @Override
-            protected Boolean isSet(final UserSettingMail settings) {
-                return Boolean.valueOf(settings.isShowGraphicEmoticons());
-            }
-            @Override
-            protected void setValue(final UserSettingMail settings,
-                final String value) {
-                settings.setShowGraphicEmoticons(Boolean.parseBoolean(value));
-            }
-        }));
-
-        mail.addElement(new Setting("deletemail", -1, new AbstractMailFuncs() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-            @Override
-            protected Boolean isSet(final UserSettingMail settings) {
-                return Boolean.valueOf(settings.isHardDeleteMsgs());
-            }
-            @Override
-            protected void setValue(final UserSettingMail settings,
-                final String value) {
-                settings.setHardDeleteMsgs(Boolean.parseBoolean(value));
-            }
-        }));
-
-        mail.addElement(new Setting("inlineattachments", -1,
-            new AbstractMailFuncs() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-            @Override
-            protected Boolean isSet(final UserSettingMail settings) {
-                return Boolean.valueOf(settings.isDisplayHtmlInlineContent());
-            }
-            @Override
-            protected void setValue(final UserSettingMail settings,
-                final String value) {
-                settings.setDisplayHtmlInlineContent(
-                    Boolean.parseBoolean(value));
-            }
-        }));
-
-        mail.addElement(new Setting("appendmailtext", -1, new AbstractMailFuncs() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-            @Override
-            protected Boolean isSet(final UserSettingMail settings) {
-                return Boolean.valueOf(!settings.isIgnoreOriginalMailTextOnReply());
-            }
-            @Override
-            protected void setValue(final UserSettingMail settings,
-                final String value) {
-                settings.setIgnoreOriginalMailTextOnReply(
-                    !Boolean.parseBoolean(value));
-            }
-        }));
-
-        mail.addElement(new Setting("forwardmessage", -1, new AbstractMailFuncs() {
-            private static final String INLINE = "Inline";
-            private static final String ATTACHMENT = "Attachment";
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-            @Override
-            protected Object isSet(final UserSettingMail settings) {
-                final String retval;
-                if (settings.isForwardAsAttachment()) {
-                    retval = ATTACHMENT;
-                } else {
-                    retval = INLINE;
-                }
-                return retval;
-            }
-            @Override
-            protected void setValue(final UserSettingMail settings,
-                final String value) {
-                settings.setForwardAsAttachment(ATTACHMENT.equals(value));
-            }
-        }));
-
-        mail.addElement(new Setting("linewrap", -1, new IValueHandler() {
-            public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
-                final UserSettingMail settings = UserSettingMailStorage
-                    .getInstance().getUserSettingMail(session.getUserId(), ctx);
-                if (null != settings) {
-                    setting.setSingleValue(Integer.valueOf(settings
-                        .getAutoLinebreak()));
-                }
-            }
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-            public boolean isWritable() {
-                return true;
-            }
-            public void writeValue(final Context ctx, final User user,
-                final Setting setting) throws SettingException {
-                final UserSettingMailStorage storage = UserSettingMailStorage
-                    .getInstance();
-                final UserSettingMail settings = storage.getUserSettingMail(
-                        user.getId(), ctx);
-                if (null != settings) {
-                    try {
-                        settings.setAutoLinebreak(Integer.parseInt(
-                            (String) setting.getSingleValue()));
-                        storage.saveUserSettingMail(settings, user.getId(),
-                                ctx);
-                    } catch (NumberFormatException e) {
-                        throw new SettingException(Code.JSON_READ_ERROR, e);
-                    } catch (OXException e) {
-                        throw new SettingException(e);
-                    }
-                }
-            }
-            public int getId() {
-                return -1;
-            }
-        }));
-
-        mail.addElement(new Setting("vcard", -1, new AbstractMailFuncs() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-            @Override
-            protected Boolean isSet(final UserSettingMail settings) {
-                return Boolean.valueOf(settings.isAppendVCard());
-            }
-            @Override
-            protected void setValue(final UserSettingMail settings,
-                final String value) {
-                settings.setAppendVCard(Boolean.parseBoolean(value));
-            }
-        }));
-
-        mail.addElement(new Setting("spambutton", -1, new ReadOnlyValue() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-            public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
-                final UserSettingMail settings = UserSettingMailStorage
-                    .getInstance().getUserSettingMail(session.getUserId(), ctx);
-                try {
-                    setting.setSingleValue(Boolean.valueOf(settings
-                        .isSpamEnabled()));
-                } catch (final MailConfigException e) {
-                    throw new SettingException(e);
-                }
-            }
-        }));
 
         try {
             final Class< ? extends PreferencesItemService>[] clazzes = getClasses();
