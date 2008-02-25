@@ -60,7 +60,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.ManagementServiceHolder;
-import com.openexchange.monitoring.MonitorInterface;
+import com.openexchange.monitoring.MonitorService;
 import com.openexchange.monitoring.internal.MonitorImpl;
 import com.openexchange.monitoring.internal.MonitoringInit;
 import com.openexchange.server.ServiceHolderListener;
@@ -129,7 +129,7 @@ public final class MonitoringActivator implements BundleActivator {
 						/*
 						 * Register monitor service
 						 */
-						serviceRegistration = context.registerService(MonitorInterface.class.getCanonicalName(),
+						serviceRegistration = context.registerService(MonitorService.class.getCanonicalName(),
 								new MonitorImpl(), null);
 					} catch (final AbstractOXException e) {
 						LOG.error(e.getLocalizedMessage(), e);

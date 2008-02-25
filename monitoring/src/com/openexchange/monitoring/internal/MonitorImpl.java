@@ -55,7 +55,7 @@ import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-import com.openexchange.monitoring.MonitorInterface;
+import com.openexchange.monitoring.MonitorService;
 import com.openexchange.monitoring.MonitoringInfo;
 
 /**
@@ -63,7 +63,7 @@ import com.openexchange.monitoring.MonitoringInfo;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public class MonitorImpl implements MonitorInterface {
+public class MonitorImpl implements MonitorService {
 	
 	public MonitorImpl() {
 		super();

@@ -49,7 +49,7 @@
 
 package com.openexchange.monitoring;
 
-public interface MonitorInterface {
+public interface MonitorService {
 
 	public void dummyMethod();
 
