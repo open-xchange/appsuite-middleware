@@ -105,6 +105,7 @@ public final class ManagementActivator implements BundleActivator {
 		this.context = context;
 		try {
 			csh = ConfigurationServiceHolder.newInstance();
+			ManagementInit.getInstance().setConfigurationServiceHolder(csh);
 			/*
 			 * Init service trackers
 			 */
@@ -132,7 +133,7 @@ public final class ManagementActivator implements BundleActivator {
 			/*
 			 * Open service trackers
 			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
+			for (final ServiceTracker tracker : serviceTrackerList) {
 				tracker.open();
 			}
 		} catch (final Throwable t) {
@@ -173,7 +174,7 @@ public final class ManagementActivator implements BundleActivator {
 			/*
 			 * Close service trackers
 			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
+			for (final ServiceTracker tracker : serviceTrackerList) {
 				tracker.close();
 			}
 			serviceTrackerList.clear();

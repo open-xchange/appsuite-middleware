@@ -55,6 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.config.Configuration;
+import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
@@ -73,11 +74,23 @@ public final class ManagementInit implements Initialization {
 	 */
 	private static final Log LOG = LogFactory.getLog(ManagementInit.class);
 
+	private ConfigurationServiceHolder csh;
+
 	/**
 	 * Prevent instantiation.
 	 */
 	private ManagementInit() {
 		super();
+	}
+
+	/**
+	 * Sets the configuration service holder
+	 * 
+	 * @param csh
+	 *            The configuration service holder
+	 */
+	public void setConfigurationServiceHolder(final ConfigurationServiceHolder csh) {
+		this.csh = csh;
 	}
 
 	/**
@@ -96,18 +109,18 @@ public final class ManagementInit implements Initialization {
 			return;
 		}
 		final ManagementAgentImpl agent = ManagementAgentImpl.getInstance();
-		final Configuration c = ConfigurationService.getInstance().getService();
+		final Configuration c = csh.getService();
 		try {
 			String bindAddress = c.getProperty("MonitorJMXBindAddress", "localhost");
 			if (bindAddress == null) {
 				bindAddress = "localhost";
 			}
-			
+
 			final int jmxPort = c.getIntProperty("MonitorJMXPort", 9999);
 			agent.setJmxPort(jmxPort);
 			agent.setJmxBindAddr(bindAddress);
 		} finally {
-			ConfigurationService.getInstance().ungetService(c);
+			csh.ungetService(c);
 		}
 		agent.run();
 		if (LOG.isInfoEnabled()) {
