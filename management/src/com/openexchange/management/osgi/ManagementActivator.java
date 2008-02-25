@@ -58,9 +58,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.config.Configuration;
+import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.management.ManagementAgent;
-import com.openexchange.management.internal.ConfigurationService;
 import com.openexchange.management.internal.ManagementAgentImpl;
 import com.openexchange.management.internal.ManagementInit;
 import com.openexchange.server.ServiceHolderListener;
@@ -83,6 +83,8 @@ public final class ManagementActivator implements BundleActivator {
 
 	private ServiceRegistration serviceRegistration;
 
+	private ConfigurationServiceHolder csh;
+
 	private ServiceHolderListener<Configuration> listener;
 
 	/**
@@ -99,15 +101,15 @@ public final class ManagementActivator implements BundleActivator {
 	 */
 	public void start(final BundleContext context) throws Exception {
 		LOG.info("starting bundle: com.openexchange.management");
-		
-	    this.context = context;
+
+		this.context = context;
 		try {
+			csh = ConfigurationServiceHolder.newInstance();
 			/*
 			 * Init service trackers
 			 */
 			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
-					new BundleServiceTracker<Configuration>(context, ConfigurationService.getInstance(),
-							Configuration.class)));
+					new BundleServiceTracker<Configuration>(context, csh, Configuration.class)));
 			/*
 			 * Start management when configuration service is available
 			 */
@@ -115,7 +117,7 @@ public final class ManagementActivator implements BundleActivator {
 
 				public void onServiceAvailable(final Configuration service) throws AbstractOXException {
 					try {
-					    stopInternal();
+						stopInternal();
 						startInternal();
 					} catch (final AbstractOXException e) {
 						LOG.error(e.getLocalizedMessage(), e);
@@ -126,13 +128,13 @@ public final class ManagementActivator implements BundleActivator {
 				public void onServiceRelease() {
 				}
 			};
-			ConfigurationService.getInstance().addServiceHolderListener(listener);
-            /*
-             * Open service trackers
-             */
-            for (ServiceTracker tracker : serviceTrackerList) {
-                tracker.open();
-            }
+			csh.addServiceHolderListener(listener);
+			/*
+			 * Open service trackers
+			 */
+			for (ServiceTracker tracker : serviceTrackerList) {
+				tracker.open();
+			}
 		} catch (final Throwable t) {
 			LOG.error(t.getLocalizedMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -141,22 +143,22 @@ public final class ManagementActivator implements BundleActivator {
 	}
 
 	private void startInternal() throws AbstractOXException {
-        ManagementInit.getInstance().start();
-        /*
-         * Register management service
-         */
-        serviceRegistration = context.registerService(ManagementAgent.class.getCanonicalName(),
-                ManagementAgentImpl.getInstance(), null);
+		ManagementInit.getInstance().start();
+		/*
+		 * Register management service
+		 */
+		serviceRegistration = context.registerService(ManagementAgent.class.getCanonicalName(), ManagementAgentImpl
+				.getInstance(), null);
 	}
 
 	private void stopInternal() throws AbstractOXException {
-        if (null != serviceRegistration) {
-            serviceRegistration.unregister();
-            serviceRegistration = null;
-        }
-        if (ManagementInit.getInstance().isStarted()) {
-            ManagementInit.getInstance().stop();
-        }
+		if (null != serviceRegistration) {
+			serviceRegistration.unregister();
+			serviceRegistration = null;
+		}
+		if (ManagementInit.getInstance().isStarted()) {
+			ManagementInit.getInstance().stop();
+		}
 	}
 
 	/*
@@ -166,16 +168,17 @@ public final class ManagementActivator implements BundleActivator {
 	 */
 	public void stop(final BundleContext context) throws Exception {
 		LOG.info("stopping bundle: com.openexchange.management");
-		
+
 		try {
-            /*
-             * Close service trackers
-             */
-            for (ServiceTracker tracker : serviceTrackerList) {
-                tracker.close();
-            }
-            serviceTrackerList.clear();
-			ConfigurationService.getInstance().removeServiceHolderListenerByName(listener.getClass().getName());
+			/*
+			 * Close service trackers
+			 */
+			for (ServiceTracker tracker : serviceTrackerList) {
+				tracker.close();
+			}
+			serviceTrackerList.clear();
+			csh.removeServiceHolderListenerByName(listener.getClass().getName());
+			csh = null;
 			stopInternal();
 		} catch (final Throwable t) {
 			LOG.error(t.getLocalizedMessage(), t);
