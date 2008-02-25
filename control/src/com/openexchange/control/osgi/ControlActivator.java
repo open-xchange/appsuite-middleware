@@ -58,7 +58,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.control.internal.ControlInit;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.management.ManagementAgent;
+import com.openexchange.management.ManagementService;
 import com.openexchange.management.ManagementServiceHolder;
 import com.openexchange.server.ServiceHolderListener;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
@@ -78,7 +78,7 @@ public final class ControlActivator implements BundleActivator {
 
 	private ManagementServiceHolder msh;
 
-	private ServiceHolderListener<ManagementAgent> listener;
+	private ServiceHolderListener<ManagementService> listener;
 
 	/**
 	 * Initializes a new {@link ControlActivator}
@@ -101,8 +101,8 @@ public final class ControlActivator implements BundleActivator {
 			/*
 			 * Init service trackers
 			 */
-			serviceTrackerList.add(new ServiceTracker(context, ManagementAgent.class.getName(),
-					new BundleServiceTracker<ManagementAgent>(context, msh, ManagementAgent.class)));
+			serviceTrackerList.add(new ServiceTracker(context, ManagementService.class.getName(),
+					new BundleServiceTracker<ManagementService>(context, msh, ManagementService.class)));
 			/*
 			 * Open service trackers
 			 */
@@ -112,9 +112,9 @@ public final class ControlActivator implements BundleActivator {
 			/*
 			 * Start monitoring when configuration service is available
 			 */
-			listener = new ServiceHolderListener<ManagementAgent>() {
+			listener = new ServiceHolderListener<ManagementService>() {
 
-				public void onServiceAvailable(final ManagementAgent service) throws AbstractOXException {
+				public void onServiceAvailable(final ManagementService service) throws AbstractOXException {
 					try {
 						if (ControlInit.getInstance().isStarted()) {
 							ControlInit.getInstance().stop();

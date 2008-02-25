@@ -76,7 +76,7 @@ import com.openexchange.mail.MailProvider;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
 import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.transport.TransportProvider;
-import com.openexchange.management.ManagementAgent;
+import com.openexchange.management.ManagementService;
 import com.openexchange.management.ManagementServiceHolder;
 import com.openexchange.monitoring.MonitorInterface;
 import com.openexchange.server.ServiceHolderListener;
@@ -199,7 +199,7 @@ public class Activator implements BundleActivator, EventHandler {
 						new BundleServiceTracker<ConfigJumpInterface>(context, ConfigJumpService.getInstance(),
 								ConfigJumpInterface.class)));
 				// Management is only needed for groupware.
-				serviceTrackerList.add(new ServiceTracker(context, ManagementAgent.class.getName(),
+				serviceTrackerList.add(new ServiceTracker(context, ManagementService.class.getName(),
 						new ManagementServiceTracker(context, msh)));
 				serviceTrackerList.add(new ServiceTracker(context, MonitorInterface.class.getName(),
 						new BundleServiceTracker<MonitorInterface>(context, MonitorService.getInstance(),

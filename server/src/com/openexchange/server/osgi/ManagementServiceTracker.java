@@ -58,7 +58,7 @@ import org.osgi.framework.BundleContext;
 
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.database.Pools;
-import com.openexchange.management.ManagementAgent;
+import com.openexchange.management.ManagementService;
 import com.openexchange.management.ManagementServiceHolder;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 
@@ -68,7 +68,7 @@ import com.openexchange.server.osgiservice.BundleServiceTracker;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ManagementServiceTracker extends BundleServiceTracker<ManagementAgent> {
+public final class ManagementServiceTracker extends BundleServiceTracker<ManagementService> {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ManagementServiceTracker.class);
@@ -80,11 +80,11 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
 	 *            The bundle context
 	 */
 	public ManagementServiceTracker(final BundleContext context, final ManagementServiceHolder msh) {
-		super(context, msh, ManagementAgent.class);
+		super(context, msh, ManagementService.class);
 	}
 
 	@Override
-	protected void addingServiceInternal(final ManagementAgent managementAgent) {
+	protected void addingServiceInternal(final ManagementService managementAgent) {
 		try {
 			/*
 			 * Add all mbeans since monitoring service is now available

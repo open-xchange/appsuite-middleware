@@ -60,7 +60,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.management.ManagementAgent;
+import com.openexchange.management.ManagementService;
 import com.openexchange.management.internal.ManagementAgentImpl;
 import com.openexchange.management.internal.ManagementInit;
 import com.openexchange.server.ServiceHolderListener;
@@ -148,7 +148,7 @@ public final class ManagementActivator implements BundleActivator {
 		/*
 		 * Register management service
 		 */
-		serviceRegistration = context.registerService(ManagementAgent.class.getCanonicalName(), ManagementAgentImpl
+		serviceRegistration = context.registerService(ManagementService.class.getCanonicalName(), ManagementAgentImpl
 				.getInstance(), null);
 	}
 

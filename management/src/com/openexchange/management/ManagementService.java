@@ -52,12 +52,12 @@ package com.openexchange.management;
 import javax.management.ObjectName;
 
 /**
- * {@link ManagementAgent}
+ * {@link ManagementService}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public interface ManagementAgent {
+public interface ManagementService {
 
 	/**
 	 * Registers a new MBean

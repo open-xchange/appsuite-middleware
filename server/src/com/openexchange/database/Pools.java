@@ -69,7 +69,7 @@ import org.jdom.JDOMException;
 
 import com.openexchange.configuration.ConfigDB;
 import com.openexchange.configuration.ConfigDB.Property;
-import com.openexchange.management.ManagementAgent;
+import com.openexchange.management.ManagementService;
 import com.openexchange.server.ServerTimer;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.DBPoolingException.Code;
@@ -243,7 +243,7 @@ public final class Pools implements Runnable {
         try {
             final ObjectName objName = new ObjectName(ConnectionPoolMBean
                 .DOMAIN, "name", name);
-            final ManagementAgent management = DatabaseInit.getInstance().getManagementServiceHolder().getService();
+            final ManagementService management = DatabaseInit.getInstance().getManagementServiceHolder().getService();
             if (null != management) {
                 try {
                     management.unregisterMBean(objName);
@@ -274,7 +274,7 @@ public final class Pools implements Runnable {
         try {
             final ObjectName objName = new ObjectName(ConnectionPoolMBean
                 .DOMAIN, "name", name);
-            final ManagementAgent management = DatabaseInit.getInstance().getManagementServiceHolder().getService();
+            final ManagementService management = DatabaseInit.getInstance().getManagementServiceHolder().getService();
             if (null != management) {
                 try {
                     management.registerMBean(objName, pool);

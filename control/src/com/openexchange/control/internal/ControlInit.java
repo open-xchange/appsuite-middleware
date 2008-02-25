@@ -58,7 +58,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.management.ManagementAgent;
+import com.openexchange.management.ManagementService;
 import com.openexchange.management.ManagementServiceHolder;
 import com.openexchange.server.Initialization;
 
@@ -117,7 +117,7 @@ public final class ControlInit implements Initialization {
 		/*
 		 * Create Beans and register them
 		 */
-		final ManagementAgent managementAgent = msh.getService();
+		final ManagementService managementAgent = msh.getService();
 		try {
 			final GeneralControl generalControlBean = new GeneralControl(bundleContext);
 			managementAgent.registerMBean(new ObjectName("com.openexchange.control", "name", "Control"),
@@ -143,7 +143,7 @@ public final class ControlInit implements Initialization {
 			return;
 		}
 
-		final ManagementAgent managementAgent = msh.getService();
+		final ManagementService managementAgent = msh.getService();
 		try {
 			managementAgent.unregisterMBean(new ObjectName("com.openexchange.control", "name", "Control"));
 		} catch (Exception exc) {

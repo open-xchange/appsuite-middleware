@@ -60,14 +60,14 @@ import javax.management.remote.JMXServiceURL;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.management.ManagementAgent;
+import com.openexchange.management.ManagementService;
 
 /**
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class ManagementAgentImpl extends AbstractAgent implements ManagementAgent {
+public class ManagementAgentImpl extends AbstractAgent implements ManagementService {
 
 	/*
 	 * Static fields

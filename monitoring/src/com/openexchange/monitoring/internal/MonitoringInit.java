@@ -58,7 +58,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.management.ManagementAgent;
+import com.openexchange.management.ManagementService;
 import com.openexchange.management.ManagementServiceHolder;
 import com.openexchange.server.Initialization;
 
@@ -123,7 +123,7 @@ public final class MonitoringInit implements Initialization {
 		/*
 		 * Create Beans and register them
 		 */
-		final ManagementAgent managementAgent = msh.getService();
+		final ManagementService managementAgent = msh.getService();
 		try {
 			final GeneralMonitor generalMonitorBean = new GeneralMonitor();
 			try {
@@ -152,7 +152,7 @@ public final class MonitoringInit implements Initialization {
 			LOG.error(MonitoringInit.class.getName() + " has not been started");
 			return;
 		}
-		final ManagementAgent managementAgent = msh.getService();
+		final ManagementService managementAgent = msh.getService();
 		if (managementAgent != null) {
 			try {
 				try {

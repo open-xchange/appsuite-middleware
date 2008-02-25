@@ -57,7 +57,7 @@ import com.openexchange.server.ServiceHolder;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ManagementServiceHolder extends ServiceHolder<ManagementAgent> {
+public final class ManagementServiceHolder extends ServiceHolder<ManagementService> {
 
 	/**
 	 * Gets the management service instance.
