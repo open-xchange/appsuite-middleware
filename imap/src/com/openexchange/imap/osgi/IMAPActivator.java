@@ -60,7 +60,9 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.openexchange.config.Configuration;
+import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.imap.IMAPProvider;
+import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.mail.MailProvider;
 
 /**
@@ -89,8 +91,6 @@ public final class IMAPActivator implements BundleActivator {
 		dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
 	}
 
-	
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -100,11 +100,19 @@ public final class IMAPActivator implements BundleActivator {
 		try {
 			tracker = new ServiceTracker(context, Configuration.class.getName(), new ServiceTrackerCustomizer() {
 
+				private final ConfigurationServiceHolder csh = ConfigurationServiceHolder.newInstance();
+
 				public Object addingService(final ServiceReference reference) {
 					final Object addedService = context.getService(reference);
 					if (addedService instanceof Configuration) {
-						imapServiceRegistration = context.registerService(MailProvider.class.getName(), new IMAPProvider(),
-								dictionary);
+						IMAPProperties.getInstance().setConfigurationServiceHolder(csh);
+						try {
+							csh.setService((Configuration) addedService);
+						} catch (final Exception e) {
+							LOG.error(e.getMessage(), e);
+						}
+						imapServiceRegistration = context.registerService(MailProvider.class.getName(),
+								new IMAPProvider(), dictionary);
 					}
 					return addedService;
 				}
@@ -114,6 +122,11 @@ public final class IMAPActivator implements BundleActivator {
 
 				public void removedService(ServiceReference reference, Object service) {
 					// TODO Unregister IMAP bundle if config down???
+					try {
+						csh.removeService();
+					} catch (final Exception e) {
+						LOG.error(e.getMessage(), e);
+					}
 				}
 			});
 			tracker.open();

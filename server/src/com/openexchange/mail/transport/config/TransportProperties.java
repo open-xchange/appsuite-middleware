@@ -52,7 +52,7 @@ package com.openexchange.mail.transport.config;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.openexchange.config.Configuration;
-import com.openexchange.mail.osgi.services.ConfigurationService;
+import com.openexchange.mail.transport.TransportInitialization;
 
 /**
  * {@link TransportProperties}
@@ -126,25 +126,26 @@ public final class TransportProperties {
 	private void loadProperties0() {
 		final StringBuilder logBuilder = new StringBuilder(1024);
 		logBuilder.append("\nLoading global transport properties...\n");
-		
-		final Configuration configuration = ConfigurationService.getInstance().getService();
+
+		final Configuration configuration = TransportInitialization.getInstance().getConfigurationServiceHolder()
+				.getService();
 		try {
-	
+
 			{
-				final String referencedPartLimitStr = configuration.getProperty("com.openexchange.mail.transport.referencedPartLimit", "1048576")
-						.trim();
+				final String referencedPartLimitStr = configuration.getProperty(
+						"com.openexchange.mail.transport.referencedPartLimit", "1048576").trim();
 				try {
 					referencedPartLimit = Integer.parseInt(referencedPartLimitStr);
 					logBuilder.append("\tReferenced Part Limit: ").append(referencedPartLimit).append('\n');
 				} catch (final NumberFormatException e) {
 					referencedPartLimit = 1048576;
-					logBuilder.append("\tReferenced Part Limit: Invalid value \"").append(referencedPartLimitStr).append(
-							"\". Setting to fallback ").append(referencedPartLimit).append('\n');
-	
+					logBuilder.append("\tReferenced Part Limit: Invalid value \"").append(referencedPartLimitStr)
+							.append("\". Setting to fallback ").append(referencedPartLimit).append('\n');
+
 				}
 			}
 		} finally {
-			ConfigurationService.getInstance().ungetService(configuration);
+			TransportInitialization.getInstance().getConfigurationServiceHolder().ungetService(configuration);
 		}
 
 		logBuilder.append("Global transport properties successfully loaded!");

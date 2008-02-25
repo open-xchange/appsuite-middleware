@@ -60,8 +60,10 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.openexchange.config.Configuration;
+import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.smtp.SMTPProvider;
+import com.openexchange.smtp.config.SMTPProperties;
 
 /**
  * {@link SMTPActivator}
@@ -98,9 +100,17 @@ public final class SMTPActivator implements BundleActivator {
 		try {
 			tracker = new ServiceTracker(context, Configuration.class.getName(), new ServiceTrackerCustomizer() {
 
+				private final ConfigurationServiceHolder csh = ConfigurationServiceHolder.newInstance();
+
 				public Object addingService(final ServiceReference reference) {
 					final Object addedService = context.getService(reference);
 					if (addedService instanceof Configuration) {
+						SMTPProperties.getInstance().setConfigurationServiceHolder(csh);
+						try {
+							csh.setService((Configuration) addedService);
+						} catch (final Exception e) {
+							LOG.error(e.getMessage(), e);
+						}
 						smtpServiceRegistration = context.registerService(TransportProvider.class.getName(),
 								new SMTPProvider(), dictionary);
 					}
@@ -112,6 +122,11 @@ public final class SMTPActivator implements BundleActivator {
 
 				public void removedService(ServiceReference reference, Object service) {
 					// TODO Unregister SMTP bundle if config down???
+					try {
+						csh.removeService();
+					} catch (final Exception e) {
+						LOG.error(e.getMessage(), e);
+					}
 				}
 			});
 			tracker.open();

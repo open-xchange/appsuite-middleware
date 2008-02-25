@@ -67,7 +67,7 @@ import com.openexchange.authentication.Authentication;
 import com.openexchange.authentication.service.AuthenticationService;
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.Configuration;
-import com.openexchange.config.services.ConfigurationService;
+import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.configjump.ConfigJumpInterface;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.i18n.I18nTools;
@@ -103,15 +103,17 @@ public class Activator implements BundleActivator, EventHandler {
 	private final CharsetProvider charsetProvider = new AliasCharsetProvider();
 
 	private final HttpService httpService = new HttpServiceImpl();
-	
+
 	private ServiceRegistration eventServiceRegistration = null;
 
 	private final List<ServiceRegistration> registrationList = new ArrayList<ServiceRegistration>();
 
 	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
 
-	private ServiceHolderListener listener;
-	
+	private ConfigurationServiceHolder configurationServiceHolder;
+
+	private ServiceHolderListener<Configuration> listener;
+
 	/**
 	 * Bundle ID of admin.<br>
 	 * TODO: Maybe this should be read by config.ini
@@ -123,84 +125,93 @@ public class Activator implements BundleActivator, EventHandler {
 	 */
 	public void start(final BundleContext context) throws Exception {
 		LOG.info("starting bundle: com.openexchange.server");
-		
+
 		try {
-		    // Configuration service is always needed.
+			// Configuration service is always needed.
+			configurationServiceHolder = ConfigurationServiceHolder.newInstance();
 			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
-					new BundleServiceTracker<Configuration>(context, ConfigurationService.getInstance(),
-							Configuration.class)));
-			
+					new BundleServiceTracker<Configuration>(context, configurationServiceHolder, Configuration.class)));
+
 			// TODO: Remove when mail is bundled
-			ConfigurationService.getInstance().addServiceHolderListener((listener = new ServiceHolderListener<Configuration>() {
+			configurationServiceHolder.addServiceHolderListener((listener = new ServiceHolderListener<Configuration>() {
 
 				public void onServiceAvailable(final Configuration service) throws Exception {
 					/**
 					 * Mail initialization
 					 */
+					com.openexchange.mail.MailInitialization.getInstance().setConfigurationServiceHolder(
+							configurationServiceHolder);
 					com.openexchange.mail.MailInitialization.getInstance().start();
 					/**
 					 * Transport initialization
 					 */
+					com.openexchange.mail.transport.TransportInitialization.getInstance()
+							.setConfigurationServiceHolder(configurationServiceHolder);
 					com.openexchange.mail.transport.TransportInitialization.getInstance().start();
-					
+
 				}
 
 				public void onServiceRelease() throws Exception {
 					// TODO Auto-generated method stub
-					
+
 				}
 			}));
-			
-		    // event service is always needed.
+
+			// event service is always needed.
 			serviceTrackerList.add(new ServiceTracker(context, EventAdmin.class.getName(),
-					new BundleServiceTracker<EventAdmin>(context, EventAdminService.getInstance(),
-							EventAdmin.class)));
-			
+					new BundleServiceTracker<EventAdmin>(context, EventAdminService.getInstance(), EventAdmin.class)));
+
 			// I18n service load
-			serviceTrackerList.add(new ServiceTracker(context, I18nTools.class.getName(), new I18nServiceListener(context)));
-		
+			serviceTrackerList.add(new ServiceTracker(context, I18nTools.class.getName(), new I18nServiceListener(
+					context)));
+
 			// Mail provider service tracker
-			serviceTrackerList.add(new ServiceTracker(context, MailProvider.class.getName(), new MailProviderServiceTracker(context)));
+			serviceTrackerList.add(new ServiceTracker(context, MailProvider.class.getName(),
+					new MailProviderServiceTracker(context)));
 
 			// Transport provider service tracker
-			serviceTrackerList.add(new ServiceTracker(context, TransportProvider.class.getName(), new TransportProviderServiceTracker(context)));
-			
-            // contacts
-			serviceTrackerList.add(new ServiceTracker(context, ContactInterface.class.getName(), new ContactServiceListener(context)));
-			
+			serviceTrackerList.add(new ServiceTracker(context, TransportProvider.class.getName(),
+					new TransportProviderServiceTracker(context)));
+
+			// contacts
+			serviceTrackerList.add(new ServiceTracker(context, ContactInterface.class.getName(),
+					new ContactServiceListener(context)));
+
 			/*
 			 * Start server
 			 */
 			if (isAdminBundleInstalled(context)) {
-                // Start up server to only fit admin needs.
+				// Start up server to only fit admin needs.
 				starter.adminStart();
 			} else {
-			    // SessionD is only needed for groupware.
-                serviceTrackerList.add(new ServiceTracker(context, SessiondConnectorInterface.class.getName(),
-                    new BundleServiceTracker<SessiondConnectorInterface>(context, SessiondService.getInstance(),
-                            SessiondConnectorInterface.class)));
-			    // ConfigJump is only needed for groupware.
-                serviceTrackerList.add(new ServiceTracker(context, ConfigJumpInterface.class.getName(),
-                    new BundleServiceTracker<ConfigJumpInterface>(context, ConfigJumpService.getInstance(),
-                            ConfigJumpInterface.class)));
-                // Management is only needed for groupware.
-                serviceTrackerList.add(new ServiceTracker(context, ManagementAgent.class.getName(), new ManagementServiceTracker(
-                    context)));
-                serviceTrackerList.add(new ServiceTracker(context, MonitorInterface.class.getName(),
-                        new BundleServiceTracker<MonitorInterface>(context, MonitorService.getInstance(),
-                                MonitorInterface.class)));
-                // Authentication is only needed for groupware.
-                serviceTrackerList.add(new ServiceTracker(context, Authentication.class.getName(),
-                    new BundleServiceTracker<Authentication>(context, AuthenticationService.getInstance(), Authentication.class)));
+				// SessionD is only needed for groupware.
+				serviceTrackerList.add(new ServiceTracker(context, SessiondConnectorInterface.class.getName(),
+						new BundleServiceTracker<SessiondConnectorInterface>(context, SessiondService.getInstance(),
+								SessiondConnectorInterface.class)));
+				// ConfigJump is only needed for groupware.
+				serviceTrackerList.add(new ServiceTracker(context, ConfigJumpInterface.class.getName(),
+						new BundleServiceTracker<ConfigJumpInterface>(context, ConfigJumpService.getInstance(),
+								ConfigJumpInterface.class)));
+				// Management is only needed for groupware.
+				serviceTrackerList.add(new ServiceTracker(context, ManagementAgent.class.getName(),
+						new ManagementServiceTracker(context)));
+				serviceTrackerList.add(new ServiceTracker(context, MonitorInterface.class.getName(),
+						new BundleServiceTracker<MonitorInterface>(context, MonitorService.getInstance(),
+								MonitorInterface.class)));
+				// Authentication is only needed for groupware.
+				serviceTrackerList.add(new ServiceTracker(context, Authentication.class.getName(),
+						new BundleServiceTracker<Authentication>(context, AuthenticationService.getInstance(),
+								Authentication.class)));
 				// Start up server the usual way
 				starter.start();
 			}
-            // Open service trackers
-            for (ServiceTracker tracker : serviceTrackerList) {
-                tracker.open();
-            }
+			// Open service trackers
+			for (ServiceTracker tracker : serviceTrackerList) {
+				tracker.open();
+			}
 			/**
 			 * In future:
+			 * 
 			 * <pre>
 			 * final ServiceProxyListener l = new ServerStarterServiceListener(starter, isAdminBundleInstalled(context));
 			 * ConfigurationService.getInstance().addServiceProxyListener(l);
@@ -222,7 +233,7 @@ public class Activator implements BundleActivator, EventHandler {
 	 */
 	public void stop(final BundleContext context) throws Exception {
 		LOG.info("stopping bundle: com.openexchange.server");
-		
+
 		try {
 			try {
 				starter.stop();
@@ -234,10 +245,17 @@ public class Activator implements BundleActivator, EventHandler {
 					registration.unregister();
 				}
 				registrationList.clear();
-				
-				ConfigurationService.getInstance().removeServiceHolderListenerByRef(listener);
+
+				/*
+				 * Close configuration service holder
+				 */
+				configurationServiceHolder.removeServiceHolderListenerByRef(listener);
 				listener = null;
-				
+				com.openexchange.mail.MailInitialization.getInstance().setConfigurationServiceHolder(null);
+				com.openexchange.mail.transport.TransportInitialization.getInstance().setConfigurationServiceHolder(
+						null);
+				configurationServiceHolder = null;
+
 				/*
 				 * Close service trackers
 				 */
@@ -271,8 +289,8 @@ public class Activator implements BundleActivator, EventHandler {
 		return false;
 	}
 
-	public void handleEvent(Event event) {
+	public void handleEvent(final Event event) {
 		System.out.println("Event detected");
-		
+
 	}
 }

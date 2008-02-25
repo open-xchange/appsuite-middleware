@@ -93,11 +93,32 @@ public final class SMTPProperties extends AbstractProtocolProperties {
 
 	private int smtpConnectionTimeout;
 
+	private ConfigurationServiceHolder configurationServiceHolder;
+
 	/**
 	 * Initializes a new {@link SMTPProperties}
 	 */
 	private SMTPProperties() {
 		super();
+	}
+
+	/**
+	 * Gets the configuration service holder
+	 * 
+	 * @return The configuration service holder
+	 */
+	public ConfigurationServiceHolder getConfigurationServiceHolder() {
+		return configurationServiceHolder;
+	}
+
+	/**
+	 * Sets the configuration service holder
+	 * 
+	 * @param configurationServiceHolder
+	 *            The configuration service holder
+	 */
+	public void setConfigurationServiceHolder(final ConfigurationServiceHolder configurationServiceHolder) {
+		this.configurationServiceHolder = configurationServiceHolder;
 	}
 
 	/*
@@ -110,7 +131,7 @@ public final class SMTPProperties extends AbstractProtocolProperties {
 		final StringBuilder logBuilder = new StringBuilder(1024);
 		logBuilder.append("\nLoading global SMTP properties...\n");
 
-		final Configuration configuration = ConfigurationServiceHolder.getInstance().getService();
+		final Configuration configuration = configurationServiceHolder.getService();
 		try {
 			{
 				final String smtpLocalhostStr = configuration.getProperty("com.openexchange.smtp.smtpLocalhost").trim();
@@ -174,7 +195,7 @@ public final class SMTPProperties extends AbstractProtocolProperties {
 				}
 			}
 		} finally {
-			ConfigurationServiceHolder.getInstance().ungetService(configuration);
+			configurationServiceHolder.ungetService(configuration);
 		}
 
 		logBuilder.append("Global SMTP properties successfully loaded!");

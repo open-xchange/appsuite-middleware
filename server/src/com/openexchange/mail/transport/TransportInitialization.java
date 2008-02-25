@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.transport;
 
+import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.transport.config.TransportPropertiesInit;
 import com.openexchange.server.Initialization;
@@ -65,6 +66,8 @@ public final class TransportInitialization implements Initialization {
 
 	private static final TransportInitialization instance = new TransportInitialization();
 
+	private ConfigurationServiceHolder configurationServiceHolder;
+
 	/**
 	 * @return The singleton instance of {@link TransportInitialization}
 	 */
@@ -79,6 +82,25 @@ public final class TransportInitialization implements Initialization {
 		super();
 	}
 
+	/**
+	 * Gets the configuration service holder
+	 * 
+	 * @return The configuration service holder
+	 */
+	public ConfigurationServiceHolder getConfigurationServiceHolder() {
+		return configurationServiceHolder;
+	}
+
+	/**
+	 * Sets the configuration service holder
+	 * 
+	 * @param configurationServiceHolder
+	 *            The configuration service holder
+	 */
+	public void setConfigurationServiceHolder(final ConfigurationServiceHolder configurationServiceHolder) {
+		this.configurationServiceHolder = configurationServiceHolder;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -90,10 +112,9 @@ public final class TransportInitialization implements Initialization {
 		 */
 		TransportPropertiesInit.getInstance().start();
 		/*
-		 * TODO: Remove
-		 * Simulate bundle availability
+		 * TODO: Remove Simulate bundle availability
 		 */
-		//TransportProvider.initTransportProvider();
+		// TransportProvider.initTransportProvider();
 	}
 
 	/*
@@ -103,10 +124,9 @@ public final class TransportInitialization implements Initialization {
 	 */
 	public void stop() throws AbstractOXException {
 		/*
-		 * TODO: Remove
-		 * Simulate bundle disappearance
+		 * TODO: Remove Simulate bundle disappearance
 		 */
-		//TransportProvider.resetTransportProvider();
+		// TransportProvider.resetTransportProvider();
 		/*
 		 * Stop global transport system
 		 */

@@ -108,12 +108,33 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 
 	private final Map<String, Boolean> newACLExtMap;
 
+	private ConfigurationServiceHolder configurationServiceHolder;
+
 	/**
 	 * Initializes a new {@link IMAPProperties}
 	 */
 	private IMAPProperties() {
 		super();
 		newACLExtMap = new ConcurrentHashMap<String, Boolean>();
+	}
+
+	/**
+	 * Gets the configuration service holder
+	 * 
+	 * @return The configuration service holder
+	 */
+	public ConfigurationServiceHolder getConfigurationServiceHolder() {
+		return configurationServiceHolder;
+	}
+
+	/**
+	 * Sets the configuration service holder
+	 * 
+	 * @param configurationServiceHolder
+	 *            The configuration service holder
+	 */
+	public void setConfigurationServiceHolder(final ConfigurationServiceHolder configurationServiceHolder) {
+		this.configurationServiceHolder = configurationServiceHolder;
 	}
 
 	/*
@@ -126,7 +147,7 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 		final StringBuilder logBuilder = new StringBuilder(1024);
 		logBuilder.append("\nLoading global IMAP properties...\n");
 
-		final Configuration configuration = ConfigurationServiceHolder.getInstance().getService();
+		final Configuration configuration = configurationServiceHolder.getService();
 		try {
 			{
 				final String imapSortStr = configuration.getProperty("com.openexchange.imap.imapSort", "application")
@@ -236,7 +257,7 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 				}
 			}
 		} finally {
-			ConfigurationServiceHolder.getInstance().ungetService(configuration);
+			configurationServiceHolder.ungetService(configuration);
 		}
 
 		logBuilder.append("Global IMAP properties successfully loaded!");

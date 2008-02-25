@@ -60,10 +60,10 @@ import java.util.regex.Pattern;
 
 import com.openexchange.config.Configuration;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.config.MailConfig.CredSrc;
 import com.openexchange.mail.config.MailConfig.LoginType;
 import com.openexchange.mail.mime.spam.DefaultSpamHandler;
-import com.openexchange.mail.osgi.services.ConfigurationService;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
 
@@ -210,7 +210,8 @@ public final class MailProperties {
 		final StringBuilder logBuilder = new StringBuilder(1024);
 		logBuilder.append("\nLoading global mail properties...\n");
 
-		final Configuration configuration = ConfigurationService.getInstance().getService();
+		final Configuration configuration = MailInitialization.getInstance().getConfigurationServiceHolder()
+				.getService();
 		try {
 
 			{
@@ -475,7 +476,7 @@ public final class MailProperties {
 				logBuilder.append("\tJavaMail Properties loaded: ").append(javaMailProperties != null).append('\n');
 			}
 		} finally {
-			ConfigurationService.getInstance().ungetService(configuration);
+			MailInitialization.getInstance().getConfigurationServiceHolder().ungetService(configuration);
 		}
 
 		logBuilder.append("Global mail properties successfully loaded!");

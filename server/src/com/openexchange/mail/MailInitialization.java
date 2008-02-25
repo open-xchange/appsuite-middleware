@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import com.openexchange.config.services.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.cache.MailCacheConfiguration;
 import com.openexchange.mail.config.MailPropertiesInit;
@@ -69,6 +70,8 @@ public final class MailInitialization implements Initialization {
 
 	private static final MailInitialization instance = new MailInitialization();
 
+	private ConfigurationServiceHolder configurationServiceHolder;
+
 	/**
 	 * No instantiation
 	 */
@@ -83,6 +86,25 @@ public final class MailInitialization implements Initialization {
 		return instance;
 	}
 
+	/**
+	 * Gets the configuration service holder
+	 * 
+	 * @return The configuration service holder
+	 */
+	public ConfigurationServiceHolder getConfigurationServiceHolder() {
+		return configurationServiceHolder;
+	}
+
+	/**
+	 * Sets the configuration service holder
+	 * 
+	 * @param configurationServiceHolder
+	 *            The configuration service holder
+	 */
+	public void setConfigurationServiceHolder(final ConfigurationServiceHolder configurationServiceHolder) {
+		this.configurationServiceHolder = configurationServiceHolder;
+	}
+
 	/*
 	 * @see com.openexchange.server.Initialization#start()
 	 */
@@ -95,10 +117,9 @@ public final class MailInitialization implements Initialization {
 		MailConnectionWatcher.init();
 		MessageUtilityInit.getInstance().start();
 		/*
-		 * TODO: Remove
-		 * Simulate bundle availability
+		 * TODO: Remove Simulate bundle availability
 		 */
-		//MailProvider.initMailProvider();
+		// MailProvider.initMailProvider();
 	}
 
 	/*
@@ -106,10 +127,9 @@ public final class MailInitialization implements Initialization {
 	 */
 	public void stop() throws AbstractOXException {
 		/*
-		 * TODO: Remove
-		 * Simulate bundle disappearance
+		 * TODO: Remove Simulate bundle disappearance
 		 */
-		//MailProvider.resetMailProvider();
+		// MailProvider.resetMailProvider();
 		/*
 		 * Stop global mail system
 		 */
