@@ -71,6 +71,8 @@ ox_system_type() {
 	return 1
     elif [ -f /etc/SuSE-release ]; then
 	return 2
+    elif [ -f /etc/redhat-release ]; then
+	return 2
     else
 	return 0
     fi
