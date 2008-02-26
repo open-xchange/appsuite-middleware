@@ -50,7 +50,6 @@
 package com.openexchange.spellcheck.internal;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -58,9 +57,9 @@ import java.util.Locale;
 import javax.swing.text.Document;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.spellcheck.SpellCheckService;
 import com.openexchange.spellcheck.SpellCheckError;
 import com.openexchange.spellcheck.SpellCheckException;
+import com.openexchange.spellcheck.SpellCheckService;
 import com.swabunga.spell.engine.SpellDictionary;
 import com.swabunga.spell.event.DocumentWordTokenizer;
 import com.swabunga.spell.event.SpellCheckEvent;
