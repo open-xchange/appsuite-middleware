@@ -87,7 +87,7 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
 	protected void addingServiceInternal(final ManagementService managementService) {
 		try {
 			/*
-			 * Add all mbeans since monitoring service is now available
+			 * Add all mbeans since management service is now available
 			 */
 			managementService.registerMBean(getObjectName(AJPv13Server.ajpv13ServerThreadsMonitor.getClass().getName(),
 					true), AJPv13Server.ajpv13ServerThreadsMonitor);
