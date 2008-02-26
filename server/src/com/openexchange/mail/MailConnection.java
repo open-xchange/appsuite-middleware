@@ -269,7 +269,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	}
 
 	/**
-	 * Gets the mailProperties
+	 * Gets the optional properties used on connect.
 	 * 
 	 * @return the mailProperties
 	 */
@@ -278,10 +278,11 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	}
 
 	/**
-	 * Sets the mailProperties
+	 * Sets optional properties used on connect. Herewith additional properties
+	 * can be applied and checked later on.
 	 * 
 	 * @param mailProperties
-	 *            the mailProperties to set
+	 *            The properties
 	 */
 	public final void setMailProperties(final Properties mailProperties) {
 		this.mailProperties = mailProperties;
