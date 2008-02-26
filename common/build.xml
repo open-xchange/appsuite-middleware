@@ -16,7 +16,7 @@
     <property name="distpackage.name" value="open-xchange-common"/>
 	<property name="composite.name" value="${distpackage.name}-${version}"/>
 
-    <fileset dir="lib/lib" id="jarfiles">
+    <fileset dir="lib" id="jarfiles">
         <include name="*"/>
         <exclude name="CVS"/>
     </fileset>
@@ -26,7 +26,7 @@
         <exclude name="CVS"/>
     </fileset>
 
-    <fileset dir="lib/jars" id="framework">
+    <fileset dir="jars" id="framework">
         <include name="org.eclipse.osgi*"/>
         <include name="org.eclipse.equinox*"/>
         <include name="javax.servlet*"/>
@@ -43,7 +43,7 @@
 
     <!-- Classpath -->
     <path id="project.classpath">
-        <pathelement location="lib/jars/${commonsloggingjar}"/>
+        <pathelement location="jars/${commonsloggingjar}"/>
     </path>
 
     <!-- Compile -->
@@ -85,15 +85,7 @@
         </copy>
         <copy todir="${commondir}">
             <fileset refid="metainf"/>
-            <filterchain>
-                <tokenfilter>
-                    <replacestring from="lib/lib" to="lib"/>
-                </tokenfilter>
-            </filterchain>
         </copy>
-        <replace dir="${commondir}">
-            <replacefilter token="lib/lib" value="lib"/>
-        </replace>
     </target>
 
     <target name="installConfig">
@@ -144,8 +136,8 @@
     <target name="dist" depends="clean">
 		<property name="dist-package" value="dist-package"/>
     	<delete dir="${dist-package}"/>
-        <mkdir dir="${dist-package}/${distpackage.name}"/>
-        <copy todir="${dist-package}/${distpackage.name}">
+        <mkdir dir="${dist-package}/${composite.name}"/>
+        <copy todir="${dist-package}/${composite.name}">
             <fileset dir=".">
                 <exclude name="**${dist-package}/**"/>
                 <exclude name="**debian/**"/>
@@ -153,9 +145,9 @@
                 <exclude name="Todo"/>
             </fileset>
         </copy>
-        <tar destfile="../${distpackage.name}.tar.gz"
+        <tar destfile="../${composite.name}.tar.gz"
 	        basedir="${dist-package}"
-    	    includes="${distpackage.name}/"
+    	    includes="${composite.name}/"
          	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
     	<delete dir="${dist-package}"/>
     </target>
