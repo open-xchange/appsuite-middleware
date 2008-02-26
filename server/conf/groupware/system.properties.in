@@ -7,7 +7,7 @@
 serviceUsageInspection=false
 
 # The service usage timeout in milliseconds. This property only has
-# effect if property 'serviceUsageInscpection' is set to 'true'.
+# effect if property 'serviceUsageInspection' is set to 'true'.
 serviceUsageTimeout=10000
 
 # Location of the MIME type file
