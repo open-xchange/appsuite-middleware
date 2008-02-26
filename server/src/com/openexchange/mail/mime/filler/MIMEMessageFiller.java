@@ -238,8 +238,6 @@ public class MIMEMessageFiller {
 	 * 
 	 * @param mimeMessage
 	 *            The MIME message
-	 * @param session
-	 *            The session
 	 * @throws MessagingException
 	 *             If headers cannot be set
 	 */

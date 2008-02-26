@@ -91,7 +91,7 @@ public interface MailLogicTools {
 	 * <p>
 	 * If mailing system deals with common RFC822 messages, this method only
 	 * delegates its request to
-	 * {@link MimeForward#getFowardMail(javax.mail.internet.MimeMessage, com.openexchange.session.Session)}.
+	 * {@link MimeForward#getFowardMail(javax.mail.internet.MimeMessage[], com.openexchange.session.Session)}.
 	 * 
 	 * @param originalUIDs
 	 *            The original messages' UIDs which should be forwarded.

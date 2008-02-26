@@ -108,12 +108,12 @@ public interface MailMessageStorage {
 			OrderDirection order, MailListField[] fields) throws MailException;
 
 	/**
-	 * Gets messages located in given folder. See parameter description to know
-	 * which messages are going to be returned
+	 * Gets mails located in given folder. See parameter description to know
+	 * which messages are going to be returned.
 	 * <p>
-	 * In contrast to {@link #getMessage(String, long)} the returned instances
-	 * of {@link MailMessage} are only pre-filled with the fields specified
-	 * through parameter <code>fields</code>.
+	 * In contrast to {@link #getMessage(String, long, boolean)} the returned
+	 * instances of {@link MailMessage} are only pre-filled with the fields
+	 * specified through parameter <code>fields</code>.
 	 * <p>
 	 * <b>Note</b> that sorting needs not to be supported by underlying mailing
 	 * system. This can be done on application side, too.<br>
@@ -143,6 +143,7 @@ public interface MailMessageStorage {
 	 *            {@link MailMessage}
 	 * @return The desired, pre-filled instances of {@link MailMessage}
 	 * @throws MailException
+	 *             If mails cannot be returned
 	 */
 	public MailMessage[] getMessages(String folder, IndexRange indexRange, MailListField sortField,
 			OrderDirection order, MailListField[] searchFields, String[] searchPatterns, boolean linkSearchTermsWithOR,
