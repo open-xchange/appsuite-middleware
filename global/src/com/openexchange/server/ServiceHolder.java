@@ -79,11 +79,6 @@ import org.apache.commons.logging.LogFactory;
  */
 public abstract class ServiceHolder<S> {
 
-	/*
-	 * TODO: Make timeout configurable
-	 */
-	private static final int TIMEOUT = 10000;
-
 	private final class ServiceHolderTask extends TimerTask {
 		@Override
 		public void run() {
@@ -97,7 +92,7 @@ public abstract class ServiceHolder<S> {
 				for (final Iterator<ServiceProxy> proxyIter = q.keySet().iterator(); proxyIter.hasNext();) {
 					final ServiceProxy proxy = proxyIter.next();
 					if (proxy.isExceeded()) {
-						LOG.error("Forced unget: Found non-ungetted service after " + TIMEOUT
+						LOG.error("Forced unget: Found non-ungetted service after " + serviceUsageTimeout
 								+ "msec that was acquired at:\n" + printStackTrace(proxy.trace));
 						proxy.proxyService = null;
 						proxy.delegate = null;
@@ -166,7 +161,7 @@ public abstract class ServiceHolder<S> {
 		}
 
 		public boolean isExceeded() {
-			return (System.currentTimeMillis() - creationTime) > TIMEOUT;
+			return (System.currentTimeMillis() - creationTime) > serviceUsageTimeout;
 		}
 
 		public StackTraceElement[] getTrace() {
@@ -174,11 +169,27 @@ public abstract class ServiceHolder<S> {
 		}
 	}
 
+	/**
+	 * Enables the service usage inspection
+	 * 
+	 * @param serviceUsageTimeout
+	 *            the service usage timeout
+	 */
+	static void enableServiceUsageInspection(final int serviceUsageTimeout) {
+		ServiceHolder.serviceUsageTimeout = serviceUsageTimeout;
+		ServiceHolder.serviceHolderTimer = new Timer("ServiceHolderTimer");
+		serviceUsageInspection = true;
+	}
+
+	private static boolean serviceUsageInspection = false;
+
+	private static int serviceUsageTimeout;
+
+	private static Timer serviceHolderTimer;
+
 	private static final Object DUMMY = new Object();
 
 	private static final Log LOG = LogFactory.getLog(ServiceHolder.class);
-
-	private static final Timer serviceHolderTimer = new Timer("ServiceHolderTimer");
 
 	private static final String printStackTrace(final StackTraceElement[] trace) {
 		final StringBuilder sb = new StringBuilder(512);
@@ -192,9 +203,7 @@ public abstract class ServiceHolder<S> {
 
 	private final Map<String, ServiceHolderListener<S>> listeners;
 
-	// private S service;
-
-	private Map<Thread, Map<ServiceProxy, Object>> usingThreads = new ConcurrentHashMap<Thread, Map<ServiceProxy, Object>>();
+	private final Map<Thread, Map<ServiceProxy, Object>> usingThreads = new ConcurrentHashMap<Thread, Map<ServiceProxy, Object>>();
 
 	private final AtomicBoolean waiting;
 
@@ -209,7 +218,12 @@ public abstract class ServiceHolder<S> {
 		waiting = new AtomicBoolean();
 		listeners = new ConcurrentHashMap<String, ServiceHolderListener<S>>();
 		serviceReference = new AtomicReference<S>();
-		serviceHolderTimer.schedule(new ServiceHolderTask(), 1000, 5000);
+		if (serviceUsageInspection) {
+			/*
+			 * Service inspection is enabled
+			 */
+			serviceHolderTimer.schedule(new ServiceHolderTask(), 1000, 5000);
+		}
 	}
 
 	/**
@@ -237,12 +251,11 @@ public abstract class ServiceHolder<S> {
 	 * 
 	 * <pre>
 	 * ...
-	 * final MyService myService = MyService.getInstance();
-	 * final Service s = myService.getService();
+	 * final Service s = myServiceHolder.getService();
 	 * try {
 	 *     // Do something...
 	 * } finally {
-	 *     myService.ungetService(s);
+	 *     myServiceHolder.ungetService(s);
 	 * }
 	 * ...
 	 * </pre>
@@ -254,19 +267,22 @@ public abstract class ServiceHolder<S> {
 		if (null == serviceReference.get()) {
 			return null;
 		}
-		if (LOG.isWarnEnabled() && usingThreads.containsKey(Thread.currentThread())) {
-			LOG.warn("Found thread using two (or more) services without ungetting service.", new Throwable());
-		}
 		countActive.incrementAndGet();
-		final Thread thread = Thread.currentThread();
-		Map<ServiceProxy, Object> proxySet = usingThreads.get(thread);
-		if (null == proxySet) {
-			proxySet = new ConcurrentHashMap<ServiceProxy, Object>(4);
-			usingThreads.put(thread, proxySet);
+		if (serviceUsageInspection) {
+			if (LOG.isWarnEnabled() && usingThreads.containsKey(Thread.currentThread())) {
+				LOG.warn("Found thread using two (or more) services without ungetting service.", new Throwable());
+			}
+			final Thread thread = Thread.currentThread();
+			Map<ServiceProxy, Object> proxySet = usingThreads.get(thread);
+			if (null == proxySet) {
+				proxySet = new ConcurrentHashMap<ServiceProxy, Object>(4);
+				usingThreads.put(thread, proxySet);
+			}
+			final ServiceProxy proxy = new ServiceProxy(serviceReference.get(), thread.getStackTrace());
+			proxySet.put(proxy, DUMMY);
+			return proxy.newProxyInstance();
 		}
-		final ServiceProxy proxy = new ServiceProxy(serviceReference.get(), thread.getStackTrace());
-		proxySet.put(proxy, DUMMY);
-		return proxy.newProxyInstance();
+		return serviceReference.get();
 	}
 
 	private final void notifyListener(final boolean isAvailable) throws Exception {
@@ -292,7 +308,7 @@ public abstract class ServiceHolder<S> {
 			return;
 		}
 		final S service = serviceReference.get();
-		if (countActive.get() > 0) {
+		if (serviceUsageInspection && countActive.get() > 0) {
 			/*
 			 * Blocking OSGi framework is not allowed, but security mechanism
 			 * built into this class ensures that an acquired service is
@@ -392,17 +408,19 @@ public abstract class ServiceHolder<S> {
 		if (service == null || countActive.get() == 0) {
 			return;
 		}
-		final Thread thread = Thread.currentThread();
-		final Map<ServiceProxy, Object> proxySet = usingThreads.get(thread);
-		if (null != proxySet) {
-			for (final Iterator<ServiceProxy> iter = proxySet.keySet().iterator(); iter.hasNext();) {
-				final ServiceProxy proxy = iter.next();
-				if (proxy.proxyService == service) {
-					iter.remove();
+		if (serviceUsageInspection) {
+			final Thread thread = Thread.currentThread();
+			final Map<ServiceProxy, Object> proxySet = usingThreads.get(thread);
+			if (null != proxySet) {
+				for (final Iterator<ServiceProxy> iter = proxySet.keySet().iterator(); iter.hasNext();) {
+					final ServiceProxy proxy = iter.next();
+					if (proxy.proxyService == service) {
+						iter.remove();
+					}
 				}
-			}
-			if (proxySet.isEmpty()) {
-				usingThreads.remove(thread);
+				if (proxySet.isEmpty()) {
+					usingThreads.remove(thread);
+				}
 			}
 		}
 		countActive.decrementAndGet();
@@ -414,4 +432,5 @@ public abstract class ServiceHolder<S> {
 			}
 		}
 	}
+
 }
