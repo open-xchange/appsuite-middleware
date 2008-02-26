@@ -72,7 +72,15 @@ public final class ServiceException extends AbstractOXException {
 		 * later.
 		 */
 		SERVICE_UNAVAILABLE("A required service is temporary not available. Please try again later.",
-				Category.TRY_AGAIN, 1);
+				Category.TRY_AGAIN, 1),
+		/**
+		 * An I/O error occurred
+		 */
+		IO_ERROR("An I/O error occurred", Category.CODE_ERROR, 2),
+		/**
+		 * Service initialization failed
+		 */
+		SERVICE_INITIALIZATION_FAILED("Service initialization failed", Category.CODE_ERROR, 3);
 
 		private final String message;
 
