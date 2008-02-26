@@ -311,8 +311,13 @@ public class CollectionTest extends ResourceTest {
 		coll.unlock(lock.getToken());
 		coll.save();
 	}
-	
-	@Override
+
+    @Override
+    public void testOriginalRemainsWhenCopyDisappears() throws Exception {
+        //SKIP
+    }
+
+    @Override
 	protected WebdavResource createResource() throws WebdavException{
 		WebdavResource resource = FACTORY.resolveCollection(testCollection+"/testResource"+Math.random());
 		assertFalse(resource.exists());

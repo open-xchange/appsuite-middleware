@@ -139,7 +139,7 @@ public class ResourceTest extends AbstractResourceTest{
 		res = FACTORY.resolveResource(url);
 		assertTrue(res.exists());
 		
-		res = resourceManager.resolveResource(testCollection+"/copy");
+		res = resourceManager.resolveResource(testCollection.dup().append("copy"));
 		assertTrue(res.exists());
 		
 		assertFalse(lastModified.equals(res.getLastModified()));
@@ -163,8 +163,57 @@ public class ResourceTest extends AbstractResourceTest{
 				in2.close();
 		}
 	}
-	
-	protected List<Property> getPropertiesToTest() {
+
+    // Original File must not disappear if the copy disappears
+    // Bug 10962
+
+    public void testOriginalRemainsWhenCopyDisappears() throws Exception {
+        WebdavResource res = createResource();
+
+        String content = "Hello, I'm the content!";
+        byte[] bytes = content.getBytes("UTF-8");
+
+        res.putBody(new ByteArrayInputStream(bytes));
+
+        WebdavPath url = res.getUrl();
+        res.copy(testCollection.dup().append("copy"));
+
+        res = FACTORY.resolveResource(url);
+        assertTrue(res.exists());
+
+
+        WebdavResource copy = resourceManager.resolveResource(testCollection.dup().append("copy"));
+        copy.delete();
+
+
+        assertFalse(copy.exists());
+        assertTrue(res.exists());
+
+        InputStream in = null;
+		InputStream in2 = null;
+		try {
+			in = res.getBody();
+			in2 = new ByteArrayInputStream(bytes);
+
+			int b = -1;
+            boolean readAntyhing = false;
+            while((b = in.read()) != -1) {
+                readAntyhing = true;
+                assertEquals(b, in2.read());
+			}
+            assertTrue(readAntyhing);
+            assertEquals(-1, in2.read());
+		} finally {
+			if(in != null)
+				in.close();
+			if(in2 != null)
+				in2.close();
+		}
+        
+
+    }
+
+    protected List<Property> getPropertiesToTest() {
 		return resourceManager.getProtocol().getKnownProperties();
 	}
 

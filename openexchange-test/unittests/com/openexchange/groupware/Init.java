@@ -8,20 +8,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.i18n.tools.I18nServices;
-import com.openexchange.monitoring.services.MonitoringConfiguration;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.EventAdminService;
 import com.openexchange.server.services.SessiondService;
-import com.openexchange.sessiond.impl.ConfigurationService;
 import com.openexchange.sessiond.impl.SessiondConnectorImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.test.TestInit;
 import com.openexchange.tools.events.TestEventAdmin;
+import com.openexchange.mail.MailInitialization;
 
 /**
  * This class contains methods for initialising tests.
@@ -122,8 +122,9 @@ public final class Init {
 	 */
  
 	new com.openexchange.event.impl.EventInit(),
-
+            
     SessiondInit.getInstance()};
+    private static ConfigurationServiceHolder configur;
 
     public static void startServer() throws Exception {
         if(running)
@@ -145,6 +146,7 @@ public final class Init {
         // handles dynamically
 
         startAndInjectConfigBundle();
+        startAndInjectMailBundle();
         startAndInjectI18NBundle();
         startAndInjectMonitoringBundle();
         startAndInjectSessiondBundle();
@@ -152,7 +154,7 @@ public final class Init {
     }
 
     private static void startAndInjectI18NBundle() throws FileNotFoundException {
-        Configuration config = (Configuration)services.get(Configuration.class);
+        ConfigurationService config = (ConfigurationService)services.get(ConfigurationService.class);
         String directory_name = config.getProperty("i18n.language.path");
 		File dir = new File(directory_name);
         I18nServices i18nServices = I18nServices.getInstance();
@@ -166,18 +168,23 @@ public final class Init {
     }
 
     private static void startAndInjectConfigBundle() {
-        Configuration config = new ConfigurationImpl();
-        services.put(Configuration.class, config);
+        ConfigurationService config = new ConfigurationImpl();
+        services.put(ConfigurationService.class, config);
     }
 
     private static void startAndInjectMonitoringBundle() throws Exception {
         // First lookup services monitoring depends on and inject them
-        MonitoringConfiguration.getInstance().setService((Configuration)services.get(Configuration.class));
     }
 
+    private static void startAndInjectMailBundle() throws Exception {
+        MailInitialization.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
+    }
+
+
     private static void startAndInjectSessiondBundle() throws Exception {
-        ConfigurationService.getInstance().setService((Configuration)services.get(Configuration.class));
+        //ConfigurationService.getInstance().setService((Configuration)services.get(Configuration.class));
         SessiondService.getInstance().setService(new SessiondConnectorImpl());
+        SessiondInit.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
     }
 
     private static void startAndInjectPushUDPBundle() throws Exception {
@@ -188,7 +195,11 @@ public final class Init {
     public static void stopServer() throws AbstractOXException {
         //for(Initialization init: started) { init.stop(); }
     }
-    
-    
 
+
+    public static ConfigurationServiceHolder getConfigurationServiceHolder() throws Exception {
+        ConfigurationServiceHolder csh = ConfigurationServiceHolder.newInstance();
+        csh.setService((ConfigurationService) services.get(ConfigurationService.class));
+        return csh;
+    }
 }

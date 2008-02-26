@@ -8,8 +8,8 @@ import java.io.ByteArrayInputStream;
 public abstract class StructureTest extends ActionTestCase {
 	// noroot ?
 	
-	private WebdavPath INDEX_HTML_URL = null;
-	private WebdavPath COPIED_INDEX_HTML_URL = null;
+	protected WebdavPath INDEX_HTML_URL = null;
+	protected WebdavPath COPIED_INDEX_HTML_URL = null;
     private WebdavPath SITEMAP_HTML_URL = null;
     private WebdavPath DEVELOPMENT_URL = null;
     private WebdavPath PM_URL = null;
