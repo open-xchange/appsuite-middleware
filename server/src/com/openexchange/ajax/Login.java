@@ -64,6 +64,7 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajp13.AJPv13RequestHandler;
+import com.openexchange.authentication.IAuthenticated;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.groupware.contexts.Context;
@@ -136,10 +137,10 @@ public class Login extends AJAXServlet {
 			Session sessionObj = null;
 			final Response response = new Response();
 			try {
-                final String[] login_infos = Authentication.login(name, password);
+                final IAuthenticated authed = Authentication.login(name, password);
 
-				final String contextname = login_infos[0];
-				final String username = login_infos[1];
+				final String contextname = authed.getContextInfo();
+				final String username = authed.getUserInfo();
 
 				final ContextStorage contextStor = ContextStorage.getInstance();
 				final int contextId = contextStor.getContextId(contextname);

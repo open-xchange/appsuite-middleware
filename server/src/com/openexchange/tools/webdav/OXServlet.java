@@ -61,6 +61,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
+import com.openexchange.authentication.IAuthenticated;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.groupware.AbstractOXException;
@@ -347,10 +348,10 @@ public abstract class OXServlet extends WebDavServlet {
 			final String ipAddress) throws AbstractOXException {
 		Session session = null;
 		try {
-			final String[] login_infos = Authentication.login(login, pass);
+			final IAuthenticated authed = Authentication.login(login, pass);
 
-			final String contextname = login_infos[0];
-			final String username = login_infos[1];
+			final String contextname = authed.getContextInfo();
+			final String username = authed.getUserInfo();
 
 			final ContextStorage contextStor = ContextStorage.getInstance();
 			final int contextId = contextStor.getContextId(contextname);
@@ -406,16 +407,12 @@ public abstract class OXServlet extends WebDavServlet {
 				LOG.error(e.getMessage(), e);
 			}
 		} catch (UserNotFoundException e) {
-			LOG.debug(e.getMessage(), e);
-		} catch (UserNotActivatedException e) {
-			LOG.debug(e.getMessage(), e);
+            throw new LoginException(LoginException.Code.INVALID_CREDENTIALS, e);
 		} catch (PasswordExpiredException e) {
-			LOG.debug(e.getMessage(), e);
-		} catch (ContextException e) {
-			LOG.error("Error looking up context.", e);
-		} catch (Exception e) {
-			LOG.error("Error", e);
-		}
+            throw new LoginException(LoginException.Code.INVALID_CREDENTIALS, e);
+        } catch (UserNotActivatedException e) {
+            throw new LoginException(LoginException.Code.INVALID_CREDENTIALS, e);
+        }
 		return session;
 	}
 

@@ -55,7 +55,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import com.openexchange.authentication.Authentication;
+import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.database.impl.DatabaseAuthentication;
 
 public class Activator implements BundleActivator {
@@ -73,7 +73,7 @@ public class Activator implements BundleActivator {
 	public void start(final BundleContext context) throws Exception {
 		LOG.info("starting bundle: com.openexchange.authentication.database");
 
-	    registration = context.registerService(Authentication.class.getName(),
+	    registration = context.registerService(AuthenticationService.class.getName(),
 	        new DatabaseAuthentication(), null);
 	}
 

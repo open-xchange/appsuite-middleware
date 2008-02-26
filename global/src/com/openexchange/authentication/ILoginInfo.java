@@ -50,24 +50,20 @@
 package com.openexchange.authentication;
 
 /**
- * This interface defines the methods for handling the login information. E.g.
- * the login information <code>user@domain.tld</code> is split into
- * <code>user</code> and <code>domain.tld</code> and the context part will be
- * used to resolve the context while the user part will be used to authenticate
- * the user.
+ * This information can be retrieved from the login screen for authenticating
+ * a user.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface Authentication {
+public interface ILoginInfo {
 
     /**
-     * This method maps the login information from the login screen to the both
-     * parts needed to resolve the context and the user of that context.
-     * @param loginInfo the complete login informations from the login screen.
-     * @return a string array with two elements in which the first contains the
-     * login info for the context and the second contains the login info for the
-     * user.
-     * @throws LoginException if something with the login info is wrong.
+     * @return the user name from the login screen.
      */
-    String[] handleLoginInfo(Object... loginInfo) throws LoginException;
+    String getUsername();
+
+    /**
+     * @return the password from the login screen.
+     */
+    String getPassword();
 
 }

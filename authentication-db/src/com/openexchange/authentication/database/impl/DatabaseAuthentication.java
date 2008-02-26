@@ -49,7 +49,9 @@
 
 package com.openexchange.authentication.database.impl;
 
-import com.openexchange.authentication.Authentication;
+import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.IAuthenticated;
+import com.openexchange.authentication.ILoginInfo;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -63,7 +65,7 @@ import com.openexchange.groupware.ldap.UserStorage;
  * This implementation authenticates the user against the database.
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class DatabaseAuthentication implements Authentication {
+public class DatabaseAuthentication implements AuthenticationService {
 
     /**
      * Default constructor.
@@ -75,13 +77,13 @@ public class DatabaseAuthentication implements Authentication {
     /**
      * {@inheritDoc}
      */
-    public String[] handleLoginInfo(final Object... loginInfo)
+    public IAuthenticated handleLoginInfo(final ILoginInfo loginInfo)
         throws LoginException {
-        final String password = (String) loginInfo[1];
+        final String password = loginInfo.getPassword();
         if (null == password || 0 == password.length()) {
             throw new LoginException(LoginException.Code.INVALID_CREDENTIALS);
         }
-        final String[] splitted = split((String) loginInfo[0]);
+        final String[] splitted = split(loginInfo.getUsername());
         final ContextStorage ctxStor = ContextStorage.getInstance();
         try {
             final int ctxId = ctxStor.getContextId(splitted[0]);
@@ -110,7 +112,14 @@ public class DatabaseAuthentication implements Authentication {
         } catch (UserException e) {
             throw new LoginException(e);
         }
-        return splitted;
+        return new IAuthenticated() {
+            public String getContextInfo() {
+                return splitted[0];
+            }
+            public String getUserInfo() {
+                return splitted[1];
+            }
+        };
     }
 
     /**

@@ -47,58 +47,18 @@
  *
  */
 
-package com.openexchange.authentication.service;
-
-import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.IAuthenticated;
-import com.openexchange.authentication.ILoginInfo;
-import com.openexchange.authentication.LoginException;
+package com.openexchange.authentication;
 
 /**
- *
+ * This data must be available to the application after a user has been
+ * authenticated. It is used to assign the according context and user
+ * information.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Authentication {
+public interface IAuthenticated {
 
-    /**
-     * Handles the reference to the authentication service.
-     */
-    private static final AuthenticationHolder service = AuthenticationHolder
-        .getInstance();
+    String getContextInfo();
 
-    /**
-     * Default constructor.
-     */
-    private Authentication() {
-        super();
-    }
+    String getUserInfo();
 
-    /**
-     * Performs a login using an authentication service.
-     * @param login entered login.
-     * @param pass entered password.
-     * @return a string array with two elements in which the first contains the
-     * login info for the context and the second contains the login info for the
-     * user.
-     * @throws LoginException if something with the login info is wrong.
-     */
-    public static IAuthenticated login(final String login, final String pass)
-        throws LoginException {
-        final AuthenticationService auth = service.getService();
-        if (null == auth) {
-            throw new LoginException(LoginException.Code.COMMUNICATION);
-        }
-        try {
-            return auth.handleLoginInfo(new ILoginInfo() {
-                public String getPassword() {
-                    return pass;
-                }
-                public String getUsername() {
-                    return login;
-                }
-            });
-        } finally {
-            service.ungetService(auth);
-        }
-    }
 }

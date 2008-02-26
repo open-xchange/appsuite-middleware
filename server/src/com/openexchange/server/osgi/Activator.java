@@ -63,8 +63,8 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.openexchange.authentication.Authentication;
-import com.openexchange.authentication.service.AuthenticationService;
+import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.service.AuthenticationHolder;
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
@@ -211,9 +211,9 @@ public class Activator implements BundleActivator, EventHandler {
 				 */
 
 				// Authentication is only needed for groupware.
-				serviceTrackerList.add(new ServiceTracker(context, Authentication.class.getName(),
-						new BundleServiceTracker<Authentication>(context, AuthenticationService.getInstance(),
-								Authentication.class)));
+				serviceTrackerList.add(new ServiceTracker(context, AuthenticationService.class.getName(),
+						new BundleServiceTracker<AuthenticationService>(context, AuthenticationHolder.getInstance(),
+								AuthenticationService.class)));
 				// Start up server the usual way
 				starter.start();
 			}

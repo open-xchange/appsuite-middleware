@@ -145,11 +145,6 @@ public class LoginException extends AbstractOXException {
         UNKNOWN("Unknown problem: \"%s\".", Category.CODE_ERROR,
             Source.SYSTEM, 3),
         /**
-         * Too few (%d) login attributes.
-         */
-        MISSING_ATTRIBUTES("Too few (%d) login attributes.",
-            Category.USER_INPUT, Source.USER, 4),
-        /**
          * Login not possible at the moment. Please try again later.
          */
         COMMUNICATION("Login not possible at the moment. Please try again "

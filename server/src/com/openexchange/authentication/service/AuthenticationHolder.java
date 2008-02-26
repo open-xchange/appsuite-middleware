@@ -50,55 +50,30 @@
 package com.openexchange.authentication.service;
 
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.IAuthenticated;
-import com.openexchange.authentication.ILoginInfo;
-import com.openexchange.authentication.LoginException;
+import com.openexchange.server.ServiceHolder;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Authentication {
+public final class AuthenticationHolder extends ServiceHolder<AuthenticationService> {
 
     /**
-     * Handles the reference to the authentication service.
+     * Reference to the singleton instance.
      */
-    private static final AuthenticationHolder service = AuthenticationHolder
-        .getInstance();
+    private static final AuthenticationHolder singleton = new AuthenticationHolder();
 
     /**
      * Default constructor.
      */
-    private Authentication() {
+    private AuthenticationHolder() {
         super();
     }
 
     /**
-     * Performs a login using an authentication service.
-     * @param login entered login.
-     * @param pass entered password.
-     * @return a string array with two elements in which the first contains the
-     * login info for the context and the second contains the login info for the
-     * user.
-     * @throws LoginException if something with the login info is wrong.
+     * @return the singleton instance.
      */
-    public static IAuthenticated login(final String login, final String pass)
-        throws LoginException {
-        final AuthenticationService auth = service.getService();
-        if (null == auth) {
-            throw new LoginException(LoginException.Code.COMMUNICATION);
-        }
-        try {
-            return auth.handleLoginInfo(new ILoginInfo() {
-                public String getPassword() {
-                    return pass;
-                }
-                public String getUsername() {
-                    return login;
-                }
-            });
-        } finally {
-            service.ungetService(auth);
-        }
+    public static AuthenticationHolder getInstance() {
+        return singleton;
     }
 }
