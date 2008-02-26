@@ -84,16 +84,16 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
 	}
 
 	@Override
-	protected void addingServiceInternal(final ManagementService managementAgent) {
+	protected void addingServiceInternal(final ManagementService managementService) {
 		try {
 			/*
 			 * Add all mbeans since monitoring service is now available
 			 */
-			managementAgent.registerMBean(getObjectName(AJPv13Server.ajpv13ServerThreadsMonitor.getClass().getName(),
+			managementService.registerMBean(getObjectName(AJPv13Server.ajpv13ServerThreadsMonitor.getClass().getName(),
 					true), AJPv13Server.ajpv13ServerThreadsMonitor);
-			managementAgent.registerMBean(getObjectName(AJPv13Server.ajpv13ListenerMonitor.getClass().getName(), true),
+			managementService.registerMBean(getObjectName(AJPv13Server.ajpv13ListenerMonitor.getClass().getName(), true),
 					AJPv13Server.ajpv13ListenerMonitor);
-			managementAgent.registerMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true),
+			managementService.registerMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true),
 					mailInterfaceMonitor);
 			Pools.getInstance().registerMBeans();
 		} catch (final MalformedObjectNameException e) {
