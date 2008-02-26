@@ -1,3 +1,6 @@
+* 2008-02-26 - francisco.laguna@open-xchange.com
+ -  Bugfix #10962. Don't remove original if the copy is removed.
+
 * 2008-02-25 - thorben.betten@open-xchange.com
 
  - Bugfix #9910: Added mechanism to ensure folder data consistency after a

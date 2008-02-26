@@ -481,7 +481,8 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 	private void copyMetadata(final DocumentMetadataResource copy) throws WebdavException {
 		loadMetadata();
 		copy.metadata = new DocumentMetadataImpl(metadata);
-		copy.metadata.setId(InfostoreFacade.NEW);
+        copy.metadata.setFilestoreLocation(null); // No file attachment in original version
+        copy.metadata.setId(InfostoreFacade.NEW);
 		copy.metadataChanged = true;
 		copy.setMetadata.addAll(Metadata.VALUES);
 	}
