@@ -28,6 +28,8 @@
 	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
     <property name="globaljar" value="com.openexchange.global.jar" />
 	<property name="configjar" value="com.openexchange.config.jar" />
+	<property name="managementjar" value="com.openexchange.management.jar" />
+	
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -35,6 +37,8 @@
 		<pathelement location="${bundlesdir}/${commonsloggingjar}" />
         <pathelement location="${bundlesdir}/${globaljar}"/>
 		<pathelement location="${bundlesdir}/${configjar}"/>
+		<pathelement location="${bundlesdir}/${managementjar}"/>
+		
     </path>
 
     <!-- Compile -->
