@@ -52,9 +52,8 @@ package com.openexchange.tools.oxfolder.deletelistener;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import com.openexchange.database.Database;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
 import com.openexchange.tools.oxfolder.deletelistener.sql.DetectCorruptPermissions;
 import com.openexchange.tools.oxfolder.deletelistener.sql.GroupPermissionMerger;
@@ -84,29 +83,27 @@ public final class OXFolderDeleteListenerHelper {
 	 * 
 	 * @param ctx
 	 *            The context
+	 * @throws DeleteFailedException
+	 *             If checking folder data consistency fails
 	 */
-	public static void ensureConsistency(final Context ctx) {
+	public static void ensureConsistency(final Context ctx, final Connection writeCon) throws DeleteFailedException {
 		try {
-			final Connection writeCon = Database.get(ctx, true);
-			try {
-				/*
-				 * Check user permissions
-				 */
-				checkUserPermissions(ctx.getContextId(), writeCon);
-				/*
-				 * Check group permissions
-				 */
-				checkGroupPermissions(ctx.getContextId(), writeCon);
-
-			} finally {
-				Database.back(ctx, true, writeCon);
-			}
-		} catch (final DBPoolingException e) {
-			LOG.error(e.getMessage(), e);
+			/*
+			 * Check user permissions
+			 */
+			checkUserPermissions(ctx.getContextId(), writeCon);
+			/*
+			 * Check group permissions
+			 */
+			checkGroupPermissions(ctx.getContextId(), writeCon);
+		} catch (final SQLException e) {
+			throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getMessage());
+		} catch (final Exception e) {
+			throw new DeleteFailedException(DeleteFailedException.Code.ERROR, e, e.getMessage());
 		}
 	}
 
-	private static void checkUserPermissions(final int cid, final Connection writeCon) {
+	private static void checkUserPermissions(final int cid, final Connection writeCon) throws SQLException, Exception {
 		/*
 		 * Detect corrupt user permissions...
 		 */
@@ -115,6 +112,7 @@ public final class OXFolderDeleteListenerHelper {
 			corruptPermissions = DetectCorruptPermissions.detectCorruptUserPermissions(cid, writeCon);
 		} catch (final SQLException e) {
 			LOG.error(e.getMessage(), e);
+			throw e;
 		}
 		/*
 		 * ... and handle them
@@ -124,22 +122,31 @@ public final class OXFolderDeleteListenerHelper {
 				LOG.info(new StringBuilder(64).append(corruptPermissions.length).append(
 						" corrupt user permissions detected").toString());
 			}
-			try {
+			final boolean doTransaction = writeCon.getAutoCommit();
+			if (doTransaction) {
 				writeCon.setAutoCommit(false);
-				try {
-					UserPermissionMerger.handleCorruptUserPermissions(corruptPermissions, writeCon);
+			}
+			try {
+				UserPermissionMerger.handleCorruptUserPermissions(corruptPermissions, writeCon);
+				if (doTransaction) {
 					writeCon.commit();
-				} catch (final SQLException e) {
-					LOG.error(e.getMessage(), e);
-					writeCon.rollback();
-				} catch (final Throwable t) {
-					LOG.error(t.getMessage(), t);
-					writeCon.rollback();
-				} finally {
-					writeCon.setAutoCommit(true);
 				}
 			} catch (final SQLException e) {
 				LOG.error(e.getMessage(), e);
+				if (doTransaction) {
+					writeCon.rollback();
+				}
+				throw e;
+			} catch (final Throwable t) {
+				LOG.error(t.getMessage(), t);
+				if (doTransaction) {
+					writeCon.rollback();
+				}
+				throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
+			} finally {
+				if (doTransaction) {
+					writeCon.setAutoCommit(true);
+				}
 			}
 		} else {
 			if (LOG.isInfoEnabled()) {
@@ -148,7 +155,7 @@ public final class OXFolderDeleteListenerHelper {
 		}
 	}
 
-	private static void checkGroupPermissions(final int cid, final Connection writeCon) {
+	private static void checkGroupPermissions(final int cid, final Connection writeCon) throws SQLException, Exception {
 		/*
 		 * Detect corrupt group permissions...
 		 */
@@ -157,6 +164,7 @@ public final class OXFolderDeleteListenerHelper {
 			corruptPermissions = DetectCorruptPermissions.detectCorruptGroupPermissions(cid, writeCon);
 		} catch (final SQLException e) {
 			LOG.error(e.getMessage(), e);
+			throw e;
 		}
 		/*
 		 * ... and handle them
@@ -166,22 +174,31 @@ public final class OXFolderDeleteListenerHelper {
 				LOG.info(new StringBuilder(64).append(corruptPermissions.length).append(
 						" corrupt group permissions detected on host ").toString());
 			}
-			try {
+			final boolean doTransaction = writeCon.getAutoCommit();
+			if (doTransaction) {
 				writeCon.setAutoCommit(false);
-				try {
-					GroupPermissionMerger.handleCorruptGroupPermissions(corruptPermissions, writeCon);
+			}
+			try {
+				GroupPermissionMerger.handleCorruptGroupPermissions(corruptPermissions, writeCon);
+				if (doTransaction) {
 					writeCon.commit();
-				} catch (final SQLException e) {
-					LOG.error(e.getMessage(), e);
-					writeCon.rollback();
-				} catch (final Throwable t) {
-					LOG.error(t.getMessage(), t);
-					writeCon.rollback();
-				} finally {
-					writeCon.setAutoCommit(true);
 				}
 			} catch (final SQLException e) {
 				LOG.error(e.getMessage(), e);
+				if (doTransaction) {
+					writeCon.rollback();
+				}
+				throw e;
+			} catch (final Throwable t) {
+				LOG.error(t.getMessage(), t);
+				if (doTransaction) {
+					writeCon.rollback();
+				}
+				throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
+			} finally {
+				if (doTransaction) {
+					writeCon.setAutoCommit(true);
+				}
 			}
 		} else {
 			if (LOG.isInfoEnabled()) {

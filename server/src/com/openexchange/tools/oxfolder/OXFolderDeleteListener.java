@@ -212,38 +212,38 @@ public class OXFolderDeleteListener implements DeleteListener {
 						DBPool.closeWriterSilent(ctx, writeCon);
 					}
 				}
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				try {
 					if (performTransaction && writeCon != null) {
 						writeCon.rollback();
 						writeCon.setAutoCommit(true);
 					}
 
-				} catch (SQLException e1) {
+				} catch (final SQLException e1) {
 					LOG.warn(e1.getMessage(), e1);
 				}
 				LOG.error(e.getMessage(), e);
 				throw new DeleteFailedException(e);
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				try {
 					if (performTransaction && writeCon != null) {
 						writeCon.rollback();
 						writeCon.setAutoCommit(true);
 					}
 
-				} catch (SQLException e1) {
+				} catch (final SQLException e1) {
 					LOG.warn(e1.getMessage(), e1);
 				}
 				LOG.error(e.getMessage(), e);
 				throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
-			} catch (DBPoolingException e) {
+			} catch (final DBPoolingException e) {
 				try {
 					if (performTransaction && writeCon != null) {
 						writeCon.rollback();
 						writeCon.setAutoCommit(true);
 					}
 
-				} catch (SQLException e1) {
+				} catch (final SQLException e1) {
 					LOG.warn(e1.getMessage(), e1);
 				}
 				LOG.error(e.getMessage(), e);
@@ -300,45 +300,62 @@ public class OXFolderDeleteListener implements DeleteListener {
 						DBPool.closeWriterSilent(ctx, writeCon);
 					}
 				}
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				try {
 					if (performTransaction && writeCon != null) {
 						writeCon.rollback();
 						writeCon.setAutoCommit(true);
 					}
 
-				} catch (SQLException e1) {
+				} catch (final SQLException e1) {
 					LOG.warn(e1.getMessage(), e1);
 				}
 				LOG.error(e.getMessage(), e);
 				throw new DeleteFailedException(e);
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				try {
 					if (performTransaction && writeCon != null) {
 						writeCon.rollback();
 						writeCon.setAutoCommit(true);
 					}
 
-				} catch (SQLException e1) {
+				} catch (final SQLException e1) {
 					LOG.warn(e1.getMessage(), e1);
 				}
 				LOG.error(e.getMessage(), e);
 				throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
-			} catch (DBPoolingException e) {
+			} catch (final DBPoolingException e) {
 				try {
 					if (performTransaction && writeCon != null) {
 						writeCon.rollback();
 						writeCon.setAutoCommit(true);
 					}
 
-				} catch (SQLException e1) {
+				} catch (final SQLException e1) {
 					LOG.warn(e1.getMessage(), e1);
 				}
 				LOG.error(e.getMessage(), e);
 				throw new DeleteFailedException(e);
 			}
 		}
-		OXFolderDeleteListenerHelper.ensureConsistency(ctx);
+		Connection wc = writeConArg;
+		try {
+			boolean closeWriteCon = false;
+			if (wc == null) {
+				wc = DBPool.pickupWriteable(ctx);
+				closeWriteCon = true;
+			}
+			try {
+				OXFolderDeleteListenerHelper.ensureConsistency(ctx, wc);
+			} finally {
+				if (closeWriteCon && wc != null) {
+					DBPool.closeWriterSilent(ctx, wc);
+				}
+			}
+		} catch (final DBPoolingException e) {
+			LOG.error(e.getMessage(), e);
+			throw new DeleteFailedException(e);
+		}
 	}
 
 }
