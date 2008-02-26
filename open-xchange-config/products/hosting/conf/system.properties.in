@@ -1,29 +1,20 @@
 # System Properties
 
-# General mail config
-MailProperties=@oxgroupwaresysconfdir@/mail.properties
+# Enabled/disable service usage inspection. If enabled, all services
+# obtained and managed by ServiceHolder class will be tracked to ensure
+# all services are put back (via unget) within a certain amount of time.
+# The time range can be defined through property 'serviceUsageTimeout'.
+serviceUsageInspection=false
 
-# General transport config
-TransportProperties=@oxgroupwaresysconfdir@/transport.properties
-
-# JavaMail Properties
-JavaMailProperties=@oxgroupwaresysconfdir@/javamail.properties
-
-# Name of the class implementing the mail connection
-MailProtocol=com.openexchange.imap.IMAPConnection
-# ... and its config
-IMAPProperties=@oxgroupwaresysconfdir@/imap.properties
-
-# Name of the class implementing the mail transport connection
-TransportProtocol=com.openexchange.smtp.SMTPTransport
-# ... and its config
-SMTPProperties=@oxgroupwaresysconfdir@/smtp.properties
+# The service usage timeout in milliseconds. This property only has
+# effect if property 'serviceUsageInspection' is set to 'true'.
+serviceUsageTimeout=10000
 
 # Location of the MIME type file
 MimeTypeFile=@oxgroupwaresysconfdir@/mime.types
 
 # Name of the class implementing the UserConfigurationStorage.
-# Currenlty known aliases: Caching, DB
+# Currently known aliases: Caching, DB
 UserConfigurationStorage=Caching
 
 # Switch for enabling caching in the groupware. Normally this should be set to
