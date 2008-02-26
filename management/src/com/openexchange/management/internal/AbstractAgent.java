@@ -60,10 +60,10 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.RMISocketFactory;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -113,9 +113,7 @@ public abstract class AbstractAgent {
 
 	}
 
-	private final Lock lockSocketFactory;
-
-	private boolean initialized;
+	private final AtomicBoolean initialized;
 
 	protected RMISocketFactory rmiSocketFactory;
 
@@ -124,8 +122,9 @@ public abstract class AbstractAgent {
 	protected Map<String, Object> environment;
 
 	public AbstractAgent() {
+		super();
+		initialized = new AtomicBoolean();
 		mbs = ManagementFactory.getPlatformMBeanServer();
-		lockSocketFactory = new ReentrantLock();
 	}
 
 	/**
@@ -257,18 +256,15 @@ public abstract class AbstractAgent {
 	}
 
 	private final void initializeRMIServerSocketFactory(final String bindAddr) throws UnknownHostException {
-		if (!initialized) {
-			lockSocketFactory.lock();
-			try {
+		if (!initialized.get()) {
+			synchronized (initialized) {
 				if (null == rmiSocketFactory) {
 					rmiSocketFactory = new AbstractAgentSocketFactory(0, bindAddr);
 					environment = new HashMap<String, Object>(2);
 					environment.put(RMIConnectorServer.RMI_SERVER_SOCKET_FACTORY_ATTRIBUTE, rmiSocketFactory);
 					environment.put(RMIConnectorServer.RMI_CLIENT_SOCKET_FACTORY_ATTRIBUTE, rmiSocketFactory);
-					initialized = true;
+					initialized.set(true);
 				}
-			} finally {
-				lockSocketFactory.unlock();
 			}
 		}
 	}
