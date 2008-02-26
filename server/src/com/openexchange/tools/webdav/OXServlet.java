@@ -61,7 +61,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
 
-import com.openexchange.authentication.IAuthenticated;
+import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.groupware.AbstractOXException;
@@ -348,7 +348,7 @@ public abstract class OXServlet extends WebDavServlet {
 			final String ipAddress) throws AbstractOXException {
 		Session session = null;
 		try {
-			final IAuthenticated authed = Authentication.login(login, pass);
+			final Authenticated authed = Authentication.login(login, pass);
 
 			final String contextname = authed.getContextInfo();
 			final String username = authed.getUserInfo();

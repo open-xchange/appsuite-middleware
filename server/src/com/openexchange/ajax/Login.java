@@ -64,7 +64,7 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajp13.AJPv13RequestHandler;
-import com.openexchange.authentication.IAuthenticated;
+import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.service.Authentication;
 import com.openexchange.groupware.contexts.Context;
@@ -137,7 +137,7 @@ public class Login extends AJAXServlet {
 			Session sessionObj = null;
 			final Response response = new Response();
 			try {
-                final IAuthenticated authed = Authentication.login(name, password);
+                final Authenticated authed = Authentication.login(name, password);
 
 				final String contextname = authed.getContextInfo();
 				final String username = authed.getUserInfo();

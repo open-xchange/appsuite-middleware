@@ -50,8 +50,8 @@
 package com.openexchange.authentication.service;
 
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.IAuthenticated;
-import com.openexchange.authentication.ILoginInfo;
+import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.LoginInfo;
 import com.openexchange.authentication.LoginException;
 
 /**
@@ -82,14 +82,14 @@ public final class Authentication {
      * user.
      * @throws LoginException if something with the login info is wrong.
      */
-    public static IAuthenticated login(final String login, final String pass)
+    public static Authenticated login(final String login, final String pass)
         throws LoginException {
         final AuthenticationService auth = service.getService();
         if (null == auth) {
             throw new LoginException(LoginException.Code.COMMUNICATION);
         }
         try {
-            return auth.handleLoginInfo(new ILoginInfo() {
+            return auth.handleLoginInfo(new LoginInfo() {
                 public String getPassword() {
                     return pass;
                 }

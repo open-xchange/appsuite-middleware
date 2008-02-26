@@ -50,8 +50,8 @@
 package com.openexchange.authentication.database.impl;
 
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.IAuthenticated;
-import com.openexchange.authentication.ILoginInfo;
+import com.openexchange.authentication.Authenticated;
+import com.openexchange.authentication.LoginInfo;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -77,7 +77,7 @@ public class DatabaseAuthentication implements AuthenticationService {
     /**
      * {@inheritDoc}
      */
-    public IAuthenticated handleLoginInfo(final ILoginInfo loginInfo)
+    public Authenticated handleLoginInfo(final LoginInfo loginInfo)
         throws LoginException {
         final String password = loginInfo.getPassword();
         if (null == password || 0 == password.length()) {
@@ -112,7 +112,7 @@ public class DatabaseAuthentication implements AuthenticationService {
         } catch (UserException e) {
             throw new LoginException(e);
         }
-        return new IAuthenticated() {
+        return new Authenticated() {
             public String getContextInfo() {
                 return splitted[0];
             }

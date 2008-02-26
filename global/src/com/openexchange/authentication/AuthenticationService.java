@@ -68,6 +68,6 @@ public interface AuthenticationService {
      * user.
      * @throws LoginException if something with the login info is wrong.
      */
-    IAuthenticated handleLoginInfo(ILoginInfo loginInfo) throws LoginException;
+    Authenticated handleLoginInfo(LoginInfo loginInfo) throws LoginException;
 
 }

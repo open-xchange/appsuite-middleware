@@ -50,20 +50,15 @@
 package com.openexchange.authentication;
 
 /**
- * This information can be retrieved from the login screen for authenticating
- * a user.
+ * This data must be available to the application after a user has been
+ * authenticated. It is used to assign the according context and user
+ * information.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface ILoginInfo {
+public interface Authenticated {
 
-    /**
-     * @return the user name from the login screen.
-     */
-    String getUsername();
+    String getContextInfo();
 
-    /**
-     * @return the password from the login screen.
-     */
-    String getPassword();
+    String getUserInfo();
 
 }
