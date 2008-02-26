@@ -241,6 +241,9 @@ public final class TransportProviderRegistry {
 		 * Unregister
 		 */
 		final TransportProvider removed = providers.remove(provider);
+		if (null == removed) {
+			return null;
+		}
 		/*
 		 * Perform shutdown
 		 */

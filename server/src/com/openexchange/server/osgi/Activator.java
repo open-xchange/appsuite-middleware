@@ -133,32 +133,34 @@ public class Activator implements BundleActivator, EventHandler {
 			// Configuration service is always needed.
 			configurationServiceHolder = ConfigurationServiceHolder.newInstance();
 			serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(),
-					new BundleServiceTracker<ConfigurationService>(context, configurationServiceHolder, ConfigurationService.class)));
+					new BundleServiceTracker<ConfigurationService>(context, configurationServiceHolder,
+							ConfigurationService.class)));
 
 			// TODO: Remove when mail is bundled
-			configurationServiceHolder.addServiceHolderListener((listener = new ServiceHolderListener<ConfigurationService>() {
+			configurationServiceHolder
+					.addServiceHolderListener((listener = new ServiceHolderListener<ConfigurationService>() {
 
-				public void onServiceAvailable(final ConfigurationService service) throws Exception {
-					/**
-					 * Mail initialization
-					 */
-					com.openexchange.mail.MailInitialization.getInstance().setConfigurationServiceHolder(
-							configurationServiceHolder);
-					com.openexchange.mail.MailInitialization.getInstance().start();
-					/**
-					 * Transport initialization
-					 */
-					com.openexchange.mail.transport.TransportInitialization.getInstance()
-							.setConfigurationServiceHolder(configurationServiceHolder);
-					com.openexchange.mail.transport.TransportInitialization.getInstance().start();
+						public void onServiceAvailable(final ConfigurationService service) throws Exception {
+							/**
+							 * Mail initialization
+							 */
+							com.openexchange.mail.MailInitialization.getInstance().setConfigurationServiceHolder(
+									configurationServiceHolder);
+							com.openexchange.mail.MailInitialization.getInstance().start();
+							/**
+							 * Transport initialization
+							 */
+							com.openexchange.mail.transport.TransportInitialization.getInstance()
+									.setConfigurationServiceHolder(configurationServiceHolder);
+							com.openexchange.mail.transport.TransportInitialization.getInstance().start();
 
-				}
+						}
 
-				public void onServiceRelease() throws Exception {
-					// TODO Auto-generated method stub
+						public void onServiceRelease() throws Exception {
+							// TODO Auto-generated method stub
 
-				}
-			}));
+						}
+					}));
 
 			// event service is always needed.
 			serviceTrackerList.add(new ServiceTracker(context, EventAdmin.class.getName(),
@@ -207,7 +209,7 @@ public class Activator implements BundleActivator, EventHandler {
 				 * 		new BundleServiceTracker&lt;MonitorService&gt;(context, MonitorService.getInstance(), MonitorService.class)));
 				 * </pre>
 				 */
-				
+
 				// Authentication is only needed for groupware.
 				serviceTrackerList.add(new ServiceTracker(context, Authentication.class.getName(),
 						new BundleServiceTracker<Authentication>(context, AuthenticationService.getInstance(),
@@ -248,6 +250,18 @@ public class Activator implements BundleActivator, EventHandler {
 			try {
 				starter.stop();
 				msh = null;
+				/*
+				 * Close configuration service holder and associated
+				 * initialization instances
+				 */
+				configurationServiceHolder.removeServiceHolderListenerByRef(listener);
+				listener = null;
+				com.openexchange.mail.MailInitialization.getInstance().setConfigurationServiceHolder(null);
+				com.openexchange.mail.transport.TransportInitialization.getInstance().setConfigurationServiceHolder(
+						null);
+				configurationServiceHolder = null;
+				com.openexchange.mail.MailInitialization.getInstance().stop();
+				com.openexchange.mail.transport.TransportInitialization.getInstance().stop();
 			} finally {
 				/*
 				 * Unregister server's services
@@ -256,16 +270,6 @@ public class Activator implements BundleActivator, EventHandler {
 					registration.unregister();
 				}
 				registrationList.clear();
-
-				/*
-				 * Close configuration service holder
-				 */
-				configurationServiceHolder.removeServiceHolderListenerByRef(listener);
-				listener = null;
-				com.openexchange.mail.MailInitialization.getInstance().setConfigurationServiceHolder(null);
-				com.openexchange.mail.transport.TransportInitialization.getInstance().setConfigurationServiceHolder(
-						null);
-				configurationServiceHolder = null;
 
 				/*
 				 * Close service trackers

@@ -234,6 +234,9 @@ public final class MailProviderRegistry {
 		 * Unregister
 		 */
 		final MailProvider removed = providers.remove(provider);
+		if (null == removed) {
+			return null;
+		}
 		/*
 		 * Perform shutdown
 		 */
