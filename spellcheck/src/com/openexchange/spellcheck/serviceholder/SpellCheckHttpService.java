@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.spellcheck.services;
+package com.openexchange.spellcheck.serviceholder;
 
 import org.osgi.service.http.HttpService;
 

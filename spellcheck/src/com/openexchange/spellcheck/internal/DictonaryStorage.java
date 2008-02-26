@@ -73,10 +73,9 @@ import org.mozilla.intl.chardet.nsDetector;
 import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
 import org.mozilla.intl.chardet.nsPSMDetector;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.spellcheck.SpellCheckException;
-import com.openexchange.spellcheck.services.SpellCheckConfigurationService;
 import com.swabunga.spell.engine.SpellDictionary;
 import com.swabunga.spell.engine.SpellDictionaryHashMap;
 
@@ -253,7 +252,7 @@ public final class DictonaryStorage {
 		}
 		final File spellCheckDir;
 		{
-			final Configuration c = SpellCheckConfigurationService.getInstance().getService();
+			final ConfigurationService c = SpellCheckInit.getInstance().getConfigurationServiceHolder().getService();
 			if (null != c) {
 				try {
 					final String dirPath = c.getProperty("com.openexchange.spellcheck.dir");
@@ -263,7 +262,7 @@ public final class DictonaryStorage {
 					}
 					spellCheckDir = new File(dirPath);
 				} finally {
-					SpellCheckConfigurationService.getInstance().ungetService(c);
+					SpellCheckInit.getInstance().getConfigurationServiceHolder().ungetService(c);
 				}
 			} else {
 				throw new SpellCheckException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE));

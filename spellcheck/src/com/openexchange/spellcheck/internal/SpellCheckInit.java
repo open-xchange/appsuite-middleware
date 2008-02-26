@@ -56,9 +56,10 @@ import javax.servlet.ServletException;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 
+import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.server.Initialization;
 import com.openexchange.spellcheck.SpellCheckException;
-import com.openexchange.spellcheck.services.SpellCheckHttpService;
+import com.openexchange.spellcheck.serviceholder.SpellCheckHttpService;
 import com.openexchange.spellcheck.servlet.SpellCheckServlet;
 
 /**
@@ -76,11 +77,18 @@ public class SpellCheckInit implements Initialization {
 
 	private static final SpellCheckInit instance = new SpellCheckInit();
 
+	/**
+	 * Gets the singleton instance of {@link SpellCheckInit}
+	 * 
+	 * @return The singleton instance of {@link SpellCheckInit}
+	 */
 	public static SpellCheckInit getInstance() {
 		return instance;
 	}
 
 	private final AtomicBoolean started;
+
+	private ConfigurationServiceHolder csh;
 
 	/**
 	 * Initializes a new {@link SpellCheckInit}
@@ -88,6 +96,25 @@ public class SpellCheckInit implements Initialization {
 	private SpellCheckInit() {
 		super();
 		started = new AtomicBoolean();
+	}
+
+	/**
+	 * Gets the configuration service holder
+	 * 
+	 * @return The configuration service holder
+	 */
+	public ConfigurationServiceHolder getConfigurationServiceHolder() {
+		return csh;
+	}
+
+	/**
+	 * Sets the configuration service holder
+	 * 
+	 * @param csh
+	 *            The configuration service holder to set
+	 */
+	public void setConfigurationServiceHolder(final ConfigurationServiceHolder csh) {
+		this.csh = csh;
 	}
 
 	/*

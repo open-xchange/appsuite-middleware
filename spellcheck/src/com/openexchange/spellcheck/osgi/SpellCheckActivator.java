@@ -58,13 +58,13 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
-import com.openexchange.config.Configuration;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.server.ServiceHolderListener;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.spellcheck.SpellCheckException;
 import com.openexchange.spellcheck.internal.SpellCheckInit;
-import com.openexchange.spellcheck.services.SpellCheckConfigurationService;
-import com.openexchange.spellcheck.services.SpellCheckHttpService;
+import com.openexchange.spellcheck.serviceholder.SpellCheckHttpService;
 
 /**
  * {@link SpellCheckActivator}
@@ -79,7 +79,7 @@ public final class SpellCheckActivator implements BundleActivator {
 
 	private static final class SpellCheckListeners {
 
-		private final ServiceHolderListener<Configuration> configListener;
+		private final ServiceHolderListener<ConfigurationService> configListener;
 
 		private final ServiceHolderListener<HttpService> httpListener;
 
@@ -88,9 +88,9 @@ public final class SpellCheckActivator implements BundleActivator {
 		public SpellCheckListeners() {
 			super();
 			mode = new AtomicInteger();
-			configListener = new ServiceHolderListener<Configuration>() {
+			configListener = new ServiceHolderListener<ConfigurationService>() {
 
-				public void onServiceAvailable(final Configuration service) throws Exception {
+				public void onServiceAvailable(final ConfigurationService service) throws Exception {
 					LOG.info("SpellCheck: Configuration service available.");
 					if (mode.compareAndSet(0, 1)) {
 						LOG.info("Waiting for HTTP service.");
@@ -130,7 +130,7 @@ public final class SpellCheckActivator implements BundleActivator {
 			SpellCheckInit.getInstance().start();
 		}
 
-		public ServiceHolderListener<Configuration> getConfigListener() {
+		public ServiceHolderListener<ConfigurationService> getConfigListener() {
 			return configListener;
 		}
 
@@ -141,6 +141,8 @@ public final class SpellCheckActivator implements BundleActivator {
 	}
 
 	private final List<ServiceTracker> serviceTrackerList;
+
+	private ConfigurationServiceHolder csh;
 
 	private SpellCheckListeners listeners;
 
@@ -159,12 +161,13 @@ public final class SpellCheckActivator implements BundleActivator {
 	 */
 	public void start(final BundleContext context) throws Exception {
 		try {
+			csh = ConfigurationServiceHolder.newInstance();
+			SpellCheckInit.getInstance().setConfigurationServiceHolder(csh);
 			/*
 			 * Add service listener for configuration service
 			 */
-			serviceTrackerList.add(new ServiceTracker(context, Configuration.class.getName(),
-					new BundleServiceTracker<Configuration>(context, SpellCheckConfigurationService.getInstance(),
-							Configuration.class)));
+			serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(),
+					new BundleServiceTracker<ConfigurationService>(context, csh, ConfigurationService.class)));
 			/*
 			 * Add service listener for HTTP service
 			 */
@@ -184,7 +187,7 @@ public final class SpellCheckActivator implements BundleActivator {
 			/*
 			 * Add listeners to specific service holders
 			 */
-			SpellCheckConfigurationService.getInstance().addServiceHolderListener(listeners.getConfigListener());
+			csh.addServiceHolderListener(listeners.getConfigListener());
 			SpellCheckHttpService.getInstance().addServiceHolderListener(listeners.getHttpListener());
 		} catch (final Throwable t) {
 			LOG.error("SpellCheckActivator.start: " + t.getLocalizedMessage(), t);
@@ -202,12 +205,13 @@ public final class SpellCheckActivator implements BundleActivator {
 			/*
 			 * Remove listeners and reset collection
 			 */
-			SpellCheckConfigurationService.getInstance().removeServiceHolderListenerByName(
+			csh.removeServiceHolderListenerByName(
 					listeners.configListener.getClass().getName());
 			SpellCheckHttpService.getInstance().removeServiceHolderListenerByName(
 					listeners.httpListener.getClass().getName());
 			listeners = null;
 			SpellCheckInit.getInstance().stop();
+			csh = null;
 			/*
 			 * Close service trackers
 			 */
