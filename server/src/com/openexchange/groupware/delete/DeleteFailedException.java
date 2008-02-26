@@ -69,9 +69,13 @@ public class DeleteFailedException extends AbstractOXException {
 		 */
 		UNKNOWN_TYPE("Unknown delete event type: %d", Category.CODE_ERROR, 1),
 		/**
-		 * A SQL error occured: %s
+		 * A SQL error occurred: %s
 		 */
-		SQL_ERROR("A SQL error occured: %s", Category.CODE_ERROR, 2);
+		SQL_ERROR("A SQL error occurred: %s", Category.CODE_ERROR, 2),
+		/**
+		 * An error occurred: %s
+		 */
+		ERROR("An error occurred: %s", Category.CODE_ERROR, 3);
 
 		private final String message;
 
