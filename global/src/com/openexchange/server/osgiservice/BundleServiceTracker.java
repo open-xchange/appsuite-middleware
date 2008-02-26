@@ -163,7 +163,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer {
 					if (serviceHolder != null) {
 						serviceHolder.removeService();
 					}
-					removedServiceInternal();
+					removedServiceInternal(serviceClass.cast(service));
 				} catch (final Exception e) {
 					LOG.error(e.getLocalizedMessage(), e);
 				}
@@ -182,7 +182,7 @@ public class BundleServiceTracker<S> implements ServiceTrackerCustomizer {
 	 * @param service
 	 *            The service
 	 */
-	protected void removedServiceInternal() {
+	protected void removedServiceInternal(final S service) {
 		if (LOG.isTraceEnabled()) {
 			LOG.trace("BundleServiceTracker.removedServiceInternal()");
 		}
