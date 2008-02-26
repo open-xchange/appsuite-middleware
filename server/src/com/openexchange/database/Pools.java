@@ -313,6 +313,19 @@ public final class Pools implements Runnable {
         }
     }
 
+    public void unregisterMBeans() {
+    	unregisterMBean("ConfigDB Read");
+    	unregisterMBean("ConfigDB Write");
+    	poolsLock.lock();
+        try {
+            for (Map.Entry<Integer, ConnectionPool> entry : oxPools.entrySet()) {
+                unregisterMBean(createMBeanName(entry.getKey().intValue()));
+            }
+        } finally {
+            poolsLock.unlock();
+        }
+    }
+
     /**
      * @return the singleton instance.
      */

@@ -104,4 +104,23 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
 			LOG.error(e.getLocalizedMessage(), e);
 		}
 	}
+
+	@Override
+	protected void removedServiceInternal(final ManagementService managementService) {
+		try {
+			/*
+			 * Add all mbeans since management service is now available
+			 */
+			managementService.unregisterMBean(getObjectName(AJPv13Server.ajpv13ServerThreadsMonitor.getClass().getName(),true));
+			managementService.unregisterMBean(getObjectName(AJPv13Server.ajpv13ListenerMonitor.getClass().getName(), true));
+			managementService.unregisterMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true));
+			Pools.getInstance().unregisterMBeans();
+		} catch (final MalformedObjectNameException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		} catch (final NullPointerException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		} catch (final Exception e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		}
+	}
 }
