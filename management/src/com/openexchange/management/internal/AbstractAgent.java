@@ -64,6 +64,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -115,6 +116,8 @@ public abstract class AbstractAgent {
 
 	private final AtomicBoolean initialized;
 
+	protected final AtomicReference<GaugeMonitor> gaugeMonitorRef;
+
 	protected RMISocketFactory rmiSocketFactory;
 
 	protected MBeanServer mbs;
@@ -123,6 +126,7 @@ public abstract class AbstractAgent {
 
 	public AbstractAgent() {
 		super();
+		gaugeMonitorRef = new AtomicReference<GaugeMonitor>();
 		initialized = new AtomicBoolean();
 		mbs = ManagementFactory.getPlatformMBeanServer();
 	}
@@ -186,8 +190,6 @@ public abstract class AbstractAgent {
 		}
 	}
 
-	protected GaugeMonitor gm;
-
 	/**
 	 * add a MBean to observe by the GaugeMonitor
 	 * 
@@ -196,17 +198,24 @@ public abstract class AbstractAgent {
 	 * @throws Exception
 	 */
 	public final void addObservedMBean(final ObjectName objectName, final String attributeName) throws Exception {
+		GaugeMonitor gm = gaugeMonitorRef.get();
 		if (gm == null) {
-			gm = new GaugeMonitor();
-			gm.setGranularityPeriod(5000);
-			gm.setDifferenceMode(false);
-			gm.setNotifyHigh(false);
-			gm.setNotifyLow(true);
-			gm.setThresholds(Integer.valueOf(50), Integer.valueOf(5));
-			mbs.registerMBean(gm, new ObjectName("Services:type=GaugeMonitor"));
-			gm.start();
+			final GaugeMonitor newgm = new GaugeMonitor();
+			newgm.setGranularityPeriod(5000);
+			newgm.setDifferenceMode(false);
+			newgm.setNotifyHigh(false);
+			newgm.setNotifyLow(true);
+			newgm.setThresholds(Integer.valueOf(50), Integer.valueOf(5));
+			if (gaugeMonitorRef.compareAndSet(gm, newgm)) {
+				/*
+				 * No other thread initialized gauge monitor in the meantime;
+				 * thus register and start it
+				 */
+				gm = gaugeMonitorRef.get();
+				mbs.registerMBean(gm, new ObjectName("Services:type=GaugeMonitor"));
+				gm.start();
+			}
 		}
-
 		gm.addObservedObject(objectName);
 		gm.setObservedAttribute(attributeName);
 	}
@@ -218,6 +227,7 @@ public abstract class AbstractAgent {
 	 * @throws Exception
 	 */
 	public final void removeObservedMBean(final ObjectName objectName) throws Exception {
+		final GaugeMonitor gm = gaugeMonitorRef.get();
 		if (gm != null) {
 			gm.removeObservedObject(objectName);
 		}
@@ -239,11 +249,11 @@ public abstract class AbstractAgent {
 		try {
 			initializeRMIServerSocketFactory(bindAddr);
 			try {
-			    registry = LocateRegistry.getRegistry(port);
-			    registry.list();
+				registry = LocateRegistry.getRegistry(port);
+				registry.list();
 			} catch (final RemoteException e) {
-			    LOG.debug(e.getMessage(), e);
-			    registry = LocateRegistry.createRegistry(port, rmiSocketFactory, rmiSocketFactory);
+				LOG.debug(e.getMessage(), e);
+				registry = LocateRegistry.createRegistry(port, rmiSocketFactory, rmiSocketFactory);
 			}
 		} catch (final Exception e) {
 			printTrace(new StringBuilder(200).append("Can not create a RMI registry on port ").append(port).append(
