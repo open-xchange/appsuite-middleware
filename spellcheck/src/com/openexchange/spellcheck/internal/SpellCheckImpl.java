@@ -58,7 +58,7 @@ import java.util.Locale;
 import javax.swing.text.Document;
 
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.spellcheck.SpellCheck;
+import com.openexchange.spellcheck.SpellCheckService;
 import com.openexchange.spellcheck.SpellCheckError;
 import com.openexchange.spellcheck.SpellCheckException;
 import com.swabunga.spell.engine.SpellDictionary;
@@ -74,7 +74,7 @@ import com.swabunga.spell.event.StringWordTokenizer;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SpellCheckImpl implements SpellCheck {
+public final class SpellCheckImpl implements SpellCheckService {
 
 	/**
 	 * Creates a new spell check with only the user dictionary added
@@ -87,7 +87,7 @@ public final class SpellCheckImpl implements SpellCheck {
 	 * @throws SpellCheckException
 	 *             If spell check creation fails
 	 */
-	public static SpellCheck newSpellCheck(final int userId, final Context ctx) throws SpellCheckException {
+	public static SpellCheckService newSpellCheck(final int userId, final Context ctx) throws SpellCheckException {
 		return new SpellCheckImpl(null, new RdbUserSpellDictionary(userId, ctx));
 	}
 
@@ -105,7 +105,7 @@ public final class SpellCheckImpl implements SpellCheck {
 	 * @throws SpellCheckException
 	 *             If spell check creation fails
 	 */
-	public static SpellCheck newSpellCheck(final int userId, final String localeStr, final Context ctx)
+	public static SpellCheckService newSpellCheck(final int userId, final String localeStr, final Context ctx)
 			throws SpellCheckException {
 		final SpellDictionary localeDictionary = DictonaryStorage.getDictionary(localeStr);
 		if (localeDictionary == null) {
@@ -127,7 +127,7 @@ public final class SpellCheckImpl implements SpellCheck {
 	 * @throws SpellCheckException
 	 *             If spell check creation fails
 	 */
-	public static SpellCheck newSpellCheck(final int userId, final Locale locale, final Context ctx)
+	public static SpellCheckService newSpellCheck(final int userId, final Locale locale, final Context ctx)
 			throws SpellCheckException {
 		final SpellDictionary localeDictionary = DictonaryStorage.getDictionary(locale);
 		if (localeDictionary == null) {

@@ -16,7 +16,6 @@ Import-Package: com.openexchange.ajax,
  com.openexchange.server.impl,
  com.openexchange.server.osgiservice,
  com.openexchange.session,
- com.openexchange.spellcheck,
  com.openexchange.tools.servlet.http,
  javax.servlet,
  javax.servlet.http,
@@ -30,3 +29,4 @@ Import-Package: com.openexchange.ajax,
 Bundle-Activator: com.openexchange.spellcheck.osgi.SpellCheckActivator
 Bundle-ClassPath: .,
  lib/lib/jazzy-core.jar
+Export-Package: com.openexchange.spellcheck
