@@ -1,0 +1,20 @@
+Source: open-xchange-admin
+Section: net
+Priority: optional
+Maintainer: choeger <choeger@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-java5-jdk|sun-j2sdk1.5, open-xchange-server, open-xchange-common (>= 6.5.0)
+Standards-Version: 3.6.1
+
+Package: open-xchange-admin
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-common (>= 6.5.0), open-xchange-server, j2re1.5|sun-java5-jre, mysql-client-5.0
+Description: Open Xchange Admin Daemon containing commandline tools and provisioning interface
+  to manage users, groups, resources and Open Xchange database and storage related setup
+  information.
+
+Package: open-xchange-admin-client
+Conflicts: openexchange-admin-client
+Architecture: all
+Section: libs
+Depends: ${shlibs:Depends}, ${misc:Depends}, sun-java5-jre|j2re1.5
+Description: The Open Xchange Admin Daemon RMI client library
