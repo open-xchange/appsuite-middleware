@@ -50,7 +50,7 @@
 package com.openexchange.server.osgiservice;
 
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -95,6 +95,7 @@ public abstract class DeferredActivator implements BundleActivator {
 		public Object addingService(final ServiceReference reference) {
 			final Object addedService = context.getService(reference);
 			if (clazz.isInstance(addedService)) {
+				services.put(clazz, addedService);
 				/*
 				 * Signal availability
 				 */
@@ -109,6 +110,7 @@ public abstract class DeferredActivator implements BundleActivator {
 		public void removedService(final ServiceReference reference, final Object service) {
 			try {
 				if (clazz.isInstance(service)) {
+					services.remove(clazz);
 					/*
 					 * Signal unavailability
 					 */
@@ -131,14 +133,17 @@ public abstract class DeferredActivator implements BundleActivator {
 	 */
 	protected BundleContext context;
 
-	protected final Map<Class<?>, ServiceTracker> serviceTrackers;
+	protected final ServiceTracker[] serviceTrackers;
+
+	protected final Map<Class<?>, Object> services;
 
 	/**
 	 * Initializes a new {@link DeferredActivator}
 	 */
 	public DeferredActivator() {
 		super();
-		serviceTrackers = new ConcurrentHashMap<Class<?>, ServiceTracker>(getNeededServices().length);
+		services = new ConcurrentHashMap<Class<?>, Object>(getNeededServices().length);
+		serviceTrackers = new ServiceTracker[getNeededServices().length];
 		availability = new boolean[getNeededServices().length];
 		/*
 		 * Mark every service as unavailable
@@ -174,14 +179,13 @@ public abstract class DeferredActivator implements BundleActivator {
 	 */
 	private final void init() {
 		final Class<?>[] classes = getNeededServices();
+		if (new HashSet<Class<?>>(Arrays.asList(classes)).size() != classes.length) {
+			throw new IllegalArgumentException("Duplicate class/interface provided through getNeededServices()");
+		}
 		for (int i = 0; i < classes.length; i++) {
-			if (serviceTrackers.containsKey(classes[i])) {
-				LOG.error("Duplicate service tracker for class/interface: " + classes[i].getName());
-				continue;
-			}
 			final ServiceTracker tracker = new ServiceTracker(context, classes[i].getName(),
 					new DeferredServiceTrackerCustomizer(classes[i], i, context));
-			serviceTrackers.put(classes[i], tracker);
+			serviceTrackers[i] = tracker;
 			tracker.open();
 		}
 	}
@@ -190,11 +194,12 @@ public abstract class DeferredActivator implements BundleActivator {
 	 * Resets this deferred activator's members
 	 */
 	private final void reset() {
-		for (final Iterator<ServiceTracker> iter = serviceTrackers.values().iterator(); iter.hasNext();) {
-			iter.next().close();
-			iter.remove();
+		for (int i = 0; i < serviceTrackers.length; i++) {
+			serviceTrackers[i].close();
+			serviceTrackers[i] = null;
 		}
 		Arrays.fill(availability, false);
+		services.clear();
 	}
 
 	/**
@@ -275,12 +280,13 @@ public abstract class DeferredActivator implements BundleActivator {
 	 */
 	public final void stop(final BundleContext context) throws Exception {
 		try {
-			reset();
 			stopBundle();
 			this.context = null;
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
+		} finally {
+			reset();
 		}
 	}
 
@@ -313,41 +319,14 @@ public abstract class DeferredActivator implements BundleActivator {
 	 * @return The service obtained by service tracker or <code>null</code>
 	 */
 	protected final <S extends Object> S getService(final Class<? extends S> clazz) {
-		final ServiceTracker tracker = serviceTrackers.get(clazz);
-		if (null == tracker) {
+		final Object service = services.get(clazz);
+		if (null == service) {
 			/*
 			 * Given class is not tracked by any service tracker
 			 */
 			return null;
 		}
-		return clazz.cast(tracker.getService());
-	}
-
-	/**
-	 * Returns {@link ServiceTracker#waitForService(long)} invoked on the
-	 * service tracker bound to specified class
-	 * 
-	 * @param <S>
-	 *            Type of service's class
-	 * @param clazz
-	 *            The service's class
-	 * @param timeout
-	 *            The positive time interval in milliseconds to wait. If zero,
-	 *            the method will wait indefinitely.
-	 * @return The service obtained by service tracker or <code>null</code>
-	 * @throws InterruptedException
-	 *             If another thread has interrupted the current thread.
-	 */
-	protected final <S extends Object> S waitForService(final Class<? extends S> clazz, final long timeout)
-			throws InterruptedException {
-		final ServiceTracker tracker = serviceTrackers.get(clazz);
-		if (null == tracker) {
-			/*
-			 * Given class is not tracked by any service tracker
-			 */
-			return null;
-		}
-		return clazz.cast(tracker.waitForService(timeout));
+		return clazz.cast(service);
 	}
 
 }
