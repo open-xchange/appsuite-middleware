@@ -1,0 +1,11 @@
+Source: open-xchange-configread
+Section: unknown
+Priority: optional
+Maintainer: choeger <choeger@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-global
+Standards-Version: 3.6.1
+
+Package: open-xchange-configread
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-global
+Description: The Open-Xchange Server Config Bundle
