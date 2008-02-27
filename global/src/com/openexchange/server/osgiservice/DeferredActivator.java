@@ -302,4 +302,25 @@ public abstract class DeferredActivator implements BundleActivator {
 	 */
 	protected abstract void stopBundle() throws Exception;
 
+	/**
+	 * Returns {@link ServiceTracker#getService()} invoked on the service
+	 * tracker bound to specified class
+	 * 
+	 * @param <S>
+	 *            Type of service's class
+	 * @param clazz
+	 *            The service's class
+	 * @return The service obtained by service tracker or <code>null</code>
+	 */
+	protected final <S extends Object> S getService(final Class<? extends S> clazz) {
+		final ServiceTracker tracker = serviceTrackers.get(clazz);
+		if (null == tracker) {
+			/*
+			 * Given class is not tracked by any service tracker
+			 */
+			return null;
+		}
+		return clazz.cast(tracker.getService());
+	}
+
 }
