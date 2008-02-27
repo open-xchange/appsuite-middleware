@@ -1,4 +1,5 @@
 * 2008-02-26 - francisco.laguna@open-xchange.com
+
  - Bugfix #10968: Fix Infostore Search: Order of requested fields shouldn't matter.
 
 * 2008-02-26 - francisco.laguna@open-xchange.com
