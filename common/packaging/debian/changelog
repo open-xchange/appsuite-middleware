@@ -1,0 +1,54 @@
+open-xchange-common (6.5.0-3) unstable; urgency=low
+
+  * Third internal beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 18 Feb 2008 10:52:21 +0100
+
+open-xchange-common (6.5.0-2) unstable; urgency=low
+
+  * Second internal beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri,  8 Feb 2008 16:30:42 +0100
+
+open-xchange-common (6.5.0-1) unstable; urgency=low
+
+  * First internal beta.
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 16 Oct 2007 11:11:25 +0200
+
+open-xchange-common (6.4.0-1) unstable; urgency=low
+
+  * SP3 RC1 build
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 13 Sep 2007 17:39:09 +0200
+
+open-xchange-common (6.3.0-5) unstable; urgency=low
+
+  * SP3 Beta3 build 2.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue,  4 Sep 2007 16:07:22 +0200
+
+open-xchange-common (6.3.0-4) unstable; urgency=low
+
+  * SP3 Beta1 build
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 10 Aug 2007 11:31:43 +0200
+
+open-xchange-common (6.3.0-3) unstable; urgency=low
+
+  * new build for internal preview
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu,  2 Aug 2007 15:57:32 +0200
+
+open-xchange-common (6.3.0-2) unstable; urgency=low
+
+  * New build because of JAR file changes.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 11 Jul 2007 12:53:06 +0200
+
+open-xchange-common (6.3.0-1) unstable; urgency=low
+
+  * Initial build.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue,  3 Jul 2007 10:22:46 +0200
+

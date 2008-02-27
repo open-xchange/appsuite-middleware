@@ -1,0 +1,11 @@
+Source: open-xchange-jcharset
+Section: unknown
+Priority: optional
+Maintainer: choeger <choeger@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), open-xchange-common (>= 6.5.0), sun-j2sdk1.5|sun-java5-jdk
+Standards-Version: 3.6.1
+
+Package: open-xchange-jcharset
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre
+Description: jcharset bundle

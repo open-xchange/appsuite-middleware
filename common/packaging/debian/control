@@ -1,0 +1,11 @@
+Source: open-xchange-common
+Section: unknown
+Priority: optional
+Maintainer: choeger <choeger@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5)
+Standards-Version: 3.6.1
+
+Package: open-xchange-common
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre
+Description: jar files and OSGi bundles commonly used by all open-xchange packages
