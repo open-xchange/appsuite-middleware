@@ -1,0 +1,77 @@
+open-xchange-admin-plugin-hosting (6.5.0-3) unstable; urgency=low
+
+  * Third internal beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 18 Feb 2008 10:51:44 +0100
+
+open-xchange-admin-plugin-hosting (6.5.0-2) unstable; urgency=low
+
+  * Second internal beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri,  8 Feb 2008 16:36:43 +0100
+
+open-xchange-admin-plugin-hosting (6.5.0-1) unstable; urgency=low
+
+  * First internal beta.
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 29 Nov 2007 13:48:42 +0100
+
+open-xchange-admin-plugin-hosting (6.2.0-2) unstable; urgency=low
+
+  * SP3 PTF 20071011 build.
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 15 Oct 2007 11:44:38 +0200
+
+open-xchange-admin-plugin-hosting (6.2.0-1) unstable; urgency=low
+
+  * SP3 RC1 build
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 13 Sep 2007 17:52:11 +0200
+
+open-xchange-admin-plugin-hosting (6.1.0-8) unstable; urgency=low
+
+  * SP3 Beta3 build 4.
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 13 Sep 2007 09:34:47 +0200
+
+open-xchange-admin-plugin-hosting (6.1.0-7) unstable; urgency=low
+
+  * SP3 Beta3 build 3.
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri,  7 Sep 2007 13:42:26 +0200
+
+open-xchange-admin-plugin-hosting (6.1.0-6) unstable; urgency=low
+
+  * Build for SP3 Beta3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 29 Aug 2007 09:46:47 +0200
+
+open-xchange-admin-plugin-hosting (6.1.0-5) unstable; urgency=low
+
+  * Build for SP3 Beta2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 17 Aug 2007 11:28:53 +0200
+
+open-xchange-admin-plugin-hosting (6.1.0-4) unstable; urgency=low
+
+  * SP3 Beta1 build
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 10 Aug 2007 12:02:42 +0200
+
+open-xchange-admin-plugin-hosting (6.1.0-3) unstable; urgency=low
+
+  * new build for internal preview
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu,  2 Aug 2007 15:57:53 +0200
+
+open-xchange-admin-plugin-hosting (6.1.0-2) unstable; urgency=low
+
+  * second internal build
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 20 Jul 2007 16:37:49 +0200
+
+open-xchange-admin-plugin-hosting (6.1.0-1) unstable; urgency=low
+
+  * Initial release.
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 21 Jun 2007 09:47:11 +0200

@@ -1,0 +1,12 @@
+Source: open-xchange-admin-plugin-hosting
+Section: net
+Priority: optional
+Maintainer: choeger <choeger@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-admin (>= 6.5.0-0)
+Standards-Version: 3.6.1
+
+Package: open-xchange-admin-plugin-hosting
+Architecture: all
+Conflicts: open-xchange-admin-plugin-context-light
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-admin (>= 6.5.0-0)
+Description: Open Xchange Admin Hosting Plugin
