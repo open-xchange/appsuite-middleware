@@ -332,19 +332,19 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 		boolean id = false;
 		for (String currentField : DB_RESULT_FIELDS) {
 			if(currentField.equals("infostore.id")){
-				currentField = "distinct infostore.id";
+				currentField = "infostore.id";
 				id = true;
 			}
 			selectFields.append(currentField);
 			selectFields.append(", ");
 		}
 		if (!id) {
-			selectFields.append("distinct infostore.id,");
+			selectFields.append("infostore.id,");
 		}
 		
 		String retval = "";
 		if (selectFields.length() > 0) {
-			retval = "SELECT " + selectFields.toString();
+			retval = "SELECT DISTINCT " + selectFields.toString();
 			retval = retval.substring(0, retval.lastIndexOf(", "));
 		}
 		return retval;
