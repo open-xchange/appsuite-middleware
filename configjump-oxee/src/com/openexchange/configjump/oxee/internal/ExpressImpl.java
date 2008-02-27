@@ -47,18 +47,11 @@
  *
  */
 
-package com.openexchange.groupware.integration;
+package com.openexchange.configjump.oxee.internal;
 
-import static com.openexchange.tools.io.IOUtils.closeStreamStuff;
-
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Properties;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.HttpClient;
@@ -66,59 +59,48 @@ import org.apache.commons.httpclient.HttpState;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
 
-import com.openexchange.ajp13.AJPv13RequestHandler;
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.configuration.SystemConfig.Property;
+import com.openexchange.configjump.ConfigJumpException;
+import com.openexchange.configjump.ConfigJumpService;
+import com.openexchange.configjump.Replacements;
 
 /**
  * Implements the config jump to the user admin interface for OXExpress.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ExpressImpl extends SetupLink {
+public class ExpressImpl implements ConfigJumpService {
 
-    /**
-     * Lock for initialization.
-     */
-    private static final Lock LOCK = new ReentrantLock();
-
-    /**
-     * Configuration properties.
-     */
-    private static Properties props;
+    private final String url;
 
     /**
      * Default constructor.
      */
-    public ExpressImpl() {
+    public ExpressImpl(final String url) {
         super();
+        this.url = url;
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    public URL getLink(final Object... values) throws SetupLinkException {
-        final String url = props.getProperty("URL");
-        if (null == url) {
-            throw new SetupLinkException(new ConfigurationException(
-                ConfigurationException.Code.PROPERTY_MISSING, "URL"));
-        }
-        int pos = 1;
-        final String userId = (String) values[pos++];
-        final String password = (String) values[pos++];
-        final String protocol = (String) values[pos++];
-        final String host = (String) values[pos++];
-        final int port = ((Integer) values[pos++]).intValue();
-        final javax.servlet.http.Cookie[] cookies = (javax.servlet.http
-            .Cookie[]) values[pos++];
+    public URL getLink(final Replacements values) throws ConfigJumpException {
+//        final String url = props.getProperty("URL");
+//        if (null == url) {
+//            throw new ConfigJumpException(new ConfigurationException(
+//                ConfigurationException.Code.PROPERTY_MISSING, "URL"));
+//        }
+        final String username = values.getUsername();
+        final String password = values.getPassword();
+        final String protocol = values.getProtocol();
+        final String host = values.getServerName();
+        final int port = values.getServerPort();
+        final javax.servlet.http.Cookie[] cookies = values.getCookies();
         final URL urlInst;
         final URL newUrlInst;
         try {
             urlInst = new URL(url);
             newUrlInst = new URL(protocol, host, port, urlInst.getPath());
         } catch (MalformedURLException e1) {
-            throw new SetupLinkException(SetupLinkException.Code.MALFORMED_URL,
+            throw new ConfigJumpException(ConfigJumpException.Code.MALFORMED_URL,
                     e1);
         }
         final HttpClient httpClient = new HttpClient();
@@ -130,61 +112,60 @@ public class ExpressImpl extends SetupLink {
         final PostMethod post = new PostMethod(url);
         post.setRequestHeader("Content-Type", PostMethod
             .FORM_URL_ENCODED_CONTENT_TYPE + "; charset=UTF-8");
-        post.addParameter(new NameValuePair("loginUsername", userId));
+        post.addParameter(new NameValuePair("loginUsername", username));
         post.addParameter(new NameValuePair("loginPassword", password));
         try {
             httpClient.executeMethod(post.getHostConfiguration(), post, state);
             final String session = post.getResponseBodyAsString();
-            return new URL(newUrlInst.toExternalForm() + AJPv13RequestHandler
-                .JSESSIONID_URI + session);
+            return new URL(newUrlInst.toExternalForm() + ";jsessionid="
+                + session);
         } catch (IOException e) {
-            throw new SetupLinkException(SetupLinkException.Code.COMMUNICATION,
-                e);
+            throw new ConfigJumpException(ConfigJumpException.Code
+                .COMMUNICATION, e);
         }
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void initialize() throws SetupLinkException {
-        LOCK.lock();
-        try {
-            if (null == props) {
-                loadProperties();
-            }
-        } finally {
-            LOCK.unlock();
-        }
-    }
+//    protected void initialize() throws SetupLinkException {
+//        LOCK.lock();
+//        try {
+//            if (null == props) {
+//                loadProperties();
+//            }
+//        } finally {
+//            LOCK.unlock();
+//        }
+//    }
 
     /**
      * Loads the properties.
      * @throws SetupLinkException if loading fails.
      */
-    private void loadProperties() throws SetupLinkException {
-        props = new Properties();
-        final String fileName = "configjump.properties";
-        if (null == fileName) {
-            throw new SetupLinkException(SetupLinkException.Code
-                .MISSING_SETTING, "configjump.properties");
-        }
-        final File file = new File(fileName);
-        if (!file.exists()) {
-            throw new SetupLinkException(new ConfigurationException(
-                ConfigurationException.Code.FILE_NOT_FOUND, file
-                .getAbsolutePath()));
-        }
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(file);
-            props.load(fis);
-        } catch (IOException e) {
-            throw new SetupLinkException(new ConfigurationException(
-                ConfigurationException.Code.NOT_READABLE, e, file
-                .getAbsolutePath()));
-        } finally {
-            closeStreamStuff(fis);
-        }
-    }
+//    private void loadProperties() throws SetupLinkException {
+//        props = new Properties();
+//        final String fileName = "configjump.properties";
+//        if (null == fileName) {
+//            throw new SetupLinkException(SetupLinkException.Code
+//                .MISSING_SETTING, "configjump.properties");
+//        }
+//        final File file = new File(fileName);
+//        if (!file.exists()) {
+//            throw new SetupLinkException(new ConfigurationException(
+//                ConfigurationException.Code.FILE_NOT_FOUND, file
+//                .getAbsolutePath()));
+//        }
+//        FileInputStream fis = null;
+//        try {
+//            fis = new FileInputStream(file);
+//            props.load(fis);
+//        } catch (IOException e) {
+//            throw new SetupLinkException(new ConfigurationException(
+//                ConfigurationException.Code.NOT_READABLE, e, file
+//                .getAbsolutePath()));
+//        } finally {
+//            closeStreamStuff(fis);
+//        }
+//    }
 }

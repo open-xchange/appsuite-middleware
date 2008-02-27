@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Config Jump for OX EE
+Bundle-SymbolicName: com.openexchange.configjump.oxee
+Bundle-Version: 6.5.0
+Bundle-Activator: com.openexchange.configjump.oxee.internal.Activator
+Bundle-Vendor: Open-Xchange Inc.
+Import-Package: com.openexchange.config,
+ com.openexchange.configjump,
+ javax.servlet.http,
+ org.apache.commons.logging,
+ org.osgi.framework;version="1.3.0",
+ org.osgi.util.tracker;version="1.3.2"

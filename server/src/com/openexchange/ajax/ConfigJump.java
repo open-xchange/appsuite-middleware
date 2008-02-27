@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -61,9 +62,10 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.configjump.ConfigJumpInterface;
+import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.ConfigJumpException;
-import com.openexchange.server.services.ConfigJumpService;
+import com.openexchange.configjump.Replacements;
+import com.openexchange.server.services.ConfigJumpHolder;
 import com.openexchange.session.Session;
 
 /**
@@ -99,22 +101,45 @@ public class ConfigJump extends SessionServlet {
         final HttpServletResponse resp) throws ServletException, IOException {
         final Session sessionObj = getSessionObject(req);
         final Response response = new Response();
-        final ConfigJumpInterface configJump = ConfigJumpService.getInstance().getService();
+        final ConfigJumpService configJump = ConfigJumpHolder.getInstance()
+            .getService();
         try {
             //protocol, host, port, userId, password
-            String protocol = "http";
+            final String protocol;
             if (req.isSecure()) {
                 protocol = "https";
+            } else {
+                protocol = "http";
             }
-            final URL url = configJump.getLink(sessionObj.getContextId(),
-                sessionObj.getUserlogin(), sessionObj.getPassword(), protocol,
-                req.getServerName(), req.getServerPort(), req.getCookies());
+            final URL url = configJump.getLink(new Replacements() {
+                public int getContextId() {
+                    return sessionObj.getContextId();
+                }
+                public String getPassword() {
+                    return sessionObj.getPassword();
+                }
+                public String getUsername() {
+                    return sessionObj.getUserlogin();
+                }
+                public String getProtocol() {
+                    return protocol;
+                }
+                public String getServerName() {
+                    return req.getServerName();
+                }
+                public int getServerPort() {
+                    return req.getServerPort();
+                }
+                public Cookie[] getCookies() {
+                    return req.getCookies();
+                }
+            });
             response.setData(url);
         } catch (ConfigJumpException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } finally {
-        	ConfigJumpService.getInstance().ungetService(configJump);
+        	ConfigJumpHolder.getInstance().ungetService(configJump);
         }
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {

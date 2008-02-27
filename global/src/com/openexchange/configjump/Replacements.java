@@ -47,35 +47,36 @@
  *
  */
 
-package com.openexchange.server.services;
+package com.openexchange.configjump;
 
-import com.openexchange.configjump.ConfigJumpInterface;
-import com.openexchange.server.ServiceHolder;
+import javax.servlet.http.Cookie;
 
 /**
- * {@link ConfigJumpService}
- * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
- * 
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ConfigJumpService extends ServiceHolder<ConfigJumpInterface> {
+public interface Replacements {
 
-	private static final ConfigJumpService instance = new ConfigJumpService();
+    /**
+     * @return the unique context identifier.
+     */
+    int getContextId();
 
-	/**
-	 * Gets the configuration service instance.
-	 * 
-	 * @return The configuration service instance.
-	 */
-	public static ConfigJumpService getInstance() {
-		return instance;
-	}
+    /**
+     * @return the user name entered on the login screen.
+     */
+    String getUsername();
 
-	/**
-	 * Default constructor
-	 */
-	private ConfigJumpService() {
-		super();
-	}
+    /**
+     * @return the password entered on the login screen.
+     */
+    String getPassword();
 
+    String getProtocol();
+
+    String getServerName();
+
+    int getServerPort();
+
+    Cookie[] getCookies();
 }

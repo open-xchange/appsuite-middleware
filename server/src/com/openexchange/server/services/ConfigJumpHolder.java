@@ -47,32 +47,35 @@
  *
  */
 
-package com.openexchange.configjump.internal;
-
-import java.net.URL;
+package com.openexchange.server.services;
 
 import com.openexchange.configjump.ConfigJumpService;
-import com.openexchange.configjump.ConfigJumpException;
-import com.openexchange.configjump.Replacements;
-import com.openexchange.configjump.ConfigJumpException.Code;
+import com.openexchange.server.ServiceHolder;
 
 /**
- * Empty implementation for the setup link.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link ConfigJumpHolder}
+ * 
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * 
  */
-public class EmptyImpl implements ConfigJumpService {
+public final class ConfigJumpHolder extends ServiceHolder<ConfigJumpService> {
 
-    /**
-     * Default constructor.
-     */
-    public EmptyImpl() {
-        super();
-    }
+	private static final ConfigJumpHolder instance = new ConfigJumpHolder();
 
-    /**
-     * {@inheritDoc}
-     */
-    public URL getLink(final Replacements values) throws ConfigJumpException {
-        throw new ConfigJumpException(Code.NOT_IMPLEMENTED);
-    }
+	/**
+	 * Gets the configuration service instance.
+	 * 
+	 * @return The configuration service instance.
+	 */
+	public static ConfigJumpHolder getInstance() {
+		return instance;
+	}
+
+	/**
+	 * Default constructor
+	 */
+	private ConfigJumpHolder() {
+		super();
+	}
+
 }

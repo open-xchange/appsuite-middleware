@@ -22,6 +22,7 @@ Export-Package: com.openexchange.authentication,
  com.openexchange.tools.arrays,
  com.openexchange.tools.stream
 Import-Package: javax.management,
+ javax.servlet.http,
  org.apache.commons.logging,
  org.apache.commons.logging.impl,
  org.apache.jcs.engine.control.event,

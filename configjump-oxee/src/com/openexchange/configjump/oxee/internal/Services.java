@@ -47,32 +47,67 @@
  *
  */
 
-package com.openexchange.configjump.internal;
+package com.openexchange.configjump.oxee.internal;
 
-import java.net.URL;
+import java.util.Properties;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 
 import com.openexchange.configjump.ConfigJumpService;
-import com.openexchange.configjump.ConfigJumpException;
-import com.openexchange.configjump.Replacements;
-import com.openexchange.configjump.ConfigJumpException.Code;
 
 /**
- * Empty implementation for the setup link.
+ * This class maintains the service registrations.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class EmptyImpl implements ConfigJumpService {
+public final class Services {
+
+    private static final Log LOG = LogFactory.getLog(Services.class);
+
+    private final BundleContext context;
+
+    private ServiceRegistration configJump;
+
+    private final Lock registrationLock = new ReentrantLock();
 
     /**
-     * Default constructor.
+     * Default constructor. 
      */
-    public EmptyImpl() {
+    public Services(final BundleContext context) {
         super();
+        this.context = context;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public URL getLink(final Replacements values) throws ConfigJumpException {
-        throw new ConfigJumpException(Code.NOT_IMPLEMENTED);
+    public void registerService(final Properties props) {
+        final String url = props.getProperty("URL");
+        if (null == url) {
+            LOG.error("Missing URL property in configjump.properties.");
+            return;
+        }
+        registrationLock.lock();
+        try {
+            if (null == configJump) {
+                configJump = context.registerService(ConfigJumpService.class
+                    .getName(), new ExpressImpl(url), null);
+            }
+        } finally {
+            registrationLock.unlock();
+        }
+    }
+
+    public void unregisterService() {
+        registrationLock.lock();
+        try {
+            if (null != configJump) {
+                configJump.unregister();
+                configJump = null;
+            }
+        } finally {
+            registrationLock.unlock();
+        }
     }
 }

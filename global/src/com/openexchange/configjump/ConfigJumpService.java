@@ -47,32 +47,23 @@
  *
  */
 
-package com.openexchange.configjump.internal;
+package com.openexchange.configjump;
 
 import java.net.URL;
 
-import com.openexchange.configjump.ConfigJumpService;
-import com.openexchange.configjump.ConfigJumpException;
-import com.openexchange.configjump.Replacements;
-import com.openexchange.configjump.ConfigJumpException.Code;
-
 /**
- * Empty implementation for the setup link.
+ * This interface defines the methods that will be used to generate browser
+ * links that redirect the user to the setup system.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class EmptyImpl implements ConfigJumpService {
+public interface ConfigJumpService {
 
     /**
-     * Default constructor.
+     * This method has to return the user specific link to the setup system.
+     * @param values the implementation of this method can define a number of
+     * objects to pass for generating a user specific link.
+     * @return a ready to use link to redirect the user to the setup system.
+     * @throws ConfigJumpException if creating the url fails.
      */
-    public EmptyImpl() {
-        super();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public URL getLink(final Replacements values) throws ConfigJumpException {
-        throw new ConfigJumpException(Code.NOT_IMPLEMENTED);
-    }
+    URL getLink(Replacements values) throws ConfigJumpException;
 }

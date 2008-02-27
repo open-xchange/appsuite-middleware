@@ -68,7 +68,7 @@ import com.openexchange.authentication.service.AuthenticationHolder;
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
-import com.openexchange.configjump.ConfigJumpInterface;
+import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.database.DatabaseInit;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.i18n.I18nTools;
@@ -82,7 +82,7 @@ import com.openexchange.monitoring.MonitorService;
 import com.openexchange.server.ServiceHolderListener;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
-import com.openexchange.server.services.ConfigJumpService;
+import com.openexchange.server.services.ConfigJumpHolder;
 import com.openexchange.server.services.EventAdminService;
 import com.openexchange.server.services.SessiondService;
 import com.openexchange.sessiond.SessiondConnectorInterface;
@@ -196,9 +196,9 @@ public class Activator implements BundleActivator, EventHandler {
 						new BundleServiceTracker<SessiondConnectorInterface>(context, SessiondService.getInstance(),
 								SessiondConnectorInterface.class)));
 				// ConfigJump is only needed for groupware.
-				serviceTrackerList.add(new ServiceTracker(context, ConfigJumpInterface.class.getName(),
-						new BundleServiceTracker<ConfigJumpInterface>(context, ConfigJumpService.getInstance(),
-								ConfigJumpInterface.class)));
+				serviceTrackerList.add(new ServiceTracker(context, ConfigJumpService.class.getName(),
+						new BundleServiceTracker<ConfigJumpService>(context, ConfigJumpHolder.getInstance(),
+								ConfigJumpService.class)));
 				// Management is only needed for groupware.
 				serviceTrackerList.add(new ServiceTracker(context, ManagementService.class.getName(),
 						new ManagementServiceTracker(context, msh)));

@@ -47,32 +47,41 @@
  *
  */
 
-package com.openexchange.configjump.internal;
+package com.openexchange.configjump.oxee.internal;
 
-import java.net.URL;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
 
-import com.openexchange.configjump.ConfigJumpService;
-import com.openexchange.configjump.ConfigJumpException;
-import com.openexchange.configjump.Replacements;
-import com.openexchange.configjump.ConfigJumpException.Code;
+import com.openexchange.config.ConfigurationService;
 
 /**
- * Empty implementation for the setup link.
+ * Activator.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class EmptyImpl implements ConfigJumpService {
+public class Activator implements BundleActivator {
 
-    /**
-     * Default constructor.
-     */
-    public EmptyImpl() {
-        super();
-    }
+    private Services services;
 
-    /**
-     * {@inheritDoc}
-     */
-    public URL getLink(final Replacements values) throws ConfigJumpException {
-        throw new ConfigJumpException(Code.NOT_IMPLEMENTED);
-    }
+    private ServiceTracker tracker;
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void start(final BundleContext context) throws Exception {
+        services = new Services(context);
+        tracker = new ServiceTracker(context, ConfigurationService.class
+            .getName(), new ConfigurationTracker(context, services));
+        tracker.open();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void stop(final BundleContext context) throws Exception {
+        tracker.close();
+        tracker = null;
+        services.unregisterService();
+        services = null;
+	}
 }

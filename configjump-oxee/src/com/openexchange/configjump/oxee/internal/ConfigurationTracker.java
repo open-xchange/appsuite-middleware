@@ -47,23 +47,64 @@
  *
  */
 
-package com.openexchange.configjump;
+package com.openexchange.configjump.oxee.internal;
 
-import java.net.URL;
+import java.util.Properties;
+
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
+import com.openexchange.config.ConfigurationService;
 
 /**
- * This interface defines the methods that will be used to generate browser
- * links that redirect the user to the setup system.
+ * This customizer handles an appearing Configuration service and activates then
+ * this bundles service.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface ConfigJumpInterface {
+public class ConfigurationTracker implements ServiceTrackerCustomizer {
+
+    private final BundleContext context;
+
+    private final Services services;
 
     /**
-     * This method has to return the user specific link to the setup system.
-     * @param values the implementation of this method can define a number of
-     * objects to pass for generating a user specific link.
-     * @return a ready to use link to redirect the user to the setup system.
-     * @throws ConfigJumpException if creating the url fails.
+     * Default constructor.
+     * @param services 
      */
-    public URL getLink(Object... values) throws ConfigJumpException;
+    public ConfigurationTracker(final BundleContext context,
+        final Services services) {
+        super();
+        this.context = context;
+        this.services = services;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Object addingService(final ServiceReference reference) {
+        final ConfigurationService configuration = (ConfigurationService) context
+            .getService(reference);
+        final Properties props = configuration.getFile("configjump.properties");
+        // TODO put URL somewhere
+        context.ungetService(reference);
+        services.registerService(props);
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void modifiedService(final ServiceReference reference,
+        final Object service) {
+        // Nothing to do.
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void removedService(final ServiceReference reference,
+        final Object service) {
+        // Nothing to do.
+    }
 }

@@ -55,7 +55,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 
-import com.openexchange.configjump.ConfigJumpInterface;
+import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.internal.EmptyImpl;
 
 /**
@@ -86,8 +86,8 @@ public final class ConfigJumpActivator implements BundleActivator {
 		LOG.info("starting bundle: com.openexchange.configjump.empty");
 		
 		try {
-		    final ConfigJumpInterface configJumpImpl= new EmptyImpl();
-			serviceRegister = context.registerService(ConfigJumpInterface.class.getName(), configJumpImpl,
+		    final ConfigJumpService configJumpImpl= new EmptyImpl();
+			serviceRegister = context.registerService(ConfigJumpService.class.getName(), configJumpImpl,
 					null);
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
