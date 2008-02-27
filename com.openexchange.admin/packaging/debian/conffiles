@@ -1,0 +1,16 @@
+/opt/open-xchange/etc/admindaemon/Sql.properties
+/opt/open-xchange/etc/admindaemon/system.properties
+/opt/open-xchange/etc/admindaemon/RMI.properties
+/opt/open-xchange/etc/admindaemon/User.properties
+/opt/open-xchange/etc/admindaemon/logging.properties
+/opt/open-xchange/etc/admindaemon/file-logging.properties
+/opt/open-xchange/etc/admindaemon/Group.properties
+/opt/open-xchange/etc/admindaemon/Resource.properties
+/opt/open-xchange/etc/admindaemon/AdminDaemon.properties
+/opt/open-xchange/etc/admindaemon/cache.ccf
+/opt/open-xchange/etc/admindaemon/configdb.properties
+/opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
+/opt/open-xchange/etc/admindaemon/mpasswd
+/opt/open-xchange/etc/admindaemon/ModuleAccessDefinitions.properties
+/opt/open-xchange/etc/admindaemon/log4j/log4j.xml
+/etc/default/open-xchange-admin

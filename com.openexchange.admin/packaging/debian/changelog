@@ -1,0 +1,155 @@
+open-xchange-admin (6.5.0-3) unstable; urgency=low
+
+  * Third internal beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 18 Feb 2008 10:51:09 +0100
+
+open-xchange-admin (6.5.0-2) unstable; urgency=low
+
+  * Second internal beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri,  8 Feb 2008 16:28:34 +0100
+
+open-xchange-admin (6.5.0-1) unstable; urgency=low
+
+  * First internal beta
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 16 Oct 2007 11:59:54 +0200
+
+open-xchange-admin (6.4.0-4) unstable; urgency=low
+
+  * SP3 PTF 20071005 build.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 11 Oct 2007 17:04:17 +0200
+
+open-xchange-admin (6.4.0-3) unstable; urgency=low
+
+  * SP3 RC3 build
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 20 Sep 2007 14:29:32 +0200
+
+open-xchange-admin (6.4.0-2) unstable; urgency=low
+
+  * SP3 RC2 build
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 18 Sep 2007 09:57:06 +0200
+
+open-xchange-admin (6.4.0-1) unstable; urgency=low
+
+  * SP3 RC1 build
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 13 Sep 2007 17:36:56 +0200
+
+open-xchange-admin (6.3.0-9) unstable; urgency=low
+
+  * SP3 Beta3 build 4.
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 13 Sep 2007 09:16:21 +0200
+
+open-xchange-admin (6.3.0-8) unstable; urgency=low
+
+  * SP3 Beta3 build 3.
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri,  7 Sep 2007 13:31:35 +0200
+
+open-xchange-admin (6.3.0-7) unstable; urgency=low
+
+  * Second build for SP3 Beta3.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue,  4 Sep 2007 16:36:37 +0200
+
+open-xchange-admin (6.3.0-6) unstable; urgency=low
+
+  * Build for SP3 Beta3
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 29 Aug 2007 09:09:01 +0200
+
+open-xchange-admin (6.3.0-5) unstable; urgency=low
+
+  * Build for SP3 Beta2
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 17 Aug 2007 11:12:11 +0200
+
+open-xchange-admin (6.3.0-4) unstable; urgency=low
+
+  * SP3 Beta1 build
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 10 Aug 2007 11:36:04 +0200
+
+open-xchange-admin (6.3.0-3) unstable; urgency=low
+
+  * new build for internal preview
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu,  2 Aug 2007 15:57:13 +0200
+
+open-xchange-admin (6.3.0-2) unstable; urgency=low
+
+  * second internal build
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 20 Jul 2007 16:35:15 +0200
+
+open-xchange-admin (6.3.0-1) unstable; urgency=low
+
+  * next unstable minor number
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon,  9 Jul 2007 11:59:52 +0200
+
+open-xchange-admin (6.1.0-9) unstable; urgency=low
+
+  * new build 
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 19 Jun 2007 17:18:23 +0200
+
+open-xchange-admin (6.1.0-8) unstable; urgency=low
+
+  * new build
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 13 Jun 2007 19:55:23 +0200
+
+open-xchange-admin (6.1.0-7) unstable; urgency=low
+
+  * new build
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 12 Jun 2007 08:53:02 +0200
+
+open-xchange-admin (6.1.0-6) unstable; urgency=low
+
+  * new build
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 11 Jun 2007 13:10:04 +0200
+
+open-xchange-admin (6.1.0-5) unstable; urgency=low
+
+  * new build
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue,  5 Jun 2007 19:59:09 +0200
+
+open-xchange-admin (6.1.0-4) unstable; urgency=low
+
+  * new build
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue,  5 Jun 2007 12:19:50 +0200
+
+open-xchange-admin (6.1.0-3) unstable; urgency=low
+
+  * new build
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri,  1 Jun 2007 14:49:50 +0200
+
+open-xchange-admin (6.1.0-2) unstable; urgency=low
+
+  * Second build for OX EE Beta
+
+ -- Carsten Hoeger <choeger@example.com>  Fri, 11 May 2007 18:04:08 +0200
+
+open-xchange-admin (6.1.0-1) unstable; urgency=low
+
+  * first build for Beta2 EE
+
+ -- Carsten Hoeger <choeger@example.com>  Fri, 27 Apr 2007 17:12:39 +0200
+
+open-xchange-admin (6.1.0-0) unstable; urgency=low
+
+  * Initial release.
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 27 Apr 2007 16:55:19 +0200
