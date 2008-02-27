@@ -1,0 +1,12 @@
+Source: open-xchange-configjump-empty
+Section: unknown
+Priority: optional
+Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= 6.5.0), open-xchange-global (>=6.5.0)
+Standards-Version: 3.6.1
+
+Package: open-xchange-configjump-empty
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common (>= 6.5.0), open-xchange-global (>=6.5.0)
+Provides: open-xchange-configjump
+Description: The Open-Xchange Empty ConfigJump

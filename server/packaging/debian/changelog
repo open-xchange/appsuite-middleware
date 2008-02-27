@@ -1,0 +1,17 @@
+open-xchange-server (6.5.0-3) unstable; urgency=low
+
+  * Third internal beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 18 Feb 2008 10:53:16 +0100
+
+open-xchange-server (6.5.0-2) unstable; urgency=low
+
+  * Second internal beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri,  8 Feb 2008 16:32:21 +0100
+
+open-xchange-server (6.5.0-1) unstable; urgency=low
+
+  * First internal beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 26 Nov 2007 12:29:44 +0100

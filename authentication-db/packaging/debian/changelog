@@ -1,0 +1,17 @@
+open-xchange-authentication-database (6.5.0-3) unstable; urgency=low
+
+  * Third internal beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 18 Feb 2008 10:52:08 +0100
+
+open-xchange-authentication-database (6.5.0-2) unstable; urgency=low
+
+  * Second internal beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri,  8 Feb 2008 16:29:59 +0100
+
+open-xchange-authentication-database (6.5.0-1) unstable; urgency=low
+
+  * First internal beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon,  3 Dec 2007 15:31:23 +0100

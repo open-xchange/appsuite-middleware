@@ -1,0 +1,27 @@
+Source: open-xchange-server
+Section: unknown
+Priority: optional
+Maintainer: choeger <choeger@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= 6.5.0), open-xchange-configread (>= 6.5.0), open-xchange-global (>= 6.5.0), open-xchange-monitoring (>= 6.5.0)
+Standards-Version: 3.6.1
+
+Package: open-xchange-server
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-common (>= 6.5.0), j2re1.5|sun-java5-jre, open-xchange-configread, open-xchange-global, open-xchange-monitoring, open-xchange-management
+Suggests: mysql-server-5.0 (>= 5.0.24)
+Conflicts: open-xchange-libs
+Replaces: open-xchange-libs
+Description: The Open-Xchange Server Bundle
+
+Package: open-xchange-config-standard
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: open-xchange
+Provides: open-xchange-config
+Description: Open-Xchange server standard configuration
+
+Package: open-xchange
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-server, open-xchange-config, adduser
+Suggests: open-xchange-authentication, open-xchange-control, open-xchange-configjump, open-xchange-charset, open-xchange-sessiond
+Description: Open-Xchange server scripts

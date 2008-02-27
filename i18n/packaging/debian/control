@@ -1,0 +1,11 @@
+Source: open-xchange-i18n
+Section: unknown
+Priority: optional
+Maintainer: choeger <choeger@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= 6.5.0), open-xchange-configread, open-xchange-server
+Standards-Version: 3.6.1
+
+Package: open-xchange-i18n
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common (>= 6.5.0), open-xchange-configread, open-xchange-server
+Description: The Open-Xchange Server i18n Bundle

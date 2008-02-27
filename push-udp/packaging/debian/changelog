@@ -1,0 +1,12 @@
+open-xchange-push-udp (6.5.0-1) unstable; urgency=low
+
+  * Third internal beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 18 Feb 2008 10:53:10 +0100
+
+open-xchange-push-udp (6.5.0-0) unstable; urgency=low
+
+  * initial import.
+
+ -- Sebastian Kauss <sebastian.kauss@open-xchange.com>  Wed, 11 Feb 2008 11:33:11 +0100
+

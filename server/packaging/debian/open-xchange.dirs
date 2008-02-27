@@ -1,0 +1,3 @@
+opt/open-xchange/etc/groupware/osgi
+opt/open-xchange/sbin
+var/log/open-xchange

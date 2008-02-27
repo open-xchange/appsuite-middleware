@@ -1,0 +1,17 @@
+open-xchange-management (6.5.0-3) unstable; urgency=low
+
+  * Third internal beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 18 Feb 2008 10:52:57 +0100
+
+open-xchange-management (6.5.0-2) unstable; urgency=low
+
+  * Second internal beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri,  8 Feb 2008 16:32:04 +0100
+
+open-xchange-management (6.5.0-1) unstable; urgency=low
+
+  * First internal beta.
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon,  3 Dec 2007 10:44:00 +0100
