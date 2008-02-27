@@ -323,4 +323,31 @@ public abstract class DeferredActivator implements BundleActivator {
 		return clazz.cast(tracker.getService());
 	}
 
+	/**
+	 * Returns {@link ServiceTracker#waitForService(long)} invoked on the
+	 * service tracker bound to specified class
+	 * 
+	 * @param <S>
+	 *            Type of service's class
+	 * @param clazz
+	 *            The service's class
+	 * @param timeout
+	 *            The positive time interval in milliseconds to wait. If zero,
+	 *            the method will wait indefinitely.
+	 * @return The service obtained by service tracker or <code>null</code>
+	 * @throws InterruptedException
+	 *             If another thread has interrupted the current thread.
+	 */
+	protected final <S extends Object> S waitForService(final Class<? extends S> clazz, final long timeout)
+			throws InterruptedException {
+		final ServiceTracker tracker = serviceTrackers.get(clazz);
+		if (null == tracker) {
+			/*
+			 * Given class is not tracked by any service tracker
+			 */
+			return null;
+		}
+		return clazz.cast(tracker.waitForService(timeout));
+	}
+
 }
