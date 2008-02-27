@@ -49,9 +49,8 @@
 
 package com.openexchange.server.osgiservice;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -108,12 +107,16 @@ public abstract class DeferredActivator implements BundleActivator {
 		}
 
 		public void removedService(final ServiceReference reference, final Object service) {
-			if (clazz.isInstance(service)) {
-				/*
-				 * Signal unavailability
-				 */
-				signalUnavailability(index);
-				handleUnavailability(clazz);
+			try {
+				if (clazz.isInstance(service)) {
+					/*
+					 * Signal unavailability
+					 */
+					signalUnavailability(index);
+					handleUnavailability(clazz);
+				}
+			} finally {
+				context.ungetService(reference);
 			}
 		}
 	}
@@ -121,7 +124,7 @@ public abstract class DeferredActivator implements BundleActivator {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(DeferredActivator.class);
 
-	protected final List<Boolean> availability;
+	protected final boolean[] availability;
 
 	/**
 	 * The execution context of the bundle
@@ -136,11 +139,11 @@ public abstract class DeferredActivator implements BundleActivator {
 	public DeferredActivator() {
 		super();
 		serviceTrackers = new ConcurrentHashMap<Class<?>, ServiceTracker>(getNeededServices().length);
-		availability = new ArrayList<Boolean>(getNeededServices().length);
-		for (int i = getNeededServices().length; i > 0; i--) {
-			availability.add(Boolean.FALSE);
-		}
-		
+		availability = new boolean[getNeededServices().length];
+		/*
+		 * Mark every service as unavailable
+		 */
+		Arrays.fill(availability, false);
 	}
 
 	/**
@@ -191,10 +194,7 @@ public abstract class DeferredActivator implements BundleActivator {
 			iter.next().close();
 			iter.remove();
 		}
-		final int size = availability.size();
-		for (int i = 0; i < size; i++) {
-			availability.set(i, Boolean.FALSE);
-		}
+		Arrays.fill(availability, false);
 	}
 
 	/**
@@ -209,9 +209,9 @@ public abstract class DeferredActivator implements BundleActivator {
 	 *            The class' index
 	 */
 	private final void signalAvailability(final int index) {
-		availability.set(index, Boolean.TRUE);
-		for (final Boolean b : availability) {
-			if (b == Boolean.FALSE) {
+		availability[index] = true;
+		for (final boolean b : availability) {
+			if (!b) {
 				return;
 			}
 		}
@@ -234,7 +234,7 @@ public abstract class DeferredActivator implements BundleActivator {
 	 *            The class' index
 	 */
 	private final void signalUnavailability(final int index) {
-		availability.set(index, Boolean.FALSE);
+		availability[index] = false;
 	}
 
 	/*
