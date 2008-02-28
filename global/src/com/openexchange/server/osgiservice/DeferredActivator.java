@@ -152,7 +152,7 @@ public abstract class DeferredActivator implements BundleActivator {
 	}
 
 	/**
-	 * Gets the classes of the service which need to be available to start this
+	 * Gets the classes of the services which need to be available to start this
 	 * activator
 	 * 
 	 * @return The array of {@link Class} instances of needed services
