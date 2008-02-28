@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.OXCachingException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
@@ -180,8 +179,6 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
 			try {
 				readCon = getReadConnection(ctx);
 				fo = cache.getFolderObject((int)folderId, false, ctx, readCon);
-			} catch (final OXCachingException e) {
-				throw new OXException(e);
 			} finally {
 				releaseReadConnection(ctx, readCon);
 			}

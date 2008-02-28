@@ -70,7 +70,7 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.server.services.EventAdminService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 
@@ -519,19 +519,11 @@ public class EventClient {
 	}
 	
 	protected void triggerEvent(Event event) throws EventException {
-		final EventAdminService eventAdminService = EventAdminService.getInstance();
-		EventAdmin eventAdmin = null;
-		try {
-			eventAdmin = eventAdminService.getService();
-			if (eventAdmin != null) {
-				eventAdmin.postEvent(event);
-			} else {
-				throw new EventException("event service not available");
-			}
-		} finally {
-			if (eventAdmin != null) {
-				eventAdminService.ungetService(eventAdmin);
-			}
+		final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
+		if (eventAdmin != null) {
+			eventAdmin.postEvent(event);
+		} else {
+			throw new EventException("event service not available");
 		}
 	}
 }

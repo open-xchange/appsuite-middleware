@@ -57,7 +57,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.openexchange.cache.OXCachingException;
+import com.openexchange.caching.CacheException;
 import com.openexchange.mail.cache.MailConnectionCache;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.session.Session;
@@ -161,7 +161,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 					return mailConnection;
 				}
 			}
-		} catch (final OXCachingException e1) {
+		} catch (final CacheException e1) {
 			/*
 			 * Fetching from cache failed
 			 */
@@ -200,7 +200,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 			} catch (final InterruptedException e) {
 				LOG.error(e.getMessage(), e);
 				throw new MailException(MailException.Code.INTERRUPT_ERROR, e, new Object[0]);
-			} catch (final OXCachingException e1) {
+			} catch (final CacheException e1) {
 				/*
 				 * Fetching from cache failed
 				 */
@@ -227,7 +227,6 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 * @throws MailException
 	 *             If mail connection creation fails
 	 */
-	@SuppressWarnings("unchecked")
 	private static final MailConnection<?, ?, ?> createNewMailConnection(
 			final Class<? extends MailConnection<?, ?, ?>> clazz, final Session session) throws MailException {
 		try {
@@ -383,7 +382,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 					signalAvailableConnection();
 					return;
 				}
-			} catch (final OXCachingException e) {
+			} catch (final CacheException e) {
 				LOG.error(e.getLocalizedMessage(), e);
 			}
 			/*

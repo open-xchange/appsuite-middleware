@@ -49,10 +49,9 @@
 
 package com.openexchange.mail.cache.eventhandler;
 
-import org.apache.jcs.engine.CacheElement;
-import org.apache.jcs.engine.control.event.ElementEvent;
-
-import com.openexchange.cache.ElementEventHandlerWrapper;
+import com.openexchange.caching.CacheElement;
+import com.openexchange.caching.ElementEvent;
+import com.openexchange.caching.ElementEventHandler;
 import com.openexchange.mail.MailConnection;
 
 /**
@@ -63,7 +62,10 @@ import com.openexchange.mail.MailConnection;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailConnectionEventHandler extends ElementEventHandlerWrapper {
+public final class MailConnectionEventHandler implements ElementEventHandler {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(MailConnectionEventHandler.class);
 
 	/**
 	 * Default constructor
@@ -77,8 +79,7 @@ public final class MailConnectionEventHandler extends ElementEventHandlerWrapper
 	 * 
 	 * @see com.openexchange.cache.ElementEventHandlerWrapper#onExceededIdletimeBackground(org.apache.jcs.engine.control.event.ElementEvent)
 	 */
-	@Override
-	protected void onExceededIdletimeBackground(final ElementEvent event) {
+	public void onExceededIdletimeBackground(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
 		close((MailConnection<?, ?, ?>) cacheElem.getVal());
 	}
@@ -88,8 +89,7 @@ public final class MailConnectionEventHandler extends ElementEventHandlerWrapper
 	 * 
 	 * @see com.openexchange.cache.ElementEventHandlerWrapper#onExceededMaxlifeBackground(org.apache.jcs.engine.control.event.ElementEvent)
 	 */
-	@Override
-	protected void onExceededMaxlifeBackground(final ElementEvent event) {
+	public void onExceededMaxlifeBackground(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
 		close((MailConnection<?, ?, ?>) cacheElem.getVal());
 	}
@@ -99,8 +99,7 @@ public final class MailConnectionEventHandler extends ElementEventHandlerWrapper
 	 * 
 	 * @see com.openexchange.cache.ElementEventHandlerWrapper#onSpooledDiskNotAvailable(org.apache.jcs.engine.control.event.ElementEvent)
 	 */
-	@Override
-	protected void onSpooledDiskNotAvailable(final ElementEvent event) {
+	public void onSpooledDiskNotAvailable(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
 		close((MailConnection<?, ?, ?>) cacheElem.getVal());
 	}
@@ -110,8 +109,7 @@ public final class MailConnectionEventHandler extends ElementEventHandlerWrapper
 	 * 
 	 * @see com.openexchange.cache.ElementEventHandlerWrapper#onSpooledNotAllowed(org.apache.jcs.engine.control.event.ElementEvent)
 	 */
-	@Override
-	protected void onSpooledNotAllowed(final ElementEvent event) {
+	public void onSpooledNotAllowed(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
 		close((MailConnection<?, ?, ?>) cacheElem.getVal());
 	}
@@ -121,5 +119,24 @@ public final class MailConnectionEventHandler extends ElementEventHandlerWrapper
 	 */
 	private void close(final MailConnection<?, ?, ?> mailConnection) {
 		mailConnection.close(false);
+	}
+
+	public void handleElementEvent(ElementEvent event) {
+		LOG.error("Unknown event type: " + event.getElementEvent());
+	}
+
+	public void onExceededIdletimeOnRequest(ElementEvent event) {
+		final CacheElement cacheElem = (CacheElement) event.getSource();
+		close((MailConnection<?, ?, ?>) cacheElem.getVal());
+	}
+
+	public void onExceededMaxlifeOnRequest(ElementEvent event) {
+		final CacheElement cacheElem = (CacheElement) event.getSource();
+		close((MailConnection<?, ?, ?>) cacheElem.getVal());
+	}
+
+	public void onSpooledDiskAvailable(ElementEvent event) {
+		final CacheElement cacheElem = (CacheElement) event.getSource();
+		close((MailConnection<?, ?, ?>) cacheElem.getVal());
 	}
 }

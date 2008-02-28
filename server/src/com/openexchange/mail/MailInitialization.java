@@ -49,7 +49,6 @@
 
 package com.openexchange.mail;
 
-import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.cache.MailCacheConfiguration;
 import com.openexchange.mail.config.MailPropertiesInit;
@@ -70,8 +69,6 @@ public final class MailInitialization implements Initialization {
 
 	private static final MailInitialization instance = new MailInitialization();
 
-	private ConfigurationServiceHolder configurationServiceHolder;
-
 	/**
 	 * No instantiation
 	 */
@@ -84,25 +81,6 @@ public final class MailInitialization implements Initialization {
 	 */
 	public static MailInitialization getInstance() {
 		return instance;
-	}
-
-	/**
-	 * Gets the configuration service holder
-	 * 
-	 * @return The configuration service holder
-	 */
-	public ConfigurationServiceHolder getConfigurationServiceHolder() {
-		return configurationServiceHolder;
-	}
-
-	/**
-	 * Sets the configuration service holder
-	 * 
-	 * @param configurationServiceHolder
-	 *            The configuration service holder
-	 */
-	public void setConfigurationServiceHolder(final ConfigurationServiceHolder configurationServiceHolder) {
-		this.configurationServiceHolder = configurationServiceHolder;
 	}
 
 	/*

@@ -64,7 +64,6 @@ import java.util.Queue;
 import java.util.Set;
 
 import com.openexchange.ajax.fields.FolderFields;
-import com.openexchange.cache.OXCachingException;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -419,30 +418,26 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 		/*
 		 * Iterate result queue
 		 */
-		try {
-			int prevModule = -1;
-			final LinkedList<Integer> cacheQueue = new LinkedList<Integer>();
-			for (int i = 0; i < size; i++) {
-				final FolderObject f = iter.next();
-				if (prevModule != f.getModule()) {
-					FolderQueryCacheManager.getInstance().putFolderQuery(getNonTreeVisibleNum(prevModule), cacheQueue,
-							session, false);
-					prevModule = f.getModule();
-					stdModules.remove(Integer.valueOf(prevModule));
-					cacheQueue.clear();
-				}
-				cacheQueue.add(Integer.valueOf(f.getObjectID()));
+		int prevModule = -1;
+		final LinkedList<Integer> cacheQueue = new LinkedList<Integer>();
+		for (int i = 0; i < size; i++) {
+			final FolderObject f = iter.next();
+			if (prevModule != f.getModule()) {
+				FolderQueryCacheManager.getInstance().putFolderQuery(getNonTreeVisibleNum(prevModule), cacheQueue,
+						session, false);
+				prevModule = f.getModule();
+				stdModules.remove(Integer.valueOf(prevModule));
+				cacheQueue.clear();
 			}
-			FolderQueryCacheManager.getInstance().putFolderQuery(getNonTreeVisibleNum(prevModule), cacheQueue, session,
-					false);
-			final int setSize = stdModules.size();
-			final Iterator<Integer> iter2 = stdModules.iterator();
-			for (int i = 0; i < setSize; i++) {
-				FolderQueryCacheManager.getInstance().putFolderQuery(getNonTreeVisibleNum(iter2.next().intValue()),
-						new LinkedList<Integer>(), session, false);
-			}
-		} catch (final OXCachingException e) {
-			throw new OXException(e);
+			cacheQueue.add(Integer.valueOf(f.getObjectID()));
+		}
+		FolderQueryCacheManager.getInstance().putFolderQuery(getNonTreeVisibleNum(prevModule), cacheQueue, session,
+				false);
+		final int setSize = stdModules.size();
+		final Iterator<Integer> iter2 = stdModules.iterator();
+		for (int i = 0; i < setSize; i++) {
+			FolderQueryCacheManager.getInstance().putFolderQuery(getNonTreeVisibleNum(iter2.next().intValue()),
+					new LinkedList<Integer>(), session, false);
 		}
 	}
 

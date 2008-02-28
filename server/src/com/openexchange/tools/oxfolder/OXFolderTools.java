@@ -64,7 +64,6 @@ import java.util.List;
 import java.util.Locale;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.OXCachingException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.contact.Contacts;
@@ -143,8 +142,6 @@ public class OXFolderTools {
 		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.FOLDER_COULD_NOT_BE_LOADED, Integer.valueOf(folderId), Integer
 					.valueOf(ctx.getContextId()), e);
-		} catch (final OXCachingException e) {
-			throw new OXException(e);
 		}
 	}
 
@@ -1534,11 +1531,7 @@ public class OXFolderTools {
 	 */
 	public static Date getFolderLastModifed(final int folderId, final Context ctx) throws OXException {
 		if (FolderCacheManager.isEnabled()) {
-			try {
-				return FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, null).getLastModified();
-			} catch (final OXCachingException e) {
-				throw new OXException(e);
-			}
+			return FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, null).getLastModified();
 		}
 		return getFolderLastModifedFromDB(folderId, ctx);
 	}

@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.transport;
 
-import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.transport.config.TransportPropertiesInit;
 import com.openexchange.server.Initialization;
@@ -66,8 +65,6 @@ public final class TransportInitialization implements Initialization {
 
 	private static final TransportInitialization instance = new TransportInitialization();
 
-	private ConfigurationServiceHolder configurationServiceHolder;
-
 	/**
 	 * @return The singleton instance of {@link TransportInitialization}
 	 */
@@ -80,25 +77,6 @@ public final class TransportInitialization implements Initialization {
 	 */
 	private TransportInitialization() {
 		super();
-	}
-
-	/**
-	 * Gets the configuration service holder
-	 * 
-	 * @return The configuration service holder
-	 */
-	public ConfigurationServiceHolder getConfigurationServiceHolder() {
-		return configurationServiceHolder;
-	}
-
-	/**
-	 * Sets the configuration service holder
-	 * 
-	 * @param configurationServiceHolder
-	 *            The configuration service holder
-	 */
-	public void setConfigurationServiceHolder(final ConfigurationServiceHolder configurationServiceHolder) {
-		this.configurationServiceHolder = configurationServiceHolder;
 	}
 
 	/*

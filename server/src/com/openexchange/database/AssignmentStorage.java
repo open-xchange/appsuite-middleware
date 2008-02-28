@@ -62,16 +62,16 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
 
-import com.openexchange.cache.CacheKey;
-import com.openexchange.cache.impl.Configuration;
-import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheService;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.DBPoolingException.Code;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * Reads assignments from the database, maybe stores them in a cache for faster
@@ -96,7 +96,7 @@ public final class AssignmentStorage {
 
     private Assignment configDB;
 
-    private JCS cache;
+    private Cache cache;
 
     /**
      * Lock for the cache.
@@ -233,7 +233,7 @@ public final class AssignmentStorage {
             Pools.CONFIGDB_WRITE_ID, null);
         if (Boolean.parseBoolean(SystemConfig.getProperty(Property.CACHE))) {
             try {
-                cache = JCS.getInstance(CACHE_NAME);
+                cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_NAME);
             } catch (CacheException e) {
                 throw new DBPoolingException(Code.NOT_INITIALIZED, e,
                     CACHE_NAME);

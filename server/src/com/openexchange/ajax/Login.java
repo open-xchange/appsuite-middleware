@@ -76,7 +76,7 @@ import com.openexchange.groupware.impl.UserNotFoundException;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.server.services.SessiondService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondConnectorInterface;
 import com.openexchange.sessiond.exception.SessiondException;
@@ -177,28 +177,24 @@ public class Login extends AJAXServlet {
 					throw new UserNotActivatedException("user is not activated!");
 				}
 
-				final SessiondConnectorInterface sessiondCon = SessiondService.getInstance()
-						.getService();
-				
+				final SessiondConnectorInterface sessiondCon = ServerServiceRegistry.getInstance().getService(
+						SessiondConnectorInterface.class);
+
 				if (sessiondCon == null) {
 					throw new LoginException(LoginException.Code.COMMUNICATION);
 				}
 
+				final String sessionId = sessiondCon.addSession(userId, name, password, context, req.getRemoteAddr());
+				sessionObj = sessiondCon.getSession(sessionId);
+
 				try {
-					final String sessionId = sessiondCon.addSession(userId, name, password,
-							context, req.getRemoteAddr());
-					sessionObj = sessiondCon.getSession(sessionId);
-					
-					try {
-						if (!context.isEnabled() ||!u.isMailEnabled()) {
-							 throw new LoginException(LoginException.Code.INVALID_CREDENTIALS);
-						}
-					} catch (UndeclaredThrowableException e) {
-						throw new LoginException(LoginException.Code.UNKNOWN, e);
+					if (!context.isEnabled() || !u.isMailEnabled()) {
+						throw new LoginException(LoginException.Code.INVALID_CREDENTIALS);
 					}
-				} finally {
-					SessiondService.getInstance().ungetService(sessiondCon);
+				} catch (UndeclaredThrowableException e) {
+					throw new LoginException(LoginException.Code.UNKNOWN, e);
 				}
+				
 			} catch (LoginException e) {
 				if (LoginException.Source.USER == e.getSource()) {
 					LOG.debug(e.getMessage(), e);
@@ -288,12 +284,9 @@ public class Login extends AJAXServlet {
 				}
 			}
 			if (session != null) {
-				final SessiondConnectorInterface sessiondCon = SessiondService.getInstance().getService();
-				try {
-					sessiondCon.removeSession(session);
-				} finally {
-					SessiondService.getInstance().ungetService(sessiondCon);
-				}
+				final SessiondConnectorInterface sessiondCon = ServerServiceRegistry.getInstance().getService(
+						SessiondConnectorInterface.class);
+				sessiondCon.removeSession(session);
 
 			} else if (LOG.isDebugEnabled()) {
 				LOG.debug("no session cookie found in request!");
@@ -308,28 +301,22 @@ public class Login extends AJAXServlet {
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
-			final SessiondConnectorInterface sessiondCon = SessiondService.getInstance().getService();
-			Session sessionObj = null;
+			final SessiondConnectorInterface sessiondCon = ServerServiceRegistry.getInstance().getService(
+					SessiondConnectorInterface.class);
+			final Session sessionObj = sessiondCon.getSessionByRandomToken(randomToken);
+
 			try {
-				sessionObj = sessiondCon.getSessionByRandomToken(randomToken);
-				
-				try {
-					final Context context = ContextStorage.getInstance()
-                        .getContext(sessionObj.getContextId());
-					final User user = UserStorage.getInstance().getUser(
-                        sessionObj.getUserId(), context);
-					if (!context.isEnabled() ||!user.isMailEnabled()) {
-						resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-					}
-				} catch (UndeclaredThrowableException e) {
+				final Context context = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+				final User user = UserStorage.getInstance().getUser(sessionObj.getUserId(), context);
+				if (!context.isEnabled() || !user.isMailEnabled()) {
 					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-				} catch (ContextException e) {
-                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-                } catch (LdapException e) {
-                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-                }
-			} finally {
-				SessiondService.getInstance().ungetService(sessiondCon);
+				}
+			} catch (UndeclaredThrowableException e) {
+				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+			} catch (ContextException e) {
+				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+			} catch (LdapException e) {
+				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 			}
 			if (null == sessionObj) {
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -344,42 +331,34 @@ public class Login extends AJAXServlet {
 				if (cookies == null) {
 					throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
 				}
-				final SessiondConnectorInterface sessiondCon = SessiondService.getInstance().getService();
-				try {
-					for (Cookie cookie : cookies) {
-						final String cookieName = cookie.getName();
-						if (cookieName.startsWith(cookiePrefix)) {
-							final String session = cookie.getValue();
-							if (sessiondCon.refreshSession(session)) {
-								final Session sessionObj = sessiondCon.getSession(session);
-								SessionServlet
-										.checkIP(sessionObj.getLocalIp(), req.getRemoteAddr());
-								
-								try {
-									final Context ctx = ContextStorage
-                                        .getInstance().getContext(sessionObj
-                                        .getContextId());
-									final User user = UserStorage.getInstance()
-                                        .getUser(sessionObj.getUserId(), ctx);
-									if (!ctx.isEnabled() ||!user.isMailEnabled()) {
-										 throw new LoginException(LoginException.Code.INVALID_CREDENTIALS);
-									}
-								} catch (UndeclaredThrowableException e) {
-									throw new LoginException(LoginException.Code.UNKNOWN, e);
-								}
+				final SessiondConnectorInterface sessiondCon = ServerServiceRegistry.getInstance().getService(
+						SessiondConnectorInterface.class);
+				for (Cookie cookie : cookies) {
+					final String cookieName = cookie.getName();
+					if (cookieName.startsWith(cookiePrefix)) {
+						final String session = cookie.getValue();
+						if (sessiondCon.refreshSession(session)) {
+							final Session sessionObj = sessiondCon.getSession(session);
+							SessionServlet.checkIP(sessionObj.getLocalIp(), req.getRemoteAddr());
 
-								response.setData(writeLogin(sessionObj));
-								break;
+							try {
+								final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+								final User user = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
+								if (!ctx.isEnabled() || !user.isMailEnabled()) {
+									throw new LoginException(LoginException.Code.INVALID_CREDENTIALS);
+								}
+							} catch (UndeclaredThrowableException e) {
+								throw new LoginException(LoginException.Code.UNKNOWN, e);
 							}
-							final Cookie respCookie = new Cookie(cookie.getName(), cookie
-									.getValue());
-							respCookie.setPath("/");
-							respCookie.setMaxAge(0); // delete
-							resp.addCookie(respCookie);
+
+							response.setData(writeLogin(sessionObj));
+							break;
 						}
+						final Cookie respCookie = new Cookie(cookie.getName(), cookie.getValue());
+						respCookie.setPath("/");
+						respCookie.setMaxAge(0); // delete
+						resp.addCookie(respCookie);
 					}
-				} finally {
-					SessiondService.getInstance().ungetService(sessiondCon);
 				}
 				if (null == response.getData()) {
 					throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);

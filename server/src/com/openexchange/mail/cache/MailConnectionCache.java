@@ -57,18 +57,18 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
-import org.apache.jcs.engine.behavior.IElementAttributes;
-import org.apache.jcs.engine.control.event.behavior.IElementEventHandler;
-
-import com.openexchange.cache.CacheKey;
-import com.openexchange.cache.OXCachingException;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheService;
+import com.openexchange.caching.ElementAttributes;
+import com.openexchange.caching.ElementEventHandler;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailConnection;
 import com.openexchange.mail.cache.eventhandler.MailConnectionEventHandler;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -84,14 +84,7 @@ import com.openexchange.session.Session;
  */
 public final class MailConnectionCache {
 
-	private static final Object[] EMPTY_ARGS = new Object[0];
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailConnectionCache.class);
-
-	private static final String REGION_NAME = "MailConnectionCache";
-
-	private static final Lock INIT_LOCK = new ReentrantLock();
+	static final String REGION_NAME = "MailConnectionCache";
 
 	private static final Lock LOCK_MOD = new ReentrantLock();
 
@@ -104,29 +97,24 @@ public final class MailConnectionCache {
 	/*
 	 * Field members
 	 */
-	private final JCS cache;
+	private final Cache cache;
 
 	/**
 	 * Prevent instantiation
 	 * 
-	 * @throws OXCachingException
+	 * @throws CacheException
 	 *             If initialization fails
 	 */
-	private MailConnectionCache() throws OXCachingException {
+	private MailConnectionCache() throws CacheException {
 		super();
-		try {
-			cache = JCS.getInstance(REGION_NAME);
-			/*
-			 * Add element event handler to default element attributes
-			 */
-			final IElementEventHandler eventHandler = new MailConnectionEventHandler();
-			final IElementAttributes attributes = cache.getDefaultElementAttributes();
-			attributes.addElementEventHandler(eventHandler);
-			cache.setDefaultElementAttributes(attributes);
-		} catch (final CacheException e) {
-			LOG.error(e.getMessage(), e);
-			throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, REGION_NAME, e.getMessage());
-		}
+		cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
+		/*
+		 * Add element event handler to default element attributes
+		 */
+		final ElementEventHandler eventHandler = new MailConnectionEventHandler();
+		final ElementAttributes attributes = cache.getDefaultElementAttributes();
+		attributes.addElementEventHandler(eventHandler);
+		cache.setDefaultElementAttributes(attributes);
 	}
 
 	/**
@@ -156,19 +144,16 @@ public final class MailConnectionCache {
 	 * Get the instance
 	 * 
 	 * @return The instance
-	 * @throws OXCachingException
+	 * @throws CacheException
 	 *             If instance initialization fails
 	 */
-	public static MailConnectionCache getInstance() throws OXCachingException {
+	public static MailConnectionCache getInstance() throws CacheException {
 		if (!initialized.get()) {
-			INIT_LOCK.lock();
-			try {
+			synchronized (initialized) {
 				if (null == singleton) {
 					singleton = new MailConnectionCache();
 					initialized.set(true);
 				}
-			} finally {
-				INIT_LOCK.unlock();
 			}
 		}
 		return singleton;
@@ -180,15 +165,15 @@ public final class MailConnectionCache {
 	 * @param session
 	 *            The session
 	 * @return An active instance of {@link MailConnection} or <code>null</code>
-	 * @throws OXCachingException
+	 * @throws CacheException
 	 *             If removing from cache fails
 	 */
-	public MailConnection<?, ?, ?> removeMailConnection(final Session session) throws OXCachingException {
+	public MailConnection<?, ?, ?> removeMailConnection(final Session session) throws CacheException {
 		final CacheKey key;
 		try {
 			key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
 		} catch (final ContextException e1) {
-			throw new OXCachingException(e1);
+			throw new CacheException(e1);
 		}
 		final Lock readLock = getLock(key).readLock();
 		readLock.lock();
@@ -215,8 +200,6 @@ public final class MailConnectionCache {
 				}
 				cache.remove(key);
 				return mailConnection;
-			} catch (CacheException e) {
-				throw new OXCachingException(OXCachingException.Code.FAILED_REMOVE, e, EMPTY_ARGS);
 			} finally {
 				/*
 				 * Downgrade lock: reacquire read without giving up write lock
@@ -243,16 +226,16 @@ public final class MailConnectionCache {
 	 *            The mail connection to put into cache
 	 * @return <code>true</code> if mail connection could be successfully
 	 *         cached; otherwise <code>false</code>
-	 * @throws OXCachingException
+	 * @throws CacheException
 	 *             If put into cache fails
 	 */
 	public boolean putMailConnection(final Session session, final MailConnection<?, ?, ?> mailConnection)
-			throws OXCachingException {
+			throws CacheException {
 		final CacheKey key;
 		try {
 			key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
 		} catch (final ContextException e1) {
-			throw new OXCachingException(e1);
+			throw new CacheException(e1);
 		}
 		final Lock readLock = getLock(key).readLock();
 		readLock.lock();
@@ -279,8 +262,6 @@ public final class MailConnectionCache {
 				}
 				cache.put(key, mailConnection);
 				return true;
-			} catch (CacheException e) {
-				throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, EMPTY_ARGS);
 			} finally {
 				/*
 				 * Downgrade lock: reacquire read without giving up write lock
@@ -304,15 +285,15 @@ public final class MailConnectionCache {
 	 *            The session
 	 * @return <code>true</code> if a user-bound mail connection is already
 	 *         present in cache; otherwise <code>false</code>
-	 * @throws OXCachingException
+	 * @throws CacheException
 	 *             If context loading fails
 	 */
-	public boolean containsMailConnection(final Session session) throws OXCachingException {
+	public boolean containsMailConnection(final Session session) throws CacheException {
 		final CacheKey key;
 		try {
 			key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
 		} catch (ContextException e) {
-			throw new OXCachingException(e);
+			throw new CacheException(e);
 		}
 		final Lock readLock = getLock(key).readLock();
 		readLock.lock();
@@ -324,6 +305,6 @@ public final class MailConnectionCache {
 	}
 
 	private static CacheKey getUserKey(final int user, final Context ctx) {
-		return new CacheKey(ctx, user);
+		return new CacheKey(ctx.getContextId(), user);
 	}
 }

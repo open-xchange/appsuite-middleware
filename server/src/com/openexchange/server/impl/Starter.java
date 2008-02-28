@@ -93,10 +93,6 @@ public class Starter implements Initialization {
 	 */
 	com.openexchange.groupware.configuration.ParticipantConfig.getInstance(),
 	/**
-	 * Sets the caching system JCS up.
-	 */
-	com.openexchange.cache.impl.Configuration.getInstance(),
-	/**
 	 * Connection pools for ConfigDB and database assignments for contexts.
 	 */
 	com.openexchange.database.DatabaseInit.getInstance(),
@@ -119,11 +115,11 @@ public class Starter implements Initialization {
 	/**
 	 * Mail initialization
 	 */
-	//com.openexchange.mail.MailInitialization.getInstance(),
+	com.openexchange.mail.MailInitialization.getInstance(),
 	/**
 	 * Transport initialization
 	 */
-	//com.openexchange.mail.transport.TransportInitialization.getInstance(),
+	com.openexchange.mail.transport.TransportInitialization.getInstance(),
 	/**
 	 * Infostore Configuration
 	 */
@@ -173,7 +169,7 @@ public class Starter implements Initialization {
 	/**
 	 * Sets the caching system JCS up.
 	 */
-	com.openexchange.cache.impl.Configuration.getInstance(),
+	//com.openexchange.cache.impl.Configuration.getInstance(),
 	/**
 	 * Connection pools for ConfigDB and database assignments for contexts.
 	 */

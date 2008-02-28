@@ -76,7 +76,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.ServiceException;
-import com.openexchange.server.services.SessiondService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondConnectorInterface;
 import com.openexchange.sessiond.exception.Classes;
@@ -136,12 +136,9 @@ public abstract class SessionServlet extends AJAXServlet {
 			rememberSession(req, session);
 			final Context ctx = ContextStorage.getStorageContext(session.getContextId());
 			if (!ctx.isEnabled()) {
-				final SessiondConnectorInterface sessiondCon = SessiondService.getInstance().getService();
-				try {
-					sessiondCon.removeSession(sessionId);
-				} finally {
-					SessiondService.getInstance().ungetService(sessiondCon);
-				}
+				final SessiondConnectorInterface sessiondCon = ServerServiceRegistry.getInstance().getService(
+						SessiondConnectorInterface.class);
+				sessiondCon.removeSession(sessionId);
 				throw EXCEPTION.create(4);
 			}
 			super.service(req, resp);
@@ -284,16 +281,12 @@ public abstract class SessionServlet extends AJAXServlet {
 	@OXThrows(category = Category.TRY_AGAIN, desc = "A session with the given identifier can not be found.", exceptionId = 3, msg = "Your session %s expired. Please start a new browser session.")
 	private static Session getSession(final String sessionId)
 			throws SessiondException {
-		final SessiondConnectorInterface sessiondCon = SessiondService.getInstance().getService();
+		final SessiondConnectorInterface sessiondCon = ServerServiceRegistry.getInstance().getService(
+				SessiondConnectorInterface.class);
 		if (sessiondCon == null) {
 			throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE));
 		}
-		Session retval = null;
-		try {
-			retval = sessiondCon.getSession(sessionId);
-		} finally {
-			SessiondService.getInstance().ungetService(sessiondCon);
-		}
+		final Session retval = sessiondCon.getSession(sessionId);
 		if (null == retval) {
 			throw EXCEPTION.create(3, sessionId);
 		}

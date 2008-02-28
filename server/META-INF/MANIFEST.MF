@@ -3,12 +3,13 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Server
 Bundle-SymbolicName: com.openexchange.server
 Bundle-Version: 6.5.0
-Bundle-Activator: com.openexchange.server.osgi.Activator
+Bundle-Activator: com.openexchange.server.osgi.ServerActivator
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.mysql.jdbc;version="3.1.13",
  com.openexchange.authentication,
  com.openexchange.cache,
  com.openexchange.cache.dynamic,
+ com.openexchange.caching,
  com.openexchange.config,
  com.openexchange.configjump,
  com.openexchange.event,
@@ -51,18 +52,6 @@ Import-Package: com.mysql.jdbc;version="3.1.13",
  org.apache.commons.io.output,
  org.apache.commons.logging,
  org.apache.commons.logging.impl,
- org.apache.jcs,
- org.apache.jcs.access,
- org.apache.jcs.access.exception,
- org.apache.jcs.auxiliary,
- org.apache.jcs.auxiliary.remote.behavior,
- org.apache.jcs.auxiliary.remote.server,
- org.apache.jcs.auxiliary.remote.server.behavior,
- org.apache.jcs.engine,
- org.apache.jcs.engine.behavior,
- org.apache.jcs.engine.control,
- org.apache.jcs.engine.control.event,
- org.apache.jcs.engine.control.event.behavior,
  org.apache.webdav.lib,
  org.jdom,
  org.jdom.input,
@@ -130,3 +119,4 @@ Export-Package: com.openexchange.ajax,
  com.openexchange.tools.servlet.http,
  com.openexchange.tools.sql
 Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: J2SE-1.5

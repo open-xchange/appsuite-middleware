@@ -49,6 +49,7 @@
 
 package com.openexchange.cache.dynamic.impl;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
@@ -57,11 +58,11 @@ import java.util.concurrent.locks.Lock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
 
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.cache.dynamic.OXNoRefresh;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheException;
 import com.openexchange.groupware.AbstractOXException;
 
 public class CachedObjectInvocationHandler<T> implements InvocationHandler {
@@ -77,10 +78,10 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
     private final Object key;
     private T cached;
     private final OXObjectFactory<T> factory;
-    private final JCS cache;
+    private final Cache cache;
 
     public CachedObjectInvocationHandler(final OXObjectFactory<T> factory,
-        final JCS cache) {
+        final Cache cache) {
         key = factory.getKey();
         this.factory = factory;
         this.cache = cache;
@@ -113,15 +114,15 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
         boolean load;
         lock.lock();
         try {
-            final Object tmp = cache.get(key);
+            final Object tmp = cache.get((Serializable) key);
             if (null == tmp) {
                 // I am the thread to load the object. Put temporary condition
                 // into cache.
                 load = true;
                 cond = lock.newCondition();
                 try {
-                    cache.putSafe(key, cond);
-                } catch (CacheException e) {
+                    cache.putSafe((Serializable) key, (Serializable) cond);
+                } catch (final CacheException e) {
                     throw new OXCachingException(OXCachingException.Code
                         .FAILED_PUT, e);
                 }
@@ -131,7 +132,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
                 if (cond.await(1, TimeUnit.SECONDS)) {
                     // Other thread finished loading the object.
                     load = false;
-                    cached = (T) cache.get(key);
+                    cached = (T) cache.get((Serializable) key);
                 } else {
                     // We have to load it, too.
                     LOG.warn("Found 2 threads loading cached objects after 1 "
@@ -155,7 +156,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
             lock.lock();
             try {
                 cond.signalAll();
-                cache.put(key, cached);
+                cache.put((Serializable) key, (Serializable) cached);
             } catch (CacheException e) {
                 throw new OXCachingException(OXCachingException.Code.FAILED_PUT,
                     e);

@@ -59,8 +59,8 @@ import org.osgi.framework.BundleContext;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.database.Pools;
 import com.openexchange.management.ManagementService;
-import com.openexchange.management.ManagementServiceHolder;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link ManagementServiceTracker}
@@ -79,19 +79,24 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
 	 * @param context
 	 *            The bundle context
 	 */
-	public ManagementServiceTracker(final BundleContext context, final ManagementServiceHolder msh) {
-		super(context, msh, ManagementService.class);
+	public ManagementServiceTracker(final BundleContext context) {
+		super(context, ManagementService.class);
 	}
 
 	@Override
 	protected void addingServiceInternal(final ManagementService managementService) {
 		try {
 			/*
+			 * Add management service to server's service registry
+			 */
+			ServerServiceRegistry.getInstance().addService(ManagementService.class, managementService);
+			/*
 			 * Add all mbeans since management service is now available
 			 */
 			managementService.registerMBean(getObjectName(AJPv13Server.ajpv13ServerThreadsMonitor.getClass().getName(),
 					true), AJPv13Server.ajpv13ServerThreadsMonitor);
-			managementService.registerMBean(getObjectName(AJPv13Server.ajpv13ListenerMonitor.getClass().getName(), true),
+			managementService.registerMBean(
+					getObjectName(AJPv13Server.ajpv13ListenerMonitor.getClass().getName(), true),
 					AJPv13Server.ajpv13ListenerMonitor);
 			managementService.registerMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true),
 					mailInterfaceMonitor);
@@ -111,8 +116,10 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
 			/*
 			 * Add all mbeans since management service is now available
 			 */
-			managementService.unregisterMBean(getObjectName(AJPv13Server.ajpv13ServerThreadsMonitor.getClass().getName(),true));
-			managementService.unregisterMBean(getObjectName(AJPv13Server.ajpv13ListenerMonitor.getClass().getName(), true));
+			managementService.unregisterMBean(getObjectName(AJPv13Server.ajpv13ServerThreadsMonitor.getClass()
+					.getName(), true));
+			managementService.unregisterMBean(getObjectName(AJPv13Server.ajpv13ListenerMonitor.getClass().getName(),
+					true));
 			managementService.unregisterMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true));
 			Pools.getInstance().unregisterMBeans();
 		} catch (final MalformedObjectNameException e) {

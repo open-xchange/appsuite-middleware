@@ -52,7 +52,8 @@
 package com.openexchange.cache.dynamic.impl;
 
 import java.lang.reflect.Proxy;
-import org.apache.jcs.JCS;
+
+import com.openexchange.caching.Cache;
 
 /**
  * Creates a proxy object for cached objects. The proxy object insures that the
@@ -73,7 +74,7 @@ public final class CacheProxy {
      * @return the proxy object.
      */
     public static <T extends Object> T getCacheProxy(
-        final OXObjectFactory<T> factory, final JCS cache,
+        final OXObjectFactory<T> factory, final Cache cache,
         final Class<?>... interfaces) {
         return (T) Proxy.newProxyInstance(
             CacheProxy.class.getClassLoader(),

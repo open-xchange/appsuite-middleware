@@ -52,7 +52,6 @@ package com.openexchange.database;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.management.ManagementServiceHolder;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.impl.DBPoolingException;
 
@@ -70,32 +69,11 @@ public final class DatabaseInit implements Initialization {
 	 */
 	private static final Log LOG = LogFactory.getLog(DatabaseInit.class);
 
-	private ManagementServiceHolder msh;
-
 	/**
 	 * Prevent instantiation
 	 */
 	private DatabaseInit() {
 		super();
-	}
-
-	/**
-	 * Sets the management service holder
-	 * 
-	 * @param msh
-	 *            The management service holder
-	 */
-	public void setManagementServiceHolder(final ManagementServiceHolder msh) {
-		this.msh = msh;
-	}
-
-	/**
-	 * Gets the management service holder
-	 * 
-	 * @return The management service holder
-	 */
-	public ManagementServiceHolder getManagementServiceHolder() {
-		return msh;
 	}
 
 	/**

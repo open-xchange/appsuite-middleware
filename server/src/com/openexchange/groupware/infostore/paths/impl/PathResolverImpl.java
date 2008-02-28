@@ -49,26 +49,6 @@
 
 package com.openexchange.groupware.infostore.paths.impl;
 
-import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api2.OXException;
-import com.openexchange.cache.OXCachingException;
-import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.cache.impl.FolderCacheNotEnabledException;
-import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.Component;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.OXThrowsMultiple;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.*;
-import com.openexchange.groupware.infostore.webdav.URLCache;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.tx.DBProvider;
-import com.openexchange.groupware.tx.TransactionException;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.webdav.protocol.WebdavPath;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -77,6 +57,30 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api2.OXException;
+import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.cache.impl.FolderCacheNotEnabledException;
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.AbstractOXException.Category;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.Classes;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
+import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.PathResolver;
+import com.openexchange.groupware.infostore.Resolved;
+import com.openexchange.groupware.infostore.webdav.URLCache;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.webdav.protocol.WebdavPath;
 
 
 @OXExceptionSource(
@@ -334,8 +338,6 @@ public class PathResolverImpl extends AbstractPathResolver implements PathResolv
 					try {
 						readCon = provider.getReadConnection(ctx);
 						o = FolderCacheManager.getInstance().loadFolderObject(folderid, ctx, readCon);
-					} catch (final OXCachingException e) {
-						throw new OXException(e);
 					} finally {
 						provider.releaseReadConnection(ctx, readCon);
 					}

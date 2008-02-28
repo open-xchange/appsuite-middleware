@@ -66,7 +66,6 @@ import java.util.Set;
 
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.OXCachingException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.event.EventException;
@@ -401,8 +400,6 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			}
 		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
-		} catch (final OXCachingException e) {
-			throw new OXException(e);
 		}
 	}
 
@@ -500,8 +497,6 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			}
 		} catch (final DBPoolingException e) {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
-		} catch (final OXCachingException e) {
-			throw new OXException(e);
 		}
 	}
 
@@ -903,8 +898,6 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 				}
 			} catch (final DBPoolingException e) {
 				throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
-			} catch (final OXCachingException e) {
-				throw new OXException(e);
 			}
 		}
 	}
@@ -1141,8 +1134,6 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 			throw new OXFolderException(FolderCode.DBPOOLING_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
-		} catch (final OXCachingException e) {
-			throw new OXException(e);
 		}
 	}
 
@@ -1214,7 +1205,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 		if (FolderCacheManager.isEnabled() && FolderCacheManager.isInitialized()) {
 			try {
 				FolderCacheManager.getInstance().removeFolderObject(folderID, ctx);
-			} catch (final OXCachingException e) {
+			} catch (final OXException e) {
 				LOG.error(e.getLocalizedMessage(), e);
 			}
 		}

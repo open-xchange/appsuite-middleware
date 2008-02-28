@@ -49,18 +49,13 @@
 
 package com.openexchange.mail.cache;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.apache.jcs.engine.control.CompositeCacheManager;
-
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheService;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MailCacheConfiguration} - Loads the configuration for mail caches
@@ -73,17 +68,7 @@ public final class MailCacheConfiguration implements Initialization {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailCacheConfiguration.class);
 
-	/**
-	 * Remembers if the configuration has been loaded.
-	 */
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
-	private static MailCacheConfiguration instance;
-
-	/**
-	 * The cache manager instance
-	 */
-	private CompositeCacheManager ccmInstance;
+	private static final MailCacheConfiguration instance = new MailCacheConfiguration();
 
 	/**
 	 * No instantiation
@@ -98,77 +83,35 @@ public final class MailCacheConfiguration implements Initialization {
 	 * @return The singleton instance of {@link MailCacheConfiguration}
 	 */
 	public static MailCacheConfiguration getInstance() {
-		if (!initialized.get()) {
-			synchronized (initialized) {
-				if (null == instance) {
-					instance = new MailCacheConfiguration();
-					initialized.set(true);
-				}
-			}
-		}
 		return instance;
 	}
 
-	/**
-	 * Loads the configuration for the caching system.
-	 * 
-	 * @throws ConfigurationException
-	 *             if the configuration can't be loaded.
-	 * @deprecated Use common initialization instead
-	 */
-	public static void load() throws ConfigurationException {
-		getInstance().configure();
-	}
-
 	private void configure() throws ConfigurationException {
-		if (null != ccmInstance) {
-			/*
-			 * Already invoked
-			 */
-			return;
+		final String cacheConfigFile = SystemConfig.getProperty(SystemConfig.Property.MailCacheConfig);
+		if (cacheConfigFile == null) {
+			throw new ConfigurationException(ConfigurationException.Code.PROPERTY_MISSING,
+					SystemConfig.Property.MailCacheConfig.getPropertyName());
 		}
-		FileInputStream fis = null;
+		final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
 		try {
-			final String cacheConfigFile = SystemConfig.getProperty(SystemConfig.Property.MailCacheConfig);
-			if (cacheConfigFile == null) {
-				LOG.error(new StringBuilder(256).append("Missing property \"").append(
-						SystemConfig.Property.MailCacheConfig.getPropertyName()).append("\" in system.properties")
-						.toString());
-				return;
-			}
-			ccmInstance = CompositeCacheManager.getUnconfiguredInstance();
-			final Properties props = new Properties();
-			try {
-				props.load((fis = new FileInputStream(cacheConfigFile)));
-			} catch (final FileNotFoundException e) {
-				throw new ConfigurationException(ConfigurationException.Code.FILE_NOT_FOUND, e, cacheConfigFile);
-			} catch (final IOException e) {
-				throw new ConfigurationException(ConfigurationException.Code.IO_ERROR, e, e.getLocalizedMessage());
-			}
-			ccmInstance.configure(props);
-		} finally {
-			if (fis != null) {
-				try {
-					fis.close();
-				} catch (final IOException e) {
-					LOG.error(e.getLocalizedMessage(), e);
-				}
-				fis = null;
-			}
+			cacheService.loadConfiguration(cacheConfigFile.trim());
+		} catch (final CacheException e) {
+			throw new ConfigurationException(e);
 		}
 	}
 
 	/**
-	 * Delegates to {@link CompositeCacheManager#freeCache(String)}
+	 * Delegates to {@link CacheService#freeCache(String)}
 	 * 
 	 * @param cacheName
 	 *            The name of the cache region that ought to be freed
 	 */
 	public void freeCache(final String cacheName) {
-		if (null == ccmInstance) {
-			return;
+		try {
+			ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(cacheName);
+		} catch (final CacheException e) {
+			LOG.error(e.getLocalizedMessage(), e);
 		}
-		ccmInstance.freeCache(cacheName);
 	}
 
 	/*
@@ -182,10 +125,7 @@ public final class MailCacheConfiguration implements Initialization {
 	 * @see com.openexchange.server.Initialization#stop()
 	 */
 	public void stop() throws AbstractOXException {
-		if (null == ccmInstance) {
-			return;
-		}
-		ccmInstance.shutDown();
-		ccmInstance = null;
+		ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(MailConnectionCache.REGION_NAME);
+		ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(MailMessageCache.REGION_NAME);
 	}
 }

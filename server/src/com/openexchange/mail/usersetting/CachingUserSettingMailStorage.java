@@ -51,6 +51,7 @@ package com.openexchange.mail.usersetting;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -62,17 +63,17 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
-
-import com.openexchange.cache.CacheKey;
-import com.openexchange.cache.impl.Configuration;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCode;
 import com.openexchange.mail.usersetting.UserSettingMail.Signature;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * CachingUserSettingMailStorage - this storage tries to use a cache for
@@ -91,7 +92,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 
 	private boolean useCache;
 
-	private JCS cache;
+	private Cache cache;
 
 	private Lock cacheWriteLock;
 
@@ -101,7 +102,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	protected CachingUserSettingMailStorage() {
 		super();
 		try {
-			cache = JCS.getInstance(CACHE_REGION_NAME);
+			cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
 			cacheWriteLock = new ReentrantLock();
 			useCache = true;
 		} catch (final CacheException e) {
@@ -177,7 +178,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 				 */
 				cacheWriteLock.lock();
 				try {
-					cache.put(new CacheKey(ctx, user), usm.clone());
+					cache.put(new CacheKey(ctx.getContextId(), user), (Serializable) usm.clone());
 				} catch (final CacheException e) {
 					LOG.error("UserSettingMail could not be put into cache", e);
 				} finally {
@@ -244,7 +245,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 					 */
 					cacheWriteLock.lock();
 					try {
-						cache.remove(new CacheKey(ctx, user));
+						cache.remove(new CacheKey(ctx.getContextId(), user));
 					} catch (final CacheException e) {
 						LOG.error("UserSettingMail could not be removed from cache", e);
 					} finally {
@@ -280,7 +281,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	public UserSettingMail loadUserSettingMail(final int user, final Context ctx, final Connection readConArg)
 			throws UserConfigurationException {
 		try {
-			UserSettingMail usm = useCache ? (UserSettingMail) cache.get(new CacheKey(ctx, user)) : null;
+			UserSettingMail usm = useCache ? (UserSettingMail) cache.get(new CacheKey(ctx.getContextId(), user)) : null;
 			if (null != usm) {
 				return (UserSettingMail) usm.clone();
 			}
@@ -292,7 +293,8 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 				/*
 				 * Still not in cache?
 				 */
-				if (null == (usm = useCache ? (UserSettingMail) cache.get(new CacheKey(ctx, user)) : null)) {
+				if (null == (usm = useCache ? (UserSettingMail) cache.get(new CacheKey(ctx.getContextId(), user))
+						: null)) {
 					usm = new UserSettingMail();
 					Connection readCon = readConArg;
 					boolean closeCon = false;
@@ -333,7 +335,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 							 * Put clone into cache
 							 */
 							try {
-								cache.put(new CacheKey(ctx, user), usm.clone());
+								cache.put(new CacheKey(ctx.getContextId(), user), (Serializable) usm.clone());
 							} catch (final CacheException e) {
 								LOG.error("UserSettingMail could not be put into cache", e);
 							}
@@ -573,7 +575,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 			 */
 			cacheWriteLock.lock();
 			try {
-				cache.remove(new CacheKey(ctx, user));
+				cache.remove(new CacheKey(ctx.getContextId(), user));
 			} catch (final CacheException e) {
 				LOG.error("UserSettingMail could not be removed from cache", e);
 			} finally {
@@ -584,7 +586,11 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 
 	@Override
 	public void shutdownStorage() {
-		Configuration.getInstance().freeCache(CACHE_REGION_NAME);
+		try {
+			ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(CACHE_REGION_NAME);
+		} catch (final CacheException e) {
+			LOG.error("Cache \"" + CACHE_REGION_NAME + "\" could not be freed", e);
+		}
 	}
 
 }

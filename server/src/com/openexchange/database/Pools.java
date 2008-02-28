@@ -73,6 +73,7 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.server.ServerTimer;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.DBPoolingException.Code;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * This class stores all connection pools. It also removes pools that are empty.
@@ -243,13 +244,9 @@ public final class Pools implements Runnable {
         try {
             final ObjectName objName = new ObjectName(ConnectionPoolMBean
                 .DOMAIN, "name", name);
-            final ManagementService management = DatabaseInit.getInstance().getManagementServiceHolder().getService();
+            final ManagementService management = ServerServiceRegistry.getInstance().getService(ManagementService.class);
             if (null != management) {
-                try {
-                    management.unregisterMBean(objName);
-                } finally {
-                	DatabaseInit.getInstance().getManagementServiceHolder().ungetService(management);
-                }
+                management.unregisterMBean(objName);
             }
         } catch (MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
@@ -274,13 +271,9 @@ public final class Pools implements Runnable {
         try {
             final ObjectName objName = new ObjectName(ConnectionPoolMBean
                 .DOMAIN, "name", name);
-            final ManagementService management = DatabaseInit.getInstance().getManagementServiceHolder().getService();
+            final ManagementService management = ServerServiceRegistry.getInstance().getService(ManagementService.class);
             if (null != management) {
-                try {
-                    management.registerMBean(objName, pool);
-                } finally {
-                	DatabaseInit.getInstance().getManagementServiceHolder().ungetService(management);
-                }
+                management.registerMBean(objName, pool);
             }
         } catch (MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);

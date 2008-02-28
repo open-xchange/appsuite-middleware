@@ -62,10 +62,10 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
-import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.ConfigJumpException;
+import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.Replacements;
-import com.openexchange.server.services.ConfigJumpHolder;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -101,8 +101,7 @@ public class ConfigJump extends SessionServlet {
         final HttpServletResponse resp) throws ServletException, IOException {
         final Session sessionObj = getSessionObject(req);
         final Response response = new Response();
-        final ConfigJumpService configJump = ConfigJumpHolder.getInstance()
-            .getService();
+        final ConfigJumpService configJump = ServerServiceRegistry.getInstance().getService(ConfigJumpService.class);
         try {
             //protocol, host, port, userId, password
             final String protocol;
@@ -138,8 +137,6 @@ public class ConfigJump extends SessionServlet {
         } catch (ConfigJumpException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-        } finally {
-        	ConfigJumpHolder.getInstance().ungetService(configJump);
         }
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {

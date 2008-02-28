@@ -6,7 +6,6 @@ package com.openexchange.cache.remote;
 import java.rmi.RemoteException;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.OXCachingException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -95,8 +94,6 @@ public class FolderCacheInvalidation implements GenericCacheInvalidationInterfac
 			} catch (final OXException e) {
 				throw new RemoteException(ERR, e);
 			} catch (final ContextException e) {
-				throw new RemoteException(ERR, e);
-			} catch (final OXCachingException e) {
 				throw new RemoteException(ERR, e);
 			}
 		}

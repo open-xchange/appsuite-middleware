@@ -49,47 +49,50 @@
 
 package com.openexchange.groupware.filestore;
 
+import java.io.Serializable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
 
 import com.openexchange.cache.dynamic.impl.CacheProxy;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheService;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 public class CachingFilestoreStorage extends FilestoreStorage {
 
 	private static final Log LOG = LogFactory.getLog(CachingFilestoreStorage.class);
 
-	private FilestoreStorage delegate;
+	private final FilestoreStorage delegate;
 	
-	private static JCS cache;
+	private static Cache cache;
 
     private static final Lock CACHE_LOCK;
 
 	static {
 		try {
-			cache = JCS.getInstance("Filestore");
-		} catch (CacheException e) {
+			cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache("Filestore");
+		} catch (final CacheException e) {
 			LOG.error(e);
 		}
         CACHE_LOCK = new ReentrantLock();
 	}
 	
-	public CachingFilestoreStorage(FilestoreStorage fs) {
+	public CachingFilestoreStorage(final FilestoreStorage fs) {
 		this.delegate = fs;
 	}
 	
 	@Override
-	public Filestore getFilestore(int id) throws FilestoreException {
+	public Filestore getFilestore(final int id) throws FilestoreException {
         final FilestoreFactory factory = new FilestoreFactory(id,delegate);
 		if(cache == null) {
 			throw new IllegalStateException("Cache not initialised! Not caching");
 		}
-        if (null == cache.get(factory.getKey())) {
+        if (null == cache.get((Serializable) factory.getKey())) {
             factory.load();
         }
 		return CacheProxy.getCacheProxy(factory, cache, Filestore.class);
@@ -98,10 +101,10 @@ public class CachingFilestoreStorage extends FilestoreStorage {
 	private static final class FilestoreFactory implements
         OXObjectFactory<Filestore> {
 
-		private int id;
-		private FilestoreStorage delegate;
+		private final int id;
+		private final FilestoreStorage delegate;
 
-		public FilestoreFactory(int id, FilestoreStorage delegate) {
+		public FilestoreFactory(final int id, final FilestoreStorage delegate) {
 			this.id = id;
 			this.delegate = delegate;
 		}

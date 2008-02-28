@@ -49,6 +49,7 @@
 
 package com.openexchange.cache.impl;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -58,12 +59,12 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
-
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.CacheKey;
-import com.openexchange.cache.OXCachingException;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
@@ -79,15 +80,13 @@ public final class FolderQueryCacheManager {
 
 	private static final Lock LOCK_MOD = new ReentrantLock();
 
-	private static final Lock LOCK_INIT = new ReentrantLock();
-
 	private static final String REGION_NAME = "OXFolderQueryCache";
 
 	private static FolderQueryCacheManager instance;
 
 	private static final AtomicBoolean initialized = new AtomicBoolean();
 
-	private final JCS folderQueryCache;
+	private final Cache folderQueryCache;
 
 	private static ReadWriteLock getContextLock(final int cid) {
 		final Integer key = Integer.valueOf(cid);
@@ -109,7 +108,7 @@ public final class FolderQueryCacheManager {
 	private FolderQueryCacheManager() throws OXException {
 		super();
 		try {
-			folderQueryCache = JCS.getInstance(REGION_NAME);
+			folderQueryCache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
 		} catch (final CacheException e) {
 			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e
 					.getLocalizedMessage());
@@ -128,14 +127,11 @@ public final class FolderQueryCacheManager {
 	 */
 	public static FolderQueryCacheManager getInstance() throws OXException {
 		if (!initialized.get()) {
-			LOCK_INIT.lock();
-			try {
+			synchronized (initialized) {
 				if (instance == null) {
 					instance = new FolderQueryCacheManager();
 					initialized.set(true);
 				}
-			} finally {
-				LOCK_INIT.unlock();
 			}
 		}
 		return instance;
@@ -144,18 +140,22 @@ public final class FolderQueryCacheManager {
 	/**
 	 * Releases the singleton instance of {@link FolderQueryCacheManager} and
 	 * frees its cache resources through {@link Configuration#freeCache(String)}
+	 * 
+	 * @throws OXException
+	 *             If cache cannot be freed
 	 */
-	public static void releaseInstance() {
+	public static void releaseInstance() throws OXException {
 		if (initialized.get()) {
-			LOCK_INIT.lock();
-			try {
+			synchronized (initialized) {
 				if (instance != null) {
 					instance = null;
-					Configuration.getInstance().freeCache(REGION_NAME);
+					try {
+						ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(REGION_NAME);
+					} catch (final CacheException e) {
+						throw new OXException(e);
+					}
 					initialized.set(false);
 				}
-			} finally {
-				LOCK_INIT.unlock();
 			}
 		}
 	}
@@ -196,22 +196,22 @@ public final class FolderQueryCacheManager {
 	/**
 	 * Puts a query result into cache
 	 * 
-	 * @throws OXCachingException
+	 * @throws OXException
 	 *             If a caching error occurs
 	 */
 	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final Session session)
-			throws OXCachingException {
+			throws OXException {
 		putFolderQuery(queryNum, q, session.getUserId(), session.getContextId());
 	}
 
 	/**
 	 * Puts a query result into cache
 	 * 
-	 * @throws OXCachingException
+	 * @throws OXException
 	 *             If a caching error occurs
 	 */
 	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final int userId, final int cid)
-			throws OXCachingException {
+			throws OXException {
 		putFolderQuery(queryNum, q, userId, cid, false);
 	}
 
@@ -221,11 +221,11 @@ public final class FolderQueryCacheManager {
 	 * given result is going to appended to existing one. Otherwise existing
 	 * entries are replaced.
 	 * 
-	 * @throws OXCachingException
+	 * @throws OXException
 	 *             If a caching error occurs
 	 */
 	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final Session session,
-			final boolean append) throws OXCachingException {
+			final boolean append) throws OXException {
 		putFolderQuery(queryNum, q, session.getUserId(), session.getContextId(), append);
 	}
 
@@ -235,12 +235,12 @@ public final class FolderQueryCacheManager {
 	 * given result is going to appended to existing one. Otherwise existing
 	 * entries are replaced.
 	 * 
-	 * @throws OXCachingException
+	 * @throws OXException
 	 *             If a caching error occurs
 	 */
 	@SuppressWarnings("unchecked")
 	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final int userId, final int cid,
-			final boolean append) throws OXCachingException {
+			final boolean append) throws OXException {
 		if (q == null) {
 			return;
 		}
@@ -262,10 +262,10 @@ public final class FolderQueryCacheManager {
 				tmp.addAll((LinkedList<Integer>) q.clone());
 			}
 			if (insertMap) {
-				folderQueryCache.putInGroup(createUserKey(userId), createContextKey(cid), map);
+				folderQueryCache.putInGroup(createUserKey(userId), createContextKey(cid), (Serializable) map);
 			}
 		} catch (final CacheException e) {
-			throw new OXCachingException(OXCachingException.Code.FAILED_PUT, e, new Object[0]);
+			throw new OXException(e);
 		} finally {
 			ctxWriteLock.unlock();
 		}

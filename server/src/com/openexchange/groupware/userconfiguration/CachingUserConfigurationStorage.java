@@ -52,14 +52,14 @@ package com.openexchange.groupware.userconfiguration;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
-
-import com.openexchange.cache.CacheKey;
-import com.openexchange.cache.impl.Configuration;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCode;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * CachingUserConfigurationStorage
@@ -75,7 +75,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 
 	private final Lock WRITE_LOCK;
 
-	private final JCS cache;
+	private final Cache cache;
 
 	/**
 	 * Constructor
@@ -90,7 +90,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 		WRITE_LOCK = new ReentrantLock();
 		this.delegateStorage = new RdbUserConfigurationStorage();
 		try {
-			cache = JCS.getInstance(CACHE_REGION_NAME);
+			cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
 		} catch (final CacheException e) {
 			throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e,
 					CACHE_REGION_NAME);
@@ -106,11 +106,11 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 
 	@Override
 	protected void stopInternal() throws AbstractOXException {
-		Configuration.getInstance().freeCache(CACHE_REGION_NAME);
+		ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(CACHE_REGION_NAME);
 	}
 
 	private static final CacheKey getKey(final int userId, final Context ctx) {
-		return new CacheKey(ctx, userId);
+		return new CacheKey(ctx.getContextId(), userId);
 	}
 
 	/*

@@ -49,21 +49,23 @@
 
 package com.openexchange.groupware.contexts.impl;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
 
 import com.openexchange.cache.dynamic.impl.CacheProxy;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.impl.ContextException.Code;
 import com.openexchange.groupware.update.Updater;
-import com.openexchange.groupware.update.exception.UpdateException;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * This class implements a caching for the context storage. It provides a proxy
@@ -87,7 +89,7 @@ public class CachingContextStorage extends ContextStorage {
     /**
      * Cache.
      */
-    private static JCS cache;
+    private static Cache cache;
 
     /**
      * Implementation of the context storage that does persistant storing.
@@ -164,9 +166,9 @@ public class CachingContextStorage extends ContextStorage {
             }
         };
         // Initial check if context exists.
-        if (null == cache.get(factory.getKey())) {
+        if (null == cache.get((Serializable) factory.getKey())) {
             try {
-                cache.put(factory.getKey(), factory.load());
+                cache.put((Serializable) factory.getKey(), (Serializable) factory.load());
             } catch (CacheException e) {
                 throw new ContextException(Code.CACHE_PUT, e);
             } catch (AbstractOXException e) {
@@ -194,7 +196,7 @@ public class CachingContextStorage extends ContextStorage {
             return;
         }
         try {
-            cache = JCS.getInstance("Context");
+            cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache("Context");
         } catch (CacheException e) {
             throw new ContextException(Code.CACHE_INIT, e);
         }

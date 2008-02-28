@@ -51,10 +51,15 @@
 
 package com.openexchange.groupware.calendar;
 
+import java.io.Serializable;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
+
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheService;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 
 
@@ -69,13 +74,13 @@ public class CalendarCache {
     private static final String CACHE_NAME = "CalendarCache";
     private static final Log LOG = LogFactory.getLog(CalendarCache.class);
     
-    private JCS jcs;
+    private Cache jcs;
     
     private CalendarCache() {
         try {
             try {
-                jcs = JCS.getInstance(CACHE_NAME);
-            } catch (CacheException ce) {
+                jcs = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_NAME);
+            } catch (final CacheException ce) {
                 LOG.error("CalendarCache could not be initialized!", ce);
             }
         } catch (Exception e) {
@@ -91,18 +96,18 @@ public class CalendarCache {
     }
     
     public synchronized void add(final Object key, final String groupKey, final Object o) throws CacheException {
-        jcs.putInGroup(key, groupKey, o);
+        jcs.putInGroup((Serializable) key, groupKey, (Serializable) o);
     }
     
-    public Object get(final Object key, final String groupKey) throws CacheException {
-        return jcs.getFromGroup(key, groupKey);
+    public Object get(final Object key, final String groupKey) {
+        return jcs.getFromGroup((Serializable) key, groupKey);
     }
     
     public synchronized void clear() throws CacheException {
         jcs.clear();
     }
     
-    public synchronized void invalidateGroup(int cid) {
+    public synchronized void invalidateGroup(final int cid) {
         jcs.invalidateGroup(CalendarFolderObject.createGroupKeyFromContextID(cid));
     }
     

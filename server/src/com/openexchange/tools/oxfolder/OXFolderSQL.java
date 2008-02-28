@@ -66,7 +66,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.OXCachingException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.groupware.Types;
@@ -1236,8 +1235,6 @@ public class OXFolderSQL {
 						LOG.error(e.getMessage(), e);
 					} catch (final OXException e) {
 						LOG.error(e.getMessage(), e);
-					} catch (final OXCachingException e) {
-						LOG.error(e.getMessage(), e);
 					}
 				}
 			}
@@ -1571,8 +1568,6 @@ public class OXFolderSQL {
 						LOG.error(e.getMessage(), e);
 					} catch (final OXException e) {
 						LOG.error(e.getMessage(), e);
-					} catch (final OXCachingException e) {
-						LOG.error(e.getMessage(), e);
 					}
 				}
 			}
@@ -1616,8 +1611,6 @@ public class OXFolderSQL {
 					} catch (final FolderCacheNotEnabledException e) {
 						LOG.error(e.getMessage(), e);
 					} catch (final OXException e) {
-						LOG.error(e.getMessage(), e);
-					} catch (final OXCachingException e) {
 						LOG.error(e.getMessage(), e);
 					}
 				}

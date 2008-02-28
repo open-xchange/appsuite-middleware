@@ -49,21 +49,24 @@
 
 package com.openexchange.groupware.ldap;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
 
 import com.openexchange.cache.CacheKey;
 import com.openexchange.cache.dynamic.impl.CacheProxy;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * This class implements the user storage using a cache to store once read
@@ -84,7 +87,7 @@ public class CachingUserStorage extends UserStorage {
     /**
      * Cache.
      */
-    private static final JCS CACHE;
+    private static final Cache CACHE;
 
     /**
      * Lock for the cache.
@@ -114,7 +117,7 @@ public class CachingUserStorage extends UserStorage {
                 return CACHE_LOCK;
             }
         };
-        if (null == CACHE.get(factory.getKey())) {
+        if (null == CACHE.get((Serializable) factory.getKey())) {
             getUserStorage().getUser(uid, context);
         }
         return CacheProxy.getCacheProxy(factory, CACHE, User.class);
@@ -128,7 +131,7 @@ public class CachingUserStorage extends UserStorage {
         getUserStorage().updateUser(user, context);
         try {
             CACHE.remove(new CacheKey(context, user.getId()));
-        } catch (CacheException e) {
+        } catch (final CacheException e) {
             throw new LdapException(Component.USER, Code.CACHE_PROBLEM, e);
         }
     }
@@ -235,7 +238,7 @@ public class CachingUserStorage extends UserStorage {
     static {
         try {
             /*Configuration.load();*/
-            CACHE = JCS.getInstance("User");
+            CACHE = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache("User");
         } catch (CacheException e) {
             throw new RuntimeException("Cannot create user cache.", e);
         }

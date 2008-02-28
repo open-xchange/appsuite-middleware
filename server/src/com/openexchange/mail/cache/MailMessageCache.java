@@ -61,14 +61,15 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
-
 import com.openexchange.cache.CacheKey;
 import com.openexchange.cache.OXCachingException;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MailMessageCache} - Caches instances of {@link MailMessage} which are
@@ -400,7 +401,7 @@ public final class MailMessageCache {
 
 	private static final Object[] EMPTY_ARGS = new Object[0];
 
-	private static final String REGION_NAME = "MailMessageCache";
+	static final String REGION_NAME = "MailMessageCache";
 
 	private static final Lock INIT_LOCK = new ReentrantLock();
 
@@ -415,7 +416,7 @@ public final class MailMessageCache {
 	/*
 	 * Field members
 	 */
-	private final JCS cache;
+	private final Cache cache;
 
 	/**
 	 * Singleton instantiation
@@ -426,7 +427,7 @@ public final class MailMessageCache {
 	private MailMessageCache() throws OXCachingException {
 		super();
 		try {
-			cache = JCS.getInstance(REGION_NAME);
+			cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
 		} catch (final CacheException e) {
 			LOG.error(e.getMessage(), e);
 			throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, REGION_NAME, e.getMessage());

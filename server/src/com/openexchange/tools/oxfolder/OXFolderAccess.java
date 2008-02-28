@@ -61,7 +61,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.OXCachingException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.contact.Contacts;
@@ -122,11 +121,7 @@ public class OXFolderAccess {
 	public final FolderObject getFolderObject(final int folderId) throws OXException {
 		final FolderObject fo;
 		if (FolderCacheManager.isEnabled()) {
-			try {
-				fo = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
-			} catch (final OXCachingException e) {
-				throw new OXException(e);
-			}
+			fo = FolderCacheManager.getInstance().getFolderObject(folderId, true, ctx, readCon);
 		} else {
 			fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
 		}

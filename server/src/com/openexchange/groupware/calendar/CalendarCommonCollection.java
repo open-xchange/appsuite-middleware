@@ -62,11 +62,11 @@ import java.util.TimeZone;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.jcs.access.exception.CacheException;
 
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.caching.CacheException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -750,11 +750,7 @@ public class CalendarCommonCollection {
             cache = CalendarCache.getInstance();
         }
         
-        try {
-            o = cache.get(check.getObjectKey(), check.getGroupKey());
-        } catch (final CacheException ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
+        o = cache.get(check.getObjectKey(), check.getGroupKey());
         
         if (o != null) {
             cfo = (CalendarFolderObject)o;
@@ -789,11 +785,7 @@ public class CalendarCommonCollection {
             cache = CalendarCache.getInstance();
         }
         
-        try {
-            o = cache.get(check.getObjectKey(), check.getGroupKey());
-        } catch (final CacheException ex) {
-            LOG.error(ex.getMessage(), ex);
-        }
+        o = cache.get(check.getObjectKey(), check.getGroupKey());
         
         if (o != null) {
             cfo = (CalendarFolderObject)o;
