@@ -9,9 +9,9 @@
     <property name="prefix" value="/opt/open-xchange"/>
 
     <!-- Constants -->
+    <property name="lib.dir" value="lib"/>
     <property name="tmp.dir" value="tmp"/>
     <property name="conf.dir" value="conf"/>
-    <property name="lib" location="${prefix}/lib"/>
 
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
@@ -34,6 +34,7 @@
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
 	<property name="globaljar" value="com.openexchange.global.jar" />
 	<property name="configjar" value="com.openexchange.configread.jar" />
+    <property name="httpclientjar" value="commons-httpclient-3.1.jar"/>
 
     <!-- Classpath -->
     <path id="project.classpath">
@@ -42,6 +43,7 @@
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
 		<pathelement location="${bundlesdir}/${globaljar}"/>
 		<pathelement location="${bundlesdir}/${configjar}"/>
+        <pathelement location="${lib.dir}/${httpclientjar}"/>
     </path>
 
     <!-- Compile -->
