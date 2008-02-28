@@ -16,7 +16,7 @@
     <property name="composite.name" value="${distpackage.name}-${version}" />
 
     <fileset dir="." id="jarfiles">
-        <include name="lib/lib/*"/>
+        <include name="lib/*"/>
         <exclude name="CVS"/>
     </fileset>
 
@@ -32,7 +32,7 @@
     <path id="project.classpath">
         <pathelement location="${bundlesdir}/${osgijar}"/>
         <pathelement location="${bundlesdir}/${commonsloggingjar}"/>
-        <pathelement location="lib/lib/jcharset-1.3.jar"/>
+        <pathelement location="lib/jcharset-1.3.jar"/>
     </path>
 
     <!-- Compile -->
@@ -78,8 +78,8 @@
     <target name="dist" depends="clean">
         <property name="dist-package" value="dist-package"/>
         <delete dir="${dist-package}"/>
-        <mkdir dir="${dist-package}/${distpackage.name}"/>
-        <copy todir="${dist-package}/${distpackage.name}">
+        <mkdir dir="${dist-package}/${composite.name}"/>
+        <copy todir="${dist-package}/${composite.name}">
             <fileset dir=".">
                 <exclude name="**${dist-package}/**"/>
                 <exclude name="**debian/**"/>
@@ -87,9 +87,9 @@
                 <exclude name="Todo"/>
             </fileset>
         </copy>
-        <tar destfile="../${distpackage.name}.tar.gz"
+        <tar destfile="../${composite.name}.tar.gz"
             basedir="${dist-package}"
-            includes="${distpackage.name}/"
+            includes="${composite.name}/"
              compression="gzip"/>        <!-- dpkg-source does not like anything else -->
         <delete dir="${dist-package}"/>
     </target>
