@@ -432,7 +432,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 				// Regex has always at minimum 2 cookies as groups.
 				continue;
 			}
-			if (name.charAt(0) == '$' && LOG.isInfoEnabled()) {
+			if (name.length() > 0 && name.charAt(0) == '$' && LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(32).append("Special cookie ").append(name).append(" not handled, yet!"));
 			}
 			final Cookie c = new Cookie(name, stripQuotes(m.group(4)));
