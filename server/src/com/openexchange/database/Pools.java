@@ -376,6 +376,7 @@ public final class Pools implements Runnable {
                 pool.getCleanerTask().cancel();
                 pool.destroy();
             }
+            oxPools.clear();
         } finally {
             poolsLock.unlock();
         }

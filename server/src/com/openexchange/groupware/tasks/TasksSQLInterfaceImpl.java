@@ -481,7 +481,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             try {
                 tasks.add(get.loadAndCheck());
             } catch (TaskException e) {
-                LOG.error(e.getMessage(), e);
+                LOG.debug(e.getMessage(), e);
             }
         }
         return new ArrayIterator<Task>(tasks.toArray(new Task[tasks.size()]));
