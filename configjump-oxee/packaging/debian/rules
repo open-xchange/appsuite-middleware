@@ -1,10 +1,10 @@
 #!/usr/bin/make -f
-# Build open-xchange-authentication-ldap
+# Build open-xchange-configjump-oxee
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-oxroot=$(CURDIR)/debian/open-xchange-authentication-ldap
+oxroot=$(CURDIR)/debian/open-xchange-configjump-oxee
 instprefix=/opt/open-xchange
 
 configure: configure-stamp
