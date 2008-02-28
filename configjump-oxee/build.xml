@@ -33,7 +33,7 @@
     <property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
     <property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
 	<property name="globaljar" value="com.openexchange.global.jar" />
-	<property name="configjar" value="com.openexchange.config.jar" />
+	<property name="configjar" value="com.openexchange.configread.jar" />
 
     <!-- Classpath -->
     <path id="project.classpath">
