@@ -3,7 +3,7 @@
 
 Name:           open-xchange-monitoring
 BuildArch:	noarch
-BuildRequires:  ant open-xchange-common open-xchange-global
+BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-management
 #%if 0%{?suse_version} <= 1010
 # SLES10
 #BuildRequires:  java-1_5_0-ibm-devel java-1_5_0-ibm-alsa update-alternatives
@@ -24,7 +24,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Monitoring Bundle
-Requires:	open-xchange-common open-xchange-global
+Requires:	open-xchange-common open-xchange-global open-xchange-management
 #
 
 %description
