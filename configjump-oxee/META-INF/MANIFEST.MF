@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Config Jump for OX EE
 Bundle-SymbolicName: com.openexchange.configjump.oxee
 Bundle-Version: 6.5.0
-Bundle-Activator: com.openexchange.configjump.oxee.internal.Activator
+Bundle-Activator: com.openexchange.configjump.oxee.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.openexchange.config,
  com.openexchange.configjump,

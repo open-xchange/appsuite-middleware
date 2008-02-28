@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.configjump.oxee.internal;
+package com.openexchange.configjump.oxee;
 
 import java.io.IOException;
 import java.net.MalformedURLException;

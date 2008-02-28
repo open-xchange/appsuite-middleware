@@ -47,64 +47,41 @@
  *
  */
 
-package com.openexchange.configjump.oxee.internal;
+package com.openexchange.configjump.oxee;
 
-import java.util.Properties;
-
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.config.ConfigurationService;
 
 /**
- * This customizer handles an appearing Configuration service and activates then
- * this bundles service.
+ * Activator.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ConfigurationTracker implements ServiceTrackerCustomizer {
+public class Activator implements BundleActivator {
 
-    private final BundleContext context;
+    private Services services;
 
-    private final Services services;
+    private ServiceTracker tracker;
 
-    /**
-     * Default constructor.
-     * @param services 
-     */
-    public ConfigurationTracker(final BundleContext context,
-        final Services services) {
-        super();
-        this.context = context;
-        this.services = services;
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	public void start(final BundleContext context) throws Exception {
+        services = new Services(context);
+        tracker = new ServiceTracker(context, ConfigurationService.class
+            .getName(), new ConfigurationTracker(context, services));
+        tracker.open();
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public Object addingService(final ServiceReference reference) {
-        final ConfigurationService configuration = (ConfigurationService) context
-            .getService(reference);
-        final Properties props = configuration.getFile("configjump.properties");
-        // TODO put URL somewhere
-        context.ungetService(reference);
-        services.registerService(props);
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void modifiedService(final ServiceReference reference,
-        final Object service) {
-        // Nothing to do.
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void removedService(final ServiceReference reference,
-        final Object service) {
-        // Nothing to do.
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	public void stop(final BundleContext context) throws Exception {
+        tracker.close();
+        tracker = null;
+        services.unregisterService();
+        services = null;
+	}
 }

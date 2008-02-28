@@ -47,41 +47,67 @@
  *
  */
 
-package com.openexchange.configjump.oxee.internal;
+package com.openexchange.configjump.oxee;
 
-import org.osgi.framework.BundleActivator;
+import java.util.Properties;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.framework.ServiceRegistration;
 
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.configjump.ConfigJumpService;
 
 /**
- * Activator.
+ * This class maintains the service registrations.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Activator implements BundleActivator {
+public final class Services {
 
-    private Services services;
+    private static final Log LOG = LogFactory.getLog(Services.class);
 
-    private ServiceTracker tracker;
+    private final BundleContext context;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void start(final BundleContext context) throws Exception {
-        services = new Services(context);
-        tracker = new ServiceTracker(context, ConfigurationService.class
-            .getName(), new ConfigurationTracker(context, services));
-        tracker.open();
-	}
+    private ServiceRegistration configJump;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void stop(final BundleContext context) throws Exception {
-        tracker.close();
-        tracker = null;
-        services.unregisterService();
-        services = null;
-	}
+    private final Lock registrationLock = new ReentrantLock();
+
+    /**
+     * Default constructor. 
+     */
+    public Services(final BundleContext context) {
+        super();
+        this.context = context;
+    }
+
+    public void registerService(final Properties props) {
+        final String url = props.getProperty("URL");
+        if (null == url) {
+            LOG.error("Missing URL property in configjump.properties.");
+            return;
+        }
+        registrationLock.lock();
+        try {
+            if (null == configJump) {
+                configJump = context.registerService(ConfigJumpService.class
+                    .getName(), new ExpressImpl(url), null);
+            }
+        } finally {
+            registrationLock.unlock();
+        }
+    }
+
+    public void unregisterService() {
+        registrationLock.lock();
+        try {
+            if (null != configJump) {
+                configJump.unregister();
+                configJump = null;
+            }
+        } finally {
+            registrationLock.unlock();
+        }
+    }
 }

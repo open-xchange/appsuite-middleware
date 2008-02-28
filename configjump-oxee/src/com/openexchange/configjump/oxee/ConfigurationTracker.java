@@ -47,67 +47,64 @@
  *
  */
 
-package com.openexchange.configjump.oxee.internal;
+package com.openexchange.configjump.oxee;
 
 import java.util.Properties;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import com.openexchange.configjump.ConfigJumpService;
+import com.openexchange.config.ConfigurationService;
 
 /**
- * This class maintains the service registrations.
+ * This customizer handles an appearing Configuration service and activates then
+ * this bundles service.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Services {
-
-    private static final Log LOG = LogFactory.getLog(Services.class);
+public class ConfigurationTracker implements ServiceTrackerCustomizer {
 
     private final BundleContext context;
 
-    private ServiceRegistration configJump;
-
-    private final Lock registrationLock = new ReentrantLock();
+    private final Services services;
 
     /**
-     * Default constructor. 
+     * Default constructor.
+     * @param services 
      */
-    public Services(final BundleContext context) {
+    public ConfigurationTracker(final BundleContext context,
+        final Services services) {
         super();
         this.context = context;
+        this.services = services;
     }
 
-    public void registerService(final Properties props) {
-        final String url = props.getProperty("URL");
-        if (null == url) {
-            LOG.error("Missing URL property in configjump.properties.");
-            return;
-        }
-        registrationLock.lock();
-        try {
-            if (null == configJump) {
-                configJump = context.registerService(ConfigJumpService.class
-                    .getName(), new ExpressImpl(url), null);
-            }
-        } finally {
-            registrationLock.unlock();
-        }
+    /**
+     * {@inheritDoc}
+     */
+    public Object addingService(final ServiceReference reference) {
+        final ConfigurationService configuration = (ConfigurationService) context
+            .getService(reference);
+        final Properties props = configuration.getFile("configjump.properties");
+        // TODO put URL somewhere
+        context.ungetService(reference);
+        services.registerService(props);
+        return null;
     }
 
-    public void unregisterService() {
-        registrationLock.lock();
-        try {
-            if (null != configJump) {
-                configJump.unregister();
-                configJump = null;
-            }
-        } finally {
-            registrationLock.unlock();
-        }
+    /**
+     * {@inheritDoc}
+     */
+    public void modifiedService(final ServiceReference reference,
+        final Object service) {
+        // Nothing to do.
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void removedService(final ServiceReference reference,
+        final Object service) {
+        // Nothing to do.
     }
 }
