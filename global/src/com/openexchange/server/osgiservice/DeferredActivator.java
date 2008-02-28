@@ -126,29 +126,22 @@ public abstract class DeferredActivator implements BundleActivator {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(DeferredActivator.class);
 
-	protected final boolean[] availability;
+	protected boolean[] availability;
 
 	/**
 	 * The execution context of the bundle
 	 */
 	protected BundleContext context;
 
-	protected final ServiceTracker[] serviceTrackers;
+	protected ServiceTracker[] serviceTrackers;
 
-	protected final Map<Class<?>, Object> services;
+	protected Map<Class<?>, Object> services;
 
 	/**
 	 * Initializes a new {@link DeferredActivator}
 	 */
 	public DeferredActivator() {
 		super();
-		services = new ConcurrentHashMap<Class<?>, Object>(getNeededServices().length);
-		serviceTrackers = new ServiceTracker[getNeededServices().length];
-		availability = new boolean[getNeededServices().length];
-		/*
-		 * Mark every service as unavailable
-		 */
-		Arrays.fill(availability, false);
 	}
 
 	/**
@@ -182,6 +175,16 @@ public abstract class DeferredActivator implements BundleActivator {
 		if (new HashSet<Class<?>>(Arrays.asList(classes)).size() != classes.length) {
 			throw new IllegalArgumentException("Duplicate class/interface provided through getNeededServices()");
 		}
+		services = new ConcurrentHashMap<Class<?>, Object>(classes.length);
+		serviceTrackers = new ServiceTracker[classes.length];
+		availability = new boolean[classes.length];
+		/*
+		 * Mark every service as unavailable
+		 */
+		Arrays.fill(availability, false);
+		/*
+		 * Initialize service trackers for needed services
+		 */
 		for (int i = 0; i < classes.length; i++) {
 			final ServiceTracker tracker = new ServiceTracker(context, classes[i].getName(),
 					new DeferredServiceTrackerCustomizer(classes[i], i, context));
@@ -198,8 +201,10 @@ public abstract class DeferredActivator implements BundleActivator {
 			serviceTrackers[i].close();
 			serviceTrackers[i] = null;
 		}
-		Arrays.fill(availability, false);
+		serviceTrackers = null;
+		availability = null;
 		services.clear();
+		services = null;
 	}
 
 	/**
