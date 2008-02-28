@@ -1,0 +1,13 @@
+Source: open-xchange-config-hosting
+Section: unknown
+Priority: optional
+Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 3.6.1
+
+Package: open-xchange-config-hosting
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange
+Provides: open-xchange-config
+Conflicts: open-xchange-config-standard
+Description: Open-Xchange server configuration for hosting systems
