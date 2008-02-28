@@ -143,8 +143,11 @@ public class FolderCacheManager {
 				if (instance != null) {
 					instance = null;
 					try {
-						ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(
-								FOLDER_CACHE_REGION_NAME);
+						final CacheService cacheService = ServerServiceRegistry.getInstance().getService(
+								CacheService.class);
+						if (null != cacheService) {
+							cacheService.freeCache(FOLDER_CACHE_REGION_NAME);
+						}
 					} catch (final CacheException e) {
 						throw new OXException(e);
 					}

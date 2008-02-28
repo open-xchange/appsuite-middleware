@@ -587,7 +587,10 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	@Override
 	public void shutdownStorage() {
 		try {
-			ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(CACHE_REGION_NAME);
+			final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+			if (null != cacheService) {
+				cacheService.freeCache(CACHE_REGION_NAME);
+			}
 		} catch (final CacheException e) {
 			LOG.error("Cache \"" + CACHE_REGION_NAME + "\" could not be freed", e);
 		}
