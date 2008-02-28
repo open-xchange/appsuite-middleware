@@ -9,8 +9,6 @@ installroot=$(CURDIR)/debian/open-xchange-jcharset
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
-	cd open-xchange-jcharset; \
-	ln -s ../openexchange-jcharset lib
 	touch configure-stamp
 
 build: build-stamp
@@ -24,7 +22,6 @@ clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
-	cd open-xchange-jcharset; \
 	ant clean
 	dh_clean 
 
@@ -33,7 +30,6 @@ install: build
 	dh_testroot
 	dh_clean -k 
 	dh_installdirs
-	cd open-xchange-jcharset; \
 	ant -Ddestdir=$(installroot) install
 
 # Build architecture-independent files here.

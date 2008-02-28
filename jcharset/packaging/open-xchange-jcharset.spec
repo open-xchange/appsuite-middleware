@@ -41,8 +41,6 @@ Authors:
 
 %install
 
-cd open-xchange-jcharset
-ln -s ../openexchange-jcharset lib
 ant -Ddestdir=%{buildroot} install
 
 %clean
