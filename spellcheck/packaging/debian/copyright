@@ -1,0 +1,39 @@
+This package was debianized by choeger <choeger@open-xchange.com> on
+Wed, 16 Aug 2006 19:19:08 +0200.
+
+
+
+Java, JavaMail, Java Activation Framework, JavaBeans and all their acronyms are
+trademarks of Sun Microsystems, Inc. OPEN-XCHANGE is a trademark of
+OPEN-XCHANGE Inc., and all other brand and product names are or may be
+trademarks of, and are used to identify products or services of, their
+respective owners.
+ 
+
+Third party licenses and packages can be found in the according license
+files, see the directory /usr/share/doc/open-xchange-common for more
+information.
+
+
+The JavaMail library and the Java Activation Framework library are
+Copyright © Sun Microsystems Inc.
+The JDOM library is Copyright © 2000-2004 by Jason Hunter & Brett McLaughlin.
+The MySQL JDBC driver is Copyright © 2002-2004 MySQL AB.
+The JSON in Java is Copyright © 2002 JSON.org.
+The Jakarta Java Caching System, Jakarta Slide application, Spring Framework and
+Jakarta Commons are all Copyright © The Apache Software Foundation.
+The Java TNEF library is Copyright © 1999-2007 by Amichai Rothman.
+Eclipse Equinox is Copyright © 2006 Eclipse Foundation and others.
+The JUnit 4.1 regression test framework is Copyright © 1997-2006 JUnit.org.
+
+Canonical is Copyright © 2004, Canonical Ltd.
+Ubuntu is Copyright © 2004-2005 The Ubuntu Documenation Team, and is licensed
+under both the GPL and the Creative Commons ShareAlike 2.0 License (CC-BY-SA)
+
+
+These components are distributed unmodified and according to grants in their
+license; the licenses and the original files are included with the packages.
+
+
+Please make sure that third-party modules and libraries are used according to
+their respective licenses.
