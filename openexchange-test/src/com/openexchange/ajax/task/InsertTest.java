@@ -52,6 +52,9 @@ package com.openexchange.ajax.task;
 import java.util.TimeZone;
 
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.framework.MultipleRequest;
+import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
 import com.openexchange.ajax.task.actions.GetResponse;
@@ -88,5 +91,22 @@ public class InsertTest extends AbstractTaskTest {
         final Task reload = getR.getTask(timeZone);
         TaskTools.compareAttributes(task, reload);
         TaskTools.delete(client, new DeleteRequest(reload));
+    }
+
+    /**
+     * Tests inserting a private task.
+     * @throws Throwable if an error occurs.
+     */
+    public void _testInsertTonnenTasks() throws Throwable {
+        final AJAXClient client = getClient();
+        final int folderId = client.getValues().getPrivateTaskFolder();
+        final TimeZone timeZone = client.getValues().getTimeZone();
+        final InsertRequest[] inserts = new InsertRequest[1000];
+        for (int i = 0; i < inserts.length; i++) {
+            final Task task = Create.createTask();
+            task.setParentFolderID(folderId);
+            inserts[i] = new InsertRequest(task, timeZone);
+        }
+        Executor.multiple(client, new MultipleRequest(inserts));
     }
 }
