@@ -66,6 +66,14 @@ public class ConfigurationException extends AbstractOXException {
     private static final long serialVersionUID = 7857242456684578343L;
 
     /**
+     * Initializes a new {@link ConfigurationException}
+     * @param cause The cause exception
+     */
+    public ConfigurationException(final AbstractOXException cause) {
+    	super(cause);
+    }
+
+    /**
      * Initializes a new exception using the information provides by the code.
      * @param code code for the exception.
      * @param messageArgs arguments that will be formatted into the message.
