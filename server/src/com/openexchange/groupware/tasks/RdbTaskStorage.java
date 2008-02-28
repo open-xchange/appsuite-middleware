@@ -71,7 +71,6 @@ import com.openexchange.groupware.tasks.Mapping.Mapper;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -122,7 +121,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    protected SearchIterator<Task> load(final Context ctx, final int[] taskIds,
+    protected TaskIterator load(final Context ctx, final int[] taskIds,
         final int[] columns) throws TaskException {
         Connection con;
         try {
@@ -188,7 +187,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    public TaskIterator list(final Context ctx, final int folderId,
+    TaskIterator list(final Context ctx, final int folderId,
         final int from, final int to, final int orderBy, final String orderDir,
         final int[] columns, final boolean onlyOwn, final int userId,
         final boolean noPrivate)
@@ -206,9 +205,13 @@ public class RdbTaskStorage extends TaskStorage {
         }
         sql.append(SQL.getOrder(orderBy, orderDir));
         sql.append(SQL.getLimit(from, to));
-        Connection con = null;
+        final Connection con;
         try {
             con = DBPool.pickup(ctx);
+        } catch (DBPoolingException e) {
+            throw new TaskException(Code.NO_CONNECTION, e);
+        }
+        try {
             final PreparedStatement stmt = con.prepareStatement(sql.toString());
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
@@ -221,8 +224,6 @@ public class RdbTaskStorage extends TaskStorage {
         } catch (SQLException e) {
             DBPool.closeWriterSilent(ctx, con);
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
-        } catch (DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
         }
     }
 
@@ -230,7 +231,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    SearchIterator<Task> search(final Context ctx, final int userId,
+    TaskIterator search(final Context ctx, final int userId,
         final TaskSearchObject search, final int orderBy, final String orderDir,
         final int[] columns, final List<Integer> all, final List<Integer> own,
         final List<Integer> shared) throws TaskException {
@@ -251,9 +252,13 @@ public class RdbTaskStorage extends TaskStorage {
             sql.append(patternCondition);
         }
         sql.append(SQL.getOrder(orderBy, orderDir));
-        Connection con = null;
+        final Connection con;
         try {
             con = DBPool.pickup(ctx);
+        } catch (DBPoolingException e) {
+            throw new TaskException(Code.NO_CONNECTION, e);
+        }
+        try {
             final PreparedStatement stmt = con.prepareStatement(sql.toString());
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
@@ -285,16 +290,11 @@ public class RdbTaskStorage extends TaskStorage {
 				LOG.trace(stmt);
 			}
             final ResultSet result = stmt.executeQuery();
-//            return new PrefetchIterator(new TaskIterator(ctx,
-//                session.getUserObject().getId(), result, -1, columns,
-//                StorageType.ACTIVE));
             return new TaskIterator(ctx, userId, result, -1, columns,
                 StorageType.ACTIVE);
         } catch (SQLException e) {
             DBPool.closeReaderSilent(ctx, con);
             throw new TaskException(Code.SEARCH_FAILED, e, e.getMessage());
-        } catch (DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
         }
     }
 

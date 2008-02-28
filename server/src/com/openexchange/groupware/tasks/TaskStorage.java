@@ -58,7 +58,6 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * Interface to different SQL implementations for storing tasks.
@@ -146,7 +145,7 @@ abstract class TaskStorage {
      * @return a task iterator.
      * @throws TaskException if an error occurs.
      */
-    protected abstract SearchIterator load(Context ctx, int[] taskIds,
+    protected abstract TaskIterator load(Context ctx, int[] taskIds,
         int[] columns) throws TaskException;
 
     /**
@@ -168,7 +167,7 @@ abstract class TaskStorage {
      * @return a SearchIterator for iterating over all returned tasks.
      * @throws TaskException if an error occurs while listing tasks.
      */
-    public abstract TaskIterator list(Context ctx, int folderId,
+    abstract TaskIterator list(Context ctx, int folderId,
         int from, int until, int orderBy, String orderDir, int[] columns,
         boolean onlyOwn, int userId, boolean noPrivate) throws TaskException;
 
@@ -186,7 +185,7 @@ abstract class TaskStorage {
      * @return an iterator for all found tasks.
      * @throws TaskException if an error occurs.
      */
-    abstract SearchIterator search(Context ctx, int userId,
+    abstract TaskIterator search(Context ctx, int userId,
         TaskSearchObject search, int orderBy, String orderDir, int[] columns,
         List<Integer> all, List<Integer> own, List<Integer> shared)
         throws TaskException;

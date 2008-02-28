@@ -62,6 +62,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
+import com.openexchange.groupware.Component;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -230,7 +231,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
     /**
      * {@inheritDoc}
      */
-    public SearchIterator getDeletedTasksInFolder(final int folderId,
+    public TaskIterator getDeletedTasksInFolder(final int folderId,
         final int[] columns, final Date since) throws OXException {
         final Context ctx;
         final User user;
@@ -280,7 +281,8 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             Permission.checkCreate(ctx, user, userConfig, folder);
             if (task.getPrivateFlag() && (Tools.isFolderPublic(folder)
                 || Tools.isFolderShared(folder, user))) {
-                throw new TaskException(Code.PRIVATE_FLAG, folderId);
+                throw new TaskException(Code.PRIVATE_FLAG, Integer
+                    .valueOf(folderId));
             }
             // Create folder mappings
             Set<Folder> folders;
@@ -458,20 +460,37 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
     /**
      * {@inheritDoc}
      */
-    public SearchIterator getObjectsById(final int[][] ids,
+    public SearchIterator<Task> getObjectsById(final int[][] ids,
         final int[] columns) throws OXException {
+        final Context ctx;
+        final int userId = session.getUserId();
+        final User user;
+        final UserConfiguration userConfig;
+        try {
+            ctx = Tools.getContext(session.getContextId());
+            user = Tools.getUser(ctx, userId);
+            userConfig = Tools.getUserConfiguration(ctx, userId);
+        } catch (final TaskException e) {
+            throw Tools.convert(e);
+        }
         // TODO Improve performance
         final List<Task> tasks = new ArrayList<Task>();
         for (int[] objectAndFolderId : ids) {
-            tasks.add(getTaskById(objectAndFolderId[0], objectAndFolderId[1]));
+            final GetTask get = new GetTask(ctx, user, userConfig,
+                objectAndFolderId[1], objectAndFolderId[0], StorageType.ACTIVE);
+            try {
+                tasks.add(get.loadAndCheck());
+            } catch (TaskException e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
-        return new ArrayIterator(tasks.toArray(new Task[tasks.size()]));
+        return new ArrayIterator<Task>(tasks.toArray(new Task[tasks.size()]));
     }
 
     /**
      * {@inheritDoc}
      */
-    public SearchIterator getTasksByExtendedSearch(
+    public SearchIterator<Task> getTasksByExtendedSearch(
         final TaskSearchObject search, final int orderBy, final String orderDir,
         final int[] columns) throws OXException {
         List<Integer> all = new ArrayList<Integer>();
@@ -529,9 +548,25 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
 	        LOG.trace("Search tasks, all: " + all + ", own: " + own + ", shared: "
 	            + shared);
         }
-        SearchIterator retval;
+        final SearchIterator<Task> retval;
         if (all.size() + own.size() + shared.size() == 0) {
-            retval = SearchIterator.EMPTY_ITERATOR;
+            retval = new SearchIterator<Task>() {
+                public void close() throws SearchIteratorException {
+                }
+                public boolean hasNext() {
+                    return false;
+                }
+                public boolean hasSize() {
+                    return true;
+                }
+                public Task next() throws SearchIteratorException, OXException {
+                    throw new SearchIteratorException(SearchIteratorException
+                        .SearchIteratorCode.NO_SUCH_ELEMENT, Component.TASK);
+                }
+                public int size() {
+                    return 0;
+                }
+            };
         } else {
             try {
                 retval = TaskStorage.getInstance().search(ctx, userId, search,

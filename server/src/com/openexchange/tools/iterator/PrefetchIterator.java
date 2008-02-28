@@ -55,6 +55,7 @@ import java.util.Queue;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.groupware.Component;
 
 /**
  * This iterator prefetches the delegating iterator results if the server
@@ -209,7 +210,8 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
                 if (null != sie) {
                     throw sie;
                 }
-                throw new SearchIteratorException("No such element!");
+                throw new SearchIteratorException(SearchIteratorException
+                    .SearchIteratorCode.NO_SUCH_ELEMENT, Component.APPOINTMENT);
             }
             return data.poll();
         }

@@ -89,7 +89,11 @@ public class SearchIteratorException extends AbstractOXException {
         /**
          * Invalid constructor argument. Instance of %s not supported
          */
-        INVALID_CONSTRUCTOR_ARG("Invalid constructor argument. Instance of %s not supported", Category.CODE_ERROR, 6);
+        INVALID_CONSTRUCTOR_ARG("Invalid constructor argument. Instance of %s not supported", Category.CODE_ERROR, 6),
+        /**
+         * No such element.
+         */
+        NO_SUCH_ELEMENT("No such element.", Category.CODE_ERROR, 7);
                 
 		
 		private final String message;
@@ -116,38 +120,6 @@ public class SearchIteratorException extends AbstractOXException {
 			return message;
 		}
 		
-	}
-	
-	/**
-	 * @deprecated
-	 */
-	public SearchIteratorException() {
-		super();
-	}
-	
-	/**
-	 * @deprecated
-	 */
-	public SearchIteratorException(String message) {
-		super(message);
-	}
-	
-	/**
-	 * @deprecated
-	 */
-	public SearchIteratorException(String message, Exception exc) {
-		super(message, exc);
-	}
-	
-	/**
-	 * @deprecated
-	 */
-	public SearchIteratorException(Exception exc) {
-		super(exc);
-	}
-	
-	public SearchIteratorException(final SearchIteratorCode code, final Component component) {
-		this(code, component, new Object[0]);
 	}
 	
 	public SearchIteratorException(final SearchIteratorCode code, final Component component, final Object... messageArgs) {

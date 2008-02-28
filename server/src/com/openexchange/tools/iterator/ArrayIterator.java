@@ -47,17 +47,22 @@
  *
  */
 
-
-
 package com.openexchange.tools.iterator;
 
-public class ArrayIterator implements SearchIterator {
+/**
+ * ArrayIterator.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public class ArrayIterator<T> implements SearchIterator<T> {
 
 	private int index;
-	private final Object[] array;
+	private final T[] array;
 	
-	public ArrayIterator(final Object[] array){
-		this.array = new Object[array.length];
+	public ArrayIterator(final T[] array) {
+	    super();
+	    // Solution to create a generic array copied from java.util.ArrayList.
+	    this.array = (T[]) java.lang.reflect.Array.
+            newInstance(array.getClass().getComponentType(), array.length);
 		System.arraycopy(array, 0, this.array, 0, array.length);
 	}
 	
@@ -65,7 +70,7 @@ public class ArrayIterator implements SearchIterator {
 		return index < array.length;
 	}
 
-	public Object next() throws SearchIteratorException {
+	public T next() throws SearchIteratorException {
 		return array[index++];
 	}
 	
@@ -79,5 +84,4 @@ public class ArrayIterator implements SearchIterator {
 	public boolean hasSize() {
 		return true;
 	}
-
 }

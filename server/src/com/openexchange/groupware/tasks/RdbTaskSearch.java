@@ -64,7 +64,6 @@ import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.Collections;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -98,7 +97,7 @@ public class RdbTaskSearch extends TaskSearch {
             stmt.setInt(pos++, userId);
             result = stmt.executeQuery();
             while (result.next()) {
-                tasks.add(result.getInt(1));
+                tasks.add(Integer.valueOf(result.getInt(1)));
             }
         } catch (SQLException e) {
             throw new TaskException(TaskException.Code.SQL_ERROR, e,
@@ -113,7 +112,7 @@ public class RdbTaskSearch extends TaskSearch {
      * {@inheritDoc}
      */
     @Override
-    public SearchIterator listModifiedTasks(final Context ctx,
+    TaskIterator listModifiedTasks(final Context ctx,
         final int folderId, final StorageType type, final int[] columns,
         final Date since, final boolean onlyOwn, final int userId,
         final boolean noPrivate) throws TaskException {
