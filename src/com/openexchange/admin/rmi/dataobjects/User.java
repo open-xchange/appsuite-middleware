@@ -3249,7 +3249,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
      * @return A {@link String} containing the timezone
      */
     final public TimeZone getTimezone() {
-        return TimeZone.getTimeZone(timezone);
+        if( this.timezone == null ) {
+            return null;
+        } else {
+            return TimeZone.getTimeZone(timezone);
+        }
     }
 
     /**
