@@ -137,6 +137,7 @@ public class EventQueue extends TimerTask {
 		}
 
 		isInit = true;
+		shuttingDown = false;
 	}
 
 	public static void add(final EventObject eventObj) throws EventException {
