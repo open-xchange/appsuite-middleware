@@ -123,7 +123,9 @@ public abstract class DeferredActivator implements BundleActivator {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(DeferredActivator.class);
 
-	protected boolean[] availability;
+	protected int availability;
+
+	private int allAvailable;
 
 	/**
 	 * The execution context of the bundle
@@ -174,11 +176,8 @@ public abstract class DeferredActivator implements BundleActivator {
 		}
 		services = new ConcurrentHashMap<Class<?>, Object>(classes.length);
 		serviceTrackers = new ServiceTracker[classes.length];
-		availability = new boolean[classes.length];
-		/*
-		 * Mark every service as unavailable
-		 */
-		Arrays.fill(availability, false);
+		availability = 0;
+		allAvailable = (((1 << classes.length)) - 1);
 		/*
 		 * Initialize service trackers for needed services
 		 */
@@ -198,7 +197,8 @@ public abstract class DeferredActivator implements BundleActivator {
 			serviceTrackers[i] = null;
 		}
 		serviceTrackers = null;
-		availability = null;
+		availability = 0;
+		allAvailable = -1;
 		services.clear();
 		services = null;
 	}
@@ -215,19 +215,16 @@ public abstract class DeferredActivator implements BundleActivator {
 	 *            The class' index
 	 */
 	private final void signalAvailability(final int index) {
-		availability[index] = true;
-		for (final boolean b : availability) {
-			if (!b) {
-				return;
+		availability |= (1 << index);
+		if (availability == allAvailable) {
+			/*
+			 * Start bundle
+			 */
+			try {
+				startBundle();
+			} catch (final Throwable t) {
+				LOG.error(t.getMessage(), t);
 			}
-		}
-		/*
-		 * Start bundle
-		 */
-		try {
-			startBundle();
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
 		}
 	}
 
@@ -240,7 +237,7 @@ public abstract class DeferredActivator implements BundleActivator {
 	 *            The class' index
 	 */
 	private final void signalUnavailability(final int index) {
-		availability[index] = false;
+		availability &= ~(1 << index);
 	}
 
 	/*
