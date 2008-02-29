@@ -51,8 +51,6 @@ package com.openexchange.mail.usersetting;
 
 import java.sql.Connection;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -69,8 +67,6 @@ public abstract class UserSettingMailStorage {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(UserSettingMailStorage.class);
-
-	private static final Lock INIT_LOCK = new ReentrantLock();
 
 	private static UserSettingMailStorage singleton;
 
@@ -90,14 +86,11 @@ public abstract class UserSettingMailStorage {
 	 */
 	public static final UserSettingMailStorage getInstance() {
 		if (!initialized.get()) {
-			INIT_LOCK.lock();
-			try {
+			synchronized (initialized) {
 				if (null == singleton) {
 					singleton = new CachingUserSettingMailStorage();
 					initialized.set(true);
 				}
-			} finally {
-				INIT_LOCK.unlock();
 			}
 		}
 		return singleton;
@@ -108,15 +101,12 @@ public abstract class UserSettingMailStorage {
 	 */
 	public static final void releaseInstance() {
 		if (initialized.get()) {
-			INIT_LOCK.lock();
-			try {
+			synchronized (initialized) {
 				if (null != singleton) {
 					singleton.shutdownStorage();
 					singleton = null;
 					initialized.set(false);
 				}
-			} finally {
-				INIT_LOCK.unlock();
 			}
 		}
 	}
