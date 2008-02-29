@@ -81,6 +81,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleListener;
+import org.osgi.framework.ServiceReference;
 
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
@@ -146,6 +147,9 @@ public class AdminDaemon {
     public void registerBundleListener(final BundleContext context) {
         final BundleListener bl = new BundleListener() {
             public void bundleChanged(final BundleEvent event) {
+            	
+            	final String sn = event.getBundle().getSymbolicName();
+            	
                 if (event.getType() == BundleEvent.STARTED) {
                     bundlelist.add(event.getBundle());
                 } else if (event.getType() == BundleEvent.STOPPED) {
@@ -263,6 +267,83 @@ public class AdminDaemon {
     }
 
     public static final ArrayList<Bundle> getBundlelist() {
-        return bundlelist;
-    }
+		return bundlelist;
+	}
+
+	/**
+	 * Looks for a matching service reference inside all bundles provided
+	 * through {@link #getBundlelist()}.
+	 * 
+	 * @param <S>
+	 *            Type of the service
+	 * @param bundleSymbolicName
+	 *            The bundle's symbolic name which offers the service
+	 * @param serviceName
+	 *            The service's name provided through "<i>name</i>" property
+	 * @param context
+	 *            The bundle context (on which
+	 *            {@link BundleContext#getService(ServiceReference)} is invoked)
+	 * @param clazz
+	 *            The service's class
+	 * @return The service if found; otherwise <code>null</code>
+	 */
+	public static final <S extends Object> S getService(final String bundleSymbolicName, final String serviceName,
+			final BundleContext context, final Class<? extends S> clazz) {
+		for (final Bundle bundle : bundlelist) {
+			if (bundle.getState() == Bundle.ACTIVE && bundleSymbolicName.equals(bundle.getSymbolicName())) {
+				final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+				if (null != servicereferences) {
+					for (final ServiceReference servicereference : servicereferences) {
+						final Object property = servicereference.getProperty("name");
+						if (null != property && property.toString().equalsIgnoreCase(serviceName)) {
+							final Object obj = context.getService(servicereference);
+							if (null == obj) {
+								log.error("Missing service " + serviceName + " in bundle " + bundleSymbolicName);
+							}
+							try {
+								return clazz.cast(obj);
+							} catch (final ClassCastException e) {
+								log.error("Service " + serviceName + "(" + obj.getClass().getName() + ") in bundle "
+										+ bundleSymbolicName + " cannot be cast to an instance of " + clazz.getName());
+								return null;
+							}
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Ungets the service identified through given bundle's symbolic name and "<i>name</i>"
+	 * property.
+	 * 
+	 * @param bundleSymbolicName
+	 *            The bundle's symbolic name which offers the service
+	 * @param serviceName
+	 *            The service's name provided through "<i>name</i>" property
+	 * @param context
+	 *            The bundle context (on which
+	 *            {@link BundleContext#ungetService(ServiceReference)} is
+	 *            invoked)
+	 */
+	public static final void ungetService(final String bundleSymbolicName, final String serviceName,
+			final BundleContext context) {
+		for (final Bundle bundle : bundlelist) {
+			if (bundle.getState() == Bundle.ACTIVE && bundleSymbolicName.equals(bundle.getSymbolicName())) {
+				final ServiceReference[] servicereferences = bundle.getRegisteredServices();
+				if (null != servicereferences) {
+					for (final ServiceReference servicereference : servicereferences) {
+						final Object property = servicereference.getProperty("name");
+						if (null != property && property.toString().equalsIgnoreCase(serviceName)) {
+							context.ungetService(servicereference);
+						}
+					}
+				}
+			}
+		}
+	}
+
+
 }
