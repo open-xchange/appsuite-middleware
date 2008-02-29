@@ -187,7 +187,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 	        try {
 	        	final Cache cache = cacheService.getCache("User");
 	            for (final int user_id : member_ids) {
-	                cache.remove(new CacheKey(ctx.getId().intValue(), Integer.valueOf(user_id)));
+	                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.valueOf(user_id)));
 	            }
 	        } catch (final CacheException e) {
 	            log.error(e.getMessage(), e);
@@ -256,7 +256,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 	        try {
 	        	final Cache cache = cacheService.getCache("User");
 	        	for (User user : members) {
-	                cache.remove(new CacheKey(ctx.getId().intValue(), user.getId()));
+	                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId()));
 	            }
 	        } catch (final CacheException e) {
 	            log.error(e.getMessage(), e);
@@ -334,13 +334,13 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
     	        	final Cache cache = cacheService.getCache("User");
     	        	if(new_members!=null){
                         for (final User user : new_members) {
-                            cache.remove(new CacheKey(ctx.getId().intValue(), user.getId()));
+                            cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId()));
                         }
                     }
                     
                     if (grp.getMembers() != null && grp.getMembers().length > 0) {
                         for (final Integer old_user_id : grp.getMembers()) {
-                            cache.remove(new CacheKey(ctx.getId().intValue(), old_user_id));
+                            cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), old_user_id));
                         }
                     }
     	        } catch (final CacheException e) {
@@ -534,7 +534,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
     	        try {
     	        	final Cache cache = cacheService.getCache("User");
     	        	for (final Integer member_id : mems) {
-                        cache.remove(new CacheKey(ctx.getId().intValue(), member_id));
+                        cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), member_id));
                     }
     	        } catch (final CacheException e) {
     	            log.error(e.getMessage(), e);
@@ -555,7 +555,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
     	        try {
     	        	final Cache cache = cacheService.getCache("User");
     	        	for (final Integer member_id : mems) {
-                        cache.remove(new CacheKey(ctx.getId().intValue(), member_id));
+                        cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), member_id));
                     }
     	        } catch (final CacheException e) {
     	            log.error(e.getMessage(), e);
@@ -697,7 +697,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
     	        	final Cache cache = cacheService.getCache("User");
     	        	for(final User[] membaz : del_groups_members){                
                         for (final User user : membaz) {
-                            cache.remove(new CacheKey(ctx.getId().intValue(), user.getId()));
+                            cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId()));
                         }                
                     }
     	        } catch (final CacheException e) {
@@ -1085,7 +1085,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 	        try {
 	        	final Cache cache = cacheService.getCache("User");
 	        	for (final User user : user_objs) {
-	                cache.remove(new CacheKey(ctx.getId().intValue(), user.getId()));
+	                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId()));
 	            }
 	        } catch (final CacheException e) {
 	            log.error(e.getMessage(), e);
@@ -1147,7 +1147,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 	        try {
 	        	final Cache cache = cacheService.getCache("User");
 	        	for (final User user : members) {
-	                cache.remove(new CacheKey(ctx.getId().intValue(), user.getId()));
+	                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId()));
 	            }
 	        } catch (final CacheException e) {
 	            log.error(e.getMessage(), e);
