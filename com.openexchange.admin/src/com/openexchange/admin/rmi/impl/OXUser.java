@@ -333,7 +333,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 				CacheService.class);
 		if (null != cacheService) {
 	        try {
-	        	final CacheKey key = new CacheKey(ctx.getId().intValue(), userid);
+	        	final CacheKey key = cacheService.newCacheKey(ctx.getId().intValue(), userid);
 	        	Cache cache = cacheService.getCache("User");
 	        	cache.remove(key);
 	        	
@@ -826,7 +826,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 				final Cache ucCache = cacheService.getCache("UserConfiguration");
 				final Cache usmCache = cacheService.getCache("UserSettingMail");
 				for (final User user : users) {
-					final CacheKey key = new CacheKey(ctx.getId().intValue(), user.getId());
+					final CacheKey key = cacheService.newCacheKey(ctx.getId().intValue(), user.getId());
 					usercCache.remove(key);
 					ucCache.remove(key);
 					usmCache.remove(key);
