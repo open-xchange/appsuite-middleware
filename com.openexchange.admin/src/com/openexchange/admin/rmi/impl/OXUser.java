@@ -63,8 +63,6 @@ import java.util.Locale;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -94,6 +92,9 @@ import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.CacheKey;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
@@ -111,6 +112,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     private static final String FALLBACK_LANGUAGE_CREATE = "en";
 
     private static final String FALLBACK_COUNTRY_CREATE = "US";
+
+    private static final String SYMBOLIC_NAME_CACHE = "com.openexchange.caching";
+
+    private static final String NAME_OXCACHE = "oxcache";
     
     private final OXUserStorageInterface oxu;
     
@@ -324,19 +329,20 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
             ClientAdminThread.cache.setAdminCredentials(ctx,mech,cauth);
         }
-        try {
-            JCS cache = JCS.getInstance("User");
-            cache.remove(new CacheKey(ctx.getId(), userid));
-        } catch (final CacheException e) {
-            log.error(e.getMessage(), e);
-        }
-        
-        try {
-            // clear cache for defaul sender address and other mail settings regarding to bug #10559
-            JCS cache = JCS.getInstance("UserSettingMail");
-            cache.remove(new CacheKey(ctx.getId(), userid));
-        } catch (final CacheException e) {
-            log.error(e.getMessage(), e);
+        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
+				CacheService.class);
+		if (null != cacheService) {
+	        try {
+	        	Cache cache = cacheService.getCache("User");
+	        	cache.remove(new CacheKey(ctx.getId().intValue(), userid));
+	        	
+	        	cache = cacheService.getCache("UserSettingMail");
+	        	cache.remove(new CacheKey(ctx.getId().intValue(), userid));
+	        } catch (final CacheException e) {
+	            log.error(e.getMessage(), e);
+	        } finally {
+	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+	        }
         }
         
         if(usrdata.getDisplay_name()!=null){
@@ -808,30 +814,29 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         
         // JCS
-        for (final User user : users) {
-            
-            try {
-                JCS cache = JCS.getInstance("User");
-                cache.remove(new CacheKey(ctx.getId(), user.getId()));
-            } catch (final CacheException e) {
-                log.error(e.getMessage(), e);
-            }
-            
-            try {
-                // clear cache for defaul sender address and other mail settings regarding to bug #10559
-                JCS cache = JCS.getInstance("UserSettingMail");
-                cache.remove(new CacheKey(ctx.getId(), user.getId()));
-            } catch (final CacheException e) {
-                log.error(e.getMessage(), e);
-            }
-
-            try {
-                UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId(), new ContextImpl(ctx.getId()));
-            } catch (UserConfigurationException e) {
-                log.error("Error removing user "+user.getId()+" in context "+ctx.getId()+" from configuration storage",e);            
-            }        
-            
-        }
+        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
+				CacheService.class);
+		if (null != cacheService) {
+			try {
+				final Cache usercCache = cacheService.getCache("User");
+				final Cache usmCache = cacheService.getCache("UserSettingMail");
+				for (final User user : users) {
+					usercCache.remove(new CacheKey(ctx.getId().intValue(), user.getId()));
+					usmCache.remove(new CacheKey(ctx.getId().intValue(), user.getId()));
+					try {
+						UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId().intValue(),
+								new ContextImpl(ctx.getId().intValue()));
+					} catch (UserConfigurationException e) {
+						log.error("Error removing user " + user.getId() + " in context " + ctx.getId()
+								+ " from configuration storage", e);
+					}
+				}
+			} catch (final CacheException e) {
+				log.error(e.getMessage(), e);
+			} finally {
+				AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+			}
+		}
         // END OF JCS
         
         if (!exceptionlist.isEmpty()) {
