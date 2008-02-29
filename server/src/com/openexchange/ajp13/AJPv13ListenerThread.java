@@ -47,16 +47,16 @@
  *
  */
 
-
-
 package com.openexchange.ajp13;
 
 /**
- * AJPv13ListenerThread
+ * {@link AJPv13ListenerThread} - A subclass of {@link Thread} enhanced with an
+ * additional flag to indicate <i>dead</i> status. This flag is checked inside
+ * AJP listener to prevent this thread from further running.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AJPv13ListenerThread extends Thread {
+public final class AJPv13ListenerThread extends Thread {
 
 	private boolean dead;
 
@@ -117,7 +117,7 @@ public class AJPv13ListenerThread extends Thread {
 	public AJPv13ListenerThread(final ThreadGroup group, final Runnable target, final String name, final long stackSize) {
 		super(group, target, name, stackSize);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
