@@ -1,5 +1,8 @@
 # System Properties
 
+# Define the location of default cache configuration file
+com.openexchange.caching.configfile:@oxconfdir@/cache.ccf
+
 # General mail config
 MailProperties=@serverconfdir@/mail.properties
 
@@ -79,7 +82,6 @@ ServletMappingDir=@serverconfdir@/servletmappings
 
 CONFIGPATH:@oxconfdir@
 AJPPROPERTIES:@serverconfdir@/ajp.properties
-CACHECCF:@oxconfdir@/cache.ccf
 IMPORTEREXPORTER:@serverconfdir@/importerExporter.xml
 LDAPPROPERTIES:@serverconfdir@/ldap.properties
 SESSIONDPROPERTIES:@serverconfdir@/sessiond.properties

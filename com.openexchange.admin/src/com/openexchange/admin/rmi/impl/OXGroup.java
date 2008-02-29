@@ -55,8 +55,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.jcs.JCS;
-import org.apache.jcs.access.exception.CacheException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -84,6 +82,9 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.cache.CacheKey;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheService;
 
 /**
  * Implementation for the RMI interface of group
@@ -93,7 +94,11 @@ import com.openexchange.cache.CacheKey;
  */
 public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
-    private static final long serialVersionUID = -8949889293005549513L;
+	private static final long serialVersionUID = -8949889293005549513L;
+
+    private static final String SYMBOLIC_NAME_CACHE = "com.openexchange.caching";
+
+    private static final String NAME_OXCACHE = "oxcache";
 
     private AdminCache cache = null;
 
@@ -176,13 +181,19 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         oxGroup.addMember(ctx, grp_id, user_objs);
 
         // JCS
-        try {
-            JCS cache = JCS.getInstance("User");
-            for (int user_id : member_ids) {
-                cache.remove(new CacheKey(ctx.getId(), user_id));
-            }
-        } catch (final CacheException e) {
-            log.error(e.getMessage(), e);
+        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
+				CacheService.class);
+		if (null != cacheService) {
+	        try {
+	        	final Cache cache = cacheService.getCache("User");
+	            for (final int user_id : member_ids) {
+	                cache.remove(new CacheKey(ctx.getId().intValue(), Integer.valueOf(user_id)));
+	            }
+	        } catch (final CacheException e) {
+	            log.error(e.getMessage(), e);
+	        } finally {
+	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+	        }
         }
         // OXFolderAdminHelper.propagateGroupModification()
         // END OF JCS
@@ -239,13 +250,19 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         oxGroup.addMember(ctx, grp_id, members);
 
         // JCS
-        try {
-            JCS cache = JCS.getInstance("User");
-            for (User user : members) {
-                cache.remove(new CacheKey(ctx.getId(), user.getId()));
-            }
-        } catch (final CacheException e) {
-            log.error(e.getMessage(), e);
+        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
+				CacheService.class);
+		if (null != cacheService) {
+	        try {
+	        	final Cache cache = cacheService.getCache("User");
+	        	for (User user : members) {
+	                cache.remove(new CacheKey(ctx.getId().intValue(), user.getId()));
+	            }
+	        } catch (final CacheException e) {
+	            log.error(e.getMessage(), e);
+	        } finally {
+	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+	        }
         }
         // END OF JCS
     }
@@ -309,25 +326,28 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             oxGroup.change(ctx, grp);
             
             //JCS
-            User[] new_members = oxGroup.getMembers(ctx, grp.getId());
-            try {
-                
-                JCS cache = JCS.getInstance("User");
-                
-                if(new_members!=null){
-                    for (User user : new_members) {
-                        cache.remove(new CacheKey(ctx.getId(), user.getId()));
+            final User[] new_members = oxGroup.getMembers(ctx, grp.getId());
+            final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
+    				CacheService.class);
+    		if (null != cacheService) {
+    	        try {
+    	        	final Cache cache = cacheService.getCache("User");
+    	        	if(new_members!=null){
+                        for (final User user : new_members) {
+                            cache.remove(new CacheKey(ctx.getId().intValue(), user.getId()));
+                        }
                     }
-                }
-                
-                if (grp.getMembers() != null && grp.getMembers().length > 0) {
-                    for (Integer old_user_id : grp.getMembers()) {
-                        cache.remove(new CacheKey(ctx.getId(), old_user_id));
+                    
+                    if (grp.getMembers() != null && grp.getMembers().length > 0) {
+                        for (final Integer old_user_id : grp.getMembers()) {
+                            cache.remove(new CacheKey(ctx.getId().intValue(), old_user_id));
+                        }
                     }
-                }
-                
-            } catch (final CacheException e) {
-                log.error(e.getMessage(), e);
+    	        } catch (final CacheException e) {
+    	            log.error(e.getMessage(), e);
+    	        } finally {
+    	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+    	        }
             }
             
             
@@ -508,14 +528,19 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         // If members sent, remove each from cache
         if (grp.getMembers() != null && grp.getMembers().length > 0) {
             final Integer[] mems = grp.getMembers();
-
-            try {
-                JCS cache = JCS.getInstance("User");
-                for (Integer member_id : mems) {
-                    cache.remove(new CacheKey(ctx.getId(), member_id));
-                }
-            } catch (final CacheException e) {
-                log.error(e.getMessage(), e);
+            final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
+    				CacheService.class);
+    		if (null != cacheService) {
+    	        try {
+    	        	final Cache cache = cacheService.getCache("User");
+    	        	for (final Integer member_id : mems) {
+                        cache.remove(new CacheKey(ctx.getId().intValue(), member_id));
+                    }
+    	        } catch (final CacheException e) {
+    	            log.error(e.getMessage(), e);
+    	        } finally {
+    	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+    	        }
             }
         }
         // END OF JCS
@@ -524,14 +549,19 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         // If members sent, remove each from cache
         if (grp.getMembers() != null && grp.getMembers().length > 0) {
             final Integer[] mems = grp.getMembers();
-
-            try {
-                JCS cache = JCS.getInstance("User");
-                for (Integer member_id : mems) {
-                    cache.remove(new CacheKey(ctx.getId(), member_id));
-                }
-            } catch (final CacheException e) {
-                log.error(e.getMessage(), e);
+            final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
+    				CacheService.class);
+    		if (null != cacheService) {
+    	        try {
+    	        	final Cache cache = cacheService.getCache("User");
+    	        	for (final Integer member_id : mems) {
+                        cache.remove(new CacheKey(ctx.getId().intValue(), member_id));
+                    }
+    	        } catch (final CacheException e) {
+    	            log.error(e.getMessage(), e);
+    	        } finally {
+    	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+    	        }
             }
         }
         // END OF JCS
@@ -660,16 +690,21 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             oxGroup.delete(ctx, grp);
             
             //JCS
-            try {
-                JCS cache = JCS.getInstance("User");
-                // invalidate each user/member entry from cache for each removed group
-                for(User[] membaz : del_groups_members){                
-                    for (User user : membaz) {
-                        cache.remove(new CacheKey(ctx.getId(), user.getId()));
-                    }                
-                }
-            } catch (final CacheException e) {
-                log.error(e.getMessage(), e);
+            final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
+    				CacheService.class);
+    		if (null != cacheService) {
+    	        try {
+    	        	final Cache cache = cacheService.getCache("User");
+    	        	for(final User[] membaz : del_groups_members){                
+                        for (final User user : membaz) {
+                            cache.remove(new CacheKey(ctx.getId().intValue(), user.getId()));
+                        }                
+                    }
+    	        } catch (final CacheException e) {
+    	            log.error(e.getMessage(), e);
+    	        } finally {
+    	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+    	        }
             }
             // END OF JCS
             
@@ -1044,13 +1079,19 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         
         
         // JCS
-        try {
-            JCS cache = JCS.getInstance("User");
-            for (User user : user_objs) {
-                cache.remove(new CacheKey(ctx.getId(), user.getId()));
-            }
-        } catch (final CacheException e) {
-            log.error(e.getMessage(), e);
+        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
+				CacheService.class);
+		if (null != cacheService) {
+	        try {
+	        	final Cache cache = cacheService.getCache("User");
+	        	for (final User user : user_objs) {
+	                cache.remove(new CacheKey(ctx.getId().intValue(), user.getId()));
+	            }
+	        } catch (final CacheException e) {
+	            log.error(e.getMessage(), e);
+	        } finally {
+	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+	        }
         }
         // END OF JCS
         
@@ -1100,13 +1141,19 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         oxGroup.removeMember(ctx, grp_id, members);
         
         // JCS
-        try {
-            JCS cache = JCS.getInstance("User");
-            for (User user : members) {
-                cache.remove(new CacheKey(ctx.getId(), user.getId()));
-            }
-        } catch (final CacheException e) {
-            log.error(e.getMessage(), e);
+        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
+				CacheService.class);
+		if (null != cacheService) {
+	        try {
+	        	final Cache cache = cacheService.getCache("User");
+	        	for (final User user : members) {
+	                cache.remove(new CacheKey(ctx.getId().intValue(), user.getId()));
+	            }
+	        } catch (final CacheException e) {
+	            log.error(e.getMessage(), e);
+	        } finally {
+	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+	        }
         }
         // END OF JCS
         
@@ -1155,4 +1202,5 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             throw new InvalidDataException("Illegal chars: \"" + illegal + "\"");
         }
     }
+
 }
