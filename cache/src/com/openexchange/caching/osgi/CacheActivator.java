@@ -49,6 +49,9 @@
 
 package com.openexchange.caching.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 import org.osgi.framework.ServiceRegistration;
 
 import com.openexchange.caching.CacheService;
@@ -65,8 +68,7 @@ import com.openexchange.server.osgiservice.DeferredActivator;
  */
 public final class CacheActivator extends DeferredActivator {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(CacheActivator.class);
+	private final Dictionary<String, String> dictionary;
 
 	private ServiceRegistration serviceRegistration;
 
@@ -74,8 +76,9 @@ public final class CacheActivator extends DeferredActivator {
 	 * Initializes a new {@link CacheActivator}
 	 */
 	public CacheActivator() {
-		// TODO Auto-generated constructor stub
 		super();
+		dictionary = new Hashtable<String, String>();
+		dictionary.put("name", "oxcache");
 	}
 
 	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
@@ -110,8 +113,8 @@ public final class CacheActivator extends DeferredActivator {
 		/*
 		 * Register service
 		 */
-		serviceRegistration = context
-				.registerService(CacheService.class.getName(), JCSCacheService.getInstance(), null);
+		serviceRegistration = context.registerService(CacheService.class.getName(), JCSCacheService.getInstance(),
+				dictionary);
 	}
 
 	/*
