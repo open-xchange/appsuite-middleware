@@ -91,9 +91,9 @@ import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
 import com.openexchange.api2.OXException;
-import com.openexchange.cache.CacheKey;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -333,11 +333,15 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 				CacheService.class);
 		if (null != cacheService) {
 	        try {
+	        	final CacheKey key = new CacheKey(ctx.getId().intValue(), userid);
 	        	Cache cache = cacheService.getCache("User");
-	        	cache.remove(new CacheKey(ctx.getId().intValue(), userid));
+	        	cache.remove(key);
+	        	
+	        	cache = cacheService.getCache("UserConfiguration");
+	        	cache.remove(key);
 	        	
 	        	cache = cacheService.getCache("UserSettingMail");
-	        	cache.remove(new CacheKey(ctx.getId().intValue(), userid));
+	        	cache.remove(key);
 	        } catch (final CacheException e) {
 	            log.error(e.getMessage(), e);
 	        } finally {
@@ -819,10 +823,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 		if (null != cacheService) {
 			try {
 				final Cache usercCache = cacheService.getCache("User");
+				final Cache ucCache = cacheService.getCache("UserConfiguration");
 				final Cache usmCache = cacheService.getCache("UserSettingMail");
 				for (final User user : users) {
-					usercCache.remove(new CacheKey(ctx.getId().intValue(), user.getId()));
-					usmCache.remove(new CacheKey(ctx.getId().intValue(), user.getId()));
+					final CacheKey key = new CacheKey(ctx.getId().intValue(), user.getId());
+					usercCache.remove(key);
+					ucCache.remove(key);
+					usmCache.remove(key);
 					try {
 						UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId().intValue(),
 								new ContextImpl(ctx.getId().intValue()));

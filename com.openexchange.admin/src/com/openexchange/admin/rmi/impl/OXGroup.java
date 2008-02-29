@@ -81,7 +81,7 @@ import com.openexchange.admin.storage.interfaces.OXGroupStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.cache.CacheKey;
+import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
