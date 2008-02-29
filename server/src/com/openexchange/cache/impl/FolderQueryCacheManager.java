@@ -150,11 +150,7 @@ public final class FolderQueryCacheManager {
 				if (instance != null) {
 					instance = null;
 					try {
-						final CacheService cacheService = ServerServiceRegistry.getInstance().getService(
-								CacheService.class);
-						if (null != cacheService) {
-							cacheService.freeCache(REGION_NAME);
-						}
+						ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(REGION_NAME);
 					} catch (final CacheException e) {
 						throw new OXException(e);
 					}

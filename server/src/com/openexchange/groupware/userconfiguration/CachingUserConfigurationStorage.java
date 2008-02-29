@@ -106,10 +106,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 
 	@Override
 	protected void stopInternal() throws AbstractOXException {
-		final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-		if (null != cacheService) {
-			cacheService.freeCache(CACHE_REGION_NAME);
-		}
+		ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(CACHE_REGION_NAME);
 	}
 
 	private static final CacheKey getKey(final int userId, final Context ctx) {
