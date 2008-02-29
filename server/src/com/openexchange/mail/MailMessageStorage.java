@@ -395,7 +395,7 @@ public interface MailMessageStorage {
 
 	/**
 	 * Releases all resources used by this message storage when closing parental
-	 * {@link MailConnection}
+	 * {@link MailAccess}
 	 * 
 	 * @throws MailException
 	 *             If resources cannot be released

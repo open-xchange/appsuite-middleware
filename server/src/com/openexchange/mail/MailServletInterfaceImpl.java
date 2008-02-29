@@ -82,7 +82,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	/*
 	 * Fields
 	 */
-	private MailConnection<?, ?, ?> mailConnection;
+	private MailAccess<?, ?, ?> mailConnection;
 
 	private MailConfig mailConfig;
 
@@ -121,7 +121,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		/*
 		 * Fetch a mail connection (either from cache or a new instance)
 		 */
-		mailConnection = MailConnection.getInstance(session);
+		mailConnection = MailAccess.getInstance(session);
 		if (!mailConnection.isConnected()) {
 			/*
 			 * Get new mail configuration

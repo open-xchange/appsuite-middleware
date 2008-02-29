@@ -92,7 +92,7 @@ public final class IMAPLogicTools extends IMAPFolderWorker implements MailLogicT
 	 * @throws IMAPException
 	 *             If context loading fails
 	 */
-	public IMAPLogicTools(final IMAPStore imapStore, final IMAPConnection imapConnection, final Session session)
+	public IMAPLogicTools(final IMAPStore imapStore, final IMAPAccess imapConnection, final Session session)
 			throws IMAPException {
 		super(imapStore, imapConnection, session);
 	}

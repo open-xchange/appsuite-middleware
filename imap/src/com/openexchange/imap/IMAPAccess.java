@@ -61,7 +61,7 @@ import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.imap.user2acl.User2ACLException;
 import com.openexchange.imap.user2acl.User2ACLInit;
-import com.openexchange.mail.MailConnection;
+import com.openexchange.mail.MailAccess;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailConfig;
@@ -71,13 +71,13 @@ import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
 /**
- * {@link IMAPConnection} - Establishes an IMAP connection and provides access
+ * {@link IMAPAccess} - Establishes an IMAP connection and provides access
  * to storages
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAPMessageStorage, IMAPLogicTools>
+public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageStorage, IMAPLogicTools>
 		implements Serializable {
 
 	/**
@@ -86,7 +86,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	private static final long serialVersionUID = -7510487764376433468L;
 
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(IMAPConnection.class);
+			.getLog(IMAPAccess.class);
 
 	private static final String CHARENC_ISO8859 = "ISO-8859-1";
 
@@ -109,7 +109,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	/**
 	 * Default constructor
 	 */
-	public IMAPConnection(final Session session) {
+	public IMAPAccess(final Session session) {
 		super(session);
 		setMailProperties((Properties) System.getProperties().clone());
 	}

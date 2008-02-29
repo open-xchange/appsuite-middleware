@@ -140,7 +140,7 @@ public abstract class MailProvider {
 		getProtocolProperties().loadProperties();
 		MailPermission.setClass(getMailPermissionClass());
 		MIMEHeaderLoader.setClass(getHeaderLoader());
-		MailConnection.startupImpl(getMailConnectionClass());
+		MailAccess.startupImpl(getMailConnectionClass());
 	}
 
 	/**
@@ -150,7 +150,7 @@ public abstract class MailProvider {
 	 *             if shut-down fails
 	 */
 	protected void shutDown() throws MailException {
-		MailConnection.shutdownImpl(getMailConnectionClass());
+		MailAccess.shutdownImpl(getMailConnectionClass());
 		MIMEHeaderLoader.resetClass();
 		MailPermission.resetClass();
 		getProtocolProperties().resetProperties();
@@ -203,11 +203,11 @@ public abstract class MailProvider {
 	}
 
 	/**
-	 * Gets the class implementing {@link MailConnection}
+	 * Gets the class implementing {@link MailAccess}
 	 * 
-	 * @return The class implementing {@link MailConnection}
+	 * @return The class implementing {@link MailAccess}
 	 */
-	public abstract Class<? extends MailConnection<?, ?, ?>> getMailConnectionClass();
+	public abstract Class<? extends MailAccess<?, ?, ?>> getMailConnectionClass();
 
 	/**
 	 * Gets the protocol properties

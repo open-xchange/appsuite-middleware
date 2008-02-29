@@ -62,7 +62,7 @@ import javax.mail.MessagingException;
 import javax.mail.Store;
 import javax.mail.UIDFolder;
 
-import com.openexchange.mail.MailConnection;
+import com.openexchange.mail.MailAccess;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
 
@@ -162,7 +162,7 @@ public abstract class SpamHandler {
 	 * @throws MailException
 	 */
 	public abstract void handleHam(Folder spamFolder, long[] msgUIDs, boolean move,
-			MailConnection<?, ?, ?> mailConnection, Store store) throws MessagingException, MailException;
+			MailAccess<?, ?, ?> mailConnection, Store store) throws MessagingException, MailException;
 
 	/**
 	 * Handles messages that should be treated as spam messages
@@ -181,7 +181,7 @@ public abstract class SpamHandler {
 	 * @throws MailException
 	 */
 	public void handleSpam(final Folder folder, final long[] msgUIDs, final boolean move,
-			final MailConnection<?, ?, ?> mailConnection, final Store store) throws MessagingException, MailException {
+			final MailAccess<?, ?, ?> mailConnection, final Store store) throws MessagingException, MailException {
 		if (!(folder instanceof UIDFolder)) {
 			throw new IllegalArgumentException("Folder argument must implement " + UIDFolder.class.getCanonicalName());
 		}

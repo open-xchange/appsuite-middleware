@@ -105,7 +105,7 @@ public interface MailLogicTools {
 	public MailMessage getFowardMessage(long[] originalUIDs, String folder) throws MailException;
 
 	/**
-	 * Releases all resources when closing parental {@link MailConnection}
+	 * Releases all resources when closing parental {@link MailAccess}
 	 * 
 	 * @throws MailException
 	 */

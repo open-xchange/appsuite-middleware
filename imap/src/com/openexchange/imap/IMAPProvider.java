@@ -50,7 +50,7 @@
 package com.openexchange.imap;
 
 import com.openexchange.imap.config.IMAPProperties;
-import com.openexchange.mail.MailConnection;
+import com.openexchange.mail.MailAccess;
 import com.openexchange.mail.MailProvider;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.config.AbstractProtocolProperties;
@@ -93,8 +93,8 @@ public final class IMAPProvider extends MailProvider {
 	 * @see com.openexchange.mail.MailProvider#getMailConnectionClass()
 	 */
 	@Override
-	public Class<? extends MailConnection<?, ?, ?>> getMailConnectionClass() {
-		return IMAPConnection.class;
+	public Class<? extends MailAccess<?, ?, ?>> getMailConnectionClass() {
+		return IMAPAccess.class;
 	}
 
 	/*

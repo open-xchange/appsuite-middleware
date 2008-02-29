@@ -58,7 +58,7 @@ import javax.mail.MessagingException;
 import javax.mail.Store;
 import javax.mail.UIDFolder;
 
-import com.openexchange.mail.MailConnection;
+import com.openexchange.mail.MailAccess;
 import com.openexchange.mail.MailException;
 
 /**
@@ -79,7 +79,7 @@ public final class DefaultSpamHandler extends SpamHandler {
 
 	@Override
 	public void handleHam(final Folder spamFolder, final long[] msgUIDs, final boolean move,
-			final MailConnection<?, ?, ?> mailConnection, final Store store) throws MessagingException, MailException {
+			final MailAccess<?, ?, ?> mailConnection, final Store store) throws MessagingException, MailException {
 		final boolean closeFolder = !spamFolder.isOpen();
 		/*
 		 * Copy to confirmed ham

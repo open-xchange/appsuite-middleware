@@ -58,12 +58,12 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Store;
 
-import com.openexchange.imap.IMAPConnection;
+import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.command.CopyIMAPCommand;
 import com.openexchange.imap.command.ExtractSpamMsgIMAPCommand;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
-import com.openexchange.mail.MailConnection;
+import com.openexchange.mail.MailAccess;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.mime.ContainerMessage;
@@ -102,12 +102,12 @@ public final class IMAPSpamAssassinSpamHandler extends SpamHandler {
 
 	@Override
 	public void handleHam(final Folder spamFolder, final long[] msgUIDs, final boolean move,
-			final MailConnection<?, ?, ?> mailConnection, final Store store) throws MessagingException, MailException {
-		_handleHam((IMAPFolder) spamFolder, msgUIDs, move, (IMAPConnection) mailConnection, (IMAPStore) store);
+			final MailAccess<?, ?, ?> mailConnection, final Store store) throws MessagingException, MailException {
+		_handleHam((IMAPFolder) spamFolder, msgUIDs, move, (IMAPAccess) mailConnection, (IMAPStore) store);
 	}
 
 	private void _handleHam(final IMAPFolder spamFolder, final long[] msgUIDs, final boolean move,
-			final IMAPConnection imapConnection, final IMAPStore imapStore) throws MessagingException, MailException {
+			final IMAPAccess imapConnection, final IMAPStore imapStore) throws MessagingException, MailException {
 		/*
 		 * Mark as ham. In contrast to mark as spam this is a very time sucking
 		 * operation. In order to deal with the original messages that are

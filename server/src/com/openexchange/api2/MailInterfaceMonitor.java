@@ -58,7 +58,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.openexchange.mail.MailConnection;
+import com.openexchange.mail.MailAccess;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -103,7 +103,7 @@ public class MailInterfaceMonitor implements MailInterfaceMonitorMBean {
 	 * @see com.openexchange.api2.MailInterfaceMonitorMBean#getNumActive()
 	 */
 	public int getNumActive() {
-		return MailConnection.getCounter();
+		return MailAccess.getCounter();
 	}
 
 	public void changeNumActive(final boolean increment) {

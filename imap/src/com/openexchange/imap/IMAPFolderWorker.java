@@ -118,7 +118,7 @@ public abstract class IMAPFolderWorker implements Serializable {
 
 	protected final transient Context ctx;
 
-	protected final IMAPConnection imapConnection;
+	protected final IMAPAccess imapConnection;
 
 	protected final UserSettingMail usm;
 
@@ -144,7 +144,7 @@ public abstract class IMAPFolderWorker implements Serializable {
 	 * @throws IMAPException
 	 *             If context lading fails
 	 */
-	public IMAPFolderWorker(final IMAPStore imapStore, final IMAPConnection imapConnection, final Session session)
+	public IMAPFolderWorker(final IMAPStore imapStore, final IMAPAccess imapConnection, final Session session)
 			throws IMAPException {
 		super();
 		this.imapStore = imapStore;

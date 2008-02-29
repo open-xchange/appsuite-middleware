@@ -63,10 +63,8 @@ import com.openexchange.mail.config.MailConfig;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailConnection} - The main class of a mail implementation.
- * <p>
- * Handles connecting to the mailing system while using an internal cache for
- * established connections (see {@link MailConnectionCache}).
+ * {@link MailAccess} - Handles connecting to the mailing system while using an
+ * internal cache for established connections (see {@link MailConnectionCache}).
  * <p>
  * Moreover it provides access to either message storage, folder storage and
  * logic tools.
@@ -74,11 +72,16 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MailConnection<T extends MailFolderStorage, E extends MailMessageStorage, L extends MailLogicTools>
+public abstract class MailAccess<T extends MailFolderStorage, E extends MailMessageStorage, L extends MailLogicTools>
 		implements Serializable {
 
+	/**
+	 * Serial version UID
+	 */
+	private static final long serialVersionUID = -2580495494392812083L;
+
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailConnection.class);
+			.getLog(MailAccess.class);
 
 	private static final AtomicInteger COUNTER = new AtomicInteger();
 
@@ -97,7 +100,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	/**
 	 * Friendly instantiation
 	 */
-	protected MailConnection(final Session session) {
+	protected MailAccess(final Session session) {
 		super();
 		this.session = session;
 	}
@@ -119,7 +122,7 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 * @throws MailException
 	 *             If implementation-specific startup fails
 	 */
-	static void startupImpl(final Class<? extends MailConnection<?, ?, ?>> clazz) throws MailException {
+	static void startupImpl(final Class<? extends MailAccess<?, ?, ?>> clazz) throws MailException {
 		createNewMailConnection(clazz, null).startup();
 	}
 
@@ -131,26 +134,26 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 * @throws MailException
 	 *             If implementation-specific shutdown fails
 	 */
-	static void shutdownImpl(final Class<? extends MailConnection<?, ?, ?>> clazz) throws MailException {
+	static void shutdownImpl(final Class<? extends MailAccess<?, ?, ?>> clazz) throws MailException {
 		createNewMailConnection(clazz, null).shutdown();
 	}
 
 	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { Session.class };
 
 	/**
-	 * Gets the proper instance of {@link MailConnection} parameterized with
-	 * given session
+	 * Gets the proper instance of {@link MailAccess} parameterized with given
+	 * session
 	 * 
 	 * @param session
 	 *            The session
-	 * @return A proper instance of {@link MailConnection}
+	 * @return A proper instance of {@link MailAccess}
 	 * @throws MailException
 	 *             If instantiation fails or a caching error occurs
 	 */
-	public static final MailConnection<?, ?, ?> getInstance(final Session session) throws MailException {
+	public static final MailAccess<?, ?, ?> getInstance(final Session session) throws MailException {
 		try {
 			if (MailConnectionCache.getInstance().containsMailConnection(session)) {
-				final MailConnection<?, ?, ?> mailConnection = MailConnectionCache.getInstance().removeMailConnection(
+				final MailAccess<?, ?, ?> mailConnection = MailConnectionCache.getInstance().removeMailConnection(
 						session);
 				if (mailConnection != null) {
 					/*
@@ -186,8 +189,8 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 				 * Try to fetch from cache again
 				 */
 				if (MailConnectionCache.getInstance().containsMailConnection(session)) {
-					final MailConnection<?, ?, ?> mailConnection = MailConnectionCache.getInstance()
-							.removeMailConnection(session);
+					final MailAccess<?, ?, ?> mailConnection = MailConnectionCache.getInstance().removeMailConnection(
+							session);
 					if (mailConnection != null) {
 						/*
 						 * Apply new thread's trace information
@@ -227,8 +230,8 @@ public abstract class MailConnection<T extends MailFolderStorage, E extends Mail
 	 * @throws MailException
 	 *             If mail connection creation fails
 	 */
-	private static final MailConnection<?, ?, ?> createNewMailConnection(
-			final Class<? extends MailConnection<?, ?, ?>> clazz, final Session session) throws MailException {
+	private static final MailAccess<?, ?, ?> createNewMailConnection(final Class<? extends MailAccess<?, ?, ?>> clazz,
+			final Session session) throws MailException {
 		try {
 			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { session });
 		} catch (SecurityException e) {

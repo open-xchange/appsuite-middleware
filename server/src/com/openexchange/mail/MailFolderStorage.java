@@ -248,7 +248,7 @@ public interface MailFolderStorage {
 	public String getTrashFolder() throws MailException;
 
 	/**
-	 * Releases all used resources when closing parental {@link MailConnection}
+	 * Releases all used resources when closing parental {@link MailAccess}
 	 * 
 	 * @throws MailException
 	 */

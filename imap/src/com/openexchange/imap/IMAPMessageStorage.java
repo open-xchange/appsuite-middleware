@@ -155,7 +155,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 	 * @throws IMAPException
 	 *             If context loading fails
 	 */
-	public IMAPMessageStorage(final IMAPStore imapStore, final IMAPConnection imapConnection, final Session session)
+	public IMAPMessageStorage(final IMAPStore imapStore, final IMAPAccess imapConnection, final Session session)
 			throws IMAPException {
 		super(imapStore, imapConnection, session);
 		userId = session.getUserId();

@@ -77,7 +77,7 @@ import javax.mail.search.SearchException;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
-import com.openexchange.mail.MailConnection;
+import com.openexchange.mail.MailAccess;
 import com.openexchange.mail.MailException;
 import com.sun.mail.iap.ConnectionException;
 import com.sun.mail.smtp.SMTPSendFailedException;
@@ -309,7 +309,7 @@ public class MIMEMailException extends MailException {
 	 * appropiate instance of {@link MIMEMailException}
 	 * <p>
 	 * This is just a convenience method that simply invokes
-	 * {@link #handleMessagingException(MessagingException, MailConnection)}
+	 * {@link #handleMessagingException(MessagingException, MailAccess)}
 	 * with the latter parameter set to <code>null</code>.
 	 * 
 	 * @param e
@@ -347,7 +347,7 @@ public class MIMEMailException extends MailException {
 	 * @return An appropriate instance of {@link MIMEMailException}
 	 */
 	public static MIMEMailException handleMessagingException(final MessagingException e,
-			final MailConnection<?, ?, ?> mailConnection) {
+			final MailAccess<?, ?, ?> mailConnection) {
 		try {
 			if (e instanceof AuthenticationFailedException
 					|| (e.getMessage() != null && e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_AUTH_FAILED) != -1)) {

@@ -52,11 +52,11 @@ package com.openexchange.mail.cache.eventhandler;
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.ElementEvent;
 import com.openexchange.caching.ElementEventHandler;
-import com.openexchange.mail.MailConnection;
+import com.openexchange.mail.MailAccess;
 
 /**
  * {@link MailConnectionEventHandler} - The mail connection event handler which
- * preludes mail connection closure if an instance of {@link MailConnection} is
+ * preludes mail connection closure if an instance of {@link MailAccess} is
  * removed from mail connection cache.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -81,7 +81,7 @@ public final class MailConnectionEventHandler implements ElementEventHandler {
 	 */
 	public void onExceededIdletimeBackground(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailConnection<?, ?, ?>) cacheElem.getVal());
+		close((MailAccess<?, ?, ?>) cacheElem.getVal());
 	}
 
 	/*
@@ -91,7 +91,7 @@ public final class MailConnectionEventHandler implements ElementEventHandler {
 	 */
 	public void onExceededMaxlifeBackground(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailConnection<?, ?, ?>) cacheElem.getVal());
+		close((MailAccess<?, ?, ?>) cacheElem.getVal());
 	}
 
 	/*
@@ -101,7 +101,7 @@ public final class MailConnectionEventHandler implements ElementEventHandler {
 	 */
 	public void onSpooledDiskNotAvailable(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailConnection<?, ?, ?>) cacheElem.getVal());
+		close((MailAccess<?, ?, ?>) cacheElem.getVal());
 	}
 
 	/*
@@ -111,13 +111,13 @@ public final class MailConnectionEventHandler implements ElementEventHandler {
 	 */
 	public void onSpooledNotAllowed(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailConnection<?, ?, ?>) cacheElem.getVal());
+		close((MailAccess<?, ?, ?>) cacheElem.getVal());
 	}
 
 	/**
-	 * Closes given instance of {@link MailConnection}
+	 * Closes given instance of {@link MailAccess}
 	 */
-	private void close(final MailConnection<?, ?, ?> mailConnection) {
+	private void close(final MailAccess<?, ?, ?> mailConnection) {
 		mailConnection.close(false);
 	}
 
@@ -127,16 +127,16 @@ public final class MailConnectionEventHandler implements ElementEventHandler {
 
 	public void onExceededIdletimeOnRequest(ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailConnection<?, ?, ?>) cacheElem.getVal());
+		close((MailAccess<?, ?, ?>) cacheElem.getVal());
 	}
 
 	public void onExceededMaxlifeOnRequest(ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailConnection<?, ?, ?>) cacheElem.getVal());
+		close((MailAccess<?, ?, ?>) cacheElem.getVal());
 	}
 
 	public void onSpooledDiskAvailable(ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailConnection<?, ?, ?>) cacheElem.getVal());
+		close((MailAccess<?, ?, ?>) cacheElem.getVal());
 	}
 }

@@ -125,7 +125,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 
 	private final transient IMAPStore imapStore;
 
-	private final transient IMAPConnection imapConnection;
+	private final transient IMAPAccess imapConnection;
 
 	private final transient Session session;
 
@@ -145,7 +145,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 	 * @throws IMAPException
 	 *             If context loading fails
 	 */
-	public IMAPFolderStorage(final IMAPStore imapStore, final IMAPConnection imapConnection, final Session session)
+	public IMAPFolderStorage(final IMAPStore imapStore, final IMAPAccess imapConnection, final Session session)
 			throws IMAPException {
 		super();
 		this.imapStore = imapStore;
