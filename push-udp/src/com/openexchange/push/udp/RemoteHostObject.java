@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.push.udp;
 
 import java.net.InetAddress;
@@ -56,70 +54,88 @@ import java.util.Date;
 
 /**
  * PushObject
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class RemoteHostObject {
-	
-	private InetAddress host;
-	
-	private int port;
-	
-	private Date timer = new Date();
-	
-	public RemoteHostObject() {
-		setTimer(new Date());
-	}
 
-	public InetAddress getHost() {
-		return host;
-	}
+    private InetAddress host;
 
-	public void setHost(final InetAddress host) {
-		this.host = host;
-	}
+    private int port;
 
-	public int getPort() {
-		return port;
-	}
+    private Date timer = new Date();
 
-	public void setPort(final int port) {
-		this.port = port;
-	}
+    public RemoteHostObject() {
+        super();
+        this.timer = new Date();
+    }
 
-	public Date getTimer() {
-		return timer;
-	}
+    public InetAddress getHost() {
+        return host;
+    }
 
-	public void setTimer(final Date timer) {
-		this.timer = timer;
-	}
-	
-	@Override
-	public boolean equals(final Object o) {
-		if (o.hashCode() == hashCode()) {
-			return true;
-		}
-		return false;
-	}
+    public void setHost(final InetAddress host) {
+        this.host = host;
+    }
 
-	@Override
-	public int hashCode() {
-		if (getHost() == null) {
-			return ("HlocalhostP" + String.valueOf(getPort())).hashCode();
-		}
-		return ("H" + getHost().getHostAddress() + "P" + String.valueOf(getPort())).hashCode();
-	}
-	
-	@Override
-	public String toString() {
-		return new StringBuilder()
-		.append("HOST=")
-		.append(getHost())
-		.append(",PORT=")
-		.append(getPort())
-		.append(",TIMER=")
-		.append(getTimer()).toString();
-	}
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(final int port) {
+        this.port = port;
+    }
+
+    public Date getTimer() {
+        return timer;
+    }
+
+    public void setTimer(final Date timer) {
+        this.timer = timer;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        final RemoteHostObject other = (RemoteHostObject) obj;
+        if (host == null) {
+            if (other.host != null)
+                return false;
+        } else if (!host.getHostAddress().equals(other.host.getHostAddress()))
+            return false;
+        if (port != other.port)
+            return false;
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((host == null) ? 0 : host.hashCode());
+        result = prime * result + port;
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder()
+        .append("HOST=")
+        .append(getHost())
+        .append(",PORT=")
+        .append(getPort())
+        .append(",TIMER=")
+        .append(getTimer()).toString();
+    }
 }

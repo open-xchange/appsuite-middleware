@@ -123,6 +123,9 @@ public class PushOutputQueue implements Runnable {
 	}
 
 	public static void addRemoteHostObject(final RemoteHostObject remoteHostObject) {
+	    if (remoteHost.contains(remoteHostObject)) {
+	        remoteHost.remove(remoteHostObject);
+	    }
 		remoteHost.add(remoteHostObject);
 	}
 
