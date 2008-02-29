@@ -70,8 +70,8 @@ public interface ElementEventHandler {
 	 * cleanup
 	 * 
 	 * @param event -
-	 *            the element event containing event code and instance of
-	 *            <code>org.apache.jcs.engine.CacheElement</code> as source
+	 *            the element event containing event code and event's source
+	 *            object
 	 */
 	public void onExceededIdletimeBackground(final ElementEvent event);
 
@@ -79,8 +79,8 @@ public interface ElementEventHandler {
 	 * The element exceeded its max life. This was detected on request
 	 * 
 	 * @param event -
-	 *            the element event containing event code and instance of
-	 *            <code>org.apache.jcs.engine.CacheElement</code> as source
+	 *            the element event containing event code and event's source
+	 *            object
 	 */
 	public void onExceededIdletimeOnRequest(final ElementEvent event);
 
@@ -89,8 +89,8 @@ public interface ElementEventHandler {
 	 * cleanup
 	 * 
 	 * @param event -
-	 *            the element event containing event code and instance of
-	 *            <code>org.apache.jcs.engine.CacheElement</code> as source
+	 *            the element event containing event code and event's source
+	 *            object
 	 */
 	public void onExceededMaxlifeBackground(final ElementEvent event);
 
@@ -98,8 +98,8 @@ public interface ElementEventHandler {
 	 * The element exceeded its max idle time. This was detected on request
 	 * 
 	 * @param event -
-	 *            the element event containing event code and instance of
-	 *            <code>org.apache.jcs.engine.CacheElement</code> as source
+	 *            the element event containing event code and event's source
+	 *            object
 	 */
 	public void onExceededMaxlifeOnRequest(final ElementEvent event);
 
@@ -108,8 +108,8 @@ public interface ElementEventHandler {
 	 * available for the region, and the element is marked as spoolable
 	 * 
 	 * @param event -
-	 *            the element event containing event code and instance of
-	 *            <code>org.apache.jcs.engine.CacheElement</code> as source
+	 *            the element event containing event code and event's source
+	 *            object
 	 */
 	public void onSpooledDiskAvailable(final ElementEvent event);
 
@@ -118,8 +118,8 @@ public interface ElementEventHandler {
 	 * store available for the region
 	 * 
 	 * @param event -
-	 *            the element event containing event code and instance of
-	 *            <code>org.apache.jcs.engine.CacheElement</code> as source
+	 *            the element event containing event code and event's source
+	 *            object
 	 */
 	public void onSpooledDiskNotAvailable(ElementEvent event);
 
@@ -128,8 +128,8 @@ public interface ElementEventHandler {
 	 * available for the region, but the element is marked as not spoolable
 	 * 
 	 * @param event -
-	 *            the element event containing event code and instance of
-	 *            <code>org.apache.jcs.engine.CacheElement</code> as source
+	 *            the element event containing event code and event's source
+	 *            object
 	 */
 	public void onSpooledNotAllowed(ElementEvent event);
 }

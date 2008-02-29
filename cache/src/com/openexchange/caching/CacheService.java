@@ -84,10 +84,10 @@ public interface CacheService {
 	 * file.
 	 * <p>
 	 * The cache manager reads a default configuration - defined through
-	 * property "CACHECCF" in 'system.properties' file - on initialization
-	 * automatically. Therefore this method is useful to extend or overwrite the
-	 * loaded default configuration and needs <b>not</b> to be invoked to
-	 * initialize the cache manager at all.
+	 * property "com.openexchange.caching.configfile" in 'system.properties'
+	 * file - on initialization automatically. Therefore this method is useful
+	 * to extend or overwrite the loaded default configuration and needs <b>not</b>
+	 * to be invoked to initialize the cache manager at all.
 	 * 
 	 * 
 	 * @param cacheConfigFile
