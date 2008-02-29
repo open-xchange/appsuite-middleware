@@ -71,7 +71,7 @@ public final class JCSCacheServiceInit {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(JCSCacheServiceInit.class);
 
-	private static final String PROP_CACHE_CONF_FILE = "CACHECCF";
+	private static final String PROP_CACHE_CONF_FILE = "com.openexchange.caching.configfile";
 
 	private static final JCSCacheServiceInit SINGLETON = new JCSCacheServiceInit();
 
