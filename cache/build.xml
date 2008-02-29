@@ -16,7 +16,7 @@
 
 	<property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
-    <property name="composite.name" value="open-xchange-caching-${version}"/>
+    <property name="composite.name" value="open-xchange-cache-${version}"/>
 	
 	<property name="cachedir" value="${destdir}/${bundlesdir}/${Bundle-SymbolicName}"/>
 	<property name="cachelibdir" value="${cachedir}/lib"/>
