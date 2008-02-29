@@ -359,7 +359,11 @@ public final class AJPv13Listener implements Runnable {
 					}
 				} catch (final InterruptedException e) {
 					if (listenerStarted) {
-						LOG.warn("An AJP listener was interrupted. Maybe caused by a bundle stop", e);
+						if (listenerThread.isDead()) {
+							LOG.debug("An AJP listener was interrupted due to bundle stop");
+						} else {
+							LOG.error("An AJP listener was interrupted. Maybe caused by a bundle stop", e);
+						}
 					}
 					keepOnRunning = false;
 				} finally {
