@@ -49,10 +49,13 @@
 
 package com.openexchange.caching.internal;
 
+import java.io.Serializable;
+
 import org.apache.jcs.JCS;
 
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 
 /**
@@ -110,6 +113,25 @@ public final class JCSCacheService implements CacheService {
 	 */
 	public void loadConfiguration(final String cacheConfigFile) throws CacheException {
 		JCSCacheServiceInit.getInstance().loadConfiguration(cacheConfigFile);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.caching.CacheService#newCacheKey(int, int)
+	 */
+	public CacheKey newCacheKey(int contextId, int objectId) {
+		return new CacheKeyImpl(contextId, objectId);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.caching.CacheService#newCacheKey(int,
+	 *      java.io.Serializable)
+	 */
+	public CacheKey newCacheKey(int contextId, Serializable obj) {
+		return new CacheKeyImpl(contextId, obj);
 	}
 
 }

@@ -175,6 +175,10 @@ public class FolderCacheManager {
 		return l;
 	}
 
+	private static final CacheKey getCacheKey(final int cid, final int objectId) {
+		return ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(cid, objectId);
+	}
+
 	/**
 	 * <p>
 	 * Fetches <code>FolderObject</code> which matches given object id. If
@@ -197,7 +201,7 @@ public class FolderCacheManager {
 		try {
 			FolderObject folderObj = null;
 			if (fromCache) {
-				folderObj = (FolderObject) folderCache.get(new CacheKey(ctx.getContextId(), objectId));
+				folderObj = (FolderObject) folderCache.get(getCacheKey(ctx.getContextId(), objectId));
 			}
 			/*
 			 * Either fromCache was false or folder object was not found.
@@ -249,7 +253,7 @@ public class FolderCacheManager {
 		final Lock ctxReadLock = getContextLock(ctx).readLock();
 		ctxReadLock.lock();
 		try {
-			final FolderObject retval = (FolderObject) folderCache.get(new CacheKey(ctx.getContextId(), objectId));
+			final FolderObject retval = (FolderObject) folderCache.get(getCacheKey(ctx.getContextId(), objectId));
 			return retval == null ? null : (FolderObject) retval.clone();
 		} finally {
 			ctxReadLock.unlock();
@@ -312,7 +316,7 @@ public class FolderCacheManager {
 		final FolderObject folderObj;
 		try {
 			folderObj = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-			final CacheKey key = new CacheKey(ctx.getContextId(), folderId);
+			final CacheKey key = getCacheKey(ctx.getContextId(), folderId);
 			/*
 			 * Do not propagate an initial PUT
 			 */
@@ -391,7 +395,7 @@ public class FolderCacheManager {
 				throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.ID, Integer.valueOf(-1),
 						Integer.valueOf(ctx.getContextId()));
 			}
-			final CacheKey ck = new CacheKey(ctx.getContextId(), folderObj.getObjectID());
+			final CacheKey ck = getCacheKey(ctx.getContextId(), folderObj.getObjectID());
 			if (!overwrite) {
 				if (folderCache.get(ck) != null) {
 					return;
@@ -468,7 +472,7 @@ public class FolderCacheManager {
 			final Lock ctxWriteLock = getContextLock(ctx).writeLock();
 			ctxWriteLock.lock();
 			try {
-				folderCache.remove(new CacheKey(ctx.getContextId(), key));
+				folderCache.remove(getCacheKey(ctx.getContextId(), key));
 			} catch (final CacheException e) {
 				throw new OXException(e);
 			} finally {

@@ -124,9 +124,10 @@ public final class AssignmentStorage {
         if (null == cache) {
             retval = loadAssignment(contextId);
         } else {
-            final CacheKey key = new CacheKey(contextId, Integer.valueOf(Server.getServerId()));
-            cacheLock.lock();
-            try {
+            final CacheKey key = ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
+					contextId, Integer.valueOf(Server.getServerId()));
+			cacheLock.lock();
+			try {
                 retval = (Assignment) cache.get(key);
                 if (null == retval) {
                     retval = loadAssignment(contextId);
@@ -209,10 +210,11 @@ public final class AssignmentStorage {
     public void removeAssignments(final int contextId) throws DBPoolingException {
         if (null != cache) {
             try {
-                cache.remove(new CacheKey(contextId, Integer.valueOf(Server.getServerId())));
-            } catch (CacheException e) {
-                LOG.error(e.getMessage(), e);
-            }
+				cache.remove(ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(contextId,
+						Integer.valueOf(Server.getServerId())));
+			} catch (CacheException e) {
+				LOG.error(e.getMessage(), e);
+			}
         }
     }
 

@@ -294,7 +294,8 @@ public final class FolderQueryCacheManager {
 	private final static QueryCacheKey.Module MODULE = QueryCacheKey.Module.FOLDER;
 
 	private static CacheKey createQueryKey(final int queryNum) {
-		return new CacheKey(MODULE.getNum(), Integer.valueOf(queryNum));
+		return ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(MODULE.getNum(),
+				Integer.valueOf(queryNum));
 	}
 
 	private static Integer createUserKey(final int userId) {
