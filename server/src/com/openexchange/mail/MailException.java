@@ -79,9 +79,9 @@ public class MailException extends AbstractOXException {
 		 */
 		JSON_ERROR("A JSON error occurred: %s", Category.CODE_ERROR, 3),
 		/**
-		 * Missing parameter in mail connection: %s
+		 * Missing parameter in user's mail config: %s
 		 */
-		MISSING_CONNECT_PARAM("Missing parameter in mail connection: %s", Category.CODE_ERROR, 4),
+		MISSING_CONNECT_PARAM("Missing parameter in user's mail config: %s", Category.CODE_ERROR, 4),
 		/**
 		 * Property error: %s
 		 */
