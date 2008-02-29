@@ -9,6 +9,7 @@ import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.InsertResponse;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
@@ -61,5 +62,19 @@ public class MultipleTest extends AppointmentTest {
 		assertFalse("first delete request has errors: ", multipleDeleteResponse.getResponse(0).hasError()); 
 		assertFalse("second delete request has errors: ", multipleDeleteResponse.getResponse(1).hasError()); 
 		assertFalse("third delete request has errors: ", multipleDeleteResponse.getResponse(2).hasError()); 
+	}
+
+	/**
+	 * Inserts a lot of appointments with 1 multiple request.
+	 */
+	public void _testTonnenInsert() throws Exception {
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getSessionId()));
+        final InsertRequest[] inserts = new InsertRequest[1000];
+        for (int i = 0; i < inserts.length; i++) {
+            AppointmentObject appointmentObj = createAppointmentObject("testMultipleInsert");
+            appointmentObj.setIgnoreConflicts(true);
+            inserts[i] = new InsertRequest(appointmentObj, client.getValues().getTimeZone(), true);
+        }
+        Executor.multiple(client, new MultipleRequest(inserts));
 	}
 }
