@@ -81,13 +81,10 @@ public abstract class DeferredActivator implements BundleActivator {
 
 		private final Class<?> clazz;
 
-		private final BundleContext context;
-
 		private final int index;
 
-		public DeferredServiceTrackerCustomizer(final Class<?> clazz, final int index, final BundleContext context) {
+		public DeferredServiceTrackerCustomizer(final Class<?> clazz, final int index) {
 			super();
-			this.context = context;
 			this.clazz = clazz;
 			this.index = index;
 		}
@@ -187,7 +184,7 @@ public abstract class DeferredActivator implements BundleActivator {
 		 */
 		for (int i = 0; i < classes.length; i++) {
 			final ServiceTracker tracker = new ServiceTracker(context, classes[i].getName(),
-					new DeferredServiceTrackerCustomizer(classes[i], i, context));
+					new DeferredServiceTrackerCustomizer(classes[i], i));
 			serviceTrackers[i] = tracker;
 			tracker.open();
 		}
