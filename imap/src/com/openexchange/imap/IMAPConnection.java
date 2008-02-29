@@ -282,6 +282,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	 */
 	@Override
 	public IMAPFolderStorage getFolderStorage() throws MailException {
+		connected = (imapStore != null && imapStore.isConnected());
 		if (connected) {
 			if (null == folderStorage) {
 				folderStorage = new IMAPFolderStorage(imapStore, this, session);
@@ -298,6 +299,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	 */
 	@Override
 	public IMAPMessageStorage getMessageStorage() throws MailException {
+		connected = (imapStore != null && imapStore.isConnected());
 		if (connected) {
 			if (null == messageStorage) {
 				messageStorage = new IMAPMessageStorage(imapStore, this, session);
@@ -314,6 +316,7 @@ public final class IMAPConnection extends MailConnection<IMAPFolderStorage, IMAP
 	 */
 	@Override
 	public IMAPLogicTools getLogicTools() throws MailException {
+		connected = (imapStore != null && imapStore.isConnected());
 		if (connected) {
 			if (null == logicTools) {
 				logicTools = new IMAPLogicTools(imapStore, this, session);

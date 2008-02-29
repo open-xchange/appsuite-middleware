@@ -1,5 +1,10 @@
 * 2008-02-28 - thorben.betten@open-xchange.com
 
+ - Bugfix #10980: Performing a deeper connectivity check when mail/folder
+   storage
+
+* 2008-02-28 - thorben.betten@open-xchange.com
+
  - Bugfix #10979: Appropriate warn message on interrupted AJP listener on
    bundle stop
 
