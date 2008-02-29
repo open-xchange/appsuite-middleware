@@ -183,10 +183,9 @@ public abstract class DeferredActivator implements BundleActivator {
 		 * Initialize service trackers for needed services
 		 */
 		for (int i = 0; i < classes.length; i++) {
-			final ServiceTracker tracker = new ServiceTracker(context, classes[i].getName(),
+			serviceTrackers[i] = new ServiceTracker(context, classes[i].getName(),
 					new DeferredServiceTrackerCustomizer(classes[i], i));
-			serviceTrackers[i] = tracker;
-			tracker.open();
+			serviceTrackers[i].open();
 		}
 	}
 
