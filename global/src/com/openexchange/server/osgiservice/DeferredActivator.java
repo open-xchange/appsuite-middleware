@@ -201,6 +201,7 @@ public abstract class DeferredActivator implements BundleActivator {
 		allAvailable = -1;
 		services.clear();
 		services = null;
+		context = null;
 	}
 
 	/**
@@ -279,7 +280,6 @@ public abstract class DeferredActivator implements BundleActivator {
 	public final void stop(final BundleContext context) throws Exception {
 		try {
 			stopBundle();
-			this.context = null;
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
