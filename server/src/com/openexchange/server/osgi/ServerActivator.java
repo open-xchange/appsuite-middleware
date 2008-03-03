@@ -215,28 +215,26 @@ public final class ServerActivator extends DeferredActivator {
 	@Override
 	protected void stopBundle() throws Exception {
 		LOG.info("stopping bundle: com.openexchange.server");
-		try {
-			starter.stop();
-			/*
-			 * Clear service registry
-			 */
-			ServerServiceRegistry.getInstance().clearRegistry();
-		} finally {
-			/*
-			 * Unregister server's services
-			 */
-			for (final ServiceRegistration registration : registrationList) {
-				registration.unregister();
-			}
-			registrationList.clear();
-			/*
-			 * Close service trackers
-			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
-				tracker.close();
-			}
-			serviceTrackerList.clear();
-		}
+        /*
+         * Unregister server's services
+         */
+        for (final ServiceRegistration registration : registrationList) {
+            registration.unregister();
+        }
+        registrationList.clear();
+        /*
+         * Close service trackers
+         */
+        for (ServiceTracker tracker : serviceTrackerList) {
+            tracker.close();
+        }
+        serviceTrackerList.clear();
+        // Stop all inside the server.
+		starter.stop();
+		/*
+		 * Clear service registry
+		 */
+		ServerServiceRegistry.getInstance().clearRegistry();
 	}
 
 	/**
