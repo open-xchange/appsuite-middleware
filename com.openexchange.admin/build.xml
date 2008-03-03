@@ -36,6 +36,7 @@
 	<property name="commonsloggingbundle" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
     <property name="globalbundle"         value="com.openexchange.global.jar"/>
 	<property name="configbundle"         value="com.openexchange.config.jar"/>
+	<property name="cachebundle"          value="com.openexchange.caching.jar"/>
 	<property name="serverbundle"         value="com.openexchange.server.jar"/>
 	<property name="monitoringbundle"     value="com.openexchange.monitoring.jar"/>
 	<property name="managementbundle"     value="com.openexchange.management.jar"/>
@@ -70,6 +71,7 @@
         <pathelement location="${bundlesdir}/${osgibundle}"/>
 		<pathelement location="${bundlesdir}/${commonsloggingbundle}" />
         <pathelement location="${bundlesdir}/${globalbundle}"/>
+		<pathelement location="${bundlesdir}/${cachebundle}"/>
 		<pathelement location="${bundlesdir}/${configbundle}"/>
 		<pathelement location="${bundlesdir}/${serverbundle}"/>
     </path>
