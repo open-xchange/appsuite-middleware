@@ -55,7 +55,6 @@ import java.sql.SQLException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
-import com.openexchange.tools.oxfolder.TransactionConnection;
 import com.openexchange.tools.oxfolder.deletelistener.sql.DetectCorruptPermissions;
 import com.openexchange.tools.oxfolder.deletelistener.sql.GroupPermissionMerger;
 import com.openexchange.tools.oxfolder.deletelistener.sql.UserPermissionMerger;
@@ -123,20 +122,31 @@ public final class OXFolderDeleteListenerHelper {
 				LOG.info(new StringBuilder(64).append(corruptPermissions.length).append(
 						" corrupt user permissions detected").toString());
 			}
-			final TransactionConnection transCon = new TransactionConnection(writeCon);
+			final boolean performTransaction = writeCon.getAutoCommit();
+			if (performTransaction) {
+				writeCon.setAutoCommit(false);
+			}
 			try {
-				UserPermissionMerger.handleCorruptUserPermissions(corruptPermissions, transCon);
-				transCon.commit();
+				UserPermissionMerger.handleCorruptUserPermissions(corruptPermissions, writeCon);
+				if (performTransaction) {
+					writeCon.commit();
+				}
 			} catch (final SQLException e) {
 				LOG.error(e.getMessage(), e);
-				transCon.rollback();
+				if (performTransaction) {
+					writeCon.rollback();
+				}
 				throw e;
 			} catch (final Throwable t) {
 				LOG.error(t.getMessage(), t);
-				transCon.rollback();
+				if (performTransaction) {
+					writeCon.rollback();
+				}
 				throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
 			} finally {
-				transCon.setAutoCommit(true);
+				if (performTransaction) {
+					writeCon.setAutoCommit(true);
+				}
 			}
 		} else {
 			if (LOG.isInfoEnabled()) {
@@ -164,20 +174,31 @@ public final class OXFolderDeleteListenerHelper {
 				LOG.info(new StringBuilder(64).append(corruptPermissions.length).append(
 						" corrupt group permissions detected on host ").toString());
 			}
-			final TransactionConnection transCon = new TransactionConnection(writeCon);
+			final boolean performTransaction = writeCon.getAutoCommit();
+			if (performTransaction) {
+				writeCon.setAutoCommit(false);
+			}
 			try {
-				GroupPermissionMerger.handleCorruptGroupPermissions(corruptPermissions, transCon);
-				transCon.commit();
+				GroupPermissionMerger.handleCorruptGroupPermissions(corruptPermissions, writeCon);
+				if (performTransaction) {
+					writeCon.commit();
+				}
 			} catch (final SQLException e) {
 				LOG.error(e.getMessage(), e);
-				transCon.rollback();
+				if (performTransaction) {
+					writeCon.rollback();
+				}
 				throw e;
 			} catch (final Throwable t) {
 				LOG.error(t.getMessage(), t);
-				transCon.rollback();
+				if (performTransaction) {
+					writeCon.rollback();
+				}
 				throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
 			} finally {
-				transCon.setAutoCommit(true);
+				if (performTransaction) {
+					writeCon.setAutoCommit(true);
+				}
 			}
 		} else {
 			if (LOG.isInfoEnabled()) {
