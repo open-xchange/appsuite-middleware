@@ -53,6 +53,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.TimeUnit;
@@ -241,7 +242,9 @@ public class PushOutputQueue implements Runnable {
 
 		if (pushConfigInterface.isEventDistributionEnabled() && !pushObject.isSync()) {
 			// if (!pushObject.isSync()) {
-			for (RemoteHostObject remoteHostObject : remoteHost) {
+		    final Iterator<RemoteHostObject> iter = remoteHost.iterator();
+			while (iter.hasNext()) {
+			    final RemoteHostObject remoteHostObject = iter.next();
 				try {
 					final StringBuilder sb = new StringBuilder();
 					sb.append(PushRequest.MAGIC);
@@ -270,6 +273,7 @@ public class PushOutputQueue implements Runnable {
 						if (LOG.isTraceEnabled()) {
 							LOG.trace("remote host object is timed out");
 						}
+						iter.remove();
 					}
 				} catch (Exception exc) {
 					LOG.error("createPushPackage", exc);
@@ -292,7 +296,9 @@ public class PushOutputQueue implements Runnable {
 		}
 
 		if (pushConfigInterface.isRegisterDistributionEnabled()) {
-			for (RemoteHostObject remoteHostObject : remoteHost) {
+		    final Iterator<RemoteHostObject> iter = remoteHost.iterator();
+			while (iter.hasNext()) {
+			    final RemoteHostObject remoteHostObject = iter.next();
 				try {
 					final StringBuilder sb = new StringBuilder();
 					sb.append(PushRequest.MAGIC);
@@ -323,6 +329,7 @@ public class PushOutputQueue implements Runnable {
 						if (LOG.isTraceEnabled()) {
 							LOG.trace("remote host object is timed out");
 						}
+						iter.remove();
 					}
 				} catch (Exception exc) {
 					LOG.error("createRegisterPackage", exc);
