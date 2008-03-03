@@ -64,7 +64,11 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.configjump.ConfigJumpException;
 import com.openexchange.configjump.ConfigJumpService;
+import com.openexchange.configjump.ICookie;
 import com.openexchange.configjump.Replacements;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -101,9 +105,11 @@ public class ConfigJump extends SessionServlet {
         final HttpServletResponse resp) throws ServletException, IOException {
         final Session sessionObj = getSessionObject(req);
         final Response response = new Response();
-        final ConfigJumpService configJump = ServerServiceRegistry.getInstance().getService(ConfigJumpService.class);
+        final ConfigJumpService configJump = ServerServiceRegistry.getInstance()
+            .getService(ConfigJumpService.class);
         try {
-            //protocol, host, port, userId, password
+            final Context ctx = ContextStorage.getInstance().getContext(
+                sessionObj.getContextId());
             final String protocol;
             if (req.isSecure()) {
                 protocol = "https";
@@ -129,12 +135,24 @@ public class ConfigJump extends SessionServlet {
                 public int getServerPort() {
                     return req.getServerPort();
                 }
-                public Cookie[] getCookies() {
-                    return req.getCookies();
+                public ICookie[] getCookies() {
+                    final Cookie[] cookies = req.getCookies();
+                    final ICookie[] retval = new ICookie[cookies.length];
+                    for (int i = 0; i < cookies.length; i++) {
+                        retval[i] = new CookieImpl(cookies[i].getName(),
+                            cookies[i].getValue());
+                    }
+                    return retval;
+                }
+                public String[] getContextInfos() {
+                    return ctx.getLoginInfo();
                 }
             });
             response.setData(url);
         } catch (ConfigJumpException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (ContextException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         }
@@ -147,4 +165,19 @@ public class ConfigJump extends SessionServlet {
         }
     }
 
+    private class CookieImpl implements ICookie {
+        private final String name;
+        private final String value;
+        public CookieImpl(final String name, final String value) {
+            super();
+            this.name = name;
+            this.value = value;
+        }
+        public String getName() {
+            return name;
+        }
+        public String getValue() {
+            return value;
+        }
+    }
 }

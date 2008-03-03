@@ -53,30 +53,10 @@ package com.openexchange.configjump;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface Replacements {
+public interface ICookie {
 
-    /**
-     * @return the unique context identifier.
-     */
-    int getContextId();
+    String getName();
 
-    /**
-     * @return the user name entered on the login screen.
-     */
-    String getUsername();
+    String getValue();
 
-    /**
-     * @return the password entered on the login screen.
-     */
-    String getPassword();
-
-    String getProtocol();
-
-    String getServerName();
-
-    int getServerPort();
-
-    ICookie[] getCookies();
-
-    String[] getContextInfos();
 }

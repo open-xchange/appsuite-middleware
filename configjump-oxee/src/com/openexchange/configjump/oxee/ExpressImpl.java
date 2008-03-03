@@ -61,6 +61,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 
 import com.openexchange.configjump.ConfigJumpException;
 import com.openexchange.configjump.ConfigJumpService;
+import com.openexchange.configjump.ICookie;
 import com.openexchange.configjump.Replacements;
 
 /**
@@ -93,7 +94,7 @@ public class ExpressImpl implements ConfigJumpService {
         final String protocol = values.getProtocol();
         final String host = values.getServerName();
         final int port = values.getServerPort();
-        final javax.servlet.http.Cookie[] cookies = values.getCookies();
+        final ICookie[] cookies = values.getCookies();
         final URL urlInst;
         final URL newUrlInst;
         try {
@@ -105,7 +106,7 @@ public class ExpressImpl implements ConfigJumpService {
         }
         final HttpClient httpClient = new HttpClient();
         final HttpState state = httpClient.getState();
-        for (javax.servlet.http.Cookie cookie : cookies) {
+        for (ICookie cookie : cookies) {
             state.addCookie(new Cookie(urlInst.getHost(), cookie.getName(),
                 cookie.getValue(), urlInst.getPath(), -1, false));
         }
