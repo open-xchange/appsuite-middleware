@@ -96,7 +96,7 @@ public final class DBUtils {
 		if (result != null) {
 			try {
 				result.close();
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}
@@ -115,7 +115,7 @@ public final class DBUtils {
 		if (null != stmt) {
 			try {
 				stmt.close();
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}
@@ -162,7 +162,7 @@ public final class DBUtils {
 		if (rs != null) {
 			try {
 				rs.close();
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				if (LOG.isErrorEnabled()) {
 					LOG.error(e.getMessage(), e);
 				}
@@ -174,7 +174,7 @@ public final class DBUtils {
 		if (stmt != null) {
 			try {
 				stmt.close();
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				if (LOG.isErrorEnabled()) {
 					LOG.error(e.getMessage(), e);
 				}
@@ -202,7 +202,7 @@ public final class DBUtils {
 		}
 		try {
 			return stmt.toString();
-		} catch (Exception x) {
+		} catch (final Exception x) {
 			return query;
 		}
 	}
@@ -216,7 +216,7 @@ public final class DBUtils {
 	public static void rollback(final Connection con) {
 		try {
 			con.rollback();
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}
