@@ -2,10 +2,10 @@ Source: open-xchange-global
 Section: unknown
 Priority: optional
 Maintainer: choeger <choeger@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= 6.5.0), open-xchange-cache (>= 6.5.0)
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common (>= 6.5.0)
 Standards-Version: 3.6.1
 
 Package: open-xchange-global
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-common (>= 6.5.0), j2re1.5|sun-java5-jre, open-xchange-cache (>= 6.5.0)
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common (>= 6.5.0)
 Description: global bundle
