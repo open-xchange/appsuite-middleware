@@ -52,6 +52,7 @@ package com.openexchange.management.osgi;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -77,6 +78,8 @@ public final class ManagementActivator implements BundleActivator {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ManagementActivator.class);
 
+	private static final String BUNDLE_ID_ADMIN = "open_xchange_admin";
+
 	private BundleContext context;
 
 	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
@@ -94,6 +97,15 @@ public final class ManagementActivator implements BundleActivator {
 		super();
 	}
 
+	private static boolean isAdminBundleInstalled(final BundleContext context) {
+        for (final Bundle bundle : context.getBundles()) {
+            if (BUNDLE_ID_ADMIN.equals(bundle.getSymbolicName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -101,7 +113,9 @@ public final class ManagementActivator implements BundleActivator {
 	 */
 	public void start(final BundleContext context) throws Exception {
 		LOG.info("starting bundle: com.openexchange.management");
-
+		if (isAdminBundleInstalled(context)) {
+		    return;
+		}
 		this.context = context;
 		try {
 			csh = ConfigurationServiceHolder.newInstance();
@@ -153,6 +167,9 @@ public final class ManagementActivator implements BundleActivator {
 	}
 
 	private void stopInternal() throws AbstractOXException {
+	    if (isAdminBundleInstalled(context)) {
+	        return;
+	    }
 		if (null != serviceRegistration) {
 			serviceRegistration.unregister();
 			serviceRegistration = null;
