@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.Map;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
@@ -155,7 +156,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		
 		HttpClient httpclient = new HttpClient();
 		
-		httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
+		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
 		PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
 		propFindMethod.setDoAuthentication( true );
 		
@@ -203,7 +204,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		
 		HttpClient httpclient = new HttpClient();
 		
-		httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
+		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
 		PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
 		propFindMethod.setDoAuthentication( true );
 		
@@ -247,7 +248,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		
 		HttpClient httpclient = new HttpClient();
 		
-		httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
+		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
 		PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
 		propFindMethod.setDoAuthentication( true );
 		
@@ -291,7 +292,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		
 		HttpClient httpclient = new HttpClient();
 		
-		httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
+		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
 		PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
 		propFindMethod.setDoAuthentication( true );
 		

@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HashSet;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
@@ -417,7 +418,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		
 		HttpClient httpclient = new HttpClient();
 		
-		httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
+		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
 		PropFindMethod propFindMethod = new PropFindMethod(host + APPOINTMENT_URL);
 		propFindMethod.setDoAuthentication( true );
 		
@@ -485,7 +486,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		
 		HttpClient httpclient = new HttpClient();
 		
-		httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
+		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
 		PropFindMethod propFindMethod = new PropFindMethod(host + APPOINTMENT_URL);
 		propFindMethod.setDoAuthentication( true );
 		
@@ -553,7 +554,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		
 		HttpClient httpclient = new HttpClient();
 		
-		httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
+		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
 		PropFindMethod propFindMethod = new PropFindMethod(host + APPOINTMENT_URL);
 		propFindMethod.setDoAuthentication( true );
 		

@@ -15,6 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.jdom.Document;
 import org.jdom.input.SAXBuilder;
@@ -84,7 +85,7 @@ public class AttachmentTest extends AbstractWebdavXMLTest {
 		host = appendPrefix(host);
 		HttpClient httpclient = new HttpClient();
 		
-		httpclient.getState().setCredentials(null, new UsernamePasswordCredentials(login, password));
+		httpclient.getState().setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(login, password));
 		DeleteMethod deleteMethod = new DeleteMethod(host + ATTACHMENT_URL);
 		deleteMethod.setDoAuthentication( true );
 		deleteMethod.setRequestHeader(attachments.MODULE, String.valueOf(attachmentObj.getModuleId()));
