@@ -96,8 +96,8 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 		} finally {
 			iter.close();
 		}
-		
-		TestWebdavFactoryBuilder.setUp();
+
+        TestWebdavFactoryBuilder.setUp();
 		factory = TestWebdavFactoryBuilder.buildFactory();
 		factory.beginRequest();
 		
@@ -147,7 +147,7 @@ public class FolderCollectionPermissionHandlingTest extends TestCase {
 	public void testAddAdminOnCreate() throws Exception {
 		FolderObject folderWithUserBMayReadAllAndAdminAndUserAMayReadAll = new FolderObject();
 		addDefaults(folderWithUserBMayReadAllAndAdminAndUserAMayReadAll);
-		folderWithUserBMayReadAllAndAdminAndUserAMayReadAll.setFolderName("User B May Read All and is Admin and User A may read all");
+		folderWithUserBMayReadAllAndAdminAndUserAMayReadAll.setFolderName("User B May Read All and is Admin and User A may read all "+System.currentTimeMillis());
 		OCLPermission perm1 = buildReadAll(userIdA, false);
 		perm1.setFolderPermission(OCLPermission.CREATE_SUB_FOLDERS);
 		OCLPermission perm2 = buildReadAll(userIdB, true);

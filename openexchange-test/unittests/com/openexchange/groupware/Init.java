@@ -15,13 +15,19 @@ import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.i18n.tools.I18nServices;
 import com.openexchange.server.Initialization;
-import com.openexchange.server.services.EventAdminService;
-import com.openexchange.server.services.SessiondService;
+import com.openexchange.server.services.ServerServiceRegistry;
+//import com.openexchange.server.services.SessiondService;
 import com.openexchange.sessiond.impl.SessiondConnectorImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.test.TestInit;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.mail.MailInitialization;
+import com.openexchange.push.udp.EventAdminService;
+import com.openexchange.caching.CacheService;
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.internal.JCSCacheService;
+import com.openexchange.caching.internal.JCSCacheServiceInit;
+import org.osgi.service.event.EventAdmin;
 
 /**
  * This class contains methods for initialising tests.
@@ -72,7 +78,7 @@ public final class Init {
 	/**
 	 * Sets the caching system JCS up.
 	 */
-	com.openexchange.cache.impl.Configuration.getInstance(),
+	//com.openexchange.cache.impl.Configuration.getInstance(),
 	/**
 	 * Connection pools for ConfigDB and database assignments for contexts.
 	 */
@@ -151,6 +157,7 @@ public final class Init {
         startAndInjectMonitoringBundle();
         startAndInjectSessiondBundle();
         startAndInjectPushUDPBundle();
+        startAndInjectCache();
     }
 
     private static void startAndInjectI18NBundle() throws FileNotFoundException {
@@ -170,6 +177,7 @@ public final class Init {
     private static void startAndInjectConfigBundle() {
         ConfigurationService config = new ConfigurationImpl();
         services.put(ConfigurationService.class, config);
+        ServerServiceRegistry.getInstance().addService(ConfigurationService.class, config);
     }
 
     private static void startAndInjectMonitoringBundle() throws Exception {
@@ -177,24 +185,32 @@ public final class Init {
     }
 
     private static void startAndInjectMailBundle() throws Exception {
-        MailInitialization.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
+        //MailInitialization.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
     }
 
 
     private static void startAndInjectSessiondBundle() throws Exception {
         //ConfigurationService.getInstance().setService((Configuration)services.get(Configuration.class));
-        SessiondService.getInstance().setService(new SessiondConnectorImpl());
+        //SessiondService.getInstance().setService(new SessiondConnectorImpl());
         SessiondInit.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
     }
 
     private static void startAndInjectPushUDPBundle() throws Exception {
+        ServerServiceRegistry.getInstance().addService(EventAdmin.class,new TestEventAdmin());
         EventAdminService.getInstance().setService(new TestEventAdmin());
         // SessiondService.getInstance().setService(new SessiondConnectorImpl());
+    }
+
+
+    public static void startAndInjectCache() throws CacheException {
+        JCSCacheServiceInit.getInstance().start((ConfigurationService) services.get(ConfigurationService.class));
+        ServerServiceRegistry.getInstance().addService(CacheService.class,JCSCacheService.getInstance());
     }
 
     public static void stopServer() throws AbstractOXException {
         //for(Initialization init: started) { init.stop(); }
     }
+
 
 
     public static ConfigurationServiceHolder getConfigurationServiceHolder() throws Exception {

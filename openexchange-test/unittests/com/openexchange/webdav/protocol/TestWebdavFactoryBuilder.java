@@ -13,6 +13,7 @@ import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.webdav.protocol.impl.DummyResourceManager;
 import com.openexchange.test.TestInit;
+import com.openexchange.test.AjaxInit;
 
 public class TestWebdavFactoryBuilder {
 
@@ -49,7 +50,7 @@ public class TestWebdavFactoryBuilder {
 		final ContextStorage ctxstor = ContextStorage.getInstance();
         final int contextId = ctxstor.getContextId("defaultcontext");
         final Context ctx = ctxstor.getContext(contextId);
-		factory.setSessionHolder(new DummySessionHolder("thorben", ctx));
+		factory.setSessionHolder(new DummySessionHolder(AjaxInit.getAJAXProperty("login"), ctx));
 		return factory;
 	}
 	
