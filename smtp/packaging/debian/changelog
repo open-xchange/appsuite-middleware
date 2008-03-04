@@ -1,0 +1,6 @@
+open-xchange-smtp (6.5.0-1) unstable; urgency=low
+
+  * Initial version
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 03 Mar 2008 16:37:09 +0100
+
