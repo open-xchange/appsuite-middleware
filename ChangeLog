@@ -1,3 +1,7 @@
+* 2008-03-04 - francisco.laguna@open-xchange.com
+
+ - Bugfix #10962: Sanitize metadata when using server copy in webdav infostore.
+
 * 2008-01-09 - marcus.klein@open-xchange.com
 
  - Bugfix #10688: Schema should be unlocked if a SQLException occurs during

@@ -474,7 +474,8 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 		loadMetadata();
 		copy.metadata = new DocumentMetadataImpl(metadata);
 		copy.metadata.setId(InfostoreFacade.NEW);
-		copy.metadataChanged = true;
+        copy.metadata.setFilestoreLocation(null);
+        copy.metadataChanged = true;
 		copy.setMetadata.addAll(Metadata.VALUES);
 	}
 	
