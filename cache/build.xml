@@ -24,6 +24,7 @@
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>
     <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+    <property name="adbundle.d" value="${prefix}/etc/admindaemon/osgi/bundle.d"/>
 
     <!-- JAR names for classpath -->
     <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
@@ -75,6 +76,9 @@
         <mkdir dir="${destdir}/${bundle.d}"/>
         <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
             message="${bundlesdir}/${bundle.name}${line.separator}"/>
+		<mkdir dir="${destdir}/${adbundle.d}"/>
+	    <echo file="${destdir}/${adbundle.d}/${Bundle-SymbolicName}.ini"
+	        message="${bundlesdir}/${bundle.name}${line.separator}"/>
     </target>
 
 	<fileset dir="lib" id="jarfiles">
