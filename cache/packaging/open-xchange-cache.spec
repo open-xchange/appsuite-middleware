@@ -24,7 +24,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        The Open-Xchange Server Caching Bundle
-Requires:       open-xchange-global open-xchange-configread
+Requires:       open-xchange-common open-xchange-global open-xchange-configread
 #
 
 %description
@@ -42,7 +42,7 @@ Authors:
 
 %install
 
-ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
+ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 
 %clean
 %{__rm} -rf %{buildroot}

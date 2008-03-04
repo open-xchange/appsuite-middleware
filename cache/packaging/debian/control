@@ -2,10 +2,10 @@ Source: open-xchange-cache
 Section: unknown
 Priority: optional
 Maintainer: Thorben Betten <thorben.betten@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-global, open-xchange-configread
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common, open-xchange-global, open-xchange-configread
 Standards-Version: 3.6.1
 
 Package: open-xchange-cache
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-global, open-xchange-configread
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common, open-xchange-global, open-xchange-configread
 Description: The Open-Xchange Server Caching Bundle

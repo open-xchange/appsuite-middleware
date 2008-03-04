@@ -1,5 +1,5 @@
 #!/usr/bin/make -f
-# Build open-xchange-configread
+# Build open-xchange-cache
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
@@ -32,7 +32,7 @@ install: build
 	dh_testroot
 	dh_clean -k 
 	dh_installdirs
-	ant -Dlib.dir=$(instprefix)/lib -Ddestdir=$(oxroot) -Dprefix=$(instprefix) install
+	ant -Ddestdir=$(oxroot) -Dprefix=$(instprefix) install
 	
 # Build architecture-independent files here.
 binary-indep: build install
