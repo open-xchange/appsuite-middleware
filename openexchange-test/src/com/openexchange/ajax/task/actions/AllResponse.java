@@ -47,53 +47,32 @@
  *
  */
 
-package com.openexchange.ajax.framework;
-
-import org.json.JSONArray;
-import org.json.JSONException;
+package com.openexchange.ajax.task.actions;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.ajax.framework.ListIDs;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonAllParser extends AbstractAJAXParser<CommonAllResponse> {
+public final class AllResponse extends CommonAllResponse {
 
-    private final int[] columns;
-
-    /**
-     * Default constructor.
-     */
-    protected CommonAllParser(final boolean failOnError, final int[] columns) {
-        super(failOnError);
-        this.columns = columns;
-    }
+    private ListIDs list;
 
     /**
-     * {@inheritDoc}
+     * @param response
      */
-    @Override
-    protected CommonAllResponse createResponse(final Response response)
-        throws JSONException {
-        final CommonAllResponse retval = instanciateResponse(response);
-        retval.setColumns(columns);
-        if (isFailOnError()) {
-            final JSONArray array = (JSONArray) retval.getData();
-            final Object[][] values = new Object[array.length()][];
-            for (int i = 0; i < array.length(); i++) {
-                final JSONArray inner = array.getJSONArray(i);
-                values[i] = new Object[inner.length()];
-                for (int j = 0; j < inner.length(); j++) {
-                    values[i][j] = inner.get(j);
-                }
-            }
-            retval.setArray(values);
-        }
-        return retval;
+    public AllResponse(final Response response) {
+        super(response);
     }
 
-    protected CommonAllResponse instanciateResponse(final Response response) {
-        return new CommonAllResponse(response);
+    public void setListIDs(final ListIDs list) {
+        this.list = list;
+    }
+
+    public ListIDs getListIDs() {
+        return list;
     }
 }

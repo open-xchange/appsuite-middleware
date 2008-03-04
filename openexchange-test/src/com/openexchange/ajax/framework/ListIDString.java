@@ -49,51 +49,33 @@
 
 package com.openexchange.ajax.framework;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import com.openexchange.ajax.container.Response;
-
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonAllParser extends AbstractAJAXParser<CommonAllResponse> {
+public final class ListIDString implements ListID {
 
-    private final int[] columns;
+    private final String folder;
 
-    /**
-     * Default constructor.
-     */
-    protected CommonAllParser(final boolean failOnError, final int[] columns) {
-        super(failOnError);
-        this.columns = columns;
+    private final String object;
+
+    public ListIDString(final String folder, final String object) {
+        super();
+        this.folder = folder;
+        this.object = object;
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected CommonAllResponse createResponse(final Response response)
-        throws JSONException {
-        final CommonAllResponse retval = instanciateResponse(response);
-        retval.setColumns(columns);
-        if (isFailOnError()) {
-            final JSONArray array = (JSONArray) retval.getData();
-            final Object[][] values = new Object[array.length()][];
-            for (int i = 0; i < array.length(); i++) {
-                final JSONArray inner = array.getJSONArray(i);
-                values[i] = new Object[inner.length()];
-                for (int j = 0; j < inner.length(); j++) {
-                    values[i][j] = inner.get(j);
-                }
-            }
-            retval.setArray(values);
-        }
-        return retval;
+    public String getFolder() {
+        return folder;
     }
 
-    protected CommonAllResponse instanciateResponse(final Response response) {
-        return new CommonAllResponse(response);
+    /**
+     * {@inheritDoc}
+     */
+    public String getObject() {
+        return object;
     }
 }

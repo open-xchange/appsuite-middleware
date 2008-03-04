@@ -52,14 +52,20 @@ package com.openexchange.ajax.task;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
+import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.task.actions.AllRequest;
+import com.openexchange.ajax.task.actions.AllResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.ListRequest;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Task;
 
 /**
@@ -69,6 +75,8 @@ import com.openexchange.groupware.tasks.Task;
 public class ListTest extends AbstractTaskTest {
 
     private static final int NUMBER = 10;
+
+    private static final int DELETES = 2;
 
     /**
      * Logger.
@@ -126,7 +134,7 @@ public class ListTest extends AbstractTaskTest {
         Executor.multiple(getClient(), new MultipleRequest(deletes)); 
     }
 
-    public void testException() throws Throwable {
+    public void oldRemovedObjectHandling() throws Throwable {
         final int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID,
             Task.LAST_MODIFIED };
         final CommonListResponse listR = TaskTools.list(getClient(),
@@ -135,5 +143,58 @@ public class ListTest extends AbstractTaskTest {
         assertTrue("No error when listing not existing object.", listR
             .hasError());
         LOG.info(listR.getException().toString());
+    }
+
+    /**
+     * This method tests the new handling of not more available objects for LIST
+     * requests.
+     */
+    public void testRemovedObjectHandling() throws Throwable {
+        final AJAXClient clientA = getClient();
+        final int folderA = clientA.getValues().getPrivateTaskFolder();
+        final AJAXClient clientB = new AJAXClient(User.User2);
+        final int folderB = clientB.getValues().getPrivateTaskFolder();
+
+        // Create some tasks.
+        final InsertRequest[] inserts = new InsertRequest[NUMBER];
+        for (int i = 0; i < inserts.length; i++) {
+            final Task task = new Task();
+            task.setTitle("Task " + (i + 1));
+            task.setParentFolderID(folderA);
+            task.addParticipant(new UserParticipant(clientA.getValues().getUserId()));
+            task.addParticipant(new UserParticipant(clientB.getValues().getUserId()));
+            inserts[i] = new InsertRequest(task, getTimeZone());
+        }
+        final MultipleResponse mInsert = (MultipleResponse) Executor.execute(
+            getClient(), new MultipleRequest(inserts));
+
+        // A now gets all of the folder.
+        int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.FOLDER_ID };
+        final AllResponse allR = TaskTools.all(clientA, new AllRequest(
+            folderA, columns, Task.TITLE, Order.ASCENDING));
+        
+        // Now B deletes some of them.
+        final DeleteRequest[] deletes1 = new DeleteRequest[DELETES];
+        for (int i = 0; i < deletes1.length; i++) {
+            final InsertResponse insertR = (InsertResponse) mInsert
+                .getResponse(NUMBER - (i + 1));
+            deletes1[i] = new DeleteRequest(folderB, insertR.getId(), insertR
+                .getTimestamp());
+        }
+        Executor.multiple(clientB, new MultipleRequest(deletes1));
+
+        // List request of A must now not contain the deleted objects and give
+        // no error.
+        final CommonListResponse listR = TaskTools.list(clientA,
+            new ListRequest(allR.getListIDs(), columns, true));
+        
+        final DeleteRequest[] deletes2 = new DeleteRequest[inserts.length
+            - DELETES];
+        for (int i = 0; i < deletes2.length; i++) {
+            final InsertResponse insertR = (InsertResponse) mInsert.getResponse(i);
+            deletes2[i] = new DeleteRequest(insertR.getFolderId(),
+                insertR.getId(), listR.getTimestamp());
+        }
+        Executor.multiple(getClient(), new MultipleRequest(deletes2)); 
     }
 }

@@ -150,4 +150,18 @@ public class CommonAllRequest implements AJAXRequest {
     public CommonAllParser getParser() {
         return new CommonAllParser(failOnError, columns);
     }
+
+    /**
+     * @return the columns
+     */
+    protected int[] getColumns() {
+        return columns;
+    }
+
+    /**
+     * @return the failOnError
+     */
+    protected boolean isFailOnError() {
+        return failOnError;
+    }
 }

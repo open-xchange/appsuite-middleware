@@ -98,8 +98,13 @@ public class CommonAllResponse extends AbstractAJAXResponse implements
         return array[row][getColumnPos(attributeId)];
     }
 
-    private int getColumnPos(final int attributeId) {
-        return Arrays.asList(columns).indexOf(attributeId);
+    public int getColumnPos(final int attributeId) {
+        for (int i = 0; i < columns.length; i++) {
+            if (columns[i] == attributeId) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**

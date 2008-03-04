@@ -47,53 +47,56 @@
  *
  */
 
-package com.openexchange.ajax.framework;
+package com.openexchange.ajax.task.actions;
 
-import org.json.JSONArray;
+import java.util.Iterator;
+
 import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.CommonAllParser;
+import com.openexchange.ajax.framework.ListIDInt;
+import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.groupware.tasks.Task;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonAllParser extends AbstractAJAXParser<CommonAllResponse> {
-
-    private final int[] columns;
+public class AllParser extends CommonAllParser {
 
     /**
      * Default constructor.
      */
-    protected CommonAllParser(final boolean failOnError, final int[] columns) {
-        super(failOnError);
-        this.columns = columns;
+    public AllParser(final boolean failOnError, final int[] columns) {
+        super(failOnError, columns);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected CommonAllResponse createResponse(final Response response)
-        throws JSONException {
-        final CommonAllResponse retval = instanciateResponse(response);
-        retval.setColumns(columns);
-        if (isFailOnError()) {
-            final JSONArray array = (JSONArray) retval.getData();
-            final Object[][] values = new Object[array.length()][];
-            for (int i = 0; i < array.length(); i++) {
-                final JSONArray inner = array.getJSONArray(i);
-                values[i] = new Object[inner.length()];
-                for (int j = 0; j < inner.length(); j++) {
-                    values[i][j] = inner.get(j);
-                }
-            }
-            retval.setArray(values);
-        }
-        return retval;
+    protected AllResponse instanciateResponse(final Response response) {
+        return new AllResponse(response);
     }
 
-    protected CommonAllResponse instanciateResponse(final Response response) {
-        return new CommonAllResponse(response);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected AllResponse createResponse(final Response response)
+        throws JSONException {
+        final AllResponse retval = (AllResponse) super.createResponse(response);
+        final Iterator<Object[]> iter = retval.iterator();
+        final ListIDs list = new ListIDs();
+        final int folderPos = retval.getColumnPos(Task.FOLDER_ID);
+        final int identifierPos = retval.getColumnPos(Task.OBJECT_ID);
+        while (iter.hasNext()) {
+            final Object[] row = iter.next();
+            list.add(new ListIDInt(((Integer) row[folderPos]).intValue(),
+                ((Integer) row[identifierPos]).intValue()));
+        }
+        retval.setListIDs(list);
+        return retval;
     }
 }

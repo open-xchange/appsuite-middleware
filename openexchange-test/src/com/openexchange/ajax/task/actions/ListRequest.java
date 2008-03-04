@@ -50,6 +50,7 @@
 package com.openexchange.ajax.task.actions;
 
 import com.openexchange.ajax.framework.CommonListRequest;
+import com.openexchange.ajax.framework.ListIDs;
 
 /**
  * 
@@ -68,5 +69,10 @@ public class ListRequest extends CommonListRequest {
         final boolean failOnError) {
         super(AbstractTaskRequest.TASKS_URL, folderAndTaskIds, columns,
             failOnError);
+    }
+
+    public ListRequest(final ListIDs list, final int[] columns,
+        final boolean failOnError) {
+        super(AbstractTaskRequest.TASKS_URL, list, columns, failOnError);
     }
 }

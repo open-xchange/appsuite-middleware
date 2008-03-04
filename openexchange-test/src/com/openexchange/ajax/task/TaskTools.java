@@ -76,11 +76,11 @@ import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.CommonUpdatesResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.task.actions.AllRequest;
+import com.openexchange.ajax.task.actions.AllResponse;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.DeleteResponse;
 import com.openexchange.ajax.task.actions.GetRequest;
@@ -348,13 +348,13 @@ public final class TaskTools extends Assert {
         return response;
     }
 
-    public static CommonAllResponse all(final AJAXSession session,
+    public static AllResponse all(final AJAXSession session,
         final AllRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
-        return (CommonAllResponse) Executor.execute(session, request);
+        return (AllResponse) Executor.execute(session, request);
     }
 
-    public static CommonAllResponse all(final AJAXClient client,
+    public static AllResponse all(final AJAXClient client,
         final AllRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
         return all(client.getSession(), request);

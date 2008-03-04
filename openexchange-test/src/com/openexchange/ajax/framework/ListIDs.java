@@ -49,51 +49,34 @@
 
 package com.openexchange.ajax.framework;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import com.openexchange.ajax.container.Response;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class CommonAllParser extends AbstractAJAXParser<CommonAllResponse> {
+public class ListIDs {
 
-    private final int[] columns;
+    private List<ListID> identifiers = new ArrayList<ListID>();
 
     /**
      * Default constructor.
      */
-    protected CommonAllParser(final boolean failOnError, final int[] columns) {
-        super(failOnError);
-        this.columns = columns;
+    public ListIDs() {
+        super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected CommonAllResponse createResponse(final Response response)
-        throws JSONException {
-        final CommonAllResponse retval = instanciateResponse(response);
-        retval.setColumns(columns);
-        if (isFailOnError()) {
-            final JSONArray array = (JSONArray) retval.getData();
-            final Object[][] values = new Object[array.length()][];
-            for (int i = 0; i < array.length(); i++) {
-                final JSONArray inner = array.getJSONArray(i);
-                values[i] = new Object[inner.length()];
-                for (int j = 0; j < inner.length(); j++) {
-                    values[i][j] = inner.get(j);
-                }
-            }
-            retval.setArray(values);
-        }
-        return retval;
+    public void add(final ListID listID) {
+        identifiers.add(listID);
     }
 
-    protected CommonAllResponse instanciateResponse(final Response response) {
-        return new CommonAllResponse(response);
+    public int size() {
+        return identifiers.size();
     }
+
+    public ListID get(int i) {
+        return identifiers.get(i);
+    }
+
 }
