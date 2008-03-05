@@ -1,3 +1,7 @@
+* 2008-03-05 - choeger@open-xchange.com
+
+  - Bugfix ID#10414 oxinstaller sets read db connection to the wrong server for master/slave setups
+
 * 2008-02-12 - dennis.sieben@open-xchange.com
 
   - Bugfix ID#10894 AJP and general monitoring does not work anymore with showRuntimeStats

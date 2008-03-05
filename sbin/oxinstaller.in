@@ -310,15 +310,11 @@ v_setprop UPLOAD_DIRECTORY "$TMPDIR_PATH" ${SERVERCONF}/server.properties
 v_setprop SERVER_NAME $SERVER_NAME ${ADMINCONF}/system.properties
 v_setprop SERVER_NAME $SERVER_NAME ${ADMINCONF}/AdminDaemon.properties
 
-SQLHOST=$CONFIGDB_READ
-SQLPORT=$CONFIGDB_READ_PORT
-EVAL_SQL_URL=$(eval echo $SQL_URL)
-v_setprop readUrl $EVAL_SQL_URL ${ADMINCONF}/configdb.properties
-
 SQLHOST=$CONFIGDB_WRITE
 SQLPORT=$CONFIGDB_WRITE_PORT
 EVAL_SQL_URL=$(eval echo $SQL_URL)
 v_setprop writeUrl $EVAL_SQL_URL ${ADMINCONF}/configdb.properties
+v_setprop readUrl $EVAL_SQL_URL ${ADMINCONF}/configdb.properties
 
 if [ "$CONFIGDB_READ" != "$CONFIGDB_WRITE" ]; then
     v_setprop useSeparateWrite "false" ${ADMINCONF}/configdb.properties
