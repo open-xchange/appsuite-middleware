@@ -50,8 +50,6 @@
 package com.openexchange.mail;
 
 import com.openexchange.mail.config.AbstractProtocolProperties;
-import com.openexchange.mail.mime.DefaultHeaderLoader;
-import com.openexchange.mail.mime.MIMEHeaderLoader;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 
@@ -138,9 +136,7 @@ public abstract class MailProvider {
 	 */
 	protected void startUp() throws MailException {
 		getProtocolProperties().loadProperties();
-		MailPermission.setClass(getMailPermissionClass());
-		MIMEHeaderLoader.setClass(getHeaderLoader());
-		MailAccess.startupImpl(getMailConnectionClass());
+		MailAccess.startupImpl(getMailAccessClass());
 	}
 
 	/**
@@ -150,9 +146,7 @@ public abstract class MailProvider {
 	 *             if shut-down fails
 	 */
 	protected void shutDown() throws MailException {
-		MailAccess.shutdownImpl(getMailConnectionClass());
-		MIMEHeaderLoader.resetClass();
-		MailPermission.resetClass();
+		MailAccess.shutdownImpl(getMailAccessClass());
 		getProtocolProperties().resetProperties();
 	}
 
@@ -164,21 +158,7 @@ public abstract class MailProvider {
 	 * 
 	 * @return The class of {@link MailPermission} implementation
 	 */
-	protected Class<? extends MailPermission> getMailPermissionClass() {
-		return DefaultMailPermission.class;
-	}
-
-	/**
-	 * Gets the implementation-specific class of {@link MIMEHeaderLoader}.
-	 * <p>
-	 * By default {@link DefaultHeaderLoader} class is returned. Overwrite if
-	 * needed.
-	 * 
-	 * @return The class {@link MIMEHeaderLoader} implementation
-	 */
-	protected Class<? extends MIMEHeaderLoader> getHeaderLoader() {
-		return DefaultHeaderLoader.class;
-	}
+	public abstract Class<? extends MailPermission> getMailPermissionClass();
 
 	/**
 	 * Gets this mail provider's protocol
@@ -207,7 +187,7 @@ public abstract class MailProvider {
 	 * 
 	 * @return The class implementing {@link MailAccess}
 	 */
-	public abstract Class<? extends MailAccess<?, ?, ?>> getMailConnectionClass();
+	public abstract Class<? extends MailAccess<?, ?, ?>> getMailAccessClass();
 
 	/**
 	 * Gets the protocol properties

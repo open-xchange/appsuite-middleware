@@ -1472,7 +1472,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		final ACL[] acls = new ACL[perms.length];
 		for (int i = 0; i < perms.length; i++) {
 			acls[i] = ((ACLPermission) perms[i]).getPermissionACL(IMAPFolderConverter.getUser2AclArgs(session,
-					imapFolder));
+					imapFolder), imapConfig, ctx);
 		}
 		return acls;
 	}

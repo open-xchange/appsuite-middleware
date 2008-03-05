@@ -54,7 +54,6 @@ import com.openexchange.mail.MailAccess;
 import com.openexchange.mail.MailProvider;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.config.AbstractProtocolProperties;
-import com.openexchange.mail.mime.MIMEHeaderLoader;
 import com.openexchange.mail.permission.MailPermission;
 
 /**
@@ -77,33 +76,13 @@ public final class IMAPProvider extends MailProvider {
 		super();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.MailProvider#getHeaderLoaderClass()
-	 */
 	@Override
-	protected Class<? extends MIMEHeaderLoader> getHeaderLoader() {
-		return IMAPHeaderLoader.class;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.MailProvider#getMailConnectionClass()
-	 */
-	@Override
-	public Class<? extends MailAccess<?, ?, ?>> getMailConnectionClass() {
+	public Class<? extends MailAccess<?, ?, ?>> getMailAccessClass() {
 		return IMAPAccess.class;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.MailProvider#getMailPermissionClass()
-	 */
 	@Override
-	protected Class<? extends MailPermission> getMailPermissionClass() {
+	public Class<? extends MailPermission> getMailPermissionClass() {
 		return ACLPermission.class;
 	}
 

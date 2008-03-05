@@ -75,20 +75,14 @@ public final class ACLPermission extends MailPermission {
 
 	private transient ACL acl;
 
-	private final transient Context ctx;
-
-	private final transient IMAPConfig imapConfig;
-
 	/**
 	 * Constructor
 	 * 
 	 * @param imapConfig
 	 *            The session user
 	 */
-	public ACLPermission(final IMAPConfig imapConfig, final Context ctx) {
+	public ACLPermission() {
 		super();
-		this.ctx = ctx;
-		this.imapConfig = imapConfig;
 	}
 
 	/*
@@ -273,7 +267,7 @@ public final class ACLPermission extends MailPermission {
 	 * @return mapped <code>ACL</code> instance
 	 * @throws AbstractOXException
 	 */
-	public ACL getPermissionACL(final User2ACLArgs user2aclArgs) throws AbstractOXException {
+	public ACL getPermissionACL(final User2ACLArgs user2aclArgs, final IMAPConfig imapConfig, final Context ctx) throws AbstractOXException {
 		if (this.acl != null) {
 			/*
 			 * Return caches ACL
@@ -292,7 +286,7 @@ public final class ACLPermission extends MailPermission {
 	 *            the <code>ACL</code> instance
 	 * @throws AbstractOXException
 	 */
-	public void parseACL(final ACL acl, final User2ACLArgs user2aclArgs) throws AbstractOXException {
+	public void parseACL(final ACL acl, final User2ACLArgs user2aclArgs, final IMAPConfig imapConfig, final Context ctx) throws AbstractOXException {
 		setEntity(User2ACL.getInstance(imapConfig).getUserID(acl.getName(), ctx, user2aclArgs));
 		parseRights(acl.getRights());
 		this.acl = acl;

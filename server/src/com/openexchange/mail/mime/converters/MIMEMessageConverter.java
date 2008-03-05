@@ -50,7 +50,9 @@
 package com.openexchange.mail.mime.converters;
 
 import static com.openexchange.mail.utils.MessageUtility.decodeMultiEncodedHeader;
+import static javax.mail.internet.MimeUtility.unfold;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -58,6 +60,8 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.activation.DataHandler;
 import javax.mail.BodyPart;
@@ -86,13 +90,13 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContainerMessage;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
-import com.openexchange.mail.mime.MIMEHeaderLoader;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.utils.StorageUtility;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MIMEMessageConverter} - Provides several methods to convert instances
@@ -1106,10 +1110,10 @@ public final class MIMEMessageConverter {
 		}
 	}
 
-	private static final String STR_CANNOT_LOAD_HEADER = "Cannot load header";
+	private static final int DEFAULT_MESSAGE_SIZE = 8192;
 
 	@SuppressWarnings("unchecked")
-	private static void setHeaders(final Part part, final MailPart mailPart) throws MailException {
+	private static void setHeaders(final Part part, final MailPart mailPart) {
 		/*
 		 * HEADERS
 		 */
@@ -1121,16 +1125,58 @@ public final class MIMEMessageConverter {
 				headerMap.put(h.getName(), h.getValue());
 			}
 		} catch (final MessagingException e) {
-			if (part instanceof Message && e.getMessage().indexOf(STR_CANNOT_LOAD_HEADER) != -1) {
-				/*
-				 * Headers could not be loaded
-				 */
-				headerMap = MIMEHeaderLoader.getInstance().loadHeaders((Message) part, false);
-			} else {
-				headerMap = new HashMap<String, String>();
+			if (LOG.isWarnEnabled()) {
+				LOG.warn("JavaMail API failed to load part's headers", e);
 			}
+			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
+			try {
+				part.writeTo(out);
+				headerMap = loadHeaders(new String(out.toByteArray(), "US-ASCII"));
+			} catch (final IOException e2) {
+				LOG.error("Unable to parse headers", e2);
+				headerMap = new HashMap<String, String>(0);
+			} catch (MessagingException e2) {
+				LOG.error("Unable to parse headers", e2);
+				headerMap = new HashMap<String, String>(0);
+			}
+
 		}
 		mailPart.addHeaders(headerMap);
+	}
+
+	private static final Pattern PATTERN_PARSE_HEADER = Pattern.compile("(\\S+):\\p{Blank}(.*)(?:(?:\r?\n)|(?:$))");
+
+	private static Map<String, String> loadHeaders(final String messageSrc) {
+		/*
+		 * Determine position of double line break
+		 */
+		final int len = messageSrc.length();
+		int i;
+		NextRead: for (i = 0; i < len; ++i) {
+			char c = messageSrc.charAt(i);
+			final int prevPos = i;
+			int count = 0;
+			while (c == '\r' || c == '\n') {
+				if (c == '\n' && ++count >= 2) {
+					i = prevPos;
+					break NextRead;
+				}
+				if (++i >= len) {
+					i = prevPos;
+					break NextRead;
+				}
+				c = messageSrc.charAt(i);
+			}
+		}
+		/*
+		 * Parse single headers
+		 */
+		final Matcher m = PATTERN_PARSE_HEADER.matcher(unfold(messageSrc.substring(0, i)));
+		final Map<String, String> retval = new HashMap<String, String>();
+		while (m.find()) {
+			retval.put(m.group(1), m.group(2));
+		}
+		return retval;
 	}
 
 	private static InternetAddress[] getAddressesOnParseError(final String[] addrs) {

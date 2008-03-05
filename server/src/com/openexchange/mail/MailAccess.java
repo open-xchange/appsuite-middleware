@@ -215,7 +215,7 @@ public abstract class MailAccess<T extends MailFolderStorage, E extends MailMess
 		/*
 		 * Create a new mail connection through user's mail provider
 		 */
-		return createNewMailConnection(MailProviderRegistry.getMailProviderBySession(session).getMailConnectionClass(),
+		return createNewMailConnection(MailProviderRegistry.getMailProviderBySession(session).getMailAccessClass(),
 				session);
 	}
 

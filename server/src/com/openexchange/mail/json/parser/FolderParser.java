@@ -63,11 +63,12 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailProvider;
+import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link FolderParser} - Parses instances of {@link JSONObject} to instances of
@@ -121,6 +122,8 @@ public final class FolderParser {
 				if (arrayLength > 0) {
 					final List<MailPermission> iPerms = new ArrayList<MailPermission>(arrayLength);
 					final UserStorage us = UserStorage.getInstance();
+					final Class<? extends MailPermission> clazz = MailProviderRegistry
+							.getMailProviderBySession(session).getMailPermissionClass();
 					for (int i = 0; i < arrayLength; i++) {
 						final JSONObject elem = jsonArr.getJSONObject(i);
 						if (!elem.has(FolderFields.ENTITY)) {
@@ -132,12 +135,13 @@ public final class FolderParser {
 						} catch (final JSONException e) {
 							final String entityStr = elem.getString(FolderFields.ENTITY);
 							try {
-								entity = us.getUserId(entityStr, ContextStorage.getStorageContext(session.getContextId()));
+								entity = us.getUserId(entityStr, ContextStorage.getStorageContext(session
+										.getContextId()));
 							} catch (final ContextException e1) {
 								throw new MailException(e1);
 							}
 						}
-						final MailPermission mailPerm = MailPermission.newInstance(session);
+						final MailPermission mailPerm = MailPermission.newInstance(clazz);
 						mailPerm.setEntity(entity);
 						if (!elem.has(FolderFields.BITS)) {
 							throw new MailException(MailException.Code.MISSING_PARAMETER, FolderFields.BITS);

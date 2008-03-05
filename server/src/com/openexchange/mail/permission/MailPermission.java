@@ -53,7 +53,6 @@ import java.lang.reflect.InvocationTargetException;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.session.Session;
 
 /**
  * {@link MailPermission} - The mail permission defining a set of access rights
@@ -69,7 +68,10 @@ import com.openexchange.session.Session;
  */
 public abstract class MailPermission extends OCLPermission {
 
-	private static Class<? extends MailPermission> clazz;
+	/**
+	 * Serial version UID
+	 */
+	private static final long serialVersionUID = 3074890171981933102L;
 
 	/**
 	 * Initializes a new {@link MailPermission}
@@ -78,40 +80,21 @@ public abstract class MailPermission extends OCLPermission {
 		super();
 	}
 
+	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] {};
+
 	/**
-	 * Sets the permission class as indicated by mail provider
+	 * Gets a new mail permission instance
 	 * 
-	 * @param clazz
-	 *            The permission class
-	 */
-	public static void setClass(final Class<? extends MailPermission> clazz) {
-		MailPermission.clazz = clazz;
-	}
-
-	/**
-	 * Resets the permission class
-	 */
-	public static void resetClass() {
-		MailPermission.clazz = null;
-	}
-
-	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { Session.class };
-
-	/**
-	 * Gets the proper mail permission implementation
-	 * 
-	 * @param session
-	 *            The session
-	 * @return The proper mail permission implementation
+	 * @return A new mail permission instance
 	 * @throws MailException
 	 *             If instantiation fails
 	 */
-	public static MailPermission newInstance(final Session session) throws MailException {
+	public static MailPermission newInstance(final Class<? extends MailPermission> clazz) throws MailException {
 		/*
 		 * Create a new mail permission
 		 */
 		try {
-			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { session });
+			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance();
 		} catch (final SecurityException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
 		} catch (final NoSuchMethodException e) {

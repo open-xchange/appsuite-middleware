@@ -290,7 +290,7 @@ public final class IMAPFolderConverter {
 				mailFolder.setOwnPermission(null);
 				ownRights = (Rights) RIGHTS_EMPTY.clone();
 			} else {
-				final ACLPermission ownPermission = new ACLPermission(imapConfig, ctx);
+				final ACLPermission ownPermission = new ACLPermission();
 				ownPermission.setEntity(session.getUserId());
 				if (!mailFolder.exists() || mailFolder.isNonExistent()) {
 					ownPermission.parseRights((ownRights = (Rights) RIGHTS_EMPTY.clone()));
@@ -416,7 +416,7 @@ public final class IMAPFolderConverter {
 			final IMAPConfig imapConfig, final MailFolder mailFolder, final Rights ownRights, final Context ctx)
 			throws AbstractOXException {
 		if (IMAPConfig.hasNewACLExt(imapConfig.getServer()) && !ownRights.contains(Rights.Right.ADMINISTER)) {
-			addOwnACL(session.getUserId(), mailFolder, ownRights, imapConfig, ctx);
+			addOwnACL(session.getUserId(), mailFolder, ownRights);
 		} else {
 			final ACL[] acls;
 			try {
@@ -434,7 +434,7 @@ public final class IMAPFolderConverter {
 					 * Remember newer IMAP server's ACL extension
 					 */
 					IMAPConfig.setNewACLExt(imapConfig.getServer(), true);
-					addOwnACL(session.getUserId(), mailFolder, ownRights, imapConfig, ctx);
+					addOwnACL(session.getUserId(), mailFolder, ownRights);
 					return;
 				}
 				throw MIMEMailException.handleMessagingException(e);
@@ -449,9 +449,9 @@ public final class IMAPFolderConverter {
 					debugBuilder = null;
 				}
 				for (int j = 0; j < acls.length; j++) {
-					final ACLPermission aclPerm = new ACLPermission(imapConfig, ctx);
+					final ACLPermission aclPerm = new ACLPermission();
 					try {
-						aclPerm.parseACL(acls[j], args);
+						aclPerm.parseACL(acls[j], args, imapConfig, ctx);
 						mailFolder.addPermission(aclPerm);
 					} catch (final AbstractOXException e) {
 						if (isUnknownEntityError(e)) {
@@ -475,9 +475,8 @@ public final class IMAPFolderConverter {
 	 * Adds current user's rights granted to IMAP folder as an ACL
 	 * 
 	 */
-	private static void addOwnACL(final int sessionUser, final MailFolder mailFolder, final Rights ownRights,
-			final IMAPConfig imapConfig, final Context ctx) {
-		final ACLPermission aclPerm = new ACLPermission(imapConfig, ctx);
+	private static void addOwnACL(final int sessionUser, final MailFolder mailFolder, final Rights ownRights) {
+		final ACLPermission aclPerm = new ACLPermission();
 		aclPerm.setEntity(sessionUser);
 		aclPerm.parseRights(ownRights);
 		mailFolder.addPermission(aclPerm);
