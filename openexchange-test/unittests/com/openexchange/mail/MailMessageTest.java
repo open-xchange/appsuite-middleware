@@ -132,7 +132,7 @@ public final class MailMessageTest extends AbstractMailTest {
 					/*
 					 * Test cache functionality
 					 */
-					final MailMessage[] mails = mailConnection.getMessageStorage().getMessagesByUID(
+					final MailMessage[] mails = mailConnection.getMessageStorage().getMessagesByID(
 							inboxFolder.getFullname(), uids, new MailListField[] { MailListField.SIZE }, false);
 					for (int i = 0; i < mails.length; i++) {
 						assertTrue("Cached message does not contain size!", mails[i].containsSize());
