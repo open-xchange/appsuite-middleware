@@ -49,20 +49,30 @@
 
 package com.openexchange.ajax.appointment.action;
 
-import com.openexchange.ajax.framework.CommonListRequest;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.ListIDs;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class ListRequest extends CommonListRequest {
+public final class AllResponse extends CommonAllResponse {
+
+    private ListIDs list;
 
     /**
-     * Default constructor.
+     * @param response
      */
-    public ListRequest(final ListIDs identifier, final int[] columns,
-        final boolean failOnError) {
-        super(AbstractAppointmentRequest.URL, identifier, columns, failOnError);
+    public AllResponse(final Response response) {
+        super(response);
+    }
+
+    public void setListIDs(final ListIDs list) {
+        this.list = list;
+    }
+
+    public ListIDs getListIDs() {
+        return list;
     }
 }

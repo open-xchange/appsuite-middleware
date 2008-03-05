@@ -90,6 +90,9 @@ public interface AJAXRequest {
         public Parameter(final String name, final Date time) {
             this(name, time.getTime());
         }
+        public Parameter(final String name, final boolean schalter) {
+            this(name, String.valueOf(schalter));
+        }
         public static String convert(final int[] values) {
             final StringBuilder columnSB = new StringBuilder();
             for (int i : values) {

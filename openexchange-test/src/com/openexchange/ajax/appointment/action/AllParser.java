@@ -47,80 +47,57 @@
  *
  */
 
-package com.openexchange.ajax.appointment;
+package com.openexchange.ajax.appointment.action;
 
-import java.util.Date;
-import java.util.TimeZone;
+import java.util.Iterator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.json.JSONException;
 
-import com.openexchange.ajax.appointment.action.DeleteRequest;
-import com.openexchange.ajax.appointment.action.InsertRequest;
-import com.openexchange.ajax.appointment.action.InsertResponse;
-import com.openexchange.ajax.appointment.action.ListRequest;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.CommonListResponse;
-import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.CommonAllParser;
 import com.openexchange.ajax.framework.ListIDInt;
 import com.openexchange.ajax.framework.ListIDs;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.AppointmentObject;
 
 /**
- * Checks if the calendar has a vulnerability in the list request.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Bug10836Test extends AbstractAJAXSession {
+public class AllParser extends CommonAllParser {
 
-	private static final Log LOG = LogFactory.getLog(Bug10836Test.class);
+    /**
+     * Default constructor.
+     */
+    public AllParser(final boolean failOnError, final int[] columns) {
+        super(failOnError, columns);
+    }
 
-	/**
-	 * Default constructor.
-	 * @param name Name of the test.
-	 */
-	public Bug10836Test(final String name) {
-		super(name);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected AllResponse instanciateResponse(final Response response) {
+        return new AllResponse(response);
+    }
 
-	/**
-	 * Creates a private appointment with user A and tries to read it with user
-	 * B through a list request.
-	 * @throws Throwable if some exception occurs.
-	 */
-	public void testVulnerability() throws Throwable {
-		final AJAXClient clientA = getClient();
-		final AJAXClient clientB = new AJAXClient(User.User2);
-		final int folderA = clientA.getValues().getPrivateAppointmentFolder();
-		final int folderB = clientB.getValues().getPrivateAppointmentFolder();
-		final TimeZone tz = clientA.getValues().getTimeZone();
-		final AppointmentObject app = new AppointmentObject();
-		app.setParentFolderID(folderA);
-		app.setTitle("Bug10836Test");
-		app.setStartDate(new Date(Tools.getHour(0)));
-		app.setEndDate(new Date(Tools.getHour(1)));
-		app.setIgnoreConflicts(true);
-		final InsertResponse insertR = (InsertResponse) Executor.execute(
-				clientA, new InsertRequest(app, tz));
-		try {
-		    final ListIDs list = new ListIDs();
-		    list.add(new ListIDInt(folderB, insertR.getId()));
-			final CommonListResponse listR = (CommonListResponse) Executor
-			    .execute(clientB, new ListRequest(list,
-		        new int[] { AppointmentObject.TITLE }, false));
-
-			assertTrue(listR.hasError());
-			/*
-			for (Object[] obj1 : listR) {
-				for (Object obj2 : obj1) {
-					assertNull(obj2);
-				}
-			}
-			*/
-		} finally {
-			Executor.execute(clientA, new DeleteRequest(folderA, insertR
-					.getId(), new Date()));
-		}
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected AllResponse createResponse(final Response response)
+        throws JSONException {
+        final AllResponse retval = (AllResponse) super.createResponse(response);
+        final Iterator<Object[]> iter = retval.iterator();
+        final ListIDs list = new ListIDs();
+        final int folderPos = retval.getColumnPos(AppointmentObject.FOLDER_ID);
+        final int identifierPos = retval.getColumnPos(AppointmentObject
+            .OBJECT_ID);
+        while (iter.hasNext()) {
+            final Object[] row = iter.next();
+            list.add(new ListIDInt(((Integer) row[folderPos]).intValue(),
+                ((Integer) row[identifierPos]).intValue()));
+        }
+        retval.setListIDs(list);
+        return retval;
+    }
 }
