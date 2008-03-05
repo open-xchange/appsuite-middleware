@@ -96,7 +96,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 * command; meaning optional <i>COPYUID</i> response is discarded.
 	 * 
 	 * @param imapFolder -
-	 *            the imap folder
+	 *            the IMAP folder
 	 * @param startSeqNum -
 	 *            the starting sequence number of the messages that shall be
 	 *            copied
@@ -123,7 +123,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 * command; meaning optional <i>COPYUID</i> response is discarded.
 	 * 
 	 * @param imapFolder -
-	 *            the imap folder
+	 *            the IMAP folder
 	 * @param seqNums -
 	 *            the sequence numbers of the messages that shall be copied
 	 * @param destFolderName -
@@ -147,7 +147,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 * command
 	 * 
 	 * @param imapFolder -
-	 *            the imap folder
+	 *            the IMAP folder
 	 * @param uids -
 	 *            the UIDs of the messages that shall be copied
 	 * @param destFolderName -
@@ -188,7 +188,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 * folder by performing a <code>COPY 1:*</code> command
 	 * 
 	 * @param imapFolder -
-	 *            the ima folder
+	 *            the IMAP folder
 	 * @param destFolderName -
 	 *            the destination folder
 	 */
@@ -313,13 +313,15 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 			 */
 			final String[] sa = resp.substring(pos).split("\\s+");
 			if (sa.length >= 3) {
-				for (int i = 1; i < sa.length; i++) {
-					if (i == 1) {
-						copyuidResp.src = sa[i];
-					} else if (i == 2) {
-						copyuidResp.dest = sa[i].replaceFirst("\\]", "");
-					}
-				}
+				/**
+				 * Array contains atoms like:
+				 * 
+				 * <pre>
+				 * &quot;1167880112&quot;, &quot;11937&quot;, &quot;11939]&quot;, &quot;Completed&quot;
+				 * </pre>
+				 */
+				copyuidResp.src = sa[1];
+				copyuidResp.dest = sa[2].replaceFirst("\\]", "");
 				copyuidResp.fillResponse(uids, retval);
 			} else {
 				LOG.error(new StringBuilder(128).append("Invalid COPYUID response: ").append(resp).toString());
@@ -375,17 +377,44 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 			final long[] srcArr = toLongArray(src);
 			final long[] destArr = toLongArray(dest);
 			for (int in = 0; in < srcArr.length; in++) {
-				final long currentUID = srcArr[in];
 				int index = 0;
-				Inner: for (; index < uids.length; index++) {
-					if (uids[index] == currentUID) {
-						break Inner;
-					}
+				/*
+				 * Determine index position in given UIDs...
+				 */
+				while (index < uids.length && uids[index] != srcArr[in]) {
+					index++;
 				}
-				retval[index] = destArr[in];
+				/*
+				 * ... and apply copied UID to corresponding index position in
+				 * return value
+				 */
+				try {
+					retval[index] = destArr[in];
+				} catch (final ArrayIndexOutOfBoundsException e) {
+					LOG.error("A COPYUID's source UID could not be found in given source UIDs", e);
+				}
 			}
 		}
 
+		/**
+		 * Turns a sequence of UIDs to a corresponding array of
+		 * <code>long</code>.
+		 * 
+		 * <pre>
+		 * 7,32,44:49
+		 * </pre>
+		 * 
+		 * would be
+		 * 
+		 * <pre>
+		 * [7,32,44,46,47,48,49]
+		 * </pre>
+		 * 
+		 * 
+		 * @param uidSet
+		 *            The sequence of UIDs
+		 * @return The corresponding array of <code>long</code>.
+		 */
 		private static long[] toLongArray(final String uidSet) {
 			final SmartLongArray arr = new SmartLongArray();
 			final String[] sa = uidSet.split(" *, *");
