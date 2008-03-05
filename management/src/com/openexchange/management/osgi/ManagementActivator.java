@@ -167,9 +167,6 @@ public final class ManagementActivator implements BundleActivator {
 	}
 
 	private void stopInternal() throws AbstractOXException {
-	    if (isAdminBundleInstalled(context)) {
-	        return;
-	    }
 		if (null != serviceRegistration) {
 			serviceRegistration.unregister();
 			serviceRegistration = null;
@@ -186,7 +183,9 @@ public final class ManagementActivator implements BundleActivator {
 	 */
 	public void stop(final BundleContext context) throws Exception {
 		LOG.info("stopping bundle: com.openexchange.management");
-
+        if (isAdminBundleInstalled(context)) {
+            return;
+        }
 		try {
 			/*
 			 * Close service trackers
