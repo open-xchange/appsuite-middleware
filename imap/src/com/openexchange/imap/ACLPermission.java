@@ -288,8 +288,8 @@ public final class ACLPermission extends MailPermission {
 	}
 
 	/**
-	 * Parses the rights given through instance of {@link ACL} into this
-	 * permission object.
+	 * Parses the rights given through specified instance of {@link ACL} into
+	 * this permission object.
 	 * 
 	 * @param acl
 	 *            The source instance of {@link ACL}
