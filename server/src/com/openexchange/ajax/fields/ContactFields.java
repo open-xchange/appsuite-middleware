@@ -234,6 +234,8 @@ public interface ContactFields extends CommonFields {
 	
 	public static final String USERFIELD20 = "userfield20";	
 
+	public static final String USER_ID = "user_id";	
+
 	public static final String LINKS = "links";
 
 	public static final String DISTRIBUTIONLIST = "distribution_list";	
