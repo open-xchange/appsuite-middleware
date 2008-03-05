@@ -29,6 +29,7 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.ajax.request.ContactRequest;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
@@ -40,8 +41,8 @@ import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.search.ContactSearchObject;
-import com.openexchange.test.TestException;
 import com.openexchange.test.OXTestToolkit;
+import com.openexchange.test.TestException;
 import com.openexchange.tools.URLParameter;
 
 public class ContactTest extends AbstractAJAXTest {
@@ -759,6 +760,40 @@ public class ContactTest extends AbstractAJAXTest {
 		return jsonArray2ContactArray((JSONArray)response.getData(), cols);
 	}
 	
+	public static ContactObject loadUser(WebConversation webCon, int userId, String host, String session) throws Exception {
+		host = appendPrefix(host);
+		
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, ContactRequest.ACTION_GET_USER);
+		parameter.setParameter(DataFields.ID, userId);
+		
+		WebRequest req = new GetMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters());
+		WebResponse resp = webCon.getResponse(req);
+		
+		assertEquals(200, resp.getResponseCode());
+		
+		final Response response = Response.parse(resp.getText());
+		
+		if (response.hasError()) {
+			fail("json error: " + response.getErrorMessage());
+		}
+		
+		ContactObject contactObj = new ContactObject();
+		
+		final JSONObject jsonObj = (JSONObject)response.getData();
+		ContactParser contactParser = new ContactParser(null);
+		contactParser.parse(contactObj, jsonObj);
+		
+		final int id = DataParser.parseInt(jsonObj, ContactFields.ID);
+		contactObj.setObjectID(id);
+
+		final int loadedUserId = DataParser.parseInt(jsonObj, ContactFields.USER_ID);
+		contactObj.setInternalUserId(loadedUserId);
+		
+		return contactObj;
+	}
+
 	public static ContactObject loadContact(WebConversation webCon, int objectId, int inFolder, String host, String session) throws Exception {
 		host = appendPrefix(host);
 		
