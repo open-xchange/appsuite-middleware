@@ -72,6 +72,17 @@ public class UnitTests {
 		tests.addTestSuite(com.openexchange.webdav.action.behaviour.RequestSpecificBehaviourRegistryTest.class);
 		tests.addTestSuite(com.openexchange.webdav.action.behaviour.UserAgentBehaviourTest.class);
 
-		return tests;
+
+        // Mail
+
+        tests.addTestSuite(com.openexchange.mail.MailAccessTest.class);
+        tests.addTestSuite(com.openexchange.mail.MailConverterTest.class);
+        tests.addTestSuite(com.openexchange.mail.MailFolderTest.class);
+        tests.addTestSuite(com.openexchange.mail.MailLogicToolsTest.class);
+        tests.addTestSuite(com.openexchange.mail.MailMessageTest.class);
+        tests.addTestSuite(com.openexchange.mail.MailParserWriterTest.class);
+
+
+        return tests;
 	}
 }
