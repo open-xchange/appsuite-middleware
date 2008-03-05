@@ -167,28 +167,29 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 
 	public void testForward() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()),
-					"mail-test-session");
+			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
+					new ContextImpl(getCid()), "mail-test-session");
+			session.setPassword(getPassword());
 			final MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
-			final MailConnection<?, ?, ?> mailConnection = MailConnection.getInstance(session);
-			mailConnection.connect(mailConfig);
+			final MailAccess<?, ?, ?> mailAccess = MailAccess.getInstance(session);
+			mailAccess.connect(/* mailConfig */);
 			try {
 				// ByteArrayInputStream in = new
 				// ByteArrayInputStream(TEST_MAIL.getBytes("US-ASCII"));
 
-				final MailMessage[] mails = mailConnection.getMessageStorage().getMessages("default/INBOX", null,
+				final MailMessage[] mails = mailAccess.getMessageStorage().getMessages("default/INBOX", null,
 						MailListField.RECEIVED_DATE, OrderDirection.DESC, null, null, false, COMMON_LIST_FIELDS);
 				int count = 0;
 				for (int i = 0; i < mails.length; i++) {
 					if (mails[i].getContentType().isMimeType("multipart/mixed")) {
 						final DumperMessageHandler msgHandler1 = new DumperMessageHandler(false);
-						new MailMessageParser().parseMailMessage(mailConnection.getMessageStorage().getMessage(
-								"default/INBOX", mails[i].getMailId()), msgHandler1);
+						new MailMessageParser().parseMailMessage(mailAccess.getMessageStorage().getMessage(
+								"default/INBOX", mails[i].getMailId(), true), msgHandler1);
 						System.out.println(msgHandler1.getString());
 						System.out.println("\n\n----------------------------------- FORWARD VERSION of Message UID #"
 								+ mails[i].getMailId() + "-------------------------------------\n\n");
-						final MailMessage forwardMail = mailConnection.getLogicTools().getFowardMessage(
-								mails[i].getMailId(), "default/INBOX");
+						final MailMessage forwardMail = mailAccess.getLogicTools().getFowardMessage(
+								new long[] { mails[i].getMailId() }, "default/INBOX");
 						final DumperMessageHandler msgHandler = new DumperMessageHandler(false);
 						new MailMessageParser().parseMailMessage(forwardMail, msgHandler);
 						System.out.println(msgHandler.getString());
@@ -199,7 +200,7 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 				}
 
 			} finally {
-				mailConnection.close(true);
+				mailAccess.close(true);
 			}
 
 		} catch (final MailException e) {
@@ -210,11 +211,12 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 
 	public void testReply() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()),
-					"mail-test-session");
+			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
+					new ContextImpl(getCid()), "mail-test-session");
+			session.setPassword(getPassword());
 			final MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
-			final MailConnection<?, ?, ?> mailConnection = MailConnection.getInstance(session);
-			mailConnection.connect(mailConfig);
+			final MailAccess<?, ?, ?> mailConnection = MailAccess.getInstance(session);
+			mailConnection.connect(/* mailConfig */);
 			try {
 				// ByteArrayInputStream in = new
 				// ByteArrayInputStream(TEST_MAIL.getBytes("US-ASCII"));
@@ -228,7 +230,7 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 					}
 					final DumperMessageHandler msgHandler1 = new DumperMessageHandler(true);
 					new MailMessageParser().parseMailMessage(mailConnection.getMessageStorage().getMessage(
-							"default/INBOX", mails[i].getMailId()), msgHandler1);
+							"default/INBOX", mails[i].getMailId(), true), msgHandler1);
 					System.out.println(msgHandler1.getString());
 					System.out.println("\n\n----------------------------------- REPLY VERSION of Message UID #"
 							+ mails[i].getMailId() + "-------------------------------------\n\n");
@@ -254,11 +256,12 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 
 	public void testQuota() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()),
-					"mail-test-session");
+			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
+					new ContextImpl(getCid()), "mail-test-session");
+			session.setPassword(getPassword());
 			final MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
-			final MailConnection<?, ?, ?> mailConnection = MailConnection.getInstance(session);
-			mailConnection.connect(mailConfig);
+			final MailAccess<?, ?, ?> mailConnection = MailAccess.getInstance(session);
+			mailConnection.connect(/* mailConfig */);
 			try {
 				final long[] quota = mailConnection.getFolderStorage().getQuota(null);
 				System.out.println(Arrays.toString(quota));

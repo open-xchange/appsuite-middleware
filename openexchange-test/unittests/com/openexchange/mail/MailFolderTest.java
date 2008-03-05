@@ -80,16 +80,17 @@ public class MailFolderTest extends AbstractMailTest {
 	public void testGetINBOXFolder() {
 		try {
 			SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()), "mail-test-session");
+			session.setPassword(getPassword());
 			MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
 			
-			MailConnection<?, ?, ?> mailConnection = MailConnection.getInstance(session);
-			mailConnection.connect(mailConfig);
+			MailAccess<?, ?, ?> mailAccess = MailAccess.getInstance(session);
+			mailAccess.connect();
 			try {
-				final MailFolder inboxFolder = mailConnection.getFolderStorage().getFolder("INBOX");
+				final MailFolder inboxFolder = mailAccess.getFolderStorage().getFolder("INBOX");
 				
 				assertTrue("No INBOX folder returned!", inboxFolder != null && inboxFolder.getName().equals("INBOX"));
 			} finally {
-				mailConnection.close(true);
+				mailAccess.close(true);
 			}
 		} catch (final Exception e) {
 			e.printStackTrace();
@@ -100,11 +101,12 @@ public class MailFolderTest extends AbstractMailTest {
 	public void testGetSubfolders() {
 		try {
 			SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()), "mail-test-session");
+			session.setPassword(getPassword());
 			MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
-			MailConnection<?, ?, ?> mailConnection = MailConnection.getInstance(session);
-			mailConnection.connect(mailConfig);
+			MailAccess<?, ?, ?> mailAccess = MailAccess.getInstance(session);
+			mailAccess.connect(/*mailConfig*/);
 			try {
-				final MailFolder[] flds = mailConnection.getFolderStorage().getSubfolders("default", true);
+				final MailFolder[] flds = mailAccess.getFolderStorage().getSubfolders("default", true);
 				
 				assertTrue("No subfolders returned!", flds != null && flds.length > 0);
 				
@@ -114,7 +116,7 @@ public class MailFolderTest extends AbstractMailTest {
 				}
 				
 			} finally {
-				mailConnection.close(true);
+				mailAccess.close(true);
 			}
 		} catch (final Exception e) {
 			e.printStackTrace();

@@ -14,6 +14,8 @@ import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.i18n.tools.I18nServices;
+import com.openexchange.imap.IMAPProvider;
+import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 //import com.openexchange.server.services.SessiondService;
@@ -22,6 +24,8 @@ import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.test.TestInit;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.mail.MailInitialization;
+import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.push.udp.EventAdminService;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.CacheException;
@@ -186,6 +190,16 @@ public final class Init {
 
     private static void startAndInjectMailBundle() throws Exception {
         //MailInitialization.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
+    	/*
+    	 * Init config
+    	 */
+    	MailProperties.getInstance().loadProperties();
+    	
+    	IMAPProperties.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
+    	/*
+		 * Register IMAP bundle
+		 */
+		MailProviderRegistry.registerMailProvider("imap_imaps", new IMAPProvider());
     }
 
 

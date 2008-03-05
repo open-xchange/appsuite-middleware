@@ -49,10 +49,16 @@
 
 package com.openexchange.mail;
 
+import java.util.Properties;
+
+import javax.mail.Session;
+
 import junit.framework.TestCase;
 
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.groupware.Init;
+import com.openexchange.imap.IMAPProvider;
+import com.openexchange.mail.mime.MIMESessionPropertyNames;
 
 /**
  * {@link AbstractMailTest}
@@ -170,4 +176,47 @@ public abstract class AbstractMailTest extends TestCase {
 		return user;
 	}
 
+	private static final String STR_TRUE = "true";
+
+	private static final String STR_FALSE = "false";
+
+	private static Properties sessionProperties;
+
+	public static final Properties getDefaultSessionProperties() {
+		synchronized (AbstractMailTest.class) {
+			if (sessionProperties == null) {
+				/*
+				 * Define session properties
+				 */
+				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_BASE64_IGNOREERRORS, STR_TRUE);
+				System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
+				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
+				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
+				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, "UTF-8");
+				/*
+				 * Define imap session properties
+				 */
+				sessionProperties = ((Properties) (System.getProperties().clone()));
+				/*
+				 * A connected IMAPStore maintains a pool of IMAP protocol objects for
+				 * use in communicating with the IMAP server. The IMAPStore will create
+				 * the initial AUTHENTICATED connection and seed the pool with this
+				 * connection. As folders are opened and new IMAP protocol objects are
+				 * needed, the IMAPStore will provide them from the connection pool, or
+				 * create them if none are available. When a folder is closed, its IMAP
+				 * protocol object is returned to the connection pool if the pool is not
+				 * over capacity.
+				 */
+				sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLSIZE, "1");
+				/*
+				 * A mechanism is provided for timing out idle connection pool IMAP
+				 * protocol objects. Timed out connections are closed and removed
+				 * (pruned) from the connection pool.
+				 */
+				sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000");
+				return sessionProperties;
+			}
+			return sessionProperties;
+		}
+	}
 }

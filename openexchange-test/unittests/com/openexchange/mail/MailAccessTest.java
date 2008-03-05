@@ -50,29 +50,31 @@
 package com.openexchange.mail;
 
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.mail.AbstractMailTest;
+import com.openexchange.mail.MailAccess;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
- * {@link MailConnectionTest}
+ * {@link MailAccessTest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailConnectionTest extends AbstractMailTest {
+public final class MailAccessTest extends AbstractMailTest {
 
 	/**
 	 * 
 	 */
-	public MailConnectionTest() {
+	public MailAccessTest() {
 		super();
 	}
 
 	/**
 	 * @param name
 	 */
-	public MailConnectionTest(String name) {
+	public MailAccessTest(String name) {
 		super(name);
 	}
 
@@ -80,51 +82,56 @@ public final class MailConnectionTest extends AbstractMailTest {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
 					new ContextImpl(getCid()), "mail-test-session");
-			MailConnection<?, ?, ?> mailConnection = MailConnection.getInstance(session);
+			session.setPassword(getPassword());
+			MailAccess<?, ?, ?> mailAccess = MailAccess.getInstance(session);
 			MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
-			mailConnection.connect();
-			System.out.println("Active connections: " + MailConnection.getCounter());
+			mailAccess.connect();
+			System.out.println("Active connections: " + MailAccess.getCounter());
 			/*
 			 * close
 			 */
-			mailConnection.close(true);
+			mailAccess.close(true);
 
-			mailConnection = MailConnection.getInstance(session);
+			mailAccess = MailAccess.getInstance(session);
 			mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
-			mailConnection.connect();
-			System.out.println("Active connections: " + MailConnection.getCounter());
+			mailAccess.connect();
+			System.out.println("Active connections: " + MailAccess.getCounter());
 			/*
 			 * close
 			 */
-			mailConnection.close(true);
+			mailAccess.close(false);
 
-			mailConnection = MailConnection.getInstance(session);
+			session.setPassword(null);
+			mailAccess = MailAccess.getInstance(session);
 			/*
 			 * Should fail
 			 */
 			try {
-				mailConnection.connect();
+				mailAccess.connect();
 				assertTrue("Connect invocation should fail", false);
 			} catch (final Exception e) {
 				assertTrue(true);
 			}
-			System.out.println("Active connections: " + MailConnection.getCounter());
+			System.out.println("Active connections: " + MailAccess.getCounter());
+			
 			
 			mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
-			mailConnection.connect();
-			System.out.println("Active connections: " + MailConnection.getCounter());
-			mailConnection.getMessageStorage().getAllMessages("default.INBOX", null, null, null,
+			session.setPassword(getPassword());
+			mailAccess = MailAccess.getInstance(session);
+			mailAccess.connect();
+			System.out.println("Active connections: " + MailAccess.getCounter());
+			mailAccess.getMessageStorage().getAllMessages("default.INBOX", null, null, null,
 					new MailListField[] { MailListField.ID });
 			/*
 			 * close
 			 */
-			mailConnection.close(true);
+			mailAccess.close(true);
 
 			/*
 			 * Test if cache closes connection
 			 */
 			Thread.sleep(10000);
-			System.out.println("Active connections: " + MailConnection.getCounter());
+			System.out.println("Active connections: " + MailAccess.getCounter());
 		} catch (final Exception e) {
 			e.printStackTrace();
 			fail(e.getLocalizedMessage());
@@ -158,7 +165,8 @@ public final class MailConnectionTest extends AbstractMailTest {
 			}
 			System.out.println("All threds finished...");
 			Thread.sleep(10000);
-			System.out.println("\tEND: Active connections: " + MailConnection.getCounter());
+			System.out.println("\tEND: Active connections: " + MailAccess.getCounter());
+			assertTrue("Zero connections should be open", 0 == MailAccess.getCounter());
 		} catch (final Exception e) {
 			e.printStackTrace();
 			fail(e.getLocalizedMessage());
@@ -177,47 +185,51 @@ public final class MailConnectionTest extends AbstractMailTest {
 			try {
 				final SessionObject session = SessionObjectWrapper.createSessionObject(testRef.getUser(),
 						new ContextImpl(testRef.getCid()), "mail-test-session");
-				MailConnection<?, ?, ?> mailConnection = MailConnection.getInstance(session);
+				session.setPassword(testRef.getPassword());
+				MailAccess<?, ?, ?> mailAccess = MailAccess.getInstance(session);
 				MailConfig mailConfig = new MailConfigWrapper(testRef.getLogin(), testRef.getPassword(), testRef.getServer(), testRef.getPort());
-				mailConnection.connect();
-				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailConnection.getCounter());
+				mailAccess.connect();
+				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailAccess.getCounter());
 				/*
 				 * close
 				 */
-				mailConnection.close(true);
+				mailAccess.close(false);
 	
-				mailConnection = MailConnection.getInstance(session);
+				mailAccess = MailAccess.getInstance(session);
 				mailConfig = new MailConfigWrapper(testRef.getLogin(), testRef.getPassword(), testRef.getServer(), testRef.getPort());
-				mailConnection.connect();
-				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailConnection.getCounter());
+				mailAccess.connect();
+				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailAccess.getCounter());
 				/*
 				 * close
 				 */
-				mailConnection.close(true);
+				mailAccess.close(false);
 	
-				mailConnection = MailConnection.getInstance(session);
+				session.setPassword(null);
+				mailAccess = MailAccess.getInstance(session);
 				/*
 				 * Should fail
 				 */
 				try {
-					mailConnection.connect();
+					mailAccess.connect();
 					assertTrue("Connect invocation should fail", false);
 				} catch (final Exception e) {
 					assertTrue(true);
 				}
-				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailConnection.getCounter());
+				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailAccess.getCounter());
 				
 				mailConfig = new MailConfigWrapper(testRef.getLogin(), testRef.getPassword(), testRef.getServer(), testRef.getPort());
-				mailConnection.connect();
-				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailConnection.getCounter());
-				mailConnection.getMessageStorage().getAllMessages("default.INBOX", null, null, null,
+				session.setPassword(testRef.getPassword());
+				mailAccess = MailAccess.getInstance(session);
+				mailAccess.connect();
+				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailAccess.getCounter());
+				mailAccess.getMessageStorage().getAllMessages("default.INBOX", null, null, null,
 						new MailListField[] { MailListField.ID });
 				/*
 				 * close
 				 */
-				mailConnection.close(true);
+				mailAccess.close(false);
 	
-				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailConnection.getCounter());
+				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailAccess.getCounter());
 				
 			} catch (final Exception e) {
 				e.printStackTrace();

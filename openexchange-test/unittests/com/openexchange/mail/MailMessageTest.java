@@ -89,9 +89,10 @@ public final class MailMessageTest extends AbstractMailTest {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
 					new ContextImpl(getCid()), "mail-test-session");
+			session.setPassword(getPassword());
 			final MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
-			final MailConnection<?, ?, ?> mailConnection = MailConnection.getInstance(session);
-			mailConnection.connect(mailConfig);
+			final MailAccess<?, ?, ?> mailConnection = MailAccess.getInstance(session);
+			mailConnection.connect(/*mailConfig*/);
 			try {
 				final MailFolder inboxFolder = mailConnection.getFolderStorage().getFolder("INBOX");
 
@@ -156,9 +157,10 @@ public final class MailMessageTest extends AbstractMailTest {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
 					new ContextImpl(getCid()), "mail-test-session");
+			session.setPassword(getPassword());
 			final MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
-			final MailConnection<?, ?, ?> mailConnection = MailConnection.getInstance(session);
-			mailConnection.connect(mailConfig);
+			final MailAccess<?, ?, ?> mailConnection = MailAccess.getInstance(session);
+			mailConnection.connect(/*mailConfig*/);
 			try {
 				final MailFolder inboxFolder = mailConnection.getFolderStorage().getFolder("INBOX");
 				checkSubfolders(inboxFolder, mailConnection);
@@ -172,7 +174,7 @@ public final class MailMessageTest extends AbstractMailTest {
 		}
 	}
 
-	private void checkSubfolders(final MailFolder parent, final MailConnection<?, ?, ?> mailConnection) throws MailException {
+	private void checkSubfolders(final MailFolder parent, final MailAccess<?, ?, ?> mailConnection) throws MailException {
 		checkMessages(parent, mailConnection);
 		final MailFolder[] subfolders = mailConnection.getFolderStorage().getSubfolders(parent.getFullname(), true);
 		assertTrue("Has Subfolders is wrong!", parent.hasSubfolders() ? subfolders != null && subfolders.length > 0
@@ -184,7 +186,7 @@ public final class MailMessageTest extends AbstractMailTest {
 
 	private static final String TEMPL = "Missing field %s in message %d in folder %s";
 
-	private void checkMessages(final MailFolder folder, final MailConnection<?, ?, ?> mailConnection) {
+	private void checkMessages(final MailFolder folder, final MailAccess<?, ?, ?> mailConnection) {
 		MailMessage[] msgs = null;
 		try {
 			msgs = mailConnection.getMessageStorage().getMessages(folder.getFullname(), null,

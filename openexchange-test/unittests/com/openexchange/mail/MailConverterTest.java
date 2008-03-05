@@ -66,12 +66,9 @@ import javax.mail.Part;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 
-import com.openexchange.imap.IMAPException;
-import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MIMESessionPropertyNames;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPStore;
@@ -100,7 +97,7 @@ public class MailConverterTest extends AbstractMailTest {
 
 	public void testMessageConverter() {
 		try {
-			final Session session = Session.getDefaultInstance(IMAPSessionProperties.getDefaultSessionProperties());
+			final Session session = Session.getDefaultInstance(getDefaultSessionProperties());
 			final IMAPStore imapStore = (IMAPStore) session.getStore("imap");
 			try {
 				imapStore.connect(getServer(), getPort(), getLogin(), getPassword());
@@ -119,9 +116,6 @@ public class MailConverterTest extends AbstractMailTest {
 				imapStore.close();
 			}
 		} catch (final MessagingException e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		} catch (final IMAPException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		} catch (final Exception e) {
