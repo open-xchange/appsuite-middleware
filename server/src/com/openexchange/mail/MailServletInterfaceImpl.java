@@ -324,7 +324,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		}
 		initConnection();
 		return mailConnection.getMessageStorage()
-				.getMessagesByUID(folder, uids, MailListField.getFields(fields), false);
+				.getMessagesByID(folder, uids, MailListField.getFields(fields), false);
 	}
 
 	@Override

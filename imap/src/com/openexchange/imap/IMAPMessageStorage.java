@@ -338,7 +338,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 		}
 	}
 
-	@SuppressWarnings("null")
 	public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange,
 			final MailListField[] searchFields, final String[] searchPatterns, final boolean linkSearchTermsWithOR,
 			final MailListField[] fields) throws MailException {
@@ -463,7 +462,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements MailMe
 		}
 	}
 
-	public MailMessage[] getMessagesByUID(final String folderArg, final long[] msgUIDs, final MailListField[] fields,
+	public MailMessage[] getMessagesByID(final String folderArg, final long[] msgUIDs, final MailListField[] fields,
 			final boolean fromCache) throws MailException {
 		try {
 			final String fullname = prepareMailFolderParam(folderArg);

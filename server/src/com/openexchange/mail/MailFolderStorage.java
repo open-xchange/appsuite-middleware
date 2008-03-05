@@ -127,7 +127,7 @@ public interface MailFolderStorage {
 	 * 
 	 * @param toCreate
 	 *            The mail folder to create
-	 * @return Fullname of the created mail folder
+	 * @return The fullname of the created mail folder
 	 * @throws MailException
 	 *             If creation fails
 	 */
@@ -136,26 +136,54 @@ public interface MailFolderStorage {
 	/**
 	 * Updates an existing mail folder identified through given fullname. All
 	 * attributes set in given mail folder parameter are applied.
+	 * <p>
+	 * The currently known attributes that make sense being updated are:
+	 * <ul>
+	 * <li>parent's fullname; meaning a move operation is performed if
+	 * {@link MailFolder#containsParentFullname()} returns <code>true</code></li>
+	 * <li>name; meaning a rename operation is performed if
+	 * {@link MailFolder#containsName()} returns <code>true</code></li>
+	 * <li>permissions; meaning folder's permissions are updated if
+	 * {@link MailFolder#containsPermissions()} returns <code>true</code></li>
+	 * <li>subscription; meaning a subscribe/unsubscribe operation is performed
+	 * if {@link MailFolder#containsSubscribed()} returns <code>true</code></li>
+	 * </ul>
+	 * Of course more folder attributes may be checked by implementation to
+	 * enhance update operations. If so, these additional operations should be
+	 * listed in method's JavaDoc header.
 	 * 
 	 * @param fullname
 	 *            The fullname of the mail folder to update
 	 * @param toUpdate
 	 *            The mail folder to update containing only the modified fields
-	 * @return Fullname of the updated mail folder
+	 * @return The fullname of the updated mail folder
 	 * @throws MailException
+	 *             If folder cannot be updated
 	 */
 	public String updateFolder(String fullname, MailFolder toUpdate) throws MailException;
 
 	/**
 	 * Deletes an existing mail folder identified through given fullname. If
-	 * folder is not located below default trash folder it is moved (including
-	 * subfolder tree) to default trash folder; otherwise it is deleted
-	 * permanently.
+	 * folder is not located below default trash folder it is backed up
+	 * (including subfolder tree) in default trash folder; otherwise it is
+	 * deleted permanently.
+	 * <p>
+	 * While another backup folder with the same name already exists below
+	 * default trash folder, an increasing serial number is appended to folder
+	 * name until its name is unique inside default trash folder's subfolders.
+	 * E.g.: If folder "DeleteMe" already exists below default trash folder, the
+	 * next name would be "DeleteMe2". If again a folder "DeleteMe2" already
+	 * exists below default trash folder, the next name would be "DeleteMe3",
+	 * and so no.
+	 * <p>
+	 * If default trash folder cannot hold subfolders, the folder is either
+	 * deleted permanently or an appropriate exception may be thrown.
 	 * 
 	 * @param fullname
 	 *            The fullname of the mail folder to delete
-	 * @return Fullname of the deleted mail folder
+	 * @return The fullname of the deleted mail folder
 	 * @throws MailException
+	 *             If mail folder cannot be deleted
 	 */
 	public String deleteFolder(String fullname) throws MailException;
 
@@ -200,50 +228,56 @@ public interface MailFolderStorage {
 	public long[] getQuota(String folder) throws MailException;
 
 	/**
-	 * Gets the ID of default drafts folder
+	 * Gets the fullname of default drafts folder
 	 * 
-	 * @return The ID of default drafts folder
+	 * @return The fullname of default drafts folder
 	 * @throws MailException
+	 *             If confirmed ham folder's fullname cannot be returned
 	 */
 	public String getConfirmedHamFolder() throws MailException;
 
 	/**
-	 * Gets the ID of default drafts folder
+	 * Gets the fullname of default drafts folder
 	 * 
-	 * @return The ID of default drafts folder
+	 * @return The fullname of default drafts folder
 	 * @throws MailException
+	 *             If confirmed spam folder's fullname cannot be returned
 	 */
 	public String getConfirmedSpamFolder() throws MailException;
 
 	/**
-	 * Gets the ID of default drafts folder
+	 * Gets the fullname of default drafts folder
 	 * 
-	 * @return The ID of default drafts folder
+	 * @return The fullname of default drafts folder
 	 * @throws MailException
+	 *             If draft folder's fullname cannot be returned
 	 */
 	public String getDraftsFolder() throws MailException;
 
 	/**
-	 * Gets the ID of default spam folder
+	 * Gets the fullname of default spam folder
 	 * 
-	 * @return The ID of default spam folder
+	 * @return The fullname of default spam folder
 	 * @throws MailException
+	 *             If spam folder's fullname cannot be returned
 	 */
 	public String getSpamFolder() throws MailException;
 
 	/**
-	 * Gets the ID of default sent folder
+	 * Gets the fullname of default sent folder
 	 * 
-	 * @return The ID of default sent folder
+	 * @return The fullname of default sent folder
 	 * @throws MailException
+	 *             If sent folder's fullname cannot be returned
 	 */
 	public String getSentFolder() throws MailException;
 
 	/**
-	 * Gets the ID of default trash folder
+	 * Gets the fullname of default trash folder
 	 * 
-	 * @return The ID of default trash folder
+	 * @return The fullname of default trash folder
 	 * @throws MailException
+	 *             If trash folder's fullname cannot be returned
 	 */
 	public String getTrashFolder() throws MailException;
 
@@ -251,6 +285,7 @@ public interface MailFolderStorage {
 	 * Releases all used resources when closing parental {@link MailAccess}
 	 * 
 	 * @throws MailException
+	 *             If resources cannot be released
 	 */
 	public void releaseResources() throws MailException;
 

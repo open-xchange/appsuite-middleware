@@ -66,6 +66,9 @@ public interface MailMessageStorage {
 	 * <p>
 	 * The returned instance of {@link MailMessage} is completely pre-filled
 	 * including content references.
+	 * <p>
+	 * If no mail could be found for given mail ID, <code>null</code> is
+	 * returned.
 	 * 
 	 * @param folder
 	 *            The folder fullname
@@ -184,7 +187,10 @@ public interface MailMessageStorage {
 			String[] searchPatterns, boolean linkSearchTermsWithOR, MailListField[] fields) throws MailException;
 
 	/**
-	 * Gets messages located in given folder by specified mail IDs
+	 * Gets the mails located in given folder by specified mail IDs.
+	 * <p>
+	 * If no mail could be found for a given mail ID, the corresponding value in
+	 * returned array is <code>null</code>.
 	 * 
 	 * @param folder
 	 *            The folder fullname
@@ -200,7 +206,7 @@ public interface MailMessageStorage {
 	 * @throws MailException
 	 *             If messages cannot be returned.
 	 */
-	public MailMessage[] getMessagesByUID(String folder, long[] mailIds, MailListField[] fields, boolean fromCache)
+	public MailMessage[] getMessagesByID(String folder, long[] mailIds, MailListField[] fields, boolean fromCache)
 			throws MailException;
 
 	/**
@@ -228,7 +234,9 @@ public interface MailMessageStorage {
 
 	/**
 	 * Deletes the messages located in given folder identified through given
-	 * mail IDs
+	 * mail IDs.
+	 * <p>
+	 * If no mail could be found for a given mail ID, it is treated as a no-op.
 	 * 
 	 * @param folder
 	 *            The folder fullname
@@ -246,8 +254,11 @@ public interface MailMessageStorage {
 	public boolean deleteMessages(String folder, long[] mailIds, boolean hardDelete) throws MailException;
 
 	/**
-	 * Copies the messages identified through given mail IDs from source folder
-	 * to destination folder
+	 * Copies the mails identified through given mail IDs from source folder to
+	 * destination folder.
+	 * <p>
+	 * If no mail could be found for a given mail ID, the corresponding value in
+	 * returned array of <code>long</code> is <code>-1</code>.
 	 * 
 	 * @param sourceFolder
 	 *            The source folder fullname
@@ -289,6 +300,8 @@ public interface MailMessageStorage {
 	 * Updates the system flags of the messages specified by given mail IDs
 	 * located in given folder.
 	 * <p>
+	 * If no mail could be found for a given mail ID, it is treated as a no-op.
+	 * <p>
 	 * System flags are:
 	 * <ul>
 	 * <li>ANSWERED - This flag is set by clients to indicate that this message
@@ -328,6 +341,8 @@ public interface MailMessageStorage {
 	 * An <b>optional</b> method that updates the color label of the messages
 	 * specified by given mail IDs located in given folder.
 	 * <p>
+	 * If no mail could be found for a given mail ID, it is treated as a no-op.
+	 * <p>
 	 * The underlying mailing system needs to support some kind of
 	 * user-definable flags.
 	 * <p>
@@ -348,6 +363,9 @@ public interface MailMessageStorage {
 	/**
 	 * Fetches the mail message's attachment identified through given
 	 * <code>sequenceId</code>.
+	 * <p>
+	 * If no mail could be found for given mail ID, returned mail part is
+	 * <code>null</code>.
 	 * 
 	 * @param folder
 	 *            The folder fullname
@@ -369,6 +387,9 @@ public interface MailMessageStorage {
 	/**
 	 * Fetches the mail message's image attachment identified through given
 	 * <code>cid</code>.
+	 * <p>
+	 * If no mail could be found for given mail ID, returned mail part is
+	 * <code>null</code>.
 	 * 
 	 * @param folder
 	 *            The folder fullname

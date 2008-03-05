@@ -161,7 +161,7 @@ public final class MailFolder implements Serializable {
 	public static final String DEFAULT_FOLDER_NAME = "E-Mail";
 
 	/**
-	 * Virtual ID of mailbox's root folder
+	 * Virtual fullname of mailbox's root folder
 	 * 
 	 * @value default
 	 */
