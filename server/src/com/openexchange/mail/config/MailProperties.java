@@ -89,7 +89,7 @@ public final class MailProperties {
 	 * 
 	 * @return The singleton instance of {@link MailProperties}
 	 */
-	static MailProperties getInstance() {
+	public static MailProperties getInstance() {
 		return instance;
 	}
 
@@ -156,7 +156,7 @@ public final class MailProperties {
 	 * @throws MailConfigException
 	 *             If loading of global mail properties fails
 	 */
-	void loadProperties() throws MailConfigException {
+	public void loadProperties() throws MailConfigException {
 		if (!loaded.get()) {
 			synchronized (loaded) {
 				if (!loaded.get()) {
@@ -170,7 +170,7 @@ public final class MailProperties {
 	/**
 	 * Exclusively resets the global mail properties
 	 */
-	void resetProperties() {
+	public void resetProperties() {
 		if (loaded.get()) {
 			synchronized (loaded) {
 				if (loaded.get()) {
