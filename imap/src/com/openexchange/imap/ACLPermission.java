@@ -186,7 +186,7 @@ public final class ACLPermission extends MailPermission {
 		return super.setAllPermission(fp, opr, opw, opd);
 	}
 
-	private static final String ERR = "This method is not applicable to an IMAP permission";
+	private static final String ERR = "This method is not applicable to an ACL permission";
 
 	/*
 	 * (non-Javadoc)
@@ -261,13 +261,22 @@ public final class ACLPermission extends MailPermission {
 	private static final transient Rights RIGHTS_UNMAPPABLE = new Rights(STR_UNMAPPABLE);
 
 	/**
-	 * Maps this permission to ACL rights and fills them into an
-	 * <code>ACL</code> instance
+	 * Maps this permission to ACL rights and fills them into an instance of
+	 * {@link ACL}.
 	 * 
-	 * @return mapped <code>ACL</code> instance
+	 * @param user2aclArgs
+	 *            The IMAP-server-specific user2acl arguments used for mapping
+	 * @param imapConfig
+	 *            The user's IMAP configuration
+	 * @param ctx
+	 *            The context
+	 * @return An instance of {@link ACL} representing this permission's rights
 	 * @throws AbstractOXException
+	 *             If this permission cannot be mapped to an instance of
+	 *             {@link ACL}
 	 */
-	public ACL getPermissionACL(final User2ACLArgs user2aclArgs, final IMAPConfig imapConfig, final Context ctx) throws AbstractOXException {
+	public ACL getPermissionACL(final User2ACLArgs user2aclArgs, final IMAPConfig imapConfig, final Context ctx)
+			throws AbstractOXException {
 		if (this.acl != null) {
 			/*
 			 * Return caches ACL
@@ -279,14 +288,22 @@ public final class ACLPermission extends MailPermission {
 	}
 
 	/**
-	 * Parses the rights given through <code>ACL</code> instance into this
-	 * permission object
+	 * Parses the rights given through instance of {@link ACL} into this
+	 * permission object.
 	 * 
-	 * @param acl -
-	 *            the <code>ACL</code> instance
+	 * @param acl
+	 *            The source instance of {@link ACL}
+	 * @param user2aclArgs
+	 *            The IMAP-server-specific user2acl arguments used for mapping
+	 * @param imapConfig
+	 *            The user's IMAP configuration
+	 * @param ctx
+	 *            The context
 	 * @throws AbstractOXException
+	 *             If given ACL cannot be applied to this permission
 	 */
-	public void parseACL(final ACL acl, final User2ACLArgs user2aclArgs, final IMAPConfig imapConfig, final Context ctx) throws AbstractOXException {
+	public void parseACL(final ACL acl, final User2ACLArgs user2aclArgs, final IMAPConfig imapConfig, final Context ctx)
+			throws AbstractOXException {
 		setEntity(User2ACL.getInstance(imapConfig).getUserID(acl.getName(), ctx, user2aclArgs));
 		parseRights(acl.getRights());
 		this.acl = acl;
