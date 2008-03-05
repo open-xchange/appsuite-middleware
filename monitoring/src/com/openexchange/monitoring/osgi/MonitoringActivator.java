@@ -158,14 +158,16 @@ public final class MonitoringActivator implements BundleActivator {
 		LOG.info("stopping bundle: com.openexchange.monitoring");
 		
 		try {
-			msh.removeServiceHolderListenerByName(listener.getClass().getName());
+		    if (null != serviceRegistration) {
+		        serviceRegistration.unregister();
+		        serviceRegistration = null;
+		    }
+
+            msh.removeServiceHolderListenerByName(listener.getClass().getName());
 			if (MonitoringInit.getInstance().isStarted()) {
 				MonitoringInit.getInstance().stop();
 			}
 			msh = null;
-
-			serviceRegistration.unregister();
-			serviceRegistration = null;
 			/*
 			 * Close service trackers
 			 */
