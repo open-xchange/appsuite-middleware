@@ -92,6 +92,8 @@ import com.openexchange.tools.servlet.OXJSONException;
 
 public class ContactRequest {
 
+	public static final String ACTION_GET_USER = "getuser";
+
 	final Session sessionObj;
 
 	final Context ctx;
@@ -143,6 +145,8 @@ public class ContactRequest {
 			return actionAll(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
 			return actionGet(jsonObject);
+		} else if (action.equalsIgnoreCase(ACTION_GET_USER)) {
+			return actionGetUser(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_SEARCH)) {
 			return actionSearch(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_COPY)) {
@@ -250,8 +254,7 @@ public class ContactRequest {
 			}
 
 			final ContactWriter contactWriter = new ContactWriter(timeZone);
-			ContactInterface contactInterface = ContactServices.getInstance().getService(
-					folderId);
+			ContactInterface contactInterface = ContactServices.getInstance().getService(folderId);
 			if (contactInterface == null) {
 				contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
 			}
@@ -389,24 +392,27 @@ public class ContactRequest {
 						}
 					}
 				} else {
-					// costs more performance because every object in the array is checked 
+					// costs more performance because every object in the array
+					// is checked
 					for (int a = 0; a < objectIdAndFolderId.length; a++) {
-						ContactInterface contactInterface = ContactServices.getInstance().getService(
-								objectIdAndFolderId[a][1]);
+						ContactInterface contactInterface = ContactServices.getInstance()
+								.getService(objectIdAndFolderId[a][1]);
 						if (contactInterface == null) {
 							contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
 						}
 						final ContactWriter contactwriter = new ContactWriter(timeZone);
 
-						final int[][] newObjectIdAndFolderId = { { objectIdAndFolderId[a][0], objectIdAndFolderId[a][1] } }; 
-						it = contactInterface.getObjectsById(newObjectIdAndFolderId, internalColumns);
+						final int[][] newObjectIdAndFolderId = { { objectIdAndFolderId[a][0],
+								objectIdAndFolderId[a][1] } };
+						it = contactInterface.getObjectsById(newObjectIdAndFolderId,
+								internalColumns);
 
 						while (it.hasNext()) {
 							final ContactObject contactObj = (ContactObject) it.next();
 							final JSONArray jsonContactArray = new JSONArray();
 							contactwriter.writeArray(contactObj, columns, jsonContactArray);
 							jsonResponseArray.put(jsonContactArray);
-							
+
 							lastModified = contactObj.getLastModified();
 						}
 
@@ -506,6 +512,32 @@ public class ContactRequest {
 		timestamp = new Date(0);
 
 		final ContactObject contactObj = contactInterface.getObjectById(id, inFolder);
+		final ContactWriter contactwriter = new ContactWriter(timeZone);
+
+		final JSONObject jsonResponseObject = new JSONObject();
+		contactwriter.writeContact(contactObj, jsonResponseObject);
+
+		timestamp = contactObj.getLastModified();
+
+		return jsonResponseObject;
+	}
+
+	public JSONObject actionGetUser(final JSONObject jsonObj) throws OXMandatoryFieldException,
+			JSONException, OXException, OXJSONException, AjaxException {
+		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
+
+		Context ctx = null;
+		try {
+			ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+		} catch (ContextException ct) {
+			new ContactException(ct);
+		}
+		
+		ContactInterface contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+
+		timestamp = new Date(0);
+
+		final ContactObject contactObj = contactInterface.getUserById(id);
 		final ContactWriter contactwriter = new ContactWriter(timeZone);
 
 		final JSONObject jsonResponseObject = new JSONObject();

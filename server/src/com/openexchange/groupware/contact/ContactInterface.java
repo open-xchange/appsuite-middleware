@@ -133,6 +133,16 @@ public interface ContactInterface {
 	 * @throws OXException, OXPermissionException
 	 */
 	public ContactObject getObjectById(int objectId, int inFolder) throws OXException;
+	
+	/**
+	 * Loads one contact of the given user id
+	 * @param userId
+	 * The User ID
+	 * @return 
+	 * return the ContactObject
+	 * @throws OXException
+	 */
+	public ContactObject getUserById(int userId) throws OXException;
 
 	/**
 	 * Lists all modified objects in a folder

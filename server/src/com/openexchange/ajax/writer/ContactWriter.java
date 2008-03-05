@@ -179,6 +179,7 @@ public class ContactWriter extends CommonWriter {
 		writeParameter(ContactFields.USERFIELD18, contactobject.getUserField18(), jsonObj);
 		writeParameter(ContactFields.USERFIELD19, contactobject.getUserField19(), jsonObj);
 		writeParameter(ContactFields.USERFIELD20, contactobject.getUserField20(), jsonObj);
+		writeParameter(ContactFields.USER_ID, contactobject.getInternalUserId(), jsonObj);
 		writeParameter(ContactFields.DISTRIBUTIONLIST_FLAG, contactobject.getMarkAsDistribtuionlist(), jsonObj);
 		
 		final JSONArray jsonLinkArray = getLinksAsJSONArray(contactobject);

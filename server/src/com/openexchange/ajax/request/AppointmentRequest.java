@@ -138,6 +138,8 @@ public class AppointmentRequest {
 		CalendarObject.PARTICIPANTS,
 		CalendarObject.USERS,
 		AppointmentObject.SHOWN_AS,
+		AppointmentObject.DELETE_EXCEPTIONS,
+		AppointmentObject.CHANGE_EXCEPTIONS,
 		AppointmentObject.FULL_TIME,
 		AppointmentObject.COLOR_LABEL,
 		CalendarDataObject.TIMEZONE

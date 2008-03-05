@@ -1003,6 +1003,27 @@ public class Contacts implements DeleteListener {
 		}
 	}
 	
+	public static ContactObject getUserById(final int userid, final int user, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
+		
+		ContactObject co = null;
+		final ContactSql contactSQL = new ContactMySql(ctx, user);
+		
+		StringBuilder sb = new StringBuilder();
+		for (int i=0;i<650;i++){				
+			if (mapping[i] != null){
+				sb.append("co.");
+				sb.append(mapping[i].getDBFieldName());
+				sb.append(',');
+			}
+		}
+		sb = contactSQL.iFgetContactById(sb);
+		contactSQL.setSelect(sb.toString());
+		contactSQL.setInternalUser(userid);	
+		co = fillContactObject(contactSQL.getSqlCommand(), user, memberInGroups, ctx, uc, readCon);
+			    
+		return co;
+	}
+	
 	public static ContactObject getContactById(final int objectId, final int userId, final int[] memberInGroups, final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
 		
 		ContactObject co = null;
