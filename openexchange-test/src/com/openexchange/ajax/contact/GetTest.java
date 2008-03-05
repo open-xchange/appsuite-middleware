@@ -52,4 +52,11 @@ public class GetTest extends ContactTest {
 		contactObject.setObjectID(objectId);
 		compareObject(contactObject, loadContact);
 	}
+	
+	public void testGetUser() throws Exception {
+		ContactObject loadContact = loadUser(getWebConversation(), userId, getHostName(), getSessionId());
+		assertNotNull("contact object is null", loadContact);
+		assertEquals("user id is not equals", userId, loadContact.getInternalUserId());
+		assertTrue("object id not set", loadContact.getObjectID() > 0);
+	}
 }
