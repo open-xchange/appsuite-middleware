@@ -517,6 +517,9 @@ public class AppointmentRequest {
 		try {
 			while (it.hasNext()) {
 				final CalendarDataObject appointmentobject = (CalendarDataObject)it.next();
+				if (null == appointmentobject) {
+				    continue;
+				}
 				final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone);
 				
 				final Date startDate = appointmentobject.getStartDate();
@@ -585,6 +588,11 @@ public class AppointmentRequest {
 			}
 			
 			return jsonResponseArray;
+		} catch (SearchIteratorException e) {
+		    throw e;
+        } catch (OXException e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
 		} finally {
 			if (it != null) {
 				it.close();

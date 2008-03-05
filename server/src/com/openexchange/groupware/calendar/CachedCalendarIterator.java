@@ -49,13 +49,11 @@
 
 package com.openexchange.groupware.calendar;
 
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
@@ -153,7 +151,7 @@ public class CachedCalendarIterator implements SearchIterator {
                 }
             }
         } else {
-            throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT, "One requested element does not exists, the request size and the result size is different.");
+            cc++;
         }
         return null;
     }
@@ -189,7 +187,7 @@ public class CachedCalendarIterator implements SearchIterator {
         CalendarDataObject cdao;
         CalendarDataObject temp;
         try {
-            cdao = (CalendarDataObject)list.get(counter++);
+            cdao = list.get(counter++);
             if (CACHED_ITERATOR_FAST_FETCH) {
                 if (pre_fetch < counter) {
                     if (readcon == null && (cdao.fillParticipants() || cdao.fillUserParticipants() || (cdao.fillFolderID() && cdao.containsParentFolderID()))) {
@@ -235,7 +233,7 @@ public class CachedCalendarIterator implements SearchIterator {
             }
             
             // Security check for bug 10836 
-            if (cdao.getFolderType() == FolderObject.PRIVATE || cdao.getFolderType() == FolderObject.SHARED) {
+            if (CACHED_ITERATOR_FAST_FETCH && (cdao.getFolderType() == FolderObject.PRIVATE || cdao.getFolderType() == FolderObject.SHARED)) {
             	UserParticipant up[] = cdao.getUsers();
             	boolean found = false;
             	for (int a = 0; a < up.length; a++) {
