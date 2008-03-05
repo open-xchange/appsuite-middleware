@@ -1,47 +1,24 @@
 # System Properties
 
-# Define the location of default cache configuration file
+# Location of default cache configuration file
 com.openexchange.caching.configfile:@oxconfdir@/cache.ccf
 
-# General mail config
-MailProperties=@serverconfdir@/mail.properties
+# Enabled/disable service usage inspection. If enabled, all services
+# obtained and managed by ServiceHolder class will be tracked to ensure
+# all services are put back (via unget) within a certain amount of time.
+# The time range can be defined through property 'serviceUsageTimeout'.
+serviceUsageInspection=false
 
-# General transport config
-TransportProperties=@serverconfdir@/transport.properties
-
-# JavaMail Properties
-JavaMailProperties=@serverconfdir@/javamail.properties
-
-# Name of the class implementing the mail connection
-MailProtocol=com.openexchange.imap.IMAPConnection
-# ... and its config
-IMAPProperties=@serverconfdir@/imap.properties
-
-# Name of the class implementing the mail transport connection
-MailTransportProtocol=com.openexchange.smtp.SMTPTransport
-# ... and its config
-SMTPProperties=@serverconfdir@/smtp.properties
+# The service usage timeout in milliseconds. This property only has
+# effect if property 'serviceUsageInspection' is set to 'true'.
+serviceUsageTimeout=10000
 
 # Location of the MIME type file
 MimeTypeFile=@serverconfdir@/mime.types
 
-# Name of the class that implements how the login information should be
-# processed.
-# * com.openexchange.groupware.contexts.RdbLoginInfo split only the login info
-#   by the @ sign and resolve context and user in database.
-LoginInfo=com.openexchange.groupware.contexts.impl.RdbLoginInfo
-
 # Name of the class implementing the UserConfigurationStorage.
-# Currenlty known aliases: Caching, DB
+# Currently known aliases: Caching, DB
 UserConfigurationStorage=Caching
-
-# Name of the class that implements how to get the link for the configuration
-# setup.
-SetupLink=com.openexchange.groupware.integration.EmptyImpl
-
-# Location of the configuration file for the user specific configuration jump.
-# The content of this file depends on the implementation of the SetupLink.
-ConfigJumpConf=@serverconfdir@/configjump.properties
 
 # Switch for enabling caching in the groupware. Normally this should be set to
 # true or the database will get a lot more load.
@@ -89,8 +66,6 @@ EVENTPROPERTIES:@serverconfdir@/event.properties
 PUSHPROPERTIES:@serverconfdir@/push.properties
 configDB=@oxconfdir@/configdb.properties
 FOLDERCACHEPROPERTIES=@serverconfdir@/foldercache.properties
-IMAPPROPERTIES=@serverconfdir@/imap.properties
-JAVAMAILPROPERTIES=@serverconfdir@/javamail.properties
 SPELLCHECKCFG=@serverconfdir@/spellcheck.cfg
 
 UPDATETASKSCFG=@serverconfdir@/updatetasks.cfg
@@ -103,5 +78,11 @@ HTMLEntities=@serverconfdir@/HTMLEntities.properties
 
 # Location of the configuration file for mail caches
 MailCacheConfig:@serverconfdir@/mailcache.ccf
+
+# Location of tidy messages configuration file
+TidyMessages=@serverconfdir@/TidyMessages.properties
+
+# Location of tidy configuration file
+TidyConfiguration=@serverconfdir@/TidyConfiguration.properties
 
 SERVER_NAME=local
