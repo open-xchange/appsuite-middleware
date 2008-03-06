@@ -56,7 +56,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.TimeZone;
 
 import javax.activation.DataHandler;
 import javax.mail.MessagingException;
@@ -69,9 +68,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.mail.mime.ContentType;
@@ -332,29 +328,14 @@ public class MailObject {
 						this.folderId).append(',').append(module).toString());
 			}
 			/*
-			 * Set sent date
+			 * Set sent date in UTC time
 			 */
 			if (msg.getSentDate() == null) {
-				final long current = System.currentTimeMillis();
-				final TimeZone userTimeZone = TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(),
-						ContextStorage.getStorageContext(session.getContextId())).getTimeZone());
-				msg.setSentDate(new Date(current + userTimeZone.getOffset(current)));
+				msg.setSentDate(new Date());
 			}
 			/*
 			 * Finally send mail
 			 */
-//			final MailConnection<?, ?, ?> mailConnection = MailConnection.getInstance(session);
-//			try {
-//				final long start = System.currentTimeMillis();
-//				mailConnection.connect(MailProvider.getInstance().getMailConfig(session));
-//				MailInterfaceImpl.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-//				MailInterfaceImpl.mailInterfaceMonitor.changeNumSuccessfulLogins(true);
-//			} catch (final MailException e) {
-//				if (e.getDetailNumber() == 2) {
-//					MailInterfaceImpl.mailInterfaceMonitor.changeNumFailedLogins(true);
-//				}
-//				throw e;
-//			}
 			final MailTransport transport = MailTransport.getInstance(session);
 			try {
 				final UnsynchronizedByteArrayOutputStream bos = new UnsynchronizedByteArrayOutputStream();
@@ -367,8 +348,6 @@ public class MailObject {
 			throw MIMEMailException.handleMessagingException(e);
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		} catch (final ContextException e) {
-			throw new MailException(e);
 		}
 	}
 

@@ -119,7 +119,6 @@ import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
-import com.sun.mail.smtp.SMTPMessage;
 
 /**
  * {@link MIMEMessageFiller} - Provides basic methods to fills an instance of
@@ -468,12 +467,12 @@ public class MIMEMessageFiller {
 	 * 
 	 * @param mail
 	 *            The source mail
-	 * @param newSMTPMsg
-	 *            The SMTP message
+	 * @param mimeMessage
+	 *            The MIME message
 	 * @throws AddressException
 	 * @throws MessagingException
 	 */
-	public void setSendHeaders(final ComposedMailMessage mail, final SMTPMessage newSMTPMsg) throws AddressException,
+	public void setSendHeaders(final ComposedMailMessage mail, final MimeMessage mimeMessage) throws AddressException,
 			MessagingException {
 		/*
 		 * Set the Reply-To header for future replies to this new message
@@ -484,19 +483,19 @@ public class MIMEMessageFiller {
 		} else {
 			ia = parseAddressList(usm.getReplyToAddr(), false);
 		}
-		newSMTPMsg.setReplyTo(ia);
+		mimeMessage.setReplyTo(ia);
 		/*
 		 * Set sent date if not done, yet
 		 */
-		if (newSMTPMsg.getSentDate() == null) {
-			newSMTPMsg.setSentDate(new Date());
+		if (mimeMessage.getSentDate() == null) {
+			mimeMessage.setSentDate(new Date());
 		}
 		/*
 		 * Set default subject if none set
 		 */
 		final String subject;
-		if ((subject = newSMTPMsg.getSubject()) == null || subject.length() == 0) {
-			newSMTPMsg.setSubject(new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale())
+		if ((subject = mimeMessage.getSubject()) == null || subject.length() == 0) {
+			mimeMessage.setSubject(new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx).getLocale())
 					.getString(MailStrings.DEFAULT_SUBJECT));
 		}
 	}

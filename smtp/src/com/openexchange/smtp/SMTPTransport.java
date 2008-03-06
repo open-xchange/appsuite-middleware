@@ -263,11 +263,9 @@ public final class SMTPTransport extends MailTransport {
 			final StringHelper strHelper = new StringHelper(locale);
 			smtpMessage.setSubject(strHelper.getString(MailStrings.ACK_SUBJECT));
 			/*
-			 * Sent date
+			 * Sent date in UTC time
 			 */
-			final Date date = new Date();
-			final int offset = TimeZone.getTimeZone(u.getTimeZone()).getOffset(date.getTime());
-			smtpMessage.setSentDate(new Date(System.currentTimeMillis() - offset));
+			smtpMessage.setSentDate(new Date());
 			/*
 			 * Set common headers
 			 */
@@ -281,6 +279,10 @@ public final class SMTPTransport extends MailTransport {
 			 * Define text content
 			 */
 			final Date sentDate = srcMail.getSentDate();
+			if (sentDate != null) {
+				final int offset = TimeZone.getTimeZone(u.getTimeZone()).getOffset(sentDate.getTime());
+				sentDate.setTime(sentDate.getTime() + offset);
+			}
 			final MimeBodyPart text = new MimeBodyPart();
 			text.setText(performLineFolding(strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT).replaceFirst(
 					"#DATE#",
