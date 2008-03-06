@@ -4,7 +4,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.ContactTest;
-import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 
 public class ListTest extends ContactTest {
@@ -75,5 +74,13 @@ public class ListTest extends ContactTest {
 		assertEquals("check response array", 2, contactArray.length);
 		
 		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getSessionId());
+	}
+	
+	public void testListUser() throws Exception {
+		final int[] userIdArray = new int[] { userId };
+		final int cols[] = new int[]{ ContactObject.OBJECT_ID, ContactObject.SUR_NAME, ContactObject.DISPLAY_NAME } ;
+		
+		ContactObject[] contactArray = listUser(getWebConversation(), userIdArray, cols, PROTOCOL + getHostName(), getSessionId());
+		assertEquals("check response array", 1, contactArray.length);
 	}
 }
