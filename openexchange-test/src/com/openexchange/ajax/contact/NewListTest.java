@@ -50,6 +50,7 @@
 package com.openexchange.ajax.contact;
 
 import java.util.Date;
+import java.util.Iterator;
 
 import com.openexchange.ajax.appointment.Tools;
 import com.openexchange.ajax.contact.action.AllRequest;
@@ -130,6 +131,20 @@ public class NewListTest extends AbstractAJAXSession {
         // no error.
         final CommonListResponse listR = (CommonListResponse) Executor.execute(
             clientA, new ListRequest(allR.getListIDs(), columns, true));
+        
+        Iterator<Object[]> it = listR.iterator();
+        while (it.hasNext()) {
+        	Object[] ar = (Object[])it.next();
+        	
+        	
+        	InsertResponse irr = (InsertResponse)mInsert.getResponse(DELETES);
+        	InsertResponse irr2 = (InsertResponse)mInsert.getResponse(DELETES+1);       	
+        	
+        	if ( ((Integer)ar[1]).intValue() == irr.getId() || ((Integer)ar[1]).intValue() == irr2.getId()){
+        		assertFalse("Error: Object was found in list", true);
+        	}
+        	
+        }
         
         final DeleteRequest[] deletes2 = new DeleteRequest[NUMBER - DELETES];
         
