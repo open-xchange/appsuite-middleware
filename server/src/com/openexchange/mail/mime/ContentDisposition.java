@@ -82,6 +82,7 @@ public final class ContentDisposition extends ParameterizedHeader implements Ser
 	 */
 	public ContentDisposition() {
 		super();
+		disposition = DEFAULT_CONTENT_DISP;
 		parameterList = new ParameterList();
 	}
 
