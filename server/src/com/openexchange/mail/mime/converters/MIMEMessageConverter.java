@@ -72,6 +72,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
+import javax.mail.Session;
 import javax.mail.UIDFolder;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.AddressException;
@@ -90,12 +91,14 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContainerMessage;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.utils.StorageUtility;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -861,12 +864,32 @@ public final class MIMEMessageConverter {
 	}
 
 	/**
+	 * Creates a message data object from given message bytes conform to RFC822
+	 * 
+	 * @param asciiBytes
+	 *            The message bytes conform to RFC822
+	 * @return an instance of <code>{@link MailMessage}</code>
+	 * @throws MailException
+	 *             If conversion fails
+	 */
+	public static MailMessage convertMessage(final byte[] asciiBytes) throws MailException {
+		try {
+			return convertMessage(new MimeMessage(MIMEDefaultSession.getDefaultSession(),
+					new UnsynchronizedByteArrayInputStream(asciiBytes)));
+		} catch (final MessagingException e) {
+			throw MIMEMailException.handleMessagingException(e);
+		}
+	}
+
+	/**
 	 * Creates a message data object from given MIME message
 	 * 
 	 * @param msg
 	 *            The MIME message
 	 * @return an instance of <code>{@link MailMessage}</code> containing the
 	 *         attributes from given MIME message
+	 * @throws MailException
+	 *             If conversion fails
 	 */
 	public static MailMessage convertMessage(final MimeMessage msg) throws MailException {
 		try {
