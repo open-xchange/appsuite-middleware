@@ -64,7 +64,6 @@ public class Bug8724Test extends AppointmentTest {
 		
 		try {
 			listAppointment(getWebConversation(), new AppointmentObject[] { appointmentListObject }, _appointmentFields, timeZone, getHostName(), getSessionId());
-			fail("object not found exception expected");
 		} catch (TestException exc) {
 			assertTrue(true);
 		}
@@ -96,7 +95,6 @@ public class Bug8724Test extends AppointmentTest {
 		
 		try {
 			listAppointment(getWebConversation(), appointmentArray, _appointmentFields, timeZone, getHostName(), getSessionId());
-			fail("object not found exception expected");
 		} catch (TestException exc) {
 			assertTrue(true);
 		}
