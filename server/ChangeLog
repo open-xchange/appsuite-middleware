@@ -1,3 +1,8 @@
+* 2008-03-06 - thorben.betten@open-xchange.com
+
+ - Bugfix #10976: No adding of user time zone's offset to a message's sent
+   date
+
 * 2008-02-28 - thorben.betten@open-xchange.com
 
  - Bugfix #10980: Performing a deeper connectivity check when mail/folder
