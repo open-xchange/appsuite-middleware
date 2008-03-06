@@ -603,7 +603,7 @@ public final class MessageWriter {
 
 	/**
 	 * Convert an array of <code>InternetAddress</code> instances into a
-	 * JSON-Array comforming to:
+	 * JSON-Array conforming to:
 	 * 
 	 * <pre>
 	 * [[&quot;The Personal&quot;, &quot;someone@somewhere.com&quot;], ...]
