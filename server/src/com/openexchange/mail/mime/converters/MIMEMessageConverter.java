@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.converters;
 
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.hasAttachments;
 import static com.openexchange.mail.utils.MessageUtility.decodeMultiEncodedHeader;
 import static javax.mail.internet.MimeUtility.unfold;
 
@@ -675,20 +676,17 @@ public final class MIMEMessageConverter {
 							}
 						}
 						mailMessage.setContentType(ct);
-						mailMessage.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
-						/*
-						 * TODO: Detailed attachment information like done with
-						 * IMAP's bodystructure information
-						 */
-						/*
-						 * try {
-						 * mailMessage.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL) &&
-						 * (ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED) ||
-						 * hasAttachments((Multipart) msg .getContent(),
-						 * ct.getSubType()))); } catch (final IOException e) {
-						 * throw new MailException(MailException.Code.IO_ERROR,
-						 * e, e.getLocalizedMessage()); }
-						 */
+						if (msg instanceof ContainerMessage) {
+							mailMessage.setHasAttachment(((ContainerMessage) msg).hasAttachment());
+						} else {
+							try {
+								mailMessage.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)
+										&& (ct.isMimeType(MIMETypes.MIME_MULTIPART_MIXED) || hasAttachments(
+												(Multipart) msg.getContent(), ct.getSubType())));
+							} catch (final IOException e) {
+								throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+							}
+						}
 					}
 				};
 				break;
