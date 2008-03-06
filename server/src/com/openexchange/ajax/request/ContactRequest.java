@@ -94,6 +94,8 @@ public class ContactRequest {
 
 	public static final String ACTION_GET_USER = "getuser";
 
+	public static final String ACTION_LIST_USER = "listuser";
+
 	final Session sessionObj;
 
 	final Context ctx;
@@ -141,6 +143,8 @@ public class ContactRequest {
 			return actionUpdates(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
 			return actionList(jsonObject);
+		} else if (action.equalsIgnoreCase(ACTION_LIST_USER)) {
+			return actionListUser(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
 			return actionAll(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
@@ -433,6 +437,68 @@ public class ContactRequest {
 		}
 	}
 
+	public JSONArray actionListUser(final JSONObject jsonObj) throws JSONException,
+			OXMandatoryFieldException, SearchIteratorException, OXException, OXJSONException,
+			AjaxException {
+		timestamp = new Date(0);
+
+		Date lastModified = null;
+
+		SearchIterator it = null;
+
+		final JSONArray jsonResponseArray = new JSONArray();
+
+		boolean isOneFolder = true;
+
+		try {
+			final String[] sColumns = DataParser
+					.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+			final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+			final JSONArray jData = DataParser.checkJSONArray(jsonObj, AJAXServlet.PARAMETER_DATA);
+			final int userIdArray[] = new int[jData.length()];
+			for (int a = 0; a < userIdArray.length; a++) {
+				userIdArray[a] = jData.getInt(a);
+			}
+			
+			int[] internalColumns = new int[columns.length + 1];
+			System.arraycopy(columns, 0, internalColumns, 0, columns.length);
+			internalColumns[columns.length] = DataObject.LAST_MODIFIED;
+
+			Context ctx = null;
+			try {
+				ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+			} catch (ContextException ct) {
+				new ContactException(ct);
+			}
+
+			try {
+				final ContactInterface contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+				final ContactWriter contactwriter = new ContactWriter(timeZone);
+
+				for (int a = 0; a < userIdArray.length; a++) {
+					final ContactObject contactObj = contactInterface.getUserById(userIdArray[a]);
+					final JSONArray jsonContactArray = new JSONArray();
+					contactwriter.writeArray(contactObj, columns, jsonContactArray);
+					jsonResponseArray.put(jsonContactArray);
+
+					lastModified = contactObj.getLastModified();
+
+					if (timestamp.getTime() < lastModified.getTime()) {
+						timestamp = lastModified;
+					}
+				}
+			} catch (Exception e) {
+				throw new OXException(e);
+			}
+
+			return jsonResponseArray;
+		} finally {
+			if (it != null) {
+				it.close();
+			}
+		}
+	}
+
 	public JSONArray actionAll(final JSONObject jsonObj) throws OXMandatoryFieldException,
 			JSONException, SearchIteratorException, OXException, OXJSONException, AjaxException {
 		final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS)
@@ -532,7 +598,7 @@ public class ContactRequest {
 		} catch (ContextException ct) {
 			new ContactException(ct);
 		}
-		
+
 		ContactInterface contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
 
 		timestamp = new Date(0);
