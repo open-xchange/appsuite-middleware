@@ -703,7 +703,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
 	/**
 	 * Gets the number of enclosed mail parts. <br>
-	 * This mehtod is only applicable if part's MIME type is
+	 * This method is only applicable if part's MIME type is
 	 * <code>multipart/*</code>
 	 * 
 	 * @return The number of enclosed mail parts or <code>-1</code> if not
@@ -713,7 +713,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 
 	/**
 	 * Gets the mail part located at given index. <br>
-	 * This mehtod is only applicable if part's MIME type is
+	 * This method is only applicable if part's MIME type is
 	 * <code>multipart/*</code>
 	 * 
 	 * @param index
