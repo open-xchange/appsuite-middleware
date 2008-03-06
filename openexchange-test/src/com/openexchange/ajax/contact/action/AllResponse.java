@@ -49,45 +49,30 @@
 
 package com.openexchange.ajax.contact.action;
 
-import java.util.TimeZone;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.writer.ContactWriter;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.ajax.framework.ListIDs;
 
 /**
- * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractContactRequest implements AJAXRequest {
+public final class AllResponse extends CommonAllResponse {
+
+    private ListIDs list;
 
     /**
-     * URL of the contacts AJAX interface.
+     * @param response
      */
-    static final String URL = "/ajax/contacts";
-
-    /**
-     * Default constructor.
-     */
-    protected AbstractContactRequest() {
-        super();
+    public AllResponse(final Response response) {
+        super(response);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public String getServletPath() {
-        return URL;
+    public void setListIDs(final ListIDs list) {
+        this.list = list;
     }
 
-    protected JSONObject convert(final ContactObject contactObj)
-        throws JSONException {
-		final JSONObject jsonObj = new JSONObject();
-        final ContactWriter contactWriter = new ContactWriter(TimeZone.getTimeZone("UTC"));
-		contactWriter.writeContact(contactObj, jsonObj);
-        return jsonObj;
+    public ListIDs getListIDs() {
+        return list;
     }
 }

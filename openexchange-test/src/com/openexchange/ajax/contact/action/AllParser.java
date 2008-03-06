@@ -49,45 +49,56 @@
 
 package com.openexchange.ajax.contact.action;
 
-import java.util.TimeZone;
+import java.util.Iterator;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.writer.ContactWriter;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.CommonAllParser;
+import com.openexchange.ajax.framework.ListIDInt;
+import com.openexchange.ajax.framework.ListIDs;
 import com.openexchange.groupware.container.ContactObject;
 
 /**
- * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:ben.pahne@open-xchange.org">Ben Pahne</a>
  */
-public abstract class AbstractContactRequest implements AJAXRequest {
-
-    /**
-     * URL of the contacts AJAX interface.
-     */
-    static final String URL = "/ajax/contacts";
+public class AllParser extends CommonAllParser {
 
     /**
      * Default constructor.
      */
-    protected AbstractContactRequest() {
-        super();
+    public AllParser(final boolean failOnError, final int[] columns) {
+        super(failOnError, columns);
     }
 
     /**
      * {@inheritDoc}
      */
-    public String getServletPath() {
-        return URL;
+    @Override
+    protected AllResponse instanciateResponse(final Response response) {
+        return new AllResponse(response);
     }
 
-    protected JSONObject convert(final ContactObject contactObj)
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected AllResponse createResponse(final Response response)
         throws JSONException {
-		final JSONObject jsonObj = new JSONObject();
-        final ContactWriter contactWriter = new ContactWriter(TimeZone.getTimeZone("UTC"));
-		contactWriter.writeContact(contactObj, jsonObj);
-        return jsonObj;
+        final AllResponse retval = (AllResponse) super.createResponse(response);
+        final Iterator<Object[]> iter = retval.iterator();
+        final ListIDs list = new ListIDs();
+        final int folderPos = retval.getColumnPos(ContactObject.FOLDER_ID);
+        final int identifierPos = retval.getColumnPos(ContactObject
+            .OBJECT_ID);
+        while (iter.hasNext()) {
+            final Object[] row = iter.next();
+            list.add(new ListIDInt(((Integer) row[folderPos]).intValue(),
+                ((Integer) row[identifierPos]).intValue()));
+        }
+        retval.setListIDs(list);
+        return retval;
     }
 }

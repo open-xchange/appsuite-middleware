@@ -4,7 +4,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.ContactTest;
-import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 
 public class AllTest extends ContactTest {
@@ -20,7 +19,7 @@ public class AllTest extends ContactTest {
 	}	
 	
 	public void testAll() throws Exception {
-		final int cols[] = new int[]{ AppointmentObject.OBJECT_ID };
+		final int cols[] = new int[]{ ContactObject.OBJECT_ID };
 		
 		ContactObject[] contactArray = listContact(getWebConversation(), contactFolderId, cols, PROTOCOL + getHostName(), getSessionId());
 	}
