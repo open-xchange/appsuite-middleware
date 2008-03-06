@@ -587,13 +587,13 @@ public final class MessageWriter {
 	}
 
 	/**
-	 * Adds the user timezone offset to given date time
+	 * Adds the user time zone offset to given date time
 	 * 
 	 * @param time
 	 *            The date time
 	 * @param timeZone
-	 *            The timezone
-	 * @return The time with added timezone offset
+	 *            The time zone
+	 * @return The time with added time zone offset
 	 */
 	public static long addUserTimezone(final long time, final TimeZone timeZone) {
 		return (time + timeZone.getOffset(time));
