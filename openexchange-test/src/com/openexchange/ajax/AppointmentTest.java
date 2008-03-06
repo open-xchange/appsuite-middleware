@@ -42,8 +42,8 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceGroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.test.TestException;
 import com.openexchange.test.OXTestToolkit;
+import com.openexchange.test.TestException;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.URLParameter;
 
@@ -62,7 +62,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 	AppointmentObject.LOCATION, CalendarObject.NOTE,
 	CalendarObject.RECURRENCE_TYPE, CalendarObject.PARTICIPANTS,
 	CalendarObject.USERS, AppointmentObject.SHOWN_AS,
-	AppointmentObject.FULL_TIME, AppointmentObject.COLOR_LABEL };
+	AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION,
+	AppointmentObject.FULL_TIME, AppointmentObject.COLOR_LABEL, AppointmentObject.DELETE_EXCEPTIONS, AppointmentObject.CHANGE_EXCEPTIONS };
 	
 	protected static final String APPOINTMENT_URL = "/ajax/calendar";
 	
@@ -319,7 +320,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 		host = appendPrefix(host);
 		
 		final AJAXSession ajaxSession = new AJAXSession(webCon, session);
-		final DeleteRequest deleteRequest = new DeleteRequest(inFolder, id, recurrencePosition, modified);
+		final DeleteRequest deleteRequest = new DeleteRequest(id, inFolder, recurrencePosition, modified);
 		deleteRequest.setFailOnError(false);
 		final AbstractAJAXResponse response = Executor.execute(ajaxSession, deleteRequest);
 		
@@ -359,6 +360,10 @@ public class AppointmentTest extends AbstractAJAXTest {
 	
 	public static AppointmentObject[] listAppointment(WebConversation webCon, int inFolder, int[] cols, Date start, Date end, TimeZone userTimeZone, boolean showAll, String host, String session)
 	throws Exception {
+		return listAppointment(webCon, inFolder, cols, start, end, userTimeZone, showAll, false, host, session);
+	}
+	public static AppointmentObject[] listAppointment(WebConversation webCon, int inFolder, int[] cols, Date start, Date end, TimeZone userTimeZone, boolean showAll, boolean recurrenceMaster, String host, String session)
+		throws Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -367,6 +372,10 @@ public class AppointmentTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_START, start);
 		parameter.setParameter(AJAXServlet.PARAMETER_END, end);
 		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
+		
+		if (recurrenceMaster) {
+			parameter.setParameter("recurrence_master", recurrenceMaster);
+		}
 		
 		if (!showAll) {
 			parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
@@ -548,7 +557,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 			}
 		}
 		
-		throw new TestException("object not found");
+		// throw new TestException("object not found");
+		return null;
 	}
 	
 	public static AppointmentObject loadAppointment(WebConversation webCon,
@@ -596,7 +606,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 			parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
 		}
 		
-		parameter.setParameter(AJAXServlet.PARAMETER_IGNORE, "deleted");
+		parameter.setParameter(AJAXServlet.PARAMETER_IGNORE, "none");
 		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
 		parameter.setParameter(AJAXServlet.PARAMETER_START, start);
 		parameter.setParameter(AJAXServlet.PARAMETER_END, end);
@@ -940,8 +950,30 @@ public class AppointmentTest extends AbstractAJAXTest {
 				appointmentObj.setParticipants(parseParticipants(jsonArray
 						.getJSONArray(pos)));
 				break;
+			case AppointmentObject.CHANGE_EXCEPTIONS:
+				if (!jsonArray.isNull(pos)) {
+					JSONArray changeExceptions = jsonArray.getJSONArray(pos);
+					appointmentObj.setChangeExceptions(parseExceptions(changeExceptions));
+				}
+				break;
+			case AppointmentObject.DELETE_EXCEPTIONS:
+				if (!jsonArray.isNull(pos)) {
+					JSONArray deleteExceptions = jsonArray.getJSONArray(pos);
+					appointmentObj.setDeleteExceptions(parseExceptions(deleteExceptions));
+				}
+				break;
 		}
 	}
+	
+	private static Date[] parseExceptions(JSONArray jsonArray)
+	throws Exception {	
+		Date[] exceptions = new Date[jsonArray.length()];
+		for (int i = 0; i < jsonArray.length(); i++) {	
+			exceptions[i] = new Date(jsonArray.getLong(i));
+		}
+		return exceptions;
+	}
+	
 	
 	private static Participant[] parseParticipants(JSONArray jsonArray)
 	throws Exception {
