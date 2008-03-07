@@ -52,9 +52,9 @@ public class MultipleTest extends AppointmentTest {
 		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId3, appointmentFolderId, timeZone, getHostName(), getSessionId());
 		final Date modified = loadAppointment.getLastModified();
 		
-		final DeleteRequest deleteRequest1 = new DeleteRequest(appointmentFolderId, objectId1, modified);
-		final DeleteRequest deleteRequest2 = new DeleteRequest(appointmentFolderId, objectId2, modified);
-		final DeleteRequest deleteRequest3 = new DeleteRequest(appointmentFolderId, objectId3, modified);
+		final DeleteRequest deleteRequest1 = new DeleteRequest(objectId1, appointmentFolderId, modified);
+		final DeleteRequest deleteRequest2 = new DeleteRequest(objectId2, appointmentFolderId, modified);
+		final DeleteRequest deleteRequest3 = new DeleteRequest(objectId3, appointmentFolderId, modified);
 
 		final MultipleRequest multipleDeleteInsertRequest = new MultipleRequest(new AJAXRequest[] { deleteRequest1, deleteRequest2, deleteRequest3 });
 		final MultipleResponse multipleDeleteResponse = (MultipleResponse) Executor.execute(ajaxSession, multipleInsertRequest);

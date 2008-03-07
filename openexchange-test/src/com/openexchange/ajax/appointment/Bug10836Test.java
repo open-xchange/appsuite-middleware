@@ -119,8 +119,7 @@ public final class Bug10836Test extends AbstractAJAXSession {
 			}
 			*/
 		} finally {
-			Executor.execute(clientA, new DeleteRequest(folderA, insertR
-					.getId(), new Date()));
+			Executor.execute(clientA, new DeleteRequest(insertR.getId(), folderA, new Date()));
 		}
 	}
 }
