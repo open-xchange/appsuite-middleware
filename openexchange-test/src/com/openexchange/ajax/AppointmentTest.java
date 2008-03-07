@@ -606,7 +606,8 @@ public class AppointmentTest extends AbstractAJAXTest {
 			parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
 		}
 		
-		parameter.setParameter(AJAXServlet.PARAMETER_IGNORE, "none");
+		
+		parameter.setParameter(AJAXServlet.PARAMETER_IGNORE, "deleted");
 		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
 		parameter.setParameter(AJAXServlet.PARAMETER_START, start);
 		parameter.setParameter(AJAXServlet.PARAMETER_END, end);
