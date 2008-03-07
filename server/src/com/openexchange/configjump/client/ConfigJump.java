@@ -47,21 +47,45 @@
  *
  */
 
-package com.openexchange.authentication.service;
+package com.openexchange.configjump.client;
 
-import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.server.ServiceHolder;
+import java.net.URL;
+
+import com.openexchange.configjump.ConfigJumpException;
+import com.openexchange.configjump.ConfigJumpService;
+import com.openexchange.configjump.Replacements;
+import com.openexchange.server.ServiceException;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class AuthenticationHolder extends ServiceHolder<AuthenticationService> {
+public final class ConfigJump {
+
+    private static final ConfigJumpHolder holder = new ConfigJumpHolder();
 
     /**
-     * Default constructor.
+     * Prevent instantiation.
      */
-    AuthenticationHolder() {
+    private ConfigJump() {
         super();
+    }
+
+    public static URL getLink(final Replacements replacements) throws ServiceException,
+        ConfigJumpException {
+        final ConfigJumpService service = holder.getService();
+        if (null == service) {
+            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
+                ConfigJumpService.class.getName());
+        }
+        try {
+            return service.getLink(replacements);
+        } finally {
+            holder.ungetService(service);
+        }
+    }
+
+    public static ConfigJumpHolder getHolder() {
+        return holder;
     }
 }

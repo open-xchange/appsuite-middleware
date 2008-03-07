@@ -47,21 +47,22 @@
  *
  */
 
-package com.openexchange.authentication.service;
+package com.openexchange.configjump.client;
 
-import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.server.ServiceHolder;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class AuthenticationHolder extends ServiceHolder<AuthenticationService> {
+public class ConfigJumpHolder extends ServiceHolder<ConfigJumpService> {
 
     /**
      * Default constructor.
      */
-    AuthenticationHolder() {
+    ConfigJumpHolder() {
         super();
     }
+
 }

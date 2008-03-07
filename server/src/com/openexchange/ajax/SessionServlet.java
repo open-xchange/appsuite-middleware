@@ -284,7 +284,7 @@ public abstract class SessionServlet extends AJAXServlet {
 		final SessiondConnectorInterface sessiondCon = ServerServiceRegistry.getInstance().getService(
 				SessiondConnectorInterface.class);
 		if (sessiondCon == null) {
-			throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE));
+			throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondConnectorInterface.class.getName()));
 		}
 		final Session retval = sessiondCon.getSession(sessionId);
 		if (null == retval) {

@@ -63,13 +63,12 @@ import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.configjump.ConfigJumpException;
-import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.ICookie;
 import com.openexchange.configjump.Replacements;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 
 /**
@@ -105,8 +104,6 @@ public class ConfigJump extends SessionServlet {
         final HttpServletResponse resp) throws ServletException, IOException {
         final Session sessionObj = getSessionObject(req);
         final Response response = new Response();
-        final ConfigJumpService configJump = ServerServiceRegistry.getInstance()
-            .getService(ConfigJumpService.class);
         try {
             final Context ctx = ContextStorage.getInstance().getContext(
                 sessionObj.getContextId());
@@ -116,7 +113,7 @@ public class ConfigJump extends SessionServlet {
             } else {
                 protocol = "http";
             }
-            final URL url = configJump.getLink(new Replacements() {
+            final URL url = com.openexchange.configjump.client.ConfigJump.getLink(new Replacements() {
                 public int getContextId() {
                     return sessionObj.getContextId();
                 }
@@ -153,6 +150,9 @@ public class ConfigJump extends SessionServlet {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (ContextException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
+        } catch (ServiceException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         }

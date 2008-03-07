@@ -61,11 +61,12 @@ import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.service.AuthenticationHolder;
+import com.openexchange.authentication.service.Authentication;
 import com.openexchange.caching.CacheService;
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configjump.ConfigJumpService;
+import com.openexchange.configjump.client.ConfigJump;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.mail.MailProvider;
@@ -101,7 +102,7 @@ public final class ServerActivator extends DeferredActivator {
 			EventAdmin.class };
 
 	private static final Class<?>[] NEEDED_SERIVICES_SERVER = { ConfigurationService.class, CacheService.class,
-			EventAdmin.class, SessiondConnectorInterface.class, ConfigJumpService.class, AuthenticationService.class };
+			EventAdmin.class, SessiondConnectorInterface.class };
 
 	private final Starter starter = new Starter();
 
@@ -197,8 +198,12 @@ public final class ServerActivator extends DeferredActivator {
 
 			// Authentication is only needed for groupware.
 			serviceTrackerList.add(new ServiceTracker(context, AuthenticationService.class.getName(),
-					new BundleServiceTracker<AuthenticationService>(context, AuthenticationHolder.getInstance(),
-							AuthenticationService.class)));
+				new BundleServiceTracker<AuthenticationService>(context, Authentication.getHolder(),
+				AuthenticationService.class)));
+			// ConfigJump
+			serviceTrackerList.add(new ServiceTracker(context, ConfigJumpService.class.getName(),
+			    new BundleServiceTracker<ConfigJumpService>(context, ConfigJump.getHolder(),
+		        ConfigJumpService.class)));
 			// Start up server the usual way
 			starter.start();
 		}

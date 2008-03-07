@@ -63,8 +63,7 @@ public final class Authentication {
     /**
      * Handles the reference to the authentication service.
      */
-    private static final AuthenticationHolder service = AuthenticationHolder
-        .getInstance();
+    private static final AuthenticationHolder holder = new AuthenticationHolder();
 
     /**
      * Default constructor.
@@ -84,7 +83,7 @@ public final class Authentication {
      */
     public static Authenticated login(final String login, final String pass)
         throws LoginException {
-        final AuthenticationService auth = service.getService();
+        final AuthenticationService auth = holder.getService();
         if (null == auth) {
             throw new LoginException(LoginException.Code.COMMUNICATION);
         }
@@ -98,7 +97,11 @@ public final class Authentication {
                 }
             });
         } finally {
-            service.ungetService(auth);
+            holder.ungetService(auth);
         }
+    }
+
+    public static AuthenticationHolder getHolder() {
+        return holder;
     }
 }
