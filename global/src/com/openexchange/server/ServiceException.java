@@ -71,7 +71,7 @@ public final class ServiceException extends AbstractOXException {
 		 * A required service is temporary not available. Please try again
 		 * later.
 		 */
-		SERVICE_UNAVAILABLE("A required service is temporary not available. Please try again later.",
+		SERVICE_UNAVAILABLE("The required service %s is temporary not available. Please try again later.",
 				Category.TRY_AGAIN, 1),
 		/**
 		 * An I/O error occurred
