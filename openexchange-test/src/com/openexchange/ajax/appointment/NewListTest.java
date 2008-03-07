@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.appointment;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Date;
 
 import com.openexchange.ajax.appointment.action.AllRequest;
@@ -58,15 +61,14 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.InsertResponse;
 import com.openexchange.ajax.appointment.action.ListRequest;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
-import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.search.Order;
 
 /**
  *
@@ -112,6 +114,11 @@ public class NewListTest extends AbstractAJAXSession {
         }
         final MultipleResponse mInsert = (MultipleResponse) Executor.execute(
             getClient(), new MultipleRequest(inserts));
+        final List<InsertResponse> toDelete = new ArrayList<InsertResponse>(NUMBER);
+        final Iterator<AbstractAJAXResponse> iter = mInsert.iterator();
+        while (iter.hasNext()) {
+            toDelete.add((InsertResponse) iter.next());
+        }
 
         // A now gets all of the folder.
         int[] columns = new int[] { AppointmentObject.TITLE, AppointmentObject
@@ -122,9 +129,8 @@ public class NewListTest extends AbstractAJAXSession {
         // Now B deletes some of them.
         final DeleteRequest[] deletes1 = new DeleteRequest[DELETES];
         for (int i = 0; i < deletes1.length; i++) {
-            final InsertResponse insertR = (InsertResponse) mInsert
-                .getResponse(NUMBER - (i + 1));
-            deletes1[i] = new DeleteRequest(folderA, insertR.getId(), allR
+            final InsertResponse insertR = toDelete.remove((NUMBER - DELETES)/2 + i); 
+            deletes1[i] = new DeleteRequest(insertR.getId(), folderA, allR
                 .getTimestamp());
         }
         Executor.multiple(clientA, new MultipleRequest(deletes1));
@@ -134,11 +140,10 @@ public class NewListTest extends AbstractAJAXSession {
         final CommonListResponse listR = (CommonListResponse) Executor.execute(
             clientA, new ListRequest(allR.getListIDs(), columns, true));
         
-        final DeleteRequest[] deletes2 = new DeleteRequest[inserts.length
-            - DELETES];
+        final DeleteRequest[] deletes2 = new DeleteRequest[toDelete.size()];
         for (int i = 0; i < deletes2.length; i++) {
-            final InsertResponse insertR = (InsertResponse) mInsert.getResponse(i);
-            deletes2[i] = new DeleteRequest(folderA, insertR.getId(),
+            final InsertResponse insertR = toDelete.get(i);
+            deletes2[i] = new DeleteRequest(insertR.getId(), folderA,
             listR.getTimestamp());
         }
         Executor.multiple(getClient(), new MultipleRequest(deletes2)); 

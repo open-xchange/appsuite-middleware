@@ -49,10 +49,15 @@
 
 package com.openexchange.ajax.task;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
@@ -167,6 +172,11 @@ public class ListTest extends AbstractTaskTest {
         }
         final MultipleResponse mInsert = (MultipleResponse) Executor.execute(
             getClient(), new MultipleRequest(inserts));
+        final List<InsertResponse> toDelete = new ArrayList<InsertResponse>(NUMBER);
+        final Iterator<AbstractAJAXResponse> iter = mInsert.iterator();
+        while (iter.hasNext()) {
+            toDelete.add((InsertResponse) iter.next());
+        }
 
         // A now gets all of the folder.
         int[] columns = new int[] { Task.TITLE, Task.OBJECT_ID, Task.FOLDER_ID };
@@ -176,8 +186,7 @@ public class ListTest extends AbstractTaskTest {
         // Now B deletes some of them.
         final DeleteRequest[] deletes1 = new DeleteRequest[DELETES];
         for (int i = 0; i < deletes1.length; i++) {
-            final InsertResponse insertR = (InsertResponse) mInsert
-                .getResponse(NUMBER - (i + 1));
+            final InsertResponse insertR = toDelete.remove((NUMBER - DELETES)/2 + i); 
             deletes1[i] = new DeleteRequest(folderB, insertR.getId(), insertR
                 .getTimestamp());
         }
@@ -188,10 +197,9 @@ public class ListTest extends AbstractTaskTest {
         final CommonListResponse listR = TaskTools.list(clientA,
             new ListRequest(allR.getListIDs(), columns, true));
         
-        final DeleteRequest[] deletes2 = new DeleteRequest[inserts.length
-            - DELETES];
+        final DeleteRequest[] deletes2 = new DeleteRequest[toDelete.size()];
         for (int i = 0; i < deletes2.length; i++) {
-            final InsertResponse insertR = (InsertResponse) mInsert.getResponse(i);
+            final InsertResponse insertR = toDelete.get(i);
             deletes2[i] = new DeleteRequest(insertR.getFolderId(),
                 insertR.getId(), listR.getTimestamp());
         }
