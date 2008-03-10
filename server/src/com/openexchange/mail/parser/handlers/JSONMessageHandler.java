@@ -252,14 +252,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			/*
 			 * Filename
 			 */
-			if (part.getFileName() != null) {
-				try {
-					jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), MimeUtility.decodeText(part
-							.getFileName()));
-				} catch (final UnsupportedEncodingException e) {
-					jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), part.getFileName());
-				}
-			} else {
+			if (fileName == null) {
 				final Object val;
 				if (isInline) {
 					val = JSONObject.NULL;
@@ -268,6 +261,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 					part.setFileName((String) val);
 				}
 				jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), val);
+			} else {
+				jsonObject.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), fileName);
 			}
 			/*
 			 * Size
@@ -435,8 +430,14 @@ public final class JSONMessageHandler implements MailMessageHandler {
 				} else if (MessageHeaders.HDR_X_MAILER.equalsIgnoreCase(entry.getKey())) {
 					hdrObject.put(entry.getKey(), entry.getValue());
 				} else {
+					/**
+					 * Uncomment this to deliver all headers:
+					 * 
+					 * <pre>
+					 * hdrObject.put(entry.getKey(), entry.getValue());
+					 * </pre>
+					 */
 					continue;
-					// msgObj.addHeader(entry.getKey(), hdr.getValue());
 				}
 			}
 			jsonObject.put(MailJSONField.HEADERS.getKey(), hdrObject);
@@ -453,8 +454,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 *      java.lang.String, java.lang.String, java.lang.String)
 	 */
 	public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType,
-			final String id) throws MailException {
-		return handleAttachment(part, false, baseContentType, null, id);
+			final boolean isInline, final String fileName, final String id) throws MailException {
+		return handleAttachment(part, isInline, baseContentType, fileName, id);
 	}
 
 	/*
