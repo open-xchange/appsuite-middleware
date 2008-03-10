@@ -84,7 +84,7 @@ public class LoginIMAPAuth extends LoginInfo {
             throw new LoginException(Code.MISSING_ATTRIBUTES, loginInfo.length);
         }
         final String[] splitted = split((String) loginInfo[0]);
-        final String uid = splitted[1];
+        final String uid = (String) loginInfo[0];
         final String password = (String) loginInfo[1];
         
         if ("".equals(uid) || "".equals(password)) {

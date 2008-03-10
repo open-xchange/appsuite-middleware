@@ -3,7 +3,8 @@
  - Bugfix #11019 Admin GUI keeps on trying to login after update
    applied attached server patch
  - Bugfix #11025 missing imap auth plugin for server
-   
+ - Bugfix #11037 IMAP authentication plugin does not forward the @domain part to the IMAP server
+ 
 * 2008-03-04 - francisco.laguna@open-xchange.com
 
  - Bugfix #10962: Sanitize metadata when using server copy in webdav infostore.
