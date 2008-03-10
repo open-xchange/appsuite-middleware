@@ -105,7 +105,7 @@ import com.sun.mail.imap.protocol.UID;
  * be generated from given fields.
  * 
  * <p>
- * This method avoids calling JavaMail's fetch() methods which implicitely
+ * This method avoids calling JavaMail's fetch() methods which implicitly
  * requests whole message envelope (FETCH 1:* (ENVELOPE INTERNALDATE
  * RFC822.SIZE)) when later working on returned <code>javax.mail.Message</code>
  * objects.
@@ -172,7 +172,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 * Constructor
 	 * 
 	 * @param imapFolder -
-	 *            the imap folder
+	 *            the IMAP folder
 	 * @param arr -
 	 *            the source array (either <code>long</code> UIDs,
 	 *            <code>int</code> SeqNums or instances of
@@ -199,7 +199,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 * Constructor
 	 * 
 	 * @param imapFolder -
-	 *            the imap folder
+	 *            the IMAP folder
 	 * @param arr -
 	 *            the source array (either <code>long</code> UIDs,
 	 *            <code>int</code> SeqNums or instances of
@@ -283,7 +283,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 * Constructor to fetch all messages of given folder
 	 * 
 	 * @param imapFolder -
-	 *            the imap folder
+	 *            the IMAP folder
 	 * @param fields -
 	 *            the demanded fields
 	 * @param sortField -
@@ -302,7 +302,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 * Constructor to fetch all messages of given folder
 	 * 
 	 * @param imapFolder -
-	 *            the imap folder
+	 *            the IMAP folder
 	 * @param fp -
 	 *            the fetch profile
 	 * @param fetchLen -
