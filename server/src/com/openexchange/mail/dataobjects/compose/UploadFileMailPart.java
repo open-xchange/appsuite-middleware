@@ -56,12 +56,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
-import javax.mail.internet.MimeUtility;
 
 import org.mozilla.intl.chardet.nsDetector;
 import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
@@ -107,12 +105,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
 		super();
 		this.uploadFile = uploadFile.getTmpFile();
 		setContentType(uploadFile.getContentType());
-		try {
-			setFileName(MimeUtility.encodeText(uploadFile.getPreparedFileName(), MailConfig.getDefaultMimeCharset(),
-					"Q"));
-		} catch (final UnsupportedEncodingException e) {
-			setFileName(uploadFile.getPreparedFileName());
-		}
+		setFileName(uploadFile.getPreparedFileName());
 		setSize(uploadFile.getSize());
 	}
 
