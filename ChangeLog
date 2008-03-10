@@ -1,3 +1,8 @@
+* 2008-03-10 - choeger@open-xchange.com
+
+ - Bugfix #11019 Admin GUI keeps on trying to login after update
+   applied attached server patch
+   
 * 2008-03-04 - francisco.laguna@open-xchange.com
 
  - Bugfix #10962: Sanitize metadata when using server copy in webdav infostore.
