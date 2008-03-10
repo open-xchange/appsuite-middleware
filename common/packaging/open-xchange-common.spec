@@ -1,6 +1,7 @@
 
 # norootforbuild
 
+
 Name:           open-xchange-common
 BuildArch: 	noarch
 BuildRequires:  ant
