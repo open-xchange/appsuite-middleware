@@ -160,33 +160,72 @@ public final class ContainerMessage extends Message implements Serializable {
 	 */
 	private int priority;
 
+	/**
+	 * The sequence number
+	 */
 	private int seqNum;
 
+	/**
+	 * The thread level
+	 */
 	private int threadLevel;
 
+	/**
+	 * Message headers
+	 */
 	private final Map<String, String> headers;
 
+	/**
+	 * Expunged flag
+	 */
 	private boolean expunged;
 
+	/**
+	 * Attachment flag
+	 */
 	private boolean hasAttachment;
 
+	/**
+	 * The body structure
+	 */
 	private BODYSTRUCTURE bodystructure;
 
+	/**
+	 * Initializes a new {@link ContainerMessage}
+	 */
 	private ContainerMessage() {
 		super();
 		this.headers = new HashMap<String, String>();
 	}
 
-	public ContainerMessage(final String folderFullname, final char separator, final int msgnum) {
+	/**
+	 * Initializes a new {@link ContainerMessage}
+	 * 
+	 * @param folderFullname
+	 *            The folder's fullname
+	 * @param separator
+	 *            The folder's separator
+	 * @param seqNum
+	 *            The message's sequence number in folder
+	 */
+	public ContainerMessage(final String folderFullname, final char separator, final int seqNum) {
 		this();
-		this.seqNum = msgnum;
+		this.seqNum = seqNum;
 		this.folderFullname = folderFullname;
 		this.separator = separator;
 	}
 
 	/**
-	 * Constructs a new <code>MessageCacheObject</code> instance from given
-	 * <b>PRE-FILLED</b> <code>Message</code> object
+	 * Initializes a new {@link ContainerMessage}
+	 * 
+	 * @param msg
+	 *            The source message
+	 * @param msgUID
+	 *            The source message's UID
+	 * @throws MessagingException
+	 *             If source message cannot be accessed
+	 * @throws MailException
+	 *             If source message's content type is invalid
 	 */
 	public ContainerMessage(final MimeMessage msg, final long msgUID) throws MessagingException, MailException {
 		super(msg.getFolder(), msg.getMessageNumber());
@@ -244,6 +283,12 @@ public final class ContainerMessage extends Message implements Serializable {
 		throw new MessagingException("Missing from address");
 	}
 
+	/**
+	 * Sets the <code>From</code> address header
+	 * 
+	 * @param from
+	 *            The from addresses
+	 */
 	public void setFrom(final InternetAddress[] from) {
 		this.from = from;
 	}
@@ -373,10 +418,23 @@ public final class ContainerMessage extends Message implements Serializable {
 		this.expunged = expunged;
 	}
 
+	/**
+	 * Gets the <i>hasAttachment</i> flag
+	 * 
+	 * @return <code>true</code> if this message holds (file) attachments;
+	 *         otherwise <code>false</code>
+	 */
 	public boolean hasAttachment() {
 		return hasAttachment;
 	}
 
+	/**
+	 * Sets the <i>hasAttachment</i> flag
+	 * 
+	 * @param hasAttachment
+	 *            <code>true</code> to mark this message to hold (file)
+	 *            attachments; otherwise <code>false</code>
+	 */
 	public void setHasAttachment(final boolean hasAttachment) {
 		this.hasAttachment = hasAttachment;
 	}
@@ -403,6 +461,12 @@ public final class ContainerMessage extends Message implements Serializable {
 		return receivedDate;
 	}
 
+	/**
+	 * Sets the received date
+	 * 
+	 * @param date
+	 *            The received date to set
+	 */
 	public void setReceivedDate(final Date date) {
 		this.receivedDate = date;
 	}
@@ -418,6 +482,12 @@ public final class ContainerMessage extends Message implements Serializable {
 
 	}
 
+	/**
+	 * Sets the message's flags
+	 * 
+	 * @param flag
+	 *            The flags to set
+	 */
 	public void setFlags(final Flags flag) {
 		this.flags = flag;
 	}
@@ -432,20 +502,26 @@ public final class ContainerMessage extends Message implements Serializable {
 		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.mail.Message#getMessageNumber()
-	 */
 	@Override
 	public int getMessageNumber() {
 		return seqNum;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.mail.Part#getSize()
+	 */
 	public int getSize() {
 		return size;
 	}
 
+	/**
+	 * Sets this message's content in bytes
+	 * 
+	 * @param size
+	 *            The size
+	 */
 	public void setSize(final int size) {
 		this.size = size;
 	}
@@ -475,6 +551,12 @@ public final class ContainerMessage extends Message implements Serializable {
 				.append(" not set!").toString());
 	}
 
+	/**
+	 * Sets this message's content type
+	 * 
+	 * @param ct
+	 *            The content type
+	 */
 	public void setContentType(final ContentType ct) {
 		this.contentType = ct;
 	}
@@ -573,15 +655,30 @@ public final class ContainerMessage extends Message implements Serializable {
 		headers.remove(header_name);
 	}
 
+	/**
+	 * Gets an {@link Iterator} for the header names
+	 * 
+	 * @return An {@link Iterator} for the header names
+	 */
 	public Iterator<String> getHeaderNames() {
 		return headers.keySet().iterator();
 	}
 
+	/**
+	 * Gets an {@link Iterator} for the header entries
+	 * 
+	 * @return An {@link Iterator} for the header entries
+	 */
 	public Iterator<Map.Entry<String, String>> getHeaders() {
 		return headers.entrySet().iterator();
 	}
 
-	public int getNumfHeaders() {
+	/**
+	 * Gets the number of headers
+	 * 
+	 * @return The number of headers
+	 */
+	public int getNumOfHeaders() {
 		return headers.size();
 	}
 
@@ -597,6 +694,11 @@ public final class ContainerMessage extends Message implements Serializable {
 		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
 	}
 
+	/**
+	 * Gets the folder fullname
+	 * 
+	 * @return The folder fullname
+	 */
 	public String getFolderFullname() {
 		return folderFullname;
 	}
@@ -620,37 +722,81 @@ public final class ContainerMessage extends Message implements Serializable {
 						: null;
 	}
 
+	/**
+	 * Sets the <code>In-Reply-To</code> addresses
+	 * 
+	 * @param inReplyTo
+	 *            The <code>In-Reply-To</code> addresses
+	 */
 	public void setInReplyTo(final String inReplyTo) {
 		this.inReplyTo = inReplyTo;
 	}
 
+	/**
+	 * Gets the <code>Message-Id</code> header's value
+	 * 
+	 * @return The <code>Message-Id</code> header's value
+	 */
 	public String getMessageId() {
 		return messageId != null ? messageId
 				: headers.containsKey(MessageHeaders.HDR_MESSAGE_ID) ? (messageId = headers
 						.get(MessageHeaders.HDR_MESSAGE_ID)) : null;
 	}
 
+	/**
+	 * Sets the <code>Message-Id</code> header's value
+	 * 
+	 * @param messageId
+	 *            The <code>Message-Id</code> header's value
+	 */
 	public void setMessageId(final String messageId) {
 		this.messageId = messageId;
 		headers.put(MessageHeaders.HDR_MESSAGE_ID, messageId);
 	}
 
+	/**
+	 * Gets the thread level
+	 * 
+	 * @return The thread level
+	 */
 	public int getThreadLevel() {
 		return threadLevel;
 	}
 
+	/**
+	 * Sets the thread level
+	 * 
+	 * @param threadLevel
+	 *            The thread level to set
+	 */
 	public void setThreadLevel(final int threadLevel) {
 		this.threadLevel = threadLevel;
 	}
 
+	/**
+	 * Gets the UID
+	 * 
+	 * @return The UID
+	 */
 	public long getUid() {
 		return uid;
 	}
 
+	/**
+	 * Sets the UID
+	 * 
+	 * @param uid
+	 *            The UID to set
+	 */
 	public void setUid(final long uid) {
 		this.uid = uid;
 	}
 
+	/**
+	 * Gets the folder separator character
+	 * 
+	 * @return The folder separator character
+	 */
 	public char getSeparator() {
 		return separator;
 	}
@@ -748,7 +894,7 @@ public final class ContainerMessage extends Message implements Serializable {
 	 * @param bodystructure
 	 *            the bodystructure to set
 	 */
-	public void setBodystructure(BODYSTRUCTURE bodystructure) {
+	public void setBodystructure(final BODYSTRUCTURE bodystructure) {
 		this.bodystructure = bodystructure;
 	}
 }
