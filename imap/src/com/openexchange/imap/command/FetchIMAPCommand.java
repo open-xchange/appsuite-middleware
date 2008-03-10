@@ -470,7 +470,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 				 * Discard corrupt message
 				 */
 				final MailException imapExc = IMAPException.handleMessagingException(e);
-				LOG.error(new StringBuilder(100).append("Message #").append(msg.getMessageNumber()).append(
+				LOG.error(new StringBuilder(128).append("Message #").append(msg.getMessageNumber()).append(
 						" discarded: ").append(imapExc.getMessage()).toString(), imapExc);
 				error = true;
 				repeatItem = false;
@@ -478,7 +478,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 				/*
 				 * Discard corrupt message
 				 */
-				LOG.error(new StringBuilder(100).append("Message #").append(msg.getMessageNumber()).append(
+				LOG.error(new StringBuilder(128).append("Message #").append(msg.getMessageNumber()).append(
 						" discarded: ").append(e.getMessage()).toString(), e);
 				error = true;
 				repeatItem = false;
