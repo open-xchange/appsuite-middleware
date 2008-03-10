@@ -150,6 +150,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		}
 	}
 
+	private final char separator;
+
 	private String[] args;
 
 	private final String command;
@@ -216,6 +218,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	public FetchIMAPCommand(final IMAPFolder imapFolder, final Object arr, final FetchProfile fp,
 			final boolean isSequential, final boolean keepOrder) throws MessagingException {
 		super(imapFolder);
+		this.separator = imapFolder.getSeparator();
 		command = getFetchCommand(imapFolder, fp);
 		set(arr, isSequential, keepOrder);
 	}
@@ -287,8 +290,11 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 *            the sort field
 	 * @param fetchLen -
 	 *            the total message count
+	 * @throws MessagingException
+	 *             If a messaging error occurs
 	 */
-	public FetchIMAPCommand(final IMAPFolder imapFolder, final int[] fields, final int sortField, final int fetchLen) {
+	public FetchIMAPCommand(final IMAPFolder imapFolder, final int[] fields, final int sortField, final int fetchLen)
+			throws MessagingException {
 		this(imapFolder, getFetchProfile(fields, sortField), fetchLen);
 	}
 
@@ -301,9 +307,13 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 *            the fetch profile
 	 * @param fetchLen -
 	 *            the total message count
+	 * @throws MessagingException
+	 *             If a messaging error occurs
 	 */
-	public FetchIMAPCommand(final IMAPFolder imapFolder, final FetchProfile fp, final int fetchLen) {
+	public FetchIMAPCommand(final IMAPFolder imapFolder, final FetchProfile fp, final int fetchLen)
+			throws MessagingException {
 		super(imapFolder);
+		this.separator = imapFolder.getSeparator();
 		if (0 == fetchLen) {
 			returnDefaultValue = true;
 		}
@@ -442,7 +452,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		} else {
 			seqnum = fetchResponse.getNumber();
 		}
-		final ContainerMessage msg = new ContainerMessage(imapFolder.getFullName(), imapFolder.getSeparator(), seqnum);
+		final ContainerMessage msg = new ContainerMessage(imapFolder.getFullName(), separator, seqnum);
 		final int itemCount = fetchResponse.getItemCount();
 		if (itemHandlers == null || itemCount != itemHandlers.length) {
 			itemHandlers = createItemHandlers(itemCount, fetchResponse);
@@ -511,9 +521,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	private static final Set<Integer> ENV_FIELDS;
 
 	static {
-		ENV_FIELDS = new HashSet<Integer>(8);
+		ENV_FIELDS = new HashSet<Integer>(6);
 		/*
-		 * The Envelope is an aggregration of the common attributes of a
+		 * The Envelope is an aggregation of the common attributes of a
 		 * Message: From, To, Cc, Bcc, ReplyTo, Subject and Date.
 		 */
 		ENV_FIELDS.add(Integer.valueOf(MailListField.FROM.getField()));
@@ -701,7 +711,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 								decVal = MimeUtility.decodeText(MimeUtility.unfold(hdrValue));
 							} catch (final UnsupportedEncodingException e) {
 								LOG.error("Unsupported encoding in a message detected and monitored.", e);
-								MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+								MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e
+										.getMessage());
 								decVal = hdrValue;
 							}
 						}
@@ -930,13 +941,13 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 			final String[] hdrs = fp.getHeaderNames();
 			if (hdrs.length > 0) {
 				command.append(' ');
-				command.append(craftHeaderCmd(imapFolder.getProtocol(), hdrs));
+				command.append(createHeaderCmd(imapFolder.getProtocol(), hdrs));
 			}
 		}
 		return command.toString();
 	}
 
-	private static String craftHeaderCmd(final IMAPProtocol p, final String[] hdrs) {
+	private static String createHeaderCmd(final IMAPProtocol p, final String[] hdrs) {
 		final StringBuilder sb;
 		if (p.isREV1()) {
 			sb = new StringBuilder("BODY.PEEK[HEADER.FIELDS (");
