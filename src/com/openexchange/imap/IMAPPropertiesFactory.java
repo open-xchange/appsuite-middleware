@@ -96,7 +96,7 @@ public class IMAPPropertiesFactory {
 	}
 
 	public static enum IMAPLoginType {
-		GLOBAL("global"), USER("user"), ANONYMOUS("anonymous");
+		GLOBAL("global"), USER("user"), ANONYMOUS("anonymous"), CONFIG("config");
 
 		private final String str;
 
@@ -394,6 +394,48 @@ public class IMAPPropertiesFactory {
 			imapProps.setImapPort(imapPort);
 			imapProps.setSmtpServer(smtpServer);
 			imapProps.setSmtpPort(smtpPort);
+                } else if (IMAPLoginType.CONFIG.equals(IMAPProperties.getImapLoginTypeInternal())) {
+                    String imapServer = props.getProperty(PROP_IMAPSERVER);
+                    if (imapServer == null) {
+                            throw new IMAPPropertyException(new StringBuilder(128).append(STR_PROPERTY).append(PROP_IMAPSERVER)
+                                            .append(STR_NOTSETIN).append(PROP_FILE).toString());
+                    }
+                    int imapPort = 143;
+                    int pos = imapServer.indexOf(':');
+                    if (pos > -1) {
+                            imapPort = Integer.parseInt(imapServer.substring(pos + 1));
+                            imapServer = imapServer.substring(0, pos);
+                    }
+                    String smtpServer = props.getProperty(PROP_SMTPSERVER);
+                    if (smtpServer == null) {
+                            throw new IMAPPropertyException(new StringBuilder(128).append(STR_PROPERTY).append(PROP_SMTPSERVER)
+                                            .append(STR_NOTSETIN).append(PROP_FILE).toString());
+                    }
+                    int smtpPort = 25;
+                    pos = smtpServer.indexOf(':');
+                    if (pos > -1) {
+                            smtpPort = Integer.parseInt(smtpServer.substring(pos + 1));
+                            smtpServer = smtpServer.substring(0, pos);
+                    }
+                    imapProps.setImapServer(imapServer);
+                    imapProps.setImapPort(imapPort);
+                    imapProps.setSmtpServer(smtpServer);
+                    imapProps.setSmtpPort(smtpPort);
+                    try {
+                            if (IMAPProperties.getImapCredSrcInternal() == null
+                                            || IMAPCredSrc.SESSION.equals(IMAPProperties.getImapCredSrcInternal())) {
+                                    imapProps.setImapPassword(sessionObj.getPassword());
+                                    imapProps.setImapLogin(User2IMAP.getInstance(userObj).getLocalIMAPLogin(sessionObj, false));
+                            } else if (IMAPCredSrc.OTHER.equals(IMAPProperties.getImapCredSrcInternal())) {
+                                    imapProps.setImapPassword(TEST_PW);
+                                    imapProps.setImapLogin(getRandomTestLogin());
+                            } else if (IMAPCredSrc.USER_IMAPLOGIN.equals(IMAPProperties.getImapCredSrcInternal())) {
+                                    imapProps.setImapPassword(sessionObj.getPassword());
+                                    imapProps.setImapLogin(User2IMAP.getInstance(userObj).getLocalIMAPLogin(sessionObj, true));
+                            }
+                    } catch (final User2IMAPException e) {
+                            imapProps.setError(e);
+                    }
 		}
 		return imapProps;
 	}
@@ -451,6 +493,8 @@ public class IMAPPropertiesFactory {
 					IMAPProperties.setImapLoginType(IMAPLoginType.USER);
 				} else if (IMAPLoginType.ANONYMOUS.toString().equalsIgnoreCase(loginType)) {
 					IMAPProperties.setImapLoginType(IMAPLoginType.ANONYMOUS);
+                                } else if (IMAPLoginType.CONFIG.toString().equalsIgnoreCase(loginType)) {
+                                    IMAPProperties.setImapLoginType(IMAPLoginType.CONFIG);
 				} else {
 					throw new IMAPPropertyException("Unknown value in property " + PROP_LOGINTYPE + " set in "
 							+ PROP_FILE + ": " + loginType);

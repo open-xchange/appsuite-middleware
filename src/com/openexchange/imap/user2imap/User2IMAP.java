@@ -335,6 +335,8 @@ public abstract class User2IMAP {
 			imapServer = sessionUser.getImapServer();
 		} else if (IMAPLoginType.ANONYMOUS.equals(IMAPProperties.getImapLoginType())) {
 			imapServer = sessionUser.getImapServer();
+                } else if (IMAPLoginType.CONFIG.equals(IMAPProperties.getImapLoginType())) {
+                    imapServer = IMAPPropertiesFactory.getProperties().getProperty(IMAPPropertiesFactory.PROP_IMAPSERVER);
 		} else {
 			return EMPTY_ARGS;
 		}

@@ -2,6 +2,7 @@
 
  - Bugfix #11019 Admin GUI keeps on trying to login after update
    applied attached server patch
+ - Bugfix #11025 missing imap auth plugin for server
    
 * 2008-03-04 - francisco.laguna@open-xchange.com
 
