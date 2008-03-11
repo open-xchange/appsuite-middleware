@@ -141,6 +141,10 @@ public class AppointmentParser extends CalendarParser {
 			appointmentobject.setTimezone(parseString(jsonobject, AppointmentFields.TIMEZONE));
 		}
 
+		if (jsonobject.has(AppointmentFields.RECURRENCE_START)) {
+			appointmentobject.setRecurringStart(parseDate(jsonobject, CalendarFields.RECURRENCE_START).getTime());
+		}
+
 		parseElementCalendar(appointmentobject, jsonobject);
 	}
 }
