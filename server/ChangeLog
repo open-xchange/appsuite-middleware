@@ -1,3 +1,7 @@
+* 2008-03-11 - sebastian.kauss@open-xchange.com
+
+ - Bugfix #10124: API does not return deleted items properly
+
 * 2008-03-06 - thorben.betten@open-xchange.com
 
  - Bugfix #10976: No adding of user time zone's offset to a message's sent
