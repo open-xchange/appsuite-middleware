@@ -50,8 +50,8 @@
 package com.openexchange.groupware.settings.tree;
 
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.SharedNode;
 import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.impl.SharedNode;
 
 /**
  * Setup for the setting that stores the GUI configuration as one string in the

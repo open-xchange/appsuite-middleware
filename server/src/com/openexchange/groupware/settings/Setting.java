@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+
 /**
  * This class represents a single setting.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -341,14 +342,14 @@ public class Setting {
     /**
      * @return the parent
      */
-    Setting getParent() {
+    public Setting getParent() {
         return parent;
     }
 
     /**
      * @return the shared
      */
-    IValueHandler getShared() {
+    public IValueHandler getShared() {
         return shared;
     }
 }

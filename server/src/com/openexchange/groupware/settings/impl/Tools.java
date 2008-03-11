@@ -47,48 +47,57 @@
  *
  */
 
-package com.openexchange.groupware.settings;
+package com.openexchange.groupware.settings.impl;
 
-import com.openexchange.session.Session;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
 /**
- * This class defines the interface to the storage for user specific settings.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class SettingStorage {
+public final class Tools {
 
     /**
-     * Default constructor.
+     * Prevent instanciation.
      */
-    protected SettingStorage() {
+    private Tools() {
         super();
     }
 
-    /**
-     * This method stores a specific setting.
-     * @param setting the setting to store.
-     * @throws SettingException if an error occurs while saving the setting.
-     */
-    public abstract void save(Setting setting)
-        throws SettingException;
-
-    /**
-     * This method reads the setting and its subsettings from the database.
-     * @param setting setting to read.
-     * @throws SettingException if an error occurs while reading the setting.
-     */
-    public abstract void readValues(Setting setting)
-        throws SettingException;
-
-    /**
-     * @param session Session.
-     * @return an instance implementing this storage interface.
-     */
-    public static SettingStorage getInstance(final Session session) {
+    public static Context getContext(final int contextId)
+        throws SettingException {
         try {
-            return new RdbSettingStorage(session);
-        } catch (SettingException e) {
-            throw new RuntimeException(e);
+            return ContextStorage.getInstance().getContext(contextId);
+        } catch (ContextException e) {
+            throw new SettingException(e);
+        }
+    }
+
+    public static User getUser(final Context ctx, final int userId)
+        throws SettingException {
+        try {
+            return UserStorage.getInstance().getUser(userId, ctx);
+        } catch (LdapException e) {
+            throw new SettingException(e);
+        }
+    }
+
+    public static UserConfiguration getUserConfiguration(final Context ctx,
+        final int userId) throws SettingException {
+        try {
+            return UserConfigurationStorage.getInstance().getUserConfiguration(
+                userId, ctx);
+        } catch (UserConfigurationException e) {
+            throw new SettingException(e);
         }
     }
 }

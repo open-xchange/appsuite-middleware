@@ -47,11 +47,18 @@
  *
  */
 
-package com.openexchange.groupware.settings;
+package com.openexchange.groupware.settings.impl;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.SettingException.Code;
 
 /**
@@ -71,6 +78,11 @@ public final class ConfigTree {
     private static Setting tree;
 
     /**
+     * Set of all identifiers for the database to check for duplicate ones.
+     */
+    private static Set<Integer> dbIdentifier = new HashSet<Integer>();
+
+    /**
      * Prevent instantiation
      */
     private ConfigTree() {
@@ -86,37 +98,35 @@ public final class ConfigTree {
      */
     public static Setting getSettingByPath(final String path)
         throws SettingException {
-        return new Setting(getSettingByPath(tree, path));
+        final String[] pathParts = path.split("/");
+        return new Setting(getSettingByPath(tree, pathParts));
     }
 
     /**
      * This is the recursive method for resolving the path.
      * @param actual setting object that is already resolved from the path.
-     * @param remainingPath the path that must be resolved.
+     * @param path the path that must be resolved.
      * @return a setting object.
      * @throws SettingException if the path cannot be resolved to a setting
      * object.
      */
     public static Setting getSettingByPath(final Setting actual,
-        final String remainingPath) throws SettingException {
+        final String[] path) throws SettingException {
         Setting retval = actual;
-        if (remainingPath.length() != 0) {
-            String pathElement;
-            String newRemaining;
-            final int slashPos = remainingPath.indexOf('/');
-            if (-1 == slashPos) {
-                pathElement = remainingPath;
-                newRemaining = "";
+        if (path.length != 0) {
+            final String[] remainingPath = new String[path.length - 1];
+            System.arraycopy(path, 1, remainingPath, 0, path.length - 1);
+            final Setting child;
+            if (0 == path[0].length()) {
+                child = actual;
             } else {
-                pathElement = remainingPath.substring(0, slashPos);
-                newRemaining = remainingPath.substring(slashPos + 1);
+                child = actual.getElement(path[0]);
             }
-            final Setting child = actual.getElement(pathElement);
             if (null == child) {
-                throw new SettingException(Code.UNKNOWN_PATH,
-                    actual.getName() + '/' + pathElement);
+                throw new SettingException(Code.UNKNOWN_PATH, actual.getName()
+                    + '/' + path[0]);
             }
-            retval = getSettingByPath(child, newRemaining);
+            retval = getSettingByPath(child, remainingPath);
         }
         return retval;
     }
@@ -134,11 +144,24 @@ public final class ConfigTree {
         return retval;
     }
 
-    static void addSharedValue(final Setting actual, final String[] path,
-        final IValueHandler shared) {
+    public static void addPreferencesItem(final PreferencesItemService item)
+        throws SettingException {
+        addSharedValue(null, item.getPath(), item.getSharedValue());
+    }
+
+    private static void addSharedValue(final Setting actual, final String[] path,
+        final IValueHandler shared) throws SettingException {
         if (null == actual) {
             addSharedValue(tree, path, shared);
         } else if (1 == path.length) {
+            if (-1 != shared.getId()) {
+                final Integer tmp = Integer.valueOf(shared.getId());
+                if (dbIdentifier.contains(tmp)) {
+                    throw new SettingException(Code.DUPLICATE_ID, tmp);
+                } else {
+                    dbIdentifier.add(tmp);
+                }
+            }
             actual.addElement(new Setting(path[0], shared.getId(), shared));
         } else {
             Setting sub = actual.getElement(path[0]);
@@ -150,6 +173,25 @@ public final class ConfigTree {
             final String[] subPath = new String[path.length - 1];
             System.arraycopy(path, 1, subPath, 0, subPath.length);
             addSharedValue(sub, subPath, shared);
+        }
+    }
+
+    public static void removePreferencesItem(final PreferencesItemService item) {
+        try {
+            removeSharedValue(getSettingByPath(tree, item.getPath()));
+        } catch (SettingException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    private static void removeSharedValue(final Setting setting) {
+        final Setting parent = setting.getParent();
+        parent.removeElement(setting);
+        if (-1 != setting.getId()) {
+            dbIdentifier.remove(Integer.valueOf(setting.getId()));
+        }
+        if (parent.isLeaf() && parent != tree) {
+            removeSharedValue(parent);
         }
     }
 
@@ -236,15 +278,14 @@ public final class ConfigTree {
             return;
         }
         tree = new Setting("", -1, new SharedNode(""));
-
         try {
             final Class< ? extends PreferencesItemService>[] clazzes = getClasses();
-            final PreferencesItemService[] setups = new PreferencesItemService[clazzes.length];
+            final PreferencesItemService[] items = new PreferencesItemService[clazzes.length];
             for (int i = 0; i < clazzes.length; i++) {
-                setups[i] = clazzes[i].newInstance();
+                items[i] = clazzes[i].newInstance();
             }
-            for (PreferencesItemService setup : setups) {
-                addSharedValue(null, setup.getPath(), setup.getSharedValue());
+            for (PreferencesItemService item : items) {
+                addPreferencesItem(item);
             }
         } catch (InstantiationException e) {
             throw new SettingException(Code.INIT, e);
@@ -257,6 +298,22 @@ public final class ConfigTree {
         if (null == tree) {
             LOG.error("Duplicate shutdown of configuration tree.");
             return;
+        }
+        try {
+            final Class< ? extends PreferencesItemService>[] clazzes = getClasses();
+            final PreferencesItemService[] items = new PreferencesItemService[clazzes.length];
+            for (int i = 0; i < clazzes.length; i++) {
+                items[i] = clazzes[i].newInstance();
+            }
+            for (PreferencesItemService item : items) {
+                removePreferencesItem(item);
+            }
+        } catch (InstantiationException e) {
+            final SettingException se = new SettingException(Code.INIT, e);
+            LOG.error(se.getMessage(), se);
+        } catch (IllegalAccessException e) {
+            final SettingException se = new SettingException(Code.INIT, e);
+            LOG.error(se.getMessage(), se);
         }
         tree = null;
     }

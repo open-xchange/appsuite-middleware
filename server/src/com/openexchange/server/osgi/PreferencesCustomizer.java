@@ -47,95 +47,75 @@
  *
  */
 
-package com.openexchange.groupware.settings;
+package com.openexchange.server.osgi;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.session.Session;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.settings.impl.ConfigTree;
 
 /**
- * This class contains the shared, same functions for all mail bit settings.
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractMailFuncs implements IValueHandler {
+public class PreferencesCustomizer implements ServiceTrackerCustomizer {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(PreferencesCustomizer.class);
+
+    private final BundleContext context;
 
     /**
      * Default constructor.
+     * @param context bundle context.
      */
-    protected AbstractMailFuncs() {
+    public PreferencesCustomizer(final BundleContext context) {
         super();
+        this.context = context;
     }
 
     /**
      * {@inheritDoc}
      */
-    public void getValue(final Session session, final Context ctx,
-        final User user, final UserConfiguration userConfig,
-        final Setting setting) throws SettingException {
-        final UserSettingMail settings;
+    public Object addingService(final ServiceReference reference) {
+        final PreferencesItemService item = (PreferencesItemService) context
+            .getService(reference);
         try {
-            settings = UserSettingMailStorage.getInstance().loadUserSettingMail(
-                session.getUserId(), ctx);
-        } catch (final UserConfigurationException e) {
-            throw new SettingException(e);
+            ConfigTree.addPreferencesItem(item);
+        } catch (SettingException e) {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("Can't add service for preferences item. Path: ");
+            final String[] path = item.getPath();
+            for (int i = 0; i < path.length; i++) {
+                sb.append(path[i]);
+                sb.append("/");
+            }
+            sb.setLength(sb.length() - 1);
+            LOG.error(sb.toString(), e);
         }
-		if (userConfig.hasWebMail()) {
-			setting.setSingleValue(isSet(settings));
-		}
-	}
-
-    /**
-	 * @param settings
-	 *            in this mail settings the bit will be requested.
-	 * @return the value of the bit.
-	 */
-    protected abstract Object isSet(UserSettingMail settings);
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean isWritable() {
-        return true;
+        return item;
     }
 
     /**
-	 * {@inheritDoc}
-	 */
-	public void writeValue(final Context ctx, final User user,
-	    final Setting setting) throws SettingException {
-        final UserSettingMailStorage storage = UserSettingMailStorage
-            .getInstance();
-		final UserSettingMail settings;
-        try {
-            settings = storage.loadUserSettingMail(user.getId(), ctx);
-        } catch (final UserConfigurationException e) {
-            throw new SettingException(e);
-        }
-		setValue(settings, (String) setting.getSingleValue());
-		try {
-			storage.saveUserSettingMail(settings, user.getId(), ctx);
-		} catch (OXException e) {
-			throw new SettingException(e);
-		}
-	}
-
-	/**
-	 * @param settings
-	 *            in this mail settings the bit will be set.
-	 * @param value
-	 *            value of the bit that should be set.
-	 */
-    protected abstract void setValue(UserSettingMail settings,
-        String value);
+     * {@inheritDoc}
+     */
+    public void modifiedService(final ServiceReference reference, final Object service) {
+        // Nothing to do.
+    }
 
     /**
      * {@inheritDoc}
      */
-    public int getId() {
-        return -1;
+    public void removedService(final ServiceReference reference, final Object service) {
+        final PreferencesItemService item = (PreferencesItemService) service;
+        ConfigTree.removePreferencesItem(item);
+        context.ungetService(reference);
     }
 }

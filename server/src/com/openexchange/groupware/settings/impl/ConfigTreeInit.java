@@ -47,56 +47,44 @@
  *
  */
 
-package com.openexchange.groupware.settings;
+package com.openexchange.groupware.settings.impl;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.server.Initialization;
 
 /**
- *
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class Tools {
+public final class ConfigTreeInit implements Initialization {
+
+    private static final ConfigTreeInit singleton = new ConfigTreeInit();
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation.
      */
-    private Tools() {
+    private ConfigTreeInit() {
         super();
     }
 
-    public static Context getContext(final int contextId)
-        throws SettingException {
-        try {
-            return ContextStorage.getInstance().getContext(contextId);
-        } catch (ContextException e) {
-            throw new SettingException(e);
-        }
+    /**
+     * @return the singleton instance.
+     */
+    public static final ConfigTreeInit getInstance() {
+        return singleton;
     }
 
-    public static User getUser(final Context ctx, final int userId)
-        throws SettingException {
-        try {
-            return UserStorage.getInstance().getUser(userId, ctx);
-        } catch (LdapException e) {
-            throw new SettingException(e);
-        }
+    /**
+     * {@inheritDoc}
+     */
+    public void start() throws SettingException {
+        ConfigTree.init();
     }
 
-    public static UserConfiguration getUserConfiguration(final Context ctx,
-        final int userId) throws SettingException {
-        try {
-            return UserConfigurationStorage.getInstance().getUserConfiguration(
-                userId, ctx);
-        } catch (UserConfigurationException e) {
-            throw new SettingException(e);
-        }
+    /**
+     * {@inheritDoc}
+     */
+    public void stop() {
+        ConfigTree.stop();
     }
 }

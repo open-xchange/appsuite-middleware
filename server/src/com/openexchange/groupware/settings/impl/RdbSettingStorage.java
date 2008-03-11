@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.settings;
+package com.openexchange.groupware.settings.impl;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -60,6 +60,9 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.SettingException.Code;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;

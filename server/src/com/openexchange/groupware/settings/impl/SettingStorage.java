@@ -47,43 +47,50 @@
  *
  */
 
-package com.openexchange.groupware.settings;
+package com.openexchange.groupware.settings.impl;
 
-import com.openexchange.server.Initialization;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.session.Session;
 
 /**
- * 
+ * This class defines the interface to the storage for user specific settings.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ConfigTreeInit implements Initialization {
-
-    private static final ConfigTreeInit singleton = new ConfigTreeInit();
+public abstract class SettingStorage {
 
     /**
-     * Prevent instantiation.
+     * Default constructor.
      */
-    private ConfigTreeInit() {
+    protected SettingStorage() {
         super();
     }
 
     /**
-     * @return the singleton instance.
+     * This method stores a specific setting.
+     * @param setting the setting to store.
+     * @throws SettingException if an error occurs while saving the setting.
      */
-    public static final ConfigTreeInit getInstance() {
-        return singleton;
-    }
+    public abstract void save(Setting setting)
+        throws SettingException;
 
     /**
-     * {@inheritDoc}
+     * This method reads the setting and its subsettings from the database.
+     * @param setting setting to read.
+     * @throws SettingException if an error occurs while reading the setting.
      */
-    public void start() throws SettingException {
-        ConfigTree.init();
-    }
+    public abstract void readValues(Setting setting)
+        throws SettingException;
 
     /**
-     * {@inheritDoc}
+     * @param session Session.
+     * @return an instance implementing this storage interface.
      */
-    public void stop() {
-        ConfigTree.stop();
+    public static SettingStorage getInstance(final Session session) {
+        try {
+            return new RdbSettingStorage(session);
+        } catch (SettingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

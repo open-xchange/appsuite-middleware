@@ -47,53 +47,48 @@
  *
  */
 
-package com.openexchange.groupware.settings.tree;
+package com.openexchange.groupware.settings.impl;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.session.Session;
 
 /**
- * 
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * This class contains the shared functions for all user settings.
  */
-public final class Identifier implements PreferencesItemService {
-
-    private static final String NAME = "identifier";
+public abstract class AbstractUserFuncs implements IValueHandler {
 
     /**
-     * Default constructor.
+     * {@inheritDoc}
      */
-    public Identifier() {
-        super();
+    public void writeValue(final Context ctx, final User user,
+        final Setting setting) throws SettingException {
+        try {
+            final UserImpl newUser = new UserImpl(user);
+            setValue(newUser, (String) setting.getSingleValue());
+            UserStorage.getInstance().updateUser(newUser, ctx);
+        } catch (LdapException e) {
+            throw new SettingException(e);
+        }
     }
 
     /**
      * {@inheritDoc}
      */
-    public String[] getPath() {
-        return new String[] { NAME };
+    public int getId() {
+        return -1;
     }
 
     /**
-     * {@inheritDoc}
+     * @param user in this user object the value should be set.
+     * @param value the value to set.
+     * @throws SettingException if writing of the value fails.
      */
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return true;
-            }
-            public void getValue(final Session session, final Context ctx,
-                final User user, final UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
-                setting.setSingleValue(Integer.valueOf(session.getUserId()));
-            }
-        };
-    }
+    protected abstract void setValue(UserImpl user, String value)
+        throws SettingException;
 }

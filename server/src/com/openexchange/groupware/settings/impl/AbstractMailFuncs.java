@@ -47,32 +47,93 @@
  *
  */
 
-package com.openexchange.groupware.settings;
+package com.openexchange.groupware.settings.impl;
 
+import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserImpl;
-import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.session.Session;
 
 /**
- * This class contains the shared functions for all user settings.
+ * This class contains the shared, same functions for all mail bit settings.
  */
-public abstract class AbstractUserFuncs implements IValueHandler {
+public abstract class AbstractMailFuncs implements IValueHandler {
+
+    /**
+     * Default constructor.
+     */
+    protected AbstractMailFuncs() {
+        super();
+    }
 
     /**
      * {@inheritDoc}
      */
-    public void writeValue(final Context ctx, final User user,
+    public void getValue(final Session session, final Context ctx,
+        final User user, final UserConfiguration userConfig,
         final Setting setting) throws SettingException {
+        final UserSettingMail settings;
         try {
-            final UserImpl newUser = new UserImpl(user);
-            setValue(newUser, (String) setting.getSingleValue());
-            UserStorage.getInstance().updateUser(newUser, ctx);
-        } catch (LdapException e) {
+            settings = UserSettingMailStorage.getInstance().loadUserSettingMail(
+                session.getUserId(), ctx);
+        } catch (final UserConfigurationException e) {
             throw new SettingException(e);
         }
+		if (userConfig.hasWebMail()) {
+			setting.setSingleValue(isSet(settings));
+		}
+	}
+
+    /**
+	 * @param settings
+	 *            in this mail settings the bit will be requested.
+	 * @return the value of the bit.
+	 */
+    protected abstract Object isSet(UserSettingMail settings);
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isWritable() {
+        return true;
     }
+
+    /**
+	 * {@inheritDoc}
+	 */
+	public void writeValue(final Context ctx, final User user,
+	    final Setting setting) throws SettingException {
+        final UserSettingMailStorage storage = UserSettingMailStorage
+            .getInstance();
+		final UserSettingMail settings;
+        try {
+            settings = storage.loadUserSettingMail(user.getId(), ctx);
+        } catch (final UserConfigurationException e) {
+            throw new SettingException(e);
+        }
+		setValue(settings, (String) setting.getSingleValue());
+		try {
+			storage.saveUserSettingMail(settings, user.getId(), ctx);
+		} catch (OXException e) {
+			throw new SettingException(e);
+		}
+	}
+
+	/**
+	 * @param settings
+	 *            in this mail settings the bit will be set.
+	 * @param value
+	 *            value of the bit that should be set.
+	 */
+    protected abstract void setValue(UserSettingMail settings,
+        String value);
 
     /**
      * {@inheritDoc}
@@ -80,12 +141,4 @@ public abstract class AbstractUserFuncs implements IValueHandler {
     public int getId() {
         return -1;
     }
-
-    /**
-     * @param user in this user object the value should be set.
-     * @param value the value to set.
-     * @throws SettingException if writing of the value fails.
-     */
-    protected abstract void setValue(UserImpl user, String value)
-        throws SettingException;
 }

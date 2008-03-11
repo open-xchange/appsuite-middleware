@@ -138,7 +138,12 @@ public class SettingException extends AbstractOXException {
          * Invalid value %s written to setting %s.
          */
         INVALID_VALUE("Invalid value %s written to setting %s.", Category
-            .USER_INPUT, 9);
+            .USER_INPUT, 9),
+        /**
+         * Found duplicate database identifier %d. Not adding preferences item.
+         */
+        DUPLICATE_ID("Found duplicate database identifier %d. Not adding "
+            + "preferences item.", Category.CODE_ERROR, 10);
 
         /**
          * Message of the exception.

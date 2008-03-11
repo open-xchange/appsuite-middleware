@@ -70,10 +70,10 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.settings.ConfigTree;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.SettingStorage;
+import com.openexchange.groupware.settings.impl.ConfigTree;
+import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONException;
 
@@ -102,6 +102,7 @@ public class ConfigMenu extends SessionServlet {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected void doGet(final HttpServletRequest req,
         final HttpServletResponse resp) throws ServletException, IOException {
         String path = getServletSpecificURI(req);
@@ -180,6 +181,7 @@ public class ConfigMenu extends SessionServlet {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected void doPut(final HttpServletRequest req,
         final HttpServletResponse resp) throws ServletException, IOException {
         final Session session = getSessionObject(req);
@@ -265,8 +267,9 @@ public class ConfigMenu extends SessionServlet {
             final Iterator<String> iter = json.keys();
             SettingException exc = null;
             while (iter.hasNext()) {
-                final String key = (String) iter.next();
-                final Setting sub = ConfigTree.getSettingByPath(setting, key);
+                final String key = iter.next();
+                final Setting sub = ConfigTree.getSettingByPath(setting,
+                    new String[] { key });
                 sub.setSingleValue(json.getString(key));
                 try {
                     // Catch single exceptions if GUI writes not writable

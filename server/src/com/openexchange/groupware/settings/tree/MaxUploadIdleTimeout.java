@@ -53,11 +53,11 @@ import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 

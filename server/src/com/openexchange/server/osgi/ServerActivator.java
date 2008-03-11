@@ -68,6 +68,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.client.ConfigJump;
 import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nTools;
 import com.openexchange.mail.MailProvider;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
@@ -196,14 +197,17 @@ public final class ServerActivator extends DeferredActivator {
 			 * </pre>
 			 */
 
-			// Authentication is only needed for groupware.
+			// Search for AuthenticationService
 			serviceTrackerList.add(new ServiceTracker(context, AuthenticationService.class.getName(),
 				new BundleServiceTracker<AuthenticationService>(context, Authentication.getHolder(),
 				AuthenticationService.class)));
-			// ConfigJump
+			// Search for ConfigJumpService
 			serviceTrackerList.add(new ServiceTracker(context, ConfigJumpService.class.getName(),
 			    new BundleServiceTracker<ConfigJumpService>(context, ConfigJump.getHolder(),
 		        ConfigJumpService.class)));
+			// Search for extensions of the preferences tree interface
+			serviceTrackerList.add(new ServiceTracker(context, PreferencesItemService.class.getName(),
+			    new PreferencesCustomizer(context)));
 			// Start up server the usual way
 			starter.start();
 		}
