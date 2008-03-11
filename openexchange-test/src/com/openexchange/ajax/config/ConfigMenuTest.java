@@ -43,7 +43,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajax.AbstractAJAXTest;
-import com.openexchange.groupware.settings.ConfigTree;
+import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.tree.TimeZone;
 
 /**

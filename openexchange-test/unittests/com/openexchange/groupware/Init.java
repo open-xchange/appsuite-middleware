@@ -126,7 +126,7 @@ public final class Init {
 	/**
 	 * Sets up the configuration tree.
 	 */
-	com.openexchange.groupware.settings.ConfigTreeInit.getInstance(),
+	com.openexchange.groupware.settings.impl.ConfigTreeInit.getInstance(),
 	/**
 	 * Responsible for starting and stopping the EventQueue
 	 */
