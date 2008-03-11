@@ -113,7 +113,7 @@ public class EventClient {
 	}
 		
 	public void create(final AppointmentObject appointmentObj, final FolderObject folderObj) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.INSERT, Types.APPOINTMENT, appointmentObj, null, folderObj, null);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.INSERT, Types.APPOINTMENT, appointmentObj, null, folderObj, null);
 
 		final Hashtable ht = new Hashtable();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -137,7 +137,7 @@ public class EventClient {
 	}
 
 	public void modify(final AppointmentObject oldAppointmentObj, AppointmentObject newAppointmentObj, FolderObject folderObj) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.UPDATE, Types.APPOINTMENT, oldAppointmentObj, newAppointmentObj, folderObj, null);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.APPOINTMENT, oldAppointmentObj, newAppointmentObj, folderObj, null);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -161,7 +161,7 @@ public class EventClient {
 	}
 	
 	public void delete(final AppointmentObject appointmentObj, final FolderObject folderObj) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.DELETE, Types.APPOINTMENT, appointmentObj, null, null, null);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.DELETE, Types.APPOINTMENT, appointmentObj, null, null, null);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -174,7 +174,7 @@ public class EventClient {
 	}
 
 	public void move(final AppointmentObject appointmentObj, FolderObject sourceFolder, FolderObject destinationFolder) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.MOVE, Types.APPOINTMENT, appointmentObj, null, sourceFolder, destinationFolder);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.MOVE, Types.APPOINTMENT, appointmentObj, null, sourceFolder, destinationFolder);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -198,7 +198,7 @@ public class EventClient {
 	}
 		
 	public void create(final Task taskObj, final FolderObject folderObj) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.INSERT, Types.TASK, taskObj, null, folderObj, null);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.INSERT, Types.TASK, taskObj, null, folderObj, null);
 
 		final Hashtable ht = new Hashtable();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -222,7 +222,7 @@ public class EventClient {
 	}
     
 	public void modify(final Task taskObj, final FolderObject folderObj) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.UPDATE, Types.TASK, taskObj, null, folderObj, null);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.TASK, taskObj, null, folderObj, null);
 
 		final Hashtable ht = new Hashtable();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -246,7 +246,7 @@ public class EventClient {
 	}
     
 	public void delete(final Task taskObj, final FolderObject folderObj) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.DELETE, Types.TASK, taskObj, null, folderObj, null);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.DELETE, Types.TASK, taskObj, null, folderObj, null);
 
 		final Hashtable ht = new Hashtable();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -259,7 +259,7 @@ public class EventClient {
 	}
 	
 	public void move(final Task taskObj, FolderObject sourceFolder, FolderObject destinationFolder) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.MOVE, Types.TASK, taskObj, null, sourceFolder, destinationFolder);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.MOVE, Types.TASK, taskObj, null, sourceFolder, destinationFolder);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -283,7 +283,7 @@ public class EventClient {
 	}
 		
 	public void create(final ContactObject contactObj, final FolderObject folderObj) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.INSERT, Types.CONTACT, contactObj, null, folderObj, null);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.INSERT, Types.CONTACT, contactObj, null, folderObj, null);
 
 		final Hashtable ht = new Hashtable();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -307,7 +307,7 @@ public class EventClient {
 	}
 	
 	public void modify(final ContactObject contactObj, final FolderObject folderObj) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.UPDATE, Types.CONTACT, contactObj, null, folderObj, null);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.CONTACT, contactObj, null, folderObj, null);
 
 		final Hashtable ht = new Hashtable();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -331,7 +331,7 @@ public class EventClient {
 	}
 	
 	public void delete(final ContactObject contactObj, final FolderObject folderObj) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.DELETE, Types.CONTACT, contactObj, null, folderObj, null);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.DELETE, Types.CONTACT, contactObj, null, folderObj, null);
 
 		final Hashtable ht = new Hashtable();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -344,7 +344,7 @@ public class EventClient {
 	}
 	
 	public void move(final ContactObject contactObj, final FolderObject folderObj) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.MOVE, Types.CONTACT, contactObj, null, folderObj, null);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.MOVE, Types.CONTACT, contactObj, null, folderObj, null);
 
 		final Hashtable ht = new Hashtable();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -368,7 +368,7 @@ public class EventClient {
 	}
 		
 	public void create(final FolderObject folderObj, final FolderObject parentFolder) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.INSERT, Types.FOLDER, folderObj, null, parentFolder, null);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.INSERT, Types.FOLDER, folderObj, null, parentFolder, null);
 
 		final Hashtable ht = new Hashtable();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -392,7 +392,7 @@ public class EventClient {
 	}
 	
 	public void modify(final FolderObject folderObj, final FolderObject parentFolder) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.UPDATE, Types.FOLDER, folderObj, null, parentFolder, null);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.FOLDER, folderObj, null, parentFolder, null);
 
 		final Hashtable ht = new Hashtable();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -421,7 +421,7 @@ public class EventClient {
 	}
 	
 	public void delete(final FolderObject folderObj, final FolderObject parentFolder) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.DELETE, Types.FOLDER, folderObj, null, parentFolder, null);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.DELETE, Types.FOLDER, folderObj, null, parentFolder, null);
 
 		final Hashtable ht = new Hashtable();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -445,7 +445,7 @@ public class EventClient {
 	}
 	
 	public void create(final DocumentMetadata document, final FolderObject parentFolder) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.INSERT, Types.INFOSTORE, document, null, parentFolder, null);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.INSERT, Types.INFOSTORE, document, null, parentFolder, null);
 
 		final Hashtable ht = new Hashtable();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -469,7 +469,7 @@ public class EventClient {
 	}
 	
 	public void modify(final DocumentMetadata document, final FolderObject parentFolder) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.UPDATE, Types.INFOSTORE, document, null, parentFolder, null);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.INFOSTORE, document, null, parentFolder, null);
 
 		final Hashtable ht = new Hashtable();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -493,7 +493,7 @@ public class EventClient {
 	}
 	
 	public void delete(final DocumentMetadata document, final FolderObject parentFolder) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.DELETE, Types.INFOSTORE, document, null, parentFolder, null);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.DELETE, Types.INFOSTORE, document, null, parentFolder, null);
 
 		final Hashtable ht = new Hashtable();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
@@ -506,7 +506,7 @@ public class EventClient {
 	}
 	
 	public void move(final DocumentMetadata document, FolderObject sourceFolder, FolderObject destinationFolder) throws EventException {
-		final CommonEvent genericEvent = new CommonEvent(userId, contextId, CommonEvent.MOVE, Types.INFOSTORE, document, null, sourceFolder, destinationFolder);
+		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.MOVE, Types.INFOSTORE, document, null, sourceFolder, destinationFolder);
 
 		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
