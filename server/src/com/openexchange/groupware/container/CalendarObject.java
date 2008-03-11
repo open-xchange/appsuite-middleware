@@ -139,7 +139,6 @@ public abstract class CalendarObject extends CommonObject
 	protected String title = null;
 	protected Date start_date = null;
 	protected Date end_date = null;
-	protected Date recurrenceStartDate = null;
 	protected String note = null;
 	protected int recurrence_id = 0;
 	protected int recurrence_position = 0;
@@ -210,10 +209,6 @@ public abstract class CalendarObject extends CommonObject
 	
 	public Date getEndDate( ) {
 		return end_date;
-	}
-	
-	public Date getRecurrenceStartDate( ) {
-		return recurrenceStartDate;
 	}
 	
 	public String getNote ( ) {
@@ -306,10 +301,6 @@ public abstract class CalendarObject extends CommonObject
 	public void setEndDate( final Date end_date ) {
 		this.end_date = end_date;
 		b_end_date = true;
-	}
-	
-	public void setRecurrenceStartDate( final Date recurrenceStartDate) {
-		this.recurrenceStartDate = recurrenceStartDate;
 	}
 	
 	public void setNote ( final String note ) {
