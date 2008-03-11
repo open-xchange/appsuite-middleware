@@ -276,8 +276,8 @@ public final class MailMessageParser {
 			if (!mailPart.containsSequenceId()) {
 				mailPart.setSequenceId(MailMessageParser.getSequenceId(prefix, partCount));
 			}
-			if (!handler.handleImagePart(mailPart, mailPart.getContentId(), contentType.getBaseType(), mailPart
-					.getSequenceId())) {
+			if (!handler.handleImagePart(mailPart, mailPart.getContentId(), contentType.getBaseType(), isInline,
+					filename, mailPart.getSequenceId())) {
 				stop = true;
 				return;
 			}
@@ -565,10 +565,10 @@ public final class MailMessageParser {
 	 * @param rawFileName
 	 *            The raw filename obtained from mail part
 	 * @param sequenceId
-	 *            The part's seequence ID
+	 *            The part's sequence ID
 	 * @param baseMimeType
-	 *            The base Mime type to look up an appropriate file extension if
-	 *            <code>rawFileName</code> is <code>null</code>
+	 *            The base MIME type to look up an appropriate file extension,
+	 *            if <code>rawFileName</code> is <code>null</code>
 	 * @return An appropriate filename
 	 */
 	public static String getFileName(final String rawFileName, final String sequenceId, final String baseMimeType) {

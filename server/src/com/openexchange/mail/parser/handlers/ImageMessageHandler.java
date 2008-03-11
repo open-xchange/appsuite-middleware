@@ -196,7 +196,7 @@ public final class ImageMessageHandler implements MailMessageHandler {
 	 *      java.lang.String, java.lang.String, java.lang.String)
 	 */
 	public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType,
-			final String id) throws MailException {
+			final boolean isInline, final String fileName, final String id) throws MailException {
 		if (imageCID == null) {
 			/*
 			 * Compare with filename

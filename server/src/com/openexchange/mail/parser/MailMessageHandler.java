@@ -138,9 +138,12 @@ public interface MailMessageHandler {
 
 	/**
 	 * Handle message's disposition notification
-	 * @param seen TODO
+	 * 
+	 * @param seen
+	 *            TODO
 	 */
-	public boolean handleDispositionNotification(InternetAddress dispositionNotificationTo, boolean seen) throws MailException;
+	public boolean handleDispositionNotification(InternetAddress dispositionNotificationTo, boolean seen)
+			throws MailException;
 
 	/**
 	 * Handle content id
@@ -205,8 +208,8 @@ public interface MailMessageHandler {
 	/**
 	 * Handle an image part (<code>image/*</code>)
 	 */
-	public boolean handleImagePart(MailPart part, String imageCID, String baseContentType, String id)
-			throws MailException;
+	public boolean handleImagePart(MailPart part, String imageCID, String baseContentType, boolean isInline,
+			String fileName, String id) throws MailException;
 
 	/**
 	 * Handle a multipart (<code>multipart/*</code>)

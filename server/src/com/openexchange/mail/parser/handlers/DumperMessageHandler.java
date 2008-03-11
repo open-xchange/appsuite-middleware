@@ -214,13 +214,15 @@ public class DumperMessageHandler implements MailMessageHandler {
 	 *      java.lang.String, java.lang.String, java.lang.String)
 	 */
 	public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType,
-			final String id) throws MailException {
+			final boolean isInline, final String fileName, final String id) throws MailException {
 		if (bodyOnly) {
 			return true;
 		}
 		strBuilder.append('\n').append("handleImagePart:\n");
 		strBuilder.append("ContentType=").append(baseContentType).append('\n');
 		strBuilder.append("Content-ID=").append(imageCID).append('\n');
+		strBuilder.append("isInline=").append(isInline).append('\n');
+		strBuilder.append("fileName=").append(fileName).append('\n');
 		strBuilder.append("sequenceId=").append(id).append('\n');
 		try {
 			strBuilder.append("Content:\n").append(MessageUtility.readStream(part.getInputStream(), "US-ASCII"));
