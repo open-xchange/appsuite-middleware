@@ -2,6 +2,9 @@
 
  - Bugfix #10124: API does not return deleted items properly
 
+ - Bugfix #10991: Unable to create tasks via WebDAV/XML if task 
+                  with attachment already exists in the folder
+
 * 2008-03-06 - thorben.betten@open-xchange.com
 
  - Bugfix #10976: No adding of user time zone's offset to a message's sent
