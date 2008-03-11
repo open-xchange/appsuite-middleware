@@ -297,7 +297,7 @@ public class AppointmentWriter extends CalendarWriter {
 			case AppointmentObject.TIMEZONE:
 				writeValue(appointmentObject.getTimezone(), jsonArray);
 				break;
-			case AppointmentObject.RECURRENCE_START_DATE:
+			case AppointmentObject.RECURRENCE_START:
 				writeValue(appointmentObject.getRecurringStart(), jsonArray);
 				break;
 			case AppointmentObject.PARTICIPANTS:
