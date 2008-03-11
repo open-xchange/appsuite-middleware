@@ -114,7 +114,8 @@ public final class IMAPLogicTools extends IMAPFolderWorker implements MailLogicT
 			for (int i = 0; i < originalUIDs.length; i++) {
 				msgs[i] = (MimeMessage) imapFolder.getMessageByUID(originalUIDs[i]);
 				if (msgs[i] == null) {
-					throw new MailException(MailException.Code.MAIL_NOT_FOUND, Long.valueOf(originalUIDs[i]), imapFolder.getFullName());
+					throw new MailException(MailException.Code.MAIL_NOT_FOUND, Long.valueOf(originalUIDs[i]),
+							imapFolder.getFullName());
 				}
 			}
 			final MailMessage forwardMail = MimeForward.getFowardMail(msgs, session);
