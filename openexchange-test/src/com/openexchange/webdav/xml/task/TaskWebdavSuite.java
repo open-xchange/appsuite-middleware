@@ -14,6 +14,8 @@ public class TaskWebdavSuite extends TestSuite{
 		tests.addTestSuite( NewTest.class );
 		tests.addTestSuite( UpdateTest.class );
 		
+		tests.addTestSuite( Bug10991Test.class );
+		
 		return tests;
 	}
 }
