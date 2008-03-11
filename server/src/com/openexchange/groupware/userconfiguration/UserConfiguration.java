@@ -662,8 +662,12 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	}
 
 	/**
-	 * If this permission is not granted, it's prohibited for the user to create
-	 * or edit public folders. Existing public folders are visible in any case.
+	 * If this permission is not granted, it is prohibited for the user to
+	 * create or edit public folders. Existing public folders are visible in any
+	 * case.
+	 * 
+	 * @return <code>true</code> full public folder access is granted;
+	 *         otherwise <code>false</code>
 	 */
 	public boolean hasFullPublicFolderAccess() {
 		return hasPermission(EDIT_PUBLIC_FOLDERS);
@@ -679,12 +683,13 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	}
 
 	/**
-	 * If this permission is not granted, neither folders are allowed to shared
-	 * nor shared folders are allowed to be seen by user. Existing permissions
-	 * are not removed if user loses this right, but the display of shared
-	 * folders is suppressed.
+	 * If this permission is not granted, neither folders are allowed to be
+	 * shared nor shared folders are allowed to be seen by user. Existing
+	 * permissions are not removed if user loses this right, but the display of
+	 * shared folders is suppressed.
 	 * 
-	 * @return
+	 * @return <code>true</code> full shared folder access is granted;
+	 *         otherwise <code>false</code>
 	 */
 	public boolean hasFullSharedFolderAccess() {
 		return hasPermission(READ_CREATE_SHARED_FOLDERS);
