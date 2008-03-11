@@ -70,8 +70,8 @@ public interface MailLogicTools {
 	 * delegates its request to
 	 * {@link MimeReply#getReplyMail(javax.mail.internet.MimeMessage, boolean, com.openexchange.session.Session, javax.mail.Session)}.
 	 * 
-	 * @param originalUID
-	 *            The original message's UID
+	 * @param originalID
+	 *            The original mail's ID
 	 * @param folder
 	 *            The folder fullname
 	 * @param replyAll
@@ -81,7 +81,7 @@ public interface MailLogicTools {
 	 * @throws MailException
 	 *             If reply message cannot be generated
 	 */
-	public MailMessage getReplyMessage(long originalUID, String folder, boolean replyAll) throws MailException;
+	public MailMessage getReplyMessage(long originalID, String folder, boolean replyAll) throws MailException;
 
 	/**
 	 * Creates a forward message for the messages specified by given original
@@ -93,8 +93,8 @@ public interface MailLogicTools {
 	 * delegates its request to
 	 * {@link MimeForward#getFowardMail(javax.mail.internet.MimeMessage[], com.openexchange.session.Session)}.
 	 * 
-	 * @param originalUIDs
-	 *            The original messages' UIDs which should be forwarded.
+	 * @param originalIDs
+	 *            The original mails' IDs which should be forwarded.
 	 * @param folder
 	 *            The folder fullname
 	 * @return An instance of {@link MailMessage} representing the forward
@@ -102,12 +102,13 @@ public interface MailLogicTools {
 	 * @throws MailException
 	 *             If forward message cannot be generated
 	 */
-	public MailMessage getFowardMessage(long[] originalUIDs, String folder) throws MailException;
+	public MailMessage getFowardMessage(long[] originalIDs, String folder) throws MailException;
 
 	/**
 	 * Releases all resources when closing parental {@link MailAccess}
 	 * 
 	 * @throws MailException
+	 *             If releasing the resources fails
 	 */
 	public void releaseResources() throws MailException;
 }
