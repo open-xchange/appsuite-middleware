@@ -134,7 +134,7 @@ public abstract class MailConfig {
 	}
 
 	public static enum LoginType {
-		GLOBAL("global"), USER("user"), ANONYMOUS("anonymous");
+		GLOBAL("global"), USER("user"), ANONYMOUS("anonymous"), CONFIG("config");
 
 		private final String str;
 
@@ -170,7 +170,7 @@ public abstract class MailConfig {
 	 * @return The appropriate mail server URL or <code>null</code>
 	 */
 	public static final String getMailServerURL(final User user) {
-		if (LoginType.GLOBAL.equals(getLoginType())) {
+		if (LoginType.GLOBAL.equals(getLoginType()) || LoginType.CONFIG.equals(getLoginType())) {
 			return MailConfig.getMailServer();
 		} else if (LoginType.USER.equals(getLoginType())) {
 			return user.getImapServer();
@@ -211,7 +211,7 @@ public abstract class MailConfig {
 				throw new MailConfigException(new StringBuilder().append("Property \"").append("masterPassword")
 						.append("\" not set").toString());
 			}
-			mailConfig.login = user.getMail();
+			mailConfig.login = user.getMail();// or user.getLoginInfo()
 			mailConfig.password = masterPw;
 		} else if (LoginType.USER.equals(getLoginType())) {
 			if (getCredSrc() == null || CredSrc.SESSION.equals(getCredSrc())) {
@@ -227,6 +227,9 @@ public abstract class MailConfig {
 		} else if (LoginType.ANONYMOUS.equals(getLoginType())) {
 			mailConfig.login = LoginType.ANONYMOUS.toString();
 			mailConfig.password = "";
+		} else if (LoginType.CONFIG.equals(getLoginType())) {
+			mailConfig.login = user.getMail();
+			mailConfig.password = session.getPassword();
 		}
 	}
 
