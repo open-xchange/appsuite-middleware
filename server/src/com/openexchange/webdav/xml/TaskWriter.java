@@ -68,6 +68,8 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.session.Session;
@@ -127,8 +129,14 @@ public class TaskWriter extends CalendarWriter {
 	public TaskWriter() {
 		
 	}
-	
+
 	public TaskWriter(final Session sessionObj) {
+		this.sessionObj = sessionObj;
+	}
+
+	public TaskWriter(final User userObj, final Context ctx, final Session sessionObj) {
+		this.userObj = userObj;
+		this.ctx = ctx;
 		this.sessionObj = sessionObj;
 	}
 	

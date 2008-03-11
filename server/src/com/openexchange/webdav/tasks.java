@@ -72,6 +72,8 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLInterfaceImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -196,7 +198,8 @@ public final class tasks extends XmlServlet {
 	
 	@Override
 	protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId, final OutputStream os) throws Exception {
-		final TaskWriter taskwriter = new TaskWriter(sessionObj);
+		final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx); 
+		final TaskWriter taskwriter = new TaskWriter(userObj, ctx, sessionObj);
 		taskwriter.startWriter(objectId, folderId, os);
 	}
 	
@@ -207,7 +210,8 @@ public final class tasks extends XmlServlet {
 	
 	@Override
 	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
-		final TaskWriter taskwriter = new TaskWriter(sessionObj);
+		final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx); 
+		final TaskWriter taskwriter = new TaskWriter(userObj, ctx, sessionObj);
 		taskwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
 	}
 	
