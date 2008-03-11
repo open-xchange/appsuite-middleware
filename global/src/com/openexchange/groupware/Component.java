@@ -268,6 +268,10 @@ public enum Component {
      */
     DELETE_EVENT("DEL"),
     /**
+     * Any errors related to mail filter <code></code>
+     */
+    MAIL_FILTER("MAIL_FILTER"),
+    /**
      * Any errors related to an OSGi service
      */
     SERVICE("SRV");
