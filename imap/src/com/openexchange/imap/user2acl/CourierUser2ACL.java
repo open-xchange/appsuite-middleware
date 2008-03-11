@@ -57,6 +57,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.config.MailConfig.CredSrc;
+import com.openexchange.mail.config.MailConfig.LoginType;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
@@ -148,7 +149,7 @@ public class CourierUser2ACL extends User2ACL {
 	}
 
 	private final String getACLNameInternal(final int userId, final Context ctx) throws AbstractOXException {
-		if (CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
+		if (LoginType.USER.equals(IMAPConfig.getLoginType()) && CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
 			return UserStorage.getInstance().getUser(userId, ctx).getImapLogin();
 		}
 		return UserStorage.getInstance().getUser(userId, ctx).getLoginInfo();
@@ -188,7 +189,7 @@ public class CourierUser2ACL extends User2ACL {
 	}
 
 	private final int getUserIDInternal(final String pattern, final Context ctx) throws AbstractOXException {
-		if (CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
+		if (LoginType.USER.equals(IMAPConfig.getLoginType()) && CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
 			/*
 			 * Find user name by user's imap login
 			 */

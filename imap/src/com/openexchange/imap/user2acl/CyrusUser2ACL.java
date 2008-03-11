@@ -54,6 +54,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.config.MailConfig.CredSrc;
+import com.openexchange.mail.config.MailConfig.LoginType;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
@@ -87,7 +88,8 @@ public final class CyrusUser2ACL extends User2ACL {
 			throws AbstractOXException {
 		if (userId == OCLPermission.ALL_GROUPS_AND_USERS) {
 			return AUTH_ID_ANYONE;
-		} else if (CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
+		} else if (LoginType.USER.equals(IMAPConfig.getLoginType())
+				&& CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
 			return UserStorage.getInstance().getUser(userId, ctx).getImapLogin();
 		}
 		return UserStorage.getInstance().getUser(userId, ctx).getLoginInfo();
@@ -98,7 +100,8 @@ public final class CyrusUser2ACL extends User2ACL {
 			throws AbstractOXException {
 		if (AUTH_ID_ANYONE.equalsIgnoreCase(pattern)) {
 			return OCLPermission.ALL_GROUPS_AND_USERS;
-		} else if (CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
+		} else if (LoginType.USER.equals(IMAPConfig.getLoginType())
+				&& CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
 			/*
 			 * Find user name by user's imap login
 			 */
