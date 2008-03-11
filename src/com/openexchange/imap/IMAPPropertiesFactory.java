@@ -421,21 +421,11 @@ public class IMAPPropertiesFactory {
                     imapProps.setImapPort(imapPort);
                     imapProps.setSmtpServer(smtpServer);
                     imapProps.setSmtpPort(smtpPort);
-                    try {
-                            if (IMAPProperties.getImapCredSrcInternal() == null
-                                            || IMAPCredSrc.SESSION.equals(IMAPProperties.getImapCredSrcInternal())) {
-                                    imapProps.setImapPassword(sessionObj.getPassword());
-                                    imapProps.setImapLogin(User2IMAP.getInstance(userObj).getLocalIMAPLogin(sessionObj, false));
-                            } else if (IMAPCredSrc.OTHER.equals(IMAPProperties.getImapCredSrcInternal())) {
-                                    imapProps.setImapPassword(TEST_PW);
-                                    imapProps.setImapLogin(getRandomTestLogin());
-                            } else if (IMAPCredSrc.USER_IMAPLOGIN.equals(IMAPProperties.getImapCredSrcInternal())) {
-                                    imapProps.setImapPassword(sessionObj.getPassword());
-                                    imapProps.setImapLogin(User2IMAP.getInstance(userObj).getLocalIMAPLogin(sessionObj, true));
-                            }
-                    } catch (final User2IMAPException e) {
-                            imapProps.setError(e);
-                    }
+                    /*
+                     * Set login to user's email address
+                     */
+                    imapProps.setImapLogin(userObj.getMail());
+                    imapProps.setImapPassword(sessionObj.getPassword());
 		}
 		return imapProps;
 	}
