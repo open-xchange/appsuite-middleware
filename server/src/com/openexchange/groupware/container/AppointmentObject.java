@@ -77,6 +77,8 @@ public class AppointmentObject extends CalendarObject implements Cloneable {
 	
 	public static final int TIMEZONE = 408;	
 	
+	public static final int RECURRENCE_START = 410;
+	
 	public static final int RESERVED = 1;
 	public static final int TEMPORARY = 2;
 	public static final int ABSENT = 3;
