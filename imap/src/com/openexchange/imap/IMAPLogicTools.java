@@ -97,12 +97,6 @@ public final class IMAPLogicTools extends IMAPFolderWorker implements MailLogicT
 		super(imapStore, imapConnection, session);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.MailTools#getFowardMessage(long,
-	 *      java.lang.String)
-	 */
 	public MailMessage getFowardMessage(final long[] originalUIDs, final String folder) throws MailException {
 		try {
 			final String fullname = prepareMailFolderParam(folder);
@@ -137,12 +131,6 @@ public final class IMAPLogicTools extends IMAPFolderWorker implements MailLogicT
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.MailTools#getReplyMessage(long,
-	 *      java.lang.String, boolean)
-	 */
 	public MailMessage getReplyMessage(final long originalUID, final String folder, final boolean replyAll)
 			throws MailException {
 		try {
