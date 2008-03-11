@@ -74,6 +74,8 @@ public interface CalendarFields extends CommonFields {
 	public static final String RECURRENCE_DATE_POSITION = "recurrence_date_position";
 	
 	public static final String RECURRENCE_TYPE = "recurrence_type";
+
+	public static final String RECURRENCE_START = "recurrence_start";
 	
 	public static final String CHANGE_EXCEPTIONS = "change_exceptions";
 	
