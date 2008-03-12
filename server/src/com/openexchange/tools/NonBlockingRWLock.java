@@ -99,35 +99,6 @@ public final class NonBlockingRWLock {
 	}
 
 	/**
-	 * Acquires the write lock exclusively.
-	 * <p>
-	 * The general contract of acquiring and finally releasing a write lock is:
-	 * 
-	 * <pre>
-	 * myRWLock.acquireWrite();
-	 * try {
-	 * 	// your code here
-	 * } finally {
-	 * 	myRWLock.releaseWrite();
-	 * }
-	 * </pre>
-	 */
-	public void acquireWrite() {
-		writeLock.lock();
-		writeCounter.set(writeCounter.incrementAndGet() % maxConcurrentWrites);
-	}
-
-	/**
-	 * Releases the previously acquired exclusive write lock.
-	 * 
-	 * @see #acquireWrite()
-	 */
-	public void releaseWrite() {
-		writeCounter.set(writeCounter.incrementAndGet() % maxConcurrentWrites);
-		writeLock.unlock();
-	}
-
-	/**
 	 * Acquires the read lock and returns current state.
 	 * <p>
 	 * The general contract of acquiring and finally releasing a read lock is:
@@ -151,6 +122,25 @@ public final class NonBlockingRWLock {
 	}
 
 	/**
+	 * Acquires the write lock exclusively.
+	 * <p>
+	 * The general contract of acquiring and finally releasing a write lock is:
+	 * 
+	 * <pre>
+	 * myRWLock.acquireWrite();
+	 * try {
+	 * 	// your code here
+	 * } finally {
+	 * 	myRWLock.releaseWrite();
+	 * }
+	 * </pre>
+	 */
+	public void acquireWrite() {
+		writeLock.lock();
+		writeCounter.set(writeCounter.incrementAndGet() % maxConcurrentWrites);
+	}
+
+	/**
 	 * Releases the previously acquired read lock and indicates if previous
 	 * state still equals current state. See {@link #acquireRead()} how to deal
 	 * with the return value.
@@ -163,5 +153,15 @@ public final class NonBlockingRWLock {
 	 */
 	public boolean releaseRead(final int prevState) {
 		return (prevState == writeCounter.get());
+	}
+
+	/**
+	 * Releases the previously acquired exclusive write lock.
+	 * 
+	 * @see #acquireWrite()
+	 */
+	public void releaseWrite() {
+		writeCounter.set(writeCounter.incrementAndGet() % maxConcurrentWrites);
+		writeLock.unlock();
 	}
 }
