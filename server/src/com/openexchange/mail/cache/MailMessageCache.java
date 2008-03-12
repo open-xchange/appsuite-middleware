@@ -403,8 +403,6 @@ public final class MailMessageCache {
 
 	static final String REGION_NAME = "MailMessageCache";
 
-	private static final Lock INIT_LOCK = new ReentrantLock();
-
 	private static final Lock LOCK_MOD = new ReentrantLock();
 
 	private static final AtomicBoolean initialized = new AtomicBoolean();
@@ -458,25 +456,36 @@ public final class MailMessageCache {
 	}
 
 	/**
-	 * Get the instance
+	 * Gets the singleton instance
 	 * 
-	 * @return The instance
+	 * @return The singleton instance
 	 * @throws OXCachingException
 	 *             If instance initialization failed
 	 */
 	public static MailMessageCache getInstance() throws OXCachingException {
 		if (!initialized.get()) {
-			INIT_LOCK.lock();
-			try {
+			synchronized (initialized) {
 				if (null == singleton) {
 					singleton = new MailMessageCache();
 					initialized.set(true);
 				}
-			} finally {
-				INIT_LOCK.unlock();
 			}
 		}
 		return singleton;
+	}
+
+	/**
+	 * Releases the singleton instance
+	 */
+	public static void releaseInstance() {
+		if (initialized.get()) {
+			synchronized (initialized) {
+				if (null != singleton) {
+					singleton = null;
+					initialized.set(false);
+				}
+			}
+		}
 	}
 
 	@SuppressWarnings(ANNOT_UNCHECKED)

@@ -141,9 +141,9 @@ public final class MailConnectionCache {
 	}
 
 	/**
-	 * Get the instance
+	 * Get the singleton instance
 	 * 
-	 * @return The instance
+	 * @return The singleton instance
 	 * @throws CacheException
 	 *             If instance initialization fails
 	 */
@@ -157,6 +157,20 @@ public final class MailConnectionCache {
 			}
 		}
 		return singleton;
+	}
+
+	/**
+	 * Releases the singleton instance
+	 */
+	public static void releaseInstance() {
+		if (initialized.get()) {
+			synchronized (initialized) {
+				if (null != singleton) {
+					singleton = null;
+					initialized.set(false);
+				}
+			}
+		}
 	}
 
 	/**
