@@ -207,7 +207,7 @@ public final class MIMEMessageConverter {
 			mimeMsg.setRecipients(Message.RecipientType.CC, mail.getCc());
 			mimeMsg.setRecipients(Message.RecipientType.BCC, mail.getBcc());
 			mimeMsg.setDisposition(mail.getContentDisposition().getDisposition());
-			if (mail.containsFileName() && mail.getFileName() != null) {
+			if (mail.containsFileName() && (mail.getFileName() != null)) {
 				mimeMsg.setFileName(mail.getFileName());
 			} else if (mail.getContentDisposition().containsFilenameParameter()) {
 				mimeMsg.setFileName(mail.getContentDisposition().getFilenameParameter());
@@ -305,7 +305,7 @@ public final class MIMEMessageConverter {
 			if (mailPart.containsContentId()) {
 				part.setHeader(MessageHeaders.HDR_CONTENT_ID, mailPart.getContentId());
 			}
-			if (mailPart.containsFileName() && mailPart.getFileName() != null) {
+			if (mailPart.containsFileName() && (mailPart.getFileName() != null)) {
 				part.setFileName(mailPart.getFileName());
 			} else if (mailPart.getContentDisposition().containsFilenameParameter()) {
 				part.setFileName(mailPart.getContentDisposition().getFilenameParameter());
@@ -559,7 +559,7 @@ public final class MIMEMessageConverter {
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
 						final String[] val = ((ContainerMessage) msg).getHeader(MessageHeaders.HDR_DISP_NOT_TO);
-						if (val != null && val.length > 0) {
+						if ((val != null) && (val.length > 0)) {
 							mailMessage.setDispositionNotification(InternetAddress.parse(val[0], true)[0]);
 							mailMessage.removeHeader(MessageHeaders.HDR_DISP_NOT_TO);
 						}
@@ -570,7 +570,7 @@ public final class MIMEMessageConverter {
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
 						final String[] val = ((ContainerMessage) msg).getHeader(MessageHeaders.HDR_X_PRIORITY);
-						if (val != null && val.length > 0) {
+						if ((val != null) && (val.length > 0)) {
 							parsePriority(val[0], mailMessage);
 							mailMessage.removeHeader(MessageHeaders.HDR_X_PRIORITY);
 						}
@@ -667,7 +667,7 @@ public final class MIMEMessageConverter {
 							LOG.error("Invalid content type: " + msg.getContentType(), e);
 							try {
 								ct = new ContentType(MIMETypes.MIME_DEFAULT);
-							} catch (MailException e1) {
+							} catch (final MailException e1) {
 								/*
 								 * Cannot occur
 								 */
@@ -800,7 +800,7 @@ public final class MIMEMessageConverter {
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
 						final String[] val = msg.getHeader(MessageHeaders.HDR_DISP_NOT_TO);
-						if (val != null && val.length > 0) {
+						if ((val != null) && (val.length > 0)) {
 							mailMessage.setDispositionNotification(InternetAddress.parse(val[0], true)[0]);
 							mailMessage.removeHeader(MessageHeaders.HDR_DISP_NOT_TO);
 						}
@@ -811,7 +811,7 @@ public final class MIMEMessageConverter {
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
 						final String[] val = msg.getHeader(MessageHeaders.HDR_X_PRIORITY);
-						if (val != null && val.length > 0) {
+						if ((val != null) && (val.length > 0)) {
 							parsePriority(val[0], mailMessage);
 							mailMessage.removeHeader(MessageHeaders.HDR_X_PRIORITY);
 						}
@@ -947,13 +947,13 @@ public final class MIMEMessageConverter {
 			mail.setContentType(msg.getContentType());
 			{
 				final String[] tmp = msg.getHeader(MessageHeaders.HDR_CONTENT_ID);
-				if (tmp != null && tmp.length > 0) {
+				if ((tmp != null) && (tmp.length > 0)) {
 					mail.setContentId(tmp[0]);
 				}
 			}
 			{
 				final String tmp = msg.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
-				if (tmp != null && tmp.length() > 0) {
+				if ((tmp != null) && (tmp.length() > 0)) {
 					mail.setContentDisposition(tmp);
 				}
 			}
@@ -1014,13 +1014,13 @@ public final class MIMEMessageConverter {
 			mailPart.setContentType(part.getContentType());
 			{
 				final String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_ID);
-				if (tmp != null && tmp.length > 0) {
+				if ((tmp != null) && (tmp.length > 0)) {
 					mailPart.setContentId(tmp[0]);
 				}
 			}
 			{
 				final String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION);
-				if (tmp != null && tmp.length > 0) {
+				if ((tmp != null) && (tmp.length > 0)) {
 					mailPart.setContentDisposition(tmp[0]);
 				}
 			}
@@ -1155,7 +1155,7 @@ public final class MIMEMessageConverter {
 			} catch (final IOException e2) {
 				LOG.error("Unable to parse headers", e2);
 				headerMap = new HashMap<String, String>(0);
-			} catch (MessagingException e2) {
+			} catch (final MessagingException e2) {
 				LOG.error("Unable to parse headers", e2);
 				headerMap = new HashMap<String, String>(0);
 			}
@@ -1176,8 +1176,8 @@ public final class MIMEMessageConverter {
 			char c = messageSrc.charAt(i);
 			final int prevPos = i;
 			int count = 0;
-			while (c == '\r' || c == '\n') {
-				if (c == '\n' && ++count >= 2) {
+			while ((c == '\r') || (c == '\n')) {
+				if ((c == '\n') && (++count >= 2)) {
 					i = prevPos;
 					break NextRead;
 				}

@@ -165,8 +165,8 @@ public final class MailMessageParser {
 		final String disposition = mailPart.containsContentDisposition() ? mailPart.getContentDisposition()
 				.getDisposition() : null;
 		final long size = mailPart.getSize();
-		final String filename = MailMessageParser.getFileName(mailPart.getFileName(), MailMessageParser.getSequenceId(
-				prefix, partCount), mailPart.getContentType().getBaseType());
+		final String filename = getFileName(mailPart.getFileName(), getSequenceId(prefix, partCount), mailPart
+				.getContentType().getBaseType());
 		final ContentType contentType = mailPart.containsContentType() ? mailPart.getContentType() : new ContentType(
 				MIMETypes.MIME_APPL_OCTET);
 		String charset = contentType.getCharsetParameter();
@@ -177,7 +177,7 @@ public final class MailMessageParser {
 		 * Parse part dependent on its MIME type
 		 */
 		final boolean isInline = Part.INLINE.equalsIgnoreCase(disposition)
-				|| (disposition == null && mailPart.getFileName() == null);
+				|| ((disposition == null) && (mailPart.getFileName() == null));
 		/**
 		 * formerly:
 		 * 
@@ -196,7 +196,7 @@ public final class MailMessageParser {
 					 * UUEncoded content detected. Handle normal text.
 					 */
 					if (!handler.handleInlineUUEncodedPlainText(uuencodedMP.getCleanText(), contentType, uuencodedMP
-							.getCleanText().length(), filename, MailMessageParser.getSequenceId(prefix, partCount))) {
+							.getCleanText().length(), filename, getSequenceId(prefix, partCount))) {
 						stop = true;
 						return;
 					}
@@ -230,7 +230,7 @@ public final class MailMessageParser {
 				 * Non-Inline: Text attachment
 				 */
 				if (!mailPart.containsSequenceId()) {
-					mailPart.setSequenceId(MailMessageParser.getSequenceId(prefix, partCount));
+					mailPart.setSequenceId(getSequenceId(prefix, partCount));
 				}
 				if (!handler.handleAttachment(mailPart, false, contentType.getBaseType(), filename, mailPart
 						.getSequenceId())) {
@@ -240,7 +240,7 @@ public final class MailMessageParser {
 			}
 		} else if (contentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
 			if (!mailPart.containsSequenceId()) {
-				mailPart.setSequenceId(MailMessageParser.getSequenceId(prefix, partCount));
+				mailPart.setSequenceId(getSequenceId(prefix, partCount));
 			}
 			if (isInline) {
 				if (!handler.handleInlineHtml(MessageUtility.readMailPart(mailPart, charset), contentType, size,
@@ -260,7 +260,7 @@ public final class MailMessageParser {
 			if (count == -1) {
 				throw new MailException(MailException.Code.INVALID_MULTIPART_CONTENT);
 			}
-			final String mpId = MailMessageParser.getSequenceId(prefix, partCount);
+			final String mpId = getSequenceId(prefix, partCount);
 			if (!mailPart.containsSequenceId()) {
 				mailPart.setSequenceId(mpId);
 			}
@@ -281,7 +281,7 @@ public final class MailMessageParser {
 			}
 		} else if (contentType.isMimeType(MIMETypes.MIME_IMAGE_ALL)) {
 			if (!mailPart.containsSequenceId()) {
-				mailPart.setSequenceId(MailMessageParser.getSequenceId(prefix, partCount));
+				mailPart.setSequenceId(getSequenceId(prefix, partCount));
 			}
 			if (!handler.handleImagePart(mailPart, mailPart.getContentId(), contentType.getBaseType(), isInline,
 					filename, mailPart.getSequenceId())) {
@@ -291,13 +291,13 @@ public final class MailMessageParser {
 		} else if (contentType.isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
 			if (isInline) {
 				final MailMessage nestedMail = (MailMessage) mailPart.getContent();
-				if (!handler.handleNestedMessage(nestedMail, MailMessageParser.getSequenceId(prefix, partCount))) {
+				if (!handler.handleNestedMessage(nestedMail, getSequenceId(prefix, partCount))) {
 					stop = true;
 					return;
 				}
 			} else {
 				if (!mailPart.containsSequenceId()) {
-					mailPart.setSequenceId(MailMessageParser.getSequenceId(prefix, partCount));
+					mailPart.setSequenceId(getSequenceId(prefix, partCount));
 				}
 				if (!handler.handleAttachment(mailPart, isInline, MIMETypes.MIME_MESSAGE_RFC822, filename, mailPart
 						.getSequenceId())) {
@@ -324,7 +324,7 @@ public final class MailMessageParser {
 				 */
 				final Attr messageClass = message.getAttribute(Attr.attMessageClass);
 				final String messageClassName = messageClass == null ? "" : ((String) messageClass.getValue());
-				if (messageClass != null && TNEF_IPM_CONTACT.equalsIgnoreCase(messageClassName)) {
+				if ((messageClass != null) && TNEF_IPM_CONTACT.equalsIgnoreCase(messageClassName)) {
 					/*
 					 * Convert contact to standard vCard. Resulting Multipart
 					 * object consists of only ONE BodyPart object which
@@ -425,7 +425,7 @@ public final class MailMessageParser {
 							contentTypeStr = (String) attachment.getMAPIProps().getPropValue(
 									MAPIProp.PR_ATTACH_MIME_TAG);
 						}
-						if (contentTypeStr == null && attachFilename != null) {
+						if ((contentTypeStr == null) && (attachFilename != null)) {
 							contentTypeStr = MIMEType2ExtMap.getContentType(attachFilename);
 						}
 						if (contentTypeStr == null) {
@@ -454,7 +454,7 @@ public final class MailMessageParser {
 					LOG.warn(tnefExc.getLocalizedMessage(), tnefExc);
 				}
 				if (!mailPart.containsSequenceId()) {
-					mailPart.setSequenceId(MailMessageParser.getSequenceId(prefix, partCount));
+					mailPart.setSequenceId(getSequenceId(prefix, partCount));
 				}
 				if (!handler.handleAttachment(mailPart, isInline, contentType.getBaseType(), filename, mailPart
 						.getSequenceId())) {
@@ -466,7 +466,7 @@ public final class MailMessageParser {
 					LOG.error(e.getLocalizedMessage(), e);
 				}
 				if (!mailPart.containsSequenceId()) {
-					mailPart.setSequenceId(MailMessageParser.getSequenceId(prefix, partCount));
+					mailPart.setSequenceId(getSequenceId(prefix, partCount));
 				}
 				if (!handler.handleAttachment(mailPart, isInline, contentType.getBaseType(), filename, mailPart
 						.getSequenceId())) {
@@ -480,7 +480,7 @@ public final class MailMessageParser {
 				|| contentType.isMimeType(MIMETypes.MIME_TEXT_ALL_CARD)
 				|| contentType.isMimeType(MIMETypes.MIME_TEXT_ALL_CALENDAR)) {
 			if (!mailPart.containsSequenceId()) {
-				mailPart.setSequenceId(MailMessageParser.getSequenceId(prefix, partCount));
+				mailPart.setSequenceId(getSequenceId(prefix, partCount));
 			}
 			if (!handler.handleSpecialPart(mailPart, contentType.getBaseType(), mailPart.getSequenceId())) {
 				stop = true;
@@ -488,7 +488,7 @@ public final class MailMessageParser {
 			}
 		} else {
 			if (!mailPart.containsSequenceId()) {
-				mailPart.setSequenceId(MailMessageParser.getSequenceId(prefix, partCount));
+				mailPart.setSequenceId(getSequenceId(prefix, partCount));
 			}
 			if (!handler.handleAttachment(mailPart, isInline, contentType.getBaseType(), filename, mailPart
 					.getSequenceId())) {
@@ -580,7 +580,7 @@ public final class MailMessageParser {
 	 */
 	public static String getFileName(final String rawFileName, final String sequenceId, final String baseMimeType) {
 		String filename = rawFileName;
-		if (filename == null || isEmptyString(filename)) {
+		if ((filename == null) || isEmptyString(filename)) {
 			final List<String> exts = MIMEType2ExtMap.getFileExtensions(baseMimeType.toLowerCase());
 			final StringBuilder sb = new StringBuilder(PREFIX.length() + sequenceId.length() + 5).append(PREFIX)
 					.append(sequenceId).append('.');
