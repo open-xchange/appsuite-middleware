@@ -52,8 +52,6 @@ package com.openexchange.mail.mime.spam;
 import static com.openexchange.mail.utils.StorageUtility.prepareMailFolderParam;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.mail.Flags;
 import javax.mail.Folder;
@@ -75,8 +73,6 @@ import com.openexchange.mail.config.MailConfig;
  */
 public abstract class SpamHandler {
 
-	private static final Lock LOCK = new ReentrantLock();
-
 	private static final AtomicBoolean initialized = new AtomicBoolean();
 
 	private static SpamHandler instance;
@@ -91,25 +87,24 @@ public abstract class SpamHandler {
 	 */
 	public static final SpamHandler getInstance() throws MailException {
 		if (!initialized.get()) {
-			LOCK.lock();
-			try {
-				if (null == instance) {
-					final String clazz = MailConfig.getSpamHandlerClass();
-					if (clazz == null || clazz.length() == 0) {
-						instance = new DefaultSpamHandler();
-					} else {
-						instance = Class.forName(clazz).asSubclass(SpamHandler.class).newInstance();
+			synchronized (initialized) {
+				try {
+					if (null == instance) {
+						final String clazz = MailConfig.getSpamHandlerClass();
+						if (clazz == null || clazz.length() == 0) {
+							instance = new DefaultSpamHandler();
+						} else {
+							instance = Class.forName(clazz).asSubclass(SpamHandler.class).newInstance();
+						}
+						initialized.set(true);
 					}
-					initialized.set(true);
+				} catch (final InstantiationException e) {
+					throw new MailException(MailException.Code.SPAM_HANDLER_INIT_FAILED, e, e.getLocalizedMessage());
+				} catch (final IllegalAccessException e) {
+					throw new MailException(MailException.Code.SPAM_HANDLER_INIT_FAILED, e, e.getLocalizedMessage());
+				} catch (final ClassNotFoundException e) {
+					throw new MailException(MailException.Code.SPAM_HANDLER_INIT_FAILED, e, e.getLocalizedMessage());
 				}
-			} catch (final InstantiationException e) {
-				throw new MailException(MailException.Code.SPAM_HANDLER_INIT_FAILED, e, e.getLocalizedMessage());
-			} catch (final IllegalAccessException e) {
-				throw new MailException(MailException.Code.SPAM_HANDLER_INIT_FAILED, e, e.getLocalizedMessage());
-			} catch (final ClassNotFoundException e) {
-				throw new MailException(MailException.Code.SPAM_HANDLER_INIT_FAILED, e, e.getLocalizedMessage());
-			} finally {
-				LOCK.unlock();
 			}
 		}
 		return instance;
@@ -120,15 +115,12 @@ public abstract class SpamHandler {
 	 */
 	public static final void releaseInstance() {
 		if (initialized.get()) {
-			LOCK.lock();
-			try {
+			synchronized (initialized) {
 				if (!initialized.get()) {
 					return;
 				}
 				instance = null;
 				initialized.set(false);
-			} finally {
-				LOCK.unlock();
 			}
 		}
 	}
@@ -161,8 +153,8 @@ public abstract class SpamHandler {
 	 * @throws MessagingException
 	 * @throws MailException
 	 */
-	public abstract void handleHam(Folder spamFolder, long[] msgUIDs, boolean move,
-			MailAccess<?, ?, ?> mailConnection, Store store) throws MessagingException, MailException;
+	public abstract void handleHam(Folder spamFolder, long[] msgUIDs, boolean move, MailAccess<?, ?, ?> mailConnection,
+			Store store) throws MessagingException, MailException;
 
 	/**
 	 * Handles messages that should be treated as spam messages

@@ -57,8 +57,6 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.mail.config.MailConfig;
 import com.openexchange.server.ServerTimer;
@@ -77,8 +75,6 @@ final class MailConnectionWatcher {
 
 	private static final ConcurrentMap<MailAccess<?, ?, ?>, Long> mailConnections = new ConcurrentHashMap<MailAccess<?, ?, ?>, Long>();
 
-	private static final Lock LOCK = new ReentrantLock();
-
 	private static final AtomicBoolean initialized = new AtomicBoolean();
 
 	private static WatcherTask watcherTask;
@@ -88,8 +84,7 @@ final class MailConnectionWatcher {
 	 */
 	static void init() {
 		if (!initialized.get()) {
-			LOCK.lock();
-			try {
+			synchronized (initialized) {
 				if (initialized.get()) {
 					return;
 				}
@@ -104,8 +99,6 @@ final class MailConnectionWatcher {
 						LOG.info("Mail connection watcher successfully established and ready for tracing");
 					}
 				}
-			} finally {
-				LOCK.unlock();
 			}
 		}
 	}
@@ -115,8 +108,7 @@ final class MailConnectionWatcher {
 	 */
 	static void stop() {
 		if (initialized.get()) {
-			LOCK.lock();
-			try {
+			synchronized (initialized) {
 				if (!initialized.get()) {
 					return;
 				}
@@ -129,8 +121,6 @@ final class MailConnectionWatcher {
 						LOG.info("Mail connection watcher successfully stopped");
 					}
 				}
-			} finally {
-				LOCK.unlock();
 			}
 		}
 	}

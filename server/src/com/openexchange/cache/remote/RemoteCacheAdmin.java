@@ -55,8 +55,6 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * RemoteCacheAdmin
@@ -71,8 +69,6 @@ public class RemoteCacheAdmin {
 
 	private static final int REGISTRY_PORT = 57462;
 
-	private static final Lock LOCK_INIT = new ReentrantLock();
-
 	private static RemoteCacheAdmin instance;
 
 	private static final AtomicBoolean initialized = new AtomicBoolean();
@@ -84,8 +80,7 @@ public class RemoteCacheAdmin {
 	 */
 	public static void startRemoteCacheAdmin() {
 		if (!initialized.get()) {
-			LOCK_INIT.lock();
-			try {
+			synchronized (initialized) {
 				if (instance == null) {
 					try {
 						instance = new RemoteCacheAdmin();
@@ -96,8 +91,6 @@ public class RemoteCacheAdmin {
 						LOG.error(e.getMessage(), e);
 					}
 				}
-			} finally {
-				LOCK_INIT.unlock();
 			}
 		}
 	}

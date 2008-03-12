@@ -51,8 +51,6 @@ package com.openexchange.mail.mime;
 
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.mail.Session;
 
@@ -74,8 +72,6 @@ public final class MIMEDefaultSession {
 		super();
 	}
 
-	private static final Lock LOCK = new ReentrantLock();
-
 	private static final AtomicBoolean initialized = new AtomicBoolean();
 
 	private static Session instance;
@@ -92,8 +88,7 @@ public final class MIMEDefaultSession {
 	 */
 	public static Session getDefaultSession() {
 		if (!initialized.get()) {
-			LOCK.lock();
-			try {
+			synchronized (initialized) {
 				if (null != instance) {
 					return instance;
 				}
@@ -115,8 +110,6 @@ public final class MIMEDefaultSession {
 				}
 				instance = Session.getInstance(((Properties) (System.getProperties().clone())), null);
 				initialized.set(true);
-			} finally {
-				LOCK.unlock();
 			}
 		}
 		return instance;
