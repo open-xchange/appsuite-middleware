@@ -85,7 +85,7 @@ public class PushUDPActivator implements BundleActivator {
 
 	private ServiceRegistration eventHandlerRegistration;
 
-	private ConfigurationServiceHolder csh;
+	private ConfigurationServiceHolder configurationServiceHolder;
 
 	private ServiceHolderListener<ConfigurationService> configurationListener;
 
@@ -102,8 +102,8 @@ public class PushUDPActivator implements BundleActivator {
 		LOG.info("starting bundle: com.openexchange.push.udp");
 
 		try {
-			csh = ConfigurationServiceHolder.newInstance();
-			PushInit.getInstance().setConfigurationServiceHolder(csh);
+			configurationServiceHolder = ConfigurationServiceHolder.newInstance();
+			PushInit.getInstance().setConfigurationServiceHolder(configurationServiceHolder);
 			/*
 			 * Init service tracker check availibility for services
 			 */
@@ -111,7 +111,7 @@ public class PushUDPActivator implements BundleActivator {
 					new BundleServiceTracker<EventAdmin>(context, EventAdminService.getInstance(),
 							EventAdmin.class)));
 			serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(),
-					new BundleServiceTracker<ConfigurationService>(context, csh, ConfigurationService.class)));
+					new BundleServiceTracker<ConfigurationService>(context, configurationServiceHolder, ConfigurationService.class)));
 			/*
 			 * Open service trackers
 			 */
@@ -167,7 +167,7 @@ public class PushUDPActivator implements BundleActivator {
 				}
 			};
 
-			csh.addServiceHolderListener(configurationListener);
+			configurationServiceHolder.addServiceHolderListener(configurationListener);
 			EventAdminService.getInstance().addServiceHolderListener(eventAdminListener);
 		} catch (final Throwable e) {
 			LOG.error("PushUDPActivator: start: ", e);
@@ -187,9 +187,9 @@ public class PushUDPActivator implements BundleActivator {
 
 		try {
 			
-			csh.removeServiceHolderListenerByName(
+			configurationServiceHolder.removeServiceHolderListenerByName(
 					configurationListener.getClass().getName());
-			csh = null;
+			configurationServiceHolder = null;
 			EventAdminService.getInstance().removeServiceHolderListenerByName(
 					eventAdminListener.getClass().getName());
 
