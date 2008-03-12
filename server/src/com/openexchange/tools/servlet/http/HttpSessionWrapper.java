@@ -223,11 +223,11 @@ public class HttpSessionWrapper implements HttpSession {
 		this.maxInactiveIntervall = maxInactiveIntervall;
 	}
 
-	private static class IteratorEnumeration implements Enumeration {
+	private static class IteratorEnumeration implements Enumeration<Object> {
 
-		private final Iterator iter;
+		private final Iterator<?> iter;
 
-		private IteratorEnumeration(Iterator iter) {
+		private IteratorEnumeration(Iterator<?> iter) {
 			this.iter = iter;
 		}
 
