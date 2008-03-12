@@ -323,12 +323,23 @@ public class HttpServletManager {
 		}
 	}
 
+	/**
+	 * Initializes HTTP servlet manager with specified initial servlet
+	 * constructor map
+	 * 
+	 * @param servletConstructorMap
+	 *            The servlet constructor map
+	 */
 	final static void initHttpServletManager(final Map<String, Constructor<?>> servletConstructorMap) {
 		HttpServletManager.servletConstructorMap = servletConstructorMap;
 		createServlets();
 	}
 
+	/**
+	 * Releases the HTTP servlet manager
+	 */
 	final static void releaseHttpServletManager() {
+		HttpServletManager.servletConstructorMap.clear();
 		HttpServletManager.servletConstructorMap = null;
 		clearServletPool();
 	}
