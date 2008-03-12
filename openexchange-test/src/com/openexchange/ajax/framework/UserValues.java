@@ -59,6 +59,7 @@ import org.xml.sax.SAXException;
 
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.config.actions.GetRequest;
+import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.tools.LocaleTools;
 import com.openexchange.tools.servlet.AjaxException;
@@ -181,6 +182,11 @@ public class UserValues {
             timeZone = TimeZone.getTimeZone(tzId);
         }
         return timeZone;
+    }
+    
+    public void setTimeZone(final TimeZone timeZone) throws AjaxException, IOException, 
+    	SAXException, JSONException {
+    	ConfigTools.set(client, new SetRequest(Tree.TimeZone, timeZone.getID()));
     }
 
     public int getUserId() throws AjaxException, IOException, SAXException,
