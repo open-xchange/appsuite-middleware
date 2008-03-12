@@ -1,3 +1,7 @@
+* 2008-03-12 - thorben.betten@open-xchange.com
+
+ - Bugfix #11027: Equal folder name response regardless of request method
+
 * 2008-03-12 - sebastian.kauss@open-xchange.com
 
  - Bugfix #11012: [L3] WebDAV interface doesn't send Free/Busy 

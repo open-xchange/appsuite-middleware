@@ -555,7 +555,8 @@ public class Folder extends SessionServlet {
 									FolderObject.VIRTUAL_USER_INFOSTORE_FOLDER_ID, UserStorage.getStorageUser(
 											sessionObj.getUserId(), ctx).getLocale()), FolderObject.INFOSTORE, true,
 							FolderObject.SYSTEM_TYPE, virtualPerm);
-					folderWriter.writeOXFolderFieldsAsArray(columns, virtualUserstoreFolder);
+					folderWriter.writeOXFolderFieldsAsArray(columns, virtualUserstoreFolder, UserStorage
+							.getStorageUser(sessionObj.getUserId(), ctx).getLocale());
 					/*
 					 * Append virtual root folder for non-tree visible infostore
 					 * folders
@@ -569,7 +570,8 @@ public class Folder extends SessionServlet {
 											FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID, UserStorage.getStorageUser(
 													sessionObj.getUserId(), ctx).getLocale()), FolderObject.INFOSTORE,
 									true, FolderObject.SYSTEM_TYPE);
-							folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder);
+							folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, UserStorage
+									.getStorageUser(sessionObj.getUserId(), ctx).getLocale());
 						}
 					} finally {
 						if (it != null) {
@@ -723,7 +725,8 @@ public class Folder extends SessionServlet {
 								if (FolderCacheManager.isInitialized()) {
 									FolderCacheManager.getInstance().putFolderObject(virtualListFolder, ctx);
 								}
-								folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder);
+								folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, UserStorage
+										.getStorageUser(sessionObj.getUserId(), ctx).getLocale());
 							}
 						} catch (final OXFolderException e) {
 							if (e.getDetailNumber() == FolderCode.NO_MODULE_ACCESS.getNumber()
@@ -754,7 +757,8 @@ public class Folder extends SessionServlet {
 								if (FolderCacheManager.isInitialized()) {
 									FolderCacheManager.getInstance().putFolderObject(virtualListFolder, ctx);
 								}
-								folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder);
+								folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, UserStorage
+										.getStorageUser(sessionObj.getUserId(), ctx).getLocale());
 							}
 						} catch (final OXFolderException e) {
 							if (e.getDetailNumber() == FolderCode.NO_MODULE_ACCESS.getNumber()
@@ -785,7 +789,8 @@ public class Folder extends SessionServlet {
 								if (FolderCacheManager.isInitialized()) {
 									FolderCacheManager.getInstance().putFolderObject(virtualListFolder, ctx);
 								}
-								folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder);
+								folderWriter.writeOXFolderFieldsAsArray(columns, virtualListFolder, UserStorage
+										.getStorageUser(sessionObj.getUserId(), ctx).getLocale());
 							}
 						} catch (final OXFolderException e) {
 							if (e.getDetailNumber() == FolderCode.NO_MODULE_ACCESS.getNumber()
@@ -1373,8 +1378,8 @@ public class Folder extends SessionServlet {
 				final FolderObject fo = foldersqlinterface.getFolderById(folderId);
 				lastModifiedDate = fo.getLastModified();
 				jsonWriter = new OXJSONWriter();
-				new FolderWriter(jsonWriter, sessionObj, ContextStorage.getStorageContext(sessionObj.getContextId()))
-						.writeOXFolderFieldsAsObject(columns, fo);
+				new FolderWriter(jsonWriter, sessionObj, ctx).writeOXFolderFieldsAsObject(columns, fo, UserStorage
+						.getStorageUser(sessionObj.getUserId(), ctx).getLocale());
 			} else {
 				MailServletInterface mailInterface = null;
 				try {

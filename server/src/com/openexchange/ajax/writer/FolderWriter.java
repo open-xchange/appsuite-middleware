@@ -50,6 +50,7 @@
 package com.openexchange.ajax.writer;
 
 import java.sql.SQLException;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import org.json.JSONArray;
@@ -121,8 +122,9 @@ public final class FolderWriter extends DataWriter {
 		return userConfStorage;
 	}
 
-	public void writeOXFolderFieldsAsObject(final int[] fields, final FolderObject fo) throws Exception {
-		writeOXFolderFieldsAsObject(fields, fo, null, -1);
+	public void writeOXFolderFieldsAsObject(final int[] fields, final FolderObject fo, final Locale locale)
+			throws Exception {
+		writeOXFolderFieldsAsObject(fields, fo, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
 	}
 
 	public void writeOXFolderFieldsAsObject(int[] fields, final FolderObject fo, final String name,
@@ -140,8 +142,9 @@ public final class FolderWriter extends DataWriter {
 		}
 	}
 
-	public void writeOXFolderFieldsAsArray(final int[] fields, final FolderObject fo) throws Exception {
-		writeOXFolderFieldsAsArray(fields, fo, null, -1);
+	public void writeOXFolderFieldsAsArray(final int[] fields, final FolderObject fo, final Locale locale)
+			throws Exception {
+		writeOXFolderFieldsAsArray(fields, fo, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
 	}
 
 	public void writeOXFolderFieldsAsArray(final int[] fields, final FolderObject fo, final String name,
