@@ -296,7 +296,6 @@ public class Folder extends SessionServlet {
 			final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(sessionObj, ctx);
 			final FolderWriter folderWriter = new FolderWriter(jsonWriter, sessionObj, ctx);
 			final FolderFieldWriter[] writers = folderWriter.getFolderFieldWriter(columns);
-
 			final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getRootFolderForUser()).asQueue();
 			final int size = q.size();
 			final Iterator<FolderObject> iter = q.iterator();
@@ -1459,8 +1458,7 @@ public class Folder extends SessionServlet {
 				final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(sessionObj, ctx);
 				FolderObject fo = new FolderObject(updateFolderId);
 				new FolderParser(UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-						sessionObj.getUserId(), ContextStorage.getStorageContext(sessionObj.getContextId()))).parse(fo,
-						jsonObj);
+						sessionObj.getUserId(), ctx)).parse(fo, jsonObj);
 				fo = foldersqlinterface.saveFolderObject(fo, timestamp);
 				retval = String.valueOf(fo.getObjectID());
 				lastModifiedDate = fo.getLastModified();
@@ -1540,8 +1538,7 @@ public class Folder extends SessionServlet {
 				FolderObject fo = new FolderObject();
 				fo.setParentFolderID(parentFolderId);
 				new FolderParser(UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-						sessionObj.getUserId(), ContextStorage.getStorageContext(sessionObj.getContextId()))).parse(fo,
-						jsonObj);
+						sessionObj.getUserId(), ctx)).parse(fo, jsonObj);
 				fo = foldersqlinterface.saveFolderObject(fo, null);
 				retval = String.valueOf(fo.getObjectID());
 				lastModifiedDate = fo.getLastModified();
