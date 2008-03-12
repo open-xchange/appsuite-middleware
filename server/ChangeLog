@@ -1,3 +1,8 @@
+* 2008-03-12 - sebastian.kauss@open-xchange.com
+
+ - Bugfix #11012: [L3] WebDAV interface doesn't send Free/Busy 
+                       times as UTC
+
 * 2008-03-11 - sebastian.kauss@open-xchange.com
 
  - Bugfix #10124: API does not return deleted items properly
