@@ -257,12 +257,17 @@ public abstract class DeferredActivator implements BundleActivator {
 	}
 
 	/**
-	 * Called when this bundle is started so the framework can perform the
-	 * bundle-specific activities necessary to start this bundle. This method
-	 * can be used to register services or to allocate any resources that this
-	 * bundle needs.
-	 * 
+	 * Called when this bundle is started; meaning all needed services are
+	 * available. So the framework can perform the bundle-specific activities
+	 * necessary to start this bundle. This method can be used to register
+	 * services or to allocate any resources that this bundle needs.
+	 * <p>
 	 * This method must complete and return to its caller in a timely manner.
+	 * <p>
+	 * <b>Note</b>: This method is possibly called multiple times. This is
+	 * related to the possibility that a temporary absent service is available
+	 * again and signals its availability. The implementing class should deal
+	 * with this issue in an appropriate manner.
 	 * 
 	 * @throws Exception
 	 *             If this method throws an exception, this bundle is marked as
@@ -295,7 +300,7 @@ public abstract class DeferredActivator implements BundleActivator {
 	 * started. There should be no active threads that were started by this
 	 * bundle when this bundle returns. A stopped bundle must not call any
 	 * Framework objects.
-	 * 
+	 * <p>
 	 * This method must complete and return to its caller in a timely manner.
 	 * 
 	 * @throws Exception
