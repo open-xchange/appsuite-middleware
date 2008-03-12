@@ -57,6 +57,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -89,15 +90,14 @@ public class freebusy extends HttpServlet {
 	 * serialVersionUID
 	 */
 	private static final long serialVersionUID = 6336387126907903347L;
-
-	private static final SimpleDateFormat inputFormat = new SimpleDateFormat("yyyyMMdd");
-	
-	private static final SimpleDateFormat outputFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
 	
 	private static final transient Log LOG = LogFactory.getLog(freebusy.class);
 	
 	@Override
 	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
+		final SimpleDateFormat inputFormat = new SimpleDateFormat("yyyyMMdd");
+		final SimpleDateFormat outputFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+		outputFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 		
 		int contextid = -1;
 		String mailPrefix = null;
@@ -182,13 +182,13 @@ public class freebusy extends HttpServlet {
 		httpServletResponse.setContentType("text/html");
 		final PrintWriter printWriter = httpServletResponse.getWriter();
 		try {
-			writeVCalendar(contextid, start, end, mailPrefix, mailSuffix, httpServletRequest.getRemoteHost(), printWriter);
+			writeVCalendar(contextid, start, end, mailPrefix, mailSuffix, httpServletRequest.getRemoteHost(), printWriter, outputFormat);
 		} catch (final Exception exc) {
 			LOG.error("doGet", exc);
 		}
 	}
 	
-	private void writeVCalendar(final int contextId, final Date start, final Date end, final String mailPrefix, final String mailSuffix, final String remoteHost, final PrintWriter printWriter) throws Exception {
+	private void writeVCalendar(final int contextId, final Date start, final Date end, final String mailPrefix, final String mailSuffix, final String remoteHost, final PrintWriter printWriter, final SimpleDateFormat outputFormat) throws Exception {
 		SearchIterator it = null;
 		
 		printWriter.println("BEGIN:VCALENDAR");
@@ -206,7 +206,7 @@ public class freebusy extends HttpServlet {
 			final AppointmentSQLInterface appointmentInterface = new CalendarSql(sessionObj);
 			it = appointmentInterface.getFreeBusyInformation(user.getId(), Participant.USER, start, end);
 			while (it.hasNext()) {
-				writeFreeBusy((AppointmentObject)it.next(), printWriter);
+				writeFreeBusy((AppointmentObject)it.next(), printWriter, outputFormat);
 			}
 		} catch (final Exception exc) {
 			LOG.error("writeVCalendar", exc);
@@ -221,7 +221,7 @@ public class freebusy extends HttpServlet {
 		printWriter.flush();
 	}
 	
-	private void writeFreeBusy(final AppointmentObject appointmentObject, final PrintWriter printWriter) throws Exception {
+	private void writeFreeBusy(final AppointmentObject appointmentObject, final PrintWriter printWriter, final SimpleDateFormat outputFormat) throws Exception {
 		printWriter.print("FREEBUSY;");
 		
 		switch (appointmentObject.getShownAs()) {
