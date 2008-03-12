@@ -100,6 +100,14 @@ public class AJAXClient {
             this.login = login;
             this.password = password;
         }
+        
+        public Property getLogin() {
+        	return login;
+        }
+        
+        public Property getPassword() {
+        	return password;
+        }
     }
 
     /**
