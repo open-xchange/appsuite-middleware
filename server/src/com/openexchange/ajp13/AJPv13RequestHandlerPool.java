@@ -136,7 +136,7 @@ public class AJPv13RequestHandlerPool {
 
 	/**
 	 * Puts back the given request handler instance into pool if space
-	 * available. Otherwise it's going to be discarded.
+	 * available. Otherwise it is discarded.
 	 * 
 	 * @param requestHandler
 	 *            The AJP request handler which shall be put back into pool
