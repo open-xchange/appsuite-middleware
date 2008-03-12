@@ -59,7 +59,7 @@ import com.openexchange.sessiond.exception.SessiondException;
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
-public interface SessiondConnectorInterface {
+public interface SessiondService {
 	
 	/**
 	 * Creates a new session object in the sessiond storage with the given session parameters

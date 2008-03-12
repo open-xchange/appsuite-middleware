@@ -78,7 +78,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondConnectorInterface;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.exception.Classes;
 import com.openexchange.sessiond.exception.SessionExceptionFactory;
 import com.openexchange.sessiond.exception.SessiondException;
@@ -136,8 +136,8 @@ public abstract class SessionServlet extends AJAXServlet {
 			rememberSession(req, session);
 			final Context ctx = ContextStorage.getStorageContext(session.getContextId());
 			if (!ctx.isEnabled()) {
-				final SessiondConnectorInterface sessiondCon = ServerServiceRegistry.getInstance().getService(
-						SessiondConnectorInterface.class);
+				final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
+						SessiondService.class);
 				sessiondCon.removeSession(sessionId);
 				throw EXCEPTION.create(4);
 			}
@@ -281,10 +281,10 @@ public abstract class SessionServlet extends AJAXServlet {
 	@OXThrows(category = Category.TRY_AGAIN, desc = "A session with the given identifier can not be found.", exceptionId = 3, msg = "Your session %s expired. Please start a new browser session.")
 	private static Session getSession(final String sessionId)
 			throws SessiondException {
-		final SessiondConnectorInterface sessiondCon = ServerServiceRegistry.getInstance().getService(
-				SessiondConnectorInterface.class);
+		final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
+				SessiondService.class);
 		if (sessiondCon == null) {
-			throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondConnectorInterface.class.getName()));
+			throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
 		}
 		final Session retval = sessiondCon.getSession(sessionId);
 		if (null == retval) {

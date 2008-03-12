@@ -56,7 +56,7 @@ import org.osgi.framework.BundleContext;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.ServiceHolder;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
-import com.openexchange.sessiond.SessiondConnectorInterface;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 
 /**
@@ -66,7 +66,7 @@ import com.openexchange.sessiond.impl.SessiondInit;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class SessiondBundleServiceTracker extends BundleServiceTracker<SessiondConnectorInterface> {
+public class SessiondBundleServiceTracker extends BundleServiceTracker<SessiondService> {
 
 	private static final Log LOG = LogFactory.getLog(SessiondBundleServiceTracker.class);
 
@@ -78,8 +78,8 @@ public class SessiondBundleServiceTracker extends BundleServiceTracker<SessiondC
 	 * @param serviceClass
 	 */
 	public SessiondBundleServiceTracker(final BundleContext context,
-			final ServiceHolder<SessiondConnectorInterface> serviceHolder) {
-		super(context, serviceHolder, SessiondConnectorInterface.class);
+			final ServiceHolder<SessiondService> serviceHolder) {
+		super(context, serviceHolder, SessiondService.class);
 	}
 
 	/*
@@ -88,7 +88,7 @@ public class SessiondBundleServiceTracker extends BundleServiceTracker<SessiondC
 	 * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
 	 */
 	@Override
-	protected void addingServiceInternal(final SessiondConnectorInterface service) {
+	protected void addingServiceInternal(final SessiondService service) {
 		try {
 			SessiondInit.getInstance().start();
 		} catch (final AbstractOXException exc) {

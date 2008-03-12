@@ -76,7 +76,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondConnectorInterface;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.encoding.Base64;
 
@@ -391,8 +391,8 @@ public abstract class OXServlet extends WebDavServlet {
 				throw new UserNotActivatedException("user is not activated!");
 			}
 
-			final SessiondConnectorInterface sessiondCon = ServerServiceRegistry.getInstance().getService(
-					SessiondConnectorInterface.class);
+			final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
+					SessiondService.class);
 			final String sessionId = sessiondCon.addSession(userId, login, pass, context, ipAddress);
 			session = sessiondCon.getSession(sessionId);
 		} catch (LoginException e) {
@@ -420,8 +420,8 @@ public abstract class OXServlet extends WebDavServlet {
 	 *         exist.
 	 */
 	private Session getSession(final String sessionId) {
-		final SessiondConnectorInterface sessiondCon = ServerServiceRegistry.getInstance().getService(
-				SessiondConnectorInterface.class);
+		final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
+				SessiondService.class);
 		return sessiondCon.getSession(sessionId);
 	}
 

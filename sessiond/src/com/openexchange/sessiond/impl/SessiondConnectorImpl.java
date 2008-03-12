@@ -54,7 +54,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondConnectorInterface;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.exception.SessiondException;
 
 /**
@@ -62,7 +62,7 @@ import com.openexchange.sessiond.exception.SessiondException;
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class SessiondConnectorImpl implements SessiondConnectorInterface {
+public class SessiondConnectorImpl implements SessiondService {
 	
 	private static final Log LOG = LogFactory.getLog(SessiondConnectorImpl.class);
 	

@@ -78,7 +78,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondConnectorInterface;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.servlet.http.Tools;
@@ -177,8 +177,8 @@ public class Login extends AJAXServlet {
 					throw new UserNotActivatedException("user is not activated!");
 				}
 
-				final SessiondConnectorInterface sessiondCon = ServerServiceRegistry.getInstance().getService(
-						SessiondConnectorInterface.class);
+				final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
+						SessiondService.class);
 
 				if (sessiondCon == null) {
 					throw new LoginException(LoginException.Code.COMMUNICATION);
@@ -284,8 +284,8 @@ public class Login extends AJAXServlet {
 				}
 			}
 			if (session != null) {
-				final SessiondConnectorInterface sessiondCon = ServerServiceRegistry.getInstance().getService(
-						SessiondConnectorInterface.class);
+				final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
+						SessiondService.class);
 				sessiondCon.removeSession(session);
 
 			} else if (LOG.isDebugEnabled()) {
@@ -301,8 +301,8 @@ public class Login extends AJAXServlet {
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
-			final SessiondConnectorInterface sessiondCon = ServerServiceRegistry.getInstance().getService(
-					SessiondConnectorInterface.class);
+			final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
+					SessiondService.class);
 			final Session sessionObj = sessiondCon.getSessionByRandomToken(randomToken);
 
 			try {
@@ -331,8 +331,8 @@ public class Login extends AJAXServlet {
 				if (cookies == null) {
 					throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
 				}
-				final SessiondConnectorInterface sessiondCon = ServerServiceRegistry.getInstance().getService(
-						SessiondConnectorInterface.class);
+				final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
+						SessiondService.class);
 				for (Cookie cookie : cookies) {
 					final String cookieName = cookie.getName();
 					if (cookieName.startsWith(cookiePrefix)) {

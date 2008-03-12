@@ -79,7 +79,7 @@ import com.openexchange.server.impl.Starter;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.sessiond.SessiondConnectorInterface;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
 
 /**
@@ -103,7 +103,7 @@ public final class ServerActivator extends DeferredActivator {
 			EventAdmin.class };
 
 	private static final Class<?>[] NEEDED_SERIVICES_SERVER = { ConfigurationService.class, CacheService.class,
-			EventAdmin.class, SessiondConnectorInterface.class };
+			EventAdmin.class, SessiondService.class };
 
 	private final Starter starter = new Starter();
 

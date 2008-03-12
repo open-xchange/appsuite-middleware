@@ -64,7 +64,7 @@ import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.ServiceHolderListener;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
-import com.openexchange.sessiond.SessiondConnectorInterface;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondConnectorImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 
@@ -79,7 +79,7 @@ public class SessiondActivator implements BundleActivator {
 
 	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
 
-	private SessiondConnectorInterface sessiondConInterface;
+	private SessiondService sessiondConInterface;
 
 	private ServiceRegistration serviceRegister = null;
 
@@ -134,7 +134,7 @@ public class SessiondActivator implements BundleActivator {
 			// sessiondInit = SessiondInit.getInstance();
 			// sessiondInit.start();
 			sessiondConInterface = new SessiondConnectorImpl();
-			serviceRegister = context.registerService(SessiondConnectorInterface.class.getName(), sessiondConInterface,
+			serviceRegister = context.registerService(SessiondService.class.getName(), sessiondConInterface,
 					null);
 		} catch (final Throwable e) {
 			LOG.error("SessiondActivator: start: ", e);
