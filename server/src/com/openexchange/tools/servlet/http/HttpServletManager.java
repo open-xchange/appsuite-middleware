@@ -56,9 +56,6 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletConfig;
@@ -69,6 +66,7 @@ import javax.servlet.http.HttpServlet;
 import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.tools.FIFOQueue;
+import com.openexchange.tools.NonBlockingRWLock;
 
 /**
  * {@link HttpServletManager} - The HTTP servlet manager
@@ -84,12 +82,7 @@ public class HttpServletManager {
 
 	private static Map<String, Constructor<?>> servletConstructorMap;
 
-	private static final AtomicInteger writeCounter = new AtomicInteger();
-
-	private static final Lock writeLock = new ReentrantLock();
-
-	// private static final ReadWriteLock RW_LOCK = new
-	// ReentrantReadWriteLock();
+	private static final NonBlockingRWLock RW_LOCK = new NonBlockingRWLock();
 
 	private HttpServletManager() {
 		super();
@@ -107,13 +100,10 @@ public class HttpServletManager {
 	 * @return The instance of {@link HttpServlet}
 	 */
 	public static HttpServlet getServlet(final String path, final StringBuilder pathStorage) {
-		int storedCounter;
+		int state;
 		HttpServlet retval = null;
 		do {
-			storedCounter = writeCounter.get();
-			while ((storedCounter & 1) == 1) {
-				storedCounter = writeCounter.get();
-			}
+			state = RW_LOCK.acquireRead();
 			if (SERVLET_POOL.containsKey(path)) {
 				pathStorage.append(path);
 				retval = getServletInternal(path);
@@ -132,35 +122,8 @@ public class HttpServletManager {
 					}
 				}
 			}
-		} while (storedCounter != writeCounter.get());
+		} while (!RW_LOCK.releaseRead(state));
 		return retval;
-
-		// final Lock readLock = RW_LOCK.readLock();
-		// readLock.lock();
-		// try {
-		// if (SERVLET_POOL.containsKey(path)) {
-		// pathStorage.append(path);
-		// return getServletInternal(path);
-		// }
-		// /*
-		// * Try through resolving
-		// */
-		// final int size = SERVLET_POOL.size();
-		// final Iterator<String> iter = SERVLET_POOL.keySet().iterator();
-		// for (int i = 0; i < size; i++) {
-		// final String currentPath = iter.next();
-		// if (Pattern.compile(currentPath.replaceFirst("\\*", ".*"),
-		// Pattern.CASE_INSENSITIVE).matcher(path)
-		// .matches()) {
-		// pathStorage.append(currentPath);
-		// return getServletInternal(currentPath);
-		// }
-		// }
-		// return null;
-		// } finally {
-		// readLock.unlock();
-		// }
-
 	}
 
 	/**
@@ -230,9 +193,8 @@ public class HttpServletManager {
 		if (SERVLET_POOL.containsKey(path) && !(servletObj instanceof SingleThreadModel)) {
 			return;
 		}
-		writeLock.lock();
+		RW_LOCK.acquireWrite();
 		try {
-			writeCounter.incrementAndGet();
 			if (SERVLET_POOL.containsKey(path)) {
 				/*
 				 * Since heading condition failed the servlet must be an
@@ -252,8 +214,7 @@ public class HttpServletManager {
 				SERVLET_POOL.put(path, servlets);
 			}
 		} finally {
-			writeLock.unlock();
-			writeCounter.incrementAndGet();
+			RW_LOCK.releaseWrite();
 		}
 	}
 
@@ -273,9 +234,8 @@ public class HttpServletManager {
 	 */
 	public static final void registerServlet(final String id, final HttpServlet servlet,
 			final Dictionary<String, String> initParams) throws ServletException {
-		writeLock.lock();
+		RW_LOCK.acquireWrite();
 		try {
-			writeCounter.incrementAndGet();
 			final String path = new URI(id.charAt(0) == '/' ? id.substring(1) : id).normalize().toString();
 			if (SERVLET_POOL.containsKey(path)) {
 				throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(id).append(
@@ -309,8 +269,7 @@ public class HttpServletManager {
 		} catch (final URISyntaxException e) {
 			throw new ServletException("Servlet path is not a valid URI", e);
 		} finally {
-			writeLock.unlock();
-			writeCounter.incrementAndGet();
+			RW_LOCK.releaseWrite();
 		}
 	}
 
@@ -321,14 +280,12 @@ public class HttpServletManager {
 	 *            The servlet ID or alias
 	 */
 	public static final void unregisterServlet(final String id) {
-		writeLock.lock();
+		RW_LOCK.acquireWrite();
 		try {
-			writeCounter.incrementAndGet();
 			AJPv13Server.SERVLET_CONFIGS.removeConfig(SERVLET_POOL.get(id).dequeue().getClass().getCanonicalName());
 			SERVLET_POOL.remove(id);
 		} finally {
-			writeLock.unlock();
-			writeCounter.incrementAndGet();
+			RW_LOCK.releaseWrite();
 		}
 	}
 
@@ -341,9 +298,8 @@ public class HttpServletManager {
 	 *            The servlet instance
 	 */
 	public static final void destroyServlet(final String id, final HttpServlet servletObj) {
-		writeLock.lock();
+		RW_LOCK.acquireWrite();
 		try {
-			writeCounter.incrementAndGet();
 			if (servletObj instanceof SingleThreadModel) {
 				/*
 				 * Single-thread are used per instance, so theres no reference
@@ -354,19 +310,16 @@ public class HttpServletManager {
 			}
 			SERVLET_POOL.remove(id);
 		} finally {
-			writeLock.unlock();
-			writeCounter.incrementAndGet();
+			RW_LOCK.releaseWrite();
 		}
 	}
 
 	private static final void clearServletPool() {
-		writeLock.lock();
+		RW_LOCK.acquireWrite();
 		try {
-			writeCounter.incrementAndGet();
 			SERVLET_POOL.clear();
 		} finally {
-			writeLock.unlock();
-			writeCounter.incrementAndGet();
+			RW_LOCK.releaseWrite();
 		}
 	}
 
@@ -383,9 +336,8 @@ public class HttpServletManager {
 	private static final Object[] INIT_ARGS = new Object[] {};
 
 	private static final void createServlets() {
-		writeLock.lock();
+		RW_LOCK.acquireWrite();
 		try {
-			writeCounter.incrementAndGet();
 			for (final Iterator<Map.Entry<String, Constructor<?>>> iter = servletConstructorMap.entrySet().iterator(); iter
 					.hasNext();) {
 				final Map.Entry<String, Constructor<?>> entry = iter.next();
@@ -437,8 +389,7 @@ public class HttpServletManager {
 				LOG.info("All Servlet Instances created & initialized");
 			}
 		} finally {
-			writeLock.unlock();
-			writeCounter.incrementAndGet();
+			RW_LOCK.releaseWrite();
 		}
 	}
 }

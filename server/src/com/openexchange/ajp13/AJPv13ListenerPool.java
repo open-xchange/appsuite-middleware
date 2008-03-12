@@ -54,9 +54,8 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+
+import com.openexchange.tools.NonBlockingRWLock;
 
 /**
  * 
@@ -82,11 +81,7 @@ public final class AJPv13ListenerPool {
 
 	private static final AtomicInteger listenerNum = new AtomicInteger();
 
-	private static final AtomicBoolean captureLock = new AtomicBoolean();
-
-	private static final Lock WAIT_LOCK = new ReentrantLock();
-
-	private static final Condition RESET_FINISHED = WAIT_LOCK.newCondition();
+	private static final NonBlockingRWLock RW_LOCK = new NonBlockingRWLock();
 
 	private AJPv13ListenerPool() {
 		super();
@@ -122,11 +117,10 @@ public final class AJPv13ListenerPool {
 	 * Resets the pool
 	 */
 	public static void resetPool() {
-		captureLock.set(true);
-		WAIT_LOCK.lock();
+		RW_LOCK.acquireWrite();
 		try {
 			/*
-			 * Clear queue
+			 * Clear queue one-by-one
 			 */
 			while (!LISTENER_QUEUE.isEmpty()) {
 				try {
@@ -140,10 +134,8 @@ public final class AJPv13ListenerPool {
 				}
 			}
 			initialized.set(false);
-			RESET_FINISHED.signalAll();
 		} finally {
-			captureLock.set(false);
-			WAIT_LOCK.unlock();
+			RW_LOCK.releaseWrite();
 		}
 	}
 
@@ -154,18 +146,16 @@ public final class AJPv13ListenerPool {
 	 *            The number of the listener to remove
 	 */
 	public static void removeListener(final int num) {
-		captureLock.set(true);
-		WAIT_LOCK.lock();
+		RW_LOCK.acquireWrite();
 		try {
-			for (final Iterator<AJPv13Listener> iter = LISTENER_QUEUE.iterator(); iter.hasNext();) {
+			Next: for (final Iterator<AJPv13Listener> iter = LISTENER_QUEUE.iterator(); iter.hasNext();) {
 				if (iter.next().getListenerNumber() == num) {
 					iter.remove();
+					break Next;
 				}
 			}
-
 		} finally {
-			captureLock.set(false);
-			WAIT_LOCK.unlock();
+			RW_LOCK.releaseWrite();
 		}
 	}
 
@@ -180,45 +170,26 @@ public final class AJPv13ListenerPool {
 	 * @return A pooled or newly created listener
 	 */
 	public static AJPv13Listener getListener() {
-		if (LISTENER_QUEUE.isEmpty()) {
-			/*
-			 * Empty Queue: All pre-created listeners are running. Create &
-			 * return a new listener.
-			 */
-			return createListener();
-		}
-		/*
-		 * Return a listener fetched from pool if still available. No lock
-		 * around poll() method cause this method is already thread-safe based
-		 * on "an efficient wait-free algorithm"
-		 */
 		AJPv13Listener retval = null;
-		boolean retry = true;
-		while (retry) {
+		boolean decrement = true;
+		int state;
+		do {
+			state = RW_LOCK.acquireRead();
 			retval = LISTENER_QUEUE.poll();
 			if (retval == null) {
-				return createListener();
+				/*
+				 * All pre-created listeners are running. Create & return a new
+				 * listener.
+				 */
+				retval = createListener();
+				decrement = false;
 			}
-			if (captureLock.get()) {
-				WAIT_LOCK.lock();
-				try {
-					/*
-					 * Ensure flag is set to false and method has finished
-					 */
-					while (captureLock.get()) {
-						RESET_FINISHED.await();
-					}
-				} catch (final InterruptedException e) {
-					LOG.error(e.getMessage(), e);
-				} finally {
-					WAIT_LOCK.unlock();
-				}
-			} else {
-				retry = false;
-			}
+
+		} while (!RW_LOCK.releaseRead(state));
+		if (decrement) {
+			AJPv13Server.ajpv13ListenerMonitor.decrementPoolSize();
+			AJPv13Server.ajpv13ListenerMonitor.decrementNumIdle();
 		}
-		AJPv13Server.ajpv13ListenerMonitor.decrementPoolSize();
-		AJPv13Server.ajpv13ListenerMonitor.decrementNumIdle();
 		return retval;
 	}
 
@@ -260,12 +231,17 @@ public final class AJPv13ListenerPool {
 	 *         <code>false</code> otherwise
 	 */
 	public static boolean putBack(final AJPv13Listener listener, final boolean enforcedPut) {
-		if (enforcedPut || (LISTENER_QUEUE.size() < LISTENER_POOL_SIZE)) {
-			AJPv13Server.ajpv13ListenerMonitor.incrementPoolSize();
-			AJPv13Server.ajpv13ListenerMonitor.incrementNumIdle();
-			return LISTENER_QUEUE.offer(listener);
+		RW_LOCK.acquireWrite();
+		try {
+			if (enforcedPut || (LISTENER_QUEUE.size() < LISTENER_POOL_SIZE)) {
+				AJPv13Server.ajpv13ListenerMonitor.incrementPoolSize();
+				AJPv13Server.ajpv13ListenerMonitor.incrementNumIdle();
+				return LISTENER_QUEUE.offer(listener);
+			}
+			return false;
+		} finally {
+			RW_LOCK.releaseWrite();
 		}
-		return false;
 	}
 
 	/**
