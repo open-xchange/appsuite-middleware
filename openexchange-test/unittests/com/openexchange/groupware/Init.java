@@ -21,6 +21,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 //import com.openexchange.server.services.SessiondService;
 import com.openexchange.sessiond.impl.SessiondConnectorImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.test.TestInit;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.mail.MailInitialization;
@@ -207,11 +208,13 @@ public final class Init {
         //ConfigurationService.getInstance().setService((Configuration)services.get(Configuration.class));
         //SessiondService.getInstance().setService(new SessiondConnectorImpl());
         SessiondInit.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
+        ServerServiceRegistry.getInstance().addService(SessiondService.class, new SessiondConnectorImpl());
     }
 
     private static void startAndInjectPushUDPBundle() throws Exception {
         ServerServiceRegistry.getInstance().addService(EventAdmin.class,new TestEventAdmin());
         EventAdminService.getInstance().setService(new TestEventAdmin());
+
         // SessiondService.getInstance().setService(new SessiondConnectorImpl());
     }
 
