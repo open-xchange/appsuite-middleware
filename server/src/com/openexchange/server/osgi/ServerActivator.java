@@ -144,6 +144,7 @@ public final class ServerActivator extends DeferredActivator {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn("Absent service: " + clazz.getName());
 		}
+		ServerServiceRegistry.getInstance().removeService(clazz);
 	}
 
 	@Override
