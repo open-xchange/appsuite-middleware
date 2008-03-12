@@ -99,7 +99,7 @@ public class HttpSessionWrapper implements HttpSession {
 		return attributes.get(attributeName);
 	}
 
-	public Enumeration getAttributeNames() {
+	public Enumeration<?> getAttributeNames() {
 		lastAccessedTime = System.currentTimeMillis();
 		return new IteratorEnumeration(attributes.keySet().iterator());
 	}
