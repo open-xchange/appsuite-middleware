@@ -67,7 +67,7 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(GeneralMonitor.class);
 
 	private MBeanServer server;
-
+	
 	public GeneralMonitor() {
 		super();
 	}
@@ -102,7 +102,8 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
 	}
 
 	public int getNumberOfActiveSessions() {
-		return MonitoringInfo.getNumberOfActiveSessions();
+		// get values from sessiond service
+		return -1; 
 	}
 
 	public int getNumberOfRunningAJPListeners() {
