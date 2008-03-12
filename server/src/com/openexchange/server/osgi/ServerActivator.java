@@ -52,6 +52,7 @@ package com.openexchange.server.osgi;
 import java.nio.charset.spi.CharsetProvider;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -105,7 +106,9 @@ public final class ServerActivator extends DeferredActivator {
 	private static final Class<?>[] NEEDED_SERIVICES_SERVER = { ConfigurationService.class, CacheService.class,
 			EventAdmin.class, SessiondService.class };
 
-	private final Starter starter = new Starter();
+	private final Starter starter;
+
+	private final AtomicBoolean started;
 
 	private Boolean adminBundleInstalled;
 
@@ -114,6 +117,8 @@ public final class ServerActivator extends DeferredActivator {
 	 */
 	public ServerActivator() {
 		super();
+		started = new AtomicBoolean();
+		starter = new Starter();
 	}
 
 	private final List<ServiceRegistration> registrationList = new ArrayList<ServiceRegistration>();
@@ -149,10 +154,8 @@ public final class ServerActivator extends DeferredActivator {
 
 	@Override
 	protected void startBundle() throws Exception {
-		LOG.info("starting bundle: com.openexchange.server");
-
 		/*
-		 * Needed services are available, so add them to registry already
+		 * (Re-)Initialize server service registry with available services
 		 */
 		{
 			final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
@@ -162,6 +165,16 @@ public final class ServerActivator extends DeferredActivator {
 				registry.addService(classes[i], getService(classes[i]));
 			}
 		}
+		if (!started.compareAndSet(false, true)) {
+			/*
+			 * Don't start the server again. A duplicate call to startBundle()
+			 * is probably caused by temporary absent service(s) whose
+			 * re-availability causes to trigger this method again.
+			 */
+			LOG.info("A temporary absent service is available again");
+			return;
+		}
+		LOG.info("starting bundle: com.openexchange.server");
 		/*
 		 * Add service trackers
 		 */
@@ -200,15 +213,15 @@ public final class ServerActivator extends DeferredActivator {
 
 			// Search for AuthenticationService
 			serviceTrackerList.add(new ServiceTracker(context, AuthenticationService.class.getName(),
-				new BundleServiceTracker<AuthenticationService>(context, Authentication.getHolder(),
-				AuthenticationService.class)));
+					new BundleServiceTracker<AuthenticationService>(context, Authentication.getHolder(),
+							AuthenticationService.class)));
 			// Search for ConfigJumpService
 			serviceTrackerList.add(new ServiceTracker(context, ConfigJumpService.class.getName(),
-			    new BundleServiceTracker<ConfigJumpService>(context, ConfigJump.getHolder(),
-		        ConfigJumpService.class)));
+					new BundleServiceTracker<ConfigJumpService>(context, ConfigJump.getHolder(),
+							ConfigJumpService.class)));
 			// Search for extensions of the preferences tree interface
 			serviceTrackerList.add(new ServiceTracker(context, PreferencesItemService.class.getName(),
-			    new PreferencesCustomizer(context)));
+					new PreferencesCustomizer(context)));
 			// Start up server the usual way
 			starter.start();
 		}
@@ -225,26 +238,30 @@ public final class ServerActivator extends DeferredActivator {
 	@Override
 	protected void stopBundle() throws Exception {
 		LOG.info("stopping bundle: com.openexchange.server");
-        /*
-         * Unregister server's services
-         */
-        for (final ServiceRegistration registration : registrationList) {
-            registration.unregister();
-        }
-        registrationList.clear();
-        /*
-         * Close service trackers
-         */
-        for (ServiceTracker tracker : serviceTrackerList) {
-            tracker.close();
-        }
-        serviceTrackerList.clear();
-        // Stop all inside the server.
-		starter.stop();
-		/*
-		 * Clear service registry
-		 */
-		ServerServiceRegistry.getInstance().clearRegistry();
+		try {
+			/*
+			 * Unregister server's services
+			 */
+			for (final ServiceRegistration registration : registrationList) {
+				registration.unregister();
+			}
+			registrationList.clear();
+			/*
+			 * Close service trackers
+			 */
+			for (ServiceTracker tracker : serviceTrackerList) {
+				tracker.close();
+			}
+			serviceTrackerList.clear();
+			// Stop all inside the server.
+			starter.stop();
+			/*
+			 * Clear service registry
+			 */
+			ServerServiceRegistry.getInstance().clearRegistry();
+		} finally {
+			started.set(false);
+		}
 	}
 
 	/**
