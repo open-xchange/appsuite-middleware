@@ -47,14 +47,13 @@
  *
  */
 
-
-
 package com.openexchange.ajp13;
 
 import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -64,57 +63,65 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class AJPv13ListenerPool {
-	
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(AJPv13ListenerPool.class);
+public final class AJPv13ListenerPool {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(AJPv13ListenerPool.class);
 
 	private static final int LISTENER_POOL_SIZE = AJPv13Config.getAJPListenerPoolSize();
 
 	/**
-	 * ...<br>A ConcurrentLinkedQueue is an appropriate choice when many threads will
-	 * share access to a common collection.<br>...
+	 * ...<br>
+	 * A ConcurrentLinkedQueue is an appropriate choice when many threads will
+	 * share access to a common collection.<br>
+	 * ...
 	 */
 	private static final Queue<AJPv13Listener> LISTENER_QUEUE = new ConcurrentLinkedQueue<AJPv13Listener>();
 
 	private static final AtomicBoolean initialized = new AtomicBoolean();
-	
-	private static int listenerNum;
-	
-	private static boolean captureLock;
-	
-	private static final Lock CREATE_LOCK = new ReentrantLock();
-	
+
+	private static final AtomicInteger listenerNum = new AtomicInteger();
+
+	private static final AtomicBoolean captureLock = new AtomicBoolean();
+
 	private static final Lock WAIT_LOCK = new ReentrantLock();
-	
+
 	private static final Condition RESET_FINISHED = WAIT_LOCK.newCondition();
-	
+
 	private AJPv13ListenerPool() {
 		super();
 	}
-	
+
 	/**
 	 * Initializes the pool by putting as many listeners as specified through
 	 * init-parameter <code>LISTENER_POOL_SIZE</code>
 	 * 
 	 */
 	public static void initPool() {
-		AJPv13Server.ajpv13ListenerMonitor.setPoolSize(LISTENER_POOL_SIZE);
-		AJPv13Server.ajpv13ListenerMonitor.setNumIdle(LISTENER_POOL_SIZE);
-		for (int i = 0; i < LISTENER_POOL_SIZE; i++) {
-			final AJPv13Listener l = new AJPv13Listener(++listenerNum, true);
-			AJPv13Watcher.addListener(l);
-			LISTENER_QUEUE.offer(l);
-		}
-		initialized.set(true);
-		if (LOG.isInfoEnabled()) {
-			LOG.info(new StringBuilder(100).append(LISTENER_POOL_SIZE).append(" AJPv13-Listeners created!").toString());
+		if (!initialized.get()) {
+			synchronized (initialized) {
+				if (!initialized.get()) {
+					AJPv13Server.ajpv13ListenerMonitor.setPoolSize(LISTENER_POOL_SIZE);
+					AJPv13Server.ajpv13ListenerMonitor.setNumIdle(LISTENER_POOL_SIZE);
+					for (int i = 0; i < LISTENER_POOL_SIZE; i++) {
+						final AJPv13Listener l = new AJPv13Listener(listenerNum.incrementAndGet(), true);
+						AJPv13Watcher.addListener(l);
+						LISTENER_QUEUE.offer(l);
+					}
+					initialized.set(true);
+					if (LOG.isInfoEnabled()) {
+						LOG.info(new StringBuilder(100).append(LISTENER_POOL_SIZE).append(" AJPv13-Listeners created!")
+								.toString());
+					}
+				}
+			}
 		}
 	}
-	
+
 	public static void resetPool() {
+		captureLock.set(true);
 		WAIT_LOCK.lock();
 		try {
-			captureLock = true;
 			/*
 			 * Clear queue
 			 */
@@ -122,38 +129,37 @@ public class AJPv13ListenerPool {
 				try {
 					final AJPv13Listener l = LISTENER_QUEUE.poll();
 					if (!l.stopListener()) {
-						LOG.error(new StringBuilder(100).append("Listener ").append(l.getListenerName()).append(
+						LOG.error(new StringBuilder(128).append("Listener ").append(l.getListenerName()).append(
 								" could NOT be properly stopped."));
 					}
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					LOG.error(e.getMessage(), e);
 				}
 			}
+			initialized.set(false);
 			RESET_FINISHED.signalAll();
 		} finally {
-			captureLock = false;
+			captureLock.set(false);
 			WAIT_LOCK.unlock();
 		}
 	}
-	
+
 	public static void removeListener(final int num) {
+		captureLock.set(true);
 		WAIT_LOCK.lock();
 		try {
-			captureLock = true;
-			final int size = LISTENER_QUEUE.size();
-			final Iterator<AJPv13Listener> iter = LISTENER_QUEUE.iterator();
-			NextListener: for (int i = 0; i < size; i++) {
+			for (final Iterator<AJPv13Listener> iter = LISTENER_QUEUE.iterator(); iter.hasNext();) {
 				if (iter.next().getListenerNumber() == num) {
 					iter.remove();
-					break NextListener;
 				}
 			}
+
 		} finally {
-			captureLock = false;
+			captureLock.set(false);
 			WAIT_LOCK.unlock();
 		}
 	}
-	
+
 	public static boolean isInitialized() {
 		return initialized.get();
 	}
@@ -172,55 +178,50 @@ public class AJPv13ListenerPool {
 			 */
 			return createListener();
 		}
-		if (captureLock) {
-			/*
-			 * Either resetPool() or invocation of removeListener(int num) set
-			 * the captureLock flag. All Threads which want to obtain a listener
-			 * ought to wait for these methods to terminate that is when the
-			 * lock WAIT_LOCK is unlocked by either method.
-			 */
-			WAIT_LOCK.lock();
-			try {
-				/*
-				 * Ensure flag is set to false and either method has finished
-				 */
-				while (captureLock) {
-					RESET_FINISHED.await();
-				}
-			} catch (InterruptedException e) {
-				LOG.error(e.getMessage(), e);
-			} finally {
-				WAIT_LOCK.unlock();
-			}
-		}
 		/*
 		 * Return a listener fetched from pool if still available. No lock
 		 * around poll() method cause this method is already thread-safe based
 		 * on "an efficient wait-free algorithm"
 		 */
-		final AJPv13Listener retval = LISTENER_QUEUE.poll();
-		if (retval == null) {
-			return createListener();
+		AJPv13Listener retval = null;
+		boolean retry = true;
+		while (retry) {
+			retval = LISTENER_QUEUE.poll();
+			if (retval == null) {
+				return createListener();
+			}
+			if (captureLock.get()) {
+				WAIT_LOCK.lock();
+				try {
+					/*
+					 * Ensure flag is set to false and method has finished
+					 */
+					while (captureLock.get()) {
+						RESET_FINISHED.await();
+					}
+				} catch (final InterruptedException e) {
+					LOG.error(e.getMessage(), e);
+				} finally {
+					WAIT_LOCK.unlock();
+				}
+			} else {
+				retry = false;
+			}
 		}
 		AJPv13Server.ajpv13ListenerMonitor.decrementPoolSize();
 		AJPv13Server.ajpv13ListenerMonitor.decrementNumIdle();
 		return retval;
 	}
-	
+
 	/**
 	 * 
 	 * @return a new <code>AJPv13Listener</code> instance created in a
 	 *         thread-safe manner
 	 */
-	private static final AJPv13Listener createListener() {
-		CREATE_LOCK.lock();
-		try {
-			final AJPv13Listener retval = new AJPv13Listener(++listenerNum);
-			AJPv13Watcher.addListener(retval);
-			return retval;
-		} finally {
-			CREATE_LOCK.unlock();
-		}
+	private static AJPv13Listener createListener() {
+		final AJPv13Listener retval = new AJPv13Listener(listenerNum.incrementAndGet());
+		AJPv13Watcher.addListener(retval);
+		return retval;
 	}
 
 	/**
@@ -233,11 +234,11 @@ public class AJPv13ListenerPool {
 	public static boolean putBack(final AJPv13Listener listener) {
 		return putBack(listener, false);
 	}
-	
+
 	/**
-	 * Puts back the given listener into pool if pool is not full, yet.
-	 * If <code>enforcedPut</code> is <code>true</code> the listener
-	 * will be put into a secondary queue.
+	 * Puts back the given listener into pool if pool is not full, yet. If
+	 * <code>enforcedPut</code> is <code>true</code> the listener will be
+	 * put into a secondary queue.
 	 * 
 	 * @param listener
 	 * @param enforcedPut
@@ -245,15 +246,15 @@ public class AJPv13ListenerPool {
 	 *         <code>false</code> otherwise
 	 */
 	public static boolean putBack(final AJPv13Listener listener, final boolean enforcedPut) {
-		if (enforcedPut || LISTENER_QUEUE.size() < LISTENER_POOL_SIZE) {
+		if (enforcedPut || (LISTENER_QUEUE.size() < LISTENER_POOL_SIZE)) {
 			AJPv13Server.ajpv13ListenerMonitor.incrementPoolSize();
 			AJPv13Server.ajpv13ListenerMonitor.incrementNumIdle();
 			return LISTENER_QUEUE.offer(listener);
 		}
 		return false;
 	}
-	
-	public static final int getPoolSize() {
+
+	public static int getPoolSize() {
 		return LISTENER_QUEUE.size();
 	}
 
