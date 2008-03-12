@@ -95,6 +95,13 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(FolderObject.class);
 
+	/**
+	 * Gets the locale-specific folder name
+	 * 
+	 * @param id The folder ID
+	 * @param locale The locale
+	 * @return The locale-specific folder name
+	 */
 	public static String getFolderString(final int id, final Locale locale) {
 		final StringHelper strHelper = new StringHelper(locale);
 		switch (id) {
