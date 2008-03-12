@@ -604,7 +604,7 @@ public class MIMEMessageFiller {
 					primaryMultipart.addBodyPart(createHtmlBodyPart((String) mail.getContent()));
 				}
 			}
-			final int size = isAttachmentForward ? 0 : mail.getEnclosedCount();
+			final int size = /*isAttachmentForward ? 0 : */mail.getEnclosedCount();
 			for (int i = 0; i < size; i++) {
 				addMessageBodyPart(primaryMultipart, mail.getEnclosedMailPart(i), false);
 			}
@@ -663,6 +663,7 @@ public class MIMEMessageFiller {
 				for (final MailMessage refMail : refMails) {
 					out.reset();
 					sb.setLength(0);
+					refMail.writeTo(out);
 					addNestedMessage(primaryMultipart, new DataHandler(new MessageDataSource(out.toByteArray(),
 							MIMETypes.MIME_MESSAGE_RFC822)), sb.append(
 							refMail.getSubject().replaceAll("\\p{Blank}+", "_")).append(".eml").toString());

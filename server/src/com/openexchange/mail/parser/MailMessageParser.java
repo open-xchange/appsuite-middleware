@@ -176,8 +176,15 @@ public final class MailMessageParser {
 		/*
 		 * Parse part dependent on its MIME type
 		 */
-		final boolean isInline = ((disposition == null || disposition.equalsIgnoreCase(Part.INLINE)) && mailPart
-				.getFileName() == null);
+		final boolean isInline = Part.INLINE.equalsIgnoreCase(disposition)
+				|| (disposition == null && mailPart.getFileName() == null);
+		/**
+		 * formerly:
+		 * 
+		 * <pre>
+		 * final boolean isInline = ((disposition == null || disposition.equalsIgnoreCase(Part.INLINE)) &amp;&amp; mailPart.getFileName() == null);
+		 * </pre>
+		 */
 		if (contentType.isMimeType(MIMETypes.MIME_TEXT_PLAIN) || contentType.isMimeType(MIMETypes.MIME_TEXT_ENRICHED)
 				|| contentType.isMimeType(MIMETypes.MIME_TEXT_RICHTEXT)
 				|| contentType.isMimeType(MIMETypes.MIME_TEXT_RTF)) {
