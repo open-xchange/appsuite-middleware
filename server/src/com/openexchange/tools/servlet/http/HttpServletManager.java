@@ -56,6 +56,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletConfig;
@@ -77,6 +78,8 @@ public class HttpServletManager {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HttpServletManager.class);
+
+	private static final AtomicBoolean initialized = new AtomicBoolean();
 
 	private static final Map<String, FIFOQueue<HttpServlet>> SERVLET_POOL = new HashMap<String, FIFOQueue<HttpServlet>>();
 
@@ -241,7 +244,7 @@ public class HttpServletManager {
 				throw new ServletException(new StringBuilder(256).append("A servlet with alias \"").append(id).append(
 						"\" has already been registered before.").toString());
 			}
-			if (null != initParams && !initParams.isEmpty()) {
+			if ((null != initParams) && !initParams.isEmpty()) {
 				AJPv13Server.SERVLET_CONFIGS.setConfig(servlet.getClass().getCanonicalName(), initParams);
 			}
 			final FIFOQueue<HttpServlet> servletQueue = new FIFOQueue<HttpServlet>(HttpServlet.class, 1);
@@ -331,17 +334,31 @@ public class HttpServletManager {
 	 *            The servlet constructor map
 	 */
 	final static void initHttpServletManager(final Map<String, Constructor<?>> servletConstructorMap) {
-		HttpServletManager.servletConstructorMap = servletConstructorMap;
-		createServlets();
+		if (!initialized.get()) {
+			synchronized (initialized) {
+				if (!initialized.get()) {
+					HttpServletManager.servletConstructorMap = servletConstructorMap;
+					createServlets();
+					initialized.set(true);
+				}
+			}
+		}
 	}
 
 	/**
 	 * Releases the HTTP servlet manager
 	 */
 	final static void releaseHttpServletManager() {
-		HttpServletManager.servletConstructorMap.clear();
-		HttpServletManager.servletConstructorMap = null;
-		clearServletPool();
+		if (initialized.get()) {
+			synchronized (initialized) {
+				if (initialized.get()) {
+					clearServletPool();
+					HttpServletManager.servletConstructorMap.clear();
+					HttpServletManager.servletConstructorMap = null;
+					initialized.set(false);
+				}
+			}
+		}
 	}
 
 	private static final Object[] INIT_ARGS = new Object[] {};

@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.servlet.http;
 
 import java.util.Date;
@@ -69,23 +67,23 @@ import javax.servlet.http.HttpSessionContext;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HttpSessionWrapper implements HttpSession {
-	
+
 	private final Map<String, Object> attributes;
-	
+
 	private final Map<String, Object> values;
-	
+
 	private long creationTime = new Date(0).getTime();
-	
+
 	private long lastAccessedTime = new Date(0).getTime();
-	
+
 	private String id;
-	
+
 	private int maxInactiveIntervall = -1;
-	
+
 	private ServletContext servletContext;
-	
+
 	private HttpSessionContext sessionContext;
-	
+
 	private boolean newSession = true;
 
 	public HttpSessionWrapper(String id) {
@@ -129,7 +127,7 @@ public class HttpSessionWrapper implements HttpSession {
 		lastAccessedTime = System.currentTimeMillis();
 		return servletContext;
 	}
-	
+
 	public void setServletContext(final ServletContext context) {
 		this.servletContext = context;
 	}
@@ -177,7 +175,7 @@ public class HttpSessionWrapper implements HttpSession {
 		lastAccessedTime = System.currentTimeMillis();
 		return newSession;
 	}
-	
+
 	public void setNew(final boolean newSession) {
 		this.newSession = newSession;
 	}
@@ -186,7 +184,7 @@ public class HttpSessionWrapper implements HttpSession {
 		lastAccessedTime = System.currentTimeMillis();
 		values.put(valueName, value);
 		if (value instanceof HttpSessionBindingListener) {
-			final HttpSessionBindingListener listener = (HttpSessionBindingListener)value;
+			final HttpSessionBindingListener listener = (HttpSessionBindingListener) value;
 			listener.valueBound(new HttpSessionBindingEvent(this, valueName));
 		}
 	}
@@ -195,7 +193,7 @@ public class HttpSessionWrapper implements HttpSession {
 		lastAccessedTime = System.currentTimeMillis();
 		final Object removedObj = attributes.remove(attributeName);
 		if (removedObj instanceof HttpSessionBindingListener) {
-			final HttpSessionBindingListener listener = (HttpSessionBindingListener)removedObj;
+			final HttpSessionBindingListener listener = (HttpSessionBindingListener) removedObj;
 			listener.valueUnbound(new HttpSessionBindingEvent(this, attributeName));
 		}
 	}
@@ -204,7 +202,7 @@ public class HttpSessionWrapper implements HttpSession {
 		lastAccessedTime = System.currentTimeMillis();
 		final Object removedObj = values.remove(valueName);
 		if (removedObj instanceof HttpSessionBindingListener) {
-			final HttpSessionBindingListener listener = (HttpSessionBindingListener)removedObj;
+			final HttpSessionBindingListener listener = (HttpSessionBindingListener) removedObj;
 			listener.valueUnbound(new HttpSessionBindingEvent(this, valueName));
 		}
 	}
@@ -215,7 +213,7 @@ public class HttpSessionWrapper implements HttpSession {
 			attributes.put(attributeName, attributeValue);
 		}
 		if (attributeValue instanceof HttpSessionBindingListener) {
-			final HttpSessionBindingListener listener = (HttpSessionBindingListener)attributeValue;
+			final HttpSessionBindingListener listener = (HttpSessionBindingListener) attributeValue;
 			listener.valueBound(new HttpSessionBindingEvent(this, attributeName));
 		}
 	}
@@ -226,9 +224,9 @@ public class HttpSessionWrapper implements HttpSession {
 	}
 
 	private static class IteratorEnumeration implements Enumeration {
-		
+
 		private final Iterator iter;
-		
+
 		private IteratorEnumeration(Iterator iter) {
 			this.iter = iter;
 		}
@@ -241,5 +239,5 @@ public class HttpSessionWrapper implements HttpSession {
 			return iter.next();
 		}
 	}
-	
+
 }

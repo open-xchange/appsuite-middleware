@@ -56,6 +56,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.servlet.http.HttpSession;
 
@@ -71,12 +72,48 @@ public final class HttpSessionManagement {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HttpSessionManagement.class);
 
-	private static Map<String, HttpSession> sessions = new ConcurrentHashMap<String, HttpSession>();
+	private static final AtomicBoolean initialized = new AtomicBoolean();
 
-	static {
-		ServerTimer.getTimer().schedule(new SessionRemover(), 100, 3600000);
+	private static Map<String, HttpSession> sessions;
+
+	private static SessionRemover sessionRemover;
+
+	/**
+	 * Initializes HTTP session management
+	 */
+	static void init() {
+		if (!initialized.get()) {
+			synchronized (initialized) {
+				if (!initialized.get()) {
+					sessions = new ConcurrentHashMap<String, HttpSession>();
+					ServerTimer.getTimer().schedule((sessionRemover = new SessionRemover()), 100, 3600000);
+					initialized.set(true);
+				}
+			}
+		}
 	}
 
+	/**
+	 * Resets HTTP session management
+	 */
+	static void reset() {
+		if (initialized.get()) {
+			synchronized (initialized) {
+				if (initialized.get()) {
+					sessions.clear();
+					sessions = null;
+					sessionRemover.cancel();
+					ServerTimer.getTimer().purge();
+					sessionRemover = null;
+					initialized.set(false);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Initializes a new {@link HttpSessionManagement}
+	 */
 	private HttpSessionManagement() {
 		super();
 	}
@@ -160,8 +197,8 @@ public final class HttpSessionManagement {
 	 *         <code>false</code>
 	 */
 	public static boolean isHttpSessionExpired(final HttpSession httpSession) {
-		return httpSession.getMaxInactiveInterval() > 0 ? (System.currentTimeMillis() - httpSession
-				.getLastAccessedTime()) > httpSession.getMaxInactiveInterval() : false;
+		return httpSession.getMaxInactiveInterval() > 0 ? ((System.currentTimeMillis() - httpSession
+				.getLastAccessedTime()) / 1000) > httpSession.getMaxInactiveInterval() : false;
 	}
 
 	/**
@@ -173,7 +210,7 @@ public final class HttpSessionManagement {
 	 */
 	public static boolean isHttpSessionValid(final String sessionId) {
 		final HttpSession httpSession = sessions.get(sessionId);
-		return (httpSession != null && !isHttpSessionExpired(httpSession));
+		return ((httpSession != null) && !isHttpSessionExpired(httpSession));
 	}
 
 	private static final char[] digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
@@ -204,7 +241,7 @@ public final class HttpSessionManagement {
 		return retval;
 	}
 
-	private static class SessionRemover extends TimerTask {
+	private static final class SessionRemover extends TimerTask {
 		@Override
 		public void run() {
 			try {

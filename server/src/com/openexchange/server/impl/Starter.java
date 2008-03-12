@@ -101,9 +101,9 @@ public class Starter implements Initialization {
 	 */
 	com.openexchange.groupware.impl.BackendServicesInit.getInstance(),
 	/**
-	 * Starts HTTP serlvet manager
+	 * Starts HTTP managers
 	 */
-	com.openexchange.tools.servlet.http.HttpServletManagerInit.getInstance(),
+	com.openexchange.tools.servlet.http.HttpManagersInit.getInstance(),
 	/**
 	 * Setup of ContextStorage and LoginInfo.
 	 */
