@@ -54,7 +54,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * AJPv13ConnectionPool
+ * {@link AJPv13ConnectionPool} - The AJP connection pool
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
