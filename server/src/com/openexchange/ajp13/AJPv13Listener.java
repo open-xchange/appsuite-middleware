@@ -253,7 +253,7 @@ public final class AJPv13Listener implements Runnable {
 				 * accepted client socket is alive, its input is not shut down
 				 * and no communication failure occurred.
 				 */
-				while (client != null && !client.isInputShutdown()) {
+				while (client != null && !client.isClosed()) {
 					try {
 						ajpCon.processRequest();
 						ajpCon.createResponse();
@@ -266,12 +266,7 @@ public final class AJPv13Listener implements Runnable {
 						}
 					} catch (final UploadServletException e) {
 						LOG.error(e.getMessage(), e);
-						/*
-						 * Send call back
-						 */
-						writeSendHeaders(client, (HttpServletResponseWrapper) e.getRes());
-						writeSendBody(client, e.getData().getBytes("UTF-8"));
-						closeAndKeepAlive();
+						closeAndKeepAlive((HttpServletResponseWrapper) e.getRes(), e.getData().getBytes("UTF-8"));
 					} catch (final ServletException e) {
 						LOG.error(e.getMessage(), e);
 						closeAndKeepAlive();
@@ -305,12 +300,16 @@ public final class AJPv13Listener implements Runnable {
 						LOG.error(logMe.getMessage(), logMe);
 						closeAndKeepAlive();
 					}
-					ajpCon.resetConnection(false);
+					if (null != ajpCon) {
+						ajpCon.resetConnection(false);
+					}
 					AJPv13Server.ajpv13ListenerMonitor.decrementNumProcessing();
 					AJPv13Server.ajpv13ListenerMonitor.addProcessingTime(System.currentTimeMillis() - processingStart);
 					AJPv13Server.ajpv13ListenerMonitor.incrementNumRequests();
 					processing = false;
-					client.getOutputStream().flush();
+					if (null != client) {
+						client.getOutputStream().flush();
+					}
 				}
 			} catch (final AJPv13SocketClosedException e) {
 				/*
@@ -385,17 +384,42 @@ public final class AJPv13Listener implements Runnable {
 		AJPv13Watcher.removeListener(num);
 	}
 
+	private void closeAndKeepAlive(final HttpServletResponseWrapper resp, final byte[] data) throws AJPv13Exception,
+			IOException {
+		if (null != client) {
+			if (null != resp) {
+				/*
+				 * Send response headers
+				 */
+				writeSendHeaders(client, resp);
+			}
+			if (null != data) {
+				/*
+				 * Send response body
+				 */
+				writeSendBody(client, data);
+			}
+			/*
+			 * Send END_RESPONSE package
+			 */
+			writeEndResponse(client, false);
+			ajpCon.getAjpRequestHandler().setEndResponseSent(true);
+		}
+	}
+
 	private void closeAndKeepAlive() throws AJPv13Exception, IOException {
-		/*
-		 * Send END_RESPONSE package
-		 */
-		writeEndResponse(client, false);
-		ajpCon.getAjpRequestHandler().setEndResponseSent(true);
+		if (null != client) {
+			/*
+			 * Send END_RESPONSE package
+			 */
+			writeEndResponse(client, false);
+			ajpCon.getAjpRequestHandler().setEndResponseSent(true);
+		}
 	}
 
 	/**
-	 * Writes connection-terminating ajp END_RESPONSE package to web server,
-	 * closes the ajp connection and accepted client socket as well.
+	 * Writes connection-terminating AJP END_RESPONSE package to web server,
+	 * closes the AJP connection and accepted client socket as well.
 	 */
 	private void terminateAndClose() {
 		try {
@@ -416,7 +440,7 @@ public final class AJPv13Listener implements Runnable {
 		}
 		try {
 			/*
-			 * Terminate ajp cycle and close socket
+			 * Terminate AJP cycle and close socket
 			 */
 			if (client != null) {
 				if (!client.isClosed()) {

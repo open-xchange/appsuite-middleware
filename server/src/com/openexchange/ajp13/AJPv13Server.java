@@ -147,6 +147,7 @@ public class AJPv13Server implements Runnable {
 				throw new AJPv13Exception(AJPCode.STARTUP_ERROR, false, ex, Integer.valueOf(AJP13_PORT));
 			}
 			initializePools();
+			AJPv13Watcher.initializeAJPv13Watcher();
 			initializeThreadArray();
 			for (int i = 0; i < threadArr.length; i++) {
 				threadArr[i].setPriority(Thread.MAX_PRIORITY);
@@ -166,6 +167,10 @@ public class AJPv13Server implements Runnable {
 			 * Stop listeners
 			 */
 			AJPv13Watcher.stopListeners();
+			/*
+			 * Reset watcher
+			 */
+			AJPv13Watcher.resetAJPv13Watcher();
 			/*
 			 * Reset pools
 			 */

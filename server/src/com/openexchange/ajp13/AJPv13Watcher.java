@@ -59,29 +59,41 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.server.ServerTimer;
 
 /**
- * AJPv13Watcher
+ * {@link AJPv13Watcher} - A watcher for AJP listeners which keeps track of
+ * their run time.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class AJPv13Watcher {
+public final class AJPv13Watcher {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13Watcher.class);
 
-	private static final boolean ENABLED = AJPv13Config.getAJPWatcherEnabled();
-
-	private static final boolean PERMISSION_ENABLED = AJPv13Config.getAJPWatcherPermission();
-
-	private static final int MAX_LISTENER_RUNNING_TIME = AJPv13Config.getAJPWatcherMaxRunningTime();
-
-	private static final int WATCHER_FREQUENCY = AJPv13Config.getAJPWatcherFrequency();
+	private static Task task;
 
 	private static final Map<Integer, AJPv13Listener> listeners = new HashMap<Integer, AJPv13Listener>();
 
 	private static final Lock LOCK = new ReentrantLock();
 
-	public static final void addListener(final AJPv13Listener listener) {
+	static void initializeAJPv13Watcher() {
+		if (AJPv13Config.getAJPWatcherEnabled()) {
+			/*
+			 * Start task
+			 */
+			ServerTimer.getTimer().schedule((task = new Task()), 1000, AJPv13Config.getAJPWatcherFrequency());
+		}
+	}
+
+	static void resetAJPv13Watcher() {
+		if (null != task) {
+			task.cancel();
+			task = null;
+			ServerTimer.getTimer().purge();
+		}
+	}
+
+	public static void addListener(final AJPv13Listener listener) {
 		LOCK.lock();
 		try {
 			if (listeners.containsKey(Integer.valueOf(listener.getListenerNumber()))) {
@@ -93,7 +105,7 @@ public class AJPv13Watcher {
 		}
 	}
 
-	public static final AJPv13Listener removeListener(final int listenerNum) {
+	public static AJPv13Listener removeListener(final int listenerNum) {
 		LOCK.lock();
 		try {
 			if (listeners.containsKey(Integer.valueOf(listenerNum))) {
@@ -105,7 +117,7 @@ public class AJPv13Watcher {
 		}
 	}
 
-	public static final int getNumOfListeners() {
+	public static int getNumOfListeners() {
 		return listeners.size();
 	}
 
@@ -114,7 +126,7 @@ public class AJPv13Watcher {
 	 * from map
 	 * 
 	 */
-	public static final void stopListeners() {
+	public static void stopListeners() {
 		LOCK.lock();
 		try {
 			stopAllListeners();
@@ -127,7 +139,7 @@ public class AJPv13Watcher {
 	 * Stops all listeners sequentially and clears them from map
 	 * 
 	 */
-	private static final void stopAllListeners() {
+	private static void stopAllListeners() {
 		final Iterator<AJPv13Listener> iter = listeners.values().iterator();
 		final int size = listeners.size();
 		for (int i = 0; i < size; i++) {
@@ -163,12 +175,12 @@ public class AJPv13Watcher {
 						 */
 						countProcessing++;
 						final long currentProcTime = (System.currentTimeMillis() - l.getProcessingStartTime());
-						if (currentProcTime > MAX_LISTENER_RUNNING_TIME) {
+						if (currentProcTime > AJPv13Config.getAJPWatcherMaxRunningTime()) {
 							if (LOG.isInfoEnabled()) {
 								final Throwable t = new Throwable();
 								t.setStackTrace(l.getStackTrace());
 								LOG.info(new StringBuilder("AJP Listener exceeds max. running time of ").append(
-										MAX_LISTENER_RUNNING_TIME).append("msec -> Processing time: ").append(
+										AJPv13Config.getAJPWatcherMaxRunningTime()).append("msec -> Processing time: ").append(
 										currentProcTime).append("msec").toString(), t);
 							}
 							countExceeded++;
@@ -179,7 +191,7 @@ public class AJPv13Watcher {
 				 * All threads are listening longer than specified max listener
 				 * running time
 				 */
-				if (PERMISSION_ENABLED && countProcessing > 0 && countExceeded == countProcessing) {
+				if (AJPv13Config.getAJPWatcherPermission() && countProcessing > 0 && countExceeded == countProcessing) {
 					final String delimStr = "\n++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 					LOG.error(new StringBuilder(300).append(delimStr).append(
 							"AJP-Watcher's run done: SYSTEM DEADLOCK DETECTED!").append(
@@ -209,12 +221,4 @@ public class AJPv13Watcher {
 		}
 	}
 
-	static {
-		if (ENABLED) {
-			/*
-			 * Start task
-			 */
-			ServerTimer.getTimer().schedule(new Task(), 1000, WATCHER_FREQUENCY);
-		}
-	}
 }
