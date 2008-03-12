@@ -47,12 +47,11 @@
  *
  */
 
-
-
 package com.openexchange.ajp13;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * AJPv13ConnectionPool
@@ -65,36 +64,60 @@ public class AJPv13ConnectionPool {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13ConnectionPool.class);
 
-	private static final int CONNECTION_POOL_SIZE = AJPv13Config.getAJPConnectionPoolSize();
+	private static final AtomicBoolean initialized = new AtomicBoolean();
 
-	private static final BlockingQueue<AJPv13Connection> CONNECTION_QUEUE = new ArrayBlockingQueue<AJPv13Connection>(
-			CONNECTION_POOL_SIZE);
-	
+	private static BlockingQueue<AJPv13Connection> CONNECTION_QUEUE;
+
 	private AJPv13ConnectionPool() {
 		super();
 	}
 
 	/**
-	 * Initializes the connection pool by creating the specified amount of
-	 * connection instances
+	 * Initializes the AJP connection pool by creating the specified amount of
+	 * connection instances given through property
+	 * {@link AJPv13Config#getAJPConnectionPoolSize()}
 	 */
 	public static void initConnectionPool() {
-		for (int i = 0; i < CONNECTION_POOL_SIZE; i++) {
-			CONNECTION_QUEUE.add(new AJPv13Connection());
+		if (!initialized.get()) {
+			synchronized (initialized) {
+				if (null == CONNECTION_QUEUE) {
+					final int poolSize = AJPv13Config.getAJPConnectionPoolSize();
+					CONNECTION_QUEUE = new ArrayBlockingQueue<AJPv13Connection>(poolSize);
+					for (int i = 0; i < poolSize; i++) {
+						CONNECTION_QUEUE.add(new AJPv13Connection());
+					}
+					if (LOG.isInfoEnabled()) {
+						LOG.info(new StringBuilder(50).append(poolSize).append(
+								" AJPv13Connection instances created in advance").toString());
+					}
+					initialized.set(true);
+				}
+			}
 		}
-		if (LOG.isInfoEnabled()) {
-			LOG.info(new StringBuilder(50).append(CONNECTION_POOL_SIZE).append(
-					" AJPv13Connection instances created in advance").toString());
-		}
-	}
-	
-	public static void resetConnectionPool() {
-		CONNECTION_QUEUE.clear();
 	}
 
 	/**
-	 * Fetches an existing connection from pool or creates & returns a new
-	 * instance if none available in pool
+	 * Resets the AJP connection pool
+	 */
+	public static void resetConnectionPool() {
+		if (initialized.get()) {
+			synchronized (initialized) {
+				if (null != CONNECTION_QUEUE) {
+					CONNECTION_QUEUE.clear();
+					CONNECTION_QUEUE = null;
+					initialized.set(false);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Fetches an existing connection from pool or creates a new instance if
+	 * none available in pool
+	 * 
+	 * @param l
+	 *            The AJP listener which is assigned to returned AJP connection
+	 * @return A pooled or newly created AJP connection
 	 */
 	public static AJPv13Connection getAJPv13Connection(final AJPv13Listener l) {
 		final AJPv13Connection ajpCon = CONNECTION_QUEUE.poll();
@@ -108,6 +131,11 @@ public class AJPv13ConnectionPool {
 	/**
 	 * Puts given AJP Connection back in pool if there's enough space in queue
 	 * otherwise the instance is going to be discarded
+	 * 
+	 * @param ajpCon
+	 *            The AJP connection which shall be put into pool
+	 * @return <code>true</code> if AJP connection was successfully put into
+	 *         pool; otherwise <code>false</code>
 	 */
 	public static boolean putBackAJPv13Connection(final AJPv13Connection ajpCon) {
 		if (ajpCon == null) {
