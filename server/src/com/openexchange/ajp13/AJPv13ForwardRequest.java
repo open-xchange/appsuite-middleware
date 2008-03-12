@@ -276,7 +276,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 			 * Determine Attributes
 			 */
 			parseAttributes(servletRequest);
-			if (encodedMethod == -1 && servletRequest.containsAttribute(ATTR_STORED_METHOD)) {
+			if ((encodedMethod == -1) && servletRequest.containsAttribute(ATTR_STORED_METHOD)) {
 				servletRequest.setMethod((String) servletRequest.getAttribute(ATTR_STORED_METHOD));
 			}
 			if (servletRequest.containsAttribute(ATTR_QUERY_STRING)) {
@@ -294,7 +294,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 			checkJSessionIDCookie(servletRequest, servletResponse, ajpRequestHandler);
 		} else {
 			final int dot = jsessionID.lastIndexOf('.');
-			if (dot != -1 && (!AJPv13Config.getJvmRoute().equals(jsessionID.substring(dot + 1)))) {
+			if ((dot != -1) && (!AJPv13Config.getJvmRoute().equals(jsessionID.substring(dot + 1)))) {
 				/*
 				 * JVM route does not match
 				 */
@@ -335,7 +335,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 	}
 
 	private static boolean allPath(final String servletPath) {
-		return servletPath.length() == 1 && servletPath.charAt(0) == '*';
+		return (servletPath.length() == 1) && (servletPath.charAt(0) == '*');
 	}
 
 	/**
@@ -381,7 +381,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 					 * Header name is encoded as an integer value.
 					 */
 					headerName = httpHeaderMapping.get(Integer.valueOf(secondByte));
-					if (!contentTypeSet && secondByte == 0x07) {
+					if (!contentTypeSet && (secondByte == 0x07)) {
 						servletRequest.setContentType(parseString());
 						contentTypeSet = true;
 						continue NextHeader;
@@ -408,8 +408,8 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 
 	private static Cookie[] parseCookieHeader(final String headerValue) throws AJPv13Exception {
 		final Matcher m = RFC2616Regex.COOKIE.matcher(headerValue);
-	    final List<Cookie> cookieList = new ArrayList<Cookie>();
-	    while (m.find()) {
+		final List<Cookie> cookieList = new ArrayList<Cookie>();
+		while (m.find()) {
 			// offset + 1 -> complete single cookie
 			int version = -1;
 			{
@@ -432,7 +432,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 				// Regex has always at minimum 2 cookies as groups.
 				continue;
 			}
-			if (name.length() > 0 && name.charAt(0) == '$' && LOG.isInfoEnabled()) {
+			if ((name.length() > 0) && (name.charAt(0) == '$') && LOG.isInfoEnabled()) {
 				LOG.info(new StringBuilder(32).append("Special cookie ").append(name).append(" not handled, yet!"));
 			}
 			final Cookie c = new Cookie(name, stripQuotes(m.group(4)));
@@ -456,10 +456,10 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 			 */
 			cookieList.add(c);
 		}
-	    if (headerValue.length() > 0 && cookieList.isEmpty()) {
-	        throw new AJPv13Exception(AJPv13Exception.AJPCode.INVALID_COOKIE_HEADER, true, headerValue);
-	    }
-        return cookieList.toArray(new Cookie[cookieList.size()]);
+		if ((headerValue.length() > 0) && cookieList.isEmpty()) {
+			throw new AJPv13Exception(AJPv13Exception.AJPCode.INVALID_COOKIE_HEADER, true, headerValue);
+		}
+		return cookieList.toArray(new Cookie[cookieList.size()]);
 	}
 
 	/**
@@ -472,7 +472,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 	 */
 	private static String stripQuotes(final String cookieValue) {
 		final int mlen = cookieValue.length() - 1;
-		if (cookieValue.charAt(0) == '"' && cookieValue.charAt(mlen) == '"') {
+		if ((cookieValue.charAt(0) == '"') && (cookieValue.charAt(mlen) == '"')) {
 			return cookieValue.substring(1, mlen);
 		}
 		return cookieValue;
@@ -499,7 +499,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		final Cookie[] cookies = servletRequest.getCookies();
 		Cookie jsessionIDCookie = null;
 		if (cookies != null) {
-			NextCookie: for (int i = 0; i < cookies.length && (jsessionIDCookie == null); i++) {
+			NextCookie: for (int i = 0; (i < cookies.length) && (jsessionIDCookie == null); i++) {
 				final Cookie current = cookies[i];
 				if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(current.getName())) {
 					/*
@@ -507,7 +507,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 					 */
 					final int pos = current.getValue().lastIndexOf('.');
 					if (pos > -1) {
-						if (AJPv13Config.getJvmRoute() != null
+						if ((AJPv13Config.getJvmRoute() != null)
 								&& !AJPv13Config.getJvmRoute().equals(current.getValue().substring(pos + 1))) {
 							/*
 							 * Different JVM route detected -> Discard
@@ -573,7 +573,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 			 * Create a new unique id
 			 */
 			final StringBuilder jsessionIDVal = new StringBuilder(HttpSessionManagement.getNewUniqueId());
-			if (AJPv13Config.getJvmRoute() != null && AJPv13Config.getJvmRoute().length() > 0) {
+			if ((AJPv13Config.getJvmRoute() != null) && (AJPv13Config.getJvmRoute().length() > 0)) {
 				jsessionIDVal.append('.').append(AJPv13Config.getJvmRoute());
 			}
 			jsessionIdVal = jsessionIDVal.toString();
@@ -587,7 +587,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 				 * Invalid cookie. Create a new unique id
 				 */
 				final StringBuilder jsessionIDVal = new StringBuilder(HttpSessionManagement.getNewUniqueId());
-				if (AJPv13Config.getJvmRoute() != null && AJPv13Config.getJvmRoute().length() > 0) {
+				if ((AJPv13Config.getJvmRoute() != null) && (AJPv13Config.getJvmRoute().length() > 0)) {
 					jsessionIDVal.append('.').append(AJPv13Config.getJvmRoute());
 				}
 				jsessionIdVal = jsessionIDVal.toString();
@@ -615,7 +615,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		/*
 		 * Special Byte 0xFF indicates absence of current string value.
 		 */
-		if (firstByte == ((byte) REQUEST_TERMINATOR) && secondByte == (byte) REQUEST_TERMINATOR) {
+		if ((firstByte == ((byte) REQUEST_TERMINATOR)) && (secondByte == (byte) REQUEST_TERMINATOR)) {
 			return STR_EMPTY;
 		}
 		final StringBuilder sb = new StringBuilder();
