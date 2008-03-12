@@ -1,10 +1,11 @@
 package com.openexchange.webdav.xml.contact;
 
+import java.util.Date;
+
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.ContactTest;
 import com.openexchange.webdav.xml.XmlServlet;
-import java.util.Date;
 
 public class DeleteTest extends ContactTest {
 	
@@ -23,7 +24,7 @@ public class DeleteTest extends ContactTest {
 	}
 	
 	public void _notestDeleteConcurentConflict() throws Exception {
-		ContactObject contactObj = createContactObject("testUpdateContactConcurentConflict");
+		ContactObject contactObj = createContactObject("testDeleteConcurentConflict");
 		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
 		try {
