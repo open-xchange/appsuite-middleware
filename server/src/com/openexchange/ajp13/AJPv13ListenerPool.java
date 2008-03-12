@@ -118,6 +118,9 @@ public final class AJPv13ListenerPool {
 		}
 	}
 
+	/**
+	 * Resets the pool
+	 */
 	public static void resetPool() {
 		captureLock.set(true);
 		WAIT_LOCK.lock();
@@ -144,6 +147,12 @@ public final class AJPv13ListenerPool {
 		}
 	}
 
+	/**
+	 * Removes the listener from pool whose number equals specified number
+	 * 
+	 * @param num
+	 *            The number of the listener to remove
+	 */
 	public static void removeListener(final int num) {
 		captureLock.set(true);
 		WAIT_LOCK.lock();
@@ -165,10 +174,10 @@ public final class AJPv13ListenerPool {
 	}
 
 	/**
-	 * Fetches a listener from pool if available, otherwise a new listener will
-	 * be created
+	 * Fetches a listener from pool if available, otherwise a new listener is
+	 * created
 	 * 
-	 * @return a pooled or new listener
+	 * @return A pooled or newly created listener
 	 */
 	public static AJPv13Listener getListener() {
 		if (LISTENER_QUEUE.isEmpty()) {
@@ -214,6 +223,7 @@ public final class AJPv13ListenerPool {
 	}
 
 	/**
+	 * Gets a newly created AJP listener
 	 * 
 	 * @return a new <code>AJPv13Listener</code> instance created in a
 	 *         thread-safe manner
@@ -228,6 +238,7 @@ public final class AJPv13ListenerPool {
 	 * Puts back the given listener into pool if pool is not full, yet.
 	 * 
 	 * @param listener
+	 *            The AJP listener which shall be put back into pool
 	 * @return <code>true</code> if given listener can be put into pool,
 	 *         <code>false</code> otherwise
 	 */
@@ -237,11 +248,14 @@ public final class AJPv13ListenerPool {
 
 	/**
 	 * Puts back the given listener into pool if pool is not full, yet. If
-	 * <code>enforcedPut</code> is <code>true</code> the listener will be
-	 * put into a secondary queue.
+	 * <code>enforcedPut</code> is <code>true</code> the listener is going
+	 * to be put in any case.
 	 * 
 	 * @param listener
+	 *            The AJP listener which shall be put back into pool
 	 * @param enforcedPut
+	 *            <code>true</code> to enforce a put even though pool's size
+	 *            is exceeded; otherwise <code>false</code>
 	 * @return <code>true</code> if given listener can be put into pool,
 	 *         <code>false</code> otherwise
 	 */
@@ -254,6 +268,11 @@ public final class AJPv13ListenerPool {
 		return false;
 	}
 
+	/**
+	 * Gets the current pool size
+	 * 
+	 * @return The current pool size
+	 */
 	public static int getPoolSize() {
 		return LISTENER_QUEUE.size();
 	}
