@@ -74,6 +74,8 @@ import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.session.Session;
@@ -187,7 +189,8 @@ public final class contacts extends XmlServlet {
 	
 	@Override
 	protected void startWriter(final Session sessionObj, final Context ctx, final int objectId, final int folderId, final OutputStream os) throws Exception {
-		final ContactWriter contactwriter = new ContactWriter(sessionObj);
+		final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+		final ContactWriter contactwriter = new ContactWriter(userObj, ctx, sessionObj);
 		contactwriter.startWriter(objectId, folderId, os);
 	}
 
@@ -198,7 +201,8 @@ public final class contacts extends XmlServlet {
 	
 	@Override
 	protected void startWriter(final Session sessionObj, final Context ctx, final int folderId, final boolean bModified, final boolean bDelete, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
-		final ContactWriter contactwriter = new ContactWriter(sessionObj);
+		final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+		final ContactWriter contactwriter = new ContactWriter(userObj, ctx, sessionObj);
 		contactwriter.startWriter(bModified, bDelete, bList, folderId, lastsync, os);
 	}
 	

@@ -197,13 +197,13 @@ public class GroupUserWriter extends ContactWriter {
 	
 	private static final Log LOG = LogFactory.getLog(GroupUserWriter.class);
 	
-	public GroupUserWriter(Session sessionObj, Context ctx, Element parent) throws Exception {
-		super(sessionObj, ctx);
+	public GroupUserWriter(final User userObj, final Context ctx, final Session sessionObj, Element parent) throws Exception {
+		super(userObj, ctx, sessionObj);
 		this.parent = parent;
 		
 		init();
 	}
-	
+
 	protected void init() throws Exception {
 		userStorage = UserStorage.getInstance();
 	}

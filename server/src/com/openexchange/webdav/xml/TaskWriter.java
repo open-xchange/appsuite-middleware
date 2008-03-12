@@ -130,10 +130,6 @@ public class TaskWriter extends CalendarWriter {
 		
 	}
 
-	public TaskWriter(final Session sessionObj) {
-		this.sessionObj = sessionObj;
-	}
-
 	public TaskWriter(final User userObj, final Context ctx, final Session sessionObj) {
 		this.userObj = userObj;
 		this.ctx = ctx;

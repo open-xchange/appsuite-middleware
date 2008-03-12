@@ -78,6 +78,8 @@ import com.openexchange.groupware.ldap.Group;
 import com.openexchange.groupware.ldap.GroupStorage;
 import com.openexchange.groupware.ldap.Resource;
 import com.openexchange.groupware.ldap.ResourceStorage;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.Version;
@@ -177,8 +179,8 @@ public final class groupuser extends PermissionServlet {
 			
 			if (s_user != null) {
 				os.write(("<ox:users>").getBytes());
-				
-				final GroupUserWriter groupuserwriter = new GroupUserWriter(sessionObj, ctx, new Element("user", XmlServlet.NS));
+				final User userObj = UserStorage.getStorageUser(sessionObj.getUserId(), ctx);
+				final GroupUserWriter groupuserwriter = new GroupUserWriter(userObj, ctx, sessionObj, new Element("user", XmlServlet.NS));
 				
 				if ("*".equals(s_user)) {
 					groupuserwriter.startWriter(true, true, lastsync, os);
