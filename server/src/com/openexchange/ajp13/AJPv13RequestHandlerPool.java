@@ -55,7 +55,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A request handler pool to hold pre-initialized instances of
- * <code>AJPv13RequestHandler</code>
+ * {@link AJPv13RequestHandler}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
