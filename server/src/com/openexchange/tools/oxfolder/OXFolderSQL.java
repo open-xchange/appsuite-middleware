@@ -1029,7 +1029,16 @@ public class OXFolderSQL {
 	 * <code>commit()</code> will be invoked, so any surrounding BEGIN-COMMIT
 	 * mechanisms will be canceled.
 	 * 
-	 * @return a unique id from underlying storage
+	 * @param ctx
+	 *            The context
+	 * @param callWriteConArg
+	 *            A writable connection
+	 * @return A unique folder id from underlying storage
+	 * @throws SQLException
+	 *             If a SQL error occurs
+	 * @throws OXException
+	 *             If writable connection cannot be obtained from/put back into
+	 *             pool
 	 */
 	public static int getNextSerial(final Context ctx, final Connection callWriteConArg) throws SQLException,
 			OXException {
