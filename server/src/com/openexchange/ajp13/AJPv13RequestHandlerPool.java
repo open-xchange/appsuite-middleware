@@ -138,16 +138,16 @@ public class AJPv13RequestHandlerPool {
 	 * Puts back the given request handler instance into pool if space
 	 * available. Otherwise it's going to be discarded.
 	 * 
-	 * @param reqHandler
+	 * @param requestHandler
 	 *            The AJP request handler which shall be put back into pool
 	 * @return <code>true</code> if AJP request handler was successfully put
 	 *         back into pool; otherwise <code>false</code>
 	 */
-	public static boolean putRequestHandler(final AJPv13RequestHandler reqHandler) {
-		if (reqHandler == null) {
+	public static boolean putRequestHandler(final AJPv13RequestHandler requestHandler) {
+		if (requestHandler == null) {
 			return false;
 		}
-		return REQUEST_HANDLER_POOL.offer(reqHandler);
+		return REQUEST_HANDLER_POOL.offer(requestHandler);
 	}
 
 }
