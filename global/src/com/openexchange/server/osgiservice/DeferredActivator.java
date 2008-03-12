@@ -168,8 +168,12 @@ public abstract class DeferredActivator implements BundleActivator {
 
 	/**
 	 * Initializes this deferred activator's members
+	 * 
+	 * @throws Exception
+	 *             If no needed services are specified and immediately starting
+	 *             bundle fails
 	 */
-	private final void init() {
+	private final void init() throws Exception {
 		final Class<?>[] classes = getNeededServices();
 		if (new HashSet<Class<?>>(Arrays.asList(classes)).size() != classes.length) {
 			throw new IllegalArgumentException("Duplicate class/interface provided through getNeededServices()");
@@ -185,6 +189,9 @@ public abstract class DeferredActivator implements BundleActivator {
 			serviceTrackers[i] = new ServiceTracker(context, classes[i].getName(),
 					new DeferredServiceTrackerCustomizer(classes[i], i));
 			serviceTrackers[i].open();
+		}
+		if (classes.length == 0) {
+			startBundle();
 		}
 	}
 
