@@ -63,7 +63,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 	CalendarObject.RECURRENCE_TYPE, CalendarObject.PARTICIPANTS,
 	CalendarObject.USERS, AppointmentObject.SHOWN_AS,
 	AppointmentObject.RECURRENCE_ID, AppointmentObject.RECURRENCE_POSITION,
-	AppointmentObject.FULL_TIME, AppointmentObject.COLOR_LABEL, AppointmentObject.DELETE_EXCEPTIONS, AppointmentObject.CHANGE_EXCEPTIONS };
+	AppointmentObject.FULL_TIME, AppointmentObject.COLOR_LABEL, AppointmentObject.DELETE_EXCEPTIONS, AppointmentObject.CHANGE_EXCEPTIONS, AppointmentObject.RECURRENCE_START };
 	
 	protected static final String APPOINTMENT_URL = "/ajax/calendar";
 	
@@ -946,6 +946,9 @@ public class AppointmentTest extends AbstractAJAXTest {
 				break;
 			case AppointmentObject.TIMEZONE:
 				appointmentObj.setTimezone(jsonArray.getString(pos));
+				break;
+			case AppointmentObject.RECURRENCE_START:
+				appointmentObj.setRecurringStart(jsonArray.getLong(pos));
 				break;
 			case AppointmentObject.PARTICIPANTS:
 				appointmentObj.setParticipants(parseParticipants(jsonArray
