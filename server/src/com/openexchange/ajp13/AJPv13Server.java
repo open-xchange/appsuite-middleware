@@ -265,7 +265,6 @@ public class AJPv13Server implements Runnable {
 					 * Not possible to start current listener, get next one from
 					 * pool and let the current one die...
 					 */
-					l = null;
 					l = AJPv13ListenerPool.getListener();
 				}
 				final long useTime = System.currentTimeMillis() - start;
