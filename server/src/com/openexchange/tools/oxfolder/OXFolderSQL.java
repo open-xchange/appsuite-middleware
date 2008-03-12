@@ -1025,7 +1025,7 @@ public class OXFolderSQL {
 
 	/**
 	 * Fetches a unique id from underlying storage. NOTE: This method assumes
-	 * that given writeable connection is set to auto-commit! In any case the
+	 * that given writable connection is set to auto-commit! In any case the
 	 * <code>commit()</code> will be invoked, so any surrounding BEGIN-COMMIT
 	 * mechanisms will be canceled.
 	 * 
