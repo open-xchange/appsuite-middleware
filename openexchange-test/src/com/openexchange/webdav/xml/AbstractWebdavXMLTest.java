@@ -1,20 +1,22 @@
 package com.openexchange.webdav.xml;
 
-import com.meterware.httpunit.PutMethodWebRequest;
-import com.openexchange.groupware.container.FolderChildObject;
-import com.openexchange.webdav.AbstractWebdavTest;
-import com.openexchange.webdav.xml.fields.DataFields;
-import com.openexchange.webdav.xml.request.PropFindMethod;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Date;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.jdom.output.XMLOutputter;
+
+import com.meterware.httpunit.PutMethodWebRequest;
+import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.webdav.AbstractWebdavTest;
+import com.openexchange.webdav.xml.fields.DataFields;
+import com.openexchange.webdav.xml.request.PropFindMethod;
 
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
@@ -248,7 +250,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 			assertNotNull(message + " is null", value);
 			assertEquals(message + " date array size is not equals", expect.length, value.length);
 			for (int a = 0; a < expect.length; a++) {
-				assertEquals(message + " byte in pos (" + a + ") is not equals",  expect[a].getTime(), value[a].getTime());
+				assertEquals(message + " date in pos (" + a + ") is not equals",  expect[a].getTime(), value[a].getTime());
 			}
 		}
 	}
