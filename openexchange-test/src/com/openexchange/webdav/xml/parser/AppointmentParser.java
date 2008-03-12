@@ -44,10 +44,11 @@
 
 package com.openexchange.webdav.xml.parser;
 
+import org.jdom.Element;
+
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.AppointmentFields;
-import org.jdom.Element;
 
 /**
  * AppointmentParser
@@ -90,15 +91,25 @@ public class AppointmentParser extends CalendarParser {
 			String[] tmp = getValue(eProp.getChild(AppointmentFields.DELETE_EXCEPTIONS, XmlServlet.NS)).split(",");
 			java.util.Date[] delete_exceptions = new java.util.Date[tmp.length];
 			
-			int counter = 0;
-			long l = 0;
-			
 			for (int a = 0; a < delete_exceptions.length; a++) {
 				delete_exceptions[a] = new java.util.Date(Long.valueOf(tmp[a]));
 			}
 			
 			appointmentObj.setDeleteExceptions(delete_exceptions);
 		}
+
+		if (hasElement(eProp.getChild(AppointmentFields.CHANGE_EXCEPTIONS, XmlServlet.NS))) {
+			String[] tmp = getValue(eProp.getChild(AppointmentFields.CHANGE_EXCEPTIONS, XmlServlet.NS)).split(",");
+			java.util.Date[] change_exceptions = new java.util.Date[tmp.length];
+
+			
+			for (int a = 0; a < change_exceptions.length; a++) {
+				change_exceptions[a] = new java.util.Date(Long.valueOf(tmp[a]));
+			}
+			
+			appointmentObj.setChangeExceptions(change_exceptions);
+		}
+
 		
 		parseElementCalendar(appointmentObj, eProp);
 	}
