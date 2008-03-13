@@ -53,7 +53,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 
 /**
- * DeleteFailedException
+ * {@link DeleteFailedException} - Thrown if a delete event cannot be performed
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -102,20 +102,51 @@ public class DeleteFailedException extends AbstractOXException {
 		}
 	}
 
+	/**
+	 * Initializes a new {@link DeleteFailedException} from specified cause
+	 * exception
+	 * 
+	 * @param cause
+	 *            The cause exception
+	 */
 	public DeleteFailedException(final AbstractOXException cause) {
 		super(cause);
 	}
 
 	private static final transient Object[] EMPTY_ARGS = new Object[0];
 
+	/**
+	 * Initializes a new {@link DeleteFailedException}
+	 * 
+	 * @param code
+	 *            The error code
+	 */
 	public DeleteFailedException(final DeleteFailedException.Code code) {
 		this(code, null, EMPTY_ARGS);
 	}
 
+	/**
+	 * Initializes a new {@link DeleteFailedException}
+	 * 
+	 * @param code
+	 *            The error code
+	 * @param messageArgs
+	 *            The message arguments
+	 */
 	public DeleteFailedException(final DeleteFailedException.Code code, final Object... messageArgs) {
 		this(code, null, messageArgs);
 	}
 
+	/**
+	 * Initializes a new {@link DeleteFailedException}
+	 * 
+	 * @param code
+	 *            The error code
+	 * @param cause
+	 *            The cause exception
+	 * @param messageArgs
+	 *            The message arguments
+	 */
 	public DeleteFailedException(final DeleteFailedException.Code code, final Throwable cause,
 			final Object... messageArgs) {
 		super(Component.DELETE_EVENT, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
