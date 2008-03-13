@@ -3,6 +3,8 @@ PROPERTIESDIR=@propertiesdir@
 LOGGINGPROPERTIES=@loggingproperties@
 OSGIPATH=@oxgroupwaresysconfdir@/osgi
 
+# This propertie sets the java options given to the groupware on start
 JAVA_XTRAOPTS="-Xms193M -Xmx512M -XX:+UseConcMarkSweepGC"
 
+# Maximum number of open Files for the groupware
 NRFILES="8192"
