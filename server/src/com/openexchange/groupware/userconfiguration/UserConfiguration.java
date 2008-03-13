@@ -78,39 +78,39 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 
 	private static final int WEBMAIL = 1;
 
-	private static final int CALENDAR = 2;
+	private static final int CALENDAR = 1 << 1;
 
-	private static final int CONTACTS = 4;
+	private static final int CONTACTS = 1 << 2;
 
-	private static final int TASKS = 8;
+	private static final int TASKS = 1 << 3;
 
-	private static final int INFOSTORE = 16;
+	private static final int INFOSTORE = 1 << 4;
 
-	private static final int PROJECTS = 32;
+	private static final int PROJECTS = 1 << 5;
 
-	private static final int FORUM = 64;
+	private static final int FORUM = 1 << 6;
 
-	private static final int PINBOARD_WRITE_ACCESS = 128;
+	private static final int PINBOARD_WRITE_ACCESS = 1 << 7;
 
-	private static final int WEBDAV_XML = 256;
+	private static final int WEBDAV_XML = 1 << 8;
 
-	private static final int WEBDAV = 512;
+	private static final int WEBDAV = 1 << 9;
 
-	private static final int ICAL = 1024;
+	private static final int ICAL = 1 << 10;
 
-	private static final int VCARD = 2048;
+	private static final int VCARD = 1 << 11;
 
-	private static final int RSS_BOOKMARKS = 4096;
+	private static final int RSS_BOOKMARKS = 1 << 12;
 
-	private static final int RSS_PORTAL = 8192;
+	private static final int RSS_PORTAL = 1 << 13;
 
-	private static final int MOBILITY = 16384;
+	private static final int MOBILITY = 1 << 14;
 
-	private static final int EDIT_PUBLIC_FOLDERS = 32768;
+	private static final int EDIT_PUBLIC_FOLDERS = 1 << 15;
 
-	private static final int READ_CREATE_SHARED_FOLDERS = 65536;
+	private static final int READ_CREATE_SHARED_FOLDERS = 1 << 16;
 
-	private static final int DELEGATE_TASKS = 131072;
+	private static final int DELEGATE_TASKS = 1 << 17;
 
 	/*
 	 * Field members
