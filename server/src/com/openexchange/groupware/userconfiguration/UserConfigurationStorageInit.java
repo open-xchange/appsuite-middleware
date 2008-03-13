@@ -50,8 +50,6 @@
 package com.openexchange.groupware.userconfiguration;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.configuration.SystemConfig.Property;
@@ -68,18 +66,18 @@ import com.openexchange.server.Initialization;
 public final class UserConfigurationStorageInit implements Initialization {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(UserConfigurationImpl.class);
+			.getLog(UserConfigurationStorageInit.class);
 
 	private static enum UserConfigurationImpl {
 
 		/**
 		 * Caching
 		 */
-		CACHING("Caching", "com.openexchange.groupware.userconfiguration.CachingUserConfigurationStorage"),
+		CACHING("Caching", CachingUserConfigurationStorage.class.getName()),
 		/**
 		 * Database
 		 */
-		DB("DB", "com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage");
+		DB("DB", RdbUserConfigurationStorage.class.getName());
 
 		private final String alias;
 
@@ -110,8 +108,6 @@ public final class UserConfigurationStorageInit implements Initialization {
 	 */
 	private Class<? extends UserConfigurationStorage> implementingClass;
 
-	private final Lock lock;
-
 	private final AtomicBoolean started = new AtomicBoolean();
 
 	/**
@@ -119,7 +115,6 @@ public final class UserConfigurationStorageInit implements Initialization {
 	 */
 	private UserConfigurationStorageInit() {
 		super();
-		lock = new ReentrantLock();
 	}
 
 	private static String getUserConfigurationImpl(final String alias) {
@@ -137,8 +132,7 @@ public final class UserConfigurationStorageInit implements Initialization {
 			LOG.error(UserConfigurationStorageInit.class.getName() + " already started");
 			return;
 		}
-		lock.lock();
-		try {
+		synchronized (started) {
 			if (null != implementingClass) {
 				return;
 			}
@@ -164,8 +158,6 @@ public final class UserConfigurationStorageInit implements Initialization {
 			} catch (final IllegalAccessException e) {
 				throw new UserConfigurationException(UserConfigurationCode.CLASS_NOT_FOUND, e, classNameProp);
 			}
-		} finally {
-			lock.unlock();
 		}
 		started.set(true);
 	}
