@@ -83,8 +83,7 @@ ox_update_config_init "$OSGIPATH/config.ini" "$OSGIPATH/config.ini.template" "$O
 
 umask 066
 exec $JAVA_BIN $JAVA_XTRAOPTS \
-	-Dopenexchange.propfile=$SYSTEMPROPERTIES \
-	-Dopenexchange.propdir=$OXPREFIX/$OXSERVERCONFIGDIR \
+	-Dopenexchange.propdir=$OXPREFIX/$OXCONFIGDIR \
 	-Dconfigdir=$OXPREFIX/$OXCONFIGDIR \
 	-Djava.util.logging.config.file=$LOGGINGPROPERTIES \
 	-Duser.timezone=GMT \
