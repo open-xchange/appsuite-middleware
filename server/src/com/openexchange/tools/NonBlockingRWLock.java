@@ -116,6 +116,9 @@ public final class NonBlockingRWLock {
 	public int acquireRead() {
 		int state = writeCounter.get();
 		while ((state & 1) == 1) {
+			/*
+			 * Write access in progress
+			 */
 			state = writeCounter.get();
 		}
 		return state;
