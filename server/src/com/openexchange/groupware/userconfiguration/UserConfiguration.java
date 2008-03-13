@@ -162,11 +162,11 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	public boolean equals(final Object other) {
 		if (this == other) {
 			return true;
-		} else if (other == null || !(other instanceof UserConfiguration)) {
+		} else if ((other == null) || !(other instanceof UserConfiguration)) {
 			return false;
 		}
 		final UserConfiguration uc = (UserConfiguration) other;
-		if (userId != uc.userId || permissionBits != uc.permissionBits) {
+		if ((userId != uc.userId) || (permissionBits != uc.permissionBits)) {
 			return false;
 		}
 		if (null != groups) {
@@ -786,7 +786,7 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 			} catch (final SQLException e) {
 				LOG.error(e.getMessage(), e);
 				throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
-			} catch (DBPoolingException e) {
+			} catch (final DBPoolingException e) {
 				LOG.error(e.getMessage(), e);
 				throw new DeleteFailedException(e);
 			}
