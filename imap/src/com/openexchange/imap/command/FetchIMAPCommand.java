@@ -523,8 +523,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	static {
 		ENV_FIELDS = new HashSet<Integer>(6);
 		/*
-		 * The Envelope is an aggregation of the common attributes of a
-		 * Message: From, To, Cc, Bcc, ReplyTo, Subject and Date.
+		 * The Envelope is an aggregation of the common attributes of a Message:
+		 * From, To, Cc, Bcc, ReplyTo, Subject and Date.
 		 */
 		ENV_FIELDS.add(Integer.valueOf(MailListField.FROM.getField()));
 		ENV_FIELDS.add(Integer.valueOf(MailListField.TO.getField()));
@@ -868,20 +868,31 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 					@Override
 					public void handleItem(final Item item, final ContainerMessage msg) throws MessagingException,
 							MailException {
-						final InputStream headerStream;
-						if (item instanceof RFC822DATA) {
-							/*
-							 * IMAP4
-							 */
-							headerStream = ((RFC822DATA) item).getByteArrayInputStream();
-						} else {
-							/*
-							 * IMAP4rev1
-							 */
-							headerStream = ((BODY) item).getByteArrayInputStream();
+						final InternetHeaders h;
+						{
+							final InputStream headerStream;
+							if (item instanceof RFC822DATA) {
+								/*
+								 * IMAP4
+								 */
+								headerStream = ((RFC822DATA) item).getByteArrayInputStream();
+							} else {
+								/*
+								 * IMAP4rev1
+								 */
+								headerStream = ((BODY) item).getByteArrayInputStream();
+							}
+							h = new InternetHeaders();
+							if (null == headerStream) {
+								if (LOG.isWarnEnabled()) {
+									LOG.warn(new StringBuilder(32).append("Cannot retrieve headers from message #")
+											.append(msg.getMessageNumber()).append(" in folder ").append(
+													msg.getFolderFullname()).toString());
+								}
+							} else {
+								h.load(headerStream);
+							}
 						}
-						final InternetHeaders h = new InternetHeaders();
-						h.load(headerStream);
 						if (!this.containsHeaderHandlers()) {
 							FetchItemHandler.createHeaderHandlers(this, h);
 						}

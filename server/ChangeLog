@@ -1,3 +1,8 @@
+* 2008-03-13 - thorben.betten@open-xchange.com
+
+ - Partial bugfix #11044: Checking returned rfc822 data's/body's input
+   stream for null reference prior to loading message's headers
+
 * 2008-03-13 - sebastian.kauss@open-xchange.com
 
  - Bugfix #9871: [CONFIG] sessionContainerTimeout is not used
