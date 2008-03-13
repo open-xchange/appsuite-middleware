@@ -62,9 +62,10 @@ import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.ServletConfigLoader;
 
 /**
+ * {@link AJPv13Server} - The AJP server which accepts incoming socket
+ * connections and delegates its processing to a dedicated AJP listener
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * 
  */
 public class AJPv13Server implements Runnable {
 
