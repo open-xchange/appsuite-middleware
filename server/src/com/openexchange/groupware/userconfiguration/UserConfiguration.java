@@ -727,11 +727,9 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 
 	private void setPermission(final boolean enable, final int permission) {
 		/*
-		 * Bitwise OR if enable and permission not set, yet. Otherwise bitwise
-		 * XOR if permission is already set and enable is false.
+		 * Set or unset specified permission
 		 */
-		permissionBits = enable && !hasPermission(permission) ? (permissionBits | permission) : (!enable
-				&& hasPermission(permission) ? (permissionBits ^ permission) : permissionBits);
+		permissionBits = enable ? (permissionBits | permission) : (permissionBits & ~permission);
 	}
 
 	/**
