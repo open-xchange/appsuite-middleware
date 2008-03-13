@@ -85,7 +85,7 @@ public abstract class AbstractIMAPCommand<T> {
 	/**
 	 * Constructor
 	 */
-	public AbstractIMAPCommand(final IMAPFolder imapFolder) {
+	protected AbstractIMAPCommand(final IMAPFolder imapFolder) {
 		super();
 		this.imapFolder = imapFolder;
 		this.protocolCommand = new AbstractIMAPProtocolCommand(this);
