@@ -1,3 +1,7 @@
+* 2008-03-13 - sebastian.kauss@open-xchange.com
+
+ - Bugfix #10925 - Context is missing in WebDAV/XML AppointmentWriter
+
 * 2008-03-12 - thorben.betten@open-xchange.com
 
  - Bugfix #11027: Equal folder name response regardless of request method
