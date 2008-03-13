@@ -67,7 +67,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public final class NonBlockingRWLock {
 
 	/**
-	 * Default number of concurrent write accesses
+	 * Default max. number of concurrent write accesses
 	 */
 	private static final int DEFAULT = 10000;
 
@@ -78,8 +78,8 @@ public final class NonBlockingRWLock {
 	private final Lock writeLock;
 
 	/**
-	 * Initializes a new {@link NonBlockingRWLock} with default number of
-	 * concurrent write accesses
+	 * Initializes a new {@link NonBlockingRWLock} with the max. number of
+	 * concurrent write accesses set to default value <code>10000</code>.
 	 */
 	public NonBlockingRWLock() {
 		this(DEFAULT);
