@@ -259,7 +259,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage implem
 				try {
 					UserConfigurationStorage.getInstance().removeUserConfiguration(userConfig.getUserId(),
 							userConfig.getContext());
-				} catch (UserConfigurationException e) {
+				} catch (final UserConfigurationException e) {
 					LOG.warn("User Configuration could not be removed from cache", e);
 				}
 			}
@@ -486,7 +486,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage implem
 			stmt.executeUpdate();
 			try {
 				UserConfigurationStorage.getInstance().removeUserConfiguration(userId, ctx);
-			} catch (UserConfigurationException e) {
+			} catch (final UserConfigurationException e) {
 				LOG.warn("User Configuration could not be removed from cache", e);
 			}
 		} finally {
