@@ -78,22 +78,41 @@ public final class NonBlockingRWLock {
 	private final Lock writeLock;
 
 	/**
-	 * Initializes a new {@link NonBlockingRWLock} with the max. number of
-	 * concurrent write accesses set to default value <code>10000</code>.
+	 * Initializes a new {@link NonBlockingRWLock}
+	 * 
+	 * @param infiniteConcurrentWrites
+	 *            <code>true</code> to enable infinite concurrent write
+	 *            accesses; otherwise <code>false</code> to use default value
+	 *            of <code>10000</code> for max. number of concurrent write
+	 *            accesses
 	 */
-	public NonBlockingRWLock() {
-		this(DEFAULT);
+	public NonBlockingRWLock(final boolean infiniteConcurrentWrites) {
+		super();
+		if (infiniteConcurrentWrites) {
+			this.maxConcurrentWrites = -1;
+			writeCounter = new AtomicInteger();
+			writeLock = new ReentrantLock();
+		} else {
+			this.maxConcurrentWrites = DEFAULT;
+			writeCounter = new AtomicInteger();
+			writeLock = new ReentrantLock();
+		}
 	}
 
 	/**
 	 * Initializes a new {@link NonBlockingRWLock}
 	 * 
 	 * @param maxConcurrentWrites
-	 *            The max. number of concurrent write accesses
+	 *            The max. number of concurrent write accesses; a value equal to
+	 *            or less than zero means infinite concurrent write accesses
 	 */
 	public NonBlockingRWLock(final int maxConcurrentWrites) {
 		super();
-		this.maxConcurrentWrites = maxConcurrentWrites;
+		if (maxConcurrentWrites <= 0) {
+			this.maxConcurrentWrites = -1;
+		} else {
+			this.maxConcurrentWrites = maxConcurrentWrites;
+		}
 		writeCounter = new AtomicInteger();
 		writeLock = new ReentrantLock();
 	}
@@ -140,7 +159,11 @@ public final class NonBlockingRWLock {
 	 */
 	public void acquireWrite() {
 		writeLock.lock();
-		writeCounter.set(writeCounter.incrementAndGet() % maxConcurrentWrites);
+		if (maxConcurrentWrites == -1) {
+			writeCounter.getAndIncrement();
+		} else {
+			writeCounter.set(writeCounter.incrementAndGet() % maxConcurrentWrites);
+		}
 	}
 
 	/**
@@ -164,7 +187,11 @@ public final class NonBlockingRWLock {
 	 * @see #acquireWrite()
 	 */
 	public void releaseWrite() {
-		writeCounter.set(writeCounter.incrementAndGet() % maxConcurrentWrites);
+		if (maxConcurrentWrites == -1) {
+			writeCounter.getAndIncrement();
+		} else {
+			writeCounter.set(writeCounter.incrementAndGet() % maxConcurrentWrites);
+		}
 		writeLock.unlock();
 	}
 }

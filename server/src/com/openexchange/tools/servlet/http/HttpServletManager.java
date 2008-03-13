@@ -85,7 +85,7 @@ public class HttpServletManager {
 
 	private static Map<String, Constructor<?>> servletConstructorMap;
 
-	private static final NonBlockingRWLock RW_LOCK = new NonBlockingRWLock();
+	private static final NonBlockingRWLock RW_LOCK = new NonBlockingRWLock(true);
 
 	private HttpServletManager() {
 		super();

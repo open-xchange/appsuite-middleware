@@ -81,7 +81,7 @@ public final class AJPv13ListenerPool {
 
 	private static final AtomicInteger listenerNum = new AtomicInteger();
 
-	private static final NonBlockingRWLock RW_LOCK = new NonBlockingRWLock();
+	private static final NonBlockingRWLock RW_LOCK = new NonBlockingRWLock(true);
 
 	private AJPv13ListenerPool() {
 		super();
