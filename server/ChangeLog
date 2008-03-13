@@ -1,5 +1,8 @@
 * 2008-03-13 - sebastian.kauss@open-xchange.com
 
+ - Bugfix #10372 - end date of recurring appointment is wrong in 
+                   search
+
  - Bugfix #10925 - Context is missing in WebDAV/XML AppointmentWriter
 
 * 2008-03-12 - thorben.betten@open-xchange.com
