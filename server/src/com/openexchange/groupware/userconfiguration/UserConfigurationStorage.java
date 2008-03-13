@@ -83,6 +83,7 @@ public abstract class UserConfigurationStorage {
 	 * @deprecated Use common {@link Initialization#start()}/{@link Initialization#stop()}
 	 *             on singleton instance instead
 	 */
+	@Deprecated
 	public static final void init() throws UserConfigurationException {
 		try {
 			UserConfigurationStorageInit.getInstance().start();
