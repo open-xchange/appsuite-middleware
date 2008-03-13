@@ -60,7 +60,7 @@ import javax.servlet.http.HttpSession;
 
 import com.openexchange.ajp13.AJPv13Exception;
 import com.openexchange.ajp13.AJPv13RequestHandler;
-import com.openexchange.ajp13.AJPv13Server;
+import com.openexchange.tools.servlet.ServletConfigLoader;
 import com.openexchange.tools.servlet.ServletRequestWrapper;
 
 /**
@@ -435,7 +435,8 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 	}
 
 	private final ServletContext getServletContext() {
-		return AJPv13Server.SERVLET_CONFIGS.getContext(servletInstance.getClass().getCanonicalName(), servletPath);
+		return ServletConfigLoader.getDefaultInstance().getContext(servletInstance.getClass().getCanonicalName(),
+				servletPath);
 	}
 
 }

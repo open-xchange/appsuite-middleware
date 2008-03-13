@@ -65,9 +65,9 @@ import javax.servlet.SingleThreadModel;
 import javax.servlet.http.HttpServlet;
 
 import com.openexchange.ajp13.AJPv13Config;
-import com.openexchange.ajp13.AJPv13Server;
 import com.openexchange.tools.FIFOQueue;
 import com.openexchange.tools.NonBlockingRWLock;
+import com.openexchange.tools.servlet.ServletConfigLoader;
 
 /**
  * {@link HttpServletManager} - The HTTP servlet manager
@@ -175,8 +175,8 @@ public class HttpServletManager {
 		}
 		try {
 			final HttpServlet servletInstance = (HttpServlet) servletConstructor.newInstance(new Object[] {});
-			servletInstance.init(AJPv13Server.SERVLET_CONFIGS.getConfig(servletInstance.getClass().getCanonicalName(),
-					servletKey));
+			servletInstance.init(ServletConfigLoader.getDefaultInstance().getConfig(
+					servletInstance.getClass().getCanonicalName(), servletKey));
 			return servletInstance;
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
@@ -206,8 +206,8 @@ public class HttpServletManager {
 				SERVLET_POOL.get(path).enqueue(servletObj);
 			} else {
 				final FIFOQueue<HttpServlet> servlets = new FIFOQueue<HttpServlet>(HttpServlet.class, 1);
-				final ServletConfig conf = AJPv13Server.SERVLET_CONFIGS.getConfig(servletObj.getClass()
-						.getCanonicalName(), path);
+				final ServletConfig conf = ServletConfigLoader.getDefaultInstance().getConfig(
+						servletObj.getClass().getCanonicalName(), path);
 				try {
 					servletObj.init(conf);
 				} catch (final ServletException e) {
@@ -245,11 +245,11 @@ public class HttpServletManager {
 						"\" has already been registered before.").toString());
 			}
 			if ((null != initParams) && !initParams.isEmpty()) {
-				AJPv13Server.SERVLET_CONFIGS.setConfig(servlet.getClass().getCanonicalName(), initParams);
+				ServletConfigLoader.getDefaultInstance().setConfig(servlet.getClass().getCanonicalName(), initParams);
 			}
 			final FIFOQueue<HttpServlet> servletQueue = new FIFOQueue<HttpServlet>(HttpServlet.class, 1);
-			final ServletConfig conf = AJPv13Server.SERVLET_CONFIGS.getConfig(servlet.getClass().getCanonicalName(),
-					path);
+			final ServletConfig conf = ServletConfigLoader.getDefaultInstance().getConfig(
+					servlet.getClass().getCanonicalName(), path);
 			servlet.init(conf);
 			servletQueue.enqueue(servlet);
 			/*
@@ -285,7 +285,8 @@ public class HttpServletManager {
 	public static final void unregisterServlet(final String id) {
 		RW_LOCK.acquireWrite();
 		try {
-			AJPv13Server.SERVLET_CONFIGS.removeConfig(SERVLET_POOL.get(id).dequeue().getClass().getCanonicalName());
+			ServletConfigLoader.getDefaultInstance().removeConfig(
+					SERVLET_POOL.get(id).dequeue().getClass().getCanonicalName());
 			SERVLET_POOL.remove(id);
 		} finally {
 			RW_LOCK.releaseWrite();
@@ -391,8 +392,8 @@ public class HttpServletManager {
 						final boolean isSTM = servletInstance instanceof SingleThreadModel;
 						servletQueue = isSTM ? new FIFOQueue<HttpServlet>(HttpServlet.class, AJPv13Config
 								.getServletPoolSize()) : new FIFOQueue<HttpServlet>(HttpServlet.class, 1);
-						final ServletConfig conf = AJPv13Server.SERVLET_CONFIGS.getConfig(servletInstance.getClass()
-								.getCanonicalName(), path);
+						final ServletConfig conf = ServletConfigLoader.getDefaultInstance().getConfig(
+								servletInstance.getClass().getCanonicalName(), path);
 						servletInstance.init(conf);
 						servletQueue.enqueue(servletInstance);
 						if (isSTM) {

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajp13;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -61,8 +60,6 @@ import com.openexchange.ajp13.monitoring.AJPv13ListenerMonitor;
 import com.openexchange.ajp13.monitoring.AJPv13ServerThreadsMonitor;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.ServletConfigLoader;
-import com.openexchange.tools.servlet.ServletConfigWrapper;
-import com.openexchange.tools.servlet.ServletContextWrapper;
 
 /**
  * 
@@ -95,8 +92,6 @@ public class AJPv13Server implements Runnable {
 
 	private final AtomicBoolean running = new AtomicBoolean();
 
-	public static final ServletConfigLoader SERVLET_CONFIGS = new ServletConfigLoader();
-
 	private static AJPv13Server instance;
 
 	private static final DecimalFormat DF = new DecimalFormat("0000");
@@ -106,15 +101,6 @@ public class AJPv13Server implements Runnable {
 	public static final AJPv13ListenerMonitor ajpv13ListenerMonitor = new AJPv13ListenerMonitor();
 
 	public static void startAJPServer() throws AJPv13Exception {
-		/*
-		 * Create Servlet Config and servlet-specific Servlet Context
-		 */
-		final ServletConfigWrapper servletConfig = new ServletConfigWrapper();
-		final ServletContextWrapper servletContext = new ServletContextWrapper(servletConfig);
-		servletConfig.setServletContextWrapper(servletContext);
-		SERVLET_CONFIGS.setDefaultConfig(servletConfig);
-		SERVLET_CONFIGS.setDefaultContext(servletContext);
-		SERVLET_CONFIGS.setDirectory(new File(AJPv13Config.getServletConfigs()));
 		synchronized (AJPv13Server.class) {
 			if (instance == null) {
 				instance = new AJPv13Server();
@@ -146,6 +132,7 @@ public class AJPv13Server implements Runnable {
 			} catch (final IOException ex) {
 				throw new AJPv13Exception(AJPCode.STARTUP_ERROR, false, ex, Integer.valueOf(AJP13_PORT));
 			}
+			ServletConfigLoader.initDefaultInstance(AJPv13Config.getServletConfigs());
 			initializePools();
 			AJPv13Watcher.initializeAJPv13Watcher();
 			initializeThreadArray();
@@ -175,6 +162,10 @@ public class AJPv13Server implements Runnable {
 			 * Reset pools
 			 */
 			resetPools();
+			/*
+			 * Reset default servlet config loader
+			 */
+			ServletConfigLoader.resetDefaultInstance();
 			/*
 			 * Interrupt & destroy threads
 			 */

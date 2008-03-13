@@ -61,6 +61,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -90,246 +91,30 @@ import javax.servlet.ServletContext;
  */
 public final class ServletConfigLoader {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ServletConfigLoader.class);
+	private static ServletConfigLoader defaultInstance;
 
 	/**
 	 * The file extension for property files
 	 */
 	private static final String FILEEXT_PROPERTIES = ".properties";
 
-	// Minimize IO and remember failed lookups
-	private final transient Set<String> clazzGuardian = new HashSet<String>();
+	private static final AtomicBoolean initialized = new AtomicBoolean();
 
-	private final transient Set<String> pathGuardian = new HashSet<String>();
-
-	// Minimize IO and cache results
-	private final transient Map<String, Map<String, String>> clazzProps = new HashMap<String, Map<String, String>>();
-
-	private final transient Map<String, Map<String, String>> pathProps = new HashMap<String, Map<String, String>>();
-
-	private transient ServletConfig defaultConfig;
-
-	private transient ServletContext defaultContext;
-
-	private File directory;
-
-	private Map<String, String> globalProps;
-
-	public ServletConfigLoader(final File directory) {
-		this.directory = directory;
-		globalProps = loadDirProps(this.directory);
-	}
-
-	public ServletConfigLoader() {
-		super();
-	}
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(ServletConfigLoader.class);
 
 	/**
-	 * Gets the configuration for given servlet class and path. The returned
-	 * configuration contains ONLY the single servlet's class properties.
+	 * Puts properties into map
 	 * 
-	 * @param clazz
-	 *            The servlet canonical class name
-	 * @return The servlet configuration
+	 * @param m -
+	 *            the destination map
+	 * @param props -
+	 *            the source properties
 	 */
-	public ServletConfig getConfig(final String clazz) {
-		final ServletConfigWrapper conf = lookupByClass(clazz);
-		if (conf != null) {
-			return conf;
+	private static void addProps(final Map<String, String> m, final Properties props) {
+		for (final Map.Entry<Object, Object> entry : props.entrySet()) {
+			m.put((String) entry.getKey(), (String) entry.getValue());
 		}
-		return defaultConfig;
-	}
-
-	/**
-	 * Gets servlet's context
-	 * 
-	 * @param clazz
-	 *            The servlet canonical class name
-	 * @return The servlet context
-	 */
-	public ServletContext getContext(final String clazz) {
-		final ServletConfigWrapper conf = lookupByClass(clazz);
-		if (conf != null) {
-			return conf.getServletContext();
-		}
-		return defaultContext;
-	}
-
-	/**
-	 * Gets the configuration for given servlet class and path. The returned
-	 * configuration contains both single servlet's class properties and path
-	 * properties.
-	 * 
-	 * @param clazz
-	 *            The servlet canonical class name
-	 * @param pathArg
-	 *            The servlet's path without leading '/' character
-	 * @return The servlet configuration
-	 */
-	public ServletConfig getConfig(final String clazz, final String pathArg) {
-		final String path = ignoreWildcards(pathArg);
-		final ServletConfigWrapper conf = lookupByClassAndPath(clazz, path);
-		if (conf != null) {
-			return conf;
-		}
-		return defaultConfig;
-	}
-
-	/**
-	 * Sets the configuration for given servlet class
-	 * 
-	 * @param clazz
-	 *            The servlet canonical class name
-	 * @param initParams
-	 *            The servlet's init parameters
-	 */
-	public void setConfig(final String clazz, final Dictionary<String, String> initParams) {
-		final int size = initParams.size();
-		final Map<String, String> map = new HashMap<String, String>(size);
-		final Enumeration<String> e = initParams.keys();
-		for (int i = 0; i < size; i++) {
-			final String key = e.nextElement();
-			map.put(key, initParams.get(key));
-		}
-		clazzProps.put(clazz, map);
-	}
-
-	/**
-	 * Removes the configuration for given servlet class
-	 * 
-	 * @param clazz
-	 *            The servlet canonical class name
-	 */
-	public void removeConfig(final String clazz) {
-		clazzProps.remove(clazz);
-	}
-
-	/**
-	 * Gets servlet's context whose servlet configuration contains both single
-	 * servlet's class properties and path properties.
-	 * 
-	 * @param clazz
-	 *            the servlet canonical class name
-	 * @param pathArg
-	 *            The servlet's path without leading '/' character
-	 * @return The servlet context
-	 */
-	public ServletContext getContext(final String clazz, final String pathArg) {
-		final String path = ignoreWildcards(pathArg);
-		final ServletConfigWrapper conf = lookupByClassAndPath(clazz, path);
-		if (conf != null) {
-			return conf.getServletContext();
-		}
-		return defaultContext;
-	}
-
-	/**
-	 * Sets the default servlet configuration
-	 * 
-	 * @param config
-	 *            The default configuration
-	 */
-	public void setDefaultConfig(final ServletConfig config) {
-		this.defaultConfig = config;
-	}
-
-	/**
-	 * Sets the default servlet context
-	 * 
-	 * @param context
-	 *            The default context
-	 */
-	public void setDefaultContext(final ServletContext context) {
-		this.defaultContext = context;
-	}
-
-	protected ServletConfigWrapper lookupByClass(final String clazz) {
-		if (clazzGuardian.contains(clazz) && globalProps == null) {
-			/*
-			 * Loading of properties already failed before and no global
-			 * properties exist
-			 */
-			return null;
-		} else if (clazzGuardian.contains(clazz) && globalProps != null) {
-			/*
-			 * Loading of properties already failed before but global properties
-			 * exist
-			 */
-			final Map<String, String> props = new HashMap<String, String>();
-			props.putAll(globalProps);
-			return buildConfig(props, clazz);
-		}
-		Map<String, String> props = clazzProps.get(clazz);
-		if (props != null) {
-			if (globalProps != null) {
-				props.putAll(globalProps);
-			}
-			return buildConfig(props, clazz);
-		}
-		props = loadProperties(new File(directory, clazz + FILEEXT_PROPERTIES));
-		if (props == null) {
-			clazzGuardian.add(clazz);
-			if (globalProps != null) {
-				props = new HashMap<String, String>();
-				props.putAll(globalProps);
-				return buildConfig(props, clazz);
-			}
-			return null;
-		}
-		clazzProps.put(clazz, props);
-		return buildConfig(props, clazz);
-	}
-
-	protected ServletConfigWrapper lookupByClassAndPath(final String clazz, final String path) {
-		if (clazzGuardian.contains(clazz) && pathGuardian.contains(path) && globalProps == null) {
-			return null;
-		}
-		/*
-		 * Property containers
-		 */
-		Map<String, String> props = clazzProps.get(clazz);
-		Map<String, String> dirProps = pathProps.get(path);
-		/*
-		 * Lookup class-specific properties
-		 */
-		if (props == null && !clazzGuardian.contains(clazz)) {
-			props = loadProperties(new File(directory, clazz + FILEEXT_PROPERTIES));
-			if (null == props) {
-				clazzGuardian.add(clazz);
-			}
-			clazzProps.put(clazz, props);
-		}
-		/*
-		 * Lookup path-specific properties in directory
-		 */
-		if (dirProps == null && !pathGuardian.contains(path)) {
-			dirProps = loadDirProps(new File(directory, path));
-			if (dirProps == null) {
-				pathGuardian.add(path);
-			}
-			pathProps.put(path, dirProps);
-		}
-		/*
-		 * No properties present at all
-		 */
-		if (dirProps == null && props == null && globalProps == null) {
-			return null;
-		}
-		/*
-		 * Compose properties for servlet configuration
-		 */
-		if (props == null) {
-			props = new HashMap<String, String>();
-		}
-		if (dirProps != null) {
-			props.putAll(dirProps);
-		}
-		if (globalProps != null) {
-			props.putAll(globalProps);
-		}
-		return buildConfig(new HashMap<String, String>(props), clazz); // Clone
-
 	}
 
 	/**
@@ -341,7 +126,7 @@ public final class ServletConfigLoader {
 	 * @return a <code>ServletConfig</code> instance containing all elements
 	 *         of given property map
 	 */
-	protected ServletConfigWrapper buildConfig(final Map<String, String> props, final String clazz) {
+	private static ServletConfigWrapper buildConfig(final Map<String, String> props, final String clazz) {
 		final ServletConfigWrapper config = new ServletConfigWrapper();
 		config.setInitParameter(props);
 		config.setServletContextWrapper(new ServletContextWrapper(config));
@@ -349,7 +134,92 @@ public final class ServletConfigLoader {
 		return config;
 	}
 
-	protected Map<String, String> loadProperties(final File propFile) {
+	/**
+	 * Gets the sole class name
+	 * 
+	 * @param fullyQualifiedName
+	 *            The fully-qualified class name
+	 * @return The sole class name
+	 */
+	private static String getClassName(final String fullyQualifiedName) {
+		final int pos;
+		if ((pos = fullyQualifiedName.lastIndexOf('.')) > 0) {
+			return fullyQualifiedName.substring(pos + 1);
+		}
+		return fullyQualifiedName;
+	}
+
+	/**
+	 * Gets the default instance
+	 * 
+	 * @return The default instance
+	 */
+	public static ServletConfigLoader getDefaultInstance() {
+		return defaultInstance;
+	}
+
+	/**
+	 * Removes all wildcard characters (<code>*</code> and <code>?</code>)
+	 * from specified path
+	 * 
+	 * @param path
+	 *            The path
+	 * @return The path with wildcard characters stripped off
+	 */
+	private static String ignoreWildcards(final String path) {
+		return path.replaceAll("\\*|\\?", "");
+	}
+
+	/**
+	 * Initializes the default instance
+	 * 
+	 * @param servletConfigDir
+	 *            The servlet config directory
+	 */
+	public static void initDefaultInstance(final String servletConfigDir) {
+		if (!initialized.get()) {
+			synchronized (initialized) {
+				if (initialized.get()) {
+					return;
+				}
+				final ServletConfigWrapper servletConfig = new ServletConfigWrapper();
+				final ServletContextWrapper servletContext = new ServletContextWrapper(servletConfig);
+				servletConfig.setServletContextWrapper(servletContext);
+				defaultInstance = new ServletConfigLoader(servletConfig, servletContext, new File(servletConfigDir));
+				initialized.set(true);
+			}
+		}
+	}
+
+	/**
+	 * Loads all properties files from specified directory
+	 * 
+	 * @param dir
+	 *            The directory containing properties files
+	 * @return A map containing all properties
+	 */
+	private static Map<String, String> loadDirProps(final File dir) {
+		final Map<String, String> m = new HashMap<String, String>();
+		if (dir.exists() && dir.isDirectory()) {
+			for (final File f : dir.listFiles()) {
+				if (f.isFile() && f.getName().toLowerCase().endsWith(FILEEXT_PROPERTIES)) {
+					m.putAll(loadProperties(f));
+				}
+			}
+			return m;
+		}
+		return null;
+	}
+
+	/**
+	 * Loads the properties file denoted by specified argument
+	 * <code>propFile</code>
+	 * 
+	 * @param propFile
+	 *            The properties file
+	 * @return A map containing the properties
+	 */
+	private static Map<String, String> loadProperties(final File propFile) {
 		if (!propFile.exists()) {
 			return null;
 		}
@@ -374,43 +244,147 @@ public final class ServletConfigLoader {
 		return m;
 	}
 
-	protected Map<String, String> loadDirProps(final File dir) {
-		final Map<String, String> m = new HashMap<String, String>();
-		if (dir.exists() && dir.isDirectory()) {
-			for (final File f : dir.listFiles()) {
-				if (f.isFile() && f.getName().endsWith(FILEEXT_PROPERTIES)) {
-					final Map<String, String> props = loadProperties(f);
-					m.putAll(props);
-				}
-			}
-			return m;
-		}
-		return null;
-	}
-
-	/*
-	 * private final String getStack() { final StringBuilder builder = new
-	 * StringBuilder(); for(StackTraceElement elem :
-	 * Thread.currentThread().getStackTrace()) {
-	 * builder.append(elem).append("\n"); } return builder.toString(); }
+	/**
+	 * Resets the default instance
 	 */
+	public static void resetDefaultInstance() {
+		if (initialized.get()) {
+			synchronized (initialized) {
+				if (!initialized.get()) {
+					return;
+				}
+				defaultInstance = null;
+				initialized.set(false);
+			}
+		}
+	}
 
 	/**
-	 * Puts properties into map
-	 * 
-	 * @param m -
-	 *            the destination map
-	 * @param props -
-	 *            the source properties
+	 * Remembers failed lookups on class property files
 	 */
-	private void addProps(final Map<String, String> m, final Properties props) {
-		for (final Map.Entry<Object, Object> entry : props.entrySet()) {
-			m.put((String) entry.getKey(), (String) entry.getValue());
-		}
+	private final transient Set<String> clazzGuardian = new HashSet<String>();
+
+	/**
+	 * Cache class properties
+	 */
+	private final transient Map<String, Map<String, String>> clazzProps = new HashMap<String, Map<String, String>>();
+
+	private transient ServletConfig defaultConfig;
+
+	private transient ServletContext defaultContext;
+
+	private File directory;
+
+	private Map<String, String> globalProps;
+
+	/**
+	 * Remembers failed lookups on path property files
+	 */
+	private final transient Set<String> pathGuardian = new HashSet<String>();
+
+	/**
+	 * Cache path properties
+	 */
+	private final transient Map<String, Map<String, String>> pathProps = new HashMap<String, Map<String, String>>();
+
+	/**
+	 * Initializes a new servlet config loader
+	 * 
+	 * @param directory
+	 *            The directory containing properties files
+	 */
+	public ServletConfigLoader(final File directory) {
+		this.directory = directory;
+		globalProps = loadDirProps(this.directory);
 	}
 
-	protected String ignoreWildcards(final String path) {
-		return path.replaceAll("\\*", "");
+	/**
+	 * Initializes a new servlet config loader
+	 * 
+	 * @param servletConfig
+	 *            The default servlet config
+	 * @param servletContext
+	 *            The default servlet context
+	 * @param directory
+	 *            The directory containing global property files
+	 */
+	private ServletConfigLoader(final ServletConfigWrapper servletConfig, final ServletContextWrapper servletContext,
+			final File directory) {
+		super();
+		this.defaultConfig = servletConfig;
+		this.defaultContext = servletContext;
+		this.directory = directory;
+		globalProps = loadDirProps(this.directory);
+	}
+
+	/**
+	 * Gets the configuration for given servlet class and path. The returned
+	 * configuration contains ONLY the single servlet's class properties.
+	 * 
+	 * @param clazz
+	 *            The servlet canonical class name
+	 * @return The servlet configuration
+	 */
+	public ServletConfig getConfig(final String clazz) {
+		final ServletConfigWrapper conf = lookupByClass(clazz);
+		if (conf != null) {
+			return conf;
+		}
+		return defaultConfig;
+	}
+
+	/**
+	 * Gets the configuration for given servlet class and path. The returned
+	 * configuration contains both single servlet's class properties and path
+	 * properties.
+	 * 
+	 * @param clazz
+	 *            The servlet canonical class name
+	 * @param pathArg
+	 *            The servlet's path without leading '/' character
+	 * @return The servlet configuration
+	 */
+	public ServletConfig getConfig(final String clazz, final String pathArg) {
+		final String path = ignoreWildcards(pathArg);
+		final ServletConfigWrapper conf = lookupByClassAndPath(clazz, path);
+		if (conf != null) {
+			return conf;
+		}
+		return defaultConfig;
+	}
+
+	/**
+	 * Gets servlet's context
+	 * 
+	 * @param clazz
+	 *            The servlet canonical class name
+	 * @return The servlet context
+	 */
+	public ServletContext getContext(final String clazz) {
+		final ServletConfigWrapper conf = lookupByClass(clazz);
+		if (conf != null) {
+			return conf.getServletContext();
+		}
+		return defaultContext;
+	}
+
+	/**
+	 * Gets servlet's context whose servlet configuration contains both single
+	 * servlet's class properties and path properties.
+	 * 
+	 * @param clazz
+	 *            the servlet canonical class name
+	 * @param path
+	 *            The servlet's path without leading '/' character
+	 * @return The servlet context
+	 */
+	public ServletContext getContext(final String clazz, final String path) {
+		final String pathStr = ignoreWildcards(path);
+		final ServletConfigWrapper conf = lookupByClassAndPath(clazz, pathStr);
+		if (conf != null) {
+			return conf.getServletContext();
+		}
+		return defaultContext;
 	}
 
 	/**
@@ -422,23 +396,177 @@ public final class ServletConfigLoader {
 		return directory;
 	}
 
+	private ServletConfigWrapper lookupByClass(final String clazz) {
+		if (clazzGuardian.contains(clazz) && (globalProps == null)) {
+			return null;
+		}
+		/*
+		 * Property containers
+		 */
+		Map<String, String> props = clazzProps.get(clazz);
+		/*
+		 * Lookup class-specific properties
+		 */
+		if (props == null) {
+			if (!clazzGuardian.contains(clazz)) {
+				props = loadProperties(new File(directory, new StringBuilder(32).append(clazz).append('.').append(
+						FILEEXT_PROPERTIES).toString()));
+				if (null == props) {
+					clazzGuardian.add(clazz);
+				} else {
+					clazzProps.put(clazz, new HashMap<String, String>(props)); // Clone
+				}
+			}
+		} else {
+			props = new HashMap<String, String>(props); // Clone
+		}
+		/*
+		 * No properties present at all
+		 */
+		if ((props == null) && (globalProps == null)) {
+			return null;
+		}
+		/*
+		 * Compose properties for servlet configuration
+		 */
+		if (props == null) {
+			props = new HashMap<String, String>();
+		}
+		if (globalProps != null) {
+			props.putAll(globalProps);
+		}
+		return buildConfig(props, clazz);
+	}
+
+	private ServletConfigWrapper lookupByClassAndPath(final String clazz, final String path) {
+		if (clazzGuardian.contains(clazz) && pathGuardian.contains(path) && (globalProps == null)) {
+			return null;
+		}
+		/*
+		 * Property containers
+		 */
+		Map<String, String> props = clazzProps.get(clazz);
+		Map<String, String> dirProps = pathProps.get(path);
+		/*
+		 * Lookup class-specific properties
+		 */
+		if (props == null) {
+			if (!clazzGuardian.contains(clazz)) {
+				props = loadProperties(new File(directory, new StringBuilder(32).append(clazz).append('.').append(
+						FILEEXT_PROPERTIES).toString()));
+				if (null == props) {
+					clazzGuardian.add(clazz);
+				} else {
+					clazzProps.put(clazz, new HashMap<String, String>(props)); // Clone
+				}
+			}
+		} else {
+			props = new HashMap<String, String>(props); // Clone
+		}
+		if ((dirProps == null) && !pathGuardian.contains(path)) {
+			dirProps = loadDirProps(new File(directory, path));
+			if (dirProps == null) {
+				pathGuardian.add(path);
+			} else {
+				pathProps.put(path, dirProps);
+			}
+		}
+		/*
+		 * No properties present at all
+		 */
+		if ((dirProps == null) && (props == null) && (globalProps == null)) {
+			return null;
+		}
+		/*
+		 * Compose properties for servlet configuration
+		 */
+		if (props == null) {
+			props = new HashMap<String, String>();
+		}
+		if (dirProps != null) {
+			props.putAll(dirProps);
+		}
+		if (globalProps != null) {
+			props.putAll(globalProps);
+		}
+		return buildConfig(props, clazz);
+	}
+
+	/**
+	 * Removes the configuration for given servlet class
+	 * 
+	 * @param clazz
+	 *            The servlet canonical class name
+	 */
+	public void removeConfig(final String clazz) {
+		clazzProps.remove(clazz);
+	}
+
+	/**
+	 * Sets the configuration for given servlet class
+	 * 
+	 * @param clazz
+	 *            The servlet canonical class name
+	 * @param initParams
+	 *            The servlet's init parameters
+	 */
+	public void setConfig(final String clazz, final Dictionary<String, String> initParams) {
+		final int size = initParams.size();
+		final Map<String, String> map = new HashMap<String, String>(size);
+		final Enumeration<String> e = initParams.keys();
+		for (int i = 0; i < size; i++) {
+			final String key = e.nextElement();
+			map.put(key, initParams.get(key));
+		}
+		clazzProps.put(clazz, map);
+	}
+
+	/**
+	 * Sets the default servlet configuration
+	 * 
+	 * @param config
+	 *            The default configuration
+	 * @throws UnsupportedOperationException
+	 *             If this method is invoked on default instance obtained via
+	 *             {@link #getDefaultInstance()}
+	 */
+	public void setDefaultConfig(final ServletConfig config) {
+		if (this == defaultInstance) {
+			throw new UnsupportedOperationException("Default servlet config must not be changed for default instance");
+		}
+		this.defaultConfig = config;
+	}
+
+	/**
+	 * Sets the default servlet context
+	 * 
+	 * @param context
+	 *            The default context
+	 * @throws UnsupportedOperationException
+	 *             If this method is invoked on default instance obtained via
+	 *             {@link #getDefaultInstance()}
+	 */
+	public void setDefaultContext(final ServletContext context) {
+		if (this == defaultInstance) {
+			throw new UnsupportedOperationException("Default servlet context must not be changed for default instance");
+		}
+		this.defaultContext = context;
+	}
+
 	/**
 	 * Sets the directory in which all servlet configurations are kept
 	 * 
 	 * @param directory
 	 *            The configurations' directory
+	 * @throws UnsupportedOperationException
+	 *             If this method is invoked on default instance obtained via
+	 *             {@link #getDefaultInstance()}
 	 */
 	public void setDirectory(final File directory) {
+		if (this == defaultInstance) {
+			throw new UnsupportedOperationException("Default servlet context must not be changed for default instance");
+		}
 		this.directory = directory;
 		globalProps = loadDirProps(this.directory);
 	}
-
-	private static String getClassName(final String fullyQualifiedName) {
-		final int pos;
-		if ((pos = fullyQualifiedName.lastIndexOf('.')) > 0) {
-			return fullyQualifiedName.substring(pos + 1);
-		}
-		return fullyQualifiedName;
-	}
-
 }
