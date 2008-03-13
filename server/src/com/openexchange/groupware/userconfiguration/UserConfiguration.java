@@ -739,6 +739,9 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 		return userId;
 	}
 
+	/**
+	 * @return The group IDs
+	 */
 	public int[] getGroups() {
 		if (null == groups) {
 			return null;
