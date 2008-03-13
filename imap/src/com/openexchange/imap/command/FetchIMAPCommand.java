@@ -79,10 +79,11 @@ import javax.mail.internet.MimeUtility;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailListField;
+import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.mime.ContainerMessage;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.utils.MessageUtility;
 import com.sun.mail.iap.Response;
@@ -454,7 +455,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		}
 		final ContainerMessage msg = new ContainerMessage(imapFolder.getFullName(), separator, seqnum);
 		final int itemCount = fetchResponse.getItemCount();
-		if (itemHandlers == null || itemCount != itemHandlers.length) {
+		if ((itemHandlers == null) || (itemCount != itemHandlers.length)) {
 			itemHandlers = createItemHandlers(itemCount, fetchResponse);
 		}
 		boolean repeatItem = true;
@@ -469,7 +470,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 				/*
 				 * Discard corrupt message
 				 */
-				final MailException imapExc = IMAPException.handleMessagingException(e);
+				final MailException imapExc = MIMEMailException.handleMessagingException(e);
 				LOG.error(new StringBuilder(128).append("Message #").append(msg.getMessageNumber()).append(
 						" discarded: ").append(imapExc.getMessage()).toString(), imapExc);
 				error = true;
@@ -600,7 +601,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 			if (!fp.contains(FetchProfile.Item.FLAGS)) {
 				fp.add(FetchProfile.Item.FLAGS);
 			}
-		} else if (field == MailListField.FLAG_SEEN.getField() && !fp.contains(FetchProfile.Item.FLAGS)) {
+		} else if ((field == MailListField.FLAG_SEEN.getField()) && !fp.contains(FetchProfile.Item.FLAGS)) {
 			fp.add(FetchProfile.Item.FLAGS);
 		}
 	}
@@ -863,7 +864,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 						msg.setUid(((UID) item).uid);
 					}
 				};
-			} else if (item instanceof RFC822DATA || item instanceof BODY) {
+			} else if ((item instanceof RFC822DATA) || (item instanceof BODY)) {
 				itemHandlers[j] = new FetchItemHandler() {
 					@Override
 					public void handleItem(final Item item, final ContainerMessage msg) throws MessagingException,
@@ -994,7 +995,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 				return true;
 			} else {
 				boolean found = false;
-				for (int i = 0; i < bodystructure.bodies.length && !found; i++) {
+				for (int i = 0; (i < bodystructure.bodies.length) && !found; i++) {
 					found |= hasAttachments(bodystructure.bodies[i]);
 				}
 				return found;
