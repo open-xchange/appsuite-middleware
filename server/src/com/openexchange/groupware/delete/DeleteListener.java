@@ -57,7 +57,8 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.server.impl.DBPoolingException;
 
 /**
- * DeleteListener
+ * {@link DeleteListener} - Performs the action(s) related to a received delete
+ * event
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -72,15 +73,15 @@ public interface DeleteListener extends EventListener {
 	 * @param readCon
 	 *            a readable connection
 	 * @param writeCon
-	 *            a writeable connection
+	 *            a writable connection
 	 * @throws DeleteFailedException
 	 *             if deletion fails
 	 * @throws LdapException
 	 *             if any user/group data could not be loaded
 	 * @throws SQLException
-	 *             if a SQL error occured
+	 *             if a SQL error occurred
 	 * @throws DBPoolingException
-	 *             if a connection pool related error occured
+	 *             if a connection pool related error occurred
 	 */
 	public void deletePerformed(DeleteEvent deleteEvent, Connection readCon, Connection writeCon)
 			throws DeleteFailedException;
