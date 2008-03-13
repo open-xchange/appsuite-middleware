@@ -120,6 +120,10 @@ ox_stop_daemon() {
 	start-stop-daemon --stop --oknodo --pidfile /var/run/${name}.pid
 	rm -f /var/run/${name}.pid
     elif [ $type -eq $LSB ]; then
+	if [ ! -f /var/run/${name}.pid ]; then
+	    # LSB not running
+	    return 7
+	fi
 	read PID < /var/run/${name}.pid
 	test -z "$PID" && { echo "unable to read pid"; return 1; }
 	if ! ps $PID > /dev/null; then
