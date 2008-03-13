@@ -1,7 +1,11 @@
 package com.openexchange.webdav.xml.appointment;
 
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.AttachmentMetadata;
+import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.ExternalGroupParticipant;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
@@ -12,9 +16,12 @@ import com.openexchange.groupware.ldap.Group;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
+import com.openexchange.webdav.xml.AttachmentTest;
 import com.openexchange.webdav.xml.FolderTest;
 import com.openexchange.webdav.xml.GroupUserTest;
 import com.openexchange.webdav.xml.XmlServlet;
+
+import java.io.ByteArrayInputStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -350,4 +357,35 @@ public class NewTest extends AppointmentTest {
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}	
+	
+	public void testAppointmentWithAttachment() throws Exception {
+		AppointmentObject appointmentObj = createAppointmentObject("testContactWithAttachment");
+		appointmentObj.setIgnoreConflicts(true);
+		final int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
+		appointmentObj.setObjectID(objectId);
+		// contactObj.setNumberOfAttachments(1);
+		
+		final AttachmentMetadata attachmentMeta = new AttachmentImpl();
+		attachmentMeta.setAttachedId(objectId);
+		attachmentMeta.setFolderId(appointmentFolderId);
+		attachmentMeta.setFileMIMEType("text/plain");
+		attachmentMeta.setModuleId(Types.APPOINTMENT);
+		attachmentMeta.setFilename("test.txt");
+		
+		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream("test".getBytes());
+		AttachmentTest.insertAttachment(webCon, attachmentMeta, byteArrayInputStream, getHostName(), getLogin(), getPassword());
+		
+		final AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getLogin(), getPassword());
+		final AppointmentObject[] appointmentArray = listAppointment(getWebConversation(), appointmentFolderId, loadAppointment.getLastModified(), true, false, getHostName(), getLogin(), getPassword());
+		
+		boolean found = false;
+		for (int a = 0; a < appointmentArray.length; a++) {
+			if (appointmentArray[a].getObjectID() == objectId) {
+				compareObject(appointmentObj, appointmentArray[a]);
+				found = true;
+			}
+		}
+		
+		assertTrue("task not found" , found);
+	}
 }
