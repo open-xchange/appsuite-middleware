@@ -1,4 +1,5 @@
-# DEFAULT CACHE REGION   
+# DEFAULT CACHE REGION. This region sets the default values if not defined per
+# cache basis.
 jcs.default=LTCP
 jcs.default.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.default.cacheattributes.MaxObjects=1000
@@ -14,7 +15,7 @@ jcs.default.elementattributes.IsSpool=false
 jcs.default.elementattributes.IsRemote=false
 jcs.default.elementattributes.IsLateral=true
 
-# PRE-DEFINED CACHE REGIONS   
+# Pre-defined cache regions for ox folder objects.   
 jcs.region.OXFolderCache=LTCP
 jcs.region.OXFolderCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.region.OXFolderCache.cacheattributes.MaxObjects=1000000
@@ -35,7 +36,7 @@ jcs.region.OXFolderCache.elementattributes.IsSpool=false
 jcs.region.OXFolderCache.elementattributes.IsRemote=false
 jcs.region.OXFolderCache.elementattributes.IsLateral=true
 
-# PRE-DEFINED CACHE REGIONS   
+# Pre-defined cache regions for email objects.
 jcs.region.OXMessageCache=
 jcs.region.OXMessageCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.region.OXMessageCache.cacheattributes.MaxObjects=10000000
@@ -53,7 +54,7 @@ jcs.region.OXMessageCache.elementattributes.IsSpool=false
 jcs.region.OXMessageCache.elementattributes.IsRemote=false
 jcs.region.OXMessageCache.elementattributes.IsLateral=false
 
-# PRE-DEFINED CACHE REGIONS
+# Pre-defined cache region for ox imap connections.
 jcs.region.OXIMAPConCache=
 jcs.region.OXIMAPConCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.region.OXIMAPConCache.cacheattributes.MaxObjects=1000000
@@ -70,7 +71,7 @@ jcs.region.OXIMAPConCache.elementattributes.IsSpool=false
 jcs.region.OXIMAPConCache.elementattributes.IsRemote=false
 jcs.region.OXIMAPConCache.elementattributes.IsLateral=false
 
-# PRE-DEFINED CACHE REGIONS
+# Pre-defined cache region for cached results on folder searches
 jcs.region.OXFolderQueryCache=
 jcs.region.OXFolderQueryCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.region.OXFolderQueryCache.cacheattributes.MaxObjects=1000000
@@ -87,7 +88,7 @@ jcs.region.OXFolderQueryCache.elementattributes.IsSpool=false
 jcs.region.OXFolderQueryCache.elementattributes.IsRemote=false
 jcs.region.OXFolderQueryCache.elementattributes.IsLateral=false
 
-# User Cache only uses RAM
+# Pre-defined cache region for User data
 jcs.region.User=LTCP
 jcs.region.User.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.region.User.cacheattributes.MaxObjects=1000
@@ -104,7 +105,7 @@ jcs.region.User.elementattributes.IsSpool=false
 jcs.region.User.elementattributes.IsRemote=false
 jcs.region.User.elementattributes.IsLateral=false
 
-# UserConfiguration Cache only uses RAM
+# Pre-defined cache for user configuration
 jcs.region.UserConfiguration=LTCP
 jcs.region.UserConfiguration.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.region.UserConfiguration.cacheattributes.MaxObjects=1000
@@ -121,7 +122,7 @@ jcs.region.UserConfiguration.elementattributes.IsSpool=false
 jcs.region.UserConfiguration.elementattributes.IsRemote=false
 jcs.region.UserConfiguration.elementattributes.IsLateral=false
 
-# UserSettingMail Cache only uses RAM
+# Pre-defined cache for user mail configuration
 jcs.region.UserSettingMail=LTCP
 jcs.region.UserSettingMail.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.region.UserSettingMail.cacheattributes.MaxObjects=1000
@@ -138,7 +139,7 @@ jcs.region.UserSettingMail.elementattributes.IsSpool=false
 jcs.region.UserSettingMail.elementattributes.IsRemote=false
 jcs.region.UserSettingMail.elementattributes.IsLateral=false
 
-# Context Cache only uses RAM
+# Pre-defined region for context data
 jcs.region.Context=LTCP
 jcs.region.Context.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.region.Context.cacheattributes.MaxObjects=1000
@@ -155,7 +156,7 @@ jcs.region.Context.elementattributes.IsSpool=false
 jcs.region.Context.elementattributes.IsRemote=false
 jcs.region.Context.elementattributes.IsLateral=false
 
-# Filestore Cache only uses RAM
+# Pre-defined region for Filestore objects
 jcs.region.Filestore=LTCP
 jcs.region.Filestore.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.region.Filestore.cacheattributes.MaxObjects=10
@@ -172,7 +173,8 @@ jcs.region.Filestore.elementattributes.IsSpool=false
 jcs.region.Filestore.elementattributes.IsRemote=false
 jcs.region.Filestore.elementattributes.IsLateral=false
 
-# DBPool Cache only uses RAM
+# Pre-defined region for metadata of database connections to save config db
+# accesses 
 jcs.region.OXDBPoolCache=LTCP
 jcs.region.OXDBPoolCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.region.OXDBPoolCache.cacheattributes.MaxObjects=1000
@@ -189,7 +191,7 @@ jcs.region.OXDBPoolCache.elementattributes.IsSpool=false
 jcs.region.OXDBPoolCache.elementattributes.IsRemote=false
 jcs.region.OXDBPoolCache.elementattributes.IsLateral=false
 
-# CachedCalendar Cache only uses RAM
+# Pre-defined region for Calendar metadata
 jcs.region.CalendarCache=
 jcs.region.CalendarCache.cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes
 jcs.region.CalendarCache.cacheattributes.MaxObjects=100000
@@ -206,7 +208,8 @@ jcs.region.CalendarCache.elementattributes.IsSpool=false
 jcs.region.CalendarCache.elementattributes.IsRemote=false
 jcs.region.CalendarCache.elementattributes.IsLateral=false
 
-# AVAILABLE AUXILIARY CACHES   
+# auxiliary cache configuration for synchronizing caches in a cluster
+# Open-Xchange uses cache invalidation on remote caches.
 # TCP Lateral Cache to broadcast PUTS and REMOVALS (and possibly GETS) to other local caches
 jcs.auxiliary.LTCP=org.apache.jcs.auxiliary.lateral.socket.tcp.LateralTCPCacheFactory
 jcs.auxiliary.LTCP.attributes=org.apache.jcs.auxiliary.lateral.socket.tcp.TCPLateralCacheAttributes

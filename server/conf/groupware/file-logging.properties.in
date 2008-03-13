@@ -1,3 +1,4 @@
+# possible log levels are ALL INFO DEBUG
 .level=INFO
 
 handlers=java.util.logging.FileHandler
