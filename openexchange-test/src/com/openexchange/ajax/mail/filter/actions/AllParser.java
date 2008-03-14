@@ -49,51 +49,26 @@
 
 package com.openexchange.ajax.mail.filter.actions;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.CommonAllParser;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class AllParser extends AbstractAJAXParser {
-
-    private final int[] columns;
+public class AllParser extends CommonAllParser {
 
     /**
      * Default constructor.
      */
     public AllParser(final boolean failOnError, final int[] columns) {
-        super(failOnError);
-        this.columns = columns;
+        super(failOnError, columns);
     }
 
     /**
-     * {@inheritDoc}
+     * Create specialized response object.
      */
     @Override
-    protected AllResponse createResponse(final Response response)
-        throws JSONException {
-        final AllResponse retval = instanciateResponse(response);
-        retval.setColumns(columns);
-        if (isFailOnError()) {
-            final JSONArray array = (JSONArray) retval.getData();
-            final Object[][] values = new Object[array.length()][];
-            for (int i = 0; i < array.length(); i++) {
-                final JSONArray inner = array.getJSONArray(i);
-                values[i] = new Object[inner.length()];
-                for (int j = 0; j < inner.length(); j++) {
-                    values[i][j] = inner.get(j);
-                }
-            }
-            retval.setArray(values);
-        }
-        return retval;
-    }
-
     protected AllResponse instanciateResponse(final Response response) {
         return new AllResponse(response);
     }

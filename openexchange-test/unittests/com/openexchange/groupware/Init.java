@@ -91,7 +91,7 @@ public final class Init {
 	/**
 	 * Starts HTTP serlvet manager
 	 */
-	com.openexchange.tools.servlet.http.HttpServletManagerInit.getInstance(),
+	com.openexchange.tools.servlet.http.HttpManagersInit.getInstance(),
 	/**
 	 * Setup of ContextStorage and LoginInfo.
 	 */

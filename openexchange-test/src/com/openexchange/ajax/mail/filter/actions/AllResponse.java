@@ -64,8 +64,7 @@ import com.openexchange.mail.filter.Rule;
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class AllResponse extends CommonAllResponse implements
-    Iterable<Object[]> {
+public class AllResponse extends CommonAllResponse {
 
     /**
      * @param response
@@ -92,7 +91,7 @@ public class AllResponse extends CommonAllResponse implements
     public Rule parseRow(final JSONArray jsonArray, final int row) throws JSONException {
     	final Rule rule = new Rule();
     	for (int a = 0; a < jsonArray.length(); a++) {
-    		AbstractMailFilterTestParser.parse(jsonArray, columns[a], a, rule);
+    		AbstractMailFilterTestParser.parse(jsonArray, getColumns()[a], a, rule);
     	}
     	
     	return rule;
