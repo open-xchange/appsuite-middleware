@@ -72,7 +72,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MailAccess<T extends MailFolderStorage, E extends MailMessageStorage, L extends MailLogicTools>
+public abstract class MailAccess<F extends MailFolderStorage, M extends MailMessageStorage, L extends MailLogicTools>
 		implements Serializable {
 
 	/**
@@ -490,7 +490,7 @@ public abstract class MailAccess<T extends MailFolderStorage, E extends MailMess
 	 * @throws MailException
 	 *             If connection is not established
 	 */
-	public abstract T getFolderStorage() throws MailException;
+	public abstract F getFolderStorage() throws MailException;
 
 	/**
 	 * Gets the appropriate {@link MailMessageStorage} implementation that
@@ -500,7 +500,7 @@ public abstract class MailAccess<T extends MailFolderStorage, E extends MailMess
 	 * @throws MailException
 	 *             If connection is not established
 	 */
-	public abstract E getMessageStorage() throws MailException;
+	public abstract M getMessageStorage() throws MailException;
 
 	/**
 	 * Gets the appropriate {@link MailLogicTools} implementation that provides
@@ -531,7 +531,7 @@ public abstract class MailAccess<T extends MailFolderStorage, E extends MailMess
 	public abstract boolean isConnectedUnsafe();
 
 	/**
-	 * Trigger all necessary startup actions
+	 * Triggers all necessary startup actions
 	 * 
 	 * @throws MailException
 	 *             If startup actions fail
@@ -539,7 +539,7 @@ public abstract class MailAccess<T extends MailFolderStorage, E extends MailMess
 	protected abstract void startup() throws MailException;
 
 	/**
-	 * Trigger all necessary shutdown actions
+	 * Triggers all necessary shutdown actions
 	 * 
 	 * @throws MailException
 	 *             If shutdown actions fail
