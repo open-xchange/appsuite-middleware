@@ -205,7 +205,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	private boolean b_fileName;
 
 	/**
-	 * The headers (if not explicitely set in other fields)
+	 * The headers (if not explicitly set in other fields)
 	 */
 	private Map<HeaderName, String> headers;
 
