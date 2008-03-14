@@ -199,15 +199,19 @@ public abstract class DeferredActivator implements BundleActivator {
 	 * Resets this deferred activator's members
 	 */
 	private final void reset() {
-		for (int i = 0; i < serviceTrackers.length; i++) {
-			serviceTrackers[i].close();
-			serviceTrackers[i] = null;
+		if (null != serviceTrackers) {
+			for (int i = 0; i < serviceTrackers.length; i++) {
+				serviceTrackers[i].close();
+				serviceTrackers[i] = null;
+			}
+			serviceTrackers = null;
 		}
-		serviceTrackers = null;
 		availability = 0;
 		allAvailable = -1;
-		services.clear();
-		services = null;
+		if (null != services) {
+			services.clear();
+			services = null;
+		}
 		context = null;
 	}
 
