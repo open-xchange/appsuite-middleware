@@ -228,18 +228,18 @@ public interface MailFolderStorage {
 	public long[] getQuota(String folder) throws MailException;
 
 	/**
-	 * Gets the fullname of default drafts folder
+	 * Gets the fullname of default confirmed ham folder
 	 * 
-	 * @return The fullname of default drafts folder
+	 * @return The fullname of default confirmed ham folder
 	 * @throws MailException
 	 *             If confirmed ham folder's fullname cannot be returned
 	 */
 	public String getConfirmedHamFolder() throws MailException;
 
 	/**
-	 * Gets the fullname of default drafts folder
+	 * Gets the fullname of default confirmed spam folder
 	 * 
-	 * @return The fullname of default drafts folder
+	 * @return The fullname of default confirmed spam folder
 	 * @throws MailException
 	 *             If confirmed spam folder's fullname cannot be returned
 	 */
