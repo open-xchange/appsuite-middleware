@@ -504,7 +504,8 @@ public abstract class MailAccess<T extends MailFolderStorage, E extends MailMess
 
 	/**
 	 * Gets the appropriate {@link MailLogicTools} implementation that provides
-	 * common mailbox-related operations/methods
+	 * operations/methods to create a reply/forward message from a referenced
+	 * message.
 	 * 
 	 * @return The appropriate {@link MailLogicTools} implementation
 	 * @throws MailException
