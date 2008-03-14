@@ -78,11 +78,19 @@ public abstract class MailPart implements Serializable, Cloneable {
 
 	public static final int NO_ENCLOSED_PARTS = -1;
 
-	private static final class MyIterator implements Iterator<Map.Entry<String, String>> {
+	/**
+	 * {@link HeaderIterator} - Converts an instance of
+	 * <code>java.util.Iterator&lt;HeaderName, String&gt;</code> to
+	 * <code>java.util.Iterator&lt;String, String&gt;</code>
+	 * 
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 * 
+	 */
+	private static final class HeaderIterator implements Iterator<Map.Entry<String, String>> {
 
 		private final Iterator<Map.Entry<HeaderName, String>> iter;
 
-		public MyIterator(final Iterator<Map.Entry<HeaderName, String>> iter) {
+		public HeaderIterator(final Iterator<Map.Entry<HeaderName, String>> iter) {
 			this.iter = iter;
 		}
 
@@ -95,7 +103,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 			if (null == e) {
 				return null;
 			}
-			return new MyEntry(e);
+			return new HeaderEntry(e);
 		}
 
 		public void remove() {
@@ -103,12 +111,20 @@ public abstract class MailPart implements Serializable, Cloneable {
 		}
 	}
 
-	private static final class MyEntry implements Map.Entry<String, String> {
+	/**
+	 * {@link HeaderEntry} - Converts an instance of
+	 * <code>java.util.Map.Entry&lt;HeaderName, String&gt;</code> to
+	 * <code>java.util.Map.Entry&lt;String, String&gt;</code>
+	 * 
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 * 
+	 */
+	private static final class HeaderEntry implements Map.Entry<String, String> {
 
-		private final Map.Entry<HeaderName, String> e;
+		private final Map.Entry<HeaderName, String> headerEntry;
 
-		public MyEntry(final Map.Entry<HeaderName, String> e) {
-			this.e = e;
+		public HeaderEntry(final Map.Entry<HeaderName, String> headerEntry) {
+			this.headerEntry = headerEntry;
 		}
 
 		/*
@@ -117,7 +133,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 		 * @see java.util.Map$Entry#getKey()
 		 */
 		public String getKey() {
-			return e.getKey().toString();
+			return headerEntry.getKey().toString();
 		}
 
 		/*
@@ -126,7 +142,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 		 * @see java.util.Map$Entry#getValue()
 		 */
 		public String getValue() {
-			return e.getValue();
+			return headerEntry.getValue();
 		}
 
 		/*
@@ -135,7 +151,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 		 * @see java.util.Map$Entry#setValue(java.lang.Object)
 		 */
 		public String setValue(final String value) {
-			return e.setValue(value);
+			return headerEntry.setValue(value);
 		}
 
 	}
@@ -494,7 +510,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 		if (null == headers) {
 			return EMPTY_ITER;
 		}
-		return new MyIterator(headers.entrySet().iterator());
+		return new HeaderIterator(headers.entrySet().iterator());
 	}
 
 	/**
