@@ -180,6 +180,7 @@ final class MailConnectionWatcher {
 		 */
 		@Override
 		public void run() {
+		    try {
 			final StringBuilder sb = new StringBuilder(512);
 			final List<MailAccess<?, ?, ?>> exceededCons = new ArrayList<MailAccess<?, ?, ?>>();
 			for (final Iterator<Entry<MailAccess<?, ?, ?>, Long>> iter = mailConnections.entrySet().iterator(); iter
@@ -220,6 +221,9 @@ final class MailConnectionWatcher {
 					}
 				}
 			}
+		    } catch (Exception e) {
+		        LOG.error(e.getMessage(), e);
+		    }
 		}
 	}
 

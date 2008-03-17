@@ -58,6 +58,9 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * {@link FileWatcher}
  * 
@@ -66,6 +69,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public final class FileWatcher {
 
+    private static final Log LOG = LogFactory.getLog(FileWatcher.class);
+    
 	private final class FileWatcherTimerTask extends TimerTask {
 		/*
 		 * (non-Javadoc)
@@ -74,6 +79,7 @@ public final class FileWatcher {
 		 */
 		@Override
 		public void run() {
+		    try {
 			if (!file.exists()) {
 				notifyListeners(true);
 			}
@@ -82,6 +88,9 @@ public final class FileWatcher {
 				timeStamp = newTimeStamp;
 				notifyListeners(false);
 			}
+		    } catch (Exception e) {
+		        LOG.error(e.getMessage(), e);
+		    }
 		}
 	}
 

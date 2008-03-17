@@ -82,6 +82,7 @@ public abstract class ServiceHolder<S> {
 	private final class ServiceHolderTask extends TimerTask {
 		@Override
 		public void run() {
+		    try {
 			if (usingThreads.isEmpty()) {
 				return;
 			}
@@ -104,6 +105,9 @@ public abstract class ServiceHolder<S> {
 					iter.remove();
 				}
 			}
+		    } catch (Exception e) {
+		        LOG.error(e.getMessage(), e);
+		    }
 		}
 	}
 
