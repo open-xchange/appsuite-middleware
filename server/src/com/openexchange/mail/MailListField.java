@@ -66,7 +66,7 @@ import com.openexchange.groupware.container.FolderObject;
 public enum MailListField {
 
 	/**
-	 * The ID
+	 * The mail ID
 	 */
 	ID(600, DataFields.ID),
 	/**
