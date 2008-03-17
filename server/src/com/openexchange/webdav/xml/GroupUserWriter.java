@@ -191,6 +191,12 @@ public class GroupUserWriter extends ContactWriter {
 		ContactObject.INTERNAL_USERID
 	};
 	
+	protected final static int[] deleteFields = {
+		DataObject.OBJECT_ID,
+		DataObject.LAST_MODIFIED,
+		ContactObject.INTERNAL_USERID
+	};
+	
 	protected UserStorage userStorage = null;
 	
 	protected Element parent = null;
@@ -265,7 +271,7 @@ public class GroupUserWriter extends ContactWriter {
 		Element e = new Element(parent.getName(), parent.getNamespace());
 		
 		try {
-			addContent2Element(e, contactobject, false);
+			addContent2Element(e, contactobject, delete);
 			xo.output(e, os);
 		} catch (Exception exc) {
 			LOG.error("writeObject", exc);
