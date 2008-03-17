@@ -1,3 +1,7 @@
+* 2008-03-17 - marcus.klein@open-xchange.com
+
+ - Bugfix #11064: Fixed a wrong constructor call.
+
 * 2008-03-17 - sebastian.kauss@open-xchange.com
 
  - Bugfix #10974: Clean up configuration files

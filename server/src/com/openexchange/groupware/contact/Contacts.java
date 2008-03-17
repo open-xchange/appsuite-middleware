@@ -2547,8 +2547,8 @@ public class Contacts implements DeleteListener {
 
 		
 		try {	
-			final ContactSql cs = new ContactMySql(null);
 			Context ct = ContextStorage.getStorageContext(so.getContextId());
+            final ContactSql cs = new ContactMySql(ct, uid);
 			
 			read = readcon.createStatement();
 			del = writecon.createStatement();
