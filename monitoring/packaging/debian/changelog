@@ -1,3 +1,9 @@
+open-xchange-monitoring (6.5.0-4) unstable; urgency=low
+
+  * Fourth internal beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 17 Mar 2008 16:02:02 +0100
+
 open-xchange-monitoring (6.5.0-3) unstable; urgency=low
 
   * Third internal beta.

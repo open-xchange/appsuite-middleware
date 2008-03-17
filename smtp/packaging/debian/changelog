@@ -1,3 +1,9 @@
+open-xchange-smtp (6.5.0-2) unstable; urgency=low
+
+  * Fourth internal beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 17 Mar 2008 16:03:15 +0100
+
 open-xchange-smtp (6.5.0-1) unstable; urgency=low
 
   * Initial version
