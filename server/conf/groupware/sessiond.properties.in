@@ -17,19 +17,21 @@ com.openexchange.sessiond.serverObjectStreamPort:33335
 # enable communication between client and server over tcp
 com.openexchange.sessiond.isTcpClientSocketEnabled:false
 
-# session container timeout
+# session container timeout in milliseconds. After this time session container
+# are rotaded, which means the oldest one will be destroyed and a new one gets
+# created.
 com.openexchange.sessiond.sessionContainerTimeout:4200000
 	
-# internal session container
+# number of session container
 com.openexchange.sessiond.numberOfSessionContainers:8
 
-# max sessions in sessiond
+# maximum number of concurrent sessions, 0 stands for unlimited
 com.openexchange.sessiond.maxSession:5000
 
 # accept only sockets from this address
 com.openexchange.sessiond.serverBindAddress:localhost
 
-# check if a user already has a session and overwrite it
+# allow users to be logged in multiple times.
 com.openexchange.sessiond.isDoubleLoginPermitted:true
 	
 # the user who can request and kick sessions
@@ -38,7 +40,8 @@ com.openexchange.sessiond.sessionAuthUser:mailadmin
 # use secure socket connection
 com.openexchange.sessiond.isSecureSocketConnectionEnabled:false
 
-# value in milliseconds
+# maxiumum value in milliseconds a session is allowed to be kept without 
+# request.
 com.openexchange.sessiond.sessionDefaultLifeTime:3600000
 
 # CA File

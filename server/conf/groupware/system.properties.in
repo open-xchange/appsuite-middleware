@@ -85,4 +85,6 @@ TidyMessages=@oxgroupwaresysconfdir@/TidyMessages.properties
 # Location of tidy configuration file
 TidyConfiguration=@oxgroupwaresysconfdir@/TidyConfiguration.properties
 
+# Server name registered by registerserver in the configuration database
+# can be read with listservers
 SERVER_NAME=local
