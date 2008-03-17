@@ -860,8 +860,15 @@ public class AppointmentRequest {
 							}
 						}
 					} else {
-						appointmentwriter.writeArray(appointmentobject, columns, jsonResponseArray);
-						counter++;
+						final RecurringResults recuResults = CalendarRecurringCollection.calculateFirstRecurring(appointmentobject);
+						if (recuResults.size() == 1) {
+							appointmentobject.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
+							appointmentobject.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
+							
+							appointmentwriter.writeArray(appointmentobject, columns, jsonResponseArray);
+						} else {
+							LOG.warn("cannot load first recurring appointment from appointment object: " + +appointmentobject.getRecurrenceType() + " / "+appointmentobject.getObjectID()+"\n\n\n");
+						}
 					}
 				} else {
 					if (appointmentobject.getFullTime() && (startUTC != null && endUTC != null)) {
