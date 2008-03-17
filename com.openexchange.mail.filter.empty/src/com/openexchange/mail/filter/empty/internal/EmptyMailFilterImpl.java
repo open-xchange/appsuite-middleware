@@ -62,6 +62,7 @@ import org.json.JSONObject;
 
 import com.openexchange.mail.filter.MailFilterConfig;
 import com.openexchange.mail.filter.MailFilterService;
+import com.openexchange.mail.filter.MailFilterSession;
 import com.openexchange.mail.filter.Rule;
 import com.openexchange.mail.filter.ajax.parser.MailFilterParser;
 import com.openexchange.mail.filter.ajax.writer.MailFilterWriter;
@@ -93,9 +94,9 @@ public class EmptyMailFilterImpl implements MailFilterService {
 		return new MailFilterConfig();
 	}
 
-	public void addRule(String forUser, Rule rule) {
+	public void addRule(MailFilterSession session, Rule rule) {
 		final List<Rule> ruleList = new ArrayList<Rule>();
-		Rule[] rules = loadRules(forUser, null);
+		Rule[] rules = loadRules(session.getLoginName(), null);
 		if (rules != null) {
 			for (int a = 0; a < rules.length; a++) {
 				ruleList.add(rules[a]);
@@ -107,12 +108,12 @@ public class EmptyMailFilterImpl implements MailFilterService {
 		}
 		ruleList.add(rule.getPosition(), rule);
 
-		saveRules(ruleList.toArray(new Rule[ruleList.size()]), forUser);
+		saveRules(ruleList.toArray(new Rule[ruleList.size()]), session.getLoginName());
 	}
 
-	public void editRule(String forUser, Rule rule) {
+	public void editRule(MailFilterSession session, Rule rule) {
 		final List<Rule> ruleList = new ArrayList<Rule>();
-		Rule[] rules = loadRules(forUser, null);
+		Rule[] rules = loadRules(session.getLoginName(), null);
 		for (int a = 0; a < rules.length; a++) {
 			if (rules[a].getId().equals(rule.getId())) {
 				ruleList.add(rule);
@@ -121,12 +122,12 @@ public class EmptyMailFilterImpl implements MailFilterService {
 			}
 		}
 
-		saveRules(ruleList.toArray(new Rule[ruleList.size()]), forUser);
+		saveRules(ruleList.toArray(new Rule[ruleList.size()]), session.getLoginName());
 	}
 
-	public void deleteRule(String forUser, String id) {
+	public void deleteRule(MailFilterSession session, String id) {
 		final List<Rule> ruleList = new ArrayList<Rule>();
-		Rule[] rules = loadRules(forUser, null);
+		Rule[] rules = loadRules(session.getLoginName(), null);
 		if (rules != null) {
 			for (int a = 0; a < rules.length; a++) {
 				if (!rules[a].getId().equals(id)) {
@@ -135,11 +136,11 @@ public class EmptyMailFilterImpl implements MailFilterService {
 			}
 		}
 
-		saveRules(ruleList.toArray(new Rule[ruleList.size()]), forUser);
+		saveRules(ruleList.toArray(new Rule[ruleList.size()]), session.getLoginName());
 	}
 
-	public Rule[] listRules(String forUser, String flag) {
-		return loadRules(forUser, flag);
+	public Rule[] listRules(MailFilterSession session, String flag) {
+		return loadRules(session.getLoginName(), flag);
 	}
 
 	private void saveRules(Rule[] rules, String forUser) {
