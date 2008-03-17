@@ -58,12 +58,12 @@ public interface MailFilterService {
 	
 	public MailFilterConfig getConfig();
 	
-	public void addRule(String forUser, Rule rule);
+	public void addRule(MailFilterSession session, Rule rule);
 	
-	public void editRule(String forUser, Rule rule);
+	public void editRule(MailFilterSession session, Rule rule);
 	
-	public void deleteRule(String forUser, String id);
+	public void deleteRule(MailFilterSession session, String id);
 	
-	public Rule[] listRules(String forUser, String flag);
+	public Rule[] listRules(MailFilterSession session, String flag);
 
 }
