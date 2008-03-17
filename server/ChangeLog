@@ -1,3 +1,7 @@
+* 2008-03-17 - sebastian.kauss@open-xchange.com
+
+ - Bugfix #10974: Clean up configuration files
+
 * 2008-03-13 - thorben.betten@open-xchange.com
 
  - Partial bugfix #11044: Checking returned rfc822 data's/body's input
@@ -10,7 +14,7 @@
    is now used in the sessiond implementation
 
  - Bugfix #10372: end date of recurring appointment is wrong in 
-                   search
+                  search
 
  - Bugfix #10925: Context is missing in WebDAV/XML AppointmentWriter
 
