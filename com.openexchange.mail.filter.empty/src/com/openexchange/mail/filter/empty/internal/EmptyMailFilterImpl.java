@@ -91,7 +91,7 @@ public class EmptyMailFilterImpl implements MailFilterService {
 	}
 
 	public MailFilterConfig getConfig() {
-		return new MailFilterConfig();
+		return new MailFilterConfigImpl();
 	}
 
 	public void addRule(MailFilterSession session, Rule rule) {
