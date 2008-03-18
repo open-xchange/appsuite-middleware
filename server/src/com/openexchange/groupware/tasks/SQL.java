@@ -259,25 +259,23 @@ public final class SQL {
                     sql.append("?,");
                 }
                 sql.setLength(sql.length() - 1);
-                sql.append(")) OR ");
+                sql.append("))");
             }
             if (own.size() > 0) {
-                sql.append("(folder in (");
+                sql.append(" OR (folder in (");
                 for (int i = 0; i < own.size(); i++) {
                     sql.append("?,");
                 }
                 sql.setLength(sql.length() - 1);
-                sql.append(") AND created_from=?) OR ");
+                sql.append(") AND created_from=?)");
             }
             if (shared.size() > 0) {
-                sql.append("(folder in (");
+                sql.append(" OR (folder in (");
                 for (int i = 0; i < shared.size(); i++) {
                     sql.append("?,");
                 }
                 sql.setLength(sql.length() - 1);
                 sql.append(") AND private=false)");
-            } else {
-                sql.setLength(sql.length() - "OR ".length());
             }
             sql.append(')');
         } else {

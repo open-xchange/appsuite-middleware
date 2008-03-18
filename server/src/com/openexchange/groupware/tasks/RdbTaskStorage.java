@@ -262,17 +262,17 @@ public class RdbTaskStorage extends TaskStorage {
             final PreparedStatement stmt = con.prepareStatement(sql.toString());
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
-            if (all.size() + own.size() + shared.size() > 0) {
-                for (int i : all) {
-                    stmt.setInt(pos++, i);
-                }
-                for (int i : own) {
-                    stmt.setInt(pos++, i);
-                    stmt.setInt(pos++, userId);
-                }
-                for (int i : shared) {
-                    stmt.setInt(pos++, i);
-                }
+            for (int i : all) {
+                stmt.setInt(pos++, i);
+            }
+            for (int i : own) {
+                stmt.setInt(pos++, i);
+            }
+            if (own.size() > 0) {
+                stmt.setInt(pos++, userId);
+            }
+            for (int i : shared) {
+                stmt.setInt(pos++, i);
             }
             if (rangeCondition.length() > 0) {
                 for (Date date : search.getRange()) {
