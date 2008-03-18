@@ -175,22 +175,23 @@ public abstract class DeferredActivator implements BundleActivator {
 	 */
 	private final void init() throws Exception {
 		final Class<?>[] classes = getNeededServices();
-		if (new HashSet<Class<?>>(Arrays.asList(classes)).size() != classes.length) {
+		final int len = null == classes ? 0 : classes.length;
+		if (null != classes && new HashSet<Class<?>>(Arrays.asList(classes)).size() != len) {
 			throw new IllegalArgumentException("Duplicate class/interface provided through getNeededServices()");
 		}
-		services = new ConcurrentHashMap<Class<?>, Object>(classes.length);
-		serviceTrackers = new ServiceTracker[classes.length];
+		services = new ConcurrentHashMap<Class<?>, Object>(len);
+		serviceTrackers = new ServiceTracker[len];
 		availability = 0;
-		allAvailable = (((1 << classes.length)) - 1);
+		allAvailable = (1 << len) - 1;
 		/*
 		 * Initialize service trackers for needed services
 		 */
-		for (int i = 0; i < classes.length; i++) {
+		for (int i = 0; i < len; i++) {
 			serviceTrackers[i] = new ServiceTracker(context, classes[i].getName(),
 					new DeferredServiceTrackerCustomizer(classes[i], i));
 			serviceTrackers[i].open();
 		}
-		if (classes.length == 0) {
+		if (len == 0) {
 			startBundle();
 		}
 	}
