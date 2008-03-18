@@ -62,12 +62,16 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.mail.filter.ConfigTestHolder;
+import com.openexchange.mail.filter.MailFilterConfig;
 import com.openexchange.mail.filter.MailFilterService;
 import com.openexchange.mail.filter.MailFilterSession;
 import com.openexchange.mail.filter.Rule;
+import com.openexchange.mail.filter.action.AbstractAction;
 import com.openexchange.mail.filter.ajax.fields.RuleFields;
 import com.openexchange.mail.filter.ajax.parser.MailFilterParser;
 import com.openexchange.mail.filter.ajax.writer.MailFilterWriter;
+import com.openexchange.mail.filter.comparison.AbstractComparison;
 import com.openexchange.mail.filter.internal.MailFilterSessionImpl;
 import com.openexchange.mail.filter.osgi.MailFilterServiceHolder;
 import com.openexchange.session.Session;
@@ -121,7 +125,7 @@ public class MailFilterRequest {
 				} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
 					return actionList(jsonObject, mailFilterService);
 				} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_CONFIG)) {
-					return actionList(jsonObject, mailFilterService);
+					return actionConfig(jsonObject, mailFilterService);
 				} else {
 					throw new AjaxException(AjaxException.Code.UnknownAction, action);
 				}
@@ -136,7 +140,46 @@ public class MailFilterRequest {
 	 */
 	protected JSONObject actionConfig(final JSONObject request,
 			final MailFilterService mailFilterService) throws AbstractOXException {
-		return new JSONObject();
+
+		final MailFilterConfig mailFilterConfig = mailFilterService.getConfig();
+		final ConfigTestHolder[] configTests = mailFilterConfig.getTests();
+		final String[] abstractActions = mailFilterConfig.getActionCommands();
+
+		final JSONObject jsonObj = new JSONObject();
+		final JSONArray jsonTestArray = new JSONArray();
+		final JSONArray jsonActionArray = new JSONArray();
+		try {
+			// tests			
+			for (int a = 0; a < configTests.length; a++) {
+				final JSONObject jsonTestObj = new JSONObject();
+				jsonTestObj.put("test", configTests[a].getTest());
+				
+				final JSONArray jsonCompArray = new JSONArray();
+				final String[] comparisons = configTests[a].getComparisons();
+				for (int b = 0; b < comparisons.length; b++) {
+					jsonCompArray.put(comparisons[a]);
+				}
+				
+				jsonTestObj.put("comparison", jsonCompArray);
+				
+				jsonTestArray.put(jsonTestObj);
+			}
+			
+			jsonObj.put("tests", jsonTestArray);
+			
+			// actions
+			for (int a = 0; a < abstractActions.length; a++) {
+				jsonActionArray.put(abstractActions[a]);
+			}
+			
+			jsonObj.put("actioncommands", jsonActionArray);
+		} catch (JSONException exc) {
+			OXJSONException oxJsonException = new OXJSONException(
+					OXJSONException.Code.JSON_BUILD_ERROR, exc);
+			throw new AbstractOXException(oxJsonException);
+		}
+
+		return jsonObj;
 	}
 
 	/**
@@ -149,7 +192,7 @@ public class MailFilterRequest {
 		try {
 			forUser = DataParser.parseString(request, "for_user");
 			id = DataParser.checkString(request, AJAXServlet.PARAMETER_ID);
-			
+
 			if (forUser == null) {
 				forUser = sessionObj.getUserlogin();
 			}
@@ -159,7 +202,9 @@ public class MailFilterRequest {
 			throw new AbstractOXException(oxJsonException);
 		}
 
-		final MailFilterSession mailFilterSession = new MailFilterSessionImpl(sessionObj.getUserId(), sessionObj.getContextId(), sessionObj.getLoginName(), sessionObj.getPassword());
+		final MailFilterSession mailFilterSession = new MailFilterSessionImpl(sessionObj
+				.getUserId(), sessionObj.getContextId(), sessionObj.getLoginName(), sessionObj
+				.getPassword());
 		mailFilterService.deleteRule(mailFilterSession, id);
 
 		return new JSONObject();
@@ -170,7 +215,8 @@ public class MailFilterRequest {
 		String forUser;
 		String flag;
 		try {
-			final String[] sColumns = DataParser.checkString(request, AJAXServlet.PARAMETER_COLUMNS).split(",");
+			final String[] sColumns = DataParser
+					.checkString(request, AJAXServlet.PARAMETER_COLUMNS).split(",");
 			final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
 			forUser = DataParser.parseString(request, "for_user");
 			flag = DataParser.parseString(request, "flag");
@@ -179,7 +225,9 @@ public class MailFilterRequest {
 				forUser = sessionObj.getUserlogin();
 			}
 
-			final MailFilterSession mailFilterSession = new MailFilterSessionImpl(sessionObj.getUserId(), sessionObj.getContextId(), sessionObj.getLoginName(), sessionObj.getPassword());
+			final MailFilterSession mailFilterSession = new MailFilterSessionImpl(sessionObj
+					.getUserId(), sessionObj.getContextId(), sessionObj.getLoginName(), sessionObj
+					.getPassword());
 			final Rule[] rules = mailFilterService.listRules(mailFilterSession, flag);
 			final MailFilterWriter mailFilterWriter = new MailFilterWriter();
 			final JSONArray jsonArray = new JSONArray();
@@ -190,9 +238,9 @@ public class MailFilterRequest {
 					jsonArray.put(jsonRuleArray);
 				}
 			}
-			
+
 			timestamp = new Date();
-			
+
 			return jsonArray;
 		} catch (JSONException exc) {
 			OXJSONException oxJsonException = new OXJSONException(
@@ -209,9 +257,10 @@ public class MailFilterRequest {
 		String forUser;
 		String flag;
 		try {
-			final String[] sColumns = DataParser.checkString(request, AJAXServlet.PARAMETER_COLUMNS).split(",");
+			final String[] sColumns = DataParser
+					.checkString(request, AJAXServlet.PARAMETER_COLUMNS).split(",");
 			final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
-			
+
 			forUser = DataParser.checkString(request, "for_user");
 			flag = DataParser.parseString(request, "flag");
 
@@ -219,7 +268,9 @@ public class MailFilterRequest {
 				forUser = sessionObj.getUserlogin();
 			}
 
-			final MailFilterSession mailFilterSession = new MailFilterSessionImpl(sessionObj.getUserId(), sessionObj.getContextId(), sessionObj.getLoginName(), sessionObj.getPassword());
+			final MailFilterSession mailFilterSession = new MailFilterSessionImpl(sessionObj
+					.getUserId(), sessionObj.getContextId(), sessionObj.getLoginName(), sessionObj
+					.getPassword());
 			final Rule[] rules = mailFilterService.listRules(mailFilterSession, flag);
 			final MailFilterWriter mailFilterWriter = new MailFilterWriter();
 			final JSONArray jsonArray = new JSONArray();
@@ -230,9 +281,9 @@ public class MailFilterRequest {
 					jsonArray.put(jsonRuleArray);
 				}
 			}
-			
+
 			timestamp = new Date();
-			
+
 			return jsonArray;
 		} catch (JSONException exc) {
 			OXJSONException oxJsonException = new OXJSONException(
@@ -244,8 +295,8 @@ public class MailFilterRequest {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected JSONObject actionNew(final JSONObject request, final MailFilterService mailFilterService)
-			throws AbstractOXException {
+	protected JSONObject actionNew(final JSONObject request,
+			final MailFilterService mailFilterService) throws AbstractOXException {
 		String forUser;
 		try {
 			forUser = DataParser.parseString(request, "for_user");
@@ -260,9 +311,11 @@ public class MailFilterRequest {
 			final Rule rule = new Rule();
 			mailFilterParser.parseMailFilter(rule, jData);
 
-			final MailFilterSession mailFilterSession = new MailFilterSessionImpl(sessionObj.getUserId(), sessionObj.getContextId(), sessionObj.getLoginName(), sessionObj.getPassword());
+			final MailFilterSession mailFilterSession = new MailFilterSessionImpl(sessionObj
+					.getUserId(), sessionObj.getContextId(), sessionObj.getLoginName(), sessionObj
+					.getPassword());
 			mailFilterService.addRule(mailFilterSession, rule);
-			
+
 			final JSONObject jsonObj = new JSONObject();
 			jsonObj.put(RuleFields.ID, rule.getId());
 			return jsonObj;
@@ -291,8 +344,10 @@ public class MailFilterRequest {
 			final MailFilterParser mailFilterParser = new MailFilterParser();
 			final Rule rule = new Rule();
 			mailFilterParser.parseMailFilter(rule, jData);
-			
-			final MailFilterSession mailFilterSession = new MailFilterSessionImpl(sessionObj.getUserId(), sessionObj.getContextId(), sessionObj.getLoginName(), sessionObj.getPassword());
+
+			final MailFilterSession mailFilterSession = new MailFilterSessionImpl(sessionObj
+					.getUserId(), sessionObj.getContextId(), sessionObj.getLoginName(), sessionObj
+					.getPassword());
 			mailFilterService.editRule(mailFilterSession, rule);
 			return new JSONObject();
 		} catch (JSONException exc) {
