@@ -3,6 +3,7 @@
  - Bugfix #11064: Fixed a wrong constructor call.
  - Bugfix #11075: Fixed wrong build of sql search command if user has permission
    to read only own objects in a task folder.
+ - Bugfix #9452: Omitting writing empty data object.
 
 * 2008-03-17 - sebastian.kauss@open-xchange.com
 

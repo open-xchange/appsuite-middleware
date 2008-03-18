@@ -224,11 +224,9 @@ public class Multiple extends SessionServlet {
 				final AppointmentRequest appointmentRequest = new AppointmentRequest(sessionObj, ctx);
 				jsonWriter.object();
 				try {
+				    final Object tmp = appointmentRequest.action(action, jsonObj);
 					jsonWriter.key(Response.DATA);
-					jsonWriter.value(appointmentRequest.action(action, jsonObj));
-					if (jsonWriter.isExpectingValue()) {
-						jsonWriter.value("");
-					}
+					jsonWriter.value(tmp);
 					if (null != appointmentRequest.getTimestamp()) {
 						jsonWriter.key(Response.TIMESTAMP).value(appointmentRequest.getTimestamp().getTime());
 					}
@@ -287,11 +285,9 @@ public class Multiple extends SessionServlet {
 				final ContactRequest contactRequest = new ContactRequest(sessionObj, ctx);
 				jsonWriter.object();
 				try {
+				    final Object tmp = contactRequest.action(action, jsonObj);
 					jsonWriter.key(Response.DATA);
-					jsonWriter.value(contactRequest.action(action, jsonObj));
-					if (jsonWriter.isExpectingValue()) {
-						jsonWriter.value("");
-					}
+					jsonWriter.value(tmp);
 					if (null != contactRequest.getTimestamp()) {
 						jsonWriter.key(Response.TIMESTAMP).value(contactRequest.getTimestamp().getTime());
 					}
@@ -346,11 +342,9 @@ public class Multiple extends SessionServlet {
 				final GroupRequest groupRequest = new GroupRequest(sessionObj, ctx);
 				jsonWriter.object();
 				try {
+				    final Object tmp = groupRequest.action(action, jsonObj);
 					jsonWriter.key(Response.DATA);
-					jsonWriter.value(groupRequest.action(action, jsonObj));
-					if (jsonWriter.isExpectingValue()) {
-						jsonWriter.value("");
-					}
+					jsonWriter.value(tmp);
 					if (null != groupRequest.getTimestamp()) {
 						jsonWriter.key(Response.TIMESTAMP).value(groupRequest.getTimestamp().getTime());
 					}
@@ -399,11 +393,9 @@ public class Multiple extends SessionServlet {
 				final ReminderRequest reminderRequest = new ReminderRequest(sessionObj, ctx);
 				jsonWriter.object();
 				try {
+				    final Object tmp = reminderRequest.action(action, jsonObj);
 					jsonWriter.key(Response.DATA);
-					jsonWriter.value(reminderRequest.action(action, jsonObj));
-					if (jsonWriter.isExpectingValue()) {
-						jsonWriter.value("");
-					}
+					jsonWriter.value(tmp);
 					if (null != reminderRequest.getTimestamp()) {
 						jsonWriter.key(Response.TIMESTAMP).value(reminderRequest.getTimestamp().getTime());
 					}
@@ -452,11 +444,9 @@ public class Multiple extends SessionServlet {
 				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, ctx);
 				jsonWriter.object();
 				try {
+				    final Object tmp = resourceRequest.action(action, jsonObj);
 					jsonWriter.key(Response.DATA);
-					jsonWriter.value(resourceRequest.action(action, jsonObj));
-					if (jsonWriter.isExpectingValue()) {
-						jsonWriter.value("");
-					}
+					jsonWriter.value(tmp);
 					if (null != resourceRequest.getTimestamp()) {
 						jsonWriter.key(Response.TIMESTAMP).value(resourceRequest.getTimestamp().getTime());
 					}
@@ -505,8 +495,9 @@ public class Multiple extends SessionServlet {
 				final TaskRequest taskRequest = new TaskRequest(sessionObj, ctx);
 				jsonWriter.object();
 				try {
+				    final Object tmp = taskRequest.action(action, jsonObj);
 					jsonWriter.key(Response.DATA);
-					jsonWriter.value(taskRequest.action(action, jsonObj));
+					jsonWriter.value(tmp);
 					if (null != taskRequest.getTimestamp()) {
 						jsonWriter.key(Response.TIMESTAMP).value(taskRequest.getTimestamp().getTime());
 					}
