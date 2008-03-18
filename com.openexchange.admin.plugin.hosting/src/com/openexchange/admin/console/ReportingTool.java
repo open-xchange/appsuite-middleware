@@ -18,6 +18,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
+import com.openexchange.configuration.ConfigDB;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.database.DatabaseInit;
@@ -101,7 +102,6 @@ public class ReportingTool extends BasicCommandlineOptions {
 			parser.printUsage();
 			sysexit(SYSEXIT_UNKNOWN_OPTION);
 		} catch (final MissingOptionException e) {
-			printError(e.getMessage(), parser);
 			parser.printUsage();
 			sysexit(SYSEXIT_MISSING_OPTION);
 		} catch (DBPoolingException e) {
@@ -214,6 +214,7 @@ public class ReportingTool extends BasicCommandlineOptions {
 	private void start() throws DBPoolingException, ConfigurationException {
 		// init db pool to fetch directly the data
 		SystemConfig.getInstance().start();
+		ConfigDB.getInstance().start();
 		DatabaseInit.getInstance().start();
 		//DatabaseInit.init();
 		// fetch data via sql or rmi interface
