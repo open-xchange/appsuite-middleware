@@ -78,7 +78,8 @@ fi
 
 CLASSPATH="-classpath $ALLCLASSES"
 
-exec $JAVA_BIN -Dopenexchange.propfile=$SYSTEMPROPERTIES $CLASSPATH  com.openexchange.admin.console.ReportingTool "$@"
+
+exec $JAVA_BIN -Dopenexchange.propdir=$PROPERTIESDIR $CLASSPATH  com.openexchange.admin.console.ReportingTool "$@"
 
 
 
