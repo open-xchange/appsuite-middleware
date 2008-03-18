@@ -54,10 +54,10 @@ package com.openexchange.mail.filter;
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-public class MailFilterConfig {
+public interface MailFilterConfig {
+
+	public ConfigTestHolder[] getTests();
 	
-	public MailFilterConfig() {
-		
-	}
+	public String[] getActionCommands();
 
 }
