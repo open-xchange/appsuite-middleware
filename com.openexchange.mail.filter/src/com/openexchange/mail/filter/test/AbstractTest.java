@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.filter.test;
 
+import com.openexchange.mail.filter.comparison.AbstractComparison;
+
 /**
  * AbstractTest
  *
@@ -61,7 +63,4 @@ public abstract class AbstractTest {
 	public String getName() {
 		return name;
 	}
-	
-	
-	
 }
