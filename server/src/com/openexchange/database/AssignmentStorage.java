@@ -67,8 +67,6 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.configuration.SystemConfig;
-import com.openexchange.configuration.SystemConfig.Property;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.DBPoolingException.Code;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -95,6 +93,8 @@ public final class AssignmentStorage {
     private static final String CACHE_NAME = "OXDBPoolCache";
 
     private Assignment configDB;
+
+    private CacheService cacheService;
 
     private Cache cache;
 
@@ -124,8 +124,8 @@ public final class AssignmentStorage {
         if (null == cache) {
             retval = loadAssignment(contextId);
         } else {
-            final CacheKey key = ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
-					contextId, Integer.valueOf(Server.getServerId()));
+            final CacheKey key = cacheService.newCacheKey(contextId,
+                Server.getServerId());
 			cacheLock.lock();
 			try {
                 retval = (Assignment) cache.get(key);
@@ -226,29 +226,42 @@ public final class AssignmentStorage {
         return singleton;
     }
 
-    public void start() throws DBPoolingException {
+    public void start() {
         if (null != configDB) {
             LOG.error("Duplicate AssignmentStorage initialization.");
             return;
         }
         configDB = new Assignment(0, 0, Pools.CONFIGDB_READ_ID,
             Pools.CONFIGDB_WRITE_ID, null);
-        if (Boolean.parseBoolean(SystemConfig.getProperty(Property.CACHE))) {
-            try {
-                cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_NAME);
-            } catch (CacheException e) {
-                throw new DBPoolingException(Code.NOT_INITIALIZED, e,
-                    CACHE_NAME);
-            }
+    }
+
+    /**
+     * Adds a found cache service to improve performance of this class.
+     * @param service a found cache service.
+     */
+    public void addCacheService(final CacheService service) {
+        this.cacheService = service;
+        try {
+            this.cache = service.getCache(CACHE_NAME);
+        } catch (CacheException e) {
+            LOG.error(e.getMessage(), e);
         }
-        
+    }
+
+    public void removeCacheService() {
+        this.cacheService = null;
+        if (null != cache) {
+            try {
+                cache.clear();
+            } catch (CacheException e) {
+                LOG.error(e.getMessage(), e);
+            }
+            cache = null;
+        }
     }
 
     public void stop() {
-        if (null != cache) {
-            cache.dispose();
-            cache = null;
-        }
+        removeCacheService();
         configDB = null;
     }
 }

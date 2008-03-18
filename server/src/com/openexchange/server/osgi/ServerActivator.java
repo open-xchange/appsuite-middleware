@@ -193,6 +193,9 @@ public final class ServerActivator extends DeferredActivator {
 		// contacts
 		serviceTrackerList.add(new ServiceTracker(context, ContactInterface.class.getName(),
 				new ContactServiceListener(context)));
+		// Add cache dynamically to database pooling. it works without, too.
+		serviceTrackerList.add(new ServiceTracker(context, CacheService.class.getName(),
+		    new CacheCustomizer(context)));
 		/*
 		 * Start server dependent on whether admin bundle is available or not
 		 */
