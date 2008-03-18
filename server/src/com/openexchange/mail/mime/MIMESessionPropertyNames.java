@@ -85,7 +85,7 @@ public final class MIMESessionPropertyNames {
 
 	public static final String PROP_MAIL_SMTP_TIMEOUT = "mail.imap.timeout";
 
-	public static final String PROP_MAIL_IMAP_CONNECTIONTIMEOUT = "mail.smtp.connectiontimeout";
+	public static final String PROP_MAIL_IMAP_CONNECTIONTIMEOUT = "mail.imap.connectiontimeout";
 
 	public static final String PROP_MAIL_IMAP_TIMEOUT = "mail.imap.timeout";
 

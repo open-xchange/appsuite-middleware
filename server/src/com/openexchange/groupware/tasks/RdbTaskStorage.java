@@ -258,8 +258,10 @@ public class RdbTaskStorage extends TaskStorage {
         } catch (DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
+        PreparedStatement stmt = null;
+        ResultSet result = null;
         try {
-            final PreparedStatement stmt = con.prepareStatement(sql.toString());
+            stmt = con.prepareStatement(sql.toString());
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             for (int i : all) {
@@ -289,10 +291,11 @@ public class RdbTaskStorage extends TaskStorage {
             if (LOG.isTraceEnabled()) {
 				LOG.trace(stmt);
 			}
-            final ResultSet result = stmt.executeQuery();
+            result = stmt.executeQuery();
             return new TaskIterator(ctx, userId, result, -1, columns,
                 StorageType.ACTIVE);
         } catch (SQLException e) {
+            closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(ctx, con);
             throw new TaskException(Code.SEARCH_FAILED, e, e.getMessage());
         }
