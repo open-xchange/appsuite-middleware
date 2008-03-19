@@ -51,7 +51,7 @@ package com.openexchange.mail;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.cache.MailCacheConfiguration;
-import com.openexchange.mail.cache.MailConnectionCache;
+import com.openexchange.mail.cache.MailAccessCache;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailPropertiesInit;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
@@ -115,7 +115,7 @@ public final class MailInitialization implements Initialization {
 		 */
 		MIMEType2ExtMap.reset();
 		MessageUtilityInit.getInstance().stop();
-		MailConnectionCache.releaseInstance();
+		MailAccessCache.releaseInstance();
 		MailMessageCache.releaseInstance();
 		UserSettingMailStorage.releaseInstance();
 		MailConnectionWatcher.stop();

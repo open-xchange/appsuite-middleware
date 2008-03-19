@@ -61,12 +61,12 @@ import com.openexchange.caching.CacheException;
 import com.openexchange.mail.MailConnectionWatcher;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
-import com.openexchange.mail.cache.MailConnectionCache;
+import com.openexchange.mail.cache.MailAccessCache;
 import com.openexchange.session.Session;
 
 /**
  * {@link MailAccess} - Handles connecting to the mailing system while using an
- * internal cache for established connections (see {@link MailConnectionCache}).
+ * internal cache for connected access objects (see {@link MailAccessCache}).
  * <p>
  * Moreover it provides access to either message storage, folder storage and
  * logic tools.
@@ -74,8 +74,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MailAccess<F extends MailFolderStorage, M extends MailMessageStorage>
-		implements Serializable {
+public abstract class MailAccess<F extends MailFolderStorage, M extends MailMessageStorage> implements Serializable {
 
 	/**
 	 * Serial version UID
@@ -154,9 +153,8 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	 */
 	public static final MailAccess<?, ?> getInstance(final Session session) throws MailException {
 		try {
-			if (MailConnectionCache.getInstance().containsMailConnection(session)) {
-				final MailAccess<?, ?> mailConnection = MailConnectionCache.getInstance().removeMailConnection(
-						session);
+			if (MailAccessCache.getInstance().containsMailConnection(session)) {
+				final MailAccess<?, ?> mailConnection = MailAccessCache.getInstance().removeMailConnection(session);
 				if (mailConnection != null) {
 					/*
 					 * Apply new thread's trace information
@@ -190,9 +188,8 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 				/*
 				 * Try to fetch from cache again
 				 */
-				if (MailConnectionCache.getInstance().containsMailConnection(session)) {
-					final MailAccess<?, ?> mailConnection = MailConnectionCache.getInstance().removeMailConnection(
-							session);
+				if (MailAccessCache.getInstance().containsMailConnection(session)) {
+					final MailAccess<?, ?> mailConnection = MailAccessCache.getInstance().removeMailConnection(session);
 					if (mailConnection != null) {
 						/*
 						 * Apply new thread's trace information
@@ -380,7 +377,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 				/*
 				 * Cache connection if desired/possible anymore
 				 */
-				if (put2Cache && MailConnectionCache.getInstance().putMailConnection(session, this)) {
+				if (put2Cache && MailAccessCache.getInstance().putMailConnection(session, this)) {
 					/*
 					 * Successfully cached: signal & return
 					 */

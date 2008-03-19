@@ -72,17 +72,17 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailConnectionCache} - a very volatile cache for already established
- * mail connections.
+ * {@link MailAccessCache} - a very volatile cache for already connected
+ * instances of {@link MailAccess}.
  * <p>
- * Only one connection can be cached per user and is dedicated to fasten
+ * Only one mail access can be cached per user and is dedicated to fasten
  * sequential mail requests<br>
  * TODO: Maybe own cache implementation (+ timer thread) to reduce lock overhead
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailConnectionCache {
+public final class MailAccessCache {
 
 	static final String REGION_NAME = "MailConnectionCache";
 
@@ -92,7 +92,7 @@ public final class MailConnectionCache {
 
 	private static final Map<CacheKey, ReadWriteLock> contextLocks = new HashMap<CacheKey, ReadWriteLock>();
 
-	private static MailConnectionCache singleton;
+	private static MailAccessCache singleton;
 
 	/*
 	 * Field members
@@ -105,7 +105,7 @@ public final class MailConnectionCache {
 	 * @throws CacheException
 	 *             If initialization fails
 	 */
-	private MailConnectionCache() throws CacheException {
+	private MailAccessCache() throws CacheException {
 		super();
 		cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
 		/*
@@ -147,11 +147,11 @@ public final class MailConnectionCache {
 	 * @throws CacheException
 	 *             If instance initialization fails
 	 */
-	public static MailConnectionCache getInstance() throws CacheException {
+	public static MailAccessCache getInstance() throws CacheException {
 		if (!initialized.get()) {
 			synchronized (initialized) {
 				if (null == singleton) {
-					singleton = new MailConnectionCache();
+					singleton = new MailAccessCache();
 					initialized.set(true);
 				}
 			}

@@ -151,7 +151,7 @@ public abstract class MailMessageStorage {
 	/**
 	 * A convenience method that delivers all messages contained in given folder
 	 * through invoking
-	 * {@link #searchMessages(String, IndexRange, MailListField, OrderDirection, SearchTerm, MailField[])
+	 * {@link #searchMessages(String, IndexRange, MailListField, OrderDirection, SearchTerm, MailField[])}
 	 * without search arguments.
 	 * <p>
 	 * Note that sorting needs not to be supported by underlying mailing system.
@@ -244,7 +244,7 @@ public abstract class MailMessageStorage {
 	 * Gets the mail located in given folder whose mail ID matches specified ID.
 	 * <p>
 	 * This is a convenience method that invokes
-	 * {@link #getMessages(String, long[], MailField[]) with specified mail ID
+	 * {@link #getMessages(String, long[], MailField[])} with specified mail ID
 	 * and {@link MailField#FULL}. Thus the returned instance of
 	 * {@link MailMessage} is completely pre-filled including content
 	 * references.
@@ -459,10 +459,9 @@ public abstract class MailMessageStorage {
 	 * return filtered mails' headers for a fast list view. See parameter
 	 * description to know which messages are going to be returned.
 	 * <p>
-	 * In contrast to
-	 * {@link #getMessages(String, long[], MailField[]) the returned instances
-	 * of {@link MailMessage} are only pre-filled with the fields specified
-	 * through parameter <code>fields</code>.
+	 * In contrast to {@link #getMessages(String, long[], MailField[])} the
+	 * returned instances of {@link MailMessage} are only pre-filled with the
+	 * fields specified through parameter <code>fields</code>.
 	 * <p>
 	 * <b>Note</b> that sorting needs not to be supported by underlying mailing
 	 * system. This can be done on application side, too.<br>
