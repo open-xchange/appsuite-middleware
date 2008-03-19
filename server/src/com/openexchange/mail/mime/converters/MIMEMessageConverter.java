@@ -469,8 +469,9 @@ public final class MIMEMessageConverter {
 	 *            The source messages
 	 * @param fields
 	 *            The fields to fill
-	 * @param Whether
-	 *            to create mail messages with reference to content or not
+	 * @param includeBody
+	 *            Whether to create mail messages with reference to content or
+	 *            not
 	 * @return The converted array of {@link Message} instances
 	 * @throws MailException
 	 *             If conversion fails

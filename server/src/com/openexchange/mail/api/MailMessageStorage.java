@@ -114,10 +114,6 @@ public abstract class MailMessageStorage {
 	 *            The destination folder fullname
 	 * @param mailIds
 	 *            The mail IDs in source folder
-	 * @param move
-	 *            <code>true</code> to perform a move operation, meaning to
-	 *            delete the copied messages in source folder afterwards,
-	 *            otherwise <code>false</code>
 	 * @param fast
 	 *            <code>true</code> to perform a fast copy operation, meaning
 	 *            the corresponding mail IDs in destination folder are ignored
@@ -155,7 +151,7 @@ public abstract class MailMessageStorage {
 	/**
 	 * A convenience method that delivers all messages contained in given folder
 	 * through invoking
-	 * {@link #searchMessages(String, IndexRange, MailListField, OrderDirection, MailListField[], String[], boolean, MailField[])}
+	 * {@link #searchMessages(String, IndexRange, MailListField, OrderDirection, SearchTerm, MailField[])
 	 * without search arguments.
 	 * <p>
 	 * Note that sorting needs not to be supported by underlying mailing system.
@@ -248,8 +244,8 @@ public abstract class MailMessageStorage {
 	 * Gets the mail located in given folder whose mail ID matches specified ID.
 	 * <p>
 	 * This is a convenience method that invokes
-	 * {@link #getMessages(String, long[], MailField[], boolean)} with specified
-	 * mail ID and {@link MailField#FULL}. Thus the returned instance of
+	 * {@link #getMessages(String, long[], MailField[]) with specified mail ID
+	 * and {@link MailField#FULL}. Thus the returned instance of
 	 * {@link MailMessage} is completely pre-filled including content
 	 * references.
 	 * <p>
@@ -381,10 +377,6 @@ public abstract class MailMessageStorage {
 	 *            The destination folder fullname
 	 * @param mailIds
 	 *            The mail IDs in source folder
-	 * @param move
-	 *            <code>true</code> to perform a move operation, meaning to
-	 *            delete the copied messages in source folder afterwards,
-	 *            otherwise <code>false</code>
 	 * @param fast
 	 *            <code>true</code> to perform a fast move operation, meaning
 	 *            the corresponding mail IDs in destination folder are ignored
@@ -415,8 +407,8 @@ public abstract class MailMessageStorage {
 	 * A convenience method that saves given draft mail to default drafts folder
 	 * and supports deletion of old draft's version (draft-edit operation).
 	 * 
-	 * @param The
-	 *            fullname of default drafts folder
+	 * @param draftFullname
+	 *            The fullname of default drafts folder
 	 * @param draftMail
 	 *            The draft mail as a composed mail
 	 * @return The stored draft mail
@@ -467,9 +459,10 @@ public abstract class MailMessageStorage {
 	 * return filtered mails' headers for a fast list view. See parameter
 	 * description to know which messages are going to be returned.
 	 * <p>
-	 * In contrast to {@link #getMessages(String, long[], boolean)} the returned
-	 * instances of {@link MailMessage} are only pre-filled with the fields
-	 * specified through parameter <code>fields</code>.
+	 * In contrast to
+	 * {@link #getMessages(String, long[], MailField[]) the returned instances
+	 * of {@link MailMessage} are only pre-filled with the fields specified
+	 * through parameter <code>fields</code>.
 	 * <p>
 	 * <b>Note</b> that sorting needs not to be supported by underlying mailing
 	 * system. This can be done on application side, too.<br>
