@@ -90,6 +90,7 @@ public final class ContextID implements PreferencesItemService {
      * {@inheritDoc}
      */
     public IValueHandler getSharedValue() {
+        // TODO Make this a ReadOnlyValue
         return new IValueHandler() {
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;

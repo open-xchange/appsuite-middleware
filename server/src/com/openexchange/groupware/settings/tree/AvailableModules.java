@@ -49,11 +49,13 @@
 
 package com.openexchange.groupware.settings.tree;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.settings.impl.ConfigTree;
@@ -65,6 +67,11 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class AvailableModules implements PreferencesItemService {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(AvailableModules.class);
 
     private static final String NAME = "availableModules";
 
@@ -86,7 +93,8 @@ public final class AvailableModules implements PreferencesItemService {
      * {@inheritDoc}
      */
     public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
+        // TODO make this a ReadOnlyValue
+        return new IValueHandler() {
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
@@ -98,6 +106,16 @@ public final class AvailableModules implements PreferencesItemService {
             }
             public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
+            }
+            public int getId() {
+                return -1;
+            }
+            public boolean isWritable() {
+                return true;
+            }
+            public void writeValue(final Context ctx, final User user,
+                final Setting setting) throws SettingException {
+                LOG.warn(NAME + " written.");
             }
         };
     }
