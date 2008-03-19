@@ -191,7 +191,7 @@ public final class IMAPException extends MIMEMailException {
 		 */
 		NO_DEFAULT_FOLDER_DELETE("Default folder %s cannot be deleted", Category.PERMISSION, 2024),
 		/**
-		 * An I/O error occured: %s
+		 * An I/O error occurred: %s
 		 */
 		IO_ERROR(MailException.Code.IO_ERROR),
 		/**
@@ -201,8 +201,7 @@ public final class IMAPException extends MIMEMailException {
 		/**
 		 * Folder %s does not hold messages and is therefore not selectable
 		 */
-		FOLDER_DOES_NOT_HOLD_MESSAGES("Folder %s does not hold messages and is therefore not selectable",
-				Category.PERMISSION, 2027),
+		FOLDER_DOES_NOT_HOLD_MESSAGES(MailException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES),
 		/**
 		 * Number of search fields (%d) do not match number of search patterns
 		 * (%d)
@@ -222,9 +221,9 @@ public final class IMAPException extends MIMEMailException {
 		IMAP_SORT_FAILED("IMAP sort failed due to following reason: %s Switching to application-based sorting",
 				Category.SUBSYSTEM_OR_SERVICE_DOWN, 2030),
 		/**
-		 * Unknow serach field: %s
+		 * Unknow search field: %s
 		 */
-		UNKNOWN_SEARCH_FIELD("Unknow serach field: %s", Category.CODE_ERROR, 2031),
+		UNKNOWN_SEARCH_FIELD("Unknow search field: %s", Category.CODE_ERROR, 2031),
 		/**
 		 * Message field %s cannot be handled
 		 */
@@ -261,10 +260,6 @@ public final class IMAPException extends MIMEMailException {
 		 */
 		UID_EXPUNGE_FAILED("Message(s) %s in folder %s could not be deleted due to following error: %s",
 				Category.INTERNAL_ERROR, 2039),
-		/**
-		 * Attachment %s not found inside message %s of mail folder %s
-		 */
-		ATTACHMENT_NOT_FOUND("Attachment %s not found inside message %s of mail folder %s", Category.CODE_ERROR, 2040),
 		/**
 		 * Not allowed to open folder %s due to missing read access
 		 */
@@ -314,7 +309,13 @@ public final class IMAPException extends MIMEMailException {
 		 * Connection was refused or timed out while attempting to connect to
 		 * remote server %s for user %s
 		 */
-		CONNECTION_ERROR(MIMEMailException.Code.CONNECT_ERROR);
+		CONNECTION_ERROR(MIMEMailException.Code.CONNECT_ERROR),
+		/**
+		 * Mailbox' root folder must not be source or the destination fullname
+		 * of a move operation.
+		 */
+		NO_ROOT_MOVE("Mailbox' root folder must not be source or the destination fullname of a move operation.",
+				Category.CODE_ERROR, 2048);
 
 		private final String message;
 

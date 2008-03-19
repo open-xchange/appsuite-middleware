@@ -55,7 +55,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.api.MailProvider;
 import com.openexchange.session.Session;
 
 /**

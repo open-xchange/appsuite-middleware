@@ -50,8 +50,6 @@
 package com.openexchange.imap.sort;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getCacheFetchProfile;
-import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getCacheFields;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
 import static com.openexchange.mail.utils.StorageUtility.EMPTY_MSGS;
 
@@ -75,8 +73,10 @@ import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.utils.StorageUtility.DummyAddress;
 import com.sun.mail.imap.IMAPFolder;
@@ -153,7 +153,7 @@ public final class IMAPSort {
 		}
 
 		private static boolean isEmptyAddrArray(final Address[] addrs) {
-			return (addrs == null || addrs.length == 0);
+			return ((addrs == null) || (addrs.length == 0));
 		}
 
 		private static String getCompareStringFromAddress(final Address addr, final Locale locale) {
@@ -163,12 +163,12 @@ public final class IMAPSort {
 			} else if (addr instanceof InternetAddress) {
 				final InternetAddress ia1 = (InternetAddress) addr;
 				final String personal = ia1.getPersonal();
-				if (personal != null && personal.length() > 0) {
+				if ((personal != null) && (personal.length() > 0)) {
 					/*
 					 * Personal is present. Skip leading quotes.
 					 */
-					return personal.charAt(0) == '\'' || personal.charAt(0) == '"' ? personal.substring(1).toLowerCase(
-							locale) : personal.toLowerCase(locale);
+					return (personal.charAt(0) == '\'') || (personal.charAt(0) == '"') ? personal.substring(1)
+							.toLowerCase(locale) : personal.toLowerCase(locale);
 				}
 				return ia1.getAddress().toLowerCase(Locale.ENGLISH);
 			} else {
@@ -177,11 +177,11 @@ public final class IMAPSort {
 		}
 
 		private static Integer compareReferences(final Object o1, final Object o2) {
-			if (o1 == null && o2 != null) {
+			if ((o1 == null) && (o2 != null)) {
 				return Integer.valueOf(-1);
-			} else if (o1 != null && o2 == null) {
+			} else if ((o1 != null) && (o2 == null)) {
 				return Integer.valueOf(1);
-			} else if (o1 == null && o2 == null) {
+			} else if ((o1 == null) && (o2 == null)) {
 				return Integer.valueOf(0);
 			}
 			/*
@@ -272,7 +272,7 @@ public final class IMAPSort {
 					}
 				};
 			case COLOR_LABEL:
-				if (IMAPConfig.isUserFlagsEnabled()) {
+				if (MailConfig.isUserFlagsEnabled()) {
 					return new FieldComparer(locale) {
 						@Override
 						public int compareFields(final Message msg1, final Message msg2) throws MessagingException {
@@ -364,10 +364,11 @@ public final class IMAPSort {
 	 *            The set to fill with actually used fields
 	 * @return Sorted messages
 	 * @throws MessagingException
+	 *             If a messaging error occurs
 	 */
-	public static Message[] sortMessages(final IMAPFolder imapFolder, final int[] filter, final MailListField[] fields,
+	public static Message[] sortMessages(final IMAPFolder imapFolder, final int[] filter, final MailField[] fields,
 			final MailListField sortFieldArg, final OrderDirection orderDir, final Locale locale,
-			final Set<MailListField> usedFields, final IMAPConfig imapConfig) throws MessagingException {
+			final Set<MailField> usedFields, final IMAPConfig imapConfig) throws MessagingException {
 		boolean applicationSort = true;
 		Message[] msgs = null;
 		final MailListField sortField = sortFieldArg == null ? MailListField.RECEIVED_DATE : sortFieldArg;
@@ -377,8 +378,8 @@ public final class IMAPSort {
 		 * and IMAP sort is enabled through config or number of messages to sort
 		 * exceeds limit.
 		 */
-		if (imapConfig.getImapCapabilities().hasSort()
-				&& (imapConfig.isImapSort() || (size >= IMAPConfig.getMailFetchLimit()))) {
+		if (imapConfig.isImapSort()
+				|| (imapConfig.getCapabilities().hasSort() && (size >= MailConfig.getMailFetchLimit()))) {
 			try {
 				long start = System.currentTimeMillis();
 				final int[] seqNums;
@@ -400,31 +401,26 @@ public final class IMAPSort {
 					LOG.debug(new StringBuilder(128).append("IMAP sort took ").append(
 							(System.currentTimeMillis() - start)).append("msec").toString());
 				}
-				if (seqNums == null || seqNums.length == 0) {
+				if ((seqNums == null) || (seqNums.length == 0)) {
 					return EMPTY_MSGS;
 				}
-				final FetchProfile fetchProfile;
-				if (seqNums.length < IMAPConfig.getMailFetchLimit()) {
-					fetchProfile = getCacheFetchProfile();
-					usedFields.addAll(getCacheFields());
-				} else {
-					fetchProfile = getFetchProfile(fields, IMAPConfig.isFastFetch());
-					usedFields.addAll(Arrays.asList(fields));
-				}
+				final FetchProfile fetchProfile = getFetchProfile(fields, IMAPConfig.isFastFetch());
+				usedFields.addAll(Arrays.asList(fields));
+				final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
 				start = System.currentTimeMillis();
-				msgs = new FetchIMAPCommand(imapFolder, seqNums, fetchProfile, false, true).doCommand();
+				msgs = new FetchIMAPCommand(imapFolder, seqNums, fetchProfile, false, true, body).doCommand();
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(seqNums.length).append(
 							" messages took ").append((System.currentTimeMillis() - start)).append("msec").toString());
 				}
-				if (msgs == null || msgs.length == 0) {
+				if ((msgs == null) || (msgs.length == 0)) {
 					return EMPTY_MSGS;
 				}
 				applicationSort = false;
-			} catch (final MessagingException e) {
+			} catch (final Throwable t) {
 				if (LOG.isWarnEnabled()) {
-					final IMAPException imapException = new IMAPException(IMAPException.Code.IMAP_SORT_FAILED, e, e
+					final IMAPException imapException = new IMAPException(IMAPException.Code.IMAP_SORT_FAILED, t, t
 							.getMessage());
 					LOG.warn(imapException.getLocalizedMessage(), imapException);
 				}
@@ -432,45 +428,22 @@ public final class IMAPSort {
 			}
 		}
 		if (applicationSort) {
-			/*
-			 * Select all messages if user does not want a search being
-			 * performed
-			 */
+			final MailField sort = MailField.toField(sortField);
+			final FetchProfile fetchProfile = getFetchProfile(fields, sort, IMAPConfig.isFastFetch());
+			usedFields.addAll(Arrays.asList(fields));
+			usedFields.add(sort);
+			final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
+			final long start = System.currentTimeMillis();
 			if (filter == null) {
-				final int allMsgCount = size;
-				final FetchProfile fetchProfile;
-				if (allMsgCount < IMAPConfig.getMailFetchLimit()) {
-					fetchProfile = getCacheFetchProfile();
-					usedFields.addAll(getCacheFields());
-				} else {
-					fetchProfile = getFetchProfile(fields, sortField, IMAPConfig.isFastFetch());
-					usedFields.addAll(Arrays.asList(fields));
-					usedFields.add(sortField);
-				}
-				final long start = System.currentTimeMillis();
-				msgs = new FetchIMAPCommand(imapFolder, fetchProfile, allMsgCount).doCommand();
-				if (LOG.isDebugEnabled()) {
-					LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(allMsgCount).append(
-							" messages took ").append((System.currentTimeMillis() - start)).append("msec").toString());
-				}
+				msgs = new FetchIMAPCommand(imapFolder, fetchProfile, size, body).doCommand();
 			} else {
-				final FetchProfile fetchProfile;
-				if (filter.length < IMAPConfig.getMailFetchLimit()) {
-					fetchProfile = getCacheFetchProfile();
-					usedFields.addAll(getCacheFields());
-				} else {
-					fetchProfile = getFetchProfile(fields, sortField, IMAPConfig.isFastFetch());
-					usedFields.addAll(Arrays.asList(fields));
-					usedFields.add(sortField);
-				}
-				final long start = System.currentTimeMillis();
-				msgs = new FetchIMAPCommand(imapFolder, filter, fetchProfile, false, false).doCommand();
-				if (LOG.isDebugEnabled()) {
-					LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(filter.length).append(
-							" messages took ").append((System.currentTimeMillis() - start)).append("msec").toString());
-				}
+				msgs = new FetchIMAPCommand(imapFolder, filter, fetchProfile, false, false, body).doCommand();
 			}
-			if (msgs == null || msgs.length == 0) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(size).append(" messages took ")
+						.append((System.currentTimeMillis() - start)).append("msec").toString());
+			}
+			if ((msgs == null) || (msgs.length == 0)) {
 				return EMPTY_MSGS;
 			}
 			final List<Message> msgList = Arrays.asList(msgs);

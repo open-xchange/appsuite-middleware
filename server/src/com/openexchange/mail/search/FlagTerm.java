@@ -47,79 +47,38 @@
  *
  */
 
-package com.openexchange.mail.config;
-
-import java.util.concurrent.atomic.AtomicBoolean;
+package com.openexchange.mail.search;
 
 /**
- * {@link AbstractProtocolProperties} - Super class of protocol-specific global
- * properties
+ * {@link FlagTerm}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class AbstractProtocolProperties {
+public final class FlagTerm extends SearchTerm<Integer> {
+
+	private final boolean set;
+
+	private final int flags;
 
 	/**
-	 * <code>"true"</code>
+	 * Initializes a new {@link FlagTerm}
 	 */
-	protected static final String STR_TRUE = "true";
-
-	/**
-	 * <code>"false"</code>
-	 */
-	protected static final String STR_FALSE = "false";
-
-	private final AtomicBoolean loaded;
-
-	/**
-	 * Initializes a new {@link AbstractProtocolProperties}
-	 */
-	protected AbstractProtocolProperties() {
+	public FlagTerm(final int flag, final boolean set) {
 		super();
-		loaded = new AtomicBoolean();
+		this.flags = flag;
+		this.set = set;
 	}
 
 	/**
-	 * Exclusively loads protocol's global properties
+	 * Gets the flags pattern: Either a positive integer if enabled or a
+	 * negative integer if disabled
 	 * 
-	 * @throws MailConfigException
-	 *             If loading of protocol's global properties fails
+	 * @return The flags pattern
 	 */
-	public void loadProperties() throws MailConfigException {
-		if (!loaded.get()) {
-			synchronized (loaded) {
-				if (!loaded.get()) {
-					loadProperties0();
-					loaded.set(true);
-				}
-			}
-		}
+	@Override
+	public Integer getPattern() {
+		return set ? Integer.valueOf(flags) : Integer.valueOf(flags * -1);
 	}
 
-	/**
-	 * Exclusively resets protocol's global properties
-	 */
-	public void resetProperties() {
-		if (loaded.get()) {
-			synchronized (loaded) {
-				if (loaded.get()) {
-					resetFields();
-					loaded.set(false);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Loads protocol's global properties
-	 * 
-	 * @throws MailConfigException
-	 */
-	protected abstract void loadProperties0() throws MailConfigException;
-
-	/**
-	 * Resets protocol's global properties' fields
-	 */
-	protected abstract void resetFields();
 }

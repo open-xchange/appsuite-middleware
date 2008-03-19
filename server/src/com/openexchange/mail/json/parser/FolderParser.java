@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.json.parser;
 
+import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,9 +65,9 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailProvider;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -99,14 +101,14 @@ public final class FolderParser {
 	 * @throws MailException
 	 *             If parsing fails
 	 */
-	public static void parse(final JSONObject jsonObj, final MailFolder mailFolder, final Session session)
+	public static void parse(final JSONObject jsonObj, final MailFolderDescription mailFolder, final Session session)
 			throws MailException {
 		try {
 			if (jsonObj.has(FolderFields.TITLE)) {
 				mailFolder.setName(jsonObj.getString(FolderFields.TITLE));
 			}
 			if (jsonObj.has(FolderFields.FOLDER_ID)) {
-				mailFolder.setParentFullname(jsonObj.getString(FolderFields.FOLDER_ID));
+				mailFolder.setParentFullname(prepareMailFolderParam(jsonObj.getString(FolderFields.FOLDER_ID)));
 			}
 			if (jsonObj.has(FolderFields.MODULE)
 					&& !jsonObj.getString(FolderFields.MODULE).equalsIgnoreCase(Folder.MODULE_MAIL)) {

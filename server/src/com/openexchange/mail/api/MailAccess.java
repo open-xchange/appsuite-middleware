@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail;
+package com.openexchange.mail.api;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -58,8 +58,10 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.caching.CacheException;
+import com.openexchange.mail.MailConnectionWatcher;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.cache.MailConnectionCache;
-import com.openexchange.mail.config.MailConfig;
 import com.openexchange.session.Session;
 
 /**
@@ -72,7 +74,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MailAccess<F extends MailFolderStorage, M extends MailMessageStorage, L extends MailLogicTools>
+public abstract class MailAccess<F extends MailFolderStorage, M extends MailMessageStorage>
 		implements Serializable {
 
 	/**
@@ -122,7 +124,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	 * @throws MailException
 	 *             If implementation-specific startup fails
 	 */
-	static void startupImpl(final Class<? extends MailAccess<?, ?, ?>> clazz) throws MailException {
+	static void startupImpl(final Class<? extends MailAccess<?, ?>> clazz) throws MailException {
 		createNewMailConnection(clazz, null).startup();
 	}
 
@@ -134,7 +136,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	 * @throws MailException
 	 *             If implementation-specific shutdown fails
 	 */
-	static void shutdownImpl(final Class<? extends MailAccess<?, ?, ?>> clazz) throws MailException {
+	static void shutdownImpl(final Class<? extends MailAccess<?, ?>> clazz) throws MailException {
 		createNewMailConnection(clazz, null).shutdown();
 	}
 
@@ -150,10 +152,10 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	 * @throws MailException
 	 *             If instantiation fails or a caching error occurs
 	 */
-	public static final MailAccess<?, ?, ?> getInstance(final Session session) throws MailException {
+	public static final MailAccess<?, ?> getInstance(final Session session) throws MailException {
 		try {
 			if (MailConnectionCache.getInstance().containsMailConnection(session)) {
-				final MailAccess<?, ?, ?> mailConnection = MailConnectionCache.getInstance().removeMailConnection(
+				final MailAccess<?, ?> mailConnection = MailConnectionCache.getInstance().removeMailConnection(
 						session);
 				if (mailConnection != null) {
 					/*
@@ -189,7 +191,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 				 * Try to fetch from cache again
 				 */
 				if (MailConnectionCache.getInstance().containsMailConnection(session)) {
-					final MailAccess<?, ?, ?> mailConnection = MailConnectionCache.getInstance().removeMailConnection(
+					final MailAccess<?, ?> mailConnection = MailConnectionCache.getInstance().removeMailConnection(
 							session);
 					if (mailConnection != null) {
 						/*
@@ -230,7 +232,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	 * @throws MailException
 	 *             If mail connection creation fails
 	 */
-	private static final MailAccess<?, ?, ?> createNewMailConnection(final Class<? extends MailAccess<?, ?, ?>> clazz,
+	private static final MailAccess<?, ?> createNewMailConnection(final Class<? extends MailAccess<?, ?>> clazz,
 			final Session session) throws MailException {
 		try {
 			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { session });
@@ -511,7 +513,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	 * @throws MailException
 	 *             If connection is not established
 	 */
-	public abstract L getLogicTools() throws MailException;
+	public abstract MailLogicTools getLogicTools() throws MailException;
 
 	/**
 	 * Checks if this connection is currently connected

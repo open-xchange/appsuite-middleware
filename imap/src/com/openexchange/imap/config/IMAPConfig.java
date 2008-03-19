@@ -53,14 +53,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.mail.MessagingException;
 
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.imap.IMAPCapabilities;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailCapabilities;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
-import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -71,95 +67,16 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class IMAPConfig extends MailConfig {
 
-	/*
-	 * User-specific fields
-	 */
-	private String imapServer;
-
-	private int imapPort;
-
-	private boolean secure;
-
-	private final AtomicBoolean capabilitiesLoaded = new AtomicBoolean();
-
-	private IMAPCapabilities imapCapabilities;
-
-	/**
-	 * Default constructor
-	 */
-	private IMAPConfig() {
-		super();
-	}
-
 	private static final String PROTOCOL_IMAP_SECURE = "imaps";
 
 	/**
-	 * Gets the user-specific IMAP configuration
+	 * Gets the block size in which large IMAP commands' UIDs/sequence numbers
+	 * arguments get splitted.
 	 * 
-	 * @param session
-	 *            The session providing needed user data
-	 * @return The user-specific IMAP configuration
-	 * @throws MailConfigException
-	 *             If user-specific IMAP configuration cannot be determined
+	 * @return The block size
 	 */
-	public static IMAPConfig getImapConfig(final Session session) throws MailConfigException {
-		final IMAPConfig imapConf = new IMAPConfig();
-		/*
-		 * Fetch user object and create its IMAP properties
-		 */
-		final User user;
-		try {
-			user = UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session
-					.getContextId()));
-		} catch (final ContextException e) {
-			throw new MailConfigException(e);
-		}
-		fillLoginAndPassword(imapConf, session, user);
-		String imapServer = MailConfig.getMailServerURL(user);
-		if (imapServer == null) {
-			if (LoginType.GLOBAL.equals(getLoginType())) {
-				throw new MailConfigException(new StringBuilder(128).append("Property \"").append("mailServer").append(
-						"\" not set in mail properties").toString());
-			}
-			throw new MailConfigException(new StringBuilder(128).append("Cannot determine mail server URL for user ")
-					.append(session.getUserId()).append(" in context ").append(session.getContextId()).toString());
-		}
-		{
-			/*
-			 * Remove ending '/' character
-			 */
-			final int lastPos = imapServer.length() - 1;
-			if (imapServer.charAt(lastPos) == '/') {
-				imapServer = imapServer.substring(0, lastPos);
-			}
-		}
-		int imapPort = 143;
-		{
-			final String[] parsed = parseProtocol(imapServer);
-			if (parsed != null) {
-				imapConf.secure = PROTOCOL_IMAP_SECURE.equals(parsed[0]);
-				imapServer = parsed[1];
-			} else {
-				imapConf.secure = false;
-			}
-			final int pos = imapServer.indexOf(':');
-			if (pos > -1) {
-				imapPort = Integer.parseInt(imapServer.substring(pos + 1));
-				imapServer = imapServer.substring(0, pos);
-			}
-		}
-		imapConf.imapServer = imapServer;
-		imapConf.imapPort = imapPort;
-		return imapConf;
-	}
-
-	/**
-	 * Gets the fastFetch
-	 * 
-	 * @return the fastFetch
-	 */
-	public static boolean isFastFetch() {
-		return IMAPProperties.getInstance().isFastFetch();
+	public static int getBlockSize() {
+		return IMAPProperties.getInstance().getBlockSize();
 	}
 
 	/**
@@ -190,32 +107,6 @@ public final class IMAPConfig extends MailConfig {
 	}
 
 	/**
-	 * Gets the imapSearch
-	 * 
-	 * @return the imapSearch
-	 */
-	public boolean isImapSearch() {
-		final boolean imapSearch = IMAPProperties.getInstance().isImapSearch();
-		if (capabilitiesLoaded.get()) {
-			return (imapSearch && (imapCapabilities.hasIMAP4rev1() || imapCapabilities.hasIMAP4()));
-		}
-		return imapSearch;
-	}
-
-	/**
-	 * Gets the imapSort
-	 * 
-	 * @return the imapSort
-	 */
-	public boolean isImapSort() {
-		final boolean imapSort = IMAPProperties.getInstance().isImapSort();
-		if (capabilitiesLoaded.get()) {
-			return (imapSort && imapCapabilities.hasSort());
-		}
-		return imapSort;
-	}
-
-	/**
 	 * Gets the imapTimeout
 	 * 
 	 * @return the imapTimeout
@@ -225,41 +116,12 @@ public final class IMAPConfig extends MailConfig {
 	}
 
 	/**
-	 * Gets the global supportsACLs
-	 * 
-	 * @return the global supportsACLs
-	 */
-	public static BoolCapVal isSupportsACLsConfig() {
-		return IMAPProperties.getInstance().getSupportsACLs();
-	}
-
-	/**
 	 * Gets the user2acl implementation's canonical class name
 	 * 
 	 * @return The user2acl implementation's canonical class name
 	 */
 	public static String getUser2AclImpl() {
 		return IMAPProperties.getInstance().getUser2AclImpl();
-	}
-
-	/**
-	 * Checks if mbox format is enabled
-	 * 
-	 * @return <code>true</code> if mbox format is enabled; otherwise
-	 *         <code>false</code>
-	 */
-	public static boolean isMBoxEnabled() {
-		return IMAPProperties.getInstance().isMBoxEnabled();
-	}
-
-	/**
-	 * Gets the block size in which large IMAP commands' UIDs/sequence numbers
-	 * arguments get splitted.
-	 * 
-	 * @return The block size
-	 */
-	public static int getBlockSize() {
-		return IMAPProperties.getInstance().getBlockSize();
 	}
 
 	/**
@@ -279,6 +141,34 @@ public final class IMAPConfig extends MailConfig {
 	}
 
 	/**
+	 * Gets the fastFetch
+	 * 
+	 * @return the fastFetch
+	 */
+	public static boolean isFastFetch() {
+		return IMAPProperties.getInstance().isFastFetch();
+	}
+
+	/**
+	 * Checks if mbox format is enabled
+	 * 
+	 * @return <code>true</code> if mbox format is enabled; otherwise
+	 *         <code>false</code>
+	 */
+	public static boolean isMBoxEnabled() {
+		return IMAPProperties.getInstance().isMBoxEnabled();
+	}
+
+	/**
+	 * Gets the global supportsACLs
+	 * 
+	 * @return the global supportsACLs
+	 */
+	public static BoolCapVal isSupportsACLsConfig() {
+		return IMAPProperties.getInstance().getSupportsACLs();
+	}
+
+	/**
 	 * Remembers if given IMAP server supports newer ACL extension conforming to
 	 * RFC 4314
 	 * 
@@ -291,14 +181,29 @@ public final class IMAPConfig extends MailConfig {
 		IMAPProperties.getInstance().getNewACLExtMap().put(imapServer, Boolean.valueOf(newACLExt));
 	}
 
-	/**
-	 * Requests if the IMAP capabilities are loaded
-	 * 
-	 * @return <code>true</code> if IMAP capabilities are loaded; otherwise
-	 *         <code>false</code>
+	private final AtomicBoolean capabilitiesLoaded = new AtomicBoolean();
+
+	private IMAPCapabilities imapCapabilities;
+
+	private int imapPort;
+
+	/*
+	 * User-specific fields
 	 */
-	public boolean isCapabilitiesLoaded() {
-		return capabilitiesLoaded.get();
+	private String imapServer;
+
+	private boolean secure;
+
+	/**
+	 * Default constructor
+	 */
+	public IMAPConfig() {
+		super();
+	}
+
+	@Override
+	public MailCapabilities getCapabilities() {
+		return capabilitiesLoaded.get() ? imapCapabilities : MailCapabilities.EMPTY_CAPS;
 	}
 
 	/**
@@ -308,6 +213,26 @@ public final class IMAPConfig extends MailConfig {
 	 */
 	public IMAPCapabilities getImapCapabilities() {
 		return imapCapabilities;
+	}
+
+	/**
+	 * Gets the imapPort
+	 * 
+	 * @return the imapPort
+	 */
+	@Override
+	public int getPort() {
+		return imapPort;
+	}
+
+	/**
+	 * Gets the imapServer
+	 * 
+	 * @return the imapServer
+	 */
+	@Override
+	public String getServer() {
+		return imapServer;
 	}
 
 	/**
@@ -347,29 +272,40 @@ public final class IMAPConfig extends MailConfig {
 		}
 	}
 
-	@Override
-	public int getCapabilities() {
-		return capabilitiesLoaded.get() ? imapCapabilities.getCapabilities() : 0;
+	/**
+	 * Requests if the IMAP capabilities are loaded
+	 * 
+	 * @return <code>true</code> if IMAP capabilities are loaded; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isCapabilitiesLoaded() {
+		return capabilitiesLoaded.get();
 	}
 
 	/**
-	 * Gets the imapPort
+	 * Gets the imapSearch
 	 * 
-	 * @return the imapPort
+	 * @return the imapSearch
 	 */
-	@Override
-	public int getPort() {
-		return imapPort;
+	public boolean isImapSearch() {
+		final boolean imapSearch = IMAPProperties.getInstance().isImapSearch();
+		if (capabilitiesLoaded.get()) {
+			return (imapSearch && (imapCapabilities.hasIMAP4rev1() || imapCapabilities.hasIMAP4()));
+		}
+		return imapSearch;
 	}
 
 	/**
-	 * Gets the imapServer
+	 * Gets the imapSort
 	 * 
-	 * @return the imapServer
+	 * @return the imapSort
 	 */
-	@Override
-	public String getServer() {
-		return imapServer;
+	public boolean isImapSort() {
+		final boolean imapSort = IMAPProperties.getInstance().isImapSort();
+		if (capabilitiesLoaded.get()) {
+			return (imapSort && imapCapabilities.hasSort());
+		}
+		return imapSort;
 	}
 
 	@Override
@@ -384,8 +320,28 @@ public final class IMAPConfig extends MailConfig {
 	 */
 	public boolean isSupportsACLs() {
 		if (capabilitiesLoaded.get() && BoolCapVal.AUTO.equals(IMAPProperties.getInstance().getSupportsACLs())) {
-			return imapCapabilities.hasACL();
+			return imapCapabilities.hasPermissions();
 		}
 		return BoolCapVal.TRUE.equals(IMAPProperties.getInstance().getSupportsACLs()) ? true : false;
+	}
+
+	@Override
+	protected void parseServerURL(final String serverURL) {
+		imapServer = serverURL;
+		imapPort = 143;
+		{
+			final String[] parsed = parseProtocol(imapServer);
+			if (parsed != null) {
+				secure = PROTOCOL_IMAP_SECURE.equals(parsed[0]);
+				imapServer = parsed[1];
+			} else {
+				secure = false;
+			}
+			final int pos = imapServer.indexOf(':');
+			if (pos > -1) {
+				imapPort = Integer.parseInt(imapServer.substring(pos + 1));
+				imapServer = imapServer.substring(0, pos);
+			}
+		}
 	}
 }

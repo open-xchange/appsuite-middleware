@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax;
 
-import static com.openexchange.mail.utils.StorageUtility.prepareMailFolderParam;
+import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.folderModule2String;
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
 
@@ -102,6 +102,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.json.writer.FolderWriter.MailFolderFieldWriter;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
@@ -1467,7 +1468,7 @@ public class Folder extends SessionServlet {
 				try {
 					final MailFolder updateFolder = mailInterface.getFolder(folderIdentifier, true);
 					if (updateFolder != null) {
-						final MailFolder mf = new MailFolder();
+						final MailFolderDescription mf = new MailFolderDescription();
 						mf.setFullname(updateFolder.getFullname());
 						mf.setExists(mf.exists());
 						mf.setSeparator(updateFolder.getSeparator());
@@ -1545,7 +1546,7 @@ public class Folder extends SessionServlet {
 			} else {
 				final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
 				try {
-					final MailFolder mf = new MailFolder();
+					final MailFolderDescription mf = new MailFolderDescription();
 					mf.setParentFullname(parentFolder);
 					com.openexchange.mail.json.parser.FolderParser.parse(jsonObj, mf, session);
 					retval = mailInterface.saveFolder(mf);

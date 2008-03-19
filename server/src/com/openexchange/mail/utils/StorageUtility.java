@@ -215,54 +215,6 @@ public final class StorageUtility {
 		return retval;
 	}
 
-	/**
-	 * Cuts off starting {@link MailFolder#DEFAULT_FOLDER_ID} from specified
-	 * folder fullname argument only if fullname argument is not
-	 * <code>null</code> and is not equal to
-	 * {@link MailFolder#DEFAULT_FOLDER_ID}. <br>
-	 * Example:
-	 * 
-	 * <pre>
-	 * &quot;default.INBOX&quot; -&gt; &quot;INBOX&quot;
-	 * </pre>
-	 * 
-	 * @param folderStringArg
-	 *            The groupware's mail folder fullname
-	 * @return The stripped mail folder fullname argument
-	 */
-	public static String prepareMailFolderParam(final String folderStringArg) {
-		if (folderStringArg == null) {
-			return null;
-		} else if (MailFolder.DEFAULT_FOLDER_ID.equals(folderStringArg)) {
-			return folderStringArg;
-		} else if (folderStringArg.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
-			return folderStringArg.substring(8);
-		}
-		return folderStringArg;
-	}
-
-	/**
-	 * Prepends {@link MailFolder#DEFAULT_FOLDER_ID} and given separator
-	 * character to given folder fullname. <br>
-	 * Example:
-	 * 
-	 * <pre>
-	 * &quot;INBOX&quot; -&gt; &quot;default.INBOX&quot;
-	 * </pre>
-	 * 
-	 * @param fullname
-	 *            The folder fullname
-	 * @param sep
-	 *            The folder's separator character
-	 * @return The groupware's mail folder fullname
-	 */
-	public static String prepareFullname(final String fullname, final char sep) {
-		if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
-			return fullname;
-		}
-		return new StringBuilder(32).append(MailFolder.DEFAULT_FOLDER_ID).append(sep).append(fullname).toString();
-	}
-
 	private static final String SWITCH_DEFAULT_FOLDER = "Switching to default value %s";
 
 	/**

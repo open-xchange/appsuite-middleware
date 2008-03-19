@@ -49,10 +49,11 @@
 
 package com.openexchange.mail.transport;
 
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.Protocol;
-import com.openexchange.mail.config.AbstractProtocolProperties;
+import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
@@ -165,7 +166,7 @@ public abstract class TransportProvider {
 
 	/**
 	 * Checks if this transport provider supports the given protocol (which is
-	 * in either secure or non-secure notation).
+	 * either in secure or non-secure notation).
 	 * <p>
 	 * This is a convenience method that invokes
 	 * {@link Protocol#isSupported(String)}
@@ -179,9 +180,9 @@ public abstract class TransportProvider {
 	}
 
 	/**
-	 * Gets the name of the class implementing {@link MailTransport}
+	 * Gets the class implementing {@link MailTransport}
 	 * 
-	 * @return The name of the class implementing {@link MailTransport}
+	 * @return The class implementing {@link MailTransport}
 	 */
 	public abstract Class<? extends MailTransport> getMailTransportClass();
 
@@ -195,12 +196,17 @@ public abstract class TransportProvider {
 	/**
 	 * Gets a new instance of {@link ComposedMailMessage}
 	 * 
+	 * @param session
+	 *            The session for handling temporary uploaded files which shall
+	 *            be added to composed mail
+	 * @param ctx
+	 *            The context to load session-related data
 	 * @return A new instance of {@link ComposedMailMessage}
 	 * @throws MailException
 	 *             If a new instance of {@link ComposedMailMessage} cannot be
 	 *             created
 	 */
-	public abstract ComposedMailMessage getNewComposedMailMessage() throws MailException;
+	public abstract ComposedMailMessage getNewComposedMailMessage(Session session, Context ctx) throws MailException;
 
 	/**
 	 * Gets a new instance of {@link UploadFileMailPart}

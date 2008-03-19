@@ -58,6 +58,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -77,6 +78,7 @@ import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.OrderDirection;
@@ -512,7 +514,7 @@ public final class IMAPCommandsCollection {
 	 * @return All unseen messages in specified folder
 	 * @throws MessagingException
 	 */
-	public static Message[] getUnreadMessages(final IMAPFolder folder, final MailListField[] fields,
+	public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields,
 			final MailListField sortField, final OrderDirection orderDir, final Locale locale)
 			throws MessagingException {
 		final IMAPFolder imapFolder = folder;
@@ -579,8 +581,10 @@ public final class IMAPCommandsCollection {
 				 */
 				final Message[] newMsgs;
 				try {
-					newMsgs = new FetchIMAPCommand(folder, newMsgSeqNums, getFetchProfile(fields, sortField, IMAPConfig
-							.isFastFetch()), false, false).doCommand();
+					final Set<MailField> set = new HashSet<MailField>(Arrays.asList(fields));
+					final boolean body = set.contains(MailField.BODY) || set.contains(MailField.FULL);
+					newMsgs = new FetchIMAPCommand(folder, newMsgSeqNums, getFetchProfile(fields, MailField
+							.toField(sortField), IMAPConfig.isFastFetch()), false, false, body).doCommand();
 				} catch (final MessagingException e) {
 					throw new ProtocolException(e.getLocalizedMessage());
 				}

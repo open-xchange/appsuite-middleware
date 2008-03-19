@@ -49,10 +49,11 @@
 
 package com.openexchange.smtp;
 
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.Protocol;
-import com.openexchange.mail.config.AbstractProtocolProperties;
+import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.InfostoreDocumentMailPart;
@@ -82,26 +83,32 @@ public final class SMTPProvider extends TransportProvider {
 	 */
 	public static final Protocol PROTOCOL_SMTP = new Protocol("smtp", "smtps");
 
+	private static final SMTPProvider instance = new SMTPProvider();
+
+	/**
+	 * Gets the singleton instance of SMTP provider
+	 * 
+	 * @return The singleton instance of SMTP provider
+	 */
+	public static SMTPProvider getInstance() {
+		return instance;
+	}
+
 	/**
 	 * Initializes a new {@link SMTPProvider}
 	 */
-	public SMTPProvider() {
+	private SMTPProvider() {
 		super();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.transport.MailTransportProvider#getMailTransportClass()
-	 */
 	@Override
 	public Class<? extends MailTransport> getMailTransportClass() {
 		return SMTPTransport.class;
 	}
 
 	@Override
-	public ComposedMailMessage getNewComposedMailMessage() throws MailException {
-		return new SMTPMailMessage();
+	public ComposedMailMessage getNewComposedMailMessage(final Session session, final Context ctx) throws MailException {
+		return new SMTPMailMessage(session, ctx);
 	}
 
 	@Override

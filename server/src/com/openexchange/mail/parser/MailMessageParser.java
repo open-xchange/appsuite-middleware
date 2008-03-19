@@ -76,7 +76,7 @@ import net.freeutils.tnef.mime.TNEFMime;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;

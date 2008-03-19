@@ -67,7 +67,7 @@ import org.mozilla.intl.chardet.nsPSMDetector;
 
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;

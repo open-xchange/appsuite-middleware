@@ -1,0 +1,203 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.mail.api;
+
+/**
+ * {@link MailCapabilities} - Holds capabilities of the underlying mail system.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
+public abstract class MailCapabilities {
+
+	/**
+	 * A constant to signal empty capabilities
+	 */
+	public static final MailCapabilities EMPTY_CAPS = new MailCapabilities() {
+
+		@Override
+		public boolean hasPermissions() {
+			return false;
+		}
+
+		@Override
+		public boolean hasQuota() {
+			return false;
+		}
+
+		@Override
+		public boolean hasSort() {
+			return false;
+		}
+
+		@Override
+		public boolean hasSubscription() {
+			return false;
+		}
+
+		@Override
+		public boolean hasThreadReferences() {
+			return false;
+		}
+
+		@Override
+		public int getCapabilities() {
+			return 0;
+		}
+	};
+
+	/*
+	 * Bit Constants
+	 */
+	/**
+	 * The bit for permission support: <code>1</code>
+	 */
+	public static final int BIT_PERMISSIONS = 1;
+
+	/**
+	 * The bit for thread reference support: <code>2</code>
+	 */
+	public static final int BIT_THREAD_REFERENCES = 2;
+
+	/**
+	 * The bit for quota support: <code>4</code>
+	 */
+	public static final int BIT_QUOTA = 4;
+
+	/**
+	 * The bit for sorting support: <code>8</code>
+	 */
+	public static final int BIT_SORT = 8;
+
+	/**
+	 * The bit for subscription support: <code>16</code>
+	 */
+	public static final int BIT_SUBSCRIPTION = 16;
+
+	/**
+	 * Initializes a new {@link MailCapabilities}
+	 */
+	public MailCapabilities() {
+		super();
+	}
+
+	/**
+	 * Indicates if mail system supports any kind of folder permissions to
+	 * define access rights for certain users to a mail folder.
+	 * <p>
+	 * Therefore this capability indicates if mail system supports shared/public
+	 * folders.
+	 * 
+	 * @return <code>true</code> if mail system supports any kind of mail
+	 *         permissions; otherwise <code>false</code>
+	 */
+	public abstract boolean hasPermissions();
+
+	/**
+	 * Indicates if mail system supports sorting messages in a certain mail
+	 * folder by their communication thread reference.
+	 * 
+	 * @return <code>true</code> if mail system supports sorting by
+	 *         communication thread reference; otherwise <code>false</code>
+	 */
+	public abstract boolean hasThreadReferences();
+
+	/**
+	 * Indicates if mail system supports user-specific quota restrictions on
+	 * resources like storage space.
+	 * 
+	 * @return <code>true</code> if mail system supports user-specific quota
+	 *         restrictions; otherwise <code>false</code>
+	 */
+	public abstract boolean hasQuota();
+
+	/**
+	 * Indicates if mail system supports sorting messages in a certain mail
+	 * folder.
+	 * 
+	 * @return <code>true</code> if mail system supports sorting; otherwise
+	 *         <code>false</code>
+	 */
+	public abstract boolean hasSort();
+
+	/**
+	 * Indicates if mail system supports subscription of mail folders.
+	 * 
+	 * @return <code>true</code> if mail system supports subscription;
+	 *         otherwise <code>false</code>
+	 */
+	public abstract boolean hasSubscription();
+
+	/**
+	 * Returns the capabilities as a bit mask.
+	 * <p>
+	 * Override to support additional capabilities:
+	 * 
+	 * <pre>
+	 * &#064;Override
+	 * public int getCapabilities() {
+	 * 	int retval = super.getCapabilities()
+	 * 	// your capabilities added here
+	 * }
+	 * </pre>
+	 * 
+	 * @return The capabilities as a bit mask
+	 */
+	public int getCapabilities() {
+		int retval = 0;
+		retval |= hasPermissions() ? BIT_PERMISSIONS : 0;
+		retval |= hasQuota() ? BIT_QUOTA : 0;
+		retval |= hasSort() ? BIT_SORT : 0;
+		retval |= hasThreadReferences() ? BIT_THREAD_REFERENCES : 0;
+		retval |= hasSubscription() ? BIT_SUBSCRIPTION : 0;
+		return retval;
+	}
+
+}

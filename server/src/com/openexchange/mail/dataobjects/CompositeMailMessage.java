@@ -292,4 +292,9 @@ public final class CompositeMailMessage extends MailMessage {
 		return delegate.getUnreadMessages();
 	}
 
+	@Override
+	public void setUnreadMessages(final int unreadMessages) {
+		delegate.setUnreadMessages(unreadMessages);
+	}
+
 }

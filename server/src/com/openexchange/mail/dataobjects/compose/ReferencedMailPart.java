@@ -75,7 +75,7 @@ import javax.activation.DataSource;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.upload.impl.AJAXUploadFile;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;

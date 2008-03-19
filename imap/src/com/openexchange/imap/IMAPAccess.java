@@ -61,24 +61,24 @@ import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.imap.user2acl.User2ACLException;
 import com.openexchange.imap.user2acl.User2ACLInit;
-import com.openexchange.mail.MailAccess;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
 /**
- * {@link IMAPAccess} - Establishes an IMAP connection and provides access
- * to storages
+ * {@link IMAPAccess} - Establishes an IMAP connection and provides access to
+ * storages
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageStorage, IMAPLogicTools>
-		implements Serializable {
+public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageStorage> implements Serializable {
 
 	/**
 	 * Serial Version UID
@@ -94,7 +94,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
 	private IMAPMessageStorage messageStorage;
 
-	private transient IMAPLogicTools logicTools;
+	private transient MailLogicTools logicTools;
 
 	private transient IMAPStore imapStore;
 
@@ -147,13 +147,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 			}
 		}
 		if (logicTools != null) {
-			try {
-				logicTools.releaseResources();
-			} catch (final IMAPException e) {
-				LOG.error(e.getLocalizedMessage(), e);
-			} finally {
-				logicTools = null;
-			}
+			logicTools = null;
 		}
 	}
 
@@ -187,7 +181,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 	@Override
 	public MailConfig getMailConfig() throws MailException {
 		if (null == imapConfig) {
-			imapConfig = IMAPConfig.getImapConfig(session);
+			imapConfig = MailConfig.getConfig(IMAPConfig.class, session);
 		}
 		return imapConfig;
 	}
@@ -315,11 +309,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 	 * @see com.openexchange.mail.MailConnection#getLogicTools()
 	 */
 	@Override
-	public IMAPLogicTools getLogicTools() throws MailException {
+	public MailLogicTools getLogicTools() throws MailException {
 		connected = (imapStore != null && imapStore.isConnected());
 		if (connected) {
 			if (null == logicTools) {
-				logicTools = new IMAPLogicTools(imapStore, this, session);
+				logicTools = new MailLogicTools(session);
 			}
 			return logicTools;
 		}

@@ -49,19 +49,17 @@
 
 package com.openexchange.imap;
 
-import static com.openexchange.mail.utils.StorageUtility.prepareMailFolderParam;
-
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailLogicTools;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.processing.MimeForward;
 import com.openexchange.mail.mime.processing.MimeReply;
 import com.openexchange.session.Session;
+import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -70,15 +68,15 @@ import com.sun.mail.imap.IMAPStore;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class IMAPLogicTools extends IMAPFolderWorker implements MailLogicTools {
+public final class IMAPLogicTools {
 
 	private static final long serialVersionUID = 5007382448690742714L;
 
-	/*
-	 * Static constants
-	 */
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(IMAPLogicTools.class);
+	private final IMAPStore imapStore;
+
+	private final IMAPAccess imapConnection;
+
+	private final Session session;
 
 	/**
 	 * Initializes a new {@link IMAPLogicTools}
@@ -94,34 +92,41 @@ public final class IMAPLogicTools extends IMAPFolderWorker implements MailLogicT
 	 */
 	public IMAPLogicTools(final IMAPStore imapStore, final IMAPAccess imapConnection, final Session session)
 			throws IMAPException {
-		super(imapStore, imapConnection, session);
+		super();
+		this.imapStore = imapStore;
+		this.imapConnection = imapConnection;
+		this.session = session;
 	}
 
-	public MailMessage getFowardMessage(final long[] originalUIDs, final String folder) throws MailException {
+	public MailMessage getFowardMessage(final long[] originalUIDs, final String fullname) throws MailException {
 		try {
-			final String fullname = prepareMailFolderParam(folder);
-			imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_ONLY);
-			/*
-			 * Fetch original messages
-			 */
-			final MimeMessage[] msgs = new MimeMessage[originalUIDs.length];
-			for (int i = 0; i < originalUIDs.length; i++) {
-				msgs[i] = (MimeMessage) imapFolder.getMessageByUID(originalUIDs[i]);
-				if (msgs[i] == null) {
-					throw new MailException(MailException.Code.MAIL_NOT_FOUND, Long.valueOf(originalUIDs[i]),
-							imapFolder.getFullName());
+			final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullname);
+			imapFolder.open(Folder.READ_ONLY);
+			try {
+				/*
+				 * Fetch original messages
+				 */
+				final MimeMessage[] msgs = new MimeMessage[originalUIDs.length];
+				for (int i = 0; i < originalUIDs.length; i++) {
+					msgs[i] = (MimeMessage) imapFolder.getMessageByUID(originalUIDs[i]);
+					if (msgs[i] == null) {
+						throw new MailException(MailException.Code.MAIL_NOT_FOUND, Long.valueOf(originalUIDs[i]),
+								imapFolder.getFullName());
+					}
 				}
-			}
-			final MailMessage forwardMail = MimeForward.getFowardMail(msgs, session);
-			{
-				final StringBuilder sb = new StringBuilder(msgs.length * 16);
-				sb.append(MailPath.getMailPath(fullname, originalUIDs[0]));
-				for (int i = 1; i < originalUIDs.length; i++) {
-					sb.append(',').append(MailPath.getMailPath(fullname, originalUIDs[i]));
+				final MailMessage forwardMail = MimeForward.getFowardMail(msgs, session);
+				{
+					final StringBuilder sb = new StringBuilder(msgs.length * 16);
+					sb.append(MailPath.getMailPath(fullname, originalUIDs[0]));
+					for (int i = 1; i < originalUIDs.length; i++) {
+						sb.append(',').append(MailPath.getMailPath(fullname, originalUIDs[i]));
+					}
+					forwardMail.setMsgref(sb.toString());
 				}
-				forwardMail.setMsgref(sb.toString());
+				return forwardMail;
+			} finally {
+				imapFolder.close(false);
 			}
-			return forwardMail;
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapConnection);
 		} catch (final IMAPException e) {
@@ -131,37 +136,28 @@ public final class IMAPLogicTools extends IMAPFolderWorker implements MailLogicT
 		}
 	}
 
-	public MailMessage getReplyMessage(final long originalUID, final String folder, final boolean replyAll)
+	public MailMessage getReplyMessage(final long originalUID, final String fullname, final boolean replyAll)
 			throws MailException {
 		try {
-			final String fullname = prepareMailFolderParam(folder);
-			imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_ONLY);
-			/*
-			 * Fetch original message
-			 */
-			final MailMessage replyMail = MimeReply.getReplyMail((MimeMessage) imapFolder.getMessageByUID(originalUID),
-					replyAll, session, imapConnection.getSession());
-			replyMail.setMsgref(MailPath.getMailPath(fullname, originalUID));
-			return replyMail;
+			final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullname);
+			imapFolder.open(Folder.READ_ONLY);
+			try {
+				/*
+				 * Fetch original message
+				 */
+				final MailMessage replyMail = MimeReply.getReplyMail((MimeMessage) imapFolder
+						.getMessageByUID(originalUID), replyAll, session, imapConnection.getSession());
+				replyMail.setMsgref(MailPath.getMailPath(fullname, originalUID));
+				return replyMail;
+			} finally {
+				imapFolder.close(false);
+			}
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapConnection);
 		} catch (final IMAPException e) {
 			throw e;
 		} catch (final MailException e) {
 			throw new IMAPException(e);
-		}
-	}
-
-	public void releaseResources() throws IMAPException {
-		if (null != imapFolder) {
-			try {
-				imapFolder.close(false);
-				resetIMAPFolder();
-			} catch (final IllegalStateException e) {
-				LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
-			} catch (final MessagingException e) {
-				LOG.error(e.getLocalizedMessage(), e);
-			}
 		}
 	}
 

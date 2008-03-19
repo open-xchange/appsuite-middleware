@@ -50,7 +50,7 @@
 package com.openexchange.mail.json.writer;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import static com.openexchange.mail.utils.StorageUtility.prepareFullname;
+import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 
 import java.io.UnsupportedEncodingException;
 import java.util.TimeZone;
@@ -72,7 +72,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.parser.MailMessageParser;

@@ -58,7 +58,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 
 /**

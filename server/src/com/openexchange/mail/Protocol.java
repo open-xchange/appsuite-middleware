@@ -64,9 +64,9 @@ public final class Protocol {
 	private static final Pattern PAT_PROT = Pattern.compile("([a-z]+)(?:((?:_[a-z]+)*))?");
 
 	/**
-	 * Parses specified protocol string whose syntax match pattern:
-	 * <i>([a-z]+)(?:((?:_[a-z]+)*))?</i>; e.g.: <code>http</code> or
-	 * <code>http_https</code>.
+	 * Parses specified protocol string whose syntax match pattern:<br>
+	 * <i>([a-z]+)(?:((?:_[a-z]+)*))?</i><br>
+	 * E.g.: <code>http</code> or <code>http_https</code>.
 	 * 
 	 * @param protocol
 	 *            The protocol string to parse

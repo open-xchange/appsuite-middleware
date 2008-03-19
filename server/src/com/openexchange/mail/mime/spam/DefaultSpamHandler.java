@@ -49,8 +49,6 @@
 
 package com.openexchange.mail.mime.spam;
 
-import static com.openexchange.mail.utils.StorageUtility.prepareMailFolderParam;
-
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
@@ -58,8 +56,8 @@ import javax.mail.MessagingException;
 import javax.mail.Store;
 import javax.mail.UIDFolder;
 
-import com.openexchange.mail.MailAccess;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.api.MailAccess;
 
 /**
  * {@link DefaultSpamHandler} - Assumes that no wrapping message holds the
@@ -79,7 +77,7 @@ public final class DefaultSpamHandler extends SpamHandler {
 
 	@Override
 	public void handleHam(final Folder spamFolder, final long[] msgUIDs, final boolean move,
-			final MailAccess<?, ?, ?> mailConnection, final Store store) throws MessagingException, MailException {
+			final MailAccess<?, ?> mailConnection, final Store store) throws MessagingException, MailException {
 		final boolean closeFolder = !spamFolder.isOpen();
 		/*
 		 * Copy to confirmed ham
@@ -89,8 +87,8 @@ public final class DefaultSpamHandler extends SpamHandler {
 				spamFolder.open(Folder.READ_ONLY);
 			}
 			final Message[] uidMsgs = ((UIDFolder) spamFolder).getMessagesByUID(msgUIDs);
-			spamFolder.copyMessages(uidMsgs, store.getFolder(prepareMailFolderParam(mailConnection.getFolderStorage()
-					.getConfirmedHamFolder())));
+			spamFolder
+					.copyMessages(uidMsgs, store.getFolder(mailConnection.getFolderStorage().getConfirmedHamFolder()));
 			if (move) {
 				/*
 				 * Copy messages to INBOX

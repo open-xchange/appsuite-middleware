@@ -57,7 +57,7 @@ import com.openexchange.api2.OXException;
  */
 public interface SearchIterator<T> {
 
-    SearchIterator EMPTY_ITERATOR = new SearchIterator() {
+    SearchIterator<?> EMPTY_ITERATOR = new SearchIterator<Object>() {
 
         public boolean hasNext() {
             return false;

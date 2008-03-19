@@ -65,6 +65,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -188,10 +189,12 @@ public final class MessageParser {
 			final TransportProvider provider) throws MailException {
 		final TransportProvider tp = provider == null ? TransportProviderRegistry
 				.getTransportProviderBySession(session) : provider;
-		final ComposedMailMessage transportMail = tp.getNewComposedMailMessage();
+		final ComposedMailMessage transportMail;
 		try {
-			parse(jsonObj, transportMail, TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(),
-					ContextStorage.getStorageContext(session.getContextId())).getTimeZone()), tp);
+			final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+			transportMail = tp.getNewComposedMailMessage(session, ctx);
+			parse(jsonObj, transportMail, TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx)
+					.getTimeZone()), tp);
 		} catch (final ContextException e) {
 			throw new MailException(e);
 		}

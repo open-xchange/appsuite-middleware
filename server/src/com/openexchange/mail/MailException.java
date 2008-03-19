@@ -51,6 +51,7 @@ package com.openexchange.mail;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
+import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
  * {@link MailException} - Base class for mail exceptions
@@ -268,7 +269,16 @@ public class MailException extends AbstractOXException {
 		 * legal system flag argument %s. Flag must be to the power of 2
 		 */
 		ILLEGAL_FLAG_ARGUMENT("Illegal system flag argument %s. Flag must be to the power of 2", Category.CODE_ERROR,
-				48);
+				48),
+		/**
+		 * Attachment %s not found inside mail %s of mail folder %s
+		 */
+		ATTACHMENT_NOT_FOUND("Attachment %s not found inside mail %s of mail folder %s", Category.CODE_ERROR, 49),
+		/**
+		 * Folder %s does not hold messages and is therefore not selectable
+		 */
+		FOLDER_DOES_NOT_HOLD_MESSAGES("Folder %s does not hold messages and is therefore not selectable",
+				Category.PERMISSION, 50);
 
 		private final String message;
 

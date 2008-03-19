@@ -47,15 +47,21 @@
  *
  */
 
-package com.openexchange.mail.config;
+package com.openexchange.mail.api;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
 
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.session.Session;
 
@@ -153,6 +159,72 @@ public abstract class MailConfig {
 	 */
 	protected MailConfig() {
 		super();
+	}
+
+	protected static final Class<?>[] CONSTRUCTOR_ARGS = new Class[0];
+
+	protected static final Object[] INIT_ARGS = new Object[0];
+
+	/**
+	 * Gets the user-specific mail configuration
+	 * 
+	 * @param clazz
+	 *            The mail configuration type
+	 * @param session
+	 *            The session providing needed user data
+	 * @return The user-specific mail configuration
+	 * @throws MailException
+	 *             If user-specific mail configuration cannot be determined
+	 */
+	public static final <C extends MailConfig> C getConfig(final Class<? extends C> clazz, final Session session)
+			throws MailException {
+		final C mailConfig;
+		try {
+			mailConfig = clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(INIT_ARGS);
+		} catch (final IllegalArgumentException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final SecurityException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final InstantiationException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final IllegalAccessException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final InvocationTargetException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final NoSuchMethodException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		}
+		/*
+		 * Fetch user object to determine server URL
+		 */
+		final User user;
+		try {
+			user = UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session
+					.getContextId()));
+		} catch (final ContextException e) {
+			throw new MailException(e);
+		}
+		fillLoginAndPassword(mailConfig, session, user);
+		String serverURL = MailConfig.getMailServerURL(user);
+		if (serverURL == null) {
+			if (LoginType.GLOBAL.equals(getLoginType())) {
+				throw new MailConfigException(new StringBuilder(128).append("Property \"").append(
+						"com.openexchange.mail.mailServer").append("\" not set in mail properties").toString());
+			}
+			throw new MailConfigException(new StringBuilder(128).append("Cannot determine mail server URL for user ")
+					.append(session.getUserId()).append(" in context ").append(session.getContextId()).toString());
+		}
+		{
+			/*
+			 * Remove ending '/' character
+			 */
+			final int lastPos = serverURL.length() - 1;
+			if (serverURL.charAt(lastPos) == '/') {
+				serverURL = serverURL.substring(0, lastPos);
+			}
+		}
+		mailConfig.parseServerURL(serverURL);
+		return mailConfig;
 	}
 
 	/*
@@ -484,12 +556,32 @@ public abstract class MailConfig {
 	}
 
 	/**
+	 * Parses given server URL which is then accessible through
+	 * {@link #getServer()} and optional {@link #getPort()}.
+	 * <p>
+	 * The implementation is supposed to use {@link #parseProtocol(String)} to
+	 * determine the protocol.
+	 * <p>
+	 * Moreover this method should check if a secure connection shall be
+	 * established dependent on URL's protocol. The result is then accessible
+	 * via {@link #isSecure()}.
+	 * 
+	 * @param serverURL
+	 *            The server URL of the form:<br>
+	 *            (&lt;protocol&gt;://)?&lt;host&gt;(:&lt;port&gt;)?
+	 * @throws MailException
+	 *             If server URL cannot be parsed
+	 */
+	protected abstract void parseServerURL(String serverURL) throws MailException;
+
+	/**
 	 * @return The host name or IP address of the server
 	 */
 	public abstract String getServer();
 
 	/**
-	 * @return The port of the server obtained via {@link #getServer()}
+	 * @return The optional port of the server obtained via {@link #getServer()}
+	 *         or <code>-1</code> if no port needed.
 	 */
 	public abstract int getPort();
 
@@ -500,9 +592,9 @@ public abstract class MailConfig {
 	public abstract boolean isSecure();
 
 	/**
-	 * @return Gets the encoded capabilities
+	 * @return Gets the mail system's capabilities
 	 */
-	public abstract int getCapabilities();
+	public abstract MailCapabilities getCapabilities();
 
 	/*
 	 * TEST TEST TEST TEST TEST

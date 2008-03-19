@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.mail.Session;
 
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailConfig;
 
 /**
  * {@link MIMEDefaultSession} - Provides access to default instance of

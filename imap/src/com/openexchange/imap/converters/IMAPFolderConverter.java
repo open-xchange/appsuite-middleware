@@ -49,8 +49,6 @@
 
 package com.openexchange.imap.converters;
 
-import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
-
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 
@@ -76,7 +74,6 @@ import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.ProtocolException;
@@ -232,13 +229,19 @@ public final class IMAPFolderConverter {
 			}
 			mailFolder.setSeparator(imapFolder.getSeparator());
 			if (mailFolder.isRootFolder()) {
-				mailFolder.setFullname(DEFAULT_FOLDER_ID);
+				mailFolder.setFullname("");
 			} else {
-				mailFolder.setFullname(StorageUtility.prepareFullname(imapFolder.getFullName(), mailFolder
-						.getSeparator()));
+				mailFolder.setFullname(imapFolder.getFullName());
 			}
 			mailFolder.setName(imapFolder.getName());
-			mailFolder.setParentFullname(prepareParentFullname(imapFolder.getParent()));
+			{
+				final Folder parent = imapFolder.getParent();
+				if (null == parent) {
+					mailFolder.setParentFullname(null);
+				} else {
+					mailFolder.setParentFullname(parent instanceof DefaultFolder ? "" : parent.getFullName());
+				}
+			}
 			/*
 			 * Determine if subfolders exist
 			 */
@@ -575,16 +578,6 @@ public final class IMAPFolderConverter {
 			retval = new Rights(STR_FULL_RIGHTS);
 		}
 		return retval;
-	}
-
-	private static String prepareParentFullname(final javax.mail.Folder parent) throws MessagingException {
-		final StringBuilder sb = new StringBuilder(32).append(DEFAULT_FOLDER_ID);
-		if (parent instanceof DefaultFolder) {
-			return sb.toString();
-		} else if (parent == null) {
-			return null;
-		}
-		return sb.append(parent.getSeparator()).append(parent.getFullName()).toString();
 	}
 
 	/**

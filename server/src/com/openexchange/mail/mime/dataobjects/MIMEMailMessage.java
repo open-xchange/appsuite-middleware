@@ -193,12 +193,7 @@ public final class MIMEMailMessage extends MailMessage {
 		mailPart.prepareForCaching();
 	}
 
-	/**
-	 * Sets the number of unread messages
-	 * 
-	 * @param unreadMessages
-	 *            The number of unread messages
-	 */
+	@Override
 	public void setUnreadMessages(final int unreadMessages) {
 		this.unreadMessages = unreadMessages;
 	}

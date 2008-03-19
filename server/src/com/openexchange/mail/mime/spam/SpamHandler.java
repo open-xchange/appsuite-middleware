@@ -49,8 +49,6 @@
 
 package com.openexchange.mail.mime.spam;
 
-import static com.openexchange.mail.utils.StorageUtility.prepareMailFolderParam;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.mail.Flags;
@@ -60,9 +58,9 @@ import javax.mail.MessagingException;
 import javax.mail.Store;
 import javax.mail.UIDFolder;
 
-import com.openexchange.mail.MailAccess;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 
 /**
  * {@link SpamHandler} - Handles spam/ham messages with <a
@@ -153,7 +151,7 @@ public abstract class SpamHandler {
 	 * @throws MessagingException
 	 * @throws MailException
 	 */
-	public abstract void handleHam(Folder spamFolder, long[] msgUIDs, boolean move, MailAccess<?, ?, ?> mailConnection,
+	public abstract void handleHam(Folder spamFolder, long[] msgUIDs, boolean move, MailAccess<?, ?> mailConnection,
 			Store store) throws MessagingException, MailException;
 
 	/**
@@ -173,7 +171,7 @@ public abstract class SpamHandler {
 	 * @throws MailException
 	 */
 	public void handleSpam(final Folder folder, final long[] msgUIDs, final boolean move,
-			final MailAccess<?, ?, ?> mailConnection, final Store store) throws MessagingException, MailException {
+			final MailAccess<?, ?> mailConnection, final Store store) throws MessagingException, MailException {
 		if (!(folder instanceof UIDFolder)) {
 			throw new IllegalArgumentException("Folder argument must implement " + UIDFolder.class.getCanonicalName());
 		}
@@ -186,14 +184,12 @@ public abstract class SpamHandler {
 				folder.open(Folder.READ_ONLY);
 			}
 			final Message[] uidMsgs = ((UIDFolder) folder).getMessagesByUID(msgUIDs);
-			folder.copyMessages(uidMsgs, store.getFolder(prepareMailFolderParam(mailConnection.getFolderStorage()
-					.getConfirmedSpamFolder())));
+			folder.copyMessages(uidMsgs, store.getFolder(mailConnection.getFolderStorage().getConfirmedSpamFolder()));
 			if (move) {
 				/*
 				 * Copy messages to spam folder
 				 */
-				folder.copyMessages(uidMsgs, store.getFolder(prepareMailFolderParam(mailConnection.getFolderStorage()
-						.getSpamFolder())));
+				folder.copyMessages(uidMsgs, store.getFolder(mailConnection.getFolderStorage().getSpamFolder()));
 				/*
 				 * Delete messages
 				 */

@@ -49,8 +49,11 @@
 
 package com.openexchange.mail.dataobjects.compose;
 
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.filler.MIMEMessageFiller;
+import com.openexchange.session.Session;
 
 /**
  * {@link ComposedMailMessage} - Subclass of {@link MailPart} designed for
@@ -61,18 +64,73 @@ import com.openexchange.mail.dataobjects.MailPart;
  */
 public abstract class ComposedMailMessage extends MailMessage {
 
+	/**
+	 * Serial version UID
+	 */
+	private static final long serialVersionUID = -6179506566418364076L;
+
 	private MailMessage[] referencedMails;
+
+	private final Session session;
+
+	private final Context ctx;
+
+	private MIMEMessageFiller filler;
 
 	/**
 	 * Default constructor
 	 */
-	protected ComposedMailMessage() {
+	protected ComposedMailMessage(final Session session, final Context ctx) {
 		super();
+		this.session = session;
+		this.ctx = ctx;
+	}
+
+	/**
+	 * Gets the session
+	 * 
+	 * @return the session
+	 */
+	public Session getSession() {
+		return session;
+	}
+
+	/**
+	 * Gets the context
+	 * 
+	 * @return the context
+	 */
+	public Context getContext() {
+		return ctx;
+	}
+
+	/**
+	 * Sets the mail filler
+	 * 
+	 * @param filler
+	 *            The mail filler
+	 */
+	public void setFiller(final MIMEMessageFiller filler) {
+		this.filler = filler;
+	}
+
+	/**
+	 * Releases this composed mail's referenced uploaded files
+	 */
+	public void release() {
+		if (null != filler) {
+			filler.deleteReferencedUploadFiles();
+		}
 	}
 
 	@Override
 	public int getUnreadMessages() {
 		throw new UnsupportedOperationException("ComposedMailMessage.getUnreadMessages() not supported");
+	}
+
+	@Override
+	public void setUnreadMessages(final int unreadMessages) {
+		throw new UnsupportedOperationException("ComposedMailMessage.setUnreadMessages() not supported");
 	}
 
 	/**

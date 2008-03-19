@@ -60,8 +60,8 @@ import java.util.regex.Pattern;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.config.MailConfig.CredSrc;
-import com.openexchange.mail.config.MailConfig.LoginType;
+import com.openexchange.mail.api.MailConfig.CredSrc;
+import com.openexchange.mail.api.MailConfig.LoginType;
 import com.openexchange.mail.mime.spam.DefaultSpamHandler;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
@@ -508,7 +508,7 @@ public final class MailProperties {
 	 * 
 	 * @return the allowNestedDefaultFolderOnAltNamespace
 	 */
-	boolean isAllowNestedDefaultFolderOnAltNamespace() {
+	public boolean isAllowNestedDefaultFolderOnAltNamespace() {
 		return allowNestedDefaultFolderOnAltNamespace;
 	}
 
@@ -517,7 +517,7 @@ public final class MailProperties {
 	 * 
 	 * @return the attachDisplaySize
 	 */
-	int getAttachDisplaySize() {
+	public int getAttachDisplaySize() {
 		return attachDisplaySize;
 	}
 
@@ -526,7 +526,7 @@ public final class MailProperties {
 	 * 
 	 * @return the credSrc
 	 */
-	CredSrc getCredSrc() {
+	public CredSrc getCredSrc() {
 		return credSrc;
 	}
 
@@ -535,7 +535,7 @@ public final class MailProperties {
 	 * 
 	 * @return the defaultMimeCharset
 	 */
-	String getDefaultMimeCharset() {
+	public String getDefaultMimeCharset() {
 		return defaultMimeCharset;
 	}
 
@@ -544,7 +544,7 @@ public final class MailProperties {
 	 * 
 	 * @return the defaultSeparator
 	 */
-	char getDefaultSeparator() {
+	public char getDefaultSeparator() {
 		return defaultSeparator;
 	}
 
@@ -553,7 +553,7 @@ public final class MailProperties {
 	 * 
 	 * @return the ignoreSubscription
 	 */
-	boolean isIgnoreSubscription() {
+	public boolean isIgnoreSubscription() {
 		return ignoreSubscription;
 	}
 
@@ -562,7 +562,7 @@ public final class MailProperties {
 	 * 
 	 * @return the supportSubscription
 	 */
-	boolean isSupportSubscription() {
+	public boolean isSupportSubscription() {
 		return supportSubscription;
 	}
 
@@ -571,7 +571,7 @@ public final class MailProperties {
 	 * 
 	 * @return the javaMailProperties
 	 */
-	Properties getJavaMailProperties() {
+	public Properties getJavaMailProperties() {
 		return javaMailProperties;
 	}
 
@@ -580,7 +580,7 @@ public final class MailProperties {
 	 * 
 	 * @return the loginType
 	 */
-	LoginType getLoginType() {
+	public LoginType getLoginType() {
 		return loginType;
 	}
 
@@ -589,7 +589,7 @@ public final class MailProperties {
 	 * 
 	 * @return the mailFetchLimit
 	 */
-	int getMailFetchLimit() {
+	public int getMailFetchLimit() {
 		return mailFetchLimit;
 	}
 
@@ -598,7 +598,7 @@ public final class MailProperties {
 	 * 
 	 * @return the mailServer
 	 */
-	String getMailServer() {
+	public String getMailServer() {
 		return mailServer;
 	}
 
@@ -607,7 +607,7 @@ public final class MailProperties {
 	 * 
 	 * @return the masterPassword
 	 */
-	String getMasterPassword() {
+	public String getMasterPassword() {
 		return masterPassword;
 	}
 
@@ -616,7 +616,7 @@ public final class MailProperties {
 	 * 
 	 * @return the maxNumOfConnections
 	 */
-	int getMaxNumOfConnections() {
+	public int getMaxNumOfConnections() {
 		return maxNumOfConnections;
 	}
 
@@ -625,7 +625,7 @@ public final class MailProperties {
 	 * 
 	 * @return the quoteLineColors
 	 */
-	String[] getQuoteLineColors() {
+	public String[] getQuoteLineColors() {
 		return quoteLineColors;
 	}
 
@@ -634,7 +634,7 @@ public final class MailProperties {
 	 * 
 	 * @return the spamEnabled
 	 */
-	boolean isSpamEnabled() {
+	public boolean isSpamEnabled() {
 		return spamEnabled;
 	}
 
@@ -643,7 +643,7 @@ public final class MailProperties {
 	 * 
 	 * @return the transportServer
 	 */
-	String getTransportServer() {
+	public String getTransportServer() {
 		return transportServer;
 	}
 
@@ -652,7 +652,7 @@ public final class MailProperties {
 	 * 
 	 * @return the userFlagsEnabled
 	 */
-	boolean isUserFlagsEnabled() {
+	public boolean isUserFlagsEnabled() {
 		return userFlagsEnabled;
 	}
 
@@ -661,7 +661,7 @@ public final class MailProperties {
 	 * 
 	 * @return the watcherEnabled
 	 */
-	boolean isWatcherEnabled() {
+	public boolean isWatcherEnabled() {
 		return watcherEnabled;
 	}
 
@@ -670,7 +670,7 @@ public final class MailProperties {
 	 * 
 	 * @return the watcherFrequency
 	 */
-	int getWatcherFrequency() {
+	public int getWatcherFrequency() {
 		return watcherFrequency;
 	}
 
@@ -679,7 +679,7 @@ public final class MailProperties {
 	 * 
 	 * @return the watcherShallClose
 	 */
-	boolean isWatcherShallClose() {
+	public boolean isWatcherShallClose() {
 		return watcherShallClose;
 	}
 
@@ -688,7 +688,7 @@ public final class MailProperties {
 	 * 
 	 * @return the watcherTime
 	 */
-	int getWatcherTime() {
+	public int getWatcherTime() {
 		return watcherTime;
 	}
 
@@ -697,7 +697,7 @@ public final class MailProperties {
 	 * 
 	 * @return the spamHandlerClass
 	 */
-	String getSpamHandlerClass() {
+	public String getSpamHandlerClass() {
 		return spamHandlerClass;
 	}
 }

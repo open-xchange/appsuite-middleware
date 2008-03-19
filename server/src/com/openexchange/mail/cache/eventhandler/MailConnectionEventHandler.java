@@ -52,7 +52,7 @@ package com.openexchange.mail.cache.eventhandler;
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.ElementEvent;
 import com.openexchange.caching.ElementEventHandler;
-import com.openexchange.mail.MailAccess;
+import com.openexchange.mail.api.MailAccess;
 
 /**
  * {@link MailConnectionEventHandler} - The mail connection event handler which
@@ -81,7 +81,7 @@ public final class MailConnectionEventHandler implements ElementEventHandler {
 	 */
 	public void onExceededIdletimeBackground(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailAccess<?, ?, ?>) cacheElem.getVal());
+		close((MailAccess<?, ?>) cacheElem.getVal());
 	}
 
 	/*
@@ -91,7 +91,7 @@ public final class MailConnectionEventHandler implements ElementEventHandler {
 	 */
 	public void onExceededMaxlifeBackground(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailAccess<?, ?, ?>) cacheElem.getVal());
+		close((MailAccess<?, ?>) cacheElem.getVal());
 	}
 
 	/*
@@ -101,7 +101,7 @@ public final class MailConnectionEventHandler implements ElementEventHandler {
 	 */
 	public void onSpooledDiskNotAvailable(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailAccess<?, ?, ?>) cacheElem.getVal());
+		close((MailAccess<?, ?>) cacheElem.getVal());
 	}
 
 	/*
@@ -111,32 +111,32 @@ public final class MailConnectionEventHandler implements ElementEventHandler {
 	 */
 	public void onSpooledNotAllowed(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailAccess<?, ?, ?>) cacheElem.getVal());
+		close((MailAccess<?, ?>) cacheElem.getVal());
 	}
 
 	/**
 	 * Closes given instance of {@link MailAccess}
 	 */
-	private void close(final MailAccess<?, ?, ?> mailConnection) {
+	private void close(final MailAccess<?, ?> mailConnection) {
 		mailConnection.close(false);
 	}
 
-	public void handleElementEvent(ElementEvent event) {
+	public void handleElementEvent(final ElementEvent event) {
 		LOG.error("Unknown event type: " + event.getElementEvent());
 	}
 
-	public void onExceededIdletimeOnRequest(ElementEvent event) {
+	public void onExceededIdletimeOnRequest(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailAccess<?, ?, ?>) cacheElem.getVal());
+		close((MailAccess<?, ?>) cacheElem.getVal());
 	}
 
-	public void onExceededMaxlifeOnRequest(ElementEvent event) {
+	public void onExceededMaxlifeOnRequest(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailAccess<?, ?, ?>) cacheElem.getVal());
+		close((MailAccess<?, ?>) cacheElem.getVal());
 	}
 
-	public void onSpooledDiskAvailable(ElementEvent event) {
+	public void onSpooledDiskAvailable(final ElementEvent event) {
 		final CacheElement cacheElem = (CacheElement) event.getSource();
-		close((MailAccess<?, ?, ?>) cacheElem.getVal());
+		close((MailAccess<?, ?>) cacheElem.getVal());
 	}
 }

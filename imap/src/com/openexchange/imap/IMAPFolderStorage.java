@@ -52,8 +52,6 @@ package com.openexchange.imap;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.utils.StorageUtility.getDefaultFolderNames;
-import static com.openexchange.mail.utils.StorageUtility.prepareFullname;
-import static com.openexchange.mail.utils.StorageUtility.prepareMailFolderParam;
 import static java.util.regex.Matcher.quoteReplacement;
 
 import java.io.Serializable;
@@ -72,7 +70,6 @@ import javax.mail.Quota;
 import javax.mail.ReadOnlyFolderException;
 import javax.mail.Quota.Resource;
 
-import com.openexchange.cache.OXCachingException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -87,10 +84,10 @@ import com.openexchange.imap.converters.IMAPFolderConverter;
 import com.openexchange.imap.user2acl.User2ACL;
 import com.openexchange.imap.user2acl.User2ACLArgs;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailFolderStorage;
 import com.openexchange.mail.MailSessionParameterNames;
-import com.openexchange.mail.cache.MailMessageCache;
+import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.server.impl.OCLPermission;
@@ -111,7 +108,7 @@ import com.sun.mail.imap.Rights;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class IMAPFolderStorage implements MailFolderStorage, Serializable {
+public final class IMAPFolderStorage extends MailFolderStorage implements Serializable {
 
 	/**
 	 * Serial Version UID
@@ -159,9 +156,9 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		this.imapConfig = imapConnection.getIMAPConfig();
 	}
 
-	public boolean exists(final String fullnameArg) throws MailException {
+	@Override
+	public boolean exists(final String fullname) throws MailException {
 		try {
-			final String fullname = prepareMailFolderParam(fullnameArg);
 			if (DEFAULT_FOLDER_ID.equals(fullname)) {
 				return true;
 			}
@@ -174,9 +171,9 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		}
 	}
 
-	public MailFolder getFolder(final String fullnameArg) throws MailException {
+	@Override
+	public MailFolder getFolder(final String fullname) throws MailException {
 		try {
-			final String fullname = prepareMailFolderParam(fullnameArg);
 			if (DEFAULT_FOLDER_ID.equals(fullname)) {
 				return IMAPFolderConverter.convertFolder((IMAPFolder) imapStore.getDefaultFolder(), session,
 						imapConfig, ctx);
@@ -197,9 +194,9 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 
 	private static final String PATTERN_ALL = "%";
 
-	public MailFolder[] getSubfolders(final String parentFullnameArg, final boolean all) throws MailException {
+	@Override
+	public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException {
 		try {
-			final String parentFullname = prepareMailFolderParam(parentFullnameArg);
 			IMAPFolder parent;
 			if (DEFAULT_FOLDER_ID.equals(parentFullname)) {
 				parent = (IMAPFolder) imapStore.getDefaultFolder();
@@ -368,6 +365,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		return retval;
 	}
 
+	@Override
 	public MailFolder getRootFolder() throws MailException {
 		try {
 			return IMAPFolderConverter.convertFolder((IMAPFolder) imapStore.getDefaultFolder(), session, imapConfig,
@@ -386,6 +384,10 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		session.setParameter(MailSessionParameterNames.PARAM_DEF_FLD_FLAG, Boolean.valueOf(checked));
 	}
 
+	private void setSeparator(final char separator) {
+		session.setParameter(MailSessionParameterNames.PARAM_SEPARATOR, Character.valueOf(separator));
+	}
+
 	private void setDefaultMailFolder(final int index, final String fullname) {
 		String[] arr = (String[]) session.getParameter(MailSessionParameterNames.PARAM_DEF_FLD_ARR);
 		if (null == arr) {
@@ -395,6 +397,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		arr[index] = fullname;
 	}
 
+	@Override
 	public void checkDefaultFolders() throws MailException {
 		if (!isDefaultFoldersChecked()) {
 			synchronized (session) {
@@ -447,6 +450,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					for (int i = 0; i < defaultFolderNames.length; i++) {
 						setDefaultMailFolder(i, checkDefaultFolder(prefix, defaultFolderNames[i], type, tmp));
 					}
+					setSeparator(inboxFolder.getSeparator());
 					setDefaultFoldersChecked(true);
 				} catch (final MessagingException e) {
 					throw IMAPException.handleMessagingException(e, imapConnection);
@@ -457,12 +461,13 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 
 	private static final int FOLDER_TYPE = (Folder.HOLDS_MESSAGES | Folder.HOLDS_FOLDERS);
 
-	public String createFolder(final MailFolder toCreate) throws MailException {
+	@Override
+	public String createFolder(final MailFolderDescription toCreate) throws MailException {
 		try {
 			/*
 			 * Insert
 			 */
-			String parentFullname = prepareMailFolderParam(toCreate.getParentFullname());
+			String parentFullname = toCreate.getParentFullname();
 			IMAPFolder parent;
 			if (DEFAULT_FOLDER_ID.equals(parentFullname)) {
 				parent = (IMAPFolder) imapStore.getDefaultFolder();
@@ -563,7 +568,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					}
 				}
 			}
-			return prepareFullname(createMe.getFullName(), createMe.getSeparator());
+			return createMe.getFullName();
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapConnection);
 		} catch (final AbstractOXException e) {
@@ -571,31 +576,44 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		}
 	}
 
-	public String updateFolder(final String fullnameArg, final MailFolder toUpdate) throws MailException {
+	@Override
+	public String moveFolder(final String fullname, final String newFullname) throws MailException {
+		if (DEFAULT_FOLDER_ID.equals(fullname) || DEFAULT_FOLDER_ID.equals(newFullname)) {
+			throw new IMAPException(IMAPException.Code.NO_ROOT_MOVE);
+		}
 		try {
-			final String fullname = prepareMailFolderParam(fullnameArg);
-			IMAPFolder updateMe = (IMAPFolder) imapStore.getFolder(fullname);
+			IMAPFolder moveMe = (IMAPFolder) imapStore.getFolder(fullname);
+			final char separator = moveMe.getSeparator();
+			final String oldParent = moveMe.getParent().getFullName();
+			final String newParent;
+			final String newName;
+			{
+				final int pos = newFullname.lastIndexOf(separator);
+				if (pos == -1) {
+					newParent = "";
+					newName = newFullname;
+				} else {
+					newParent = newFullname.substring(0, pos);
+					newName = newFullname.substring(pos + 1);
+				}
+			}
 			/*
 			 * Check for move
 			 */
-			final String oldParent = updateMe.getParent().getFullName();
-			final String newParent = prepareMailFolderParam(toUpdate.getParentFullname());
-			final boolean move = toUpdate.containsParentFullname() && !newParent.equals(oldParent);
+			final boolean move = !newParent.equals(oldParent);
 			/*
 			 * Check for rename. Rename must not be performed if a move has
 			 * already been done
 			 */
-			final String oldName = updateMe.getName();
-			final String newName = toUpdate.getName();
-			final boolean rename = (!move && toUpdate.containsName() && !newName.equalsIgnoreCase(oldName));
+			final boolean rename = (!move && !newName.equals(moveMe.getName()));
 			if (move) {
 				/*
 				 * Perform move operation
 				 */
-				if (isDefaultFolder(updateMe.getFullName())) {
-					throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
+				if (isDefaultFolder(moveMe.getFullName())) {
+					throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, moveMe.getFullName());
 				}
-				IMAPFolder destFolder = ((IMAPFolder) (DEFAULT_FOLDER_ID.equals(newParent) ? imapStore
+				IMAPFolder destFolder = ((IMAPFolder) (newParent.length() == 0 ? imapStore
 						.getDefaultFolder() : imapStore.getFolder(newParent)));
 				if (!destFolder.exists()) {
 					destFolder = checkForNamespaceFolder(newParent);
@@ -618,21 +636,20 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 						throw new IMAPException(IMAPException.Code.NO_ACCESS, newParent);
 					}
 				}
-				if (!checkFolderNameValidity(newName == null ? updateMe.getName() : newName, updateMe.getSeparator())) {
-					throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(updateMe
-							.getSeparator()));
+				if (!checkFolderNameValidity(newName, separator)) {
+					throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(separator));
 				}
-				if (destFolder.getFullName().startsWith(updateMe.getFullName())) {
-					throw new IMAPException(IMAPException.Code.NO_MOVE_TO_SUBFLD, updateMe.getName(), destFolder
+				if (destFolder.getFullName().startsWith(moveMe.getFullName())) {
+					throw new IMAPException(IMAPException.Code.NO_MOVE_TO_SUBFLD, moveMe.getName(), destFolder
 							.getName());
 				}
 				try {
-					updateMe = moveFolder(updateMe, destFolder, newName);
+					moveMe = moveFolder(moveMe, destFolder, newName);
 				} catch (final MailException e) {
-					deleteTemporaryCreatedFolder(destFolder, newName == null ? updateMe.getName() : newName);
+					deleteTemporaryCreatedFolder(destFolder, newName);
 					throw e;
 				} catch (final MessagingException e) {
-					deleteTemporaryCreatedFolder(destFolder, newName == null ? updateMe.getName() : newName);
+					deleteTemporaryCreatedFolder(destFolder, newName);
 					throw e;
 				}
 			}
@@ -643,35 +660,34 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 				/*
 				 * Perform rename operation
 				 */
-				if (isDefaultFolder(updateMe.getFullName())) {
-					throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
-				} else if (imapConfig.isSupportsACLs() && ((updateMe.getType() & Folder.HOLDS_MESSAGES) > 0)) {
+				if (isDefaultFolder(moveMe.getFullName())) {
+					throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, moveMe.getFullName());
+				} else if (imapConfig.isSupportsACLs() && ((moveMe.getType() & Folder.HOLDS_MESSAGES) > 0)) {
 					try {
-						if (!RightsCache.getCachedRights(updateMe, true, session).contains(Rights.Right.CREATE)) {
-							throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, updateMe.getFullName());
+						if (!RightsCache.getCachedRights(moveMe, true, session).contains(Rights.Right.CREATE)) {
+							throw new IMAPException(IMAPException.Code.NO_CREATE_ACCESS, moveMe.getFullName());
 						}
 					} catch (final MessagingException e) {
-						throw new IMAPException(IMAPException.Code.NO_ACCESS, updateMe.getFullName());
+						throw new IMAPException(IMAPException.Code.NO_ACCESS, moveMe.getFullName());
 					}
 				}
-				if (!checkFolderNameValidity(newName, updateMe.getSeparator())) {
-					throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(updateMe
-							.getSeparator()));
+				if (!checkFolderNameValidity(newName, separator)) {
+					throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(separator));
 				}
 				/*
 				 * Rename can only be invoked on a closed folder
 				 */
-				if (updateMe.isOpen()) {
-					updateMe.close(false);
+				if (moveMe.isOpen()) {
+					moveMe.close(false);
 				}
 				final IMAPFolder renameFolder;
 				{
-					final String parentFullName = updateMe.getParent().getFullName();
+					final String parentFullName = moveMe.getParent().getFullName();
 					final StringBuilder tmp = new StringBuilder();
 					if (parentFullName.length() > 0) {
-						tmp.append(parentFullName).append(updateMe.getSeparator());
+						tmp.append(parentFullName).append(separator);
 					}
-					tmp.append(toUpdate.getName());
+					tmp.append(moveMe.getName());
 					renameFolder = (IMAPFolder) imapStore.getFolder(tmp.toString());
 				}
 				if (renameFolder.exists()) {
@@ -682,13 +698,13 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 				 */
 				Map<String, Boolean> subscriptionStatus;
 				final String newFullName = renameFolder.getFullName();
-				final String oldFullName = updateMe.getFullName();
+				final String oldFullName = moveMe.getFullName();
 				try {
-					subscriptionStatus = getSubscriptionStatus(updateMe, oldFullName, newFullName);
+					subscriptionStatus = getSubscriptionStatus(moveMe, oldFullName, newFullName);
 				} catch (final MessagingException e) {
 					if (LOG.isWarnEnabled()) {
 						LOG.warn(new StringBuilder(128).append("Subscription status of folder \"").append(
-								updateMe.getFullName()).append(
+								moveMe.getFullName()).append(
 								"\" and its subfolders could not be stored prior to rename operation"));
 					}
 					subscriptionStatus = null;
@@ -698,19 +714,19 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 				 */
 				boolean success = false;
 				final long start = System.currentTimeMillis();
-				success = updateMe.renameTo(renameFolder);
+				success = moveMe.renameTo(renameFolder);
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				/*
 				 * Success?
 				 */
 				if (!success) {
-					throw new IMAPException(IMAPException.Code.UPDATE_FAILED, updateMe.getFullName());
+					throw new IMAPException(IMAPException.Code.UPDATE_FAILED, moveMe.getFullName());
 				}
-				updateMe = (IMAPFolder) imapStore.getFolder(oldFullName);
-				if (updateMe.exists()) {
-					deleteFolder(updateMe);
+				moveMe = (IMAPFolder) imapStore.getFolder(oldFullName);
+				if (moveMe.exists()) {
+					deleteFolder(moveMe);
 				}
-				updateMe = (IMAPFolder) imapStore.getFolder(newFullName);
+				moveMe = (IMAPFolder) imapStore.getFolder(newFullName);
 				/*
 				 * Apply remembered subscription status
 				 */
@@ -718,11 +734,25 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					/*
 					 * At least subscribe to renamed folder
 					 */
-					updateMe.setSubscribed(true);
+					moveMe.setSubscribed(true);
 				} else {
-					applySubscriptionStatus(updateMe, subscriptionStatus);
+					applySubscriptionStatus(moveMe, subscriptionStatus);
 				}
 			}
+			return moveMe.getFullName();
+		} catch (final MessagingException e) {
+			throw IMAPException.handleMessagingException(e, imapConnection);
+		} catch (final IMAPException e) {
+			throw e;
+		} catch (final AbstractOXException e) {
+			throw new IMAPException(e);
+		}
+	}
+
+	@Override
+	public String updateFolder(final String fullname, final MailFolderDescription toUpdate) throws MailException {
+		try {
+			final IMAPFolder updateMe = (IMAPFolder) imapStore.getFolder(fullname);
 			if (imapConfig.isSupportsACLs() && toUpdate.containsPermissions()) {
 				final ACL[] oldACLs = getACLSafe(updateMe);
 				if (oldACLs != null) {
@@ -784,7 +814,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 				updateMe.setSubscribed(toUpdate.isSubscribed());
 				IMAPCommandsCollection.forceSetSubscribed(imapStore, updateMe.getFullName(), toUpdate.isSubscribed());
 			}
-			return prepareFullname(updateMe.getFullName(), updateMe.getSeparator());
+			return updateMe.getFullName();
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapConnection);
 		} catch (final IMAPException e) {
@@ -810,9 +840,9 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		}
 	}
 
-	public String deleteFolder(final String fullnameArg) throws MailException {
+	@Override
+	public String deleteFolder(final String fullname) throws MailException {
 		try {
-			final String fullname = prepareMailFolderParam(fullnameArg);
 			IMAPFolder deleteMe = (IMAPFolder) imapStore.getFolder(fullname);
 			if (!deleteMe.exists()) {
 				deleteMe = checkForNamespaceFolder(fullname);
@@ -820,7 +850,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, fullname);
 				}
 			}
-			final IMAPFolder trashFolder = (IMAPFolder) imapStore.getFolder(prepareMailFolderParam(getTrashFolder()));
+			final IMAPFolder trashFolder = (IMAPFolder) imapStore.getFolder(getTrashFolder());
 			if (deleteMe.getParent().getFullName().equals(trashFolder.getFullName())
 					|| ((trashFolder.getType() & Folder.HOLDS_FOLDERS) == 0)) {
 				/*
@@ -856,7 +886,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					throw e;
 				}
 			}
-			return fullnameArg;
+			return fullname;
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapConnection);
 		}
@@ -866,9 +896,9 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 
 	private static final int INT_1 = 1;
 
-	public void clearFolder(final String fullnameArg) throws MailException {
+	@Override
+	public void clearFolder(final String fullname) throws MailException {
 		try {
-			final String fullname = prepareMailFolderParam(fullnameArg);
 			final IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullname);
 			try {
 				if ((f.getType() & Folder.HOLDS_MESSAGES) == 0) {
@@ -885,7 +915,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 			}
 			f.open(Folder.READ_WRITE);
 			try {
-				final String trashFullname = prepareMailFolderParam(getTrashFolder());
+				final String trashFullname = getTrashFolder();
 				final boolean backup = (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
 						ctx).isHardDeleteMsgs() && !(f.getFullName().equals(trashFullname)));
 				int msgCount = f.getMessageCount();
@@ -1005,14 +1035,6 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					LOG.info(debug.append("Folder '").append(fullname).append("' cleared in ").append(
 							System.currentTimeMillis() - startClear).append("msec"));
 				}
-				try {
-					/*
-					 * Update message cache
-					 */
-					MailMessageCache.getInstance().removeFolderMessages(f.getFullName(), session.getUserId(), ctx);
-				} catch (final OXCachingException e) {
-					LOG.error(e.getLocalizedMessage(), e);
-				}
 			} finally {
 				f.close(false);
 			}
@@ -1027,9 +1049,9 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 
 	private static final MailFolder[] EMPTY_PATH = new MailFolder[0];
 
-	public MailFolder[] getPath2DefaultFolder(final String fullnameArg) throws MailException {
+	@Override
+	public MailFolder[] getPath2DefaultFolder(final String fullname) throws MailException {
 		try {
-			final String fullname = prepareMailFolderParam(fullnameArg);
 			if (fullname.equals(DEFAULT_FOLDER_ID)) {
 				return EMPTY_PATH;
 			}
@@ -1061,40 +1083,48 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		}
 	}
 
+	@Override
 	public String getConfirmedHamFolder() throws MailException {
 		return getStdFolder(StorageUtility.INDEX_CONFIRMED_HAM);
 	}
 
+	@Override
 	public String getConfirmedSpamFolder() throws MailException {
 		return getStdFolder(StorageUtility.INDEX_CONFIRMED_SPAM);
 	}
 
+	@Override
 	public String getDraftsFolder() throws MailException {
 		return getStdFolder(StorageUtility.INDEX_DRAFTS);
 	}
 
+	@Override
 	public String getSentFolder() throws MailException {
 		return getStdFolder(StorageUtility.INDEX_SENT);
 	}
 
+	@Override
 	public String getSpamFolder() throws MailException {
 		return getStdFolder(StorageUtility.INDEX_SPAM);
 	}
 
+	@Override
 	public String getTrashFolder() throws MailException {
 		return getStdFolder(StorageUtility.INDEX_TRASH);
 	}
 
+	@Override
 	public void releaseResources() throws IMAPException {
 	}
 
 	private static final String QUOTA_RES_STORAGE = "STORAGE";
 
-	public long[] getQuota(final String folder) throws MailException {
+	@Override
+	public com.openexchange.mail.Quota getQuota(final String folder) throws MailException {
 		try {
 			final IMAPFolder f;
 			{
-				final String fullname = folder == null ? STR_INBOX : prepareMailFolderParam(folder);
+				final String fullname = folder == null ? STR_INBOX : folder;
 				final boolean isDefaultFolder = fullname.equals(DEFAULT_FOLDER_ID);
 				f = (IMAPFolder) (isDefaultFolder ? imapStore.getDefaultFolder() : imapStore.getFolder(fullname));
 				if (!isDefaultFolder && !f.exists()) {
@@ -1116,7 +1146,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 			}
 			f.open(Folder.READ_ONLY);
 			if (!imapConfig.getImapCapabilities().hasQuota()) {
-				return new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
+				return com.openexchange.mail.Quota.UNLIMITED;
 			}
 			final Quota[] folderQuota;
 			try {
@@ -1125,16 +1155,16 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			} catch (final MessagingException mexc) {
 				if (mexc.getNextException() instanceof ParsingException) {
-					return new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
+					return com.openexchange.mail.Quota.UNLIMITED;
 				}
 				throw mexc;
 			}
 			if (folderQuota.length == 0) {
-				return new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
+				return com.openexchange.mail.Quota.UNLIMITED;
 			}
 			final Quota.Resource[] resources = folderQuota[0].resources;
 			if (resources.length == 0) {
-				return new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
+				return com.openexchange.mail.Quota.UNLIMITED;
 			}
 			Resource storageResource = null;
 			for (int i = 0; i < resources.length; i++) {
@@ -1149,12 +1179,12 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 				if (LOG.isWarnEnabled()) {
 					logUnsupportedQuotaResources(resources, 0);
 				}
-				return new long[] { UNLIMITED_QUOTA, UNLIMITED_QUOTA };
+				return com.openexchange.mail.Quota.UNLIMITED;
 			}
 			if (resources.length > 1 && LOG.isWarnEnabled()) {
 				logUnsupportedQuotaResources(resources, 1);
 			}
-			return new long[] { storageResource.limit, storageResource.usage };
+			return new com.openexchange.mail.Quota(storageResource.limit, storageResource.usage);
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapConnection);
 		}
@@ -1439,7 +1469,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		boolean isDefaultFolder = false;
 		isDefaultFolder = (folderFullName.equalsIgnoreCase(STR_INBOX));
 		for (int index = 0; index < 6 && !isDefaultFolder; index++) {
-			if (folderFullName.equalsIgnoreCase(prepareMailFolderParam(getStdFolder(index)))) {
+			if (folderFullName.equalsIgnoreCase(getStdFolder(index))) {
 				return true;
 			}
 		}
@@ -1447,19 +1477,17 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 	}
 
 	private String getStdFolder(final int index) throws MailException {
-		try {
-			if (StorageUtility.INDEX_INBOX == index) {
-				final Folder inbox = imapStore.getFolder(STR_INBOX);
-				return prepareFullname(inbox.getFullName(), inbox.getSeparator());
-			}
-			if (isDefaultFoldersChecked()) {
-				return getDefaultMailFolder(index);
-			}
+		if (!isDefaultFoldersChecked()) {
 			checkDefaultFolders();
-			return getDefaultMailFolder(index);
-		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
 		}
+		if (StorageUtility.INDEX_INBOX == index) {
+			return STR_INBOX;
+		}
+		if (isDefaultFoldersChecked()) {
+			return getDefaultMailFolder(index);
+		}
+		checkDefaultFolders();
+		return getDefaultMailFolder(index);
 	}
 
 	private String getDefaultMailFolder(final int index) {
@@ -1533,7 +1561,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 		 * Check default folder
 		 */
 		boolean checkSubscribed = true;
-		final Folder f = imapStore.getFolder(tmp.append(prefix).append(prepareMailFolderParam(name)).toString());
+		final Folder f = imapStore.getFolder(tmp.append(prefix).append(name).toString());
 		tmp.setLength(0);
 		if (!f.exists() && !f.create(type)) {
 			final IMAPException oxme = new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_CREATION, tmp.append(
@@ -1556,7 +1584,7 @@ public final class IMAPFolderStorage implements MailFolderStorage, Serializable 
 					.toString());
 			tmp.setLength(0);
 		}
-		return prepareFullname(f.getFullName(), f.getSeparator());
+		return f.getFullName();
 	}
 
 	/**

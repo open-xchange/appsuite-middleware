@@ -47,68 +47,32 @@
  *
  */
 
-package com.openexchange.mail;
-
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.processing.MimeForward;
-import com.openexchange.mail.mime.processing.MimeReply;
+package com.openexchange.mail.search;
 
 /**
- * {@link MailLogicTools} - Extends the mail message/folder storage
- * functionality by replying to/forwarding a mail message.
+ * {@link FromTerm}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public interface MailLogicTools {
+public final class FromTerm extends SearchTerm<String> {
+
+	private final String unicodeAddr;
 
 	/**
-	 * Creates a reply message for the message specified by given original UID
-	 * which is located in given folder.
-	 * <p>
-	 * If mailing system deals with common RFC822 messages, this method only
-	 * delegates its request to
-	 * {@link MimeReply#getReplyMail(javax.mail.internet.MimeMessage, boolean, com.openexchange.session.Session, javax.mail.Session)}.
-	 * 
-	 * @param originalID
-	 *            The original mail's ID
-	 * @param folder
-	 *            The folder fullname
-	 * @param replyAll
-	 *            <code>true</code> to reply to all recipients; otherwise
-	 *            <code>false</code>
-	 * @return An instance of {@link MailMessage} representing the reply message
-	 * @throws MailException
-	 *             If reply message cannot be generated
+	 * Initializes a new {@link FromTerm}
 	 */
-	public MailMessage getReplyMessage(long originalID, String folder, boolean replyAll) throws MailException;
+	public FromTerm(final String unicodeAddr) {
+		super();
+		this.unicodeAddr = unicodeAddr;
+	}
 
 	/**
-	 * Creates a forward message for the messages specified by given original
-	 * UIDs which are located in given folder. If multiple messages are
-	 * specified then these messages are forwarded as <b>attachment</b> since
-	 * no inline forward is possible.
-	 * <p>
-	 * If mailing system deals with common RFC822 messages, this method only
-	 * delegates its request to
-	 * {@link MimeForward#getFowardMail(javax.mail.internet.MimeMessage[], com.openexchange.session.Session)}.
-	 * 
-	 * @param originalIDs
-	 *            The original mails' IDs which should be forwarded.
-	 * @param folder
-	 *            The folder fullname
-	 * @return An instance of {@link MailMessage} representing the forward
-	 *         message
-	 * @throws MailException
-	 *             If forward message cannot be generated
+	 * @return The unicode representation of the from address
 	 */
-	public MailMessage getFowardMessage(long[] originalIDs, String folder) throws MailException;
+	@Override
+	public String getPattern() {
+		return unicodeAddr;
+	}
 
-	/**
-	 * Releases all resources when closing parental {@link MailAccess}
-	 * 
-	 * @throws MailException
-	 *             If releasing the resources fails
-	 */
-	public void releaseResources() throws MailException;
 }

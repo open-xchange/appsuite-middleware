@@ -49,16 +49,15 @@
 
 package com.openexchange.imap;
 
+import com.openexchange.mail.api.MailCapabilities;
+
 /**
- * {@link IMAPCapabilities}
+ * {@link IMAPCapabilities} - The capabilities of underlying IMAP server
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class IMAPCapabilities {
+public class IMAPCapabilities extends MailCapabilities {
 
-	/*
-	 * String Constants
-	 */
 	/**
 	 * ACL
 	 */
@@ -110,25 +109,15 @@ public class IMAPCapabilities {
 	public static final String CAP_IDLE = "IDLE";
 
 	/*
-	 * Bit Constants
+	 * IMAP bit constants
 	 */
-	private static final int BIT_ACL = 1;
+	private static final int BIT_THREAD_ORDEREDSUBJECT = 32;
 
-	private static final int BIT_THREAD_REFERENCES = 2;
+	private static final int BIT_IMAP4 = 64;
 
-	private static final int BIT_THREAD_ORDEREDSUBJECT = 4;
+	private static final int BIT_IMAP4_REV1 = 128;
 
-	private static final int BIT_QUOTA = 8;
-
-	private static final int BIT_IMAP4 = 16;
-
-	private static final int BIT_IMAP4_REV1 = 32;
-
-	private static final int BIT_UIDPLUS = 64;
-
-	private static final int BIT_SORT = 128;
-
-	private static final int BIT_SUBSCRIPTION = 256;
+	private static final int BIT_UIDPLUS = 256;
 
 	private static final int BIT_NAMESPACE = 512;
 
@@ -166,7 +155,8 @@ public class IMAPCapabilities {
 		super();
 	}
 
-	public boolean hasACL() {
+	@Override
+	public boolean hasPermissions() {
 		return hasACL;
 	}
 
@@ -190,6 +180,7 @@ public class IMAPCapabilities {
 		this.hasIMAP4rev1 = hasIMAP4rev1;
 	}
 
+	@Override
 	public boolean hasQuota() {
 		return hasQuota;
 	}
@@ -198,6 +189,7 @@ public class IMAPCapabilities {
 		this.hasQuota = hasQuota;
 	}
 
+	@Override
 	public boolean hasSort() {
 		return hasSort;
 	}
@@ -214,6 +206,7 @@ public class IMAPCapabilities {
 		this.hasThreadOrderedSubject = hasThreadOrderedSubject;
 	}
 
+	@Override
 	public boolean hasThreadReferences() {
 		return hasThreadReferences;
 	}
@@ -230,6 +223,7 @@ public class IMAPCapabilities {
 		this.hasUIDPlus = hasUIDPlus;
 	}
 
+	@Override
 	public boolean hasSubscription() {
 		return hasSubscription;
 	}
@@ -254,9 +248,10 @@ public class IMAPCapabilities {
 		this.hasIdle = hasIdle;
 	}
 
+	@Override
 	public final int getCapabilities() {
 		int retval = 0;
-		retval |= hasACL ? BIT_ACL : 0;
+		retval |= hasACL ? BIT_PERMISSIONS : 0;
 		retval |= hasIMAP4 ? BIT_IMAP4 : 0;
 		retval |= hasIMAP4rev1 ? BIT_IMAP4_REV1 : 0;
 		retval |= hasQuota ? BIT_QUOTA : 0;
@@ -271,7 +266,7 @@ public class IMAPCapabilities {
 	}
 
 	public final void parseCapabilities(final int caps) {
-		hasACL = ((caps & BIT_ACL) > 0);
+		hasACL = ((caps & BIT_PERMISSIONS) > 0);
 		hasIMAP4 = ((caps & BIT_IMAP4) > 0);
 		hasIMAP4rev1 = ((caps & BIT_IMAP4_REV1) > 0);
 		hasQuota = ((caps & BIT_QUOTA) > 0);

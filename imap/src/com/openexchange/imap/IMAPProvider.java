@@ -50,10 +50,10 @@
 package com.openexchange.imap;
 
 import com.openexchange.imap.config.IMAPProperties;
-import com.openexchange.mail.MailAccess;
-import com.openexchange.mail.MailProvider;
 import com.openexchange.mail.Protocol;
-import com.openexchange.mail.config.AbstractProtocolProperties;
+import com.openexchange.mail.api.AbstractProtocolProperties;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.permission.MailPermission;
 
 /**
@@ -69,15 +69,26 @@ public final class IMAPProvider extends MailProvider {
 	 */
 	public static final Protocol PROTOCOL_IMAP = new Protocol("imap", "imaps");
 
+	private static final IMAPProvider instance = new IMAPProvider();
+
+	/**
+	 * Gets the singleton instance of IMAP provider
+	 * 
+	 * @return The singleton instance of IMAP provider
+	 */
+	public static IMAPProvider getInstance() {
+		return instance;
+	}
+
 	/**
 	 * Initializes a new {@link IMAPProvider}
 	 */
-	public IMAPProvider() {
+	private IMAPProvider() {
 		super();
 	}
 
 	@Override
-	public Class<? extends MailAccess<?, ?, ?>> getMailAccessClass() {
+	public Class<? extends MailAccess<?, ?>> getMailAccessClass() {
 		return IMAPAccess.class;
 	}
 

@@ -58,7 +58,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.server.ServerTimer;
 
 /**
@@ -68,12 +69,12 @@ import com.openexchange.server.ServerTimer;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-final class MailConnectionWatcher {
+public final class MailConnectionWatcher {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailConnectionWatcher.class);
 
-	private static final ConcurrentMap<MailAccess<?, ?, ?>, Long> mailConnections = new ConcurrentHashMap<MailAccess<?, ?, ?>, Long>();
+	private static final ConcurrentMap<MailAccess<?, ?>, Long> mailConnections = new ConcurrentHashMap<MailAccess<?, ?>, Long>();
 
 	private static final AtomicBoolean initialized = new AtomicBoolean();
 
@@ -141,7 +142,7 @@ final class MailConnectionWatcher {
 	 * @param mailConnection
 	 *            The mail connection to add
 	 */
-	static void addMailConnection(final MailAccess<?, ?, ?> mailConnection) {
+	public static void addMailConnection(final MailAccess<?, ?> mailConnection) {
 		if (!initialized.get()) {
 			LOG.error("Mail connection watcher is not running. Aborting addMailConnection()");
 			return;
@@ -158,7 +159,7 @@ final class MailConnectionWatcher {
 	 * @param mailConnection
 	 *            The mail connection to remove
 	 */
-	static void removeMailConnection(final MailAccess<?, ?, ?> mailConnection) {
+	public static void removeMailConnection(final MailAccess<?, ?> mailConnection) {
 		if (!initialized.get()) {
 			LOG.error("Mail connection watcher is not running. Aborting removeMailConnection()");
 			return;
@@ -180,50 +181,50 @@ final class MailConnectionWatcher {
 		 */
 		@Override
 		public void run() {
-		    try {
-			final StringBuilder sb = new StringBuilder(512);
-			final List<MailAccess<?, ?, ?>> exceededCons = new ArrayList<MailAccess<?, ?, ?>>();
-			for (final Iterator<Entry<MailAccess<?, ?, ?>, Long>> iter = mailConnections.entrySet().iterator(); iter
-					.hasNext();) {
-				final Entry<MailAccess<?, ?, ?>, Long> e = iter.next();
-				if (!e.getKey().isConnectedUnsafe()) {
-					/*
-					 * Remove closed connection from watcher
-					 */
-					iter.remove();
-				} else {
-					if ((System.currentTimeMillis() - e.getValue().longValue()) > MailConfig.getWatcherTime()) {
-						sb.setLength(0);
-						LOG.info(sb
-								.append(INFO_PREFIX.replaceFirst("#N#", String.valueOf(MailConfig.getWatcherTime())))
-								.append(e.getKey().getTrace()).toString());
-						exceededCons.add(e.getKey());
-					}
-				}
-			}
-			if (!exceededCons.isEmpty()) {
-				/*
-				 * Remove/Close exceeded connections
-				 */
-				final int n = exceededCons.size();
-				for (int i = 0; i < n; i++) {
-					final MailAccess<?, ?, ?> mailConnection = exceededCons.get(i);
-					try {
-						if (MailConfig.isWatcherShallClose()) {
+			try {
+				final StringBuilder sb = new StringBuilder(512);
+				final List<MailAccess<?, ?>> exceededCons = new ArrayList<MailAccess<?, ?>>();
+				for (final Iterator<Entry<MailAccess<?, ?>, Long>> iter = mailConnections.entrySet().iterator(); iter
+						.hasNext();) {
+					final Entry<MailAccess<?, ?>, Long> e = iter.next();
+					if (!e.getKey().isConnectedUnsafe()) {
+						/*
+						 * Remove closed connection from watcher
+						 */
+						iter.remove();
+					} else {
+						if ((System.currentTimeMillis() - e.getValue().longValue()) > MailConfig.getWatcherTime()) {
 							sb.setLength(0);
-							sb.append(INFO_PREFIX2).append(mailConnection.toString());
-							mailConnection.close(false);
-							sb.append(INFO_PREFIX3);
-							LOG.info(sb.toString());
+							LOG.info(sb.append(
+									INFO_PREFIX.replaceFirst("#N#", String.valueOf(MailConfig.getWatcherTime())))
+									.append(e.getKey().getTrace()).toString());
+							exceededCons.add(e.getKey());
 						}
-					} finally {
-						mailConnections.remove(mailConnection);
 					}
 				}
+				if (!exceededCons.isEmpty()) {
+					/*
+					 * Remove/Close exceeded connections
+					 */
+					final int n = exceededCons.size();
+					for (int i = 0; i < n; i++) {
+						final MailAccess<?, ?> mailConnection = exceededCons.get(i);
+						try {
+							if (MailConfig.isWatcherShallClose()) {
+								sb.setLength(0);
+								sb.append(INFO_PREFIX2).append(mailConnection.toString());
+								mailConnection.close(false);
+								sb.append(INFO_PREFIX3);
+								LOG.info(sb.toString());
+							}
+						} finally {
+							mailConnections.remove(mailConnection);
+						}
+					}
+				}
+			} catch (Exception e) {
+				LOG.error(e.getMessage(), e);
 			}
-		    } catch (Exception e) {
-		        LOG.error(e.getMessage(), e);
-		    }
 		}
 	}
 

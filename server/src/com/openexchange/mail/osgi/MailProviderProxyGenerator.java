@@ -55,7 +55,7 @@ import java.lang.reflect.Method;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
-import com.openexchange.mail.MailProvider;
+import com.openexchange.mail.api.MailProvider;
 
 /**
  * {@link MailProviderProxyGenerator} - Generates proxy objects for mail

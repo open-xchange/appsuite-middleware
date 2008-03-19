@@ -60,6 +60,7 @@ import java.util.Set;
 import javax.mail.FetchProfile;
 import javax.mail.UIDFolder;
 
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.sun.mail.imap.IMAPFolder;
@@ -73,6 +74,9 @@ import com.sun.mail.imap.protocol.UIDSet;
  */
 public final class MIMEStorageUtility {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(MIMEStorageUtility.class);
+
 	/**
 	 * No instance
 	 */
@@ -82,7 +86,9 @@ public final class MIMEStorageUtility {
 
 	private static final FetchProfile CACHE_FETCH_PROFILE = new FetchProfile();
 
-	private static final Collection<MailListField> CACHE_FIELDS;
+	private static final Collection<MailField> CACHE_FIELDS;
+
+	private static final MailField[] CACHE_FIELDS_ARR;
 
 	private static final FetchProfile UID_FETCH_PROFILE = new FetchProfile();
 
@@ -95,6 +101,7 @@ public final class MIMEStorageUtility {
 		CACHE_FETCH_PROFILE.add(MessageHeaders.HDR_X_PRIORITY);
 		UID_FETCH_PROFILE.add(UIDFolder.FetchProfileItem.UID);
 		CACHE_FIELDS = fetchProfile2MailListFields(CACHE_FETCH_PROFILE);
+		CACHE_FIELDS_ARR = CACHE_FIELDS.toArray(new MailField[CACHE_FIELDS.size()]);
 	}
 
 	/**
@@ -104,8 +111,19 @@ public final class MIMEStorageUtility {
 	 * @return The corresponding fields to the fetch profile obtained by
 	 *         {@link #getCacheFetchProfile()}
 	 */
-	public static Collection<MailListField> getCacheFields() {
+	public static Collection<MailField> getCacheFields() {
 		return CACHE_FIELDS;
+	}
+
+	/**
+	 * The corresponding fields to fetch profile obtained by
+	 * {@link #getCacheFetchProfile()}
+	 * 
+	 * @return The corresponding fields to the fetch profile obtained by
+	 *         {@link #getCacheFetchProfile()}
+	 */
+	public static MailField[] getCacheFieldsArray() {
+		return CACHE_FIELDS_ARR;
 	}
 
 	/**
@@ -138,71 +156,71 @@ public final class MIMEStorageUtility {
 	 * @return An appropriate collection of {@link MailListField} enumeration
 	 *         constants
 	 */
-	public static Collection<MailListField> fetchProfile2MailListFields(final FetchProfile fetchProfile) {
-		final Set<MailListField> set = new HashSet<MailListField>();
+	public static Collection<MailField> fetchProfile2MailListFields(final FetchProfile fetchProfile) {
+		final Set<MailField> set = new HashSet<MailField>();
 		/*
 		 * Folder is always set
 		 */
-		set.add(MailListField.FOLDER_ID);
+		set.add(MailField.FOLDER_ID);
 		if (fetchProfile.contains(FetchProfile.Item.ENVELOPE)) {
 			/*
 			 * From, To, Cc, Bcc, ReplyTo, Subject and Date
 			 */
-			set.add(MailListField.FROM);
-			set.add(MailListField.TO);
-			set.add(MailListField.CC);
-			set.add(MailListField.BCC);
-			set.add(MailListField.SUBJECT);
-			set.add(MailListField.RECEIVED_DATE);
-			set.add(MailListField.SENT_DATE);
-			set.add(MailListField.SIZE);
+			set.add(MailField.FROM);
+			set.add(MailField.TO);
+			set.add(MailField.CC);
+			set.add(MailField.BCC);
+			set.add(MailField.SUBJECT);
+			set.add(MailField.RECEIVED_DATE);
+			set.add(MailField.SENT_DATE);
+			set.add(MailField.SIZE);
 		} else {
-			set.add(MailListField.RECEIVED_DATE);
+			set.add(MailField.RECEIVED_DATE);
 			if (fetchProfile.contains(IMAPFolder.FetchProfileItem.SIZE)) {
-				set.add(MailListField.SIZE);
+				set.add(MailField.SIZE);
 			}
 		}
 		if (fetchProfile.contains(UIDFolder.FetchProfileItem.UID)) {
-			set.add(MailListField.ID);
+			set.add(MailField.ID);
 		}
 		if (fetchProfile.contains(FetchProfile.Item.CONTENT_INFO)) {
-			set.add(MailListField.ATTACHMENT);
+			set.add(MailField.ATTACHMENT);
 		}
 		if (fetchProfile.contains(FetchProfile.Item.FLAGS)) {
-			set.add(MailListField.FLAGS);
-			set.add(MailListField.COLOR_LABEL);
-			set.add(MailListField.FLAG_SEEN);
+			set.add(MailField.FLAGS);
+			set.add(MailField.COLOR_LABEL);
+			set.add(MailField.FLAG_SEEN);
 		}
 		if (fetchProfile.contains(IMAPFolder.FetchProfileItem.HEADERS)) {
-			set.add(MailListField.FROM);
-			set.add(MailListField.TO);
-			set.add(MailListField.CC);
-			set.add(MailListField.BCC);
-			set.add(MailListField.SUBJECT);
-			set.add(MailListField.DISPOSITION_NOTIFICATION_TO);
-			set.add(MailListField.PRIORITY);
-			set.add(MailListField.SENT_DATE);
+			set.add(MailField.FROM);
+			set.add(MailField.TO);
+			set.add(MailField.CC);
+			set.add(MailField.BCC);
+			set.add(MailField.SUBJECT);
+			set.add(MailField.DISPOSITION_NOTIFICATION_TO);
+			set.add(MailField.PRIORITY);
+			set.add(MailField.SENT_DATE);
 		} else {
 			if (fetchProfile.contains(MessageHeaders.HDR_FROM)) {
-				set.add(MailListField.FROM);
+				set.add(MailField.FROM);
 			}
 			if (fetchProfile.contains(MessageHeaders.HDR_TO)) {
-				set.add(MailListField.TO);
+				set.add(MailField.TO);
 			}
 			if (fetchProfile.contains(MessageHeaders.HDR_CC)) {
-				set.add(MailListField.CC);
+				set.add(MailField.CC);
 			}
 			if (fetchProfile.contains(MessageHeaders.HDR_BCC)) {
-				set.add(MailListField.BCC);
+				set.add(MailField.BCC);
 			}
 			if (fetchProfile.contains(MessageHeaders.HDR_SUBJECT)) {
-				set.add(MailListField.SUBJECT);
+				set.add(MailField.SUBJECT);
 			}
 			if (fetchProfile.contains(MessageHeaders.HDR_DISP_NOT_TO)) {
-				set.add(MailListField.DISPOSITION_NOTIFICATION_TO);
+				set.add(MailField.DISPOSITION_NOTIFICATION_TO);
 			}
 			if (fetchProfile.contains(MessageHeaders.HDR_X_PRIORITY)) {
-				set.add(MailListField.PRIORITY);
+				set.add(MailField.PRIORITY);
 			}
 		}
 		return set;
@@ -250,7 +268,11 @@ public final class MIMEStorageUtility {
 	}
 
 	/**
-	 * Gets the appropriate IMAP fetch profile
+	 * Gets the appropriate fetch profile.
+	 * <p>
+	 * <b>Note</b> that {@link MailField#BODY} and {@link MailField#FULL} are
+	 * discarded since no corresponding fetch profile item exists and therefore
+	 * should be handled separately.
 	 * 
 	 * @param fields
 	 *            The fields
@@ -259,12 +281,16 @@ public final class MIMEStorageUtility {
 	 *            items; otherwise <code>false</code>
 	 * @return The appropriate IMAP fetch profile
 	 */
-	public static FetchProfile getFetchProfile(final MailListField[] fields, final boolean preferEnvelope) {
+	public static FetchProfile getFetchProfile(final MailField[] fields, final boolean preferEnvelope) {
 		return getFetchProfile(fields, null, preferEnvelope);
 	}
 
 	/**
-	 * Gets the appropriate IMAP fetch profile
+	 * Gets the appropriate fetch profile
+	 * <p>
+	 * <b>Note</b> that {@link MailField#BODY} and {@link MailField#FULL} are
+	 * discarded since no corresponding fetch profile item exists and therefore
+	 * should be handled separately.
 	 * 
 	 * @param fields
 	 *            The fields
@@ -275,35 +301,39 @@ public final class MIMEStorageUtility {
 	 *            items; otherwise <code>false</code>
 	 * @return The appropriate IMAP fetch profile
 	 */
-	public static FetchProfile getFetchProfile(final MailListField[] fields, final MailListField sortField,
+	public static FetchProfile getFetchProfile(final MailField[] fields, final MailField sortField,
 			final boolean preferEnvelope) {
 		return getFetchProfile(fields, null, sortField, preferEnvelope);
 	}
 
-	private static final Set<MailListField> ENV_FIELDS;
+	private static final Set<MailField> ENV_FIELDS;
 
 	static {
-		ENV_FIELDS = new HashSet<MailListField>(8);
+		ENV_FIELDS = new HashSet<MailField>(8);
 		/*
 		 * The Envelope is an aggregation of the common attributes of a Message:
 		 * From, To, Cc, Bcc, ReplyTo, Subject and Date.
 		 */
-		ENV_FIELDS.add(MailListField.FROM);
-		ENV_FIELDS.add(MailListField.TO);
-		ENV_FIELDS.add(MailListField.CC);
-		ENV_FIELDS.add(MailListField.BCC);
-		ENV_FIELDS.add(MailListField.SUBJECT);
-		ENV_FIELDS.add(MailListField.SENT_DATE);
+		ENV_FIELDS.add(MailField.FROM);
+		ENV_FIELDS.add(MailField.TO);
+		ENV_FIELDS.add(MailField.CC);
+		ENV_FIELDS.add(MailField.BCC);
+		ENV_FIELDS.add(MailField.SUBJECT);
+		ENV_FIELDS.add(MailField.SENT_DATE);
 		/*
 		 * Discard the two extra fetch profile items contained in JavaMail's
 		 * ENVELOPE constant: RFC822.SIZE and INTERNALDATE
 		 */
-		//ENV_FIELDS.add(MailListField.RECEIVED_DATE);
-		//ENV_FIELDS.add(MailListField.SIZE);
+		// ENV_FIELDS.add(MailListField.RECEIVED_DATE);
+		// ENV_FIELDS.add(MailListField.SIZE);
 	}
 
 	/**
-	 * Gets the appropriate IMAP fetch profile
+	 * Gets the appropriate fetch profile
+	 * <p>
+	 * <b>Note</b> that {@link MailField#BODY} and {@link MailField#FULL} are
+	 * discarded since no corresponding fetch profile item exists and therefore
+	 * should be handled separately.
 	 * 
 	 * @param fields
 	 *            The fields
@@ -316,13 +346,13 @@ public final class MIMEStorageUtility {
 	 *            items; otherwise <code>false</code>
 	 * @return The appropriate IMAP fetch profile
 	 */
-	public static FetchProfile getFetchProfile(final MailListField[] fields, final MailListField[] searchFields,
-			final MailListField sortField, final boolean preferEnvelope) {
+	public static FetchProfile getFetchProfile(final MailField[] fields, final MailField[] searchFields,
+			final MailField sortField, final boolean preferEnvelope) {
 		final FetchProfile retval = new FetchProfile();
 		/*
 		 * Use a set to avoid duplicate entries
 		 */
-		final Set<MailListField> set = new HashSet<MailListField>();
+		final Set<MailField> set = new HashSet<MailField>();
 		if (fields != null) {
 			set.addAll(Arrays.asList(fields));
 		}
@@ -343,7 +373,7 @@ public final class MIMEStorageUtility {
 		}
 		if (!set.isEmpty()) {
 			final int size = set.size();
-			final Iterator<MailListField> iter = set.iterator();
+			final Iterator<MailField> iter = set.iterator();
 			for (int i = 0; i < size; i++) {
 				addFetchItem(retval, iter.next());
 			}
@@ -351,8 +381,11 @@ public final class MIMEStorageUtility {
 		return retval;
 	}
 
-	private static void addFetchItem(final FetchProfile fp, final MailListField field) {
+	private static void addFetchItem(final FetchProfile fp, final MailField field) {
 		switch (field) {
+		case HEADERS:
+			fp.add(IMAPFolder.FetchProfileItem.HEADERS);
+			break;
 		case ID:
 			fp.add(UIDFolder.FetchProfileItem.UID);
 			break;

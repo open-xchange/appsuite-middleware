@@ -66,7 +66,7 @@ import com.openexchange.caching.ElementEventHandler;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.mail.MailAccess;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.eventhandler.MailConnectionEventHandler;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -182,7 +182,7 @@ public final class MailConnectionCache {
 	 * @throws CacheException
 	 *             If removing from cache fails
 	 */
-	public MailAccess<?, ?, ?> removeMailConnection(final Session session) throws CacheException {
+	public MailAccess<?, ?> removeMailConnection(final Session session) throws CacheException {
 		final CacheKey key;
 		try {
 			key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
@@ -205,7 +205,7 @@ public final class MailConnectionCache {
 			final Lock writeLock = getLock(key).writeLock();
 			writeLock.lock();
 			try {
-				final MailAccess<?, ?, ?> mailConnection = (MailAccess<?, ?, ?>) cache.get(key);
+				final MailAccess<?, ?> mailConnection = (MailAccess<?, ?>) cache.get(key);
 				/*
 				 * Still available?
 				 */
@@ -243,7 +243,7 @@ public final class MailConnectionCache {
 	 * @throws CacheException
 	 *             If put into cache fails
 	 */
-	public boolean putMailConnection(final Session session, final MailAccess<?, ?, ?> mailConnection)
+	public boolean putMailConnection(final Session session, final MailAccess<?, ?> mailConnection)
 			throws CacheException {
 		final CacheKey key;
 		try {

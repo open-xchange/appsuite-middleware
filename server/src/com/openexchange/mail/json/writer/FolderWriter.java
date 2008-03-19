@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.json.writer;
 
+import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,7 +61,7 @@ import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderException;
@@ -141,10 +143,11 @@ public final class FolderWriter {
 						try {
 							if (withKey) {
 
-								((JSONObject) jsonContainer).put(FolderFields.ID, fullName == null ? folder
-										.getFullname() : fullName);
+								((JSONObject) jsonContainer).put(FolderFields.ID, prepareFullname(
+										fullName == null ? folder.getFullname() : fullName, folder.getSeparator()));
 							} else {
-								((JSONArray) jsonContainer).put(fullName == null ? folder.getFullname() : fullName);
+								((JSONArray) jsonContainer).put(prepareFullname(fullName == null ? folder.getFullname()
+										: fullName, folder.getSeparator()));
 							}
 						} catch (final JSONException e) {
 							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
@@ -232,9 +235,11 @@ public final class FolderWriter {
 							final boolean all) throws MailException {
 						try {
 							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.FOLDER_ID, folder.getParentFullname());
+								((JSONObject) jsonContainer).put(FolderFields.FOLDER_ID, prepareFullname(folder
+										.getParentFullname(), folder.getSeparator()));
 							} else {
-								((JSONArray) jsonContainer).put(folder.getParentFullname());
+								((JSONArray) jsonContainer).put(prepareFullname(folder.getParentFullname(), folder
+										.getSeparator()));
 							}
 						} catch (final JSONException e) {
 							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
@@ -534,9 +539,10 @@ public final class FolderWriter {
 							 */
 							if (withKey) {
 								((JSONObject) jsonContainer).put(FolderFields.CAPABILITIES, Integer.valueOf(mailConfig
-										.getCapabilities()));
+										.getCapabilities().getCapabilities()));
 							} else {
-								((JSONArray) jsonContainer).put(Integer.valueOf(mailConfig.getCapabilities()));
+								((JSONArray) jsonContainer).put(Integer.valueOf(mailConfig.getCapabilities()
+										.getCapabilities()));
 							}
 						} catch (final JSONException e) {
 							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());

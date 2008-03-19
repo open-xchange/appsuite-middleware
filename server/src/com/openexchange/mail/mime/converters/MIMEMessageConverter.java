@@ -83,11 +83,13 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
 
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailListField;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.compose.ComposeType;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContainerMessage;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
@@ -97,6 +99,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -187,6 +190,9 @@ public final class MIMEMessageConverter {
 	 *             If conversion fails
 	 */
 	public static Message convertMailMessage(final MailMessage mail) throws MailException {
+		if (mail instanceof ComposedMailMessage) {
+			return convertComposedMailMessage((ComposedMailMessage) mail);
+		}
 		try {
 			final MimeMessage mimeMsg = new MimeMessage(MIMEDefaultSession.getDefaultSession());
 			final String charset = mail.getContentType().containsCharsetParameter() ? mail.getContentType()
@@ -233,6 +239,84 @@ public final class MIMEMessageConverter {
 			throw new MailException(e);
 		} catch (final MailException e) {
 			throw new MailException(e);
+		} catch (final IOException e) {
+			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+		}
+	}
+
+	/**
+	 * Converts given instance of {@link ComposedMailMessage} into a
+	 * JavaMail-conform {@link Message} object
+	 * 
+	 * @param composedMail
+	 *            The source instance of {@link ComposedMailMessage}
+	 * @return A JavaMail-conform {@link Message} object
+	 * @throws MailException
+	 *             If conversion fails
+	 */
+	public static Message convertComposedMailMessage(final ComposedMailMessage composedMail) throws MailException {
+		try {
+			final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession());
+			/*
+			 * Fill message
+			 */
+			final MIMEMessageFiller filler = new MIMEMessageFiller(composedMail.getSession(), composedMail.getContext());
+			composedMail.setFiller(filler);
+			/*
+			 * Set headers
+			 */
+			filler.setMessageHeaders(composedMail, mimeMessage);
+			/*
+			 * Set common headers
+			 */
+			filler.setCommonHeaders(mimeMessage);
+			/*
+			 * Fill body
+			 */
+			filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW, null);
+			mimeMessage.saveChanges();
+			return mimeMessage;
+		} catch (final MessagingException e) {
+			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+		} catch (final IOException e) {
+			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+		}
+	}
+
+	/**
+	 * Fills specified instance of {@link ComposedMailMessage} with
+	 * {@link MIMEMessageFiller}.
+	 * 
+	 * @param composedMail
+	 *            The composed mail
+	 * @return A filled instance of {@link MailMessage} ready for further usage
+	 * @throws MailException
+	 *             If mail cannot be filled.
+	 */
+	public static MailMessage fillComposedMailMessage(final ComposedMailMessage composedMail) throws MailException {
+		try {
+			final MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession());
+			/*
+			 * Fill message
+			 */
+			final MIMEMessageFiller filler = new MIMEMessageFiller(composedMail.getSession(), composedMail.getContext());
+			composedMail.setFiller(filler);
+			/*
+			 * Set headers
+			 */
+			filler.setMessageHeaders(composedMail, mimeMessage);
+			/*
+			 * Set common headers
+			 */
+			filler.setCommonHeaders(mimeMessage);
+			/*
+			 * Fill body
+			 */
+			filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW, null);
+			mimeMessage.saveChanges();
+			return convertMessage(mimeMessage);
+		} catch (final MessagingException e) {
+			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}
@@ -354,8 +438,8 @@ public final class MIMEMessageConverter {
 	 * Only the fields specified through parameter <code>fields</code> are
 	 * going to be set
 	 * 
-	 * @see #convertMessages(Message[], Folder, MailListField[]) to convert
-	 *      common instances of {@link Message}
+	 * @see #convertMessages(Message[], Folder, MailField[]) to convert common
+	 *      instances of {@link Message}
 	 * 
 	 * @param msgs
 	 *            The source messages
@@ -366,8 +450,34 @@ public final class MIMEMessageConverter {
 	 *             If conversion fails
 	 * 
 	 */
-	public static MailMessage[] convertMessages(final Message[] msgs, final MailListField[] fields)
-			throws MailException {
+	public static MailMessage[] convertMessages(final Message[] msgs, final MailField[] fields) throws MailException {
+		return convertMessages(msgs, fields, false);
+	}
+
+	/**
+	 * Converts given array of {@link Message} instances to an array of
+	 * {@link MailMessage} instances. The single elements of the array are
+	 * expected to be instances of {@link ContainerMessage}; meaning the
+	 * messages were created through a manual fetch.
+	 * <p>
+	 * Only the fields specified through parameter <code>fields</code> are
+	 * going to be set
+	 * 
+	 * @see #convertMessages(Message[], Folder, MailField[])
+	 * 
+	 * @param msgs
+	 *            The source messages
+	 * @param fields
+	 *            The fields to fill
+	 * @param Whether
+	 *            to create mail messages with reference to content or not
+	 * @return The converted array of {@link Message} instances
+	 * @throws MailException
+	 *             If conversion fails
+	 * 
+	 */
+	public static MailMessage[] convertMessages(final Message[] msgs, final MailField[] fields,
+			final boolean includeBody) throws MailException {
 		/**
 		 * TODO: Change signature to:
 		 * 
@@ -383,7 +493,7 @@ public final class MIMEMessageConverter {
 					/*
 					 * Create with no reference to content
 					 */
-					mails[i] = new MIMEMailMessage();
+					mails[i] = includeBody ? new MIMEMailMessage((MimeMessage) msgs[i]) : new MIMEMailMessage();
 					fillMessage(fillers, mails[i], msgs[i]);
 				}
 			}
@@ -410,7 +520,7 @@ public final class MIMEMessageConverter {
 	 * @throws MailException
 	 *             If conversion fails
 	 */
-	public static MailMessage[] convertMessages(final Message[] msgs, final Folder folder, final MailListField[] fields)
+	public static MailMessage[] convertMessages(final Message[] msgs, final Folder folder, final MailField[] fields)
 			throws MailException {
 		try {
 			final MailMessageFieldFiller[] fillers = createFieldFillers(folder, fields);
@@ -448,10 +558,102 @@ public final class MIMEMessageConverter {
 	 * @throws MailException
 	 *             If field fillers cannot be created
 	 */
-	private static MailMessageFieldFiller[] createFieldFillers(final MailListField[] fields) throws MailException {
+	private static MailMessageFieldFiller[] createFieldFillers(final MailField[] fields) throws MailException {
 		final MailMessageFieldFiller[] fillers = new MailMessageFieldFiller[fields.length];
 		for (int i = 0; i < fields.length; i++) {
 			switch (fields[i]) {
+			case HEADERS:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						final ContainerMessage containerMessage = (ContainerMessage) msg;
+						/*
+						 * From
+						 */
+						mailMessage.addFrom((InternetAddress[]) containerMessage.getFrom());
+						/*
+						 * To, Cc, and Bcc
+						 */
+						mailMessage.addTo((InternetAddress[]) containerMessage.getRecipients(Message.RecipientType.TO));
+						mailMessage.addCc((InternetAddress[]) containerMessage.getRecipients(Message.RecipientType.CC));
+						mailMessage.addBcc((InternetAddress[]) containerMessage
+								.getRecipients(Message.RecipientType.BCC));
+						/*
+						 * Reply-To
+						 */
+						final StringBuilder sb = new StringBuilder(128);
+						{
+							final InternetAddress[] replyTo = (InternetAddress[]) containerMessage.getReplyTo();
+							if (null != replyTo) {
+								sb.append(replyTo[0].toString());
+								for (int j = 1; j < replyTo.length; j++) {
+									sb.append(", ").append(replyTo[j].toString());
+								}
+								mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
+								sb.setLength(0);
+							}
+						}
+						/*
+						 * Subject
+						 */
+						mailMessage.setSubject(containerMessage.getSubject());
+						/*
+						 * Date
+						 */
+						mailMessage.setSentDate(containerMessage.getSentDate());
+						/*
+						 * X-Priority
+						 */
+						mailMessage.setPriority(Integer.parseInt(containerMessage
+								.getHeader(MessageHeaders.HDR_X_PRIORITY)[0]));
+						/*
+						 * Message-Id
+						 */
+						{
+							final String[] messageId = containerMessage.getHeader(MessageHeaders.HDR_MESSAGE_ID);
+							if (null != messageId) {
+								mailMessage.addHeader(MessageHeaders.HDR_MESSAGE_ID, messageId[0]);
+							}
+						}
+						/*
+						 * In-Reply-To
+						 */
+						{
+							final String[] inReplyTo = containerMessage.getHeader(MessageHeaders.HDR_IN_REPLY_TO);
+							if (null != inReplyTo) {
+								sb.append(inReplyTo[0].toString());
+								for (int j = 1; j < inReplyTo.length; j++) {
+									sb.append(", ").append(inReplyTo[j].toString());
+								}
+								mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
+								sb.setLength(0);
+							}
+						}
+						/*
+						 * References
+						 */
+						{
+							final String[] references = containerMessage.getHeader(MessageHeaders.HDR_REFERENCES);
+							if (null != references) {
+								sb.append(references[0].toString());
+								for (int j = 1; j < references.length; j++) {
+									sb.append(", ").append(references[j].toString());
+								}
+								mailMessage.addHeader(MessageHeaders.HDR_REFERENCES, sb.toString());
+								sb.setLength(0);
+							}
+						}
+						/*
+						 * All other
+						 */
+						final int size = containerMessage.getNumOfHeaders();
+						final Iterator<Map.Entry<String, String>> iter = containerMessage.getHeaders();
+						for (int j = 0; j < size; j++) {
+							final Map.Entry<String, String> entry = iter.next();
+							mailMessage.addHeader(entry.getKey(), entry.getValue());
+						}
+					}
+				};
+				break;
 			case ID:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
@@ -612,6 +814,12 @@ public final class MIMEMessageConverter {
 					}
 				};
 				break;
+			case BODY:
+			case FULL:
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Ignoring mail field " + fields[i]);
+				}
+				break;
 			default:
 				throw new MailException(MailException.Code.INVALID_FIELD, fields[i].toString());
 			}
@@ -632,11 +840,86 @@ public final class MIMEMessageConverter {
 	 * @throws MailException
 	 *             If field fillers cannot be created
 	 */
-	private static MailMessageFieldFiller[] createFieldFillers(final Folder folder, final MailListField[] fields)
+	private static MailMessageFieldFiller[] createFieldFillers(final Folder folder, final MailField[] fields)
 			throws MailException {
 		final MailMessageFieldFiller[] fillers = new MailMessageFieldFiller[fields.length];
 		for (int i = 0; i < fields.length; i++) {
 			switch (fields[i]) {
+			case HEADERS:
+				fillers[i] = new MailMessageFieldFiller() {
+					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
+						/*
+						 * From
+						 */
+						mailMessage.addFrom((InternetAddress[]) msg.getFrom());
+						/*
+						 * To, Cc, and Bcc
+						 */
+						mailMessage.addTo((InternetAddress[]) msg.getRecipients(Message.RecipientType.TO));
+						mailMessage.addCc((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC));
+						mailMessage.addBcc((InternetAddress[]) msg.getRecipients(Message.RecipientType.BCC));
+						/*
+						 * Subject
+						 */
+						mailMessage.setSubject(msg.getSubject());
+						/*
+						 * Date
+						 */
+						mailMessage.setSentDate(msg.getSentDate());
+						/*
+						 * X-Priority
+						 */
+						{
+							final String[] xPriority = msg.getHeader(MessageHeaders.HDR_X_PRIORITY);
+							if (null != xPriority) {
+								parsePriority(xPriority[0], mailMessage);
+							}
+						}
+						/*
+						 * Message-Id
+						 */
+						{
+							final String[] messageId = msg.getHeader(MessageHeaders.HDR_MESSAGE_ID);
+							if (null != messageId) {
+								mailMessage.addHeader(MessageHeaders.HDR_MESSAGE_ID, messageId[0]);
+							}
+						}
+						/*
+						 * In-Reply-To
+						 */
+						final StringBuilder sb = new StringBuilder(128);
+						{
+							final String[] inReplyTo = msg.getHeader(MessageHeaders.HDR_IN_REPLY_TO);
+							if (null != inReplyTo) {
+								sb.append(inReplyTo[0].toString());
+								for (int j = 1; j < inReplyTo.length; j++) {
+									sb.append(", ").append(inReplyTo[j].toString());
+								}
+								mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
+								sb.setLength(0);
+							}
+						}
+						/*
+						 * References
+						 */
+						{
+							final String[] references = msg.getHeader(MessageHeaders.HDR_REFERENCES);
+							if (null != references) {
+								sb.append(references[0].toString());
+								for (int j = 1; j < references.length; j++) {
+									sb.append(", ").append(references[j].toString());
+								}
+								mailMessage.addHeader(MessageHeaders.HDR_REFERENCES, sb.toString());
+								sb.setLength(0);
+							}
+						}
+						/*
+						 * All other
+						 */
+						setHeaders(msg, mailMessage);
+					}
+				};
+				break;
 			case ID:
 				fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
 
@@ -853,6 +1136,12 @@ public final class MIMEMessageConverter {
 					}
 				};
 				break;
+			case BODY:
+			case FULL:
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Ignoring mail field " + fields[i]);
+				}
+				break;
 			default:
 				throw new MailException(MailException.Code.INVALID_FIELD, fields[i].toString());
 			}
@@ -909,7 +1198,7 @@ public final class MIMEMessageConverter {
 				mail.setFolder(f.getFullName());
 				mail.setSeparator(f.getSeparator());
 				mail.setMailId(((UIDFolder) f).getUID(msg));
-				mail.setUnreadMessages(mail.isSeen() ? f.getUnreadMessageCount() : f.getUnreadMessageCount() - 1);
+				mail.setUnreadMessages(f.getUnreadMessageCount());
 			}
 			setHeaders(msg, mail);
 			try {
@@ -1066,6 +1355,39 @@ public final class MIMEMessageConverter {
 		} catch (final MessagingException e) {
 			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
 		}
+	}
+
+	/**
+	 * Converts specified flags bit mask to an instance of {@link Flags}
+	 * 
+	 * @param flags
+	 *            The flags bit mask
+	 * @return The corresponding instance of {@link Flags}
+	 */
+	public static Flags convertMailFlags(final int flags) {
+		final Flags flagsObj = new Flags();
+		if ((flags | MailMessage.FLAG_ANSWERED) == MailMessage.FLAG_ANSWERED) {
+			flagsObj.add(Flags.Flag.ANSWERED);
+		}
+		if ((flags | MailMessage.FLAG_DELETED) == MailMessage.FLAG_DELETED) {
+			flagsObj.add(Flags.Flag.DELETED);
+		}
+		if ((flags | MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT) {
+			flagsObj.add(Flags.Flag.DRAFT);
+		}
+		if ((flags | MailMessage.FLAG_FLAGGED) == MailMessage.FLAG_FLAGGED) {
+			flagsObj.add(Flags.Flag.FLAGGED);
+		}
+		if ((flags | MailMessage.FLAG_RECENT) == MailMessage.FLAG_RECENT) {
+			flagsObj.add(Flags.Flag.RECENT);
+		}
+		if ((flags | MailMessage.FLAG_SEEN) == MailMessage.FLAG_SEEN) {
+			flagsObj.add(Flags.Flag.SEEN);
+		}
+		if ((flags | MailMessage.FLAG_USER) == MailMessage.FLAG_USER) {
+			flagsObj.add(Flags.Flag.USER);
+		}
+		return flagsObj;
 	}
 
 	private static int estimateSize(final InputStream in, final String tansferEnc) throws IOException {

@@ -58,7 +58,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.Protocol;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.session.Session;
 
@@ -111,7 +111,7 @@ public final class TransportProviderRegistry {
 		}
 		provider = getTransportProvider(protocol);
 		if (null == provider) {
-			throw new MailException(MailException.Code.UNKNOWN_PROTOCOL, MailConfig.getMailServerURL(session));
+			throw new MailException(MailException.Code.UNKNOWN_PROTOCOL, TransportConfig.getTransportServerURL(session));
 		}
 		session.setParameter(MailSessionParameterNames.PARAM_TRANSPORT_PROVIDER, provider);
 		return provider;

@@ -54,8 +54,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailProvider;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.api.MailProvider;
 
 /**
  * Service tracker for mail providers

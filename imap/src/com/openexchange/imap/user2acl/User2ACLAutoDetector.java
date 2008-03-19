@@ -61,7 +61,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.mail.config.MailConfig.BoolCapVal;
+import com.openexchange.mail.api.MailConfig.BoolCapVal;
 
 /**
  * {@link User2ACLAutoDetector}

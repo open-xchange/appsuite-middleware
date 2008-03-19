@@ -71,6 +71,11 @@ public final class MailSessionParameterNames {
 	public static final String PARAM_DEF_FLD_FLAG = "com.openexchange.mail.deffldflag";
 
 	/**
+	 * Mail folder separator
+	 */
+	public static final String PARAM_SEPARATOR = "com.openexchange.mail.separator";
+
+	/**
 	 * Default folder array
 	 */
 	public static final String PARAM_DEF_FLD_ARR = "com.openexchange.mail.deffldarr";

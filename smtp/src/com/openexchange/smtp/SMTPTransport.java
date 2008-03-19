@@ -81,7 +81,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -91,6 +91,7 @@ import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
@@ -217,7 +218,7 @@ public final class SMTPTransport extends MailTransport {
 
 	private SMTPConfig getTransportConfig() throws MailException {
 		if (smtpConfig == null) {
-			smtpConfig = SMTPConfig.getSmtpConfig(session, ctx);
+			smtpConfig = TransportConfig.getTransportConfig(SMTPConfig.class, session);
 		}
 		return smtpConfig;
 	}
@@ -392,7 +393,8 @@ public final class SMTPTransport extends MailTransport {
 			if (composedMail.getReferencedMailsSize() == 1) {
 				tempIds = ReferencedMailPart.loadReferencedParts(composedMail, session);
 			}
-			if (ComposeType.FORWARD.equals(sendType) && (usm.isForwardAsAttachment() || composedMail.getReferencedMailsSize() > 1)) {
+			if (ComposeType.FORWARD.equals(sendType)
+					&& (usm.isForwardAsAttachment() || composedMail.getReferencedMailsSize() > 1)) {
 				smtpFiller.fillMail((SMTPMailMessage) composedMail, smtpMessage, sendType, composedMail
 						.getReferencedMails());
 			} else {

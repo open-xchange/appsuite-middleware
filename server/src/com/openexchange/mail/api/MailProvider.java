@@ -47,9 +47,10 @@
  *
  */
 
-package com.openexchange.mail;
+package com.openexchange.mail.api;
 
-import com.openexchange.mail.config.AbstractProtocolProperties;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.Protocol;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
 
@@ -124,7 +125,7 @@ public abstract class MailProvider {
 	 *            <code>true</code> if deprecated; otherwise
 	 *            <code>false</code>
 	 */
-	void setDeprecated(final boolean deprecated) {
+	public void setDeprecated(final boolean deprecated) {
 		this.deprecated = deprecated;
 	}
 
@@ -134,7 +135,7 @@ public abstract class MailProvider {
 	 * @throws MailException
 	 *             If start-up fails
 	 */
-	protected void startUp() throws MailException {
+	public void startUp() throws MailException {
 		getProtocolProperties().loadProperties();
 		MailAccess.startupImpl(getMailAccessClass());
 	}
@@ -145,7 +146,7 @@ public abstract class MailProvider {
 	 * @throws MailException
 	 *             if shut-down fails
 	 */
-	protected void shutDown() throws MailException {
+	public void shutDown() throws MailException {
 		MailAccess.shutdownImpl(getMailAccessClass());
 		getProtocolProperties().resetProperties();
 	}
@@ -168,8 +169,8 @@ public abstract class MailProvider {
 	public abstract Protocol getProtocol();
 
 	/**
-	 * Checks if this mail provider supports the given protocol (which is in
-	 * either secure or non-secure notation).
+	 * Checks if this mail provider supports the given protocol (which is either
+	 * in secure or non-secure notation).
 	 * <p>
 	 * This is a convenience method that invokes
 	 * {@link Protocol#isSupported(String)}
@@ -187,7 +188,7 @@ public abstract class MailProvider {
 	 * 
 	 * @return The class implementing {@link MailAccess}
 	 */
-	public abstract Class<? extends MailAccess<?, ?, ?>> getMailAccessClass();
+	public abstract Class<? extends MailAccess<?, ?>> getMailAccessClass();
 
 	/**
 	 * Gets the protocol properties

@@ -112,7 +112,7 @@ public final class SMTPActivator implements BundleActivator {
 							LOG.error(e.getMessage(), e);
 						}
 						smtpServiceRegistration = context.registerService(TransportProvider.class.getName(),
-								new SMTPProvider(), dictionary);
+								SMTPProvider.getInstance(), dictionary);
 					}
 					return addedService;
 				}

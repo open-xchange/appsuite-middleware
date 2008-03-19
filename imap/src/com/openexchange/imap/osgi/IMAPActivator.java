@@ -63,7 +63,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.config.IMAPProperties;
-import com.openexchange.mail.MailProvider;
+import com.openexchange.mail.api.MailProvider;
 
 /**
  * {@link IMAPActivator}
@@ -111,8 +111,8 @@ public final class IMAPActivator implements BundleActivator {
 						} catch (final Exception e) {
 							LOG.error(e.getMessage(), e);
 						}
-						imapServiceRegistration = context.registerService(MailProvider.class.getName(),
-								new IMAPProvider(), dictionary);
+						imapServiceRegistration = context.registerService(MailProvider.class.getName(), IMAPProvider
+								.getInstance(), dictionary);
 					}
 					return addedService;
 				}

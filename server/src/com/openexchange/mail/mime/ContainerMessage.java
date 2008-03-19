@@ -51,6 +51,8 @@ package com.openexchange.mail.mime;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -66,6 +68,7 @@ import javax.activation.DataHandler;
 import javax.mail.Address;
 import javax.mail.Flags;
 import javax.mail.Folder;
+import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -77,7 +80,10 @@ import javax.mail.internet.MimeUtility;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
 /**
@@ -98,6 +104,8 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 public final class ContainerMessage extends Message implements Serializable {
 
 	private static final String ERR_METHOD_NOT_SUPPORTED = "Method not supported";
+
+	private static final String ERR_MISSING_CONTENT = "Missing content";
 
 	private static final long serialVersionUID = -5236672658788027516L;
 
@@ -190,6 +198,10 @@ public final class ContainerMessage extends Message implements Serializable {
 	 */
 	private BODYSTRUCTURE bodystructure;
 
+	private byte[] content;
+
+	private DataHandler dh;
+
 	/**
 	 * Initializes a new {@link ContainerMessage}
 	 */
@@ -237,22 +249,62 @@ public final class ContainerMessage extends Message implements Serializable {
 		if (msg.isExpunged()) {
 			expunged = true;
 		} else {
-			this.from = (InternetAddress[]) msg.getFrom();
-			this.to = (InternetAddress[]) msg.getRecipients(RecipientType.TO);
-			this.cc = (InternetAddress[]) msg.getRecipients(RecipientType.CC);
-			this.bcc = (InternetAddress[]) msg.getRecipients(RecipientType.BCC);
-			this.replyTo = msg.getReplyTo() == null ? null : (InternetAddress[]) msg.getReplyTo();
-			this.inReplyTo = msg.getHeader(MessageHeaders.HDR_IN_REPLY_TO, ",");
-			this.messageId = msg.getHeader(MessageHeaders.HDR_MESSAGE_ID, null);
-			this.subject = msg.getSubject();
-			this.date = msg.getSentDate();
-			this.receivedDate = msg.getReceivedDate();
-			this.flags = msg.getFlags();
-			this.contentType = new ContentType(msg.getContentType());
-			this.size = msg.getSize();
-			final String[] tmp;
-			this.priority = (tmp = msg.getHeader(MessageHeaders.HDR_X_PRIORITY)) == null || tmp[0] == null
-					|| tmp[0].length() == 0 ? MailMessage.PRIORITY_NORMAL : parsePriorityStr(tmp[0]);
+			parseMimeHeaders(msg);
+		}
+	}
+
+	private void parseMimeHeaders(final MimeMessage msg) throws MessagingException, MailException {
+		this.from = (InternetAddress[]) msg.getFrom();
+		this.to = (InternetAddress[]) msg.getRecipients(RecipientType.TO);
+		this.cc = (InternetAddress[]) msg.getRecipients(RecipientType.CC);
+		this.bcc = (InternetAddress[]) msg.getRecipients(RecipientType.BCC);
+		this.replyTo = msg.getReplyTo() == null ? null : (InternetAddress[]) msg.getReplyTo();
+		this.inReplyTo = msg.getHeader(MessageHeaders.HDR_IN_REPLY_TO, ",");
+		this.messageId = msg.getHeader(MessageHeaders.HDR_MESSAGE_ID, null);
+		this.subject = msg.getSubject();
+		this.date = msg.getSentDate();
+		this.receivedDate = msg.getReceivedDate();
+		this.flags = msg.getFlags();
+		this.contentType = new ContentType(msg.getContentType());
+		this.size = msg.getSize();
+		final String[] tmp;
+		this.priority = (tmp = msg.getHeader(MessageHeaders.HDR_X_PRIORITY)) == null || tmp[0] == null
+				|| tmp[0].length() == 0 ? MailMessage.PRIORITY_NORMAL : parsePriorityStr(tmp[0]);
+		for (final Enumeration<?> e = msg.getAllHeaders(); e.hasMoreElements();) {
+			Header hdr = (Header) e.nextElement();
+			msg.setHeader(hdr.getName(), MimeUtility.unfold(hdr.getValue()));
+		}
+	}
+
+	/**
+	 * Parse the input stream setting the <code>headers</code> and
+	 * <code>content</code> fields appropriately.
+	 * 
+	 * @param is
+	 *            The message input stream
+	 * @exception MessagingException
+	 *                If input stream cannot be parsed
+	 */
+	public void parse(final InputStream is) throws MessagingException, MailException {
+		final MimeMessage msg = new MimeMessage(MIMEDefaultSession.getDefaultSession(), is);
+		parseMimeHeaders(msg);
+		try {
+			final InputStream msgIn = msg.getInputStream();
+			if (null != msgIn) {
+				try {
+					final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream();
+					final byte[] bytes = new byte[1024];
+					int count = -1;
+					while ((count = msgIn.read(bytes, 0, bytes.length)) != -1) {
+						tmp.write(bytes, 0, count);
+					}
+					this.content = tmp.toByteArray();
+				} finally {
+					msgIn.close();
+				}
+			}
+		} catch (final IOException e) {
+			throw new MailException(MailException.Code.IO_ERROR, e, e.getMessage());
 		}
 	}
 
@@ -586,15 +638,28 @@ public final class ContainerMessage extends Message implements Serializable {
 	}
 
 	public InputStream getInputStream() throws MessagingException {
-		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
+		if (null == content) {
+			throw new MessagingException(ERR_MISSING_CONTENT);
+		}
+		return new UnsynchronizedByteArrayInputStream(content);
 	}
 
 	public DataHandler getDataHandler() throws MessagingException {
-		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
+		if (null == content) {
+			throw new MessagingException(ERR_MISSING_CONTENT);
+		}
+		if (null == dh) {
+			dh = new DataHandler(new MessageDataSource(content, contentType.toString()));
+		}
+		return dh;
 	}
 
 	public Object getContent() throws MessagingException {
-		throw new MessagingException(ERR_METHOD_NOT_SUPPORTED);
+		try {
+			return getDataHandler().getContent();
+		} catch (final IOException e) {
+			throw new MessagingException("Content cannot be returned", e);
+		}
 	}
 
 	public void setDataHandler(final DataHandler dh) throws MessagingException {

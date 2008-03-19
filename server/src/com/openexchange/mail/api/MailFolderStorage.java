@@ -47,9 +47,12 @@
  *
  */
 
-package com.openexchange.mail;
+package com.openexchange.mail.api;
 
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.Quota;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolderDescription;
 
 /**
  * {@link MailFolderStorage} - Offers basic access methods to mail folder(s)
@@ -57,7 +60,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public interface MailFolderStorage {
+public abstract class MailFolderStorage {
 
 	/**
 	 * Constant which indicates unlimited quota
@@ -77,7 +80,7 @@ public interface MailFolderStorage {
 	 * @throws MailException
 	 *             If existence cannot be checked
 	 */
-	public boolean exists(final String fullname) throws MailException;
+	public abstract boolean exists(final String fullname) throws MailException;
 
 	/**
 	 * Gets the folder identified through given fullname
@@ -88,7 +91,7 @@ public interface MailFolderStorage {
 	 * @throws MailException
 	 *             If folder could not be fetched
 	 */
-	public MailFolder getFolder(final String fullname) throws MailException;
+	public abstract MailFolder getFolder(final String fullname) throws MailException;
 
 	/**
 	 * Gets the first level subfolders located below the folder whose fullname
@@ -97,12 +100,15 @@ public interface MailFolderStorage {
 	 * @param parentFullname
 	 *            The parent fullname
 	 * @param all
-	 *            whether if all or only subscribed subfolders shall be returned
+	 *            Whether all or only subscribed subfolders shall be returned.
+	 *            If underlying mailing system does not support folder
+	 *            subscription, this argument should always be treated as
+	 *            <code>true</code>.
 	 * @return An array of {@link MailFolder} representing the subfolders
 	 * @throws MailException
 	 *             If subfolders cannot be delivered
 	 */
-	public MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException;
+	public abstract MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException;
 
 	/**
 	 * Gets the mailbox's default folder
@@ -111,7 +117,7 @@ public interface MailFolderStorage {
 	 * @throws MailException
 	 *             If mailbox's default folder cannot be delivered
 	 */
-	public MailFolder getRootFolder() throws MailException;
+	public abstract MailFolder getRootFolder() throws MailException;
 
 	/**
 	 * Checks user's default folder as defined in user's mail settings and
@@ -120,7 +126,7 @@ public interface MailFolderStorage {
 	 * @throws MailException
 	 *             If user's default folder could not be checked
 	 */
-	public void checkDefaultFolders() throws MailException;
+	public abstract void checkDefaultFolders() throws MailException;
 
 	/**
 	 * Creates a new mail folder with attributes taken from given mail folder
@@ -131,7 +137,7 @@ public interface MailFolderStorage {
 	 * @throws MailException
 	 *             If creation fails
 	 */
-	public String createFolder(MailFolder toCreate) throws MailException;
+	public abstract String createFolder(MailFolderDescription toCreate) throws MailException;
 
 	/**
 	 * Updates an existing mail folder identified through given fullname. All
@@ -139,18 +145,16 @@ public interface MailFolderStorage {
 	 * <p>
 	 * The currently known attributes that make sense being updated are:
 	 * <ul>
-	 * <li>parent's fullname; meaning a move operation is performed if
-	 * {@link MailFolder#containsParentFullname()} returns <code>true</code></li>
-	 * <li>name; meaning a rename operation is performed if
-	 * {@link MailFolder#containsName()} returns <code>true</code></li>
 	 * <li>permissions; meaning folder's permissions are updated if
-	 * {@link MailFolder#containsPermissions()} returns <code>true</code></li>
+	 * {@link MailFolderDescription#containsPermissions()} returns
+	 * <code>true</code></li>
 	 * <li>subscription; meaning a subscribe/unsubscribe operation is performed
-	 * if {@link MailFolder#containsSubscribed()} returns <code>true</code></li>
+	 * if {@link MailFolderDescription#containsSubscribed()} returns
+	 * <code>true</code></li>
 	 * </ul>
 	 * Of course more folder attributes may be checked by implementation to
-	 * enhance update operations. If so, these additional operations should be
-	 * listed in method's JavaDoc header.
+	 * enhance update operations. The programmer may extend the
+	 * {@link MailFolderDescription} class to do so.
 	 * 
 	 * @param fullname
 	 *            The fullname of the mail folder to update
@@ -160,7 +164,56 @@ public interface MailFolderStorage {
 	 * @throws MailException
 	 *             If folder cannot be updated
 	 */
-	public String updateFolder(String fullname, MailFolder toUpdate) throws MailException;
+	public abstract String updateFolder(String fullname, MailFolderDescription toUpdate) throws MailException;
+
+	/**
+	 * Moves the folder identified through given fullname to the path specified
+	 * through argument <code>newFullname</code>. Thus a rename can be
+	 * implicitly performed.
+	 * <p>
+	 * E.g.:
+	 * 
+	 * <pre>
+	 * my.path.to.folder -&gt; my.newpath.to.folder
+	 * </pre>
+	 * 
+	 * @param fullname
+	 *            The folder fullname
+	 * @param newFullname
+	 *            The new fullname to move to
+	 * @return The new fullname where the folder has been moved
+	 * @throws MailException
+	 *             If folder cannot be moved
+	 */
+	public abstract String moveFolder(String fullname, String newFullname) throws MailException;
+
+	/**
+	 * Renames the folder identified through given fullname to the specified new
+	 * name.
+	 * <p>
+	 * Since a rename is a move operation in the same (parent) folder, this is
+	 * only a convenience method that may be overridden if necessary.
+	 * <p>
+	 * E.g.:
+	 * 
+	 * <pre>
+	 * my.path.to.folder -&gt; my.path.to.newfolder
+	 * </pre>
+	 * 
+	 * @param fullname
+	 *            The folder fullname
+	 * @param newName
+	 *            The new name
+	 * @return The new fullname
+	 * @throws MailException
+	 *             If folder cannot be renamed
+	 */
+	public String renameFolder(final String fullname, final String newName) throws MailException {
+		final MailFolder folder = getFolder(fullname);
+		final String newPath = new StringBuilder(folder.getParentFullname()).append(folder.getSeparator()).append(
+				newName).toString();
+		return moveFolder(fullname, newPath);
+	}
 
 	/**
 	 * Deletes an existing mail folder identified through given fullname. If
@@ -185,7 +238,7 @@ public interface MailFolderStorage {
 	 * @throws MailException
 	 *             If mail folder cannot be deleted
 	 */
-	public String deleteFolder(String fullname) throws MailException;
+	public abstract String deleteFolder(String fullname) throws MailException;
 
 	/**
 	 * Deletes the content of the folder identified through given fullname
@@ -196,7 +249,7 @@ public interface MailFolderStorage {
 	 * @throws MailException
 	 *             If folder's content cannot be cleared
 	 */
-	public void clearFolder(String fullname) throws MailException;
+	public abstract void clearFolder(String fullname) throws MailException;
 
 	/**
 	 * Gets the reverse path from the folder identified through given fullname
@@ -211,21 +264,20 @@ public interface MailFolderStorage {
 	 * @throws MailException
 	 *             If path cannot be determined
 	 */
-	public MailFolder[] getPath2DefaultFolder(String fullname) throws MailException;
+	public abstract MailFolder[] getPath2DefaultFolder(String fullname) throws MailException;
 
 	/**
-	 * Detects both quota limit and quota usage on given mailbox's folder
-	 * gathered in an array of <code>long</code>. The first value is the
-	 * quota limit and the second is the quota usage.
+	 * Detects both quota limit and quota usage on given mailbox folder's
+	 * quotaroot.
 	 * 
 	 * @param folder
 	 *            The folder fullname (if <code>null</code> <i>"INBOX"</i> is
 	 *            used)
-	 * @return Both quota limit and quota usage
+	 * @return The quota
 	 * @throws MailException
 	 *             If quota limit and/or quote usage cannot be determined
 	 */
-	public long[] getQuota(String folder) throws MailException;
+	public abstract Quota getQuota(String folder) throws MailException;
 
 	/**
 	 * Gets the fullname of default confirmed ham folder
@@ -234,7 +286,7 @@ public interface MailFolderStorage {
 	 * @throws MailException
 	 *             If confirmed ham folder's fullname cannot be returned
 	 */
-	public String getConfirmedHamFolder() throws MailException;
+	public abstract String getConfirmedHamFolder() throws MailException;
 
 	/**
 	 * Gets the fullname of default confirmed spam folder
@@ -243,7 +295,7 @@ public interface MailFolderStorage {
 	 * @throws MailException
 	 *             If confirmed spam folder's fullname cannot be returned
 	 */
-	public String getConfirmedSpamFolder() throws MailException;
+	public abstract String getConfirmedSpamFolder() throws MailException;
 
 	/**
 	 * Gets the fullname of default drafts folder
@@ -252,7 +304,7 @@ public interface MailFolderStorage {
 	 * @throws MailException
 	 *             If draft folder's fullname cannot be returned
 	 */
-	public String getDraftsFolder() throws MailException;
+	public abstract String getDraftsFolder() throws MailException;
 
 	/**
 	 * Gets the fullname of default spam folder
@@ -261,7 +313,7 @@ public interface MailFolderStorage {
 	 * @throws MailException
 	 *             If spam folder's fullname cannot be returned
 	 */
-	public String getSpamFolder() throws MailException;
+	public abstract String getSpamFolder() throws MailException;
 
 	/**
 	 * Gets the fullname of default sent folder
@@ -270,7 +322,7 @@ public interface MailFolderStorage {
 	 * @throws MailException
 	 *             If sent folder's fullname cannot be returned
 	 */
-	public String getSentFolder() throws MailException;
+	public abstract String getSentFolder() throws MailException;
 
 	/**
 	 * Gets the fullname of default trash folder
@@ -279,7 +331,7 @@ public interface MailFolderStorage {
 	 * @throws MailException
 	 *             If trash folder's fullname cannot be returned
 	 */
-	public String getTrashFolder() throws MailException;
+	public abstract String getTrashFolder() throws MailException;
 
 	/**
 	 * Releases all used resources when closing parental {@link MailAccess}
@@ -287,6 +339,6 @@ public interface MailFolderStorage {
 	 * @throws MailException
 	 *             If resources cannot be released
 	 */
-	public void releaseResources() throws MailException;
+	public abstract void releaseResources() throws MailException;
 
 }

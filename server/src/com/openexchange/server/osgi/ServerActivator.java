@@ -71,7 +71,7 @@ import com.openexchange.configjump.client.ConfigJump;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nTools;
-import com.openexchange.mail.MailProvider;
+import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
 import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.transport.TransportProvider;

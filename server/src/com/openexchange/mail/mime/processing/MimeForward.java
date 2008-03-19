@@ -73,7 +73,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -106,6 +106,31 @@ public final class MimeForward {
 	 */
 	private MimeForward() {
 		super();
+	}
+
+	/**
+	 * Composes a forward message from specified original messages based on MIME
+	 * objects from <code>JavaMail</code> API
+	 * <p>
+	 * If multiple messages are given these messages are forwarded as
+	 * attachments
+	 * 
+	 * @param originalMails
+	 *            The referenced original mails
+	 * @param session
+	 *            The session containing needed user data
+	 * @return An instance of {@link MailMessage} representing an user-editable
+	 *         forward mail
+	 * @throws MailException
+	 *             If forward mail cannot be composed
+	 */
+	public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session)
+			throws MailException {
+		final MimeMessage[] mimeMessages = new MimeMessage[originalMails.length];
+		for (int i = 0; i < mimeMessages.length; i++) {
+			mimeMessages[i] = (MimeMessage) MIMEMessageConverter.convertMailMessage(originalMails[i]);
+		}
+		return getFowardMail(mimeMessages, session);
 	}
 
 	/**

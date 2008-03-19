@@ -169,32 +169,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
 	private List<ContainerMessage> retval;
 
-	/**
-	 * Constructor
-	 * 
-	 * @param imapFolder -
-	 *            the IMAP folder
-	 * @param arr -
-	 *            the source array (either <code>long</code> UIDs,
-	 *            <code>int</code> SeqNums or instances of
-	 *            <code>Message</code>)
-	 * @param fields -
-	 *            the demanded fields
-	 * @param sortField -
-	 *            the sort field
-	 * @param isSequential -
-	 *            whether the source array values are sequential
-	 * @param keepOrder -
-	 *            whether to keep or to ignore given order through parameter
-	 *            <code>arr</code>; only has effect if parameter
-	 *            <code>arr</code> is of type <code>Message[]</code> or
-	 *            <code>int[]</code>
-	 * @throws MessagingException
-	 */
-	public FetchIMAPCommand(final IMAPFolder imapFolder, final Object arr, final int[] fields, final int sortField,
-			final boolean isSequential, final boolean keepOrder) throws MessagingException {
-		this(imapFolder, arr, getFetchProfile(fields, sortField), isSequential, keepOrder);
-	}
+	private final boolean loadBody;
 
 	/**
 	 * Constructor
@@ -218,9 +193,38 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 */
 	public FetchIMAPCommand(final IMAPFolder imapFolder, final Object arr, final FetchProfile fp,
 			final boolean isSequential, final boolean keepOrder) throws MessagingException {
+		this(imapFolder, arr, fp, isSequential, keepOrder, false);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param imapFolder -
+	 *            the IMAP folder
+	 * @param arr -
+	 *            the source array (either <code>long</code> UIDs,
+	 *            <code>int</code> SeqNums or instances of
+	 *            <code>Message</code>)
+	 * @param fp -
+	 *            the fetch profile
+	 * @param isSequential -
+	 *            whether the source array values are sequential
+	 * @param keepOrder -
+	 *            whether to keep or to ignore given order through parameter
+	 *            <code>arr</code>; only has effect if parameter
+	 *            <code>arr</code> is of type <code>Message[]</code> or
+	 *            <code>int[]</code>
+	 * @param loadBody
+	 *            <code>true</code> to load complete messages' bodies;
+	 *            otherwise <code>false</code>
+	 * @throws MessagingException
+	 */
+	public FetchIMAPCommand(final IMAPFolder imapFolder, final Object arr, final FetchProfile fp,
+			final boolean isSequential, final boolean keepOrder, final boolean loadBody) throws MessagingException {
 		super(imapFolder);
+		this.loadBody = loadBody;
 		this.separator = imapFolder.getSeparator();
-		command = getFetchCommand(imapFolder, fp);
+		command = getFetchCommand(imapFolder, fp, loadBody);
 		set(arr, isSequential, keepOrder);
 	}
 
@@ -285,18 +289,16 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 * 
 	 * @param imapFolder -
 	 *            the IMAP folder
-	 * @param fields -
-	 *            the demanded fields
-	 * @param sortField -
-	 *            the sort field
+	 * @param fp -
+	 *            the fetch profile
 	 * @param fetchLen -
 	 *            the total message count
 	 * @throws MessagingException
 	 *             If a messaging error occurs
 	 */
-	public FetchIMAPCommand(final IMAPFolder imapFolder, final int[] fields, final int sortField, final int fetchLen)
+	public FetchIMAPCommand(final IMAPFolder imapFolder, final FetchProfile fp, final int fetchLen)
 			throws MessagingException {
-		this(imapFolder, getFetchProfile(fields, sortField), fetchLen);
+		this(imapFolder, fp, fetchLen, false);
 	}
 
 	/**
@@ -308,12 +310,16 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 *            the fetch profile
 	 * @param fetchLen -
 	 *            the total message count
+	 * @param loadBody
+	 *            <code>true</code> to load complete messages' bodies;
+	 *            otherwise <code>false</code>
 	 * @throws MessagingException
 	 *             If a messaging error occurs
 	 */
-	public FetchIMAPCommand(final IMAPFolder imapFolder, final FetchProfile fp, final int fetchLen)
-			throws MessagingException {
+	public FetchIMAPCommand(final IMAPFolder imapFolder, final FetchProfile fp, final int fetchLen,
+			final boolean loadBody) throws MessagingException {
 		super(imapFolder);
+		this.loadBody = loadBody;
 		this.separator = imapFolder.getSeparator();
 		if (0 == fetchLen) {
 			returnDefaultValue = true;
@@ -321,7 +327,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		args = AbstractIMAPCommand.ARGS_ALL;
 		uid = false;
 		length = fetchLen;
-		command = getFetchCommand(imapFolder, fp);
+		command = getFetchCommand(imapFolder, fp, loadBody);
 		retval = new ArrayList<ContainerMessage>(length);
 		index = 0;
 	}
@@ -456,7 +462,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		final ContainerMessage msg = new ContainerMessage(imapFolder.getFullName(), separator, seqnum);
 		final int itemCount = fetchResponse.getItemCount();
 		if ((itemHandlers == null) || (itemCount != itemHandlers.length)) {
-			itemHandlers = createItemHandlers(itemCount, fetchResponse);
+			itemHandlers = createItemHandlers(itemCount, fetchResponse, loadBody);
 		}
 		boolean repeatItem = true;
 		boolean error = false;
@@ -489,7 +495,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 				 * response. Re-Build fetch item handlers according to current
 				 * untagged fetch response.
 				 */
-				itemHandlers = createItemHandlers(itemCount, fetchResponse);
+				itemHandlers = createItemHandlers(itemCount, fetchResponse, loadBody);
 				repeatItem = true;
 			}
 		} while (repeatItem);
@@ -784,7 +790,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 */
 	private static final String DEFAULT_CONTENT_TYPE = "text/plain; charset=us-ascii";
 
-	private static FetchItemHandler[] createItemHandlers(final int itemCount, final FetchResponse f) {
+	private static FetchItemHandler[] createItemHandlers(final int itemCount, final FetchResponse f,
+			final boolean loadBody) {
 		final FetchItemHandler[] itemHandlers = new FetchItemHandler[itemCount];
 		for (int j = 0; j < itemCount; j++) {
 			final Item item = f.getItem(j);
@@ -869,6 +876,30 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 					@Override
 					public void handleItem(final Item item, final ContainerMessage msg) throws MessagingException,
 							MailException {
+						if (loadBody) {
+							final InputStream msgStream;
+							if (item instanceof RFC822DATA) {
+								/*
+								 * IMAP4
+								 */
+								msgStream = ((RFC822DATA) item).getByteArrayInputStream();
+							} else {
+								/*
+								 * IMAP4rev1
+								 */
+								msgStream = ((BODY) item).getByteArrayInputStream();
+							}
+							if (null == msgStream) {
+								if (LOG.isWarnEnabled()) {
+									LOG.warn(new StringBuilder(32).append("Cannot retrieve body from message #")
+											.append(msg.getMessageNumber()).append(" in folder ").append(
+													msg.getFolderFullname()).toString());
+								}
+							} else {
+								msg.parse(msgStream);
+							}
+							return;
+						}
 						final InternetHeaders h;
 						{
 							final InputStream headerStream;
@@ -917,14 +948,20 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
 	private static final String EnvelopeCmd = "ENVELOPE INTERNALDATE RFC822.SIZE";
 
-	private static String getFetchCommand(final IMAPFolder imapFolder, final FetchProfile fp) {
+	private static String getFetchCommand(final IMAPFolder imapFolder, final FetchProfile fp, final boolean loadBody) {
 		final StringBuilder command = new StringBuilder(128);
-		boolean allHeaders = false;
-		final boolean envelope = (fp.contains(FetchProfile.Item.ENVELOPE));
-		if (envelope) {
-			command.append(EnvelopeCmd);
+		final boolean envelope;
+		if (fp.contains(FetchProfile.Item.ENVELOPE)) {
+			if (!loadBody) {
+				command.append(EnvelopeCmd);
+				envelope = true;
+			} else {
+				command.append("INTERNALDATE");
+				envelope = false;
+			}
 		} else {
 			command.append("INTERNALDATE");
+			envelope = false;
 		}
 		if (fp.contains(FetchProfile.Item.FLAGS)) {
 			command.append(" FLAGS");
@@ -935,7 +972,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		if (fp.contains(UIDFolder.FetchProfileItem.UID)) {
 			command.append(" UID");
 		}
-		if (fp.contains(IMAPFolder.FetchProfileItem.HEADERS)) {
+		boolean allHeaders = false;
+		if (fp.contains(IMAPFolder.FetchProfileItem.HEADERS) && !loadBody) {
 			allHeaders = true;
 			if (imapFolder.getProtocol().isREV1()) {
 				command.append(" BODY.PEEK[HEADER]");
@@ -949,11 +987,21 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		/*
 		 * If we're not fetching all headers, fetch individual headers
 		 */
-		if (!allHeaders) {
+		if (!allHeaders && !loadBody) {
 			final String[] hdrs = fp.getHeaderNames();
 			if (hdrs.length > 0) {
 				command.append(' ');
 				command.append(createHeaderCmd(imapFolder.getProtocol(), hdrs));
+			}
+		}
+		if (loadBody) {
+			/*
+			 * Load full message
+			 */
+			if (imapFolder.getProtocol().isREV1()) {
+				command.append(" BODY.PEEK[]");
+			} else {
+				command.append(" RFC822");
 			}
 		}
 		return command.toString();

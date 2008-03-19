@@ -55,21 +55,15 @@ import java.io.Serializable;
 
 import javax.mail.Flags;
 import javax.mail.Folder;
-import javax.mail.Message;
-import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
-import javax.mail.ReadOnlyFolderException;
 
-import com.openexchange.cache.OXCachingException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailListField;
-import com.openexchange.mail.cache.MailMessageCache;
-import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -81,33 +75,27 @@ import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.Rights.Right;
 
 /**
- * {@link IMAPFolderWorker}
+ * {@link IMAPFolderWorker} - An abstract class that extends
+ * {@link MailMessageStorage} by convenience methods for working on a certain
+ * IMAP folder.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class IMAPFolderWorker implements Serializable {
+public abstract class IMAPFolderWorker extends MailMessageStorage implements Serializable {
+
+	private static final long serialVersionUID = -3802840535524866003L;
 
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(IMAPFolderWorker.class);
 
 	protected static final String WARN_FLD_ALREADY_CLOSED = "Invoked close() on a closed folder";
 
-	private static final String ERROR_KEEP_SEEN = "/SEEN flag cannot be set: ";
-
 	protected static final String STR_INBOX = "INBOX";
 
 	protected static final String STR_FALSE = "false";
 
 	protected static final Flags FLAGS_SEEN = new Flags(Flags.Flag.SEEN);
-
-	protected static final MailListField[] FIELDS_FLAGS = new MailListField[] { MailListField.FLAGS };
-
-	protected static final transient Object[] ARGS_FLAG_SEEN_SET = new Object[] { Integer
-			.valueOf(MailMessage.FLAG_SEEN) };
-
-	protected static final transient Object[] ARGS_FLAG_SEEN_UNSET = new Object[] { Integer.valueOf(-1
-			* MailMessage.FLAG_SEEN) };
 
 	/*
 	 * Fields
@@ -127,10 +115,6 @@ public abstract class IMAPFolderWorker implements Serializable {
 	protected transient IMAPFolder imapFolder;
 
 	protected int holdsMessages = -1;
-
-	protected transient Message handleSeen;
-
-	protected boolean seen;
 
 	/**
 	 * Initializes a new {@link IMAPFolderWorker}
@@ -189,109 +173,6 @@ public abstract class IMAPFolderWorker implements Serializable {
 	}
 
 	/**
-	 * Marks the message referenced by field {@link #handleSeen} as seen by
-	 * setting system flag \SEEN.
-	 * <p>
-	 * If {@link #handleSeen} is <code>null</code>, nothing happens.
-	 */
-	protected final void keepSeen() {
-		if (handleSeen == null) {
-			return;
-		} else if (imapFolder == null) {
-			return;
-		}
-		try {
-			if (!holdsMessages()) {
-				/*
-				 * Folder is not selectable, further working working on this
-				 * folder will result in an IMAP error telling "Mailbox does not
-				 * exist".
-				 */
-				return;
-			} else if (seen == handleSeen.isSet(Flags.Flag.SEEN)) {
-				/*
-				 * Already appropriately marked
-				 */
-				return;
-			} else if (imapConfig.isSupportsACLs()) {
-				/*
-				 * Check \KEEP_SEEN right
-				 */
-				try {
-					if (!RightsCache.getCachedRights(imapFolder, true, session).contains(Rights.Right.KEEP_SEEN)) {
-						/*
-						 * User has no \KEEP_SEEN right
-						 */
-						if (LOG.isWarnEnabled()) {
-							LOG.warn(new StringBuilder(ERROR_KEEP_SEEN).append("Missing KEEP_SEEN right").toString());
-						}
-						return;
-					}
-				} catch (final MessagingException e) {
-					if (LOG.isWarnEnabled()) {
-						LOG.warn(new StringBuilder(ERROR_KEEP_SEEN).append(e.getMessage()).toString(), e);
-					}
-					return;
-				}
-			}
-			try {
-				if (imapFolder.getMode() == Folder.READ_ONLY) {
-					try {
-						imapFolder.close(false);
-					} catch (final IllegalStateException e) {
-						LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
-					}
-					imapFolder.open(Folder.READ_WRITE);
-				}
-			} catch (final IllegalStateException e) {
-				LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
-				/*
-				 * Folder is closed
-				 */
-				try {
-					imapFolder.open(Folder.READ_WRITE);
-				} catch (final ReadOnlyFolderException e1) {
-					LOG.error(new StringBuilder(ERROR_KEEP_SEEN).append(e1.getMessage()).toString(), e1);
-					return;
-				}
-			}
-			handleSeen.setFlags(FLAGS_SEEN, seen);
-			try {
-				if (MailMessageCache.getInstance().containsFolderMessages(imapFolder.getFullName(),
-						session.getUserId(), ctx)) {
-					/*
-					 * Update cache entry
-					 */
-					final long[] uid = new long[] { imapFolder.getUID(handleSeen) };
-					final long start = System.currentTimeMillis();
-					MailMessageCache.getInstance().updateCachedMessages(uid, imapFolder.getFullName(),
-							session.getUserId(), ctx, FIELDS_FLAGS,
-							seen ? ARGS_FLAG_SEEN_SET : ARGS_FLAG_SEEN_UNSET);
-					if (LOG.isDebugEnabled()) {
-						LOG.debug(new StringBuilder(128).append(uid.length).append(" cached message(s) updated in ")
-								.append((System.currentTimeMillis() - start)).append("msec").toString());
-					}
-
-				}
-			} catch (final OXCachingException e) {
-				LOG.error(e.getLocalizedMessage(), e);
-			}
-		} catch (final MessageRemovedException e) {
-			if (LOG.isWarnEnabled()) {
-				LOG.warn(new StringBuilder(ERROR_KEEP_SEEN).append(e.getMessage()).toString(), e);
-			}
-			return;
-		} catch (final MessagingException e) {
-			if (LOG.isErrorEnabled()) {
-				LOG.error(new StringBuilder(ERROR_KEEP_SEEN).append(e.getMessage()).toString(), e);
-			}
-			return;
-		} finally {
-			handleSeen = null;
-		}
-	}
-
-	/**
 	 * Sets and opens (only if exists) the folder in a safe manner, checks if
 	 * selectable and for right {@link Right#READ}
 	 * 
@@ -347,14 +228,8 @@ public abstract class IMAPFolderWorker implements Serializable {
 					return imapFolder;
 				}
 				/*
-				 * Folder is open, check \SEEN flag and close folder
+				 * Folder is open, so close folder
 				 */
-				if (handleSeen != null) {
-					/*
-					 * Mark stored message as seen
-					 */
-					keepSeen();
-				}
 				try {
 					imapFolder.close(false);
 				} finally {

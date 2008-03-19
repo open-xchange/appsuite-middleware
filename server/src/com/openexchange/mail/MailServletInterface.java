@@ -50,8 +50,9 @@
 package com.openexchange.mail;
 
 import com.openexchange.api2.MailInterfaceMonitor;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -338,7 +339,7 @@ public abstract class MailServletInterface {
 	 * Creates a new mail folder described by given
 	 * <code>MailFolderObject</code> instance
 	 */
-	public abstract String saveFolder(MailFolder mailFolder) throws MailException;
+	public abstract String saveFolder(MailFolderDescription mailFolder) throws MailException;
 
 	/**
 	 * Deletes given folder

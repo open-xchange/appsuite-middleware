@@ -81,7 +81,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -118,6 +118,28 @@ public final class MimeReply {
 	 */
 	private MimeReply() {
 		super();
+	}
+
+	/**
+	 * Composes a reply message from specified original message based on MIME
+	 * objects from <code>JavaMail</code> API
+	 * 
+	 * @param originalMail
+	 *            The referenced original mail
+	 * @param replyAll
+	 *            <code>true</code> to reply to all; otherwise
+	 *            <code>false</code>
+	 * @param session
+	 *            The session containing needed user data
+	 * @return An instance of {@link MailMessage} representing an user-editable
+	 *         reply mail
+	 * @throws MailException
+	 *             If reply mail cannot be composed
+	 */
+	public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session)
+			throws MailException {
+		return getReplyMail((MimeMessage) MIMEMessageConverter.convertMailMessage(originalMail), replyAll, session,
+				MIMEDefaultSession.getDefaultSession());
 	}
 
 	/**

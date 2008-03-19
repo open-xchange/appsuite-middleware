@@ -49,12 +49,8 @@
 
 package com.openexchange.smtp.config;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.transport.config.TransportConfig;
-import com.openexchange.session.Session;
 
 /**
  * {@link SMTPConfig}
@@ -64,87 +60,7 @@ import com.openexchange.session.Session;
  */
 public final class SMTPConfig extends TransportConfig {
 
-	/*
-	 * User-specific fields
-	 */
-	private String smtpServer;
-
-	private int smtpPort;
-
-	private boolean secure;
-
-	/**
-	 * Constructor
-	 */
-	private SMTPConfig() {
-		super();
-	}
-
 	private static final String PROTOCOL_SMTP_SECURE = "smtps";
-
-	/**
-	 * Gets the user-specific SMTP configuration
-	 * 
-	 * @param session
-	 *            The session providing needed user data
-	 * @return The user-specific SMTP configuration
-	 * @throws MailConfigException
-	 *             If user-specific SMTP configuration cannot be determined
-	 */
-	public static SMTPConfig getSmtpConfig(final Session session, final Context ctx) throws MailConfigException {
-		final SMTPConfig smtpConf = new SMTPConfig();
-		/*
-		 * Fetch user object and create its IMAP properties
-		 */
-		final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
-		fillLoginAndPassword(smtpConf, session, user);
-		String smtpServer = TransportConfig.getTransportServerURL(user);
-		if (smtpServer == null) {
-			if (LoginType.GLOBAL.equals(getLoginType())) {
-				throw new MailConfigException(new StringBuilder(128).append("Property \"").append("transportServer")
-						.append("\" not set in mail properties").toString());
-			}
-			throw new MailConfigException(new StringBuilder(128).append(
-					"Cannot determine transport server URL for user ").append(session.getUserId()).append(
-					" in context ").append(session.getContextId()).toString());
-		}
-		{
-			/*
-			 * Remove ending '/' character
-			 */
-			final int lastPos = smtpServer.length() - 1;
-			if (smtpServer.charAt(lastPos) == '/') {
-				smtpServer = smtpServer.substring(0, lastPos);
-			}
-		}
-		int smtpPort = 25;
-		{
-			final String[] parsed = parseProtocol(smtpServer);
-			if (parsed != null) {
-				smtpConf.secure = PROTOCOL_SMTP_SECURE.equals(parsed[0]);
-				smtpServer = parsed[1];
-			} else {
-				smtpConf.secure = false;
-			}
-			final int pos = smtpServer.indexOf(':');
-			if (pos > -1) {
-				smtpPort = Integer.parseInt(smtpServer.substring(pos + 1));
-				smtpServer = smtpServer.substring(0, pos);
-			}
-		}
-		smtpConf.smtpServer = smtpServer;
-		smtpConf.smtpPort = smtpPort;
-		return smtpConf;
-	}
-
-	/**
-	 * Gets the smtpAuth
-	 * 
-	 * @return the smtpAuth
-	 */
-	public static boolean isSmtpAuth() {
-		return SMTPProperties.getInstance().isSmtpAuth();
-	}
 
 	/**
 	 * Gets the smtpAuthEnc
@@ -153,24 +69,6 @@ public final class SMTPConfig extends TransportConfig {
 	 */
 	public static String getSmtpAuthEnc() {
 		return SMTPProperties.getInstance().getSmtpAuthEnc();
-	}
-
-	/**
-	 * Gets the smtpEnvelopeFrom
-	 * 
-	 * @return the smtpEnvelopeFrom
-	 */
-	public static boolean isSmtpEnvelopeFrom() {
-		return SMTPProperties.getInstance().isSmtpEnvelopeFrom();
-	}
-
-	/**
-	 * Gets the smtpLocalhost
-	 * 
-	 * @return the smtpLocalhost
-	 */
-	public static String getSmtpLocalhost() {
-		return SMTPProperties.getInstance().getSmtpLocalhost();
 	}
 
 	/**
@@ -183,12 +81,65 @@ public final class SMTPConfig extends TransportConfig {
 	}
 
 	/**
+	 * Gets the smtpLocalhost
+	 * 
+	 * @return the smtpLocalhost
+	 */
+	public static String getSmtpLocalhost() {
+		return SMTPProperties.getInstance().getSmtpLocalhost();
+	}
+
+	/**
 	 * Gets the smtpTimeout
 	 * 
 	 * @return the smtpTimeout
 	 */
 	public static int getSmtpTimeout() {
 		return SMTPProperties.getInstance().getSmtpTimeout();
+	}
+
+	/**
+	 * Gets the smtpAuth
+	 * 
+	 * @return the smtpAuth
+	 */
+	public static boolean isSmtpAuth() {
+		return SMTPProperties.getInstance().isSmtpAuth();
+	}
+
+	/**
+	 * Gets the smtpEnvelopeFrom
+	 * 
+	 * @return the smtpEnvelopeFrom
+	 */
+	public static boolean isSmtpEnvelopeFrom() {
+		return SMTPProperties.getInstance().isSmtpEnvelopeFrom();
+	}
+
+	private boolean secure;
+
+	private int smtpPort;
+
+	/*
+	 * User-specific fields
+	 */
+	private String smtpServer;
+
+	/**
+	 * Default constructor
+	 */
+	public SMTPConfig() {
+		super();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.config.MailConfig#getCapabilities()
+	 */
+	@Override
+	public MailCapabilities getCapabilities() {
+		return MailCapabilities.EMPTY_CAPS;
 	}
 
 	/**
@@ -216,13 +167,23 @@ public final class SMTPConfig extends TransportConfig {
 		return secure;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.config.MailConfig#getCapabilities()
-	 */
 	@Override
-	public int getCapabilities() {
-		return 0;
+	protected void parseServerURL(final String serverURL) {
+		smtpServer = serverURL;
+		smtpPort = 25;
+		{
+			final String[] parsed = parseProtocol(smtpServer);
+			if (parsed != null) {
+				secure = PROTOCOL_SMTP_SECURE.equals(parsed[0]);
+				smtpServer = parsed[1];
+			} else {
+				secure = false;
+			}
+			final int pos = smtpServer.indexOf(':');
+			if (pos > -1) {
+				smtpPort = Integer.parseInt(smtpServer.substring(pos + 1));
+				smtpServer = smtpServer.substring(0, pos);
+			}
+		}
 	}
 }

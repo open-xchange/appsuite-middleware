@@ -50,7 +50,6 @@
 package com.openexchange.imap.spam;
 
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.toUIDSet;
-import static com.openexchange.mail.utils.StorageUtility.prepareMailFolderParam;
 
 import javax.mail.FetchProfile;
 import javax.mail.Folder;
@@ -63,9 +62,9 @@ import com.openexchange.imap.command.CopyIMAPCommand;
 import com.openexchange.imap.command.ExtractSpamMsgIMAPCommand;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
-import com.openexchange.mail.MailAccess;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.mime.ContainerMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.spam.SpamHandler;
@@ -102,7 +101,7 @@ public final class IMAPSpamAssassinSpamHandler extends SpamHandler {
 
 	@Override
 	public void handleHam(final Folder spamFolder, final long[] msgUIDs, final boolean move,
-			final MailAccess<?, ?, ?> mailConnection, final Store store) throws MessagingException, MailException {
+			final MailAccess<?, ?> mailConnection, final Store store) throws MessagingException, MailException {
 		_handleHam((IMAPFolder) spamFolder, msgUIDs, move, (IMAPAccess) mailConnection, (IMAPStore) store);
 	}
 
@@ -135,8 +134,7 @@ public final class IMAPSpamAssassinSpamHandler extends SpamHandler {
 				plainUIDs.append(msgUIDs[i]);
 			}
 		}
-		final String confirmedHamFullname = prepareMailFolderParam(imapConnection.getFolderStorage()
-				.getConfirmedHamFolder());
+		final String confirmedHamFullname = imapConnection.getFolderStorage().getConfirmedHamFolder();
 		/*
 		 * Copy plain messages to confirmed ham and INBOX
 		 */

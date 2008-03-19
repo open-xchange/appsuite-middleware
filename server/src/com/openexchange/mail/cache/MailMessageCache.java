@@ -631,7 +631,7 @@ public final class MailMessageCache {
 
 	/**
 	 * Gets the corresponding messages from cache. If a cache entry could not be
-	 * found the corresponding index in returned array is <code>null</code>.
+	 * found <code>null</code> is returned to force a reload from mail server.
 	 * 
 	 * @param uids
 	 *            The UIDs
@@ -659,9 +659,15 @@ public final class MailMessageCache {
 			final MailMessage[] retval = new MailMessage[uids.length];
 			for (int i = 0; i < retval.length; i++) {
 				/*
-				 * TODO: Return clones version ???
+				 * TODO: Return cloned version ???
 				 */
 				retval[i] = map.getValue(fullname, Long.valueOf(uids[i]));
+				if (retval[i] == null) {
+					/*
+					 * Not all desired messages can be served from cache
+					 */
+					return null;
+				}
 			}
 			return retval;
 		} finally {

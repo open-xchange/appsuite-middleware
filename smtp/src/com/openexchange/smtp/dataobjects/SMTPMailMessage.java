@@ -56,10 +56,12 @@ import java.util.List;
 
 import javax.activation.DataHandler;
 
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
+import com.openexchange.session.Session;
 
 /**
  * {@link SMTPMailMessage} - Extends the {@link ComposedMailMessage} class to
@@ -81,8 +83,8 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 	/**
 	 * Constructor
 	 */
-	public SMTPMailMessage(final String mailBody) {
-		super();
+	public SMTPMailMessage(final String mailBody, final Session session, final Context ctx) {
+		super(session, ctx);
 		this.mailPart = new SMTPBodyPart(mailBody);
 		enclosedParts = new ArrayList<MailPart>();
 	}
@@ -105,8 +107,8 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 	/**
 	 * Constructor
 	 */
-	public SMTPMailMessage() {
-		super();
+	public SMTPMailMessage(final Session session, final Context ctx) {
+		super(session, ctx);
 		enclosedParts = new ArrayList<MailPart>();
 	}
 

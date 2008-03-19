@@ -49,9 +49,15 @@
 
 package com.openexchange.mail.transport.config;
 
+import java.lang.reflect.InvocationTargetException;
+
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.session.Session;
 
 /**
@@ -69,6 +75,68 @@ public abstract class TransportConfig extends MailConfig {
 	 */
 	protected TransportConfig() {
 		super();
+	}
+
+	/**
+	 * Gets the user-specific transport configuration
+	 * 
+	 * @param clazz
+	 *            The transport configuration type
+	 * @param session
+	 *            The session providing needed user data
+	 * @return The user-specific transport configuration
+	 * @throws MailException
+	 *             If user-specific transport configuration cannot be determined
+	 */
+	public static final <C extends TransportConfig> C getTransportConfig(final Class<? extends C> clazz,
+			final Session session) throws MailException {
+		final C transportConfig;
+		try {
+			transportConfig = clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(INIT_ARGS);
+		} catch (final IllegalArgumentException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final SecurityException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final InstantiationException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final IllegalAccessException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final InvocationTargetException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		} catch (final NoSuchMethodException e) {
+			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
+		}
+		/*
+		 * Fetch user object to determine server URL
+		 */
+		final User user;
+		try {
+			user = UserStorage.getStorageUser(session.getUserId(), ContextStorage.getStorageContext(session
+					.getContextId()));
+		} catch (final ContextException e) {
+			throw new MailException(e);
+		}
+		fillLoginAndPassword(transportConfig, session, user);
+		String serverURL = TransportConfig.getTransportServerURL(user);
+		if (serverURL == null) {
+			if (LoginType.GLOBAL.equals(getLoginType())) {
+				throw new MailConfigException(new StringBuilder(128).append("Property \"").append(
+						"com.openexchange.mail.transportServer").append("\" not set in mail properties").toString());
+			}
+			throw new MailConfigException(new StringBuilder(128).append("Cannot determine mail server URL for user ")
+					.append(session.getUserId()).append(" in context ").append(session.getContextId()).toString());
+		}
+		{
+			/*
+			 * Remove ending '/' character
+			 */
+			final int lastPos = serverURL.length() - 1;
+			if (serverURL.charAt(lastPos) == '/') {
+				serverURL = serverURL.substring(0, lastPos);
+			}
+		}
+		transportConfig.parseServerURL(serverURL);
+		return transportConfig;
 	}
 
 	/**

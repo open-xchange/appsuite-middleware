@@ -64,7 +64,7 @@ import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.UUEncodedAttachmentMailPart;

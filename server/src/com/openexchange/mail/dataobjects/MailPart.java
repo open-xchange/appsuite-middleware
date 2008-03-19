@@ -745,6 +745,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * @param out
 	 *            The output stream to write to
 	 * @throws MailException
+	 *             If writing to output stream fails
 	 */
 	public void writeTo(final OutputStream out) throws MailException {
 		InputStream in = null;
