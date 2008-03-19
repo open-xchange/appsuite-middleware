@@ -69,7 +69,6 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.tools.URLParameter;
 
@@ -125,8 +124,7 @@ public final class LinkTools extends Assert {
         return Response.parse(body);
     }
 
-    public static void extractInsertId(final Response response)
-        throws JSONException {
+    public static void extractInsertId(final Response response) {
         assertFalse(response.getErrorMessage(), response.hasError());
     }
 
