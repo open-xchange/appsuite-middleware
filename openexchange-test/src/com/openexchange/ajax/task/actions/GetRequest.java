@@ -52,7 +52,6 @@ package com.openexchange.ajax.task.actions;
 import org.json.JSONException;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * Retrieves a task from the server.
@@ -120,7 +119,7 @@ public class GetRequest extends AbstractTaskRequest {
     /**
      * {@inheritDoc}
      */
-    public AbstractAJAXParser getParser() {
+    public GetParser getParser() {
         return new GetParser(failOnError);
     }
 }

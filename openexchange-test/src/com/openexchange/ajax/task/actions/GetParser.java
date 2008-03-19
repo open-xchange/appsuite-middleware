@@ -58,7 +58,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GetParser extends AbstractAJAXParser {
+public class GetParser extends AbstractAJAXParser<GetResponse> {
 
     /**
      * Default constructor.
