@@ -47,68 +47,77 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.framework;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.writer.TaskWriter;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.ajax.container.Response;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractTaskRequest implements AJAXRequest {
+public class CommonSearchResponse extends AbstractAJAXResponse implements
+    Iterable<Object[]> {
+
+    private int[] columns;
+
+    private Object[][] array;
 
     /**
-     * URL of the tasks AJAX interface.
+     * @param response
      */
-    public static final String TASKS_URL = "/ajax/tasks";
-    public static final int[] GUI_COLUMNS = new int[] { Task.OBJECT_ID,
-        Task.FOLDER_ID };
+    public CommonSearchResponse(final Response response) {
+        super(response);
+    }
 
     /**
-     * Default constructor.
+     * @return the array
      */
-    protected AbstractTaskRequest() {
-        super();
+    public Object[][] getArray() {
+        return array;
+    }
+
+    /**
+     * @param array the array to set
+     */
+    void setArray(final Object[][] array) {
+        this.array = array;
     }
 
     /**
      * {@inheritDoc}
      */
-    public String getServletPath() {
-        return TASKS_URL;
+    public Iterator<Object[]> iterator() {
+        return Collections.unmodifiableList(Arrays.asList(array)).iterator();
     }
 
-    protected JSONObject convert(final Task task, final TimeZone timeZone)
-        throws JSONException {
-		final JSONObject retval = new JSONObject();
-        new TaskWriter(timeZone).writeTask(task, retval);
-        return retval;
+    public Object getValue(final int row, final int attributeId) {
+        return array[row][getColumnPos(attributeId)];
     }
 
-    public static int[] addGUIColumns(final int[] columns) {
-        final List<Integer> list = new ArrayList<Integer>();
+    public int getColumnPos(final int attributeId) {
         for (int i = 0; i < columns.length; i++) {
-            list.add(Integer.valueOf(columns[i]));
+            if (columns[i] == attributeId) {
+                return i;
+            }
         }
-        // Move GUI_COLUMNS to end.
-        for (int i = 0; i < GUI_COLUMNS.length; i++) {
-            final Integer column = Integer.valueOf(GUI_COLUMNS[i]);
-            list.remove(column);
-            list.add(column);
-        }
-        final int[] retval = new int[list.size()];
-        for (int i = 0; i < retval.length; i++) {
-            retval[i] = list.get(i).intValue();
-        }
-        return retval;
+        return -1;
+    }
+
+    /**
+     * @return the columns
+     */
+    public int[] getColumns() {
+        return columns;
+    }
+
+    /**
+     * @param columns the columns to set
+     */
+    public void setColumns(final int[] columns) {
+        this.columns = columns;
     }
 }

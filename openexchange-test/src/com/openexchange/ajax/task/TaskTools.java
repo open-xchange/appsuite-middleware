@@ -88,12 +88,14 @@ import com.openexchange.ajax.task.actions.GetResponse;
 import com.openexchange.ajax.task.actions.InsertRequest;
 import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.ListRequest;
+import com.openexchange.ajax.task.actions.SearchRequest;
+import com.openexchange.ajax.task.actions.SearchResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.ajax.task.actions.UpdatesRequest;
 import com.openexchange.ajax.writer.TaskWriter;
 import com.openexchange.api2.OXException;
-import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskException;
@@ -134,13 +136,12 @@ public final class TaskTools extends Assert {
      * @throws IOException if the communication with the server fails.
      * @throws SAXException if a SAX error occurs.
      * @throws JSONException if parsing of serialized json fails.
-     * @throws OXException if reading the folders fails.
      * @deprecated Use {@link AJAXClient#getPrivateTaskFolder()}.
      */
+    @Deprecated
     public static int getPrivateTaskFolder(final WebConversation conversation,
         final String hostName, final String sessionId)
-        throws IOException, SAXException, JSONException,
-        OXException, AjaxException {
+        throws IOException, SAXException, JSONException, AjaxException {
         final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
             sessionId));
         return client.getValues().getPrivateTaskFolder();
@@ -156,13 +157,12 @@ public final class TaskTools extends Assert {
      * @throws JSONException if parsing of serialized json fails.
      * @throws SAXException if a SAX error occurs.
      * @throws IOException if the communication with the server fails.
-     * @throws ConfigurationException 
      * @deprecated use {@link #insert(AJAXSession, TaskInsertRequest)}
      */
+    @Deprecated
     public static Response insertTask(final WebConversation conversation,
         final String hostName, final String sessionId, final Task task)
-        throws JSONException, IOException, SAXException, AjaxException,
-        ConfigurationException {
+        throws JSONException, IOException, SAXException, AjaxException {
         LOG.trace("Inserting task.");
         final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
             sessionId));
@@ -174,6 +174,7 @@ public final class TaskTools extends Assert {
     /**
      * @deprecated use {@link #insert(AJAXClient, InsertRequest)}.
      */
+    @Deprecated
     public static InsertResponse insert(final AJAXSession session,
         final InsertRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
@@ -189,6 +190,7 @@ public final class TaskTools extends Assert {
     /**
      * @deprecated use {@link #update(AJAXSession, UpdateRequest)}
      */
+    @Deprecated
     public static Response updateTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,
         final int taskId, final JSONObject json, final Date lastModified)
@@ -222,10 +224,11 @@ public final class TaskTools extends Assert {
     /**
      * @deprecated use {@link #update(AJAXSession, UpdateRequest)}
      */
+    @Deprecated
     public static Response updateTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,
         final Task task, final Date lastModified) throws JSONException,
-        IOException, SAXException, AjaxException, ConfigurationException {
+        IOException, SAXException, AjaxException {
         final TimeZone timeZone = new AJAXClient(new AJAXSession(conversation,
             sessionId)).getValues().getTimeZone();
 		final JSONObject jsonObj = new JSONObject();
@@ -237,6 +240,7 @@ public final class TaskTools extends Assert {
     /**
      * @deprecated use {@link #update(AJAXClient, UpdateRequest)}.
      */
+    @Deprecated
     public static UpdateResponse update(final AJAXSession session,
         final UpdateRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
@@ -252,10 +256,11 @@ public final class TaskTools extends Assert {
     /**
      * @deprecated use {@link #get(AJAXSession, GetRequest)}
      */
+    @Deprecated
     public static Response getTask(final WebConversation conversation,
         final String hostName, final String sessionId, final int folderId,
         final int taskId) throws IOException, SAXException, JSONException,
-        OXException, AjaxException, ConfigurationException {
+        OXException, AjaxException {
         LOG.trace("Getting task.");
         final AJAXClient client = new AJAXClient(new AJAXSession(conversation,
             sessionId));
@@ -269,6 +274,7 @@ public final class TaskTools extends Assert {
     /**
      * @deprecated use {@link #get(AJAXClient, GetRequest)}.
      */
+    @Deprecated
     public static GetResponse get(final AJAXSession session,
         final GetRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
@@ -314,6 +320,7 @@ public final class TaskTools extends Assert {
     /**
      * @deprecated use {@link #all(AJAXSession, AllRequest)}.
      */
+    @Deprecated
     public static Response getAllTasksInFolder(
         final WebConversation conversation, final String hostName,
         final String sessionId, final int folderId, final int[] columns,
@@ -384,6 +391,7 @@ public final class TaskTools extends Assert {
     /**
      * @deprecated Use {@link #list(AJAXClient, ListRequest)}.
      */
+    @Deprecated
     public static Response getTaskList(final WebConversation conversation,
         final String hostName, final String sessionId,
         final int[][] folderAndTaskIds, final int[] columns)
@@ -429,57 +437,10 @@ public final class TaskTools extends Assert {
         assertFalse(response.getErrorMessage(), response.hasError());
     }
 
-    /**
-     * Executes a searach.
-     * @param conversation WebConversation.
-     * @param hostName Host name of the server.
-     * @param sessionId Session identifier of the user.
-     * @param search object with the search patterns.
-     * @param columns attributes of the found task that should be returned.
-     * @param sort Sort the result by this attribute.
-     * @param order Sort direction. (ASC, DESC).
-     * @return a response object that data contains the task list.
-     * @throws TaskException if the search object contains invalid values.
-     * @throws JSONException if parsing of serialized json fails.
-     * @throws SAXException if a SAX error occurs.
-     * @throws IOException if the communication with the server fails.
-     */
-    public static Response searchTask(final WebConversation conversation,
-        final String hostName, final String sessionId,
-        final TaskSearchObject search, final int[] columns, final int sort,
-        final String order) throws JSONException, TaskException, IOException,
-        SAXException {
-        final JSONObject json = TaskSearchJSONWriter.write(search);
-        final ByteArrayInputStream bais = new ByteArrayInputStream(json
-            .toString().getBytes(ENCODING));
-        final URLParameter parameter = new URLParameter();
-        parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
-            AJAXServlet.ACTION_SEARCH);
-        final StringBuilder columnString = new StringBuilder();
-        for (int i : columns) {
-            columnString.append(i);
-            columnString.append(',');
-        }
-        columnString.delete(columnString.length() - 1, columnString.length());
-        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS,
-            columnString.toString());
-        if (null != order) {
-            parameter.setParameter(AJAXServlet.PARAMETER_SORT,
-                String.valueOf(sort));
-            parameter.setParameter(AJAXServlet.PARAMETER_ORDER, order);
-        }
-        final WebRequest req = new PutMethodWebRequest(AbstractAJAXTest.PROTOCOL
-            + hostName + TASKS_URL + parameter.getURLParameters(), bais,
-            AJAXServlet.CONTENTTYPE_JAVASCRIPT);
-        final WebResponse resp = conversation.getResponse(req);
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,
-            resp.getResponseCode());
-        final String body = resp.getText();
-        LOG.trace("Response body: " + body);
-        final Response response = Response.parse(body);
-        assertFalse(response.getErrorMessage(), response.hasError());
-        return response;
+    public static SearchResponse search(final AJAXClient client,
+        final SearchRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (SearchResponse) Executor.execute(client, request);
     }
 
     /**

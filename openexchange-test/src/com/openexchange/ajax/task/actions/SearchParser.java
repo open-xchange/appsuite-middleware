@@ -49,66 +49,28 @@
 
 package com.openexchange.ajax.task.actions;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TimeZone;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.writer.TaskWriter;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.CommonSearchParser;
 
 /**
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractTaskRequest implements AJAXRequest {
+public class SearchParser extends CommonSearchParser {
 
     /**
-     * URL of the tasks AJAX interface.
+     * @param failOnError
+     * @param columns
      */
-    public static final String TASKS_URL = "/ajax/tasks";
-    public static final int[] GUI_COLUMNS = new int[] { Task.OBJECT_ID,
-        Task.FOLDER_ID };
-
-    /**
-     * Default constructor.
-     */
-    protected AbstractTaskRequest() {
-        super();
+    public SearchParser(boolean failOnError, int[] columns) {
+        super(failOnError, columns);
     }
 
     /**
      * {@inheritDoc}
      */
-    public String getServletPath() {
-        return TASKS_URL;
-    }
-
-    protected JSONObject convert(final Task task, final TimeZone timeZone)
-        throws JSONException {
-		final JSONObject retval = new JSONObject();
-        new TaskWriter(timeZone).writeTask(task, retval);
-        return retval;
-    }
-
-    public static int[] addGUIColumns(final int[] columns) {
-        final List<Integer> list = new ArrayList<Integer>();
-        for (int i = 0; i < columns.length; i++) {
-            list.add(Integer.valueOf(columns[i]));
-        }
-        // Move GUI_COLUMNS to end.
-        for (int i = 0; i < GUI_COLUMNS.length; i++) {
-            final Integer column = Integer.valueOf(GUI_COLUMNS[i]);
-            list.remove(column);
-            list.add(column);
-        }
-        final int[] retval = new int[list.size()];
-        for (int i = 0; i < retval.length; i++) {
-            retval[i] = list.get(i).intValue();
-        }
-        return retval;
+    @Override
+    protected SearchResponse instanciateResponse(final Response response) {
+        return new SearchResponse(response);
     }
 }

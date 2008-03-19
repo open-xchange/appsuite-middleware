@@ -352,19 +352,6 @@ public class TasksTest extends AbstractAJAXTest {
     }
 
     /**
-     * Tests the search for tasks.
-     * @throws Throwable if an error occurs.
-     */
-    public void testSearch() throws Throwable {
-        final TaskSearchObject search = new TaskSearchObject();
-        final Response response = searchTask(getWebConversation(),
-            getHostName(), getSessionId(), search, new int[] { Task.OBJECT_ID },
-            -1, null);
-        assertNotNull("Response contains no data.", response.getData());
-        // TODO parse response
-    }
-
-    /**
      * Creates a task with a reminder and checks if the reminder is stored
      * correctly.
      * @throws Throwable if an error occurs.

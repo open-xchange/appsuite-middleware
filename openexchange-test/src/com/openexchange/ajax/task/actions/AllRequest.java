@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.task.actions;
 
-import java.util.ArrayList;
-import java.util.List;
 
 import com.openexchange.ajax.framework.CommonAllRequest;
 import com.openexchange.groupware.search.Order;
@@ -62,11 +60,6 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class AllRequest extends CommonAllRequest {
 
-    public static final int[] GUI_COLUMNS = new int[] {
-        Task.OBJECT_ID,
-        Task.FOLDER_ID
-    };
-
     public static final int GUI_SORT = Task.END_DATE;
 
     public static final Order GUI_ORDER = Order.DESCENDING;
@@ -76,26 +69,8 @@ public class AllRequest extends CommonAllRequest {
      */
     public AllRequest(final int folderId, final int[] columns, final int sort,
         final Order order) {
-        super(AbstractTaskRequest.TASKS_URL, folderId, addGUIColumns(columns),
-            sort, order, true);
-    }
-
-    private static int[] addGUIColumns(final int[] columns) {
-        final List<Integer> list = new ArrayList<Integer>();
-        for (int i = 0; i < columns.length; i++) {
-            list.add(Integer.valueOf(columns[i]));
-        }
-        // Move GUI_COLUMNS to end.
-        for (int i = 0; i < GUI_COLUMNS.length; i++) {
-            final Integer column = Integer.valueOf(GUI_COLUMNS[i]);
-            list.remove(column);
-            list.add(column);
-        }
-        final int[] retval = new int[list.size()];
-        for (int i = 0; i < retval.length; i++) {
-            retval[i] = list.get(i).intValue();
-        }
-        return retval;
+        super(AbstractTaskRequest.TASKS_URL, folderId, AbstractTaskRequest
+            .addGUIColumns(columns), sort, order, true);
     }
 
     /**

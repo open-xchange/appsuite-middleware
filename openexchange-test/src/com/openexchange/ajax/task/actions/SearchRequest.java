@@ -50,65 +50,90 @@
 package com.openexchange.ajax.task.actions;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.writer.TaskWriter;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.OrderFields;
+import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.search.TaskSearchObject;
+import com.openexchange.groupware.tasks.TaskException;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractTaskRequest implements AJAXRequest {
+public class SearchRequest extends AbstractTaskRequest {
 
-    /**
-     * URL of the tasks AJAX interface.
-     */
-    public static final String TASKS_URL = "/ajax/tasks";
-    public static final int[] GUI_COLUMNS = new int[] { Task.OBJECT_ID,
-        Task.FOLDER_ID };
+    final TaskSearchObject search;
 
-    /**
-     * Default constructor.
-     */
-    protected AbstractTaskRequest() {
+    final int[] columns;
+
+    final int sort;
+
+    final Order order;
+
+    // TODO add unimplemented limit
+
+    final boolean failOnError;
+
+    public SearchRequest(final TaskSearchObject search, final int[] columns) {
+        this(search, columns, true);
+    }
+
+    public SearchRequest(final TaskSearchObject search, final int[] columns,
+        final boolean failOnError) {
+        this(search, columns, 0, null, failOnError);
+    }
+
+    public SearchRequest(final TaskSearchObject search, final int[] columns,
+        final int sort, final Order order) {
+        this(search, columns, sort, order, true);
+    }
+
+    public SearchRequest(final TaskSearchObject search, final int[] columns,
+        final int sort, final Order order, final boolean failOnError) {
         super();
+        this.search = search;
+        this.columns = AbstractTaskRequest.addGUIColumns(columns);
+        this.sort = sort;
+        this.order = order;
+        this.failOnError = failOnError;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public String getServletPath() {
-        return TASKS_URL;
+    public JSONObject getBody() throws JSONException {
+        try {
+            return TaskSearchJSONWriter.write(search);
+        } catch (TaskException e) {
+            throw new JSONException(e);
+        }
     }
 
-    protected JSONObject convert(final Task task, final TimeZone timeZone)
-        throws JSONException {
-		final JSONObject retval = new JSONObject();
-        new TaskWriter(timeZone).writeTask(task, retval);
-        return retval;
+    public Method getMethod() {
+        return Method.PUT;
     }
 
-    public static int[] addGUIColumns(final int[] columns) {
-        final List<Integer> list = new ArrayList<Integer>();
-        for (int i = 0; i < columns.length; i++) {
-            list.add(Integer.valueOf(columns[i]));
+    public Parameter[] getParameters() {
+        final List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH));
+        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        if (null != order) {
+            params.add(new Parameter(AJAXServlet.PARAMETER_SORT, sort));
+            params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields
+                .write(order)));
         }
-        // Move GUI_COLUMNS to end.
-        for (int i = 0; i < GUI_COLUMNS.length; i++) {
-            final Integer column = Integer.valueOf(GUI_COLUMNS[i]);
-            list.remove(column);
-            list.add(column);
+        final Date[] range = search.getRange();
+        if (null != range && range.length == 2) {
+            params.add(new Parameter(AJAXServlet.PARAMETER_START, range[0]));
+            params.add(new Parameter(AJAXServlet.PARAMETER_END, range[1]));
         }
-        final int[] retval = new int[list.size()];
-        for (int i = 0; i < retval.length; i++) {
-            retval[i] = list.get(i).intValue();
-        }
-        return retval;
+        return params.toArray(new Parameter[params.size()]);
+    }
+
+    public SearchParser getParser() {
+        return new SearchParser(failOnError, columns);
     }
 }

@@ -55,6 +55,7 @@ import java.util.TimeZone;
 
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.ajax.task.actions.AbstractTaskRequest;
 import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
@@ -104,8 +105,8 @@ public class SmokeTest extends AbstractTaskTest {
         final Task reload = getR.getTask(timeZone);
         TaskTools.compareAttributes(task, reload);
         final CommonAllResponse allR = TaskTools.all(client, new AllRequest(
-            folderId, AllRequest.GUI_COLUMNS, AllRequest.GUI_SORT, AllRequest
-            .GUI_ORDER));
+            folderId, AbstractTaskRequest.GUI_COLUMNS, AllRequest.GUI_SORT,
+            AllRequest.GUI_ORDER));
         boolean foundObject = false;
         for (Object[] rowValues : allR) {
             if (rowValues[0].equals(insertR.getId())) {

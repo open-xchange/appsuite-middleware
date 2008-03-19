@@ -71,7 +71,19 @@ public final class TaskTestSuite {
      */
     public static Test suite() {
         final TestSuite tests = new TestSuite();
+        // First the function tests.
+        tests.addTestSuite(TasksTest.class);
+        
+        // Now several single function tests.
+        tests.addTestSuite(InsertTest.class);
+        tests.addTestSuite(CharsetTest.class);
+        tests.addTestSuite(TruncationTest.class);
+        tests.addTestSuite(FloatTest.class);
         tests.addTestSuite(AllTest.class);
+        tests.addTestSuite(ListTest.class);
+        tests.addTestSuite(UpdatesTest.class);
+
+        // And finally bug tests.
         tests.addTestSuite(Bug6335Test.class);
         tests.addTestSuite(Bug7276Test.class);
         tests.addTestSuite(Bug7380Test.class);
@@ -80,13 +92,7 @@ public final class TaskTestSuite {
         tests.addTestSuite(Bug9252Test.class);
         tests.addTestSuite(Bug10119Test.class);
         tests.addTestSuite(Bug10400Test.class);
-        tests.addTestSuite(TruncationTest.class);
-        tests.addTestSuite(InsertTest.class);
-        tests.addTestSuite(CharsetTest.class);
-        tests.addTestSuite(FloatTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(TasksTest.class);
+        tests.addTestSuite(Bug11075Test.class);
         return tests;
     }
 }

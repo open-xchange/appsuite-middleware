@@ -47,68 +47,53 @@
  *
  */
 
-package com.openexchange.ajax.task.actions;
+package com.openexchange.ajax.framework;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TimeZone;
-
+import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.writer.TaskWriter;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.ajax.container.Response;
 
 /**
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractTaskRequest implements AJAXRequest {
+public class CommonSearchParser extends AbstractAJAXParser<CommonSearchResponse> {
 
-    /**
-     * URL of the tasks AJAX interface.
-     */
-    public static final String TASKS_URL = "/ajax/tasks";
-    public static final int[] GUI_COLUMNS = new int[] { Task.OBJECT_ID,
-        Task.FOLDER_ID };
+    private final int[] columns;
 
     /**
      * Default constructor.
      */
-    protected AbstractTaskRequest() {
-        super();
+    protected CommonSearchParser(final boolean failOnError, final int[] columns) {
+        super(failOnError);
+        this.columns = columns;
     }
 
     /**
      * {@inheritDoc}
      */
-    public String getServletPath() {
-        return TASKS_URL;
-    }
-
-    protected JSONObject convert(final Task task, final TimeZone timeZone)
+    @Override
+    protected CommonSearchResponse createResponse(final Response response)
         throws JSONException {
-		final JSONObject retval = new JSONObject();
-        new TaskWriter(timeZone).writeTask(task, retval);
+        final CommonSearchResponse retval = instanciateResponse(response);
+        retval.setColumns(columns);
+        if (isFailOnError()) {
+            final JSONArray array = (JSONArray) retval.getData();
+            final Object[][] values = new Object[array.length()][];
+            for (int i = 0; i < array.length(); i++) {
+                final JSONArray inner = array.getJSONArray(i);
+                values[i] = new Object[inner.length()];
+                for (int j = 0; j < inner.length(); j++) {
+                    values[i][j] = inner.get(j);
+                }
+            }
+            retval.setArray(values);
+        }
         return retval;
     }
 
-    public static int[] addGUIColumns(final int[] columns) {
-        final List<Integer> list = new ArrayList<Integer>();
-        for (int i = 0; i < columns.length; i++) {
-            list.add(Integer.valueOf(columns[i]));
-        }
-        // Move GUI_COLUMNS to end.
-        for (int i = 0; i < GUI_COLUMNS.length; i++) {
-            final Integer column = Integer.valueOf(GUI_COLUMNS[i]);
-            list.remove(column);
-            list.add(column);
-        }
-        final int[] retval = new int[list.size()];
-        for (int i = 0; i < retval.length; i++) {
-            retval[i] = list.get(i).intValue();
-        }
-        return retval;
+    protected CommonSearchResponse instanciateResponse(final Response response) {
+        return new CommonSearchResponse(response);
     }
 }

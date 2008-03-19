@@ -35,7 +35,7 @@
  * Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.ajax.task.actions;
 
 import java.util.Date;
 
@@ -72,7 +72,8 @@ public class TaskSearchJSONWriter {
         throws TaskException, JSONException {
         final Date[] range = search.getRange();
         if (range != null && range.length != 2) {
-            throw new TaskException(Code.WRONG_DATE_RANGE, range.length);
+            throw new TaskException(Code.WRONG_DATE_RANGE,
+                Integer.valueOf(range.length));
         }
         final JSONObject json = new JSONObject();
         if (TaskSearchObject.NO_FOLDER == search.getFolder()) {
