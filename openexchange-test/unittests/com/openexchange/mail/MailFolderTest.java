@@ -50,7 +50,8 @@
 package com.openexchange.mail;
 
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
@@ -83,7 +84,7 @@ public class MailFolderTest extends AbstractMailTest {
 			session.setPassword(getPassword());
 			MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
 			
-			MailAccess<?, ?, ?> mailAccess = MailAccess.getInstance(session);
+			MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
 			try {
 				final MailFolder inboxFolder = mailAccess.getFolderStorage().getFolder("INBOX");
@@ -103,7 +104,7 @@ public class MailFolderTest extends AbstractMailTest {
 			SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()), "mail-test-session");
 			session.setPassword(getPassword());
 			MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
-			MailAccess<?, ?, ?> mailAccess = MailAccess.getInstance(session);
+			MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect(/*mailConfig*/);
 			try {
 				final MailFolder[] flds = mailAccess.getFolderStorage().getSubfolders("default", true);

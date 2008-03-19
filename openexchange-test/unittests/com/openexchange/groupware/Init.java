@@ -8,6 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.osgi.service.event.EventAdmin;
+
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheService;
+import com.openexchange.caching.internal.JCSCacheService;
+import com.openexchange.caching.internal.JCSCacheServiceInit;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.config.internal.ConfigurationImpl;
@@ -16,50 +22,43 @@ import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.i18n.tools.I18nServices;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.config.IMAPProperties;
-import com.openexchange.server.Initialization;
-import com.openexchange.server.services.ServerServiceRegistry;
-//import com.openexchange.server.services.SessiondService;
-import com.openexchange.sessiond.impl.SessiondConnectorImpl;
-import com.openexchange.sessiond.impl.SessiondInit;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.test.TestInit;
-import com.openexchange.tools.events.TestEventAdmin;
-import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.push.udp.EventAdminService;
-import com.openexchange.caching.CacheService;
-import com.openexchange.caching.CacheException;
-import com.openexchange.caching.internal.JCSCacheService;
-import com.openexchange.caching.internal.JCSCacheServiceInit;
-import org.osgi.service.event.EventAdmin;
+import com.openexchange.server.Initialization;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.impl.SessiondConnectorImpl;
+import com.openexchange.sessiond.impl.SessiondInit;
+import com.openexchange.test.TestInit;
+import com.openexchange.tools.events.TestEventAdmin;
 
 /**
  * This class contains methods for initialising tests.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Init {
 
-    private static boolean infostorePropertiesLoaded = false;
+	private static boolean infostorePropertiesLoaded = false;
 
 	private static boolean systemPropertiesLoaded = false;
 
 	private static boolean dbInitialized = false;
 
-    private static boolean contextInitialized = false;
-    
+	private static boolean contextInitialized = false;
+
 	private static boolean sessiondInit = false;
 
-    //private static Properties infostoreProps = null;
+	// private static Properties infostoreProps = null;
 
-    private static final List<Initialization> started = new ArrayList<Initialization>();
-    private static boolean running;
+	private static final List<Initialization> started = new ArrayList<Initialization>();
 
+	private static boolean running;
 
-    private static final Map<Class, Object> services = new HashMap<Class,Object>();
+	private static final Map<Class, Object> services = new HashMap<Class, Object>();
 
-
-    private static final Initialization[] inits = new Initialization[] {
+	private static final Initialization[] inits = new Initialization[] {
 	/**
 	 * Reads system.properties.
 	 */
@@ -83,156 +82,156 @@ public final class Init {
 	/**
 	 * Sets the caching system JCS up.
 	 */
-	//com.openexchange.cache.impl.Configuration.getInstance(),
-	/**
-	 * Connection pools for ConfigDB and database assignments for contexts.
-	 */
-	com.openexchange.database.DatabaseInit.getInstance(),
-	/**
-	 * Starts HTTP serlvet manager
-	 */
-	com.openexchange.tools.servlet.http.HttpManagersInit.getInstance(),
-	/**
-	 * Setup of ContextStorage and LoginInfo.
-	 */
-	com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
-	/**
-	 * Folder initialization
-	 */
-	com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
-	/**
-	 * Mail initialization
-	 */
-	com.openexchange.mail.MailInitialization.getInstance(),
-	/**
-	 * Infostore Configuration
-	 */
-	com.openexchange.groupware.infostore.InfostoreConfig.getInstance(),
-	/**
-	 * Contact Configuration
-	 */
-	com.openexchange.groupware.contact.ContactConfig.getInstance(),
-	/**
-	 * Attachment Configuration
-	 */
-	com.openexchange.groupware.attach.AttachmentConfig.getInstance(),
-	/**
-	 * User configuration init
-	 */
-	com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
-	/**
-	 * Notification Configuration
-	 */
-	com.openexchange.groupware.notify.NotificationConfig.getInstance(),
-	/**
-	 * Sets up the configuration tree.
-	 */
-	com.openexchange.groupware.settings.impl.ConfigTreeInit.getInstance(),
-	/**
-	 * Responsible for starting and stopping the EventQueue
-	 */
- 
-	new com.openexchange.event.impl.EventInit(),
-            
-    SessiondInit.getInstance()};
-    private static ConfigurationServiceHolder configur;
+	// com.openexchange.cache.impl.Configuration.getInstance(),
+			/**
+			 * Connection pools for ConfigDB and database assignments for
+			 * contexts.
+			 */
+			com.openexchange.database.DatabaseInit.getInstance(),
+			/**
+			 * Starts HTTP serlvet manager
+			 */
+			com.openexchange.tools.servlet.http.HttpManagersInit.getInstance(),
+			/**
+			 * Setup of ContextStorage and LoginInfo.
+			 */
+			com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
+			/**
+			 * Folder initialization
+			 */
+			com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
+			/**
+			 * Mail initialization
+			 */
+			com.openexchange.mail.MailInitialization.getInstance(),
+			/**
+			 * Infostore Configuration
+			 */
+			com.openexchange.groupware.infostore.InfostoreConfig.getInstance(),
+			/**
+			 * Contact Configuration
+			 */
+			com.openexchange.groupware.contact.ContactConfig.getInstance(),
+			/**
+			 * Attachment Configuration
+			 */
+			com.openexchange.groupware.attach.AttachmentConfig.getInstance(),
+			/**
+			 * User configuration init
+			 */
+			com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
+			/**
+			 * Notification Configuration
+			 */
+			com.openexchange.groupware.notify.NotificationConfig.getInstance(),
+			/**
+			 * Sets up the configuration tree.
+			 */
+			com.openexchange.groupware.settings.impl.ConfigTreeInit.getInstance(),
+			/**
+			 * Responsible for starting and stopping the EventQueue
+			 */
 
-    public static void startServer() throws Exception {
-        if(running)
-            return;
-        running = true;
-        System.setProperty("openexchange.propdir", TestInit.getTestProperty("openexchange.propdir"));
+			new com.openexchange.event.impl.EventInit(),
 
-        injectTestServices();
-        for(Initialization init : inits) {
-            init.start();
-            started.add(init);
-        }
-    }
+			SessiondInit.getInstance() };
 
-    private static void injectTestServices() throws Exception {
-        // Since unit tests are running outside the OSGi container
-        // we'll have to do the service wiring differently.
-        // This method duplicates statically what the OSGi container
-        // handles dynamically
+	private static ConfigurationServiceHolder configur;
 
-        startAndInjectConfigBundle();
-        startAndInjectMailBundle();
-        startAndInjectI18NBundle();
-        startAndInjectMonitoringBundle();
-        startAndInjectSessiondBundle();
-        startAndInjectPushUDPBundle();
-        startAndInjectCache();
-    }
+	public static void startServer() throws Exception {
+		if (running)
+			return;
+		running = true;
+		System.setProperty("openexchange.propdir", TestInit.getTestProperty("openexchange.propdir"));
 
-    private static void startAndInjectI18NBundle() throws FileNotFoundException {
-        ConfigurationService config = (ConfigurationService)services.get(ConfigurationService.class);
-        String directory_name = config.getProperty("i18n.language.path");
+		injectTestServices();
+		for (Initialization init : inits) {
+			init.start();
+			started.add(init);
+		}
+	}
+
+	private static void injectTestServices() throws Exception {
+		// Since unit tests are running outside the OSGi container
+		// we'll have to do the service wiring differently.
+		// This method duplicates statically what the OSGi container
+		// handles dynamically
+
+		startAndInjectConfigBundle();
+		startAndInjectMailBundle();
+		startAndInjectI18NBundle();
+		startAndInjectMonitoringBundle();
+		startAndInjectSessiondBundle();
+		startAndInjectPushUDPBundle();
+		startAndInjectCache();
+	}
+
+	private static void startAndInjectI18NBundle() throws FileNotFoundException {
+		ConfigurationService config = (ConfigurationService) services.get(ConfigurationService.class);
+		String directory_name = config.getProperty("i18n.language.path");
 		File dir = new File(directory_name);
-        I18nServices i18nServices = I18nServices.getInstance();
-        try {
-            for (ResourceBundle rc : new ResourceBundleDiscoverer(dir).getResourceBundles()) {
-                i18nServices.addService(rc.getLocale(), new I18nImpl(rc));    
-            }
-        } catch (final NullPointerException e) {
-            e.printStackTrace();
-        }
-    }
+		I18nServices i18nServices = I18nServices.getInstance();
+		try {
+			for (ResourceBundle rc : new ResourceBundleDiscoverer(dir).getResourceBundles()) {
+				i18nServices.addService(rc.getLocale(), new I18nImpl(rc));
+			}
+		} catch (final NullPointerException e) {
+			e.printStackTrace();
+		}
+	}
 
-    private static void startAndInjectConfigBundle() {
-        ConfigurationService config = new ConfigurationImpl();
-        services.put(ConfigurationService.class, config);
-        ServerServiceRegistry.getInstance().addService(ConfigurationService.class, config);
-    }
+	private static void startAndInjectConfigBundle() {
+		ConfigurationService config = new ConfigurationImpl();
+		services.put(ConfigurationService.class, config);
+		ServerServiceRegistry.getInstance().addService(ConfigurationService.class, config);
+	}
 
-    private static void startAndInjectMonitoringBundle() throws Exception {
-        // First lookup services monitoring depends on and inject them
-    }
+	private static void startAndInjectMonitoringBundle() throws Exception {
+		// First lookup services monitoring depends on and inject them
+	}
 
-    private static void startAndInjectMailBundle() throws Exception {
-        //MailInitialization.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
-    	/*
-    	 * Init config
-    	 */
-    	MailProperties.getInstance().loadProperties();
-    	
-    	IMAPProperties.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
-    	/*
+	private static void startAndInjectMailBundle() throws Exception {
+		// MailInitialization.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
+		/*
+		 * Init config
+		 */
+		MailProperties.getInstance().loadProperties();
+
+		IMAPProperties.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
+		/*
 		 * Register IMAP bundle
 		 */
-		MailProviderRegistry.registerMailProvider("imap_imaps", new IMAPProvider());
-    }
+		MailProviderRegistry.registerMailProvider("imap_imaps", IMAPProvider.getInstance());
+	}
 
+	private static void startAndInjectSessiondBundle() throws Exception {
+		// ConfigurationService.getInstance().setService((Configuration)services.get(Configuration.class));
+		// SessiondService.getInstance().setService(new
+		// SessiondConnectorImpl());
+		SessiondInit.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
+		ServerServiceRegistry.getInstance().addService(SessiondService.class, new SessiondConnectorImpl());
+	}
 
-    private static void startAndInjectSessiondBundle() throws Exception {
-        //ConfigurationService.getInstance().setService((Configuration)services.get(Configuration.class));
-        //SessiondService.getInstance().setService(new SessiondConnectorImpl());
-        SessiondInit.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
-        ServerServiceRegistry.getInstance().addService(SessiondService.class, new SessiondConnectorImpl());
-    }
+	private static void startAndInjectPushUDPBundle() throws Exception {
+		ServerServiceRegistry.getInstance().addService(EventAdmin.class, new TestEventAdmin());
+		EventAdminService.getInstance().setService(new TestEventAdmin());
 
-    private static void startAndInjectPushUDPBundle() throws Exception {
-        ServerServiceRegistry.getInstance().addService(EventAdmin.class,new TestEventAdmin());
-        EventAdminService.getInstance().setService(new TestEventAdmin());
+		// SessiondService.getInstance().setService(new
+		// SessiondConnectorImpl());
+	}
 
-        // SessiondService.getInstance().setService(new SessiondConnectorImpl());
-    }
+	public static void startAndInjectCache() throws CacheException {
+		JCSCacheServiceInit.getInstance().start((ConfigurationService) services.get(ConfigurationService.class));
+		ServerServiceRegistry.getInstance().addService(CacheService.class, JCSCacheService.getInstance());
+	}
 
+	public static void stopServer() throws AbstractOXException {
+		// for(Initialization init: started) { init.stop(); }
+	}
 
-    public static void startAndInjectCache() throws CacheException {
-        JCSCacheServiceInit.getInstance().start((ConfigurationService) services.get(ConfigurationService.class));
-        ServerServiceRegistry.getInstance().addService(CacheService.class,JCSCacheService.getInstance());
-    }
-
-    public static void stopServer() throws AbstractOXException {
-        //for(Initialization init: started) { init.stop(); }
-    }
-
-
-
-    public static ConfigurationServiceHolder getConfigurationServiceHolder() throws Exception {
-        ConfigurationServiceHolder csh = ConfigurationServiceHolder.newInstance();
-        csh.setService((ConfigurationService) services.get(ConfigurationService.class));
-        return csh;
-    }
+	public static ConfigurationServiceHolder getConfigurationServiceHolder() throws Exception {
+		ConfigurationServiceHolder csh = ConfigurationServiceHolder.newInstance();
+		csh.setService((ConfigurationService) services.get(ConfigurationService.class));
+		return csh;
+	}
 }

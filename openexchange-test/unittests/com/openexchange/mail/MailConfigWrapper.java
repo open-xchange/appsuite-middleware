@@ -49,7 +49,8 @@
 
 package com.openexchange.mail;
 
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailCapabilities;
+import com.openexchange.mail.api.MailConfig;
 
 /**
  * {@link MailConfigWrapper}
@@ -86,8 +87,8 @@ public final class MailConfigWrapper extends MailConfig {
 	 * @see com.openexchange.mail.config.MailConfig#getCapabilities()
 	 */
 	@Override
-	public int getCapabilities() {
-		return 0;
+	public MailCapabilities getCapabilities() {
+		return MailCapabilities.EMPTY_CAPS;
 	}
 
 	/*
@@ -100,7 +101,8 @@ public final class MailConfigWrapper extends MailConfig {
 		return port;
 	}
 
-    public boolean isSecure() {
+    @Override
+	public boolean isSecure() {
         return secure;
     }
 
@@ -112,6 +114,10 @@ public final class MailConfigWrapper extends MailConfig {
 	@Override
 	public String getServer() {
 		return server;
+	}
+
+	@Override
+	protected void parseServerURL(String serverURL) throws MailException {
 	}
 
 }

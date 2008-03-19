@@ -51,8 +51,8 @@ package com.openexchange.mail;
 
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.AbstractMailTest;
-import com.openexchange.mail.MailAccess;
-import com.openexchange.mail.config.MailConfig;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
@@ -83,7 +83,7 @@ public final class MailAccessTest extends AbstractMailTest {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
 					new ContextImpl(getCid()), "mail-test-session");
 			session.setPassword(getPassword());
-			MailAccess<?, ?, ?> mailAccess = MailAccess.getInstance(session);
+			MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
 			mailAccess.connect();
 			System.out.println("Active connections: " + MailAccess.getCounter());
@@ -121,7 +121,7 @@ public final class MailAccessTest extends AbstractMailTest {
 			mailAccess.connect();
 			System.out.println("Active connections: " + MailAccess.getCounter());
 			mailAccess.getMessageStorage().getAllMessages("default.INBOX", null, null, null,
-					new MailListField[] { MailListField.ID });
+					new MailField[] { MailField.ID });
 			/*
 			 * close
 			 */
@@ -186,7 +186,7 @@ public final class MailAccessTest extends AbstractMailTest {
 				final SessionObject session = SessionObjectWrapper.createSessionObject(testRef.getUser(),
 						new ContextImpl(testRef.getCid()), "mail-test-session");
 				session.setPassword(testRef.getPassword());
-				MailAccess<?, ?, ?> mailAccess = MailAccess.getInstance(session);
+				MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 				MailConfig mailConfig = new MailConfigWrapper(testRef.getLogin(), testRef.getPassword(), testRef.getServer(), testRef.getPort());
 				mailAccess.connect();
 				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailAccess.getCounter());
@@ -223,7 +223,7 @@ public final class MailAccessTest extends AbstractMailTest {
 				mailAccess.connect();
 				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailAccess.getCounter());
 				mailAccess.getMessageStorage().getAllMessages("default.INBOX", null, null, null,
-						new MailListField[] { MailListField.ID });
+						new MailField[] { MailField.ID });
 				/*
 				 * close
 				 */
