@@ -50,21 +50,25 @@
 package com.openexchange.ajax.contact.action;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.ContactObject;
 
 /**
- * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GetParser extends AbstractAJAXParser<GetResponse> {
+public class UserGetParser extends AbstractAJAXParser<GetResponse> {
 
     /**
      * Default constructor.
      */
-    GetParser() {
-        super(false);
+    public UserGetParser(final boolean failOnError) {
+        super(failOnError);
     }
 
     /**
@@ -74,5 +78,21 @@ public class GetParser extends AbstractAJAXParser<GetResponse> {
     protected GetResponse createResponse(final Response response)
         throws JSONException {
         return new GetResponse(response);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public GetResponse parse(final String body) throws JSONException {
+        final GetResponse retval = super.parse(body);
+        try {
+            final ContactObject contact = retval.getContact();
+            final JSONObject json = (JSONObject) retval.getData();
+            contact.setInternalUserId(json.getInt(ContactFields.USER_ID));
+        } catch (final OXException e) {
+            throw new JSONException(e);
+        }
+        return retval;
     }
 }

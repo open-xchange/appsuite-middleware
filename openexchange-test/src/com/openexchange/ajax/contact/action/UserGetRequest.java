@@ -51,28 +51,61 @@ package com.openexchange.ajax.contact.action;
 
 import org.json.JSONException;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.request.ContactRequest;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
- * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class GetParser extends AbstractAJAXParser<GetResponse> {
+public class UserGetRequest extends AbstractContactRequest {
+
+    /**
+     * Unique identifier of the user.
+     */
+    private final int userId;
 
     /**
      * Default constructor.
+     * @param userId unique identifier of the user.
      */
-    GetParser() {
-        super(false);
+    public UserGetRequest(final int userId) {
+        super();
+        this.userId = userId;
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected GetResponse createResponse(final Response response)
-        throws JSONException {
-        return new GetResponse(response);
+    public Object getBody() throws JSONException {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Method getMethod() {
+        return Method.GET;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Parameter[] getParameters() {
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, ContactRequest
+                .ACTION_GET_USER),
+            new Parameter(AJAXServlet.PARAMETER_INFOLDER, FolderObject
+                .SYSTEM_LDAP_FOLDER_ID),
+            new Parameter(AJAXServlet.PARAMETER_ID, userId)
+        };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public UserGetParser getParser() {
+        return new UserGetParser(true);
     }
 }
