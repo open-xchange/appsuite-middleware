@@ -58,7 +58,7 @@ import java.util.Date;
 public class Group implements Cloneable {
 
     /**
-     * Unique nummeric identifier of this group.
+     * Unique numeric identifier of this group.
      */
     private int identifier;
 
