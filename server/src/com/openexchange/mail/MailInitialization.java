@@ -94,7 +94,7 @@ public final class MailInitialization implements Initialization {
 		 */
 		MailPropertiesInit.getInstance().start();
 		MailCacheConfiguration.getInstance().start();
-		MailConnectionWatcher.init();
+		MailAccessWatcher.init();
 		MessageUtilityInit.getInstance().start();
 		/*
 		 * TODO: Remove Simulate bundle availability
@@ -118,7 +118,7 @@ public final class MailInitialization implements Initialization {
 		MailAccessCache.releaseInstance();
 		MailMessageCache.releaseInstance();
 		UserSettingMailStorage.releaseInstance();
-		MailConnectionWatcher.stop();
+		MailAccessWatcher.stop();
 		SpamHandler.releaseInstance();
 		MailCacheConfiguration.getInstance().stop();
 		MailPropertiesInit.getInstance().stop();

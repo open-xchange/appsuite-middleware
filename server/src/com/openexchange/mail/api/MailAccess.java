@@ -58,7 +58,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.caching.CacheException;
-import com.openexchange.mail.MailConnectionWatcher;
+import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.cache.MailAccessCache;
@@ -160,7 +160,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 					 * Apply new thread's trace information
 					 */
 					mailConnection.applyNewThread();
-					MailConnectionWatcher.addMailConnection(mailConnection);
+					MailAccessWatcher.addMailConnection(mailConnection);
 					return mailConnection;
 				}
 			}
@@ -195,7 +195,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 						 * Apply new thread's trace information
 						 */
 						mailConnection.applyNewThread();
-						MailConnectionWatcher.addMailConnection(mailConnection);
+						MailAccessWatcher.addMailConnection(mailConnection);
 						return mailConnection;
 					}
 				}
@@ -331,7 +331,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 		}
 		checkFieldsBeforeConnect(getMailConfig());
 		connectInternal();
-		MailConnectionWatcher.addMailConnection(this);
+		MailAccessWatcher.addMailConnection(this);
 	}
 
 	/**
@@ -396,7 +396,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 			/*
 			 * Remove from watcher no matter if cached or closed
 			 */
-			MailConnectionWatcher.removeMailConnection(this);
+			MailAccessWatcher.removeMailConnection(this);
 		}
 	}
 

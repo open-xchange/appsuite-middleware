@@ -63,16 +63,17 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.server.ServerTimer;
 
 /**
- * {@link MailConnectionWatcher} - Keeps track of established mail connections
- * and allows a forced close if connection time exceeds allowed time
+ * {@link MailAccessWatcher} - Keeps track of connected instances of
+ * {@link MailAccess} and allows a forced close if connection time exceeds
+ * allowed time
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailConnectionWatcher {
+public final class MailAccessWatcher {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailConnectionWatcher.class);
+			.getLog(MailAccessWatcher.class);
 
 	private static final ConcurrentMap<MailAccess<?, ?>, Long> mailConnections = new ConcurrentHashMap<MailAccess<?, ?>, Long>();
 
@@ -129,7 +130,7 @@ public final class MailConnectionWatcher {
 	/**
 	 * Prevent instantiation
 	 */
-	private MailConnectionWatcher() {
+	private MailAccessWatcher() {
 		super();
 	}
 
