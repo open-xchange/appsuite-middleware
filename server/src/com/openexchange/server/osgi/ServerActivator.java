@@ -162,7 +162,10 @@ public final class ServerActivator extends DeferredActivator {
 			registry.clearRegistry();
 			final Class<?>[] classes = getNeededServices();
 			for (int i = 0; i < classes.length; i++) {
-				registry.addService(classes[i], getService(classes[i]));
+				final Object service = getService(classes[i]);
+				if (null != service) {
+					registry.addService(classes[i], service);
+				}
 			}
 		}
 		if (!started.compareAndSet(false, true)) {
