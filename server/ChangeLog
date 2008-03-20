@@ -1,3 +1,7 @@
+* 2008-03-20 - marcus.klein@open-xchange.com
+
+ - Bugfix #9447: This problem was fixed with fix for bug #10400.
+
 * 2008-03-20 - thorben.betten@open-xchange.com
 
  - Bugfix #10969: Removed usages of com.openexchange.cache.CacheKey to
