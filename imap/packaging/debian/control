@@ -2,10 +2,10 @@ Source: open-xchange-imap
 Section: unknown
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common, open-xchange-global, open-xchange-configread, open-xchange-monitoring, open-xchange-server
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.6.5), sun-j2sdk1.5|sun-java5-jdk, open-xchange-common, open-xchange-global, open-xchange-configread, open-xchange-monitoring, open-xchange-caching, open-xchange-server
 Standards-Version: 3.6.1
 
 Package: open-xchange-imap
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common, open-xchange-global, open-xchange-configread, open-xchange-monitoring, open-xchange-server
+Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common, open-xchange-global, open-xchange-configread, open-xchange-monitoring, open-xchange-caching, open-xchange-server
 Description: The Open-Xchange Server IMAP Bundle
