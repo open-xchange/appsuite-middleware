@@ -139,16 +139,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 	 * 
 	 * @param imapStore
 	 *            The IMAP store
-	 * @param imapConnection
-	 *            The IMAP connection
+	 * @param imapAccess
+	 *            The IMAP access
 	 * @param session
 	 *            The session providing needed user data
 	 * @throws IMAPException
 	 *             If context loading fails
 	 */
-	public IMAPMessageStorage(final IMAPStore imapStore, final IMAPAccess imapConnection, final Session session)
+	public IMAPMessageStorage(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session)
 			throws IMAPException {
-		super(imapStore, imapConnection, session);
+		super(imapStore, imapAccess, session);
 	}
 
 	@Override
@@ -184,7 +184,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			}
 			return MIMEMessageConverter.convertMessages(msgs, fields, body);
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		}
 	}
 
@@ -230,7 +230,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			}
 			return mail;
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		}
 	}
 
@@ -284,7 +284,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			return MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(new MailField[usedFields.size()]),
 					usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL));
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		}
 	}
 
@@ -385,7 +385,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			return MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(new MailField[usedFields.size()]),
 					body);
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		}
 	}
 
@@ -411,7 +411,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			}
 			return MIMEMessageConverter.convertMessages(msgs, fields);
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		}
 	}
 
@@ -430,7 +430,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			} catch (final MessagingException e) {
 				throw new IMAPException(IMAPException.Code.NO_ACCESS, imapFolder.getFullName());
 			}
-			final String trashFullname = imapConnection.getFolderStorage().getTrashFolder();
+			final String trashFullname = imapAccess.getFolderStorage().getTrashFolder();
 			if (null == trashFullname) {
 				// TODO: Bug#8992 -> What to do if trash folder is null
 				if (LOG.isErrorEnabled()) {
@@ -471,7 +471,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			resetIMAPFolder();
 			return true;
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		}
 	}
 
@@ -522,8 +522,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			/*
 			 * Connection is broken. Not possible to retry.
 			 */
-			throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapConnection.getMailConfig().getServer(),
-					imapConnection.getMailConfig().getLogin());
+			throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapAccess.getMailConfig().getServer(),
+					imapAccess.getMailConfig().getLogin());
 		} catch (final ProtocolException e) {
 			throw new IMAPException(IMAPException.Code.UID_EXPUNGE_FAILED, e, Arrays.toString(tmp), imapFolder
 					.getFullName(), e.getMessage());
@@ -596,7 +596,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			 */
 			final int spamAction;
 			if (usm.isSpamEnabled()) {
-				final String spamFullName = imapConnection.getFolderStorage().getSpamFolder();
+				final String spamFullName = imapAccess.getFolderStorage().getSpamFolder();
 				spamAction = spamFullName.equals(imapFolder.getFullName()) ? SPAM_HAM : (spamFullName
 						.equals(destFullname) ? SPAM_SPAM : SPAM_NOOP);
 			} else {
@@ -644,7 +644,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				imapFolder.close(false);
 				resetIMAPFolder();
 			}
-			final String draftFullname = imapConnection.getFolderStorage().getDraftsFolder();
+			final String draftFullname = imapAccess.getFolderStorage().getDraftsFolder();
 			if (destFullname.equals(draftFullname)) {
 				/*
 				 * A copy/move to drafts folder. Ensure to set \Draft flag.
@@ -682,7 +682,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			}
 			return result;
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		}
 	}
 
@@ -726,8 +726,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				/*
 				 * Connection is broken. Not possible to retry.
 				 */
-				throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapConnection.getMailConfig()
-						.getServer(), imapConnection.getMailConfig().getLogin());
+				throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapAccess.getMailConfig()
+						.getServer(), imapAccess.getMailConfig().getLogin());
 			} catch (final ProtocolException e) {
 				throw new IMAPException(IMAPException.Code.UID_EXPUNGE_FAILED, e, Arrays.toString(tmp), imapFolder
 						.getFullName(), e.getMessage());
@@ -789,7 +789,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			}
 			return retval;
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		}
 	}
 
@@ -865,7 +865,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				resetIMAPFolder();
 			}
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		}
 	}
 
@@ -921,10 +921,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			imapFolder.close(false);
 			resetIMAPFolder();
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		} catch (final ProtocolException e) {
 			throw IMAPException.handleMessagingException(new MessagingException(e.getLocalizedMessage(), e),
-					imapConnection);
+					imapAccess);
 		}
 	}
 
@@ -932,7 +932,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 	public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage composedMail)
 			throws MailException {
 		try {
-			final MimeMessage mimeMessage = new MimeMessage(imapConnection.getSession());
+			final MimeMessage mimeMessage = new MimeMessage(imapAccess.getSession());
 			/*
 			 * Check for edit-draft operation
 			 */
@@ -990,7 +990,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			}
 			return retval;
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		} catch (final IOException e) {
 			throw new IMAPException(IMAPException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}
@@ -1094,7 +1094,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		 * Check for spam handling
 		 */
 		if (usm.isSpamEnabled()) {
-			final boolean locatedInSpamFolder = imapConnection.getFolderStorage().getSpamFolder().equals(
+			final boolean locatedInSpamFolder = imapAccess.getFolderStorage().getSpamFolder().equals(
 					imapFolder.getFullName());
 			if (isSpam) {
 				if (locatedInSpamFolder) {
@@ -1108,7 +1108,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				 * Handle spam
 				 */
 				try {
-					SpamHandler.getInstance().handleSpam(imapFolder, msgUIDs, move, imapConnection, imapStore);
+					SpamHandler.getInstance().handleSpam(imapFolder, msgUIDs, move, imapAccess, imapStore);
 					/*
 					 * Close and reopen to force internal message cache update
 					 */
@@ -1130,7 +1130,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			 * Handle ham.
 			 */
 			try {
-				SpamHandler.getInstance().handleHam(imapFolder, msgUIDs, move, imapConnection, imapStore);
+				SpamHandler.getInstance().handleHam(imapFolder, msgUIDs, move, imapAccess, imapStore);
 				/*
 				 * Close and reopen to force internal message cache update
 				 */

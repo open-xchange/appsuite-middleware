@@ -106,7 +106,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 
 	protected final transient Context ctx;
 
-	protected final IMAPAccess imapConnection;
+	protected final IMAPAccess imapAccess;
 
 	protected final UserSettingMail usm;
 
@@ -121,18 +121,18 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 	 * 
 	 * @param imapStore
 	 *            The IMAP store
-	 * @param imapConnection
-	 *            The IMAP connection
+	 * @param imapAccess
+	 *            The IMAP access
 	 * @param session
 	 *            The session providing needed user data
 	 * @throws IMAPException
 	 *             If context lading fails
 	 */
-	public IMAPFolderWorker(final IMAPStore imapStore, final IMAPAccess imapConnection, final Session session)
+	public IMAPFolderWorker(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session)
 			throws IMAPException {
 		super();
 		this.imapStore = imapStore;
-		this.imapConnection = imapConnection;
+		this.imapAccess = imapAccess;
 		this.session = session;
 		try {
 			this.ctx = ContextStorage.getStorageContext(session.getContextId());
@@ -140,7 +140,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 			throw new IMAPException(e);
 		}
 		this.usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
-		this.imapConfig = imapConnection.getIMAPConfig();
+		this.imapConfig = imapAccess.getIMAPConfig();
 	}
 
 	/**
@@ -260,7 +260,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 				}
 				if (desiredMode == Folder.READ_WRITE
 						&& ((imapFolder.getType() & Folder.HOLDS_MESSAGES) == 0)
-						&& STR_FALSE.equalsIgnoreCase(imapConnection.getMailProperties().getProperty(
+						&& STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(
 								MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_FALSE))
 						&& IMAPCommandsCollection.isReadOnly(imapFolder)) {
 					throw new IMAPException(IMAPException.Code.READ_ONLY_FOLDER, imapFolder.getFullName());
@@ -291,7 +291,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 		}
 		if (desiredMode == Folder.READ_WRITE
 				&& ((retval.getType() & Folder.HOLDS_MESSAGES) == 0)
-				&& STR_FALSE.equalsIgnoreCase(imapConnection.getMailProperties().getProperty(
+				&& STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(
 						MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_FALSE))
 				&& IMAPCommandsCollection.isReadOnly(retval)) {
 			throw new IMAPException(IMAPException.Code.READ_ONLY_FOLDER, retval.getFullName());

@@ -136,7 +136,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 	 * @param imapStore
 	 *            The IMAP store
 	 * @param imapAccess
-	 *            The IMAP connection
+	 *            The IMAP access
 	 * @param session
 	 *            The session providing needed user data
 	 * @throws IMAPException
