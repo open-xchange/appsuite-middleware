@@ -51,19 +51,16 @@ package com.openexchange.imap.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.imap.IMAPProvider;
-import com.openexchange.imap.config.IMAPProperties;
+import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.api.MailProvider;
+import com.openexchange.server.osgiservice.DeferredActivator;
 
 /**
  * {@link IMAPActivator}
@@ -71,14 +68,14 @@ import com.openexchange.mail.api.MailProvider;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class IMAPActivator implements BundleActivator {
+public final class IMAPActivator extends DeferredActivator {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(IMAPActivator.class);
 
-	private final Dictionary<String, String> dictionary;
+	private final AtomicBoolean started;
 
-	private ServiceTracker tracker;
+	private final Dictionary<String, String> dictionary;
 
 	private ServiceRegistration imapServiceRegistration;
 
@@ -87,49 +84,58 @@ public final class IMAPActivator implements BundleActivator {
 	 */
 	public IMAPActivator() {
 		super();
+		started = new AtomicBoolean();
 		dictionary = new Hashtable<String, String>();
 		dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
-	public void start(final BundleContext context) throws Exception {
+	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, CacheService.class };
+
+	@Override
+	protected Class<?>[] getNeededServices() {
+		return NEEDED_SERVICES;
+	}
+
+	@Override
+	protected void handleUnavailability(final Class<?> clazz) {
+		/*
+		 * Never stop the server even if a needed service is absent
+		 */
+		if (LOG.isWarnEnabled()) {
+			LOG.warn("Absent service: " + clazz.getName());
+		}
+		IMAPServiceRegistry.getInstance().removeService(clazz);
+	}
+
+	@Override
+	public void startBundle() throws Exception {
 		try {
-			tracker = new ServiceTracker(context, ConfigurationService.class.getName(), new ServiceTrackerCustomizer() {
-
-				private final ConfigurationServiceHolder csh = ConfigurationServiceHolder.newInstance();
-
-				public Object addingService(final ServiceReference reference) {
-					final Object addedService = context.getService(reference);
-					if (addedService instanceof ConfigurationService) {
-						IMAPProperties.getInstance().setConfigurationServiceHolder(csh);
-						try {
-							csh.setService((ConfigurationService) addedService);
-						} catch (final Exception e) {
-							LOG.error(e.getMessage(), e);
-						}
-						imapServiceRegistration = context.registerService(MailProvider.class.getName(), IMAPProvider
-								.getInstance(), dictionary);
-					}
-					return addedService;
-				}
-
-				public void modifiedService(ServiceReference reference, Object service) {
-				}
-
-				public void removedService(ServiceReference reference, Object service) {
-					// TODO Unregister IMAP bundle if config down???
-					try {
-						csh.removeService();
-					} catch (final Exception e) {
-						LOG.error(e.getMessage(), e);
+			/*
+			 * (Re-)Initialize server service registry with available services
+			 */
+			{
+				final IMAPServiceRegistry registry = IMAPServiceRegistry.getInstance();
+				registry.clearRegistry();
+				final Class<?>[] classes = getNeededServices();
+				for (int i = 0; i < classes.length; i++) {
+					final Object service = getService(classes[i]);
+					if (null != service) {
+						registry.addService(classes[i], service);
 					}
 				}
-			});
-			tracker.open();
+			}
+			if (!started.compareAndSet(false, true)) {
+				/*
+				 * Don't start the server again. A duplicate call to
+				 * startBundle() is probably caused by temporary absent
+				 * service(s) whose re-availability causes to trigger this
+				 * method again.
+				 */
+				LOG.info("A temporary absent service is available again");
+				return;
+			}
+			imapServiceRegistration = context.registerService(MailProvider.class.getName(), IMAPProvider.getInstance(),
+					dictionary);
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -137,25 +143,22 @@ public final class IMAPActivator implements BundleActivator {
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
-	public void stop(final BundleContext context) throws Exception {
+	@Override
+	public void stopBundle() throws Exception {
 		try {
 			if (null != imapServiceRegistration) {
 				imapServiceRegistration.unregister();
 				imapServiceRegistration = null;
 			}
+			/*
+			 * Clear service registry
+			 */
+			IMAPServiceRegistry.getInstance().clearRegistry();
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		} finally {
-			if (null != tracker) {
-				tracker.close();
-				tracker = null;
-			}
+			started.set(false);
 		}
 	}
 

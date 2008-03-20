@@ -53,7 +53,9 @@ import static com.openexchange.imap.IMAPCommandsCollection.supportsUserDefinedFl
 
 import javax.mail.MessagingException;
 
-import com.openexchange.cache.CacheKey;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheService;
+import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.session.Session;
@@ -128,7 +130,8 @@ public final class UserFlagsCache {
 
 		private CacheKey getKeyInternal() {
 			if (null == key) {
-				key = new CacheKey(MailCacheCode.USER_FLAGS.getCode(), fullname);
+				key = IMAPServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
+						MailCacheCode.USER_FLAGS.getCode(), fullname);
 			}
 			return key;
 		}

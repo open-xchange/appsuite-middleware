@@ -47,144 +47,109 @@
  *
  */
 
-package com.openexchange.smtp.config;
+package com.openexchange.smtp.services;
 
-import com.openexchange.mail.api.MailCapabilities;
-import com.openexchange.mail.transport.config.TransportConfig;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * {@link SMTPConfig}
+ * {@link SMTPServiceRegistry} - A registry for services needed by SMTP bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SMTPConfig extends TransportConfig {
+public final class SMTPServiceRegistry {
 
-	private static final String PROTOCOL_SMTP_SECURE = "smtps";
+	private static final SMTPServiceRegistry REGISTRY = new SMTPServiceRegistry();
 
 	/**
-	 * Gets the smtpAuthEnc
+	 * Gets the service registry
 	 * 
-	 * @return the smtpAuthEnc
+	 * @return The service registry
 	 */
-	public static String getSmtpAuthEnc() {
-		return SMTPProperties.getInstance().getSmtpAuthEnc();
+	public static SMTPServiceRegistry getInstance() {
+		return REGISTRY;
 	}
 
-	/**
-	 * Gets the smtpConnectionTimeout
-	 * 
-	 * @return the smtpConnectionTimeout
-	 */
-	public static int getSmtpConnectionTimeout() {
-		return SMTPProperties.getInstance().getSmtpConnectionTimeout();
-	}
+	private final Map<Class<?>, Object> services;
 
 	/**
-	 * Gets the smtpLocalhost
-	 * 
-	 * @return the smtpLocalhost
+	 * Initializes a new {@link SMTPServiceRegistry}
 	 */
-	public static String getSmtpLocalhost() {
-		return SMTPProperties.getInstance().getSmtpLocalhost();
-	}
-
-	/**
-	 * Gets the smtpTimeout
-	 * 
-	 * @return the smtpTimeout
-	 */
-	public static int getSmtpTimeout() {
-		return SMTPProperties.getInstance().getSmtpTimeout();
-	}
-
-	/**
-	 * Gets the smtpAuth
-	 * 
-	 * @return the smtpAuth
-	 */
-	public static boolean isSmtpAuth() {
-		return SMTPProperties.getInstance().isSmtpAuth();
-	}
-
-	/**
-	 * Gets the smtpEnvelopeFrom
-	 * 
-	 * @return the smtpEnvelopeFrom
-	 */
-	public static boolean isSmtpEnvelopeFrom() {
-		return SMTPProperties.getInstance().isSmtpEnvelopeFrom();
-	}
-
-	/*
-	 * +++++++++ User-specific fields +++++++++
-	 */
-
-	private boolean secure;
-
-	private int smtpPort;
-
-	private String smtpServer;
-
-	/**
-	 * Default constructor
-	 */
-	public SMTPConfig() {
+	private SMTPServiceRegistry() {
 		super();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.config.MailConfig#getCapabilities()
-	 */
-	@Override
-	public MailCapabilities getCapabilities() {
-		return MailCapabilities.EMPTY_CAPS;
+		services = new ConcurrentHashMap<Class<?>, Object>();
 	}
 
 	/**
-	 * Gets the smtpPort
-	 * 
-	 * @return the smtpPort
+	 * Clears the whole registry
 	 */
-	@Override
-	public int getPort() {
-		return smtpPort;
+	public void clearRegistry() {
+		services.clear();
 	}
 
 	/**
-	 * Gets the smtpServer
+	 * Removes a service bound to given class from this service registry
 	 * 
-	 * @return the smtpServer
+	 * @param clazz
+	 *            The service's class
 	 */
-	@Override
-	public String getServer() {
-		return smtpServer;
+	public void removeService(final Class<?> clazz) {
+		services.remove(clazz);
+	}
+
+	/**
+	 * Adds a service bound to given class to this service registry
+	 * 
+	 * @param clazz
+	 *            The service's class
+	 * @param service
+	 *            The service itself
+	 */
+	public <S extends Object> void addService(final Class<? extends S> clazz, final S service) {
+		services.put(clazz, service);
+	}
+
+	/**
+	 * Gets the service defined by given class
+	 * 
+	 * @param <S>
+	 *            The type of service's class
+	 * @param clazz
+	 *            The service's class
+	 * @return The service if found; otherwise <code>null</code>
+	 */
+	public <S extends Object> S getService(final Class<? extends S> clazz) {
+		final Object service = services.get(clazz);
+		if (null == service) {
+			/*
+			 * Service is not present
+			 */
+			return null;
+		}
+		return clazz.cast(service);
 	}
 
 	@Override
-	public boolean isSecure() {
-		return secure;
-	}
-
-	@Override
-	protected void parseServerURL(final String serverURL) {
-		smtpServer = serverURL;
-		smtpPort = 25;
-		{
-			final String[] parsed = parseProtocol(smtpServer);
-			if (parsed != null) {
-				secure = PROTOCOL_SMTP_SECURE.equals(parsed[0]);
-				smtpServer = parsed[1];
-			} else {
-				secure = false;
-			}
-			final int pos = smtpServer.indexOf(':');
-			if (pos > -1) {
-				smtpPort = Integer.parseInt(smtpServer.substring(pos + 1));
-				smtpServer = smtpServer.substring(0, pos);
+	public String toString() {
+		final StringBuilder sb = new StringBuilder(256);
+		sb.append("SMTP service registry:\n");
+		if (services.isEmpty()) {
+			sb.append("<empty>");
+		} else {
+			final Iterator<Map.Entry<Class<?>, Object>> iter = services.entrySet().iterator();
+			while (true) {
+				final Map.Entry<Class<?>, Object> e = iter.next();
+				sb.append(e.getKey().getName()).append(": ").append(e.getValue().toString());
+				if (iter.hasNext()) {
+					sb.append('\n');
+				} else {
+					break;
+				}
 			}
 		}
+		return sb.toString();
 	}
+
 }
