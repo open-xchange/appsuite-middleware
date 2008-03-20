@@ -49,9 +49,7 @@
 
 package com.openexchange.imap.services;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link IMAPServiceRegistry} - A registry for services needed by IMAP bundle
@@ -61,95 +59,22 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class IMAPServiceRegistry {
 
-	private static final IMAPServiceRegistry REGISTRY = new IMAPServiceRegistry();
+	private static final ServiceRegistry REGISTRY = new ServiceRegistry();
 
 	/**
 	 * Gets the service registry
 	 * 
 	 * @return The service registry
 	 */
-	public static IMAPServiceRegistry getInstance() {
+	public static ServiceRegistry getServiceRegistry() {
 		return REGISTRY;
 	}
-
-	private final Map<Class<?>, Object> services;
 
 	/**
 	 * Initializes a new {@link IMAPServiceRegistry}
 	 */
 	private IMAPServiceRegistry() {
 		super();
-		services = new ConcurrentHashMap<Class<?>, Object>();
-	}
-
-	/**
-	 * Clears the whole registry
-	 */
-	public void clearRegistry() {
-		services.clear();
-	}
-
-	/**
-	 * Removes a service bound to given class from this service registry
-	 * 
-	 * @param clazz
-	 *            The service's class
-	 */
-	public void removeService(final Class<?> clazz) {
-		services.remove(clazz);
-	}
-
-	/**
-	 * Adds a service bound to given class to this service registry
-	 * 
-	 * @param clazz
-	 *            The service's class
-	 * @param service
-	 *            The service itself
-	 */
-	public <S extends Object> void addService(final Class<? extends S> clazz, final S service) {
-		services.put(clazz, service);
-	}
-
-	/**
-	 * Gets the service defined by given class
-	 * 
-	 * @param <S>
-	 *            The type of service's class
-	 * @param clazz
-	 *            The service's class
-	 * @return The service if found; otherwise <code>null</code>
-	 */
-	public <S extends Object> S getService(final Class<? extends S> clazz) {
-		final Object service = services.get(clazz);
-		if (null == service) {
-			/*
-			 * Service is not present
-			 */
-			return null;
-		}
-		return clazz.cast(service);
-	}
-
-	@Override
-	public String toString() {
-		final StringBuilder sb = new StringBuilder(256);
-		sb.append("IMAP service registry:\n");
-		if (services.isEmpty()) {
-			sb.append("<empty>");
-		} else {
-			final Iterator<Map.Entry<Class<?>, Object>> iter = services.entrySet().iterator();
-			while (true) {
-				final Map.Entry<Class<?>, Object> e = iter.next();
-				sb.append(e.getKey().getName()).append(": ").append(e.getValue().toString());
-				if (iter.hasNext()) {
-					sb.append('\n');
-				} else {
-					break;
-				}
-			}
-		}
-		return sb.toString();
 	}
 
 }

@@ -110,7 +110,7 @@ public final class SMTPProperties extends AbstractProtocolProperties {
 		final StringBuilder logBuilder = new StringBuilder(1024);
 		logBuilder.append("\nLoading global SMTP properties...\n");
 
-		final ConfigurationService configuration = SMTPServiceRegistry.getInstance().getService(
+		final ConfigurationService configuration = SMTPServiceRegistry.getServiceRegistry().getService(
 				ConfigurationService.class);
 		{
 			final String smtpLocalhostStr = configuration.getProperty("com.openexchange.smtp.smtpLocalhost").trim();

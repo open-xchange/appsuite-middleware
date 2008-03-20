@@ -61,6 +61,7 @@ import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link IMAPActivator}
@@ -104,7 +105,7 @@ public final class IMAPActivator extends DeferredActivator {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn("Absent service: " + clazz.getName());
 		}
-		IMAPServiceRegistry.getInstance().removeService(clazz);
+		IMAPServiceRegistry.getServiceRegistry().removeService(clazz);
 	}
 
 	@Override
@@ -114,7 +115,7 @@ public final class IMAPActivator extends DeferredActivator {
 			 * (Re-)Initialize server service registry with available services
 			 */
 			{
-				final IMAPServiceRegistry registry = IMAPServiceRegistry.getInstance();
+				final ServiceRegistry registry = IMAPServiceRegistry.getServiceRegistry();
 				registry.clearRegistry();
 				final Class<?>[] classes = getNeededServices();
 				for (int i = 0; i < classes.length; i++) {
@@ -153,7 +154,7 @@ public final class IMAPActivator extends DeferredActivator {
 			/*
 			 * Clear service registry
 			 */
-			IMAPServiceRegistry.getInstance().clearRegistry();
+			IMAPServiceRegistry.getServiceRegistry().clearRegistry();
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);

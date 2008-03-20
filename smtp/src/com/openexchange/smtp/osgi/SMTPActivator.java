@@ -58,6 +58,7 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.smtp.SMTPProvider;
 import com.openexchange.smtp.services.SMTPServiceRegistry;
 
@@ -103,7 +104,7 @@ public final class SMTPActivator extends DeferredActivator {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn("Absent service: " + clazz.getName());
 		}
-		SMTPServiceRegistry.getInstance().removeService(clazz);
+		SMTPServiceRegistry.getServiceRegistry().removeService(clazz);
 	}
 
 	@Override
@@ -113,7 +114,7 @@ public final class SMTPActivator extends DeferredActivator {
 			 * (Re-)Initialize server service registry with available services
 			 */
 			{
-				final SMTPServiceRegistry registry = SMTPServiceRegistry.getInstance();
+				final ServiceRegistry registry = SMTPServiceRegistry.getServiceRegistry();
 				registry.clearRegistry();
 				final Class<?>[] classes = getNeededServices();
 				for (int i = 0; i < classes.length; i++) {
@@ -152,7 +153,7 @@ public final class SMTPActivator extends DeferredActivator {
 			/*
 			 * Clear service registry
 			 */
-			SMTPServiceRegistry.getInstance().clearRegistry();
+			SMTPServiceRegistry.getServiceRegistry().clearRegistry();
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);

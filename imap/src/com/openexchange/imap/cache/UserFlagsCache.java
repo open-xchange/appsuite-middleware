@@ -130,7 +130,7 @@ public final class UserFlagsCache {
 
 		private CacheKey getKeyInternal() {
 			if (null == key) {
-				key = IMAPServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
+				key = IMAPServiceRegistry.getServiceRegistry().getService(CacheService.class).newCacheKey(
 						MailCacheCode.USER_FLAGS.getCode(), fullname);
 			}
 			return key;

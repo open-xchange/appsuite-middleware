@@ -134,7 +134,7 @@ public final class RightsCache {
 
 		private CacheKey getKeyInternal() {
 			if (null == key) {
-				key = IMAPServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
+				key = IMAPServiceRegistry.getServiceRegistry().getService(CacheService.class).newCacheKey(
 						MailCacheCode.RIGHTS.getCode(), fullname);
 			}
 			return key;

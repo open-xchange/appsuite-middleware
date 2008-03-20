@@ -185,7 +185,7 @@ public final class NamespaceFoldersCache {
 
 		private CacheKey getKeyInternal() {
 			if (null == key) {
-				key = IMAPServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
+				key = IMAPServiceRegistry.getServiceRegistry().getService(CacheService.class).newCacheKey(
 						MailCacheCode.NAMESPACE_FOLDERS.getCode(), namespaceKey);
 			}
 			return key;

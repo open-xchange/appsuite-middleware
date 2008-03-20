@@ -126,7 +126,7 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 		final StringBuilder logBuilder = new StringBuilder(1024);
 		logBuilder.append("\nLoading global IMAP properties...\n");
 
-		final ConfigurationService configuration = IMAPServiceRegistry.getInstance().getService(
+		final ConfigurationService configuration = IMAPServiceRegistry.getServiceRegistry().getService(
 				ConfigurationService.class);
 		{
 			final String imapSortStr = configuration.getProperty("com.openexchange.imap.imapSort", "application")
