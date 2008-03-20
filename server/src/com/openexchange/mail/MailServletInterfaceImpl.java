@@ -403,7 +403,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			final boolean linkSearchTermsWithOR, final int[] fields) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		final SearchTerm<?> searchTerm = SearchUtility.parseFields(searchCols, searchPatterns, linkSearchTermsWithOR);
+		final SearchTerm<?> searchTerm = searchCols == null || searchCols.length == 0 ? null : SearchUtility
+				.parseFields(searchCols, searchPatterns, linkSearchTermsWithOR);
 		/*
 		 * Identify and sort messages according to search term and sort criteria
 		 * while only fetching their IDs
@@ -544,7 +545,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			final int[] fields) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		final SearchTerm<?> searchTerm = SearchUtility.parseFields(searchCols, searchPatterns, linkSearchTermsWithOR);
+		final SearchTerm<?> searchTerm = searchCols == null || searchCols.length == 0 ? null : SearchUtility
+				.parseFields(searchCols, searchPatterns, linkSearchTermsWithOR);
 		/*
 		 * Identify and thread-sort messages according to search term while only
 		 * fetching their IDs

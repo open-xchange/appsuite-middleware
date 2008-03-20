@@ -51,24 +51,10 @@ package com.openexchange.mail;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.mail.Message;
-import javax.mail.search.AndTerm;
-import javax.mail.search.ComparisonTerm;
-import javax.mail.search.FlagTerm;
-import javax.mail.search.FromStringTerm;
-import javax.mail.search.HeaderTerm;
-import javax.mail.search.OrTerm;
-import javax.mail.search.RecipientStringTerm;
-import javax.mail.search.SentDateTerm;
-import javax.mail.search.SizeTerm;
-import javax.mail.search.SubjectTerm;
-
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.search.SearchTerm;
 
 /**
@@ -262,6 +248,55 @@ public enum MailField {
 		final MailField[] fields = MailField.values();
 		for (final MailField mailField : fields) {
 			if (mailField.getListField().equals(listField)) {
+				return mailField;
+			}
+		}
+		return null;
+	}
+
+	private static final MailField[] EMPTY_FIELDS = new MailField[0];
+
+	/**
+	 * Creates an array of {@link MailField} corresponding to given
+	 * <code>int</code> values.
+	 * <p>
+	 * This is just a convenience method that invokes {@link #getField(int)} for
+	 * every <code>int</code> value.
+	 * 
+	 * @see #getField(int)
+	 * @param fields
+	 *            The <code>int</code> values
+	 * @return The array of {@link MailField} corresponding to given
+	 *         <code>int</code> values
+	 */
+	public static final MailField[] getFields(final int[] fields) {
+		if (fields == null || fields.length == 0) {
+			return EMPTY_FIELDS;
+		}
+		final MailField[] retval = new MailField[fields.length];
+		for (int i = 0; i < fields.length; i++) {
+			retval[i] = getField(fields[i]);
+		}
+		return retval;
+	}
+
+	/**
+	 * Maps specified <code>int</code> value to a mail field. A negative
+	 * <code>int</code> value is mapped to {@link MailField#BODY}
+	 * 
+	 * @param field
+	 *            The <code>int</code> value
+	 * @return The mapped {@link MailField} or <code>null</code> if no
+	 *         corresponding mail field could be found
+	 */
+	public static final MailField getField(final int field) {
+		if (field < 0) {
+			return MailField.BODY;
+		}
+		final MailField[] fields = MailField.values();
+		for (final MailField mailField : fields) {
+			final MailListField listField = mailField.getListField();
+			if (listField != null && listField.getField() == field) {
 				return mailField;
 			}
 		}

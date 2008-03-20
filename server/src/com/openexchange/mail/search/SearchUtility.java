@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.search;
 
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailListField;
 
 /**
@@ -91,32 +92,50 @@ public final class SearchUtility {
 	 * @return An appropriate search term
 	 */
 	public static SearchTerm<?> parseFields(final int[] searchFields, final String[] patterns, final boolean linkWithOR) {
-		final MailListField[] listFields = MailListField.getFields(searchFields);
+		final MailField[] fields = MailField.getFields(searchFields);
 		SearchTerm<?> retval = null;
-		for (int i = 0; i < listFields.length; i++) {
-			final SearchTerm<?> term;
-			switch (listFields[i]) {
-			case FROM:
-				term = new FromTerm(patterns[i]);
-				break;
-			case TO:
-				term = new ToTerm(patterns[i]);
-				break;
-			case CC:
-				term = new CcTerm(patterns[i]);
-				break;
-			case BCC:
-				term = new BccTerm(patterns[i]);
-				break;
-			case SUBJECT:
-				term = new SubjectTerm(patterns[i]);
-				break;
-			default:
-				term = new BodyTerm(patterns[i]);
-				break;
+		for (int i = 0; i < fields.length; i++) {
+			if (!isEmptyString(patterns[i])) {
+				final SearchTerm<?> term;
+				switch (fields[i]) {
+				case FROM:
+					term = new FromTerm(patterns[i]);
+					break;
+				case TO:
+					term = new ToTerm(patterns[i]);
+					break;
+				case CC:
+					term = new CcTerm(patterns[i]);
+					break;
+				case BCC:
+					term = new BccTerm(patterns[i]);
+					break;
+				case SUBJECT:
+					term = new SubjectTerm(patterns[i]);
+					break;
+				case BODY:
+					term = new BodyTerm(patterns[i]);
+					break;
+				default:
+					term = new BodyTerm(patterns[i]);
+					break;
+				}
+				retval = (retval == null) ? term : (linkWithOR ? new ORTerm(retval, term) : new ANDTerm(retval, term));
 			}
-			retval = (retval == null) ? term : (linkWithOR ? new ORTerm(retval, term) : new ANDTerm(retval, term));
 		}
 		return retval;
+	}
+
+	private static boolean isEmptyString(final String str) {
+		if (null == str) {
+			return true;
+		}
+		final char[] chars = str.toCharArray();
+		for (final char c : chars) {
+			if (!Character.isWhitespace(c)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

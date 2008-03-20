@@ -2,6 +2,7 @@
 
  - Bugfix #10969: Removed usages of com.openexchange.cache.CacheKey to
    avoid ClassCastException in a distributed setup
+ - Bugfix #10886: Fixed NPE when searching with an empty pattern
 
 * 2008-03-17 - marcus.klein@open-xchange.com
 
