@@ -282,7 +282,10 @@ public enum MailField {
 
 	/**
 	 * Maps specified <code>int</code> value to a mail field. A negative
-	 * <code>int</code> value is mapped to {@link MailField#BODY}
+	 * <code>int</code> value is mapped to {@link MailField#BODY}.
+	 * <p>
+	 * Mail fields which do not hold a corresponding list field are not mappable
+	 * to an <code>int</code> value; in consequence they are ignored
 	 * 
 	 * @param field
 	 *            The <code>int</code> value
