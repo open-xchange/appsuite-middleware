@@ -122,7 +122,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 
 	private final transient IMAPStore imapStore;
 
-	private final transient IMAPAccess imapConnection;
+	private final transient IMAPAccess imapAccess;
 
 	private final transient Session session;
 
@@ -135,25 +135,25 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 	 * 
 	 * @param imapStore
 	 *            The IMAP store
-	 * @param imapConnection
+	 * @param imapAccess
 	 *            The IMAP connection
 	 * @param session
 	 *            The session providing needed user data
 	 * @throws IMAPException
 	 *             If context loading fails
 	 */
-	public IMAPFolderStorage(final IMAPStore imapStore, final IMAPAccess imapConnection, final Session session)
+	public IMAPFolderStorage(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session)
 			throws IMAPException {
 		super();
 		this.imapStore = imapStore;
-		this.imapConnection = imapConnection;
+		this.imapAccess = imapAccess;
 		this.session = session;
 		try {
 			this.ctx = ContextStorage.getStorageContext(session.getContextId());
 		} catch (final ContextException e) {
 			throw new IMAPException(e);
 		}
-		this.imapConfig = imapConnection.getIMAPConfig();
+		this.imapConfig = imapAccess.getIMAPConfig();
 	}
 
 	@Override
@@ -167,7 +167,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			}
 			return (checkForNamespaceFolder(fullname) != null);
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		}
 	}
 
@@ -188,7 +188,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			}
 			return IMAPFolderConverter.convertFolder(f, session, imapConfig, ctx);
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		}
 	}
 
@@ -271,7 +271,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			}
 			return EMPTY_PATH;
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		}
 	}
 
@@ -371,7 +371,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			return IMAPFolderConverter.convertFolder((IMAPFolder) imapStore.getDefaultFolder(), session, imapConfig,
 					ctx);
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		}
 	}
 
@@ -453,7 +453,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 					setSeparator(inboxFolder.getSeparator());
 					setDefaultFoldersChecked(true);
 				} catch (final MessagingException e) {
-					throw IMAPException.handleMessagingException(e, imapConnection);
+					throw IMAPException.handleMessagingException(e, imapAccess);
 				}
 			}
 		}
@@ -570,7 +570,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			}
 			return createMe.getFullName();
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		} catch (final AbstractOXException e) {
 			throw new IMAPException(e);
 		}
@@ -741,7 +741,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			}
 			return moveMe.getFullName();
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		} catch (final IMAPException e) {
 			throw e;
 		} catch (final AbstractOXException e) {
@@ -816,7 +816,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			}
 			return updateMe.getFullName();
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		} catch (final IMAPException e) {
 			throw e;
 		} catch (final AbstractOXException e) {
@@ -888,7 +888,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			}
 			return fullname;
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		}
 	}
 
@@ -984,8 +984,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 							LOG.debug(debug.append("EXPUNGE command timed out in ").append(
 									(System.currentTimeMillis() - startExpunge)).append("msec").toString());
 						}
-						throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapConnection.getMailConfig()
-								.getServer(), imapConnection.getMailConfig().getLogin());
+						throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapAccess.getMailConfig()
+								.getServer(), imapAccess.getMailConfig().getLogin());
 					}
 					/*
 					 * Decrement
@@ -1039,9 +1039,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				f.close(false);
 			}
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		} catch (final ProtocolException e) {
-			throw IMAPException.handleMessagingException(new MessagingException(e.getMessage(), e), imapConnection);
+			throw IMAPException.handleMessagingException(new MessagingException(e.getMessage(), e), imapAccess);
 		} catch (final AbstractOXException e) {
 			throw new IMAPException(e);
 		}
@@ -1079,7 +1079,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			}
 			return list.toArray(new MailFolder[list.size()]);
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		}
 	}
 
@@ -1186,7 +1186,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			}
 			return new com.openexchange.mail.Quota(storageResource.limit, storageResource.usage);
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess);
 		}
 	}
 
