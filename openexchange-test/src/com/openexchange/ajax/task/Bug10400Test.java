@@ -74,11 +74,6 @@ import com.openexchange.groupware.tasks.Task;
 public class Bug10400Test extends AbstractTaskTest {
 
     /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(Bug10400Test.class);
-
-    /**
      * Default constructor.
      * @param name Name of the test.
      */
