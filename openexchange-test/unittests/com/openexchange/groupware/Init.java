@@ -21,7 +21,7 @@ import com.openexchange.i18n.impl.I18nImpl;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.i18n.tools.I18nServices;
 import com.openexchange.imap.IMAPProvider;
-import com.openexchange.imap.config.IMAPProperties;
+import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.push.udp.EventAdminService;
@@ -158,12 +158,12 @@ public final class Init {
 		// handles dynamically
 
 		startAndInjectConfigBundle();
+		startAndInjectCache();
 		startAndInjectMailBundle();
 		startAndInjectI18NBundle();
 		startAndInjectMonitoringBundle();
 		startAndInjectSessiondBundle();
 		startAndInjectPushUDPBundle();
-		startAndInjectCache();
 	}
 
 	private static void startAndInjectI18NBundle() throws FileNotFoundException {
@@ -196,8 +196,10 @@ public final class Init {
 		 * Init config
 		 */
 		MailProperties.getInstance().loadProperties();
-
-		IMAPProperties.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
+		
+		IMAPServiceRegistry.getInstance().addService(ConfigurationService.class, services.get(ConfigurationService.class));
+		IMAPServiceRegistry.getInstance().addService(CacheService.class, services.get(CacheService.class));
+		
 		/*
 		 * Register IMAP bundle
 		 */
