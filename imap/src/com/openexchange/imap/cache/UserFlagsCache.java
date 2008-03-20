@@ -50,12 +50,12 @@
 package com.openexchange.imap.cache;
 
 import static com.openexchange.imap.IMAPCommandsCollection.supportsUserDefinedFlags;
+import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
 
 import javax.mail.MessagingException;
 
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.session.Session;
@@ -130,7 +130,7 @@ public final class UserFlagsCache {
 
 		private CacheKey getKeyInternal() {
 			if (null == key) {
-				key = IMAPServiceRegistry.getServiceRegistry().getService(CacheService.class).newCacheKey(
+				key = getServiceRegistry().getService(CacheService.class).newCacheKey(
 						MailCacheCode.USER_FLAGS.getCode(), fullname);
 			}
 			return key;

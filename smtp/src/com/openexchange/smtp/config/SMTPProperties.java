@@ -49,12 +49,13 @@
 
 package com.openexchange.smtp.config;
 
+import static com.openexchange.smtp.services.SMTPServiceRegistry.getServiceRegistry;
+
 import java.nio.charset.Charset;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.config.MailConfigException;
-import com.openexchange.smtp.services.SMTPServiceRegistry;
 
 /**
  * {@link SMTPProperties}
@@ -110,7 +111,7 @@ public final class SMTPProperties extends AbstractProtocolProperties {
 		final StringBuilder logBuilder = new StringBuilder(1024);
 		logBuilder.append("\nLoading global SMTP properties...\n");
 
-		final ConfigurationService configuration = SMTPServiceRegistry.getServiceRegistry().getService(
+		final ConfigurationService configuration = getServiceRegistry().getService(
 				ConfigurationService.class);
 		{
 			final String smtpLocalhostStr = configuration.getProperty("com.openexchange.smtp.smtpLocalhost").trim();

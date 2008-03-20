@@ -49,12 +49,13 @@
 
 package com.openexchange.imap.config;
 
+import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
+
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
 import com.openexchange.mail.config.MailConfigException;
@@ -126,8 +127,7 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 		final StringBuilder logBuilder = new StringBuilder(1024);
 		logBuilder.append("\nLoading global IMAP properties...\n");
 
-		final ConfigurationService configuration = IMAPServiceRegistry.getServiceRegistry().getService(
-				ConfigurationService.class);
+		final ConfigurationService configuration = getServiceRegistry().getService(ConfigurationService.class);
 		{
 			final String imapSortStr = configuration.getProperty("com.openexchange.imap.imapSort", "application")
 					.trim();
