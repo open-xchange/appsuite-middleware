@@ -234,12 +234,16 @@ public final class FolderWriter {
 							final String name, final int hasSubfolders, final String fullName, final int module,
 							final boolean all) throws MailException {
 						try {
-							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.FOLDER_ID, prepareFullname(folder
-										.getParentFullname(), folder.getSeparator()));
+							final Object parent;
+							if (null == folder.getParentFullname()) {
+								parent = JSONObject.NULL;
 							} else {
-								((JSONArray) jsonContainer).put(prepareFullname(folder.getParentFullname(), folder
-										.getSeparator()));
+								parent = prepareFullname(folder.getParentFullname(), folder.getSeparator());
+							}
+							if (withKey) {
+								((JSONObject) jsonContainer).put(FolderFields.FOLDER_ID, parent);
+							} else {
+								((JSONArray) jsonContainer).put(parent);
 							}
 						} catch (final JSONException e) {
 							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
