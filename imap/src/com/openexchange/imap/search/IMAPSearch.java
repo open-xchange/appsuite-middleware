@@ -71,6 +71,7 @@ import javax.mail.search.FlagTerm;
 import javax.mail.search.FromStringTerm;
 import javax.mail.search.HeaderTerm;
 import javax.mail.search.OrTerm;
+import javax.mail.search.ReceivedDateTerm;
 import javax.mail.search.RecipientStringTerm;
 import javax.mail.search.SearchTerm;
 import javax.mail.search.SentDateTerm;
@@ -251,7 +252,7 @@ public final class IMAPSearch {
 			} else {
 				ct = ComparisonTerm.EQ;
 			}
-			searchTerm = new SentDateTerm(ct, new Date(dat[1]));
+			searchTerm = new ReceivedDateTerm(ct, new Date(dat[1]));
 		} else if (mailSearchTerm instanceof com.openexchange.mail.search.ANDTerm) {
 			final com.openexchange.mail.search.SearchTerm<?>[] terms = ((com.openexchange.mail.search.ANDTerm) mailSearchTerm)
 					.getPattern();
