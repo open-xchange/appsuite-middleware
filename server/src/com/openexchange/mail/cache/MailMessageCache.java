@@ -61,10 +61,10 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.openexchange.cache.CacheKey;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.MailListField;
@@ -727,7 +727,8 @@ public final class MailMessageCache {
 	}
 
 	private static CacheKey getMapKey(final int userId, final Context ctx) {
-		return new CacheKey(ctx, userId);
+		return ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(ctx.getContextId(),
+				userId);
 	}
 
 }

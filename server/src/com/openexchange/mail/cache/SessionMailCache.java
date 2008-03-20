@@ -58,7 +58,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.openexchange.cache.CacheKey;
+import com.openexchange.caching.CacheKey;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.session.Session;
 
@@ -98,8 +98,7 @@ public final class SessionMailCache {
 	public static SessionMailCache getInstance(final Session session) {
 		SessionMailCache mailCache = null;
 		try {
-			mailCache = (SessionMailCache) session
-					.getParameter(MailSessionParameterNames.PARAM_MAIL_CACHE);
+			mailCache = (SessionMailCache) session.getParameter(MailSessionParameterNames.PARAM_MAIL_CACHE);
 		} catch (final ClassCastException e) {
 			/*
 			 * Class version does not match; just renew session cache.

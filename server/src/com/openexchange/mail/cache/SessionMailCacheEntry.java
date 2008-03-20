@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.cache;
 
-import com.openexchange.cache.CacheKey;
+import com.openexchange.caching.CacheKey;
 
 /**
  * {@link SessionMailCacheEntry} - A cache entry suitable for any object.

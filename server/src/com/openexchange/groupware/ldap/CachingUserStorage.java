@@ -57,11 +57,11 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.cache.CacheKey;
 import com.openexchange.cache.dynamic.impl.CacheProxy;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.contexts.Context;
@@ -108,8 +108,9 @@ public class CachingUserStorage extends UserStorage {
     public User getUser(final int uid, final Context context) throws LdapException {
         final OXObjectFactory<User> factory = new OXObjectFactory<User>() {
             public Object getKey() {
-                return new CacheKey(context, uid);
-            }
+				return ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
+						context.getContextId(), uid);
+			}
             public User load() throws LdapException {
                 return getUserStorage().getUser(uid, context);
             }
@@ -130,19 +131,21 @@ public class CachingUserStorage extends UserStorage {
     public void updateUser(final User user, final Context context) throws LdapException {
         getUserStorage().updateUser(user, context);
         try {
-            CACHE.remove(new CacheKey(context, user.getId()));
-        } catch (final CacheException e) {
-            throw new LdapException(Component.USER, Code.CACHE_PROBLEM, e);
-        }
+			CACHE.remove(ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
+					context.getContextId(), user.getId()));
+		} catch (final CacheException e) {
+			throw new LdapException(Component.USER, Code.CACHE_PROBLEM, e);
+		}
     }
 
     /**
-     * {@inheritDoc}
-     */
+	 * {@inheritDoc}
+	 */
     @Override
 	public int getUserId(final String uid, final Context context) throws LdapException {
-        final CacheKey key = new CacheKey(context, uid);
-        int identifier = -1;
+        final CacheKey key = ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
+				context.getContextId(), uid);
+		int identifier = -1;
         final Integer tmp = (Integer) CACHE.get(key);
         if (null == tmp) {
             if (LOG.isTraceEnabled()) {
@@ -198,9 +201,10 @@ public class CachingUserStorage extends UserStorage {
      */
     @Override
     public int resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
-        final CacheKey key = new CacheKey(context, imapLogin);
-        final int identifier;
-        final Integer tmp = (Integer) CACHE.get(key);
+        final CacheKey key = ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
+				context.getContextId(), imapLogin);
+		final int identifier;
+		final Integer tmp = (Integer) CACHE.get(key);
         if (null == tmp) {
             try {
                 identifier = getUserStorage().resolveIMAPLogin(imapLogin, context);
