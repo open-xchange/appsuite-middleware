@@ -47,76 +47,38 @@
  *
  */
 
-package com.openexchange.ajax.contact.action;
+package com.openexchange.ajax.links.actions;
 
-import java.util.Date;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.groupware.container.LinkObject;
 
 /**
- * Stores parameters for the delete request.
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class DeleteRequest extends AbstractContactRequest {
+public final class AllResponse extends AbstractAJAXResponse {
 
-    private final int folderId;
-
-    private final int objectId;
-
-    private final Date lastModified;
+    private LinkObject[] links;
 
     /**
-     * Default constructor.
+     * @param response
      */
-    public DeleteRequest(final int folderId, final int objectId, final Date lastModified) {
-        super();
-		this.folderId = folderId;
-		this.objectId = objectId;
-		this.lastModified = lastModified;
-	}
-
-    public DeleteRequest(final ContactObject contact) {
-        this(contact.getParentFolderID(), contact.getObjectID(),
-            contact.getLastModified());
+    public AllResponse(final Response response) {
+        super(response);
     }
 
     /**
-     * {@inheritDoc}
+     * @return the links
      */
-    public Object getBody() throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put(DataFields.ID, objectId);
-        json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
-        return json;
+    public LinkObject[] getLinks() {
+        return links;
     }
 
     /**
-     * {@inheritDoc}
+     * @param links the links to set
      */
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_DELETE),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified)
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public DeleteParser getParser() {
-        return new DeleteParser();
+    void setLinks(final LinkObject[] links) {
+        this.links = links;
     }
 }

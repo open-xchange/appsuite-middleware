@@ -47,76 +47,48 @@
  *
  */
 
-package com.openexchange.ajax.contact.action;
-
-import java.util.Date;
+package com.openexchange.ajax.links.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.groupware.container.LinkObject;
 
 /**
- * Stores parameters for the delete request.
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class DeleteRequest extends AbstractContactRequest {
+public abstract class AbstractLinkRequest implements AJAXRequest {
 
-    private final int folderId;
-
-    private final int objectId;
-
-    private final Date lastModified;
+    /**
+     * URL to AJAX link interface.
+     */
+    private static final String LINK_URL = "/ajax/link";
 
     /**
      * Default constructor.
      */
-    public DeleteRequest(final int folderId, final int objectId, final Date lastModified) {
+    public AbstractLinkRequest() {
         super();
-		this.folderId = folderId;
-		this.objectId = objectId;
-		this.lastModified = lastModified;
-	}
-
-    public DeleteRequest(final ContactObject contact) {
-        this(contact.getParentFolderID(), contact.getObjectID(),
-            contact.getLastModified());
     }
 
     /**
      * {@inheritDoc}
      */
-    public Object getBody() throws JSONException {
+    public String getServletPath() {
+        return LINK_URL;
+    }
+
+    public static JSONObject convert(final LinkObject link) throws JSONException {
         final JSONObject json = new JSONObject();
-        json.put(DataFields.ID, objectId);
-        json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
+        json.put("id1", link.getFirstId());
+        json.put("module1", link.getFirstType());
+        json.put("folder1", link.getFirstFolder());
+        json.put("id2", link.getSecondId());
+        json.put("module2", link.getSecondType());
+        json.put("folder2", link.getSecondFolder());
         return json;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_DELETE),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified)
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public DeleteParser getParser() {
-        return new DeleteParser();
-    }
 }

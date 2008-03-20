@@ -47,76 +47,36 @@
  *
  */
 
-package com.openexchange.ajax.contact.action;
-
-import java.util.Date;
+package com.openexchange.ajax.links.actions;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.CommonInsertParser;
+import com.openexchange.ajax.framework.CommonInsertResponse;
 
 /**
- * Stores parameters for the delete request.
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class DeleteRequest extends AbstractContactRequest {
-
-    private final int folderId;
-
-    private final int objectId;
-
-    private final Date lastModified;
+public class InsertParser extends CommonInsertParser {
 
     /**
-     * Default constructor.
+     * @param failOnError
      */
-    public DeleteRequest(final int folderId, final int objectId, final Date lastModified) {
-        super();
-		this.folderId = folderId;
-		this.objectId = objectId;
-		this.lastModified = lastModified;
-	}
-
-    public DeleteRequest(final ContactObject contact) {
-        this(contact.getParentFolderID(), contact.getObjectID(),
-            contact.getLastModified());
+    public InsertParser(boolean failOnError) {
+        super(failOnError);
     }
 
     /**
      * {@inheritDoc}
      */
-    public Object getBody() throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put(DataFields.ID, objectId);
-        json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
-        return json;
+    @Override
+    protected CommonInsertResponse createResponse(final Response response)
+        throws JSONException {
+        final CommonInsertResponse retval = instantiateResponse(response);
+        // Can't parse anything here.
+        return retval;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_DELETE),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified)
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public DeleteParser getParser() {
-        return new DeleteParser();
-    }
 }

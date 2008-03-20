@@ -47,52 +47,42 @@
  *
  */
 
-package com.openexchange.ajax.contact.action;
-
-import java.util.Date;
+package com.openexchange.ajax.links.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.LinkObject;
 
 /**
- * Stores parameters for the delete request.
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class DeleteRequest extends AbstractContactRequest {
+public final class InsertRequest extends AbstractLinkRequest {
 
-    private final int folderId;
+    private final LinkObject link;
 
-    private final int objectId;
-
-    private final Date lastModified;
+    private final boolean failOnError;
 
     /**
      * Default constructor.
      */
-    public DeleteRequest(final int folderId, final int objectId, final Date lastModified) {
+    public InsertRequest(final LinkObject link, final boolean failOnError) {
         super();
-		this.folderId = folderId;
-		this.objectId = objectId;
-		this.lastModified = lastModified;
-	}
+        this.link = link;
+        this.failOnError = failOnError;
+    }
 
-    public DeleteRequest(final ContactObject contact) {
-        this(contact.getParentFolderID(), contact.getObjectID(),
-            contact.getLastModified());
+    public InsertRequest(final LinkObject link) {
+        this(link, true);
     }
 
     /**
      * {@inheritDoc}
      */
-    public Object getBody() throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put(DataFields.ID, objectId);
-        json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
-        return json;
+    public JSONObject getBody() throws JSONException {
+        return convert(link);
     }
 
     /**
@@ -107,16 +97,14 @@ public class DeleteRequest extends AbstractContactRequest {
      */
     public Parameter[] getParameters() {
         return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_DELETE),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified)
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW)
         };
     }
 
     /**
      * {@inheritDoc}
      */
-    public DeleteParser getParser() {
-        return new DeleteParser();
+    public InsertParser getParser() {
+        return new InsertParser(failOnError);
     }
 }

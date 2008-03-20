@@ -109,7 +109,7 @@ public class NewListTest extends AbstractAJAXSession {
         }
         
         
-        final MultipleResponse mInsert = (MultipleResponse) Executor.execute(getClient(), new MultipleRequest(inserts));
+        final MultipleResponse mInsert = Executor.multiple(getClient(), new MultipleRequest(inserts));
 
         // A now gets all of the folder.
         int[] columns = new int[] { ContactObject.SUR_NAME, ContactObject.OBJECT_ID, ContactObject.FOLDER_ID };
@@ -134,7 +134,7 @@ public class NewListTest extends AbstractAJAXSession {
         
         Iterator<Object[]> it = listR.iterator();
         while (it.hasNext()) {
-        	Object[] ar = (Object[])it.next();
+        	Object[] ar = it.next();
         	
         	
         	InsertResponse irr = (InsertResponse)mInsert.getResponse(DELETES);

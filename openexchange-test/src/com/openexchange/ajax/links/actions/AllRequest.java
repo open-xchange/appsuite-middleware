@@ -47,59 +47,55 @@
  *
  */
 
-package com.openexchange.ajax.contact.action;
-
-import java.util.Date;
+package com.openexchange.ajax.links.actions;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.ajax.framework.AJAXRequest;
 
 /**
- * Stores parameters for the delete request.
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class DeleteRequest extends AbstractContactRequest {
+public final class AllRequest extends AbstractLinkRequest implements AJAXRequest {
 
-    private final int folderId;
+    private final int id;
 
-    private final int objectId;
+    private final int type;
 
-    private final Date lastModified;
+    private final int folder;
+
+    private final boolean failOnError;
+
+    public AllRequest(final int id, final int type, final int folder) {
+        this(id, type, folder, true);
+    }
 
     /**
      * Default constructor.
      */
-    public DeleteRequest(final int folderId, final int objectId, final Date lastModified) {
+    public AllRequest(final int id, final int type, final int folder,
+        final boolean failOnError) {
         super();
-		this.folderId = folderId;
-		this.objectId = objectId;
-		this.lastModified = lastModified;
-	}
-
-    public DeleteRequest(final ContactObject contact) {
-        this(contact.getParentFolderID(), contact.getObjectID(),
-            contact.getLastModified());
+        this.id = id;
+        this.type = type;
+        this.folder = folder;
+        this.failOnError = failOnError;
     }
 
     /**
      * {@inheritDoc}
      */
     public Object getBody() throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put(DataFields.ID, objectId);
-        json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
-        return json;
+        return null;
     }
 
     /**
      * {@inheritDoc}
      */
     public Method getMethod() {
-        return Method.PUT;
+        return Method.GET;
     }
 
     /**
@@ -107,16 +103,17 @@ public class DeleteRequest extends AbstractContactRequest {
      */
     public Parameter[] getParameters() {
         return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_DELETE),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified)
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL),
+            new Parameter(AJAXServlet.PARAMETER_ID, id),
+            new Parameter("module", type),
+            new Parameter(AJAXServlet.PARAMETER_INFOLDER, folder)
         };
     }
 
     /**
      * {@inheritDoc}
      */
-    public DeleteParser getParser() {
-        return new DeleteParser();
+    public AllParser getParser() {
+        return new AllParser(failOnError);
     }
 }

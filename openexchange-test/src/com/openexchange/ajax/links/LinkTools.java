@@ -69,8 +69,16 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.CommonInsertResponse;
+import com.openexchange.ajax.framework.Executor;
+import com.openexchange.ajax.links.actions.AbstractLinkRequest;
+import com.openexchange.ajax.links.actions.AllRequest;
+import com.openexchange.ajax.links.actions.AllResponse;
+import com.openexchange.ajax.links.actions.InsertRequest;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.tools.URLParameter;
+import com.openexchange.tools.servlet.AjaxException;
 
 /**
  * 
@@ -104,7 +112,7 @@ public final class LinkTools extends Assert {
         final String host, final String session, final LinkObject link)
         throws JSONException, IOException, SAXException {
         LOG.trace("Inserting link.");
-        final JSONObject json = toJSON(link);
+        final JSONObject json = AbstractLinkRequest.convert(link);
         
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
@@ -128,14 +136,15 @@ public final class LinkTools extends Assert {
         assertFalse(response.getErrorMessage(), response.hasError());
     }
 
-    public static JSONObject toJSON(final LinkObject link) throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put("id1", link.getFirstId());
-        json.put("module1", link.getFirstType());
-        json.put("folder1", link.getFirstFolder());
-        json.put("id2", link.getSecondId());
-        json.put("module2", link.getSecondType());
-        json.put("folder2", link.getSecondFolder());
-        return json;
+    public static CommonInsertResponse insert(final AJAXClient client,
+        final InsertRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (CommonInsertResponse) Executor.execute(client, request);
+    }
+
+    public static AllResponse all(final AJAXClient client,
+        final AllRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (AllResponse) Executor.execute(client, request);
     }
 }

@@ -70,6 +70,7 @@ public abstract class AbstractTaskRequest implements AJAXRequest {
      * URL of the tasks AJAX interface.
      */
     public static final String TASKS_URL = "/ajax/tasks";
+
     public static final int[] GUI_COLUMNS = new int[] { Task.OBJECT_ID,
         Task.FOLDER_ID };
 

@@ -47,76 +47,64 @@
  *
  */
 
-package com.openexchange.ajax.contact.action;
+package com.openexchange.ajax.links.actions;
 
-import java.util.Date;
-
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.groupware.container.LinkObject;
 
 /**
- * Stores parameters for the delete request.
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ *
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class DeleteRequest extends AbstractContactRequest {
-
-    private final int folderId;
-
-    private final int objectId;
-
-    private final Date lastModified;
+public final class AllParser extends AbstractAJAXParser<AllResponse> {
 
     /**
-     * Default constructor.
+     * @param failOnError
      */
-    public DeleteRequest(final int folderId, final int objectId, final Date lastModified) {
-        super();
-		this.folderId = folderId;
-		this.objectId = objectId;
-		this.lastModified = lastModified;
-	}
-
-    public DeleteRequest(final ContactObject contact) {
-        this(contact.getParentFolderID(), contact.getObjectID(),
-            contact.getLastModified());
+    public AllParser(boolean failOnError) {
+        super(failOnError);
     }
 
     /**
      * {@inheritDoc}
      */
-    public Object getBody() throws JSONException {
-        final JSONObject json = new JSONObject();
-        json.put(DataFields.ID, objectId);
-        json.put(AJAXServlet.PARAMETER_INFOLDER, folderId);
-        return json;
+    @Override
+    protected AllResponse createResponse(final Response response)
+        throws JSONException {
+        final AllResponse retval = new AllResponse(response);
+        if (isFailOnError()) {
+            final JSONArray array = (JSONArray) retval.getData();
+            final LinkObject[] links = new LinkObject[array.length()];
+            for (int i = 0; i < array.length(); i++) {
+                final JSONObject obj = array.getJSONObject(i);
+                links[i] = new LinkObject();
+                if (obj.has("id1")) {
+                    links[i].setFirstId(obj.getInt("id1"));
+                }
+                if (obj.has("module1")) {
+                    links[i].setFirstType(obj.getInt("module1"));
+                }
+                if (obj.has("folder1")) {
+                    links[i].setFirstFolder(obj.getInt("folder1"));
+                }
+                if (obj.has("id2")) {
+                    links[i].setSecondId(obj.getInt("id2"));
+                }
+                if (obj.has("module2")) {
+                    links[i].setSecondType(obj.getInt("module2"));
+                }
+                if (obj.has("folder2")) {
+                    links[i].setSecondFolder(obj.getInt("folder2"));
+                }
+            }
+            retval.setLinks(links);
+        }
+        return retval;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
-                .ACTION_DELETE),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified)
-        };
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public DeleteParser getParser() {
-        return new DeleteParser();
-    }
 }

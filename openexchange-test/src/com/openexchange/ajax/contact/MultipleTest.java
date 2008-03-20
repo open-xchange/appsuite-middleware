@@ -2,13 +2,11 @@ package com.openexchange.ajax.contact;
 
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.contact.action.InsertResponse;
+import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
@@ -18,13 +16,12 @@ import com.openexchange.groupware.container.ContactObject;
 
 public class MultipleTest extends ContactTest {
 	
-	private static final Log LOG = LogFactory.getLog(MultipleTest.class);
-	
 	public MultipleTest(String name) {
 		super(name);
 	}
 	
-	protected void setUp() throws Exception {
+	@Override
+    protected void setUp() throws Exception {
 		super.setUp();
 	}
 	
@@ -43,7 +40,7 @@ public class MultipleTest extends ContactTest {
 		final InsertRequest insertRequest3 = new InsertRequest(contactObj, true);
 		
 		final MultipleRequest multipleInsertRequest = new MultipleRequest(new AJAXRequest[] { insertRequest1, insertRequest2, insertRequest3 });
-		final MultipleResponse multipleInsertResponse = (MultipleResponse) Executor.execute(ajaxSession, multipleInsertRequest);
+		final MultipleResponse multipleInsertResponse = Executor.multiple(new AJAXClient(ajaxSession), multipleInsertRequest);
 		
 		assertFalse("first insert request has errors: ", multipleInsertResponse.getResponse(0).hasError()); 
 		assertFalse("second insert request has errors: ", multipleInsertResponse.getResponse(1).hasError()); 
