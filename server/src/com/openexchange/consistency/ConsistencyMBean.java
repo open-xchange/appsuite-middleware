@@ -34,7 +34,7 @@ public interface ConsistencyMBean {
 
     // Repair
 
-    public void repairFilesInContext(int contextId, String resolverPolicy);
+    public void repairFilesInContext(int contextId, String resolverPolicy) throws AbstractOXException;
 
     public void repairFilesInFilestore(int filestoreId, String resolverPolicy);
 
