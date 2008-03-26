@@ -53,6 +53,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -80,6 +81,13 @@ import java.sql.Connection;
 public class InMemoryInfostoreDatabase extends DatabaseImpl {
 
     private Map<Context,Map<Integer, List<DocumentMetadata>>> data = new HashMap<Context, Map<Integer, List<DocumentMetadata>>>();
+
+    private Map<Context, List<DocumentMetadata>> changes = new HashMap<Context, List<DocumentMetadata>>();
+
+    private Map<Context, List<DocumentMetadata>> deletions = new HashMap<Context, List<DocumentMetadata>>();
+
+    private Map<Context, List<DocumentMetadata>> creations = new HashMap<Context, List<DocumentMetadata>>();
+        
 
     public void put(Context ctx, DocumentMetadata dm) {
         List<DocumentMetadata> versions = getVersions(ctx,dm.getId());
@@ -141,7 +149,16 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     }
 
     public int[] removeDocument(String identifier, Context ctx) throws OXException {
-        throw new UnsupportedOperationException();
+        for(List<DocumentMetadata> versions : getCtxMap(ctx).values()) {
+            for(DocumentMetadata metadata : versions) {
+                String location = metadata.getFilestoreLocation();
+                if(location != null && location.equals(identifier)) {
+                    deletions.get(ctx).add(metadata);
+                    return new int[]{1,1};
+                }
+            }
+        }
+        return new int[]{1,1};
     }
 
     public int[] removeDelDocument(String identifier, Context ctx) throws OXException {
@@ -149,7 +166,19 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     }
 
     public int modifyDocument(String oldidentifier, String newidentifier, String description, String mimetype, Context ctx) throws OXException {
-        throw new UnsupportedOperationException();
+        for(List<DocumentMetadata> versions : getCtxMap(ctx).values()) {
+            for(DocumentMetadata metadata : versions) {
+                String location = metadata.getFilestoreLocation();
+                if(location != null && location.equals(oldidentifier)) {
+                    metadata.setFilestoreLocation(newidentifier);
+                    metadata.setDescription(description);
+                    metadata.setFileMIMEType(mimetype);
+                    changes.get(ctx).add(metadata);
+                    return metadata.getId();
+                }
+            }
+        }
+        return -1;
     }
 
     public int modifyDelDocument(String oldidentifier, String newidentifier, String description, String mimetype, Context ctx) throws OXException {
@@ -157,7 +186,10 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     }
 
     public int[] saveDocumentMetadata(String identifier, DocumentMetadata document, User user, Context ctx) throws OXException {
-        throw new UnsupportedOperationException();
+        document.setFilestoreLocation(identifier);
+        creations.get(ctx).add(document);
+        return new int[]{1,1,1};
+
     }
 
     public List<Integer> removeVersion(int id, int[] versionId, Context ctx, User user, UserConfiguration userConfig) throws OXException {
@@ -222,15 +254,15 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     }
 
     public void startTransaction() throws TransactionException {
-        throw new UnsupportedOperationException();
+        //IGNORE
     }
 
     public void commit() throws TransactionException {
-        throw new UnsupportedOperationException();
+        //IGNORE
     }
 
     public void finish() throws TransactionException {
-        throw new UnsupportedOperationException();
+        // IGNORE
     }
 
     public void rollback() throws TransactionException {
@@ -279,5 +311,32 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
 
     public void startDBTransaction() throws TransactionException {
         throw new UnsupportedOperationException();
+    }
+
+    public void forgetChanges(Context ctx) {
+        changes.put(ctx, new ArrayList<DocumentMetadata>());
+    }
+
+    public List<DocumentMetadata> getChanges(Context ctx) {
+        if(!changes.containsKey(ctx)) {
+            return new ArrayList<DocumentMetadata>();
         }
+        return changes.get(ctx);
+    }
+
+    public void forgetDeletions(Context ctx) {
+        deletions.put(ctx, new ArrayList<DocumentMetadata>());
+    }
+
+    public List<DocumentMetadata> getDeletions(Context ctx) {
+        return deletions.get(ctx);
+    }
+
+    public void forgetCreated(Context ctx) {
+        creations.put(ctx, new ArrayList<DocumentMetadata>());
+    }
+
+    public List<DocumentMetadata> getCreated(Context ctx) {
+        return creations.get(ctx);
+    }
 }

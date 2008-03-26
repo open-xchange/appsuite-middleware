@@ -60,8 +60,11 @@ import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.InMemoryInfostoreDatabase;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.tools.file.InMemoryFileStorage;
 import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.FileStorageException;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -182,6 +185,115 @@ public class ConsistencyTest extends TestCase {
         ConsistencyMBean consistency = getConsistencyTool();
         Map<Integer, List<String>>  unassigned = consistency.listAllUnassignedFiles();
         assertContexts(unassigned, UNASSIGNED, ctx, ctx2, ctx3);
+    }
+
+    public void testCreateDummyFilesForInfoitems() throws AbstractOXException {
+        ConsistencyMBean consistency = getConsistencyTool();
+        database.forgetChanges(ctx);
+        consistency.repairFilesInContext(ctx.getContextId(), "missing_file_for_infoitem : create_dummy");
+
+        List<DocumentMetadata> changes = database.getChanges(ctx);
+        assertEquals(2, changes.size());
+        storage.setContext(ctx);
+        for(DocumentMetadata version : changes) {
+            assertEquals("\nCaution! The file has changed", version.getDescription());
+            assertEquals("text/plain", version.getFileMIMEType());
+            try {
+                assertNotNull(storage.getFile(version.getFilestoreLocation()));
+            } catch (FileStorageException e) {
+                fail(e.toString());
+            }
+        }
+    }
+
+    public void testCreateDummyFilesForAttachments() throws AbstractOXException {
+        ConsistencyMBean consistency = getConsistencyTool();
+        attachments.forgetChanges(ctx);
+        consistency.repairFilesInContext(ctx.getContextId(), "missing_file_for_attachment : create_dummy");
+
+        List<AttachmentMetadata> changes = attachments.getChanges(ctx);
+        assertEquals(1, changes.size());
+
+        for(AttachmentMetadata attachment : changes) {
+            assertEquals("\nCaution! The file has changed", attachment.getComment());
+            assertEquals("text/plain", attachment.getFileMIMEType());
+            try {
+                assertNotNull(storage.getFile(attachment.getFileId()));
+            } catch (FileStorageException e) {
+                fail(e.toString());
+            }
+        }
+
+    }
+
+    public void testDeleteStaleInfoitems() throws AbstractOXException {
+        ConsistencyMBean consistency = getConsistencyTool();
+        database.forgetDeletions(ctx);
+        consistency.repairFilesInContext(ctx.getContextId(), "missing_file_for_infoitem : delete");
+
+        List<DocumentMetadata> deletions = database.getDeletions(ctx);
+        assertEquals(2, deletions.size());
+
+        Set<String> missing = new HashSet<String>(MISSING);
+        for(DocumentMetadata document : deletions) {
+            assertTrue(missing.remove(document.getFilestoreLocation()));
+        }
+        assertEquals(1, missing.size());
+
+    }
+
+    public void testDeleteStaleAttachments() throws AbstractOXException {
+        ConsistencyMBean consistency = getConsistencyTool();
+        attachments.forgetDeletions(ctx);
+        consistency.repairFilesInContext(ctx.getContextId(), "missing_file_for_attachment : delete");
+
+        List<AttachmentMetadata> deletions = attachments.getDeletions(ctx);
+        assertEquals(1, deletions.size());
+
+        Set<String> missing = new HashSet<String>(MISSING);
+        for(AttachmentMetadata document : deletions) {
+            assertTrue(missing.remove(document.getFileId()));
+        }
+        assertEquals(2, missing.size());
+    }
+
+    public void testCreateInfoitemForUnassignedFile() throws AbstractOXException {
+        ConsistencyMBean consistency = getConsistencyTool();
+        database.forgetCreated(ctx);
+        consistency.repairFilesInContext(1, "missing_entry_for_file : create_admin_infoitem");
+
+        List<DocumentMetadata> created = database.getCreated(ctx);
+        assertEquals(UNASSIGNED.size(), created.size());
+
+        Set<String> unassigned = new HashSet<String>(UNASSIGNED);
+        for(DocumentMetadata document : created) {
+            String location = document.getFilestoreLocation();
+            assertTrue(unassigned.remove(location));
+            if(location != null) {
+                String description = "This file needs attention";
+                String title = "Restoredfile";
+                String fileName = "Restoredfile";
+
+                assertEquals(description, document.getDescription());
+                assertEquals(title, document.getTitle());
+                assertEquals(fileName, document.getFileName());
+            }
+        }
+    }
+
+    public void testDeleteUnassignedFile() throws AbstractOXException {
+        ConsistencyMBean consistency = getConsistencyTool();
+        storage.forgetDeleted(ctx);
+        consistency.repairFilesInContext(1, "missing_entry_for_file : delete");
+
+
+        List<String> deleted = storage.getDeleted(ctx);
+
+        assertEquals(UNASSIGNED.size(), deleted.size());
+
+        Set<String> unassigned = new HashSet<String>(UNASSIGNED);
+        unassigned.removeAll(deleted);
+        assertTrue(unassigned.isEmpty());
     }
 
     protected void assertContexts(Map<Integer, List<String>> missing,Set<String> expect, Context...contexts) {
@@ -363,6 +475,10 @@ public class ConsistencyTest extends TestCase {
 
         protected List<Context> getAllContexts() {
             return new ArrayList<Context>(contexts.values());
+        }
+
+        protected User getAdmin(Context ctx) throws LdapException {
+            return null;
         }
     }
 

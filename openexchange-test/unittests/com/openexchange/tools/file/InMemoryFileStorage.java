@@ -49,6 +49,7 @@
 package com.openexchange.tools.file;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
 
 import java.io.InputStream;
 import java.io.ByteArrayInputStream;
@@ -64,6 +65,9 @@ import java.util.ArrayList;
 public class InMemoryFileStorage extends FileStorage{
 
     private Map<Context, Map<String, byte[]>>  data = new HashMap<Context, Map<String, byte[]>>();
+
+    private Map<Context, List<String>> deletions = new HashMap<Context, List<String>>();
+
     private Context ctx;
 
     public InMemoryFileStorage() throws FileStorageException {
@@ -73,6 +77,7 @@ public class InMemoryFileStorage extends FileStorage{
 
     protected boolean delete(String name) throws FileStorageException {
         getCtxMap().put(name,null);
+        deletions.get(ctx).add(name);
         return true;
     }
 
@@ -95,10 +100,16 @@ public class InMemoryFileStorage extends FileStorage{
         for(byte b : bytes) {
             data[i++] = b;
         }
+        put(name, data);
     }
 
     protected InputStream load(String name) throws FileStorageException {
-        return new ByteArrayInputStream(get(name));
+
+        byte[] bytes = get(name);
+        if(bytes == null) {
+            return null;
+        }
+        return new ByteArrayInputStream(bytes);
     }
 
     protected long length(String name) throws FileStorageException {
@@ -152,5 +163,17 @@ public class InMemoryFileStorage extends FileStorage{
 
     private byte[] get(String name) {
         return getCtxMap().get(name);
+    }
+
+    private void put(String name, byte[] bytes) {
+        getCtxMap().put(name, bytes);
+    }
+
+    public void forgetDeleted(Context ctx) {
+        deletions.put(ctx, new ArrayList<String>());
+    }
+
+    public List<String> getDeleted(Context ctx) {
+        return deletions.get(ctx);
     }
 }
