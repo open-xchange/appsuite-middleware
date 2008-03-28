@@ -10,6 +10,7 @@ import java.util.ResourceBundle;
 
 import org.osgi.service.event.EventAdmin;
 
+import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.internal.JCSCacheService;
@@ -32,6 +33,8 @@ import com.openexchange.sessiond.impl.SessiondConnectorImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.test.TestInit;
 import com.openexchange.tools.events.TestEventAdmin;
+import com.openexchange.tools.servlet.ServletConfigLoader;
+import com.openexchange.tools.servlet.http.HttpManagersInit;
 
 /**
  * This class contains methods for initialising tests.
@@ -81,7 +84,18 @@ public final class Init {
 	/**
 	 * Starts HTTP serlvet manager
 	 */
-	com.openexchange.tools.servlet.http.HttpManagersInit.getInstance(),
+	new Initialization() {
+        public void start() throws AbstractOXException {
+            AJPv13Config.getInstance().start();
+            ServletConfigLoader.initDefaultInstance(AJPv13Config.getServletConfigs());
+            HttpManagersInit.getInstance().start();
+        }
+        public void stop() throws AbstractOXException {
+            HttpManagersInit.getInstance().stop();
+            ServletConfigLoader.resetDefaultInstance();
+            AJPv13Config.getInstance().stop();
+        }
+	},
 	/**
 	 * Setup of ContextStorage and LoginInfo.
 	 */
