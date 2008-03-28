@@ -40,23 +40,13 @@ import com.openexchange.tools.events.TestEventAdmin;
  */
 public final class Init {
 
-	private static boolean infostorePropertiesLoaded = false;
-
-	private static boolean systemPropertiesLoaded = false;
-
-	private static boolean dbInitialized = false;
-
-	private static boolean contextInitialized = false;
-
-	private static boolean sessiondInit = false;
-
 	// private static Properties infostoreProps = null;
 
 	private static final List<Initialization> started = new ArrayList<Initialization>();
 
 	private static boolean running;
 
-	private static final Map<Class, Object> services = new HashMap<Class, Object>();
+	private static final Map<Class<?>, Object> services = new HashMap<Class<?>, Object>();
 
 	private static final Initialization[] inits = new Initialization[] {
 	/**
@@ -83,60 +73,58 @@ public final class Init {
 	 * Sets the caching system JCS up.
 	 */
 	// com.openexchange.cache.impl.Configuration.getInstance(),
-			/**
-			 * Connection pools for ConfigDB and database assignments for
-			 * contexts.
-			 */
-			com.openexchange.database.DatabaseInit.getInstance(),
-			/**
-			 * Starts HTTP serlvet manager
-			 */
-			com.openexchange.tools.servlet.http.HttpManagersInit.getInstance(),
-			/**
-			 * Setup of ContextStorage and LoginInfo.
-			 */
-			com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
-			/**
-			 * Folder initialization
-			 */
-			com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
-			/**
-			 * Mail initialization
-			 */
-			com.openexchange.mail.MailInitialization.getInstance(),
-			/**
-			 * Infostore Configuration
-			 */
-			com.openexchange.groupware.infostore.InfostoreConfig.getInstance(),
-			/**
-			 * Contact Configuration
-			 */
-			com.openexchange.groupware.contact.ContactConfig.getInstance(),
-			/**
-			 * Attachment Configuration
-			 */
-			com.openexchange.groupware.attach.AttachmentConfig.getInstance(),
-			/**
-			 * User configuration init
-			 */
-			com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
-			/**
-			 * Notification Configuration
-			 */
-			com.openexchange.groupware.notify.NotificationConfig.getInstance(),
-			/**
-			 * Sets up the configuration tree.
-			 */
-			com.openexchange.groupware.settings.impl.ConfigTreeInit.getInstance(),
-			/**
-			 * Responsible for starting and stopping the EventQueue
-			 */
+	/**
+	 * Connection pools for ConfigDB and database assignments for
+	 * contexts.
+	 */
+	com.openexchange.database.DatabaseInit.getInstance(),
+	/**
+	 * Starts HTTP serlvet manager
+	 */
+	com.openexchange.tools.servlet.http.HttpManagersInit.getInstance(),
+	/**
+	 * Setup of ContextStorage and LoginInfo.
+	 */
+	com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
+	/**
+	 * Folder initialization
+	 */
+	com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
+	/**
+	 * Mail initialization
+	 */
+	com.openexchange.mail.MailInitialization.getInstance(),
+	/**
+	 * Infostore Configuration
+	 */
+	com.openexchange.groupware.infostore.InfostoreConfig.getInstance(),
+	/**
+	 * Contact Configuration
+	 */
+	com.openexchange.groupware.contact.ContactConfig.getInstance(),
+	/**
+	 * Attachment Configuration
+	 */
+	com.openexchange.groupware.attach.AttachmentConfig.getInstance(),
+	/**
+	 * User configuration init
+	 */
+	com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
+	/**
+	 * Notification Configuration
+	 */
+	com.openexchange.groupware.notify.NotificationConfig.getInstance(),
+	/**
+	 * Sets up the configuration tree.
+	 */
+	com.openexchange.groupware.settings.impl.ConfigTreeInit.getInstance(),
+	/**
+	 * Responsible for starting and stopping the EventQueue
+	 */
 
-			new com.openexchange.event.impl.EventInit(),
+	new com.openexchange.event.impl.EventInit(),
 
-			SessiondInit.getInstance() };
-
-	private static ConfigurationServiceHolder configur;
+	SessiondInit.getInstance() };
 
 	public static void startServer() throws Exception {
 		if (running)
@@ -224,10 +212,12 @@ public final class Init {
 
 	public static void startAndInjectCache() throws CacheException {
 		JCSCacheServiceInit.getInstance().start((ConfigurationService) services.get(ConfigurationService.class));
-		ServerServiceRegistry.getInstance().addService(CacheService.class, JCSCacheService.getInstance());
+		final CacheService cache = JCSCacheService.getInstance();
+		services.put(CacheService.class, cache);
+		ServerServiceRegistry.getInstance().addService(CacheService.class, cache);
 	}
 
-	public static void stopServer() throws AbstractOXException {
+	public static void stopServer() {
 		// for(Initialization init: started) { init.stop(); }
 	}
 
