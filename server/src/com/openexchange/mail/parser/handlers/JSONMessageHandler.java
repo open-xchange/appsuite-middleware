@@ -191,7 +191,9 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		jsonObject = new JSONObject();
 		if (!displayVersion) {
 			try {
-				jsonObject.put(MailJSONField.MSGREF.getKey(), mailPath.toString());
+			    if (null != mailPath) {
+			        jsonObject.put(MailJSONField.MSGREF.getKey(), mailPath.toString());
+			    }
 			} catch (final JSONException e) {
 				throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
 			}
