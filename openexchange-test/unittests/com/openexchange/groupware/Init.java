@@ -197,8 +197,8 @@ public final class Init {
 		 */
 		MailProperties.getInstance().loadProperties();
 		
-		IMAPServiceRegistry.getInstance().addService(ConfigurationService.class, services.get(ConfigurationService.class));
-		IMAPServiceRegistry.getInstance().addService(CacheService.class, services.get(CacheService.class));
+		IMAPServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, services.get(ConfigurationService.class));
+		IMAPServiceRegistry.getServiceRegistry().addService(CacheService.class, services.get(CacheService.class));
 		
 		/*
 		 * Register IMAP bundle
