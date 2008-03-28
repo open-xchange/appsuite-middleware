@@ -106,5 +106,4 @@ public final class AllParser extends AbstractAJAXParser<AllResponse> {
         }
         return retval;
     }
-
 }

@@ -63,5 +63,4 @@ public class CommonDeleteResponse extends AbstractAJAXResponse {
     public CommonDeleteResponse(final Response response) {
         super(response);
     }
-
 }

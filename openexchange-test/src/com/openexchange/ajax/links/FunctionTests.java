@@ -49,15 +49,22 @@
 
 package com.openexchange.ajax.links;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+
+import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.links.actions.AllRequest;
 import com.openexchange.ajax.links.actions.AllResponse;
+import com.openexchange.ajax.links.actions.DeleteRequest;
 import com.openexchange.ajax.links.actions.InsertRequest;
 import com.openexchange.ajax.task.TaskTools;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.groupware.tasks.Task;
@@ -73,6 +80,69 @@ public final class FunctionTests extends AbstractAJAXSession {
      */
     public FunctionTests(final String name) {
         super(name);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public void testNew() throws Exception {
+        final AJAXClient client = getClient();
+        int fid1 = client.getValues().getPrivateContactFolder();
+        int oid1;
+        {
+            ContactObject co = new ContactObject();
+            co.setSurName("Meier");
+            co.setGivenName("Herbert");
+            co.setDisplayName("Meier, Herbert");
+            co.setParentFolderID(fid1);
+            final com.openexchange.ajax.contact.action.InsertResponse response =
+                (InsertResponse) Executor.execute(client,
+                new com.openexchange.ajax.contact.action.InsertRequest(co));
+            oid1 = response.getId();
+        }
+        int fid2 = client.getValues().getPrivateAppointmentFolder();
+        int oid2;
+        {
+            AppointmentObject ao = new AppointmentObject();
+            ao.setTitle("Nasenmann");
+            Calendar c = Calendar.getInstance();
+            c.set(Calendar.HOUR_OF_DAY, 8);
+            c.set(Calendar.MINUTE, 0);
+            c.set(Calendar.SECOND, 0);
+            c.set(Calendar.MILLISECOND, 0);
+            c.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+            long startTime = c.getTimeInMillis();
+            long endTime = startTime + 3600000;
+
+            ao.setStartDate(new Date(startTime));
+            ao.setEndDate(new Date(endTime));
+            ao.setLocation("Location");
+            ao.setShownAs(AppointmentObject.ABSENT);
+            ao.setParentFolderID(fid2);
+            ao.setIgnoreConflicts(true);
+
+            final TimeZone tz = client.getValues().getTimeZone();
+            final com.openexchange.ajax.appointment.action.InsertResponse response =
+                (com.openexchange.ajax.appointment.action.InsertResponse) Executor.execute(client,
+            new com.openexchange.ajax.appointment.action.InsertRequest(ao, tz));
+            oid2 = response.getId();
+        }
+        /*
+         *  Now Build The Link Object
+         * 
+         */
+        
+        LinkObject lo = new LinkObject();
+        lo.setFirstFolder(fid1);
+        lo.setFirstId(oid1);
+        lo.setFirstType(com.openexchange.groupware.Types.CONTACT);
+        lo.setSecondFolder(fid2);
+        lo.setSecondId(oid2);
+        lo.setSecondType(com.openexchange.groupware.Types.APPOINTMENT);
+
+        final InsertRequest request = new InsertRequest(lo);
+        final CommonInsertResponse response = LinkTools.insert(client, request);
     }
 
     /**
@@ -121,6 +191,7 @@ public final class FunctionTests extends AbstractAJAXSession {
                 contact.getObjectID(), Types.CONTACT, contact.getParentFolderID()));
             final LinkObject[] links = allR.getLinks();
             assertTrue("Too few links found.", links.length >= 1);
+            LinkTools.delete(client, new DeleteRequest(link));
         } finally {
             TaskTools.delete(client, new com.openexchange.ajax.task.actions
                 .DeleteRequest(task));

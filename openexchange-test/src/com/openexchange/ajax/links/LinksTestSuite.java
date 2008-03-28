@@ -47,35 +47,16 @@
  *
  */
 
-package com.openexchange.ajax.links.actions;
+package com.openexchange.ajax.links;
 
-import org.json.JSONException;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.CommonInsertParser;
-import com.openexchange.ajax.framework.CommonInsertResponse;
+public class LinksTestSuite {
 
-/**
- *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- */
-public class InsertParser extends CommonInsertParser {
-
-    /**
-     * @param failOnError
-     */
-    public InsertParser(boolean failOnError) {
-        super(failOnError);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected CommonInsertResponse createResponse(final Response response)
-        throws JSONException {
-        final CommonInsertResponse retval = instantiateResponse(response);
-        // Can't parse anything here.
-        return retval;
+    public static Test suite() {
+        TestSuite suite = new TestSuite("AJAX tests for links.");
+        suite.addTestSuite(FunctionTests.class);
+        return suite;
     }
 }

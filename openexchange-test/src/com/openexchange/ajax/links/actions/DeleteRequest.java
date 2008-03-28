@@ -49,33 +49,76 @@
 
 package com.openexchange.ajax.links.actions;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.CommonInsertParser;
-import com.openexchange.ajax.framework.CommonInsertResponse;
+import com.openexchange.ajax.framework.CommonDeleteParser;
+import com.openexchange.groupware.container.LinkObject;
 
 /**
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class InsertParser extends CommonInsertParser {
+public final class DeleteRequest extends AbstractLinkRequest {
+
+    private final LinkObject link;
+
+    private final boolean failOnError;
 
     /**
-     * @param failOnError
+     * Default constructor.
      */
-    public InsertParser(boolean failOnError) {
-        super(failOnError);
+    public DeleteRequest(final LinkObject link, final boolean failOnError) {
+        super();
+        this.link = link;
+        this.failOnError = failOnError;
+    }
+
+    public DeleteRequest(final LinkObject link) {
+        this(link, true);
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected CommonInsertResponse createResponse(final Response response)
-        throws JSONException {
-        final CommonInsertResponse retval = instantiateResponse(response);
-        // Can't parse anything here.
-        return retval;
+    public JSONObject getBody() throws JSONException {
+        final JSONArray array = new JSONArray();
+        final JSONArray linkTarget = new JSONArray();
+        linkTarget.put(link.getSecondId());
+        linkTarget.put(link.getSecondType());
+        linkTarget.put(link.getSecondFolder());
+        array.put(linkTarget);
+        final Response response = new Response();
+        response.setData(array);
+        return response.getJSON();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Method getMethod() {
+        return Method.PUT;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Parameter[] getParameters() {
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
+            new Parameter(AJAXServlet.PARAMETER_ID, link.getFirstId()),
+            new Parameter("module", link.getFirstType()),
+            new Parameter(AJAXServlet.PARAMETER_INFOLDER, link.getFirstFolder())
+        };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public CommonDeleteParser getParser() {
+        return new CommonDeleteParser(failOnError);
     }
 }

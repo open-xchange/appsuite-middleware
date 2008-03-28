@@ -32,94 +32,6 @@ public class LinkTest extends AbstractAJAXTest {
 
 	private static final String LINK_URL = "/ajax/link";
 
-	
-	public void testNew() throws Exception {
-		
-		/*
-		 *  BUILD 2 OBJECTS FOR THE FIRST TEST
-		 *  1. Contact Object
-		 *  2. Appointment Object
-		 */
-		
-		FolderObject fo = FolderTest.getStandardContactFolder(getWebConversation(), getHostName(), getSessionId());
-		int  fid1 = fo.getObjectID();
-		ContactObject co = new ContactObject();
-		co.setSurName("Meier");
-		co.setGivenName("Herbert");
-		co.setDisplayName("Meier, Herbert");
-		co.setParentFolderID(fid1);
-		int oid1 = ContactTest.insertContact(getWebConversation(),co, PROTOCOL+getHostName(), getSessionId());
-		
-		fo = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
-		int fid2 = fo.getObjectID();
-		AppointmentObject ao = new AppointmentObject();
-		ao.setTitle("Nasenmann");
-		Calendar c = Calendar.getInstance();
-		c.set(Calendar.HOUR_OF_DAY, 8);
-		c.set(Calendar.MINUTE, 0);
-		c.set(Calendar.SECOND, 0);
-		c.set(Calendar.MILLISECOND, 0);
-		c.setTimeZone(TimeZone.getTimeZone("GMT"));
-		
-		long startTime = c.getTimeInMillis();
-		long endTime = startTime + 3600000;
-		
-		ao.setStartDate(new Date(startTime));
-		ao.setEndDate(new Date(endTime));
-		ao.setLocation("Location");
-		ao.setShownAs(AppointmentObject.ABSENT);
-		ao.setParentFolderID(fid2);
-		ao.setIgnoreConflicts(true);
-		
-		int oid2 =	AppointmentTest.insertAppointment(getWebConversation(), ao, TimeZone.getDefault(), PROTOCOL+getHostName(), getSessionId());
-		
-		/*
-		 *  Now Build The Link Object
-		 * 
-		 */
-		
-		LinkObject lo = new LinkObject();
-		lo.setFirstFolder(fid1);
-		lo.setFirstId(oid1);
-		lo.setFirstType(com.openexchange.groupware.Types.CONTACT);
-		lo.setSecondFolder(fid2);
-		lo.setSecondId(oid2);
-		lo.setSecondType(com.openexchange.groupware.Types.APPOINTMENT);
-		
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrintWriter pw = new PrintWriter(baos);
-
-		JSONWriter jsonwriter = new JSONWriter(pw);
-		jsonwriter.object();
-		jsonwriter.key("id1").value(lo.getFirstId());
-		jsonwriter.key("module1").value(lo.getFirstType());
-		jsonwriter.key("folder1").value(lo.getFirstFolder());
-		jsonwriter.key("id2").value(lo.getSecondId());
-		jsonwriter.key("module2").value(lo.getSecondType());
-		jsonwriter.key("folder2").value(lo.getSecondFolder());
-		jsonwriter.endObject();
-		
-		pw.flush();
-		
-		
-		final URLParameter parameter = new URLParameter();
-		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
-		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
-		
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		WebRequest req = new PutMethodWebRequest(PROTOCOL + getHostName()+ LINK_URL + parameter.getURLParameters(), bais, "text/javascript");
-		WebResponse resp = getWebConversation().getResponse(req);
-		
-		assertEquals(200, resp.getResponseCode());
-		
-		final Response response = Response.parse(resp.getText());
-		
-		if (response.hasError()) {
-			fail("json error: " + response.getErrorMessage());
-		}
-	}
-	
-	
 	public static int[] insertLink(WebConversation webCon, String host, String session) throws Exception {
 
 		FolderObject fo = FolderTest.getStandardContactFolder(webCon, host, session);
@@ -205,44 +117,6 @@ public class LinkTest extends AbstractAJAXTest {
 		}
 
 		return repo;
-	}
-	
-	public static void insertLink(LinkObject lo, WebConversation webCon, String host, String session) throws Exception {
-
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrintWriter pw = new PrintWriter(baos);
-
-		JSONWriter jsonwriter = new JSONWriter(pw);
-		jsonwriter.object();
-		jsonwriter.key("id1").value(lo.getFirstId());
-		jsonwriter.key("module1").value(lo.getFirstType());
-		jsonwriter.key("folder1").value(lo.getFirstFolder());
-		jsonwriter.key("id2").value(lo.getSecondId());
-		jsonwriter.key("module2").value(lo.getSecondType());
-		jsonwriter.key("folder2").value(lo.getSecondFolder());
-		jsonwriter.endObject();
-		
-		pw.flush();
-		
-		JSONObject jResponse = null;
-		
-		final URLParameter parameter = new URLParameter();
-		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
-		
-		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
-		WebRequest req = new PutMethodWebRequest(PROTOCOL + host+ LINK_URL + parameter.getURLParameters(), bais, "text/javascript");
-		WebResponse resp = webCon.getResponse(req);
-		
-		jResponse = new JSONObject(resp.getText());
-		
-		assertEquals(200, resp.getResponseCode());
-		
-		final Response response = Response.parse(jResponse.toString());
-		
-		if (response.hasError()) {
-			fail("json error: " + response.getErrorMessage());
-		}
 	}
 	
 	public void testAll() throws Exception {

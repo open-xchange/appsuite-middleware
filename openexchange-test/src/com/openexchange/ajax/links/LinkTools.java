@@ -70,11 +70,13 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.links.actions.AbstractLinkRequest;
 import com.openexchange.ajax.links.actions.AllRequest;
 import com.openexchange.ajax.links.actions.AllResponse;
+import com.openexchange.ajax.links.actions.DeleteRequest;
 import com.openexchange.ajax.links.actions.InsertRequest;
 import com.openexchange.groupware.container.LinkObject;
 import com.openexchange.tools.URLParameter;
@@ -146,5 +148,11 @@ public final class LinkTools extends Assert {
         final AllRequest request) throws AjaxException, IOException,
         SAXException, JSONException {
         return (AllResponse) Executor.execute(client, request);
+    }
+
+    public static CommonDeleteResponse delete(final AJAXClient client,
+        final DeleteRequest request) throws AjaxException, IOException,
+        SAXException, JSONException {
+        return (CommonDeleteResponse) Executor.execute(client, request);
     }
 }

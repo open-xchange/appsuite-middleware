@@ -126,6 +126,8 @@ public class NewListTest extends AbstractAJAXSession {
         final AllResponse allR = (AllResponse) Executor.execute(clientA,
             new AllRequest(folderA, columns, listStart, listEnd));
         
+        // TODO This delete of B does not remove the appointments but only the
+        // participant.
         // Now B deletes some of them.
         final DeleteRequest[] deletes1 = new DeleteRequest[DELETES];
         for (int i = 0; i < deletes1.length; i++) {
