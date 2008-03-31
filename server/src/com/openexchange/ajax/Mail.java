@@ -338,8 +338,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionGetUpdates(final Session session, final JSONWriter writer, final JSONObject requestObj,
 			final MailServletInterface mi) throws JSONException {
-		Response
-				.write(actionGetUpdates(session, ParamContainer.getInstance(requestObj, Component.MAIL), mi), writer);
+		Response.write(actionGetUpdates(session, ParamContainer.getInstance(requestObj, Component.MAIL), mi), writer);
 	}
 
 	private final void actionGetUpdates(final HttpServletRequest req, final HttpServletResponse resp)
@@ -371,8 +370,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionGetMailCount(final Session session, final JSONWriter writer, final JSONObject requestObj,
 			final MailServletInterface mi) throws JSONException {
-		Response.write(actionGetMailCount(session, ParamContainer.getInstance(requestObj, Component.MAIL), mi),
-				writer);
+		Response.write(actionGetMailCount(session, ParamContainer.getInstance(requestObj, Component.MAIL), mi), writer);
 	}
 
 	private final void actionGetMailCount(final HttpServletRequest req, final HttpServletResponse resp)
@@ -431,8 +429,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionGetAllMails(final Session session, final JSONWriter writer, final JSONObject requestObj,
 			final MailServletInterface mi) throws SearchIteratorException, JSONException {
-		Response.write(actionGetAllMails(session, ParamContainer.getInstance(requestObj, Component.MAIL), mi),
-				writer);
+		Response.write(actionGetAllMails(session, ParamContainer.getInstance(requestObj, Component.MAIL), mi), writer);
 	}
 
 	private final void actionGetAllMails(final HttpServletRequest req, final HttpServletResponse resp)
@@ -560,8 +557,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionGetReply(final Session session, final JSONWriter writer, final JSONObject jo,
 			final boolean reply2all, final MailServletInterface mailInterface) throws JSONException {
-		Response.write(actionGetReply(session, reply2all, ParamContainer.getInstance(jo, Component.MAIL),
-				mailInterface), writer);
+		Response.write(
+				actionGetReply(session, reply2all, ParamContainer.getInstance(jo, Component.MAIL), mailInterface),
+				writer);
 	}
 
 	private final void actionGetReply(final HttpServletRequest req, final HttpServletResponse resp,
@@ -627,8 +625,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionGetForward(final Session session, final JSONWriter writer, final JSONObject requestObj,
 			final MailServletInterface mailInterface) throws JSONException {
-		Response.write(actionGetForward(session, ParamContainer.getInstance(requestObj, Component.MAIL),
-				mailInterface), writer);
+		Response.write(
+				actionGetForward(session, ParamContainer.getInstance(requestObj, Component.MAIL), mailInterface),
+				writer);
 	}
 
 	private final void actionGetForward(final HttpServletRequest req, final HttpServletResponse resp)
@@ -694,8 +693,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionGetMessage(final Session session, final JSONWriter writer, final JSONObject requestObj,
 			final MailServletInterface mi) throws JSONException {
-		Response
-				.write(actionGetMessage(session, ParamContainer.getInstance(requestObj, Component.MAIL), mi), writer);
+		Response.write(actionGetMessage(session, ParamContainer.getInstance(requestObj, Component.MAIL), mi), writer);
 	}
 
 	private final void actionGetMessage(final HttpServletRequest req, final HttpServletResponse resp)
@@ -1784,8 +1782,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionPutCopyMail(final Session session, final JSONWriter writer, final JSONObject jsonObj,
 			final MailServletInterface mailInterface) throws JSONException {
-		Response.write(actionPutCopyMail(session, jsonObj.getString(Response.DATA), ParamContainer.getInstance(
-				jsonObj, Component.MAIL), mailInterface), writer);
+		Response.write(actionPutCopyMail(session, jsonObj.getString(Response.DATA), ParamContainer.getInstance(jsonObj,
+				Component.MAIL), mailInterface), writer);
 	}
 
 	private final void actionPutCopyMail(final HttpServletRequest req, final HttpServletResponse resp)
@@ -1871,8 +1869,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 		actionPutMailMultiple(session, writer, mailIDs, srcFolder, destFolder, false, mailInterface);
 	}
 
-	public final void actionPutMailMultiple(final Session session, final JSONWriter writer,
-			final MailPath[] mailIDs, final String srcFolder, final String destFolder, final boolean move,
+	public final void actionPutMailMultiple(final Session session, final JSONWriter writer, final MailPath[] mailIDs,
+			final String srcFolder, final String destFolder, final boolean move,
 			final MailServletInterface mailInterfaceArg) throws JSONException {
 		try {
 			MailServletInterface mailInterface = mailInterfaceArg;
@@ -1928,8 +1926,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 		}
 	}
 
-	public void actionPutStoreFlagsMultiple(final Session session, final JSONWriter writer,
-			final MailPath[] mailIDs, final String folder, final int flagsBits, final boolean flagValue,
+	public void actionPutStoreFlagsMultiple(final Session session, final JSONWriter writer, final MailPath[] mailIDs,
+			final String folder, final int flagsBits, final boolean flagValue,
 			final MailServletInterface mailInterfaceArg) throws JSONException {
 		try {
 			MailServletInterface mailInterface = mailInterfaceArg;
@@ -1972,9 +1970,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 		}
 	}
 
-	public void actionPutColorLabelMultiple(final Session session, final JSONWriter writer,
-			final MailPath[] mailIDs, final String folder, final int colorLabel,
-			final MailServletInterface mailInterfaceArg) throws JSONException {
+	public void actionPutColorLabelMultiple(final Session session, final JSONWriter writer, final MailPath[] mailIDs,
+			final String folder, final int colorLabel, final MailServletInterface mailInterfaceArg)
+			throws JSONException {
 		try {
 			MailServletInterface mailInterface = mailInterfaceArg;
 			boolean closeMailInterface = false;
@@ -2069,12 +2067,11 @@ public class Mail extends PermissionServlet implements UploadListener {
 				{
 					final FolderObject folderObj = new OXFolderAccess(ctx).getFolderObject(destFolderID);
 					final EffectivePermission p = folderObj.getEffectiveUserPermission(session.getUserId(),
-							UserConfigurationStorage.getInstance()
-									.getUserConfigurationSafe(session.getUserId(), ctx));
+							UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx));
 					if (!p.isFolderVisible()) {
 						throw new OXFolderException(FolderCode.NOT_VISIBLE, getFolderName(folderObj), getUserName(
-								session, UserStorage.getStorageUser(session.getUserId(), ctx)), Integer
-								.valueOf(ctx.getContextId()));
+								session, UserStorage.getStorageUser(session.getUserId(), ctx)), Integer.valueOf(ctx
+								.getContextId()));
 					}
 					if (!p.canWriteOwnObjects()) {
 						throw new OXFolderException(FolderCode.NO_WRITE_PERMISSION, getUserName(session, UserStorage
@@ -2167,9 +2164,15 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * Start response
 		 */
 		try {
-			final String folderPath = paramContainer.checkStringParam(PARAMETER_FOLDERID);
-			final long uid = Long.parseLong(paramContainer.checkStringParam(PARAMETER_ID));
 			final JSONObject bodyObj = new JSONObject(body);
+			final String folderPath = bodyObj.has(PARAMETER_FOLDERID) ? bodyObj.getString(PARAMETER_FOLDERID) : null;
+			if (null == folderPath) {
+				throw new MailException(MailException.Code.MISSING_PARAM, PARAMETER_FOLDERID);
+			}
+			final long uid = bodyObj.has(PARAMETER_ID) ? Long.parseLong(bodyObj.getString(PARAMETER_ID)) : -1L;
+			if (-1 == uid) {
+				throw new MailException(MailException.Code.MISSING_PARAM, PARAMETER_ID);
+			}
 			final String fromAddr = bodyObj.has(MailJSONField.FROM.getKey())
 					&& !bodyObj.isNull(MailJSONField.FROM.getKey()) ? bodyObj.getString(MailJSONField.FROM.getKey())
 					: null;
@@ -2187,9 +2190,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 				}
 			}
 		} catch (final MailException e) {
-			LOG.error(e.getMessage(), e);
-			response.setException(e);
-		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		} catch (final Exception e) {

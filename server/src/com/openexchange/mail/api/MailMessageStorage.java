@@ -274,6 +274,7 @@ public abstract class MailMessageStorage {
 		}
 		final MailMessage mail = mails[0];
 		if (!mail.isSeen() && markSeen) {
+			mail.setPrevSeen(false);
 			updateMessageFlags(folder, new long[] { mailId }, MailMessage.FLAG_SEEN, true);
 			mail.setFlag(MailMessage.FLAG_SEEN, true);
 			mail.setUnreadMessages(mail.getUnreadMessages() <= 0 ? 0 : mail.getUnreadMessages() - 1);

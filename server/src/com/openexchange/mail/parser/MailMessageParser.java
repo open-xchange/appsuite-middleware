@@ -554,7 +554,8 @@ public final class MailMessageParser {
 		 * DISPOSITION-NOTIFICATION-TO
 		 */
 		if (mail.containsDispositionNotification()) {
-			handler.handleDispositionNotification(mail.getDispositionNotification(), mail.isSeen());
+			handler.handleDispositionNotification(mail.getDispositionNotification(), mail.containsPrevSeen() ? mail
+					.isPrevSeen() : mail.isSeen());
 		}
 		/*
 		 * HEADERS

@@ -418,11 +418,18 @@ public final class MessageWriter {
 					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
 							throws MailException {
 						try {
+							final Object value;
+							if ((mail.containsPrevSeen() ? mail.isPrevSeen() : mail.isSeen())) {
+								value = mail.getDispositionNotification() == null ? JSONObject.NULL : mail
+										.getDispositionNotification().toUnicodeString();
+							} else {
+								value = JSONObject.NULL;
+							}
 							if (withKey) {
 								((JSONObject) jsonContainer).put(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey(),
-										mail.getDispositionNotification().toUnicodeString());
+										value);
 							} else {
-								((JSONArray) jsonContainer).put(mail.getDispositionNotification().toUnicodeString());
+								((JSONArray) jsonContainer).put(value);
 							}
 						} catch (final JSONException e) {
 							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());

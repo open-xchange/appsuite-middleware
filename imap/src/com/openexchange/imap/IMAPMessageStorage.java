@@ -202,6 +202,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			}
 			final MailMessage mail = MIMEMessageConverter.convertMessage(msg);
 			if (!mail.isSeen() && markSeen) {
+				mail.setPrevSeen(false);
 				if (imapConfig.isSupportsACLs()) {
 					try {
 						if (RightsCache.getCachedRights(imapFolder, true, session).contains(Rights.Right.KEEP_SEEN)) {
@@ -218,7 +219,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 									mail.getMailId()).append(" in folder ").append(mail.getFolder()).toString(), e);
 						}
 					}
-
 				} else {
 					/*
 					 * Switch \Seen flag
@@ -726,8 +726,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				/*
 				 * Connection is broken. Not possible to retry.
 				 */
-				throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapAccess.getMailConfig()
-						.getServer(), imapAccess.getMailConfig().getLogin());
+				throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapAccess.getMailConfig().getServer(),
+						imapAccess.getMailConfig().getLogin());
 			} catch (final ProtocolException e) {
 				throw new IMAPException(IMAPException.Code.UID_EXPUNGE_FAILED, e, Arrays.toString(tmp), imapFolder
 						.getFullName(), e.getMessage());
@@ -923,8 +923,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapAccess);
 		} catch (final ProtocolException e) {
-			throw IMAPException.handleMessagingException(new MessagingException(e.getLocalizedMessage(), e),
-					imapAccess);
+			throw IMAPException
+					.handleMessagingException(new MessagingException(e.getLocalizedMessage(), e), imapAccess);
 		}
 	}
 

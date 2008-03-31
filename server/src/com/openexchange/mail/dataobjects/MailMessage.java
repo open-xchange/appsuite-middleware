@@ -224,6 +224,13 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	private boolean b_flags;
 
 	/**
+	 * The previous \Seen state
+	 */
+	private boolean prevSeen;
+
+	private boolean b_prevSeen;
+
+	/**
 	 * From addresses
 	 */
 	private Set<InternetAddress> from;
@@ -703,6 +710,50 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 			throw new MailException(MailException.Code.ILLEGAL_FLAG_ARGUMENT, Integer.valueOf(flag));
 		}
 		flags = enable ? (flags | flag) : (flags & ~flag);
+	}
+
+	/**
+	 * Gets the previous \Seen state.
+	 * <p>
+	 * This flag is used when writing the message later on. There a check is
+	 * performed whether header <code>Disposition-Notification-To</code> is
+	 * indicated or not.
+	 * 
+	 * @return the previous \Seen state
+	 */
+	public boolean isPrevSeen() {
+		return prevSeen;
+	}
+
+	/**
+	 * @return <code>true</code> if previous \Seen state is set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean containsPrevSeen() {
+		return b_prevSeen;
+	}
+
+	/**
+	 * Removes the previous \Seen state
+	 */
+	public void removePrevSeen() {
+		prevSeen = false;
+		b_prevSeen = false;
+	}
+
+	/**
+	 * Sets the previous \Seen state.
+	 * <p>
+	 * This flag is used when writing the message later on. There a check is
+	 * performed whether header <code>Disposition-Notification-To</code> is
+	 * indicated or not.
+	 * 
+	 * @param prevSeen
+	 *            the previous \Seen state to set
+	 */
+	public void setPrevSeen(final boolean prevSeen) {
+		this.prevSeen = prevSeen;
+		b_prevSeen = true;
 	}
 
 	/**

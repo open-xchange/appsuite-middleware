@@ -230,8 +230,8 @@ public final class SMTPTransport extends MailTransport {
 	public void sendReceiptAck(final MailMessage srcMail, final String fromAddr) throws MailException {
 		try {
 			clearUp();
-			final String dispNotification = srcMail.getHeader(MessageHeaders.HDR_DISP_TO);
-			if (dispNotification == null || dispNotification.length() == 0) {
+			final InternetAddress dispNotification = srcMail.getDispositionNotification();
+			if (dispNotification == null) {
 				throw new SMTPException(SMTPException.Code.MISSING_NOTIFICATION_HEADER, MessageHeaders.HDR_DISP_TO,
 						Long.valueOf(srcMail.getMailId()));
 			}
@@ -252,7 +252,7 @@ public final class SMTPTransport extends MailTransport {
 			/*
 			 * Set to
 			 */
-			smtpMessage.addRecipients(RecipientType.TO, InternetAddress.parse(dispNotification, true));
+			smtpMessage.addRecipients(RecipientType.TO, new Address[] { dispNotification });
 			/*
 			 * Set header
 			 */
