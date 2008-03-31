@@ -289,7 +289,6 @@ public final class AJPv13Connection {
 		 */
 		if (outputStream != null) {
 			try {
-				outputStream.flush();
 				outputStream.close();
 			} catch (IOException e) {
 				LOG.error(e.getMessage(), e);
