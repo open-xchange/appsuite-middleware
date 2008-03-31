@@ -420,10 +420,10 @@ public final class MessageWriter {
 						try {
 							final Object value;
 							if ((mail.containsPrevSeen() ? mail.isPrevSeen() : mail.isSeen())) {
+								value = JSONObject.NULL;
+							} else {
 								value = mail.getDispositionNotification() == null ? JSONObject.NULL : mail
 										.getDispositionNotification().toUnicodeString();
-							} else {
-								value = JSONObject.NULL;
 							}
 							if (withKey) {
 								((JSONObject) jsonContainer).put(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey(),
