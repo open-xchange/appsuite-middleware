@@ -64,25 +64,26 @@ import com.openexchange.mail.dataobjects.UUEncodedAttachmentMailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
- * {@link NonInlinePartHandler} - Gathers all occuring non-inline parts in a
+ * {@link NonInlineForwardPartHandler} - Gathers all occuring non-inline parts in a
  * mail and makes them accessible through {@link #getNonInlineParts()}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class NonInlinePartHandler implements MailMessageHandler {
+public final class NonInlineForwardPartHandler implements MailMessageHandler {
 
 	private final List<MailPart> nonInlineParts;
 
 	/**
 	 * Constructor
 	 */
-	public NonInlinePartHandler() {
+	public NonInlineForwardPartHandler() {
 		super();
 		nonInlineParts = new ArrayList<MailPart>();
 	}
@@ -93,7 +94,7 @@ public final class NonInlinePartHandler implements MailMessageHandler {
 	 * @param nonInlineParts
 	 *            The container for non-inline parts
 	 */
-	private NonInlinePartHandler(final List<MailPart> nonInlineParts) {
+	private NonInlineForwardPartHandler(final List<MailPart> nonInlineParts) {
 		super();
 		this.nonInlineParts = nonInlineParts;
 	}
@@ -113,7 +114,7 @@ public final class NonInlinePartHandler implements MailMessageHandler {
 	 */
 	public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType,
 			final String fileName, final String id) throws MailException {
-		if (!isInline) {
+		if (!isInline || part.getHeader(MessageHeaders.HDR_CONTENT_ID) != null) {
 			nonInlineParts.add(part);
 		}
 		return true;
@@ -192,7 +193,10 @@ public final class NonInlinePartHandler implements MailMessageHandler {
 	 */
 	public boolean handleImagePart(final MailPart part, final String imageCID, final String baseContentType,
 			final boolean isInline, final String fileName, final String id) throws MailException {
-		if (!isInline) {
+		if (!isInline || imageCID != null) {
+			/*
+			 * Add if disposition is non-inline or a content ID is present
+			 */
 			nonInlineParts.add(part);
 		}
 		return true;
@@ -288,7 +292,7 @@ public final class NonInlinePartHandler implements MailMessageHandler {
 	 *      java.lang.String)
 	 */
 	public boolean handleNestedMessage(final MailMessage nestedMail, final String id) throws MailException {
-		final NonInlinePartHandler handler = new NonInlinePartHandler(nonInlineParts);
+		final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler(nonInlineParts);
 		new MailMessageParser().parseMailMessage(nestedMail, handler, id);
 		return true;
 	}

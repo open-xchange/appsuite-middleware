@@ -56,6 +56,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -481,10 +482,13 @@ public final class MimeReply {
 		if (found) {
 			final boolean isHtml = retvalContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL);
 			String replyPrefix = strHelper.getString(MailStrings.REPLY_PREFIX);
-			replyPrefix = replyPrefix.replaceFirst("#DATE#", msg.getSentDate() == null ? "" : DateFormat
-					.getDateInstance(DateFormat.LONG, locale).format(msg.getSentDate()));
-			replyPrefix = replyPrefix.replaceFirst("#TIME#", msg.getSentDate() == null ? "" : DateFormat
-					.getTimeInstance(DateFormat.SHORT, locale).format(msg.getSentDate()));
+			{
+				final Date date = msg.getSentDate();
+				replyPrefix = replyPrefix.replaceFirst("#DATE#", date == null ? "" : DateFormat.getDateInstance(
+						DateFormat.LONG, locale).format(date));
+				replyPrefix = replyPrefix.replaceFirst("#TIME#", date == null ? "" : DateFormat.getTimeInstance(
+						DateFormat.SHORT, locale).format(date));
+			}
 			{
 				final InternetAddress[] from = (InternetAddress[]) msg.getFrom();
 				replyPrefix = replyPrefix.replaceFirst("#SENDER#", from == null || from.length == 0 ? "" : from[0]

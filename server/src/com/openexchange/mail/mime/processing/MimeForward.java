@@ -51,6 +51,7 @@ package com.openexchange.mail.mime.processing;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -84,7 +85,7 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
-import com.openexchange.mail.parser.handlers.NonInlinePartHandler;
+import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
@@ -365,23 +366,27 @@ public final class MimeForward {
 			forwardPrefix = forwardPrefix.replaceFirst("#TO#", to == null || to.length == 0 ? ""
 					: MimeProcessingUtility.addrs2String(to));
 		}
-		try {
-			forwardPrefix = forwardPrefix.replaceFirst("#DATE#", msg.getReceivedDate() == null ? "" : DateFormat
-					.getDateInstance(DateFormat.LONG, locale).format(msg.getReceivedDate()));
-		} catch (final Throwable t) {
-			if (LOG.isWarnEnabled()) {
-				LOG.warn(t.getMessage(), t);
+		{
+			final Date date = msg.getSentDate();
+			try {
+				forwardPrefix = forwardPrefix.replaceFirst("#DATE#", date == null ? "" : DateFormat.getDateInstance(
+						DateFormat.LONG, locale).format(date));
+			} catch (final Throwable t) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn(t.getMessage(), t);
+				}
+				forwardPrefix = forwardPrefix.replaceFirst("#DATE#", "");
 			}
-			forwardPrefix = forwardPrefix.replaceFirst("#DATE#", "");
-		}
-		try {
-			forwardPrefix = forwardPrefix.replaceFirst("#TIME#", msg.getReceivedDate() == null ? "" : DateFormat
-					.getTimeInstance(DateFormat.SHORT, locale).format(msg.getReceivedDate()));
-		} catch (final Throwable t) {
-			if (LOG.isWarnEnabled()) {
-				LOG.warn(t.getMessage(), t);
+			try {
+				forwardPrefix = forwardPrefix.replaceFirst("#TIME#", date == null ? "" : DateFormat.getTimeInstance(
+						DateFormat.SHORT, locale).format(date));
+			} catch (final Throwable t) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn(t.getMessage(), t);
+				}
+				forwardPrefix = forwardPrefix.replaceFirst("#TIME#", "");
 			}
-			forwardPrefix = forwardPrefix.replaceFirst("#TIME#", "");
+
 		}
 		forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", MessageUtility.decodeMultiEncodedHeader(msg
 				.getSubject()));
@@ -409,7 +414,7 @@ public final class MimeForward {
 	private static void addNonInlineParts(final MimeMessage originalMsg, final CompositeMailMessage forwardMail)
 			throws MailException {
 		final MailMessage originalMail = MIMEMessageConverter.convertMessage(originalMsg);
-		final NonInlinePartHandler handler = new NonInlinePartHandler();
+		final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
 		new MailMessageParser().parseMailMessage(originalMail, handler);
 		final List<MailPart> nonInlineParts = handler.getNonInlineParts();
 		for (final MailPart mailPart : nonInlineParts) {

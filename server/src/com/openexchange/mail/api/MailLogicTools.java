@@ -50,6 +50,7 @@
 package com.openexchange.mail.api;
 
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.processing.MimeForward;
 import com.openexchange.mail.mime.processing.MimeReply;
@@ -100,7 +101,9 @@ public class MailLogicTools {
 	 *             If reply message cannot be generated
 	 */
 	public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll) throws MailException {
-		return MimeReply.getReplyMail(originalMail, replyAll, session);
+		final MailMessage replyMail = MimeReply.getReplyMail(originalMail, replyAll, session);
+		replyMail.setMsgref(MailPath.getMailPath(originalMail.getFolder(), originalMail.getMailId()));
+		return replyMail;
 	}
 
 	/**
@@ -122,7 +125,16 @@ public class MailLogicTools {
 	 *             If forward message cannot be generated
 	 */
 	public MailMessage getFowardMessage(final MailMessage[] originalMails) throws MailException {
-		return MimeForward.getFowardMail(originalMails, session);
+		final MailMessage forwardMail = MimeForward.getFowardMail(originalMails, session);
+		{
+			final StringBuilder sb = new StringBuilder(originalMails.length * 16);
+			sb.append(MailPath.getMailPath(originalMails[0].getFolder(), originalMails[0].getMailId()));
+			for (int i = 1; i < originalMails.length; i++) {
+				sb.append(',').append(MailPath.getMailPath(originalMails[i].getFolder(), originalMails[i].getMailId()));
+			}
+			forwardMail.setMsgref(sb.toString());
+		}
+		return forwardMail;
 	}
 
 }
