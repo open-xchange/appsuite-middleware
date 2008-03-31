@@ -73,6 +73,7 @@ import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.parser.MailMessageHandler;
+import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
@@ -347,9 +348,15 @@ public final class MailPartHandler implements MailMessageHandler {
 	 * @see com.openexchange.mail.parser.MailMessageHandler#handleNestedMessage(com.openexchange.mail.dataobjects.MailMessage,
 	 *      java.lang.String)
 	 */
-	public boolean handleNestedMessage(final MailMessage nestedMsg, final String id) throws MailException {
+	public boolean handleNestedMessage(final MailMessage nestedMail, final String id) throws MailException {
 		if (this.id.equals(id)) {
-			mailPart = nestedMsg;
+			mailPart = nestedMail;
+			return false;
+		}
+		final MailPartHandler nestedHandler = new MailPartHandler(this.id);
+		new MailMessageParser().parseMailMessage(nestedMail, nestedHandler, id);
+		if (null != nestedHandler.getMailPart()) {
+			mailPart = nestedHandler.getMailPart();
 			return false;
 		}
 		return true;
