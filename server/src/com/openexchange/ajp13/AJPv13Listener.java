@@ -300,9 +300,7 @@ public final class AJPv13Listener implements Runnable {
 						LOG.error(logMe.getMessage(), logMe);
 						closeAndKeepAlive();
 					}
-					if (null != ajpCon) {
-						ajpCon.resetConnection(false);
-					}
+					ajpCon.resetConnection(false);
 					AJPv13Server.ajpv13ListenerMonitor.decrementNumProcessing();
 					AJPv13Server.ajpv13ListenerMonitor.addProcessingTime(System.currentTimeMillis() - processingStart);
 					AJPv13Server.ajpv13ListenerMonitor.incrementNumRequests();
