@@ -56,11 +56,13 @@ import java.io.InputStream;
 import java.io.ByteArrayInputStream;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tx.TransactionException;
@@ -68,8 +70,13 @@ import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.api2.OXException;
+import com.openexchange.server.impl.DBPoolingException;
 
 /**
+ * Provides the Business Logic for the consistency tool. Concrete subclasses must provide integration
+ * to the environment by implementing the abstract methods.
+ *
+ * @author Dennis Sieben
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public abstract class Consistency implements ConsistencyMBean {
@@ -149,16 +156,16 @@ public abstract class Consistency implements ConsistencyMBean {
         repair(repairMe, resolverPolicy);
     }
 
-    public void repairFilesInFilestore(int filestoreId, String resolverPolicy) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void repairFilesInFilestore(int filestoreId, String resolverPolicy) throws AbstractOXException {
+        repair(getContextsForFilestore(filestoreId), resolverPolicy);
     }
 
-    public void repairFilesInDatabase(int databaseId, String resolverPolicy) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void repairFilesInDatabase(int databaseId, String resolverPolicy) throws AbstractOXException {
+        repair(getContextsForDatabase(databaseId), resolverPolicy);
     }
 
-    public void repairAllFiles(String resolverPolicy) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void repairAllFiles(String resolverPolicy) throws AbstractOXException {
+        repair(getAllContexts(), resolverPolicy);
     }
 
     private void repair(List<Context> contexts, String policy) throws AbstractOXException {
@@ -187,16 +194,14 @@ public abstract class Consistency implements ConsistencyMBean {
 	    LOG.debug(e.getMessage(), e);
 	}
 
-	private void erroroutput(final String text, final Exception e) {
-	    LOG.debug(text, e);
-	}
-
-    private void outputSet(final SortedSet<String> set) {
+	private void outputSet(final SortedSet<String> set) {
 	    final Iterator<String> itstr = set.iterator();
-	    while (itstr.hasNext()) {
-	        output(itstr.next());
+	    StringBuilder sb = new StringBuilder();
+        while (itstr.hasNext()) {
+	        sb.append(itstr.next()).append("\n");
 	    }
-	}
+        output(sb.toString());
+    }
 
     /**
 	 * Makes the difference set between two set, the first one is changed
@@ -218,7 +223,7 @@ public abstract class Consistency implements ConsistencyMBean {
 		// We believe in the worst case, so lets check the storage first, so
 		// that the state file is recreated
 		stor.recreateStateFile();
-
+    
 		final SortedSet<String> filestoreset = stor.getFileList();
 		final SortedSet<String> attachmentset =
 			attach.getAttachmentFileStoreLocationsperContext(ctx);
@@ -272,13 +277,13 @@ public abstract class Consistency implements ConsistencyMBean {
         }
     }
 
-    protected abstract Context getContext(int contextId);
+    protected abstract Context getContext(int contextId) throws ContextException;
     protected abstract DatabaseImpl getDatabase();
     protected abstract AttachmentBase getAttachments();
-    protected abstract FileStorage getFileStorage(Context ctx);
-    protected abstract List<Context> getContextsForFilestore(int filestoreId);
-    protected abstract List<Context> getContextsForDatabase(int datbaseId);
-    protected abstract List<Context> getAllContexts();
+    protected abstract FileStorage getFileStorage(Context ctx) throws FileStorageException, FilestoreException;
+    protected abstract List<Context> getContextsForFilestore(int filestoreId) throws ContextException;
+    protected abstract List<Context> getContextsForDatabase(int datbaseId) throws ContextException, DBPoolingException;
+    protected abstract List<Context> getAllContexts() throws ContextException;
     protected abstract User getAdmin(Context ctx) throws LdapException;
         
 
