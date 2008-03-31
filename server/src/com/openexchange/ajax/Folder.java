@@ -104,6 +104,7 @@ import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.json.writer.FolderWriter.MailFolderFieldWriter;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.FolderObjectIterator;
@@ -1547,7 +1548,7 @@ public class Folder extends SessionServlet {
 				final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
 				try {
 					final MailFolderDescription mf = new MailFolderDescription();
-					mf.setParentFullname(parentFolder);
+					mf.setParentFullname(MailFolderUtility.prepareMailFolderParam(parentFolder));
 					com.openexchange.mail.json.parser.FolderParser.parse(jsonObj, mf, session);
 					retval = mailInterface.saveFolder(mf);
 				} finally {
