@@ -437,10 +437,9 @@ public final class AJPv13RequestHandler {
 			 * Read only payloadLength bytes
 			 */
 			bytes = new byte[payloadLength];
-			int bytesRead = 0;
+			int bytesRead = -1;
 			int offset = 0;
-			while (bytesRead != -1 && offset < bytes.length) {
-				bytesRead = in.read(bytes, offset, bytes.length - offset);
+			while ((bytesRead = in.read(bytes, offset, bytes.length - offset)) != -1 && offset < bytes.length) {
 				offset += bytesRead;
 			}
 			if (offset < bytes.length) {
