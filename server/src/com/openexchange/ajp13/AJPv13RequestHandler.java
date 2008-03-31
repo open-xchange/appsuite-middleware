@@ -437,16 +437,18 @@ public final class AJPv13RequestHandler {
 			 * Read only payloadLength bytes
 			 */
 			bytes = new byte[payloadLength];
-			Arrays.fill(bytes, ((byte) -1));
 			int bytesRead = 0;
 			int offset = 0;
 			while (bytesRead != -1 && offset < bytes.length) {
 				bytesRead = in.read(bytes, offset, bytes.length - offset);
 				offset += bytesRead;
 			}
-			if (offset < bytes.length && LOG.isWarnEnabled()) {
-				LOG.warn(new StringBuilder().append("Incomplete payload data in AJP package: Should be ").append(
-						payloadLength).append(" but was ").append(offset).toString(), new Throwable());
+			if (offset < bytes.length) {
+				Arrays.fill(bytes, offset, bytes.length, ((byte) -1));
+				if (LOG.isWarnEnabled()) {
+					LOG.warn(new StringBuilder().append("Incomplete payload data in AJP package: Should be ").append(
+							payloadLength).append(" but was ").append(offset).toString(), new Throwable());
+				}
 			}
 		} else {
 			/*
@@ -573,7 +575,7 @@ public final class AJPv13RequestHandler {
 			servletInst = new HttpErrorServlet("No servlet bound to path/alias: " + path);
 		}
 		servlet = servletInst;
-		//servletId = pathStorage.length() > 0 ? pathStorage.toString() : null;
+		// servletId = pathStorage.length() > 0 ? pathStorage.toString() : null;
 		if (servletId.length() > 0) {
 			servletPath = servletId.toString().replaceFirst("\\*", ""); // path;
 		}
