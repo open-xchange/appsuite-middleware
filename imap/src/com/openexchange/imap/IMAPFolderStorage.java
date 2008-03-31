@@ -687,7 +687,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 					if (parentFullName.length() > 0) {
 						tmp.append(parentFullName).append(separator);
 					}
-					tmp.append(moveMe.getName());
+					tmp.append(newName);
 					renameFolder = (IMAPFolder) imapStore.getFolder(tmp.toString());
 				}
 				if (renameFolder.exists()) {
