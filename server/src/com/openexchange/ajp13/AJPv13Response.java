@@ -51,7 +51,6 @@ package com.openexchange.ajp13;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -67,6 +66,8 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 public class AJPv13Response {
 
 	private static final String STR_EMPTY = "";
+
+	private static final String STR_SET_COOKIE = "Set-Cookie";
 
 	private static final int INT_150 = 150;
 
@@ -224,7 +225,8 @@ public class AJPv13Response {
 				throw new AJPv13Exception(AJPCode.NO_EMPTY_SENT_BODY_CHUNK, true);
 			}
 			/*
-			 * prefix + chunk_length (2 bytes) + chunk bytes + terminating zero byte
+			 * prefix + chunk_length (2 bytes) + chunk bytes + terminating zero
+			 * byte
 			 */
 			dataLength = 4 + length;
 			if (dataLength + RESPONSE_PREFIX_LENGTH > MAX_PACKAGE_SIZE) {
@@ -241,7 +243,7 @@ public class AJPv13Response {
 			 * prefix + http_status_code + http_status_msg (empty string) +
 			 * num_headers (integer)
 			 */
-			final Map<String, List<String>> formattedCookies = servletResponse.getFormatedCookies();
+			final String[][] formattedCookies = servletResponse.getFormatedCookies();
 			dataLength = getHeaderSizeInBytes(servletResponse) + getCookiesSizeInBytes(formattedCookies) + 5
 					+ servletResponse.getStatusMsg().length() + 2 + 1;
 			if (dataLength + RESPONSE_PREFIX_LENGTH > MAX_PACKAGE_SIZE) {
@@ -252,20 +254,20 @@ public class AJPv13Response {
 			writeInt(servletResponse.getStatus(), byteArray);
 			writeString(servletResponse.getStatusMsg(), byteArray);
 			writeInt(servletResponse.getHeadersSize() + getNumOfCookieHeader(formattedCookies), byteArray);
-			final int headersSize = servletResponse.getHeadersSize();
-			final Iterator<String> iter = servletResponse.getHeaderNames();
-			for (int i = 0; i < headersSize; i++) {
-				final String headerName = iter.next();
-				final String headerValue = servletResponse.getHeader(headerName);
-				writeHeader(headerName, headerValue, byteArray);
+			{
+				final int headersSize = servletResponse.getHeadersSize();
+				final Iterator<String> iter = servletResponse.getHeaderNames();
+				for (int i = 0; i < headersSize; i++) {
+					final String headerName = iter.next();
+					final String headerValue = servletResponse.getHeader(headerName);
+					writeHeader(headerName, headerValue, byteArray);
+				}
 			}
-			final int size = formattedCookies.size();
-			final Iterator<Map.Entry<String, List<String>>> iter2 = formattedCookies.entrySet().iterator();
-			for (int i = 0; i < size; i++) {
-				final Map.Entry<String, List<String>> entry = iter2.next();
-				final int listSize = entry.getValue().size();
-				for (int j = 0; j < listSize; j++) {
-					writeHeader(entry.getKey(), entry.getValue().get(j), byteArray);
+			for (int i = 0; i < formattedCookies.length; i++) {
+				final String hdrName = i == 0 ? STR_SET_COOKIE : new StringBuilder(STR_SET_COOKIE.length() + 1).append(
+						STR_SET_COOKIE).append(i + 1).toString();
+				for (int j = 0; j < formattedCookies[i].length; j++) {
+					writeHeader(hdrName, formattedCookies[i][j], byteArray);
 				}
 			}
 			break;
@@ -354,7 +356,7 @@ public class AJPv13Response {
 		 * prefix + http_status_code + http_status_msg (empty string) +
 		 * num_headers (integer)
 		 */
-		final Map<String, List<String>> formattedCookies = servletResponse.getFormatedCookies();
+		final String[][] formattedCookies = servletResponse.getFormatedCookies();
 		String statusMsg = servletResponse.getStatusMsg();
 		if (null == statusMsg) {
 			statusMsg = "";
@@ -370,20 +372,20 @@ public class AJPv13Response {
 		writeInt(servletResponse.getStatus(), byteArray);
 		writeString(statusMsg, byteArray);
 		writeInt(servletResponse.getHeadersSize() + getNumOfCookieHeader(formattedCookies), byteArray);
-		final int headersSize = servletResponse.getHeadersSize();
-		final Iterator<String> iter = servletResponse.getHeaderNames();
-		for (int i = 0; i < headersSize; i++) {
-			final String headerName = iter.next();
-			final String headerValue = servletResponse.getHeader(headerName);
-			writeHeader(headerName, headerValue, byteArray);
+		{
+			final int headersSize = servletResponse.getHeadersSize();
+			final Iterator<String> iter = servletResponse.getHeaderNames();
+			for (int i = 0; i < headersSize; i++) {
+				final String headerName = iter.next();
+				final String headerValue = servletResponse.getHeader(headerName);
+				writeHeader(headerName, headerValue, byteArray);
+			}
 		}
-		final int size = formattedCookies.size();
-		final Iterator<Map.Entry<String, List<String>>> iter2 = formattedCookies.entrySet().iterator();
-		for (int i = 0; i < size; i++) {
-			final Map.Entry<String, List<String>> entry = iter2.next();
-			final int listSize = entry.getValue().size();
-			for (int j = 0; j < listSize; j++) {
-				writeHeader(entry.getKey(), entry.getValue().get(j), byteArray);
+		for (int i = 0; i < formattedCookies.length; i++) {
+			final String hdrName = i == 0 ? STR_SET_COOKIE : new StringBuilder(STR_SET_COOKIE.length() + 1).append(
+					STR_SET_COOKIE).append(i + 1).toString();
+			for (int j = 0; j < formattedCookies[i].length; j++) {
+				writeHeader(hdrName, formattedCookies[i][j], byteArray);
 			}
 		}
 		return byteArray.toByteArray();
@@ -500,33 +502,31 @@ public class AJPv13Response {
 		return sb.toString();
 	}
 
-	private static final int getCookiesSizeInBytes(final Map<String, List<String>> formattedCookies) {
+	private static final int getCookiesSizeInBytes(final String[][] formattedCookies) {
 		int retval = 0;
-		final int size = formattedCookies.size();
-		final Iterator<Map.Entry<String, List<String>>> iter = formattedCookies.entrySet().iterator();
-		for (int i = 0; i < size; i++) {
-			final Map.Entry<String, List<String>> entry = iter.next();
-			/*
-			 * Set-Cookie and Set-Cookie2 is enoced in ajp protocol as integer
-			 * value
-			 */
-			final boolean encodedHeader = headerMap.containsKey(entry.getKey());
-			final int listSize = entry.getValue().size();
-			for (int j = 0; j < listSize; j++) {
-				retval += (encodedHeader ? 2 : (entry.getKey().length() + 3));
-				retval += entry.getValue().get(j).length() + 3;
+		for (int i = 0; i < formattedCookies.length; i++) {
+			final int hdrNameLen;
+			{
+				final String hdrName = i == 0 ? STR_SET_COOKIE : new StringBuilder(STR_SET_COOKIE.length() + 1).append(
+						STR_SET_COOKIE).append(i + 1).toString();
+				/*
+				 * Set-Cookie and Set-Cookie2 is encoded in AJP protocol as an
+				 * integer value
+				 */
+				hdrNameLen = headerMap.containsKey(hdrName) ? 2 : hdrName.length() + 3;
+			}
+			for (int j = 0; j < formattedCookies[i].length; j++) {
+				retval += hdrNameLen;
+				retval += formattedCookies[i][j].length() + 3;
 			}
 		}
 		return retval;
 	}
 
-	private static final int getNumOfCookieHeader(final Map<String, List<String>> formattedCookies) {
+	private static final int getNumOfCookieHeader(final String[][] formattedCookies) {
 		int retval = 0;
-		final int size = formattedCookies.size();
-		final Iterator<Map.Entry<String, List<String>>> iter = formattedCookies.entrySet().iterator();
-		for (int i = 0; i < size; i++) {
-			final Map.Entry<String, List<String>> entry = iter.next();
-			retval += entry.getValue().size();
+		for (int i = 0; i < formattedCookies.length; i++) {
+			retval += formattedCookies[i].length;
 		}
 		return retval;
 	}
