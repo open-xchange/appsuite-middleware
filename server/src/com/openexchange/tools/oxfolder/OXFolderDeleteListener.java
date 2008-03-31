@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
@@ -137,7 +138,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 					}
 					final int userId = delEvent.getId();
 					/*
-					 * Get context's mailadmin
+					 * Get context's admin
 					 */
 					int mailadmin = ctx.getMailadmin();
 					if (mailadmin == -1) {
@@ -199,6 +200,14 @@ public class OXFolderDeleteListener implements DeleteListener {
 						 */
 						OXFolderSQL.handleEntityFolders(userId, mailadmin, lastModified, TABLE_BACKUP_FOLDER,
 								TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
+					}
+					if (!isMailAdmin) {
+						/*
+						 * Update shared folder's last-modified timestamp to
+						 * enforce a folder repaint in AJAX-UI
+						 */
+						OXFolderSQL.updateLastModified(FolderObject.SYSTEM_SHARED_FOLDER_ID, lastModified, mailadmin,
+								writeCon, ctx);
 					}
 					if (performTransaction) {
 						writeCon.commit();
@@ -288,6 +297,14 @@ public class OXFolderDeleteListener implements DeleteListener {
 					 */
 					OXFolderSQL.handleEntityPermissions(groupId, mailadmin, lastModified, TABLE_BACKUP_FOLDER,
 							TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
+					/*
+					 * Update shared and public folders' last-modified timestamp
+					 * to enforce a folder repaint in AJAX-UI
+					 */
+					OXFolderSQL.updateLastModified(FolderObject.SYSTEM_SHARED_FOLDER_ID, lastModified, mailadmin,
+							writeCon, ctx);
+					OXFolderSQL.updateLastModified(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, lastModified, mailadmin,
+							writeCon, ctx);
 					if (performTransaction) {
 						writeCon.commit();
 						writeCon.setAutoCommit(true);
