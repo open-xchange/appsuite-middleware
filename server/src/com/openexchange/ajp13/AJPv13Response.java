@@ -69,8 +69,6 @@ public class AJPv13Response {
 
 	private static final String STR_SET_COOKIE = "Set-Cookie";
 
-	private static final int INT_150 = 150;
-
 	public static final int MAX_INT_VALUE = 65535;
 
 	public static final int MAX_PACKAGE_SIZE = 8192;
@@ -464,6 +462,7 @@ public class AJPv13Response {
 	 */
 	private static final int getHeaderSizeInBytes(final HttpServletResponseWrapper servletResponse) {
 		int retval = 0;
+		final StringBuilder sb = new StringBuilder(128);
 		final Set<Map.Entry<String, String[]>> set = servletResponse.getHeaderEntrySet();
 		for (Map.Entry<String, String[]> hdr : set) {
 			if (headerMap.containsKey(hdr.getKey())) {
@@ -478,26 +477,20 @@ public class AJPv13Response {
 				 */
 				retval += hdr.getKey().length() + 3;
 			}
-			retval += array2string(hdr.getValue()).length() + 3;
+			sb.setLength(0);
+			retval += array2string(hdr.getValue(), sb).length() + 3;
 		}
 		return retval;
 	}
 
-	private static final String array2string(final String[] sa) {
-		if (sa == null) {
+	private static final String array2string(final String[] sa, final StringBuilder sb) {
+		if (sa == null || sa.length == 0) {
 			return STR_EMPTY;
 		}
-		final int iMax = sa.length - 1;
-		if (iMax == -1) {
-			return STR_EMPTY;
-		}
-		final StringBuilder sb = new StringBuilder(INT_150);
 		sb.append(sa[0]);
-		if (iMax > 0) {
-			for (int i = 1; i <= iMax; i++) {
-				sb.append(',');
-				sb.append(sa[i]);
-			}
+		for (int i = 1; i < sa.length; i++) {
+			sb.append(',');
+			sb.append(sa[i]);
 		}
 		return sb.toString();
 	}
