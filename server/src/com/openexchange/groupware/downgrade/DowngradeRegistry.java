@@ -66,7 +66,69 @@ import com.openexchange.tools.oxfolder.downgrade.OXFolderDowngradeListener;
  * {@link DowngradeRegistry} - A registry for instances of
  * {@link DowngradeListener} whose
  * {@link DowngradeListener#downgradePerformed(DowngradeEvent)} methods are
- * executed in the order added to this registry.
+ * executed.
+ * <p>
+ * The added listeners should complete the following tasks:
+ * <ul>
+ * <li><b>Calendar/Task</b><br>
+ * If user lost access to calendar/task module the following actions have to be
+ * performed.
+ * <ul>
+ * <li>Delete all module's private items</li>
+ * <li>Remove affected user from module's private items' participants. If no
+ * participant remains, remove the item</li>
+ * <li>Delete all attachments held by the items deleted through previous steps</li>
+ * <li>Delete all links to/from the items deleted through previous steps</li>
+ * <li>Delete all reminder bound to the items deleted through previous steps</li>
+ * <li>Delete all module's private folders except the user's private default
+ * folder</li>
+ * <li>Delete all share permissions held by the user's private default folder</li>
+ * <li>Delete all permissions held by module's public folders which grant
+ * access for affected user. If necessary reassign to context's admin rather
+ * than delete the permission in question</li>
+ * </ul>
+ * </li>
+ * 
+ * <li><b>Infostore</b><br>
+ * If user lost access to infostore module the following actions have to be
+ * performed.
+ * <ul>
+ * <li>Delete all items and folders located below user's default infostore
+ * folder</li>
+ * <li>Delete all share permissions held by the user's default infostore folder</li>
+ * <li>Delete all permissions held by other infostore folders which grant
+ * access for affected user. If necessary reassign to context's admin rather
+ * than delete the permission in question</li>
+ * <li>Delete all links to remote infostore items</li>
+ * <li>Delete all WebDAV properties and locks held by remote infostore folders</li>
+ * </ul>
+ * </li>
+ * 
+ * <li><b>Full public folder access</b><br>
+ * If user lost full public folder access he is no more able to see affected
+ * public data, thus nothing has to be deleted here.</li>
+ * <ul>
+ * </ul>
+ * 
+ * <li><b>Full shared folder access</b><br>
+ * If user lost full shared folder access neither sharing nor viewing shared
+ * folders is possible
+ * <ul>
+ * <li>Delete all share permissions held by user's private folders</li>
+ * <li>Delete all share permissions granted to affected by other private
+ * folders</li>
+ * </ul>
+ * </li>
+ * 
+ * <li><b>Delegating tasks</b><br>
+ * If user lost capability to delegate tasks all delegations of user's tasks
+ * have to be removed.
+ * <ul>
+ * <li>Delete additional participants from task items created by user</li>
+ * </ul>
+ * </li>
+ * 
+ * </ul>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
