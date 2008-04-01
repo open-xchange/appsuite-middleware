@@ -264,7 +264,7 @@ public enum Component {
      */
     PERMISSION("PERMISSION"),
     /**
-     * Any errors related to handling a delete event
+     * Any errors related to handling a <code></code>
      */
     DELETE_EVENT("DEL"),
     /**
@@ -278,7 +278,12 @@ public enum Component {
     /**
      * Any errors related to handling a downgrade event
      */
-    DOWNGRADE_EVENT("DOW");
+    DOWNGRADE_EVENT("DOW"),
+    /**
+     * Consistency Tool
+     */
+    CONSISTENCY("CSTY");
+    ;
 
     /**
      * The abbrevation for components.
