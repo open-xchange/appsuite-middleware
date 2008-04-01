@@ -54,6 +54,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Comparator;
+import java.util.SortedSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -451,7 +453,11 @@ public class QuotaFileStorage extends FileStorage {
 		
 	}
 
-	private static final QuotaFileStorageException addContextInfo(final FileStorageException x, final Context ctx) {
+    public SortedSet<String> getFileList() throws FileStorageException {
+        return delegate.getFileList();
+    }
+
+    private static final QuotaFileStorageException addContextInfo(final FileStorageException x, final Context ctx) {
 		return new QuotaFileStorageException(QuotaFileStorageException.Code.UNDERLYING_EXCEPTION, x, String.valueOf(ctx.getFilestoreId()), String.valueOf(ctx.getContextId()), x.getMessage());
 	}
 	

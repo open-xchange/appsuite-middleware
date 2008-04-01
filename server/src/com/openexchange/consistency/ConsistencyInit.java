@@ -74,9 +74,6 @@ public class ConsistencyInit implements Initialization {
     private static final Log LOG = LogFactory.getLog(ConsistencyInit.class);
     private static final ConsistencyExceptionFactory EXCEPTIONS = new ConsistencyExceptionFactory(ConsistencyInit.class);
 
-    private ObjectName name;
-
-
     @OXThrows(category = AbstractOXException.Category.INTERNAL_ERROR, desc = "", exceptionId = 1, msg = "Could not register Consistency MBean. Internal Error: %s")
     public void start() throws AbstractOXException {
         ConsistencyMBean bean = new OsgiOXConsistency();
@@ -107,9 +104,10 @@ public class ConsistencyInit implements Initialization {
     private void registerBean(ObjectName name, ConsistencyMBean bean) throws Exception {
         ManagementService management = discoverManagementService();
         if(management == null) {
-            LOG.error("Can not find JMX management service, skipping export of consistency mbean. The consistency tool will not be available on this server instance.");
+            LOG.error("Can not find JMX management service, skipping export of consistency mbean. The consistency tool will not be available on this server instance until the management service becomes available.");
             return;            
         }
+        LOG.info("Registering consistency MBean under name: "+name);
         management.registerMBean(name, bean);
 
     }
@@ -119,6 +117,7 @@ public class ConsistencyInit implements Initialization {
         if(management == null) {
             LOG.info("It seems like the management service has gone away. Skipping unregistration of the consistency mbean.");
         }
+        LOG.info("Unregistering consistency MBean with name "+name);
         management.unregisterMBean(name);
     }
 

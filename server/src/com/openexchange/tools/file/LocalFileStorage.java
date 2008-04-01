@@ -56,6 +56,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.Set;
+import java.util.HashSet;
 
 import javax.activation.MimetypesFileTypeMap;
 
@@ -94,6 +98,11 @@ public class LocalFileStorage extends FileStorage {
      * Location of the storage.
      */
     private final File storage;
+
+    private static final Set<String> SPECIAL_FILENAMES = new HashSet(){{
+        add(LOCK_FILENAME);
+        add(STATEFILENAME);
+    }};
 
     /**
      * Default constructor.
@@ -291,4 +300,30 @@ public class LocalFileStorage extends FileStorage {
         }
     }
 
+    /**
+     * Optimized version of superclasses method. Lists all file IDs excluding
+     * the state file.
+     * @return SortedSet<String>
+     * @throws FileStorageException
+     */
+    @Override
+    public SortedSet<String> getFileList() throws FileStorageException {
+        SortedSet<String> allIds = new TreeSet<String>();
+        listRecursively(allIds, "", storage);
+        return allIds;
+    }
+
+    private void listRecursively(SortedSet<String> allIds, String prefix, File file) {
+        if(SPECIAL_FILENAMES.contains(file.getName())) {
+            // Skip
+            return;
+        }
+        if(file.isDirectory()) {
+            for(File subfile : file.listFiles()) {
+                listRecursively(allIds, prefix+"/"+file.getName(), subfile);  // Adds an illegal /storage_name/ in the beginning
+            }
+        } else {
+            allIds.add(prefix.substring(2+storage.getName().length())+"/"+file.getName()); // Gets rid of that illegal prefix
+        }
+    }
 }

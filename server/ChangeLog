@@ -1,3 +1,7 @@
+* 2008-04-01 - francisco.laguna@open-xchange.com
+ - Consistency Tool migrated to JMX
+
+
 * 2008-03-31 - thorben.betten@open-xchange.com
 
  - Bugfix #11092: Fixed creation of mail folders

@@ -665,7 +665,8 @@ public class DatabaseImpl extends DBService {
 						+ " WHERE id=? AND  " + basetablename + ".cid=?");
 
 		try {
-			PreparedStatement stmt = writecon.prepareStatement(version_select
+            startDBTransaction();
+            PreparedStatement stmt = writecon.prepareStatement(version_select
 					.toString());
 			stmt.setString(1, identifier);
 			stmt.setInt(2, ctx.getContextId());
@@ -705,11 +706,14 @@ public class DatabaseImpl extends DBService {
 			stmt.setString(2, identifier);
 			retval[1] = stmt.executeUpdate();
 			stmt.close();
-		} catch (final SQLException e) {
-			throw new OXException("Error while removing documents from table.",
+            commitDBTransaction();
+        } catch (final SQLException e) {
+            rollbackDBTransaction();
+            throw new OXException("Error while removing documents from table.",
 					e);
 		} finally {
-			releaseWriteConnection(ctx, writecon);
+            finishDBTransaction();
+            releaseWriteConnection(ctx, writecon);
 		}
 		return retval;
 	}
@@ -745,7 +749,8 @@ public class DatabaseImpl extends DBService {
 						+ " SET file_store_location=?,  description=?, file_mimetype=? "
 						+ "WHERE file_store_location=? AND cid=?");
 		try {
-			String olddescription = null;
+            startDBTransaction();
+            String olddescription = null;
 			PreparedStatement stmt = writecon
 					.prepareStatement(select_description.toString());
 			stmt.setString(1, oldidentifier);
@@ -769,11 +774,14 @@ public class DatabaseImpl extends DBService {
 			stmt.setInt(5, ctx.getContextId());
 			retval = stmt.executeUpdate();
 			stmt.close();
-		} catch (final SQLException e) {
-			throw new OXException(
+            commitDBTransaction();
+        } catch (final SQLException e) {
+            rollbackDBTransaction();
+            throw new OXException(
 					"Error while getting permissions for folder.", e);
 		} finally {
-			releaseWriteConnection(ctx, writecon);
+            finishDBTransaction();
+            releaseWriteConnection(ctx, writecon);
 		}
 		return retval;
 	}
@@ -785,7 +793,8 @@ public class DatabaseImpl extends DBService {
 		PreparedStatement stmt = null;
 		Connection writeCon = null;
 		try {
-			final int folder_id = new OXFolderAccess(ctx).getDefaultFolder(user.getId(), FolderObject.INFOSTORE).getObjectID();
+            startDBTransaction();
+            final int folder_id = new OXFolderAccess(ctx).getDefaultFolder(user.getId(), FolderObject.INFOSTORE).getObjectID();
 			writeCon = getWriteConnection(ctx);
 
 			final int infostore_id = IDGenerator
@@ -847,14 +856,18 @@ public class DatabaseImpl extends DBService {
 			retval[2] = stmt.executeUpdate();
 			document.setVersion(1);
 			document.setId(infostore_id);
-		} catch (final SQLException e) {
-			LOG.error("", e);
+            commitDBTransaction();
+        } catch (final SQLException e) {
+            rollbackDBTransaction();
+            LOG.error("", e);
 			throw new OXException(e);
 		} catch (final OXException e) {
-			LOG.error("", e);
+            rollbackDBTransaction();
+            LOG.error("", e);
 			throw new OXException(e);
 		} finally {
-			close(stmt, null);
+            finishDBTransaction();
+            close(stmt, null);
 			releaseWriteConnection(ctx, writeCon);
 		}
 		return retval;

@@ -68,7 +68,7 @@ import java.io.IOException;
  */
 public class ConsistencyCheck {
     public static void main(String[] args) {
-        // in host 127.0.0.1:9999 (repair | list) (errors in) (database 1 | filestore 1 | context 1 | all ) (with policies) (missing_file_for_infoitem : (delete | create_dummy)) (missing_file_for_attachment : (delete | create_dummy)) (missing_entry_for_file : (delete | create_admin_infoitem))
+        // in host 127.0.0.1:9999 (repair | list (missing | unassigned) (errors in) (database 1 | filestore 1 | context 1 | all ) (with policies) (missing_file_for_infoitem : (delete | create_dummy)) (missing_file_for_attachment : (delete | create_dummy)) (missing_entry_for_file : (delete | create_admin_infoitem))
         SimpleLexer lexer = new SimpleLexer(args);
         Configuration config = new Configuration();
 
@@ -88,8 +88,8 @@ public class ConsistencyCheck {
         if(lexer.consume("repair")) {
             config.setAction("repair");
         } else if (lexer.consume("list")) {
-            if(lexer.consume("misssing")) {
-                config.setAction("list");
+            if(lexer.consume("missing")) {
+                config.setAction("listMissing");
             } else if (lexer.consume("unassigned")) {
                 config.setAction("listUnassigned");
             } else {
@@ -161,6 +161,7 @@ public class ConsistencyCheck {
 
         try {
             config.run();
+            System.out.println("Done");
         } catch (Exception x) {
             x.printStackTrace();
         }
@@ -171,6 +172,7 @@ public class ConsistencyCheck {
     private static boolean parseId(SimpleLexer lexer, Configuration config) {
         try {
             config.setSourceId(Integer.parseInt(lexer.getCurrent()));
+            lexer.advance();
             return true;
         } catch (NumberFormatException nfe) {
             return false;
@@ -218,6 +220,9 @@ public class ConsistencyCheck {
         }
 
         public String getCurrent() {
+            if(eol()) {
+                return "";
+            }
             return args[index];
         }
 
@@ -257,7 +262,7 @@ public class ConsistencyCheck {
         }
 
         public boolean eol() {
-            return index == args.length;
+            return index >= args.length;
         }
     }
 
@@ -331,7 +336,11 @@ public class ConsistencyCheck {
         }
 
         private void repair() throws AbstractOXException, IOException {
-        try {
+            if(policies.isEmpty()) {
+                System.out.println("Nothing to be done. Please specify one or more resolver policies");
+                return;
+            }
+            try {
                 connect();
                 if("database".equals(source)) {
                     consistency.repairFilesInDatabase(sourceId, getPolicyString());

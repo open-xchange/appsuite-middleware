@@ -61,6 +61,7 @@ import com.openexchange.database.Pools;
 import com.openexchange.management.ManagementService;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.consistency.ConsistencyInit;
 
 /**
  * {@link ManagementServiceTracker}
@@ -101,7 +102,8 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
 			managementService.registerMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true),
 					mailInterfaceMonitor);
 			Pools.getInstance().registerMBeans();
-		} catch (final MalformedObjectNameException e) {
+            new ConsistencyInit().start();
+        } catch (final MalformedObjectNameException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		} catch (final NullPointerException e) {
 			LOG.error(e.getLocalizedMessage(), e);
@@ -122,7 +124,8 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
 					true));
 			managementService.unregisterMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true));
 			Pools.getInstance().unregisterMBeans();
-		} catch (final MalformedObjectNameException e) {
+            new ConsistencyInit().stop();
+        } catch (final MalformedObjectNameException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		} catch (final NullPointerException e) {
 			LOG.error(e.getLocalizedMessage(), e);

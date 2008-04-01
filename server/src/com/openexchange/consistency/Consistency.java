@@ -84,6 +84,7 @@ public abstract class Consistency implements ConsistencyMBean {
     private static final Log LOG = LogFactory.getLog(Consistency.class);
 
     public List<String> listMissingFilesInContext(int contextId) throws AbstractOXException {
+        LOG.info("Listing missing files in context "+contextId);
         DoNothingSolver doNothing = new DoNothingSolver();
         RecordSolver recorder = new RecordSolver();
         Context ctx = getContext(contextId);
@@ -93,19 +94,23 @@ public abstract class Consistency implements ConsistencyMBean {
 
 
     public Map<Integer, List<String>> listMissingFilesInFilestore(int filestoreId) throws AbstractOXException {
+        LOG.info("Listing missing files in filestore "+filestoreId);
         return listMissing(getContextsForFilestore(filestoreId));
     }
 
 
     public Map<Integer, List<String>> listMissingFilesInDatabase(int databaseId) throws AbstractOXException {
+        LOG.info("List missing files in database "+databaseId);
         return listMissing(getContextsForDatabase(databaseId));
     }
 
     public Map<Integer, List<String>> listAllMissingFiles() throws AbstractOXException {
+        LOG.info("List all missing files");
         return listMissing(getAllContexts());
     }
 
     public List<String> listUnassignedFilesInContext(int contextId) throws AbstractOXException {
+        LOG.info("List all unassigned files in context "+contextId);
         DoNothingSolver doNothing = new DoNothingSolver();
         RecordSolver recorder = new RecordSolver();
         Context ctx = getContext(contextId);
@@ -114,14 +119,17 @@ public abstract class Consistency implements ConsistencyMBean {
     }
 
     public Map<Integer, List<String>> listUnassignedFilesInFilestore(int filestoreId) throws AbstractOXException {
+        LOG.info("List all unassigned files in filestore "+filestoreId);
         return listUnassigned(getContextsForFilestore(filestoreId));
     }
 
     public Map<Integer, List<String>> listUnassignedFilesInDatabase(int databaseId) throws AbstractOXException {
+        LOG.info("List all unassigned files in database "+databaseId);
         return listUnassigned(getContextsForDatabase(databaseId));
     }
 
     public Map<Integer, List<String>> listAllUnassignedFiles() throws AbstractOXException {
+        LOG.info("List all unassigned files");
         return listUnassigned(getAllContexts());
     }
 
@@ -191,7 +199,7 @@ public abstract class Consistency implements ConsistencyMBean {
 	}
 
 	private void erroroutput(final Exception e) {
-	    LOG.debug(e.getMessage(), e);
+	    LOG.error(e.getMessage(), e);
 	}
 
 	private void outputSet(final SortedSet<String> set) {
@@ -220,21 +228,31 @@ public abstract class Consistency implements ConsistencyMBean {
 	}
 
 	private void checkOneContext(final Context ctx, ProblemSolver dbSolver, ProblemSolver attachmentSolver, ProblemSolver fileSolver, DatabaseImpl database, AttachmentBase attach, FileStorage stor) throws AbstractOXException {
-		// We believe in the worst case, so lets check the storage first, so
+
+        // We believe in the worst case, so lets check the storage first, so
 		// that the state file is recreated
-		stor.recreateStateFile();
-    
-		final SortedSet<String> filestoreset = stor.getFileList();
-		final SortedSet<String> attachmentset =
+		LOG.info("Checking context "+ctx.getContextId()+". Using solvers db: "+dbSolver.description()+" attachments: "+attachmentSolver.description()+" files: "+fileSolver.description());
+        stor.recreateStateFile();
+
+        LOG.info("Listing all files in filestore");
+        final SortedSet<String> filestoreset = stor.getFileList();
+        LOG.info("Found "+filestoreset.size()+" files in the filestore for this context");
+        LOG.info("Loading all attachments");
+        final SortedSet<String> attachmentset =
 			attach.getAttachmentFileStoreLocationsperContext(ctx);
-		SortedSet<String> dbfileset;
+        LOG.info("Found "+attachmentset.size()+" attachments");
+        SortedSet<String> dbfileset;
 		try {
-			dbfileset = database.getDocumentFileStoreLocationsperContext(ctx);
-			final SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset);
+            LOG.info("Loading all infostore filestore locations");
+            dbfileset = database.getDocumentFileStoreLocationsperContext(ctx);
+            LOG.info("Found "+dbfileset.size()+" infostore filepaths");
+            final SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset);
 			joineddbfileset.addAll(attachmentset);
 
+            LOG.info("Found "+joineddbfileset.size()+" filestore ids in total. There are "+filestoreset.size()+" files in the filespool. A difference of "+Math.abs(joineddbfileset.size()-filestoreset.size()));
 
-			// Build the difference set of the database set, so that the final
+
+            // Build the difference set of the database set, so that the final
 			// dbfileset contains all the members that aren't in the filestoreset
 			if (diffset(dbfileset, filestoreset, "database list",
 					"filestore list")) {
@@ -344,12 +362,18 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static interface ProblemSolver {
         public void solve(Context ctx, Set<String> problems) throws OXException ;
+
+        String description();
     }
 
     private static class DoNothingSolver implements ProblemSolver {
 
         public void solve(Context ctx, Set<String> problems) throws OXException {
             // Ignore
+        }
+
+        public String description() {
+            return "Do Nothing";
         }
     }
 
@@ -359,6 +383,10 @@ public abstract class Consistency implements ConsistencyMBean {
 
         public void solve(Context ctx, Set<String> problems) throws OXException {
             memory.addAll(problems);
+        }
+
+        public String description() {
+            return "Remember in List";
         }
 
         public List<String> getProblems() {
@@ -403,7 +431,6 @@ public abstract class Consistency implements ConsistencyMBean {
             for (String old_identifier : problems) {
                 try {
                     final String identifier = createDummyFile();
-                    database.setTransactional(true);
                     database.startTransaction();
                     final int changed = database.modifyDocument(old_identifier,
                             identifier, "\nCaution! The file has changed",
@@ -415,9 +442,9 @@ public abstract class Consistency implements ConsistencyMBean {
                                 "dummy identifier " + identifier);
                     }
                 } catch (FileStorageException e) {
-                    LOG.debug("", e);
+                    LOG.error("", e);
                 } catch (OXException e) {
-                    LOG.debug("", e);
+                    LOG.error("", e);
                     try {
                         database.rollback();
                         return;
@@ -433,6 +460,10 @@ public abstract class Consistency implements ConsistencyMBean {
                 }
             }
         }
+
+        public String description() {
+            return "Create dummy file for infoitem";
+        }
     }
 
     private static class CreateDummyFileForAttachment extends CreateDummyFile implements ProblemSolver {
@@ -445,51 +476,55 @@ public abstract class Consistency implements ConsistencyMBean {
 
 
         public void solve(Context ctx, Set<String> problems) throws OXException {
-         /*
-		 * Here we operate in two stages. First we create a dummy entry in the
-		 * filestore. Second we update the Entries in the database
-		 */
-		final int size = problems.size();
-		final Iterator<String> it = problems.iterator();
-		for (int k = 0; k < size; k++) {
-			try {
-				final String identifier = createDummyFile();
-				final String old_identifier = it.next();
-				attachments.setTransactional(true);
-				attachments.startTransaction();
-				final int changed = attachments.modifyAttachment(old_identifier, identifier,
-						"\nCaution! The file has changed", "text/plain", ctx);
-				attachments.commit();
-				if (changed == 1 && LOG.isInfoEnabled()) {
-					LOG.info("Created dummy entry for: " + old_identifier +
-							". New identifier is: " + identifier);
-				}
-			} catch (FileStorageException e) {
-				LOG.debug("", e);
-			} catch (TransactionException e) {
-				LOG.debug("", e);
-				try {
-					attachments.rollback();
-					return;
-				} catch (TransactionException e1) {
-					LOG.debug("", e1);
-				}
-			} catch (OXException e) {
-				LOG.debug("", e);
-				try {
-					attachments.rollback();
-					return;
-				} catch (TransactionException e1) {
-					LOG.debug("", e1);
-				}
-			} finally {
-				try {
-					attachments.finish();
-				} catch (TransactionException e) {
-					LOG.debug("", e);
-				}
-			}
-		}
+            /*
+            * Here we operate in two stages. First we create a dummy entry in the
+            * filestore. Second we update the Entries in the database
+            */
+            final int size = problems.size();
+            final Iterator<String> it = problems.iterator();
+            for (int k = 0; k < size; k++) {
+                try {
+                    final String identifier = createDummyFile();
+                    final String old_identifier = it.next();
+                    attachments.setTransactional(true);
+                    attachments.startTransaction();
+                    final int changed = attachments.modifyAttachment(old_identifier, identifier,
+                            "\nCaution! The file has changed", "text/plain", ctx);
+                    attachments.commit();
+                    if (changed == 1 && LOG.isInfoEnabled()) {
+                        LOG.info("Created dummy entry for: " + old_identifier +
+                                ". New identifier is: " + identifier);
+                    }
+                } catch (FileStorageException e) {
+                    LOG.error("", e);
+                } catch (TransactionException e) {
+                    LOG.error("", e);
+                    try {
+                        attachments.rollback();
+                        return;
+                    } catch (TransactionException e1) {
+                        LOG.error("", e1);
+                    }
+                } catch (OXException e) {
+                    LOG.error("", e);
+                    try {
+                        attachments.rollback();
+                        return;
+                    } catch (TransactionException e1) {
+                        LOG.debug("", e1);
+                    }
+                } finally {
+                    try {
+                        attachments.finish();
+                    } catch (TransactionException e) {
+                        LOG.debug("", e);
+                    }
+                }
+            }
+        }
+
+        public String description() {
+            return "Create dummy file for attachment";
         }
 
     }
@@ -514,8 +549,12 @@ public abstract class Consistency implements ConsistencyMBean {
 			 */
                 storage.recreateStateFile();
             } catch (FileStorageException e) {
-                LOG.debug("", e);
+                LOG.error("", e);
             }
+        }
+
+        public String description() {
+            return "delete file";
         }
     }
 
@@ -529,36 +568,40 @@ public abstract class Consistency implements ConsistencyMBean {
 
         public void solve(Context ctx, Set<String> problems) throws OXException {
             // Now we go through the set an delete each superfluous entry:
-		for (String identifier : problems) {
-			try {
-				database.setTransactional(true);
-				database.startTransaction();
-				final int[] numbers = database.removeDocument(identifier, ctx);
-				database.commit();
-				if (numbers[0] == 1 && LOG.isInfoEnabled()) {
-					LOG.info("Have to change infostore version number " +
-							"for entry: " + identifier);
-				}
-				if (numbers[1] == 1 && LOG.isInfoEnabled()) {
-					LOG.info("Deleted entry " + identifier + " from " +
-							"infostore_documents.");
-				}
-			} catch (OXException e) {
-				LOG.debug("", e);
-				try {
-					database.rollback();
-					return;
-				} catch (TransactionException e1) {
-					LOG.debug("", e1);
-				}
-			} finally {
-				try {
-					database.finish();
-				} catch (TransactionException e) {
-					LOG.debug("", e);
-				}
-			}
-		}
+            for (String identifier : problems) {
+                try {
+                    database.startTransaction();
+                    database.setRequestTransactional(true);
+                    final int[] numbers = database.removeDocument(identifier, ctx);
+                    database.commit();
+                    if (numbers[0] == 1 && LOG.isInfoEnabled()) {
+                        LOG.info("Have to change infostore version number " +
+                                "for entry: " + identifier);
+                    }
+                    if (numbers[1] == 1 && LOG.isInfoEnabled()) {
+                        LOG.info("Deleted entry " + identifier + " from " +
+                                "infostore_documents.");
+                    }
+                } catch (OXException e) {
+                    LOG.error("", e);
+                    try {
+                        database.rollback();
+                        return;
+                    } catch (TransactionException e1) {
+                        LOG.debug("", e1);
+                    }
+                } finally {
+                    try {
+                        database.finish();
+                    } catch (TransactionException e) {
+                        LOG.debug("", e);
+                    }
+                }
+            }
+        }
+
+        public String description() {
+            return "delete infoitem";
         }
     }
 
@@ -569,47 +612,51 @@ public abstract class Consistency implements ConsistencyMBean {
         }
         public void solve(Context ctx, Set<String> problems) throws OXException {
             // Now we go through the set an delete each superfluous entry:
-		final Iterator<String> it = problems.iterator();
-		while (it.hasNext()) {
-			try {
-				final String identifier = it.next();
-				attachments.setTransactional(true);
-				attachments.startTransaction();
-				final int[] numbers = attachments.removeAttachment(identifier, ctx);
-				attachments.commit();
-				if (numbers[0] ==  1 && LOG.isInfoEnabled()) {
-					LOG.info("Inserted entry for identifier " + identifier + " and Context " + ctx.getContextId()
-							+ " in " + "del_attachments");
-				}
-				if (numbers[1] == 1 && LOG.isInfoEnabled()) {
-					LOG.info("Removed attachment database entry for: " + identifier);
-				}
-			} catch (TransactionException e) {
-				LOG.debug("", e);
-				try {
-					attachments.rollback();
-					return;
-				} catch (TransactionException e1) {
-					LOG.debug("", e1);
-				}
-				return;
-			} catch (OXException e) {
-				LOG.debug("", e);
-				try {
-					attachments.rollback();
-					return;
-				} catch (TransactionException e1) {
-					LOG.debug("", e1);
-				}
-				return;
-			} finally {
-				try {
-					attachments.finish();
-				} catch (TransactionException e) {
-					LOG.debug("", e);
-				}
-			}
-		}
+            final Iterator<String> it = problems.iterator();
+            while (it.hasNext()) {
+                try {
+                    final String identifier = it.next();
+                    attachments.setTransactional(true);
+                    attachments.startTransaction();
+                    final int[] numbers = attachments.removeAttachment(identifier, ctx);
+                    attachments.commit();
+                    if (numbers[0] ==  1 && LOG.isInfoEnabled()) {
+                        LOG.info("Inserted entry for identifier " + identifier + " and Context " + ctx.getContextId()
+                                + " in " + "del_attachments");
+                    }
+                    if (numbers[1] == 1 && LOG.isInfoEnabled()) {
+                        LOG.info("Removed attachment database entry for: " + identifier);
+                    }
+                } catch (TransactionException e) {
+                    LOG.debug("", e);
+                    try {
+                        attachments.rollback();
+                        return;
+                    } catch (TransactionException e1) {
+                        LOG.debug("", e1);
+                    }
+                    return;
+                } catch (OXException e) {
+                    LOG.error("", e);
+                    try {
+                        attachments.rollback();
+                        return;
+                    } catch (TransactionException e1) {
+                        LOG.debug("", e1);
+                    }
+                    return;
+                } finally {
+                    try {
+                        attachments.finish();
+                    } catch (TransactionException e) {
+                        LOG.debug("", e);
+                    }
+                }
+            }
+        }
+
+        public String description() {
+            return "delete attachment";
         }
     }
 
@@ -645,7 +692,6 @@ public abstract class Consistency implements ConsistencyMBean {
                     try {
                         document.setFileSize(storage.getFileSize(identifier));
                         document.setFileMIMEType(storage.getMimeType(identifier));
-                        database.setTransactional(true);
                         database.startTransaction();
                         final int[] numbers = database.saveDocumentMetadata(identifier, document, user, ctx);
                         database.commit();
@@ -655,7 +701,7 @@ public abstract class Consistency implements ConsistencyMBean {
                                     "a new document");
                         }
                     } catch (FileStorageException e) {
-                        LOG.debug("", e);
+                        LOG.error("", e);
                         try {
                             database.rollback();
                             return;
@@ -663,7 +709,7 @@ public abstract class Consistency implements ConsistencyMBean {
                             LOG.debug("", e1);
                         }
                     } catch (OXException e) {
-                        LOG.debug("", e);
+                        LOG.error("", e);
                         try {
                             database.rollback();
                             return;
@@ -680,8 +726,12 @@ public abstract class Consistency implements ConsistencyMBean {
                 }
 
             } catch (LdapException e) {
-                LOG.debug("", e);
+                LOG.error("", e);
             }
+        }
+
+        public String description() {
+            return "create infoitem";
         }
     }
 }

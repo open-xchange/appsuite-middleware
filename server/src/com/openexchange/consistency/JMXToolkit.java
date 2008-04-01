@@ -64,7 +64,7 @@ public class JMXToolkit {
     public static ObjectName getObjectName() {
         try {
             if (name == null) {
-                name = new ObjectName("com.openexchange.consistency", "name", "FilestoreConsistency");
+                name = new ObjectName("com.openexchange.consistency.Consistency", "name", "FilestoreConsistency");
             }
             return name;
         } catch (MalformedObjectNameException e) {
