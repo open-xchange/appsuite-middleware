@@ -12,6 +12,10 @@ BuildRequires:  ant open-xchange-common open-xchange-global
 %if 0%{?suse_version}
 BuildRequires:  java-1_5_0-sun-devel
 %endif
+%if 0%{?rhel_version}
+# libgcj seems to be installed whether we want or not and libgcj needs cairo
+BuildRequires:  cairo java-1.5.0-sun-devel
+%endif
 %if 0%{?fedora_version}
 BuildRequires:  java-devel-icedtea
 %endif
