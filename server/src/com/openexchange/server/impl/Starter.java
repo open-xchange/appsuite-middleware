@@ -147,7 +147,12 @@ public class Starter implements Initialization {
 	/**
 	 * Responsible for starting and stopping the EventQueue
 	 */
-	new com.openexchange.event.impl.EventInit() };
+	new com.openexchange.event.impl.EventInit(),
+	/**
+	 * Downgrade registry start-up
+	 */
+	com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance()
+	};
 
 	/**
 	 * This contains the components that must be started if the admin uses APIs
