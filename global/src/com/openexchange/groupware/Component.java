@@ -264,7 +264,7 @@ public enum Component {
      */
     PERMISSION("PERMISSION"),
     /**
-     * Any errors related to handling a <code></code>
+     * Any errors related to handling a delete event
      */
     DELETE_EVENT("DEL"),
     /**
@@ -274,7 +274,11 @@ public enum Component {
     /**
      * Any errors related to an OSGi service
      */
-    SERVICE("SRV");
+    SERVICE("SRV"),
+    /**
+     * Any errors related to handling a downgrade event
+     */
+    DOWNGRADE_EVENT("DOW");
 
     /**
      * The abbrevation for components.
