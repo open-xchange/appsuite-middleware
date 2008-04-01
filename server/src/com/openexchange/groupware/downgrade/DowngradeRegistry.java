@@ -94,11 +94,9 @@ public final class DowngradeRegistry {
 	private static DowngradeRegistry instance;
 
 	/**
-	 * Gets the singleton instance of {@link DowngradeRegistry}
-	 * 
-	 * @return The singleton instance of {@link DowngradeRegistry}
+	 * Initializes the singleton instance of {@link DowngradeRegistry}
 	 */
-	public static DowngradeRegistry getInstance() {
+	static void initInstance() {
 		if (!INITIALIZED.get()) {
 			synchronized (INITIALIZED) {
 				if (instance == null) {
@@ -108,6 +106,26 @@ public final class DowngradeRegistry {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Releases the singleton instance of {@link DowngradeRegistry}
+	 */
+	static void releaseInstance() {
+		if (INITIALIZED.get()) {
+			synchronized (INITIALIZED) {
+				if (instance != null) {
+					instance = null;
+					INITIALIZED.set(false);
+				}
+			}
+		}
+	}
+
+	/**
+	 * @return The singleton instance of {@link DowngradeRegistry}
+	 */
+	public static DowngradeRegistry getInstance() {
 		return instance;
 	}
 
