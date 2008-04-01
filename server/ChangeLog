@@ -1,6 +1,7 @@
 * 2008-04-01 - francisco.laguna@open-xchange.com
  - Consistency Tool migrated to JMX
-
+ - Do not remove infoitems in every context, when a user is deleted. Only
+   delete infoitems in the context in which the user was removed
 
 * 2008-03-31 - thorben.betten@open-xchange.com
 

@@ -73,7 +73,7 @@ public class InfostoreDelete implements DeleteListener {
 		provider.setReadConnection(readCon);
 		provider.setWriteConnection(writeCon);
 		try {
-			database.removeUser(sqlDelEvent.getId(), null, new ServerSessionAdapter(sqlDelEvent
+			database.removeUser(sqlDelEvent.getId(), sqlDelEvent.getContext(), new ServerSessionAdapter(sqlDelEvent
 					.getSession(), sqlDelEvent.getContext()));
 		} catch (final OXException e) {
 			throw new DeleteFailedException(e);
