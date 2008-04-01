@@ -193,26 +193,20 @@ public final class DowngradeRegistry {
 
 	private void init() {
 		/*
-		 * Insert module downgrade listeners
+		 * TODO: Insert module downgrade listeners for calendar, task and
+		 * infostore
 		 */
-		// registerDeleteListener(new TasksDelete());
-		// registerDeleteListener(new InfostoreDelete());
-		// registerDeleteListener(new Contacts());
-		// registerDeleteListener(new CalendarAdministration());
 		/*
-		 * Delete user configuration & settings
+		 * TODO: Insert downgrade listeners for user configuration, settings,
+		 * quota and attachments
 		 */
-		// registerDeleteListener(new UserConfiguration());
-		// registerDeleteListener(new UserSettingMail());
-		// registerDeleteListener(new QuotaUsageDelete());
-		// registerDeleteListener(new AttachmentContextDelete());
-		// registerDeleteListener(new AttachmentDelDelete());
 		/*
-		 * At last insert folder downgrade listener
+		 * Insert folder downgrade listener
 		 */
 		registerDowngradeListener(new OXFolderDowngradeListener());
-		// Remove FileStorage if context is deleted.
-		// registerDeleteListener(new FileStorageRemover());
+		/*
+		 * TODO: Insert downgrade listeners for FileStorage.
+		 */
 	}
 
 	/**
