@@ -64,8 +64,7 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.oxfolder.deletelistener.OXFolderDeleteListenerHelper;
 
 /**
- * Implements interface
- * <code>com.openexchange.groupware.delete.DeleteListener</code>.
+ * Implements interface {@link DeleteListener}.
  * 
  * <p>
  * In case of a normal user all his private permissions (working & backup) are
@@ -87,7 +86,7 @@ import com.openexchange.tools.oxfolder.deletelistener.OXFolderDeleteListenerHelp
  * <p>
  * In case of context's admin, every reference located in any folder or
  * permission table (working & backup) are removed, that either points to admin
- * hisself or point to virtual group 'All Groups & Users'
+ * himself or point to virtual group 'All Groups & Users'
  * </p>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
