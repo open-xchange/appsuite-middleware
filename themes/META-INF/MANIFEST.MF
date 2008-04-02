@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Theme Publisher Bundle
+Bundle-SymbolicName: com.openexchange.themes
+Bundle-Version: 6.5.0
+Bundle-Activator: com.openexchange.themes.ThemesActivator
+Bundle-Vendor: Open-Xchange GmbH
+Import-Package: com.openexchange.config,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.ldap,
+ com.openexchange.groupware.settings,
+ com.openexchange.groupware.userconfiguration,
+ com.openexchange.server.osgiservice,
+ com.openexchange.session,
+ org.apache.commons.logging,
+ org.osgi.framework;version="1.3.0",
+ org.osgi.util.tracker;version="1.3.2"
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
