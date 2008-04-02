@@ -35,6 +35,7 @@ import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
@@ -986,6 +987,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 			JSONObject jparticipant = jsonArray.getJSONObject(i);
 			int type = jparticipant.getInt("type");
 			int id = jparticipant.getInt("id");
+			String mail = jparticipant.optString("mail");
 			Participant p = null;
 			switch (type) {
 				case Participant.USER:
@@ -1005,6 +1007,9 @@ public class AppointmentTest extends AbstractAJAXTest {
 				case Participant.RESOURCEGROUP:
 					p = new ResourceGroupParticipant();
 					p.setIdentifier(id);
+					break;
+				case Participant.EXTERNAL_USER:
+					p = new ExternalUserParticipant(mail);
 					break;
 				default:
 					throw new OXConflictException("invalid type");
