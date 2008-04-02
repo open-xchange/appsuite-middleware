@@ -3,7 +3,8 @@
 OXFUNCTIONS=@oxfunctions@
 OXCONFIG=@oxscriptconf@
 OXPREFIX=@prefix@
-CONSOLELOG=@consolelogfile@
+OXBUNDLES=$OXPREFIX/bundles
+
 
 test -f $OXFUNCTIONS || {
 	echo "missing common shell functions file"
@@ -23,18 +24,11 @@ JAVA_OPTS="${JAVA_XTRAOPTS} \
 -Dopenexchange.propfile=$SYSTEMPROPERTIES \
 -Djava.util.logging.config.file=$LOGGINGPROPERTIES"
 
-ALLCLASSES=$(for jar in @libdirpath@/*.jar; do
-    echo -n "${jar}:"
-    done)
 
-if [ -d @oxgroupwaresysconfdir@/log4j ]; then
-    ALLCLASSES="${ALLCLASSES}@oxgroupwaresysconfdir@/log4j:"
-fi
-
-CLASSPATH="-classpath $ALLCLASSES"
+CLASSPATH="-classpath $OXBUNDLES/com.openexchange.server.jar:$OXBUNDLES/com.openexchange.global.jar:$OXBUNDLES/org.apache.commons.logging_1.0.4.v200706111724.jar"
 
 pushd $OXPREFIX
 
 umask 066
-exec $JAVA_BIN $JAVA_OPTS $CLASSPATH Consistency "$@"
+exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.consistency.ConsistencyCheck $@
 
