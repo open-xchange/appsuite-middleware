@@ -47,131 +47,84 @@
  *
  */
 
-package com.openexchange.configuration;
+package com.openexchange.mail;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import com.openexchange.tools.conf.AbstractConfig;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
- * {@link MailConfig}
+ * {@link MailGetTest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailConfig extends AbstractConfig {
+public final class MailGetTest extends AbstractMailTest {
 
 	/**
-	 * Enumeration of all properties in the ajax.properties file.
-	 */
-	public static enum Property {
-		/**
-		 * Server host.
-		 */
-		SERVER("server"),
-		/**
-		 * port
-		 */
-		PORT("port"),
-		/**
-		 * User login
-		 */
-		LOGIN("login"),
-		/**
-		 * Password
-		 */
-		PASSWORD("password"),
-		/**
-		 * User ID
-		 */
-		USER("user"),
-		/**
-		 * Context ID
-		 */
-		CONTEXT("cid"),
-		/**
-		 * Directory which contains test mails (rfc 822 files)
-		 */
-		TEST_MAIL_DIR("testMailDir");
-
-		/**
-		 * Name of the property in the ajax.properties file.
-		 */
-		private String propertyName;
-
-		/**
-		 * Default constructor.
-		 * 
-		 * @param propertyName
-		 *            Name of the property in the ajax.properties file.
-		 */
-		private Property(final String propertyName) {
-			this.propertyName = propertyName;
-		}
-
-		/**
-		 * @return the propertyName
-		 */
-		public String getPropertyName() {
-			return propertyName;
-		}
-	}
-
-	private static final TestConfig.Property KEY = TestConfig.Property.MAIL_PROPS;
-
-	private static final Lock LOCK_INIT = new ReentrantLock();
-
-	private static boolean initialized;
-
-	private static MailConfig singleton;
-
-	/**
-	 * Default constructor
-	 */
-	public MailConfig() {
-
-	}
-
-	@Override
-	protected String getPropertyFileName() throws ConfigurationException {
-		final String fileName = TestConfig.getProperty(KEY);
-		if (null == fileName) {
-			throw new ConfigurationException(ConfigurationException.Code.PROPERTY_MISSING, KEY.getPropertyName());
-		}
-		return fileName;
-	}
-
-	/**
-	 * Reads the mail configuration.
 	 * 
-	 * @throws ConfigurationException
-	 *             if reading configuration fails.
 	 */
-	public static void init() throws ConfigurationException {
-		TestConfig.init();
-		if (!initialized) {
-			LOCK_INIT.lock();
-			try {
-				if (null == singleton) {
-					singleton = new MailConfig();
-					singleton.loadPropertiesInternal();
-				}
-			} finally {
-				LOCK_INIT.unlock();
-			}
-		}
+	public MailGetTest() {
+		super();
 	}
 
-	public static String getProperty(final Property key) {
-		if (!initialized) {
-			try {
-				init();
-			} catch (final ConfigurationException e) {
-				return null;
+	/**
+	 * @param name
+	 */
+	public MailGetTest(final String name) {
+		super(name);
+	}
+
+	private static final MailField[] FIELDS_ID = { MailField.ID };
+
+	private static final MailField[] FIELDS_MORE = { MailField.ID, MailField.ATTACHMENT, MailField.FLAGS,
+			MailField.BODY };
+
+	public void testMailGet() {
+		try {
+			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
+					new ContextImpl(getCid()), "mail-test-session");
+			session.setPassword(getPassword());
+			final MailMessage[] mails = getMessages(getTestMailDir(), -1);
+
+			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+			mailAccess.connect();
+			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
+
+			MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID);
+			for (int i = 0; i < fetchedMails.length; i++) {
+				System.out.println("Fetched: " + fetchedMails[i].getMailId());
 			}
+
+			fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_MORE);
+			for (int i = 0; i < fetchedMails.length; i++) {
+				System.out.println("Fetched More: " + fetchedMails[i].getMailId() + " "
+						+ fetchedMails[i].hasAttachment() + " " + fetchedMails[i].getContentType());
+				if (fetchedMails[i].getContentType().isMimeType("multipart/*")) {
+					System.out.println("Enclosed count: " + fetchedMails[i].getEnclosedCount());
+				} else {
+					System.out.println("Content: " + fetchedMails[i].getContent());
+				}
+			}
+
+			final boolean success = mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
+			if (success) {
+				System.out.println("Successfully deleted");
+			} else {
+				System.out.println("Delete failed");
+			}
+
+			/*
+			 * close
+			 */
+			mailAccess.close(false);
+
+		} catch (final Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
 		}
-		return singleton.getPropertyInternal(key.getPropertyName());
 	}
 
 }

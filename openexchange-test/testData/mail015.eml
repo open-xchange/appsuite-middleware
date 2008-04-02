@@ -1,0 +1,38 @@
+Return-Path: <schweigi@open-xchange.com>
+Date: Thu, 20 Sep 2007 11:01:25 +0200
+From: Thomas Schweiger <schweigi@open-xchange.com>
+To: Thomas Schweiger <schweigi@open-xchange.com>
+Subject: test PGP signed mail
+Message-ID: <20070920090125.GA12567@open-xchange.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="mP3DRpeJDSE+ciuQ"
+Content-Disposition: inline
+X-Operating-System: SUSE LINUX
+X-Mailer: Open-Xchange v6.0 Console Mailer
+X-PGP-Key: 1024D/D532F2E8
+X-PGP-Fingerprint: 815B 2A54 E23A FEF9 1AED 6CF9 2603 813F D532 F2E8
+X-Message-Flag: "Es ist Wahnsinn, das Leben so zu sehen wie es ist, anstatt es zu sehen wie es sein sollte."
+X-Private-URL1: http://www.schweigisito.de
+X-Private-URL2: http://www.straight-live.de
+
+
+--mP3DRpeJDSE+ciuQ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+This mail contains a PGP signature.
+
+
+--mP3DRpeJDSE+ciuQ
+Content-Type: application/pgp-signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.2 (GNU/Linux)
+
+iD8DBQFG8jblJgOBP9Uy8ugRAp4+AJ9iAZcBh6ke0zrqkrtLMWH+QKfTGgCffF+5
+F2P9TrHERgiiyRTA6x6BR2U=
+=Wk8C
+-----END PGP SIGNATURE-----
+
+--mP3DRpeJDSE+ciuQ--

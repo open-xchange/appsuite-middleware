@@ -120,7 +120,7 @@ public final class MailAccessTest extends AbstractMailTest {
 			mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
 			System.out.println("Active connections: " + MailAccess.getCounter());
-			mailAccess.getMessageStorage().getAllMessages("default.INBOX", null, null, null,
+			mailAccess.getMessageStorage().getAllMessages("INBOX", null, null, null,
 					new MailField[] { MailField.ID });
 			/*
 			 * close
@@ -222,7 +222,7 @@ public final class MailAccessTest extends AbstractMailTest {
 				mailAccess = MailAccess.getInstance(session);
 				mailAccess.connect();
 				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailAccess.getCounter());
-				mailAccess.getMessageStorage().getAllMessages("default.INBOX", null, null, null,
+				mailAccess.getMessageStorage().getAllMessages("INBOX", null, null, null,
 						new MailField[] { MailField.ID });
 				/*
 				 * close

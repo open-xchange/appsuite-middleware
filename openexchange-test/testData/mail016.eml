@@ -1,0 +1,425 @@
+Return-Path: <newsletter@bounces.splunk.com>
+Received: from ox.open-xchange.com ([unix socket])
+	 by ox.open-xchange.com (Cyrus v2.2.12-Invoca-RPM-2.2.12-8.1.RHEL4) with LMTPA;
+	 Thu, 27 Sep 2007 22:06:57 +0200
+X-Sieve: CMU Sieve 2.2
+Received: by ox.open-xchange.com (Postfix, from userid 99)
+	id CCED232C4DC; Thu, 27 Sep 2007 22:06:57 +0200 (CEST)
+X-Spam-Checker-Version: SpamAssassin 3.1.8 (2007-02-13) on ox.open-xchange.com
+X-Spam-Level: 
+X-Spam-Status: No, score=-3.2 required=5.0 tests=ALL_TRUSTED,AWL,BAYES_00,
+	HTML_MESSAGE,HTML_TITLE_EMPTY autolearn=ham version=3.1.8
+Received: from sp.splunk.com (sp.splunk.com [64.127.105.41])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(Client did not present a certificate)
+	by ox.open-xchange.com (Postfix) with ESMTP id B76DE32C50F
+	for <daniel.halbe@open-xchange.com>; Thu, 27 Sep 2007 22:06:53 +0200 (CEST)
+Received: from apache by sp.int.splunk.com with local (Exim 4.43)
+	id 1IazdF-0003uO-JH
+	for daniel.halbe@open-xchange.com; Thu, 27 Sep 2007 13:06:46 -0700
+Date: Thu, 27 Sep 2007 13:06:45 -0700
+To: Daniel Halbe <daniel.halbe@open-xchange.com>
+From: Splunk Newsletter <newsletter@bounces.splunk.com>
+Reply-to: Splunk Newsletter <newsletter@bounces.splunk.com>
+Subject: Splunkvox Newsletter | September 2007
+Message-ID: <63a043f845fb927586c3578499686ac6@localhost.localdomain>
+X-Priority: 3
+X-Mailer: PHPMailer [version 1.73]
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+	boundary="b1_63a043f845fb927586c3578499686ac6"
+
+
+--b1_63a043f845fb927586c3578499686ac6
+Content-Type: text/plain; charset = "BIG-5"
+Content-Transfer-Encoding: quoted-printable
+
+Welcome.
+Greetings. It=E2=80=99s been a very busy last month around here. Many of =
+you probably saw we closed a $25M financing:=20
+http://www.splunk.com/index.php/affiliate_redirect?domain=3Damericanventur=
+emagazine&uri=3D/news.php?newsid=3D3428&ac=3Dns0901.=20
+This is the fuel we need to continue innovating. In addition to shipping =
+3.0 this summer we =
+(http://blogs.splunk.com/thebaum/2007/08/05/agile-what?ac=3Dns0907-2)
+retooled our complete product development methodology. See more at =
+http://blogs.splunk.com/thebaum/2007/08/05/agile-what?ac=3Dns0907-2.=20
+Our more agile focus lets us move in parallel on many projects at the same =
+time. When you submit an enhancement request=20
+or bug to support@splunk.com, it now goes directly to the engineers and =
+product managers. The whole idea is to continue=20
+to find new ways to communicate transparently with everyone in the Splunk =
+community.
+
+Along those lines, we've given a major facelift and moved all of our =
+Splunk support forums to the new SplunkBase.=20
+See http://blogs.splunk.com/thebaum/2007/09/18/splunkbase-gets-a-big-face-=
+lift?ac=3Dns0907-3. We=E2=80=99ve always said,=20
+"we only build things we ourselves use." Be sure to check out the Add-Ons =
+section where you can download all kinds=20
+of goodness for your Splunk server and let us know what you think of the =
+new SplunkBase.
+
+We remain completely focused on building the Splunk community =E2=80=93 we =
+want to help you share your issues, ideas,=20
+and solutions. Enjoy Splunkvox and happy splunking.
+Michael Baum, CEO and Co-founder
+
+
+What's New
+As of 3.0.2, we now have an AIX version - that's right, you can run Splunk =
+on AIX. Whether you just need to access data
+on AIX and forward it to another Splunk server already running on another =
+platform, or you want to run your entire=20
+deployment on AIX! We support AIX 5.2 and 5.3. Get it? Want it? Download =
+it now at http://www.splunk.com/index.php/landing?ac=3Dns0907-5
+Christina Noren, VP Products and Services
+
+Tips & Tricks
+Have you ever tried to extend Splunk with your own event processor?
+Custom search commands (http://www.splunk.com/doc/3.0.2/developer/searchpr=
+ocessors/&ac=3Dns0907-6) are the Splunk
+ features that enable you to do this. You can find an example =
+implementation of a custom search command in the AfterGlow=20
+add-on on SplunkBase at http://www.splunk.com/index.php/affiliate_redirect=
+?domain=3Dsplunkbase&uri=3D/addons/All/Splunk/addon:AfterGlow_Graphing&ac=
+=3Dns0907-7.=20
+It allows you to pass events into the afterglow custom command to have it =
+generate a link graph of relationships in the events.=20
+You can find a sample visualization of firewall traffic SecViz.org on =
+http://secviz.org/?q=3Dnode/13.
+Want to learn how to do it yourself? Read up on creating search commands =
+at http://www.splunk.com/doc/3.0.2/developer/searchprocessors/&ac=3Dns0907=
+-9.=20
+Or have a look at http://blogs.splunk.com/raffy/2007/09/16/afterglow-and-s=
+plunk?ac=3Dns0907-10, which talks in more detail about the AfterGlow =
+integration.
+Next time we'll talk about how to build field actions to find where an IP =
+address is located on the globe.
+Raffael Marty, Chief Security Strategist and Sr. Product Manager
+
+Is Your SysAdmin a Rockstar?
+Nominate Your IT Hero for SysAdmin of the Year 2007
+You still have time to nominate your IT Hero for SysAdmin of the Year =
+http://www.splunk.com/index.php/affiliate_redirect?domain=3Dsysadminofthey=
+ear&uri=3D/&ac=3Dns0907-11.
+The award shines a spotlight on the tech stars behind the scenes. =
+It=E2=80=99s easy =E2=80=93 nominate your company=E2=80=99s IT rockstar =
+and they=E2=80=99ll=20
+be entered to win killer prizes like a MacBook Pro, an Apple iPhone, or a =
+Gibson guitar.  Since the contest began on July 27th, we have received =
+2500 entries! =20
+Keep them coming =E2=80=93 we know there are more unsung heroes out there. =
+Contest ends October 12.
+Patrick McGovern,VP Marketing and Community
+
+Splunk Inc.
+118 King Street, 5th Floor  |  San Francisco, CA 94107  |  www.splunk.com  =
+|  +1.866.GET.SPLUNK
+
+
+
+To remove yourself from this email list go to https://sp.splunk.com//remov=
+eme.php?identifier=3D809c3e84-3e7f-dc08-a7a0-46fc0d21b74d
+
+
+--b1_63a043f845fb927586c3578499686ac6
+Content-Type: text/html; charset = "BIG-5"
+Content-Transfer-Encoding: quoted-printable
+
+<title></title>
+<meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dutf-8" =
+/>
+<meta http-equiv=3D"Content-Language" content=3D"en-us" />        <style =
+type=3D"text/css" media=3D"screen">
+
+
+
+
+
+body {
+
+margin: 0px;
+
+padding: 0px;
+
+color: #666;
+
+background: #eee;
+
+
+
+}
+
+
+
+p {
+
+line-height: 1.5em;
+
+margin: 0em 0em 1em 0em;
+
+}
+
+
+
+img {
+
+border: 0px;
+
+}
+
+
+
+
+
+a:link,
+
+a:visited {
+
+color: #2e778d;
+
+}
+
+a:hover {
+
+text-decoration: none;
+
+background: #dbeeb8;
+
+}
+
+
+
+a:active {
+
+color: #2e778d;
+
+text-decoration: none;
+
+}
+
+
+
+h1,h2,h3 {
+
+font-weight: normal;
+
+line-height: normal;
+
+margin: 0em 0em 0.5em 0em;
+
+padding: 0px;
+
+}
+
+
+
+* #Box {
+
+color: #666;
+
+background: #fff;
+
+border: 1px solid #ddd;
+
+margin: 0px auto;
+
+}
+
+
+
+
+
+</style>
+<div id=3D"BodyImposter" style=3D"background-color: rgb(238, 238, 238); =
+margin-top: 10px;">
+<table width=3D"600" cellspacing=3D"0" cellpadding=3D"10" id=3D"Box" =
+style=3D"border: 1px solid rgb(221, 221, 221); margin: 0px auto; color: =
+rgb(102, 102, 102); background-color: rgb(255, 255, 255);">
+    <tbody>
+        <tr>
+            <td>
+            <table width=3D"580" cellspacing=3D"0" cellpadding=3D"20" =
+id=3D"Masthead">
+                <tbody>
+                    <tr>
+                        <td style=3D"background-color: rgb(0, 0, 0);">    =
+<img width=3D"500" height=3D"41" =
+src=3D"http://www.splunk.com/web_assets/images/email/splunkvox.gif" =
+alt=3D"image" />    </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table width=3D"580" cellspacing=3D"0" cellpadding=3D"20" =
+id=3D"Content" style=3D"border: 1px solid rgb(238, 238, 238); color: =
+rgb(102, 102, 102); background-color: rgb(255, 255, 255);">
+                <tbody>
+                    <tr valign=3D"top">
+                        <td id=3D"Primary" style=3D"font-family: =
+Helvetica,Arial,sans-serif; font-style: normal; font-variant: normal; =
+font-weight: normal; font-size: 12px; font-size-adjust: none; line-height: =
+1.5em;">
+                        <p style=3D"margin-top: -5px; text-align: right; =
+color: rgb(0, 0, 0);">Sept 27, 2007</p>
+                        <!-------->
+                        <h2 style=3D"border-top: 1px solid rgb(221, 221, =
+221); margin: 10px 0pt 0pt; padding: 8px 0pt 5px; font-family: =
+Helvetica,Arial,sans-serif; font-style: normal; font-variant: normal; =
+font-size: 21px; line-height: normal; font-size-adjust: none; font-weight: =
+normal; color: rgb(115, 165, 80);">Welcome</h2>
+                        <img width=3D"75" height=3D"75" style=3D"border: =
+1px solid rgb(221, 221, 221); margin: 5px 10px 10px 0px; padding: 6px; =
+float: left; clear: both;" =
+src=3D"http://www.splunk.com/web_assets/images/photos/thebaum.png" =
+alt=3D"" />
+                        <p>          Greetings. It&rsquo;s been a very =
+busy last month around here. Many of you probably saw we closed a <a =
+href=3D"http://www.splunk.com/index.php/affiliate_redirect?domain=3Dameric=
+anventuremagazine&amp;uri=3D/news.php?newsid=3D3428&amp;ac=3Dns0901">$25M =
+financing</a>. This is the fuel we need to continue innovating. In =
+addition to shipping 3.0 this summer we <a href=3D"http://blogs.splunk.com=
+/thebaum/2007/08/05/agile-what?ac=3Dns0907-2">retooled our complete =
+product development methodology</a>. Our more agile focus lets us move in =
+parallel on many projects at the same time. When you submit an enhancement =
+request or bug to support@splunk.com it now goes directly to the engineers =
+and product managers. The whole idea is to continue to find new ways to =
+communicate transparently with everyone in the Splunk community.  </p>
+                        <p>  Along those lines, we've given <a =
+href=3D"http://blogs.splunk.com/thebaum/2007/09/18/splunkbase-gets-a-big-f=
+ace-lift?ac=3Dns0907-3">SplunkBase</a> a major facelift and moved all of =
+our Splunk support forums to the new SplunkBase. We&rsquo;ve always said, =
+"we only build things we ourselves use." Be sure to check out the Add-Ons =
+section where you can download all kinds of goodness for your Splunk =
+server and let us know what you think of the new SplunkBase.  </p>
+                        <p>  We remain completely focused on building the =
+Splunk community &ndash; we want to help you share your issues, ideas, and =
+solutions. Enjoy Splunkvox and happy splunking.  </p>
+                        <p>  <strong><span style=3D"color: rgb(0, 0, =
+0);">Michael Baum,</span> CEO and Co-founder</strong>  </p>
+                        <!-------->
+                        <h2 style=3D"border-top: 1px solid rgb(221, 221, =
+221); margin: 10px 0pt 0pt; padding: 8px 0pt 5px; font-family: =
+Helvetica,Arial,sans-serif; font-style: normal; font-variant: normal; =
+font-size: 21px; line-height: normal; font-size-adjust: none; font-weight: =
+normal; color: rgb(115, 165, 80);">What's New</h2>
+                        <h3 style=3D"padding: 8px 0pt 5px; font-family: =
+Helvetica,Arial,sans-serif; font-style: normal; font-variant: normal; =
+font-size: 18px; line-height: normal; font-size-adjust: none; font-weight: =
+normal; color: rgb(0, 0, 0);">AIX</h3>
+                        <img width=3D"75" height=3D"75" style=3D"border: =
+1px solid rgb(221, 221, 221); margin: 5px 10px 10px 0px; padding: 6px; =
+float: left; clear: both;" =
+src=3D"http://www.splunk.com/web_assets/images/photos/cfrln.png" alt=3D"" =
+/>
+                        <p>  As of 3.0.2, we now have an AIX version - =
+that's right, you can run Splunk on AIX. Whether you just need to access =
+data on AIX and forward it to another Splunk server already running on =
+another platform, or you want to run your entire deployment on AIX! We =
+support AIX 5.2 and 5.3.  </p>
+                        <p>  <a style=3D"color: rgb(46, 119, 141);" =
+href=3D"http://www.splunk.com/index.php/landing?ac=3Dns0907-5">Get it? =
+Want it? Download it now</a>  </p>
+                        <p>  <strong><span style=3D"color: rgb(0, 0, =
+0);">Christina Noren,</span> VP Products and Services</strong>  </p>
+                        <!-------->
+                        <h2 style=3D"border-top: 1px solid rgb(221, 221, =
+221); margin: 10px 0pt 0pt; padding: 8px 0pt 5px; font-family: =
+Helvetica,Arial,sans-serif; font-style: normal; font-variant: normal; =
+font-size: 21px; line-height: normal; font-size-adjust: none; font-weight: =
+normal; color: rgb(115, 165, 80);">Tips & Tricks</h2>
+                        <h3 style=3D"padding: 8px 0pt 5px; font-family: =
+Helvetica,Arial,sans-serif; font-style: normal; font-variant: normal; =
+font-size: 18px; line-height: normal; font-size-adjust: none; font-weight: =
+normal; color: rgb(0, 0, 0);">  Have you ever tried to extend Splunk with =
+your own event processor?</h3>
+                        <img width=3D"75" height=3D"75" style=3D"border: =
+1px solid rgb(221, 221, 221); margin: 5px 10px 10px 0px; padding: 6px; =
+float: left; clear: both;" =
+src=3D"http://www.splunk.com/web_assets/images/photos/raffy_75.png" =
+alt=3D"" />
+                        <p>  <a href=3D"http://www.splunk.com/doc/3.0.2/de=
+veloper/searchprocessors/&amp;ac=3Dns0907-6">Custom search commands</a> =
+are the Splunk features that enable you to do this.            An example =
+implementation of a custom search command you can find in the <a =
+href=3D"http://www.splunk.com/index.php/affiliate_redirect?domain=3Dsplunk=
+base&amp;uri=3D/addons/All/Splunk/addon:AfterGlow_Graphing&amp;ac=3Dns0907=
+-7">AfterGlow add-on</a> on SplunkBase. It allows you to pass events into =
+the Afterglow custom command to have it generate a link graph of =
+relationships in the events. You can find a sample visualization of =
+firewall traffic on <a =
+href=3D"http://secviz.org/?q=3Dnode/13">SecViz.org</a>.  </p>
+                        <p>  Want to learn how to do it yourself? Read up =
+on <a href=3D"http://www.splunk.com/doc/3.0.2/developer/searchprocessors/&=
+amp;ac=3Dns0907-9">creating search commands</a>, or have a look at this <a =
+href=3D"http://blogs.splunk.com/raffy/2007/09/16/afterglow-and-splunk?ac=
+=3Dns0907-10">blog</a> entry, which talks in more detail about the =
+AfterGlow integration.  </p>
+                        <p>  Next time we'll talk about how to build field =
+actions to find where an IP address is located on the globe.  </p>
+                        <p>  <strong><span style=3D"color: rgb(0, 0, =
+0);">Raffael Marty,</span> Chief Security Strategist and Sr. Product =
+Manager</strong>  </p>
+                        <!-------->
+                        <h2 style=3D"border-top: 1px solid rgb(221, 221, =
+221); margin: 10px 0pt 0pt; padding: 8px 0pt 5px; font-family: =
+Helvetica,Arial,sans-serif; font-style: normal; font-variant: normal; =
+font-size: 21px; line-height: normal; font-size-adjust: none; font-weight: =
+normal; color: rgb(115, 165, 80);">Is Your SysAdmin a Rockstar?</h2>
+                        <h3 style=3D"padding: 8px 0pt 5px; font-family: =
+Helvetica,Arial,sans-serif; font-style: normal; font-variant: normal; =
+font-size: 18px; line-height: normal; font-size-adjust: none; font-weight: =
+normal; color: rgb(0, 0, 0);">Nominate Your IT Hero for SysAdmin of the =
+Year 2007.</h3>
+                        <a style=3D"color: rgb(46, 119, 141);" =
+href=3D"http://www.splunk.com/index.php/affiliate_redirect?domain=3Dsysadm=
+inoftheyear&amp;uri=3D/&amp;ac=3Dns0907-11"><img width=3D"145" =
+height=3D"156" alt=3D"" =
+src=3D"http://www.splunk.com/web_assets/images/email/saoty_badge.gif" =
+style=3D"border: 1px solid rgb(221, 221, 221); margin: 5px 0px 10px 10px; =
+padding: 6px; float: right; clear: both;" /></a>
+                        <p>  You still have time to nominate your IT Hero =
+for <a href=3D"http://www.splunk.com/index.php/affiliate_redirect?domain=
+=3Dsysadminoftheyear&amp;uri=3D/&amp;ac=3Dns0907-11">SysAdmin of the =
+Year</a>. The award shines a spotlight on the tech stars behind the =
+scenes. It&rsquo;s easy &ndash; nominate your company&rsquo;s IT rockstar =
+and they&rsquo;ll be entered to win killer prizes like a MacBook Pro, an =
+Apple iPhone, or a Gibson guitar.    </p>
+                        <p>    </p>
+                        <p>  Since the contest began on July 27th, we have =
+received 2500 entries!  Keep them coming &ndash; we know there are more =
+unsung heroes out there. Contest ends October 12.  </p>
+                        <p>  <strong><span style=3D"color: rgb(0, 0, =
+0);">Patrick McGovern,</span> VP Marketing and Community</strong>  </p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<table width=3D"630" cellspacing=3D"0" cellpadding=3D"15" id=3D"Legal" =
+style=3D"margin: 0px auto;">
+    <tbody>
+        <tr>
+            <td style=3D"font-family: Helvetica,Arial,sans-serif; =
+font-style: normal; font-variant: normal; font-weight: normal; font-size: =
+12px; line-height: normal; font-size-adjust: none;">
+            <p>&copy;Splunk Inc.<br />  118 King Street, 5th Floor  |  San =
+Francisco, CA 94107  |  <a style=3D"color: rgb(46, 119, 141);" =
+href=3D"http://www.splunk.com?ac=3Dns0807-9">www.splunk.com</a>  |  =
++1.866.GET.SPLUNK</p>
+            </td>
+        </tr>
+    </tbody>
+</table>
+</div><br><font size=3D'2'>To remove yourself from this email list <a =
+href=3D'https://sp.splunk.com//removeme.php?identifier=3D809c3e84-3e7f-dc0=
+8-a7a0-46fc0d21b74d'>click here</a></font><br><IMG HEIGHT=3D1 WIDTH=3D1 =
+src=3Dhttps://sp.splunk.com//image.php?identifier=3D809c3e84-3e7f-dc08-a7a=
+0-46fc0d21b74d>
+
+
+
+--b1_63a043f845fb927586c3578499686ac6--

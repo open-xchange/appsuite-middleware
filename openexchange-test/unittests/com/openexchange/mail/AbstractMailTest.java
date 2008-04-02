@@ -49,16 +49,24 @@
 
 package com.openexchange.mail;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
+import javax.mail.MessagingException;
 import javax.mail.Session;
+import javax.mail.internet.MimeMessage;
 
 import junit.framework.TestCase;
 
 import com.openexchange.configuration.MailConfig;
 import com.openexchange.groupware.Init;
-import com.openexchange.imap.IMAPProvider;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
+import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 
 /**
  * {@link AbstractMailTest}
@@ -75,10 +83,12 @@ public abstract class AbstractMailTest extends TestCase {
 	private String login;
 
 	private String password;
-	
+
 	private int user;
-	
+
 	private int cid;
+
+	private String testMailDir;
 
 	/**
 	 * 
@@ -111,20 +121,21 @@ public abstract class AbstractMailTest extends TestCase {
 			password = MailConfig.getProperty(MailConfig.Property.PASSWORD);
 			user = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.USER));
 			cid = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.CONTEXT));
+			testMailDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
 		} catch (final Exception e) {
 			e.printStackTrace();
 			throw e;
 		}
 	}
 
-    @Override
-    protected void tearDown() throws Exception {
-        Init.stopServer();
-    }
+	@Override
+	protected void tearDown() throws Exception {
+		Init.stopServer();
+	}
 
-    /**
+	/**
 	 * Gets the login
-	 *
+	 * 
 	 * @return the login
 	 */
 	protected final String getLogin() {
@@ -133,7 +144,7 @@ public abstract class AbstractMailTest extends TestCase {
 
 	/**
 	 * Gets the password
-	 *
+	 * 
 	 * @return the password
 	 */
 	protected final String getPassword() {
@@ -142,7 +153,7 @@ public abstract class AbstractMailTest extends TestCase {
 
 	/**
 	 * Gets the port
-	 *
+	 * 
 	 * @return the port
 	 */
 	protected final int getPort() {
@@ -151,7 +162,7 @@ public abstract class AbstractMailTest extends TestCase {
 
 	/**
 	 * Gets the server
-	 *
+	 * 
 	 * @return the server
 	 */
 	protected final String getServer() {
@@ -160,7 +171,7 @@ public abstract class AbstractMailTest extends TestCase {
 
 	/**
 	 * Gets the cid
-	 *
+	 * 
 	 * @return the cid
 	 */
 	protected final int getCid() {
@@ -169,11 +180,20 @@ public abstract class AbstractMailTest extends TestCase {
 
 	/**
 	 * Gets the user
-	 *
+	 * 
 	 * @return the user
 	 */
 	protected final int getUser() {
 		return user;
+	}
+
+	/**
+	 * Gets the test mail directory
+	 * 
+	 * @return the test mail directory
+	 */
+	protected final String getTestMailDir() {
+		return testMailDir;
 	}
 
 	private static final String STR_TRUE = "true";
@@ -182,7 +202,12 @@ public abstract class AbstractMailTest extends TestCase {
 
 	private static Properties sessionProperties;
 
-	public static final Properties getDefaultSessionProperties() {
+	/**
+	 * Gets the default session properties
+	 * 
+	 * @return The default session properties
+	 */
+	protected static final Properties getDefaultSessionProperties() {
 		synchronized (AbstractMailTest.class) {
 			if (sessionProperties == null) {
 				/*
@@ -198,25 +223,76 @@ public abstract class AbstractMailTest extends TestCase {
 				 */
 				sessionProperties = ((Properties) (System.getProperties().clone()));
 				/*
-				 * A connected IMAPStore maintains a pool of IMAP protocol objects for
-				 * use in communicating with the IMAP server. The IMAPStore will create
-				 * the initial AUTHENTICATED connection and seed the pool with this
-				 * connection. As folders are opened and new IMAP protocol objects are
-				 * needed, the IMAPStore will provide them from the connection pool, or
-				 * create them if none are available. When a folder is closed, its IMAP
-				 * protocol object is returned to the connection pool if the pool is not
+				 * A connected IMAPStore maintains a pool of IMAP protocol
+				 * objects for use in communicating with the IMAP server. The
+				 * IMAPStore will create the initial AUTHENTICATED connection
+				 * and seed the pool with this connection. As folders are opened
+				 * and new IMAP protocol objects are needed, the IMAPStore will
+				 * provide them from the connection pool, or create them if none
+				 * are available. When a folder is closed, its IMAP protocol
+				 * object is returned to the connection pool if the pool is not
 				 * over capacity.
 				 */
 				sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLSIZE, "1");
 				/*
-				 * A mechanism is provided for timing out idle connection pool IMAP
-				 * protocol objects. Timed out connections are closed and removed
-				 * (pruned) from the connection pool.
+				 * A mechanism is provided for timing out idle connection pool
+				 * IMAP protocol objects. Timed out connections are closed and
+				 * removed (pruned) from the connection pool.
 				 */
 				sessionProperties.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_CONNECTIONPOOLTIMEOUT, "1000");
 				return sessionProperties;
 			}
 			return sessionProperties;
 		}
+	}
+
+	/**
+	 * Reads MIME messages (<code>*.eml</code> files) from specified
+	 * directory
+	 * 
+	 * @param dir
+	 *            The directory containing <code>*.eml</code> files
+	 * @param limit
+	 *            The limit or <code>-1</code> to read all available
+	 *            <code>*.eml</code> files
+	 * @return The read MIME messages
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 * @throws MailException
+	 *             If conversion from RFC822 message fails
+	 */
+	protected static final MailMessage[] getMessages(final String dir, final int limit) throws MessagingException,
+			IOException, MailException {
+		final File fdir = new File(dir);
+		final File[] messageFiles = fdir.listFiles(new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				return name.toLowerCase().endsWith(".eml");
+			}
+		});
+		final int len = limit < 0 ? messageFiles.length : Math.min(messageFiles.length, limit);
+		final MimeMessage[] msgs = new MimeMessage[len];
+		final Session session = Session.getInstance(getDefaultSessionProperties());
+		for (int i = 0; i < msgs.length; i++) {
+			InputStream in = null;
+			try {
+				in = new FileInputStream(messageFiles[i]);
+				msgs[i] = new MimeMessage(session, in);
+			} finally {
+				if (null != in) {
+					try {
+						in.close();
+					} catch (final IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		final MailMessage[] retval = new MailMessage[msgs.length];
+		for (int i = 0; i < retval.length; i++) {
+			retval[i] = MIMEMessageConverter.convertMessage(msgs[i]);
+		}
+		return retval;
 	}
 }

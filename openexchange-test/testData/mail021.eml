@@ -1,0 +1,58 @@
+From: Marcus Klein <m.klein@netline-is.de>
+Organization: Netline Internet Service GmbH
+X-KMail-Fcc: sent-mail
+To: =?UTF-8?Q?'Braukhoff=2C_J=C3=B6rg'?= <joerg.braukhoff@open-xchange.com>
+Cc: "'Di Lella, Leonardo'" <leonardo.dilella@open-xchange.com>,
+	=?UTF-8?Q?'J=C3=B6rg_Braukhoff_=28joerg.braukhoff?=
+	=?UTF-8?Q?@open-xchange.com=29'?=,
+	=?UTF-8?Q?'Braukhoff=2C_J=C3=B6rg'?= <joerg.braukhoff@open-xchange.com>,
+	=?UTF-8?Q?Braukhoff=2C_J=C3=B6rg?= <joerg.braukhoff@open-xchange.com>
+Date: Wed, 9 Jan 2008 11:01:10 +0100
+User-Agent: KMail/1.9.7
+MIME-Version: 1.0
+Content-Type: Multipart/Mixed;
+  boundary="Boundary-00=_mtJhHd7H54sG6XG"
+X-KMail-Recipients: marcus@1337
+Status: R
+Subject: RFC2231-Test
+X-Status: N
+X-KMail-EncryptionState:  
+X-KMail-SignatureState:  
+X-KMail-MDN-Sent:  
+X-Length: 1307
+X-UID: 6
+
+--Boundary-00=_mtJhHd7H54sG6XG
+Content-Type: text/plain;
+  charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+
+-- 
+Marcus Klein
+--
+Netline Internet Service GmbH
+
+There are 10 kinds of humans - those, who understand the
+binary system, and those, who do not understand it.
+
+--Boundary-00=_mtJhHd7H54sG6XG
+Content-Type: text/plain;
+  charset="utf-8";
+  name*=utf-8''test%20%C3%A4%C3%B6%C3%BC%2Etxt
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+	filename*=utf-8''test%20%C3%A4%C3%B6%C3%BC%2Etxt
+
+dGVzdMOkw7bDvAo=
+
+--Boundary-00=_mtJhHd7H54sG6XG
+Content-Type: text/plain; charset="utf-8"; name*1*=utf-8''%EC%84%9C%EC%98%81%EC%A7%84%2Etxt; name*2*=funny%2Etxt
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+	filename*=utf-8''%EC%84%9C%EC%98%81%EC%A7%84%2Etxt
+
+7ISc7JiB7KeE
+
+--Boundary-00=_mtJhHd7H54sG6XG--

@@ -1,0 +1,60 @@
+Return-Path: <dream-team-bounces@open-xchange.com>
+Received: from ox.netline-is.de ([unix socket]) by ox (Cyrus v2.2.3) with LMTP; Thu, 30 Aug 2007 11:12:47 +0200
+X-Sieve: CMU Sieve 2.2
+Received: by ox.netline-is.de (Postfix, from userid 65534) id 5635B321D06; Thu, 30 Aug 2007 11:12:47 +0200 (CEST)
+Received: from netline.de (comfire.netline.de [192.168.32.1]) by ox.netline-is.de (Postfix) with ESMTP id EBCCE321CEE for <thorben@netline-is.de>; Thu, 30 Aug 2007 11:12:43 +0200 (CEST)
+Received: from [10.20.30.11] (helo=www.open-xchange.org ident=mail) by netline.de with esmtp (Exim) id 1IQfx1-0000CK-00 for thorben@netline-is.de; Thu, 30 Aug 2007 11:04:31 +0200
+Received: from mail.open-xchange.com ([10.20.30.22] helo=ox.open-xchange.com) by www.open-xchange.org with esmtp (Exim 3.36 #1 (Debian)) id 1IQg3z-0004gg-00 for <thorben@open-xchange.org>; Thu, 30 Aug 2007 11:11:43 +0200
+Received: by ox.open-xchange.com (Postfix, from userid 76) id ECA1832C81D; Thu, 30 Aug 2007 11:11:38 +0200 (CEST)
+Received: from ox.open-xchange.com ([unix socket]) by ox.open-xchange.com (Cyrus v2.2.12-Invoca-RPM-2.2.12-8.1.RHEL4) with LMTPA; Thu, 30 Aug 2007 11:11:36 +0200
+X-Sieve: CMU Sieve 2.2
+Received: by ox.open-xchange.com (Postfix, from userid 99) id 59DBF32C7D9; Thu, 30 Aug 2007 11:11:31 +0200 (CEST)
+Received: from ox.open-xchange.com (localhost.localdomain [127.0.0.1]) by ox.open-xchange.com (Postfix) with ESMTP id 2C2F132C7D4; Thu, 30 Aug 2007 11:11:27 +0200 (CEST)
+X-Original-To: dream-team@ox.open-xchange.com
+Delivered-To: dream-team@ox.open-xchange.com
+Received: by ox.open-xchange.com (Postfix, from userid 99) id BBB4032C80A; Thu, 30 Aug 2007 11:11:25 +0200 (CEST)
+Received: from ox.open-xchange.com (localhost.localdomain [127.0.0.1]) by ox.open-xchange.com (Postfix) with ESMTP id 5996632C7D4 for <dream-team@open-xchange.com>; Thu, 30 Aug 2007 11:11:24 +0200 (CEST)
+Message-ID: <880949849.14601188465084353.OPEN-XCHANGE.WebMail.tomcat@ox.open-xchange.com>
+Date: Thu, 30 Aug 2007 11:11:24 +0200 (CEST)
+From: Frank Hoberg <frank.hoberg@open-xchange.com>
+To: dream-team@open-xchange.com
+MIME-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
+X-Priority: 3 (normal)
+X-Mailer: OPEN-XCHANGE 5607 - WebMail
+X-Operating-System: Linux 2.6.9-42.0.3.ELsmp x86 (JVM 1.4.2)
+Organization: Open-Xchange Inc.
+Subject: [dream-team] Document: New Comp Plan 20070829.pdf
+X-BeenThere: dream-team@open-xchange.com
+X-Mailman-Version: 2.1.5
+Precedence: list
+List-Id: Mailinglist for whole the dream-team of Open-Xchange - all members of Open-Change <dream-team.open-xchange.com>
+List-Unsubscribe: <https://ox.open-xchange.com/mailman/listinfo/dream-team>, <mailto:dream-team-request@open-xchange.com?subject=unsubscribe>
+List-Archive: <https://ox.open-xchange.com/pipermail/dream-team>
+List-Post: <mailto:dream-team@open-xchange.com>
+List-Help: <mailto:dream-team-request@open-xchange.com?subject=help>
+List-Subscribe: <https://ox.open-xchange.com/mailman/listinfo/dream-team>, <mailto:dream-team-request@open-xchange.com?subject=subscribe>
+Sender: dream-team-bounces@open-xchange.com
+Errors-To: dream-team-bounces@open-xchange.com
+X-Spam-Checker-Version: SpamAssassin 2.64 (2004-01-11) on ox.netline-is.de
+X-Spam-Level: 
+X-Spam-Status: No, hits=-4.5 required=5.0 tests=AWL,BAYES_00 autolearn=no version=2.64
+
+Here you will find the new compensation plan details as presented in
+Olpe at Aug 29, 2007. If you have further questions or you coudn=C2=B4t
+participate in the meetings where the plan has been presented, please
+contact your respective manager.
+https://ox.open-xchange.com/servlet/showobject?object_id=3D113011&module=3D=
+documents
+Frank _______________________________________________ Frank Hoberg,
+Founder & General Manager EMEA T: +49 (0) 2761 8385 0 - M: +49 (0) 177
+79 293 35 e-mail:frank.hoberg@open-xchange.com website:
+www.open-xchange.com Open-Xchange GmbH, Martinstr. 41, D-57462 Olpe AG
+N=C3=BCrnberg, HRB 22121 Gesch=C3=A4ftsf=C3=BChrer: Frank Hoberg, Martin
+Ka=
+uss
+------------------------------------------------------------ Winner of
+Innovation Award 2007 for Small and Medium-Sized Enterprises Winner of
+ServerWatch Product Award 2006 Winner of "Best Open Source Solution",
+LinuxWorld Boston 2006 _______________________________________________
+
