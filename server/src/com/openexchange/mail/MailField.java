@@ -76,9 +76,9 @@ public enum MailField {
 	 */
 	FOLDER_ID(MailListField.FOLDER_ID),
 	/**
-	 * Whether message contains attachments
+	 * The Content-Type; includes whether message contains attachments or not
 	 */
-	ATTACHMENT(MailListField.ATTACHMENT),
+	CONTENT_TYPE(MailListField.ATTACHMENT),
 	/**
 	 * From
 	 */
@@ -128,21 +128,9 @@ public enum MailField {
 	 */
 	PRIORITY(MailListField.PRIORITY),
 	/**
-	 * Message reference
-	 */
-	MSG_REF(MailListField.MSG_REF),
-	/**
 	 * Color Label
 	 */
 	COLOR_LABEL(MailListField.COLOR_LABEL),
-	/**
-	 * Folder
-	 */
-	FOLDER(MailListField.FOLDER),
-	/**
-	 * Flag \SEEN
-	 */
-	FLAG_SEEN(MailListField.FLAG_SEEN),
 	/**
 	 * To peek the mail body (\Seen flag is left unchanged)
 	 */

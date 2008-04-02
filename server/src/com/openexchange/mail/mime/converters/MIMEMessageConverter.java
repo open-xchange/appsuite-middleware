@@ -617,7 +617,15 @@ public final class MIMEMessageConverter {
 						 */
 						final StringBuilder sb = new StringBuilder(128);
 						{
-							final InternetAddress[] replyTo = (InternetAddress[]) extMimeMessage.getReplyTo();
+							InternetAddress[] replyTo = null;
+							try {
+								replyTo = (InternetAddress[]) extMimeMessage.getReplyTo();
+							} catch (final AddressException e) {
+								final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_REPLY_TO, null);
+								if (null != addrStr) {
+									replyTo = new InternetAddress[] { new DummyAddress(addrStr) };
+								}
+							}
 							if (null != replyTo) {
 								sb.append(replyTo[0].toString());
 								for (int j = 1; j < replyTo.length; j++) {
@@ -702,7 +710,7 @@ public final class MIMEMessageConverter {
 					}
 				};
 				break;
-			case ATTACHMENT:
+			case CONTENT_TYPE:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MailException,
 							MessagingException {
@@ -860,15 +868,6 @@ public final class MIMEMessageConverter {
 					}
 				};
 				break;
-			case MSG_REF:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						/*
-						 * Ignore
-						 */
-					}
-				};
-				break;
 			case COLOR_LABEL:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
@@ -877,24 +876,6 @@ public final class MIMEMessageConverter {
 						if (!mailMessage.containsColorLabel()) {
 							mailMessage.setColorLabel(MailMessage.COLOR_LABEL_NONE);
 						}
-					}
-				};
-				break;
-			case FOLDER:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						/*
-						 * Ignore
-						 */
-					}
-				};
-				break;
-			case FLAG_SEEN:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						/*
-						 * Ignore
-						 */
 					}
 				};
 				break;
@@ -935,13 +916,52 @@ public final class MIMEMessageConverter {
 						/*
 						 * From
 						 */
-						mailMessage.addFrom((InternetAddress[]) msg.getFrom());
+						try {
+							mailMessage.addFrom((InternetAddress[]) msg.getFrom());
+						} catch (final AddressException e) {
+							mailMessage.addFrom(DummyAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_FROM)));
+						}
 						/*
 						 * To, Cc, and Bcc
 						 */
-						mailMessage.addTo((InternetAddress[]) msg.getRecipients(Message.RecipientType.TO));
-						mailMessage.addCc((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC));
-						mailMessage.addBcc((InternetAddress[]) msg.getRecipients(Message.RecipientType.BCC));
+						try {
+							mailMessage.addTo((InternetAddress[]) msg.getRecipients(Message.RecipientType.TO));
+						} catch (final AddressException e) {
+							mailMessage.addTo(DummyAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_TO)));
+						}
+						try {
+							mailMessage.addCc((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC));
+						} catch (final AddressException e) {
+							mailMessage.addCc(DummyAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_CC)));
+						}
+						try {
+							mailMessage.addBcc((InternetAddress[]) msg.getRecipients(Message.RecipientType.BCC));
+						} catch (final AddressException e) {
+							mailMessage.addBcc(DummyAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_BCC)));
+						}
+						/*
+						 * Reply-To
+						 */
+						final StringBuilder sb = new StringBuilder(128);
+						{
+							InternetAddress[] replyTo = null;
+							try {
+								replyTo = (InternetAddress[]) msg.getReplyTo();
+							} catch (final AddressException e) {
+								final String[] addrStr = msg.getHeader(MessageHeaders.HDR_REPLY_TO);
+								if (null != addrStr) {
+									replyTo = new InternetAddress[] { new DummyAddress(addrStr[0]) };
+								}
+							}
+							if (null != replyTo) {
+								sb.append(replyTo[0].toString());
+								for (int j = 1; j < replyTo.length; j++) {
+									sb.append(", ").append(replyTo[j].toString());
+								}
+								mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
+								sb.setLength(0);
+							}
+						}
 						/*
 						 * Subject
 						 */
@@ -973,7 +993,6 @@ public final class MIMEMessageConverter {
 						/*
 						 * In-Reply-To
 						 */
-						final StringBuilder sb = new StringBuilder(128);
 						{
 							final String[] inReplyTo = msg.getHeader(MessageHeaders.HDR_IN_REPLY_TO);
 							if (null != inReplyTo) {
@@ -1026,7 +1045,7 @@ public final class MIMEMessageConverter {
 					}
 				};
 				break;
-			case ATTACHMENT:
+			case CONTENT_TYPE:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
 							MailException {
@@ -1195,15 +1214,6 @@ public final class MIMEMessageConverter {
 					}
 				};
 				break;
-			case MSG_REF:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						/*
-						 * Ignore
-						 */
-					}
-				};
-				break;
 			case COLOR_LABEL:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
@@ -1212,24 +1222,6 @@ public final class MIMEMessageConverter {
 						if (!mailMessage.containsColorLabel()) {
 							mailMessage.setColorLabel(MailMessage.COLOR_LABEL_NONE);
 						}
-					}
-				};
-				break;
-			case FOLDER:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						/*
-						 * Ignore
-						 */
-					}
-				};
-				break;
-			case FLAG_SEEN:
-				fillers[i] = new MailMessageFieldFiller() {
-					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						/*
-						 * Ignore
-						 */
 					}
 				};
 				break;
@@ -1284,6 +1276,9 @@ public final class MIMEMessageConverter {
 			 * Parse flags
 			 */
 			parseFlags(msg.getFlags(), mail);
+			if (!mail.containsColorLabel()) {
+				mail.setColorLabel(MailMessage.COLOR_LABEL_NONE);
+			}
 			/*
 			 * Set folder data
 			 */
@@ -1335,18 +1330,24 @@ public final class MIMEMessageConverter {
 				final String[] tmp = msg.getHeader(MessageHeaders.HDR_CONTENT_ID);
 				if ((tmp != null) && (tmp.length > 0)) {
 					mail.setContentId(tmp[0]);
+				} else {
+					mail.setContentId(null);
 				}
 			}
 			{
 				final String tmp = msg.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
 				if ((tmp != null) && (tmp.length() > 0)) {
 					mail.setContentDisposition(tmp);
+				} else {
+					mail.setContentDisposition((String) null);
 				}
 			}
 			{
 				final String dispNot = msg.getHeader(MessageHeaders.HDR_DISP_NOT_TO, null);
 				if (dispNot != null) {
 					mail.setDispositionNotification(InternetAddress.parse(dispNot, true)[0]);
+				} else {
+					mail.setDispositionNotification(null);
 				}
 			}
 			mail.removeHeader(MessageHeaders.HDR_DISP_NOT_TO);
@@ -1362,12 +1363,17 @@ public final class MIMEMessageConverter {
 			mail.removeHeader(MessageHeaders.HDR_X_PRIORITY);
 			if (msg.getReceivedDate() != null) {
 				mail.setReceivedDate(msg.getReceivedDate());
+			} else {
+				mail.setReceivedDate(null);
 			}
 			if (msg.getSentDate() != null) {
 				mail.setSentDate(msg.getSentDate());
+			} else {
+				mail.setSentDate(null);
 			}
 			mail.setSize(msg.getSize());
 			mail.setSubject(msg.getSubject());
+			mail.setThreadLevel(0);
 			return mail;
 		} catch (final MessagingException e) {
 			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());

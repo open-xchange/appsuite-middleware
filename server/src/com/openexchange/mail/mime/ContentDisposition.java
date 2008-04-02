@@ -96,7 +96,6 @@ public final class ContentDisposition extends ParameterizedHeader implements Ser
 	 */
 	public ContentDisposition(final String contentDisp) throws MailException {
 		super();
-		disposition = DEFAULT_CONTENT_DISP;
 		parseContentDisp(contentDisp);
 	}
 
@@ -105,6 +104,14 @@ public final class ContentDisposition extends ParameterizedHeader implements Ser
 	}
 
 	private void parseContentDisp(final String contentDispArg, final boolean paramList) throws MailException {
+		if (null == contentDispArg || contentDispArg.length() == 0) {
+			/*
+			 * Nothing to parse
+			 */
+			disposition = DEFAULT_CONTENT_DISP;
+			parameterList = new ParameterList();
+			return;
+		}
 		final String contentDisp = prepareParameterizedHeader(contentDispArg);
 		final Matcher cdMatcher = PATTERN_CONTENT_DISP.matcher(contentDisp);
 		if (!cdMatcher.find()) {

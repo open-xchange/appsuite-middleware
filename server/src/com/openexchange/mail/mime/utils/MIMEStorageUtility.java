@@ -74,9 +74,6 @@ import com.sun.mail.imap.protocol.UIDSet;
  */
 public final class MIMEStorageUtility {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MIMEStorageUtility.class);
-
 	/**
 	 * No instance
 	 */
@@ -184,12 +181,11 @@ public final class MIMEStorageUtility {
 			set.add(MailField.ID);
 		}
 		if (fetchProfile.contains(FetchProfile.Item.CONTENT_INFO)) {
-			set.add(MailField.ATTACHMENT);
+			set.add(MailField.CONTENT_TYPE);
 		}
 		if (fetchProfile.contains(FetchProfile.Item.FLAGS)) {
 			set.add(MailField.FLAGS);
 			set.add(MailField.COLOR_LABEL);
-			set.add(MailField.FLAG_SEEN);
 		}
 		if (fetchProfile.contains(IMAPFolder.FetchProfileItem.HEADERS)) {
 			set.add(MailField.FROM);
@@ -389,7 +385,7 @@ public final class MIMEStorageUtility {
 		case ID:
 			fp.add(UIDFolder.FetchProfileItem.UID);
 			break;
-		case ATTACHMENT:
+		case CONTENT_TYPE:
 			fp.add(FetchProfile.Item.CONTENT_INFO);
 			break;
 		case FROM:
@@ -414,9 +410,7 @@ public final class MIMEStorageUtility {
 			fp.add(MessageHeaders.HDR_DATE);
 			break;
 		case FLAGS:
-			if (!fp.contains(FetchProfile.Item.FLAGS)) {
-				fp.add(FetchProfile.Item.FLAGS);
-			}
+			fp.add(FetchProfile.Item.FLAGS);
 			break;
 		case DISPOSITION_NOTIFICATION_TO:
 			fp.add(MessageHeaders.HDR_DISP_NOT_TO);
@@ -425,11 +419,6 @@ public final class MIMEStorageUtility {
 			fp.add(MessageHeaders.HDR_X_PRIORITY);
 			break;
 		case COLOR_LABEL:
-			if (!fp.contains(FetchProfile.Item.FLAGS)) {
-				fp.add(FetchProfile.Item.FLAGS);
-			}
-			break;
-		case FLAG_SEEN:
 			if (!fp.contains(FetchProfile.Item.FLAGS)) {
 				fp.add(FetchProfile.Item.FLAGS);
 			}

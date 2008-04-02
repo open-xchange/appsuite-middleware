@@ -66,6 +66,18 @@ public final class ContentType extends ParameterizedHeader implements Serializab
 	private static final long serialVersionUID = -9197784872892324694L;
 
 	/**
+	 * The default content type: <code>text/plain; charset=us-ascii</code>
+	 */
+	public static final ContentType DEFAULT_CONTENT_TYPE;
+
+	static {
+		DEFAULT_CONTENT_TYPE = new ContentType();
+		DEFAULT_CONTENT_TYPE.setPrimaryType("text");
+		DEFAULT_CONTENT_TYPE.setSubType("plain");
+		DEFAULT_CONTENT_TYPE.setCharsetParameter("us-ascii");
+	}
+
+	/**
 	 * The regular expression that should match whole content type
 	 */
 	private static final Pattern PATTERN_CONTENT_TYPE = Pattern
@@ -114,6 +126,9 @@ public final class ContentType extends ParameterizedHeader implements Serializab
 	}
 
 	private void parseContentType(final String contentTypeArg, final boolean paramList) throws MailException {
+		if (null == contentTypeArg || contentTypeArg.length() == 0) {
+			setContentType(DEFAULT_CONTENT_TYPE);
+		}
 		final String contentType = prepareParameterizedHeader(contentTypeArg);
 		final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(contentType);
 		if (!ctMatcher.find() || ctMatcher.start() != 0) {
