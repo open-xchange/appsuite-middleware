@@ -570,13 +570,48 @@ public final class MIMEMessageConverter {
 						/*
 						 * From
 						 */
-						mailMessage.addFrom((InternetAddress[]) extMimeMessage.getFrom());
+						try {
+							mailMessage.addFrom((InternetAddress[]) extMimeMessage.getFrom());
+						} catch (final AddressException e) {
+							final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_FROM, null);
+							if (LOG.isDebugEnabled()) {
+								LOG.debug("Unparseable internet address" + addrStr);
+							}
+							mailMessage.addFrom(new DummyAddress(addrStr));
+						}
 						/*
 						 * To, Cc, and Bcc
 						 */
-						mailMessage.addTo((InternetAddress[]) extMimeMessage.getRecipients(Message.RecipientType.TO));
-						mailMessage.addCc((InternetAddress[]) extMimeMessage.getRecipients(Message.RecipientType.CC));
-						mailMessage.addBcc((InternetAddress[]) extMimeMessage.getRecipients(Message.RecipientType.BCC));
+						try {
+							mailMessage.addTo((InternetAddress[]) extMimeMessage
+									.getRecipients(Message.RecipientType.TO));
+						} catch (final AddressException e) {
+							final String[] addrs = extMimeMessage.getHeader(MessageHeaders.HDR_TO);
+							if (LOG.isDebugEnabled()) {
+								LOG.debug("Unparseable internet addresses" + addrs);
+							}
+							mailMessage.addTo(DummyAddress.getAddresses(addrs));
+						}
+						try {
+							mailMessage.addCc((InternetAddress[]) extMimeMessage
+									.getRecipients(Message.RecipientType.CC));
+						} catch (final AddressException e) {
+							final String[] addrs = extMimeMessage.getHeader(MessageHeaders.HDR_CC);
+							if (LOG.isDebugEnabled()) {
+								LOG.debug("Unparseable internet addresses" + addrs);
+							}
+							mailMessage.addCc(DummyAddress.getAddresses(addrs));
+						}
+						try {
+							mailMessage.addBcc((InternetAddress[]) extMimeMessage
+									.getRecipients(Message.RecipientType.BCC));
+						} catch (final AddressException e) {
+							final String[] addrs = extMimeMessage.getHeader(MessageHeaders.HDR_BCC);
+							if (LOG.isDebugEnabled()) {
+								LOG.debug("Unparseable internet addresses" + addrs);
+							}
+							mailMessage.addBcc(DummyAddress.getAddresses(addrs));
+						}
 						/*
 						 * Reply-To
 						 */
@@ -806,6 +841,8 @@ public final class MIMEMessageConverter {
 						if ((val != null) && (val.length > 0)) {
 							mailMessage.setDispositionNotification(InternetAddress.parse(val[0], true)[0]);
 							mailMessage.removeHeader(MessageHeaders.HDR_DISP_NOT_TO);
+						} else {
+							mailMessage.setDispositionNotification(null);
 						}
 					}
 				};
@@ -837,6 +874,9 @@ public final class MIMEMessageConverter {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
 							MailException {
 						parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailMessage);
+						if (!mailMessage.containsColorLabel()) {
+							mailMessage.setColorLabel(MailMessage.COLOR_LABEL_NONE);
+						}
 					}
 				};
 				break;
@@ -917,6 +957,8 @@ public final class MIMEMessageConverter {
 							final String[] xPriority = msg.getHeader(MessageHeaders.HDR_X_PRIORITY);
 							if (null != xPriority) {
 								parsePriority(xPriority[0], mailMessage);
+							} else {
+								mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
 							}
 						}
 						/*
@@ -1134,6 +1176,8 @@ public final class MIMEMessageConverter {
 						if ((val != null) && (val.length > 0)) {
 							mailMessage.setDispositionNotification(InternetAddress.parse(val[0], true)[0]);
 							mailMessage.removeHeader(MessageHeaders.HDR_DISP_NOT_TO);
+						} else {
+							mailMessage.setDispositionNotification(null);
 						}
 					}
 				};
@@ -1165,6 +1209,9 @@ public final class MIMEMessageConverter {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
 							MailException {
 						parseFlags(msg.getFlags(), mailMessage);
+						if (!mailMessage.containsColorLabel()) {
+							mailMessage.setColorLabel(MailMessage.COLOR_LABEL_NONE);
+						}
 					}
 				};
 				break;
