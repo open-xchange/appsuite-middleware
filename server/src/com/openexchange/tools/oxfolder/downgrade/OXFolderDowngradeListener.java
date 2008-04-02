@@ -62,8 +62,8 @@ import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.downgrade.sql.OXFolderDowngradeSQL;
 
 /**
- * {@link OXFolderDowngradeListener} - Performs deletion of unused folder data remaining
- * from a former downgrade.
+ * {@link OXFolderDowngradeListener} - Performs deletion of unused folder data
+ * remaining from a former downgrade.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -213,6 +213,27 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 	 */
 	private static void deleteInfostoreFolderData(final int entity, final int cid, final Connection writeCon)
 			throws OXFolderException {
+		try {
+			/*
+			 * Strip permissions on default folder
+			 */
+			OXFolderDowngradeSQL.cleanDefaultModuleFolder(entity, FolderObject.INFOSTORE, cid, TABLE_FOLDER_BACKUP,
+					TABLE_PERMISSIONS_BACKUP, writeCon);
+			OXFolderDowngradeSQL.cleanDefaultModuleFolder(entity, FolderObject.INFOSTORE, cid, TABLE_FOLDER_WORKING,
+					TABLE_PERMISSIONS_WORKING, writeCon);
+			/*
+			 * Remove subfolders below default folder
+			 */
+			OXFolderDowngradeSQL.removeSubInfostoreFolders(entity, cid, TABLE_FOLDER_BACKUP, TABLE_PERMISSIONS_BACKUP,
+					writeCon);
+			OXFolderDowngradeSQL.removeSubInfostoreFolders(entity, cid, TABLE_FOLDER_WORKING,
+					TABLE_PERMISSIONS_WORKING, writeCon);
+		} catch (final SQLException e) {
+			throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+		}
+		/*
+		 * Strip all user permission from other (public) infostore folders
+		 */
 		deleteModuleFolderData(entity, FolderObject.INFOSTORE, cid, writeCon, false);
 	}
 
@@ -236,6 +257,8 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 				/*
 				 * Remove default folder's shared permissions
 				 */
+				OXFolderDowngradeSQL.cleanDefaultModuleFolder(entity, module, cid, TABLE_FOLDER_BACKUP,
+						TABLE_PERMISSIONS_BACKUP, writeCon);
 				OXFolderDowngradeSQL.cleanDefaultModuleFolder(entity, module, cid, TABLE_FOLDER_WORKING,
 						TABLE_PERMISSIONS_WORKING, writeCon);
 			}

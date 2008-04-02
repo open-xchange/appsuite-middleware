@@ -57,7 +57,7 @@ import java.util.regex.Pattern;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 
-import com.openexchange.mail.mime.ContainerMessage;
+import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -88,15 +88,15 @@ public final class ThreadSortUtil {
 	 * @return an array of <code>javax.mail.Message</code> objects only filled
 	 *         with message's sequence number
 	 */
-	public static ContainerMessage[] getMessagesFromThreadResponse(final String folderFullname, final char separator,
+	public static ExtendedMimeMessage[] getMessagesFromThreadResponse(final String folderFullname, final char separator,
 			final String threadResponse) {
 		final Matcher m = PATTERN_THREAD_RESP.matcher(threadResponse);
 		if (m.find()) {
-			final List<ContainerMessage> tmp = new ArrayList<ContainerMessage>();
+			final List<ExtendedMimeMessage> tmp = new ArrayList<ExtendedMimeMessage>();
 			do {
-				tmp.add(new ContainerMessage(folderFullname, separator, Integer.parseInt(m.group())));
+				tmp.add(new ExtendedMimeMessage(folderFullname, separator, Integer.parseInt(m.group())));
 			} while (m.find());
-			return tmp.toArray(new ContainerMessage[tmp.size()]);
+			return tmp.toArray(new ExtendedMimeMessage[tmp.size()]);
 		}
 		return null;
 	}

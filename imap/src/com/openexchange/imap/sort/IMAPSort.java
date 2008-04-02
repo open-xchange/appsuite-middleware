@@ -78,7 +78,7 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.utils.StorageUtility.DummyAddress;
+import com.openexchange.mail.mime.DummyAddress;
 import com.sun.mail.imap.IMAPFolder;
 
 /**

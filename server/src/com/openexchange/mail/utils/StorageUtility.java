@@ -62,7 +62,6 @@ import javax.mail.internet.InternetAddress;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfigException;
-import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.usersetting.UserSettingMail;
 
@@ -77,54 +76,6 @@ public final class StorageUtility {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(StorageUtility.class);
-
-	public static final class DummyAddress extends InternetAddress {
-
-		private static final long serialVersionUID = -3276144799717449603L;
-
-		private static final String TYPE = "rfc822";
-
-		private final String address;
-
-		public DummyAddress(final String address) {
-			this.address = MessageUtility.decodeMultiEncodedHeader(address);
-		}
-
-		@Override
-		public String getType() {
-			return TYPE;
-		}
-
-		@Override
-		public String toString() {
-			return address;
-		}
-
-		@Override
-		public String getAddress() {
-			return address;
-		}
-
-		@Override
-		public String getPersonal() {
-			return null;
-		}
-
-		@Override
-		public boolean equals(final Object address) {
-			if (address instanceof InternetAddress) {
-				final InternetAddress ia = (InternetAddress) address;
-				return this.address.equalsIgnoreCase(ia.getAddress());
-			}
-			return false;
-		}
-
-		@Override
-		public int hashCode() {
-			return address.hashCode();
-		}
-
-	}
 
 	/*
 	 * Public constants

@@ -90,8 +90,9 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.mime.ContainerMessage;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.DummyAddress;
+import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
@@ -100,7 +101,6 @@ import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
-import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -432,7 +432,7 @@ public final class MIMEMessageConverter {
 	/**
 	 * Converts given array of {@link Message} instances to an array of
 	 * {@link MailMessage} instances. The single elements of the array are
-	 * expected to be instances of {@link ContainerMessage}; meaning the
+	 * expected to be instances of {@link ExtendedMimeMessage}; meaning the
 	 * messages were created through a manual fetch.
 	 * <p>
 	 * Only the fields specified through parameter <code>fields</code> are
@@ -457,7 +457,7 @@ public final class MIMEMessageConverter {
 	/**
 	 * Converts given array of {@link Message} instances to an array of
 	 * {@link MailMessage} instances. The single elements of the array are
-	 * expected to be instances of {@link ContainerMessage}; meaning the
+	 * expected to be instances of {@link ExtendedMimeMessage}; meaning the
 	 * messages were created through a manual fetch.
 	 * <p>
 	 * Only the fields specified through parameter <code>fields</code> are
@@ -479,13 +479,6 @@ public final class MIMEMessageConverter {
 	 */
 	public static MailMessage[] convertMessages(final Message[] msgs, final MailField[] fields,
 			final boolean includeBody) throws MailException {
-		/**
-		 * TODO: Change signature to:
-		 * 
-		 * <pre>
-		 * convertMessages(final ContainerMessage[] msgs, final MailListField[] fields)
-		 * </pre>
-		 */
 		try {
 			final MailMessageFieldFiller[] fillers = createFieldFillers(fields);
 			final MailMessage[] mails = new MIMEMailMessage[msgs.length];
@@ -544,13 +537,20 @@ public final class MIMEMessageConverter {
 	private static void fillMessage(final MailMessageFieldFiller[] fillers, final MailMessage mailMessage,
 			final Message msg) throws MailException, MessagingException {
 		for (final MailMessageFieldFiller filler : fillers) {
-			filler.fillField(mailMessage, msg);
+			if (null != filler) {
+				filler.fillField(mailMessage, msg);
+			}
 		}
 	}
 
+	private static final String[] NON_MATCHING_HEADERS = { MessageHeaders.HDR_FROM, MessageHeaders.HDR_TO,
+			MessageHeaders.HDR_CC, MessageHeaders.HDR_BCC, MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_SUBJECT,
+			MessageHeaders.HDR_DATE, MessageHeaders.HDR_X_PRIORITY, MessageHeaders.HDR_MESSAGE_ID,
+			MessageHeaders.HDR_IN_REPLY_TO, MessageHeaders.HDR_REFERENCES };
+
 	/**
 	 * Creates the field fillers and expects the messages to be instances of
-	 * {@link ContainerMessage}
+	 * {@link ExtendedMimeMessage}
 	 * 
 	 * @param fields
 	 *            The fields to fill
@@ -566,24 +566,23 @@ public final class MIMEMessageConverter {
 			case HEADERS:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						final ContainerMessage containerMessage = (ContainerMessage) msg;
+						final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
 						/*
 						 * From
 						 */
-						mailMessage.addFrom((InternetAddress[]) containerMessage.getFrom());
+						mailMessage.addFrom((InternetAddress[]) extMimeMessage.getFrom());
 						/*
 						 * To, Cc, and Bcc
 						 */
-						mailMessage.addTo((InternetAddress[]) containerMessage.getRecipients(Message.RecipientType.TO));
-						mailMessage.addCc((InternetAddress[]) containerMessage.getRecipients(Message.RecipientType.CC));
-						mailMessage.addBcc((InternetAddress[]) containerMessage
-								.getRecipients(Message.RecipientType.BCC));
+						mailMessage.addTo((InternetAddress[]) extMimeMessage.getRecipients(Message.RecipientType.TO));
+						mailMessage.addCc((InternetAddress[]) extMimeMessage.getRecipients(Message.RecipientType.CC));
+						mailMessage.addBcc((InternetAddress[]) extMimeMessage.getRecipients(Message.RecipientType.BCC));
 						/*
 						 * Reply-To
 						 */
 						final StringBuilder sb = new StringBuilder(128);
 						{
-							final InternetAddress[] replyTo = (InternetAddress[]) containerMessage.getReplyTo();
+							final InternetAddress[] replyTo = (InternetAddress[]) extMimeMessage.getReplyTo();
 							if (null != replyTo) {
 								sb.append(replyTo[0].toString());
 								for (int j = 1; j < replyTo.length; j++) {
@@ -596,30 +595,29 @@ public final class MIMEMessageConverter {
 						/*
 						 * Subject
 						 */
-						mailMessage.setSubject(containerMessage.getSubject());
+						mailMessage.setSubject(extMimeMessage.getSubject());
 						/*
 						 * Date
 						 */
-						mailMessage.setSentDate(containerMessage.getSentDate());
+						mailMessage.setSentDate(extMimeMessage.getSentDate());
 						/*
 						 * X-Priority
 						 */
-						mailMessage.setPriority(Integer.parseInt(containerMessage
-								.getHeader(MessageHeaders.HDR_X_PRIORITY)[0]));
+						mailMessage.setPriority(extMimeMessage.getPriority());
 						/*
 						 * Message-Id
 						 */
 						{
-							final String[] messageId = containerMessage.getHeader(MessageHeaders.HDR_MESSAGE_ID);
+							final String messageId = extMimeMessage.getHeader(MessageHeaders.HDR_MESSAGE_ID, null);
 							if (null != messageId) {
-								mailMessage.addHeader(MessageHeaders.HDR_MESSAGE_ID, messageId[0]);
+								mailMessage.addHeader(MessageHeaders.HDR_MESSAGE_ID, messageId);
 							}
 						}
 						/*
 						 * In-Reply-To
 						 */
 						{
-							final String[] inReplyTo = containerMessage.getHeader(MessageHeaders.HDR_IN_REPLY_TO);
+							final String[] inReplyTo = extMimeMessage.getHeader(MessageHeaders.HDR_IN_REPLY_TO);
 							if (null != inReplyTo) {
 								sb.append(inReplyTo[0].toString());
 								for (int j = 1; j < inReplyTo.length; j++) {
@@ -633,7 +631,7 @@ public final class MIMEMessageConverter {
 						 * References
 						 */
 						{
-							final String[] references = containerMessage.getHeader(MessageHeaders.HDR_REFERENCES);
+							final String[] references = extMimeMessage.getHeader(MessageHeaders.HDR_REFERENCES);
 							if (null != references) {
 								sb.append(references[0].toString());
 								for (int j = 1; j < references.length; j++) {
@@ -646,11 +644,10 @@ public final class MIMEMessageConverter {
 						/*
 						 * All other
 						 */
-						final int size = containerMessage.getNumOfHeaders();
-						final Iterator<Map.Entry<String, String>> iter = containerMessage.getHeaders();
-						for (int j = 0; j < size; j++) {
-							final Map.Entry<String, String> entry = iter.next();
-							mailMessage.addHeader(entry.getKey(), entry.getValue());
+						for (final Enumeration<?> e = extMimeMessage.getNonMatchingHeaders(NON_MATCHING_HEADERS); e
+								.hasMoreElements();) {
+							final Header h = (Header) e.nextElement();
+							mailMessage.addHeader(h.getName(), h.getValue());
 						}
 					}
 				};
@@ -658,15 +655,15 @@ public final class MIMEMessageConverter {
 			case ID:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setMailId(((ContainerMessage) msg).getUid());
+						mailMessage.setMailId(((ExtendedMimeMessage) msg).getUid());
 					}
 				};
 				break;
 			case FOLDER_ID:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setSeparator(((ContainerMessage) msg).getSeparator());
-						mailMessage.setFolder(((ContainerMessage) msg).getFolderFullname());
+						mailMessage.setSeparator(((ExtendedMimeMessage) msg).getSeparator());
+						mailMessage.setFolder(((ExtendedMimeMessage) msg).getFullname());
 					}
 				};
 				break;
@@ -675,71 +672,115 @@ public final class MIMEMessageConverter {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MailException,
 							MessagingException {
 						try {
-							mailMessage.setContentType(((ContainerMessage) msg).getContentType());
+							mailMessage.setContentType(((ExtendedMimeMessage) msg).getContentType());
 						} catch (final MailException e) {
 							/*
 							 * Cannot occur
 							 */
 							LOG.error(e.getLocalizedMessage(), e);
 						}
-						mailMessage.setHasAttachment(((ContainerMessage) msg).hasAttachment());
+						mailMessage.setHasAttachment(((ExtendedMimeMessage) msg).hasAttachment());
 					}
 				};
 				break;
 			case FROM:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.addFrom((InternetAddress[]) ((ContainerMessage) msg).getFrom());
+						final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
+						try {
+							mailMessage.addFrom((InternetAddress[]) extMimeMessage.getFrom());
+						} catch (final AddressException e) {
+							final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_FROM, null);
+							if (LOG.isDebugEnabled()) {
+								LOG.debug(new StringBuilder(128).append(
+										"Internet address could not be properly parsed, ").append(
+										"using plain address' string representation instead: ").append(addrStr)
+										.toString(), e);
+							}
+							mailMessage.addFrom(new DummyAddress(addrStr));
+						}
 					}
 				};
 				break;
 			case TO:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.addTo((InternetAddress[]) ((ContainerMessage) msg).getRecipients(RecipientType.TO));
+						final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
+						try {
+							mailMessage.addTo((InternetAddress[]) extMimeMessage.getRecipients(RecipientType.TO));
+						} catch (final AddressException e) {
+							if (LOG.isDebugEnabled()) {
+								LOG.debug(new StringBuilder(128).append(
+										"Internet addresses could not be properly parsed, ").append(
+										"using plain addresses' string representation instead.").toString(), e);
+							}
+							mailMessage.addTo(DummyAddress
+									.getAddresses(extMimeMessage.getHeader(MessageHeaders.HDR_TO)));
+						}
 					}
 				};
 				break;
 			case CC:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.addCc((InternetAddress[]) ((ContainerMessage) msg).getRecipients(RecipientType.CC));
+						final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
+						try {
+							mailMessage.addCc((InternetAddress[]) extMimeMessage.getRecipients(RecipientType.CC));
+						} catch (final AddressException e) {
+							if (LOG.isDebugEnabled()) {
+								LOG.debug(new StringBuilder(128).append(
+										"Internet addresses could not be properly parsed, ").append(
+										"using plain addresses' string representation instead.").toString(), e);
+							}
+							mailMessage.addCc(DummyAddress
+									.getAddresses(extMimeMessage.getHeader(MessageHeaders.HDR_CC)));
+						}
 					}
 				};
 				break;
 			case BCC:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.addBcc((InternetAddress[]) ((ContainerMessage) msg)
-								.getRecipients(RecipientType.BCC));
+						final ExtendedMimeMessage extMimeMessage = (ExtendedMimeMessage) msg;
+						try {
+							mailMessage.addBcc((InternetAddress[]) extMimeMessage.getRecipients(RecipientType.BCC));
+						} catch (final AddressException e) {
+							if (LOG.isDebugEnabled()) {
+								LOG.debug(new StringBuilder(128).append(
+										"Internet addresses could not be properly parsed, ").append(
+										"using plain addresses' string representation instead.").toString(), e);
+							}
+							mailMessage.addCc(DummyAddress.getAddresses(extMimeMessage
+									.getHeader(MessageHeaders.HDR_BCC)));
+						}
 					}
 				};
 				break;
 			case SUBJECT:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setSubject(((ContainerMessage) msg).getSubject());
+						mailMessage.setSubject(((ExtendedMimeMessage) msg).getSubject());
 					}
 				};
 				break;
 			case SIZE:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setSize(((ContainerMessage) msg).getSize());
+						mailMessage.setSize(((ExtendedMimeMessage) msg).getSize());
 					}
 				};
 				break;
 			case SENT_DATE:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setSentDate(((ContainerMessage) msg).getSentDate());
+						mailMessage.setSentDate(((ExtendedMimeMessage) msg).getSentDate());
 					}
 				};
 				break;
 			case RECEIVED_DATE:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setReceivedDate(((ContainerMessage) msg).getReceivedDate());
+						mailMessage.setReceivedDate(((ExtendedMimeMessage) msg).getReceivedDate());
 					}
 				};
 				break;
@@ -747,21 +788,21 @@ public final class MIMEMessageConverter {
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
 							MailException {
-						parseFlags(((ContainerMessage) msg).getFlags(), mailMessage);
+						parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailMessage);
 					}
 				};
 				break;
 			case THREAD_LEVEL:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setThreadLevel(((ContainerMessage) msg).getThreadLevel());
+						mailMessage.setThreadLevel(((ExtendedMimeMessage) msg).getThreadLevel());
 					}
 				};
 				break;
 			case DISPOSITION_NOTIFICATION_TO:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						final String[] val = ((ContainerMessage) msg).getHeader(MessageHeaders.HDR_DISP_NOT_TO);
+						final String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_DISP_NOT_TO);
 						if ((val != null) && (val.length > 0)) {
 							mailMessage.setDispositionNotification(InternetAddress.parse(val[0], true)[0]);
 							mailMessage.removeHeader(MessageHeaders.HDR_DISP_NOT_TO);
@@ -772,10 +813,12 @@ public final class MIMEMessageConverter {
 			case PRIORITY:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						final String[] val = ((ContainerMessage) msg).getHeader(MessageHeaders.HDR_X_PRIORITY);
+						final String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_X_PRIORITY);
 						if ((val != null) && (val.length > 0)) {
 							parsePriority(val[0], mailMessage);
 							mailMessage.removeHeader(MessageHeaders.HDR_X_PRIORITY);
+						} else {
+							mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
 						}
 					}
 				};
@@ -793,7 +836,7 @@ public final class MIMEMessageConverter {
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException,
 							MailException {
-						parseFlags(((ContainerMessage) msg).getFlags(), mailMessage);
+						parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailMessage);
 					}
 				};
 				break;
@@ -917,7 +960,11 @@ public final class MIMEMessageConverter {
 						/*
 						 * All other
 						 */
-						setHeaders(msg, mailMessage);
+						for (final Enumeration<?> e = msg.getNonMatchingHeaders(NON_MATCHING_HEADERS); e
+								.hasMoreElements();) {
+							final Header h = (Header) e.nextElement();
+							mailMessage.addHeader(h.getName(), h.getValue());
+						}
 					}
 				};
 				break;
@@ -960,8 +1007,8 @@ public final class MIMEMessageConverter {
 							}
 						}
 						mailMessage.setContentType(ct);
-						if (msg instanceof ContainerMessage) {
-							mailMessage.setHasAttachment(((ContainerMessage) msg).hasAttachment());
+						if (msg instanceof ExtendedMimeMessage) {
+							mailMessage.setHasAttachment(((ExtendedMimeMessage) msg).hasAttachment());
 						} else {
 							try {
 								mailMessage.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)
@@ -984,7 +1031,7 @@ public final class MIMEMessageConverter {
 							if (LOG.isDebugEnabled()) {
 								LOG.debug("Unparseable addresse(s): " + Arrays.toString(fromHdr), e);
 							}
-							mailMessage.addFrom(new ContainerMessage.DummyAddress(fromHdr[0]));
+							mailMessage.addFrom(new DummyAddress(fromHdr[0]));
 						}
 					}
 				};
@@ -999,7 +1046,7 @@ public final class MIMEMessageConverter {
 							if (LOG.isDebugEnabled()) {
 								LOG.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
 							}
-							mailMessage.addTo(new ContainerMessage.DummyAddress(hdr[0]));
+							mailMessage.addTo(new DummyAddress(hdr[0]));
 						}
 					}
 				};
@@ -1014,7 +1061,7 @@ public final class MIMEMessageConverter {
 							if (LOG.isDebugEnabled()) {
 								LOG.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
 							}
-							mailMessage.addCc(new ContainerMessage.DummyAddress(hdr[0]));
+							mailMessage.addCc(new DummyAddress(hdr[0]));
 						}
 					}
 				};
@@ -1029,7 +1076,7 @@ public final class MIMEMessageConverter {
 							if (LOG.isDebugEnabled()) {
 								LOG.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
 							}
-							mailMessage.addBcc(new ContainerMessage.DummyAddress(hdr[0]));
+							mailMessage.addBcc(new DummyAddress(hdr[0]));
 						}
 					}
 				};
@@ -1098,6 +1145,8 @@ public final class MIMEMessageConverter {
 						if ((val != null) && (val.length > 0)) {
 							parsePriority(val[0], mailMessage);
 							mailMessage.removeHeader(MessageHeaders.HDR_X_PRIORITY);
+						} else {
+							mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
 						}
 					}
 				};
@@ -1525,7 +1574,7 @@ public final class MIMEMessageConverter {
 	private static InternetAddress[] getAddressesOnParseError(final String[] addrs) {
 		final InternetAddress[] retval = new InternetAddress[addrs.length];
 		for (int i = 0; i < addrs.length; i++) {
-			retval[i] = new StorageUtility.DummyAddress(addrs[i]);
+			retval[i] = new DummyAddress(addrs[i]);
 		}
 		return retval;
 	}

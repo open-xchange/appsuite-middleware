@@ -86,7 +86,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
 	private static final MailField[] FIELDS_FULL = new MailField[] { MailField.FULL };
 
-	private static final MailField[] FIELDS_ID = new MailField[] { MailField.ID };
+	private static final MailField[] FIELDS_ID_INFO = new MailField[] { MailField.ID, MailField.FOLDER_ID };
 
 	private static final String INBOX_ID = "INBOX";
 
@@ -411,31 +411,36 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		 */
 		MailMessage[] mails = mailConnection.getMessageStorage().searchMessages(fullname,
 				null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
-				MailListField.getField(sortCol), OrderDirection.getOrderDirection(order), searchTerm, FIELDS_ID);
+				MailListField.getField(sortCol), OrderDirection.getOrderDirection(order), searchTerm, FIELDS_ID_INFO);
 		if ((mails == null) || (mails.length == 0)) {
 			return SearchIterator.EMPTY_ITERATOR;
 		}
 		final MailField[] useFields;
+		final boolean onlyFolderAndID;
 		if (mails.length < MailProperties.getInstance().getMailFetchLimit()) {
 			/*
 			 * Selection fits into cache: Prepare for caching
 			 */
 			useFields = com.openexchange.mail.mime.utils.MIMEStorageUtility.getCacheFieldsArray();
+			onlyFolderAndID = false;
 		} else {
 			useFields = MailField.toFields(MailListField.getFields(fields));
+			onlyFolderAndID = onlyFolderAndID(useFields);
 		}
-		/*
-		 * Extract IDs
-		 */
-		final long[] mailIds = new long[mails.length];
-		for (int i = 0; i < mailIds.length; i++) {
-			mailIds[i] = mails[i].getMailId();
+		if (!onlyFolderAndID) {
+			/*
+			 * Extract IDs
+			 */
+			final long[] mailIds = new long[mails.length];
+			for (int i = 0; i < mailIds.length; i++) {
+				mailIds[i] = mails[i].getMailId();
+			}
+			/*
+			 * Fetch identified messages by their IDs and pre-fill them
+			 * according to specified fields
+			 */
+			mails = mailConnection.getMessageStorage().getMessages(fullname, mailIds, useFields);
 		}
-		/*
-		 * Fetch identified messages by their IDs and pre-fill them according to
-		 * specified fields
-		 */
-		mails = mailConnection.getMessageStorage().getMessages(fullname, mailIds, useFields);
 		try {
 			/*
 			 * Remove old user cache entries
@@ -452,6 +457,29 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			LOG.error(e.getLocalizedMessage(), e);
 		}
 		return SearchIteratorAdapter.createArrayIterator(mails);
+	}
+
+	/**
+	 * Checks if specified fields only consist of mail ID and folder ID
+	 * 
+	 * @param fields
+	 *            The fields to check
+	 * @return <code>true</code> if specified fields only consist of mail ID
+	 *         and folder ID; otherwise <code>false</code>
+	 */
+	private static boolean onlyFolderAndID(final MailField[] fields) {
+		if (fields.length != 2) {
+			return false;
+		}
+		int i = 0;
+		for (final MailField field : fields) {
+			if (MailField.ID.equals(field)) {
+				i |= 1;
+			} else if (MailField.FOLDER_ID.equals(field)) {
+				i |= 2;
+			}
+		}
+		return (i == 3);
 	}
 
 	@Override
@@ -553,31 +581,36 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		 */
 		MailMessage[] mails = mailConnection.getMessageStorage().getThreadSortedMessages(fullname,
 				fromToIndices == null ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
-				searchTerm, FIELDS_ID);
+				searchTerm, FIELDS_ID_INFO);
 		if ((mails == null) || (mails.length == 0)) {
 			return SearchIterator.EMPTY_ITERATOR;
 		}
 		final MailField[] useFields;
+		final boolean onlyFolderAndID;
 		if (mails.length < MailProperties.getInstance().getMailFetchLimit()) {
 			/*
 			 * Selection fits into cache: Prepare for caching
 			 */
 			useFields = com.openexchange.mail.mime.utils.MIMEStorageUtility.getCacheFieldsArray();
+			onlyFolderAndID = false;
 		} else {
 			useFields = MailField.toFields(MailListField.getFields(fields));
+			onlyFolderAndID = onlyFolderAndID(useFields);
 		}
-		/*
-		 * Extract IDs
-		 */
-		final long[] mailIds = new long[mails.length];
-		for (int i = 0; i < mailIds.length; i++) {
-			mailIds[i] = mails[i].getMailId();
+		if (!onlyFolderAndID) {
+			/*
+			 * Extract IDs
+			 */
+			final long[] mailIds = new long[mails.length];
+			for (int i = 0; i < mailIds.length; i++) {
+				mailIds[i] = mails[i].getMailId();
+			}
+			/*
+			 * Fetch identified messages by their IDs and pre-fill them
+			 * according to specified fields
+			 */
+			mails = mailConnection.getMessageStorage().getMessages(fullname, mailIds, useFields);
 		}
-		/*
-		 * Fetch identified messages by their IDs and pre-fill them according to
-		 * specified fields
-		 */
-		mails = mailConnection.getMessageStorage().getMessages(fullname, mailIds, useFields);
 		try {
 			/*
 			 * Remove old user cache entries

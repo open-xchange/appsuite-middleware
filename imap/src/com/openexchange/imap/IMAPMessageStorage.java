@@ -90,7 +90,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
-import com.openexchange.mail.mime.ContainerMessage;
+import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
@@ -379,7 +379,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				}
 				final Message[] tmp = msgs;
 				final int retvalLength = toIndex - fromIndex + 1;
-				msgs = new ContainerMessage[retvalLength];
+				msgs = new ExtendedMimeMessage[retvalLength];
 				System.arraycopy(tmp, fromIndex, msgs, 0, retvalLength);
 			}
 			return MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(new MailField[usedFields.size()]),
@@ -1021,7 +1021,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		final Iterator<TreeNode> iter = threadList.iterator();
 		for (int i = 0; i < threadListSize; i++) {
 			final TreeNode currentNode = iter.next();
-			((ContainerMessage) msgs[index]).setThreadLevel(level);
+			((ExtendedMimeMessage) msgs[index]).setThreadLevel(level);
 			index++;
 			index = createThreadSortMessages(currentNode.getChilds(), level + 1, msgs, index);
 		}

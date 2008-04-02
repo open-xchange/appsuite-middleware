@@ -407,8 +407,7 @@ public final class OXFolderDowngradeSQL {
 			stmt.setInt(3, entity);
 			rs = stmt.executeQuery();
 			if (!rs.next()) {
-				throw new IllegalStateException("Missing default folder for module " + module + " in context " + cid
-						+ " for user " + entity);
+				return;
 			}
 			fuid = rs.getInt(1);
 		} finally {
@@ -640,6 +639,107 @@ public final class OXFolderDowngradeSQL {
 			stmt.executeUpdate();
 		} finally {
 			closeSQLStuff(null, stmt);
+		}
+	}
+
+	private static final String SQL_SEL_SUB_INFO_FLD = "SELECT ot.fuid FROM " + RPL_FOLDER
+			+ " AS ot WHERE ot.parent IN (" + "SELECT ot2.fuid FROM " + RPL_FOLDER
+			+ " AS ot2 WHERE ot2.cid = ? AND ot2.module = ? AND ot2.created_from = ? AND ot2.default_flag = 1)";
+
+	private static final String SQL_SEL_SUB2_INFO_FLD = "SELECT ot.fuid FROM " + RPL_FOLDER
+			+ " AS ot WHERE ot.cid = ? AND ot.parent = ?";
+
+	private static final String SQL_DEL_INFO_PERM = "DELETE FROM " + RPL_PERM
+			+ " AS op WHERE op.cid = ? AND op.fuid = ?";
+
+	private static final String SQL_DEL_INFO = "DELETE FROM " + RPL_FOLDER + " AS ot WHERE ot.cid = ? AND ot.fuid = ?";
+
+	/**
+	 * Removes all subfolders below default infostore folder
+	 * 
+	 * @param entity
+	 *            The entity
+	 * @param cid
+	 *            The context ID
+	 * @param folderTable
+	 *            The folder table identifier
+	 * @param permTable
+	 *            The permission table identifier
+	 * @param writeCon
+	 *            A writable connection
+	 * @throws SQLException
+	 *             If a SQL error occurs
+	 */
+	public static void removeSubInfostoreFolders(final int entity, final int cid, final String folderTable,
+			final String permTable, final Connection writeCon) throws SQLException {
+		/*
+		 * Remove all subfolders below default infostore folder
+		 */
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		final int[] fuids;
+		try {
+			stmt = writeCon.prepareStatement(SQL_SEL_SUB_INFO_FLD.replaceAll(RPL_FOLDER, folderTable));
+			stmt.setInt(1, cid);
+			stmt.setInt(2, FolderObject.INFOSTORE);
+			stmt.setInt(3, entity);
+			rs = stmt.executeQuery();
+			final SmartIntArray sia = new SmartIntArray(128);
+			while (rs.next()) {
+				sia.append(rs.getInt(1));
+			}
+			fuids = sia.toArray();
+		} finally {
+			closeSQLStuff(rs, stmt);
+			rs = null;
+			stmt = null;
+		}
+		for (final int fuid : fuids) {
+			deleteFolder(fuid, cid, folderTable, permTable, writeCon);
+		}
+	}
+
+	private static void deleteFolder(final int fuid, final int cid, final String folderTable, final String permTable,
+			final Connection writeCon) throws SQLException {
+		PreparedStatement stmt = null;
+		{
+			ResultSet rs = null;
+			final int[] subFuids;
+			try {
+				stmt = writeCon.prepareStatement(SQL_SEL_SUB2_INFO_FLD.replaceFirst(RPL_FOLDER, folderTable));
+				stmt.setInt(1, cid);
+				stmt.setInt(2, fuid);
+				rs = stmt.executeQuery();
+				final SmartIntArray sia = new SmartIntArray(128);
+				while (rs.next()) {
+					sia.append(rs.getInt(1));
+				}
+				subFuids = sia.toArray();
+			} finally {
+				closeSQLStuff(rs, stmt);
+				stmt = null;
+			}
+			for (final int subFuid : subFuids) {
+				deleteFolder(subFuid, cid, folderTable, permTable, writeCon);
+			}
+		}
+		try {
+			stmt = writeCon.prepareStatement(SQL_DEL_INFO_PERM.replaceFirst(RPL_PERM, permTable));
+			stmt.setInt(1, cid);
+			stmt.setInt(2, fuid);
+			stmt.executeUpdate();
+		} finally {
+			closeSQLStuff(null, stmt);
+			stmt = null;
+		}
+		try {
+			stmt = writeCon.prepareStatement(SQL_DEL_INFO.replaceFirst(RPL_FOLDER, folderTable));
+			stmt.setInt(1, cid);
+			stmt.setInt(2, fuid);
+			stmt.executeUpdate();
+		} finally {
+			closeSQLStuff(null, stmt);
+			stmt = null;
 		}
 	}
 

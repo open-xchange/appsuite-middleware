@@ -65,7 +65,7 @@ import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.mime.ContainerMessage;
+import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.spam.SpamHandler;
 import com.openexchange.tools.Collections.SmartLongArray;
@@ -117,7 +117,7 @@ public final class IMAPSpamAssassinSpamHandler extends SpamHandler {
 		final FetchProfile fp = new FetchProfile();
 		fp.add(MessageHeaders.HDR_X_SPAM_FLAG);
 		fp.add(FetchProfile.Item.CONTENT_INFO);
-		final ContainerMessage[] msgs = (ContainerMessage[]) new FetchIMAPCommand(spamFolder, msgUIDs, fp, false, false)
+		final ExtendedMimeMessage[] msgs = (ExtendedMimeMessage[]) new FetchIMAPCommand(spamFolder, msgUIDs, fp, false, false)
 				.doCommand();
 		/*
 		 * Separate the plain from the nested messages inside spam folder
