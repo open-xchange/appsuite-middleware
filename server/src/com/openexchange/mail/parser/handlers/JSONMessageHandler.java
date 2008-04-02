@@ -141,7 +141,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 * @param mailPath
 	 *            The unique mail path
 	 * @param displayVersion
-	 *            <code>true</code> to create a version gfor display;
+	 *            <code>true</code> to create a version for display;
 	 *            otherwise <code>false</code>
 	 * @param session
 	 *            The session
