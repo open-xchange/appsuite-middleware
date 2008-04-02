@@ -83,7 +83,7 @@ public final class MailParserWriterTest extends AbstractMailTest {
 
 	private static final MailField[] COMMON_LIST_FIELDS = { MailField.ID, MailField.FOLDER_ID,
 			MailField.SIZE, MailField.FROM, MailField.TO, MailField.RECEIVED_DATE,
-			MailField.SENT_DATE, MailField.SUBJECT, MailField.ATTACHMENT, MailField.FLAGS,
+			MailField.SENT_DATE, MailField.SUBJECT, MailField.CONTENT_TYPE, MailField.FLAGS,
 			MailField.PRIORITY, MailField.COLOR_LABEL };
 
 	public void testMessageWriter() {
@@ -96,7 +96,7 @@ public final class MailParserWriterTest extends AbstractMailTest {
 			mailConnection.connect(/*mailConfig*/);
 			try {
 				final MailMessage[] mails = mailConnection.getMessageStorage().getAllMessages("INBOX", null, null,
-						null, new MailField[] { MailField.ID, MailField.ATTACHMENT });
+						null, new MailField[] { MailField.ID, MailField.CONTENT_TYPE });
 
 				for (final MailMessage mail : mails) {
 					if (mail.getContentType().isMimeType("multipart/mixed")) {

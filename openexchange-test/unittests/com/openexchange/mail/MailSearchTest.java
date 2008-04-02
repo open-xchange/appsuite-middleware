@@ -52,28 +52,34 @@ package com.openexchange.mail;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.search.ComparisonType;
+import com.openexchange.mail.search.FlagTerm;
+import com.openexchange.mail.search.HeaderTerm;
+import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.search.SizeTerm;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
- * {@link MailGetTest}
+ * {@link MailSearchTest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailGetTest extends AbstractMailTest {
+public final class MailSearchTest extends AbstractMailTest {
 
 	/**
 	 * 
 	 */
-	public MailGetTest() {
+	public MailSearchTest() {
 		super();
 	}
 
 	/**
 	 * @param name
 	 */
-	public MailGetTest(final String name) {
+	public MailSearchTest(final String name) {
 		super(name);
 	}
 
@@ -84,12 +90,9 @@ public final class MailGetTest extends AbstractMailTest {
 
 	private static final MailField[] FIELDS_EVEN_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS,
 			MailField.FROM, MailField.TO, MailField.DISPOSITION_NOTIFICATION_TO, MailField.COLOR_LABEL,
-			MailField.HEADERS, MailField.SUBJECT, MailField.THREAD_LEVEL, MailField.SIZE, MailField.PRIORITY,
-			MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.CC, MailField.BCC, MailField.FOLDER_ID };
+			MailField.HEADERS, MailField.SUBJECT, MailField.THREAD_LEVEL, MailField.SIZE, MailField.PRIORITY };
 
-	private static final MailField[] FIELDS_FULL = { MailField.FULL };
-
-	public void testMailGet() {
+	public void testMailSearch() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
 					new ContextImpl(getCid()), "mail-test-session");
@@ -101,12 +104,16 @@ public final class MailGetTest extends AbstractMailTest {
 			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
 			try {
 
-				MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID);
+				SearchTerm<?> term = new HeaderTerm(MessageHeaders.HDR_CONTENT_TYPE, "text/plain; charset=us-ascii");
+				MailMessage[] fetchedMails = mailAccess.getMessageStorage().searchMessages("INBOX", IndexRange.NULL,
+						null, null, term, FIELDS_ID);
 				for (int i = 0; i < fetchedMails.length; i++) {
 					assertFalse("Mail ID is -1", fetchedMails[i].getMailId() == -1);
 				}
 
-				fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_MORE);
+				term = new FlagTerm(MailMessage.FLAG_SEEN, false);
+				fetchedMails = mailAccess.getMessageStorage().searchMessages("INBOX", IndexRange.NULL, null, null,
+						term, FIELDS_MORE);
 				for (int i = 0; i < fetchedMails.length; i++) {
 					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == -1);
 					assertTrue("Missing content type", fetchedMails[i].containsContentType());
@@ -118,7 +125,11 @@ public final class MailGetTest extends AbstractMailTest {
 					}
 				}
 
-				fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_EVEN_MORE);
+				term = new SizeTerm(ComparisonType.GREATER_THAN, 1023); // all
+																		// >=
+																		// 1KB
+				fetchedMails = mailAccess.getMessageStorage().searchMessages("INBOX", IndexRange.NULL, null, null,
+						term, FIELDS_EVEN_MORE);
 				for (int i = 0; i < fetchedMails.length; i++) {
 					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == -1);
 					assertTrue("Missing content type", fetchedMails[i].containsContentType());
@@ -132,37 +143,6 @@ public final class MailGetTest extends AbstractMailTest {
 					assertTrue("Missing thread level", fetchedMails[i].containsThreadLevel());
 					assertTrue("Missing size", fetchedMails[i].containsSize());
 					assertTrue("Missing priority", fetchedMails[i].containsPriority());
-					assertTrue("Missing sent date", fetchedMails[i].containsSentDate());
-					assertTrue("Missing received date", fetchedMails[i].containsReceivedDate());
-					assertTrue("Missing Cc", fetchedMails[i].containsCc());
-					assertTrue("Missing Bcc", fetchedMails[i].containsBcc());
-					assertTrue("Missing folder fullname", fetchedMails[i].containsFolder());
-				}
-
-				fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_FULL);
-				for (int i = 0; i < fetchedMails.length; i++) {
-					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == -1);
-					assertTrue("Missing content type", fetchedMails[i].containsContentType());
-					assertTrue("Missing flags", fetchedMails[i].containsFlags());
-					assertTrue("Missing From", fetchedMails[i].containsFrom());
-					assertTrue("Missing To", fetchedMails[i].containsTo());
-					assertTrue("Missing Disposition-Notification-To", fetchedMails[i].containsDispositionNotification());
-					assertTrue("Missing color label", fetchedMails[i].containsColorLabel());
-					assertTrue("Missing headers", fetchedMails[i].containsHeaders());
-					assertTrue("Missing subject", fetchedMails[i].containsSubject());
-					assertTrue("Missing thread level", fetchedMails[i].containsThreadLevel());
-					assertTrue("Missing size", fetchedMails[i].containsSize());
-					assertTrue("Missing priority", fetchedMails[i].containsPriority());
-					assertTrue("Missing sent date", fetchedMails[i].containsSentDate());
-					assertTrue("Missing received date", fetchedMails[i].containsReceivedDate());
-					assertTrue("Missing Cc", fetchedMails[i].containsCc());
-					assertTrue("Missing Bcc", fetchedMails[i].containsBcc());
-					assertTrue("Missing folder fullname", fetchedMails[i].containsFolder());
-					if (fetchedMails[i].getContentType().isMimeType("multipart/*")) {
-						assertFalse("Enclosed count returned -1", fetchedMails[i].getEnclosedCount() == -1);
-					} else {
-						assertFalse("Content is null", fetchedMails[i].getContent() == null);
-					}
 				}
 
 			} finally {

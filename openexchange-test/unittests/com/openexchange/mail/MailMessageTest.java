@@ -82,7 +82,7 @@ public final class MailMessageTest extends AbstractMailTest {
 	}
 
 	private static final MailField[] COMMON_LIST_FIELDS = { MailField.ID, MailField.FOLDER_ID, MailField.FROM,
-			MailField.TO, MailField.RECEIVED_DATE, MailField.SENT_DATE, MailField.SUBJECT, MailField.ATTACHMENT,
+			MailField.TO, MailField.RECEIVED_DATE, MailField.SENT_DATE, MailField.SUBJECT, MailField.CONTENT_TYPE,
 			MailField.FLAGS, MailField.PRIORITY, MailField.COLOR_LABEL };
 
 	public void testGetMessages() {
