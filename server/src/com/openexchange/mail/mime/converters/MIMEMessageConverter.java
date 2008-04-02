@@ -1469,25 +1469,25 @@ public final class MIMEMessageConverter {
 	 */
 	public static Flags convertMailFlags(final int flags) {
 		final Flags flagsObj = new Flags();
-		if ((flags | MailMessage.FLAG_ANSWERED) == MailMessage.FLAG_ANSWERED) {
+		if ((flags & MailMessage.FLAG_ANSWERED) == MailMessage.FLAG_ANSWERED) {
 			flagsObj.add(Flags.Flag.ANSWERED);
 		}
-		if ((flags | MailMessage.FLAG_DELETED) == MailMessage.FLAG_DELETED) {
+		if ((flags & MailMessage.FLAG_DELETED) == MailMessage.FLAG_DELETED) {
 			flagsObj.add(Flags.Flag.DELETED);
 		}
-		if ((flags | MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT) {
+		if ((flags & MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT) {
 			flagsObj.add(Flags.Flag.DRAFT);
 		}
-		if ((flags | MailMessage.FLAG_FLAGGED) == MailMessage.FLAG_FLAGGED) {
+		if ((flags & MailMessage.FLAG_FLAGGED) == MailMessage.FLAG_FLAGGED) {
 			flagsObj.add(Flags.Flag.FLAGGED);
 		}
-		if ((flags | MailMessage.FLAG_RECENT) == MailMessage.FLAG_RECENT) {
+		if ((flags & MailMessage.FLAG_RECENT) == MailMessage.FLAG_RECENT) {
 			flagsObj.add(Flags.Flag.RECENT);
 		}
-		if ((flags | MailMessage.FLAG_SEEN) == MailMessage.FLAG_SEEN) {
+		if ((flags & MailMessage.FLAG_SEEN) == MailMessage.FLAG_SEEN) {
 			flagsObj.add(Flags.Flag.SEEN);
 		}
-		if ((flags | MailMessage.FLAG_USER) == MailMessage.FLAG_USER) {
+		if ((flags & MailMessage.FLAG_USER) == MailMessage.FLAG_USER) {
 			flagsObj.add(Flags.Flag.USER);
 		}
 		return flagsObj;
