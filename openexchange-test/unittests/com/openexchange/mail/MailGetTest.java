@@ -82,6 +82,10 @@ public final class MailGetTest extends AbstractMailTest {
 	private static final MailField[] FIELDS_MORE = { MailField.ID, MailField.ATTACHMENT, MailField.FLAGS,
 			MailField.BODY };
 
+	private static final MailField[] FIELDS_EVEN_MORE = { MailField.ID, MailField.ATTACHMENT, MailField.FLAGS,
+			MailField.FROM, MailField.TO, MailField.DISPOSITION_NOTIFICATION_TO, MailField.COLOR_LABEL,
+			MailField.HEADERS, MailField.SUBJECT, MailField.THREAD_LEVEL, MailField.SIZE, MailField.PRIORITY };
+
 	public void testMailGet() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
@@ -92,34 +96,52 @@ public final class MailGetTest extends AbstractMailTest {
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
 			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
+			try {
 
-			MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID);
-			for (int i = 0; i < fetchedMails.length; i++) {
-				System.out.println("Fetched: " + fetchedMails[i].getMailId());
-			}
-
-			fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_MORE);
-			for (int i = 0; i < fetchedMails.length; i++) {
-				System.out.println("Fetched More: " + fetchedMails[i].getMailId() + " "
-						+ fetchedMails[i].hasAttachment() + " " + fetchedMails[i].getContentType());
-				if (fetchedMails[i].getContentType().isMimeType("multipart/*")) {
-					System.out.println("Enclosed count: " + fetchedMails[i].getEnclosedCount());
-				} else {
-					System.out.println("Content: " + fetchedMails[i].getContent());
+				MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID);
+				for (int i = 0; i < fetchedMails.length; i++) {
+					assertFalse("Mail ID is -1", fetchedMails[i].getMailId() == -1);
 				}
-			}
+	
+				fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_MORE);
+				for (int i = 0; i < fetchedMails.length; i++) {
+					if (fetchedMails[i].getContentType().isMimeType("multipart/*")) {
+						assertFalse("Enclosed count returned -1", fetchedMails[i].getEnclosedCount() == -1);
+					} else {
+						assertFalse("Content is null", fetchedMails[i].getContent() == null);
+					}
+				}
+	
+				fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_EVEN_MORE);
+				for (int i = 0; i < fetchedMails.length; i++) {
+					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == -1);
+					assertTrue("Missing content type", fetchedMails[i].containsContentType());
+					assertTrue("Missing flags", fetchedMails[i].containsFlags());
+					assertTrue("Missing From", fetchedMails[i].containsFrom());
+					assertTrue("Missing To", fetchedMails[i].containsTo());
+					assertTrue("Missing Disposition-Notification-To", fetchedMails[i].containsDispositionNotification());
+					assertTrue("Missing color label", fetchedMails[i].containsColorLabel());
+					assertTrue("Missing headers", fetchedMails[i].containsHeaders());
+					assertTrue("Missing subject", fetchedMails[i].containsSubject());
+					assertTrue("Missing thread level", fetchedMails[i].containsThreadLevel());
+					assertTrue("Missing size", fetchedMails[i].containsSize());
+					assertTrue("Missing priority", fetchedMails[i].containsPriority());
+				}
+				
+			} finally {
 
-			final boolean success = mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
-			if (success) {
-				System.out.println("Successfully deleted");
-			} else {
-				System.out.println("Delete failed");
+				final boolean success = mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
+				if (success) {
+					System.out.println("Successfully deleted");
+				} else {
+					System.out.println("Delete failed");
+				}
+	
+				/*
+				 * close
+				 */
+				mailAccess.close(false);
 			}
-
-			/*
-			 * close
-			 */
-			mailAccess.close(false);
 
 		} catch (final Exception e) {
 			e.printStackTrace();
