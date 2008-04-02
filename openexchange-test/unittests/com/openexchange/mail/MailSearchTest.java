@@ -49,6 +49,10 @@
 
 package com.openexchange.mail;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -85,8 +89,9 @@ public final class MailSearchTest extends AbstractMailTest {
 
 	private static final MailField[] FIELDS_ID = { MailField.ID };
 
-	private static final MailField[] FIELDS_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS,
-			MailField.BODY };
+	private static final MailField[] FIELDS_ID_AND_HEADER = { MailField.ID, MailField.HEADERS };
+
+	private static final MailField[] FIELDS_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS };
 
 	private static final MailField[] FIELDS_EVEN_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS,
 			MailField.FROM, MailField.TO, MailField.DISPOSITION_NOTIFICATION_TO, MailField.COLOR_LABEL,
@@ -105,31 +110,33 @@ public final class MailSearchTest extends AbstractMailTest {
 			try {
 
 				SearchTerm<?> term = new HeaderTerm(MessageHeaders.HDR_CONTENT_TYPE, "text/plain; charset=us-ascii");
+				long start = System.currentTimeMillis();
 				MailMessage[] fetchedMails = mailAccess.getMessageStorage().searchMessages("INBOX", IndexRange.NULL,
 						null, null, term, FIELDS_ID);
+				System.out.println("Header search took: " + (System.currentTimeMillis() - start) + "msec");
 				for (int i = 0; i < fetchedMails.length; i++) {
 					assertFalse("Mail ID is -1", fetchedMails[i].getMailId() == -1);
 				}
 
 				term = new FlagTerm(MailMessage.FLAG_SEEN, false);
+				start = System.currentTimeMillis();
 				fetchedMails = mailAccess.getMessageStorage().searchMessages("INBOX", IndexRange.NULL, null, null,
 						term, FIELDS_MORE);
+				System.out.println("Unseen search took: " + (System.currentTimeMillis() - start) + "msec");
 				for (int i = 0; i < fetchedMails.length; i++) {
 					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == -1);
 					assertTrue("Missing content type", fetchedMails[i].containsContentType());
 					assertTrue("Missing flags", fetchedMails[i].containsFlags());
-					if (fetchedMails[i].getContentType().isMimeType("multipart/*")) {
-						assertFalse("Enclosed count returned -1", fetchedMails[i].getEnclosedCount() == -1);
-					} else {
-						assertFalse("Content is null", fetchedMails[i].getContent() == null);
-					}
 				}
 
-				term = new SizeTerm(ComparisonType.GREATER_THAN, 1023); // all
-																		// >=
-																		// 1KB
+				/*
+				 * All >= 1KB (1024bytes)
+				 */
+				term = new SizeTerm(ComparisonType.GREATER_THAN, 1023);
+				start = System.currentTimeMillis();
 				fetchedMails = mailAccess.getMessageStorage().searchMessages("INBOX", IndexRange.NULL, null, null,
 						term, FIELDS_EVEN_MORE);
+				System.out.println("Size search took: " + (System.currentTimeMillis() - start) + "msec");
 				for (int i = 0; i < fetchedMails.length; i++) {
 					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == -1);
 					assertTrue("Missing content type", fetchedMails[i].containsContentType());
@@ -143,6 +150,34 @@ public final class MailSearchTest extends AbstractMailTest {
 					assertTrue("Missing thread level", fetchedMails[i].containsThreadLevel());
 					assertTrue("Missing size", fetchedMails[i].containsSize());
 					assertTrue("Missing priority", fetchedMails[i].containsPriority());
+				}
+
+				final Map<Long, String> map = new HashMap<Long, String>(fetchedMails.length);
+				for (int i = 0; i < fetchedMails.length && i < 100; i++) {
+					final String messageId = fetchedMails[i].getHeader(MessageHeaders.HDR_MESSAGE_ID);
+					if (null != messageId && messageId.length() > 0 && !"null".equalsIgnoreCase(messageId)) {
+						map.put(Long.valueOf(fetchedMails[i].getMailId()), messageId);
+					}
+				}
+
+				final int size = map.size();
+				final Iterator<Map.Entry<Long, String>> iter = map.entrySet().iterator();
+				for (int i = 0; i < size; i++) {
+					final Map.Entry<Long, String> e = iter.next();
+					term = new HeaderTerm(MessageHeaders.HDR_MESSAGE_ID, e.getValue());
+					start = System.currentTimeMillis();
+					final MailMessage[] searchedMails = mailAccess.getMessageStorage().searchMessages("INBOX",
+							IndexRange.NULL, null, null, term, FIELDS_ID_AND_HEADER);
+					assertTrue("Search failed: No result", null != searchedMails);
+					assertTrue("Search failed: Non-matching result size", searchedMails.length >= 1);
+					boolean found = false;
+					for (int j = 0; j < searchedMails.length && !found; j++) {
+						final String messageId = searchedMails[j].getHeader(MessageHeaders.HDR_MESSAGE_ID);
+						assertTrue("Missing Message-Id", null != messageId);
+						assertTrue("Non-matching Message-Id", messageId.equals(e.getValue()));
+						found = e.getKey().longValue() == searchedMails[j].getMailId();
+					}
+					assertTrue("Non-matching mail ID", found);
 				}
 
 			} finally {
@@ -165,5 +200,4 @@ public final class MailSearchTest extends AbstractMailTest {
 			fail(e.getLocalizedMessage());
 		}
 	}
-
 }
