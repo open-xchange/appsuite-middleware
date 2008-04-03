@@ -60,8 +60,9 @@ public class Move extends AbstractAction {
 	
 	public String folder;
 	
-	public Move(final String mail) {
+	public Move(final String folder) {
 		name = MOVE;
+		this.folder = folder;
 	}
 	
 	public String getFolder() {
