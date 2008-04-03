@@ -33,6 +33,7 @@ Bundle-ClassPath: .,
  lib/tnef.jar,
  lib/xerces.jar
 Export-Package: com.mysql.jdbc;version="3.1.13",
+ com.openexchange.tools.ssl,
  com.sun.mail.iap,
  com.sun.mail.imap,
  com.sun.mail.imap.protocol,

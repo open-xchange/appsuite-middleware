@@ -165,9 +165,9 @@ public class LoginException extends AbstractOXException {
         CLASS_NOT_FOUND("Class %1$s can not be found.", Category.SETUP_ERROR,
             Source.SYSTEM, 8),
         /**
-         * Missing property %1$s in server.properties.
+         * Missing property %1$s.
          */
-        MISSING_SETTING("Missing property %1$s in server.properties.",
+        MISSING_PROPERTY("Missing property %1$s.",
             Category.SETUP_ERROR, Source.SYSTEM, 9),
         /**
          * database down.
