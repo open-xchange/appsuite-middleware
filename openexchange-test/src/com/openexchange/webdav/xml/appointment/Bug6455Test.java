@@ -7,7 +7,6 @@ import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.FolderTest;
 import com.openexchange.webdav.xml.XmlServlet;
-import com.sun.corba.se.spi.ior.ObjectId;
 
 public class Bug6455Test extends AppointmentTest {
 	
