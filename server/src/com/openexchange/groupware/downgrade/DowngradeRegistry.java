@@ -288,8 +288,24 @@ public final class DowngradeRegistry {
 	public void unregisterDowngradeListener(final DowngradeListener listener) {
 		registryLock.lock();
 		try {
-			listeners.remove(listener);
-			classes.remove(listener.getClass());
+			final Class<? extends DowngradeListener> clazz = listener.getClass();
+			if (!classes.contains(clazz)) {
+				return;
+			}
+			if (!listeners.remove(listener)) {
+				/*
+				 * Remove by reference did not work
+				 */
+				int size = listeners.size();
+				for (int i = 0; i < size; i++) {
+					if (clazz.equals(listeners.get(i).getClass())) {
+						listeners.remove(i);
+						// Reset size to leave loop
+						size = 0;
+					}
+				}
+			}
+			classes.remove(clazz);
 		} finally {
 			registryLock.unlock();
 		}
