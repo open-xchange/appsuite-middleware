@@ -461,6 +461,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 
 	@Override
 	public String createFolder(final MailFolderDescription toCreate) throws MailException {
+		boolean created = false;
+		IMAPFolder createMe = null;
 		try {
 			/*
 			 * Insert
@@ -495,7 +497,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character
 						.valueOf(parent.getSeparator()));
 			}
-			final IMAPFolder createMe;
 			if (parent.getFullName().length() == 0) {
 				/*
 				 * Below default folder
@@ -518,7 +519,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			} else {
 				ftype = FOLDER_TYPE;
 			}
-			if (!createMe.create(ftype)) {
+			if (!(created = createMe.create(ftype))) {
 				throw new IMAPException(IMAPException.Code.FOLDER_CREATION_FAILED, createMe.getFullName(),
 						parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parent.getFullName());
 			}
@@ -568,8 +569,28 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			}
 			return createMe.getFullName();
 		} catch (final MessagingException e) {
+			if (created) {
+				try {
+					if (createMe.exists()) {
+						createMe.delete(true);
+					}
+				} catch (final Throwable e2) {
+					LOG.error(new StringBuilder().append("Temporary created IMAP folder \"").append(
+							createMe.getFullName()).append("could not be deleted"), e2);
+				}
+			}
 			throw IMAPException.handleMessagingException(e, imapAccess);
 		} catch (final AbstractOXException e) {
+			if (created) {
+				try {
+					if (createMe.exists()) {
+						createMe.delete(true);
+					}
+				} catch (final Throwable e2) {
+					LOG.error(new StringBuilder().append("Temporary created IMAP folder \"").append(
+							createMe.getFullName()).append("could not be deleted"), e2);
+				}
+			}
 			throw new IMAPException(e);
 		}
 	}
@@ -839,7 +860,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 	}
 
 	@Override
-	public String deleteFolder(final String fullname) throws MailException {
+	public String deleteFolder(final String fullname, final boolean hardDelete) throws MailException {
 		try {
 			IMAPFolder deleteMe = (IMAPFolder) imapStore.getFolder(fullname);
 			if (!deleteMe.exists()) {
@@ -847,6 +868,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				if (null == deleteMe) {
 					throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, fullname);
 				}
+			}
+			if (hardDelete) {
+				/*
+				 * Delete permanently
+				 */
+				deleteFolder(deleteMe);
 			}
 			final IMAPFolder trashFolder = (IMAPFolder) imapStore.getFolder(getTrashFolder());
 			if (deleteMe.getParent().getFullName().equals(trashFolder.getFullName())
