@@ -240,9 +240,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				 */
 				final List<MailFolder> list = new ArrayList<MailFolder>(subfolders.size());
 				for (final Folder subfolder : subfolders) {
-					final MailFolder mo = IMAPFolderConverter.convertFolder((IMAPFolder) subfolder, session,
-							imapConfig, ctx);
-					list.add(mo);
+					list.add(IMAPFolderConverter.convertFolder((IMAPFolder) subfolder, session, imapConfig, ctx));
 				}
 				return list.toArray(new MailFolder[list.size()]);
 			}
@@ -613,8 +611,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				if (isDefaultFolder(moveMe.getFullName())) {
 					throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, moveMe.getFullName());
 				}
-				IMAPFolder destFolder = ((IMAPFolder) (newParent.length() == 0 ? imapStore
-						.getDefaultFolder() : imapStore.getFolder(newParent)));
+				IMAPFolder destFolder = ((IMAPFolder) (newParent.length() == 0 ? imapStore.getDefaultFolder()
+						: imapStore.getFolder(newParent)));
 				if (!destFolder.exists()) {
 					destFolder = checkForNamespaceFolder(newParent);
 					if (null == destFolder) {
