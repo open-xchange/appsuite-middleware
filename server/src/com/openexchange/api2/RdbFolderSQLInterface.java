@@ -398,7 +398,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 *             If a caching error occurs
 	 */
 	private static final void loadNonTreeVisibleFoldersIntoQueryCache(final Session session, final Context ctx,
-			UserConfiguration userConfiguration) throws SearchIteratorException, OXException {
+			final UserConfiguration userConfiguration) throws SearchIteratorException, OXException {
 		/*
 		 * Fetch queue from iterator (which implicitly puts referenced objects
 		 * into cache!)
