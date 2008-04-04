@@ -47,9 +47,11 @@
  *
  */
 
-package com.openexchange.mail;
+package com.openexchange.mail.messagestorage;
 
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.mail.AbstractMailTest;
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.sessiond.impl.SessionObject;

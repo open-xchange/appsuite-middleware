@@ -47,39 +47,43 @@
  *
  */
 
-package com.openexchange.mail;
+package com.openexchange.mail.messagestorage;
 
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.mail.AbstractMailTest;
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
- * {@link MailAppendTest}
+ * {@link MailFlagsTest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailAppendTest extends AbstractMailTest {
+public final class MailFlagsTest extends AbstractMailTest {
 
 	/**
 	 * 
 	 */
-	public MailAppendTest() {
+	public MailFlagsTest() {
 		super();
 	}
 
 	/**
 	 * @param name
 	 */
-	public MailAppendTest(final String name) {
+	public MailFlagsTest(final String name) {
 		super(name);
 	}
 
 	private static final MailField[] FIELDS_ID = { MailField.ID };
 
-	public void testMailAppend() {
+	private static final MailField[] FIELDS_ID_AND_FLAGS = { MailField.ID, MailField.FLAGS };
+
+	public void testMailFlags() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
 					new ContextImpl(getCid()), "mail-test-session");
@@ -89,28 +93,35 @@ public final class MailAppendTest extends AbstractMailTest {
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
 			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
+			try {
 
-			for (int i = 0; i < uids.length; i++) {
-				final MailMessage m = mailAccess.getMessageStorage().getMessage("INBOX", uids[i], true);
-				System.out.println("Mail #" + m.getMailId() + ": " + m.getSubject());
+				mailAccess.getMessageStorage().updateMessageFlags("INBOX", uids, MailMessage.FLAG_SEEN, true);
+				MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids,
+						FIELDS_ID_AND_FLAGS);
+				for (int i = 0; i < fetchedMails.length; i++) {
+					assertTrue("Mail is not marked as \\Seen", fetchedMails[i].isSeen());
+				}
+
+				mailAccess.getMessageStorage().updateMessageFlags("INBOX", uids, MailMessage.FLAG_ANSWERED, true);
+				fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID_AND_FLAGS);
+				for (int i = 0; i < fetchedMails.length; i++) {
+					assertTrue("Mail is not marked as \\Answered", fetchedMails[i].isAnswered());
+				}
+
+			} finally {
+
+				boolean success = mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
+				if (success) {
+					System.out.println("Successfully deleted");
+				} else {
+					System.out.println("Delete failed");
+				}
+
+				/*
+				 * close
+				 */
+				mailAccess.close(false);
 			}
-
-			final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID);
-			for (int i = 0; i < fetchedMails.length; i++) {
-				System.out.println("Fetched: " + fetchedMails[i].getMailId());
-			}
-
-			final boolean success = mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
-			if (success) {
-				System.out.println("Successfully deleted");
-			} else {
-				System.out.println("Delete failed");
-			}
-
-			/*
-			 * close
-			 */
-			mailAccess.close(false);
 
 		} catch (final Exception e) {
 			e.printStackTrace();

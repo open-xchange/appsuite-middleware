@@ -47,13 +47,16 @@
  *
  */
 
-package com.openexchange.mail;
+package com.openexchange.mail.messagestorage;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.mail.AbstractMailTest;
+import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
