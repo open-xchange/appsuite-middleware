@@ -239,7 +239,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				 * Output subfolders
 				 */
 				final List<MailFolder> list = new ArrayList<MailFolder>(subfolders.size());
-				for (Folder subfolder : subfolders) {
+				for (final Folder subfolder : subfolders) {
 					final MailFolder mo = IMAPFolderConverter.convertFolder((IMAPFolder) subfolder, session,
 							imapConfig, ctx);
 					list.add(mo);
