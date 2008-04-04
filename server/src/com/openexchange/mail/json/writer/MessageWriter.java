@@ -74,7 +74,6 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.utils.MessageUtility;
@@ -121,27 +120,9 @@ public final class MessageWriter {
 		} else {
 			mailPath = MailPath.NULL;
 		}
-		final JSONMessageHandler handler = new JSONMessageHandler(mailPath, displayVersion, session);
+		final JSONMessageHandler handler = new JSONMessageHandler(mailPath, mail, displayVersion, session);
 		new MailMessageParser().parseMailMessage(mail, handler);
-		final JSONObject jObject = handler.getJSONObject();
-		try {
-			/*
-			 * Add missing fields
-			 */
-			if (mail.containsFolder() && mail.getMailId() > 0) {
-				jObject.put(FolderChildFields.FOLDER_ID, prepareFullname(mail.getFolder(), mail.getSeparator()));
-				jObject.put(DataFields.ID, mail.getMailId());
-			}
-			jObject.put(MailJSONField.UNREAD.getKey(), mail.getUnreadMessages());
-			jObject.put(MailJSONField.HAS_ATTACHMENTS.getKey(), mail.getContentType().isMimeType(
-					MIMETypes.MIME_MULTIPART_MIXED));
-			jObject.put(MailJSONField.CONTENT_TYPE.getKey(), mail.getContentType().getBaseType());
-			jObject.put(MailJSONField.SIZE.getKey(), mail.getSize());
-			jObject.put(MailJSONField.THREAD_LEVEL.getKey(), mail.getThreadLevel());
-		} catch (final JSONException e) {
-			LOG.error(e.getMessage(), e);
-		}
-		return jObject;
+		return handler.getJSONObject();
 	}
 
 	public static interface MailFieldWriter {

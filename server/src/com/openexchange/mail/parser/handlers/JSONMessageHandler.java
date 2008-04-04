@@ -50,6 +50,7 @@
 package com.openexchange.mail.parser.handlers;
 
 import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
+import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,6 +71,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -141,8 +144,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 * @param mailPath
 	 *            The unique mail path
 	 * @param displayVersion
-	 *            <code>true</code> to create a version for display;
-	 *            otherwise <code>false</code>
+	 *            <code>true</code> to create a version for display; otherwise
+	 *            <code>false</code>
 	 * @param session
 	 *            The session
 	 * @throws MailException
@@ -168,6 +171,9 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 * 
 	 * @param mailPath
 	 *            The unique mail path
+	 * @param mail
+	 *            The mail message to add JSON fields not set by message parser
+	 *            traversal
 	 * @param displayVersion
 	 *            <code>true</code> to create a version for display; otherwise
 	 *            <code>false</code>
@@ -176,8 +182,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 * @throws MailException
 	 *             If a JSON error occurs
 	 */
-	public JSONMessageHandler(final MailPath mailPath, final boolean displayVersion, final Session session)
-			throws MailException {
+	public JSONMessageHandler(final MailPath mailPath, final MailMessage mail, final boolean displayVersion,
+			final Session session) throws MailException {
 		super();
 		this.session = session;
 		try {
@@ -189,14 +195,27 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		this.displayVersion = displayVersion;
 		this.mailPath = mailPath;
 		jsonObject = new JSONObject();
-		if (!displayVersion) {
-			try {
-			    if (null != mailPath) {
-			        jsonObject.put(MailJSONField.MSGREF.getKey(), mailPath.toString());
-			    }
-			} catch (final JSONException e) {
-				throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+		try {
+			if (!displayVersion && null != mailPath) {
+				jsonObject.put(MailJSONField.MSGREF.getKey(), mailPath.toString());
 			}
+			if (null != mail) {
+				/*
+				 * Add missing fields
+				 */
+				if (mail.containsFolder() && mail.getMailId() > 0) {
+					jsonObject.put(FolderChildFields.FOLDER_ID, prepareFullname(mail.getFolder(), mail.getSeparator()));
+					jsonObject.put(DataFields.ID, mail.getMailId());
+				}
+				jsonObject.put(MailJSONField.UNREAD.getKey(), mail.getUnreadMessages());
+				jsonObject.put(MailJSONField.HAS_ATTACHMENTS.getKey(), mail.getContentType().isMimeType(
+						MIMETypes.MIME_MULTIPART_MIXED));
+				jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), mail.getContentType().getBaseType());
+				jsonObject.put(MailJSONField.SIZE.getKey(), mail.getSize());
+				jsonObject.put(MailJSONField.THREAD_LEVEL.getKey(), mail.getThreadLevel());
+			}
+		} catch (final JSONException e) {
+			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
 		}
 	}
 
@@ -706,7 +725,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 */
 	public boolean handleNestedMessage(final MailMessage nestedMsg, final String id) throws MailException {
 		try {
-			final JSONMessageHandler msgHandler = new JSONMessageHandler(mailPath, displayVersion, session);
+			final JSONMessageHandler msgHandler = new JSONMessageHandler(mailPath, null, displayVersion, session);
 			new MailMessageParser().parseMailMessage(nestedMsg, msgHandler, id);
 			getNestedMsgsArr().put(msgHandler.getJSONObject());
 			return true;

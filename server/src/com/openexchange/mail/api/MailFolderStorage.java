@@ -216,10 +216,28 @@ public abstract class MailFolderStorage {
 	}
 
 	/**
-	 * Deletes an existing mail folder identified through given fullname. If
-	 * folder is not located below default trash folder it is backed up
-	 * (including subfolder tree) in default trash folder; otherwise it is
-	 * deleted permanently.
+	 * Deletes an existing mail folder identified through given fullname.
+	 * <p>
+	 * This is a convenience method that invokes
+	 * {@link #deleteFolder(String, boolean)} with <code>hardDelete</code> set
+	 * to <code>false</code>.
+	 * 
+	 * @param fullname
+	 *            The fullname of the mail folder to delete
+	 * @return The fullname of the deleted mail folder
+	 * @throws MailException
+	 *             If mail folder cannot be deleted
+	 */
+	public String deleteFolder(String fullname) throws MailException {
+		return deleteFolder(fullname, false);
+	}
+
+	/**
+	 * Deletes an existing mail folder identified through given fullname.
+	 * <p>
+	 * If <code>hardDelete</code> is not set and folder is not located below
+	 * default trash folder it is backed up (including subfolder tree) in
+	 * default trash folder; otherwise it is deleted permanently.
 	 * <p>
 	 * While another backup folder with the same name already exists below
 	 * default trash folder, an increasing serial number is appended to folder
@@ -234,11 +252,13 @@ public abstract class MailFolderStorage {
 	 * 
 	 * @param fullname
 	 *            The fullname of the mail folder to delete
+	 * @param hardDelete
+	 *            Whether to delete permanently or to backup into trash folder
 	 * @return The fullname of the deleted mail folder
 	 * @throws MailException
 	 *             If mail folder cannot be deleted
 	 */
-	public abstract String deleteFolder(String fullname) throws MailException;
+	public abstract String deleteFolder(String fullname, boolean hardDelete) throws MailException;
 
 	/**
 	 * Deletes the content of the folder identified through given fullname

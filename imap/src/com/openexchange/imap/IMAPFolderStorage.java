@@ -874,6 +874,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				 * Delete permanently
 				 */
 				deleteFolder(deleteMe);
+				return fullname;
 			}
 			final IMAPFolder trashFolder = (IMAPFolder) imapStore.getFolder(getTrashFolder());
 			if (deleteMe.getParent().getFullName().equals(trashFolder.getFullName())

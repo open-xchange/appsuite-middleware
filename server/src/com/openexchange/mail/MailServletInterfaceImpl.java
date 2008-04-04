@@ -191,7 +191,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	public String deleteFolder(final String folder) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		return prepareFullname(mailConnection.getFolderStorage().deleteFolder(fullname), getSeparator());
+		return prepareFullname(mailConnection.getFolderStorage().deleteFolder(fullname, false), getSeparator());
 	}
 
 	@Override
