@@ -227,6 +227,9 @@ public final class IMAPFolderConverter {
 					break Attribs;
 				}
 			}
+			if (!mailFolder.containsNonExistent()) {
+				mailFolder.setNonExistent(false);
+			}
 			mailFolder.setSeparator(imapFolder.getSeparator());
 			if (mailFolder.isRootFolder()) {
 				mailFolder.setFullname("");
