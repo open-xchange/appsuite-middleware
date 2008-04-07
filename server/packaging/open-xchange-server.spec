@@ -54,7 +54,7 @@ Requires:	open-xchange
 Group:          Applications/Productivity
 Summary:	Open-Xchange server scripts
 Prereq:		/usr/sbin/useradd
-Requires:	open-xchange-server open-xchange-config open-xchange-authentication open-xchange-control open-xchange-configjump open-xchange-charset open-xchange-sessiond, mysql >= 5.0.0
+Requires:	open-xchange-server open-xchange-config open-xchange-authentication open-xchange-control open-xchange-configjump open-xchange-charset open-xchange-sessiond open-xchange-mailstore open-xchange-smtp open-xchange-push-udp open-xchange-i18n open-xchange-jcharset, mysql >= 5.0.0
 
 
 %description -n open-xchange-config-standard
