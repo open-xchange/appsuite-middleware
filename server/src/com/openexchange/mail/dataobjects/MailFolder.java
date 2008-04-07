@@ -587,6 +587,7 @@ public final class MailFolder implements Serializable {
 	 */
 	public void setSeparator(final char separator) {
 		this.separator = separator;
+		b_separator = true;
 	}
 
 	/**
