@@ -46,20 +46,10 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.tools.exceptions;
 
-package com.openexchange.groupware.attach;
-
-public class Classes {
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_ATTACHMENTEXCEPTIONFACTORY = 0;
-	
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_CREATEATTACHMENTACTION = 1;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_UPDATEATTACHMENTACTION = 2;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_DELETEATTACHMENTACTION = 3;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_ATTACHMENTBASEIMPL = 4;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_FIREATTACHEDEVENTACTION = 5;
-	public static final int COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_FIREDETACHEDEVENTACTION = 6;
-
-
-    public static final int COM_OPENEXCHANGE_AJAX_REQUEST_ATTACHMENTREQUEST = 7;
-    public static final int COM_OPENEXCHANGE_AJAX_ATTACHMENT = 8;
+/**
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ */
+public class OXAborted extends RuntimeException {
 }

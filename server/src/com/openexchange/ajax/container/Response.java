@@ -244,8 +244,10 @@ public final class Response {
 	public JSONArray getErrorParams() {
 		final JSONArray array = new JSONArray();
 		if (exception != null && null != exception.getMessageArgs()) {
-			array.put(Arrays.asList(exception.getMessageArgs()));
-		}
+			for(Object arg : exception.getMessageArgs()) {
+                array.put(arg);
+            }
+        }
 		return array;
 	}
 

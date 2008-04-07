@@ -64,9 +64,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.parser.AttachmentParser;
 import com.openexchange.ajax.parser.AttachmentParser.UnknownColumnException;
 import com.openexchange.ajax.writer.AttachmentWriter;
-import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.attach.AttachmentField;
-import com.openexchange.groupware.attach.AttachmentMetadata;
+import com.openexchange.groupware.attach.*;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -75,12 +73,18 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.exceptions.OXAborted;
 import com.openexchange.session.Session;
 
+@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_AJAX_REQUEST_ATTACHMENTREQUEST, component = Component.ATTACHMENT)
 public class AttachmentRequest extends CommonRequest {
 	
 	private static final AttachmentParser PARSER = new AttachmentParser();
@@ -89,8 +93,9 @@ public class AttachmentRequest extends CommonRequest {
 	private static final AttachmentBase ATTACHMENT_BASE = Attachment.ATTACHMENT_BASE;
 	
 	private static final Log LOG = LogFactory.getLog(AttachmentRequest.class);
-	
-	private UserConfiguration userConfig;
+	private static final AttachmentExceptionFactory EXCEPTIONS = new AttachmentExceptionFactory(AttachmentRequest.class);
+
+    private UserConfiguration userConfig;
 	private final User user;
 	private Context ctx;
 
@@ -120,10 +125,10 @@ public class AttachmentRequest extends CommonRequest {
 				if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_ATTACHEDID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ID)) {
 					return true;
 				}
-				final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-				final int attachedId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ATTACHEDID));
-				final int moduleId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_MODULE));
-				final int id = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ID));
+				final int folderId = requireNumber(req, AJAXServlet.PARAMETER_FOLDERID);
+				final int attachedId = requireNumber(req, AJAXServlet.PARAMETER_ATTACHEDID);
+				final int moduleId = requireNumber(req, AJAXServlet.PARAMETER_MODULE);
+				final int id = requireNumber(req, AJAXServlet.PARAMETER_ID);
 				
 				get(folderId,attachedId,moduleId,id);
 				return true;
@@ -131,11 +136,16 @@ public class AttachmentRequest extends CommonRequest {
 				if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ATTACHEDID, AJAXServlet.PARAMETER_TIMESTAMP)) {
 					return true;
 				}
-				final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-				final int attachedId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ATTACHEDID));
-				final int moduleId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_MODULE));
+                final int folderId = requireNumber(req, AJAXServlet.PARAMETER_FOLDERID);
+                final int attachedId = requireNumber(req, AJAXServlet.PARAMETER_ATTACHEDID);
+                final int moduleId = requireNumber(req, AJAXServlet.PARAMETER_MODULE);
 				
-				final long timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
+				long timestamp = -1;
+                try {
+                    timestamp = Long.parseLong(req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
+                } catch (NumberFormatException nfe) {
+                    numberError(AJAXServlet.PARAMETER_TIMESTAMP, req.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
+                }
 				
 				final AttachmentField[] columns = PARSER.getColumns(req.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
 				
@@ -157,10 +167,10 @@ public class AttachmentRequest extends CommonRequest {
 				if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ATTACHEDID)) {
 					return true;
 				}
-				final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-				final int attachedId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ATTACHEDID));
-				final int moduleId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_MODULE));
-				
+                final int folderId = requireNumber(req, AJAXServlet.PARAMETER_FOLDERID);
+                final int attachedId = requireNumber(req, AJAXServlet.PARAMETER_ATTACHEDID);
+                final int moduleId = requireNumber(req, AJAXServlet.PARAMETER_MODULE);
+
 				final AttachmentField[] columns = PARSER.getColumns(req.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
 				
 				AttachmentField sort = null;
@@ -178,11 +188,11 @@ public class AttachmentRequest extends CommonRequest {
 				if (!checkRequired(req, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ATTACHEDID)) {
 					return true;
 				}
-				final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-				final int attachedId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_ATTACHEDID));
-				final int moduleId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_MODULE));
-				
-				final JSONArray idsArray = (JSONArray) req.getBody();
+                final int folderId = requireNumber(req, AJAXServlet.PARAMETER_FOLDERID);
+                final int attachedId = requireNumber(req, AJAXServlet.PARAMETER_ATTACHEDID);
+                final int moduleId = requireNumber(req, AJAXServlet.PARAMETER_MODULE);
+
+                final JSONArray idsArray = (JSONArray) req.getBody();
 				
 				int[] ids = new int[idsArray.length()];
 				for(int i = 0; i < idsArray.length(); i++) {
@@ -213,12 +223,30 @@ public class AttachmentRequest extends CommonRequest {
 		}*/
 		catch (UnknownColumnException e) {
 			handle(e);
-		}
+		} catch (OXAborted x) {
+            return true;
+        }
 		
 		return false;
 	}
-	
-	// Actions
+
+    private int requireNumber(SimpleRequest req, String parameter) {
+        String value = req.getParameter(parameter);
+        try {
+            return Integer.parseInt(value);            
+        } catch(NumberFormatException  nfe) {
+            numberError(parameter, value);
+            throw new OXAborted();
+        }
+    }
+
+    @OXThrows(category = AbstractOXException.Category.CODE_ERROR, desc = "", exceptionId = 1, msg = "Invalid parameter sent in request. Parameter '%s' was '%s' which does not look like a number")
+    public void numberError(String parameter, String value) {
+        AttachmentException t = EXCEPTIONS.create(1, parameter, value);
+        handle(t);
+    }
+
+    // Actions
 	
 	private void get(final int folderId, final int attachedId, final int moduleId, final int id) {
 		try {

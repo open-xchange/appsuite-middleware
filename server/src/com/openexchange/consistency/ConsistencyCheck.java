@@ -68,7 +68,6 @@ import java.io.IOException;
  */
 public class ConsistencyCheck {
     public static void main(String[] args) {
-        // in host 127.0.0.1:9999 (repair | list (missing | unassigned) (errors in) (database 1 | filestore 1 | context 1 | all ) (with policies) (missing_file_for_infoitem : (delete | create_dummy)) (missing_file_for_attachment : (delete | create_dummy)) (missing_entry_for_file : (delete | create_admin_infoitem))
         SimpleLexer lexer = new SimpleLexer(args);
         Configuration config = new Configuration();
 
@@ -117,7 +116,7 @@ public class ConsistencyCheck {
             if (! parseId(lexer, config)) {
                 System.exit( noid() );
             };
-        } else if (lexer.consume("all")) {
+        } else if (lexer.consume("all") || lexer.consume("everywhere")) {
             config.setSource("all");
         } else {
             System.exit( noproblemsource() );

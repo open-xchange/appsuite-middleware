@@ -77,13 +77,13 @@ import com.openexchange.ajax.exceptions.InfostoreException2Message;
 import com.openexchange.ajax.parser.AttachmentParser;
 import com.openexchange.ajax.request.AttachmentRequest;
 import com.openexchange.ajax.request.ServletRequestAdapter;
+import com.openexchange.ajax.request.SimpleRequest;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.attach.AttachmentConfig;
-import com.openexchange.groupware.attach.AttachmentField;
-import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.attach.Attachments;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.Component;
+import com.openexchange.groupware.OXThrows;
+import com.openexchange.groupware.attach.*;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
@@ -101,6 +101,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.LoggingLogic;
+import com.openexchange.tools.exceptions.OXAborted;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -112,6 +113,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
+@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_AJAX_ATTACHMENT, component = Component.ATTACHMENT)
 public class Attachment extends PermissionServlet {
 	
 	private static final String MIME_TEXT_HTML_CHARSET_UTF8 = "text/html; charset=UTF-8";
@@ -122,7 +124,9 @@ public class Attachment extends PermissionServlet {
 
 	private static final long serialVersionUID = -5819944675070929520L;
 
-	private static transient final AttachmentParser PARSER = new AttachmentParser();
+    private static final AttachmentExceptionFactory EXCEPTIONS = new AttachmentExceptionFactory(Attachment.class);
+
+    private static transient final AttachmentParser PARSER = new AttachmentParser();
 	
 	private static transient final AttachmentField[] REQUIRED = new AttachmentField[]{
 		AttachmentField.FOLDER_ID_LITERAL,
@@ -156,7 +160,7 @@ public class Attachment extends PermissionServlet {
 	
 	
 	@Override
-	protected void doGet(final HttpServletRequest req, final HttpServletResponse res)
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse res)
 	throws ServletException, IOException {
 		final String action = req.getParameter(PARAMETER_ACTION);
 		if(action == null) {
@@ -190,13 +194,12 @@ public class Attachment extends PermissionServlet {
 			int folderId, attachedId, moduleId, id;
 			final String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
 			try {
-				folderId = Integer.parseInt(req.getParameter(PARAMETER_FOLDERID));
-				attachedId = Integer.parseInt(req.getParameter(PARAMETER_ATTACHEDID));
-				moduleId = Integer.parseInt(req.getParameter(PARAMETER_MODULE));
-				id = Integer.parseInt(req.getParameter(PARAMETER_ID));
+				folderId = requireNumber(req, res, action, contentType, PARAMETER_FOLDERID);
+				attachedId = requireNumber(req, res, action, contentType, PARAMETER_ATTACHEDID);
+				moduleId = requireNumber(req, res, action, contentType, PARAMETER_MODULE);
+				id = requireNumber(req, res, action, contentType, PARAMETER_ID);
 					
-			} catch (NumberFormatException x) {
-				handle(res, new AbstractOXException("Invalid Number"), action, contentType == null ? JS_FRAGMENT_POPUP : null );
+			} catch (OXAborted x) {
 				return;
 			}
 			
@@ -214,8 +217,22 @@ public class Attachment extends PermissionServlet {
 			}
 		}
 	}
-	
-	@Override
+
+   
+    @OXThrows(category = AbstractOXException.Category.CODE_ERROR, desc = "", exceptionId = 1, msg = "Invalid parameter sent in request. Parameter '%s' was '%s' which does not look like a number")
+    private int requireNumber(HttpServletRequest req, HttpServletResponse res, String action, String contentType, String parameter) { 
+        String value = req.getParameter(parameter);
+        try {
+            return Integer.parseInt(value);
+        } catch(NumberFormatException  nfe) {
+            AttachmentException t = EXCEPTIONS.create(1, parameter, value);
+            handle(res, t, action, contentType == null ? JS_FRAGMENT_POPUP : null );
+            throw new OXAborted();
+        }
+    }
+        
+
+    @Override
 	protected void doPut(final HttpServletRequest req, final HttpServletResponse res)
 	throws ServletException, IOException {
 

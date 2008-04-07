@@ -1,3 +1,7 @@
+* 2008-04-07 - francisco.laguna@open-xchange.com
+ - Catch NumberFormatExceptions in Attachment Servlet, when a request does not include a properly formatted number
+   (Bug #11074)
+
 * 2008-04-01 - francisco.laguna@open-xchange.com
  - Consistency Tool migrated to JMX (Bug #11067)
  - Faster listing of all files in a LocalFileStorage (Bug #10079)
