@@ -351,6 +351,9 @@ public final class IMAPFolderConverter {
 							mailFolder.setDefaulFolder(true);
 						}
 					}
+					if (!mailFolder.containsDefaulFolder()) {
+						mailFolder.setDefaulFolder(false);
+					}
 				}
 			}
 			if (mailFolder.isHoldsMessages() && ownRights.contains(Rights.Right.READ)) {
