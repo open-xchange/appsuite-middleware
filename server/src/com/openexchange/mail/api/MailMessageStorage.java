@@ -425,21 +425,21 @@ public abstract class MailMessageStorage {
 		} else {
 			tempIds = null;
 		}
-		final MailMessage filledMail = MIMEMessageConverter.fillComposedMailMessage(draftMail);
-		filledMail.setFlag(MailMessage.FLAG_DRAFT, true);
-		/*
-		 * Append message to draft folder
-		 */
-		final MailMessage retval;
-		{
-			final long uid = appendMessages(draftFullname, new MailMessage[] { filledMail })[0];
+		final long uid;
+		try {
+			final MailMessage filledMail = MIMEMessageConverter.fillComposedMailMessage(draftMail);
+			filledMail.setFlag(MailMessage.FLAG_DRAFT, true);
+			/*
+			 * Append message to draft folder
+			 */
+			uid = appendMessages(draftFullname, new MailMessage[] { filledMail })[0];
+		} finally {
 			draftMail.release();
 			if (null != tempIds) {
 				for (final String id : tempIds) {
 					draftMail.getSession().removeUploadedFile(id);
 				}
 			}
-			retval = getMessage(draftFullname, uid, true);
 		}
 		/*
 		 * Check for draft-edit operation: Delete old version
@@ -451,8 +451,10 @@ public abstract class MailMessageStorage {
 			}
 			draftMail.setMsgref(null);
 		}
-		return retval;
-
+		/*
+		 * Return draft mail
+		 */
+		return getMessage(draftFullname, uid, true);
 	}
 
 	/**
