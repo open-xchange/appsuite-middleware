@@ -416,6 +416,9 @@ public abstract class MailMessageStorage {
 	 * @throws MailException
 	 */
 	public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws MailException {
+		if (!draftMail.isDraft()) {
+			draftMail.setFlag(MailMessage.FLAG_DRAFT, true);
+		}
 		final List<String> tempIds;
 		if (draftMail.getMsgref() != null) {
 			/*
