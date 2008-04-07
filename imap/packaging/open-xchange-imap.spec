@@ -2,6 +2,7 @@
 # norootforbuild
 
 Name:           open-xchange-imap
+Provides:	open-xchange-mailstore
 BuildArch:	noarch
 BuildRequires:  ant open-xchange-common open-xchange-global open-xchange-configread open-xchange-monitoring open-xchange-cache open-xchange-server
 #%if 0%{?suse_version} <= 1010
