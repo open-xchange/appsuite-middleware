@@ -135,11 +135,13 @@ public final class MailSaveDraftTest extends AbstractMailTest {
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
+
+			final String draftFullname = mailAccess.getFolderStorage().getDraftsFolder();
+
 			long prevUid = -1;
 			long uid = -1;
 			try {
-				MailMessage mail = mailAccess.getMessageStorage().saveDraft(
-						mailAccess.getFolderStorage().getDraftsFolder(), draftMail);
+				MailMessage mail = mailAccess.getMessageStorage().saveDraft(draftFullname, draftMail);
 				uid = mail.getMailId();
 				prevUid = uid;
 				System.out.println("First draft's UID: " + uid);
@@ -158,8 +160,7 @@ public final class MailSaveDraftTest extends AbstractMailTest {
 				draftMail.setReferencedMail(mail);
 				draftMail.setMsgref(new MailPath(mail.getFolder(), mail.getMailId()).toString());
 
-				mail = mailAccess.getMessageStorage().saveDraft(mailAccess.getFolderStorage().getDraftsFolder(),
-						draftMail);
+				mail = mailAccess.getMessageStorage().saveDraft(draftFullname, draftMail);
 				uid = mail.getMailId();
 				System.out.println("Edit-draft's UID: " + uid);
 				/*
@@ -167,8 +168,7 @@ public final class MailSaveDraftTest extends AbstractMailTest {
 				 */
 				Exception exc = null;
 				try {
-					mailAccess.getMessageStorage().getMessage(mailAccess.getFolderStorage().getDraftsFolder(), prevUid,
-							false);
+					mailAccess.getMessageStorage().getMessage(draftFullname, prevUid, false);
 				} catch (final MailException e) {
 					prevUid = -1;
 					exc = e;
@@ -200,7 +200,7 @@ public final class MailSaveDraftTest extends AbstractMailTest {
 				}
 			} finally {
 				if (prevUid != -1) {
-					final boolean success = mailAccess.getMessageStorage().deleteMessages("INBOX",
+					final boolean success = mailAccess.getMessageStorage().deleteMessages(draftFullname,
 							new long[] { prevUid }, true);
 					if (success) {
 						System.out.println("Successfully deleted");
@@ -209,8 +209,8 @@ public final class MailSaveDraftTest extends AbstractMailTest {
 					}
 				}
 				if (uid != -1) {
-					final boolean success = mailAccess.getMessageStorage().deleteMessages("INBOX", new long[] { uid },
-							true);
+					final boolean success = mailAccess.getMessageStorage().deleteMessages(draftFullname,
+							new long[] { uid }, true);
 					if (success) {
 						System.out.println("Successfully deleted");
 					} else {
