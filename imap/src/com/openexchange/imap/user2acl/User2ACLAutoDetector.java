@@ -50,7 +50,9 @@
 package com.openexchange.imap.user2acl;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -82,11 +84,29 @@ public final class User2ACLAutoDetector {
 
 	private static final int BUFSIZE = 512;
 
-	private static final String IMAPCMD_LOGOUT = "A11 LOGOUT\r\n";
-
-	private static final String IMAPCMD_CAPABILITY = "A10 CAPABILITY\r\n";
-
 	private static final String CHARSET_US_ASCII = "US-ASCII";
+
+	private static final byte[] IMAPCMD_LOGOUT;
+
+	private static final byte[] IMAPCMD_CAPABILITY;
+
+	static {
+		byte[] tmp;
+		try {
+			tmp = "A11 LOGOUT\r\n".getBytes(CHARSET_US_ASCII);
+		} catch (final UnsupportedEncodingException e) {
+			// Cannot occur
+			tmp = null;
+		}
+		IMAPCMD_LOGOUT = tmp;
+		try {
+			tmp = "A10 CAPABILITY\r\n".getBytes(CHARSET_US_ASCII);
+		} catch (final UnsupportedEncodingException e) {
+			// Cannot occur
+			tmp = null;
+		}
+		IMAPCMD_CAPABILITY = tmp;
+	}
 
 	/**
 	 * Prevent instantiation
@@ -180,7 +200,6 @@ public final class User2ACLAutoDetector {
 		CONTACT_LOCK.lock();
 		try {
 			Socket s = null;
-			InputStreamReader isr = null;
 			try {
 				try {
 					s = new Socket();
@@ -202,35 +221,78 @@ public final class User2ACLAutoDetector {
 					throw new User2ACLException(User2ACLException.Code.CREATING_SOCKET_FAILED, e, inetAddress
 							.toString(), e.getLocalizedMessage());
 				}
-				isr = new InputStreamReader(s.getInputStream(), CHARSET_US_ASCII);
+				final InputStream in = s.getInputStream();
+				final OutputStream out = s.getOutputStream();
+				boolean skipLF = false;
+				/*
+				 * Skip IMAP server greeting on connect
+				 */
+				boolean eol = false;
+				int i = -1;
+				while (!eol && (i = in.read()) != -1) {
+					final char c = (char) i;
+					if ((c == '\n') || (c == '\r')) {
+						if (c == '\r') {
+							skipLF = true;
+						}
+						eol = true;
+					}
+				}
+				/*
+				 * Request capabilities through CAPABILITY command
+				 */
+				out.write(IMAPCMD_CAPABILITY);
+				out.flush();
+				/*
+				 * Read CAPABILITY response
+				 */
 				final StringBuilder sb = new StringBuilder(BUFSIZE);
-				final char[] buf = new char[BUFSIZE];
-				int bytesRead = -1;
-				if ((bytesRead = isr.read(buf, 0, buf.length)) != -1) {
-					sb.append(buf, 0, bytesRead);
-				}
-				s.getOutputStream().write(IMAPCMD_CAPABILITY.getBytes(CHARSET_US_ASCII));
-				s.getOutputStream().flush();
-				sb.setLength(0);
-				if ((bytesRead = isr.read(buf, 0, buf.length)) != -1) {
-					sb.append(buf, 0, bytesRead);
-				}
+				boolean nextLine = false;
+				NextLoop: do {
+					eol = false;
+					i = in.read();
+					if (i != -1) {
+						/*
+						 * Character '*' (whose integer value is 42) indicates
+						 * an untagged response; meaning subsequent response
+						 * lines will follow
+						 */
+						nextLine = (i == 42);
+						do {
+							final char c = (char) i;
+							if ((c == '\n') || (c == '\r')) {
+								if (c == '\n' && skipLF) {
+									// Discard remaining LF
+									skipLF = false;
+									nextLine = true;
+									continue NextLoop;
+								}
+								if (c == '\r') {
+									skipLF = true;
+								}
+								eol = true;
+							} else {
+								sb.append(c);
+							}
+						} while (!eol && (i = in.read()) != -1);
+					}
+					if (nextLine) {
+						sb.append('\n');
+					}
+				} while (nextLine);
 				final boolean retval = PAT_ACL.matcher(sb.toString()).find();
-				s.getOutputStream().write(IMAPCMD_LOGOUT.getBytes(CHARSET_US_ASCII));
-				s.getOutputStream().flush();
-				sb.setLength(0);
-				while ((bytesRead = isr.read(buf, 0, buf.length)) != -1) {
-					sb.append(buf, 0, bytesRead);
+				/*
+				 * Close connection through LOGOUT command
+				 */
+				out.write(IMAPCMD_LOGOUT);
+				out.flush();
+				/*
+				 * Consume until socket closure
+				 */
+				while ((i = in.read()) != -1) {
 				}
 				return retval;
 			} finally {
-				if (isr != null) {
-					try {
-						isr.close();
-					} catch (final IOException e) {
-						LOG.error(e.getLocalizedMessage(), e);
-					}
-				}
 				if (s != null) {
 					try {
 						s.close();
@@ -252,8 +314,11 @@ public final class User2ACLAutoDetector {
 		}
 		CONTACT_LOCK.lock();
 		try {
+			user2Acl = map.get(inetAddress);
+			if (user2Acl != null) {
+				return user2Acl;
+			}
 			Socket s = null;
-			InputStreamReader isr = null;
 			try {
 				try {
 					s = new Socket();
@@ -275,13 +340,39 @@ public final class User2ACLAutoDetector {
 					throw new User2ACLException(User2ACLException.Code.CREATING_SOCKET_FAILED, e, inetAddress
 							.toString(), e.getLocalizedMessage());
 				}
-				isr = new InputStreamReader(s.getInputStream(), CHARSET_US_ASCII);
+				final InputStream in = s.getInputStream();
+				final OutputStream out = s.getOutputStream();
 				final StringBuilder sb = new StringBuilder(BUFSIZE);
-				final char[] buf = new char[BUFSIZE];
-				int bytesRead = -1;
-				if ((bytesRead = isr.read(buf, 0, buf.length)) != -1) {
-					sb.append(buf, 0, bytesRead);
+				/*
+				 * Read IMAP server greeting on connect
+				 */
+				boolean eol = false;
+				int i = -1;
+				while (!eol && (i = in.read()) != -1) {
+					final char c = (char) i;
+					if ((c == '\n') || (c == '\r')) {
+						eol = true;
+					} else {
+						sb.append(c);
+					}
 				}
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder(256).append("\n\tIMAP server [").append(inetAddress.toString()).append(
+							"] greeting: ").append(sb.toString()));
+				}
+				/*
+				 * Close connection through LOGOUT command
+				 */
+				out.write(IMAPCMD_LOGOUT);
+				out.flush();
+				/*
+				 * Consume until socket closure
+				 */
+				while ((i = in.read()) != -1) {
+				}
+				/*
+				 * Map greeting to a known IMAP server
+				 */
 				final IMAPServer imapServer = mapInfo2IMAPServer(sb.toString(), inetAddress, imapPort);
 				try {
 					user2Acl = Class.forName(imapServer.getImpl()).asSubclass(User2ACL.class).newInstance();
@@ -292,11 +383,6 @@ public final class User2ACLAutoDetector {
 				} catch (final ClassNotFoundException e) {
 					throw new User2ACLException(User2ACLException.Code.INSTANTIATION_FAILED, e, EMPTY_ARGS);
 				}
-				s.getOutputStream().write(IMAPCMD_LOGOUT.getBytes(CHARSET_US_ASCII));
-				s.getOutputStream().flush();
-				while ((bytesRead = isr.read(buf, 0, buf.length)) != -1) {
-					sb.append(buf, 0, bytesRead);
-				}
 				map.put(inetAddress, user2Acl);
 				if (LOG.isInfoEnabled()) {
 					LOG.info(new StringBuilder(256).append("\n\tIMAP server [").append(inetAddress.toString()).append(
@@ -304,13 +390,6 @@ public final class User2ACLAutoDetector {
 				}
 				return user2Acl;
 			} finally {
-				if (isr != null) {
-					try {
-						isr.close();
-					} catch (final IOException e) {
-						LOG.error(e.getLocalizedMessage(), e);
-					}
-				}
 				if (s != null) {
 					try {
 						s.close();
