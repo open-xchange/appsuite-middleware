@@ -49,27 +49,16 @@
 
 package com.openexchange.mail.messagestorage;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.mail.internet.InternetAddress;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
-import com.openexchange.mail.parser.MailMessageParser;
-import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 import com.openexchange.smtp.dataobjects.SMTPMailMessage;
@@ -81,32 +70,6 @@ import com.openexchange.smtp.dataobjects.SMTPMailMessage;
  * 
  */
 public final class MailSaveDraftTest extends AbstractMailTest {
-
-	private final String MSG_DRAFT = "Return-Path: <thorben@dev-prototyp.open-xchange.com>\n"
-			+ "Received: from dev-prototyp.open-xchange.com ([unix socket])\n"
-			+ "	 by dev-prototyp (Cyrus v2.2.13-Debian-2.2.13-10) with LMTPA;\n"
-			+ "	 Wed, 19 Mar 2008 09:52:23 +0100\n" + "X-Sieve: CMU Sieve 2.2\n"
-			+ "Received: from thorben (unknown [192.168.32.167])\n"
-			+ "	by dev-prototyp.open-xchange.com (Postfix) with ESMTP id 313D77AF18\n"
-			+ "	for <thorben@dev-prototyp.open-xchange.com>; Wed, 19 Mar 2008 09:52:23 +0100 (CET)\n"
-			+ "Date: Wed, 19 Mar 2008 12:41:10 +0000 (GMT)\n"
-			+ "From: \"Betten, Thorben\" <thorben@dev-prototyp.open-xchange.com>\n" + "Sender: thorben@1337\n"
-			+ "To: thorben@dev-prototyp.open-xchange.com\n"
-			+ "Message-ID: <974704333.01205930471012.JavaMail.thorben@thorben>\n" + "Subject: sdfsdf\n"
-			+ "MIME-Version: 1.0\n" + "Content-Type: multipart/alternative; \n"
-			+ "	boundary=\"----=_Part_0_112430522.1205930470650\"\n" + "X-Priority: 3\n"
-			+ "X-Mailer: Open-Xchange Mailer v6.5.0-0\n" + "\n" + "------=_Part_0_112430522.1205930470650\n"
-			+ "MIME-Version: 1.0\n" + "Content-Type: text/plain; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n"
-			+ "\n" + "dsfsdfsdfsdf\n" + "------=_Part_0_112430522.1205930470650\n" + "MIME-Version: 1.0\n"
-			+ "Content-Type: text/html; charset=UTF-8\n" + "Content-Transfer-Encoding: 7bit\n" + "\n"
-			+ "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\"\n"
-			+ "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n" + "\n"
-			+ "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n" + "  <head>\n"
-			+ "    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\">\n"
-			+ "    <meta name=\"generator\"\n"
-			+ "    content=\"HTML Tidy for Java (vers. 26 Sep 2004), see www.w3.org\" />\n" + "\n"
-			+ "    <title></title>\n" + "  </head>\n" + "\n" + "  <body>\n" + "    dsfsdfsdfsdf\n" + "  </body>\n"
-			+ "</html>\n" + "\n" + "------=_Part_0_112430522.1205930470650--\n" + "\n";
 
 	/**
 	 * 
