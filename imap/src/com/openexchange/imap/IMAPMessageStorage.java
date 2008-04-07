@@ -932,7 +932,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 	public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage composedMail)
 			throws MailException {
 		try {
+			if (!composedMail.isDraft()) {
+				composedMail.setFlag(MailMessage.FLAG_DRAFT, true);
+			}
 			final MimeMessage mimeMessage = new MimeMessage(imapAccess.getSession());
+			mimeMessage.setFlag(Flags.Flag.DRAFT, true);
 			/*
 			 * Check for edit-draft operation
 			 */
@@ -963,7 +967,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				 * Fill body
 				 */
 				filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW, null);
-				mimeMessage.setFlag(Flags.Flag.DRAFT, true);
 				mimeMessage.saveChanges();
 				/*
 				 * Append message to draft folder
