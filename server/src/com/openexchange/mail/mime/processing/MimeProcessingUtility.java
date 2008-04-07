@@ -93,8 +93,8 @@ public final class MimeProcessingUtility {
 	 *             If part's attributes cannot be accessed
 	 */
 	static boolean isInline(final Part part) throws MessagingException {
-		return ((part.getDisposition() == null || Part.INLINE.equalsIgnoreCase(part.getDisposition())) && part
-				.getFileName() == null);
+		final String disposition = part.getDisposition();
+		return Part.INLINE.equalsIgnoreCase(disposition) || ((disposition == null) && (part.getFileName() == null));
 	}
 
 	/**

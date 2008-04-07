@@ -360,9 +360,9 @@ public final class MIMEMessageConverter {
 			/*
 			 * Other content
 			 */
-			if (!contentType.containsCharsetParameter()) {
+			/*if (!contentType.containsCharsetParameter()) {
 				contentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
-			}
+			}*/
 			addPartHeaders(part, mailPart);
 			part.setDataHandler(new DataHandler(
 					new MessageDataSource(mailPart.getInputStream(), contentType.toString())));
@@ -1457,6 +1457,28 @@ public final class MIMEMessageConverter {
 			return mailPart;
 		} catch (final MessagingException e) {
 			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+		}
+	}
+
+	/**
+	 * Creates a {@link Part} object from given instance of {@link MailPart}
+	 * 
+	 * @param mailPart
+	 *            The instance of {@link MailPart}
+	 * @return Appropriate instance of {@link Part}
+	 */
+	public static Part convertMailPart(final MailPart mailPart) throws MailException {
+		try {
+			if (mailPart instanceof MailMessage) {
+				return convertMailMessage((MailMessage) mailPart);
+			}
+			final MimeBodyPart mbp = new MimeBodyPart();
+			addPart(mbp, mailPart);
+			return mbp;
+		} catch (final MessagingException e) {
+			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+		} catch (final IOException e) {
+			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}
 	}
 
