@@ -52,6 +52,7 @@ package com.openexchange.mail.folderstorage;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
@@ -88,17 +89,23 @@ public final class MailFolderTest extends AbstractMailTest {
 			try {
 				String fullname = mailAccess.getFolderStorage().getDraftsFolder();
 				assertTrue("Missing drafts folder", fullname != null && fullname.length() > 0);
-				
+
 				fullname = mailAccess.getFolderStorage().getSentFolder();
-				assertTrue("Missing drafts folder", fullname != null && fullname.length() > 0);
-				
+				assertTrue("Missing sent folder", fullname != null && fullname.length() > 0);
+
 				fullname = mailAccess.getFolderStorage().getSpamFolder();
-				assertTrue("Missing drafts folder", fullname != null && fullname.length() > 0);
-				
+				assertTrue("Missing spam folder", fullname != null && fullname.length() > 0);
+
 				fullname = mailAccess.getFolderStorage().getTrashFolder();
-				assertTrue("Missing drafts folder", fullname != null && fullname.length() > 0);
-				
-				
+				assertTrue("Missing trash folder", fullname != null && fullname.length() > 0);
+
+				if (UserSettingMailStorage.getInstance().getUserSettingMail(getUser(), getCid()).isSpamEnabled()) {
+					fullname = mailAccess.getFolderStorage().getConfirmedHamFolder();
+					assertTrue("Missing confirmed ham folder: " + fullname, fullname != null && fullname.length() > 0);
+
+					fullname = mailAccess.getFolderStorage().getConfirmedSpamFolder();
+					assertTrue("Missing confirmed spam folder: " + fullname, fullname != null && fullname.length() > 0);
+				}
 
 			} finally {
 				/*
