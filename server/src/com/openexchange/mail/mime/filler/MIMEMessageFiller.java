@@ -604,7 +604,7 @@ public class MIMEMessageFiller {
 					primaryMultipart.addBodyPart(createHtmlBodyPart((String) mail.getContent()));
 				}
 			}
-			final int size = /*isAttachmentForward ? 0 : */mail.getEnclosedCount();
+			final int size = /* isAttachmentForward ? 0 : */mail.getEnclosedCount();
 			for (int i = 0; i < size; i++) {
 				addMessageBodyPart(primaryMultipart, mail.getEnclosedMailPart(i), false);
 			}
