@@ -82,7 +82,7 @@ public abstract class AbstractMailTest extends TestCase {
 
 	private String login;
 
-	private String secondlogin;
+	private int secondUser;
 
 	private String password;
 
@@ -120,7 +120,7 @@ public abstract class AbstractMailTest extends TestCase {
 			server = MailConfig.getProperty(MailConfig.Property.SERVER);
 			port = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.PORT));
 			login = MailConfig.getProperty(MailConfig.Property.LOGIN);
-			secondlogin = MailConfig.getProperty(MailConfig.Property.SECOND_LOGIN);
+			secondUser = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.SECOND_USER));
 			password = MailConfig.getProperty(MailConfig.Property.PASSWORD);
 			user = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.USER));
 			cid = Integer.parseInt(MailConfig.getProperty(MailConfig.Property.CONTEXT));
@@ -150,8 +150,8 @@ public abstract class AbstractMailTest extends TestCase {
 	 * 
 	 * @return the second login
 	 */
-	protected final String getSecondLogin() {
-		return secondlogin;
+	protected final int getSecondUser() {
+		return secondUser;
 	}
 
 	/**

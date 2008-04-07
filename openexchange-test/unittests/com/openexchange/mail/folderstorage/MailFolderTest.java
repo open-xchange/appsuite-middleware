@@ -429,7 +429,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.addPermission(p);
 					mailAccess.getFolderStorage().createFolder(mfd);
 				}
-				
+
 				if (MailConfig.isSupportSubscription()) {
 					final MailFolderDescription mfd = new MailFolderDescription();
 					mfd.setSubscribed(true);
@@ -438,50 +438,31 @@ public final class MailFolderTest extends AbstractMailTest {
 					assertTrue("Could not be subscribed", mailAccess.getFolderStorage().getFolder(fullname)
 							.isSubscribed());
 				}
-				
-				
 
-				boolean found = false;
-				MailFolder[] folders = mailAccess.getFolderStorage().getSubfolders(parentFullname, true);
-				for (int i = 0; i < folders.length; i++) {
-					final MailFolder mf = folders[i];
-					assertTrue("Missing default folder flag", mf.containsDefaulFolder());
-					assertTrue("Missing deleted count", mf.containsDeletedMessageCount());
-					assertTrue("Missing exists flag", mf.containsExists());
-					assertTrue("Missing fullname", mf.containsFullname());
-					assertTrue("Missing holds folders flag", mf.containsHoldsFolders());
-					assertTrue("Missing holds messages flag", mf.containsHoldsMessages());
-					assertTrue("Missing message count", mf.containsMessageCount());
-					assertTrue("Missing name", mf.containsName());
-					assertTrue("Missing new message count", mf.containsNewMessageCount());
-					assertTrue("Missing non-existent flag", mf.containsNonExistent());
-					assertTrue("Missing own permission", mf.containsOwnPermission());
-					assertTrue("Missing parent fullname", mf.containsParentFullname());
-					assertTrue("Missing permissions", mf.containsPermissions());
-					assertTrue("Missing root folder flag", mf.containsRootFolder());
-					assertTrue("Missing separator flag", mf.containsSeparator());
-					assertTrue("Missing subfolder flag", mf.containsSubfolders());
-					assertTrue("Missing subscribed flag", mf.containsSubscribed());
-					assertTrue("Missing subscribed subfolders flag", mf.containsSubscribedSubfolders());
-					assertTrue("Missing summary", mf.containsSummary());
-					assertTrue("Missing supports user flags flag", mf.containsSupportsUserFlags());
-					assertTrue("Missing unread message count", mf.containsUnreadMessageCount());
-					if (fullname.equals(mf.getFullname())) {
-						found = true;
-						assertFalse("Subscribed, but shouldn't be", MailConfig.isSupportSubscription() ? mf
-								.isSubscribed() : false);
-					}
-				}
-				assertTrue("Newly created subfolder not found!", found);
+				final MailFolderDescription mfd = new MailFolderDescription();
+				final Class<? extends MailPermission> clazz = MailProviderRegistry.getMailProviderBySession(session)
+						.getMailPermissionClass();
+				final MailPermission p1 = MailPermission.newInstance(clazz);
+				p1.setEntity(getUser());
+				p1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
+						OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+				p1.setFolderAdmin(true);
+				p1.setGroupPermission(false);
+				mfd.addPermission(p1);
+				final MailPermission p2 = MailPermission.newInstance(clazz);
+				p2.setEntity(getSecondUser());
+				p2.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.ADMIN_PERMISSION,
+						OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+				p2.setFolderAdmin(false);
+				p2.setGroupPermission(false);
+				mfd.addPermission(p2);
+				assertTrue("Hugh... No permissions?!", mfd.containsPermissions());
+				mailAccess.getFolderStorage().updateFolder(fullname, mfd);
 
-				if (MailConfig.isSupportSubscription()) {
-					found = false;
-					folders = mailAccess.getFolderStorage().getSubfolders(parentFullname, false);
-					for (final MailFolder mailFolder : folders) {
-						found |= (fullname.equals(mailFolder.getFullname()));
-					}
-					assertFalse("Unsubscribed subfolder listed as subscribed!", found);
-				}
+				final MailFolder updatedFolder = mailAccess.getFolderStorage().getFolder(fullname);
+				final OCLPermission[] perms = updatedFolder.getPermissions();
+
+				assertTrue("Unexpected number of permissions: " + perms.length, perms.length == 2);
 
 			} finally {
 				if (fullname != null) {

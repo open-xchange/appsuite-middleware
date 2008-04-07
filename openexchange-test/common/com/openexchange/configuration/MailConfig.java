@@ -95,9 +95,9 @@ public final class MailConfig extends AbstractConfig {
 		 */
 		TEST_MAIL_DIR("testMailDir"),
 		/**
-		 * The second login
+		 * The second user
 		 */
-		SECOND_LOGIN("secondlogin");
+		SECOND_USER("seconduser");
 
 		/**
 		 * Name of the property in the ajax.properties file.
