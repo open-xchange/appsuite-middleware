@@ -544,7 +544,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			/*
 			 * Subscribe
 			 */
-			if (toCreate.containsSubscribed()) {
+			if (!IMAPConfig.isSupportSubscription()) {
+				IMAPCommandsCollection.forceSetSubscribed(imapStore, createMe.getFullName(), true);
+			} else if (toCreate.containsSubscribed()) {
 				IMAPCommandsCollection.forceSetSubscribed(imapStore, createMe.getFullName(), toCreate.isSubscribed());
 			} else {
 				IMAPCommandsCollection.forceSetSubscribed(imapStore, createMe.getFullName(), true);
