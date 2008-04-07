@@ -93,7 +93,11 @@ public final class MailConfig extends AbstractConfig {
 		/**
 		 * Directory which contains test mails (rfc 822 files)
 		 */
-		TEST_MAIL_DIR("testMailDir");
+		TEST_MAIL_DIR("testMailDir"),
+		/**
+		 * The second login
+		 */
+		SECOND_LOGIN("secondlogin");
 
 		/**
 		 * Name of the property in the ajax.properties file.

@@ -385,4 +385,119 @@ public final class MailFolderTest extends AbstractMailTest {
 			fail(e.getLocalizedMessage());
 		}
 	}
+
+	public void testFolderUpdate() {
+		try {
+			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
+					new ContextImpl(getCid()), "mail-test-session");
+			session.setPassword(getPassword());
+
+			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+			mailAccess.connect();
+
+			String fullname = null;
+			try {
+				final MailFolder f = mailAccess.getFolderStorage().getFolder("INBOX");
+
+				String parentFullname = null;
+				{
+					final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
+					if (inbox.isHoldsFolders()) {
+						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
+								"TemporaryFolder").toString();
+						parentFullname = "INBOX";
+					} else {
+						fullname = "TemporaryFolder";
+						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+					}
+
+					final MailFolderDescription mfd = new MailFolderDescription();
+					mfd.setExists(false);
+					mfd.setParentFullname(parentFullname);
+					mfd.setSeparator(inbox.getSeparator());
+					mfd.setSubscribed(false);
+					mfd.setName("TemporaryFolder");
+
+					final Class<? extends MailPermission> clazz = MailProviderRegistry
+							.getMailProviderBySession(session).getMailPermissionClass();
+					final MailPermission p = MailPermission.newInstance(clazz);
+					p.setEntity(getUser());
+					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
+							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+					p.setFolderAdmin(true);
+					p.setGroupPermission(false);
+					mfd.addPermission(p);
+					mailAccess.getFolderStorage().createFolder(mfd);
+				}
+				
+				if (MailConfig.isSupportSubscription()) {
+					final MailFolderDescription mfd = new MailFolderDescription();
+					mfd.setSubscribed(true);
+					mailAccess.getFolderStorage().updateFolder(fullname, mfd);
+
+					assertTrue("Could not be subscribed", mailAccess.getFolderStorage().getFolder(fullname)
+							.isSubscribed());
+				}
+				
+				
+
+				boolean found = false;
+				MailFolder[] folders = mailAccess.getFolderStorage().getSubfolders(parentFullname, true);
+				for (int i = 0; i < folders.length; i++) {
+					final MailFolder mf = folders[i];
+					assertTrue("Missing default folder flag", mf.containsDefaulFolder());
+					assertTrue("Missing deleted count", mf.containsDeletedMessageCount());
+					assertTrue("Missing exists flag", mf.containsExists());
+					assertTrue("Missing fullname", mf.containsFullname());
+					assertTrue("Missing holds folders flag", mf.containsHoldsFolders());
+					assertTrue("Missing holds messages flag", mf.containsHoldsMessages());
+					assertTrue("Missing message count", mf.containsMessageCount());
+					assertTrue("Missing name", mf.containsName());
+					assertTrue("Missing new message count", mf.containsNewMessageCount());
+					assertTrue("Missing non-existent flag", mf.containsNonExistent());
+					assertTrue("Missing own permission", mf.containsOwnPermission());
+					assertTrue("Missing parent fullname", mf.containsParentFullname());
+					assertTrue("Missing permissions", mf.containsPermissions());
+					assertTrue("Missing root folder flag", mf.containsRootFolder());
+					assertTrue("Missing separator flag", mf.containsSeparator());
+					assertTrue("Missing subfolder flag", mf.containsSubfolders());
+					assertTrue("Missing subscribed flag", mf.containsSubscribed());
+					assertTrue("Missing subscribed subfolders flag", mf.containsSubscribedSubfolders());
+					assertTrue("Missing summary", mf.containsSummary());
+					assertTrue("Missing supports user flags flag", mf.containsSupportsUserFlags());
+					assertTrue("Missing unread message count", mf.containsUnreadMessageCount());
+					if (fullname.equals(mf.getFullname())) {
+						found = true;
+						assertFalse("Subscribed, but shouldn't be", MailConfig.isSupportSubscription() ? mf
+								.isSubscribed() : false);
+					}
+				}
+				assertTrue("Newly created subfolder not found!", found);
+
+				if (MailConfig.isSupportSubscription()) {
+					found = false;
+					folders = mailAccess.getFolderStorage().getSubfolders(parentFullname, false);
+					for (final MailFolder mailFolder : folders) {
+						found |= (fullname.equals(mailFolder.getFullname()));
+					}
+					assertFalse("Unsubscribed subfolder listed as subscribed!", found);
+				}
+
+			} finally {
+				if (fullname != null) {
+					mailAccess.getFolderStorage().deleteFolder(fullname, true);
+					System.out.println("Temporary folder deleted");
+				}
+
+				/*
+				 * close
+				 */
+				mailAccess.close(false);
+			}
+
+		} catch (final Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
 }
