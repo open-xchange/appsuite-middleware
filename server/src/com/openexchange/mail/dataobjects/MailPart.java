@@ -83,8 +83,8 @@ public abstract class MailPart implements Serializable, Cloneable {
 
 	/**
 	 * The integer constant returned by {@link #getEnclosedCount()} if mail
-	 * part's content type does not match multipart/* and therefore does not
-	 * hold any enclosed parts.
+	 * part's content type does not match <code>multipart/*</code> and
+	 * therefore does not hold any enclosed parts.
 	 */
 	public static final int NO_ENCLOSED_PARTS = -1;
 
@@ -688,6 +688,18 @@ public abstract class MailPart implements Serializable, Cloneable {
 			LOG.error(e.getLocalizedMessage(), e);
 			throw new InternalError(e.getLocalizedMessage());
 		}
+	}
+
+	/**
+	 * Checks if part's MIME type is <code>multipart/*</code>
+	 * 
+	 * @return <code>true</code> if part holds enclosed parts; otherwise
+	 *         <code>false</code>
+	 * @throws MailException
+	 *             If check fails
+	 */
+	public boolean hasEnclosedParts() throws MailException {
+		return getEnclosedCount() != NO_ENCLOSED_PARTS;
 	}
 
 	/**
