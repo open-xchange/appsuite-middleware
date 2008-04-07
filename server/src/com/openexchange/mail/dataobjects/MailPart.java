@@ -81,6 +81,11 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 */
 	private static final long serialVersionUID = 4688498122773765967L;
 
+	/**
+	 * The integer constant returned by {@link #getEnclosedCount()} if mail
+	 * part's content type does not match multipart/* and therefore does not
+	 * hold any enclosed parts.
+	 */
 	public static final int NO_ENCLOSED_PARTS = -1;
 
 	/**
@@ -727,6 +732,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * This method is only applicable if part's MIME type is
 	 * <code>multipart/*</code>
 	 * 
+	 * @see #NO_ENCLOSED_PARTS
 	 * @return The number of enclosed mail parts or <code>-1</code> if not
 	 *         applicable
 	 */
