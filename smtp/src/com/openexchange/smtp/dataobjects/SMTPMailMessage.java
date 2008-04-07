@@ -81,11 +81,23 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 	private transient List<MailPart> enclosedParts;
 
 	/**
-	 * Constructor
+	 * Initializes a new {@link SMTPMailMessage}.
+	 * <p>
+	 * Although content is expected to be HTML, the real message's content type
+	 * is defined through {@link #setContentType(String)} or
+	 * {@link #setContentType(com.openexchange.mail.mime.ContentType)}. The
+	 * HTML is then converted appropriately.
+	 * 
+	 * @param htmlMailBody
+	 *            The mail body as HTML content
+	 * @param session
+	 *            The session providing user data
+	 * @param ctx
+	 *            The context
 	 */
-	public SMTPMailMessage(final String mailBody, final Session session, final Context ctx) {
+	public SMTPMailMessage(final String htmlMailBody, final Session session, final Context ctx) {
 		super(session, ctx);
-		this.mailPart = new SMTPBodyPart(mailBody);
+		this.mailPart = new SMTPBodyPart(htmlMailBody);
 		enclosedParts = new ArrayList<MailPart>();
 	}
 
