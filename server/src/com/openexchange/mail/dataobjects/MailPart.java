@@ -76,6 +76,11 @@ import com.openexchange.mail.mime.HeaderName;
  */
 public abstract class MailPart implements Serializable, Cloneable {
 
+	/**
+	 * Serial version UID
+	 */
+	private static final long serialVersionUID = 4688498122773765967L;
+
 	public static final int NO_ENCLOSED_PARTS = -1;
 
 	/**
@@ -751,6 +756,9 @@ public abstract class MailPart implements Serializable, Cloneable {
 		InputStream in = null;
 		try {
 			in = getInputStream();
+			if (null == in) {
+				throw new MailException(MailException.Code.NO_CONTENT);
+			}
 			final byte[] buf = new byte[8192];
 			int count = -1;
 			while ((count = in.read(buf, 0, buf.length)) != -1) {
