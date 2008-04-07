@@ -497,10 +497,10 @@ public final class MimeReply {
 			{
 				final String nextLine = "\n\n";
 				if (isHtml) {
-					replyPrefix = MessageUtility.htmlFormat(new StringBuilder(replyPrefix.length() + 3)
+					replyPrefix = MessageUtility.htmlFormat(new StringBuilder(replyPrefix.length() + 4)
 							.append(nextLine).append(replyPrefix).append(nextLine).toString());
 				} else {
-					replyPrefix = new StringBuilder(replyPrefix.length() + 3).append(nextLine).append(replyPrefix)
+					replyPrefix = new StringBuilder(replyPrefix.length() + 4).append(nextLine).append(replyPrefix)
 							.append(nextLine).toString();
 				}
 			}
