@@ -50,6 +50,7 @@
 package com.openexchange.mail.dataobjects;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -295,6 +296,11 @@ public final class CompositeMailMessage extends MailMessage {
 	@Override
 	public void setUnreadMessages(final int unreadMessages) {
 		delegate.setUnreadMessages(unreadMessages);
+	}
+
+	@Override
+	public void writeTo(final OutputStream out) throws MailException {
+		delegate.writeTo(out);
 	}
 
 }
