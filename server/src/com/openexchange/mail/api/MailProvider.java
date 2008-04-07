@@ -159,7 +159,9 @@ public abstract class MailProvider {
 	 * 
 	 * @return The class of {@link MailPermission} implementation
 	 */
-	public abstract Class<? extends MailPermission> getMailPermissionClass();
+	public Class<? extends MailPermission> getMailPermissionClass() {
+		return DefaultMailPermission.class;
+	}
 
 	/**
 	 * Gets this mail provider's protocol
