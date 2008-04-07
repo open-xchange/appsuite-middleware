@@ -149,18 +149,18 @@ public final class MailAccessWatcher {
 			return;
 		}
 		/*
-		 * Insert or update mailconnection's timestamp
+		 * Insert or update timestamp
 		 */
 		mailConnections.put(mailConnection, Long.valueOf(System.currentTimeMillis()));
 	}
 
 	/**
-	 * Removes specified mail connection from this watcher's tracing
+	 * Removes specified mail access from this watcher's tracing
 	 * 
 	 * @param mailConnection
 	 *            The mail connection to remove
 	 */
-	public static void removeMailConnection(final MailAccess<?, ?> mailConnection) {
+	public static void removeMailAccess(final MailAccess<?, ?> mailConnection) {
 		if (!initialized.get()) {
 			LOG.error("Mail connection watcher is not running. Aborting removeMailConnection()");
 			return;

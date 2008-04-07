@@ -231,7 +231,7 @@ public final class MailAccessCache {
 	}
 
 	/**
-	 * Puts given mail connection into cache if none user-bound connection is
+	 * Puts given mail access into cache if none user-bound connection is
 	 * already contained in cache
 	 * 
 	 * @param session
@@ -243,7 +243,7 @@ public final class MailAccessCache {
 	 * @throws CacheException
 	 *             If put into cache fails
 	 */
-	public boolean putMailConnection(final Session session, final MailAccess<?, ?> mailConnection)
+	public boolean putMailAccess(final Session session, final MailAccess<?, ?> mailConnection)
 			throws CacheException {
 		final CacheKey key;
 		try {

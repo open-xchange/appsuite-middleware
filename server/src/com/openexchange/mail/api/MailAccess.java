@@ -107,7 +107,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	}
 
 	/**
-	 * Resets this connection's settings
+	 * Resets this access' settings
 	 */
 	protected final void resetFields() {
 		mailProperties = null;
@@ -119,24 +119,24 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	 * Triggers all implementation-specific startup actions
 	 * 
 	 * @param className
-	 *            The mail connection class name
+	 *            The mail access class name
 	 * @throws MailException
 	 *             If implementation-specific startup fails
 	 */
 	static void startupImpl(final Class<? extends MailAccess<?, ?>> clazz) throws MailException {
-		createNewMailConnection(clazz, null).startup();
+		createNewMailAccess(clazz, null).startup();
 	}
 
 	/**
 	 * Triggers all implementation-specific shutdown actions
 	 * 
 	 * @param className
-	 *            The mail connection class name
+	 *            The mail access class name
 	 * @throws MailException
 	 *             If implementation-specific shutdown fails
 	 */
 	static void shutdownImpl(final Class<? extends MailAccess<?, ?>> clazz) throws MailException {
-		createNewMailConnection(clazz, null).shutdown();
+		createNewMailAccess(clazz, null).shutdown();
 	}
 
 	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { Session.class };
@@ -154,14 +154,14 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	public static final MailAccess<?, ?> getInstance(final Session session) throws MailException {
 		try {
 			if (MailAccessCache.getInstance().containsMailConnection(session)) {
-				final MailAccess<?, ?> mailConnection = MailAccessCache.getInstance().removeMailConnection(session);
-				if (mailConnection != null) {
+				final MailAccess<?, ?> mailAccess = MailAccessCache.getInstance().removeMailConnection(session);
+				if (mailAccess != null) {
 					/*
 					 * Apply new thread's trace information
 					 */
-					mailConnection.applyNewThread();
-					MailAccessWatcher.addMailConnection(mailConnection);
-					return mailConnection;
+					mailAccess.applyNewThread();
+					MailAccessWatcher.addMailConnection(mailAccess);
+					return mailAccess;
 				}
 			}
 		} catch (final CacheException e1) {
@@ -189,14 +189,14 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 				 * Try to fetch from cache again
 				 */
 				if (MailAccessCache.getInstance().containsMailConnection(session)) {
-					final MailAccess<?, ?> mailConnection = MailAccessCache.getInstance().removeMailConnection(session);
-					if (mailConnection != null) {
+					final MailAccess<?, ?> mailAccess = MailAccessCache.getInstance().removeMailConnection(session);
+					if (mailAccess != null) {
 						/*
 						 * Apply new thread's trace information
 						 */
-						mailConnection.applyNewThread();
-						MailAccessWatcher.addMailConnection(mailConnection);
-						return mailConnection;
+						mailAccess.applyNewThread();
+						MailAccessWatcher.addMailConnection(mailAccess);
+						return mailAccess;
 					}
 				}
 			} catch (final InterruptedException e) {
@@ -214,22 +214,21 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 		/*
 		 * Create a new mail connection through user's mail provider
 		 */
-		return createNewMailConnection(MailProviderRegistry.getMailProviderBySession(session).getMailAccessClass(),
-				session);
+		return createNewMailAccess(MailProviderRegistry.getMailProviderBySession(session).getMailAccessClass(), session);
 	}
 
 	/**
-	 * Creates a new mail connection instance by class name
+	 * Creates a new mail access instance by class name
 	 * 
 	 * @param clazz
-	 *            The mail connection class
+	 *            The mail access class
 	 * @param session
 	 *            The session providing needed user data
 	 * @return Newly created mail connection instance
 	 * @throws MailException
 	 *             If mail connection creation fails
 	 */
-	private static final MailAccess<?, ?> createNewMailConnection(final Class<? extends MailAccess<?, ?>> clazz,
+	private static final MailAccess<?, ?> createNewMailAccess(final Class<? extends MailAccess<?, ?>> clazz,
 			final Session session) throws MailException {
 		try {
 			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { session });
@@ -249,21 +248,21 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	}
 
 	/**
-	 * @return the global connection counter
+	 * @return the global access counter
 	 */
 	public static final int getCounter() {
 		return COUNTER.get();
 	}
 
 	/**
-	 * Increments the global connection counter
+	 * Increments the global access counter
 	 */
 	protected static final void incrementCounter() {
 		COUNTER.incrementAndGet();
 	}
 
 	/**
-	 * Decrements the global connection counter
+	 * Decrements the global access counter
 	 */
 	protected static final void decrementCounter() {
 		COUNTER.decrementAndGet();
@@ -290,7 +289,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	}
 
 	/**
-	 * Checks if all necessary fields are set in this connection object
+	 * Checks if all necessary fields are set in this access object
 	 * <p>
 	 * This routine is implicitly invoked by {@link #connect()}
 	 * 
@@ -316,7 +315,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	}
 
 	/**
-	 * Opens this connection. May be invoked on an already opened connection.
+	 * Opens this access. May be invoked on an already opened access.
 	 * 
 	 * @throws MailException
 	 *             If the connection could not be established for various
@@ -327,10 +326,12 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	public final void connect() throws MailException {
 		applyNewThread();
 		if (isConnected()) {
+			getFolderStorage().checkDefaultFolders();
 			return;
 		}
 		checkFieldsBeforeConnect(getMailConfig());
 		connectInternal();
+		getFolderStorage().checkDefaultFolders();
 		MailAccessWatcher.addMailConnection(this);
 	}
 
@@ -345,7 +346,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	protected abstract void connectInternal() throws MailException;
 
 	/**
-	 * Closes this connection
+	 * Closes this access
 	 * <p>
 	 * An already closed connection is not going to be put into cache and is
 	 * treated as a no-op.
@@ -377,7 +378,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 				/*
 				 * Cache connection if desired/possible anymore
 				 */
-				if (put2Cache && MailAccessCache.getInstance().putMailConnection(session, this)) {
+				if (put2Cache && MailAccessCache.getInstance().putMailAccess(session, this)) {
 					/*
 					 * Successfully cached: signal & return
 					 */
@@ -396,17 +397,17 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 			/*
 			 * Remove from watcher no matter if cached or closed
 			 */
-			MailAccessWatcher.removeMailConnection(this);
+			MailAccessWatcher.removeMailAccess(this);
 		}
 	}
 
 	/**
-	 * Gets the trace of the thread that lastly obtained this connection.
+	 * Gets the trace of the thread that lastly obtained this access.
 	 * <p>
-	 * This is useful to detect certain threads which uses a connection for a
-	 * long time
+	 * This is useful to detect certain threads which uses an access for a long
+	 * time
 	 * 
-	 * @return the trace of the thread that lastly obtained this connection
+	 * @return the trace of the thread that lastly obtained this access
 	 */
 	public final String getTrace() {
 		final StringBuilder sBuilder = new StringBuilder(512);
