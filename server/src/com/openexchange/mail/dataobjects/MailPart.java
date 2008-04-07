@@ -733,8 +733,8 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * <code>multipart/*</code>
 	 * 
 	 * @see #NO_ENCLOSED_PARTS
-	 * @return The number of enclosed mail parts or <code>-1</code> if not
-	 *         applicable
+	 * @return The number of enclosed mail parts or {@link #NO_ENCLOSED_PARTS}
+	 *         if not applicable
 	 */
 	public abstract int getEnclosedCount() throws MailException;
 
