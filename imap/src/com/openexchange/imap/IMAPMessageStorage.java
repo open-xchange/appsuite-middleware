@@ -948,47 +948,51 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			/*
 			 * Fill message
 			 */
+			final long uid;
 			final MIMEMessageFiller filler = new MIMEMessageFiller(session, ctx);
-			/*
-			 * Set headers
-			 */
-			filler.setMessageHeaders(composedMail, mimeMessage);
-			/*
-			 * Set common headers
-			 */
-			filler.setCommonHeaders(mimeMessage);
-			/*
-			 * Fill body
-			 */
-			filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW, null);
-			mimeMessage.setFlag(Flags.Flag.DRAFT, true);
-			mimeMessage.saveChanges();
-			/*
-			 * Append message to draft folder
-			 */
-			final MailMessage retval;
-			{
-				final long uid = appendMessages(draftFullname, new MailMessage[] { MIMEMessageConverter
+			try {
+				/*
+				 * Set headers
+				 */
+				filler.setMessageHeaders(composedMail, mimeMessage);
+				/*
+				 * Set common headers
+				 */
+				filler.setCommonHeaders(mimeMessage);
+				/*
+				 * Fill body
+				 */
+				filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW, null);
+				mimeMessage.setFlag(Flags.Flag.DRAFT, true);
+				mimeMessage.saveChanges();
+				/*
+				 * Append message to draft folder
+				 */
+				uid = appendMessages(draftFullname, new MailMessage[] { MIMEMessageConverter
 						.convertMessage(mimeMessage) })[0];
+			} finally {
 				filler.deleteReferencedUploadFiles();
 				if (null != tempIds) {
 					for (final String id : tempIds) {
 						session.removeUploadedFile(id);
 					}
 				}
-				retval = getMessage(draftFullname, uid, true);
 			}
 			/*
 			 * Check for draft-edit operation: Delete old version
 			 */
-			if (composedMail.getReferencedMail() != null) {
-				if (composedMail.getReferencedMail().isDraft()) {
-					deleteMessages(composedMail.getReferencedMail().getFolder(), new long[] { composedMail
-							.getReferencedMail().getMailId() }, true);
+			final MailMessage refMail = composedMail.getReferencedMail();
+			if (refMail != null) {
+				if (refMail.isDraft()) {
+					deleteMessages(refMail.getFolder(), new long[] { composedMail.getReferencedMail().getMailId() },
+							true);
 				}
 				composedMail.setMsgref(null);
 			}
-			return retval;
+			/*
+			 * Return draft mail
+			 */
+			return getMessage(draftFullname, uid, true);
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapAccess);
 		} catch (final IOException e) {
