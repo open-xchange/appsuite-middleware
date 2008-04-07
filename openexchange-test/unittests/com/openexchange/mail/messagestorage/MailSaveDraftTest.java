@@ -107,7 +107,6 @@ public final class MailSaveDraftTest extends AbstractMailTest {
 				MailMessage mail = mailAccess.getMessageStorage().saveDraft(draftFullname, draftMail);
 				uid = mail.getMailId();
 				prevUid = uid;
-				System.out.println("First draft's UID: " + uid);
 				/*
 				 * Check content
 				 */
@@ -125,7 +124,6 @@ public final class MailSaveDraftTest extends AbstractMailTest {
 
 				mail = mailAccess.getMessageStorage().saveDraft(draftFullname, draftMail);
 				uid = mail.getMailId();
-				System.out.println("Edit-draft's UID: " + uid);
 				/*
 				 * Check existence of former draft version
 				 */
