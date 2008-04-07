@@ -519,14 +519,36 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			} else {
 				ftype = FOLDER_TYPE;
 			}
-			if (!(created = createMe.create(ftype))) {
-				throw new IMAPException(IMAPException.Code.FOLDER_CREATION_FAILED, createMe.getFullName(),
-						parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parent.getFullName());
+			try {
+				if (!(created = createMe.create(ftype))) {
+					throw new IMAPException(IMAPException.Code.FOLDER_CREATION_FAILED, createMe.getFullName(),
+							parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parent.getFullName());
+				}
+			} catch (final MessagingException e) {
+				if ("Unsupported type".equals(e.getMessage())) {
+					if (LOG.isWarnEnabled()) {
+						LOG.warn("IMAP folder creation failed due to unsupported type."
+								+ " Going to retry with fallback type HOLDS-MESSAGES.", e);
+					}
+					if (!(created = createMe.create(Folder.HOLDS_MESSAGES))) {
+						throw new IMAPException(IMAPException.Code.FOLDER_CREATION_FAILED, createMe.getFullName(),
+								parent instanceof DefaultFolder ? DEFAULT_FOLDER_ID : parent.getFullName());
+					}
+					if (LOG.isInfoEnabled()) {
+						LOG.info("IMAP folder created with fallback type HOLDS_MESSAGES");
+					}
+				} else {
+					throw IMAPException.handleMessagingException(e, imapAccess);
+				}
 			}
 			/*
 			 * Subscribe
 			 */
-			IMAPCommandsCollection.forceSetSubscribed(imapStore, createMe.getFullName(), true);
+			if (toCreate.containsSubscribed()) {
+				IMAPCommandsCollection.forceSetSubscribed(imapStore, createMe.getFullName(), toCreate.isSubscribed());
+			} else {
+				IMAPCommandsCollection.forceSetSubscribed(imapStore, createMe.getFullName(), true);
+			}
 			if (imapConfig.isSupportsACLs() && toCreate.containsPermissions()) {
 				final ACL[] initialACLs = getACLSafe(createMe);
 				if (initialACLs != null) {
