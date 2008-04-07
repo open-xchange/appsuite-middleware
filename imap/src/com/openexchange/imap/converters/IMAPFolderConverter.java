@@ -363,19 +363,32 @@ public final class IMAPFolderConverter {
 				mailFolder.setNewMessageCount(imapFolder.getNewMessageCount());
 				mailFolder.setUnreadMessageCount(imapFolder.getUnreadMessageCount());
 				mailFolder.setDeletedMessageCount(imapFolder.getDeletedMessageCount());
+			} else {
+				mailFolder.setSummary(null);
+				mailFolder.setMessageCount(-1);
+				mailFolder.setNewMessageCount(-1);
+				mailFolder.setUnreadMessageCount(-1);
+				mailFolder.setDeletedMessageCount(-1);
 			}
-			mailFolder.setSubscribed(imapFolder.isSubscribed());
-			if (imapConfig.isSupportsACLs() && mailFolder.isHoldsMessages() && mailFolder.exists()
-					&& (ownRights.contains(Rights.Right.READ) || ownRights.contains(Rights.Right.ADMINISTER))
-					&& !(imapFolder instanceof DefaultFolder)) {
-				try {
-					applyACL2Permissions(imapFolder, session, imapConfig, mailFolder, ownRights, ctx);
-				} catch (final AbstractOXException e) {
-					if (LOG.isWarnEnabled()) {
-						LOG.warn("ACLs could not be parsed", e);
+			mailFolder.setSubscribed(IMAPConfig.isSupportSubscription() ? imapFolder.isSubscribed() : true);
+			if (imapConfig.isSupportsACLs()) {
+				if (mailFolder.isHoldsMessages() && mailFolder.exists()
+						&& (ownRights.contains(Rights.Right.READ) || ownRights.contains(Rights.Right.ADMINISTER))
+						&& !(imapFolder instanceof DefaultFolder)) {
+					try {
+						applyACL2Permissions(imapFolder, session, imapConfig, mailFolder, ownRights, ctx);
+					} catch (final AbstractOXException e) {
+						if (LOG.isWarnEnabled()) {
+							LOG.warn("ACLs could not be parsed", e);
+						}
+						mailFolder.removePermissions();
+						addOwnACL(session.getUserId(), mailFolder, ownRights);
 					}
-					mailFolder.removePermissions();
+				} else {
+					addEmptyACL(session.getUserId(), mailFolder);
 				}
+			} else {
+				addOwnACL(session.getUserId(), mailFolder, ownRights);
 			}
 			if (IMAPConfig.isUserFlagsEnabled() && mailFolder.exists() && mailFolder.isHoldsMessages()
 					&& ownRights.contains(Rights.Right.READ)
@@ -488,6 +501,18 @@ public final class IMAPFolderConverter {
 		final ACLPermission aclPerm = new ACLPermission();
 		aclPerm.setEntity(sessionUser);
 		aclPerm.parseRights(ownRights);
+		mailFolder.addPermission(aclPerm);
+	}
+
+	/**
+	 * Adds empty ACL to specified mail folder
+	 * 
+	 */
+	private static void addEmptyACL(final int sessionUser, final MailFolder mailFolder) {
+		final ACLPermission aclPerm = new ACLPermission();
+		aclPerm.setEntity(sessionUser);
+		aclPerm.setAllPermission(OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
+				OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
 		mailFolder.addPermission(aclPerm);
 	}
 
