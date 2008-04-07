@@ -204,8 +204,7 @@ public final class Html2TextConverter {
 					/*
 					 * A starting tag
 					 */
-					final String CurrentTag = getTag(input);
-					text = convertTag(CurrentTag, in_body ? getLastChar(result) : getLastChar(result2));
+					text = convertTag(getTag(input), in_body ? getLastChar(result) : getLastChar(result2));
 				} else if (c == '&') {
 					final String special = getSpecial(input);
 					if (special.length() > 0) {
