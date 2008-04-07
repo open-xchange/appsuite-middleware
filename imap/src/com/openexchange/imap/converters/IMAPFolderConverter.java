@@ -232,17 +232,18 @@ public final class IMAPFolderConverter {
 			}
 			mailFolder.setSeparator(imapFolder.getSeparator());
 			if (mailFolder.isRootFolder()) {
-				mailFolder.setFullname("");
+				mailFolder.setFullname(MailFolder.DEFAULT_FOLDER_ID);
 			} else {
 				mailFolder.setFullname(imapFolder.getFullName());
 			}
-			mailFolder.setName(imapFolder.getName());
+			mailFolder.setName(mailFolder.isRootFolder() ? MailFolder.DEFAULT_FOLDER_NAME : imapFolder.getName());
 			{
 				final Folder parent = imapFolder.getParent();
 				if (null == parent) {
 					mailFolder.setParentFullname(null);
 				} else {
-					mailFolder.setParentFullname(parent instanceof DefaultFolder ? "" : parent.getFullName());
+					mailFolder.setParentFullname(parent instanceof DefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME
+							: parent.getFullName());
 				}
 			}
 			/*
@@ -355,6 +356,8 @@ public final class IMAPFolderConverter {
 						mailFolder.setDefaulFolder(false);
 					}
 				}
+			} else {
+				mailFolder.setDefaulFolder(false);
 			}
 			if (mailFolder.isHoldsMessages() && ownRights.contains(Rights.Right.READ)) {
 				mailFolder.setSummary(new StringBuilder().append('(').append(imapFolder.getMessageCount()).append('/')
