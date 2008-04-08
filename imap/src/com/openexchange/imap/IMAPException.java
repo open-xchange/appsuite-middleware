@@ -209,10 +209,10 @@ public final class IMAPException extends MIMEMailException {
 		INVALID_SEARCH_PARAMS("Number of search fields (%d) do not match number of search patterns (%d)",
 				Category.CODE_ERROR, 2028),
 		/**
-		 * IMAP search failed due to following reason: %s Switching to
+		 * IMAP search failed due to following reason: %s. Switching to
 		 * application-based search
 		 */
-		IMAP_SEARCH_FAILED("IMAP search failed due to following reason: %s Switching to application-based search",
+		IMAP_SEARCH_FAILED("IMAP search failed due to following reason: %s. Switching to application-based search",
 				Category.SUBSYSTEM_OR_SERVICE_DOWN, 2029),
 		/**
 		 * IMAP sort failed due to following reason: %s Switching to
