@@ -21,7 +21,7 @@ BuildRequires:  java-devel-icedtea
 %endif
 #%endif
 Version:        6.5.0
-Release:        1
+Release:        2
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
