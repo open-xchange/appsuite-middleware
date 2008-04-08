@@ -51,11 +51,19 @@ package com.openexchange.mail.folderstorage;
 
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.AbstractMailTest;
+import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.Quota;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.impl.OCLPermission;
@@ -69,6 +77,10 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
  * 
  */
 public final class MailFolderTest extends AbstractMailTest {
+
+	private static final String TEMPORARY_FOLDER = "TemporaryFolder";
+
+	private static final String INBOX = "INBOX";
 
 	/**
 	 * 
@@ -177,7 +189,7 @@ public final class MailFolderTest extends AbstractMailTest {
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
 			try {
-				final MailFolder f = mailAccess.getFolderStorage().getFolder("INBOX");
+				final MailFolder f = mailAccess.getFolderStorage().getFolder(INBOX);
 				assertTrue("Missing default folder flag", f.containsDefaulFolder());
 				assertTrue("Missing deleted count", f.containsDeletedMessageCount());
 				assertTrue("Missing exists flag", f.containsExists());
@@ -213,7 +225,7 @@ public final class MailFolderTest extends AbstractMailTest {
 		}
 	}
 
-	public void testFolderSubfolders() {
+	public void testFolderCreateAndSubfolders() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
 					new ContextImpl(getCid()), "mail-test-session");
@@ -224,7 +236,7 @@ public final class MailFolderTest extends AbstractMailTest {
 
 			String fullname = null;
 			try {
-				final MailFolder f = mailAccess.getFolderStorage().getFolder("INBOX");
+				final MailFolder f = mailAccess.getFolderStorage().getFolder(INBOX);
 				assertTrue("Missing default folder flag", f.containsDefaulFolder());
 				assertTrue("Missing deleted count", f.containsDeletedMessageCount());
 				assertTrue("Missing exists flag", f.containsExists());
@@ -249,13 +261,13 @@ public final class MailFolderTest extends AbstractMailTest {
 
 				String parentFullname = null;
 				{
-					final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
+					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
 					if (inbox.isHoldsFolders()) {
 						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-								"TemporaryFolder").toString();
-						parentFullname = "INBOX";
+								TEMPORARY_FOLDER).toString();
+						parentFullname = INBOX;
 					} else {
-						fullname = "TemporaryFolder";
+						fullname = TEMPORARY_FOLDER;
 						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
 					}
 
@@ -264,7 +276,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setParentFullname(parentFullname);
 					mfd.setSeparator(inbox.getSeparator());
 					mfd.setSubscribed(false);
-					mfd.setName("TemporaryFolder");
+					mfd.setName(TEMPORARY_FOLDER);
 
 					final Class<? extends MailPermission> clazz = MailProviderRegistry
 							.getMailProviderBySession(session).getMailPermissionClass();
@@ -323,7 +335,7 @@ public final class MailFolderTest extends AbstractMailTest {
 			} finally {
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					System.out.println("Temporary folder deleted");
+					System.out.println("Temporary folder deleted: " + fullname);
 				}
 
 				/*
@@ -397,17 +409,16 @@ public final class MailFolderTest extends AbstractMailTest {
 
 			String fullname = null;
 			try {
-				final MailFolder f = mailAccess.getFolderStorage().getFolder("INBOX");
 
 				String parentFullname = null;
 				{
-					final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
+					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
 					if (inbox.isHoldsFolders()) {
 						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-								"TemporaryFolder").toString();
-						parentFullname = "INBOX";
+								TEMPORARY_FOLDER).toString();
+						parentFullname = INBOX;
 					} else {
-						fullname = "TemporaryFolder";
+						fullname = TEMPORARY_FOLDER;
 						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
 					}
 
@@ -416,7 +427,7 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setParentFullname(parentFullname);
 					mfd.setSeparator(inbox.getSeparator());
 					mfd.setSubscribed(false);
-					mfd.setName("TemporaryFolder");
+					mfd.setName(TEMPORARY_FOLDER);
 
 					final Class<? extends MailPermission> clazz = MailProviderRegistry
 							.getMailProviderBySession(session).getMailPermissionClass();
@@ -464,10 +475,631 @@ public final class MailFolderTest extends AbstractMailTest {
 
 				assertTrue("Unexpected number of permissions: " + perms.length, perms.length == 2);
 
+				for (final OCLPermission permission : perms) {
+					if (permission.getEntity() == getUser()) {
+						assertTrue(permission.getFolderPermission() >= OCLPermission.CREATE_SUB_FOLDERS);
+						assertTrue(permission.getReadPermission() >= OCLPermission.READ_ALL_OBJECTS);
+						assertTrue(permission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS);
+						assertTrue(permission.getDeletePermission() >= OCLPermission.DELETE_ALL_OBJECTS);
+						assertTrue(permission.isFolderAdmin());
+					} else if (permission.getEntity() == getSecondUser()) {
+						assertTrue(permission.getFolderPermission() == OCLPermission.READ_FOLDER);
+						assertTrue(permission.getReadPermission() >= OCLPermission.READ_ALL_OBJECTS);
+						assertTrue(permission.getWritePermission() == OCLPermission.NO_PERMISSIONS);
+						assertTrue(permission.getDeletePermission() == OCLPermission.NO_PERMISSIONS);
+						assertFalse(permission.isFolderAdmin());
+					}
+				}
+
 			} finally {
 				if (fullname != null) {
 					mailAccess.getFolderStorage().deleteFolder(fullname, true);
-					System.out.println("Temporary folder deleted");
+					System.out.println("Temporary folder deleted: " + fullname);
+				}
+
+				/*
+				 * close
+				 */
+				mailAccess.close(false);
+			}
+
+		} catch (final Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
+
+	public void testFolderMove() {
+		try {
+			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
+					new ContextImpl(getCid()), "mail-test-session");
+			session.setPassword(getPassword());
+
+			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+			mailAccess.connect();
+
+			String fullname = null;
+			try {
+
+				String parentFullname = null;
+				char separator = '\0';
+				{
+					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
+					if (inbox.isHoldsFolders()) {
+						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
+								TEMPORARY_FOLDER).toString();
+						parentFullname = INBOX;
+					} else {
+						fullname = TEMPORARY_FOLDER;
+						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+					}
+
+					final MailFolderDescription mfd = new MailFolderDescription();
+					mfd.setExists(false);
+					mfd.setParentFullname(parentFullname);
+					mfd.setSeparator((separator = inbox.getSeparator()));
+					mfd.setSubscribed(false);
+					mfd.setName(TEMPORARY_FOLDER);
+
+					final Class<? extends MailPermission> clazz = MailProviderRegistry
+							.getMailProviderBySession(session).getMailPermissionClass();
+					final MailPermission p = MailPermission.newInstance(clazz);
+					p.setEntity(getUser());
+					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
+							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+					p.setFolderAdmin(true);
+					p.setGroupPermission(false);
+					mfd.addPermission(p);
+					mailAccess.getFolderStorage().createFolder(mfd);
+				}
+
+				final String newFullname = new StringBuilder(parentFullname).append(separator).append(
+						"TemporaryFolderMoved").toString();
+				mailAccess.getFolderStorage().moveFolder(fullname, newFullname);
+
+				Exception exc = null;
+				try {
+					mailAccess.getFolderStorage().getFolder(fullname);
+				} catch (final MailException e) {
+					exc = e;
+				}
+				assertTrue("Moved folder still exists", exc != null);
+
+				fullname = newFullname;
+				final MailFolder mf = mailAccess.getFolderStorage().getFolder(fullname);
+
+				assertTrue("Unexpected name: " + mf.getName(), "TemporaryFolderMoved".equals(mf.getName()));
+				assertTrue("Unexpected parent: " + mf.getParentFullname(), parentFullname
+						.equals(mf.getParentFullname()));
+
+			} finally {
+				if (fullname != null) {
+					mailAccess.getFolderStorage().deleteFolder(fullname, true);
+					System.out.println("Temporary folder deleted: " + fullname);
+				}
+
+				/*
+				 * close
+				 */
+				mailAccess.close(false);
+			}
+
+		} catch (final Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
+
+	public void testFolderRename() {
+		try {
+			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
+					new ContextImpl(getCid()), "mail-test-session");
+			session.setPassword(getPassword());
+
+			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+			mailAccess.connect();
+
+			String fullname = null;
+			try {
+
+				String parentFullname = null;
+				char separator = '\0';
+				{
+					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
+					if (inbox.isHoldsFolders()) {
+						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
+								TEMPORARY_FOLDER).toString();
+						parentFullname = INBOX;
+					} else {
+						fullname = TEMPORARY_FOLDER;
+						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+					}
+
+					final MailFolderDescription mfd = new MailFolderDescription();
+					mfd.setExists(false);
+					mfd.setParentFullname(parentFullname);
+					mfd.setSeparator((separator = inbox.getSeparator()));
+					mfd.setSubscribed(false);
+					mfd.setName(TEMPORARY_FOLDER);
+
+					final Class<? extends MailPermission> clazz = MailProviderRegistry
+							.getMailProviderBySession(session).getMailPermissionClass();
+					final MailPermission p = MailPermission.newInstance(clazz);
+					p.setEntity(getUser());
+					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
+							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+					p.setFolderAdmin(true);
+					p.setGroupPermission(false);
+					mfd.addPermission(p);
+					mailAccess.getFolderStorage().createFolder(mfd);
+				}
+
+				mailAccess.getFolderStorage().renameFolder(fullname, "TemporaryFolderRenamed");
+
+				Exception exc = null;
+				try {
+					mailAccess.getFolderStorage().getFolder(fullname);
+				} catch (final MailException e) {
+					exc = e;
+				}
+				assertTrue("Renamed folder still exists", exc != null);
+
+				fullname = new StringBuilder(parentFullname).append(separator).append("TemporaryFolderRenamed")
+						.toString();
+				final MailFolder mf = mailAccess.getFolderStorage().getFolder(fullname);
+
+				assertTrue("Unexpected name: " + mf.getName(), "TemporaryFolderRenamed".equals(mf.getName()));
+				assertTrue("Unexpected parent: " + mf.getParentFullname(), parentFullname
+						.equals(mf.getParentFullname()));
+
+			} finally {
+				if (fullname != null) {
+					mailAccess.getFolderStorage().deleteFolder(fullname, true);
+					System.out.println("Temporary folder deleted: " + fullname);
+				}
+
+				/*
+				 * close
+				 */
+				mailAccess.close(false);
+			}
+
+		} catch (final Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
+
+	public void testFolderDelete() {
+		try {
+			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
+					new ContextImpl(getCid()), "mail-test-session");
+			session.setPassword(getPassword());
+
+			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+			mailAccess.connect();
+
+			String fullname = null;
+			try {
+				final String name = TEMPORARY_FOLDER;
+
+				String parentFullname = null;
+				{
+					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
+					if (inbox.isHoldsFolders()) {
+						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(name)
+								.toString();
+						parentFullname = INBOX;
+					} else {
+						fullname = name;
+						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+					}
+
+					final MailFolderDescription mfd = new MailFolderDescription();
+					mfd.setExists(false);
+					mfd.setParentFullname(parentFullname);
+					mfd.setSeparator(inbox.getSeparator());
+					mfd.setSubscribed(false);
+					mfd.setName(name);
+
+					final Class<? extends MailPermission> clazz = MailProviderRegistry
+							.getMailProviderBySession(session).getMailPermissionClass();
+					final MailPermission p = MailPermission.newInstance(clazz);
+					p.setEntity(getUser());
+					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
+							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+					p.setFolderAdmin(true);
+					p.setGroupPermission(false);
+					mfd.addPermission(p);
+					mailAccess.getFolderStorage().createFolder(mfd);
+				}
+
+				int numAppendix = mailAccess.getFolderStorage().getFolder(
+						mailAccess.getFolderStorage().getTrashFolder()).isHoldsFolders() ? 0 : -1;
+				if (numAppendix == 0) {
+					final MailFolder[] trashedFolders = mailAccess.getFolderStorage().getSubfolders(
+							mailAccess.getFolderStorage().getTrashFolder(), true);
+					for (final MailFolder mailFolder : trashedFolders) {
+						if (mailFolder.getName().startsWith(name)) {
+							final String substr = mailFolder.getName().substring(name.length());
+							if (substr.length() > 0) {
+								final int tmp = numAppendix;
+								try {
+									numAppendix = Math.max(numAppendix, Integer.parseInt(substr));
+								} catch (final NumberFormatException e) {
+									// ignore
+									numAppendix = tmp;
+								}
+							}
+						}
+					}
+					if (numAppendix > 0) {
+						numAppendix++;
+					}
+				}
+
+				mailAccess.getFolderStorage().deleteFolder(fullname);
+
+				Exception exc = null;
+				try {
+					mailAccess.getFolderStorage().getFolder(fullname);
+				} catch (final MailException e) {
+					exc = e;
+				}
+				assertTrue("Deleted folder still exists", exc != null);
+
+				if (numAppendix >= 0) {
+					boolean found = false;
+					/*
+					 * Find backup folder below trash folder
+					 */
+					final MailFolder[] trashedFolders = mailAccess.getFolderStorage().getSubfolders(
+							mailAccess.getFolderStorage().getTrashFolder(), true);
+					for (int i = 0; i < trashedFolders.length && !found; i++) {
+						if (trashedFolders[i].getName().startsWith(name)) {
+							if (numAppendix == 0) {
+								found = trashedFolders[i].getName().equals(name);
+							} else {
+								final String substr = trashedFolders[i].getName().substring(name.length());
+								try {
+									found = (numAppendix == Integer.parseInt(substr));
+								} catch (final NumberFormatException e) {
+									// ignore
+								}
+							}
+							if (found) {
+								fullname = trashedFolders[i].getFullname();
+							}
+						}
+					}
+					if (!found) {
+						fullname = null;
+					}
+					assertTrue("No backup folder found below trash folder", found);
+				}
+
+			} finally {
+				if (fullname != null) {
+					mailAccess.getFolderStorage().deleteFolder(fullname, true);
+					System.out.println("Temporary folder deleted: " + fullname);
+				}
+
+				/*
+				 * close
+				 */
+				mailAccess.close(false);
+			}
+
+		} catch (final Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
+
+	private static final MailField[] FIELDS_ID = { MailField.ID };
+
+	public void testFolderClear() {
+		try {
+			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
+					new ContextImpl(getCid()), "mail-test-session");
+			session.setPassword(getPassword());
+
+			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+			mailAccess.connect();
+
+			String fullname = null;
+			long[] trashedIDs = null;
+			String trashFullname = null;
+			try {
+				final String name = TEMPORARY_FOLDER;
+
+				{
+					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
+					final String parentFullname;
+					if (inbox.isHoldsFolders()) {
+						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(name)
+								.toString();
+						parentFullname = INBOX;
+					} else {
+						fullname = name;
+						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+					}
+
+					final MailFolderDescription mfd = new MailFolderDescription();
+					mfd.setExists(false);
+					mfd.setParentFullname(parentFullname);
+					mfd.setSeparator(inbox.getSeparator());
+					mfd.setSubscribed(false);
+					mfd.setName(name);
+
+					final Class<? extends MailPermission> clazz = MailProviderRegistry
+							.getMailProviderBySession(session).getMailPermissionClass();
+					final MailPermission p = MailPermission.newInstance(clazz);
+					p.setEntity(getUser());
+					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
+							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+					p.setFolderAdmin(true);
+					p.setGroupPermission(false);
+					mfd.addPermission(p);
+					mailAccess.getFolderStorage().createFolder(mfd);
+				}
+
+				final MailMessage[] mails = getMessages(getTestMailDir(), -1);
+				long[] uids = mailAccess.getMessageStorage().appendMessages(fullname, mails);
+
+				MailFolder f = mailAccess.getFolderStorage().getFolder(fullname);
+				assertTrue("Messages not completely appended to mail folder " + fullname,
+						f.getMessageCount() == uids.length);
+
+				trashFullname = mailAccess.getFolderStorage().getTrashFolder();
+				int numTrashedMails = mailAccess.getFolderStorage().getFolder(trashFullname).getMessageCount();
+				final MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname,
+						IndexRange.NULL, MailListField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
+				final long nextId = trashed[0].getMailId() + 1;
+				trashedIDs = new long[uids.length];
+				for (int i = 0; i < trashedIDs.length; i++) {
+					trashedIDs[i] = (nextId + i);
+				}
+
+				mailAccess.getFolderStorage().clearFolder(fullname);
+
+				assertTrue("Folder should be empty", mailAccess.getFolderStorage().getFolder(fullname)
+						.getMessageCount() == 0);
+				final int expectedMsgCount = numTrashedMails + uids.length;
+				assertTrue("Mails not completely backuped", mailAccess.getFolderStorage().getFolder(trashFullname)
+						.getMessageCount() == expectedMsgCount);
+
+				mailAccess.getMessageStorage().deleteMessages(trashFullname, trashedIDs, true);
+				trashedIDs = null;
+
+				uids = mailAccess.getMessageStorage().appendMessages(fullname, mails);
+				f = mailAccess.getFolderStorage().getFolder(fullname);
+				assertTrue("Messages not completely appended to mail folder " + fullname,
+						f.getMessageCount() == uids.length);
+
+				numTrashedMails = mailAccess.getFolderStorage().getFolder(trashFullname).getMessageCount();
+
+				mailAccess.getFolderStorage().clearFolder(fullname, true);
+
+				assertTrue("Folder should be empty", mailAccess.getFolderStorage().getFolder(fullname)
+						.getMessageCount() == 0);
+				assertTrue("Mails not deleted permanently although hardDelete flag set to true", mailAccess
+						.getFolderStorage().getFolder(trashFullname).getMessageCount() == numTrashedMails);
+
+			} finally {
+				if (fullname != null) {
+					mailAccess.getFolderStorage().deleteFolder(fullname, true);
+					System.out.println("Temporary folder deleted: " + fullname);
+				}
+
+				if (trashedIDs != null) {
+					mailAccess.getMessageStorage().deleteMessages(trashFullname, trashedIDs, true);
+				}
+
+				/*
+				 * close
+				 */
+				mailAccess.close(false);
+			}
+
+		} catch (final Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
+
+	public void testFolderQuota() {
+		try {
+			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
+					new ContextImpl(getCid()), "mail-test-session");
+			session.setPassword(getPassword());
+
+			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+			mailAccess.connect();
+
+			final MailCapabilities caps = mailAccess.getMailConfig().getCapabilities();
+			if (!caps.hasQuota()) {
+				System.out.println("Mail system's capabilities indicate no QUOTA support."
+						+ " Skipping testFolderQuota()...");
+				return;
+			}
+
+			String fullname = null;
+			try {
+				final String name = TEMPORARY_FOLDER;
+
+				{
+					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
+					final String parentFullname;
+					if (inbox.isHoldsFolders()) {
+						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(name)
+								.toString();
+						parentFullname = INBOX;
+					} else {
+						fullname = name;
+						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+					}
+
+					final MailFolderDescription mfd = new MailFolderDescription();
+					mfd.setExists(false);
+					mfd.setParentFullname(parentFullname);
+					mfd.setSeparator(inbox.getSeparator());
+					mfd.setSubscribed(false);
+					mfd.setName(name);
+
+					final Class<? extends MailPermission> clazz = MailProviderRegistry
+							.getMailProviderBySession(session).getMailPermissionClass();
+					final MailPermission p = MailPermission.newInstance(clazz);
+					p.setEntity(getUser());
+					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
+							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+					p.setFolderAdmin(true);
+					p.setGroupPermission(false);
+					mfd.addPermission(p);
+					mailAccess.getFolderStorage().createFolder(mfd);
+				}
+
+				final long prevUsage = mailAccess.getFolderStorage().getQuota(fullname).usage;
+				if (prevUsage == Quota.UNLIMITED.usage) {
+					System.out.println("Current user has unlimited QUOTA. Skipping testFolderQuota()...");
+					return;
+				}
+
+				mailAccess.getMessageStorage().appendMessages(fullname, getMessages(getTestMailDir(), -1));
+				assertTrue("QUOTA not increased although mails were appended", mailAccess.getFolderStorage().getQuota(
+						fullname).usage > prevUsage);
+
+			} finally {
+				if (fullname != null) {
+					mailAccess.getFolderStorage().deleteFolder(fullname, true);
+					System.out.println("Temporary folder deleted: " + fullname);
+				}
+
+				/*
+				 * close
+				 */
+				mailAccess.close(false);
+			}
+
+		} catch (final Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
+
+	public void testPath2DefaultFolder() {
+		try {
+			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
+					new ContextImpl(getCid()), "mail-test-session");
+			session.setPassword(getPassword());
+
+			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+			mailAccess.connect();
+			String fullname = null;
+			String anotherFullname = null;
+			try {
+				final String name = TEMPORARY_FOLDER;
+
+				{
+					final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
+					final String parentFullname;
+					if (inbox.isHoldsFolders()) {
+						fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(name)
+								.toString();
+						parentFullname = INBOX;
+					} else {
+						fullname = name;
+						parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+					}
+
+					final MailFolderDescription mfd = new MailFolderDescription();
+					mfd.setExists(false);
+					mfd.setParentFullname(parentFullname);
+					mfd.setSeparator(inbox.getSeparator());
+					mfd.setSubscribed(false);
+					mfd.setName(name);
+
+					final Class<? extends MailPermission> clazz = MailProviderRegistry
+							.getMailProviderBySession(session).getMailPermissionClass();
+					final MailPermission p = MailPermission.newInstance(clazz);
+					p.setEntity(getUser());
+					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
+							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+					p.setFolderAdmin(true);
+					p.setGroupPermission(false);
+					mfd.addPermission(p);
+					mailAccess.getFolderStorage().createFolder(mfd);
+				}
+
+				MailFolder[] path = mailAccess.getFolderStorage().getPath2DefaultFolder(fullname);
+				assertTrue("Unexpected path length: " + path.length, path.length == 2);
+
+				for (int i = 0; i < path.length; i++) {
+					if (i == 0) {
+						assertTrue("Unexpected mail folder in first path position", path[i].getFullname().equals(
+								fullname));
+					} else {
+						assertTrue("Unexpected mail folder in second path position", path[i].getFullname()
+								.equals(INBOX));
+					}
+				}
+				path = null;
+				
+				{
+					final MailFolder temp = mailAccess.getFolderStorage().getFolder(fullname);
+					final String parentFullname;
+					if (temp.isHoldsFolders()) {
+						anotherFullname = new StringBuilder(temp.getFullname()).append(temp.getSeparator()).append(name)
+								.toString();
+						parentFullname = temp.getFullname();
+						
+						final MailFolderDescription mfd = new MailFolderDescription();
+						mfd.setExists(false);
+						mfd.setParentFullname(parentFullname);
+						mfd.setSeparator(temp.getSeparator());
+						mfd.setSubscribed(false);
+						mfd.setName(name);
+
+						final Class<? extends MailPermission> clazz = MailProviderRegistry
+								.getMailProviderBySession(session).getMailPermissionClass();
+						final MailPermission p = MailPermission.newInstance(clazz);
+						p.setEntity(getUser());
+						p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
+								OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+						p.setFolderAdmin(true);
+						p.setGroupPermission(false);
+						mfd.addPermission(p);
+						mailAccess.getFolderStorage().createFolder(mfd);
+						
+						final MailFolder[] apath = mailAccess.getFolderStorage().getPath2DefaultFolder(anotherFullname);
+						assertTrue("Unexpected path length: " + apath.length, apath.length == 3);
+						
+						for (int i = 0; i < apath.length; i++) {
+							if (i == 0) {
+								assertTrue("Unexpected mail folder in first path position", apath[i].getFullname().equals(
+										anotherFullname));
+							} else if (i == 1) {
+								assertTrue("Unexpected mail folder in first path position", apath[i].getFullname().equals(
+										fullname));
+							} else {
+								assertTrue("Unexpected mail folder in second path position", apath[i].getFullname()
+										.equals(INBOX));
+							}
+						}
+					}
+
+					
+				}
+
+			} finally {
+				if (anotherFullname != null) {
+					mailAccess.getFolderStorage().deleteFolder(anotherFullname, true);
+					System.out.println("Temporary folder deleted: " + anotherFullname);
+				}
+				
+				if (fullname != null) {
+					mailAccess.getFolderStorage().deleteFolder(fullname, true);
+					System.out.println("Temporary folder deleted: " + fullname);
 				}
 
 				/*
