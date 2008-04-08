@@ -58,7 +58,6 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.AbstractMailTest;
@@ -406,8 +405,6 @@ public final class MailForwardTest extends AbstractMailTest {
 
 				final MailMessage forwardMail = mailAccess.getLogicTools().getFowardMessage(
 						new MailMessage[] { sourceMail });
-
-				forwardMail.writeTo(System.out);
 
 				{
 					final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(getUser(),
