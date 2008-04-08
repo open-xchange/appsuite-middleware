@@ -440,7 +440,6 @@ public final class IMAPCommandsCollection {
 	 * @throws MessagingException
 	 *             If IMAP <i>SORT</i> command fails
 	 */
-	@SuppressWarnings("unchecked")
 	public static int[] getServerSortList(final IMAPFolder imapFolder, final String sortCrit, final String[] mdat)
 			throws MessagingException {
 		if (mdat == null || mdat.length == 0) {
