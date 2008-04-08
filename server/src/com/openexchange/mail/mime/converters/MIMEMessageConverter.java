@@ -850,7 +850,6 @@ public final class MIMEMessageConverter {
 						final String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_DISP_NOT_TO);
 						if ((val != null) && (val.length > 0)) {
 							mailMessage.setDispositionNotification(InternetAddress.parse(val[0], true)[0]);
-							mailMessage.removeHeader(MessageHeaders.HDR_DISP_NOT_TO);
 						} else {
 							mailMessage.setDispositionNotification(null);
 						}
@@ -863,7 +862,6 @@ public final class MIMEMessageConverter {
 						final String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_X_PRIORITY);
 						if ((val != null) && (val.length > 0)) {
 							parsePriority(val[0], mailMessage);
-							mailMessage.removeHeader(MessageHeaders.HDR_X_PRIORITY);
 						} else {
 							mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
 						}
@@ -1196,7 +1194,6 @@ public final class MIMEMessageConverter {
 						final String[] val = msg.getHeader(MessageHeaders.HDR_DISP_NOT_TO);
 						if ((val != null) && (val.length > 0)) {
 							mailMessage.setDispositionNotification(InternetAddress.parse(val[0], true)[0]);
-							mailMessage.removeHeader(MessageHeaders.HDR_DISP_NOT_TO);
 						} else {
 							mailMessage.setDispositionNotification(null);
 						}
@@ -1209,7 +1206,6 @@ public final class MIMEMessageConverter {
 						final String[] val = msg.getHeader(MessageHeaders.HDR_X_PRIORITY);
 						if ((val != null) && (val.length > 0)) {
 							parsePriority(val[0], mailMessage);
-							mailMessage.removeHeader(MessageHeaders.HDR_X_PRIORITY);
 						} else {
 							mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
 						}
@@ -1360,7 +1356,6 @@ public final class MIMEMessageConverter {
 					mail.setDispositionNotification(null);
 				}
 			}
-			mail.removeHeader(MessageHeaders.HDR_DISP_NOT_TO);
 			String filename = decodeMultiEncodedHeader(msg.getFileName());
 			if (filename == null) {
 				filename = mail.getContentDisposition().getFilenameParameter();
@@ -1370,7 +1365,6 @@ public final class MIMEMessageConverter {
 			}
 			mail.setFileName(filename);
 			parsePriority(mail.getHeader(MessageHeaders.HDR_X_PRIORITY), mail);
-			mail.removeHeader(MessageHeaders.HDR_X_PRIORITY);
 			if (msg.getReceivedDate() != null) {
 				mail.setReceivedDate(msg.getReceivedDate());
 			} else {
