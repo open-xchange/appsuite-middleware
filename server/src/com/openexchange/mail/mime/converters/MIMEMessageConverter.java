@@ -101,6 +101,7 @@ import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -360,9 +361,10 @@ public final class MIMEMessageConverter {
 			/*
 			 * Other content
 			 */
-			/*if (!contentType.containsCharsetParameter()) {
-				contentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
-			}*/
+			/*
+			 * if (!contentType.containsCharsetParameter()) {
+			 * contentType.setCharsetParameter(MailConfig.getDefaultMimeCharset()); }
+			 */
 			addPartHeaders(part, mailPart);
 			part.setDataHandler(new DataHandler(
 					new MessageDataSource(mailPart.getInputStream(), contentType.toString())));
@@ -1256,6 +1258,8 @@ public final class MIMEMessageConverter {
 		}
 	}
 
+	private static final String MULTI_SUBTYPE_MIXED = "MIXED";
+
 	/**
 	 * Creates a message data object from given MIME message
 	 * 
@@ -1327,6 +1331,12 @@ public final class MIMEMessageConverter {
 			}
 			mail.setContentType(msg.getContentType());
 			{
+				final ContentType ct = mail.getContentType();
+				mail.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)
+						&& (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || MIMEMessageUtility.hasAttachments(
+								(Multipart) msg.getContent(), ct.getSubType())));
+			}
+			{
 				final String[] tmp = msg.getHeader(MessageHeaders.HDR_CONTENT_ID);
 				if ((tmp != null) && (tmp.length > 0)) {
 					mail.setContentId(tmp[0]);
@@ -1377,6 +1387,8 @@ public final class MIMEMessageConverter {
 			return mail;
 		} catch (final MessagingException e) {
 			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+		} catch (final IOException e) {
+			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}
 	}
 
