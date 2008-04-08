@@ -334,9 +334,11 @@ public final class MailAttachmentTest extends AbstractMailTest {
 				}
 
 				MailMessage testMail = MIMEMessageConverter.convertMessage(RFC822_WO_ATTACH.getBytes("US-ASCII"));
+				assertTrue("Missing hasAttachment", testMail.containsHasAttachment());
 				assertFalse("A message w/o attachments is marked to hold attachments", testMail.hasAttachment());
 
 				testMail = MIMEMessageConverter.convertMessage(RFC822_WITH_ATTACH.getBytes("US-ASCII"));
+				assertTrue("Missing hasAttachment", testMail.containsHasAttachment());
 				assertTrue("A message with attachments is marked to NOT hold attachments", testMail.hasAttachment());
 
 			} finally {

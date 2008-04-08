@@ -49,6 +49,10 @@
 
 package com.openexchange.mail.messagestorage;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
@@ -112,9 +116,12 @@ public final class MailDeleteTest extends AbstractMailTest {
 				MailFolder trash = mailAccess.getFolderStorage().getFolder(trashFullname);
 				final int prevMessageCount = trash.getMessageCount();
 
-				MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname,
-						IndexRange.NULL, MailListField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
-				final long nextId = trashed[0].getMailId() + 1;
+				MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
+						MailListField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID);
+				final Set<Long> prevIds = new HashSet<Long>(prevMessageCount);
+				for (final MailMessage mail : trashed) {
+					prevIds.add(Long.valueOf(mail.getMailId()));
+				}
 
 				mailAccess.getMessageStorage().deleteMessages("INBOX", uids, false);
 
@@ -122,13 +129,28 @@ public final class MailDeleteTest extends AbstractMailTest {
 				assertTrue("Trash's number of message has not been increased appropriately", prevMessageCount
 						+ uids.length == trash.getMessageCount());
 				
-				trashedIDs = new long[uids.length];
-				for (int i = 0; i < trashedIDs.length; i++) {
-					trashedIDs[i] = (nextId + i);
+				trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
+						MailListField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID);
+				assertTrue("Size mismatch: " + trashed.length + " but should be " + trash.getMessageCount(), trashed.length == trash.getMessageCount());
+				final Set<Long> ids = new HashSet<Long>(trash.getMessageCount());
+				for (final MailMessage mail : trashed) {
+					ids.add(Long.valueOf(mail.getMailId()));
 				}
+				ids.removeAll(prevIds);
+				assertTrue("Size mismatch: " + ids.size() + " but should be " + uids.length, ids.size() == uids.length);
 				
+				trashedIDs = new long[uids.length];
+				{
+					int k = 0;
+					for (final Long id : ids) {
+						trashedIDs[k++] = id.longValue();
+					}
+				}
+
 				trashed = mailAccess.getMessageStorage().getMessages(trashFullname, trashedIDs, FIELDS_EVEN_MORE);
-				assertTrue("No matching trashed messages found", trashed != null && trashed.length == uids.length);
+				assertTrue("No matching trashed messages found: "
+						+ (null == trashed ? "null" : String.valueOf(trashed.length)) + " IDs: "
+						+ Arrays.toString(trashedIDs), trashed != null && trashed.length == uids.length);
 				for (int i = 0; i < trashed.length; i++) {
 					assertFalse("Missing mail ID", trashed[i].getMailId() == -1);
 					assertTrue("Missing content type", trashed[i].containsContentType());
@@ -157,9 +179,10 @@ public final class MailDeleteTest extends AbstractMailTest {
 				} else {
 					System.out.println("Delete failed");
 				}
-				
+
 				if (trashedIDs != null) {
-					success = mailAccess.getMessageStorage().deleteMessages(mailAccess.getFolderStorage().getTrashFolder(), trashedIDs, true);
+					success = mailAccess.getMessageStorage().deleteMessages(
+							mailAccess.getFolderStorage().getTrashFolder(), trashedIDs, true);
 					if (success) {
 						System.out.println("Trashed messages successfully deleted");
 					} else {
