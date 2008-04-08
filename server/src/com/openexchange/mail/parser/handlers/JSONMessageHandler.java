@@ -63,7 +63,6 @@ import java.util.TimeZone;
 import java.util.Map.Entry;
 
 import javax.mail.Part;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 
@@ -129,8 +128,6 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	private JSONArray attachmentsArr;
 
 	private JSONArray nestedMsgsArr;
-
-	private boolean seen;
 
 	private boolean isAlternative;
 
@@ -418,19 +415,10 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			for (int i = 0; i < size; i++) {
 				final Map.Entry<String, String> entry = iter.next();
 				if (MessageHeaders.HDR_DISP_NOT_TO.equalsIgnoreCase(entry.getKey())) {
-					if (!seen) {
-						/*
-						 * Disposition-Notification: Indicate an expected read
-						 * ack if this header is available and if mail has not
-						 * been seen, yet
-						 */
-						try {
-							jsonObject.put(MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey(), new InternetAddress(
-									entry.getValue()).toUnicodeString());
-						} catch (final AddressException e) {
-							LOG.error(e.getLocalizedMessage(), e);
-						}
-					}
+					/*
+					 * This special header is handled through handleDispositionNotification()
+					 */
+					continue;
 				} else if (MessageHeaders.HDR_X_PRIORITY.equalsIgnoreCase(entry.getKey())) {
 					/*
 					 * Priority
