@@ -112,7 +112,7 @@ public final class SMTPActivator extends DeferredActivator {
 	public void startBundle() throws Exception {
 		try {
 			/*
-			 * (Re-)Initialize server service registry with available services
+			 * (Re-)Initialize service registry with available services
 			 */
 			{
 				final ServiceRegistry registry = getServiceRegistry();
