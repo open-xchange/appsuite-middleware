@@ -310,10 +310,14 @@ public final class IMAPSearch {
 					} catch (final MessagingException e) {
 						throw MIMEMailException.handleMessagingException(e);
 					}
-					if ((val == null) && (hdr[1] == null)) {
+					if ((val == null || val.length == 0) && (hdr[1] == null)) {
 						return true;
 					}
-					return hdr[1].equals(val[0]);
+					boolean found = false;
+					for (int i = 0; i < val.length && !found; i++) {
+						found = (val[i].toLowerCase(Locale.ENGLISH).indexOf(hdr[1]) != -1);
+					}
+					return found;
 				}
 			};
 		} else if (term instanceof com.openexchange.mail.search.FlagTerm) {
