@@ -694,7 +694,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	@Override
 	public String saveFolder(final MailFolderDescription mailFolder) throws MailException {
 		initConnection();
-		if (mailFolder.exists()
+		if (!mailFolder.containsExists() && !mailFolder.containsFullname()) {
+			throw new MailException(MailException.Code.INSUFFICIENT_FOLDER_ATTR);
+		}
+		if ((mailFolder.containsExists() && mailFolder.exists())
 				|| ((mailFolder.getFullname() != null) && mailConnection.getFolderStorage().exists(
 						mailFolder.getFullname()))) {
 			/*

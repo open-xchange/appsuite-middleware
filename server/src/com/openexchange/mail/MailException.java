@@ -51,7 +51,6 @@ package com.openexchange.mail;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
-import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
  * {@link MailException} - Base class for mail exceptions
@@ -278,7 +277,15 @@ public class MailException extends AbstractOXException {
 		 * Folder %s does not hold messages and is therefore not selectable
 		 */
 		FOLDER_DOES_NOT_HOLD_MESSAGES("Folder %s does not hold messages and is therefore not selectable",
-				Category.PERMISSION, 50);
+				Category.PERMISSION, 50),
+		/**
+		 * Insufficient folder attributes: Either existence status or fullname
+		 * have to be present to determine if a mail folder create or update
+		 * shall be performed
+		 */
+		INSUFFICIENT_FOLDER_ATTR("Insufficient folder attributes: Either existence status "
+				+ "or fullname have to be present to determine if a "
+				+ "mail folder create or update shall be performed", Category.CODE_ERROR, 51);
 
 		private final String message;
 

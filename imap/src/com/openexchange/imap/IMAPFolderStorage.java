@@ -947,7 +947,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 	private static final int INT_1 = 1;
 
 	@Override
-	public void clearFolder(final String fullname) throws MailException {
+	public void clearFolder(final String fullname, final boolean hardDelete) throws MailException {
 		try {
 			final IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullname);
 			try {
@@ -966,8 +966,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			f.open(Folder.READ_WRITE);
 			try {
 				final String trashFullname = getTrashFolder();
-				final boolean backup = (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
-						ctx).isHardDeleteMsgs() && !(f.getFullName().equals(trashFullname)));
+				final boolean backup = (!hardDelete
+						&& !UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx)
+								.isHardDeleteMsgs() && !(f.getFullName().equals(trashFullname)));
 				int msgCount = f.getMessageCount();
 				/*
 				 * Block-wise deletion

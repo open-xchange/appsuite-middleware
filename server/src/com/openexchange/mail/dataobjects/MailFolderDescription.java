@@ -53,11 +53,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link MailFolderDescription} - A simple object for updating or creating a
  * folder which holds user-modifiable folder attributes.
+ * <p>
+ * See the method descriptions of {@link #setExists(boolean)} and/or
+ * {@link #setFullname(String)} how to signal a create or an update operation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -134,6 +138,8 @@ public class MailFolderDescription {
 	}
 
 	/**
+	 * Checks if existence status has been set
+	 * 
 	 * @return <code>true</code> if exists status is set; otherwise
 	 *         <code>false</code>
 	 */
@@ -142,6 +148,8 @@ public class MailFolderDescription {
 	}
 
 	/**
+	 * Checks if fullname has been set
+	 * 
 	 * @return <code>true</code> if fullname is set; otherwise
 	 *         <code>false</code>
 	 */
@@ -150,6 +158,8 @@ public class MailFolderDescription {
 	}
 
 	/**
+	 * Checks if name has been set
+	 * 
 	 * @return <code>true</code> if name is set; otherwise <code>false</code>
 	 */
 	public boolean containsName() {
@@ -157,6 +167,8 @@ public class MailFolderDescription {
 	}
 
 	/**
+	 * Checks if parent fullname has been set
+	 * 
 	 * @return <code>true</code> if parentFullname is set; otherwise
 	 *         <code>false</code>
 	 */
@@ -165,6 +177,8 @@ public class MailFolderDescription {
 	}
 
 	/**
+	 * Checks if permissions have been set
+	 * 
 	 * @return <code>true</code> if permissions are set; otherwise
 	 *         <code>false</code>
 	 */
@@ -173,6 +187,8 @@ public class MailFolderDescription {
 	}
 
 	/**
+	 * Checks if separator has been set
+	 * 
 	 * @return <code>true</code> if separator is set; otherwise
 	 *         <code>false</code>
 	 */
@@ -181,6 +197,8 @@ public class MailFolderDescription {
 	}
 
 	/**
+	 * Checks if subscription status has been set
+	 * 
 	 * @return <code>true</code> if subscribed is set; otherwise
 	 *         <code>false</code>
 	 */
@@ -191,6 +209,7 @@ public class MailFolderDescription {
 	/**
 	 * Checks if this folder exists
 	 * 
+	 * @see #setExists(boolean)
 	 * @return <code>true</code> if folder exists in mailbox; otherwise
 	 *         <code>false</code>
 	 */
@@ -199,6 +218,9 @@ public class MailFolderDescription {
 	}
 
 	/**
+	 * Gets the fullname
+	 * 
+	 * @see #setFullname(String)
 	 * @return the fullname
 	 */
 	public String getFullname() {
@@ -206,6 +228,8 @@ public class MailFolderDescription {
 	}
 
 	/**
+	 * Gets the name
+	 * 
 	 * @return the name
 	 */
 	public String getName() {
@@ -213,15 +237,17 @@ public class MailFolderDescription {
 	}
 
 	/**
-	 * Gets the parentFullname
+	 * Gets the parent fullname
 	 * 
-	 * @return the parentFullname
+	 * @return the parent fullname
 	 */
 	public String getParentFullname() {
 		return parentFullname;
 	}
 
 	/**
+	 * Gets the permissions
+	 * 
 	 * @return the permissions as array of {@link OCLPermission}
 	 */
 	public OCLPermission[] getPermissions() {
@@ -241,7 +267,9 @@ public class MailFolderDescription {
 	}
 
 	/**
-	 * @return the subscribed
+	 * Gets the subscription status
+	 * 
+	 * @return the subscription status
 	 */
 	public boolean isSubscribed() {
 		return subscribed;
@@ -272,7 +300,7 @@ public class MailFolderDescription {
 	}
 
 	/**
-	 * Removes the parentFullname
+	 * Removes the parent fullname
 	 */
 	public void removeParentFullname() {
 		parentFullname = null;
@@ -296,7 +324,7 @@ public class MailFolderDescription {
 	}
 
 	/**
-	 * Removes the subscribed
+	 * Removes the subscription status
 	 */
 	public void removeSubscribed() {
 		subscribed = false;
@@ -305,7 +333,14 @@ public class MailFolderDescription {
 
 	/**
 	 * Sets the exists status
+	 * <p>
+	 * This flag is checked at first to detect if an update or create operation
+	 * shall be performed. If not set - this is {@link #containsExists()}
+	 * returns <code>false</code> - the folder's fullname in conjunction with
+	 * {@link MailFolderStorage#exists(String)} is used to determine folder
+	 * existence.
 	 * 
+	 * @see #setFullname(String)
 	 * @param exists
 	 *            <code>true</code> if folder exists in mailbox; otherwise
 	 *            <code>false</code>
@@ -316,6 +351,13 @@ public class MailFolderDescription {
 	}
 
 	/**
+	 * Sets the fullname
+	 * <p>
+	 * If {@link #containsExists()} returns <code>false</code> the
+	 * {@link MailFolderStorage#exists(String)} method is used to determine
+	 * folder existence.
+	 * 
+	 * @see #setExists(boolean)
 	 * @param fullname
 	 *            the fullname to set
 	 */
@@ -325,6 +367,8 @@ public class MailFolderDescription {
 	}
 
 	/**
+	 * Sets the name
+	 * 
 	 * @param name
 	 *            the name to set
 	 */
@@ -334,10 +378,10 @@ public class MailFolderDescription {
 	}
 
 	/**
-	 * Sets the parentFullname
+	 * Sets the parent fullname
 	 * 
 	 * @param parentFullname
-	 *            the parentFullname to set
+	 *            the parent fullname to set
 	 */
 	public void setParentFullname(final String parentFullname) {
 		this.parentFullname = parentFullname;
@@ -355,8 +399,10 @@ public class MailFolderDescription {
 	}
 
 	/**
+	 * Sets the subscription status
+	 * 
 	 * @param subscribed
-	 *            the subscribed to set
+	 *            the subscription status to set
 	 */
 	public void setSubscribed(final boolean subscribed) {
 		this.subscribed = subscribed;

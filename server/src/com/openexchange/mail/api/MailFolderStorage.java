@@ -269,7 +269,22 @@ public abstract class MailFolderStorage {
 	 * @throws MailException
 	 *             If folder's content cannot be cleared
 	 */
-	public abstract void clearFolder(String fullname) throws MailException;
+	public void clearFolder(String fullname) throws MailException {
+		clearFolder(fullname, false);
+	}
+
+	/**
+	 * Deletes the content of the folder identified through given fullname
+	 * 
+	 * @param fullname
+	 *            The fullname of the mail folder whose content should be
+	 *            cleared
+	 * @param hardDelete
+	 *            Whether to delete permanently or to backup into trash folder
+	 * @throws MailException
+	 *             If folder's content cannot be cleared
+	 */
+	public abstract void clearFolder(String fullname, boolean hardDelete) throws MailException;
 
 	/**
 	 * Gets the reverse path from the folder identified through given fullname
