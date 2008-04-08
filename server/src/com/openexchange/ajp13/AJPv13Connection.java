@@ -118,7 +118,7 @@ public final class AJPv13Connection {
 		if (outputStream != null) {
 			try {
 				outputStream.flush();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}
@@ -290,7 +290,7 @@ public final class AJPv13Connection {
 		if (outputStream != null) {
 			try {
 				outputStream.close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOG.error(e.getMessage(), e);
 			}
 			this.outputStream = null;
@@ -298,7 +298,7 @@ public final class AJPv13Connection {
 		if (inputStream != null) {
 			try {
 				inputStream.close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOG.error(e.getMessage(), e);
 			}
 			this.inputStream = null;
@@ -355,7 +355,7 @@ public final class AJPv13Connection {
 		try {
 			this.inputStream = new BufferedInputStream(listener.getSocket().getInputStream());
 			this.outputStream = new BufferedOutputStream(listener.getSocket().getOutputStream());
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}
