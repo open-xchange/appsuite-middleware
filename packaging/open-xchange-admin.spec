@@ -15,7 +15,7 @@ BuildRequires:  cairo java-1.5.0-sun-devel
 BuildRequires:  java-devel-icedtea
 %endif
 Version:        6.5.0
-Release:        1
+Release:        4
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
