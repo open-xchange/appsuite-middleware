@@ -47,39 +47,77 @@
  *
  */
 
-package com.openexchange.mail.search;
+package com.openexchange.mail.utils;
 
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+import java.util.regex.Pattern;
 
 /**
- * {@link CcTerm}
+ * {@link DateUtils} - Provides some date-related utility constants/methods
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class CcTerm extends SearchTerm<String> {
+public final class DateUtils {
 
-	private String addr;
+	private static final DateFormat DATEFORMAT_RFC822 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z",
+			Locale.ENGLISH);
+
+	private static final Pattern PATTERN_RFC822_FIX = Pattern.compile(",(?= 20[0-9][0-9])");
 
 	/**
-	 * Initializes a new {@link CcTerm}
+	 * Gets the corresponding instance of {@link Date} from specified RFC822
+	 * date string
+	 * 
+	 * @param string
+	 *            The RFC822 date string
+	 * @return The corresponding instance of {@link Date}
 	 */
-	public CcTerm(final String pattern) {
-		super();
+	public static final Date getDateRFC822(final String string) {
+		final String s = PATTERN_RFC822_FIX.matcher(string).replaceFirst("");
 		try {
-			this.addr = new InternetAddress(pattern, true).getAddress();
-		} catch (final AddressException e) {
-			this.addr = pattern;
+			return DATEFORMAT_RFC822.parse(s);
+		} catch (final ParseException e) {
+			throw new IllegalArgumentException(e.getMessage());
 		}
 	}
 
 	/**
-	 * @return The pattern of the cc address
+	 * Gets the corresponding RFC822 date string from specified instance of
+	 * {@link Date}
+	 * 
+	 * @param d
+	 *            The instance of {@link Date} to convert
+	 * @return The corresponding RFC822 date string
 	 */
-	@Override
-	public String getPattern() {
-		return addr;
+	public static final String toStringRFC822(final Date d) {
+		return toStringRFC822(d, TimeZone.getDefault());
 	}
 
+	/**
+	 * Gets the corresponding RFC822 date string from specified instance of
+	 * {@link Date}
+	 * 
+	 * @param d
+	 *            The instance of {@link Date} to convert
+	 * @param tz
+	 *            The time zone
+	 * @return The corresponding RFC822 date string
+	 */
+	public static final String toStringRFC822(final Date d, final TimeZone tz) {
+		DATEFORMAT_RFC822.setTimeZone(tz);
+		return DATEFORMAT_RFC822.format(d);
+	}
+
+	/**
+	 * Initializes a new {@link DateUtils}
+	 */
+	private DateUtils() {
+		super();
+	}
 }

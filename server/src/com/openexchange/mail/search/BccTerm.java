@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.search;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+
 /**
  * {@link BccTerm}
  * 
@@ -57,22 +60,26 @@ package com.openexchange.mail.search;
  */
 public final class BccTerm extends SearchTerm<String> {
 
-	private final String unicodeAddr;
+	private String addr;
 
 	/**
 	 * Initializes a new {@link BccTerm}
 	 */
-	public BccTerm(final String unicodeAddr) {
+	public BccTerm(final String pattern) {
 		super();
-		this.unicodeAddr = unicodeAddr;
+		try {
+			this.addr = new InternetAddress(pattern, true).getAddress();
+		} catch (final AddressException e) {
+			this.addr = pattern;
+		}
 	}
 
 	/**
-	 * @return The unicode representation of the bcc address
+	 * @return The pattern of the bcc address
 	 */
 	@Override
 	public String getPattern() {
-		return unicodeAddr;
+		return addr;
 	}
 
 }

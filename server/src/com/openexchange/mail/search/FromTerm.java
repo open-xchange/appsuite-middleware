@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.search;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+
 /**
  * {@link FromTerm}
  * 
@@ -57,22 +60,26 @@ package com.openexchange.mail.search;
  */
 public final class FromTerm extends SearchTerm<String> {
 
-	private final String unicodeAddr;
+	private String addr;
 
 	/**
 	 * Initializes a new {@link FromTerm}
 	 */
-	public FromTerm(final String unicodeAddr) {
+	public FromTerm(final String pattern) {
 		super();
-		this.unicodeAddr = unicodeAddr;
+		try {
+			this.addr = new InternetAddress(pattern, true).getAddress();
+		} catch (final AddressException e) {
+			this.addr = pattern;
+		}
 	}
 
 	/**
-	 * @return The unicode representation of the from address
+	 * @return The pattern of the from address
 	 */
 	@Override
 	public String getPattern() {
-		return unicodeAddr;
+		return addr;
 	}
 
 }
