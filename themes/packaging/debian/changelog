@@ -1,3 +1,9 @@
+open-xchange-themes (6.5.0-2) unstable; urgency=low
+
+  * Second internal beta.
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  9 Apr 2008 14:27:55 +0200
+
 open-xchange-themes (6.5.0-1) unstable; urgency=low
 
   * First internal beta.
