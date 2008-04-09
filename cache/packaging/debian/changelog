@@ -1,3 +1,9 @@
+open-xchange-cache (6.5.0-3) unstable; urgency=low
+
+  * Fifth internal Beta.
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  9 Apr 2008 10:33:39 +0200
+
 open-xchange-cache (6.5.0-2) unstable; urgency=low
 
   * Fourth internal beta.
