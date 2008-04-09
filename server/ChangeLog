@@ -1,6 +1,7 @@
-* 2008-04-07 - francisco.laguna@open-xchange.com
+* 2008-04-09 - thorben.betten@open-xchange.com
 
  - Bugfix #11105: Fixed non-tree-visible folders query
+ - Bugfix 9914: Additional check if upload form's file name is encoded
 
 * 2008-04-07 - francisco.laguna@open-xchange.com
  - Catch NumberFormatExceptions in Attachment Servlet, when a request does not include a properly formatted number

@@ -51,6 +51,9 @@ package com.openexchange.groupware.upload.impl;
 
 import java.io.File;
 
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.tools.codec.CodecUtils;
+
 /**
  * UploadFile
  * 
@@ -101,6 +104,17 @@ public class UploadFile {
 	}
 
 	/**
+	 * Gets the file name as given through upload form.
+	 * <p>
+	 * The file name possible contains the full path on sender's file system and
+	 * may be encoded as well; e.g.<br>
+	 * <code>l=C3=B6l=C3=BCl=C3=96=C3=96=C3=96.txt</code> or
+	 * <code>C:\MyFolderOnDisk\myfile.dat</code>
+	 * <p>
+	 * To ensure to deal with the expected file name call
+	 * {@link #getPreparedFileName()}.
+	 * 
+	 * @see #getPreparedFileName()
 	 * @return file name
 	 */
 	public String getFileName() {
@@ -108,7 +122,8 @@ public class UploadFile {
 	}
 
 	/**
-	 * Gets the prepared file name; meaning prepending path informations omitted
+	 * Gets the prepared file name; meaning prepending path and encoding
+	 * informations omitted
 	 * 
 	 * @return The prepared file name
 	 */
@@ -127,10 +142,18 @@ public class UploadFile {
 			} else if ((pos = preparedFileName.lastIndexOf('/')) != -1) {
 				preparedFileName = preparedFileName.substring(pos + 1);
 			}
+			preparedFileName = CodecUtils.decode(preparedFileName, ServerConfig
+					.getProperty(ServerConfig.Property.DefaultEncoding));
 		}
 		return preparedFileName;
 	}
 
+	/**
+	 * Sets the file name as provided through upload form.
+	 * 
+	 * @param fileName
+	 *            The file name
+	 */
 	public void setFileName(final String fileName) {
 		this.fileName = fileName;
 	}
