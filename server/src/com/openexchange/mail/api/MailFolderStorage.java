@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.api;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -228,7 +231,7 @@ public abstract class MailFolderStorage {
 	 * @throws MailException
 	 *             If mail folder cannot be deleted
 	 */
-	public String deleteFolder(String fullname) throws MailException {
+	public String deleteFolder(final String fullname) throws MailException {
 		return deleteFolder(fullname, false);
 	}
 
@@ -269,7 +272,7 @@ public abstract class MailFolderStorage {
 	 * @throws MailException
 	 *             If folder's content cannot be cleared
 	 */
-	public void clearFolder(String fullname) throws MailException {
+	public void clearFolder(final String fullname) throws MailException {
 		clearFolder(fullname, false);
 	}
 
@@ -299,7 +302,18 @@ public abstract class MailFolderStorage {
 	 * @throws MailException
 	 *             If path cannot be determined
 	 */
-	public abstract MailFolder[] getPath2DefaultFolder(String fullname) throws MailException;
+	public MailFolder[] getPath2DefaultFolder(final String fullname) throws MailException {
+		if (fullname.equals(MailFolder.DEFAULT_FOLDER_ID)) {
+			return new MailFolder[0];
+		}
+		MailFolder f = getFolder(fullname);
+		final List<MailFolder> list = new ArrayList<MailFolder>();
+		do {
+			list.add(f);
+			f = getFolder(f.getParentFullname());
+		} while (!f.getFullname().equals(MailFolder.DEFAULT_FOLDER_ID));
+		return list.toArray(new MailFolder[list.size()]);
+	}
 
 	/**
 	 * Detects both quota limit and quota usage on given mailbox folder's
