@@ -57,4 +57,4 @@ ant -Dlib.dir=/opt/open-xchange/lib -Ddestdir=%{buildroot} -Dprefix=/opt/open-xc
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d/
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
-
+%config(noreplace) /opt/open-xchange/etc/groupware/themes.properties
