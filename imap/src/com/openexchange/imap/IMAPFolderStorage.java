@@ -300,7 +300,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				iter.remove();
 				continue NextNSFolder;
 			}
-			for (Folder subfolder : subfolders) {
+			for (final Folder subfolder : subfolders) {
 				if (nsFullname.equals(subfolder.getFullName())) {
 					/*
 					 * Namespace folder already contained in subfolder list
