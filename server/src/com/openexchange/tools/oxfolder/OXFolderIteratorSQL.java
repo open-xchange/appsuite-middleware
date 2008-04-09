@@ -432,7 +432,7 @@ public final class OXFolderIteratorSQL {
 		return new FolderObjectIterator(rs, stmt, false, ctx, readCon, true);
 	}
 
-	private static final String SQL_SELPBFLD = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND type = ? AND fuid NOT IN #IDS#";
+	private static final String SQL_SEL_ALL_PUB = "SELECT fuid FROM oxfolder_tree WHERE cid = ? AND type = ? ORDER BY fuid";
 
 	/**
 	 * Returns all visible public folders that are not visible in hierarchic
@@ -481,11 +481,11 @@ public final class OXFolderIteratorSQL {
 			 * 2.) All non-user-visible public folders
 			 */
 			readCon = DBPool.pickup(ctx);
-			stmt = readCon.prepareStatement(SQL_SELPBFLD.replaceFirst("#IDS#", queue2SQLString(q, size)));
+			stmt = readCon.prepareStatement(SQL_SEL_ALL_PUB);
 			stmt.setInt(1, ctx.getContextId());
 			stmt.setInt(2, FolderObject.PUBLIC);
 			rs = stmt.executeQuery();
-			final Set<Integer> nonVisibleSet = new HashSet<Integer>();
+			final Set<Integer> nonVisibleSet = new HashSet<Integer>(1024);
 			while (rs.next()) {
 				nonVisibleSet.add(Integer.valueOf(rs.getInt(1)));
 			}
@@ -493,13 +493,12 @@ public final class OXFolderIteratorSQL {
 			rs = null;
 			stmt.close();
 			stmt = null;
+			nonVisibleSet.removeAll(queue2IDSet(q, size));
 			/*
 			 * 3.) Filter all visible public folders with a non-visible parent
 			 */
-			final Iterator<FolderObject> iter = q.iterator();
-			for (int i = 0; i < size; i++) {
-				final FolderObject fo = iter.next();
-				if (!nonVisibleSet.contains(Integer.valueOf(fo.getParentFolderID()))) {
+			for (final Iterator<FolderObject> iter = q.iterator(); iter.hasNext();) {
+				if (!nonVisibleSet.contains(Integer.valueOf(iter.next().getParentFolderID()))) {
 					iter.remove();
 				}
 			}
@@ -515,17 +514,13 @@ public final class OXFolderIteratorSQL {
 		}
 	}
 
-	private static String queue2SQLString(final Queue<FolderObject> q, final int size) {
+	private static Set<Integer> queue2IDSet(final Queue<FolderObject> q, final int size) {
+		final Set<Integer> retval = new HashSet<Integer>(size);
 		final Iterator<FolderObject> iter = q.iterator();
-		final StringBuilder sb = new StringBuilder(1024);
-		sb.append('(');
-		sb.append(iter.next().getObjectID());
-		for (int i = 1; i < size; i++) {
-			sb.append(',');
-			sb.append(iter.next().getObjectID());
+		for (int i = 0; i < size; i++) {
+			retval.add(Integer.valueOf(iter.next().getObjectID()));
 		}
-		sb.append(')');
-		return sb.toString();
+		return retval;
 	}
 
 	/**

@@ -1,4 +1,8 @@
 * 2008-04-07 - francisco.laguna@open-xchange.com
+
+ - Bugfix #11105: Fixed non-tree-visible folders query
+
+* 2008-04-07 - francisco.laguna@open-xchange.com
  - Catch NumberFormatExceptions in Attachment Servlet, when a request does not include a properly formatted number
    (Bug #11074)
 
