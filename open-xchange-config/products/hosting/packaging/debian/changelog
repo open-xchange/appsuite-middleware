@@ -1,3 +1,9 @@
+open-xchange-config-hosting (6.5.0-1) unstable; urgency=low
+
+  * First build for SP4
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 10 Apr 2008 14:52:28 +0200
+
 open-xchange-config-hosting (6.4.0-2) unstable; urgency=low
 
   * SP3 RC3 build
