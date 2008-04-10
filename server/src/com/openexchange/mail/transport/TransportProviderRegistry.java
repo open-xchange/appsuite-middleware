@@ -58,7 +58,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.Protocol;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.session.Session;
 
@@ -240,7 +239,7 @@ public final class TransportProviderRegistry {
 		/*
 		 * Unregister
 		 */
-		final TransportProvider removed = providers.remove(provider);
+		final TransportProvider removed = providers.remove(provider.getProtocol());
 		if (null == removed) {
 			return null;
 		}
