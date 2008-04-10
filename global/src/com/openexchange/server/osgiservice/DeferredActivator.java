@@ -176,7 +176,7 @@ public abstract class DeferredActivator implements BundleActivator {
 	private final void init() throws Exception {
 		final Class<?>[] classes = getNeededServices();
 		final int len = null == classes ? 0 : classes.length;
-		if (null != classes && new HashSet<Class<?>>(Arrays.asList(classes)).size() != len) {
+		if (len > 0 && new HashSet<Class<?>>(Arrays.asList(classes)).size() != len) {
 			throw new IllegalArgumentException("Duplicate class/interface provided through getNeededServices()");
 		}
 		services = new ConcurrentHashMap<Class<?>, Object>(len);
