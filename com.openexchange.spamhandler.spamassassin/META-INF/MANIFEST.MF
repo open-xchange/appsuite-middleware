@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SpamAssassinSpamHandler
+Bundle-SymbolicName: com.openexchange.spamhandler.spamassassin
+Bundle-Version: 6.5.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: com.openexchange.groupware,
+ com.openexchange.mail,
+ com.openexchange.mail.api,
+ com.openexchange.mail.dataobjects,
+ com.openexchange.mail.mime,
+ com.openexchange.server.osgiservice,
+ com.openexchange.spamhandler,
+ org.apache.commons.logging;version="1.0.4",
+ org.apache.commons.logging.impl;version="1.0.4",
+ org.osgi.framework;version="1.3.0"
+Bundle-Activator: com.openexchange.spamhandler.spamassassin.osgi.SpamAssassinSpamHandlerActivator
