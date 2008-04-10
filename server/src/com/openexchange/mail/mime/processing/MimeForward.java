@@ -52,7 +52,6 @@ package com.openexchange.mail.mime.processing;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -76,7 +75,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
-import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.UUEncodedAttachmentMailPart;
@@ -87,8 +85,6 @@ import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
-import com.openexchange.mail.parser.MailMessageParser;
-import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
@@ -473,14 +469,15 @@ public final class MimeForward {
 				doubleBreak).append(firstSeenText).toString();
 	}
 
-	private static void addNonInlineParts(final MimeMessage originalMsg, final CompositeMailMessage forwardMail)
-			throws MailException {
-		final MailMessage originalMail = MIMEMessageConverter.convertMessage(originalMsg);
-		final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
-		new MailMessageParser().parseMailMessage(originalMail, handler);
-		final List<MailPart> nonInlineParts = handler.getNonInlineParts();
-		for (final MailPart mailPart : nonInlineParts) {
-			forwardMail.addAdditionalParts(mailPart);
-		}
-	}
+	/*
+	 * private static void addNonInlineParts(final MimeMessage originalMsg,
+	 * final CompositeMailMessage forwardMail) throws MailException { final
+	 * MailMessage originalMail =
+	 * MIMEMessageConverter.convertMessage(originalMsg); final
+	 * NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
+	 * new MailMessageParser().parseMailMessage(originalMail, handler); final
+	 * List<MailPart> nonInlineParts = handler.getNonInlineParts(); for (final
+	 * MailPart mailPart : nonInlineParts) {
+	 * forwardMail.addAdditionalParts(mailPart); } }
+	 */
 }
