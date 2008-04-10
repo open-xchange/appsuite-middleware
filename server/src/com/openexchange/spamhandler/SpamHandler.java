@@ -129,6 +129,7 @@ public abstract class SpamHandler {
 	 * @param mailAccess
 	 *            The mail access
 	 * @throws MailException
+	 *             If handling spam fails
 	 */
 	public void handleSpam(final String fullname, final long[] mailIDs, final boolean move,
 			final MailAccess<?, ?> mailAccess) throws MailException {
@@ -144,8 +145,6 @@ public abstract class SpamHandler {
 			final String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
 			mailAccess.getMessageStorage().moveMessages(fullname, spamFullname, mailIDs, true);
 		}
-		
-		System.out.println("SPAM HANDLED BY SPAM HANDLER!!");
 	}
 
 	/**
@@ -177,7 +176,7 @@ public abstract class SpamHandler {
 	 * @param mailAccess
 	 *            The mail access
 	 * @throws MailException
-	 *             If handling the ham messages fails
+	 *             If handling ham fails
 	 */
 	public abstract void handleHam(String spamFullname, long[] mailIDs, boolean move, MailAccess<?, ?> mailAccess)
 			throws MailException;

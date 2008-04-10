@@ -106,8 +106,6 @@ public final class DefaultSpamHandler extends SpamHandler {
 		if (move) {
 			mailAccess.getMessageStorage().moveMessages(spamFullname, FULLNAME_INBOX, mailIDs, true);
 		}
-		
-		System.out.println("HAM HANDLED BY DEFAULT SPAM HANDLER!!");
 	}
 
 }
