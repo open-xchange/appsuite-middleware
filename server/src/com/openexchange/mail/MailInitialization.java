@@ -55,7 +55,6 @@ import com.openexchange.mail.cache.MailAccessCache;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailPropertiesInit;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
-import com.openexchange.mail.mime.spam.SpamHandler;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtilityInit;
 import com.openexchange.server.Initialization;
@@ -119,7 +118,6 @@ public final class MailInitialization implements Initialization {
 		MailMessageCache.releaseInstance();
 		UserSettingMailStorage.releaseInstance();
 		MailAccessWatcher.stop();
-		SpamHandler.releaseInstance();
 		MailCacheConfiguration.getInstance().stop();
 		MailPropertiesInit.getInstance().stop();
 	}

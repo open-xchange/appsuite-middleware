@@ -79,28 +79,28 @@ public final class MessageDataSource implements DataSource {
 
 	private static final String DEFAULT_ENCODING = MailConfig.getDefaultMimeCharset();
 
-	private byte[] data;
+	private final byte[] data;
 
-	private String contentType;
+	private final String contentType;
 
 	private String name;
 
 	/**
-	 * Create a datasource from an input stream
+	 * Create a data source from an input stream
 	 */
 	public MessageDataSource(final InputStream inputStream, final String contentType) throws IOException {
 		this(inputStream, contentType, null);
 	}
 
 	/**
-	 * Create a datasource from an input stream
+	 * Create a data source from an input stream
 	 */
 	public MessageDataSource(final InputStream inputStream, final ContentType contentType) throws IOException {
 		this(inputStream, contentType, null);
 	}
 
 	/**
-	 * Create a datasource from an input stream
+	 * Create a data source from an input stream
 	 */
 	public MessageDataSource(final InputStream inputStream, final String contentType, final String name)
 			throws IOException {
@@ -112,7 +112,7 @@ public final class MessageDataSource implements DataSource {
 	}
 
 	/**
-	 * Create a datasource from an input stream
+	 * Create a data source from an input stream
 	 */
 	public MessageDataSource(final InputStream inputStream, final ContentType contentType, final String name)
 			throws IOException {
@@ -124,7 +124,7 @@ public final class MessageDataSource implements DataSource {
 	}
 
 	/**
-	 * Create a datasource from a byte array
+	 * Create a data source from a byte array
 	 */
 	public MessageDataSource(final byte[] data, final String contentType) {
 		this.contentType = contentType;
@@ -133,7 +133,7 @@ public final class MessageDataSource implements DataSource {
 	}
 
 	/**
-	 * Create a datasource from a String
+	 * Create a data source from a String
 	 */
 	public MessageDataSource(final String data, final String contentType) throws UnsupportedEncodingException,
 			MailException {
@@ -143,7 +143,7 @@ public final class MessageDataSource implements DataSource {
 	}
 
 	/**
-	 * Create a datasource from a String
+	 * Create a data source from a String
 	 */
 	public MessageDataSource(final String data, final ContentType contentType) throws UnsupportedEncodingException {
 		this.contentType = contentType.toString();
@@ -182,8 +182,8 @@ public final class MessageDataSource implements DataSource {
 		return name;
 	}
 
-	protected static int copyStream(final InputStream inputStreamArg, final UnsynchronizedByteArrayOutputStream outputStream)
-			throws IOException {
+	protected static int copyStream(final InputStream inputStreamArg,
+			final UnsynchronizedByteArrayOutputStream outputStream) throws IOException {
 		final InputStream inputStream = inputStreamArg instanceof BufferedInputStream ? (BufferedInputStream) inputStreamArg
 				: new BufferedInputStream(inputStreamArg);
 		try {

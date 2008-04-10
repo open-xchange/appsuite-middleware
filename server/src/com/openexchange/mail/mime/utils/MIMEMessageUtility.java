@@ -238,7 +238,7 @@ public final class MIMEMessageUtility {
 	 */
 	private static final String MULTI_SUBTYPE_ALTERNATIVE = "ALTERNATIVE";
 
-	private static final String MULTI_SUBTYPE_MIXED = "MIXED";
+	//private static final String MULTI_SUBTYPE_MIXED = "MIXED";
 
 	private static final String MULTI_SUBTYPE_SIGNED = "SIGNED";
 

@@ -70,9 +70,11 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.SearchUtility;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.session.Session;
+import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
@@ -103,9 +105,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
 	private MailConfig mailConfig;
 
-	private MailAccess<?, ?> mailConnection;
+	private MailAccess<?, ?> mailAccess;
 
 	private final Session session;
+
+	private final UserSettingMail usm;
 
 	/**
 	 * No direct instantiation
@@ -127,19 +131,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			throw new MailException(MailException.Code.ACCOUNT_DOES_NOT_EXIST, Integer.valueOf(ctx.getContextId()));
 		}
 		this.session = session;
+		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
 	}
 
 	@Override
 	public void checkDefaultFolders(final String[] defaultFolderNames) throws MailException {
 		initConnection();
-		mailConnection.getFolderStorage().checkDefaultFolders();
+		mailAccess.getFolderStorage().checkDefaultFolders();
 	}
 
 	@Override
 	public boolean clearFolder(final String folder) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		mailConnection.getFolderStorage().clearFolder(fullname);
+		mailAccess.getFolderStorage().clearFolder(fullname);
 		try {
 			/*
 			 * Update message cache
@@ -154,14 +159,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	@Override
 	public void close(final boolean putIntoCache) throws MailException {
 		try {
-			if (mailConnection != null) {
-				mailConnection.close(putIntoCache);
+			if (mailAccess != null) {
+				mailAccess.close(putIntoCache);
 			}
 		} finally {
-			mailConnection = null;
+			mailAccess = null;
 			init = false;
 		}
 	}
+
+	private static final int SPAM_HAM = -1;
+
+	private static final int SPAM_NOOP = 0;
+
+	private static final int SPAM_SPAM = 1;
 
 	@Override
 	public long[] copyMessages(final String sourceFolder, final String destFolder, final long[] msgUIDs,
@@ -169,11 +180,42 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		initConnection();
 		final String sourceFullname = prepareMailFolderParam(sourceFolder);
 		final String destFullname = prepareMailFolderParam(destFolder);
+		/*
+		 * Check for spam action; meaning a move/copy from/to spam folder
+		 */
+		final String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
+		final int spamAction;
+		if (usm.isSpamEnabled()) {
+			spamAction = spamFullname.equals(sourceFullname) ? SPAM_HAM
+					: (spamFullname.equals(destFullname) ? SPAM_SPAM : SPAM_NOOP);
+		} else {
+			spamAction = SPAM_NOOP;
+		}
+		if (spamAction != SPAM_NOOP) {
+			final boolean locatedInSpamFolder = SPAM_HAM == spamAction || spamFullname.equals(sourceFullname);
+			if (spamAction == SPAM_SPAM) {
+				if (!locatedInSpamFolder) {
+					/*
+					 * Handle spam
+					 */
+					SpamHandlerRegistry.getSpamHandlerBySession(session).handleSpam(sourceFullname, msgUIDs, false,
+							mailAccess);
+				}
+			} else {
+				if (locatedInSpamFolder) {
+					/*
+					 * Handle ham.
+					 */
+					SpamHandlerRegistry.getSpamHandlerBySession(session).handleHam(sourceFullname, msgUIDs, false,
+							mailAccess);
+				}
+			}
+		}
 		final long[] maildIds;
 		if (move) {
-			maildIds = mailConnection.getMessageStorage().moveMessages(sourceFullname, destFullname, msgUIDs, false);
+			maildIds = mailAccess.getMessageStorage().moveMessages(sourceFullname, destFullname, msgUIDs, false);
 		} else {
-			maildIds = mailConnection.getMessageStorage().copyMessages(sourceFullname, destFullname, msgUIDs, false);
+			maildIds = mailAccess.getMessageStorage().copyMessages(sourceFullname, destFullname, msgUIDs, false);
 		}
 		try {
 			/*
@@ -191,7 +233,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	public String deleteFolder(final String folder) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		return prepareFullname(mailConnection.getFolderStorage().deleteFolder(fullname, false), getSeparator());
+		return prepareFullname(mailAccess.getFolderStorage().deleteFolder(fullname, false), getSeparator());
 	}
 
 	@Override
@@ -199,7 +241,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		final boolean retval = mailConnection.getMessageStorage().deleteMessages(fullname, msgUIDs, hardDelete);
+		final boolean retval = mailAccess.getMessageStorage().deleteMessages(fullname, msgUIDs, hardDelete);
 		try {
 			/*
 			 * Update message cache
@@ -215,7 +257,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	public int[] getAllMessageCount(final String folder) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		final MailFolder f = mailConnection.getFolderStorage().getFolder(fullname);
+		final MailFolder f = mailAccess.getFolderStorage().getFolder(fullname);
 		return new int[] { f.getMessageCount(), f.getNewMessageCount(), f.getUnreadMessageCount(),
 				f.getDeletedMessageCount() };
 	}
@@ -235,8 +277,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	public SearchIterator<?> getChildFolders(final String parentFolder, final boolean all) throws MailException {
 		initConnection();
 		final String parentFullname = prepareMailFolderParam(parentFolder);
-		return SearchIteratorAdapter.createArrayIterator(mailConnection.getFolderStorage().getSubfolders(
-				parentFullname, all));
+		return SearchIteratorAdapter.createArrayIterator(mailAccess.getFolderStorage().getSubfolders(parentFullname,
+				all));
 	}
 
 	@Override
@@ -245,7 +287,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			return prepareFullname(getDefaultMailFolder(StorageUtility.INDEX_CONFIRMED_HAM), getSeparator());
 		}
 		initConnection();
-		return prepareFullname(mailConnection.getFolderStorage().getConfirmedHamFolder(), getSeparator());
+		return prepareFullname(mailAccess.getFolderStorage().getConfirmedHamFolder(), getSeparator());
 	}
 
 	@Override
@@ -254,7 +296,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			return prepareFullname(getDefaultMailFolder(StorageUtility.INDEX_CONFIRMED_SPAM), getSeparator());
 		}
 		initConnection();
-		return prepareFullname(mailConnection.getFolderStorage().getConfirmedSpamFolder(), getSeparator());
+		return prepareFullname(mailAccess.getFolderStorage().getConfirmedSpamFolder(), getSeparator());
 	}
 
 	private String getDefaultMailFolder(final int index) {
@@ -266,7 +308,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	public int getDeletedMessageCount(final String folder) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		return mailConnection.getFolderStorage().getFolder(fullname).getDeletedMessageCount();
+		return mailAccess.getFolderStorage().getFolder(fullname).getDeletedMessageCount();
 	}
 
 	@Override
@@ -275,14 +317,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			return prepareFullname(getDefaultMailFolder(StorageUtility.INDEX_DRAFTS), getSeparator());
 		}
 		initConnection();
-		return prepareFullname(mailConnection.getFolderStorage().getDraftsFolder(), getSeparator());
+		return prepareFullname(mailAccess.getFolderStorage().getDraftsFolder(), getSeparator());
 	}
 
 	@Override
 	public MailFolder getFolder(final String folder, final boolean checkFolder) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		return mailConnection.getFolderStorage().getFolder(fullname);
+		return mailAccess.getFolderStorage().getFolder(fullname);
 	}
 
 	@Override
@@ -290,9 +332,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		final MailMessage[] originalMails = mailConnection.getMessageStorage().getMessages(fullname, fowardMsgUIDs,
+		final MailMessage[] originalMails = mailAccess.getMessageStorage().getMessages(fullname, fowardMsgUIDs,
 				FIELDS_FULL);
-		return mailConnection.getLogicTools().getFowardMessage(originalMails);
+		return mailAccess.getLogicTools().getFowardMessage(originalMails);
 	}
 
 	@Override
@@ -301,7 +343,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			return prepareFullname(INBOX_ID, getSeparator());
 		}
 		initConnection();
-		return prepareFullname(mailConnection.getFolderStorage().getFolder(INBOX_ID).getFullname(), getSeparator());
+		return prepareFullname(mailAccess.getFolderStorage().getFolder(INBOX_ID).getFullname(), getSeparator());
 	}
 
 	@Override
@@ -323,7 +365,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			throw new MailException(MailException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, MailFolder.DEFAULT_FOLDER_ID);
 		}
 		final String fullname = prepareMailFolderParam(folder);
-		final MailMessage mail = mailConnection.getMessageStorage().getMessage(fullname, msgUID, true);
+		final MailMessage mail = mailAccess.getMessageStorage().getMessage(fullname, msgUID, true);
 		/*
 		 * Update cache since \Seen flag is possibly changed
 		 */
@@ -348,21 +390,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			final boolean displayVersion) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		return mailConnection.getMessageStorage().getAttachment(fullname, msgUID, attachmentPosition, displayVersion);
+		return mailAccess.getMessageStorage().getAttachment(fullname, msgUID, attachmentPosition);
 	}
 
 	@Override
 	public int getMessageCount(final String folder) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		return mailConnection.getFolderStorage().getFolder(fullname).getMessageCount();
+		return mailAccess.getFolderStorage().getFolder(fullname).getMessageCount();
 	}
 
 	@Override
 	public MailPart getMessageImage(final String folder, final long msgUID, final String cid) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		return mailConnection.getMessageStorage().getImageAttachment(fullname, msgUID, cid);
+		return mailAccess.getMessageStorage().getImageAttachment(fullname, msgUID, cid);
 	}
 
 	@Override
@@ -385,7 +427,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			LOG.error(e.getLocalizedMessage(), e);
 		}
 		initConnection();
-		final MailMessage[] mails = mailConnection.getMessageStorage().getMessages(fullname, uids,
+		final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(fullname, uids,
 				MailField.toFields(MailListField.getFields(fields)));
 		try {
 			if (MailMessageCache.getInstance().containsFolderMessages(fullname, session.getUserId(), ctx)) {
@@ -409,7 +451,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		 * Identify and sort messages according to search term and sort criteria
 		 * while only fetching their IDs
 		 */
-		MailMessage[] mails = mailConnection.getMessageStorage().searchMessages(fullname,
+		MailMessage[] mails = mailAccess.getMessageStorage().searchMessages(fullname,
 				null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
 				MailListField.getField(sortCol), OrderDirection.getOrderDirection(order), searchTerm, FIELDS_ID_INFO);
 		if ((mails == null) || (mails.length == 0)) {
@@ -439,7 +481,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			 * Fetch identified messages by their IDs and pre-fill them
 			 * according to specified fields
 			 */
-			mails = mailConnection.getMessageStorage().getMessages(fullname, mailIds, useFields);
+			mails = mailAccess.getMessageStorage().getMessages(fullname, mailIds, useFields);
 		}
 		try {
 			/*
@@ -486,7 +528,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	public int getNewMessageCount(final String folder) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		return mailConnection.getFolderStorage().getFolder(fullname).getNewMessageCount();
+		return mailAccess.getFolderStorage().getFolder(fullname).getNewMessageCount();
 	}
 
 	@Override
@@ -494,7 +536,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			final int[] fields, final int limit) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		return SearchIteratorAdapter.createArrayIterator(mailConnection.getMessageStorage().getUnreadMessages(fullname,
+		return SearchIteratorAdapter.createArrayIterator(mailAccess.getMessageStorage().getUnreadMessages(fullname,
 				MailListField.getField(sortCol), OrderDirection.getOrderDirection(order),
 				MailField.toFields(MailListField.getFields(fields)), limit));
 	}
@@ -503,26 +545,25 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	public SearchIterator<?> getPathToDefaultFolder(final String folder) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		return SearchIteratorAdapter.createArrayIterator(mailConnection.getFolderStorage().getPath2DefaultFolder(
-				fullname));
+		return SearchIteratorAdapter.createArrayIterator(mailAccess.getFolderStorage().getPath2DefaultFolder(fullname));
 	}
 
 	@Override
 	public long[] getQuota() throws MailException {
 		initConnection();
-		return mailConnection.getFolderStorage().getQuota(INBOX_ID).toLongArray();
+		return mailAccess.getFolderStorage().getQuota(INBOX_ID).toLongArray();
 	}
 
 	@Override
 	public long getQuotaLimit() throws MailException {
 		initConnection();
-		return mailConnection.getFolderStorage().getQuota(INBOX_ID).limit;
+		return mailAccess.getFolderStorage().getQuota(INBOX_ID).limit;
 	}
 
 	@Override
 	public long getQuotaUsage() throws MailException {
 		initConnection();
-		return mailConnection.getFolderStorage().getQuota(INBOX_ID).usage;
+		return mailAccess.getFolderStorage().getQuota(INBOX_ID).usage;
 	}
 
 	@Override
@@ -530,14 +571,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		final MailMessage originalMail = mailConnection.getMessageStorage().getMessage(fullname, replyMsgUID, false);
-		return mailConnection.getLogicTools().getReplyMessage(originalMail, replyToAll);
+		final MailMessage originalMail = mailAccess.getMessageStorage().getMessage(fullname, replyMsgUID, false);
+		return mailAccess.getLogicTools().getReplyMessage(originalMail, replyToAll);
 	}
 
 	@Override
 	public SearchIterator<?> getRootFolders() throws MailException {
 		initConnection();
-		return SearchIteratorAdapter.createArrayIterator(new MailFolder[] { mailConnection.getFolderStorage()
+		return SearchIteratorAdapter.createArrayIterator(new MailFolder[] { mailAccess.getFolderStorage()
 				.getRootFolder() });
 	}
 
@@ -547,7 +588,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			return prepareFullname(getDefaultMailFolder(StorageUtility.INDEX_SENT), getSeparator());
 		}
 		initConnection();
-		return prepareFullname(mailConnection.getFolderStorage().getSentFolder(), getSeparator());
+		return prepareFullname(mailAccess.getFolderStorage().getSentFolder(), getSeparator());
 	}
 
 	private char getSeparator() {
@@ -564,7 +605,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			return prepareFullname(getDefaultMailFolder(StorageUtility.INDEX_SPAM), getSeparator());
 		}
 		initConnection();
-		return prepareFullname(mailConnection.getFolderStorage().getSpamFolder(), getSeparator());
+		return prepareFullname(mailAccess.getFolderStorage().getSpamFolder(), getSeparator());
 	}
 
 	@Override
@@ -579,7 +620,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		 * Identify and thread-sort messages according to search term while only
 		 * fetching their IDs
 		 */
-		MailMessage[] mails = mailConnection.getMessageStorage().getThreadSortedMessages(fullname,
+		MailMessage[] mails = mailAccess.getMessageStorage().getThreadSortedMessages(fullname,
 				fromToIndices == null ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
 				searchTerm, FIELDS_ID_INFO);
 		if ((mails == null) || (mails.length == 0)) {
@@ -609,7 +650,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			 * Fetch identified messages by their IDs and pre-fill them
 			 * according to specified fields
 			 */
-			mails = mailConnection.getMessageStorage().getMessages(fullname, mailIds, useFields);
+			mails = mailAccess.getMessageStorage().getMessages(fullname, mailIds, useFields);
 		}
 		try {
 			/*
@@ -635,14 +676,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			return prepareFullname(getDefaultMailFolder(StorageUtility.INDEX_TRASH), getSeparator());
 		}
 		initConnection();
-		return prepareFullname(mailConnection.getFolderStorage().getTrashFolder(), getSeparator());
+		return prepareFullname(mailAccess.getFolderStorage().getTrashFolder(), getSeparator());
 	}
 
 	@Override
 	public int getUnreadMessageCount(final String folder) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		return mailConnection.getFolderStorage().getFolder(fullname).getUnreadMessageCount();
+		return mailAccess.getFolderStorage().getFolder(fullname).getUnreadMessageCount();
 	}
 
 	private void initConnection() throws MailException {
@@ -652,14 +693,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		/*
 		 * Fetch a mail connection (either from cache or a new instance)
 		 */
-		mailConnection = MailAccess.getInstance(session);
-		if (!mailConnection.isConnected()) {
+		mailAccess = MailAccess.getInstance(session);
+		if (!mailAccess.isConnected()) {
 			/*
 			 * Get new mail configuration
 			 */
 			final long start = System.currentTimeMillis();
 			try {
-				mailConnection.connect();
+				mailAccess.connect();
 				MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				MailServletInterface.mailInterfaceMonitor.changeNumSuccessfulLogins(true);
 			} catch (final MailException e) {
@@ -669,8 +710,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 				throw e;
 			}
 		}
-		mailConfig = mailConnection.getMailConfig();
-		mailConnection.getFolderStorage().checkDefaultFolders();
+		mailConfig = mailAccess.getMailConfig();
+		mailAccess.getFolderStorage().checkDefaultFolders();
 		init = true;
 	}
 
@@ -684,11 +725,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		initConnection();
 		if (draftMail.getMsgref() != null) {
 			final MailPath path = new MailPath(draftMail.getMsgref());
-			draftMail.setReferencedMail(mailConnection.getMessageStorage().getMessage(path.getFolder(), path.getUid(),
+			draftMail.setReferencedMail(mailAccess.getMessageStorage().getMessage(path.getFolder(), path.getUid(),
 					false));
 		}
-		final String draftsFullname = prepareMailFolderParam(mailConnection.getFolderStorage().getDraftsFolder());
-		return mailConnection.getMessageStorage().saveDraft(draftsFullname, draftMail).getMailPath().toString();
+		final String draftsFullname = prepareMailFolderParam(mailAccess.getFolderStorage().getDraftsFolder());
+		return mailAccess.getMessageStorage().saveDraft(draftsFullname, draftMail).getMailPath().toString();
 	}
 
 	@Override
@@ -698,8 +739,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			throw new MailException(MailException.Code.INSUFFICIENT_FOLDER_ATTR);
 		}
 		if ((mailFolder.containsExists() && mailFolder.exists())
-				|| ((mailFolder.getFullname() != null) && mailConnection.getFolderStorage().exists(
-						mailFolder.getFullname()))) {
+				|| ((mailFolder.getFullname() != null) && mailAccess.getFolderStorage()
+						.exists(mailFolder.getFullname()))) {
 			/*
 			 * Update
 			 */
@@ -730,7 +771,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 					newFullname.append(oldName);
 				}
 				if (!newParent.equals(oldParent)) { // move & rename
-					fullname = mailConnection.getFolderStorage().moveFolder(fullname, newFullname.toString());
+					fullname = mailAccess.getFolderStorage().moveFolder(fullname, newFullname.toString());
 					movePerformed = true;
 				}
 			}
@@ -740,18 +781,18 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			if (!movePerformed && mailFolder.containsName()) {
 				final String newName = mailFolder.getName();
 				if (!newName.equals(oldName)) { // rename
-					fullname = mailConnection.getFolderStorage().renameFolder(fullname, newName);
+					fullname = mailAccess.getFolderStorage().renameFolder(fullname, newName);
 				}
 			}
 			/*
 			 * Handle update of permission or subscription
 			 */
-			return prepareFullname(mailConnection.getFolderStorage().updateFolder(fullname, mailFolder), getSeparator());
+			return prepareFullname(mailAccess.getFolderStorage().updateFolder(fullname, mailFolder), getSeparator());
 		}
 		/*
 		 * Insert
 		 */
-		return prepareFullname(mailConnection.getFolderStorage().createFolder(mailFolder), getSeparator());
+		return prepareFullname(mailAccess.getFolderStorage().createFolder(mailFolder), getSeparator());
 	}
 
 	@Override
@@ -771,7 +812,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 				}
 				final MailMessage[] referencedMails = new MailMessage[paths.length];
 				for (int i = 0; i < paths.length; i++) {
-					referencedMails[i] = mailConnection.getMessageStorage().getMessage(paths[i].getFolder(),
+					referencedMails[i] = mailAccess.getMessageStorage().getMessage(paths[i].getFolder(),
 							paths[i].getUid(), false);
 				}
 				composedMail.setReferencedMails(referencedMails);
@@ -783,7 +824,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 				/*
 				 * Mark referenced mail as answered
 				 */
-				mailConnection.getMessageStorage().updateMessageFlags(paths[0].getFolder(),
+				mailAccess.getMessageStorage().updateMessageFlags(paths[0].getFolder(),
 						new long[] { paths[0].getUid() }, MailMessage.FLAG_ANSWERED, true);
 			}
 			if (UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx)
@@ -797,11 +838,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			 * Append to Sent folder
 			 */
 			final long start = System.currentTimeMillis();
-			final String sentFullname = prepareMailFolderParam(mailConnection.getFolderStorage().getSentFolder());
+			final String sentFullname = prepareMailFolderParam(mailAccess.getFolderStorage().getSentFolder());
 			final long[] uidArr;
 			try {
-				uidArr = mailConnection.getMessageStorage()
-						.appendMessages(sentFullname, new MailMessage[] { sentMail });
+				uidArr = mailAccess.getMessageStorage().appendMessages(sentFullname, new MailMessage[] { sentMail });
 				try {
 					/*
 					 * Update cache
@@ -820,8 +860,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 				/*
 				 * Mark appended sent mail as seen
 				 */
-				mailConnection.getMessageStorage()
-						.updateMessageFlags(sentFullname, uidArr, MailMessage.FLAG_SEEN, true);
+				mailAccess.getMessageStorage().updateMessageFlags(sentFullname, uidArr, MailMessage.FLAG_SEEN, true);
 			}
 			final MailPath retval = new MailPath(sentFullname, uidArr[0]);
 			if (LOG.isDebugEnabled()) {
@@ -840,7 +879,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		final String fullname = prepareMailFolderParam(folder);
 		final MailTransport transport = MailTransport.getInstance(session);
 		try {
-			transport.sendReceiptAck(mailConnection.getMessageStorage().getMessage(fullname, msgUID, false), fromAddr);
+			transport.sendReceiptAck(mailAccess.getMessageStorage().getMessage(fullname, msgUID, false), fromAddr);
 		} finally {
 			transport.close();
 		}
@@ -853,7 +892,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		mailConnection.getMessageStorage().updateMessageColorLabel(fullname, msgUID, newColorLabel);
+		mailAccess.getMessageStorage().updateMessageColorLabel(fullname, msgUID, newColorLabel);
 		try {
 			if (MailMessageCache.getInstance().containsFolderMessages(fullname, session.getUserId(), ctx)) {
 				/*
@@ -872,7 +911,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		mailConnection.getMessageStorage().updateMessageFlags(fullname, msgUID, flagBits, flagVal);
+		mailAccess.getMessageStorage().updateMessageFlags(fullname, msgUID, flagBits, flagVal);
 		if (MailConfig.isSpamEnabled() && ((flagBits & MailMessage.FLAG_SPAM) > 0)) {
 			/*
 			 * Remove from cache

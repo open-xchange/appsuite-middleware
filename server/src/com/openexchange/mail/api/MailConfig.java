@@ -529,15 +529,6 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * Gets the spamHandlerClass
-	 * 
-	 * @return the spamHandlerClass
-	 */
-	public static String getSpamHandlerClass() {
-		return MailProperties.getInstance().getSpamHandlerClass();
-	}
-
-	/**
 	 * Gets the login
 	 * 
 	 * @return the login

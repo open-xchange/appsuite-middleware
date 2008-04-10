@@ -53,6 +53,8 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
+import com.openexchange.spamhandler.SpamHandler;
+import com.openexchange.spamhandler.SpamHandlerRegistry;
 
 /**
  * {@link MailProvider} - The main intention of the provider class is to make
@@ -164,11 +166,31 @@ public abstract class MailProvider {
 	}
 
 	/**
+	 * Gets the spam handler used by this mail provider.
+	 * 
+	 * @return The spam handler
+	 */
+	public final SpamHandler getSpamHandler() {
+		return SpamHandlerRegistry.getSpamHandler(getSpamHandlerName());
+	}
+
+	/**
 	 * Gets this mail provider's protocol
 	 * 
 	 * @return The protocol
 	 */
 	public abstract Protocol getProtocol();
+
+	/**
+	 * Gets the unique registration name of the spam handler that shall be used
+	 * by this mail provider.
+	 * <p>
+	 * If <code>null</code> is returned, the spam handler associated with
+	 * {@link SpamHandler#SPAM_HANDLER_FALLBACK} is used.
+	 * 
+	 * @return The registration name of the spam handler
+	 */
+	protected abstract String getSpamHandlerName();
 
 	/**
 	 * Checks if this mail provider supports the given protocol (which is either

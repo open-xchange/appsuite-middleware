@@ -107,4 +107,10 @@ public final class IMAPProvider extends MailProvider {
 		return IMAPProperties.getInstance();
 	}
 
+	@Override
+	protected String getSpamHandlerName() {
+		// TODO: Read from config which spam handler to use
+		return "DefaultSpamHandler";
+	}
+
 }

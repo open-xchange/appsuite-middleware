@@ -66,6 +66,7 @@ import com.openexchange.mail.parser.handlers.ImageMessageHandler;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.spamhandler.SpamHandler;
 
 /**
  * {@link MailMessageStorage} - Offers basic access methods to mail message
@@ -193,16 +194,12 @@ public abstract class MailMessageStorage {
 	 *            The mail ID
 	 * @param sequenceId
 	 *            The attachment sequence ID
-	 * @param displayVersion
-	 *            <code>true</code> if returned value is for displaying
-	 *            purpose
 	 * @return The attachment wrapped by an {@link MailPart} instance
 	 * @throws MailException
 	 *             If no attachment can be found whose sequence ID matches given
 	 *             <code>sequenceId</code>.
 	 */
-	public MailPart getAttachment(final String folder, final long mailId, final String sequenceId,
-			final boolean displayVersion) throws MailException {
+	public MailPart getAttachment(final String folder, final long mailId, final String sequenceId) throws MailException {
 		final MailPartHandler handler = new MailPartHandler(sequenceId);
 		new MailMessageParser().parseMailMessage(getMessage(folder, mailId, false), handler);
 		if (handler.getMailPart() == null) {
@@ -547,6 +544,11 @@ public abstract class MailMessageStorage {
 	 * <li>USER - A special flag that indicates that this folder supports user
 	 * defined flags. </li>
 	 * </ul>
+	 * <p>
+	 * Moreover this routine checks for any spam related actions; meaning the
+	 * {@link MailMessage#FLAG_SPAM} shall be enabled/disabled. Thus the
+	 * {@link SpamHandler#handleSpam(String, long[], boolean, MailAccess)}/{@link SpamHandler#handleHam(String, long[], boolean, MailAccess)}
+	 * methods needs to be executed.
 	 * 
 	 * @param folder
 	 *            The folder fullname

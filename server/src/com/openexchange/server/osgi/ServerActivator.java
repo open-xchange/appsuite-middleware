@@ -81,6 +81,8 @@ import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.spamhandler.SpamHandler;
+import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
 
 /**
@@ -193,6 +195,10 @@ public final class ServerActivator extends DeferredActivator {
 		serviceTrackerList.add(new ServiceTracker(context, TransportProvider.class.getName(),
 				new TransportProviderServiceTracker(context)));
 
+		// Spam handler provider service tracker
+		serviceTrackerList.add(new ServiceTracker(context, SpamHandler.class.getName(), new SpamHandlerServiceTracker(
+				context)));
+
 		// contacts
 		serviceTrackerList.add(new ServiceTracker(context, ContactInterface.class.getName(),
 				new ContactServiceListener(context)));
@@ -255,7 +261,7 @@ public final class ServerActivator extends DeferredActivator {
 			/*
 			 * Close service trackers
 			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
+			for (final ServiceTracker tracker : serviceTrackerList) {
 				tracker.close();
 			}
 			serviceTrackerList.clear();

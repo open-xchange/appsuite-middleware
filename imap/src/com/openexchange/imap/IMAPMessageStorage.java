@@ -94,7 +94,6 @@ import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
-import com.openexchange.mail.mime.spam.SpamHandler;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.CommandFailedException;
@@ -542,12 +541,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		return copyOrMoveMessages(sourceFolder, destFolder, mailIds, true, fast);
 	}
 
-	private static final int SPAM_HAM = -1;
-
-	private static final int SPAM_NOOP = 0;
-
-	private static final int SPAM_SPAM = 1;
-
 	private long[] copyOrMoveMessages(final String sourceFullname, final String destFullname, final long[] msgUIDs,
 			final boolean move, final boolean fast) throws MailException {
 		try {
@@ -592,17 +585,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				}
 			}
 			/*
-			 * Any spam action involved?
-			 */
-			final int spamAction;
-			if (usm.isSpamEnabled()) {
-				final String spamFullName = imapAccess.getFolderStorage().getSpamFolder();
-				spamAction = spamFullName.equals(imapFolder.getFullName()) ? SPAM_HAM : (spamFullName
-						.equals(destFullname) ? SPAM_SPAM : SPAM_NOOP);
-			} else {
-				spamAction = SPAM_NOOP;
-			}
-			/*
 			 * Copy operation
 			 */
 			final long[] result = new long[msgUIDs.length];
@@ -623,7 +605,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				final long[] tmp = new long[blockSize];
 				for (int len = msgUIDs.length; len > blockSize; len -= blockSize) {
 					System.arraycopy(msgUIDs, offset, tmp, 0, tmp.length);
-					final long[] uids = copyOrMoveByUID(move, fast, destFullname, spamAction, tmp, debug);
+					final long[] uids = copyOrMoveByUID(move, fast, destFullname, tmp, debug);
 					/*
 					 * Append UIDs
 					 */
@@ -635,7 +617,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			} else {
 				remain = msgUIDs;
 			}
-			final long[] uids = copyOrMoveByUID(move, fast, destFullname, spamAction, remain, debug);
+			final long[] uids = copyOrMoveByUID(move, fast, destFullname, remain, debug);
 			System.arraycopy(uids, 0, result, offset, uids.length);
 			if (move) {
 				/*
@@ -686,9 +668,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		}
 	}
 
-	private long[] copyOrMoveByUID(final boolean move, final boolean fast, final String destFullname,
-			final int spamAction, final long[] tmp, final StringBuilder sb) throws MessagingException, MailException,
-			IMAPException {
+	private long[] copyOrMoveByUID(final boolean move, final boolean fast, final String destFullname, final long[] tmp,
+			final StringBuilder sb) throws MessagingException, MailException, IMAPException {
 		long start = System.currentTimeMillis();
 		long[] uids = new CopyIMAPCommand(imapFolder, tmp, destFullname, false, fast).doCommand();
 		if (LOG.isDebugEnabled()) {
@@ -701,15 +682,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			 * Invalid UIDs
 			 */
 			uids = getDestinationUIDs(tmp, destFullname);
-		}
-		if (spamAction != SPAM_NOOP) {
-			try {
-				handleSpamByUID(tmp, spamAction == SPAM_SPAM, false, imapFolder.getFullName(), Folder.READ_WRITE);
-			} catch (final MessagingException e) {
-				if (LOG.isWarnEnabled()) {
-					LOG.warn(e.getMessage(), e);
-				}
-			}
 		}
 		if (move) {
 			start = System.currentTimeMillis();
@@ -1115,7 +1087,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				 * Handle spam
 				 */
 				try {
-					SpamHandler.getInstance().handleSpam(imapFolder, msgUIDs, move, imapAccess, imapStore);
+					IMAPProvider.getInstance().getSpamHandler().handleSpam(imapFolder.getFullName(), msgUIDs, move,
+							imapAccess);
 					/*
 					 * Close and reopen to force internal message cache update
 					 */
@@ -1137,7 +1110,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			 * Handle ham.
 			 */
 			try {
-				SpamHandler.getInstance().handleHam(imapFolder, msgUIDs, move, imapAccess, imapStore);
+				IMAPProvider.getInstance().getSpamHandler().handleHam(imapFolder.getFullName(), msgUIDs, move,
+						imapAccess);
 				/*
 				 * Close and reopen to force internal message cache update
 				 */

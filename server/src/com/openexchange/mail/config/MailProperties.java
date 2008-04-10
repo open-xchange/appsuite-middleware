@@ -62,7 +62,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig.CredSrc;
 import com.openexchange.mail.api.MailConfig.LoginType;
-import com.openexchange.mail.mime.spam.DefaultSpamHandler;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -138,8 +137,6 @@ public final class MailProperties {
 
 	private boolean watcherShallClose;
 
-	private String spamHandlerClass;
-
 	private boolean supportSubscription;
 
 	/**
@@ -202,7 +199,6 @@ public final class MailProperties {
 		watcherTime = 0;
 		watcherFrequency = 0;
 		watcherShallClose = false;
-		spamHandlerClass = null;
 		supportSubscription = false;
 	}
 
@@ -448,12 +444,6 @@ public final class MailProperties {
 		}
 
 		{
-			spamHandlerClass = configuration.getProperty("com.openexchange.mail.spamHandlerClass",
-					DefaultSpamHandler.class.getName()).trim();
-			logBuilder.append("\tSpam Handler Class: ").append(spamHandlerClass).append('\n');
-		}
-
-		{
 			String javaMailPropertiesStr = configuration.getProperty("com.openexchange.mail.JavaMailProperties");
 			if (null != javaMailPropertiesStr) {
 				javaMailPropertiesStr = javaMailPropertiesStr.trim();
@@ -690,14 +680,5 @@ public final class MailProperties {
 	 */
 	public int getWatcherTime() {
 		return watcherTime;
-	}
-
-	/**
-	 * Gets the spamHandlerClass
-	 * 
-	 * @return the spamHandlerClass
-	 */
-	public String getSpamHandlerClass() {
-		return spamHandlerClass;
 	}
 }
