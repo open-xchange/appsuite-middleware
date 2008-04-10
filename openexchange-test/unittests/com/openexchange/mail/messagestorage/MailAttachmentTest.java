@@ -325,7 +325,7 @@ public final class MailAttachmentTest extends AbstractMailTest {
 						for (int i = 0; i < len; i++) {
 							final String sequenceId = jArray.getJSONObject(i).getString(MailListField.ID.getKey());
 							final MailPart part = mailAccess.getMessageStorage().getAttachment("INBOX", id.longValue(),
-									sequenceId, true);
+									sequenceId);
 							assertFalse("No mail part found for sequence ID: " + sequenceId, null == part);
 						}
 					} else {

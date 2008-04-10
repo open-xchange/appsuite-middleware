@@ -541,10 +541,11 @@ public final class MailSearchTest extends AbstractMailTest {
 					 */
 					final MailMessage[] mails = getMessages(getTestMailDir(), -1);
 					final int breakEven = MailConfig.getMailFetchLimit();
-					int count = 0;
+					final long[] uids = mailAccess.getMessageStorage().appendMessages(fullname, mails);
+					int count = mails.length;
 					while (count < breakEven) {
-						mailAccess.getMessageStorage().appendMessages(fullname, mails);
-						count += mails.length;
+						mailAccess.getMessageStorage().copyMessages(fullname, fullname, uids, true);
+						count += uids.length;
 					}
 					/*
 					 * One more time...
