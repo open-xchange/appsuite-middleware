@@ -234,7 +234,7 @@ public final class MailProviderRegistry {
 		/*
 		 * Unregister
 		 */
-		final MailProvider removed = providers.remove(provider);
+		final MailProvider removed = providers.remove(provider.getProtocol());
 		if (null == removed) {
 			return null;
 		}
