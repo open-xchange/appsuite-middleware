@@ -49,8 +49,6 @@
 
 package com.openexchange.mail;
 
-import com.openexchange.mail.api.MailFolderStorage;
-
 /**
  * {@link Quota}
  * 
@@ -62,8 +60,16 @@ public final class Quota {
 	/**
 	 * The unlimited quota if no quota restrictions exist
 	 */
-	public static final Quota UNLIMITED = new Quota(MailFolderStorage.UNLIMITED_QUOTA,
-			MailFolderStorage.UNLIMITED_QUOTA);
+	public static final Quota UNLIMITED = new Quota(Quota.UNLIMITED_QUOTA, Quota.UNLIMITED_QUOTA);
+
+	/**
+	 * Constant which indicates unlimited quota
+	 * 
+	 * @value <code>-1</code>
+	 */
+	private static final int UNLIMITED_QUOTA = -1;
+
+	private long[] arr;
 
 	/**
 	 * The quota's limit
@@ -74,8 +80,6 @@ public final class Quota {
 	 * The quota's usage
 	 */
 	public final long usage;
-
-	private long[] arr;
 
 	/**
 	 * Initializes a new {@link Quota}

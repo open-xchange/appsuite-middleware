@@ -66,13 +66,6 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
 public abstract class MailFolderStorage {
 
 	/**
-	 * Constant which indicates unlimited quota
-	 * 
-	 * @value <code>-1</code>
-	 */
-	public static final int UNLIMITED_QUOTA = -1;
-
-	/**
 	 * Checks if a folder exists whose fullname matches given
 	 * <code>fullname</code>
 	 * 
