@@ -181,6 +181,10 @@ public final class MIMEMailPart extends MailPart {
 			try {
 				return part.getInputStream();
 			} catch (final IOException e) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Part's input stream cannot be obtained,"
+							+ " trying to read from part's raw input stream instead", e);
+				}
 				if (part instanceof MimeBodyPart) {
 					return ((MimeBodyPart) part).getRawInputStream();
 				} else if (part instanceof MimeMessage) {
@@ -188,6 +192,10 @@ public final class MIMEMailPart extends MailPart {
 				}
 				throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 			} catch (final MessagingException e) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Part's input stream cannot be obtained,"
+							+ " trying to read from part's raw input stream instead", e);
+				}
 				if (part instanceof MimeBodyPart) {
 					return ((MimeBodyPart) part).getRawInputStream();
 				} else if (part instanceof MimeMessage) {
