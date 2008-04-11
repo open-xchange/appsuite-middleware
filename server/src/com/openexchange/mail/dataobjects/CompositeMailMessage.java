@@ -271,6 +271,16 @@ public final class CompositeMailMessage extends MailMessage {
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see com.openexchange.mail.dataobjects.MailPart#loadContent()
+	 */
+	@Override
+	public void loadContent() throws MailException {
+		delegate.loadContent();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.openexchange.mail.dataobjects.MailPart#prepareForCaching()
 	 */
 	@Override

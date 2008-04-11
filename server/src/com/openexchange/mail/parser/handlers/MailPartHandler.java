@@ -147,6 +147,10 @@ public final class MailPartHandler implements MailMessageHandler {
 		}
 
 		@Override
+		public void loadContent() {
+		}
+
+		@Override
 		public void prepareForCaching() {
 		}
 

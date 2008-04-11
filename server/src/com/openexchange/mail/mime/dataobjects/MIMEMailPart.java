@@ -51,11 +51,14 @@ package com.openexchange.mail.mime.dataobjects;
 
 import static com.openexchange.mail.mime.ContentType.isMimeType;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Enumeration;
 
 import javax.activation.DataHandler;
+import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -64,8 +67,11 @@ import javax.mail.internet.MimeMessage;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MIMEMailPart} - Represents a MIME part as per RFC 822.
@@ -182,8 +188,9 @@ public final class MIMEMailPart extends MailPart {
 				return part.getInputStream();
 			} catch (final IOException e) {
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("Part's input stream cannot be obtained,"
-							+ " trying to read from part's raw input stream instead", e);
+					LOG.debug(new StringBuilder(256).append("Part's input stream could not be obtained: ").append(
+							e.getMessage() == null ? "<no error message given>" : e.getMessage()).append(
+							". Trying to read from part's raw input stream instead").toString(), e);
 				}
 				if (part instanceof MimeBodyPart) {
 					return ((MimeBodyPart) part).getRawInputStream();
@@ -193,8 +200,9 @@ public final class MIMEMailPart extends MailPart {
 				throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 			} catch (final MessagingException e) {
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("Part's input stream cannot be obtained,"
-							+ " trying to read from part's raw input stream instead", e);
+					LOG.debug(new StringBuilder(256).append("Part's input stream could not be obtained: ").append(
+							e.getMessage() == null ? "<no error message given>" : e.getMessage()).append(
+							". Trying to read from part's raw input stream instead").toString(), e);
 				}
 				if (part instanceof MimeBodyPart) {
 					return ((MimeBodyPart) part).getRawInputStream();
@@ -284,5 +292,43 @@ public final class MIMEMailPart extends MailPart {
 		 */
 		multipart = null;
 		part = null;
+	}
+
+	@Override
+	public void loadContent() throws MailException {
+		if (null == part) {
+			throw new IllegalStateException(ERR_NULL_PART);
+		}
+		try {
+			if (part instanceof MimeBodyPart) {
+				final Object content = part.getContent();
+				if (content instanceof MimeMessage) {
+					/*
+					 * Special treatment for message/rfc822 data
+					 */
+					final MimeBodyPart newPart = new MimeBodyPart();
+					final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
+					((MimeMessage) content).writeTo(out);
+					newPart.setContent(new MimeMessage(MIMEDefaultSession.getDefaultSession(),
+							new UnsynchronizedByteArrayInputStream(out.toByteArray())), MIMETypes.MIME_MESSAGE_RFC822);
+					part = newPart;
+				} else if (content instanceof Multipart) {
+					/*
+					 * Force to call MimeMultipart.parse()
+					 */
+					((Multipart) content).getCount();
+				} else {
+					final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
+					((MimeBodyPart) part).writeTo(out);
+					part = new MimeBodyPart(new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+				}
+			} else if (part instanceof MimeMessage) {
+				part = new MimeMessage(MIMEDefaultSession.getDefaultSession(), ((MimeMessage) part).getRawInputStream());
+			}
+		} catch (final MessagingException e) {
+			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
+		} catch (final IOException e) {
+			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+		}
 	}
 }

@@ -125,6 +125,10 @@ public final class UUEncodedAttachmentMailPart extends MailPart {
 	}
 
 	@Override
+	public void loadContent() {
+	}
+
+	@Override
 	public void prepareForCaching() {
 	}
 

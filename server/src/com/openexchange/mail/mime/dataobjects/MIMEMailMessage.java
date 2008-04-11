@@ -71,7 +71,7 @@ public final class MIMEMailMessage extends MailMessage {
 
 	private static final long serialVersionUID = 4593386724062676753L;
 
-	private final MIMEMailPart mailPart;
+	private final MailPart mailPart;
 
 	private long uid = -1L;
 
@@ -181,6 +181,16 @@ public final class MIMEMailMessage extends MailMessage {
 	@Override
 	public void writeTo(final OutputStream out) throws MailException {
 		mailPart.writeTo(out);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.dataobjects.MailPart#loadContent()
+	 */
+	@Override
+	public void loadContent() throws MailException {
+		mailPart.loadContent();
 	}
 
 	/*

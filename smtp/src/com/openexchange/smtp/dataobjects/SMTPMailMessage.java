@@ -155,6 +155,10 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 	}
 
 	@Override
+	public void loadContent() {
+	}
+
+	@Override
 	public void prepareForCaching() {
 		mailPart.prepareForCaching();
 	}

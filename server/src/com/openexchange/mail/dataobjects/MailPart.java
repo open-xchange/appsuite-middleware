@@ -64,6 +64,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
+import com.openexchange.mail.mime.MessageHeaders;
 
 /**
  * {@link MailPart} - Abstract super class for all {@link MailPart} subclasses.
@@ -265,6 +266,16 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * @return the contentType
 	 */
 	public ContentType getContentType() {
+		if (!b_contentType) {
+			final String ct = getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+			if (ct != null) {
+				try {
+					setContentType(new ContentType(ct));
+				} catch (final MailException e) {
+					LOG.error(e.getMessage(), e);
+				}
+			}
+		}
 		return contentType;
 	}
 
@@ -321,6 +332,16 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * @return the disposition
 	 */
 	public ContentDisposition getContentDisposition() {
+		if (!b_disposition) {
+			final String disp = getHeader(MessageHeaders.HDR_DISPOSITION);
+			if (disp != null) {
+				try {
+					setContentDisposition(new ContentDisposition(disp));
+				} catch (final MailException e) {
+					LOG.error(e.getMessage(), e);
+				}
+			}
+		}
 		return contentDisposition;
 	}
 
@@ -604,6 +625,12 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * @return the contentId
 	 */
 	public String getContentId() {
+		if (!b_contentId) {
+			final String cid = getHeader(MessageHeaders.HDR_CONTENT_ID);
+			if (cid != null) {
+				setContentId(cid);
+			}
+		}
 		return contentId;
 	}
 
@@ -761,6 +788,20 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * @return The mail part
 	 */
 	public abstract MailPart getEnclosedMailPart(final int index) throws MailException;
+
+	/**
+	 * Ensures that the part's content is loaded, thus this part is independent
+	 * of the original.
+	 * <p>
+	 * This method is intended for mailing systems that read the contents
+	 * stepwise on demand. If dealing with such a mail part and its underlying
+	 * connection is closed, part's content is no more accessible. Otherwise
+	 * this method may be implemented with an empty body.
+	 * 
+	 * @throws MailException
+	 *             If loading part's content fails
+	 */
+	public abstract void loadContent() throws MailException;
 
 	/**
 	 * Writes complete part's data into given output stream

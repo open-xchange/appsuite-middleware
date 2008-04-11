@@ -58,11 +58,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.HeaderName;
+import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.utils.DateUtils;
+import com.openexchange.mail.utils.MessageUtility;
 
 /**
  * {@link MailMessage} - Abstract super class for all {@link MailMessage}
@@ -72,6 +77,11 @@ import com.openexchange.mail.mime.HeaderName;
  * 
  */
 public abstract class MailMessage extends MailPart implements Serializable, Cloneable {
+
+	private static final long serialVersionUID = 8585899349289256569L;
+
+	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(MailMessage.class);
 
 	/**
 	 * This message has been answered. This flag is set by clients to indicate
@@ -410,10 +420,19 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	 * @return The <i>From</i> addresses
 	 */
 	public InternetAddress[] getFrom() {
-		if (null == from) {
-			return EMPTY_ADDRS;
+		if (!b_from) {
+			final String fromStr = getHeader(MessageHeaders.HDR_FROM);
+			if (fromStr == null) {
+				return EMPTY_ADDRS;
+			}
+			try {
+				addFrom(InternetAddress.parse(fromStr, true));
+			} catch (final AddressException e) {
+				LOG.error(e.getMessage(), e);
+				return EMPTY_ADDRS;
+			}
 		}
-		return from.toArray(new InternetAddress[from.size()]);
+		return from == null ? EMPTY_ADDRS : from.toArray(new InternetAddress[from.size()]);
 	}
 
 	/**
@@ -470,10 +489,19 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	 * @return The <i>To</i> addresses
 	 */
 	public InternetAddress[] getTo() {
-		if (null == to) {
-			return EMPTY_ADDRS;
+		if (!b_to) {
+			final String toStr = getHeader(MessageHeaders.HDR_TO);
+			if (toStr == null) {
+				return EMPTY_ADDRS;
+			}
+			try {
+				addTo(InternetAddress.parse(toStr, true));
+			} catch (final AddressException e) {
+				LOG.error(e.getMessage(), e);
+				return EMPTY_ADDRS;
+			}
 		}
-		return to.toArray(new InternetAddress[to.size()]);
+		return to == null ? EMPTY_ADDRS : to.toArray(new InternetAddress[to.size()]);
 	}
 
 	/**
@@ -530,10 +558,19 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	 * @return The <i>Cc</i> addresses
 	 */
 	public InternetAddress[] getCc() {
-		if (null == cc) {
-			return EMPTY_ADDRS;
+		if (!b_cc) {
+			final String ccStr = getHeader(MessageHeaders.HDR_CC);
+			if (ccStr == null) {
+				return EMPTY_ADDRS;
+			}
+			try {
+				addCc(InternetAddress.parse(ccStr, true));
+			} catch (final AddressException e) {
+				LOG.error(e.getMessage(), e);
+				return EMPTY_ADDRS;
+			}
 		}
-		return cc.toArray(new InternetAddress[cc.size()]);
+		return cc == null ? EMPTY_ADDRS : cc.toArray(new InternetAddress[cc.size()]);
 	}
 
 	/**
@@ -590,10 +627,19 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	 * @return The <i>Bcc</i> addresses
 	 */
 	public InternetAddress[] getBcc() {
-		if (null == bcc) {
-			return EMPTY_ADDRS;
+		if (!b_bcc) {
+			final String bccStr = getHeader(MessageHeaders.HDR_TO);
+			if (bccStr == null) {
+				return EMPTY_ADDRS;
+			}
+			try {
+				addBcc(InternetAddress.parse(bccStr, true));
+			} catch (final AddressException e) {
+				LOG.error(e.getMessage(), e);
+				return EMPTY_ADDRS;
+			}
 		}
-		return bcc.toArray(new InternetAddress[bcc.size()]);
+		return bcc == null ? EMPTY_ADDRS : bcc.toArray(new InternetAddress[bcc.size()]);
 	}
 
 	/**
@@ -798,6 +844,12 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	 * @return the subject
 	 */
 	public String getSubject() {
+		if (!b_subject) {
+			final String subjectStr = getHeader(MessageHeaders.HDR_SUBJECT);
+			if (subjectStr != null) {
+				setSubject(MessageUtility.decodeMultiEncodedHeader(subjectStr));
+			}
+		}
 		return subject;
 	}
 
@@ -834,6 +886,12 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	 * @return the sentDate
 	 */
 	public Date getSentDate() {
+		if (!b_sentDate) {
+			final String sentDateStr = getHeader(MessageHeaders.HDR_DATE);
+			if (sentDateStr != null) {
+				setSentDate(DateUtils.getDateRFC822(sentDateStr));
+			}
+		}
 		return sentDate == null ? null : new Date(sentDate.getTime());
 	}
 
@@ -1012,6 +1070,12 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	 * @return the priority
 	 */
 	public int getPriority() {
+		if (!b_priority) {
+			final String prioStr = getHeader(MessageHeaders.HDR_X_PRIORITY);
+			if (prioStr != null) {
+				setPriority(MIMEMessageConverter.parsePriority(prioStr));
+			}
+		}
 		return priority;
 	}
 
@@ -1084,6 +1148,16 @@ public abstract class MailMessage extends MailPart implements Serializable, Clon
 	 * @return the dispositionNotification
 	 */
 	public InternetAddress getDispositionNotification() {
+		if (!b_dispositionNotification) {
+			final String dispNotTo = getHeader(MessageHeaders.HDR_DISP_NOT_TO);
+			if (dispNotTo != null) {
+				try {
+					setDispositionNotification(new InternetAddress(dispNotTo, true));
+				} catch (final AddressException e) {
+					LOG.error(e.getMessage(), e);
+				}
+			}
+		}
 		return dispositionNotification;
 	}
 

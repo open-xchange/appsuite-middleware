@@ -244,6 +244,15 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see com.openexchange.mail.dataobjects.MailPart#loadContent()
+	 */
+	@Override
+	public void loadContent() {
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
 	 */
 	public ComposedPartType getType() {

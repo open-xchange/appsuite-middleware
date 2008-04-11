@@ -102,6 +102,8 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public abstract class ReferencedMailPart extends MailPart implements ComposedMailPart {
 
+	private static final long serialVersionUID = 1097727980840011436L;
+
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ReferencedMailPart.class);
 
@@ -471,6 +473,15 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.dataobjects.MailPart#loadContent()
+	 */
+	@Override
+	public void loadContent() {
 	}
 
 	/*

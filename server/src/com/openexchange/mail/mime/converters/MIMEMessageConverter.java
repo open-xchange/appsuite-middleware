@@ -1399,12 +1399,12 @@ public final class MIMEMessageConverter {
 	 * @return an instance of <code>{@link MailPart}</code> containing the
 	 *         attributes from given part
 	 */
-	public static MIMEMailPart convertPart(final Part part) throws MailException {
+	public static MailPart convertPart(final Part part) throws MailException {
 		try {
 			/*
 			 * Create with reference to content
 			 */
-			final MIMEMailPart mailPart = new MIMEMailPart(part);
+			final MailPart mailPart = new MIMEMailPart(part);
 			/*
 			 * Set all cacheable data
 			 */
@@ -1682,5 +1682,27 @@ public final class MIMEMessageConverter {
 			}
 		}
 		mailMessage.setPriority(priority);
+	}
+
+	/**
+	 * Parses the value of header <code>X-Priority</code>
+	 * 
+	 * @param priorityStr
+	 *            The header value
+	 */
+	public static int parsePriority(final String priorityStr) {
+		int priority = MailMessage.PRIORITY_NORMAL;
+		if (null != priorityStr) {
+			final String[] tmp = priorityStr.split(" +");
+			try {
+				priority = Integer.parseInt(tmp[0]);
+			} catch (final NumberFormatException nfe) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn("Strange X-Priority header: " + tmp[0], nfe);
+				}
+				priority = MailMessage.PRIORITY_NORMAL;
+			}
+		}
+		return priority;
 	}
 }
