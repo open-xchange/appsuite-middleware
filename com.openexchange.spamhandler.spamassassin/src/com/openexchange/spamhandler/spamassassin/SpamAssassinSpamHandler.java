@@ -57,6 +57,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -159,8 +160,15 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
 		extractIDs = null;
 		final long[] exc = new long[1];
 		for (int i = 0; i < spamArr.length; i++) {
-			final MailMessage tmp = (MailMessage) mailAccess.getMessageStorage().getAttachment(spamFullname,
-					spamArr[i], "2");
+			final MailPart wrapped = mailAccess.getMessageStorage().getAttachment(spamFullname, spamArr[i], "2");
+			MailMessage tmp = null;
+			if (null == wrapped) {
+				tmp = null;
+			} else if (wrapped instanceof MailMessage) {
+				tmp = (MailMessage) wrapped;
+			} else if (wrapped.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+				tmp = (MailMessage) (wrapped.getContent());
+			}
 			if (null == tmp) {
 				/*
 				 * Handle like a plain spam message
