@@ -1550,6 +1550,7 @@ public class Folder extends SessionServlet {
 					final MailFolderDescription mf = new MailFolderDescription();
 					mf.setParentFullname(MailFolderUtility.prepareMailFolderParam(parentFolder));
 					com.openexchange.mail.json.parser.FolderParser.parse(jsonObj, mf, session);
+					mf.setExists(false);
 					retval = mailInterface.saveFolder(mf);
 				} finally {
 					try {
