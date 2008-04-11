@@ -65,7 +65,8 @@ public final class ProviderUtility {
 	}
 
 	/**
-	 * Extracts the protocol from specified server URL
+	 * Extracts the protocol from specified server URL:<br>
+	 * <code>(&lt;protocol&gt;://)?(&lt;host&gt;)(:&lt;port&gt;)?</code>
 	 * 
 	 * @param serverUrl
 	 *            The server URL
@@ -80,8 +81,8 @@ public final class ProviderUtility {
 		/*
 		 * Parse protocol out of URL
 		 */
-		for (int i = 0; i < len && ((c = serverUrl.charAt(i)) != '/'); i++) {
-			if (c == ':') {
+		for (int i = 0; (i < len) && ((c = serverUrl.charAt(i)) != '/'); i++) {
+			if ((c == ':') && ((c = serverUrl.charAt(i + 1)) == '/') && ((c = serverUrl.charAt(i + 2)) == '/')) {
 				final String s = serverUrl.substring(0, i).toLowerCase();
 				if (isValidProtocol(s)) {
 					protocol = s;
@@ -106,7 +107,7 @@ public final class ProviderUtility {
 		}
 		for (int i = 1; i < len; i++) {
 			c = protocol.charAt(i);
-			if (!Character.isLetterOrDigit(c) && c != '.' && c != '+' && c != '-') {
+			if (!Character.isLetterOrDigit(c) && (c != '.') && (c != '+') && (c != '-')) {
 				return false;
 			}
 		}
