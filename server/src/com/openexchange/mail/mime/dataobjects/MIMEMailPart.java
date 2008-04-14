@@ -55,21 +55,23 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Enumeration;
 
 import javax.activation.DataHandler;
-import javax.mail.Header;
+import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -102,6 +104,12 @@ public final class MIMEMailPart extends MailPart {
 	 * Whether this part's content is of MIME type <code>multipart/*</code>
 	 */
 	private final boolean isMulti;
+
+	/**
+	 * Indicates whether content has been loaded via {@link #loadContent()} or
+	 * not
+	 */
+	private boolean contentLoaded;
 
 	/**
 	 * Constructor - Only applies specified part, but does not set any
@@ -290,8 +298,10 @@ public final class MIMEMailPart extends MailPart {
 		/*
 		 * Release references
 		 */
-		multipart = null;
-		part = null;
+		if (!contentLoaded) {
+			multipart = null;
+			part = null;
+		}
 	}
 
 	@Override
@@ -301,34 +311,124 @@ public final class MIMEMailPart extends MailPart {
 		}
 		try {
 			if (part instanceof MimeBodyPart) {
-				final Object content = part.getContent();
-				if (content instanceof MimeMessage) {
+				final ContentType contentType = new ContentType(part.getContentType());
+				if (contentType.isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
 					/*
-					 * Special treatment for message/rfc822 data
+					 * Compose a new body part with message/rfc822 data
 					 */
 					final MimeBodyPart newPart = new MimeBodyPart();
-					final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
-					((MimeMessage) content).writeTo(out);
 					newPart.setContent(new MimeMessage(MIMEDefaultSession.getDefaultSession(),
-							new UnsynchronizedByteArrayInputStream(out.toByteArray())), MIMETypes.MIME_MESSAGE_RFC822);
+							getInputStreamFromPart((Message) part.getContent())), MIMETypes.MIME_MESSAGE_RFC822);
 					part = newPart;
-				} else if (content instanceof Multipart) {
+					contentLoaded = true;
+				} else if (contentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
 					/*
-					 * Force to call MimeMultipart.parse()
+					 * Compose a new body part with multipart/* data
 					 */
-					((Multipart) content).getCount();
+					final MimeBodyPart newPart = new MimeBodyPart();
+					newPart.setContent(new MimeMultipart(new MessageDataSource(getBytesFromMultipart((Multipart) part
+							.getContent()), contentType.toString())));
+					part = newPart;
+					multipart = null;
+					contentLoaded = true;
 				} else {
-					final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
-					((MimeBodyPart) part).writeTo(out);
-					part = new MimeBodyPart(new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+					part = new MimeBodyPart(getInputStreamFromPart(part));
+					contentLoaded = true;
 				}
 			} else if (part instanceof MimeMessage) {
-				part = new MimeMessage(MIMEDefaultSession.getDefaultSession(), ((MimeMessage) part).getRawInputStream());
+				part = new MimeMessage(MIMEDefaultSession.getDefaultSession(), getInputStreamFromPart(part));
+				contentLoaded = true;
 			}
 		} catch (final MessagingException e) {
 			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}
+	}
+
+	/**
+	 * Gets the input stream of specified part's raw data.
+	 * 
+	 * @param part
+	 *            Either a message or a body part
+	 * @return The input stream of specified part's raw data (with the optional
+	 *         empty starting line omitted)
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 */
+	private static InputStream getInputStreamFromPart(final Part part) throws IOException, MessagingException {
+		return new UnsynchronizedByteArrayInputStream(getBytesFromPart(part));
+	}
+
+	/**
+	 * Gets the bytes of specified part's raw data.
+	 * 
+	 * @param part
+	 *            Either a message or a body part
+	 * @return The bytes of specified part's raw data (with the optional empty
+	 *         starting line omitted)
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 */
+	private static byte[] getBytesFromPart(final Part part) throws IOException, MessagingException {
+		byte[] data;
+		{
+			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
+			part.writeTo(out);
+			data = out.toByteArray();
+		}
+		return stripEmptyStartingLine(data);
+	}
+
+	/**
+	 * Gets the bytes of specified multipart's raw data.
+	 * 
+	 * @param multipart
+	 *            A multipart object
+	 * @return The bytes of specified multipart's raw data (with the optional
+	 *         empty starting line omitted)
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 */
+	private static byte[] getBytesFromMultipart(final Multipart multipart) throws IOException, MessagingException {
+		byte[] data;
+		{
+			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
+			multipart.writeTo(out);
+			data = out.toByteArray();
+		}
+		return stripEmptyStartingLine(data);
+	}
+
+	/**
+	 * Strips the possible empty starting line from specified byte array
+	 * 
+	 * @param data
+	 *            The byte array
+	 * @return The stripped byte array
+	 */
+	private static byte[] stripEmptyStartingLine(final byte[] data) {
+		/*
+		 * Starts with an empty line?
+		 */
+		int start = 0;
+		if (data[start] == '\r') {
+			start++;
+		}
+		if (data[start] == '\n') {
+			start++;
+		}
+		if (start > 0) {
+			final byte[] data0 = new byte[data.length - start];
+			System.arraycopy(data, start, data0, 0, data0.length);
+			return data0;
+		}
+		return data;
 	}
 }

@@ -794,9 +794,12 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * of the original.
 	 * <p>
 	 * This method is intended for mailing systems that read the contents
-	 * stepwise on demand. If dealing with such a mail part and its underlying
-	 * connection is closed, part's content is no more accessible. Otherwise
+	 * stepwise on demand. If dealing with such a mail part with its underlying
+	 * connection closed, the part's content is no more accessible. Otherwise
 	 * this method may be implemented with an empty body.
+	 * <p>
+	 * Moreover the loaded content is no more discarded when
+	 * {@link #prepareForCaching()} is invoked.
 	 * 
 	 * @throws MailException
 	 *             If loading part's content fails

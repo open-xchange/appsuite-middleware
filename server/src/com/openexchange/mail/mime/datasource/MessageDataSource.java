@@ -50,12 +50,15 @@
 package com.openexchange.mail.mime.datasource;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 import javax.activation.DataSource;
+import javax.mail.internet.SharedInputStream;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
@@ -76,8 +79,6 @@ public final class MessageDataSource implements DataSource {
 			.getLog(MessageDataSource.class);
 
 	private static final int DEFAULT_BUF_SIZE = 0x2000;
-
-	private static final String DEFAULT_ENCODING = MailConfig.getDefaultMimeCharset();
 
 	private final byte[] data;
 
@@ -105,7 +106,7 @@ public final class MessageDataSource implements DataSource {
 	public MessageDataSource(final InputStream inputStream, final String contentType, final String name)
 			throws IOException {
 		this.contentType = contentType;
-		final UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
+		final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
 		copyStream(inputStream, baos);
 		data = baos.toByteArray();
 		this.name = name;
@@ -116,11 +117,7 @@ public final class MessageDataSource implements DataSource {
 	 */
 	public MessageDataSource(final InputStream inputStream, final ContentType contentType, final String name)
 			throws IOException {
-		this.contentType = contentType.toString();
-		final UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
-		copyStream(inputStream, baos);
-		data = baos.toByteArray();
-		this.name = name;
+		this(inputStream, contentType.toString(), name);
 	}
 
 	/**
@@ -137,18 +134,32 @@ public final class MessageDataSource implements DataSource {
 	 */
 	public MessageDataSource(final String data, final String contentType) throws UnsupportedEncodingException,
 			MailException {
-		this.contentType = contentType;
 		final ContentType ct = new ContentType(contentType);
-		this.data = data.getBytes(ct.getCharsetParameter() == null ? DEFAULT_ENCODING : ct.getCharsetParameter());
+		if (!ct.containsCharsetParameter()) {
+			ct.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+		}
+		this.data = data.getBytes(ct.getCharsetParameter());
+		this.contentType = ct.toString();
 	}
 
 	/**
 	 * Create a data source from a String
 	 */
 	public MessageDataSource(final String data, final ContentType contentType) throws UnsupportedEncodingException {
-		this.contentType = contentType.toString();
-		this.data = data.getBytes(contentType.getCharsetParameter() == null ? DEFAULT_ENCODING : contentType
-				.getCharsetParameter());
+		final ContentType ct;
+		if (!contentType.containsCharsetParameter()) {
+			ct = new ContentType();
+			try {
+				ct.setContentType(contentType);
+			} catch (final MailException e) {
+				// Cannot occur
+			}
+			ct.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+		} else {
+			ct = contentType;
+		}
+		this.data = data.getBytes(ct.getCharsetParameter());
+		this.contentType = ct.toString();
 	}
 
 	/**
@@ -182,10 +193,17 @@ public final class MessageDataSource implements DataSource {
 		return name;
 	}
 
-	protected static int copyStream(final InputStream inputStreamArg,
-			final UnsynchronizedByteArrayOutputStream outputStream) throws IOException {
-		final InputStream inputStream = inputStreamArg instanceof BufferedInputStream ? (BufferedInputStream) inputStreamArg
-				: new BufferedInputStream(inputStreamArg);
+	protected static int copyStream(final InputStream inputStreamArg, final ByteArrayOutputStream outputStream)
+			throws IOException {
+		final InputStream inputStream;
+		if (inputStreamArg instanceof ByteArrayInputStream) {
+			inputStream = inputStreamArg;
+		} else if (inputStreamArg instanceof SharedInputStream) {
+			inputStream = inputStreamArg;
+		} else {
+			inputStream = inputStreamArg instanceof BufferedInputStream ? (BufferedInputStream) inputStreamArg
+					: new BufferedInputStream(inputStreamArg);
+		}
 		try {
 			final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
 			int len;
