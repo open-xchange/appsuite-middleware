@@ -49,10 +49,12 @@
 
 package com.openexchange.mail.dataobjects;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -65,6 +67,7 @@ import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MailPart} - Abstract super class for all {@link MailPart} subclasses.
@@ -836,6 +839,32 @@ public abstract class MailPart implements Serializable, Cloneable {
 					LOG.error(e.getLocalizedMessage(), e);
 				}
 			}
+		}
+	}
+
+	private static final String US_ASCII = "US-ASCII";
+
+	/**
+	 * Gets the mail part's source
+	 * 
+	 * @return The mail part's source
+	 * @throws MailException
+	 *             If mail part's source cannot be returned
+	 */
+	public String getSource() throws MailException {
+		byte[] data;
+		{
+			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
+			writeTo(out);
+			data = out.toByteArray();
+		}
+		try {
+			return new String(data, US_ASCII);
+		} catch (final UnsupportedEncodingException e) {
+			/*
+			 * Cannot occur
+			 */
+			throw new MailException(MailException.Code.ENCODING_ERROR, e, US_ASCII);
 		}
 	}
 

@@ -279,6 +279,9 @@ public final class MIMEMailPart extends MailPart {
 	 */
 	@Override
 	public void writeTo(final OutputStream out) throws MailException {
+		if (null == part) {
+			throw new IllegalStateException(ERR_NULL_PART);
+		}
 		try {
 			part.writeTo(out);
 		} catch (final IOException e) {
