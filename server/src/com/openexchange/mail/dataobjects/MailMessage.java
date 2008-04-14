@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.dataobjects;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -76,7 +75,7 @@ import com.openexchange.mail.utils.MessageUtility;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class MailMessage extends MailPart implements Serializable, Cloneable {
+public abstract class MailMessage extends MailPart {
 
 	private static final long serialVersionUID = 8585899349289256569L;
 
