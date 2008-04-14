@@ -127,15 +127,19 @@ public final class FolderWriter extends DataWriter {
 		writeOXFolderFieldsAsObject(fields, fo, FolderObject.getFolderString(fo.getObjectID(), locale), -1);
 	}
 
-	public void writeOXFolderFieldsAsObject(int[] fields, final FolderObject fo, final String name,
+	public void writeOXFolderFieldsAsObject(final int[] fields, final FolderObject fo, final String name,
 			final int hasSubfolders) throws Exception {
 		try {
 			jsonwriter.object();
+			final int[] fs;
 			if (fields == null) {
-				fields = ALL_FLD_FIELDS;
+				fs = ALL_FLD_FIELDS;
+			} else {
+				fs = new int[fields.length];
+				System.arraycopy(fields, 0, fs, 0, fields.length);
 			}
-			for (int i = 0; i < fields.length; i++) {
-				writeOXFolderField(fields[i], fo, true, name, hasSubfolders);
+			for (int i = 0; i < fs.length; i++) {
+				writeOXFolderField(fs[i], fo, true, name, hasSubfolders);
 			}
 		} finally {
 			jsonwriter.endObject();
