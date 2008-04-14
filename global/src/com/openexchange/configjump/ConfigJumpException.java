@@ -134,7 +134,7 @@ public class ConfigJumpException extends AbstractOXException {
         /**
          * Link is not implemented.
          */
-        NOT_IMPLEMENTED("Link is not implemented.", Category.SETUP_ERROR, 8);
+        NOT_IMPLEMENTED("Extras link is not implemented.", Category.SETUP_ERROR, 8);
 
         /**
          * Message of the exception.

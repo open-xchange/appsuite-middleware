@@ -54,10 +54,11 @@ import java.net.URL;
 import com.openexchange.configjump.ConfigJumpException;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.Replacements;
-import com.openexchange.server.ServiceException;
+import com.openexchange.configjump.ConfigJumpException.Code;
 
 /**
- *
+ * Provides a static method for the servlet to generate the ConfigJump URL based
+ * on the service.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class ConfigJump {
@@ -71,12 +72,10 @@ public final class ConfigJump {
         super();
     }
 
-    public static URL getLink(final Replacements replacements) throws ServiceException,
-        ConfigJumpException {
+    public static URL getLink(final Replacements replacements) throws ConfigJumpException {
         final ConfigJumpService service = holder.getService();
         if (null == service) {
-            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
-                ConfigJumpService.class.getName());
+            throw new ConfigJumpException(Code.NOT_IMPLEMENTED);
         }
         try {
             return service.getLink(replacements);

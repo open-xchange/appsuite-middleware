@@ -68,7 +68,6 @@ import com.openexchange.configjump.Replacements;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 
 /**
@@ -150,9 +149,6 @@ public class ConfigJump extends SessionServlet {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (ContextException e) {
-            LOG.error(e.getMessage(), e);
-            response.setException(e);
-        } catch (ServiceException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         }

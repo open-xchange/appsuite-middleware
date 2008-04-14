@@ -64,5 +64,4 @@ public class ConfigJumpHolder extends ServiceHolder<ConfigJumpService> {
     ConfigJumpHolder() {
         super();
     }
-
 }
