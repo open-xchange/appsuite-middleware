@@ -47,21 +47,74 @@
  *
  */
 
-package com.openexchange.authentication.service;
+package com.openexchange.server.osgi;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.server.ServiceHolder;
+import com.openexchange.authentication.service.Authentication;
 
 /**
- *
+ * Authentication service tracker putting the service into the static
+ * authentication class.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class AuthenticationHolder extends ServiceHolder<AuthenticationService> {
+public class AuthenticationCustomizer implements ServiceTrackerCustomizer {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(AuthenticationCustomizer.class);
+
+    /**
+     * Reference to the bundle context.
+     */
+    private final BundleContext context;
 
     /**
      * Default constructor.
+     * @param context the bundle context.
      */
-    AuthenticationHolder() {
+    public AuthenticationCustomizer(final BundleContext context) {
         super();
+        this.context = context;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Object addingService(final ServiceReference reference) {
+        final AuthenticationService auth = (AuthenticationService) context
+            .getService(reference);
+        if (null == Authentication.getService()) {
+            Authentication.setService(auth);
+        } else {
+            LOG.error("Several authentication services found. Remove all except one!");
+        }
+        return auth;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void modifiedService(final ServiceReference reference,
+        final Object service) {
+        // Nothing to do.
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void removedService(final ServiceReference reference,
+        final Object service) {
+        final AuthenticationService auth = (AuthenticationService) service;
+        if (Authentication.getService() == auth) {
+            Authentication.setService(null);
+        }
+        context.ungetService(reference);
     }
 }

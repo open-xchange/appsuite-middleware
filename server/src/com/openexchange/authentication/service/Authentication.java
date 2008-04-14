@@ -53,9 +53,10 @@ import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.authentication.LoginException;
+import com.openexchange.server.ServiceException;
 
 /**
- *
+ * Provides a static method for the login servlet to do the authentication.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Authentication {
@@ -63,7 +64,7 @@ public final class Authentication {
     /**
      * Handles the reference to the authentication service.
      */
-    private static final AuthenticationHolder holder = new AuthenticationHolder();
+    private static AuthenticationService service;
 
     /**
      * Default constructor.
@@ -80,28 +81,35 @@ public final class Authentication {
      * login info for the context and the second contains the login info for the
      * user.
      * @throws LoginException if something with the login info is wrong.
+     * @throws ServiceException if the authentication service is not available.
      */
     public static Authenticated login(final String login, final String pass)
-        throws LoginException {
-        final AuthenticationService auth = holder.getService();
+        throws LoginException, ServiceException {
+        final AuthenticationService auth = service;
         if (null == auth) {
-            throw new LoginException(LoginException.Code.COMMUNICATION);
+            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE);
         }
-        try {
-            return auth.handleLoginInfo(new LoginInfo() {
-                public String getPassword() {
-                    return pass;
-                }
-                public String getUsername() {
-                    return login;
-                }
-            });
-        } finally {
-            holder.ungetService(auth);
-        }
+        return auth.handleLoginInfo(new LoginInfo() {
+            public String getPassword() {
+                return pass;
+            }
+            public String getUsername() {
+                return login;
+            }
+        });
     }
 
-    public static AuthenticationHolder getHolder() {
-        return holder;
+    /**
+     * @return the service
+     */
+    public static AuthenticationService getService() {
+        return service;
+    }
+
+    /**
+     * @param service the service to set
+     */
+    public static void setService(final AuthenticationService service) {
+        Authentication.service = service;
     }
 }

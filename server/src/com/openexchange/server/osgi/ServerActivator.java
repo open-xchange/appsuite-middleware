@@ -62,7 +62,6 @@ import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.service.Authentication;
 import com.openexchange.caching.CacheService;
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.ConfigurationService;
@@ -225,8 +224,7 @@ public final class ServerActivator extends DeferredActivator {
 
 			// Search for AuthenticationService
 			serviceTrackerList.add(new ServiceTracker(context, AuthenticationService.class.getName(),
-					new BundleServiceTracker<AuthenticationService>(context, Authentication.getHolder(),
-							AuthenticationService.class)));
+				new AuthenticationCustomizer(context)));
 			// Search for ConfigJumpService
 			serviceTrackerList.add(new ServiceTracker(context, ConfigJumpService.class.getName(),
 					new BundleServiceTracker<ConfigJumpService>(context, ConfigJump.getHolder(),
