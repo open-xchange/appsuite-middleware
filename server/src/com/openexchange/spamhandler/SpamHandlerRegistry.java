@@ -94,10 +94,14 @@ public final class SpamHandlerRegistry {
 
 	/**
 	 * Gets the spam handler appropriate for specified registration name.
+	 * <p>
+	 * If specified registration name is <code>null</code> or equals
+	 * {@link SpamHandler#SPAM_HANDLER_FALLBACK},
+	 * {@link NoSpamHandler#getInstance()} is returned.
 	 * 
 	 * @param registrationName
 	 *            The spam handler's registration name
-	 * @return The appropriate spam handler
+	 * @return The appropriate spam handler or <code>null</code>
 	 */
 	public static SpamHandler getSpamHandler(final String registrationName) {
 		if (null == registrationName) {
@@ -105,7 +109,9 @@ public final class SpamHandlerRegistry {
 				LOG.warn(new StringBuilder(64).append("Given registration name is null. Using fallback spam handler '")
 						.append(SpamHandler.SPAM_HANDLER_FALLBACK).append('\'').toString());
 			}
-			return spamHandlers.get(SpamHandler.SPAM_HANDLER_FALLBACK);
+			return NoSpamHandler.getInstance();
+		} else if (SpamHandler.SPAM_HANDLER_FALLBACK.equals(registrationName)) {
+			return NoSpamHandler.getInstance();
 		}
 		final SpamHandler spamHandler = spamHandlers.get(registrationName);
 		if (null == spamHandler) {
@@ -114,7 +120,7 @@ public final class SpamHandlerRegistry {
 						registrationName).append("'. Using fallback '").append(SpamHandler.SPAM_HANDLER_FALLBACK)
 						.append('\'').toString());
 			}
-			return spamHandlers.get(SpamHandler.SPAM_HANDLER_FALLBACK);
+			return NoSpamHandler.getInstance();
 		}
 		return spamHandler;
 	}
@@ -131,7 +137,9 @@ public final class SpamHandlerRegistry {
 	 *         name; otherwise <code>false</code>
 	 */
 	public static boolean registerSpamHandler(final String registrationName, final SpamHandler spamHandler) {
-		if (spamHandlers.containsKey(registrationName)) {
+		if (null == registrationName || SpamHandler.SPAM_HANDLER_FALLBACK.equals(registrationName)) {
+			return false;
+		} else if (spamHandlers.containsKey(registrationName)) {
 			return false;
 		}
 		try {

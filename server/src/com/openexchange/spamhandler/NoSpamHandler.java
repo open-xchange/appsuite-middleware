@@ -47,28 +47,68 @@
  *
  */
 
-package com.openexchange.mail.search;
+package com.openexchange.spamhandler;
+
+import com.openexchange.mail.MailException;
+import com.openexchange.mail.api.MailAccess;
 
 /**
- * {@link SearchTerm}
- *
+ * {@link NoSpamHandler} - The special spam handler ignoring invocations to both
+ * {@link #handleSpam(String, long[], boolean, MailAccess)} and
+ * {@link #handleHam(String, long[], boolean, MailAccess)}.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
-public abstract class SearchTerm<T> {
+public final class NoSpamHandler extends SpamHandler {
+
+	private static final NoSpamHandler instance = new NoSpamHandler();
 
 	/**
-	 * Initializes a new {@link SearchTerm}
+	 * Gets the {@link NoSpamHandler} instance
+	 * 
+	 * @return The {@link NoSpamHandler} instance
 	 */
-	public SearchTerm() {
-		super();
+	public static NoSpamHandler getInstance() {
+		return instance;
 	}
 
 	/**
-	 * Gets the pattern to which the expression should match.
-	 * 
-	 * @return The pattern
+	 * Initializes a new {@link NoSpamHandler}
 	 */
-	public abstract T getPattern();
+	private NoSpamHandler() {
+		super();
+	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.spamhandler.SpamHandler#getSpamHandlerName()
+	 */
+	@Override
+	public String getSpamHandlerName() {
+		return SpamHandler.SPAM_HANDLER_FALLBACK;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.spamhandler.SpamHandler#handleHam(java.lang.String,
+	 *      long[], boolean, com.openexchange.mail.api.MailAccess)
+	 */
+	@Override
+	public void handleHam(String spamFullname, long[] mailIDs, boolean move, MailAccess<?, ?> mailAccess)
+			throws MailException {
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.spamhandler.SpamHandler#handleSpam(java.lang.String,
+	 *      long[], boolean, com.openexchange.mail.api.MailAccess)
+	 */
+	@Override
+	public void handleSpam(final String fullname, final long[] mailIDs, final boolean move,
+			final MailAccess<?, ?> mailAccess) throws MailException {
+	}
 }

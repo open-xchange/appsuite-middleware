@@ -61,6 +61,8 @@ import com.openexchange.spamhandler.SpamHandler;
  */
 public final class DefaultSpamHandler extends SpamHandler {
 
+	private static final String NAME = "DefaultSpamHandler";
+
 	private static final DefaultSpamHandler instance = new DefaultSpamHandler();
 
 	/**
@@ -86,7 +88,7 @@ public final class DefaultSpamHandler extends SpamHandler {
 	 */
 	@Override
 	public String getSpamHandlerName() {
-		return SPAM_HANDLER_FALLBACK;
+		return NAME;
 	}
 
 	/*

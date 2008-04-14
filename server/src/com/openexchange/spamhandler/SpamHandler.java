@@ -50,10 +50,7 @@
 package com.openexchange.spamhandler;
 
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link SpamHandler}
@@ -65,10 +62,8 @@ public abstract class SpamHandler {
 
 	/**
 	 * The fallback spam handler
-	 * <p>
-	 * TODO: Make configurable
 	 */
-	public static final String SPAM_HANDLER_FALLBACK = "DefaultSpamHandler";
+	public static final String SPAM_HANDLER_FALLBACK = "NoSpamHandler";
 
 	/**
 	 * The fullname of the INBOX folder

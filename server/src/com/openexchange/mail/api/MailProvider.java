@@ -185,12 +185,14 @@ public abstract class MailProvider {
 	 * Gets the unique registration name of the spam handler that shall be used
 	 * by this mail provider.
 	 * <p>
-	 * If <code>null</code> is returned, the spam handler associated with
-	 * {@link SpamHandler#SPAM_HANDLER_FALLBACK} is used.
+	 * If {@link SpamHandler#SPAM_HANDLER_FALLBACK} is returned, no spam handler
+	 * is going to be used; meaning all spam-related actions are ignored..
 	 * 
 	 * @return The registration name of the spam handler
 	 */
-	protected abstract String getSpamHandlerName();
+	protected String getSpamHandlerName() {
+		return SpamHandler.SPAM_HANDLER_FALLBACK;
+	}
 
 	/**
 	 * Checks if this mail provider supports the given protocol (which is either
