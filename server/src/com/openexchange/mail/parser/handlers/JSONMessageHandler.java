@@ -55,10 +55,13 @@ import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.Map.Entry;
 
@@ -85,6 +88,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -400,6 +404,14 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		return true;
 	}
 
+	/**
+	 * These headers are covered by fields of {@link MailMessage}
+	 */
+	private static final Set<HeaderName> COVERED_HEADER_NAMES = new HashSet<HeaderName>(Arrays.asList(new HeaderName[] {
+			MessageHeaders.CONTENT_DISPOSITION, MessageHeaders.CONTENT_ID, MessageHeaders.CONTENT_TYPE,
+			MessageHeaders.BCC, MessageHeaders.CC, MessageHeaders.DATE, MessageHeaders.DISP_NOT_TO,
+			MessageHeaders.FROM, MessageHeaders.X_PRIORITY, MessageHeaders.SUBJECT, MessageHeaders.TO }));
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -416,7 +428,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 				final Map.Entry<String, String> entry = iter.next();
 				if (MessageHeaders.HDR_DISP_NOT_TO.equalsIgnoreCase(entry.getKey())) {
 					/*
-					 * This special header is handled through handleDispositionNotification()
+					 * This special header is handled through
+					 * handleDispositionNotification()
 					 */
 					continue;
 				} else if (MessageHeaders.HDR_X_PRIORITY.equalsIgnoreCase(entry.getKey())) {
@@ -439,14 +452,9 @@ public final class JSONMessageHandler implements MailMessageHandler {
 				} else if (MessageHeaders.HDR_X_MAILER.equalsIgnoreCase(entry.getKey())) {
 					hdrObject.put(entry.getKey(), entry.getValue());
 				} else {
-					/**
-					 * Uncomment this to deliver all headers:
-					 * 
-					 * <pre>
-					 * hdrObject.put(entry.getKey(), entry.getValue());
-					 * </pre>
-					 */
-					continue;
+					if (!COVERED_HEADER_NAMES.contains(HeaderName.valueOf(entry.getKey()))) {
+						hdrObject.put(entry.getKey(), entry.getValue());
+					}
 				}
 			}
 			jsonObject.put(MailJSONField.HEADERS.getKey(), hdrObject);
