@@ -62,6 +62,14 @@ public final class ANDTerm extends SearchTerm<SearchTerm<?>[]> {
 	/**
 	 * Initializes a new {@link ANDTerm}
 	 */
+	protected ANDTerm() {
+		super();
+		terms = new SearchTerm<?>[2];
+	}
+
+	/**
+	 * Initializes a new {@link ANDTerm}
+	 */
 	public ANDTerm(final SearchTerm<?> firstTerm, final SearchTerm<?> secondTerm) {
 		super();
 		terms = new SearchTerm<?>[] { firstTerm, secondTerm };
@@ -76,6 +84,26 @@ public final class ANDTerm extends SearchTerm<SearchTerm<?>[]> {
 	@Override
 	public SearchTerm<?>[] getPattern() {
 		return terms;
+	}
+
+	/**
+	 * Sets the first search term
+	 * 
+	 * @param firstTerm
+	 *            The first search term
+	 */
+	public void setFirstTerm(final SearchTerm<?> firstTerm) {
+		terms[0] = firstTerm;
+	}
+
+	/**
+	 * Sets the second search term
+	 * 
+	 * @param secondTerm
+	 *            The second search term
+	 */
+	public void setSecondTerm(final SearchTerm<?> secondTerm) {
+		terms[1] = secondTerm;
 	}
 
 }

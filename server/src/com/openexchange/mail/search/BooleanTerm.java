@@ -50,60 +50,41 @@
 package com.openexchange.mail.search;
 
 /**
- * {@link ORTerm}
+ * {@link BooleanTerm}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ORTerm extends SearchTerm<SearchTerm<?>[]> {
-
-	private final SearchTerm<?>[] terms;
+public final class BooleanTerm extends SearchTerm<Boolean> {
 
 	/**
-	 * Initializes a new {@link ORTerm}
+	 * The boolean term for <code>true</code>
 	 */
-	protected ORTerm() {
+	public static final BooleanTerm TRUE = new BooleanTerm(true);
+
+	/**
+	 * The boolean term for <code>false</code>
+	 */
+	public static final BooleanTerm FALSE = new BooleanTerm(false);
+
+	private final boolean value;
+
+	/**
+	 * Initializes a new {@link BooleanTerm}
+	 */
+	private BooleanTerm(final boolean value) {
 		super();
-		terms = new SearchTerm<?>[2];
+		this.value = value;
 	}
 
-	/**
-	 * Initializes a new {@link ORTerm}
-	 */
-	public ORTerm(final SearchTerm<?> firstTerm, final SearchTerm<?> secondTerm) {
-		super();
-		terms = new SearchTerm<?>[] { firstTerm, secondTerm };
-	}
-
-	/**
-	 * Gets the search terms that should be linked with an OR as an array of
-	 * {@link SearchTerm} with length <code>2</code>.
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @return The terms that should be linked with an OR
+	 * @see com.openexchange.mail.search.SearchTerm#getPattern()
 	 */
 	@Override
-	public SearchTerm<?>[] getPattern() {
-		return terms;
-	}
-
-	/**
-	 * Sets the first search term
-	 * 
-	 * @param firstTerm
-	 *            The first search term
-	 */
-	public void setFirstTerm(final SearchTerm<?> firstTerm) {
-		terms[0] = firstTerm;
-	}
-
-	/**
-	 * Sets the second search term
-	 * 
-	 * @param secondTerm
-	 *            The second search term
-	 */
-	public void setSecondTerm(final SearchTerm<?> secondTerm) {
-		terms[1] = secondTerm;
+	public Boolean getPattern() {
+		return Boolean.valueOf(value);
 	}
 
 }

@@ -312,6 +312,13 @@ public final class Searcher {
 					return (text.toLowerCase(Locale.ENGLISH).indexOf(pattern.toLowerCase(Locale.ENGLISH)) > -1);
 				}
 			};
+		} else if (com.openexchange.mail.search.BooleanTerm.class.equals(termClass)) {
+			return new SearchTermMatcher() {
+				public boolean matches(final MailMessage mailMessage, final SearchTerm<?> searchTerm)
+						throws MailException {
+					return ((com.openexchange.mail.search.BooleanTerm) searchTerm).getPattern().booleanValue();
+				}
+			};
 		} else {
 			LOG.error("Unknown search term class: " + termClass.getName());
 			return null;

@@ -263,8 +263,37 @@ public final class IMAPSearch {
 			searchTerm = new OrTerm(getSearchTerm(terms[0]), getSearchTerm(terms[1]));
 		} else if (mailSearchTerm instanceof com.openexchange.mail.search.BodyTerm) {
 			searchTerm = new BodyTerm(((com.openexchange.mail.search.BodyTerm) mailSearchTerm).getPattern());
+		} else if (mailSearchTerm instanceof com.openexchange.mail.search.BooleanTerm) {
+			searchTerm = BooleanSearchTerm.getInstance(((com.openexchange.mail.search.BooleanTerm) mailSearchTerm)
+					.getPattern().booleanValue());
 		}
 		return searchTerm;
+	}
+
+	private static final class BooleanSearchTerm extends SearchTerm {
+
+		private static final BooleanSearchTerm TRUE = new BooleanSearchTerm(true);
+
+		private static final BooleanSearchTerm FALSE = new BooleanSearchTerm(false);
+
+		public static BooleanSearchTerm getInstance(final boolean value) {
+			return value ? TRUE : FALSE;
+		}
+
+		private static final long serialVersionUID = -8073302646525000957L;
+
+		private final boolean value;
+
+		private BooleanSearchTerm(final boolean value) {
+			super();
+			this.value = value;
+		}
+
+		@Override
+		public boolean match(final Message msg) {
+			return value;
+		}
+
 	}
 
 	/**
