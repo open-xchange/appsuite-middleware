@@ -141,9 +141,7 @@ public class I18nActivator implements BundleActivator {
 	 */
 	private static ServiceRegistration[] initI18nServices(final BundleContext context, final ConfigurationService config)
 			throws FileNotFoundException {
-
-		// File dir = new File("/home/fred/i18n/osgi/");
-
+		                                       
 		final File dir = new File(config.getProperty("i18n.language.path"));
 
 		final List<ResourceBundle> resourceBundles = new ResourceBundleDiscoverer(dir).getResourceBundles();
