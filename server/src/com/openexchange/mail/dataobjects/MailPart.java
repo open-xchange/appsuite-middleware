@@ -56,8 +56,10 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import javax.activation.DataHandler;
@@ -569,6 +571,60 @@ public abstract class MailPart implements Serializable, Cloneable {
 	public Map<HeaderName, String> getHeaders() {
 		if (containsHeaders() && null != headers) {
 			return headers;
+		}
+		return null;
+	}
+
+	/**
+	 * Gets the non-matching headers as a map
+	 * 
+	 * @param nonMatchingHeaders
+	 *            The non-matching headers
+	 * @return The non-matching headers as a map
+	 */
+	public Map<HeaderName, String> getNonMatchingHeaders(final String[] nonMatchingHeaders) {
+		if (containsHeaders() && null != headers) {
+			final Set<HeaderName> set = new HashSet<HeaderName>(nonMatchingHeaders.length);
+			for (int i = 0; i < nonMatchingHeaders.length; i++) {
+				set.add(HeaderName.valueOf(nonMatchingHeaders[i]));
+			}
+			final Map<HeaderName, String> retval = new HashMap<HeaderName, String>();
+			final int size = headers.size();
+			final Iterator<Map.Entry<HeaderName, String>> iter = headers.entrySet().iterator();
+			for (int i = 0; i < size; i++) {
+				final Map.Entry<HeaderName, String> e = iter.next();
+				if (!set.contains(e.getKey())) {
+					retval.put(HeaderName.valueOf(e.getKey().toString()), e.getValue());
+				}
+			}
+			return retval;
+		}
+		return null;
+	}
+
+	/**
+	 * Gets the matching headers as a map
+	 * 
+	 * @param matchingHeaders
+	 *            The matching headers
+	 * @return The matching headers as a map
+	 */
+	public Map<HeaderName, String> getMatchingHeaders(final String[] matchingHeaders) {
+		if (containsHeaders() && null != headers) {
+			final Set<HeaderName> set = new HashSet<HeaderName>(matchingHeaders.length);
+			for (int i = 0; i < matchingHeaders.length; i++) {
+				set.add(HeaderName.valueOf(matchingHeaders[i]));
+			}
+			final Map<HeaderName, String> retval = new HashMap<HeaderName, String>();
+			final int size = headers.size();
+			final Iterator<Map.Entry<HeaderName, String>> iter = headers.entrySet().iterator();
+			for (int i = 0; i < size; i++) {
+				final Map.Entry<HeaderName, String> e = iter.next();
+				if (set.contains(e.getKey())) {
+					retval.put(HeaderName.valueOf(e.getKey().toString()), e.getValue());
+				}
+			}
+			return retval;
 		}
 		return null;
 	}
