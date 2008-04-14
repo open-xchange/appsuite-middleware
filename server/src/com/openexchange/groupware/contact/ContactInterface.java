@@ -51,9 +51,14 @@ package com.openexchange.groupware.contact;
 
 import java.util.Date;
 
+import com.openexchange.api.OXConflictException;
+import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
+import com.openexchange.contact.LdapServer;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -65,6 +70,10 @@ public interface ContactInterface {
 	
 	public static final String OVERRIDE_FOLDER_ATTRIBUTE = "override_folder";
 	
+	public void insertContactObject(final ContactObject co) throws OXException;
+	
+	public void updateContactObject(final ContactObject co, final int fid, final java.util.Date d) throws OXException, OXConcurrentModificationException, ContactException;
+
 	/**
 	 * Determines the number of contacts a certain
 	 * private or public folder.
@@ -166,6 +175,8 @@ public interface ContactInterface {
 	 */	
 	public SearchIterator getDeletedContactsInFolder(int folderId, int[] cols, Date since) throws OXException;
 	
+	public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXObjectNotFoundException, OXConflictException, OXException;
+	
 	/**
 	 * Loads a range of contacts by the given IDs
 	 * @param objectIdAndInFolder[]
@@ -178,4 +189,11 @@ public interface ContactInterface {
 	 * @throws OXException
 	 */	
 	public SearchIterator getObjectsById(int[][] objectIdAndInFolder, int cols[]) throws OXException, Exception;
+	
+	public int getFolderId();
+	
+	public LdapServer getLdapServer();
+	
+	public void setSession(Session s) throws OXException;
+
 }

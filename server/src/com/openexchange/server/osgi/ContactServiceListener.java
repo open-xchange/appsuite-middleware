@@ -57,7 +57,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactServices;
-import com.openexchange.i18n.I18nTools;
 
 public class ContactServiceListener implements ServiceTrackerCustomizer{
 	
@@ -75,11 +74,13 @@ public class ContactServiceListener implements ServiceTrackerCustomizer{
 	
 	public Object addingService(final ServiceReference reference) {
         final ContactInterface contactInterface = (ContactInterface)context.getService(reference); 
-        int[] overRiding = (int[])reference.getProperty(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE);
         
-        for (int a = 0; a < overRiding.length; a++) {
-        	LOG.info("Adding Service Bundle Contact Interface: " + reference.getBundle().getSymbolicName() + " for folder: "+overRiding[a]);
-        	services.addService(overRiding[a], contactInterface);
+        Object id = reference.getProperty(ContactInterface.OVERRIDE_FOLDER_ATTRIBUTE);
+        	
+        if (id != null){
+        	int ix = new Integer(id.toString()).intValue();
+        	LOG.info("Adding Service Bundle Contact Interface: " + reference.getBundle().getSymbolicName() + " for folder: "+ix);
+        	services.addService(ix, contactInterface);
         }
         
 		return contactInterface;

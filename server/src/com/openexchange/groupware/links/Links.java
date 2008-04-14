@@ -155,6 +155,7 @@ public class Links {
 		module[Types.CONTACT] = new modules() {
 			public boolean isReadable(final int oid, final int fid, final int user, final int[] group, final Session so) throws ContextException {
 				Context ct = ContextStorage.getStorageContext(so.getContextId());
+				
 				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ct).hasContact()){
 					return false;
 				}

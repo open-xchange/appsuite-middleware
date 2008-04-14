@@ -75,8 +75,12 @@ import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contact.ContactException;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactServices;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFile;
@@ -120,10 +124,23 @@ public class Contact extends DataServlet {
 				
 				OutputStream os = null;
 				
-				final ContactSQLInterface sqlinterface = new RdbContactSQLInterface(sessionObj);
+				
+				Context ctx = null;
+				try {
+					ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
+				} catch (ContextException ct) {
+					new ContactException(ct);
+				}
+				
+				ContactInterface contactInterface = ContactServices.getInstance().getService(inFolder, ctx.getContextId());
+				//ContactInterface contactInterface = ContactServices.getInstance().getService(inFolder);
+				if (contactInterface == null) {
+					contactInterface = new RdbContactSQLInterface(sessionObj, ctx);
+				}
+				contactInterface.setSession(sessionObj);
 				
 				try {
-					final ContactObject contactObj = sqlinterface.getObjectById(id, inFolder);
+					final ContactObject contactObj = contactInterface.getObjectById(id, inFolder);
 					final String imageContentType = contactObj.getImageContentType();
 					if (imageContentType != null) {
 						httpServletResponse.setContentType(imageContentType);

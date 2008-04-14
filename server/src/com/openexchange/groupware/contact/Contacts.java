@@ -95,7 +95,6 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -2113,6 +2112,13 @@ public class Contacts implements DeleteListener {
 	}
 
 	public static boolean performContactReadCheck(final int folderId, final int created_from, final int user, final int[] group, final Context ctx, final UserConfiguration uc, final Connection readCon){
+		
+		ContactInterface contactInterface = ContactServices.getInstance().getService(folderId, ctx.getContextId());
+		//ContactInterface contactInterface = ContactServices.getInstance().getService(folderId);
+		if (contactInterface != null) {
+			return false;
+		}
+		
 		try{
 			final FolderObject contactFolder = new OXFolderAccess(readCon, ctx).getFolderObject(folderId);
 			if (contactFolder.getModule() != FolderObject.CONTACT) {
@@ -2756,6 +2762,7 @@ public class Contacts implements DeleteListener {
 		Object getData(ResultSet rs,int pos) throws SQLException;
 		
 		String getValueAsString(ContactObject co);
+		void setValueAsString(String s, ContactObject co);
 		String getReadableTitle();
 	}
 	
@@ -2804,6 +2811,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Display name";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setDisplayName(s);
+			}
 		};
 		/**************** * field02 *  * *************/
 		mapping[ContactObject.SUR_NAME] = new mapper() {
@@ -2846,6 +2856,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Surname";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setSurName(s);
+			}
 		};	
 		/**************** * field03 *  * *************/
 		mapping[ContactObject.GIVEN_NAME] = new mapper() {
@@ -2887,6 +2900,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Given name";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setGivenName(s);
 			}
 		};			
 		/**************** * field04 *  * *************/
@@ -2932,6 +2948,9 @@ public class Contacts implements DeleteListener {
 				
 				return "Middle name";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setMiddleName(s);
+			}
 		};		
 		/**************** * field05 *  * *************/
 		mapping[ContactObject.SUFFIX] = new mapper() {
@@ -2973,6 +2992,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Suffix";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setSuffix(s);
 			}
 		};				
 		/**************** * field06 *  * *************/
@@ -3017,6 +3039,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {	
 				return "Title";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setTitle(s);
+			}
 		};				
 		/**************** * field07 *  * *************/
 		mapping[ContactObject.STREET_HOME] = new mapper() {
@@ -3058,6 +3083,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Street home";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setStreetHome(s);
 			}
 		};				
 		/**************** * field08 *  * *************/
@@ -3101,6 +3129,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Postal code home";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setPostalCodeHome(s);
+			}
 		};				
 		/**************** * field09 *  * *************/
 		mapping[ContactObject.CITY_HOME] = new mapper() {
@@ -3142,6 +3173,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 					return "City home";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setCityHome(s);
 			}
 		};			
 		/**************** * field10 *  * *************/
@@ -3185,6 +3219,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "State home";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setStateHome(s);
+			}
 		};				
 		/**************** * field11 *  * *************/
 		mapping[ContactObject.COUNTRY_HOME] = new mapper() {
@@ -3226,6 +3263,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Country home";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setCountryHome(s);
 			}
 		};				
 
@@ -3270,6 +3310,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Martial status";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setMaritalStatus(s);
+			}
 		};				
 		/**************** * field13 *  * *************/
 		mapping[ContactObject.NUMBER_OF_CHILDREN] = new mapper() {
@@ -3311,6 +3354,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Number of children";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setNumberOfChildren(s);
 			}
 		};				
 		/**************** * field14 *  * *************/
@@ -3354,6 +3400,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Profession";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setProfession(s);
+			}
 		};				
 		/**************** * field15 *  * *************/
 		mapping[ContactObject.NICKNAME] = new mapper() {
@@ -3395,6 +3444,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Nickname";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setNickname(s);
 			}
 		};				
 		/**************** * field16 *  * *************/
@@ -3438,6 +3490,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Spouse name";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setSpouseName(s);
+			}
 		};				
 		/**************** * field17 *  * *************/
 		mapping[ContactObject.NOTE] = new mapper() {
@@ -3479,6 +3534,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Note";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setNote(s);
 			}
 		};				
 		/**************** * field18 *  * *************/
@@ -3522,6 +3580,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Company";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setCompany(s);
+			}
 		};				
 		/**************** * field19 *  * *************/
 		mapping[ContactObject.DEPARTMENT] = new mapper() {
@@ -3563,6 +3624,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Department";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setDepartment(s);
 			}
 		};			
 		/**************** * field20 *  * *************/
@@ -3606,6 +3670,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Position";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setPosition(s);
+			}
 		};				
 		/**************** * field21 *  * *************/
 		mapping[ContactObject.EMPLOYEE_TYPE] = new mapper() {
@@ -3647,6 +3714,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Employee type";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setEmployeeType(s);
 			}
 		};				
 		/**************** * field22 *  * *************/
@@ -3690,6 +3760,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Room number";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setRoomNumber(s);
+			}
 		};				
 		/**************** * field23 *  * *************/
 		mapping[ContactObject.STREET_BUSINESS] = new mapper() {
@@ -3731,6 +3804,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Street business";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setStreetBusiness(s);
 			}
 		};				
 		/**************** * field24 *  * *************/
@@ -3774,6 +3850,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Postal code business";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setPostalCodeBusiness(s);
+			}
 		};				
 		/**************** * field25 *  * *************/
 		mapping[ContactObject.CITY_BUSINESS] = new mapper() {
@@ -3815,6 +3894,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "City business";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setCityBusiness(s);
 			}
 		};				
 		/**************** * field26 *  * *************/
@@ -3858,6 +3940,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "State business";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setStateBusiness(s);
+			}
 		};				
 		/**************** * field27 *  * *************/
 		mapping[ContactObject.COUNTRY_BUSINESS] = new mapper() {
@@ -3895,10 +3980,13 @@ public class Contacts implements DeleteListener {
 				return rs.getString(pos);
 			}
 			public String getValueAsString(final ContactObject co) {
-					return co.getCountryBusiness();
+				return co.getCountryBusiness();
 			}
 			public String getReadableTitle() {
 				return "Country business";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setCountryBusiness(s);
 			}
 		};				
 		/**************** * field28 *  * *************/
@@ -3942,6 +4030,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Number of employee";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setNumberOfEmployee(s);
+			}
 		};				
 		/**************** * field29 *  * *************/
 		mapping[ContactObject.SALES_VOLUME] = new mapper() {
@@ -3983,6 +4074,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Sales volume";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setSalesVolume(s);
 			}
 		};				
 		/**************** * field30 *  * *************/
@@ -4026,6 +4120,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Tax id";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setTaxID(s);
+			}
 		};				
 		/**************** * field31 *  * *************/
 		mapping[ContactObject.COMMERCIAL_REGISTER] = new mapper() {
@@ -4067,6 +4164,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Commercial register";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setCommercialRegister(s);
 			}
 		};				
 		/**************** * field32 *  * *************/
@@ -4110,6 +4210,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Branches";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setBranches(s);
+			}
 		};				
 		/**************** * field33 *  * *************/
 		mapping[ContactObject.BUSINESS_CATEGORY] = new mapper() {
@@ -4151,6 +4254,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Business category";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setBusinessCategory(s);
 			}
 		};				
 		/**************** * field34 *  * *************/
@@ -4194,6 +4300,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Info";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setInfo(s);
+			}
 		};				
 		/**************** * field35 *  * *************/
 		mapping[ContactObject.MANAGER_NAME] = new mapper() {
@@ -4235,6 +4344,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Manager's name";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setManagerName(s);
 			}
 		};				
 		/**************** * field36 *  * *************/
@@ -4278,6 +4390,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Assistant's name";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setAssistantName(s);
+			}
 		};				
 		/**************** * field37 *  * *************/
 		mapping[ContactObject.STREET_OTHER] = new mapper() {
@@ -4319,6 +4434,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Street other";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setStreetOther(s);
 			}
 		};				
 		/**************** * field38 *  * *************/
@@ -4362,6 +4480,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Postal code other";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setPostalCodeOther(s);
+			}
 		};				
 		/**************** * field39 *  * *************/
 		mapping[ContactObject.CITY_OTHER] = new mapper() {
@@ -4403,6 +4524,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "City other"; 
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setCityOther(s);
 			}
 		};				
 		/**************** * field40 *  * *************/
@@ -4446,6 +4570,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "State other";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setStateOther(s);
+			}
 		};				
 		/**************** * field41 *  * *************/
 		mapping[ContactObject.COUNTRY_OTHER] = new mapper() {
@@ -4487,6 +4614,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Country other";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setCountryOther(s);
 			}
 		};
 		/**************** * field42 *  * *************/
@@ -4530,6 +4660,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Telephone assistant";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setTelephoneAssistant(s);
+			}
 		};				
 		/**************** * field43 *  * *************/
 		mapping[ContactObject.TELEPHONE_BUSINESS1] = new mapper() {
@@ -4571,6 +4704,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Telephone business 1";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setTelephoneBusiness1(s);
 			}
 		};				
 		/**************** * field44 *  * *************/
@@ -4614,6 +4750,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Telephone business 2";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setTelephoneBusiness2(s);
+			}
 		};				
 		/**************** * field45 *  * *************/
 		mapping[ContactObject.FAX_BUSINESS] = new mapper() {
@@ -4655,6 +4794,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "FAX business";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setFaxBusiness(s);
 			}
 		};				
 		/**************** * field46 *  * *************/
@@ -4698,6 +4840,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Telephone callback";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setTelephoneCallback(s);
+			}
 		};				
 		/**************** * field47 *  * *************/
 		mapping[ContactObject.TELEPHONE_CAR] = new mapper() {
@@ -4739,6 +4884,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Telephone car";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setTelephoneCar(s);
 			}
 		};				
 		/**************** * field48 *  * *************/
@@ -4782,6 +4930,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Telephone company";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setTelephoneCompany(s);
+			}
 		};				
 		/**************** * field49 *  * *************/
 		mapping[ContactObject.TELEPHONE_HOME1] = new mapper() {
@@ -4823,6 +4974,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Telephone home 1";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setTelephoneHome1(s);
 			}
 		};				
 		/**************** * field50 *  * *************/
@@ -4866,6 +5020,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Telephone home 2";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setTelephoneHome2(s);
+			}
 		};				
 		/**************** * field51 *  * *************/
 		mapping[ContactObject.FAX_HOME] = new mapper() {
@@ -4907,6 +5064,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "FAX home";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setFaxHome(s);
 			}
 		};				
 		/**************** * field52 *  * *************/
@@ -4950,6 +5110,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Telephone ISDN";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setTelephoneISDN(s);
+			}
 		};				
 		/**************** * field53 *  * *************/
 		mapping[ContactObject.CELLULAR_TELEPHONE1] = new mapper() {
@@ -4991,6 +5154,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Cellular telephone 1";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setCellularTelephone1(s);
 			}
 		};				
 		/**************** * field54 *  * *************/
@@ -5034,6 +5200,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Cellular telephone 2";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setCellularTelephone2(s);
+			}
 		};				
 		/**************** * field55 *  * *************/
 		mapping[ContactObject.TELEPHONE_OTHER] = new mapper() {
@@ -5075,6 +5244,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Telephone other";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setTelephoneOther(s);
 			}
 		};				
 		/**************** * field56 *  * *************/
@@ -5118,6 +5290,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "FAX other";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setFaxOther(s);
+			}
 		};				
 		/**************** * field57 *  * *************/
 		mapping[ContactObject.TELEPHONE_PAGER] = new mapper() {
@@ -5159,6 +5334,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Telephone pager";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setTelephonePager(s);
 			}
 		};				
 		/**************** * field58 *  * *************/
@@ -5202,6 +5380,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Telephone primary";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setTelephonePrimary(s);
+			}
 		};				
 		/**************** * field59 *  * *************/
 		mapping[ContactObject.TELEPHONE_RADIO] = new mapper() {
@@ -5243,6 +5424,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Telephone radio";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setTelephoneRadio(s);
 			}
 		};				
 		/**************** * field60 *  * *************/
@@ -5286,6 +5470,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Telephone telex";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setTelephoneTelex(s);
+			}
 		};				
 		/**************** * field61 *  * *************/
 		mapping[ContactObject.TELEPHONE_TTYTDD] = new mapper() {
@@ -5328,6 +5515,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Telephone TTY/TDD";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setTelephoneTTYTTD(s);
+			}
 		};				
 		/**************** * field62 *  * *************/
 		mapping[ContactObject.INSTANT_MESSENGER1] = new mapper() {
@@ -5369,6 +5559,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Instantmessenger 1";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setInstantMessenger1(s);
 			}
 		};				
 
@@ -5413,6 +5606,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Instantmessenger 2";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setInstantMessenger2(s);
+			}
 		};				
 	
 		/**************** * field64 *  * *************/
@@ -5456,6 +5652,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Telephone IP";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setTelephoneIP(s);
+			}
 		};			
 		/**************** * field65 *  * *************/
 		mapping[ContactObject.EMAIL1] = new mapper() {
@@ -5497,6 +5696,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Email 1";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setEmail1(s);
 			}
 		};			
 		/**************** * field66 *  * *************/
@@ -5540,6 +5742,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Email 2";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setEmail2(s);
+			}
 		};		
 		/**************** * field67 *  * *************/
 		mapping[ContactObject.EMAIL3] = new mapper() {
@@ -5581,6 +5786,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Email 3";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setEmail3(s);
 			}
 		};		
 		/**************** * field68 *  * *************/
@@ -5624,6 +5832,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "URL";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setURL(s);
+			}
 		};		
 		/**************** * field69 *  * *************/
 		mapping[ContactObject.CATEGORIES] = new mapper() {
@@ -5665,6 +5876,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Categories";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setCategories(s);
 			}
 		};
 		/**************** * field70 *  * *************/
@@ -5708,6 +5922,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Dynamic Field 1";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField01(s);
+			}
 		};
 		/**************** * field71 *  * *************/
 		mapping[ContactObject.USERFIELD02] = new mapper() {
@@ -5749,6 +5966,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Dynamic Field 2";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField02(s);
 			}
 		};		
 		/**************** * field72 *  * *************/
@@ -5792,6 +6012,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Dynamic Field 3";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField03(s);
+			}
 		};		
 		/**************** * field73 *  * *************/
 		mapping[ContactObject.USERFIELD04] = new mapper() {
@@ -5833,6 +6056,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Dynamic Field 4";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField04(s);
 			}
 		};		
 		/**************** * field74 *  * *************/
@@ -5876,6 +6102,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Dynamic Field 5";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField05(s);
+			}
 		};		
 		/**************** * field75 *  * *************/
 		mapping[ContactObject.USERFIELD06] = new mapper() {
@@ -5917,6 +6146,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Dynamic Field 6";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField06(s);
 			}
 		};		
 		/**************** * field76 *  * *************/
@@ -5960,6 +6192,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Dynamic Field 7";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField07(s);
+			}
 		};		
 		/**************** * field77 *  * *************/
 		mapping[ContactObject.USERFIELD08] = new mapper() {
@@ -6001,6 +6236,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Dynamic Field 8";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField08(s);
 			}
 		};		
 		/**************** * field78 *  * *************/
@@ -6044,6 +6282,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Dynamic Field 9";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField09(s);
+			}
 		};		
 		/**************** * field79 *  * *************/
 		mapping[ContactObject.USERFIELD10] = new mapper() {
@@ -6085,6 +6326,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Dynamic Field 10";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField10(s);
 			}
 		};
 		/**************** * field80 *  * *************/
@@ -6128,6 +6372,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Dynamic Field 11";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField11(s);
+			}
 		};			
 		/**************** * field81 *  * *************/
 		mapping[ContactObject.USERFIELD12] = new mapper() {
@@ -6169,6 +6416,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Dynamic Field 12";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField12(s);
 			}
 		};			
 		/**************** * field82 *  * *************/
@@ -6212,6 +6462,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Dynamic Field 13";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField13(s);
+			}
 		};			
 		/**************** * field83 *  * *************/
 		mapping[ContactObject.USERFIELD14] = new mapper() {
@@ -6253,6 +6506,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Dynamic Field 14";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField14(s);
 			}
 		};			
 		/**************** * field84 *  * *************/
@@ -6296,6 +6552,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Dynamic Field 15";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField15(s);
+			}
 		};			
 		/**************** * field85 *  * *************/
 		mapping[ContactObject.USERFIELD16] = new mapper() {
@@ -6337,6 +6596,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Dynamic Field 16";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField17(s);
 			}
 		};			
 		/**************** * field86 *  * *************/
@@ -6380,6 +6642,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Dynamic Field 17";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField17(s);
+			}
 		};			
 		/**************** * field87 *  * *************/
 		mapping[ContactObject.USERFIELD18] = new mapper() {
@@ -6421,6 +6686,9 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Dynamic Field 18";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField18(s);
 			}
 		};			
 		/**************** * field88 *  * *************/
@@ -6464,6 +6732,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Dynamic Field 19";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField19(s);
+			}
 		};			
 		/**************** * field89 *  * *************/
 		mapping[ContactObject.USERFIELD20] = new mapper() {
@@ -6506,6 +6777,9 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Dynamic Field 20";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				co.setUserField20(s);
+			}
 		};			
 		/**************** * intfield01 *  * *************/
 		mapping[ContactObject.OBJECT_ID] = new mapper() {
@@ -6538,6 +6812,11 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Object id";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				if (null == s)
+					s = "0";
+				co.setObjectID(new Integer(s).intValue());
 			}
 		};
 		/**************** * intfield02 *  * *************/
@@ -6572,6 +6851,11 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Number of distributionlists";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				if (null == s)
+					s = "0";
+				co.setNumberOfDistributionLists(new Integer(s).intValue());
+			}
 		};
 		/**************** * intfield03 *  * *************/
 		mapping[ContactObject.NUMBER_OF_LINKS] = new mapper() {
@@ -6604,6 +6888,11 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Number of links";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				if (null == s)
+					s = "0";
+				co.setNumberOfLinks(new Integer(s).intValue());
 			}
 		};
 		/**************** * intfield02 Part 2 *  * *************/
@@ -6641,6 +6930,8 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return null;
+			}
+			public void setValueAsString(String s, ContactObject co) {
 			}
 		};
 		/**************** * intfield03 Part 2 *  * *************/
@@ -6680,6 +6971,8 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return null;
 			}
+			public void setValueAsString(String s, ContactObject co) {
+			}
 		};
 		/**************** * fid *  * *************/
 		mapping[ContactObject.FOLDER_ID] = new mapper() {
@@ -6713,6 +7006,11 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Folder id";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				if (null == s)
+					s = "0";
+				co.setParentFolderID(new Integer(s).intValue());
+			}
 		};
 		/**************** * cid *  * *************/
 		mapping[ContactObject.CONTEXTID] = new mapper() {
@@ -6745,6 +7043,11 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Context id";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				if (null == s)
+					s = "0";
+				co.setContextId(new Integer(s).intValue());
 			}
 		};
 		/**************** * pflag *  * *************/
@@ -6791,6 +7094,10 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return null;
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				if (null != s)
+					co.setPrivateFlag(true);
+			}
 		};
 		/**************** * created_from *  * *************/
 		mapping[ContactObject.CREATED_BY] = new mapper() {
@@ -6824,6 +7131,11 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Created by";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				if (null == s)
+					s = "0";
+				co.setCreatedBy(new Integer(s).intValue());
+			}
 		};
 		/**************** * changed_from *  * *************/
 		mapping[ContactObject.MODIFIED_BY] = new mapper() {
@@ -6856,6 +7168,11 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Modified by";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				if (null == s)
+					s = "0";
+				co.setModifiedBy(new Integer(s).intValue());
 			}
 		};
 		/**************** * creating_date *  * *************/
@@ -6898,6 +7215,13 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Creation date";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				Date d = null;
+				if (null != s){
+					d = new Date(new Long(s).longValue());
+				}
+				co.setCreationDate(d);
+			}
 		};
 		/**************** * changing_date *  * *************/
 		mapping[ContactObject.LAST_MODIFIED] = new mapper() {
@@ -6938,6 +7262,13 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Changing date";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				Date d = null;
+				if (null != s){
+					d = new Date(new Long(s).longValue());
+				}
+				co.setLastModified(d);
 			}
 		};		
 		/**************** * timestampfield01 *  * *************/
@@ -6995,6 +7326,13 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return "Birthday";
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				Date d = null;
+				if (null != s){
+					d = new Date(new Long(s).longValue());
+				}
+				co.setBirthday(d);
+			}
 		};		
 		/**************** * timestampfield02 *  * *************/
 		mapping[ContactObject.ANNIVERSARY] = new mapper() {
@@ -7050,6 +7388,13 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Anniversay";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				Date d = null;
+				if (null != s){
+					d = new Date(new Long(s).longValue());
+				}
+				co.setAnniversary(d);
 			}
 		};			
 
@@ -7107,6 +7452,10 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return null;
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				// TODO
+				//co.setImage1();
+			}
 		};		
 		/**************** * intfield04 *  * *************/
 		mapping[ContactObject.IMAGE_LAST_MODIFIED] = new mapper() {
@@ -7155,6 +7504,8 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return null;
 			}
+			public void setValueAsString(String s, ContactObject co) {
+			}
 		};
 		/**************** * intfield04 *  * *************/
 		mapping[ContactObject.IMAGE1_CONTENT_TYPE] = new mapper() {
@@ -7188,6 +7539,8 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return null;
 			}
+			public void setValueAsString(String s, ContactObject co) {
+			}
 		};
 		/**************** * intfield04 *  * *************/
 		mapping[ContactObject.NUMBER_OF_IMAGES] = new mapper() {
@@ -7217,6 +7570,11 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return null;
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				if (null == s)
+					s = "0";
+				co.setNumberOfImages(new Integer(s).intValue());
 			}
 		};
 		/**************** * userid *  * *************/
@@ -7254,6 +7612,11 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return null;
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				if (null == s)
+					s = "0";
+				co.setInternalUserId(new Integer(s).intValue());
 			}
 		};	
 		/**************** * intfield05 *  * *************/
@@ -7295,6 +7658,11 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return null;
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				if (null == s)
+					s="0";
+				co.setLabel(new Integer(s).intValue());
 			}
 		};	
 		/**************** * field90 *  * *************/
@@ -7338,6 +7706,8 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return null;
 			}
+			public void setValueAsString(String s, ContactObject co) {
+			}
 		};	
 		/**************** * intfield06 *  * *************/
 		mapping[ContactObject.DEFAULT_ADDRESS] = new mapper() {
@@ -7378,6 +7748,11 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return "Default address";
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				if (null == s)
+					s = "0";
+				co.setDefaultAddress(new Integer(s).intValue());
 			}
 		};	
 		/**************** * intfield07 *  * *************/
@@ -7432,6 +7807,11 @@ public class Contacts implements DeleteListener {
 			public String getReadableTitle() {
 				return null;
 			}
+			public void setValueAsString(String s, ContactObject co) {
+				if (null != s){
+					co.setMarkAsDistributionlist(true);
+				}
+			}
 		};
 		/**************** * intfield08 *  * *************/
 		mapping[ContactObject.NUMBER_OF_ATTACHMENTS] = new mapper() {
@@ -7472,6 +7852,11 @@ public class Contacts implements DeleteListener {
 			}
 			public String getReadableTitle() {
 				return null;
+			}
+			public void setValueAsString(String s, ContactObject co) {
+				if (null == s)
+					s = "0";
+				co.setNumberOfAttachments(new Integer(s).intValue());
 			}
 		};	
 	}

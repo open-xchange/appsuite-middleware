@@ -82,9 +82,21 @@ public class ContactServices {
 		}
 		return 0;
 	}
-	
+	/*
 	public ContactInterface getService(int folderId){
 		ContactInterface contactInterface = services.get(folderId);
 		return contactInterface;
+
 	}
+	*/
+	
+	public ContactInterface getService(int folderId, int context_id){
+		ContactInterface contactInterface = services.get(folderId);
+			if (null == contactInterface || context_id != contactInterface.getLdapServer().getContext())
+				return null;
+			else
+				return contactInterface;
+
+	}
+	
 }

@@ -64,6 +64,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXObjectNotFoundException;
+import com.openexchange.contact.LdapServer;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.Component;
@@ -752,7 +753,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 		}
 		return co;
 	}
-
+	
 	@OXThrowsMultiple(
 			category={	Category.SOCKET_CONNECTION,
 									Category.CODE_ERROR,
@@ -1339,9 +1340,20 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 			return false;
 		}
 	}
-	
+
 	public int getFolderId() {
+		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	public LdapServer getLdapServer() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void setSession(Session s) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
