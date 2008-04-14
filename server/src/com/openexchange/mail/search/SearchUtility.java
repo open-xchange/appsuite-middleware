@@ -49,6 +49,10 @@
 
 package com.openexchange.mail.search;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailListField;
 
@@ -137,5 +141,39 @@ public final class SearchUtility {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Splits the specified search term into contained primary search terms.
+	 * 
+	 * @param searchTerm
+	 *            The search term to split
+	 * @return An {@link Iterator} of contained primary search terms.
+	 */
+	public static Iterator<SearchTerm<?>> splitSearchTerm(final SearchTerm<?> searchTerm) {
+		final List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>();
+		addSearchTerm(searchTerm, /*new HashSet<Class<? extends SearchTerm>>(),*/ terms);
+		return terms.iterator();
+	}
+
+	private static void addSearchTerm(final SearchTerm<?> searchTerm, /*final Set<Class<? extends SearchTerm>> classes,*/
+			final List<SearchTerm<?>> terms) {
+		if (searchTerm instanceof com.openexchange.mail.search.ANDTerm) {
+			final com.openexchange.mail.search.SearchTerm<?>[] andTerms = ((com.openexchange.mail.search.ANDTerm) searchTerm)
+					.getPattern();
+			addSearchTerm(andTerms[0], /*classes,*/ terms);
+			addSearchTerm(andTerms[1], /*classes,*/ terms);
+		} else if (searchTerm instanceof com.openexchange.mail.search.ORTerm) {
+			final com.openexchange.mail.search.SearchTerm<?>[] orTerms = ((com.openexchange.mail.search.ORTerm) searchTerm)
+					.getPattern();
+			addSearchTerm(orTerms[0], /*classes,*/ terms);
+			addSearchTerm(orTerms[1], /*classes,*/ terms);
+		} else {
+			/*if (classes.contains(searchTerm.getClass())) {
+				return;
+			}
+			classes.add(searchTerm.getClass());*/
+			terms.add(searchTerm);
+		}
 	}
 }
