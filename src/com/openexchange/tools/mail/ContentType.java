@@ -50,47 +50,50 @@
 package com.openexchange.tools.mail;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.imap.OXMailException;
-import com.openexchange.imap.OXMailException.MailCode;
 
 /**
- * ContentType
+ * {@link ContentType} - Parses value of MIME header <code>Content-Type</code>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ContentType implements Serializable {
+public final class ContentType extends ParameterizedHeader implements Serializable {
 
 	private static final long serialVersionUID = -9197784872892324694L;
 
+	/**
+	 * The default content type: <code>text/plain; charset=us-ascii</code>
+	 */
+	public static final ContentType DEFAULT_CONTENT_TYPE;
+
+	static {
+		DEFAULT_CONTENT_TYPE = new ContentType();
+		DEFAULT_CONTENT_TYPE.setPrimaryType("text");
+		DEFAULT_CONTENT_TYPE.setSubType("plain");
+		DEFAULT_CONTENT_TYPE.setCharsetParameter("us-ascii");
+	}
+
+	/**
+	 * The regular expression that should match whole content type
+	 */
 	private static final Pattern PATTERN_CONTENT_TYPE = Pattern
-			.compile("([^\\s]+)(/)([^\\s]+?\\s*)((?:(?:;\\s*|\\s+)\\S+=(?:(?:[^;]*)|(?:\"\\S+?\")))*)",
-					Pattern.CASE_INSENSITIVE);
+			.compile("(?:([\\p{ASCII}&&[^/;\\s\"]]+)(?:/([\\p{ASCII}&&[^;\\s\"]]+))?)");
 
-	private static final Pattern PATTERN_PARAMETER = Pattern.compile(
-			"(;\\s*|\\s+)(\\S+)(=)((?:(?:[^;]*)|(?:\"\\S+?\")))", Pattern.CASE_INSENSITIVE);
-
-	private static final Pattern PATTERN_BASETYPE = Pattern
-			.compile("([^\\s]+)(/)([^\\s^;]+)", Pattern.CASE_INSENSITIVE);
-
-	private static final Pattern PATTERN_SINGLE_PARAM = Pattern.compile("([^\\s]+)(\\s*[=|:]\\s*)([^\\s^;]+)",
-			Pattern.CASE_INSENSITIVE);
-
+	/**
+	 * The MIME type delimiter
+	 * 
+	 * @value /
+	 */
 	private static final char DELIMITER = '/';
 
-	private static final char SEMICOLON = ';';
+	private static final String DEFAULT_SUBTYPE = "OCTET-STREAM";
 
-	private static final int NONE = -1;
-
-	private static final String SPLIT = "\\s*";
+	private static final String PARAM_CHARSET = "charset";
 
 	private String primaryType;
 
@@ -98,86 +101,113 @@ public final class ContentType implements Serializable {
 
 	private String baseType;
 
-	private final Map<String, String> parameters;
-
+	/**
+	 * Initializes a new {@link ContentType}
+	 */
 	public ContentType() {
 		super();
-		parameters = new HashMap<String, String>();
+		parameterList = new ParameterList();
 	}
 
+	/**
+	 * Initializes a new {@link ContentType}
+	 * 
+	 * @param contentType
+	 *            The content type
+	 * @throws OXException
+	 *             If content type cannot be parsed
+	 */
 	public ContentType(final String contentType) throws OXException {
-		this(contentType, true);
+		super();
+		parseContentType(contentType);
 	}
 
-	public ContentType(final String contentType, final boolean strict) throws OXException {
-		this();
-		if (strict) {
-			/*
-			 * Expect a correct base type (e.g. text/plain) and
-			 * semicolon-separated parameters (if any)
-			 */
-			parseContentType(contentType);
-		} else {
-			int pos = NONE;
-			final Matcher m = PATTERN_BASETYPE.matcher(contentType);
-			if (m.find()) {
-				baseType = null;
-				primaryType = m.group(1);
-				subType = m.group(3);
-				pos = m.end();
-			} else {
-				throw new OXMailException(MailCode.INVALID_CONTENT_TYPE, contentType);
-			}
-			if (pos != NONE) {
-				final String paramStr = contentType.substring(pos);
-				final int delim = paramStr.charAt(0) == SEMICOLON ? SEMICOLON : Character.isWhitespace(paramStr
-						.charAt(0)) ? paramStr.charAt(0) : NONE;
-				if (delim != NONE) {
-					final String[] paramArr = paramStr.split(new StringBuilder(SPLIT).append((char) delim)
-							.append(SPLIT).toString());
-					NextParam: for (int i = 0; i < paramArr.length; i++) {
-						final Matcher paramMatcher;
-						if (paramArr[i].length() == 0) {
-							continue NextParam;
-						} else if ((paramMatcher = PATTERN_SINGLE_PARAM.matcher(paramArr[i])).matches()) {
-							parameters.put(paramMatcher.group(1).toLowerCase(Locale.ENGLISH), paramMatcher.group(3));
-						}
-					}
-				}
-			}
+	private void parseContentType(final String contentType) throws OXException {
+		parseContentType(contentType, true);
+	}
+
+	private void parseContentType(final String contentTypeArg, final boolean paramList) throws OXException {
+		if (null == contentTypeArg || contentTypeArg.length() == 0) {
+			setContentType(DEFAULT_CONTENT_TYPE);
 		}
-	}
-
-	private void parseContentType(final String ct) throws OXException {
-		final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(ct);
-		if (!ctMatcher.matches()) {
-			throw new OXMailException(MailCode.INVALID_CONTENT_TYPE, ct);
+		final String contentType = prepareParameterizedHeader(contentTypeArg);
+		final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(contentType);
+		if (!ctMatcher.find() || ctMatcher.start() != 0) {
+			throw new OXMailException(OXMailException.MailCode.INVALID_CONTENT_TYPE, contentTypeArg);
 		}
 		primaryType = ctMatcher.group(1);
-		subType = ctMatcher.group(3);
-		baseType = null;
-		parseParameters(ct);
-	}
-
-	private void parseParameters(final String ct) {
-		final Matcher paramMatcher = PATTERN_PARAMETER.matcher(ct);
-		NextParam: while (paramMatcher.find()) {
-			final String value = paramMatcher.group(4);
-			if (value.length() == 0 || "\"\"".equals(value)) {
-				continue NextParam;
-			}
-			parameters.put(paramMatcher.group(2).toLowerCase(Locale.ENGLISH), value);
+		subType = ctMatcher.group(2);
+		if (subType == null || subType.length() == 0) {
+			subType = DEFAULT_SUBTYPE;
+		}
+		baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
+		if (paramList) {
+			parameterList = new ParameterList(contentType.substring(ctMatcher.end()));
 		}
 	}
+
+	// /**
+	// * Initializes a new {@link ContentType}
+	// *
+	// * @param contentTypeArg
+	// * The content type
+	// * @param strict
+	// * <code>true</code> for strict parsing; otherwise
+	// * <code>false</code>
+	// * @throws MailException
+	// * If content type cannot be parsed
+	// */
+	// public ContentType(final String contentTypeArg, final boolean strict)
+	// throws MailException {
+	// super();
+	// final String contentType = prepareContentType(contentTypeArg);
+	// if (strict) {
+	// /*
+	// * Expect a correct base type (e.g. text/plain) and
+	// * semicolon-separated parameters (if any)
+	// */
+	// parseContentType(contentType);
+	// } else {
+	// int pos = NONE;
+	// final Matcher m = PATTERN_BASETYPE.matcher(contentType);
+	// if (m.find()) {
+	// baseType = null;
+	// primaryType = m.group(1);
+	// subType = m.group(2);
+	// if (subType == null || subType.length() == 0) {
+	// subType = DEFAULT_SUBTYPE;
+	// }
+	// pos = m.end();
+	// } else {
+	// throw new MailException(MailException.Code.INVALID_CONTENT_TYPE,
+	// contentType);
+	// }
+	// if (pos != NONE) {
+	// final String paramStr = contentType.substring(pos);
+	// final int delim = paramStr.charAt(0) == SEMICOLON ? SEMICOLON :
+	// Character.isWhitespace(paramStr
+	// .charAt(0)) ? paramStr.charAt(0) : NONE;
+	// if (delim != NONE) {
+	// final String[] paramArr = paramStr.split(new
+	// StringBuilder(SPLIT).append((char) delim)
+	// .append(SPLIT).toString());
+	// NextParam: for (int i = 0; i < paramArr.length; i++) {
+	// final Matcher paramMatcher;
+	// if (paramArr[i].length() == 0) {
+	// continue NextParam;
+	// } else if ((paramMatcher =
+	// PATTERN_SINGLE_PARAM.matcher(paramArr[i])).matches()) {
+	// parameters.put(paramMatcher.group(1).toLowerCase(Locale.ENGLISH),
+	// paramMatcher.group(3));
+	// }
+	// }
+	// }
+	// }
+	// }
+	// }
 
 	private void parseBaseType(final String baseType) throws OXException {
-		final Matcher baseTypeMatcher = PATTERN_BASETYPE.matcher(baseType);
-		if (!baseTypeMatcher.matches()) {
-			throw new OXMailException(MailCode.INVALID_CONTENT_TYPE, baseType);
-		}
-		primaryType = baseTypeMatcher.group(1);
-		subType = baseTypeMatcher.group(3);
-		this.baseType = null;
+		parseContentType(baseType, false);
 	}
 
 	/**
@@ -185,11 +215,14 @@ public final class ContentType implements Serializable {
 	 * 
 	 * @param contentType
 	 *            The content type to apply
-	 * @throws OXException
+	 * @throws MailException
 	 */
 	public void setContentType(final ContentType contentType) throws OXException {
+		if (contentType == this) {
+			return;
+		}
 		setBaseType(contentType.getBaseType());
-		this.parameters.putAll(contentType.parameters);
+		this.parameterList = (ParameterList) contentType.parameterList.clone();
 	}
 
 	/**
@@ -229,7 +262,7 @@ public final class ContentType implements Serializable {
 		if (baseType != null) {
 			return baseType;
 		}
-		return (baseType = new StringBuilder().append(primaryType).append(DELIMITER).append(subType).toString());
+		return (baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString());
 	}
 
 	/**
@@ -240,52 +273,25 @@ public final class ContentType implements Serializable {
 	}
 
 	/**
-	 * Adds given key-value-pair to content-type's parameter list. Any existing
-	 * parameters are overwritten.
+	 * Sets charset parameter
 	 */
-	public void addParameter(final String key, final String value) {
-		parameters.put(key.toLowerCase(Locale.ENGLISH), value);
+	public void setCharsetParameter(final String charset) {
+		setParameter(PARAM_CHARSET, charset);
 	}
 
 	/**
-	 * Sets given parameter
+	 * @return the charset value or <code>null</code> if not present
 	 */
-	public void setParameter(final String key, final String value) {
-		addParameter(key, value);
+	public String getCharsetParameter() {
+		return getParameter(PARAM_CHARSET);
 	}
 
 	/**
-	 * @return the value associated with given key or <code>null</code> if not
-	 *         present
+	 * @return <code>true</code> if charset parameter is present,
+	 *         <code>false</code> otherwise
 	 */
-	public String getParameter(final String key) {
-		return parameters.get(key.toLowerCase(Locale.ENGLISH));
-	}
-
-	/**
-	 * Removes & returns the value associated with given key or
-	 * <code>null</code> if not present
-	 * 
-	 * @return the value associated with given key or <code>null</code> if not
-	 *         present
-	 */
-	public String removeParameter(final String key) {
-		return parameters.remove(key.toLowerCase(Locale.ENGLISH));
-	}
-
-	/**
-	 * @return <code>true</code> if parameter is present, <code>false</code>
-	 *         otherwise
-	 */
-	public boolean containsParameter(final String key) {
-		return parameters.containsKey(key.toLowerCase(Locale.ENGLISH));
-	}
-
-	/**
-	 * @return an <code>java.util.Iterator</code> of available parameter names
-	 */
-	public Iterator<String> getParameterNames() {
-		return parameters.keySet().iterator();
+	public boolean containsCharsetParameter() {
+		return containsParameter(PARAM_CHARSET);
 	}
 
 	/**
@@ -296,7 +302,7 @@ public final class ContentType implements Serializable {
 	}
 
 	/**
-	 * Checks if Content-Type's base type matches given wilcard pattern (e.g
+	 * Checks if Content-Type's base type matches given wildcard pattern (e.g
 	 * text/plain, text/* or text/htm*)
 	 * 
 	 * @return <code>true</code> if Content-Type's base type matches given
@@ -309,7 +315,7 @@ public final class ContentType implements Serializable {
 	}
 
 	/**
-	 * Checks if given MIME type's base type matches given wilcard pattern (e.g
+	 * Checks if given MIME type's base type matches given wildcard pattern (e.g
 	 * text/plain, text/* or text/htm*)
 	 * 
 	 * 
@@ -319,10 +325,10 @@ public final class ContentType implements Serializable {
 	 *            The pattern
 	 * @return <code>true</code> if pattern matches; otherwise
 	 *         <code>false</code>
-	 * @throws OXMailException
+	 * @throws OXException
 	 *             If an invalid MIME type is detected
 	 */
-	public static boolean isMimeType(final String mimeType, final String pattern) throws OXMailException {
+	public static boolean isMimeType(final String mimeType, final String pattern) throws OXException {
 		final Pattern p = Pattern.compile(pattern.replaceAll("\\*", ".*").replaceAll("\\?", ".?"),
 				Pattern.CASE_INSENSITIVE);
 		return p.matcher(getBaseType(mimeType)).matches();
@@ -334,15 +340,19 @@ public final class ContentType implements Serializable {
 	 * @param mimeType
 	 *            The MIME type
 	 * @return the base type
-	 * @throws OXMailException
+	 * @throws OXException
 	 *             If an invalid MIME type is detected
 	 */
-	public static String getBaseType(final String mimeType) throws OXMailException {
-		final Matcher m = PATTERN_BASETYPE.matcher(mimeType);
+	public static String getBaseType(final String mimeType) throws OXException {
+		final Matcher m = PATTERN_CONTENT_TYPE.matcher(mimeType);
 		if (m.find()) {
-			return new StringBuilder(32).append(m.group(1)).append('/').append(m.group(3)).toString();
+			String subType = m.group(2);
+			if (subType == null || subType.length() == 0) {
+				subType = DEFAULT_SUBTYPE;
+			}
+			return new StringBuilder(32).append(m.group(1)).append('/').append(subType).toString();
 		}
-		throw new OXMailException(MailCode.INVALID_CONTENT_TYPE, mimeType);
+		throw new OXMailException(OXMailException.MailCode.INVALID_CONTENT_TYPE, mimeType);
 	}
 
 	/*
@@ -352,14 +362,9 @@ public final class ContentType implements Serializable {
 	 */
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder(64);
 		sb.append(primaryType).append(DELIMITER).append(subType);
-		final int size = parameters.size();
-		final Iterator<Map.Entry<String, String>> iter = parameters.entrySet().iterator();
-		for (int i = 0; i < size; i++) {
-			final Map.Entry<String, String> entry = iter.next();
-			sb.append("; ").append(entry.getKey()).append('=').append(entry.getValue());
-		}
+		parameterList.appendUnicodeString(sb);
 		return sb.toString();
 	}
 

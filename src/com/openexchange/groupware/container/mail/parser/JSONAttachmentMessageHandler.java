@@ -67,10 +67,12 @@ import javax.mail.Part;
 import javax.mail.Flags.Flag;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeUtility;
 
 import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.mail.JSONMessageAttachmentObject;
+import com.openexchange.imap.MessageHeaders;
 import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.OXMailException.MailCode;
 import com.openexchange.sessiond.SessionObject;
@@ -304,11 +306,24 @@ public class JSONAttachmentMessageHandler implements MessageHandler {
 		if (this.id.equals(id)) {
 			try {
 				attachment = new JSONMessageAttachmentObject(id);
-				attachment.setFileName(part.getFileName() == null ? fileName : part.getFileName());
+				attachment.setFileName(fileName == null ? part.getFileName() : fileName);
 				attachment.setSize(part.getSize());
 				attachment.setContentType(baseContentType);
 				attachment.setDisposition(isInline ? Part.INLINE : Part.ATTACHMENT);
 				attachment.setContentID(JSONMessageAttachmentObject.CONTENT_INPUT_STREAM);
+				/*
+				 * Determine proper content type
+				 */
+				{
+					final String[] sa = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+					if (null != sa && sa.length > 0) {
+						try {
+							attachment.setContentTypeObj(new ContentType(MimeUtility.unfold(sa[0])));
+						} catch (final Exception e) {
+							attachment.setContentTypeObj(null);
+						}
+					}
+				}
 				/*
 				 * Set content
 				 */
@@ -359,6 +374,19 @@ public class JSONAttachmentMessageHandler implements MessageHandler {
 				attachment.setDisposition(Part.ATTACHMENT);
 				attachment.setContent(part.getInputStream());
 				attachment.setContentID(JSONMessageAttachmentObject.CONTENT_INPUT_STREAM);
+				/*
+				 * Determine proper content type
+				 */
+				{
+					final String[] sa = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+					if (null != sa && sa.length > 0) {
+						try {
+							attachment.setContentTypeObj(new ContentType(MimeUtility.unfold(sa[0])));
+						} catch (final Exception e) {
+							attachment.setContentTypeObj(null);
+						}
+					}
+				}
 				return false;
 			} catch (MessagingException e) {
 				throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
@@ -386,6 +414,19 @@ public class JSONAttachmentMessageHandler implements MessageHandler {
 				attachment.setDisposition(Part.ATTACHMENT);
 				attachment.setContent(part.getInputStream());
 				attachment.setContentID(JSONMessageAttachmentObject.CONTENT_INPUT_STREAM);
+				/*
+				 * Determine proper content type
+				 */
+				{
+					final String[] sa = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+					if (null != sa && sa.length > 0) {
+						try {
+							attachment.setContentTypeObj(new ContentType(MimeUtility.unfold(sa[0])));
+						} catch (final Exception e) {
+							attachment.setContentTypeObj(null);
+						}
+					}
+				}
 				return false;
 			} catch (MessagingException e) {
 				throw MailInterfaceImpl.handleMessagingException(e, session.getIMAPProperties(), session.getContext());
@@ -414,6 +455,19 @@ public class JSONAttachmentMessageHandler implements MessageHandler {
 			attachment.setContentType(ct.getBaseType());
 			attachment.setContent(null);
 			attachment.setContentID(JSONMessageAttachmentObject.CONTENT_NONE);
+			/*
+			 * Determine proper content type
+			 */
+			{
+				final String s = mp.getContentType();
+				if (null != s && s.length() > 0) {
+					try {
+						attachment.setContentTypeObj(new ContentType(MimeUtility.unfold(s)));
+					} catch (final Exception e) {
+						attachment.setContentTypeObj(null);
+					}
+				}
+			}
 			return false;
 		}
 		return true;

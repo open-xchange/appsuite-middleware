@@ -70,6 +70,7 @@ import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimePart;
+import javax.mail.internet.MimeUtility;
 
 import net.freeutils.tnef.Attachment;
 import net.freeutils.tnef.Attr;
@@ -87,10 +88,12 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.imap.IMAPProperties;
 import com.openexchange.imap.IMAPUtils;
+import com.openexchange.imap.MessageHeaders;
 import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.TNEFBodyPart;
 import com.openexchange.imap.OXMailException.MailCode;
 import com.openexchange.sessiond.SessionObject;
+import com.openexchange.tools.mail.ContentDisposition;
 import com.openexchange.tools.mail.ContentType;
 import com.openexchange.tools.mail.UUEncodedMultiPart;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
@@ -221,18 +224,54 @@ public class MessageDumper {
 		int partCount = partCountArg;
 		final String disposition = part.getDisposition();
 		final int size = part.getSize();
-		final String filename = MessageUtils.getFileName(part, MessageUtils.getIdentifier(prefix, partCount));
 		final ContentType contentType = new ContentType();
+		boolean checkByFilename = false;
 		try {
-			contentType.setContentType(part.getContentType() == null ? MIME_APPL_OCTET : part.getContentType());
+			final String[] sa = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+			if (null == sa || sa.length == 0) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn("Missing Content-Type header in message part");
+				}
+				checkByFilename = true;
+				contentType.setContentType(MIME_APPL_OCTET);
+			} else {
+				contentType.setContentType(MimeUtility.unfold(sa[0]));
+			}
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
-			/*
-			 * Try to determine MIME type from file name
-			 */
-			if (part.getFileName() != null) {
-				contentType.setContentType(new MimetypesFileTypeMap().getContentType(new File(filename).getName())
-						.toLowerCase(session.getLocale()));
+			checkByFilename = true;
+			contentType.setContentType(MIME_APPL_OCTET);
+		}
+		final ContentDisposition contentDisposition = new ContentDisposition();
+		try {
+			final String[] sa = part.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION);
+			if (null == sa || sa.length == 0) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Missing Content-Disposition header in message part");
+				}
+				contentDisposition.setContentDisposition(Part.INLINE);
+			} else {
+				contentDisposition.setContentDisposition(MimeUtility.unfold(sa[0]));
+			}
+		} catch (final Exception e) {
+			LOG.error(e.getMessage(), e);
+			contentDisposition.setContentDisposition(Part.INLINE);
+		}
+		final String filename;
+		{
+			String fn = contentDisposition.getFilenameParameter();
+			if (fn == null) {
+				fn = contentType.getParameter("name");
+			}
+			filename = MessageUtils.getFileName(fn, MessageUtils.getIdentifier(prefix, partCount));
+			if (checkByFilename) {
+				/*
+				 * Try to determine MIME type from file name
+				 */
+				if (part.getFileName() != null) {
+					contentType.setContentType(new MimetypesFileTypeMap().getContentType(new File(filename).getName())
+							.toLowerCase(session.getLocale()));
+				}
 			}
 		}
 		/*

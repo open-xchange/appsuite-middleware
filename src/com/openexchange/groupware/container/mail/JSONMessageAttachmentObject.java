@@ -61,6 +61,7 @@ import com.openexchange.groupware.container.mail.parser.MessageUtils;
 import com.openexchange.groupware.upload.UploadEvent;
 import com.openexchange.imap.OXMailException;
 import com.openexchange.imap.OXMailException.MailCode;
+import com.openexchange.tools.mail.ContentType;
 
 /**
  * JSONMessageAttachmentObject
@@ -100,6 +101,8 @@ public class JSONMessageAttachmentObject implements Cloneable {
 
 	private int contentID = CONTENT_NONE;
 
+	private ContentType contentTypeObj;
+
 	public JSONMessageAttachmentObject() {
 		super();
 	}
@@ -120,6 +123,7 @@ public class JSONMessageAttachmentObject implements Cloneable {
 		uniqueDiskFileName = null;
 		infostoreDocumentInputStream = null;
 		contentID = CONTENT_NONE;
+		contentTypeObj = null;
 	}
 
 	public Object getContent() {
@@ -143,6 +147,14 @@ public class JSONMessageAttachmentObject implements Cloneable {
 
 	public void setContentType(final String contentType) {
 		this.contentType = contentType;
+	}
+
+	public ContentType getContentTypeObj() {
+		return contentTypeObj;
+	}
+
+	public void setContentTypeObj(final ContentType contentTypeObj) {
+		this.contentTypeObj = contentTypeObj;
 	}
 
 	public String getCid() {

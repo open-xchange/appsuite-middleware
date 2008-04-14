@@ -1151,7 +1151,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					} else {
 						final String fileName = getSaveAsFileName(mao.getFileName(), internetExplorer, mao
 								.getContentType());
-						contentType = new ContentType(mao.getContentType());
+						contentType = mao.getContentTypeObj() == null ? new ContentType(mao.getContentType()) : mao.getContentTypeObj();
 						if (contentType.getBaseType().equalsIgnoreCase(MIME_APPLICATION_OCTET_STREAM)) {
 							/*
 							 * Try to determine MIME type via JAF
@@ -1161,7 +1161,12 @@ public class Mail extends PermissionServlet implements UploadListener {
 							contentType.setPrimaryType(ct.substring(0, pos));
 							contentType.setSubType(ct.substring(pos + 1));
 						}
-						contentType.addParameter(STR_NAME, fileName);
+						String name = contentType.getParameter("name");
+						if (name == null) {
+							contentType.setParameter(STR_NAME, fileName);
+						} else if (!fileName.equals(name)) {
+							contentType.setParameter(STR_NAME, fileName);
+						}
 						resp.setHeader(STR_CONTENT_DISPOSITION, new StringBuilder(50).append(STR_INLINE_FILENAME)
 								.append(fileName).append('"').toString());
 					}

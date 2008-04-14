@@ -1,3 +1,8 @@
+* 2008-04-14 - thorben.betten@open-xchange.com
+
+ - Bugfixes #9914 and #10668: Fixed several encoding/decoding problems with
+   attachment filenames containing umlauts and added RFC2231 support
+
 * 2008-03-11 - choeger@open-xchange.com
 
  - Bugfix #11038 IMAP logic does not honor the @domain part of a logged in user

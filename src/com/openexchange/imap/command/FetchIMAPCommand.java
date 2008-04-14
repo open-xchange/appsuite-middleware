@@ -821,7 +821,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 							 * Try with less strict parsing
 							 */
 							try {
-								msg.setContentType(new ContentType(sb.toString(), false));
+								msg.setContentType(new ContentType(sb.toString()));
 							} catch (final OXException ie) {
 								LOG.error(ie.getMessage(), ie);
 								msg.setContentType(new ContentType(DEFAULT_CONTENT_TYPE));
