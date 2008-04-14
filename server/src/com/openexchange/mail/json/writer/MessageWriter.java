@@ -517,9 +517,6 @@ public final class MessageWriter {
 					public void writeField(Object jsonContainer, MailMessage mail, int level, boolean withKey)
 							throws MailException {
 						try {
-							/*
-							 * TODO: Total, New, Unread, and Deleted count
-							 */
 							if (withKey) {
 								((JSONObject) jsonContainer).put(MailJSONField.UNREAD.getKey(), mail
 										.getUnreadMessages());
