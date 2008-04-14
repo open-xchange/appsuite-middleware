@@ -2,6 +2,7 @@
 
  - Bugfixes #9914 and #10668: Fixed several encoding/decoding problems with
    attachment filenames containing umlauts and added RFC2231 support
+ - Bugfix #10644: Checking ACL support prior to accessing a folder's ACL list
 
 * 2008-03-11 - choeger@open-xchange.com
 

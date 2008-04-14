@@ -5439,12 +5439,14 @@ public class MailInterfaceImpl implements MailInterface {
 			mailInterfaceMonitor.changeNumActive(true);
 			try {
 				newFolder.setSubscribed(toMove.isSubscribed());
-				/*
-				 * Copy ACLs
-				 */
-				final ACL[] acls = toMove.getACL();
-				for (int i = 0; i < acls.length; i++) {
-					newFolder.addACL(acls[i]);
+				if (IMAPProperties.isSupportsACLs()) {
+					/*
+					 * Copy ACLs
+					 */
+					final ACL[] acls = toMove.getACL();
+					for (int i = 0; i < acls.length; i++) {
+						newFolder.addACL(acls[i]);
+					}
 				}
 			} finally {
 				try {
