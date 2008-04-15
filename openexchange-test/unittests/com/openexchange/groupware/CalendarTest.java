@@ -96,6 +96,10 @@ public class CalendarTest extends TestCase {
     public static void dontDelete() {
         do_not_delete = true;
     }
+
+    public static void doDelete() {
+        do_not_delete = false;
+    }
     
     public static int getUserId() throws Exception {
         if (!init) {

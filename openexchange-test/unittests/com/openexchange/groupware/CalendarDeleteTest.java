@@ -66,6 +66,8 @@ public class CalendarDeleteTest extends TestCase {
             
         } catch (Throwable ex) {
             throw new Exception(ex.getMessage(), ex);
+        } finally {
+            CalendarTest.doDelete();
         }
         
     }
