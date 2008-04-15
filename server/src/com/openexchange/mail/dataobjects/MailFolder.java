@@ -172,7 +172,10 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * @return the fullname
+	 * Gets the fullname
+	 * 
+	 * @return The fullname ({@link #DEFAULT_FOLDER_ID} if this mail folder
+	 *         denotes the root folder)
 	 */
 	public String getFullname() {
 		return fullname;
@@ -554,9 +557,10 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Gets the parentFullname
+	 * Gets the parent fullname
 	 * 
-	 * @return the parentFullname
+	 * @return The parent fullname or <code>null</code> if this mail folder
+	 *         denotes the root folder
 	 */
 	public String getParentFullname() {
 		return parentFullname;
@@ -671,7 +675,8 @@ public class MailFolder implements Serializable {
 	/**
 	 * Gets the ownPermission
 	 * 
-	 * @return the ownPermission
+	 * @return the ownPermission or <code>null</code> if this mail folder
+	 *         denotes the root folder
 	 */
 	public OCLPermission getOwnPermission() {
 		return ownPermission;
@@ -783,7 +788,8 @@ public class MailFolder implements Serializable {
 	/**
 	 * Gets the summary
 	 * 
-	 * @return the summary
+	 * @return The summary or <code>null</code> if this mail folder denotes
+	 *         the root folder.
 	 */
 	public String getSummary() {
 		return summary;
