@@ -640,17 +640,17 @@ public final class IMAPCommandsCollection {
 	private static final String COMMAND_EXPUNGE = "EXPUNGE";
 
 	/**
-	 * <p>
 	 * Performs the <code>EXPUNGE</code> command on whole folder referenced by
 	 * <code>imapFolder</code>.
 	 * <p>
-	 * <b>NOTE</b> folder's message cache is left in an inconsistent state
-	 * cause its kept message references are not marked as expunged. Therefore
-	 * the folder should be closed afterwards to force message cache update.
+	 * <b>NOTE</b>: The internal message cache of specified instance of
+	 * {@link IMAPFolder} is left in an inconsistent state cause its kept
+	 * message references are not marked as expunged. Therefore the folder
+	 * should be closed afterwards to force a message cache update.
 	 * 
 	 * 
 	 * @param imapFolder -
-	 *            the imap folder
+	 *            the IMAP folder
 	 * @return <code>true</code> if everything went fine; otherwise
 	 *         <code>false</code>
 	 * @throws ProtocolException -

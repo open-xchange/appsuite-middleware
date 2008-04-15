@@ -807,6 +807,8 @@ public class MailFolder implements Serializable {
 
 	/**
 	 * Sets the summary
+	 * <p>
+	 * Set to <code>null</code> for root folder.
 	 * 
 	 * @param summary
 	 *            the summary to set
