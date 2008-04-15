@@ -173,21 +173,11 @@ public final class MailDeleteTest extends AbstractMailTest {
 
 			} finally {
 
-				boolean success = mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
-				if (success) {
-					System.out.println("Successfully deleted");
-				} else {
-					System.out.println("Delete failed");
-				}
+				mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
 
 				if (trashedIDs != null) {
-					success = mailAccess.getMessageStorage().deleteMessages(
+					mailAccess.getMessageStorage().deleteMessages(
 							mailAccess.getFolderStorage().getTrashFolder(), trashedIDs, true);
-					if (success) {
-						System.out.println("Trashed messages successfully deleted");
-					} else {
-						System.out.println("Trashed messages' deletion failed");
-					}
 				}
 
 				/*

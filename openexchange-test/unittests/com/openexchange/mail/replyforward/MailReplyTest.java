@@ -504,12 +504,7 @@ public final class MailReplyTest extends AbstractMailTest {
 
 				if (uid != -1) {
 					final long[] uids = new long[] { uid };
-					final boolean success = mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
-					if (success) {
-						System.out.println("Successfully deleted");
-					} else {
-						System.out.println("Delete failed");
-					}
+					mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
 				}
 
 				/*

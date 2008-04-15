@@ -161,22 +161,10 @@ public final class MailSaveDraftTest extends AbstractMailTest {
 				}
 			} finally {
 				if (prevUid != -1) {
-					final boolean success = mailAccess.getMessageStorage().deleteMessages(draftFullname,
-							new long[] { prevUid }, true);
-					if (success) {
-						System.out.println("Successfully deleted");
-					} else {
-						System.out.println("Delete failed");
-					}
+					mailAccess.getMessageStorage().deleteMessages(draftFullname, new long[] { prevUid }, true);
 				}
 				if (uid != -1) {
-					final boolean success = mailAccess.getMessageStorage().deleteMessages(draftFullname,
-							new long[] { uid }, true);
-					if (success) {
-						System.out.println("Successfully deleted");
-					} else {
-						System.out.println("Delete failed");
-					}
+					mailAccess.getMessageStorage().deleteMessages(draftFullname, new long[] { uid }, true);
 				}
 				/*
 				 * close

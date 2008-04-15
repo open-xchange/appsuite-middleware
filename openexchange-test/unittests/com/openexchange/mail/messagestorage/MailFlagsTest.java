@@ -110,12 +110,7 @@ public final class MailFlagsTest extends AbstractMailTest {
 
 			} finally {
 
-				boolean success = mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
-				if (success) {
-					System.out.println("Successfully deleted");
-				} else {
-					System.out.println("Delete failed");
-				}
+				mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
 
 				/*
 				 * close

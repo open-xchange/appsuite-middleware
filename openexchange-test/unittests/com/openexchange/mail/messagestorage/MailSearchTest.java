@@ -200,12 +200,7 @@ public final class MailSearchTest extends AbstractMailTest {
 
 			} finally {
 
-				final boolean success = mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
-				if (success) {
-					System.out.println("Successfully deleted");
-				} else {
-					System.out.println("Delete failed");
-				}
+				mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
 
 				/*
 				 * close

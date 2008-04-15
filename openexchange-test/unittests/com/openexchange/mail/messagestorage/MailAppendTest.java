@@ -103,12 +103,7 @@ public final class MailAppendTest extends AbstractMailTest {
 					System.out.println("Fetched: " + fetchedMails[i].getMailId());
 				}
 	
-				final boolean success = mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
-				if (success) {
-					System.out.println("Successfully deleted");
-				} else {
-					System.out.println("Delete failed");
-				}
+				mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
 			} finally {
 				/*
 				 * close

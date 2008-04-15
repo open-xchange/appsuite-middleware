@@ -216,12 +216,7 @@ public final class MailImageTest extends AbstractMailTest {
 				}
 
 			} finally {
-				boolean success = mailAccess.getMessageStorage().deleteMessages("INBOX", new long[] { uid }, true);
-				if (success) {
-					System.out.println("Successfully deleted");
-				} else {
-					System.out.println("Delete failed");
-				}
+				mailAccess.getMessageStorage().deleteMessages("INBOX", new long[] { uid }, true);
 				/*
 				 * close
 				 */
