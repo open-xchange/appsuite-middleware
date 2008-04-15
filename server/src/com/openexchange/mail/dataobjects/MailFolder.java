@@ -153,19 +153,19 @@ public class MailFolder implements Serializable {
 	/**
 	 * Virtual name of mailbox's root folder
 	 * 
-	 * @value E-Mail
+	 * @value "E-Mail"
 	 */
 	public static final String DEFAULT_FOLDER_NAME = "E-Mail";
 
 	/**
 	 * Virtual fullname of mailbox's root folder
 	 * 
-	 * @value default
+	 * @value "default"
 	 */
 	public static final String DEFAULT_FOLDER_ID = "default";
 
 	/**
-	 * Default constructor
+	 * Initializes a new {@link MailFolder}
 	 */
 	public MailFolder() {
 		super();
