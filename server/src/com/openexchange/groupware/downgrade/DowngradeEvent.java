@@ -53,6 +53,8 @@ import java.sql.Connection;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * {@link DowngradeEvent} - The event thrown to perform deletion of unused data
@@ -70,6 +72,8 @@ public final class DowngradeEvent {
 	private final Connection readCon;
 
 	private final Connection writeCon;
+
+	private transient Session session;
 
 	/**
 	 * Initializes a new {@link DowngradeEvent}
@@ -145,4 +149,15 @@ public final class DowngradeEvent {
 		return writeCon;
 	}
 
+	/**
+	 * Getter for the instance of {@link Session} belonging to context's admin
+	 * 
+	 * @return an instance of {@link Session} belonging to context's admin
+	 */
+	public Session getSession() {
+		if (session == null) {
+			session = SessionObjectWrapper.createSessionObject(ctx.getMailadmin(), ctx, "DeleteEventSessionObject");
+		}
+		return session;
+	}
 }
