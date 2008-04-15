@@ -97,9 +97,14 @@ public final class ElementAttributes2JCS implements ElementAttributes {
 
 	public ArrayList<ElementEventHandler> getElementEventHandlers() {
 		final ArrayList<?> l = attributes.getElementEventHandlers();
-		final ArrayList<ElementEventHandler> retval = new ArrayList<ElementEventHandler>(l.size());
-		for (final Object object : l) {
-			retval.add(new ElementEventHandler2JCS((IElementEventHandler) object));
+		final ArrayList<ElementEventHandler> retval;
+		if (l == null) {
+			retval = new ArrayList<ElementEventHandler>(0);
+		} else {
+			retval = new ArrayList<ElementEventHandler>(l.size());
+			for (final Object object : l) {
+				retval.add(new ElementEventHandler2JCS((IElementEventHandler) object));
+			}
 		}
 		return retval;
 	}

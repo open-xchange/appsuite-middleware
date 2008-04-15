@@ -105,8 +105,11 @@ public final class JCSElementAttributesDelegator extends org.apache.jcs.engine.E
 	}
 
 	@Override
-	public ArrayList getElementEventHandlers() {
+	public ArrayList<IElementEventHandler> getElementEventHandlers() {
 		final ArrayList<ElementEventHandler> l = attributes.getElementEventHandlers();
+		if (l == null || l.size() == 0) {
+			return null;
+		}
 		final ArrayList<IElementEventHandler> retval = new ArrayList<IElementEventHandler>(l.size());
 		for (final ElementEventHandler handler : l) {
 			retval.add(new JCSElementEventHandlerDelegator(handler));
