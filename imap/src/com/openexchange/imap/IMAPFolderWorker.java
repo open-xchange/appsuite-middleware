@@ -164,6 +164,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 	 * @return <code>true</code> if field {@link #imapFolder} indicates to
 	 *         hold messages
 	 * @throws MessagingException
+	 *             If a messaging error occurs
 	 */
 	protected boolean holdsMessages() throws MessagingException {
 		if (holdsMessages == -1) {
@@ -183,7 +184,10 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 	 *            {@link Folder#READ_WRITE})
 	 * @return The properly opened IMAP folder
 	 * @throws MessagingException
+	 *             If a messaging error occurs
 	 * @throws IMAPException
+	 *             If user does not hold sufficient rights to open the IMAP
+	 *             folder in desired mode
 	 */
 	protected final IMAPFolder setAndOpenFolder(final String fullname, final int desiredMode)
 			throws MessagingException, MailException {
@@ -203,7 +207,10 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 	 *            {@link Folder#READ_WRITE})
 	 * @return The properly opened IMAP folder
 	 * @throws MessagingException
+	 *             If a messaging error occurs
 	 * @throws IMAPException
+	 *             If user does not hold sufficient rights to open the IMAP
+	 *             folder in desired mode
 	 */
 	protected final IMAPFolder setAndOpenFolder(final IMAPFolder imapFolder, final String fullname,
 			final int desiredMode) throws MessagingException, MailException {
