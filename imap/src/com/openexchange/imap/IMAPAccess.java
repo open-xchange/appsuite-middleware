@@ -49,7 +49,6 @@
 
 package com.openexchange.imap;
 
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.security.Security;
 import java.util.Properties;
@@ -72,13 +71,13 @@ import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
 
 /**
- * {@link IMAPAccess} - Establishes an IMAP connection and provides access to
+ * {@link IMAPAccess} - Establishes an IMAP access and provides access to
  * storages
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageStorage> implements Serializable {
+public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageStorage> {
 
 	/**
 	 * Serial Version UID
