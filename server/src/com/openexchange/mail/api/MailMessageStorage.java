@@ -520,7 +520,9 @@ public abstract class MailMessageStorage {
 
 	/**
 	 * Updates the system flags of the messages specified by given mail IDs
-	 * located in given folder.
+	 * located in given folder. If parameter <code>set</code> is
+	 * <code>true</code> the affected flags denoted by <code>flags</code>
+	 * are added; otherwise removed.
 	 * <p>
 	 * If no mail could be found for a given mail ID, it is treated as a no-op.
 	 * <p>
