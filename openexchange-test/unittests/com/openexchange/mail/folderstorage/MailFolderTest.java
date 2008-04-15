@@ -194,7 +194,7 @@ public final class MailFolderTest extends AbstractMailTest {
 			mailAccess.connect();
 			try {
 				final MailFolder f = mailAccess.getFolderStorage().getFolder(INBOX);
-				assertTrue("Missing default folder flag", f.containsDefaulFolder());
+				assertTrue("Missing default folder flag", f.containsDefaultFolder());
 				assertTrue("Missing deleted count", f.containsDeletedMessageCount());
 				assertTrue("Missing exists flag", f.containsExists());
 				assertTrue("Missing fullname", f.containsFullname());
@@ -243,7 +243,7 @@ public final class MailFolderTest extends AbstractMailTest {
 			String fullname = null;
 			try {
 				final MailFolder f = mailAccess.getFolderStorage().getFolder(INBOX);
-				assertTrue("Missing default folder flag", f.containsDefaulFolder());
+				assertTrue("Missing default folder flag", f.containsDefaultFolder());
 				assertTrue("Missing deleted count", f.containsDeletedMessageCount());
 				assertTrue("Missing exists flag", f.containsExists());
 				assertTrue("Missing fullname", f.containsFullname());
@@ -302,7 +302,7 @@ public final class MailFolderTest extends AbstractMailTest {
 				MailFolder[] folders = mailAccess.getFolderStorage().getSubfolders(parentFullname, true);
 				for (int i = 0; i < folders.length; i++) {
 					final MailFolder mf = folders[i];
-					assertTrue("Missing default folder flag", mf.containsDefaulFolder());
+					assertTrue("Missing default folder flag", mf.containsDefaultFolder());
 					assertTrue("Missing deleted count", mf.containsDeletedMessageCount());
 					assertTrue("Missing exists flag", mf.containsExists());
 					assertTrue("Missing fullname", mf.containsFullname());
@@ -370,7 +370,7 @@ public final class MailFolderTest extends AbstractMailTest {
 			mailAccess.connect();
 			try {
 				final MailFolder f = mailAccess.getFolderStorage().getRootFolder();
-				assertTrue("Missing default folder flag", f.containsDefaulFolder());
+				assertTrue("Missing default folder flag", f.containsDefaultFolder());
 				assertTrue("Missing deleted count", f.containsDeletedMessageCount());
 				assertTrue("Missing exists flag", f.containsExists());
 				assertTrue("Missing fullname", f.containsFullname());

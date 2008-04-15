@@ -31,6 +31,9 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondConnectorImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
+import com.openexchange.spamhandler.SpamHandlerRegistry;
+import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
+import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
 import com.openexchange.test.TestInit;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.servlet.ServletConfigLoader;
@@ -82,7 +85,7 @@ public final class Init {
 	 */
 	com.openexchange.database.DatabaseInit.getInstance(),
 	/**
-	 * Starts HTTP serlvet manager
+	 * Starts HTTP servlet manager
 	 */
 	new Initialization() {
         public void start() throws AbstractOXException {
@@ -162,6 +165,7 @@ public final class Init {
 		startAndInjectConfigBundle();
 		startAndInjectCache();
 		startAndInjectMailBundle();
+		startAndInjectSpamHandler();
 		startAndInjectI18NBundle();
 		startAndInjectMonitoringBundle();
 		startAndInjectSessiondBundle();
@@ -206,6 +210,13 @@ public final class Init {
 		 * Register IMAP bundle
 		 */
 		MailProviderRegistry.registerMailProvider("imap_imaps", IMAPProvider.getInstance());
+	}
+
+	private static void startAndInjectSpamHandler() {
+		SpamHandlerRegistry.registerSpamHandler(DefaultSpamHandler.getInstance().getSpamHandlerName(),
+				DefaultSpamHandler.getInstance());
+		SpamHandlerRegistry.registerSpamHandler(SpamAssassinSpamHandler.getInstance().getSpamHandlerName(),
+				SpamAssassinSpamHandler.getInstance());
 	}
 
 	private static void startAndInjectSessiondBundle() throws Exception {
