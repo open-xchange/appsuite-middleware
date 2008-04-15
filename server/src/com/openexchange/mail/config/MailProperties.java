@@ -119,8 +119,6 @@ public final class MailProperties {
 
 	private boolean ignoreSubscription;
 
-	private boolean spamEnabled;
-
 	private char defaultSeparator;
 
 	private int maxNumOfConnections;
@@ -190,7 +188,6 @@ public final class MailProperties {
 		allowNestedDefaultFolderOnAltNamespace = false;
 		defaultMimeCharset = null;
 		ignoreSubscription = false;
-		spamEnabled = false;
 		defaultSeparator = '\0';
 		maxNumOfConnections = 0;
 		quoteLineColors = null;
@@ -337,13 +334,6 @@ public final class MailProperties {
 					.trim();
 			supportSubscription = Boolean.parseBoolean(supSubsStr);
 			logBuilder.append("\tSupport Subscription: ").append(supportSubscription).append('\n');
-		}
-
-		{
-			final String spamEnabledStr = configuration.getProperty("com.openexchange.mail.spamEnabled", STR_FALSE)
-					.trim();
-			spamEnabled = Boolean.parseBoolean(spamEnabledStr);
-			logBuilder.append("\tSpam Enabled: ").append(spamEnabled).append('\n');
 		}
 
 		{
@@ -617,15 +607,6 @@ public final class MailProperties {
 	 */
 	public String[] getQuoteLineColors() {
 		return quoteLineColors;
-	}
-
-	/**
-	 * Gets the spamEnabled
-	 * 
-	 * @return the spamEnabled
-	 */
-	public boolean isSpamEnabled() {
-		return spamEnabled;
 	}
 
 	/**

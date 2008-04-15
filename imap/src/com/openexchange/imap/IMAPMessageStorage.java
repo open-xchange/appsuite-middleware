@@ -827,7 +827,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			/*
 			 * Check for spam action
 			 */
-			if (IMAPConfig.isSpamEnabled() && ((flags & MailMessage.FLAG_SPAM) > 0)) {
+			if (usm.isSpamEnabled() && ((flags & MailMessage.FLAG_SPAM) > 0)) {
 				handleSpamByUID(msgUIDs, set, true, fullname, Folder.READ_WRITE);
 			} else {
 				/*

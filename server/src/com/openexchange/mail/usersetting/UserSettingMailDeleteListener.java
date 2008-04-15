@@ -47,56 +47,47 @@
  *
  */
 
-package com.openexchange.groupware.settings.tree.modules.mail;
+package com.openexchange.mail.usersetting;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.session.Session;
+import static com.openexchange.mail.usersetting.UserSettingMailStorage.getInstance;
+
+import java.sql.Connection;
+
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.groupware.delete.DeleteListener;
 
 /**
- *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link UserSettingMailDeleteListener}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public class SpamButton implements PreferencesItemService {
+public final class UserSettingMailDeleteListener implements DeleteListener {
 
-    /**
-     * Default constructor.
-     */
-    public SpamButton() {
-        super();
-    }
+	/**
+	 * Initializes a new {@link UserSettingMailDeleteListener}
+	 */
+	public UserSettingMailDeleteListener() {
+		super();
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public String[] getPath() {
-        return new String[] { "modules", "mail", "spambutton" };
-    }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.delete.DeleteListener#deletePerformed(com.openexchange.groupware.delete.DeleteEvent,
+	 *      java.sql.Connection, java.sql.Connection)
+	 */
+	public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon)
+			throws DeleteFailedException {
+		if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
+			try {
+				getInstance().deleteUserSettingMail(deleteEvent.getId(), deleteEvent.getContext(), writeCon);
+			} catch (final AbstractOXException e) {
+				throw new DeleteFailedException(e);
+			}
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasWebMail();
-            }
-            public void getValue(final Session session, final Context ctx,
-                final User user, UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
-                final UserSettingMail settings = UserSettingMailStorage
-                    .getInstance().getUserSettingMail(session.getUserId(), ctx);
-                setting.setSingleValue(Boolean.valueOf(settings
-				    .isSpamEnabled()));
-            }
-        };
-    }
 }

@@ -49,17 +49,10 @@
 
 package com.openexchange.mail.usersetting;
 
-import static com.openexchange.mail.usersetting.UserSettingMailStorage.getInstance;
-
 import java.io.Serializable;
-import java.sql.Connection;
 
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.mail.api.MailConfig;
-import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.spamhandler.SpamHandlerRegistry;
 
 /**
  * {@link UserSettingMail} - User's mail settings
@@ -67,7 +60,7 @@ import com.openexchange.mail.config.MailConfigException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class UserSettingMail implements DeleteListener, Cloneable, Serializable {
+public final class UserSettingMail implements Cloneable, Serializable {
 
 	public static final class Signature implements Cloneable, Serializable {
 
@@ -230,6 +223,13 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 
 	public static final String STD_CONFIRMED_HAM = "Confirmed Ham";
 
+	/*
+	 * Member fields
+	 */
+	private final int userId;
+
+	private final int cid;
+
 	private boolean modifiedDuringSession;
 
 	private boolean displayHtmlInlineContent;
@@ -288,8 +288,15 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 
 	private long uploadQuotaPerFile;
 
-	public UserSettingMail() {
+	private Boolean spamHandlerFound;
+
+	/**
+	 * Initializes a new {@link UserSettingMail}
+	 */
+	public UserSettingMail(final int userId, final int cid) {
 		super();
+		this.userId = userId;
+		this.cid = cid;
 	}
 
 	/*
@@ -318,23 +325,12 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
+	/**
+	 * Gets the character count after which a line break is added in
+	 * <code>text/plain</code> messages
 	 * 
-	 * @see com.openexchange.groupware.delete.DeleteListener#deletePerformed(com.openexchange.groupware.delete.DeleteEvent,
-	 *      java.sql.Connection, java.sql.Connection)
+	 * @return The character count after which a line break is added
 	 */
-	public void deletePerformed(final DeleteEvent delEvent, final Connection readCon, final Connection writeCon)
-			throws DeleteFailedException {
-		if (delEvent.getType() == DeleteEvent.TYPE_USER) {
-			try {
-				getInstance().deleteUserSettingMail(delEvent.getId(), delEvent.getContext(), writeCon);
-			} catch (final OXException e) {
-				throw new DeleteFailedException(e);
-			}
-		}
-	}
-
 	public int getAutoLinebreak() {
 		return autoLinebreak;
 	}
@@ -363,14 +359,34 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 		return retval;
 	}
 
+	/**
+	 * Gets the name of the confirmed ham folder.
+	 * <p>
+	 * <b>Note</b>: This is only the name, not its fullname.
+	 * 
+	 * @return The name of the confirmed ham folder
+	 */
 	public String getConfirmedHam() {
 		return confirmedHam;
 	}
 
+	/**
+	 * Gets the name of the confirmed spam folder.
+	 * <p>
+	 * <b>Note</b>: This is only the name, not its fullname.
+	 * 
+	 * @return The name of the confirmed spam folder
+	 */
 	public String getConfirmedSpam() {
 		return confirmedSpam;
 	}
 
+	/**
+	 * Define an array of message headers which shall be displayed for this user
+	 * in mail's detail view.
+	 * 
+	 * @return An array of message headers which shall be displayed
+	 */
 	public String[] getDisplayMsgHeaders() {
 		if (displayMsgHeaders == null) {
 			return null;
@@ -380,18 +396,49 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 		return retval;
 	}
 
+	/**
+	 * Indicates the desired message format when preparing a message for
+	 * transport.
+	 * <p>
+	 * The returned <code>int</code> value is one of
+	 * {@link #MSG_FORMAT_TEXT_ONLY}, {@link #MSG_FORMAT_HTML_ONLY}, and
+	 * {@link #MSG_FORMAT_BOTH}.
+	 * 
+	 * @return The desired message format
+	 */
 	public int getMsgFormat() {
 		return msgFormat;
 	}
 
+	/**
+	 * The desired address that shall be set as <code>Reply-To</code> header
+	 * when sending messages.
+	 * <p>
+	 * If returned value is <code>null</code> or empty, the message's
+	 * <code>From</code> header is used as fallback.
+	 * 
+	 * @return The desired <code>Reply-To</code> address
+	 */
 	public String getReplyToAddr() {
 		return replyToAddr;
 	}
 
+	/**
+	 * The default send address. This address is used to set the
+	 * <code>From</code> header and the <code>Sender</code> header as well.
+	 * 
+	 * @return The default send address
+	 */
 	public String getSendAddr() {
 		return sendAddr;
 	}
 
+	/**
+	 * Gets the user-defined signatures that are either prepended or appended to
+	 * a message's body.
+	 * 
+	 * @return The user-defined signatures
+	 */
 	public Signature[] getSignatures() {
 		if (signatures == null) {
 			return null;
@@ -401,92 +448,225 @@ public final class UserSettingMail implements DeleteListener, Cloneable, Seriali
 		return retval;
 	}
 
+	/**
+	 * Gets the name of the draft folder.
+	 * <p>
+	 * <b>Note</b>: This is only the name, not its fullname.
+	 * 
+	 * @return The name of the draft folder
+	 */
 	public String getStdDraftsName() {
 		return stdDraftsName;
 	}
 
+	/**
+	 * Gets the name of the sent folder.
+	 * <p>
+	 * <b>Note</b>: This is only the name, not its fullname.
+	 * 
+	 * @return The name of the sent folder
+	 */
 	public String getStdSentName() {
 		return stdSentName;
 	}
 
+	/**
+	 * Gets the name of the spam folder.
+	 * <p>
+	 * <b>Note</b>: This is only the name, not its fullname.
+	 * 
+	 * @return The name of the spam folder
+	 */
 	public String getStdSpamName() {
 		return stdSpamName;
 	}
 
+	/**
+	 * Gets the name of the trash folder.
+	 * <p>
+	 * <b>Note</b>: This is only the name, not its fullname.
+	 * 
+	 * @return The name of the trash folder
+	 */
 	public String getStdTrashName() {
 		return stdTrashName;
 	}
 
+	/**
+	 * Gets the overall upload quota limit when uploading several file
+	 * attachments.
+	 * 
+	 * @return The overall upload quota limit.
+	 */
 	public long getUploadQuota() {
 		return uploadQuota;
 	}
 
+	/**
+	 * Gets the upload quota limit per file when uploading several file
+	 * attachments.
+	 * 
+	 * @return The upload quota limit per file.
+	 */
 	public long getUploadQuotaPerFile() {
 		return uploadQuotaPerFile;
 	}
 
+	/**
+	 * Checks if user's VCard shall be attached to a message on transport
+	 * 
+	 * @return <code>true</code> if user's VCard shall be attached to a
+	 *         message on transport; otherwise <code>false</code>
+	 */
 	public boolean isAppendVCard() {
 		return appendVCard;
 	}
 
+	/**
+	 * Checks if user allows to display inline HTML content of a message.
+	 * 
+	 * @return <code>true</code> if user allows to display inline HTML content
+	 *         of a message; otherwise <code>false</code>
+	 */
 	public boolean isDisplayHtmlInlineContent() {
 		return displayHtmlInlineContent;
 	}
 
+	/**
+	 * Checks if a forwarded message is supposed to be added as an attachment;
+	 * otherwise it is added inline.
+	 * 
+	 * @return <code>true</code> if a forwarded message is supposed to be
+	 *         added as an attachment; otherwise <code>false</code> if it is
+	 *         added inline.
+	 */
 	public boolean isForwardAsAttachment() {
 		return forwardAsAttachment;
 	}
 
+	/**
+	 * Checks if messages are supposed to be deleted permanently or backuped
+	 * into trash folder.
+	 * 
+	 * @return <code>true</code> if messages are supposed to be deleted
+	 *         permanently; otherwise <code>false</code> to backup in trash
+	 *         folder
+	 */
 	public boolean isHardDeleteMsgs() {
 		return hardDeleteMsgs;
 	}
 
+	/**
+	 * Checks if original message's content shall be ignored in reply version to
+	 * the message
+	 * 
+	 * @return <code>true</code> if original message's content shall be
+	 *         ignored; otherwise <code>false</code> to include.
+	 */
 	public boolean isIgnoreOriginalMailTextOnReply() {
 		return ignoreOriginalMailTextOnReply;
 	}
 
+	/**
+	 * Internal flag to track this mail setting's modified status.
+	 * 
+	 * @return <code>true</code> if modified during session (and to force a
+	 *         reload); otherwise <code>false</code>
+	 */
 	public boolean isModifiedDuringSession() {
 		return modifiedDuringSession;
 	}
 
+	/**
+	 * Currently not used
+	 */
 	public boolean isMsgPreview() {
 		return msgPreview;
 	}
 
+	/**
+	 * Checks if a sent message shall be copied into sent folder
+	 * 
+	 * @return <code>true</code> if a sent message shall be copied into sent
+	 *         folder; otherwise <code>false</code>
+	 */
 	public boolean isNoCopyIntoStandardSentFolder() {
 		return noCopyIntoStandardSentFolder;
 	}
 
+	/**
+	 * Checks if an appointment created by this mail setting's user is supposed
+	 * to notify its participants via mail
+	 * 
+	 * @return <code>true</code> if an appointment created by this mail
+	 *         setting's user is supposed to notify its participants via mail;
+	 *         otherwise <code>false</code>
+	 */
 	public boolean isNotifyAppointments() {
 		return notifyAppointments;
 	}
 
+	/**
+	 * Currently not used
+	 */
 	public boolean isNotifyOnReadAck() {
 		return notifyOnReadAck;
 	}
 
+	/**
+	 * Checks if a task created by this mail setting's user is supposed to
+	 * notify its participants via mail
+	 * 
+	 * @return <code>true</code> if a task created by this mail setting's user
+	 *         is supposed to notify its participants via mail; otherwise
+	 *         <code>false</code>
+	 */
 	public boolean isNotifyTasks() {
 		return notifyTasks;
 	}
 
+	/**
+	 * Indicates if user wants to see graphical emoticons rather than
+	 * corresponding textual representation
+	 * 
+	 * @return <code>true</code> if user wants to see graphical emoticons
+	 *         rather than corresponding textual representation; otherwise
+	 *         <code>false</code>
+	 */
 	public boolean isShowGraphicEmoticons() {
 		return showGraphicEmoticons;
 	}
 
 	/**
-	 * @return <code>true</code> if both global property for spam enablement
-	 *         <small><b>AND</b></small> user-defined property for spam
-	 *         enablement are turned on; otherwise <code>false</code>
-	 * @throws MailConfigException
+	 * Checks if user has spam enabled. Spam is enabled if both an appropriate
+	 * spam handler is defined by user's mail provider <small><b>AND</b></small>
+	 * its mail settings enable spam.
+	 * 
+	 * @return <code>true</code> if user has spam enabled; otherwise
+	 *         <code>false</code>
 	 */
-	public boolean isSpamEnabled() throws MailConfigException {
-		return (MailConfig.isSpamEnabled() && spamEnabled);
+	public boolean isSpamEnabled() {
+		if (null == spamHandlerFound) {
+			spamHandlerFound = Boolean.valueOf(SpamHandlerRegistry.hasSpamHandler(UserStorage.getStorageUser(userId,
+					cid)));
+		}
+		return (spamHandlerFound.booleanValue() && spamEnabled);
 	}
 
+	/**
+	 * Currently not used.
+	 */
 	public boolean isTextOnlyCompose() {
 		return textOnlyCompose;
 	}
 
+	/**
+	 * Indicates if user wants to see reply quotes inside a message's content
+	 * indented in a color dependent on quote level.
+	 * 
+	 * @return <code>true</code> to indent in color; otherwise
+	 *         <code>false</code>
+	 */
 	public boolean isUseColorQuote() {
 		return useColorQuote;
 	}

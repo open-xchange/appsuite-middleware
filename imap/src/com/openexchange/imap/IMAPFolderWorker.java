@@ -223,8 +223,11 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 				final int mode = imapFolder.getMode();
 				if (isIdenticalFolder && imapFolder.isOpen() && mode >= desiredMode) {
 					/*
-					 * Identical folder is already opened in an appropriate mode
+					 * Identical folder is already opened in an appropriate
+					 * mode, but anyway update the IMAP folder to ensure its
+					 * message cache and counters are up-to-date.
 					 */
+					IMAPCommandsCollection.updateIMAPFolder(imapFolder);
 					return imapFolder;
 				}
 				/*

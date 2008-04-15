@@ -912,7 +912,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
 		mailAccess.getMessageStorage().updateMessageFlags(fullname, msgUID, flagBits, flagVal);
-		if (MailConfig.isSpamEnabled() && ((flagBits & MailMessage.FLAG_SPAM) > 0)) {
+		if (usm.isSpamEnabled() && ((flagBits & MailMessage.FLAG_SPAM) > 0)) {
 			/*
 			 * Remove from cache
 			 */

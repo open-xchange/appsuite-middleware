@@ -217,7 +217,10 @@ public abstract class AbstractIMAPCommand<T> {
 
 	/**
 	 * Determine if <code>IMAPProtocol.notifyResponseHandlers(Response[])</code>
-	 * shall be invoked
+	 * shall be invoked.
+	 * <p>
+	 * If disabled the corresponding IMAP folder may contains an obsolete state
+	 * concerning message count and message cache.
 	 * 
 	 * @return <code>true</code> if
 	 *         <code>IMAPProtocol.notifyResponseHandlers(Response[])</code>

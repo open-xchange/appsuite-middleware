@@ -297,7 +297,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 				 */
 				if (null == (usm = useCache ? (UserSettingMail) cache.get(ServerServiceRegistry.getInstance()
 						.getService(CacheService.class).newCacheKey(ctx.getContextId(), user)) : null)) {
-					usm = new UserSettingMail();
+					usm = new UserSettingMail(user, ctx.getContextId());
 					Connection readCon = readConArg;
 					boolean closeCon = false;
 					PreparedStatement stmt = null;

@@ -69,7 +69,7 @@ import com.openexchange.groupware.infostore.InfostoreDelete;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.tasks.TasksDelete;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailDeleteListener;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.file.QuotaUsageDelete;
 import com.openexchange.tools.oxfolder.OXFolderDeleteListener;
@@ -119,7 +119,7 @@ public final class DeleteRegistry {
 		 * Delete user configuration & settings
 		 */
 		registerDeleteListener(new UserConfiguration());
-		registerDeleteListener(new UserSettingMail());
+		registerDeleteListener(new UserSettingMailDeleteListener());
 		registerDeleteListener(new QuotaUsageDelete());
 		registerDeleteListener(new AttachmentContextDelete());
 		registerDeleteListener(new AttachmentDelDelete());

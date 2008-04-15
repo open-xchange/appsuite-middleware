@@ -52,8 +52,10 @@ package com.openexchange.spamhandler;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.session.Session;
 
 /**
@@ -77,6 +79,38 @@ public final class SpamHandlerRegistry {
 	 */
 	private SpamHandlerRegistry() {
 		super();
+	}
+
+	/**
+	 * Checks if a spam handler is present for the user denoted by specified
+	 * session.
+	 * <p>
+	 * This is a convenience method that checks if the spam handler returned by
+	 * {@link #getSpamHandlerBySession(Session)} is not an instance of
+	 * {@link NoSpamHandler}.
+	 * 
+	 * @param session
+	 *            The session providing user data
+	 * @return <code>true</code> if a spam handler is defined by user's mail
+	 *         provider; otherwise <code>false</code>
+	 * @throws MailException
+	 *             If existence of a spam handler cannot be checked
+	 */
+	public static boolean hasSpamHandler(final Session session) throws MailException {
+		return !SpamHandler.SPAM_HANDLER_FALLBACK.equals(getSpamHandlerBySession(session).getSpamHandlerName());
+	}
+
+	/**
+	 * Checks if a spam handler is present for the denoted user.
+	 * 
+	 * @param user
+	 *            The user
+	 * @return <code>true</code> if a spam handler is defined by user's mail
+	 *         provider; otherwise <code>false</code>
+	 */
+	public static boolean hasSpamHandler(final User user) {
+		return !SpamHandler.SPAM_HANDLER_FALLBACK.equals(MailProviderRegistry.getMailProviderByURL(
+				MailConfig.getMailServerURL(user)).getSpamHandler().getSpamHandlerName());
 	}
 
 	/**

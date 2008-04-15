@@ -466,15 +466,6 @@ public abstract class MailConfig {
 	}
 
 	/**
-	 * Gets the spamEnabled
-	 * 
-	 * @return the spamEnabled
-	 */
-	public static final boolean isSpamEnabled() {
-		return MailProperties.getInstance().isSpamEnabled();
-	}
-
-	/**
 	 * Gets the userFlagsEnabled
 	 * 
 	 * @return the userFlagsEnabled

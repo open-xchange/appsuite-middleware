@@ -131,6 +131,48 @@ public final class IMAPCommandsCollection {
 		super();
 	}
 
+	/**
+	 * Updates specified IMAP folders internal <code>total</code> and
+	 * <code>recent</code> counters through executing an <code>EXAMINE</code>
+	 * command.
+	 * 
+	 * @param imapFolder
+	 *            The IMAP folder to update
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 */
+	public static void updateIMAPFolder(final IMAPFolder imapFolder) throws MessagingException {
+		imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+			/*
+			 * (non-Javadoc)
+			 * 
+			 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
+			 */
+			public Object doCommand(IMAPProtocol p) throws ProtocolException {
+				/*
+				 * Encode the mbox as per RFC2060
+				 */
+				Argument args = new Argument();
+				args.writeString(BASE64MailboxEncoder.encode(imapFolder.getFullName()));
+				/*
+				 * Perform command
+				 */
+				final Response[] r = p.command("EXAMINE", args);
+				/*
+				 * Grab last response that should indicate an OK
+				 */
+				final Response response = r[r.length - 1];
+				/*
+				 * Dispatch responses and thus update folder when handling
+				 * untagged responses of EXISTS and RECENT
+				 */
+				p.notifyResponseHandlers(r);
+				p.handleResult(response);
+				return null;
+			}
+		});
+	}
+
 	private static final String STR_UID = "UID";
 
 	private static final String TMPL_FETCH_HEADER_REV1 = "FETCH %s (BODY.PEEK[HEADER])";
