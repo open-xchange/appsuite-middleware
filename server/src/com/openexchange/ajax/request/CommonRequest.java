@@ -97,7 +97,8 @@ public abstract class CommonRequest {
 			LL.log((AbstractOXException) t);
 			res.setException((AbstractOXException) t);
 		} else {
-			res.setException(new AbstractOXException(t));
+            LOG.error(t.getLocalizedMessage(), t);
+            res.setException(new AbstractOXException(t));
 		}
 		try {
 			Response.write(res, w);
