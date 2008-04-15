@@ -53,6 +53,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.imap.dataobjects.IMAPMailFolder;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
@@ -202,7 +203,9 @@ public final class MailFolderTest extends AbstractMailTest {
 				assertTrue("Missing message count", f.containsMessageCount());
 				assertTrue("Missing name", f.containsName());
 				assertTrue("Missing new message count", f.containsNewMessageCount());
-				assertTrue("Missing non-existent flag", f.containsNonExistent());
+				if (f instanceof IMAPMailFolder) {
+					assertTrue("Missing non-existent flag", ((IMAPMailFolder) f).containsNonExistent());
+				}
 				assertTrue("Missing own permission", f.containsOwnPermission());
 				assertTrue("Missing parent fullname", f.containsParentFullname());
 				assertTrue("Missing permissions", f.containsPermissions());
@@ -249,7 +252,9 @@ public final class MailFolderTest extends AbstractMailTest {
 				assertTrue("Missing message count", f.containsMessageCount());
 				assertTrue("Missing name", f.containsName());
 				assertTrue("Missing new message count", f.containsNewMessageCount());
-				assertTrue("Missing non-existent flag", f.containsNonExistent());
+				if (f instanceof IMAPMailFolder) {
+					assertTrue("Missing non-existent flag", ((IMAPMailFolder) f).containsNonExistent());
+				}
 				assertTrue("Missing own permission", f.containsOwnPermission());
 				assertTrue("Missing parent fullname", f.containsParentFullname());
 				assertTrue("Missing permissions", f.containsPermissions());
@@ -306,7 +311,9 @@ public final class MailFolderTest extends AbstractMailTest {
 					assertTrue("Missing message count", mf.containsMessageCount());
 					assertTrue("Missing name", mf.containsName());
 					assertTrue("Missing new message count", mf.containsNewMessageCount());
-					assertTrue("Missing non-existent flag", mf.containsNonExistent());
+					if (f instanceof IMAPMailFolder) {
+						assertTrue("Missing non-existent flag", ((IMAPMailFolder) f).containsNonExistent());
+					}
 					assertTrue("Missing own permission", mf.containsOwnPermission());
 					assertTrue("Missing parent fullname", mf.containsParentFullname());
 					assertTrue("Missing permissions", mf.containsPermissions());
@@ -372,7 +379,9 @@ public final class MailFolderTest extends AbstractMailTest {
 				assertTrue("Missing message count", f.containsMessageCount());
 				assertTrue("Missing name", f.containsName());
 				assertTrue("Missing new message count", f.containsNewMessageCount());
-				assertTrue("Missing non-existent flag", f.containsNonExistent());
+				if (f instanceof IMAPMailFolder) {
+					assertTrue("Missing non-existent flag", ((IMAPMailFolder) f).containsNonExistent());
+				}
 				assertTrue("Missing own permission", f.containsOwnPermission());
 				assertTrue("Missing parent fullname", f.containsParentFullname());
 				assertTrue("Missing permissions", f.containsPermissions());
