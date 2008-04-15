@@ -363,14 +363,11 @@ public final class IMAPFolderConverter {
 				mailFolder.setDefaultFolder(false);
 			}
 			if (mailFolder.isHoldsMessages() && ownRights.contains(Rights.Right.READ)) {
-				mailFolder.setSummary(new StringBuilder().append('(').append(imapFolder.getMessageCount()).append('/')
-						.append(imapFolder.getUnreadMessageCount()).append(')').toString());
 				mailFolder.setMessageCount(imapFolder.getMessageCount());
 				mailFolder.setNewMessageCount(imapFolder.getNewMessageCount());
 				mailFolder.setUnreadMessageCount(imapFolder.getUnreadMessageCount());
 				mailFolder.setDeletedMessageCount(imapFolder.getDeletedMessageCount());
 			} else {
-				mailFolder.setSummary(null);
 				mailFolder.setMessageCount(-1);
 				mailFolder.setNewMessageCount(-1);
 				mailFolder.setUnreadMessageCount(-1);

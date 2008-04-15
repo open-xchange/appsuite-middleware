@@ -411,12 +411,13 @@ public final class FolderWriter {
 							/*
 							 * Put value
 							 */
+							final String value = folder.isRootFolder() ? "" : new StringBuilder(16).append('(').append(
+									folder.getMessageCount()).append('/').append(folder.getUnreadMessageCount())
+									.append(')').toString();
 							if (withKey) {
-								((JSONObject) jsonContainer).put(FolderFields.SUMMARY, folder.isRootFolder()
-										|| !folder.containsSummary() ? "" : folder.getSummary());
+								((JSONObject) jsonContainer).put(FolderFields.SUMMARY, value);
 							} else {
-								((JSONArray) jsonContainer).put(folder.isRootFolder() || !folder.containsSummary() ? ""
-										: folder.getSummary());
+								((JSONArray) jsonContainer).put(value);
 							}
 						} catch (final JSONException e) {
 							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
@@ -438,8 +439,8 @@ public final class FolderWriter {
 								((JSONObject) jsonContainer).put(FolderFields.STANDARD_FOLDER, folder
 										.containsDefaultFolder() ? folder.isDefaultFolder() : false);
 							} else {
-								((JSONArray) jsonContainer).put(folder.containsDefaultFolder() ? folder.isDefaultFolder()
-										: false);
+								((JSONArray) jsonContainer).put(folder.containsDefaultFolder() ? folder
+										.isDefaultFolder() : false);
 							}
 						} catch (final JSONException e) {
 							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());

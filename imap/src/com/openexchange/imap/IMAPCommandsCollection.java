@@ -703,6 +703,10 @@ public final class IMAPCommandsCollection {
 	 * normal <i>EXPUNGE</i> on folder</li>
 	 * <li>Restore the \Deleted flags on remaining messages</li>
 	 * </ol>
+	 * <b>NOTE</b>: The internal message cache of specified instance of
+	 * {@link IMAPFolder} is left in an inconsistent state cause its kept
+	 * message references are not marked as expunged. Therefore the folder
+	 * should be closed afterwards to force a message cache update.
 	 * 
 	 * @param imapFolder
 	 *            The IMAP folder

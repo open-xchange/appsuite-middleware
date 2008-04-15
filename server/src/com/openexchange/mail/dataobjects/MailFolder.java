@@ -142,10 +142,6 @@ public class MailFolder implements Serializable {
 
 	private boolean b_defaultFolder;
 
-	private String summary;
-
-	private boolean b_summary;
-
 	private List<OCLPermission> permissions;
 
 	private boolean b_permissions;
@@ -783,45 +779,6 @@ public class MailFolder implements Serializable {
 	public void setDefaultFolder(final boolean defaultFolder) {
 		this.defaultFolder = defaultFolder;
 		b_defaultFolder = true;
-	}
-
-	/**
-	 * Gets the summary
-	 * 
-	 * @return The summary or <code>null</code> if this mail folder denotes
-	 *         the root folder.
-	 */
-	public String getSummary() {
-		return summary;
-	}
-
-	/**
-	 * @return <code>true</code> if summary is set; otherwise
-	 *         <code>false</code>
-	 */
-	public boolean containsSummary() {
-		return b_summary;
-	}
-
-	/**
-	 * Removes the summary
-	 */
-	public void removeSummary() {
-		summary = null;
-		b_summary = false;
-	}
-
-	/**
-	 * Sets the summary
-	 * <p>
-	 * Set to <code>null</code> for root folder.
-	 * 
-	 * @param summary
-	 *            the summary to set
-	 */
-	public void setSummary(final String summary) {
-		this.summary = summary;
-		b_summary = true;
 	}
 
 	/**
