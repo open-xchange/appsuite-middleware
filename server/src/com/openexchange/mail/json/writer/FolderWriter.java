@@ -436,9 +436,9 @@ public final class FolderWriter {
 							 */
 							if (withKey) {
 								((JSONObject) jsonContainer).put(FolderFields.STANDARD_FOLDER, folder
-										.containsDefaulFolder() ? folder.isDefaulFolder() : false);
+										.containsDefaultFolder() ? folder.isDefaultFolder() : false);
 							} else {
-								((JSONArray) jsonContainer).put(folder.containsDefaulFolder() ? folder.isDefaulFolder()
+								((JSONArray) jsonContainer).put(folder.containsDefaultFolder() ? folder.isDefaultFolder()
 										: false);
 							}
 						} catch (final JSONException e) {

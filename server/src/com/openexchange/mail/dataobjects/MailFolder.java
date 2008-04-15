@@ -137,9 +137,9 @@ public class MailFolder implements Serializable {
 
 	private boolean b_rootFolder;
 
-	private boolean defaulFolder;
+	private boolean defaultFolder;
 
-	private boolean b_defaulFolder;
+	private boolean b_defaultFolder;
 
 	private String summary;
 
@@ -732,39 +732,39 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Gets the defaulFolder
+	 * Gets the default folder status
 	 * 
-	 * @return the defaulFolder
+	 * @return the default folder status
 	 */
-	public boolean isDefaulFolder() {
-		return defaulFolder;
+	public boolean isDefaultFolder() {
+		return defaultFolder;
 	}
 
 	/**
-	 * @return <code>true</code> if defaulFolder is set; otherwise
+	 * @return <code>true</code> if default folder is set; otherwise
 	 *         <code>false</code>
 	 */
-	public boolean containsDefaulFolder() {
-		return b_defaulFolder;
+	public boolean containsDefaultFolder() {
+		return b_defaultFolder;
 	}
 
 	/**
-	 * Removes the defaulFolder
+	 * Removes the default folder status
 	 */
-	public void removeDefaulFolder() {
-		defaulFolder = false;
-		b_defaulFolder = false;
+	public void removeDefaultFolder() {
+		defaultFolder = false;
+		b_defaultFolder = false;
 	}
 
 	/**
-	 * Sets the defaulFolder
+	 * Sets the default folder status
 	 * 
-	 * @param defaulFolder
-	 *            the defaulFolder to set
+	 * @param defaultFolder
+	 *            the default folder status to set
 	 */
-	public void setDefaulFolder(final boolean defaulFolder) {
-		this.defaulFolder = defaulFolder;
-		b_defaulFolder = true;
+	public void setDefaultFolder(final boolean defaultFolder) {
+		this.defaultFolder = defaultFolder;
+		b_defaultFolder = true;
 	}
 
 	/**

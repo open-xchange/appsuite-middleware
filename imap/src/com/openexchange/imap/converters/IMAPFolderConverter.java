@@ -346,21 +346,21 @@ public final class IMAPFolderConverter {
 				 * Default folder
 				 */
 				if (STR_INBOX.equals(imapFolder.getFullName())) {
-					mailFolder.setDefaulFolder(true);
+					mailFolder.setDefaultFolder(true);
 				} else if (isDefaultFoldersChecked(session)) {
 					final int len = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
 							ContextStorage.getStorageContext(session.getContextId())).isSpamEnabled() ? 6 : 4;
-					for (int i = 0; (i < len) && !mailFolder.isDefaulFolder(); i++) {
+					for (int i = 0; (i < len) && !mailFolder.isDefaultFolder(); i++) {
 						if (mailFolder.getFullname().equals(getDefaultMailFolder(i, session))) {
-							mailFolder.setDefaulFolder(true);
+							mailFolder.setDefaultFolder(true);
 						}
 					}
-					if (!mailFolder.containsDefaulFolder()) {
-						mailFolder.setDefaulFolder(false);
+					if (!mailFolder.containsDefaultFolder()) {
+						mailFolder.setDefaultFolder(false);
 					}
 				}
 			} else {
-				mailFolder.setDefaulFolder(false);
+				mailFolder.setDefaultFolder(false);
 			}
 			if (mailFolder.isHoldsMessages() && ownRights.contains(Rights.Right.READ)) {
 				mailFolder.setSummary(new StringBuilder().append('(').append(imapFolder.getMessageCount()).append('/')
