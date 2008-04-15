@@ -49,8 +49,10 @@
 
 package com.openexchange.mail.messagestorage;
 
+import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.AbstractMailTest;
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -102,7 +104,12 @@ public final class MailGetTest extends AbstractMailTest {
 			mailAccess.connect();
 			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
 			try {
-
+				try {
+					mailAccess.getMessageStorage().getMessage("INBOX", System.currentTimeMillis(), true);	
+				} catch (MailException e) {
+					assertEquals("No or wrong Exception is thrown", "MSG-0032", e.getErrorCode());
+				}
+				
 				MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID);
 				for (int i = 0; i < fetchedMails.length; i++) {
 					assertFalse("Mail ID is -1", fetchedMails[i].getMailId() == -1);
