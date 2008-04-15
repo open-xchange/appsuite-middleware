@@ -124,6 +124,12 @@ public final class MailDeleteTest extends AbstractMailTest {
 				}
 
 				mailAccess.getMessageStorage().deleteMessages("INBOX", uids, false);
+				
+				try{
+					mailAccess.getMessageStorage().deleteMessages("INBOX", new long[] { System.currentTimeMillis() }, false);
+				} catch (Exception e) {
+					fail(e.getMessage());
+				}
 
 				trash = mailAccess.getFolderStorage().getFolder(trashFullname);
 				assertTrue("Trash's number of message has not been increased appropriately", prevMessageCount
