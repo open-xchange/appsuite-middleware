@@ -415,7 +415,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 	}
 
 	@Override
-	public boolean deleteMessages(final String fullname, final long[] msgUIDs, final boolean hardDelete)
+	public void deleteMessages(final String fullname, final long[] msgUIDs, final boolean hardDelete)
 			throws MailException {
 		try {
 			imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_WRITE);
@@ -468,7 +468,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			 */
 			imapFolder.close(false);
 			resetIMAPFolder();
-			return true;
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapAccess);
 		}

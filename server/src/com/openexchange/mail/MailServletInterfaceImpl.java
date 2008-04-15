@@ -241,7 +241,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		final boolean retval = mailAccess.getMessageStorage().deleteMessages(fullname, msgUIDs, hardDelete);
+		mailAccess.getMessageStorage().deleteMessages(fullname, msgUIDs, hardDelete);
 		try {
 			/*
 			 * Update message cache
@@ -250,7 +250,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		} catch (final OXCachingException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 		}
-		return retval;
+		return true;
 	}
 
 	@Override

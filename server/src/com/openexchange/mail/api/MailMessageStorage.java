@@ -142,12 +142,10 @@ public abstract class MailMessageStorage {
 	 *            <code>true</code> to hard delete the messages, meaning not
 	 *            to create a backup copy of each message in default trash
 	 *            folder; otherwise <code>false</code>
-	 * @return <code>true</code> if delete was successful; otherwise
-	 *         <code>false</code>
 	 * @throws MailException
 	 *             If messages cannot be deleted.
 	 */
-	public abstract boolean deleteMessages(String folder, long[] mailIds, boolean hardDelete) throws MailException;
+	public abstract void deleteMessages(String folder, long[] mailIds, boolean hardDelete) throws MailException;
 
 	/**
 	 * A convenience method that delivers all messages contained in given folder
