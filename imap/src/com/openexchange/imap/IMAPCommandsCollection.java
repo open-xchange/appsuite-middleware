@@ -734,7 +734,8 @@ public final class IMAPCommandsCollection {
 			throw e;
 		} catch (final ProtocolException e) {
 			if (LOG.isWarnEnabled()) {
-				LOG.warn(new StringBuilder("UID EXPUNGE failed: ").append(e.getLocalizedMessage()).toString(), e);
+				LOG.warn(new StringBuilder(64).append("UID EXPUNGE failed: ").append(e.getLocalizedMessage()).append(
+						".\nPerforming fallback actions.").toString(), e);
 			}
 			/*
 			 * UID EXPUNGE did not work; perform fallback actions
