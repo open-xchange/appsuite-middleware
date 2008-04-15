@@ -156,7 +156,7 @@ public final class DowngradeEvent {
 	 */
 	public Session getSession() {
 		if (session == null) {
-			session = SessionObjectWrapper.createSessionObject(ctx.getMailadmin(), ctx, "DeleteEventSessionObject");
+			session = SessionObjectWrapper.createSessionObject(ctx.getMailadmin(), ctx, "DowngradeEventSessionObject");
 		}
 		return session;
 	}
