@@ -79,6 +79,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 import com.sun.mail.iap.ConnectionException;
 import com.sun.mail.smtp.SMTPSendFailedException;
 
@@ -309,8 +310,8 @@ public class MIMEMailException extends MailException {
 	 * appropiate instance of {@link MIMEMailException}
 	 * <p>
 	 * This is just a convenience method that simply invokes
-	 * {@link #handleMessagingException(MessagingException, MailAccess)}
-	 * with the latter parameter set to <code>null</code>.
+	 * {@link #handleMessagingException(MessagingException, MailAccess)} with
+	 * the latter parameter set to <code>null</code>.
 	 * 
 	 * @param e
 	 *            The messaging exception
@@ -341,27 +342,23 @@ public class MIMEMailException extends MailException {
 	 * 
 	 * @param e
 	 *            The messaging exception
-	 * @param mailConnection
-	 *            The corresponding mail connection used to add informations
+	 * @param mailConfig
+	 *            The corresponding mail configuration used to add informations
 	 *            like mail server etc.
 	 * @return An appropriate instance of {@link MIMEMailException}
 	 */
-	public static MIMEMailException handleMessagingException(final MessagingException e,
-			final MailAccess<?, ?> mailConnection) {
+	public static MIMEMailException handleMessagingException(final MessagingException e, final MailConfig mailConfig) {
 		try {
 			if (e instanceof AuthenticationFailedException
 					|| (e.getMessage() != null && e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_AUTH_FAILED) != -1)) {
 				final boolean temporary = e.getMessage() != null
 						&& ERR_TMP.equals(e.getMessage().toLowerCase(Locale.ENGLISH));
 				if (temporary) {
-					return new MIMEMailException(MIMEMailException.Code.LOGIN_FAILED, e, mailConnection == null
-							|| mailConnection.getMailConfig() == null ? STR_EMPTY : mailConnection.getMailConfig()
-							.getServer(), mailConnection == null || mailConnection.getMailConfig() == null ? STR_EMPTY
-							: mailConnection.getMailConfig().getLogin());
+					return new MIMEMailException(MIMEMailException.Code.LOGIN_FAILED, e, mailConfig == null ? STR_EMPTY
+							: mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
 				}
-				return new MIMEMailException(MIMEMailException.Code.INVALID_CREDENTIALS, e, mailConnection == null
-						|| mailConnection.getMailConfig() == null ? STR_EMPTY : mailConnection.getMailConfig()
-						.getServer());
+				return new MIMEMailException(MIMEMailException.Code.INVALID_CREDENTIALS, e,
+						mailConfig == null ? STR_EMPTY : mailConfig.getServer());
 			} else if (e instanceof FolderClosedException) {
 				return new MIMEMailException(Code.FOLDER_CLOSED, e, e.getLocalizedMessage());
 			} else if (e instanceof FolderNotFoundException) {
@@ -401,14 +398,12 @@ public class MIMEMailException extends MailException {
 			} else if (e instanceof StoreClosedException) {
 				return new MIMEMailException(Code.STORE_CLOSED, e, e.getMessage());
 			} else if (e.getNextException() instanceof BindException) {
-				return new MIMEMailException(Code.BIND_ERROR, e, mailConnection == null
-						|| mailConnection.getMailConfig() == null ? STR_EMPTY : Integer.valueOf(mailConnection
-						.getMailConfig().getPort()));
+				return new MIMEMailException(Code.BIND_ERROR, e, mailConfig == null ? STR_EMPTY : Integer
+						.valueOf(mailConfig.getPort()));
 			} else if (e.getNextException() instanceof ConnectionException) {
 				mailInterfaceMonitor.changeNumBrokenConnections(true);
-				return new MIMEMailException(Code.CONNECT_ERROR, e, mailConnection == null
-						|| mailConnection.getMailConfig() == null ? STR_EMPTY : mailConnection.getMailConfig()
-						.getServer(), mailConnection == null ? STR_EMPTY : mailConnection.getMailConfig().getLogin());
+				return new MIMEMailException(Code.CONNECT_ERROR, e, mailConfig == null ? STR_EMPTY : mailConfig
+						.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
 			} else if (e.getNextException() instanceof ConnectException) {
 				/*
 				 * Most modern IP stack implementations sense connection
@@ -416,21 +411,19 @@ public class MIMEMailException extends MailException {
 				 * java.net.ConnectionException
 				 */
 				mailInterfaceMonitor.changeNumTimeoutConnections(true);
-				final MIMEMailException me = new MIMEMailException(Code.CONNECT_ERROR, e, mailConnection == null
-						|| mailConnection.getMailConfig() == null ? STR_EMPTY : mailConnection.getMailConfig()
-						.getServer(), mailConnection == null ? STR_EMPTY : mailConnection.getMailConfig().getLogin());
+				final MIMEMailException me = new MIMEMailException(Code.CONNECT_ERROR, e,
+						mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY
+								: mailConfig.getLogin());
 				return me;
 			} else if (e.getNextException().getClass().getName().endsWith(EXC_CONNECTION_RESET_EXCEPTION)) {
 				mailInterfaceMonitor.changeNumBrokenConnections(true);
 				return new MIMEMailException(Code.CONNECTION_RESET, e, new Object[0]);
 			} else if (e.getNextException() instanceof NoRouteToHostException) {
-				return new MIMEMailException(Code.NO_ROUTE_TO_HOST, e, mailConnection == null
-						|| mailConnection.getMailConfig() == null ? STR_EMPTY : mailConnection.getMailConfig()
+				return new MIMEMailException(Code.NO_ROUTE_TO_HOST, e, mailConfig == null ? STR_EMPTY : mailConfig
 						.getServer());
 			} else if (e.getNextException() instanceof PortUnreachableException) {
-				return new MIMEMailException(Code.PORT_UNREACHABLE, e, mailConnection == null
-						|| mailConnection.getMailConfig() == null ? STR_EMPTY : Integer.valueOf(mailConnection
-						.getMailConfig().getPort()));
+				return new MIMEMailException(Code.PORT_UNREACHABLE, e, mailConfig == null ? STR_EMPTY : Integer
+						.valueOf(mailConfig.getPort()));
 			} else if (e.getNextException() instanceof SocketException) {
 				/*
 				 * Treat dependent on message
@@ -438,8 +431,7 @@ public class MIMEMailException extends MailException {
 				final SocketException se = (SocketException) e.getNextException();
 				if ("Socket closed".equals(se.getMessage()) || "Connection reset".equals(se.getMessage())) {
 					mailInterfaceMonitor.changeNumBrokenConnections(true);
-					return new MIMEMailException(Code.BROKEN_CONNECTION, e, mailConnection == null
-							|| mailConnection.getMailConfig() == null ? STR_EMPTY : mailConnection.getMailConfig()
+					return new MIMEMailException(Code.BROKEN_CONNECTION, e, mailConfig == null ? STR_EMPTY : mailConfig
 							.getServer());
 				}
 				return new MIMEMailException(Code.SOCKET_ERROR, e, e.getMessage());

@@ -74,7 +74,7 @@ public final class IMAPLogicTools {
 
 	private final IMAPStore imapStore;
 
-	private final IMAPAccess imapConnection;
+	private final IMAPAccess imapAccess;
 
 	private final Session session;
 
@@ -83,18 +83,18 @@ public final class IMAPLogicTools {
 	 * 
 	 * @param imapStore
 	 *            The IMAP store
-	 * @param imapConnection
-	 *            The IMAP connection
+	 * @param imapAccess
+	 *            The IMAP access
 	 * @param session
 	 *            The session providing needed user data
 	 * @throws IMAPException
 	 *             If context loading fails
 	 */
-	public IMAPLogicTools(final IMAPStore imapStore, final IMAPAccess imapConnection, final Session session)
+	public IMAPLogicTools(final IMAPStore imapStore, final IMAPAccess imapAccess, final Session session)
 			throws IMAPException {
 		super();
 		this.imapStore = imapStore;
-		this.imapConnection = imapConnection;
+		this.imapAccess = imapAccess;
 		this.session = session;
 	}
 
@@ -128,7 +128,7 @@ public final class IMAPLogicTools {
 				imapFolder.close(false);
 			}
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess.getIMAPConfig());
 		} catch (final IMAPException e) {
 			throw e;
 		} catch (final MailException e) {
@@ -146,14 +146,14 @@ public final class IMAPLogicTools {
 				 * Fetch original message
 				 */
 				final MailMessage replyMail = MimeReply.getReplyMail((MimeMessage) imapFolder
-						.getMessageByUID(originalUID), replyAll, session, imapConnection.getSession());
+						.getMessageByUID(originalUID), replyAll, session, imapAccess.getSession());
 				replyMail.setMsgref(MailPath.getMailPath(fullname, originalUID));
 				return replyMail;
 			} finally {
 				imapFolder.close(false);
 			}
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConnection);
+			throw IMAPException.handleMessagingException(e, imapAccess.getIMAPConfig());
 		} catch (final IMAPException e) {
 			throw e;
 		} catch (final MailException e) {
