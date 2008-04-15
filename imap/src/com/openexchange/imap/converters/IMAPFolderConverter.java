@@ -66,6 +66,7 @@ import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.dataobjects.IMAPMailFolder;
 import com.openexchange.imap.user2acl.IMAPServer;
 import com.openexchange.imap.user2acl.User2ACLArgs;
 import com.openexchange.imap.user2acl.User2ACLException;
@@ -177,15 +178,15 @@ public final class IMAPFolderConverter {
 	 *            The session
 	 * @param ctx
 	 *            The context
-	 * @return an instance of <code>{@link MailFolder}</code> containing the
-	 *         attributes from given IMAP folder
+	 * @return an instance of <code>{@link IMAPMailFolder}</code> containing
+	 *         the attributes from given IMAP folder
 	 * @throws MailException
 	 *             If conversion fails
 	 */
-	public static MailFolder convertFolder(final IMAPFolder imapFolder, final Session session,
+	public static IMAPMailFolder convertFolder(final IMAPFolder imapFolder, final Session session,
 			final IMAPConfig imapConfig, final Context ctx) throws MailException {
 		try {
-			final MailFolder mailFolder = new MailFolder();
+			final IMAPMailFolder mailFolder = new IMAPMailFolder();
 			mailFolder.setRootFolder(imapFolder instanceof DefaultFolder);
 			mailFolder.setExists(imapFolder.exists());
 			String[] attrs;

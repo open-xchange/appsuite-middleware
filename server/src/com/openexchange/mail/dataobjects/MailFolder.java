@@ -62,7 +62,7 @@ import com.openexchange.server.impl.OCLPermission;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailFolder implements Serializable {
+public class MailFolder implements Serializable {
 
 	/**
 	 * Serial Version UID
@@ -96,10 +96,6 @@ public final class MailFolder implements Serializable {
 	private boolean exists;
 
 	private boolean b_exists;
-
-	private boolean nonExistent;
-
-	private boolean b_nonExistent;
 
 	private boolean holdsMessages;
 
@@ -513,45 +509,6 @@ public final class MailFolder implements Serializable {
 	public void setUnreadMessageCount(final int unreadMessageCount) {
 		this.unreadMessageCount = unreadMessageCount;
 		b_unreadMessageCount = true;
-	}
-
-	/**
-	 * Checks if this folder is non-existent according to IMAP's "LIST-EXTENDED"
-	 * extension
-	 * 
-	 * @return <code>true</code> if non-existent; otherwise <code>false</code>
-	 */
-	public boolean isNonExistent() {
-		return nonExistent;
-	}
-
-	/**
-	 * @return <code>true</code> if non-existent is set; otherwise
-	 *         <code>false</code>
-	 */
-	public boolean containsNonExistent() {
-		return b_nonExistent;
-	}
-
-	/**
-	 * Removes the non-existent status
-	 */
-	public void removeNonExistent() {
-		nonExistent = false;
-		b_nonExistent = false;
-	}
-
-	/**
-	 * Sets if this folder is non-existent according to IMAP's "LIST-EXTENDED"
-	 * extension
-	 * 
-	 * @param nonExistent
-	 *            <code>true</code> to set as non-existent; otherwise
-	 *            <code>false</code>
-	 */
-	public void setNonExistent(final boolean nonExistent) {
-		this.nonExistent = nonExistent;
-		b_nonExistent = true;
 	}
 
 	/**
