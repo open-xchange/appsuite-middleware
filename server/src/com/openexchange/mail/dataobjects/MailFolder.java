@@ -195,6 +195,11 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
+	 * Sets this mail folder's fullname.
+	 * <p>
+	 * If this mail folder denotes the root folder, {@link #DEFAULT_FOLDER_ID}
+	 * is supposed to be set as fullname
+	 * 
 	 * @param fullname
 	 *            the fullname to set
 	 */
@@ -574,10 +579,13 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Sets the parentFullname
+	 * Sets the parent fullname
+	 * <p>
+	 * If this mail folder denotes the root folder, <code>null</code> is
+	 * supposed to be set.
 	 * 
 	 * @param parentFullname
-	 *            the parentFullname to set
+	 *            the parent fullname to set
 	 */
 	public void setParentFullname(final String parentFullname) {
 		this.parentFullname = parentFullname;
