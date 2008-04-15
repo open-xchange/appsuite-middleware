@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.folderstorage;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
@@ -900,12 +903,11 @@ public final class MailFolderTest extends AbstractMailTest {
 
 				trashFullname = mailAccess.getFolderStorage().getTrashFolder();
 				int numTrashedMails = mailAccess.getFolderStorage().getFolder(trashFullname).getMessageCount();
-				final MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname,
-						IndexRange.NULL, MailListField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
-				final long nextId = trashed[0].getMailId() + 1;
-				trashedIDs = new long[uids.length];
-				for (int i = 0; i < trashedIDs.length; i++) {
-					trashedIDs[i] = (nextId + i);
+				final Set<Long> ids = new HashSet<Long>(numTrashedMails);
+				MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
+						MailListField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
+				for (int i = 0; i < trashed.length; i++) {
+					ids.add(Long.valueOf(trashed[i].getMailId()));
 				}
 
 				mailAccess.getFolderStorage().clearFolder(fullname);
@@ -916,6 +918,20 @@ public final class MailFolderTest extends AbstractMailTest {
 				assertTrue("Mails not completely backuped", mailAccess.getFolderStorage().getFolder(trashFullname)
 						.getMessageCount() == expectedMsgCount);
 
+				final Set<Long> newIds = new HashSet<Long>(expectedMsgCount);
+				trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
+						MailListField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
+				assertTrue("Size mismatch: " + trashed.length + " but should be " + expectedMsgCount,
+						trashed.length == expectedMsgCount);
+				for (int i = 0; i < trashed.length; i++) {
+					newIds.add(Long.valueOf(trashed[i].getMailId()));
+				}
+				newIds.removeAll(ids);
+				trashedIDs = new long[newIds.size()];
+				int i = 0;
+				for (final Long id : newIds) {
+					trashedIDs[i++] = id.longValue();
+				}
 				mailAccess.getMessageStorage().deleteMessages(trashFullname, trashedIDs, true);
 				trashedIDs = null;
 

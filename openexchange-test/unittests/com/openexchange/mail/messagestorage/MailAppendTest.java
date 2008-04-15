@@ -90,29 +90,31 @@ public final class MailAppendTest extends AbstractMailTest {
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
-			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
-
-			for (int i = 0; i < uids.length; i++) {
-				final MailMessage m = mailAccess.getMessageStorage().getMessage("INBOX", uids[i], true);
-				System.out.println("Mail #" + m.getMailId() + ": " + m.getSubject());
+			try {
+				final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
+	
+				for (int i = 0; i < uids.length; i++) {
+					final MailMessage m = mailAccess.getMessageStorage().getMessage("INBOX", uids[i], true);
+					System.out.println("Mail #" + m.getMailId() + ": " + m.getSubject());
+				}
+	
+				final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID);
+				for (int i = 0; i < fetchedMails.length; i++) {
+					System.out.println("Fetched: " + fetchedMails[i].getMailId());
+				}
+	
+				final boolean success = mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
+				if (success) {
+					System.out.println("Successfully deleted");
+				} else {
+					System.out.println("Delete failed");
+				}
+			} finally {
+				/*
+				 * close
+				 */
+				mailAccess.close(false);
 			}
-
-			final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID);
-			for (int i = 0; i < fetchedMails.length; i++) {
-				System.out.println("Fetched: " + fetchedMails[i].getMailId());
-			}
-
-			final boolean success = mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
-			if (success) {
-				System.out.println("Successfully deleted");
-			} else {
-				System.out.println("Delete failed");
-			}
-
-			/*
-			 * close
-			 */
-			mailAccess.close(false);
 
 		} catch (final Exception e) {
 			e.printStackTrace();

@@ -35,7 +35,7 @@ public class UserConfigurationFactory {
 		
 		User user = users.getUser(1);
 		UserConfiguration config = new UserConfiguration(permissions, user.getId(), user.getGroups(), ctx);
-		UserSettingMail mailSetting = new UserSettingMail();
+		UserSettingMail mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(true);
 		mailSetting.setNotifyTasks(true);
 		//config.setUserSettingMail(mailSetting);
@@ -44,7 +44,7 @@ public class UserConfigurationFactory {
 		
 		user = users.getUser(2);
 		config = new UserConfiguration(permissions, user.getId(), user.getGroups(), ctx);
-		mailSetting = new UserSettingMail();
+		mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(true);
 		mailSetting.setNotifyTasks(true);
 		//config.setUserSettingMail(mailSetting);
@@ -53,7 +53,7 @@ public class UserConfigurationFactory {
 		
 		user = users.getUser(3);
 		config = new UserConfiguration(permissions, user.getId(), user.getGroups(), ctx);
-		mailSetting = new UserSettingMail();
+		mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(true);
 		mailSetting.setNotifyTasks(true);
 		//config.setUserSettingMail(mailSetting);
@@ -62,7 +62,7 @@ public class UserConfigurationFactory {
 		
 		user = users.getUser(4);
 		config = new UserConfiguration(permissions, user.getId(), user.getGroups(), ctx);
-		mailSetting = new UserSettingMail();
+		mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(true);
 		mailSetting.setNotifyTasks(true);
 		//config.setUserSettingMail(mailSetting);
@@ -71,7 +71,7 @@ public class UserConfigurationFactory {
 		
 		user = users.getUser(5);
 		config = new UserConfiguration(permissions, user.getId(), user.getGroups(), ctx);
-		mailSetting = new UserSettingMail();
+		mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(false);
 		mailSetting.setNotifyTasks(true);
 		//config.setUserSettingMail(mailSetting);
@@ -80,7 +80,7 @@ public class UserConfigurationFactory {
 		
 		user = users.getUser(6);
 		config = new UserConfiguration(permissions, user.getId(), user.getGroups(), ctx);
-		mailSetting = new UserSettingMail();
+		mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(true);
 		mailSetting.setNotifyTasks(false);
 		//config.setUserSettingMail(mailSetting);
@@ -89,7 +89,7 @@ public class UserConfigurationFactory {
 		
 		user = users.getUser(7);
 		config = new UserConfiguration(permissions, user.getId(), user.getGroups(), ctx);
-		mailSetting = new UserSettingMail();
+		mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(true);
 		mailSetting.setNotifyTasks(true);
 		//config.setUserSettingMail(mailSetting);
@@ -98,7 +98,7 @@ public class UserConfigurationFactory {
 		
 		user = users.getUser(8);
 		config = new UserConfiguration(permissions, user.getId(), user.getGroups(), ctx);
-		mailSetting = new UserSettingMail();
+		mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(true);
 		mailSetting.setNotifyTasks(true);
 		//config.setUserSettingMail(mailSetting);
@@ -107,7 +107,7 @@ public class UserConfigurationFactory {
 		
 		user = users.getUser(9);
 		config = new UserConfiguration(permissions, user.getId(), user.getGroups(), ctx);
-		mailSetting = new UserSettingMail();
+		mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(true);
 		mailSetting.setNotifyTasks(true);
 		//config.setUserSettingMail(mailSetting);
@@ -116,7 +116,7 @@ public class UserConfigurationFactory {
 		
 		user = users.getUser(10);
 		config = new UserConfiguration(permissions, user.getId(), user.getGroups(), ctx);
-		mailSetting = new UserSettingMail();
+		mailSetting = new UserSettingMail(user.getId(), ctx.getContextId());
 		mailSetting.setNotifyAppointments(true);
 		mailSetting.setNotifyTasks(true);
 		//config.setUserSettingMail(mailSetting);
