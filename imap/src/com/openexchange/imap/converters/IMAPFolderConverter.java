@@ -221,10 +221,12 @@ public final class IMAPFolderConverter {
 				});
 				mailFolder.setSubscribedSubfolders(hasChildren(li));
 			}
-			Attribs: for (final String attribute : attrs) {
-				if (ATTRIBUTE_NON_EXISTENT.equalsIgnoreCase(attribute)) {
-					mailFolder.setNonExistent(true);
-					break Attribs;
+			if (null != attrs) {
+				Attribs: for (final String attribute : attrs) {
+					if (ATTRIBUTE_NON_EXISTENT.equalsIgnoreCase(attribute)) {
+						mailFolder.setNonExistent(true);
+						break Attribs;
+					}
 				}
 			}
 			if (!mailFolder.containsNonExistent()) {
