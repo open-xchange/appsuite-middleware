@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.server.impl.OCLPermission;
 
 /**
@@ -685,10 +686,14 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Sets the ownPermission
+	 * Sets own permission.
+	 * <p>
+	 * Apply an instance of {@link DefaultMailPermission} if mailing system does
+	 * not support permissions, except if this mail folder denotes the root
+	 * folder, then apply <code>null</code>.
 	 * 
 	 * @param ownPermission
-	 *            the ownPermission to set
+	 *            the own permission to set
 	 */
 	public void setOwnPermission(final OCLPermission ownPermission) {
 		this.ownPermission = ownPermission;
