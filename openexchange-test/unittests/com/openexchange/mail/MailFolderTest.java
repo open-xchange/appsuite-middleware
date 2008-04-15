@@ -58,9 +58,9 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * {@link MailFolderTest}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
 public class MailFolderTest extends AbstractMailTest {
 
@@ -80,15 +80,16 @@ public class MailFolderTest extends AbstractMailTest {
 
 	public void testGetINBOXFolder() {
 		try {
-			SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()), "mail-test-session");
+			SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()),
+					"mail-test-session");
 			session.setPassword(getPassword());
 			MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
-			
+
 			MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
 			try {
 				final MailFolder inboxFolder = mailAccess.getFolderStorage().getFolder("INBOX");
-				
+
 				assertTrue("No INBOX folder returned!", inboxFolder != null && inboxFolder.getName().equals("INBOX"));
 			} finally {
 				mailAccess.close(true);
@@ -98,24 +99,26 @@ public class MailFolderTest extends AbstractMailTest {
 			fail(e.getLocalizedMessage());
 		}
 	}
-	
+
 	public void testGetSubfolders() {
 		try {
-			SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()), "mail-test-session");
+			SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()),
+					"mail-test-session");
 			session.setPassword(getPassword());
 			MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
 			MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-			mailAccess.connect(/*mailConfig*/);
+			mailAccess.connect(/* mailConfig */);
 			try {
 				final MailFolder[] flds = mailAccess.getFolderStorage().getSubfolders("default", true);
-				
+
 				assertTrue("No subfolders returned!", flds != null && flds.length > 0);
-				
+
 				for (int i = 0; i < flds.length; i++) {
-					System.out.println(flds[i].getFullname() + " Subscribed=" + flds[i].isSubscribed() + " Summary=" + flds[i].getSummary()
-							+ " HasSubfolders=" + flds[i].hasSubfolders() + " HasSUbscribedSubfodlers=" + flds[i].hasSubscribedSubfolders());
+					System.out.println(flds[i].getFullname() + " Subscribed=" + flds[i].isSubscribed()
+							+ " HasSubfolders=" + flds[i].hasSubfolders() + " HasSUbscribedSubfodlers="
+							+ flds[i].hasSubscribedSubfolders());
 				}
-				
+
 			} finally {
 				mailAccess.close(true);
 			}
@@ -124,5 +127,5 @@ public class MailFolderTest extends AbstractMailTest {
 			fail(e.getLocalizedMessage());
 		}
 	}
-	
+
 }

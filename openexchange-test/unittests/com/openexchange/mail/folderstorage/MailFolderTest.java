@@ -214,7 +214,6 @@ public final class MailFolderTest extends AbstractMailTest {
 				assertTrue("Missing subfolder flag", f.containsSubfolders());
 				assertTrue("Missing subscribed flag", f.containsSubscribed());
 				assertTrue("Missing subscribed subfolders flag", f.containsSubscribedSubfolders());
-				assertTrue("Missing summary", f.containsSummary());
 				assertTrue("Missing supports user flags flag", f.containsSupportsUserFlags());
 				assertTrue("Missing unread message count", f.containsUnreadMessageCount());
 
@@ -263,7 +262,6 @@ public final class MailFolderTest extends AbstractMailTest {
 				assertTrue("Missing subfolder flag", f.containsSubfolders());
 				assertTrue("Missing subscribed flag", f.containsSubscribed());
 				assertTrue("Missing subscribed subfolders flag", f.containsSubscribedSubfolders());
-				assertTrue("Missing summary", f.containsSummary());
 				assertTrue("Missing supports user flags flag", f.containsSupportsUserFlags());
 				assertTrue("Missing unread message count", f.containsUnreadMessageCount());
 
@@ -322,7 +320,6 @@ public final class MailFolderTest extends AbstractMailTest {
 					assertTrue("Missing subfolder flag", mf.containsSubfolders());
 					assertTrue("Missing subscribed flag", mf.containsSubscribed());
 					assertTrue("Missing subscribed subfolders flag", mf.containsSubscribedSubfolders());
-					assertTrue("Missing summary", mf.containsSummary());
 					assertTrue("Missing supports user flags flag", mf.containsSupportsUserFlags());
 					assertTrue("Missing unread message count", mf.containsUnreadMessageCount());
 					if (fullname.equals(mf.getFullname())) {
@@ -390,7 +387,6 @@ public final class MailFolderTest extends AbstractMailTest {
 				assertTrue("Missing subfolder flag", f.containsSubfolders());
 				assertTrue("Missing subscribed flag", f.containsSubscribed());
 				assertTrue("Missing subscribed subfolders flag", f.containsSubscribedSubfolders());
-				assertTrue("Missing summary", f.containsSummary());
 				assertTrue("Missing supports user flags flag", f.containsSupportsUserFlags());
 				assertTrue("Missing unread message count", f.containsUnreadMessageCount());
 
