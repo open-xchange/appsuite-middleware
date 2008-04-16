@@ -82,8 +82,9 @@ public class RequestDBProvider implements DBProvider {
 
 	private static final Log LOG = LogFactory.getLog(RequestDBProvider.class);
 	private static final TXExceptionFactory EXCEPTIONS = new TXExceptionFactory(RequestDBProvider.class);
-	
-	public static class DBTransaction {
+
+
+    public static class DBTransaction {
 		public Connection writeConnection;
 		public Connection readConnection;
 		public Context ctx;
@@ -91,8 +92,10 @@ public class RequestDBProvider implements DBProvider {
 		
 		List<Throwable> readConnectionStacks = new ArrayList<Throwable>();
 		public boolean autoCommit;
-		
-		public DBTransaction() {
+
+        public boolean commit = true;
+
+        public DBTransaction() {
 			for(int i = 0; i < 10; i++) {
 				readConnectionStacks.add(null);
 			}
@@ -182,8 +185,10 @@ public class RequestDBProvider implements DBProvider {
 	protected void commit(final DBTransaction tx) throws TransactionException {
 		try {
 			if (tx.writeConnection != null && !tx.writeConnection.getAutoCommit()) {
-				tx.writeConnection.commit();
-			}
+				if(tx.commit) {
+                    tx.writeConnection.commit();                        
+                }
+            }
 		} catch (final SQLException e) {
 			throw EXCEPTIONS.create(0,e);
 		}
@@ -358,4 +363,17 @@ public class RequestDBProvider implements DBProvider {
 		}
 		tx.transactional = transactional;
 	}
+
+
+    public void setCommitsTransaction(boolean commits) {
+        final DBTransaction tx = getActiveTransaction();
+		if(tx == null) {
+			throw new IllegalStateException("No Transaction Active");
+		}
+		if(tx.writeConnection != null && transactional) {
+			throw new IllegalStateException("Cannot switch on transaction after a write occurred");
+		}
+        tx.commit = commits;
+    }
+
 }

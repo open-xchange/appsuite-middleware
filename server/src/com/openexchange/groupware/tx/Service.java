@@ -56,4 +56,6 @@ public interface Service {
 	public void finish() throws TransactionException;
 	public void setTransactional(boolean transactional);
 	public void setRequestTransactional(boolean transactional);
+    public void setCommitsTransaction(boolean commits);
+        
 }

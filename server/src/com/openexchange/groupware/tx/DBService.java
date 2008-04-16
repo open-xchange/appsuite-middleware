@@ -203,8 +203,13 @@ public abstract class DBService implements Service, DBProviderUser, DBProvider{
 	public void setRequestTransactional(final boolean transactional) {
 		provider.setRequestTransactional(transactional);
 	}
-		
-	protected void close(final PreparedStatement stmt, final ResultSet rs) {
+
+
+    public void setCommitsTransaction(boolean mustCommit) {
+        provider.setCommitsTransaction(false);
+    }
+
+    protected void close(final PreparedStatement stmt, final ResultSet rs) {
 		if(stmt != null) {
 			try {
 				stmt.close();
