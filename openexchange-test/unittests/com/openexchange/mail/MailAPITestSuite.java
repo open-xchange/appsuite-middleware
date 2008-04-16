@@ -54,9 +54,9 @@ import junit.framework.TestSuite;
 
 /**
  * {@link MailAPITestSuite}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
 public final class MailAPITestSuite extends TestSuite {
 
@@ -67,34 +67,38 @@ public final class MailAPITestSuite extends TestSuite {
 		super();
 	}
 
-	 /**
-     * @return a test suite containing smoke tests.
-     */
-    public static Test suite() {
-        TestSuite mailSuite = new TestSuite();
-        /*
-         * Message storage
-         */
-        mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailAppendTest.class);
-        mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailAttachmentTest.class);
-        mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailColorLabelTest.class);
-        mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailCopyTest.class);
-        mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailDeleteTest.class);
-        mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailFlagsTest.class);
-        mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailGetTest.class);
-        mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailImageTest.class);
-        mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailMoveTest.class);
-        mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailSaveDraftTest.class);
-        mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailSearchTest.class);
-        /*
-         * Reply/forward
-         */
-        mailSuite.addTestSuite(com.openexchange.mail.replyforward.MailForwardTest.class);
-        mailSuite.addTestSuite(com.openexchange.mail.replyforward.MailReplyTest.class);
-        /*
-         * Folder storage
-         */
-        mailSuite.addTestSuite(com.openexchange.mail.folderstorage.MailFolderTest.class);
-        return mailSuite;
-    }
+	/**
+	 * @return a test suite containing smoke tests.
+	 */
+	public static Test suite() {
+		TestSuite mailSuite = new TestSuite();
+		/*
+		 * Storages consistency
+		 */
+		mailSuite.addTestSuite(com.openexchange.mail.storagesconsistency.MailStoragesConsistencyTest.class);
+		/*
+		 * Message storage
+		 */
+		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailAppendTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailAttachmentTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailColorLabelTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailCopyTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailDeleteTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailFlagsTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailGetTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailImageTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailMoveTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailSaveDraftTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailSearchTest.class);
+		/*
+		 * Reply/forward
+		 */
+		mailSuite.addTestSuite(com.openexchange.mail.replyforward.MailForwardTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.replyforward.MailReplyTest.class);
+		/*
+		 * Folder storage
+		 */
+		mailSuite.addTestSuite(com.openexchange.mail.folderstorage.MailFolderTest.class);
+		return mailSuite;
+	}
 }

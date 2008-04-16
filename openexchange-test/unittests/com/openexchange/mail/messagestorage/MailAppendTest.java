@@ -65,6 +65,10 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
  */
 public final class MailAppendTest extends AbstractMailTest {
 
+	private static final String INBOX = "INBOX";
+
+	private static final MailField[] FIELDS_ID = { MailField.ID };
+
 	/**
 	 * 
 	 */
@@ -79,8 +83,6 @@ public final class MailAppendTest extends AbstractMailTest {
 		super(name);
 	}
 
-	private static final MailField[] FIELDS_ID = { MailField.ID };
-
 	public void testMailAppend() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
@@ -91,19 +93,22 @@ public final class MailAppendTest extends AbstractMailTest {
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
 			try {
-				final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
-	
-				for (int i = 0; i < uids.length; i++) {
-					final MailMessage m = mailAccess.getMessageStorage().getMessage("INBOX", uids[i], true);
-					System.out.println("Mail #" + m.getMailId() + ": " + m.getSubject());
+				final long[] uids = mailAccess.getMessageStorage().appendMessages(INBOX, mails);
+				try {
+
+					for (int i = 0; i < uids.length; i++) {
+						final MailMessage m = mailAccess.getMessageStorage().getMessage(INBOX, uids[i], true);
+						System.out.println("Mail #" + m.getMailId() + ": " + m.getSubject());
+					}
+
+					final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages(INBOX, uids,
+							FIELDS_ID);
+					for (int i = 0; i < fetchedMails.length; i++) {
+						System.out.println("Fetched: " + fetchedMails[i].getMailId());
+					}
+				} finally {
+					mailAccess.getMessageStorage().deleteMessages(INBOX, uids, true);
 				}
-	
-				final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID);
-				for (int i = 0; i < fetchedMails.length; i++) {
-					System.out.println("Fetched: " + fetchedMails[i].getMailId());
-				}
-	
-				mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
 			} finally {
 				/*
 				 * close

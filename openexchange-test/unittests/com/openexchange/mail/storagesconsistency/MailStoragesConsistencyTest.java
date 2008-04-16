@@ -138,13 +138,20 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
 					mfd.addPermission(p);
 					mailAccess.getFolderStorage().createFolder(mfd);
 				}
-
+				/*
+				 * Touch folder by message storage
+				 */
 				final long[] uids = mailAccess.getMessageStorage().appendMessages(fullname,
 						getMessages(getTestMailDir(), -1));
 				mailAccess.getMessageStorage().copyMessages(fullname, fullname, uids, true);
-
+				/*
+				 * Delete folder by folder storage
+				 */
 				mailAccess.getFolderStorage().deleteFolder(fullname, true);
-
+				/*
+				 * Check if folder storage's modification has been reported to
+				 * message storage
+				 */
 				try {
 					mailAccess.getMessageStorage().getAllMessages(fullname, IndexRange.NULL, null, null, FIELDS_ID);
 				} catch (final MailException e) {
