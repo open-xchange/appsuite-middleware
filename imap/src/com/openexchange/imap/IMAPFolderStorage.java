@@ -789,6 +789,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			throw e;
 		} catch (final AbstractOXException e) {
 			throw new IMAPException(e);
+		} finally {
+			/*
+			 * Notify message storage
+			 */
+			imapAccess.getMessageStorage().closeIMAPFolderQuietly();
 		}
 	}
 
@@ -864,6 +869,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			throw e;
 		} catch (final AbstractOXException e) {
 			throw new IMAPException(e);
+		} finally {
+			/*
+			 * Notify message storage
+			 */
+			imapAccess.getMessageStorage().closeIMAPFolderQuietly();
 		}
 
 	}
@@ -939,6 +949,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			return fullname;
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapConfig);
+		} finally {
+			/*
+			 * Notify message storage
+			 */
+			imapAccess.getMessageStorage().closeIMAPFolderQuietly();
 		}
 	}
 
@@ -1035,8 +1050,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 							LOG.debug(debug.append("EXPUNGE command timed out in ").append(
 									(System.currentTimeMillis() - startExpunge)).append("msec").toString());
 						}
-						throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapAccess.getMailConfig()
-								.getServer(), imapAccess.getMailConfig().getLogin());
+						throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapConfig.getServer(),
+								imapConfig.getLogin());
 					}
 					/*
 					 * Decrement
@@ -1095,6 +1110,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			throw IMAPException.handleMessagingException(new MessagingException(e.getMessage(), e), imapConfig);
 		} catch (final AbstractOXException e) {
 			throw new IMAPException(e);
+		} finally {
+			/*
+			 * Notify message storage
+			 */
+			imapAccess.getMessageStorage().closeIMAPFolderQuietly();
 		}
 	}
 

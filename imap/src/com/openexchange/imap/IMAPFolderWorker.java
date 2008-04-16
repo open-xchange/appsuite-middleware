@@ -143,6 +143,33 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 		this.imapConfig = imapAccess.getIMAPConfig();
 	}
 
+	@Override
+	public void releaseResources() throws MailException {
+		if (null != imapFolder) {
+			try {
+				imapFolder.close(false);
+			} catch (final IllegalStateException e) {
+				LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
+			} catch (final MessagingException e) {
+				throw IMAPException.handleMessagingException(e, imapConfig);
+			} finally {
+				resetIMAPFolder();
+			}
+		}
+	}
+
+	/**
+	 * Closes the stored IMAP folder quietly (if any) through invoking
+	 * {@link #releaseResources()} and catching a possibly thrown exception.
+	 */
+	public void closeIMAPFolderQuietly() {
+		try {
+			releaseResources();
+		} catch (final Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+	}
+
 	/**
 	 * Resets the IMAP folder by setting field {@link #imapFolder} to
 	 * <code>null</code> and field {@link #holdsMessages} to <code>-1</code>.
@@ -231,10 +258,10 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 				if (isIdenticalFolder && imapFolder.isOpen() && mode >= desiredMode) {
 					/*
 					 * Identical folder is already opened in an appropriate
-					 * mode, but anyway update the IMAP folder to ensure its
-					 * message cache and counters are up-to-date.
+					 * mode.
 					 */
-					IMAPCommandsCollection.updateIMAPFolder(imapFolder);
+					// IMAPCommandsCollection.updateIMAPFolder(imapFolder,
+					// mode);
 					return imapFolder;
 				}
 				/*

@@ -132,9 +132,9 @@ public final class IMAPCommandsCollection {
 	}
 
 	/**
-	 * Updates specified IMAP folders internal <code>total</code> and
+	 * Updates specified IMAP folder's internal <code>total</code> and
 	 * <code>recent</code> counters through executing an <code>EXAMINE</code>
-	 * command.
+	 * or <code>SELECT</code> command dependent on IMAP folder's open mode.
 	 * 
 	 * @param imapFolder
 	 *            The IMAP folder to update
@@ -142,32 +142,47 @@ public final class IMAPCommandsCollection {
 	 *             If a messaging error occurs
 	 */
 	public static void updateIMAPFolder(final IMAPFolder imapFolder) throws MessagingException {
+		updateIMAPFolder(imapFolder, imapFolder.getMode());
+	}
+
+	/**
+	 * Updates specified IMAP folder's internal <code>total</code> and
+	 * <code>recent</code> counters through executing an <code>EXAMINE</code>
+	 * or <code>SELECT</code> command dependent on specified mode.
+	 * 
+	 * @param imapFolder
+	 *            The IMAP folder to update
+	 * @param mode
+	 *            The mode in which the folder is opened
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 */
+	public static void updateIMAPFolder(final IMAPFolder imapFolder, final int mode) throws MessagingException {
 		imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 			/*
 			 * (non-Javadoc)
 			 * 
 			 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
 			 */
-			public Object doCommand(IMAPProtocol p) throws ProtocolException {
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
 				/*
 				 * Encode the mbox as per RFC2060
 				 */
-				Argument args = new Argument();
+				final Argument args = new Argument();
 				args.writeString(BASE64MailboxEncoder.encode(imapFolder.getFullName()));
 				/*
 				 * Perform command
 				 */
-				final Response[] r = p.command("EXAMINE", args);
-				/*
-				 * Grab last response that should indicate an OK
-				 */
-				final Response response = r[r.length - 1];
+				final Response[] tmp = mode == IMAPFolder.READ_ONLY ? p.command("EXAMINE", args) : p.command("SELECT",
+						args);
+				final Response[] r = new Response[tmp.length - 1];
+				System.arraycopy(tmp, 0, r, 0, r.length);
 				/*
 				 * Dispatch responses and thus update folder when handling
 				 * untagged responses of EXISTS and RECENT
 				 */
 				p.notifyResponseHandlers(r);
-				p.handleResult(response);
+				p.handleResult(tmp[tmp.length - 1]);
 				return null;
 			}
 		});
@@ -494,7 +509,7 @@ public final class IMAPCommandsCollection {
 		 * ProtocolCommand
 		 */
 		final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-			public Object doCommand(IMAPProtocol p) throws ProtocolException {
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
 				final Response[] r = p.command(new StringBuilder(mdat[0].length() + 16).append("SORT (").append(
 						sortCrit).append(") UTF-8 ").append(mdat[0]).toString(), null);
 				final Response response = r[r.length - 1];
@@ -565,13 +580,13 @@ public final class IMAPCommandsCollection {
 			 * 
 			 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
 			 */
-			public Object doCommand(IMAPProtocol p) throws ProtocolException {
-				Response[] r = p.command(COMMAND_SEARCH_UNSEEN, null);
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				final Response[] r = p.command(COMMAND_SEARCH_UNSEEN, null);
 				/*
 				 * Result is something like: * SEARCH 12 20 24
 				 */
 				int[] newMsgSeqNums = null;
-				Response response = r[r.length - 1];
+				final Response response = r[r.length - 1];
 				{
 					final SmartIntArray tmp = new SmartIntArray(32);
 					try {
@@ -773,11 +788,11 @@ public final class IMAPCommandsCollection {
 				 * 
 				 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
 				 */
-				public Object doCommand(IMAPProtocol p) throws ProtocolException {
+				public Object doCommand(final IMAPProtocol p) throws ProtocolException {
 					/*
 					 * Encode the mbox as per RFC2060
 					 */
-					Argument args = new Argument();
+					final Argument args = new Argument();
 					args.writeString(BASE64MailboxEncoder.encode(f.getFullName()));
 					/*
 					 * Perform command
@@ -1054,7 +1069,7 @@ public final class IMAPCommandsCollection {
 			 * 
 			 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
 			 */
-			public Object doCommand(IMAPProtocol p) throws ProtocolException {
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
 				final String command = new StringBuilder("SELECT ").append(
 						prepareStringArgument(imapFolder.getFullName())).toString();
 				final Response[] r = p.command(command, null);

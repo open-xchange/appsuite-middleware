@@ -974,20 +974,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		}
 	}
 
-	@Override
-	public void releaseResources() throws IMAPException {
-		if (null != imapFolder) {
-			try {
-				imapFolder.close(false);
-				resetIMAPFolder();
-			} catch (final IllegalStateException e) {
-				LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
-			} catch (final MessagingException e) {
-				LOG.error(e.getLocalizedMessage(), e);
-			}
-		}
-	}
-
 	/*
 	 * +++++++++++++++++ Helper methods +++++++++++++++++++
 	 */
