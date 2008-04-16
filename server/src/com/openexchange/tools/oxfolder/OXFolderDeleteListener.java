@@ -58,7 +58,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.oxfolder.deletelistener.OXFolderDeleteListenerHelper;
@@ -109,269 +108,142 @@ public class OXFolderDeleteListener implements DeleteListener {
 		super();
 	}
 
-	public void deletePerformed(final DeleteEvent delEvent, final Connection readConArg, final Connection writeConArg)
+	public void deletePerformed(final DeleteEvent delEvent, final Connection readCon, final Connection writeCon)
 			throws DeleteFailedException {
-		Connection readCon = readConArg;
-		Connection writeCon = writeConArg;
 		final Context ctx = delEvent.getContext();
 		final long lastModified = System.currentTimeMillis();
 		/*
 		 * User deletion
 		 */
 		if (delEvent.getType() == DeleteEvent.TYPE_USER) {
-			boolean performTransaction = true;
 			try {
-				final boolean createReadCon = (readCon == null);
-				boolean closeWriteCon = false;
-				try {
-					if (createReadCon) {
-						readCon = DBPool.pickup(ctx);
-					}
-					if (writeCon == null) {
-						writeCon = DBPool.pickupWriteable(ctx);
-						closeWriteCon = true;
-					}
-					performTransaction = writeCon.getAutoCommit();
-					if (performTransaction) {
-						writeCon.setAutoCommit(false);
-					}
-					final int userId = delEvent.getId();
-					/*
-					 * Get context's admin
-					 */
-					int mailadmin = ctx.getMailadmin();
+				final int userId = delEvent.getId();
+				/*
+				 * Get context's admin
+				 */
+				int mailadmin = ctx.getMailadmin();
+				if (mailadmin == -1) {
+					mailadmin = OXFolderSQL.getContextMailAdmin(readCon, ctx);
 					if (mailadmin == -1) {
-						mailadmin = OXFolderSQL.getContextMailAdmin(readCon, ctx);
-						if (mailadmin == -1) {
-							throw new OXFolderException(FolderCode.NO_ADMIN_USER_FOUND_IN_CONTEXT, Integer.valueOf(ctx
-									.getContextId()));
-						}
-					}
-					final boolean isMailAdmin = (mailadmin == userId);
-					/*
-					 * Hander user's permissions
-					 */
-					if (isMailAdmin) {
-						/*
-						 * Working
-						 */
-						OXFolderSQL.handleMailAdminPermissions(userId, TABLE_WORKING_FOLDER, TABLE_WORKING_PERMS,
-								readCon, writeCon, ctx);
-						/*
-						 * Backup
-						 */
-						OXFolderSQL.handleMailAdminPermissions(userId, TABLE_BACKUP_FOLDER, TABLE_BACKUP_PERMS,
-								readCon, writeCon, ctx);
-					} else {
-						/*
-						 * Working
-						 */
-						OXFolderSQL.handleEntityPermissions(userId, mailadmin, lastModified, TABLE_WORKING_FOLDER,
-								TABLE_WORKING_PERMS, readCon, writeCon, ctx);
-						/*
-						 * Backup
-						 */
-						OXFolderSQL.handleEntityPermissions(userId, mailadmin, lastModified, TABLE_BACKUP_FOLDER,
-								TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
-					}
-					/*
-					 * Handle user's folders
-					 */
-					if (isMailAdmin) {
-						/*
-						 * Working
-						 */
-						OXFolderSQL.handleMailAdminFolders(userId, TABLE_WORKING_FOLDER, TABLE_WORKING_PERMS, readCon,
-								writeCon, ctx);
-						/*
-						 * Backup
-						 */
-						OXFolderSQL.handleMailAdminFolders(userId, TABLE_BACKUP_FOLDER, TABLE_BACKUP_PERMS, readCon,
-								writeCon, ctx);
-					} else {
-						/*
-						 * Working
-						 */
-						OXFolderSQL.handleEntityFolders(userId, mailadmin, lastModified, TABLE_WORKING_FOLDER,
-								TABLE_WORKING_PERMS, readCon, writeCon, ctx);
-						/*
-						 * Backup
-						 */
-						OXFolderSQL.handleEntityFolders(userId, mailadmin, lastModified, TABLE_BACKUP_FOLDER,
-								TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
-					}
-					if (!isMailAdmin) {
-						/*
-						 * Update shared folder's last-modified timestamp to
-						 * enforce a folder repaint in AJAX-UI
-						 */
-						OXFolderSQL.updateLastModified(FolderObject.SYSTEM_SHARED_FOLDER_ID, lastModified, mailadmin,
-								writeCon, ctx);
-					}
-					if (performTransaction) {
-						writeCon.commit();
-						writeCon.setAutoCommit(true);
-					}
-				} finally {
-					if (createReadCon && readCon != null) {
-						DBPool.closeReaderSilent(ctx, readCon);
-					}
-					if (closeWriteCon && writeCon != null) {
-						DBPool.closeWriterSilent(ctx, writeCon);
+						throw new OXFolderException(FolderCode.NO_ADMIN_USER_FOUND_IN_CONTEXT, Integer.valueOf(ctx
+								.getContextId()));
 					}
 				}
-			} catch (final OXException e) {
-				try {
-					if (performTransaction && writeCon != null) {
-						writeCon.rollback();
-						writeCon.setAutoCommit(true);
-					}
-
-				} catch (final SQLException e1) {
-					LOG.warn(e1.getMessage(), e1);
-				}
-				LOG.error(e.getMessage(), e);
-				throw new DeleteFailedException(e);
-			} catch (final SQLException e) {
-				try {
-					if (performTransaction && writeCon != null) {
-						writeCon.rollback();
-						writeCon.setAutoCommit(true);
-					}
-
-				} catch (final SQLException e1) {
-					LOG.warn(e1.getMessage(), e1);
-				}
-				LOG.error(e.getMessage(), e);
-				throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
-			} catch (final DBPoolingException e) {
-				try {
-					if (performTransaction && writeCon != null) {
-						writeCon.rollback();
-						writeCon.setAutoCommit(true);
-					}
-
-				} catch (final SQLException e1) {
-					LOG.warn(e1.getMessage(), e1);
-				}
-				LOG.error(e.getMessage(), e);
-				throw new DeleteFailedException(e);
-			}
-		} else if (delEvent.getType() == DeleteEvent.TYPE_GROUP) {
-			boolean performTransaction = true;
-			try {
-				final boolean createReadCon = (readCon == null);
-				boolean closeWriteCon = false;
-				try {
-					if (createReadCon) {
-						readCon = DBPool.pickup(ctx);
-					}
-					if (writeCon == null) {
-						writeCon = DBPool.pickupWriteable(ctx);
-						closeWriteCon = true;
-					}
-					performTransaction = writeCon.getAutoCommit();
-					if (performTransaction) {
-						writeCon.setAutoCommit(false);
-					}
-					final int groupId = delEvent.getId();
+				final boolean isMailAdmin = (mailadmin == userId);
+				/*
+				 * Hander user's permissions
+				 */
+				if (isMailAdmin) {
 					/*
-					 * Get context's mailadmin
+					 * Working
 					 */
-					int mailadmin = ctx.getMailadmin();
-					if (mailadmin == -1) {
-						mailadmin = OXFolderSQL.getContextMailAdmin(readCon, ctx);
-						if (mailadmin == -1) {
-							throw new OXFolderException(FolderCode.NO_ADMIN_USER_FOUND_IN_CONTEXT, Integer.valueOf(ctx
-									.getContextId()));
-						}
-					}
+					OXFolderSQL.handleMailAdminPermissions(userId, TABLE_WORKING_FOLDER, TABLE_WORKING_PERMS, readCon,
+							writeCon, ctx);
 					/*
-					 * Hander group's permissions
+					 * Backup
 					 */
-					OXFolderSQL.handleEntityPermissions(groupId, mailadmin, lastModified, TABLE_WORKING_FOLDER,
+					OXFolderSQL.handleMailAdminPermissions(userId, TABLE_BACKUP_FOLDER, TABLE_BACKUP_PERMS, readCon,
+							writeCon, ctx);
+				} else {
+					/*
+					 * Working
+					 */
+					OXFolderSQL.handleEntityPermissions(userId, mailadmin, lastModified, TABLE_WORKING_FOLDER,
 							TABLE_WORKING_PERMS, readCon, writeCon, ctx);
 					/*
 					 * Backup
 					 */
-					OXFolderSQL.handleEntityPermissions(groupId, mailadmin, lastModified, TABLE_BACKUP_FOLDER,
+					OXFolderSQL.handleEntityPermissions(userId, mailadmin, lastModified, TABLE_BACKUP_FOLDER,
 							TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
+				}
+				/*
+				 * Handle user's folders
+				 */
+				if (isMailAdmin) {
 					/*
-					 * Update shared and public folders' last-modified timestamp
-					 * to enforce a folder repaint in AJAX-UI
+					 * Working
+					 */
+					OXFolderSQL.handleMailAdminFolders(userId, TABLE_WORKING_FOLDER, TABLE_WORKING_PERMS, readCon,
+							writeCon, ctx);
+					/*
+					 * Backup
+					 */
+					OXFolderSQL.handleMailAdminFolders(userId, TABLE_BACKUP_FOLDER, TABLE_BACKUP_PERMS, readCon,
+							writeCon, ctx);
+				} else {
+					/*
+					 * Working
+					 */
+					OXFolderSQL.handleEntityFolders(userId, mailadmin, lastModified, TABLE_WORKING_FOLDER,
+							TABLE_WORKING_PERMS, readCon, writeCon, ctx);
+					/*
+					 * Backup
+					 */
+					OXFolderSQL.handleEntityFolders(userId, mailadmin, lastModified, TABLE_BACKUP_FOLDER,
+							TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
+				}
+				if (!isMailAdmin) {
+					/*
+					 * Update shared folder's last-modified timestamp to enforce
+					 * a folder repaint in AJAX-UI
 					 */
 					OXFolderSQL.updateLastModified(FolderObject.SYSTEM_SHARED_FOLDER_ID, lastModified, mailadmin,
 							writeCon, ctx);
-					OXFolderSQL.updateLastModified(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, lastModified, mailadmin,
-							writeCon, ctx);
-					if (performTransaction) {
-						writeCon.commit();
-						writeCon.setAutoCommit(true);
-					}
-				} finally {
-					if (createReadCon && readCon != null) {
-						DBPool.closeReaderSilent(ctx, readCon);
-					}
-					if (closeWriteCon && writeCon != null) {
-						DBPool.closeWriterSilent(ctx, writeCon);
-					}
 				}
 			} catch (final OXException e) {
-				try {
-					if (performTransaction && writeCon != null) {
-						writeCon.rollback();
-						writeCon.setAutoCommit(true);
-					}
-
-				} catch (final SQLException e1) {
-					LOG.warn(e1.getMessage(), e1);
-				}
 				LOG.error(e.getMessage(), e);
 				throw new DeleteFailedException(e);
 			} catch (final SQLException e) {
-				try {
-					if (performTransaction && writeCon != null) {
-						writeCon.rollback();
-						writeCon.setAutoCommit(true);
-					}
-
-				} catch (final SQLException e1) {
-					LOG.warn(e1.getMessage(), e1);
-				}
 				LOG.error(e.getMessage(), e);
 				throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
 			} catch (final DBPoolingException e) {
-				try {
-					if (performTransaction && writeCon != null) {
-						writeCon.rollback();
-						writeCon.setAutoCommit(true);
+				LOG.error(e.getMessage(), e);
+				throw new DeleteFailedException(e);
+			}
+		} else if (delEvent.getType() == DeleteEvent.TYPE_GROUP) {
+			try {
+				final int groupId = delEvent.getId();
+				/*
+				 * Get context's mailadmin
+				 */
+				int mailadmin = ctx.getMailadmin();
+				if (mailadmin == -1) {
+					mailadmin = OXFolderSQL.getContextMailAdmin(readCon, ctx);
+					if (mailadmin == -1) {
+						throw new OXFolderException(FolderCode.NO_ADMIN_USER_FOUND_IN_CONTEXT, Integer.valueOf(ctx
+								.getContextId()));
 					}
-
-				} catch (final SQLException e1) {
-					LOG.warn(e1.getMessage(), e1);
 				}
+				/*
+				 * Hander group's permissions
+				 */
+				OXFolderSQL.handleEntityPermissions(groupId, mailadmin, lastModified, TABLE_WORKING_FOLDER,
+						TABLE_WORKING_PERMS, readCon, writeCon, ctx);
+				/*
+				 * Backup
+				 */
+				OXFolderSQL.handleEntityPermissions(groupId, mailadmin, lastModified, TABLE_BACKUP_FOLDER,
+						TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
+				/*
+				 * Update shared and public folders' last-modified timestamp to
+				 * enforce a folder repaint in AJAX-UI
+				 */
+				OXFolderSQL.updateLastModified(FolderObject.SYSTEM_SHARED_FOLDER_ID, lastModified, mailadmin, writeCon,
+						ctx);
+				OXFolderSQL.updateLastModified(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, lastModified, mailadmin, writeCon,
+						ctx);
+			} catch (final OXException e) {
+				LOG.error(e.getMessage(), e);
+				throw new DeleteFailedException(e);
+			} catch (final SQLException e) {
+				LOG.error(e.getMessage(), e);
+				throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
+			} catch (final DBPoolingException e) {
 				LOG.error(e.getMessage(), e);
 				throw new DeleteFailedException(e);
 			}
 		}
-		Connection wc = writeConArg;
-		try {
-			boolean closeWriteCon = false;
-			if (wc == null) {
-				wc = DBPool.pickupWriteable(ctx);
-				closeWriteCon = true;
-			}
-			try {
-				OXFolderDeleteListenerHelper.ensureConsistency(ctx, wc);
-			} finally {
-				if (closeWriteCon && wc != null) {
-					DBPool.closeWriterSilent(ctx, wc);
-				}
-			}
-		} catch (final DBPoolingException e) {
-			LOG.error(e.getMessage(), e);
-			throw new DeleteFailedException(e);
-		}
+		OXFolderDeleteListenerHelper.ensureConsistency(ctx, writeCon);
 	}
 
 }
