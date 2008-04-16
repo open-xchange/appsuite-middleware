@@ -286,7 +286,7 @@
             <replacefilter token="@bundlesdir@" value="${bundlesdir}"/>
         </replace>
         <replace file="${patch.conf.dir}/osgi/config.ini.template">
-            <replacefilter token="@logfile@" value="${log.install.dir}/osgi-groupware.log"/>
+            <replacefilter token="@logfile@" value="${log.install.dir}/open-xchange-osgi.log"/>
         </replace>
     </target>
 
