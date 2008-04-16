@@ -616,6 +616,18 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				}
 			}
 			throw new IMAPException(e);
+		} catch (final Exception e) {
+			if (created) {
+				try {
+					if (createMe.exists()) {
+						createMe.delete(true);
+					}
+				} catch (final Throwable e2) {
+					LOG.error(new StringBuilder().append("Temporary created IMAP folder \"").append(
+							createMe.getFullName()).append("could not be deleted"), e2);
+				}
+			}
+			throw new MailException(MailException.Code.UNEXPECTED_ERROR, e, e.getMessage());
 		}
 	}
 
@@ -626,6 +638,16 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		}
 		try {
 			IMAPFolder moveMe = (IMAPFolder) imapStore.getFolder(fullname);
+			if (!moveMe.exists()) {
+				moveMe = checkForNamespaceFolder(fullname);
+				if (null == moveMe) {
+					throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, fullname);
+				}
+			}
+			/*
+			 * Notify message storage about outstanding move
+			 */
+			imapAccess.getMessageStorage().notifyIMAPFolderModification(fullname);
 			final char separator = moveMe.getSeparator();
 			final String oldParent = moveMe.getParent().getFullName();
 			final String newParent;
@@ -789,18 +811,26 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			throw e;
 		} catch (final AbstractOXException e) {
 			throw new IMAPException(e);
-		} finally {
-			/*
-			 * Notify message storage
-			 */
-			imapAccess.getMessageStorage().closeIMAPFolderQuietly();
 		}
 	}
 
 	@Override
 	public String updateFolder(final String fullname, final MailFolderDescription toUpdate) throws MailException {
 		try {
-			final IMAPFolder updateMe = (IMAPFolder) imapStore.getFolder(fullname);
+			IMAPFolder updateMe = (IMAPFolder) imapStore.getFolder(fullname);
+			if (!updateMe.exists()) {
+				updateMe = checkForNamespaceFolder(fullname);
+				if (null == updateMe) {
+					throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, fullname);
+				}
+			}
+			/*
+			 * Notify message storage
+			 */
+			imapAccess.getMessageStorage().notifyIMAPFolderModification(fullname);
+			/*
+			 * Proceed update
+			 */
 			if (imapConfig.isSupportsACLs() && toUpdate.containsPermissions()) {
 				final ACL[] oldACLs = getACLSafe(updateMe);
 				if (oldACLs != null) {
@@ -869,13 +899,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			throw e;
 		} catch (final AbstractOXException e) {
 			throw new IMAPException(e);
-		} finally {
-			/*
-			 * Notify message storage
-			 */
-			imapAccess.getMessageStorage().closeIMAPFolderQuietly();
 		}
-
 	}
 
 	private void deleteTemporaryCreatedFolder(final IMAPFolder destFolder, final String name) throws MessagingException {
@@ -903,6 +927,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 					throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, fullname);
 				}
 			}
+			imapAccess.getMessageStorage().notifyIMAPFolderModification(fullname);
 			if (hardDelete) {
 				/*
 				 * Delete permanently
@@ -921,6 +946,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				/*
 				 * Just move this folder to trash
 				 */
+				imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFolder.getFullName());
 				final String name = deleteMe.getName();
 				int appendix = 1;
 				final StringBuilder sb = new StringBuilder();
@@ -949,11 +975,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			return fullname;
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapConfig);
-		} finally {
-			/*
-			 * Notify message storage
-			 */
-			imapAccess.getMessageStorage().closeIMAPFolderQuietly();
 		}
 	}
 
@@ -964,7 +985,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 	@Override
 	public void clearFolder(final String fullname, final boolean hardDelete) throws MailException {
 		try {
-			final IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullname);
+			IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullname);
+			if (!f.exists()) {
+				f = checkForNamespaceFolder(fullname);
+				if (null == f) {
+					throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, fullname);
+				}
+			}
+			imapAccess.getMessageStorage().notifyIMAPFolderModification(fullname);
 			try {
 				if ((f.getType() & Folder.HOLDS_MESSAGES) == 0) {
 					throw new IMAPException(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, f.getFullName());
@@ -984,6 +1012,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				final boolean backup = (!hardDelete
 						&& !UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx)
 								.isHardDeleteMsgs() && !(f.getFullName().equals(trashFullname)));
+				if (backup) {
+					imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFullname);
+				}
 				int msgCount = f.getMessageCount();
 				/*
 				 * Block-wise deletion
@@ -1110,11 +1141,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			throw IMAPException.handleMessagingException(new MessagingException(e.getMessage(), e), imapConfig);
 		} catch (final AbstractOXException e) {
 			throw new IMAPException(e);
-		} finally {
-			/*
-			 * Notify message storage
-			 */
-			imapAccess.getMessageStorage().closeIMAPFolderQuietly();
 		}
 	}
 

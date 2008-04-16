@@ -52,6 +52,7 @@ package com.openexchange.imap;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 
 import java.io.Serializable;
+import java.util.Set;
 
 import javax.mail.Flags;
 import javax.mail.Folder;
@@ -146,27 +147,64 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 	@Override
 	public void releaseResources() throws MailException {
 		if (null != imapFolder) {
-			try {
-				imapFolder.close(false);
-			} catch (final IllegalStateException e) {
-				LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
-			} catch (final MessagingException e) {
-				throw IMAPException.handleMessagingException(e, imapConfig);
-			} finally {
-				resetIMAPFolder();
-			}
+			closeIMAPFolder();
 		}
 	}
 
 	/**
-	 * Closes the stored IMAP folder quietly (if any) through invoking
-	 * {@link #releaseResources()} and catching a possibly thrown exception.
+	 * Reports a modification of the IMAP folder denoted by specified fullname.
+	 * If stored IMAP folder's fullname equals specified fullname, it is closed
+	 * quietly.
+	 * 
+	 * @param modifiedFullname
+	 *            The fullname of the folder which has been modified
 	 */
-	public void closeIMAPFolderQuietly() {
+	public void notifyIMAPFolderModification(final String modifiedFullname) {
+		if (null == imapFolder || !modifiedFullname.equals(imapFolder.getFullName())) {
+			/*
+			 * Modified folder did not affect remembered IMAP folder
+			 */
+			return;
+		}
 		try {
-			releaseResources();
+			closeIMAPFolder();
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
+		}
+
+	}
+
+	/**
+	 * Reports a modification of the IMAP folders denoted by specified set of
+	 * fullnames. If stored IMAP folder's fullname is contained in set of
+	 * fullnames, it is closed quietly.
+	 * 
+	 * @param modifiedFullnames
+	 *            The fullnames of the folders which have been modified
+	 */
+	public void notifyIMAPFolderModification(final Set<String> modifiedFullnames) {
+		if (null == imapFolder || !modifiedFullnames.contains(imapFolder.getFullName())) {
+			/*
+			 * Modified folders did not affect remembered IMAP folder
+			 */
+			return;
+		}
+		try {
+			closeIMAPFolder();
+		} catch (final Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+	}
+
+	private void closeIMAPFolder() throws MailException {
+		try {
+			imapFolder.close(false);
+		} catch (final IllegalStateException e) {
+			LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
+		} catch (final MessagingException e) {
+			throw IMAPException.handleMessagingException(e, imapConfig);
+		} finally {
+			resetIMAPFolder();
 		}
 	}
 
