@@ -296,7 +296,11 @@ public class MailException extends AbstractOXException {
 		 */
 		INSUFFICIENT_FOLDER_ATTR("Insufficient folder attributes: Either existence status "
 				+ "or fullname have to be present to determine if a "
-				+ "mail folder create or update shall be performed", Category.CODE_ERROR, 51);
+				+ "mail folder create or update shall be performed", Category.CODE_ERROR, 51),
+		/**
+		 * Root folder must not be modified or deleted
+		 */
+		NO_ROOT_FOLDER_MODIFY_DELETE("Root folder must not be modified or deleted", Category.CODE_ERROR, 52);
 
 		private final String message;
 

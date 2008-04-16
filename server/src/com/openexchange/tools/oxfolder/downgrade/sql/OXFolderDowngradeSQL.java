@@ -58,6 +58,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -690,13 +691,8 @@ public final class OXFolderDowngradeSQL {
 	private static final String SQL_SEL_SUB2_INFO_FLD = "SELECT ot.fuid FROM " + RPL_FOLDER
 			+ " AS ot WHERE ot.cid = ? AND ot.parent = ?";
 
-	private static final String SQL_DEL_INFO_PERM = "DELETE FROM " + RPL_PERM
-			+ " AS op WHERE op.cid = ? AND op.fuid = ?";
-
-	private static final String SQL_DEL_INFO = "DELETE FROM " + RPL_FOLDER + " AS ot WHERE ot.cid = ? AND ot.fuid = ?";
-
 	/**
-	 * Removes all subfolders below default infostore folder
+	 * Gathers all subfolders below default infostore folder
 	 * 
 	 * @param entity
 	 *            The entity
@@ -712,7 +708,7 @@ public final class OXFolderDowngradeSQL {
 	 * @throws SQLException
 	 *             If a SQL error occurs
 	 */
-	public static Set<Integer> removeSubInfostoreFolders(final int entity, final int cid, final String folderTable,
+	public static int[] gatherSubInfostoreFolders(final int entity, final int cid, final String folderTable,
 			final String permTable, final Connection writeCon) throws SQLException {
 		/*
 		 * Remove all subfolders below default infostore folder
@@ -738,13 +734,20 @@ public final class OXFolderDowngradeSQL {
 		}
 		final Set<Integer> ids = new HashSet<Integer>(64);
 		for (final int fuid : fuids) {
-			deleteFolder(fuid, cid, folderTable, permTable, ids, writeCon);
+			gatherSubfolderIDs(fuid, cid, folderTable, permTable, ids, writeCon);
 		}
-		return Collections.unmodifiableSet(ids);
+		final int[] retval = new int[ids.size()];
+		if (retval.length > 0) {
+			final Iterator<Integer> iter = ids.iterator();
+			for (int i = 0; i < retval.length; i++) {
+				retval[i] = iter.next().intValue();
+			}
+		}
+		return retval;
 	}
 
-	private static void deleteFolder(final int fuid, final int cid, final String folderTable, final String permTable,
-			final Set<Integer> ids, final Connection writeCon) throws SQLException {
+	private static void gatherSubfolderIDs(final int fuid, final int cid, final String folderTable,
+			final String permTable, final Set<Integer> ids, final Connection writeCon) throws SQLException {
 		PreparedStatement stmt = null;
 		{
 			ResultSet rs = null;
@@ -764,26 +767,8 @@ public final class OXFolderDowngradeSQL {
 				stmt = null;
 			}
 			for (final int subFuid : subFuids) {
-				deleteFolder(subFuid, cid, folderTable, permTable, ids, writeCon);
+				gatherSubfolderIDs(subFuid, cid, folderTable, permTable, ids, writeCon);
 			}
-		}
-		try {
-			stmt = writeCon.prepareStatement(SQL_DEL_INFO_PERM.replaceFirst(RPL_PERM, permTable));
-			stmt.setInt(1, cid);
-			stmt.setInt(2, fuid);
-			stmt.executeUpdate();
-		} finally {
-			closeSQLStuff(null, stmt);
-			stmt = null;
-		}
-		try {
-			stmt = writeCon.prepareStatement(SQL_DEL_INFO.replaceFirst(RPL_FOLDER, folderTable));
-			stmt.setInt(1, cid);
-			stmt.setInt(2, fuid);
-			stmt.executeUpdate();
-		} finally {
-			closeSQLStuff(null, stmt);
-			stmt = null;
 		}
 		ids.add(Integer.valueOf(fuid));
 	}
