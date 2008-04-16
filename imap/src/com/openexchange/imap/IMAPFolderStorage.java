@@ -675,7 +675,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				/*
 				 * Perform move operation
 				 */
-				if (isDefaultFolder(moveMe.getFullName())) {
+				if (isStandardFolder(moveMe.getFullName())) {
 					throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, moveMe.getFullName());
 				}
 				IMAPFolder destFolder = ((IMAPFolder) (newParent.length() == 0 ? imapStore.getDefaultFolder()
@@ -725,7 +725,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				/*
 				 * Perform rename operation
 				 */
-				if (isDefaultFolder(moveMe.getFullName())) {
+				if (isStandardFolder(moveMe.getFullName())) {
 					throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, moveMe.getFullName());
 				} else if (imapConfig.isSupportsACLs() && ((moveMe.getType() & Folder.HOLDS_MESSAGES) > 0)) {
 					try {
@@ -840,7 +840,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 						 * Default folder is affected, check if owner still
 						 * holds full rights
 						 */
-						if (isDefaultFolder(updateMe.getFullName())
+						if (isStandardFolder(updateMe.getFullName())
 								&& !stillHoldsFullRights(updateMe, newACLs, imapConfig, session, ctx)) {
 							throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_UPDATE, updateMe.getFullName());
 						} else if (!RightsCache.getCachedRights(updateMe, true, session).contains(
@@ -1182,32 +1182,32 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 
 	@Override
 	public String getConfirmedHamFolder() throws MailException {
-		return getStdFolder(StorageUtility.INDEX_CONFIRMED_HAM);
+		return getStandardFolder(StorageUtility.INDEX_CONFIRMED_HAM);
 	}
 
 	@Override
 	public String getConfirmedSpamFolder() throws MailException {
-		return getStdFolder(StorageUtility.INDEX_CONFIRMED_SPAM);
+		return getStandardFolder(StorageUtility.INDEX_CONFIRMED_SPAM);
 	}
 
 	@Override
 	public String getDraftsFolder() throws MailException {
-		return getStdFolder(StorageUtility.INDEX_DRAFTS);
+		return getStandardFolder(StorageUtility.INDEX_DRAFTS);
 	}
 
 	@Override
 	public String getSentFolder() throws MailException {
-		return getStdFolder(StorageUtility.INDEX_SENT);
+		return getStandardFolder(StorageUtility.INDEX_SENT);
 	}
 
 	@Override
 	public String getSpamFolder() throws MailException {
-		return getStdFolder(StorageUtility.INDEX_SPAM);
+		return getStandardFolder(StorageUtility.INDEX_SPAM);
 	}
 
 	@Override
 	public String getTrashFolder() throws MailException {
-		return getStdFolder(StorageUtility.INDEX_TRASH);
+		return getStandardFolder(StorageUtility.INDEX_TRASH);
 	}
 
 	@Override
@@ -1357,7 +1357,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 	}
 
 	private void deleteFolder(final IMAPFolder deleteMe) throws MailException, MessagingException {
-		if (isDefaultFolder(deleteMe.getFullName())) {
+		if (isStandardFolder(deleteMe.getFullName())) {
 			throw new IMAPException(IMAPException.Code.NO_DEFAULT_FOLDER_DELETE, deleteMe.getFullName());
 		} else if (!deleteMe.exists()) {
 			throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, deleteMe.getFullName());
@@ -1562,18 +1562,18 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		return newFolder;
 	}
 
-	private boolean isDefaultFolder(final String folderFullName) throws MailException {
+	private boolean isStandardFolder(final String folderFullName) throws MailException {
 		boolean isDefaultFolder = false;
 		isDefaultFolder = (folderFullName.equalsIgnoreCase(STR_INBOX));
 		for (int index = 0; index < 6 && !isDefaultFolder; index++) {
-			if (folderFullName.equalsIgnoreCase(getStdFolder(index))) {
+			if (folderFullName.equalsIgnoreCase(getStandardFolder(index))) {
 				return true;
 			}
 		}
 		return isDefaultFolder;
 	}
 
-	private String getStdFolder(final int index) throws MailException {
+	private String getStandardFolder(final int index) throws MailException {
 		if (!isDefaultFoldersChecked()) {
 			checkDefaultFolders();
 		}

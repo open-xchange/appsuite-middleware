@@ -53,13 +53,15 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.openexchange.groupware.Component;
+
 /**
  * {@link Protocol} - Represents both a mail and transport protocol
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class Protocol {
+public final class Protocol implements Component {
 
 	private static final Pattern PAT_PROT = Pattern.compile("([a-z]+)(?:((?:_[a-z]+)*))?");
 
@@ -98,6 +100,8 @@ public final class Protocol {
 	private final int hashCode;
 
 	private final String name;
+
+	private String abbr;
 
 	/**
 	 * Initializes a new {@link Protocol}
@@ -250,5 +254,12 @@ public final class Protocol {
 			}
 		}
 		return sb.toString();
+	}
+
+	public String getAbbreviation() {
+		if (null == abbr) {
+			abbr = name.toUpperCase(Locale.ENGLISH);
+		}
+		return abbr;
 	}
 }

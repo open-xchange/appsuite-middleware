@@ -53,7 +53,7 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -520,7 +520,7 @@ public final class IMAPFolderConverter {
 	}
 
 	private static boolean isUnknownEntityError(final AbstractOXException e) {
-		return Component.USER.equals(e.getComponent())
+		return EnumComponent.USER.equals(e.getComponent())
 				&& (UserException.Code.USER_NOT_FOUND.getDetailNumber() == e.getDetailNumber() || LdapException.Code.USER_NOT_FOUND
 						.getDetailNumber() == e.getDetailNumber());
 	}

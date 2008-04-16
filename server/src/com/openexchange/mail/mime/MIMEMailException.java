@@ -77,6 +77,7 @@ import javax.mail.search.SearchException;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -84,7 +85,7 @@ import com.sun.mail.iap.ConnectionException;
 import com.sun.mail.smtp.SMTPSendFailedException;
 
 /**
- * {@link MIMEMailException}
+ * {@link MIMEMailException} - For MIME related errors
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -230,7 +231,7 @@ public class MIMEMailException extends MailException {
 		 */
 		NO_ROUTE_TO_HOST("No route to host: server (%s) cannot be reached", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1018),
 		/**
-		 * Port %s was unreachabe on remote mail server
+		 * Port %s was unreachable on remote mail server
 		 */
 		PORT_UNREACHABLE("Port %s was unreachable on remote server", Category.SUBSYSTEM_OR_SERVICE_DOWN, 1019),
 		/**
@@ -290,13 +291,13 @@ public class MIMEMailException extends MailException {
 	}
 
 	protected MIMEMailException(final Code code, final Throwable cause, final Object... messageArgs) {
-		super(Component.MAIL, code.category, code.detailNumber, code.message, cause);
+		super(EnumComponent.MAIL, code.category, code.detailNumber, code.message, cause);
 		super.setMessageArgs(messageArgs);
 	}
 
 	private static final transient Object[] EMPTY_ARGS = new Object[0];
 
-	protected MIMEMailException(Code code) {
+	protected MIMEMailException(final Code code) {
 		this(code, EMPTY_ARGS);
 	}
 
@@ -307,7 +308,7 @@ public class MIMEMailException extends MailException {
 
 	/**
 	 * Handles given instance of {@link MessagingException} and creates an
-	 * appropiate instance of {@link MIMEMailException}
+	 * appropriate instance of {@link MIMEMailException}
 	 * <p>
 	 * This is just a convenience method that simply invokes
 	 * {@link #handleMessagingException(MessagingException, MailAccess)} with
@@ -315,7 +316,7 @@ public class MIMEMailException extends MailException {
 	 * 
 	 * @param e
 	 *            The messaging exception
-	 * @return An appropiate instance of {@link MIMEMailException}
+	 * @return An appropriate instance of {@link MIMEMailException}
 	 */
 	public static MIMEMailException handleMessagingException(final MessagingException e) {
 		return handleMessagingException(e, null);

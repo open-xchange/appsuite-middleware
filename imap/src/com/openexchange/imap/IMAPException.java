@@ -50,7 +50,6 @@
 package com.openexchange.imap;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.MIMEMailException;
 
@@ -354,25 +353,66 @@ public final class IMAPException extends MIMEMailException {
 		}
 	}
 
+	/**
+	 * Gets the message corresponding to specified error code with given message
+	 * arguments applied.
+	 * 
+	 * @param code
+	 *            The code
+	 * @param msgArgs
+	 *            The message arguments
+	 * @return The message corresponding to specified error code with given
+	 *         message arguments applied
+	 */
 	public static String getFormattedMessage(final Code code, final Object... msgArgs) {
 		return String.format(code.getMessage(), msgArgs);
 	}
 
 	private static final transient Object[] EMPTY_ARGS = new Object[0];
 
+	/**
+	 * Initializes a new {@link IMAPException}
+	 * 
+	 * @param cause
+	 *            The cause
+	 */
 	public IMAPException(final AbstractOXException cause) {
 		super(cause);
 	}
 
+	/**
+	 * Initializes a new {@link IMAPException}
+	 * 
+	 * @param code
+	 *            The code
+	 * @param messageArgs
+	 *            The message arguments
+	 */
 	public IMAPException(final Code code, final Object... messageArgs) {
 		this(code, null, messageArgs);
 	}
 
+	/**
+	 * Initializes a new {@link IMAPException}
+	 * 
+	 * @param code
+	 *            The code
+	 * @param cause
+	 *            The cause
+	 * @param messageArgs
+	 *            The message arguments
+	 */
 	public IMAPException(final Code code, final Throwable cause, final Object... messageArgs) {
-		super(Component.IMAP, code.category, code.detailNumber, code.message, cause);
+		super(IMAPProvider.PROTOCOL_IMAP, code.category, code.detailNumber, code.message, cause);
 		super.setMessageArgs(messageArgs);
 	}
 
+	/**
+	 * Initializes a new {@link IMAPException}
+	 * 
+	 * @param code
+	 *            The code
+	 */
 	public IMAPException(Code code) {
 		this(code, EMPTY_ARGS);
 	}

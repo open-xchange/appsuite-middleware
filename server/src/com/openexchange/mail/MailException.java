@@ -51,9 +51,16 @@ package com.openexchange.mail;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
- * {@link MailException} - Base class for mail exceptions
+ * {@link MailException} - Base class for mail exceptions.
+ * <p>
+ * The detail number range in subclasses generated in mail bundles is supposed
+ * to start with <code>2000</code> and may go up to <code>2999</code>.
+ * <p>
+ * The detail number range in subclasses generated in transport bundles is
+ * supposed to start with <code>3000</code> and may go up to <code>3999</code>.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -316,24 +323,72 @@ public class MailException extends AbstractOXException {
 		}
 	}
 
+	/**
+	 * Initializes a new {@link MailException}
+	 * 
+	 * @param cause
+	 *            The cause
+	 */
 	public MailException(final AbstractOXException cause) {
 		super(cause);
 	}
 
+	/**
+	 * Initializes a new {@link MailException}
+	 * 
+	 * @param code
+	 *            The code
+	 * @param messageArgs
+	 *            The message arguments
+	 */
 	public MailException(final Code code, final Object... messageArgs) {
 		this(code, null, messageArgs);
 	}
 
+	/**
+	 * Initializes a new {@link MailException}
+	 * 
+	 * @param code
+	 *            The code
+	 * @param cause
+	 *            The cause
+	 * @param messageArgs
+	 *            The message arguments
+	 */
 	public MailException(final Code code, final Throwable cause, final Object... messageArgs) {
-		super(Component.MAIL, code.getCategory(), code.getNumber(), code.getMessage(), cause);
+		super(EnumComponent.MAIL, code.getCategory(), code.getNumber(), code.getMessage(), cause);
 		super.setMessageArgs(messageArgs);
 	}
 
+	/**
+	 * Initializes a new {@link MailException}
+	 * 
+	 * @param component
+	 *            The component
+	 * @param category
+	 *            The category
+	 * @param detailNumber
+	 *            The detail number
+	 * @param message
+	 *            The message
+	 * @param cause
+	 *            The cause
+	 */
 	public MailException(final Component component, final Category category, final int detailNumber,
 			final String message, final Throwable cause) {
 		super(component, category, detailNumber, message, cause);
 	}
 
+	/**
+	 * Initializes a new {@link MailException}
+	 * 
+	 * @param component
+	 *            The component
+	 * @param message
+	 *            The message
+	 * @param cause
+	 *            The cause
+	 */
 	public MailException(final Component component, final String message, final AbstractOXException cause) {
 		super(component, message, cause);
 	}

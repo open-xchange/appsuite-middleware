@@ -50,7 +50,7 @@
 package com.openexchange.imap.user2acl;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * {@link User2ACLException} - Indicates errors related to user2ACL mappings
@@ -180,7 +180,7 @@ public final class User2ACLException extends AbstractOXException {
 	 *            arguments that will be formatted into the message.
 	 */
 	public User2ACLException(final User2ACLException.Code code, final Throwable cause, final Object... messageArgs) {
-		super(Component.ACL_ERROR, code.category, code.number, code.message, cause);
+		super(EnumComponent.ACL_ERROR, code.category, code.number, code.message, cause);
 		setMessageArgs(messageArgs);
 	}
 }

@@ -50,7 +50,7 @@
 package com.openexchange.mail.config;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.mail.MailException;
 
 /**
@@ -75,7 +75,7 @@ public final class MailConfigException extends MailException {
 	 * 
 	 */
 	public MailConfigException(final String message, final Throwable cause) {
-		super(Component.MAIL, MailException.Code.PROPERTY_ERROR.getCategory(), MailException.Code.PROPERTY_ERROR
+		super(EnumComponent.MAIL, MailException.Code.PROPERTY_ERROR.getCategory(), MailException.Code.PROPERTY_ERROR
 				.getNumber(), MailException.Code.PROPERTY_ERROR.getMessage(), cause);
 		super.setMessageArgs(message);
 	}
@@ -85,7 +85,7 @@ public final class MailConfigException extends MailException {
 	 * 
 	 */
 	public MailConfigException(final String message) {
-		super(Component.MAIL, MailException.Code.PROPERTY_ERROR.getCategory(), MailException.Code.PROPERTY_ERROR
+		super(EnumComponent.MAIL, MailException.Code.PROPERTY_ERROR.getCategory(), MailException.Code.PROPERTY_ERROR
 				.getNumber(), MailException.Code.PROPERTY_ERROR.getMessage(), null);
 		super.setMessageArgs(message);
 	}
@@ -95,7 +95,7 @@ public final class MailConfigException extends MailException {
 	 * instance.
 	 */
 	public MailConfigException(final Exception e) {
-		super(Component.MAIL, MailException.Code.PROPERTY_ERROR.getCategory(), MailException.Code.PROPERTY_ERROR
+		super(EnumComponent.MAIL, MailException.Code.PROPERTY_ERROR.getCategory(), MailException.Code.PROPERTY_ERROR
 				.getNumber(), MailException.Code.PROPERTY_ERROR.getMessage(), e);
 		super.setMessageArgs(e.getMessage());
 	}
