@@ -89,10 +89,11 @@ final class TasksImpl extends Tasks {
 
     /**
      * {@inheritDoc}
+     * TODO use given connection.
      */
     @Override
     public boolean containsNotSelfCreatedTasks(final Session session,
-        final int folderId) throws OXException {
+        final Connection con, final int folderId) throws OXException {
         try {
             final Context ctx = Tools.getContext(session.getContextId());
             return TaskStorage.getInstance().containsNotSelfCreatedTasks(ctx,
@@ -104,18 +105,10 @@ final class TasksImpl extends Tasks {
 
     /**
      * {@inheritDoc}
+     * TODO use given connection.
      */
     @Override
-    public boolean containsNotSelfCreatedTasks(final Session session,
-        final Connection con, final int folderId) throws OXException {
-        return containsNotSelfCreatedTasks(session, folderId);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void deleteTasksInFolder(final Session session,
+    public void deleteTasksInFolder(final Session session, Connection con,
         final int folderId) throws OXException {
         final TaskStorage storage = TaskStorage.getInstance();
         final ParticipantStorage partStor = ParticipantStorage.getInstance();
@@ -155,7 +148,7 @@ final class TasksImpl extends Tasks {
                     .taskId, StorageType.ACTIVE);
                 if (folders.size() == 1) {
                     // Task is only in the folder that is deleted.
-                    deleteTask.add(data.taskId);
+                    deleteTask.add(Integer.valueOf(data.taskId));
                     continue;
                 }
                 final Set<InternalParticipant> participants = ParticipantStorage
@@ -166,7 +159,7 @@ final class TasksImpl extends Tasks {
                     .getParticipant(participants, folder.getUser());
                 if (null == participant) {
                     // Delegators folder of the task is deleted.
-                    deleteTask.add(data.taskId);
+                    deleteTask.add(Integer.valueOf(data.taskId));
                 } else {
                     data.task = new Task();
                     data.task.setObjectID(data.taskId);
@@ -193,7 +186,7 @@ final class TasksImpl extends Tasks {
                     task.getLastModified());
             }
             for (UpdateData data : removeParticipant) {
-                if (deleteTask.contains(data.taskId)) {
+                if (deleteTask.contains(Integer.valueOf(data.taskId))) {
                     continue;
                 }
                 TaskLogic.updateTask(ctx, data.task, data.lastRead,

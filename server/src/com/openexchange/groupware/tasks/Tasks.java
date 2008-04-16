@@ -53,6 +53,9 @@ import java.sql.Connection;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tasks.TaskException.Code;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 
 /**
@@ -82,9 +85,33 @@ public abstract class Tasks {
     }
 
     /**
+     * @deprecated use {@link #containsNotSelfCreatedTasks(Session, Connection, int)}
+     */
+    @Deprecated
+    public final boolean containsNotSelfCreatedTasks(Session session,
+        int folderId) throws OXException {
+        final Context ctx;
+        final Connection con;
+        try {
+            ctx = Tools.getContext(session.getContextId());
+            con = DBPool.pickup(ctx);
+        } catch (TaskException e) {
+            throw Tools.convert(e);
+        } catch (DBPoolingException e) {
+            throw Tools.convert(new TaskException(Code.NO_CONNECTION, e));
+        }
+        try {
+            return containsNotSelfCreatedTasks(session, con, folderId);
+        } finally {
+            DBPool.closeReaderSilent(ctx, con);
+        }
+    }
+
+    /**
      * Checks if a folder contains tasks that are not created by the user the
      * session belongs to.
      * @param session Session.
+     * @param con readonly database connection.
      * @param folderId task folder.
      * @return <code>true</code> if the folder contains tasks that are created
      * by users other than the user of the session, <code>false</code>
@@ -92,12 +119,39 @@ public abstract class Tasks {
      * @throws OXException if an error occurs.
      */
     public abstract boolean containsNotSelfCreatedTasks(Session session,
-        int folderId) throws OXException;
-
-    public abstract boolean containsNotSelfCreatedTasks(Session session,
         Connection con, int folderId) throws OXException;
 
-    public abstract void deleteTasksInFolder(Session session,
+    /**
+     * @deprecated use {@link #deleteTasksInFolder(Session, Connection, int)}
+     */
+    @Deprecated
+    public final void deleteTasksInFolder(Session session, int folderId)
+        throws OXException {
+        final Context ctx;
+        final Connection con;
+        try {
+            ctx = Tools.getContext(session.getContextId());
+            con = DBPool.pickup(ctx);
+        } catch (TaskException e) {
+            throw Tools.convert(e);
+        } catch (DBPoolingException e) {
+            throw Tools.convert(new TaskException(Code.NO_CONNECTION, e));
+        }
+        try {
+            deleteTasksInFolder(session, con, folderId);
+        } finally {
+            DBPool.closeReaderSilent(ctx, con);
+        }
+    }
+
+    /**
+     * Deletes all tasks in a folder.
+     * @param session Session.
+     * @param con writable database connection.
+     * @param folderId identifier of a folder that tasks should be deleted.
+     * @throws OXException if a problem occurs.
+     */
+    public abstract void deleteTasksInFolder(Session session, Connection con,
         int folderId) throws OXException;
 
     /**
