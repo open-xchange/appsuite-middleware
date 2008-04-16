@@ -466,7 +466,7 @@ public class FolderCacheManager {
 	 */
 	public void removeFolderObject(final int key, final Context ctx) throws OXException {
 		/*
-		 * Remove object in cache if exist
+		 * Remove object from cache if exist
 		 */
 		if (key > 0) {
 			final Lock ctxWriteLock = getContextLock(ctx).writeLock();
@@ -478,6 +478,39 @@ public class FolderCacheManager {
 			} finally {
 				ctxWriteLock.unlock();
 			}
+		}
+	}
+
+	/**
+	 * Removes matching <code>FolderObject</code> instances from cache
+	 * 
+	 * @param keys
+	 *            the keys
+	 * @param ctx
+	 *            the context
+	 * @throws OXException
+	 *             If a caching error occurs
+	 */
+	public void removeFolderObjects(final int[] keys, final Context ctx) throws OXException {
+		if (keys == null || keys.length == 0) {
+			return;
+		}
+		/*
+		 * Remove objects from cache
+		 */
+		final Lock ctxWriteLock = getContextLock(ctx).writeLock();
+		ctxWriteLock.lock();
+		try {
+			for (int i = 0; i < keys.length; i++) {
+				final int key = keys[i];
+				if (key > 0) {
+					folderCache.remove(getCacheKey(ctx.getContextId(), key));
+				}
+			}
+		} catch (final CacheException e) {
+			throw new OXException(e);
+		} finally {
+			ctxWriteLock.unlock();
 		}
 	}
 

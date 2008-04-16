@@ -56,7 +56,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.Collections.SmartIntArray;
@@ -392,10 +395,13 @@ public final class OXFolderDowngradeSQL {
 	 *            The permission table identifier
 	 * @param writeCon
 	 *            A writable connection
+	 * @return The folder ID of the module's default folder which has been
+	 *         stripped by additional permissions or <code>-1</code> if none
+	 *         found.
 	 * @throws SQLException
 	 *             If a SQL error occurs
 	 */
-	public static void cleanDefaultModuleFolder(final int entity, final int module, final int cid,
+	public static int cleanDefaultModuleFolder(final int entity, final int module, final int cid,
 			final String folderTable, final String permTable, final Connection writeCon) throws SQLException {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -407,7 +413,7 @@ public final class OXFolderDowngradeSQL {
 			stmt.setInt(3, entity);
 			rs = stmt.executeQuery();
 			if (!rs.next()) {
-				return;
+				return -1;
 			}
 			fuid = rs.getInt(1);
 		} finally {
@@ -424,6 +430,7 @@ public final class OXFolderDowngradeSQL {
 		} finally {
 			closeSQLStuff(rs, stmt);
 		}
+		return fuid;
 	}
 
 	private static final String SQL_LOAD_PERMS = "SELECT op.permission_id, op.fp, op.orp, op.owp, op.odp, "
@@ -587,6 +594,12 @@ public final class OXFolderDowngradeSQL {
 		}
 	}
 
+	private static final String SQL_SEL_SHARED_PERMS = "SELECT ot.fuid FROM " + RPL_FOLDER
+			+ " AS ot WHERE ot.cid = ? AND ot.created_from = ?" + " AND ot.type = ? AND op.permission_id <> ?";
+
+	private static final String SQL_SEL_SHARED_PERMS_FOREIGN = "SELECT ot.fuid FROM " + RPL_FOLDER
+			+ " AS ot WHERE ot.cid = ? AND ot.created_from <> ?" + " AND ot.type = ? AND op.permission_id = ?";
+
 	private static final String SQL_DEL_SHARED_PERMS = "DELETE op FROM " + RPL_PERM + " AS op, " + RPL_FOLDER
 			+ " AS ot" + " WHERE op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? AND ot.created_from = ?"
 			+ " AND ot.type = ? AND op.permission_id <> ?";
@@ -609,13 +622,28 @@ public final class OXFolderDowngradeSQL {
 	 *            The permission table identifier
 	 * @param writeCon
 	 *            A writable connection
+	 * @return A set containing the affected IDs
 	 * @throws SQLException
 	 *             If a SQL error occurs
 	 */
-	public static void removeShareAccess(final int entity, final int cid, final String folderTable,
+	public static Set<Integer> removeShareAccess(final int entity, final int cid, final String folderTable,
 			final String permTable, final Connection writeCon) throws SQLException {
+		final Set<Integer> ids = new HashSet<Integer>();
 		PreparedStatement stmt = null;
+		ResultSet rs = null;
 		try {
+			stmt = writeCon.prepareStatement(SQL_SEL_SHARED_PERMS.replaceFirst(RPL_FOLDER, folderTable));
+			stmt.setInt(1, cid);
+			stmt.setInt(2, entity);
+			stmt.setInt(3, FolderObject.PRIVATE);
+			stmt.setInt(4, entity);
+			rs = stmt.executeQuery();
+			while (rs.next()) {
+				ids.add(Integer.valueOf(rs.getInt(1)));
+			}
+			rs.close();
+			rs = null;
+			stmt.close();
 			stmt = writeCon.prepareStatement(SQL_DEL_SHARED_PERMS.replaceAll(RPL_PERM, permTable).replaceFirst(
 					RPL_FOLDER, folderTable));
 			stmt.setInt(1, cid);
@@ -625,10 +653,22 @@ public final class OXFolderDowngradeSQL {
 			stmt.setInt(5, entity);
 			stmt.executeUpdate();
 		} finally {
-			closeSQLStuff(null, stmt);
+			closeSQLStuff(rs, stmt);
 			stmt = null;
 		}
 		try {
+			stmt = writeCon.prepareStatement(SQL_SEL_SHARED_PERMS_FOREIGN.replaceFirst(RPL_FOLDER, folderTable));
+			stmt.setInt(1, cid);
+			stmt.setInt(2, entity);
+			stmt.setInt(3, FolderObject.PRIVATE);
+			stmt.setInt(4, entity);
+			rs = stmt.executeQuery();
+			while (rs.next()) {
+				ids.add(Integer.valueOf(rs.getInt(1)));
+			}
+			rs.close();
+			rs = null;
+			stmt.close();
 			stmt = writeCon.prepareStatement(SQL_DEL_SHARED_PERMS_FOREIGN.replaceAll(RPL_PERM, permTable).replaceFirst(
 					RPL_FOLDER, folderTable));
 			stmt.setInt(1, cid);
@@ -638,8 +678,9 @@ public final class OXFolderDowngradeSQL {
 			stmt.setInt(5, entity);
 			stmt.executeUpdate();
 		} finally {
-			closeSQLStuff(null, stmt);
+			closeSQLStuff(rs, stmt);
 		}
+		return Collections.unmodifiableSet(ids);
 	}
 
 	private static final String SQL_SEL_SUB_INFO_FLD = "SELECT ot.fuid FROM " + RPL_FOLDER
@@ -667,10 +708,11 @@ public final class OXFolderDowngradeSQL {
 	 *            The permission table identifier
 	 * @param writeCon
 	 *            A writable connection
+	 * @return A set containing the IDs of deleted folders
 	 * @throws SQLException
 	 *             If a SQL error occurs
 	 */
-	public static void removeSubInfostoreFolders(final int entity, final int cid, final String folderTable,
+	public static Set<Integer> removeSubInfostoreFolders(final int entity, final int cid, final String folderTable,
 			final String permTable, final Connection writeCon) throws SQLException {
 		/*
 		 * Remove all subfolders below default infostore folder
@@ -694,13 +736,15 @@ public final class OXFolderDowngradeSQL {
 			rs = null;
 			stmt = null;
 		}
+		final Set<Integer> ids = new HashSet<Integer>(64);
 		for (final int fuid : fuids) {
-			deleteFolder(fuid, cid, folderTable, permTable, writeCon);
+			deleteFolder(fuid, cid, folderTable, permTable, ids, writeCon);
 		}
+		return Collections.unmodifiableSet(ids);
 	}
 
 	private static void deleteFolder(final int fuid, final int cid, final String folderTable, final String permTable,
-			final Connection writeCon) throws SQLException {
+			final Set<Integer> ids, final Connection writeCon) throws SQLException {
 		PreparedStatement stmt = null;
 		{
 			ResultSet rs = null;
@@ -720,7 +764,7 @@ public final class OXFolderDowngradeSQL {
 				stmt = null;
 			}
 			for (final int subFuid : subFuids) {
-				deleteFolder(subFuid, cid, folderTable, permTable, writeCon);
+				deleteFolder(subFuid, cid, folderTable, permTable, ids, writeCon);
 			}
 		}
 		try {
@@ -741,6 +785,7 @@ public final class OXFolderDowngradeSQL {
 			closeSQLStuff(null, stmt);
 			stmt = null;
 		}
+		ids.add(Integer.valueOf(fuid));
 	}
 
 }

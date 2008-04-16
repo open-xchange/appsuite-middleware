@@ -462,9 +462,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 		 */
 		if (FolderCacheManager.isEnabled() && FolderCacheManager.isInitialized()) {
 			try {
-				for (int i = 0; i < folderIDs.length; i++) {
-					FolderCacheManager.getInstance().removeFolderObject(folderIDs[i], ctx);
-				}
+				FolderCacheManager.getInstance().removeFolderObjects(folderIDs, ctx);
 			} catch (final OXException e) {
 				LOG.error(e.getLocalizedMessage(), e);
 			}
