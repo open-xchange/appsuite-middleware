@@ -2242,34 +2242,15 @@ public class Contacts implements DeleteListener {
 		}
 	}
 	
-	@OXThrows(
-			category=Category.CODE_ERROR,
-			desc="40",
-			exceptionId=40,
-			msg="Unable to perform contact folder check for readable content: Context %1$d Folder %2$d"
-	)
 	public static boolean containsForeignObjectInFolder(final int fid, final int uid, final Session so) throws OXException, DBPoolingException {
 		Connection readCon = null;
-		ResultSet rs = null;
-		Statement st = null;
 		Context ct = null;
 		try{
 			ct = ContextStorage.getStorageContext(so.getContextId());
 			readCon = DBPool.pickup(ct);
-			st = readCon.createStatement();
-			final ContactSql cs = new ContactMySql(null);
-			rs = st.executeQuery(cs.iFcontainsForeignObjectInFolder(fid,uid,so.getContextId()));
-			if (rs.next()){
-				return true;
-			}
-			return false;
+			return containsForeignObjectInFolder(fid, uid, so, readCon);
 		} catch (final ContextException d){
 			throw new ContactException(d);
-		} catch (final SQLException se){
-			throw EXCEPTIONS.create(40, se, Integer.valueOf(so.getContextId()), Integer.valueOf(fid));
-			//throw new OXException("UNABLE TO PERFORM ForeignObjectCheck");
-		} finally {
-			closeResources(rs, st, readCon, true, ct);
 		}
 	}
 
