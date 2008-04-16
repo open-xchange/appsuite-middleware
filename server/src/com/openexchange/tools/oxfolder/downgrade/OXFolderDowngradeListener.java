@@ -51,15 +51,31 @@ package com.openexchange.tools.oxfolder.downgrade;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
+import com.openexchange.api2.OXException;
+import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.cache.impl.FolderQueryCacheManager;
+import com.openexchange.groupware.calendar.CalendarCache;
+import com.openexchange.groupware.calendar.CalendarSql;
+import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeFailedException;
 import com.openexchange.groupware.downgrade.DowngradeListener;
+import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.tasks.Tasks;
+import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.oxfolder.OXFolderException;
+import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.oxfolder.downgrade.sql.OXFolderDowngradeSQL;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link OXFolderDowngradeListener} - Performs deletion of unused folder data
@@ -91,14 +107,12 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 	@Override
 	public void downgradePerformed(final DowngradeEvent event) throws DowngradeFailedException {
 		final UserConfiguration newUserConfiguration = event.getNewUserConfiguration();
-		final Context ctx = event.getContext();
-		final Connection writeCon = event.getWriteCon();
 		if (!newUserConfiguration.hasCalendar()) {
 			/*
 			 * User lost calendar module access:
 			 */
 			try {
-				deleteCalendarFolderData(newUserConfiguration.getUserId(), ctx.getContextId(), writeCon);
+				deleteCalendarFolderData(newUserConfiguration.getUserId(), event);
 			} catch (final OXFolderException e) {
 				throw new DowngradeFailedException(e);
 			}
@@ -111,7 +125,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 			 * User lost task module access:
 			 */
 			try {
-				deleteTaskFolderData(newUserConfiguration.getUserId(), ctx.getContextId(), writeCon);
+				deleteTaskFolderData(newUserConfiguration.getUserId(), event);
 			} catch (OXFolderException e) {
 				throw new DowngradeFailedException(e);
 			}
@@ -124,7 +138,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 			 * User lost infostore module access:
 			 */
 			try {
-				deleteInfostoreFolderData(newUserConfiguration.getUserId(), ctx.getContextId(), writeCon);
+				deleteInfostoreFolderData(newUserConfiguration.getUserId(), event);
 			} catch (OXFolderException e) {
 				throw new DowngradeFailedException(e);
 			}
@@ -137,13 +151,26 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 			 * User lost full shared folder access:
 			 */
 			try {
-				deleteSharedFolderData(newUserConfiguration.getUserId(), ctx.getContextId(), writeCon);
+				deleteSharedFolderData(newUserConfiguration.getUserId(), event);
 			} catch (OXFolderException e) {
 				throw new DowngradeFailedException(e);
 			}
 			if (LOG.isInfoEnabled()) {
 				LOG.info("All shared folder data removed due to loss of full shared folder access");
 			}
+		}
+		/*
+		 * Update affected context's query caches
+		 */
+		try {
+			if (FolderQueryCacheManager.isInitialized()) {
+				FolderQueryCacheManager.getInstance().invalidateContextQueries(event.getContext().getContextId());
+			}
+			if (CalendarCache.isInitialized()) {
+				CalendarCache.getInstance().invalidateGroup(event.getContext().getContextId());
+			}
+		} catch (final Exception e) {
+			LOG.error(e.getMessage(), e);
 		}
 	}
 
@@ -159,16 +186,13 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 	 * 
 	 * @param entity
 	 *            The user's ID
-	 * @param cid
-	 *            The context ID
-	 * @param writeCon
-	 *            A writable connection
+	 * @param event
+	 *            The downgrade event
 	 * @throws OXFolderException
 	 *             If a folder error occurs
 	 */
-	private static void deleteCalendarFolderData(final int entity, final int cid, final Connection writeCon)
-			throws OXFolderException {
-		deleteModuleFolderData(entity, FolderObject.CALENDAR, cid, writeCon, true);
+	private static void deleteCalendarFolderData(final int entity, final DowngradeEvent event) throws OXFolderException {
+		deleteModuleFolderData(entity, FolderObject.CALENDAR, event, true);
 	}
 
 	/**
@@ -183,16 +207,13 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 	 * 
 	 * @param entity
 	 *            The user's ID
-	 * @param cid
-	 *            The context ID
-	 * @param writeCon
-	 *            A writable connection
+	 * @param event
+	 *            The downgrade event
 	 * @throws OXFolderException
 	 *             If a folder error occurs
 	 */
-	private static void deleteTaskFolderData(final int entity, final int cid, final Connection writeCon)
-			throws OXFolderException {
-		deleteModuleFolderData(entity, FolderObject.TASK, cid, writeCon, true);
+	private static void deleteTaskFolderData(final int entity, final DowngradeEvent event) throws OXFolderException {
+		deleteModuleFolderData(entity, FolderObject.TASK, event, true);
 	}
 
 	/**
@@ -201,44 +222,75 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 	 * <li>Delete all public infostore folders' permissions assigned to
 	 * affected user; reassign to context admin if necessary</li>
 	 * </ul>
+	 * <p>
+	 * Folder cache is udated, too
 	 * 
 	 * @param entity
 	 *            The user's ID
-	 * @param cid
-	 *            The context ID
-	 * @param writeCon
-	 *            A writable connection
+	 * @param event
+	 *            The downgrade event
 	 * @throws OXFolderException
 	 *             If a folder error occurs
 	 */
-	private static void deleteInfostoreFolderData(final int entity, final int cid, final Connection writeCon)
-			throws OXFolderException {
+	private void deleteInfostoreFolderData(final int entity, final DowngradeEvent event) throws OXFolderException {
+		final int cid = event.getContext().getContextId();
 		try {
+			final Set<Integer> fuids = new HashSet<Integer>(16);
 			/*
 			 * Strip permissions on default folder
 			 */
-			OXFolderDowngradeSQL.cleanDefaultModuleFolder(entity, FolderObject.INFOSTORE, cid, TABLE_FOLDER_BACKUP,
-					TABLE_PERMISSIONS_BACKUP, writeCon);
-			OXFolderDowngradeSQL.cleanDefaultModuleFolder(entity, FolderObject.INFOSTORE, cid, TABLE_FOLDER_WORKING,
-					TABLE_PERMISSIONS_WORKING, writeCon);
+			int fuid = OXFolderDowngradeSQL.cleanDefaultModuleFolder(entity, FolderObject.INFOSTORE, cid,
+					TABLE_FOLDER_BACKUP, TABLE_PERMISSIONS_BACKUP, event.getWriteCon());
+			if (fuid != -1) {
+				fuids.add(Integer.valueOf(fuid));
+			}
+			fuid = OXFolderDowngradeSQL.cleanDefaultModuleFolder(entity, FolderObject.INFOSTORE, cid,
+					TABLE_FOLDER_WORKING, TABLE_PERMISSIONS_WORKING, event.getWriteCon());
+			if (fuid != -1) {
+				fuids.add(Integer.valueOf(fuid));
+			}
 			/*
 			 * Remove subfolders below default folder
 			 */
-			OXFolderDowngradeSQL.removeSubInfostoreFolders(entity, cid, TABLE_FOLDER_BACKUP, TABLE_PERMISSIONS_BACKUP,
-					writeCon);
-			OXFolderDowngradeSQL.removeSubInfostoreFolders(entity, cid, TABLE_FOLDER_WORKING,
-					TABLE_PERMISSIONS_WORKING, writeCon);
+			Set<Integer> tmp = OXFolderDowngradeSQL.removeSubInfostoreFolders(entity, cid, TABLE_FOLDER_BACKUP,
+					TABLE_PERMISSIONS_BACKUP, event.getWriteCon());
+			fuids.addAll(tmp);
+			tmp = OXFolderDowngradeSQL.removeSubInfostoreFolders(entity, cid, TABLE_FOLDER_WORKING,
+					TABLE_PERMISSIONS_WORKING, event.getWriteCon());
+			fuids.addAll(tmp);
+			/*
+			 * Update cache
+			 */
+			removeFromFolderCache(fuids, event.getContext());
 		} catch (final SQLException e) {
 			throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
 		}
 		/*
 		 * Strip all user permission from other (public) infostore folders
 		 */
-		deleteModuleFolderData(entity, FolderObject.INFOSTORE, cid, writeCon, false);
+		deleteModuleFolderData(entity, FolderObject.INFOSTORE, event, false);
 	}
 
-	private static void deleteModuleFolderData(final int entity, final int module, final int cid,
-			final Connection writeCon, final boolean checkPrivate) throws OXFolderException {
+	/**
+	 * Deletes specified module's folder data and updates the folder cache
+	 * 
+	 * @param entity
+	 *            The entity whose folder data ought to be deleted
+	 * @param module
+	 *            The module
+	 * @param event
+	 *            The downgrade event providing needed information
+	 * @param checkPrivate
+	 *            <code>true</code> to also check module's private folders;
+	 *            otherwise <code>false</code>
+	 * @throws OXFolderException
+	 *             If deleting module's folder data fails
+	 */
+	private static void deleteModuleFolderData(final int entity, final int module, final DowngradeEvent event,
+			final boolean checkPrivate) throws OXFolderException {
+		final Set<Integer> ids = new HashSet<Integer>(128);
+		final int cid = event.getContext().getContextId();
+		final Connection writeCon = event.getWriteCon();
 		try {
 			int[] fuids = null;
 			if (checkPrivate) {
@@ -247,20 +299,66 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 				 */
 				fuids = OXFolderDowngradeSQL
 						.getModulePrivateFolders(module, entity, cid, TABLE_FOLDER_BACKUP, writeCon);
+				/*
+				 * TODO: Delete folders' content through iterating over fuids
+				 */
+				/**
+				 * <pre>
+				 * final OXFolderAccess access = new OXFolderAccess(writeCon, event.getContext());
+				 * for (int i = 0; i &lt; fuids.length; i++) {
+				 * 	// Delete folder content
+				 * 	final int imodule = access.getFolderModule(fuids[i]);
+				 * 	switch (imodule) {
+				 * 	case FolderObject.CALENDAR:
+				 * 		deleteContainedAppointments(fuids[i]);
+				 * 		break;
+				 * 	case FolderObject.TASK:
+				 * 		deleteContainedTasks(fuids[i]);
+				 * 		break;
+				 * 	case FolderObject.CONTACT:
+				 * 		deleteContainedContacts(fuids[i]);
+				 * 		break;
+				 * 	case FolderObject.UNBOUND:
+				 * 		break;
+				 * 	case FolderObject.INFOSTORE:
+				 * 		deleteContainedDocuments(fuids[i]);
+				 * 		break;
+				 * 	case FolderObject.PROJECT:
+				 * 		// TODO: Delete all projects in project folder
+				 * 		break;
+				 * 	default:
+				 * 		throw new OXFolderException(OXFolderException.FolderCode.UNKNOWN_MODULE, Integer.valueOf(module), Integer
+				 * 				.valueOf(cid));
+				 * 	}
+				 * }
+				 * </pre>
+				 */
 				OXFolderDowngradeSQL.deleteFolderPermissions(fuids, cid, TABLE_PERMISSIONS_BACKUP, writeCon);
 				OXFolderDowngradeSQL.deleteFolders(fuids, cid, TABLE_FOLDER_BACKUP, writeCon);
+				for (final int id : fuids) {
+					ids.add(Integer.valueOf(id));
+				}
 				fuids = OXFolderDowngradeSQL.getModulePrivateFolders(module, entity, cid, TABLE_FOLDER_WORKING,
 						writeCon);
 				OXFolderDowngradeSQL.deleteFolderPermissions(fuids, cid, TABLE_PERMISSIONS_WORKING, writeCon);
 				OXFolderDowngradeSQL.deleteFolders(fuids, cid, TABLE_FOLDER_WORKING, writeCon);
+				for (final int id : fuids) {
+					ids.add(Integer.valueOf(id));
+				}
 				fuids = null;
 				/*
 				 * Remove default folder's shared permissions
 				 */
-				OXFolderDowngradeSQL.cleanDefaultModuleFolder(entity, module, cid, TABLE_FOLDER_BACKUP,
+				int fuid = OXFolderDowngradeSQL.cleanDefaultModuleFolder(entity, module, cid, TABLE_FOLDER_BACKUP,
 						TABLE_PERMISSIONS_BACKUP, writeCon);
-				OXFolderDowngradeSQL.cleanDefaultModuleFolder(entity, module, cid, TABLE_FOLDER_WORKING,
+				if (fuid != -1) {
+					ids.add(Integer.valueOf(fuid));
+				}
+				fuid = OXFolderDowngradeSQL.cleanDefaultModuleFolder(entity, module, cid, TABLE_FOLDER_WORKING,
 						TABLE_PERMISSIONS_WORKING, writeCon);
+				if (fuid != -1) {
+					ids.add(Integer.valueOf(fuid));
+				}
 			}
 			/*
 			 * Handle module's public folders
@@ -269,26 +367,107 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 					TABLE_PERMISSIONS_BACKUP, writeCon);
 			for (final int fuid : fuids) {
 				OXFolderDowngradeSQL.handleAffectedPublicFolder(entity, fuid, cid, TABLE_PERMISSIONS_BACKUP, writeCon);
+				ids.add(Integer.valueOf(fuid));
 			}
 			fuids = OXFolderDowngradeSQL.getAffectedPublicFolders(entity, module, cid, TABLE_FOLDER_WORKING,
 					TABLE_PERMISSIONS_BACKUP, writeCon);
 			for (final int fuid : fuids) {
 				OXFolderDowngradeSQL.handleAffectedPublicFolder(entity, fuid, cid, TABLE_PERMISSIONS_WORKING, writeCon);
+				ids.add(Integer.valueOf(fuid));
 			}
 		} catch (final SQLException e) {
 			throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
 		}
+		/*
+		 * Update cache
+		 */
+		removeFromFolderCache(ids, event.getContext());
 	}
 
-	private static void deleteSharedFolderData(final int entity, final int cid, final Connection writeCon)
-			throws OXFolderException {
+	private void deleteContainedAppointments(final int folderID, final DowngradeEvent event) throws OXException {
+		final CalendarSql cSql = new CalendarSql(event.getSession());
 		try {
-			OXFolderDowngradeSQL
-					.removeShareAccess(entity, cid, TABLE_FOLDER_BACKUP, TABLE_PERMISSIONS_BACKUP, writeCon);
-			OXFolderDowngradeSQL.removeShareAccess(entity, cid, TABLE_FOLDER_WORKING, TABLE_PERMISSIONS_WORKING,
-					writeCon);
+			cSql.deleteAppointmentsInFolder(folderID);
+		} catch (final SQLException e) {
+			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(event.getContext().getContextId()));
+		}
+	}
+
+	private void deleteContainedTasks(final int folderID, final DowngradeEvent event) throws OXException {
+		final Tasks tasks = Tasks.getInstance();
+		tasks.deleteTasksInFolder(event.getSession(), folderID);
+	}
+
+	private void deleteContainedContacts(final int folderID, final DowngradeEvent event) throws OXException {
+		Contacts.trashContactsFromFolder(folderID, event.getSession(), event.getReadCon(), event.getWriteCon(), false);
+	}
+
+	private void deleteContainedDocuments(final int folderID, final DowngradeEvent event) throws OXException {
+		final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
+		db.setTransactional(true);
+		db.startTransaction();
+		try {
+			db.removeDocument(folderID, System.currentTimeMillis(), new ServerSessionAdapter(event.getSession(), event
+					.getContext()));
+			db.commit();
+		} catch (final OXException x) {
+			db.rollback();
+			throw x;
+		} finally {
+			db.finish();
+		}
+	}
+
+	/**
+	 * Deletes the shared folder data and updates cache
+	 * 
+	 * @param entity
+	 *            The entity
+	 * @param event
+	 *            The downgrade event
+	 * @throws OXFolderException
+	 *             If deleting the shared folder data fails
+	 */
+	private static void deleteSharedFolderData(final int entity, final DowngradeEvent event) throws OXFolderException {
+		final int cid = event.getContext().getContextId();
+		final Set<Integer> set = new HashSet<Integer>();
+		try {
+			Set<Integer> tmp = OXFolderDowngradeSQL.removeShareAccess(entity, cid, TABLE_FOLDER_BACKUP,
+					TABLE_PERMISSIONS_BACKUP, event.getWriteCon());
+			set.addAll(tmp);
+			tmp = OXFolderDowngradeSQL.removeShareAccess(entity, cid, TABLE_FOLDER_WORKING, TABLE_PERMISSIONS_WORKING,
+					event.getWriteCon());
+			set.addAll(tmp);
 		} catch (final SQLException e) {
 			throw new OXFolderException(OXFolderException.FolderCode.SQL_ERROR, e, Integer.valueOf(cid));
+		}
+		/*
+		 * Update cache
+		 */
+		removeFromFolderCache(set, event.getContext());
+	}
+
+	private static void removeFromFolderCache(final Collection<Integer> collection, final Context ctx) {
+		final int[] ints = new int[collection.size()];
+		final Iterator<Integer> iter = collection.iterator();
+		for (int i = 0; i < ints.length; i++) {
+			ints[i] = iter.next().intValue();
+		}
+		removeFromFolderCache(ints, ctx);
+	}
+
+	private static void removeFromFolderCache(final int[] folderIDs, final Context ctx) {
+		/*
+		 * Remove from cache
+		 */
+		if (FolderCacheManager.isEnabled() && FolderCacheManager.isInitialized()) {
+			try {
+				for (int i = 0; i < folderIDs.length; i++) {
+					FolderCacheManager.getInstance().removeFolderObject(folderIDs[i], ctx);
+				}
+			} catch (final OXException e) {
+				LOG.error(e.getLocalizedMessage(), e);
+			}
 		}
 	}
 
