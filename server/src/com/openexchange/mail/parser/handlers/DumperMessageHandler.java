@@ -399,13 +399,14 @@ public class DumperMessageHandler implements MailMessageHandler {
 	 * @see com.openexchange.mail.parser.MailMessageHandler#handleSpecialPart(com.openexchange.mail.dataobjects.MailContent,
 	 *      java.lang.String, java.lang.String)
 	 */
-	public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String id)
+	public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id)
 			throws MailException {
 		if (bodyOnly) {
 			return true;
 		}
 		strBuilder.append('\n').append("handleSpecialPart:\n");
 		strBuilder.append("ContentType=").append(baseContentType).append('\n');
+		strBuilder.append("filename=").append(fileName).append('\n');
 		strBuilder.append("sequenceId=").append(id).append('\n');
 		try {
 			strBuilder.append("Content:\n").append(MessageUtility.readStream(part.getInputStream(), "US-ASCII"));

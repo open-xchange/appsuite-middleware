@@ -482,7 +482,7 @@ public final class MailMessageParser {
 			if (!mailPart.containsSequenceId()) {
 				mailPart.setSequenceId(getSequenceId(prefix, partCount));
 			}
-			if (!handler.handleSpecialPart(mailPart, contentType.getBaseType(), mailPart.getSequenceId())) {
+			if (!handler.handleSpecialPart(mailPart, contentType.getBaseType(), filename, mailPart.getSequenceId())) {
 				stop = true;
 				return;
 			}

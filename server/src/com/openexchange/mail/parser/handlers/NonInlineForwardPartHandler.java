@@ -70,8 +70,8 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
- * {@link NonInlineForwardPartHandler} - Gathers all occuring non-inline parts in a
- * mail and makes them accessible through {@link #getNonInlineParts()}
+ * {@link NonInlineForwardPartHandler} - Gathers all occuring non-inline parts
+ * in a mail and makes them accessible through {@link #getNonInlineParts()}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -330,8 +330,8 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
 	 * @see com.openexchange.mail.parser.MailMessageHandler#handleSpecialPart(com.openexchange.mail.dataobjects.MailPart,
 	 *      java.lang.String, java.lang.String)
 	 */
-	public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String id)
-			throws MailException {
+	public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName,
+			final String id) throws MailException {
 		return true;
 	}
 

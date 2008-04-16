@@ -812,7 +812,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 * @see com.openexchange.mail.parser.MailMessageHandler#handleSpecialPart(com.openexchange.mail.dataobjects.MailPart,
 	 *      java.lang.String, java.lang.String)
 	 */
-	public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String id)
+	public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id)
 			throws MailException {
 		/*
 		 * When creating a JSON message object from a message we do not
@@ -820,7 +820,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		 * Therefore invoke the handleAttachment method. Maybe we need a
 		 * seperate handling in the future for vcards.
 		 */
-		return handleAttachment(part, false, baseContentType, null, id);
+		return handleAttachment(part, false, baseContentType, fileName, id);
 	}
 
 	/*

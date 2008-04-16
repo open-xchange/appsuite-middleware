@@ -355,10 +355,10 @@ public final class ImageMessageHandler implements MailMessageHandler {
 	 * @see com.openexchange.mail.parser.MailMessageHandler#handleSpecialPart(com.openexchange.mail.dataobjects.MailPart,
 	 *      java.lang.String, java.lang.String)
 	 */
-	public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String id)
-			throws MailException {
+	public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName,
+			final String id) throws MailException {
 		return handleAttachment(part, !Part.ATTACHMENT.equalsIgnoreCase(part.getContentDisposition().getDisposition()),
-				baseContentType, part.getFileName(), id);
+				baseContentType, fileName, id);
 	}
 
 	/*

@@ -203,7 +203,7 @@ public interface MailMessageHandler {
 	 * <code>text/vcard</code>, <code>text/calendar</code> or
 	 * <code>text/x-vCalendar</code>
 	 */
-	public boolean handleSpecialPart(MailPart part, String baseContentType, String id) throws MailException;
+	public boolean handleSpecialPart(MailPart part, String baseContentType, String fileName, String id) throws MailException;
 
 	/**
 	 * Handle an image part (<code>image/*</code>)
