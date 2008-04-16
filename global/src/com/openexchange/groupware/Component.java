@@ -285,13 +285,13 @@ public enum Component {
     CONSISTENCY("CSTY");
 
     /**
-     * The abbrevation for components.
+     * The abbreviation for components.
      */
     private String abbrevation;
 
     /**
      * Default constructor.
-     * @param abbrevation Abbrevation for the component.
+     * @param abbrevation Abbreviation for the component.
      */
     private Component(final String abbrevation) {
         this.abbrevation = abbrevation;
