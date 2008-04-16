@@ -557,13 +557,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	@Override
 	public long getQuotaLimit() throws MailException {
 		initConnection();
-		return mailAccess.getFolderStorage().getQuota(INBOX_ID).limit;
+		return mailAccess.getFolderStorage().getQuota(INBOX_ID).getLimit();
 	}
 
 	@Override
 	public long getQuotaUsage() throws MailException {
 		initConnection();
-		return mailAccess.getFolderStorage().getQuota(INBOX_ID).usage;
+		return mailAccess.getFolderStorage().getQuota(INBOX_ID).getUsage();
 	}
 
 	@Override

@@ -74,12 +74,12 @@ public final class Quota {
 	/**
 	 * The quota's limit
 	 */
-	public final long limit;
+	private final long limit;
 
 	/**
 	 * The quota's usage
 	 */
-	public final long usage;
+	private final long usage;
 
 	/**
 	 * Initializes a new {@link Quota}
@@ -93,6 +93,24 @@ public final class Quota {
 		super();
 		this.limit = limit;
 		this.usage = usage;
+	}
+
+	/**
+	 * Gets the limit
+	 * 
+	 * @return the limit
+	 */
+	public long getLimit() {
+		return limit;
+	}
+
+	/**
+	 * Gets the usage
+	 * 
+	 * @return the usage
+	 */
+	public long getUsage() {
+		return usage;
 	}
 
 	/**
