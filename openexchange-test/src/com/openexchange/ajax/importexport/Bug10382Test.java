@@ -54,7 +54,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.AppointmentObject;
 
 /**
@@ -86,7 +86,7 @@ public class Bug10382Test extends AbstractAJAXSession {
             fail("ICal imported without permissions.");
         }
         final AbstractOXException exception = response.getException();
-        if (exception.getComponent() != Component.IMPORT_EXPORT) {
+        if (exception.getComponent() != EnumComponent.IMPORT_EXPORT) {
             fail("Wrong component in exception.");
         }
         if (exception.getDetailNumber() != 1100) {

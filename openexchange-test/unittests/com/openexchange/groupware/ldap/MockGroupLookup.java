@@ -3,7 +3,7 @@ package com.openexchange.groupware.ldap;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.ldap.LdapException.Code;
 
 /**
@@ -16,7 +16,7 @@ public class MockGroupLookup {
 	
 	public Group getGroup(int gid) throws LdapException {
 		if(!groups.containsKey(gid))
-			throw new LdapException(Component.GROUP, Code.GROUP_NOT_FOUND,
+			throw new LdapException(EnumComponent.GROUP, Code.GROUP_NOT_FOUND,
                 gid, -1);
 		return groups.get(gid);
 	}

@@ -3,7 +3,7 @@ package com.openexchange.groupware.ldap;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.ldap.LdapException.Code;
 
 /**
@@ -17,7 +17,7 @@ public class MockUserLookup {
 	
 	public User getUser(int uid) throws LdapException {
 		if(!users.containsKey(uid)) {
-			throw new LdapException(Component.USER, Code.USER_NOT_FOUND, uid,
+			throw new LdapException(EnumComponent.USER, Code.USER_NOT_FOUND, uid,
                 -1);
 		}
 		return users.get(uid);

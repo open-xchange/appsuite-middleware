@@ -4,7 +4,7 @@ package com.openexchange.groupware.attach;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.attach.util.GetSwitch;
@@ -668,17 +668,17 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 		
 		public void checkMayAttach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
 			checked = 1;
-			throw new OXPermissionException(Component.INFOSTORE, AbstractOXException.Category.USER_INPUT,0,"Badaaam!",null);
+			throw new OXPermissionException(EnumComponent.INFOSTORE, AbstractOXException.Category.USER_INPUT,0,"Badaaam!",null);
 		}
 		
 		public void checkMayDetach(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
 			checked = 2;
-			throw new OXPermissionException(Component.INFOSTORE, AbstractOXException.Category.USER_INPUT,0,"Badaaam!",null);
+			throw new OXPermissionException(EnumComponent.INFOSTORE, AbstractOXException.Category.USER_INPUT,0,"Badaaam!",null);
 		}
 		
 		public void checkMayReadAttachments(int folderId, int objectId, User user, UserConfiguration userConfig, Context ctx) throws OXException {
 			checked = 3;
-			throw new OXPermissionException(Component.INFOSTORE, AbstractOXException.Category.USER_INPUT,0,"Badaaam!",null);
+			throw new OXPermissionException(EnumComponent.INFOSTORE, AbstractOXException.Category.USER_INPUT,0,"Badaaam!",null);
 		}
 		
 		public void assertMayAttach(){

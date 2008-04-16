@@ -59,7 +59,7 @@ import com.openexchange.ajax.task.actions.InsertResponse;
 import com.openexchange.ajax.task.actions.UpdateRequest;
 import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TaskException;
 
@@ -123,7 +123,7 @@ public class Bug7276Test extends AbstractTaskTest {
             gResponse2.hasError());
         final TaskException.Code code = TaskException.Code.NO_PERMISSION;
         final AbstractOXException exc = gResponse2.getException();
-        assertEquals("Wrong exception message.", Component.TASK, exc.getComponent());
+        assertEquals("Wrong exception message.", EnumComponent.TASK, exc.getComponent());
         assertEquals("Wrong exception message.", code.getCategory(), exc.getCategory());
         assertEquals("Wrong exception message.", code.getNumber(), exc.getDetailNumber());
         // Clean up

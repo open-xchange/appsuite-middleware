@@ -64,7 +64,7 @@ import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.tools.URLParameter;
@@ -130,7 +130,7 @@ public class Bug6335Test extends ContactTest {
         assertTrue("Invalid character was not detected.", response.hasError());
         //final TaskException.Code code = TaskException.Code.INVALID_DATA;
         final AbstractOXException exc = response.getException();
-        assertEquals("Wrong exception message.", Component.CONTACT, exc.getComponent());
+        assertEquals("Wrong exception message.", EnumComponent.CONTACT, exc.getComponent());
         assertEquals("Wrong exception message.", Category.USER_INPUT, exc.getCategory());
         assertEquals("Wrong exception message.", 168, exc.getDetailNumber());
 	}
