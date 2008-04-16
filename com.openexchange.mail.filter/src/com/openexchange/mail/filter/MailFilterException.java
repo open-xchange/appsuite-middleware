@@ -50,6 +50,7 @@ package com.openexchange.mail.filter;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 public class MailFilterException extends AbstractOXException {
 
@@ -123,7 +124,7 @@ public class MailFilterException extends AbstractOXException {
     }
 
     public MailFilterException(final Code code, final Throwable cause, final Object... messageArgs) {
-        super(Component.MAIL_FILTER, code.getCategory(), code.getNumber(), code.getMessage(), cause);
+        super(EnumComponent.MAIL_FILTER, code.getCategory(), code.getNumber(), code.getMessage(), cause);
         super.setMessageArgs(messageArgs);
     }
 
