@@ -67,6 +67,10 @@ public class MailException extends AbstractOXException {
 
 	public static enum Code {
 		/**
+		 * Unexpected error: %s
+		 */
+		UNEXPECTED_ERROR("Unexpected error: %s", Category.INTERNAL_ERROR, 0),
+		/**
 		 * Missing parameter %s
 		 */
 		MISSING_PARAMETER("Missing parameter %s", Category.CODE_ERROR, 1),
