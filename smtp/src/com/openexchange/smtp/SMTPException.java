@@ -50,7 +50,6 @@
 package com.openexchange.smtp;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.mime.MIMEMailException;
 
@@ -155,21 +154,48 @@ public final class SMTPException extends MIMEMailException {
 	}
 
 	/**
+	 * Initializes a new {@link SMTPException}
+	 * 
 	 * @param cause
+	 *            The cause
 	 */
 	public SMTPException(final AbstractOXException cause) {
 		super(cause);
 	}
 
+	/**
+	 * Initializes a new {@link SMTPException}
+	 * 
+	 * @param code
+	 *            The code
+	 * @param messageArgs
+	 *            The message arguments
+	 */
 	public SMTPException(final Code code, final Object... messageArgs) {
 		this(code, null, messageArgs);
 	}
 
+	/**
+	 * Initializes a new {@link SMTPException}
+	 * 
+	 * @param code
+	 *            The code
+	 * @param cause
+	 *            The cause
+	 * @param messageArgs
+	 *            The message arguments
+	 */
 	public SMTPException(final Code code, final Throwable cause, final Object... messageArgs) {
-		super(Component.SMTP, code.category, code.detailNumber, code.message, cause);
+		super(SMTPProvider.PROTOCOL_SMTP, code.category, code.detailNumber, code.message, cause);
 		super.setMessageArgs(messageArgs);
 	}
 
+	/**
+	 * Initializes a new {@link SMTPException}
+	 * 
+	 * @param code
+	 *            The code
+	 */
 	public SMTPException(Code code) {
 		this(code, EMPTY_ARGS);
 	}
