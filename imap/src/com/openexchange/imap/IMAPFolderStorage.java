@@ -637,6 +637,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			throw new IMAPException(IMAPException.Code.NO_ROOT_MOVE);
 		}
 		try {
+			if (DEFAULT_FOLDER_ID.equals(fullname)) {
+				throw new MailException(MailException.Code.NO_ROOT_FOLDER_MODIFY_DELETE);
+			}
 			IMAPFolder moveMe = (IMAPFolder) imapStore.getFolder(fullname);
 			if (!moveMe.exists()) {
 				moveMe = checkForNamespaceFolder(fullname);
@@ -817,6 +820,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 	@Override
 	public String updateFolder(final String fullname, final MailFolderDescription toUpdate) throws MailException {
 		try {
+			if (DEFAULT_FOLDER_ID.equals(fullname)) {
+				throw new MailException(MailException.Code.NO_ROOT_FOLDER_MODIFY_DELETE);
+			}
 			IMAPFolder updateMe = (IMAPFolder) imapStore.getFolder(fullname);
 			if (!updateMe.exists()) {
 				updateMe = checkForNamespaceFolder(fullname);
@@ -920,6 +926,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 	@Override
 	public String deleteFolder(final String fullname, final boolean hardDelete) throws MailException {
 		try {
+			if (DEFAULT_FOLDER_ID.equals(fullname)) {
+				throw new MailException(MailException.Code.NO_ROOT_FOLDER_MODIFY_DELETE);
+			}
 			IMAPFolder deleteMe = (IMAPFolder) imapStore.getFolder(fullname);
 			if (!deleteMe.exists()) {
 				deleteMe = checkForNamespaceFolder(fullname);
@@ -936,7 +945,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				return fullname;
 			}
 			final IMAPFolder trashFolder = (IMAPFolder) imapStore.getFolder(getTrashFolder());
-			if (deleteMe.getParent().getFullName().equals(trashFolder.getFullName())
+			if (deleteMe.getParent().getFullName().startsWith(trashFolder.getFullName())
 					|| ((trashFolder.getType() & Folder.HOLDS_FOLDERS) == 0)) {
 				/*
 				 * Delete permanently
@@ -985,6 +994,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 	@Override
 	public void clearFolder(final String fullname, final boolean hardDelete) throws MailException {
 		try {
+			if (DEFAULT_FOLDER_ID.equals(fullname)) {
+				throw new MailException(MailException.Code.NO_ROOT_FOLDER_MODIFY_DELETE);
+			}
 			IMAPFolder f = (IMAPFolder) imapStore.getFolder(fullname);
 			if (!f.exists()) {
 				f = checkForNamespaceFolder(fullname);

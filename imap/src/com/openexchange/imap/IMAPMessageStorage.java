@@ -437,7 +437,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				}
 				throw new IMAPException(IMAPException.Code.MISSING_DEFAULT_FOLDER_NAME, "trash");
 			}
-			final boolean backup = (!usm.isHardDeleteMsgs() && !hardDelete && !(fullname.equals(trashFullname)));
+			final boolean backup = (!usm.isHardDeleteMsgs() && !hardDelete && !(fullname.startsWith(trashFullname)));
 			final StringBuilder debug;
 			if (LOG.isDebugEnabled()) {
 				debug = new StringBuilder(128);
