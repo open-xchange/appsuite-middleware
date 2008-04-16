@@ -49,6 +49,9 @@
 
 package com.openexchange.groupware.contact;
 
+import static com.openexchange.tools.sql.DBUtils.closeResources;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -2266,23 +2269,34 @@ public class Contacts implements DeleteListener {
 			throw EXCEPTIONS.create(40, se, Integer.valueOf(so.getContextId()), Integer.valueOf(fid));
 			//throw new OXException("UNABLE TO PERFORM ForeignObjectCheck");
 		} finally {
-			try{
-				if (rs != null){
-					rs.close();
-				}
-				if (st != null){
-					st.close();
-				}
-			} catch (final SQLException see){
-				LOG.error("Unable to close ResultSet or Statement",see);
+			closeResources(rs, st, readCon, true, ct);
+		}
+	}
+
+	@OXThrows(
+			category=Category.CODE_ERROR,
+			desc="40",
+			exceptionId=40,
+			msg="Unable to perform contact folder check for readable content: Context %1$d Folder %2$d"
+	)
+	public static boolean containsForeignObjectInFolder(final int fid, final int uid, final Session so, final Connection readCon) throws OXException {
+		ResultSet rs = null;
+		Statement st = null;
+		try{
+			st = readCon.createStatement();
+			final ContactSql cs = new ContactMySql(null);
+			rs = st.executeQuery(cs.iFcontainsForeignObjectInFolder(fid,uid,so.getContextId()));
+			if (rs.next()){
+				return true;
 			}
-			try{
-				if (readCon != null){
-					DBPool.closeReaderSilent(ct, readCon);
-				}
-			} catch (final Exception e){
-				LOG.error("Unable to return Connection");
-			}
+			return false;
+		} catch (final ContextException d){
+			throw new ContactException(d);
+		} catch (final SQLException se){
+			throw EXCEPTIONS.create(40, se, Integer.valueOf(so.getContextId()), Integer.valueOf(fid));
+			//throw new OXException("UNABLE TO PERFORM ForeignObjectCheck");
+		} finally {
+			closeSQLStuff(rs, st);
 		}
 	}
 	
@@ -2310,25 +2324,32 @@ public class Contacts implements DeleteListener {
 			//throw EXCEPTIONS.create(41, se, cx.getContextId(), fid);
 			//throw new OXException("UNABLE TO PERFORM containsAnyObjectCheck");
 		} finally {
-			try{
-				if (rs != null){
-					rs.close();
-				}
-				if (st != null){
-					st.close();
-				}
-			} catch (final SQLException see){
-				LOG.error("Unable to close ResultSet or Statement",see);
-			}
-			try{
-				if (readCon != null){
-					DBPool.closeReaderSilent(cx, readCon);
-				}
-			} catch (final Exception e){
-				LOG.error("Unable to return Connection");
-			}
+			closeResources(rs, st, readCon, true, cx);
 		}
-	} 
+	}
+
+	public static boolean containsAnyObjectInFolder(final int fid, final Connection readCon, final Context cx) throws OXException {
+		ResultSet rs = null;
+		Statement st = null;
+		try{
+			st = readCon.createStatement(); 
+			final ContactSql cs = new ContactMySql(null);
+			rs = st.executeQuery(cs.iFgetFolderSelectString(fid, cx.getContextId()));
+			if (rs.next()){
+				return true;
+			}
+			return false;
+		} catch (final ContextException d){
+			throw new ContactException(d);
+		} catch (final SQLException se){
+			LOG.error("Unable to perform containsAnyObjectInFolder check. Cid: "+cx.getContextId()+" Fid: "+fid+" Cause:"+se);
+			return false;
+			//throw EXCEPTIONS.create(41, se, cx.getContextId(), fid);
+			//throw new OXException("UNABLE TO PERFORM containsAnyObjectCheck");
+		} finally {
+			closeSQLStuff(rs, st);
+		}
+	}
 	
 	public static void deleteContactsFromFolder(final int fid, final int user, final int[] group, final Session so, final Connection readcon, final Connection writecon) throws OXException {
 		trashContactsFromFolder(fid, so, readcon, writecon, true);
