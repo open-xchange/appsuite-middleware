@@ -1227,7 +1227,14 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 
 	private void deleteContainedTasks(final int folderID) throws OXException {
 		final Tasks tasks = Tasks.getInstance();
-		tasks.deleteTasksInFolder(session, folderID);
+		if (null == writeCon) {
+			tasks.deleteTasksInFolder(session, folderID);
+		} else {
+			LOG.error("Clearing task folder with a given connection not possible", new Throwable());
+			// TODO: Uncomment following line to enable clearing task folder
+			// with a specified connection parameter
+			// tasks.deleteTasksInFolder(session, writeCon, folderID);
+		}
 	}
 
 	private void deleteContainedContacts(final int folderID) throws OXException {
@@ -1250,7 +1257,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 						DBPool.push(ctx, readCon);
 					} catch (final DBPoolingException e) {
 						/*
-						 * Just log here cause nevertheless writeable connection
+						 * Just log here cause nevertheless writable connection
 						 * should be closed
 						 */
 						LOG.error(e.getMessage(), e);
@@ -1287,7 +1294,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	}
 
 	/**
-	 * Gathers all deleteable folders
+	 * Gathers all folders which are allowed to be deleted
 	 */
 	private HashMap<Integer, HashMap<?, ?>> gatherDeleteableFolders(final int folderID, final int userId,
 			final UserConfiguration userConfig, final String permissionIDs) throws OXException, DBPoolingException,
@@ -1298,7 +1305,7 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	}
 
 	/**
-	 * Gathers all deleteable folders
+	 * Gathers all folders which are allowed to be deleted in a recursive manner
 	 */
 	private void gatherDeleteableSubfoldersRecursively(final int folderID, final int userId,
 			final UserConfiguration userConfig, final String permissionIDs,
