@@ -78,7 +78,7 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.DummyAddress;
+import com.openexchange.mail.mime.PlainTextAddress;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
@@ -157,8 +157,8 @@ public final class IMAPSort {
 		}
 
 		private static String getCompareStringFromAddress(final Address addr, final Locale locale) {
-			if (addr instanceof DummyAddress) {
-				final DummyAddress da1 = (DummyAddress) addr;
+			if (addr instanceof PlainTextAddress) {
+				final PlainTextAddress da1 = (PlainTextAddress) addr;
 				return da1.getAddress().toLowerCase(Locale.ENGLISH);
 			} else if (addr instanceof InternetAddress) {
 				final InternetAddress ia1 = (InternetAddress) addr;

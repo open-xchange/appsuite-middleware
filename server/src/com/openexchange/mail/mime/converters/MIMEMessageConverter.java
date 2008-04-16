@@ -91,7 +91,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.DummyAddress;
+import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
@@ -579,7 +579,7 @@ public final class MIMEMessageConverter {
 							if (LOG.isDebugEnabled()) {
 								LOG.debug("Unparseable internet address" + addrStr);
 							}
-							mailMessage.addFrom(new DummyAddress(addrStr));
+							mailMessage.addFrom(new PlainTextAddress(addrStr));
 						}
 						/*
 						 * To, Cc, and Bcc
@@ -592,7 +592,7 @@ public final class MIMEMessageConverter {
 							if (LOG.isDebugEnabled()) {
 								LOG.debug("Unparseable internet addresses" + addrs);
 							}
-							mailMessage.addTo(DummyAddress.getAddresses(addrs));
+							mailMessage.addTo(PlainTextAddress.getAddresses(addrs));
 						}
 						try {
 							mailMessage.addCc((InternetAddress[]) extMimeMessage
@@ -602,7 +602,7 @@ public final class MIMEMessageConverter {
 							if (LOG.isDebugEnabled()) {
 								LOG.debug("Unparseable internet addresses" + addrs);
 							}
-							mailMessage.addCc(DummyAddress.getAddresses(addrs));
+							mailMessage.addCc(PlainTextAddress.getAddresses(addrs));
 						}
 						try {
 							mailMessage.addBcc((InternetAddress[]) extMimeMessage
@@ -612,7 +612,7 @@ public final class MIMEMessageConverter {
 							if (LOG.isDebugEnabled()) {
 								LOG.debug("Unparseable internet addresses" + addrs);
 							}
-							mailMessage.addBcc(DummyAddress.getAddresses(addrs));
+							mailMessage.addBcc(PlainTextAddress.getAddresses(addrs));
 						}
 						/*
 						 * Reply-To
@@ -625,7 +625,7 @@ public final class MIMEMessageConverter {
 							} catch (final AddressException e) {
 								final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_REPLY_TO, null);
 								if (null != addrStr) {
-									replyTo = new InternetAddress[] { new DummyAddress(addrStr) };
+									replyTo = new InternetAddress[] { new PlainTextAddress(addrStr) };
 								}
 							}
 							if (null != replyTo) {
@@ -742,7 +742,7 @@ public final class MIMEMessageConverter {
 										"using plain address' string representation instead: ").append(addrStr)
 										.toString(), e);
 							}
-							mailMessage.addFrom(new DummyAddress(addrStr));
+							mailMessage.addFrom(new PlainTextAddress(addrStr));
 						}
 					}
 				};
@@ -759,7 +759,7 @@ public final class MIMEMessageConverter {
 										"Internet addresses could not be properly parsed, ").append(
 										"using plain addresses' string representation instead.").toString(), e);
 							}
-							mailMessage.addTo(DummyAddress
+							mailMessage.addTo(PlainTextAddress
 									.getAddresses(extMimeMessage.getHeader(MessageHeaders.HDR_TO)));
 						}
 					}
@@ -777,7 +777,7 @@ public final class MIMEMessageConverter {
 										"Internet addresses could not be properly parsed, ").append(
 										"using plain addresses' string representation instead.").toString(), e);
 							}
-							mailMessage.addCc(DummyAddress
+							mailMessage.addCc(PlainTextAddress
 									.getAddresses(extMimeMessage.getHeader(MessageHeaders.HDR_CC)));
 						}
 					}
@@ -795,7 +795,7 @@ public final class MIMEMessageConverter {
 										"Internet addresses could not be properly parsed, ").append(
 										"using plain addresses' string representation instead.").toString(), e);
 							}
-							mailMessage.addCc(DummyAddress.getAddresses(extMimeMessage
+							mailMessage.addCc(PlainTextAddress.getAddresses(extMimeMessage
 									.getHeader(MessageHeaders.HDR_BCC)));
 						}
 					}
@@ -919,7 +919,7 @@ public final class MIMEMessageConverter {
 						try {
 							mailMessage.addFrom((InternetAddress[]) msg.getFrom());
 						} catch (final AddressException e) {
-							mailMessage.addFrom(DummyAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_FROM)));
+							mailMessage.addFrom(PlainTextAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_FROM)));
 						}
 						/*
 						 * To, Cc, and Bcc
@@ -927,17 +927,17 @@ public final class MIMEMessageConverter {
 						try {
 							mailMessage.addTo((InternetAddress[]) msg.getRecipients(Message.RecipientType.TO));
 						} catch (final AddressException e) {
-							mailMessage.addTo(DummyAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_TO)));
+							mailMessage.addTo(PlainTextAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_TO)));
 						}
 						try {
 							mailMessage.addCc((InternetAddress[]) msg.getRecipients(Message.RecipientType.CC));
 						} catch (final AddressException e) {
-							mailMessage.addCc(DummyAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_CC)));
+							mailMessage.addCc(PlainTextAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_CC)));
 						}
 						try {
 							mailMessage.addBcc((InternetAddress[]) msg.getRecipients(Message.RecipientType.BCC));
 						} catch (final AddressException e) {
-							mailMessage.addBcc(DummyAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_BCC)));
+							mailMessage.addBcc(PlainTextAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_BCC)));
 						}
 						/*
 						 * Reply-To
@@ -950,7 +950,7 @@ public final class MIMEMessageConverter {
 							} catch (final AddressException e) {
 								final String[] addrStr = msg.getHeader(MessageHeaders.HDR_REPLY_TO);
 								if (null != addrStr) {
-									replyTo = new InternetAddress[] { new DummyAddress(addrStr[0]) };
+									replyTo = new InternetAddress[] { new PlainTextAddress(addrStr[0]) };
 								}
 							}
 							if (null != replyTo) {
@@ -1092,7 +1092,7 @@ public final class MIMEMessageConverter {
 							if (LOG.isDebugEnabled()) {
 								LOG.debug("Unparseable addresse(s): " + Arrays.toString(fromHdr), e);
 							}
-							mailMessage.addFrom(new DummyAddress(fromHdr[0]));
+							mailMessage.addFrom(new PlainTextAddress(fromHdr[0]));
 						}
 					}
 				};
@@ -1107,7 +1107,7 @@ public final class MIMEMessageConverter {
 							if (LOG.isDebugEnabled()) {
 								LOG.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
 							}
-							mailMessage.addTo(new DummyAddress(hdr[0]));
+							mailMessage.addTo(new PlainTextAddress(hdr[0]));
 						}
 					}
 				};
@@ -1122,7 +1122,7 @@ public final class MIMEMessageConverter {
 							if (LOG.isDebugEnabled()) {
 								LOG.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
 							}
-							mailMessage.addCc(new DummyAddress(hdr[0]));
+							mailMessage.addCc(new PlainTextAddress(hdr[0]));
 						}
 					}
 				};
@@ -1137,7 +1137,7 @@ public final class MIMEMessageConverter {
 							if (LOG.isDebugEnabled()) {
 								LOG.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
 							}
-							mailMessage.addBcc(new DummyAddress(hdr[0]));
+							mailMessage.addBcc(new PlainTextAddress(hdr[0]));
 						}
 					}
 				};
@@ -1655,7 +1655,7 @@ public final class MIMEMessageConverter {
 	private static InternetAddress[] getAddressesOnParseError(final String[] addrs) {
 		final InternetAddress[] retval = new InternetAddress[addrs.length];
 		for (int i = 0; i < addrs.length; i++) {
-			retval[i] = new DummyAddress(addrs[i]);
+			retval[i] = new PlainTextAddress(addrs[i]);
 		}
 		return retval;
 	}

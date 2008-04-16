@@ -54,28 +54,29 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.mail.utils.MessageUtility;
 
 /**
- * {@link DummyAddress} - A dummy internet address without a personal part.
+ * {@link PlainTextAddress} - A plain text internet address without a personal
+ * part.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class DummyAddress extends InternetAddress {
+public final class PlainTextAddress extends InternetAddress {
 
 	/**
-	 * Creates a newly allocated array of {@link DummyAddress} generated from
-	 * specified addresses.
+	 * Creates a newly allocated array of {@link PlainTextAddress} generated
+	 * from specified addresses.
 	 * 
 	 * @param addresses
 	 *            The source addresses as an array of {@link String}
-	 * @return A newly allocated array of {@link DummyAddress}
+	 * @return A newly allocated array of {@link PlainTextAddress}
 	 */
-	public static DummyAddress[] getAddresses(final String[] addresses) {
+	public static PlainTextAddress[] getAddresses(final String[] addresses) {
 		if (addresses == null || addresses.length == 0) {
-			return new DummyAddress[0];
+			return new PlainTextAddress[0];
 		}
-		final DummyAddress[] retval = new DummyAddress[addresses.length];
+		final PlainTextAddress[] retval = new PlainTextAddress[addresses.length];
 		for (int i = 0; i < retval.length; i++) {
-			retval[i] = new DummyAddress(addresses[i]);
+			retval[i] = new PlainTextAddress(addresses[i]);
 		}
 		return retval;
 	}
@@ -88,7 +89,7 @@ public final class DummyAddress extends InternetAddress {
 
 	private final int hashCode;
 
-	public DummyAddress(final String address) {
+	public PlainTextAddress(final String address) {
 		this.address = MessageUtility.decodeMultiEncodedHeader(address);
 		hashCode = address.toLowerCase().hashCode();
 	}
