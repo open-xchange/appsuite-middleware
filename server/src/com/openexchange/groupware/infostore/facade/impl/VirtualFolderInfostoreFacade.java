@@ -228,7 +228,11 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 		
 	}
 
-	public void setTransactional(final boolean transactional) {
+    public void setCommitsTransaction(boolean commits) {
+        
+    }
+
+    public void setTransactional(final boolean transactional) {
 		
 	}
 
