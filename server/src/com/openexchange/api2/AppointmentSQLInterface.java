@@ -49,6 +49,7 @@
 
 package com.openexchange.api2;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
 
@@ -248,6 +249,16 @@ public interface AppointmentSQLInterface {
 	 * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
 	 */
 	public void deleteAppointmentsInFolder(int inFolder) throws OXException, SQLException;
+
+	/**
+	 * deletes all Appointments in given folder using specified connection.
+	 * <p>
+	 * connection is left untouched; meaning no commit/rollback actions take place
+	 * @param folderid
+	 * @param writeCon
+	 * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
+	 */
+	public void deleteAppointmentsInFolder(int inFolder, Connection writeCon) throws OXException, SQLException;
         
 	/**
 	 * checks if the given folder contains any foreign objects

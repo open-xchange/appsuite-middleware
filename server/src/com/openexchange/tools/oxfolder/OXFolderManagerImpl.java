@@ -86,6 +86,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.groupware.tx.StaticDBPoolProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
@@ -98,7 +99,7 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * OXFolderManagerImpl implements interface
+ * {@link OXFolderManagerImpl} implements interface
  * <code>com.openexchange.tools.oxfolder.OXFolderManager</code>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -1214,7 +1215,11 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	private void deleteContainedAppointments(final int folderID) throws OXException {
 		final CalendarSql cSql = new CalendarSql(session);
 		try {
-			cSql.deleteAppointmentsInFolder(folderID);
+			if (null == writeCon) {
+				cSql.deleteAppointmentsInFolder(folderID);
+			} else {
+				cSql.deleteAppointmentsInFolder(folderID, writeCon);
+			}
 		} catch (final SQLException e) {
 			throw new OXFolderException(FolderCode.SQL_ERROR, e, Integer.valueOf(ctx.getContextId()));
 		}
@@ -1261,7 +1266,13 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	}
 
 	private void deleteContainedDocuments(final int folderID) throws OXException {
-		final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
+		final InfostoreFacade db;
+		if (writeCon == null) {
+			db = new InfostoreFacadeImpl(new DBPoolProvider());
+		} else {
+			db = new InfostoreFacadeImpl(new StaticDBPoolProvider(writeCon));
+			db.setCommitsTransaction(false);
+		}
 		db.setTransactional(true);
 		db.startTransaction();
 		try {

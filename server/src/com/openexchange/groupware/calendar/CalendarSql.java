@@ -742,6 +742,45 @@ public class CalendarSql implements AppointmentSQLInterface {
             throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
     }
+
+    public void deleteAppointmentsInFolder(int fid, Connection writeCon) throws OXException {
+    	if (session != null) {
+            PreparedStatement prep = null;
+            ResultSet rs = null;
+            final Context ctx = Tools.getContext(session);
+            try  {
+                try {
+                    final OXFolderAccess ofa = new OXFolderAccess(writeCon, ctx);
+                    if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PRIVATE) {
+                        prep = cimp.getPrivateFolderObjects(fid, ctx, writeCon);
+                        rs = cimp.getResultSet(prep);
+                        cimp.deleteAppointmentsInFolder(session, ctx, rs, writeCon, writeCon, FolderObject.PRIVATE, fid);
+                    } else if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PUBLIC) {
+                        prep = cimp.getPublicFolderObjects(fid, ctx, writeCon);
+                        rs = cimp.getResultSet(prep);
+                        cimp.deleteAppointmentsInFolder(session, ctx, rs, writeCon, writeCon, FolderObject.PUBLIC, fid);
+                    } else {
+                        throw new OXCalendarException(OXCalendarException.Code.FOLDER_DELETE_INVALID_REQUEST);
+                    }
+                } catch(final SQLException sqle) {
+                    throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+                }
+            } catch(final OXCalendarException oxc) {
+                throw oxc;
+            } catch(final OXPermissionException oxpe) {
+                throw oxpe;
+            } catch(final OXException oxe) {
+                throw oxe;
+            } catch(final Exception e) {
+                throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(29));
+            } finally {
+                CalendarCommonCollection.closeResultSet(rs);
+                CalendarCommonCollection.closePreparedStatement(prep);
+            }
+        } else {
+            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+        }
+    }
     
     public boolean checkIfFolderContainsForeignObjects(int uid, int fid) throws OXException, SQLException {
         if (session != null) {
