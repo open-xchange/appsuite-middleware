@@ -181,6 +181,10 @@ public class InMemoryAttachmentBase implements AttachmentBase{
         throw new UnsupportedOperationException();
     }
 
+    public void setCommitsTransaction(boolean commits) {
+        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
     public void put(Context ctx, AttachmentMetadata attachment) {
         getCtxMap(ctx).put(attachment.getId(), attachment);
     }
