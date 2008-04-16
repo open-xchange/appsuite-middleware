@@ -151,7 +151,7 @@ public class OXFolderAccess {
 
 	/**
 	 * Creates a <code>java.util.List</code> of <code>FolderObject</code>
-	 * instances filles which match given folder IDs
+	 * instances fills which match given folder IDs
 	 * 
 	 * @param folderIDs -
 	 *            the folder IDs as an <code>int</code> array
