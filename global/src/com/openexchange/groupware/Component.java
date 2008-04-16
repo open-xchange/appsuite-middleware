@@ -302,7 +302,7 @@ public enum Component {
 	}
 	
 	/**
-     * @return the abbrevation.
+     * @return the abbreviation.
 	 */
     public String getAbbreviation(){
 		return abbrevation;
