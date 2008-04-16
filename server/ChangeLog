@@ -1,6 +1,8 @@
 * 2008-04-15 - francisco.laguna@open-xchange.com
 
  - Delete/Modify calendar data on user downgrade.
+ - Delete/Modify infostore data on user downgrade.
+
 
 * 2008-04-15 - thorben.betten@open-xchange.com
 

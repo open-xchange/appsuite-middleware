@@ -46,45 +46,69 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-
 package com.openexchange.groupware.infostore;
 
-import java.sql.Connection;
-
-import com.openexchange.api2.OXException;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.downgrade.DowngradeListener;
+import com.openexchange.groupware.downgrade.DowngradeEvent;
+import com.openexchange.groupware.downgrade.DowngradeFailedException;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.tx.ThreadLocalDBProvider;
+import com.openexchange.groupware.tx.DBProvider;
+import com.openexchange.groupware.tx.StaticDBPoolProvider;
+import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.api2.OXException;
 
-public class InfostoreDelete implements DeleteListener {
+/**
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ */
+public class InfostoreDowngrade extends DowngradeListener {
+    public void downgradePerformed(DowngradeEvent event) throws DowngradeFailedException {
+        DBProvider provider = new StaticDBPoolProvider(event.getWriteCon());
 
-	private final ThreadLocalDBProvider provider = new ThreadLocalDBProvider();
+        ServerSession session = new ServerSessionAdapter(event.getSession(), event.getContext());
 
-	private final InfostoreFacade database = new InfostoreFacadeImpl(provider);
+        InfostoreFacade infostore = new InfostoreFacadeImpl(provider);
+        infostore.setTransactional(true);
+        infostore.setCommitsTransaction(false);
+        try {
 
-    public InfostoreDelete() {
-        database.setTransactional(true);
-        database.setCommitsTransaction(false);
+            OXFolderAccess access = new OXFolderAccess(event.getContext());
+            FolderObject fo = access.getDefaultFolder(event.getNewUserConfiguration().getUserId(), FolderObject.INFOSTORE);
+            int folderId = fo.getObjectID();
+
+
+            infostore.startTransaction();
+
+            infostore.removeDocument(folderId, Long.MAX_VALUE, session);
+
+            infostore.commit();
+        } catch (TransactionException e) {
+            try {
+                infostore.rollback();
+            } catch (TransactionException e1) {
+                //IGNORE
+            }
+            throw new DowngradeFailedException(e);
+        } catch (OXException e) {
+            try {
+                infostore.rollback();
+            } catch (TransactionException e1) {
+                //IGNORE
+            }
+            throw new DowngradeFailedException(e);
+        } finally {
+            try {
+                infostore.finish();
+            } catch (TransactionException e) {
+                //IGNORE
+            }
+        }
     }
 
-    public void deletePerformed(final DeleteEvent sqlDelEvent, final Connection readCon, final Connection writeCon)
-			throws DeleteFailedException {
-		if (sqlDelEvent.getType() != DeleteEvent.TYPE_USER) {
-			return;
-		}
-		provider.setReadConnection(readCon);
-		provider.setWriteConnection(writeCon);
-		try {
-			database.removeUser(sqlDelEvent.getId(), sqlDelEvent.getContext(), new ServerSessionAdapter(sqlDelEvent
-					.getSession(), sqlDelEvent.getContext()));
-		} catch (final OXException e) {
-			throw new DeleteFailedException(e);
-		} finally {
-			provider.reset();
-		}
-	}
-
+    public int getOrder() {
+        return 2;
+    }
 }

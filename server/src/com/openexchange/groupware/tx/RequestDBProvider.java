@@ -60,15 +60,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajp13.AJPv13ListenerThread;
-import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.Component;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tx.Classes;
 
 import com.openexchange.groupware.AbstractOXException.Category;
 
-@OXExceptionSource(classId=Classes.COM_OPENEXCHANGE_GROUPWARE_TX_REQUESTDBPROVIDER, component=EnumComponent.TRANSACTION)
+@OXExceptionSource(classId=Classes.COM_OPENEXCHANGE_GROUPWARE_TX_REQUESTDBPROVIDER, component= Component.TRANSACTION)
 
 @OXThrowsMultiple(
 		category={Category.SUBSYSTEM_OR_SERVICE_DOWN,Category.SUBSYSTEM_OR_SERVICE_DOWN,Category.SUBSYSTEM_OR_SERVICE_DOWN},
@@ -82,6 +81,7 @@ public class RequestDBProvider implements DBProvider {
 
 	private static final Log LOG = LogFactory.getLog(RequestDBProvider.class);
 	private static final TXExceptionFactory EXCEPTIONS = new TXExceptionFactory(RequestDBProvider.class);
+    private boolean commits;
 
 
     public static class DBTransaction {
@@ -136,7 +136,8 @@ public class RequestDBProvider implements DBProvider {
 	public void startTransaction() throws TransactionException {
 		final DBTransaction tx = createTransaction();
 		tx.transactional = transactional;
-		txIds.set(tx);
+		tx.commit = commits;
+        txIds.set(tx);
 	}
 	
 	public void commit() throws TransactionException{
@@ -366,14 +367,7 @@ public class RequestDBProvider implements DBProvider {
 
 
     public void setCommitsTransaction(boolean commits) {
-        final DBTransaction tx = getActiveTransaction();
-		if(tx == null) {
-			throw new IllegalStateException("No Transaction Active");
-		}
-		if(tx.writeConnection != null && transactional) {
-			throw new IllegalStateException("Cannot switch on transaction after a write occurred");
-		}
-        tx.commit = commits;
+        this.commits = commits;
     }
 
 }

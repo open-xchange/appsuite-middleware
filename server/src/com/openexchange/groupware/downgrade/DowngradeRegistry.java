@@ -62,6 +62,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.tools.oxfolder.downgrade.OXFolderDowngradeListener;
 import com.openexchange.groupware.calendar.CalendarAdministration;
+import com.openexchange.groupware.infostore.InfostoreDowngrade;
 
 /**
  * {@link DowngradeRegistry} - A registry for instances of
@@ -194,9 +195,10 @@ public final class DowngradeRegistry {
 
 	private void init() {
         registerDowngradeListener(new CalendarAdministration().getDowngradeListener());
+        registerDowngradeListener(new InfostoreDowngrade());
         /*
-		 * TODO: Insert module downgrade listeners for calendar, task and
-		 * infostore
+		 * TODO: Insert module downgrade listeners for task
+		 * 
 		 */
 		/*
 		 * TODO: Insert downgrade listeners for user configuration, settings,
