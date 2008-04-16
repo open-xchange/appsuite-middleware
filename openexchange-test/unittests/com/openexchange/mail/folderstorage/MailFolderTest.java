@@ -1027,15 +1027,15 @@ public final class MailFolderTest extends AbstractMailTest {
 					mailAccess.getFolderStorage().createFolder(mfd);
 				}
 
-				final long prevUsage = mailAccess.getFolderStorage().getQuota(fullname).usage;
-				if (prevUsage == Quota.UNLIMITED.usage) {
+				final long prevUsage = mailAccess.getFolderStorage().getQuota(fullname).getUsage();
+				if (prevUsage == Quota.UNLIMITED.getUsage()) {
 					System.out.println("Current user has unlimited QUOTA. Skipping testFolderQuota()...");
 					return;
 				}
 
 				mailAccess.getMessageStorage().appendMessages(fullname, getMessages(getTestMailDir(), -1));
 				assertTrue("QUOTA not increased although mails were appended", mailAccess.getFolderStorage().getQuota(
-						fullname).usage > prevUsage);
+						fullname).getUsage() > prevUsage);
 
 			} finally {
 				if (fullname != null) {
