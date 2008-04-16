@@ -283,7 +283,6 @@ public enum Component {
      * Consistency Tool
      */
     CONSISTENCY("CSTY");
-    ;
 
     /**
      * The abbrevation for components.
