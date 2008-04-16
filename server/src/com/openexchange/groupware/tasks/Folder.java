@@ -103,6 +103,7 @@ class Folder {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean equals(final Object obj) {
         if (!(obj instanceof Folder)) {
             return false;
@@ -113,6 +114,7 @@ class Folder {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int hashCode() {
         return identifier;
     }
@@ -120,8 +122,8 @@ class Folder {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String toString() {
         return "TaskFolder: " + getIdentifier() + ", User: " + getUser();
     }
-
 }

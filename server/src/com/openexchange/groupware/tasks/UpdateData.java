@@ -51,6 +51,7 @@ package com.openexchange.groupware.tasks;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import com.openexchange.groupware.container.FolderObject;
@@ -240,10 +241,11 @@ class UpdateData {
 
     Set<TaskParticipant> getUpdatedParticipants() throws TaskException {
         if (null == updatedParticipants) {
+            updatedParticipants = new HashSet<TaskParticipant>();
             if (changed.containsParticipants()) {
-                updatedParticipants = getChangedParticipants();
+                updatedParticipants.addAll(getChangedParticipants());
             } else {
-                updatedParticipants = getOrigParticipants();
+                updatedParticipants.addAll(getOrigParticipants());
             }
         }
         return updatedParticipants;
@@ -267,7 +269,8 @@ class UpdateData {
      */
     Set<Folder> getUpdatedFolder() throws TaskException {
         if (null == updatedFolders) {
-            updatedFolders = getOrigFolder();
+            updatedFolders = new HashSet<Folder>();
+            updatedFolders.addAll(getOrigFolder());
             updatedFolders.addAll(getAddedFolder());
             updatedFolders.removeAll(getRemovedFolder());
         }
@@ -275,7 +278,7 @@ class UpdateData {
     }
 
     /**
-     * Prepares the data structures for an update.
+     * Checks everything and prepares the data structures for an update.
      * @throws TaskException if an error occurs
      */
     void prepare() throws TaskException {
@@ -287,11 +290,19 @@ class UpdateData {
         TaskLogic.checkUpdateTask(changed, getOrigTask(), user, userConfig,
             getChangedParticipants(), getOrigParticipants());
         // Now we do the damn stuff.
+        prepareWithoutChecks();
+    }
+
+    /**
+     * Prepares the data structures for an update.
+     * @throws TaskException if an error occurs.
+     */
+    void prepareWithoutChecks() throws TaskException {
         prepareFields();
         prepareParticipants();
         prepareFolder();
     }
-
+    
     private boolean preparedFields;
 
     private void prepareFields() throws TaskException {
@@ -339,18 +350,26 @@ class UpdateData {
                     ParticipantStorage.extractInternal(removed)));
             }
         }
-        // If the creator is added as participant its folder mapping must be
-        // removed.
-        addedFolder.removeAll(origFolders);
+        // Ensure only one folder mapping for one user.
+        final Iterator<Folder> iter = addedFolder.iterator();
+        while (iter.hasNext()) {
+            final Folder addedFolder = iter.next();
+            for (Folder origFolder : origFolders) {
+                if (addedFolder.getUser() == origFolder.getUser()) {
+                    iter.remove();
+                }
+            }
+        }
         // Check if updated folders will be empty - last participant has been
         // removed.
-        final Set<Folder> updated = getUpdatedFolder();
+        final Set<Folder> updated = new HashSet<Folder>();
+        updated.addAll(getOrigFolder());
+        updated.addAll(addedFolder);
+        updated.removeAll(removedFolder);
         if (updated.isEmpty()) {
-            // add creators folder mapping.
-            final int creator = origTask.getCreatedBy();
-            addedFolder.add(new Folder(Tools.getUserTaskStandardFolder(ctx,
-                creator), creator));
-            updatedFolders = null;
+            // add current user folder mapping
+            addedFolder.add(FolderStorage.extractFolderOfUser(getOrigFolder(),
+                getUserId()));
         }
         preparedFolder = true;
     }

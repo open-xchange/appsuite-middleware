@@ -190,7 +190,7 @@ public final class SQL {
      */
     static final Map<StorageType, String> SEARCH_FOLDER_BY_USER =
         new EnumMap<StorageType, String>(StorageType.class);
-
+    
     /**
      * Prevent instantiation
      */
@@ -218,7 +218,7 @@ public final class SQL {
         throws TaskException {
         final StringBuilder sql = new StringBuilder();
         for (int i : columns) {
-            final Mapper mapper = Mapping.getMapping(i);
+            final Mapper<?> mapper = Mapping.getMapping(i);
             if (null == mapper) {
                 switch (i) {
                 case Task.PARTICIPANTS:
@@ -230,7 +230,7 @@ public final class SQL {
                     }
                     break;
                 default:
-                    throw new TaskException(Code.UNKNOWN_ATTRIBUTE, i);
+                    throw new TaskException(Code.UNKNOWN_ATTRIBUTE, Integer.valueOf(i));
                 }
             } else {
                 sql.append(mapper.getDBColumnName());
@@ -298,7 +298,7 @@ public final class SQL {
             if (range.length == 2) {
                 sql.append("(end >= ? AND end < ?)");
             } else {
-                throw new TaskException(Code.WRONG_DATE_RANGE, range.length);
+                throw new TaskException(Code.WRONG_DATE_RANGE, Integer.valueOf(range.length));
             }
         }
         return sql.toString();
@@ -377,23 +377,23 @@ public final class SQL {
     public static int[] findTruncated(final String[] fields) {
         final List<Integer> truncated = new ArrayList<Integer>();
         for (String field : fields) {
-            for (Mapper mapper : Mapping.MAPPERS) {
+            for (Mapper<?> mapper : Mapping.MAPPERS) {
                 if (mapper.getDBColumnName().equals(field)) {
-                    truncated.add(mapper.getId());
+                    truncated.add(Integer.valueOf(mapper.getId()));
                     break;
                 }
             }
         }
         final int[] retval = new int[truncated.size()];
         for (int i = 0; i < truncated.size(); i++) {
-            retval[i] = truncated.get(i);
+            retval[i] = truncated.get(i).intValue();
         }
         return retval;
     }
 
     static {
         final StringBuilder selectAll = new StringBuilder();
-        for (Mapper mapper : Mapping.MAPPERS) {
+        for (Mapper<?> mapper : Mapping.MAPPERS) {
             selectAll.append(mapper.getDBColumnName());
             selectAll.append(',');
         }
