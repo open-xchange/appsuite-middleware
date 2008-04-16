@@ -401,7 +401,6 @@ public class OXFolderAccess {
 				 */
 				return true;
 			} else if (oclPerm.canDeleteOwnObjects()) {
-				// TODO: Additional parameter for readable connection
 				/*
 				 * User may only delete own objects. Check if folder contains
 				 * foreign objects which must not be deleted.
@@ -419,7 +418,6 @@ public class OXFolderAccess {
 					return readCon == null ? !Contacts.containsForeignObjectInFolder(fo.getObjectID(), userId, session)
 							: !Contacts.containsForeignObjectInFolder(fo.getObjectID(), userId, session, readCon);
 				case FolderObject.PROJECT:
-					// TODO:
 					break;
 				case FolderObject.INFOSTORE:
 					final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider()
