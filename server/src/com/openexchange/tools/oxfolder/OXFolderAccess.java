@@ -370,6 +370,10 @@ public class OXFolderAccess {
 	/**
 	 * Determines if session's user is allowed to delete all objects located in
 	 * given folder.
+	 * <p>
+	 * <b>Note</b>: This method checks only by contained items and does <small><b>NOT</b></small>
+	 * check by the user's effective folder permission itself. Thus the user is
+	 * supposed to hold sufficient folder permissions on specified folder.
 	 * 
 	 * @param fo -
 	 *            the folder object
