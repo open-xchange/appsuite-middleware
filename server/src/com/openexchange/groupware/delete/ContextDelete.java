@@ -56,9 +56,8 @@ package com.openexchange.groupware.delete;
  *
  */
 public abstract class ContextDelete implements DeleteListener {
-	// I'll go to hell for this.
+	// No more hell for this. Yay!
 	protected final boolean isContextDelete(final DeleteEvent deleteEvent) {
-		return deleteEvent.getType() == DeleteEvent.TYPE_USER
-				&& deleteEvent.getId() == deleteEvent.getContext().getMailadmin();
+		return deleteEvent.getType() == DeleteEvent.TYPE_CONTEXT;
 	}
 }

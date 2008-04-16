@@ -61,13 +61,14 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.ajp13.AJPv13ListenerThread;
 import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.contexts.Context;
 
 import com.openexchange.groupware.AbstractOXException.Category;
 
-@OXExceptionSource(classId=Classes.COM_OPENEXCHANGE_GROUPWARE_TX_REQUESTDBPROVIDER, component= Component.TRANSACTION)
+@OXExceptionSource(classId=Classes.COM_OPENEXCHANGE_GROUPWARE_TX_REQUESTDBPROVIDER, component= EnumComponent.TRANSACTION)
 
 @OXThrowsMultiple(
 		category={Category.SUBSYSTEM_OR_SERVICE_DOWN,Category.SUBSYSTEM_OR_SERVICE_DOWN,Category.SUBSYSTEM_OR_SERVICE_DOWN},
@@ -81,7 +82,7 @@ public class RequestDBProvider implements DBProvider {
 
 	private static final Log LOG = LogFactory.getLog(RequestDBProvider.class);
 	private static final TXExceptionFactory EXCEPTIONS = new TXExceptionFactory(RequestDBProvider.class);
-    private boolean commits;
+    private boolean commits = true;
 
 
     public static class DBTransaction {
