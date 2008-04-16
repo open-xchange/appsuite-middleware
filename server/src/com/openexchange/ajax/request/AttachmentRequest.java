@@ -74,7 +74,7 @@ import com.openexchange.groupware.tx.TransactionException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.tools.session.ServerSession;
@@ -84,7 +84,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.exceptions.OXAborted;
 import com.openexchange.session.Session;
 
-@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_AJAX_REQUEST_ATTACHMENTREQUEST, component = Component.ATTACHMENT)
+@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_AJAX_REQUEST_ATTACHMENTREQUEST, component = EnumComponent.ATTACHMENT)
 public class AttachmentRequest extends CommonRequest {
 	
 	private static final AttachmentParser PARSER = new AttachmentParser();

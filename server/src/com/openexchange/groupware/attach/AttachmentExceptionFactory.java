@@ -51,7 +51,7 @@ package com.openexchange.groupware.attach;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXExceptionFactory;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 public class AttachmentExceptionFactory extends AbstractOXExceptionFactory {
@@ -61,10 +61,10 @@ public class AttachmentExceptionFactory extends AbstractOXExceptionFactory {
 	}
 	
 	@Override
-	protected AbstractOXException buildException(final Component component,
+	protected AbstractOXException buildException(final EnumComponent component,
 			final Category category, final int number, final String message, final Throwable cause,
 			final Object... msgArgs) {
-		if(component != Component.ATTACHMENT) {
+		if(component != EnumComponent.ATTACHMENT) {
 			throw new IllegalArgumentException("This Exception Factory can only create AttachmentExceptions");
 		}
 		return new AttachmentException(category,number,message,cause,msgArgs);

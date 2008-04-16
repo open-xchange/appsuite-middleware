@@ -65,7 +65,7 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -98,7 +98,7 @@ import com.openexchange.tools.session.ServerSession;
 
 @OXExceptionSource(
     classId=ImportExportExceptionClasses.ICALIMPORTER, 
-	component=Component.IMPORT_EXPORT
+	component=EnumComponent.IMPORT_EXPORT
 )
 @OXThrowsMultiple(
 	category={
@@ -372,12 +372,12 @@ public class ICalImporter extends AbstractImporter implements Importer {
 
 	@Override
 	protected String getNameForFieldInTruncationError(int id, OXException oxex) {
-		if(oxex.getComponent() == Component.APPOINTMENT){
+		if(oxex.getComponent() == EnumComponent.APPOINTMENT){
 			final CalendarField field = CalendarField.getByAppointmentObjectId(id);
 			if(field != null){
 				return field.getName();
 			}
-		} else if(oxex.getComponent() == Component.TASK){
+		} else if(oxex.getComponent() == EnumComponent.TASK){
 			final TaskField field = TaskField.getByTaskID(id);
 			if(field != null){
 				return field.getName();

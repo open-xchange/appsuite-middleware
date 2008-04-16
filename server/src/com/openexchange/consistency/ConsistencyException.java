@@ -49,7 +49,7 @@
 package com.openexchange.consistency;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException;
 
 /**
@@ -58,7 +58,7 @@ import com.openexchange.groupware.AbstractOXException;
 public class ConsistencyException extends OXException{
 
 	public ConsistencyException(Category category, int id, String message, Throwable cause, Object...msgParams){
-		super(Component.CONSISTENCY, category, id, message,cause);
+		super(EnumComponent.CONSISTENCY, category, id, message,cause);
 		setMessageArgs(msgParams);
 	}
 

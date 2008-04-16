@@ -58,7 +58,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -78,7 +78,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 	
 @OXExceptionSource(
 		classId=Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_CONTACTSATTACHMENT,
-		component=Component.CONTACT
+		component=EnumComponent.CONTACT
 	)
 public class ContactsAttachment implements AttachmentListener, AttachmentAuthorization {
 

@@ -50,7 +50,7 @@
 package com.openexchange.groupware.settings;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * This exception indicates a problem in the user settings component.
@@ -89,7 +89,7 @@ public class SettingException extends AbstractOXException {
      */
     public SettingException(final Code code, final Throwable cause,
         final Object... messageArgs) {
-        super(Component.USER_SETTING, code.category, code.detailNumber,
+        super(EnumComponent.USER_SETTING, code.category, code.detailNumber,
             null == code.message ? cause.getMessage() : code.message, cause);
         setMessageArgs(messageArgs);
     }

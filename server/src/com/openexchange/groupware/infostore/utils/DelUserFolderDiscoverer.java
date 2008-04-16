@@ -55,7 +55,7 @@ import java.util.List;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -72,7 +72,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
-@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_UTILS_DELUSERFOLDERDISCOVERER, component = Component.INFOSTORE)
+@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_UTILS_DELUSERFOLDERDISCOVERER, component = EnumComponent.INFOSTORE)
 public class DelUserFolderDiscoverer extends DBService {
 
 	private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(

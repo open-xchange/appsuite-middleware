@@ -51,7 +51,7 @@ package com.openexchange.groupware.calendar;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  *  OXCalendarException
@@ -65,7 +65,7 @@ public class OXCalendarException extends OXException {
     }
     
     public OXCalendarException(final Code code, Throwable throwable, Object... messageArgs) {
-        super(Component.APPOINTMENT, code.category, code.detailNumber, code.message, throwable);
+        super(EnumComponent.APPOINTMENT, code.category, code.detailNumber, code.message, throwable);
         super.setMessageArgs(messageArgs);
     }
     

@@ -52,7 +52,7 @@ package com.openexchange.groupware.importexport.csv;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -77,7 +77,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
 
 @OXExceptionSource(
 	classId=ImportExportExceptionClasses.CSVPARSER, 
-	component=Component.IMPORT_EXPORT)
+	component=EnumComponent.IMPORT_EXPORT)
 @OXThrowsMultiple(
 	category={Category.USER_INPUT, Category.CODE_ERROR}, 
 	desc={"",""}, 

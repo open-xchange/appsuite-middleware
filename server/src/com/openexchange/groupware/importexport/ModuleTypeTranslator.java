@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.Types;
@@ -70,7 +70,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
  */
 @OXExceptionSource(
 		classId=ImportExportExceptionClasses.MODULETYPETRANSLATOR, 
-		component=Component.IMPORT_EXPORT)
+		component=EnumComponent.IMPORT_EXPORT)
 	@OXThrowsMultiple(
 		category={
 			Category.USER_INPUT,

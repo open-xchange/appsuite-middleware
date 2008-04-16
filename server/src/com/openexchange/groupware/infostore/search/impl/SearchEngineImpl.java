@@ -62,7 +62,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -94,7 +94,7 @@ import com.openexchange.tools.oxfolder.OXFolderTools;
 
 @OXExceptionSource(
 		classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_SEARCH_IMPL_SEARCHENGINEIMPL,
-		component=Component.INFOSTORE
+		component=EnumComponent.INFOSTORE
 )
 public class SearchEngineImpl extends DBService implements SearchEngine {	
 	
@@ -374,7 +374,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 					close();
 				}
 			} catch (final Exception e) {
-				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR,e,Component.INFOSTORE);
+				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR,e,EnumComponent.INFOSTORE);
 			}
 		}
 		
@@ -403,7 +403,7 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 				}
 				return retval;
 			} catch (final Exception exc) {
-				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR,exc,Component.INFOSTORE);
+				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR,exc,EnumComponent.INFOSTORE);
 			}
 		}
 

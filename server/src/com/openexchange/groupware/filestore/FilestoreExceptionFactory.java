@@ -51,7 +51,7 @@ package com.openexchange.groupware.filestore;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXExceptionFactory;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
@@ -72,7 +72,7 @@ public class FilestoreExceptionFactory extends AbstractOXExceptionFactory {
      * {@inheritDoc}
      */
     @Override
-    protected AbstractOXException buildException(final Component component,
+    protected AbstractOXException buildException(final EnumComponent component,
         final Category category, final int number, final String message,
         final Throwable cause, final Object... msgArgs) {
         return new FilestoreException(component, category, number, message,

@@ -71,7 +71,7 @@ import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ExternalGroupParticipant;
@@ -1260,7 +1260,7 @@ class CalendarMySQL implements CalendarSqlImp {
 				CalendarCommonCollection.closePreparedStatement(pi);
 			}
 		} else {
-			throw new OXMandatoryFieldException(Component.APPOINTMENT, 1000011, "UserParticipant is empty!");
+			throw new OXMandatoryFieldException(EnumComponent.APPOINTMENT, 1000011, "UserParticipant is empty!");
 		}
 	}
 
@@ -1626,7 +1626,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		}
 
 		if (clientLastModifiedCheck && edao.getLastModified().getTime() > clientLastModified.getTime()) {
-			throw new OXConcurrentModificationException(Component.APPOINTMENT, OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
+			throw new OXConcurrentModificationException(EnumComponent.APPOINTMENT, OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
 		}
 
 		final int rec_action = co.checkUpdateRecurring(cdao, edao);
@@ -1852,7 +1852,7 @@ class CalendarMySQL implements CalendarSqlImp {
 				updateParticipants(cdao, edao, so.getUserId(), so.getContextId(), writecon, cup);
 				final int ret = pst.executeUpdate();
 				if (ret == 0) {
-					throw new OXConcurrentModificationException(Component.APPOINTMENT, OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
+					throw new OXConcurrentModificationException(EnumComponent.APPOINTMENT, OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
 				}
 			} finally {
 				CalendarCommonCollection.closePreparedStatement(pst);
@@ -2486,7 +2486,7 @@ class CalendarMySQL implements CalendarSqlImp {
 				}
 			} else if (changes[0] == 0) {
 				LOG.warn(StringCollection.convertArraytoString(new Object[] { "Object not found: setUserConfirmation: prg_dates_members object_id = ", Integer.valueOf(oid), " cid = ", Integer.valueOf(so.getContextId()), " uid = ", Integer.valueOf(uid) }));
-				throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT, "Unable to set User Confirmation");
+				throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "Unable to set User Confirmation");
 			} else {
 				LOG.warn(StringCollection.convertArraytoString(new Object[] { "Result of setUserConfirmation was ", Integer.valueOf(changes[0]), ". Check prg_dates_members object_id = ", Integer.valueOf(oid), " cid = ", Integer.valueOf(so.getContextId()), " uid = ", Integer.valueOf(uid) }));
 			}
@@ -2535,7 +2535,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			if (rs.next()) {
 				number_of_attachments = rs.getInt(1);
 			} else {
-				throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT, "Unable to handle attachment action");
+				throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "Unable to handle attachment action");
 			}
 		} catch (final DBPoolingException dbpe) {
 			throw new OXException(dbpe);
@@ -2555,7 +2555,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			number_of_attachments--;
 			if (number_of_attachments < 0) {
 				LOG.warn(StringCollection.convertArraytoString(new Object[] { "Object seems to be corrupted: attachmentAction:", Boolean.valueOf(action), " oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }));
-				throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT, "Unable to processed attachment action. Got no attachments");
+				throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "Unable to processed attachment action. Got no attachments");
 			}
 		}
 
@@ -2573,7 +2573,7 @@ class CalendarMySQL implements CalendarSqlImp {
 			changes = pst.executeBatch();
 			if (changes[0] == 0) {
 				LOG.warn(StringCollection.convertArraytoString(new Object[] { "Object not found: attachmentAction: oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }));
-				throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT, "Unable to processed attachment action (update).");
+				throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "Unable to processed attachment action (update).");
 			}
 			LOG.warn(StringCollection.convertArraytoString(new Object[] { "Result of attachmentAction was ", Integer.valueOf(changes[0]), ". Check prg_dates oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }));
 		} catch (final DBPoolingException dbpe) {
@@ -2843,7 +2843,7 @@ class CalendarMySQL implements CalendarSqlImp {
 		}
 
 		if (edao != null && edao.getLastModified().getTime() > clientLastModified.getTime()) {
-			throw new OXConcurrentModificationException(Component.APPOINTMENT, OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
+			throw new OXConcurrentModificationException(EnumComponent.APPOINTMENT, OXConcurrentModificationException.ConcurrentModificationCode.CONCURRENT_MODIFICATION);
 		}
 
 		if (edao != null) {

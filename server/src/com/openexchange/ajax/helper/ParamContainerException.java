@@ -50,7 +50,7 @@
 package com.openexchange.ajax.helper;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * ParamContainerException
@@ -128,7 +128,7 @@ public class ParamContainerException extends AbstractOXException {
 	 * @param cause
 	 * @param messageArgs
 	 */
-	public ParamContainerException(final Component component, final Category category, final int number,
+	public ParamContainerException(final EnumComponent component, final Category category, final int number,
 			final String message, final Throwable cause, final Object... messageArgs) {
 		super(component, category, number, message, cause);
 		super.setMessageArgs(messageArgs);

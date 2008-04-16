@@ -61,7 +61,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
 import com.openexchange.server.impl.DBPool;
@@ -86,11 +86,11 @@ public class RdbResourceStorage extends ResourceStorage {
     public ResourceGroup getGroup(final int groupId, final Context context) throws LdapException {
         final ResourceGroup[] groups = getGroups(new int[] { groupId }, context);
         if (null == groups || groups.length == 0) {
-            throw new LdapException(Component.RESOURCE,
+            throw new LdapException(EnumComponent.RESOURCE,
                 Code.RESOURCEGROUP_NOT_FOUND, Integer.valueOf(groupId));
         }
         if (groups.length > 1) {
-            throw new LdapException(Component.RESOURCE,
+            throw new LdapException(EnumComponent.RESOURCE,
                 Code.RESOURCEGROUP_CONFLICT, Integer.valueOf(groupId));
         }
         return groups[0];
@@ -105,7 +105,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (Exception e) {
-            throw new LdapException(Component.RESOURCE, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.RESOURCE, Code.NO_CONNECTION, e);
         }
         final String sql = "SELECT id,identifier,displayName,available "
             + "FROM resource_group WHERE cid=?";
@@ -127,7 +127,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 groups.add(group);
             }
         } catch (SQLException e) {
-            throw new LdapException(Component.RESOURCE, Code.SQL_ERROR, e,
+            throw new LdapException(EnumComponent.RESOURCE, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -152,7 +152,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (Exception e) {
-            throw new LdapException(Component.RESOURCE, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.RESOURCE, Code.NO_CONNECTION, e);
         }
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT id,identifier,displayName,available ");
@@ -183,7 +183,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 groups.add(group);
             }
         } catch (SQLException e) {
-            throw new LdapException(Component.RESOURCE, Code.SQL_ERROR, e,
+            throw new LdapException(EnumComponent.RESOURCE, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -232,11 +232,11 @@ public class RdbResourceStorage extends ResourceStorage {
     public Resource getResource(final int resourceId, final Context context) throws LdapException {
         final Resource[] resources = getResources(new int[] { resourceId }, context);
         if (resources.length == 0) {
-            throw new LdapException(Component.RESOURCE,
+            throw new LdapException(EnumComponent.RESOURCE,
                 Code.RESOURCE_NOT_FOUND, Integer.valueOf(resourceId));
         }
         if (resources.length > 1) {
-            throw new LdapException(Component.RESOURCE, Code.RESOURCE_CONFLICT,
+            throw new LdapException(EnumComponent.RESOURCE, Code.RESOURCE_CONFLICT,
                 Integer.valueOf(resourceId));
         }
         return resources[0];
@@ -257,7 +257,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (Exception e) {
-            throw new LdapException(Component.RESOURCE, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.RESOURCE, Code.NO_CONNECTION, e);
         }
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT id,identifier,displayName,mail,available,");
@@ -291,7 +291,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 resources.add(res);
             }
         } catch (SQLException e) {
-            throw new LdapException(Component.RESOURCE, Code.SQL_ERROR, e,
+            throw new LdapException(EnumComponent.RESOURCE, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -310,7 +310,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (Exception e) {
-            throw new LdapException(Component.RESOURCE, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.RESOURCE, Code.NO_CONNECTION, e);
         }
         final String sql = "SELECT id,identifier,displayName,available "
             + "FROM resource_group WHERE cid=? AND identifier LIKE ?";
@@ -333,7 +333,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 groups.add(group);
             }
         } catch (SQLException e) {
-            throw new LdapException(Component.RESOURCE, Code.SQL_ERROR, e,
+            throw new LdapException(EnumComponent.RESOURCE, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -352,7 +352,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (Exception e) {
-            throw new LdapException(Component.RESOURCE, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.RESOURCE, Code.NO_CONNECTION, e);
         }
         final String sql = "SELECT id,identifier,displayName,mail,"
             + "available,description,lastModified FROM resource WHERE cid=? "
@@ -378,7 +378,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 resources.add(res);
             }
         } catch (SQLException e) {
-            throw new LdapException(Component.RESOURCE, Code.SQL_ERROR, e,
+            throw new LdapException(EnumComponent.RESOURCE, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -397,7 +397,7 @@ public class RdbResourceStorage extends ResourceStorage {
         try {
             con = DBPool.pickup(context);
         } catch (Exception e) {
-            throw new LdapException(Component.RESOURCE, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.RESOURCE, Code.NO_CONNECTION, e);
         }
         final String sql = "SELECT id,identifier,displayName,mail,"
             + "available,description,lastModified FROM resource WHERE cid=? "
@@ -423,7 +423,7 @@ public class RdbResourceStorage extends ResourceStorage {
                 resources.add(res);
             }
         } catch (SQLException e) {
-            throw new LdapException(Component.RESOURCE, Code.SQL_ERROR, e,
+            throw new LdapException(EnumComponent.RESOURCE, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);

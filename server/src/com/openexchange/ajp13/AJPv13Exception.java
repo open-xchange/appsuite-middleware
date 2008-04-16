@@ -53,7 +53,7 @@
 package com.openexchange.ajp13;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -247,7 +247,7 @@ protected static final Object[] EMPTY_ARGS = new Object[0];
 	 */
 	public AJPv13Exception(final AJPCode code, final boolean keepAlive, final Exception cause,
 			final Object... messageArgs) {
-		super(Component.AJP, code.category, code.detailNumber, code.message, cause);
+		super(EnumComponent.AJP, code.category, code.detailNumber, code.message, cause);
 		setMessageArgs(messageArgs);
 		this.keepAlive = keepAlive;
 	}
@@ -260,7 +260,7 @@ protected static final Object[] EMPTY_ARGS = new Object[0];
 	 *            The throwable to wrap
 	 */
 	public AJPv13Exception(final Throwable cause) {
-		super(Component.AJP, AJPCode.INTERNAL_EXCEPTION.category, AJPCode.INTERNAL_EXCEPTION.detailNumber, cause
+		super(EnumComponent.AJP, AJPCode.INTERNAL_EXCEPTION.category, AJPCode.INTERNAL_EXCEPTION.detailNumber, cause
 				.getMessage(), cause);
 		setMessageArgs(EMPTY_ARGS);
 		this.keepAlive = false;

@@ -51,7 +51,7 @@ package com.openexchange.groupware.reminder;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * ReminderException
@@ -70,7 +70,7 @@ public class ReminderException extends OXException {
 	
 	public ReminderException(final Code code, final Throwable throwable,
         final Object... messageArgs) {
-		super(Component.REMINDER, code.category, code.detailNumber,
+		super(EnumComponent.REMINDER, code.category, code.detailNumber,
             code.message, throwable);
 		setMessageArgs(messageArgs);
 	}

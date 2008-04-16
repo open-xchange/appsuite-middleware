@@ -57,7 +57,7 @@ import java.util.Map;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -80,7 +80,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 @OXExceptionSource(
 		classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INFOSTORESECURITYIMPL,
-		component=Component.INFOSTORE
+		component=EnumComponent.INFOSTORE
 )
 public class InfostoreSecurityImpl extends DBService implements InfostoreSecurity {
 

@@ -63,7 +63,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -94,7 +94,7 @@ import com.openexchange.session.Session;
 	
 @OXExceptionSource(
 		classId=1,
-		component=Component.LINKING
+		component=EnumComponent.LINKING
 )
 public class Links {
 

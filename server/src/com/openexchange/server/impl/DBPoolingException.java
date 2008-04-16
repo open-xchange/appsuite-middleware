@@ -52,7 +52,7 @@
 package com.openexchange.server.impl;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * This exception is used if problems occur with the pooling of database
@@ -72,7 +72,7 @@ public class DBPoolingException extends AbstractOXException {
      * @deprecated since all exceptions should have error codes.
      */
     public DBPoolingException(final String message) {
-        super(Component.DB_POOLING, message);
+        super(EnumComponent.DB_POOLING, message);
     }
 
     /**
@@ -80,7 +80,7 @@ public class DBPoolingException extends AbstractOXException {
      * @deprecated since all exceptions should have error codes.
      */
     public DBPoolingException(final Exception exc) {
-        super(Component.DB_POOLING, exc);
+        super(EnumComponent.DB_POOLING, exc);
     }
 
     /**
@@ -116,7 +116,7 @@ public class DBPoolingException extends AbstractOXException {
      */
     public DBPoolingException(final Code code, final Throwable cause,
         final Object... messageArgs) {
-        super(Component.DB_POOLING, code.category, code.detailNumber,
+        super(EnumComponent.DB_POOLING, code.category, code.detailNumber,
             null == code.message ? cause.getMessage() : code.message, cause);
         setMessageArgs(messageArgs);
     }

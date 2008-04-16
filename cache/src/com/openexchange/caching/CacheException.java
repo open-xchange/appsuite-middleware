@@ -50,7 +50,7 @@
 package com.openexchange.caching;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * {@link CacheException} - Represents a cache exception occurred in underlying
@@ -177,7 +177,7 @@ public final class CacheException extends AbstractOXException {
 	 *            The message arguments
 	 */
 	public CacheException(final Code code, final Throwable cause, final Object... messageArgs) {
-		super(Component.CACHE, code.getCategory(), code.getNumber(), code.getMessage(), cause);
+		super(EnumComponent.CACHE, code.getCategory(), code.getNumber(), code.getMessage(), cause);
 		super.setMessageArgs(messageArgs);
 	}
 

@@ -51,7 +51,7 @@ package com.openexchange.api;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * OXMandatoryfieldException
@@ -81,18 +81,18 @@ public class OXMandatoryFieldException extends OXException {
         super(cause);
     }
 
-	public OXMandatoryFieldException(final Component component, final int detailNumber, final String missingField) {
+	public OXMandatoryFieldException(final EnumComponent component, final int detailNumber, final String missingField) {
 		super(component, Category.CODE_ERROR, detailNumber, EXC_MSG, null);
 		setMessageArgs(missingField);
 	}
 
-	public OXMandatoryFieldException(final Component component, final int detailNumber, final Throwable cause,
+	public OXMandatoryFieldException(final EnumComponent component, final int detailNumber, final Throwable cause,
 			final String missingField) {
 		super(component, Category.CODE_ERROR, detailNumber, EXC_MSG, cause);
 		setMessageArgs(missingField);
 	}
 
-	public OXMandatoryFieldException(final Component component, final Category category, final int detailNumber,
+	public OXMandatoryFieldException(final EnumComponent component, final Category category, final int detailNumber,
 			final Throwable cause, final String missingField) {
 		super(component, category, detailNumber, EXC_MSG, cause);
 		setMessageArgs(missingField);

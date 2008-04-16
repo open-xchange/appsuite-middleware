@@ -198,7 +198,7 @@ public class CalendarOperation implements SearchIterator {
                     }
                 }
             } else {
-                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT, "Object "+oid+" in context "+cdao.getContextID()+" does not exists");
+                throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "Object "+oid+" in context "+cdao.getContextID()+" does not exists");
             }
         } finally {
             load_resultset.close();
@@ -771,7 +771,7 @@ public class CalendarOperation implements SearchIterator {
                                     break;
                                 }
                             default:
-                                throw new SearchIteratorException(SearchIteratorException.SearchIteratorCode.NOT_IMPLEMENTED, com.openexchange.groupware.Component.APPOINTMENT, cols[a]);
+                                throw new SearchIteratorException(SearchIteratorException.SearchIteratorCode.NOT_IMPLEMENTED, com.openexchange.groupware.EnumComponent.APPOINTMENT, cols[a]);
                         }
                     } catch(SQLException sqle) {
                         throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
@@ -833,7 +833,7 @@ public class CalendarOperation implements SearchIterator {
                 }
                  */
                 if (check_folder_id != cdao.getParentFolderID()) {                
-                    throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.Component.APPOINTMENT, "Object not found : uid:oid:fid:InFolder "+so.getUserId() + ":"+ cdao.getObjectID() + ":"+cdao.getParentFolderID()+":"+check_folder_id);
+                    throw new OXObjectNotFoundException(OXObjectNotFoundException.Code.OBJECT_NOT_FOUND, com.openexchange.groupware.EnumComponent.APPOINTMENT, "Object not found : uid:oid:fid:InFolder "+so.getUserId() + ":"+ cdao.getObjectID() + ":"+cdao.getParentFolderID()+":"+check_folder_id);
                 } else {
                 	cdao.setActionFolder(check_folder_id);
                 }

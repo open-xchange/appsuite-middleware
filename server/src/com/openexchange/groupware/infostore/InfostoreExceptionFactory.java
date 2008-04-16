@@ -51,7 +51,7 @@ package com.openexchange.groupware.infostore;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXExceptionFactory;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 public class InfostoreExceptionFactory extends AbstractOXExceptionFactory{
@@ -63,8 +63,8 @@ public class InfostoreExceptionFactory extends AbstractOXExceptionFactory{
 	private static final int CLASS = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_INFOSTOREEXCEPTIONFACTORY;
 	
 	@Override
-	protected AbstractOXException buildException(final Component component, final Category category, final int number, final String message, final Throwable cause, final Object... msgArgs) {
-		if(component != Component.INFOSTORE) {
+	protected AbstractOXException buildException(final EnumComponent component, final Category category, final int number, final String message, final Throwable cause, final Object... msgArgs) {
+		if(component != EnumComponent.INFOSTORE) {
 			throw new IllegalArgumentException("This factory can only build exceptions for the infostore");
 		}
 		return new InfostoreException(category,number,message,cause,msgArgs);

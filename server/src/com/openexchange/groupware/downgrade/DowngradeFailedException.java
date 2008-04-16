@@ -50,7 +50,7 @@
 package com.openexchange.groupware.downgrade;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * {@link DowngradeFailedException} - Thrown if a downgrade event cannot be
@@ -149,7 +149,7 @@ public class DowngradeFailedException extends AbstractOXException {
 	 */
 	public DowngradeFailedException(final DowngradeFailedException.Code code, final Throwable cause,
 			final Object... messageArgs) {
-		super(Component.DOWNGRADE_EVENT, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
+		super(EnumComponent.DOWNGRADE_EVENT, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
 		setMessageArgs(messageArgs);
 	}
 

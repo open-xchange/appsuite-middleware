@@ -66,7 +66,7 @@ import org.json.JSONException;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -91,7 +91,7 @@ import com.openexchange.tools.servlet.http.Tools;
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-@OXExceptionSource(classId = Classes.SESSION_SERVLET, component = Component.SESSION)
+@OXExceptionSource(classId = Classes.SESSION_SERVLET, component = EnumComponent.SESSION)
 public abstract class SessionServlet extends AJAXServlet {
 
 	/**

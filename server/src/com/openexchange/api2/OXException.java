@@ -50,7 +50,7 @@
 package com.openexchange.api2;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * OXException.
@@ -82,7 +82,7 @@ public class OXException extends AbstractOXException {
      * @param component Component.
      * @param message Message.
 	 */
-    protected OXException(final Component component, final String message) {
+    protected OXException(final EnumComponent component, final String message) {
 		super(component, message);
 	}
 
@@ -96,7 +96,7 @@ public class OXException extends AbstractOXException {
     /**
      * @deprecated use constructor with component, category and detailNumber.
      */
-	public OXException(final Component component, final String message,
+	public OXException(final EnumComponent component, final String message,
         final Throwable cause) {
 		super(component, message, cause);
 	}
@@ -111,7 +111,7 @@ public class OXException extends AbstractOXException {
     /**
      * @deprecated use constructor with component, category and detailNumber.
      */
-	public OXException(final Component component, final Exception exc) {
+	public OXException(final EnumComponent component, final Exception exc) {
 		super(component, exc);
 	}
 
@@ -131,7 +131,7 @@ public class OXException extends AbstractOXException {
      * @param cause the cause.
      * @param messageArgs arguments for the exception message.
      */
-    public OXException(final Component component, final Category category,
+    public OXException(final EnumComponent component, final Category category,
         final int number, final String message, final Throwable cause, final Object... messageArgs) {
         super(component, category, number, message, cause);
         super.setMessageArgs(messageArgs);

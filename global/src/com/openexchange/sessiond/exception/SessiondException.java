@@ -50,7 +50,7 @@
 package com.openexchange.sessiond.exception;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * Exception if something not works as expected with the session.
@@ -76,7 +76,7 @@ public class SessiondException extends AbstractOXException {
      * @param code code
      */
     public SessiondException(final Code code) {
-        super(Component.SESSION, code.getCategory(), code.getDetailNumber(), code.getMessage(), null);
+        super(EnumComponent.SESSION, code.getCategory(), code.getDetailNumber(), code.getMessage(), null);
     }
     
     /**
@@ -86,7 +86,7 @@ public class SessiondException extends AbstractOXException {
      * @param msgArgs arguments for the exception message.
      */
     public SessiondException(Category category, String message, int detailNumber, Throwable cause) {
-        super(Component.SESSION, category, detailNumber, message, cause);
+        super(EnumComponent.SESSION, category, detailNumber, message, cause);
     }
     
     /**
@@ -97,11 +97,11 @@ public class SessiondException extends AbstractOXException {
      */
     public SessiondException(final Code code, final Throwable cause,
         final Object[] msgArgs) {
-        super(Component.SESSION, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
+        super(EnumComponent.SESSION, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
         setMessageArgs(msgArgs);
     }
     
-	public SessiondException(Component component, Category category,
+	public SessiondException(EnumComponent component, Category category,
 			int number, String message, Throwable cause, Object[] msgArgs) {
         super(component, category, number, message, cause);
         setMessageArgs(msgArgs);

@@ -58,7 +58,7 @@ import java.util.Date;
 
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -130,7 +130,7 @@ public class RdbFolderSyncInterface implements FolderSyncInterface {
 			}
 			if (clientLastModified != null
 					&& oxfolderAccess.getFolderLastModified(folderobject.getObjectID()).after(clientLastModified)) {
-				throw new OXConcurrentModificationException(Component.FOLDER,
+				throw new OXConcurrentModificationException(EnumComponent.FOLDER,
 						OXFolderException.DETAIL_NUMBER_CONCURRENT_MODIFICATION, new Object[0]);
 			}
 			final EffectivePermission effectivePerm = folderobject

@@ -84,7 +84,7 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -162,7 +162,7 @@ public final class AJAXFile extends PermissionServlet {
 	private void actionKeepAlive(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
 			IOException {
 		try {
-			Response.write(actionKeepAlive(getSessionObject(req), ParamContainer.getInstance(req, Component.UPLOAD,
+			Response.write(actionKeepAlive(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.UPLOAD,
 					resp)), resp.getWriter());
 		} catch (final JSONException e) {
 			final Response response = new Response();

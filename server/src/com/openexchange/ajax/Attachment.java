@@ -81,7 +81,7 @@ import com.openexchange.ajax.request.SimpleRequest;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.attach.*;
 import com.openexchange.groupware.contexts.Context;
@@ -113,7 +113,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_AJAX_ATTACHMENT, component = Component.ATTACHMENT)
+@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_AJAX_ATTACHMENT, component = EnumComponent.ATTACHMENT)
 public class Attachment extends PermissionServlet {
 	
 	private static final String MIME_TEXT_HTML_CHARSET_UTF8 = "text/html; charset=UTF-8";

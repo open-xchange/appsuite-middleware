@@ -50,7 +50,7 @@
 package com.openexchange.groupware.filestore;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * Exception for problem in the filestore API.
@@ -72,7 +72,7 @@ public class FilestoreException extends AbstractOXException {
      * @param cause the cause.
      * @param messageArgs arguments for the exception message.
      */
-    public FilestoreException(final Component component, final Category category,
+    public FilestoreException(final EnumComponent component, final Category category,
         final int detailNumber, final String message, final Throwable cause,
         final Object... messageArgs) {
         super(component, category, detailNumber, message, cause);

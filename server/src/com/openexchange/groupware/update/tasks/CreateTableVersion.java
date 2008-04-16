@@ -58,7 +58,7 @@ import java.sql.SQLException;
 import com.openexchange.database.Database;
 import com.openexchange.database.Server;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -74,7 +74,7 @@ import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
  */
 @OXExceptionSource(
 	    classId = Classes.UPDATE_TASK,
-	    component = Component.UPDATE
+	    component = EnumComponent.UPDATE
 	)
 public final class CreateTableVersion implements UpdateTask {
 	

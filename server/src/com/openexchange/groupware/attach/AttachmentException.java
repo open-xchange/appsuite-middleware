@@ -51,14 +51,14 @@ package com.openexchange.groupware.attach;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 public class AttachmentException extends OXException {
 
 	private static final long serialVersionUID = -5210881621553596187L;
 
 	public AttachmentException(Category category, int number, String message, Throwable cause, Object[] msgArgs) {
-		super(Component.ATTACHMENT, category,number,message,cause);
+		super(EnumComponent.ATTACHMENT, category,number,message,cause);
 		setMessageArgs(msgArgs);
 	}
 

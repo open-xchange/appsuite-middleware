@@ -52,7 +52,7 @@
 package com.openexchange.tools.iterator;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  *   SearchIteratorException
@@ -122,11 +122,11 @@ public class SearchIteratorException extends AbstractOXException {
 		
 	}
 	
-	public SearchIteratorException(final SearchIteratorCode code, final Component component, final Object... messageArgs) {
+	public SearchIteratorException(final SearchIteratorCode code, final EnumComponent component, final Object... messageArgs) {
 		this(code, null, component, messageArgs);
 	}
 	
-	public SearchIteratorException(final SearchIteratorCode code, final Throwable cause, final Component component, final Object... messageArgs) {
+	public SearchIteratorException(final SearchIteratorCode code, final Throwable cause, final EnumComponent component, final Object... messageArgs) {
 		super(component, code.category, code.detailNumber, code.message, cause);
 		super.setMessageArgs(messageArgs);
 	}

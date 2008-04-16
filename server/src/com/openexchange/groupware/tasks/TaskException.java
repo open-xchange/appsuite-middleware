@@ -50,7 +50,7 @@
 package com.openexchange.groupware.tasks;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * This exception will be thrown if exceptions in the tasks occur.
@@ -95,7 +95,7 @@ public class TaskException extends AbstractOXException {
      */
     public TaskException(final Code code, final Throwable cause,
         final Object... messageArgs) {
-        super(Component.TASK, code.category, code.number, code.message, cause);
+        super(EnumComponent.TASK, code.category, code.number, code.message, cause);
         detail = code.detail;
         setMessageArgs(messageArgs);
     }

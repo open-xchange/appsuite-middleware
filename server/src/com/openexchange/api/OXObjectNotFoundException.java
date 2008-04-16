@@ -53,7 +53,7 @@ package com.openexchange.api;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
    OXConflictException
@@ -112,11 +112,11 @@ public class OXObjectNotFoundException extends OXException
     }
     
     
-    public OXObjectNotFoundException(final Code code, Component component, Object... messageArgs) {
+    public OXObjectNotFoundException(final Code code, EnumComponent component, Object... messageArgs) {
          this(code, component, null, messageArgs);         
     }    
     
-    public OXObjectNotFoundException(final Code code, Component component, Throwable throwable, Object... messageArgs) {
+    public OXObjectNotFoundException(final Code code, EnumComponent component, Throwable throwable, Object... messageArgs) {
          super(component, code.category, code.detailNumber, code.message, throwable);
          super.setMessageArgs(messageArgs);
     }      

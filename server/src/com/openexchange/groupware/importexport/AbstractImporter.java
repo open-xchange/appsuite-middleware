@@ -50,7 +50,7 @@
 package com.openexchange.groupware.importexport;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -66,7 +66,7 @@ import com.openexchange.groupware.importexport.exceptions.ImportExportExceptionF
  */
 @OXExceptionSource(
 		classId=ImportExportExceptionClasses.ABSTRACTIMPORTER, 
-		component=Component.IMPORT_EXPORT)
+		component=EnumComponent.IMPORT_EXPORT)
 	@OXThrowsMultiple(
 		category={
 			Category.TRUNCATED}, 

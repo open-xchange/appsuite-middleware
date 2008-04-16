@@ -51,11 +51,11 @@ package com.openexchange.groupware.infostore;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 public class InfostoreException extends OXException {
 	public InfostoreException(Category category, int id, String message, Throwable cause, Object...msgParams){
-		super(Component.INFOSTORE, category, id, message,cause);
+		super(EnumComponent.INFOSTORE, category, id, message,cause);
 		setMessageArgs(msgParams);
 	}
 

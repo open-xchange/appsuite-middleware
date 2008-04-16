@@ -51,7 +51,7 @@ package com.openexchange.groupware.tx;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * TODO Error codes
@@ -66,11 +66,11 @@ public class TransactionException extends OXException {
 	}
 
 	public TransactionException(Category category, int number, String message, Throwable cause, Object...msgArgs) {
-		super(Component.TRANSACTION, category, number, message, cause);
+		super(EnumComponent.TRANSACTION, category, number, message, cause);
 		setMessageArgs(msgArgs);
 	}
 
-	public TransactionException(Component component, String message) {
+	public TransactionException(EnumComponent component, String message) {
 		super(component, message);
 	}
 

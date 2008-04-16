@@ -91,7 +91,7 @@ import java.util.Date;
 
 @OXExceptionSource(
 		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_ATTACHMENTBASEIMPL,
-		component = Component.ATTACHMENT
+		component = EnumComponent.ATTACHMENT
 )
 public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 

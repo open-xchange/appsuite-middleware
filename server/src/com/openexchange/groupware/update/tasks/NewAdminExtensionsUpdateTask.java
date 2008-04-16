@@ -64,7 +64,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -77,7 +77,7 @@ import com.openexchange.server.impl.DBPoolingException;
  */
 @OXExceptionSource(
         classId = Classes.TASK_NEW_ADMIN_EXTENSIONS,
-        component = Component.UPDATE)
+        component = EnumComponent.UPDATE)
 public class NewAdminExtensionsUpdateTask implements UpdateTask {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(NewAdminExtensionsUpdateTask.class);

@@ -50,7 +50,7 @@
 package com.openexchange.authentication;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * Exception for all problems appearing during the login of a user. Currently
@@ -97,7 +97,7 @@ public class LoginException extends AbstractOXException {
      */
     public LoginException(final Code code, final Throwable cause,
         final Object... messageArgs) {
-        super(Component.LOGIN, code.category, code.number, code.message, cause);
+        super(EnumComponent.LOGIN, code.category, code.number, code.message, cause);
         this.source = code.source;
         setMessageArgs(messageArgs);
     }

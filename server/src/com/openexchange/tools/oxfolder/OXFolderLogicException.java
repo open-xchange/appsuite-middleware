@@ -50,7 +50,7 @@
 package com.openexchange.tools.oxfolder;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
@@ -69,7 +69,7 @@ public class OXFolderLogicException extends OXException {
 	}
 
 	public OXFolderLogicException(final FolderCode code, final Object... messageArgs) {
-		super(Component.FOLDER, Category.PERMISSION, code.getNumber(), code.getMessage(), null, messageArgs);
+		super(EnumComponent.FOLDER, Category.PERMISSION, code.getNumber(), code.getMessage(), null, messageArgs);
 	}
 
 	public OXFolderLogicException(final FolderCode code, String messagePrefix) {
@@ -77,13 +77,13 @@ public class OXFolderLogicException extends OXException {
 	}
 
 	public OXFolderLogicException(final FolderCode code, String messagePrefix, final Object... messageArgs) {
-		super(Component.FOLDER, Category.PERMISSION, code.getNumber(), new StringBuilder().append(messagePrefix)
+		super(EnumComponent.FOLDER, Category.PERMISSION, code.getNumber(), new StringBuilder().append(messagePrefix)
 				.append(code.getMessage()).toString(), null, messageArgs);
 	}
 
 	public OXFolderLogicException(final FolderCode code, final Exception cause, final boolean insertCauseMsg,
 			final Object... messageArgs) {
-		super(Component.FOLDER, Category.PERMISSION, code.getNumber(), insertCauseMsg ? new StringBuilder().append(
+		super(EnumComponent.FOLDER, Category.PERMISSION, code.getNumber(), insertCauseMsg ? new StringBuilder().append(
 				code.getMessage()).append(':').append(cause.getMessage()).toString() : code.getMessage(), cause,
 				messageArgs);
 	}

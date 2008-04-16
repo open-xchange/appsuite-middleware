@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.update;
 
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -64,7 +64,7 @@ import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
  * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@OXExceptionSource(classId = Classes.SCHEMA_STORE, component = Component.UPDATE)
+@OXExceptionSource(classId = Classes.SCHEMA_STORE, component = EnumComponent.UPDATE)
 public abstract class SchemaStore {
 
 	/**

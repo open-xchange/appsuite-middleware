@@ -50,7 +50,7 @@
 package com.openexchange.groupware.delete;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * {@link DeleteFailedException} - Thrown if a delete event cannot be performed
@@ -149,7 +149,7 @@ public class DeleteFailedException extends AbstractOXException {
 	 */
 	public DeleteFailedException(final DeleteFailedException.Code code, final Throwable cause,
 			final Object... messageArgs) {
-		super(Component.DELETE_EVENT, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
+		super(EnumComponent.DELETE_EVENT, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
 		setMessageArgs(messageArgs);
 	}
 

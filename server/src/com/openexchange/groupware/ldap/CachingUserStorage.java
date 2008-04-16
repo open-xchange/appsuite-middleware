@@ -63,7 +63,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -134,7 +134,7 @@ public class CachingUserStorage extends UserStorage {
 			CACHE.remove(ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
 					context.getContextId(), user.getId()));
 		} catch (final CacheException e) {
-			throw new LdapException(Component.USER, Code.CACHE_PROBLEM, e);
+			throw new LdapException(EnumComponent.USER, Code.CACHE_PROBLEM, e);
 		}
     }
 
@@ -155,7 +155,7 @@ public class CachingUserStorage extends UserStorage {
             try {
                 CACHE.put(key, Integer.valueOf(identifier));
             } catch (CacheException e) {
-                throw new LdapException(Component.USER, Code.CACHE_PROBLEM, e);
+                throw new LdapException(EnumComponent.USER, Code.CACHE_PROBLEM, e);
             }
         } else {
             if (LOG.isTraceEnabled()) {

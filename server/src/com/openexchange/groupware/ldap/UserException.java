@@ -50,7 +50,7 @@
 package com.openexchange.groupware.ldap;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.ldap.LdapException.Code;
 import com.openexchange.groupware.ldap.LdapException.Detail;
 
@@ -87,7 +87,7 @@ public class UserException extends AbstractOXException {
      */
     public UserException(final Code code, final Throwable cause,
         final Object... messageArgs) {
-        super(Component.USER, code.category, code.detailNumber, code.message,
+        super(EnumComponent.USER, code.category, code.detailNumber, code.message,
             cause);
         this.detail = code.detail;
         setMessageArgs(messageArgs);

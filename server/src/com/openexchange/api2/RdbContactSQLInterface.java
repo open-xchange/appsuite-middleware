@@ -67,7 +67,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -101,7 +101,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 @OXExceptionSource(
 		classId=Classes.COM_OPENEXCHANGE_API2_DATABASEIMPL_RDBCONTACTSQLINTERFACE,
-		component=Component.CONTACT
+		component=EnumComponent.CONTACT
 	)
 	
 public class RdbContactSQLInterface implements ContactSQLInterface, ContactInterface {

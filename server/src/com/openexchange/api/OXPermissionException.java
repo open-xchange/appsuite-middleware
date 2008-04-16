@@ -51,7 +51,7 @@ package com.openexchange.api;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * OXPermissionException
@@ -74,7 +74,7 @@ public class OXPermissionException extends OXException {
      */
     public OXPermissionException(final Code code, final Throwable cause,
         final Object... messageArgs) {
-        super(Component.PERMISSION, code.category, code.number,
+        super(EnumComponent.PERMISSION, code.category, code.number,
             null == code.message ? cause.getMessage() : code.message, cause);
         setMessageArgs(messageArgs);
     }
@@ -88,7 +88,7 @@ public class OXPermissionException extends OXException {
      * @param cause the cause.
      * @param messageArgs arguments for the exception message.
      */
-    public OXPermissionException(final Component component, final Category category,
+    public OXPermissionException(final EnumComponent component, final Category category,
         final int number, final String message, final Throwable cause, final Object... messageArgs) {
         super(component, category, number, message, cause);
         super.setMessageArgs(messageArgs);

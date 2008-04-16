@@ -62,7 +62,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderCacheNotEnabledException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -85,7 +85,7 @@ import com.openexchange.webdav.protocol.WebdavPath;
 
 @OXExceptionSource(
 	classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_PATH_IMPL_PATHRESOLVERIMPL,
-	component = Component.INFOSTORE
+	component = EnumComponent.INFOSTORE
 )
 public class PathResolverImpl extends AbstractPathResolver implements PathResolver, URLCache {
 	private Mode MODE;

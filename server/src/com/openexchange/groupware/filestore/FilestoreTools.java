@@ -52,7 +52,7 @@ package com.openexchange.groupware.filestore;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -64,7 +64,7 @@ import com.openexchange.groupware.contexts.Context;
  */
 @OXExceptionSource(
     classId=Classes.FILESTORE_TOOLS,
-    component=Component.FILESTORE
+    component=EnumComponent.FILESTORE
 )
 public final class FilestoreTools {
 

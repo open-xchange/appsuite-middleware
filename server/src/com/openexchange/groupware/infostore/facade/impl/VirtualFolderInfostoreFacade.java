@@ -52,7 +52,7 @@ package com.openexchange.groupware.infostore.facade.impl;
 import java.io.InputStream;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -74,7 +74,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 @OXExceptionSource(
 		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_FACADE_IMPL_VIRTUALFOLDERINFOSTOREFACADE, 
-		component = Component.INFOSTORE
+		component = EnumComponent.INFOSTORE
 		
 )
 public class VirtualFolderInfostoreFacade implements InfostoreFacade {

@@ -54,14 +54,14 @@ import java.util.Date;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.attach.AttachmentExceptionFactory;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Classes;
 
-@OXExceptionSource(classId=Classes.COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_DELETEATTACHMENTACTION, component=Component.ATTACHMENT)
+@OXExceptionSource(classId=Classes.COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_DELETEATTACHMENTACTION, component=EnumComponent.ATTACHMENT)
 public class DeleteAttachmentAction extends AttachmentListQueryAction {
 
 	private static final AttachmentExceptionFactory EXCEPTIONS = new AttachmentExceptionFactory(DeleteAttachmentAction.class);

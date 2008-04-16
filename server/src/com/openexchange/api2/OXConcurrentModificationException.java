@@ -50,7 +50,7 @@
 package com.openexchange.api2;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * OXConcurrentModificationException
@@ -104,7 +104,7 @@ public class OXConcurrentModificationException extends OXException {
 	 * instance
 	 * </p>
 	 */
-	public OXConcurrentModificationException(final Component component, final int detailNumber,
+	public OXConcurrentModificationException(final EnumComponent component, final int detailNumber,
 			final Object... messageArgs) {
 		super(component, ConcurrentModificationCode.CONCURRENT_MODIFICATION.message);
 		setCategory(ConcurrentModificationCode.CONCURRENT_MODIFICATION.category);
@@ -112,7 +112,7 @@ public class OXConcurrentModificationException extends OXException {
 		setMessageArgs(messageArgs);
 	}
         
-	public OXConcurrentModificationException(final Component component, final ConcurrentModificationCode code,
+	public OXConcurrentModificationException(final EnumComponent component, final ConcurrentModificationCode code,
 			final Object... messageArgs) {
 		super(component, code.message);
 		setCategory(code.category);

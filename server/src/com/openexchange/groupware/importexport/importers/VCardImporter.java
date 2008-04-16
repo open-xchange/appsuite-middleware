@@ -67,7 +67,7 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -95,7 +95,7 @@ import com.openexchange.tools.versit.filetokenizer.VCardTokenizer;
 
 @OXExceptionSource(
     classId=ImportExportExceptionClasses.VCARDIMPORTER,
-    component=Component.IMPORT_EXPORT
+    component=EnumComponent.IMPORT_EXPORT
 )
 @OXThrowsMultiple(
     category={

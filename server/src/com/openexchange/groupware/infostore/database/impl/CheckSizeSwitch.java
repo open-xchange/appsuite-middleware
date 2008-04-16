@@ -61,12 +61,12 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.infostore.Classes;
 
 @OXExceptionSource(
 		classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_CHECKSIZESWITCH,
-		component=Component.INFOSTORE
+		component=EnumComponent.INFOSTORE
 )
 public class CheckSizeSwitch implements MetadataSwitcher {
 	

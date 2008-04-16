@@ -50,7 +50,7 @@
 package com.openexchange.sessiond.exception;
 
 import com.openexchange.groupware.AbstractOXExceptionFactory;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
@@ -71,7 +71,7 @@ public class SessionExceptionFactory extends AbstractOXExceptionFactory<Sessiond
      * {@inheritDoc}
      */
     @Override
-    protected SessiondException buildException(final Component component,
+    protected SessiondException buildException(final EnumComponent component,
         final Category category, final int number, final String message,
         final Throwable cause, final Object... msgArgs) {
         return new SessiondException(component, category, number, message, cause,

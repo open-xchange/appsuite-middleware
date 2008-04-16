@@ -51,7 +51,7 @@ package com.openexchange.groupware.userconfiguration;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 public class UserConfigurationException extends OXException {
@@ -137,12 +137,12 @@ public class UserConfigurationException extends OXException {
 
 	public UserConfigurationException(final UserConfigurationCode code, final Throwable cause,
 			final Object... messageArgs) {
-		super(Component.USER_SETTING, code.category, code.detailNumber, code.message, cause);
+		super(EnumComponent.USER_SETTING, code.category, code.detailNumber, code.message, cause);
 		super.setMessageArgs(messageArgs);
 	}
 
 	public UserConfigurationException(final UserConfigurationCode code, final Object... messageArgs) {
-		super(Component.USER_SETTING, code.category, code.detailNumber, code.message, null);
+		super(EnumComponent.USER_SETTING, code.category, code.detailNumber, code.message, null);
 		super.setMessageArgs(messageArgs);
 	}
 

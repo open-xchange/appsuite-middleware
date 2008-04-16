@@ -62,7 +62,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -561,7 +561,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
                 }
                 public Task next() throws SearchIteratorException, OXException {
                     throw new SearchIteratorException(SearchIteratorException
-                        .SearchIteratorCode.NO_SUCH_ELEMENT, Component.TASK);
+                        .SearchIteratorCode.NO_SUCH_ELEMENT, EnumComponent.TASK);
                 }
                 public int size() {
                     return 0;

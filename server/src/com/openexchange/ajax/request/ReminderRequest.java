@@ -68,7 +68,7 @@ import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarRecurringCollection;
@@ -177,7 +177,7 @@ public class ReminderRequest {
         } catch(OXException oxe) {
             LOG.debug(oxe.getMessage(), oxe);
             
-            if (oxe.getComponent().equals(Component.REMINDER) && oxe.getDetailNumber() == 9) {
+            if (oxe.getComponent().equals(EnumComponent.REMINDER) && oxe.getDetailNumber() == 9) {
                 jsonArray.put(id);
                 return jsonArray;
             }

@@ -50,7 +50,7 @@
 package com.openexchange.groupware.contexts.impl;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * This exception will be thrown if error occur in the storage classes for the
@@ -89,7 +89,7 @@ public class ContextException extends AbstractOXException {
      */
     public ContextException(final Code code, final Throwable cause,
         final Object... messageArgs) {
-        super(Component.CONTEXT, code.category, code.number, code.message,
+        super(EnumComponent.CONTEXT, code.category, code.number, code.message,
             cause);
         setMessageArgs(messageArgs);
     }

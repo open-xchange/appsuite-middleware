@@ -64,7 +64,7 @@ import org.json.JSONObject;
 import org.json.JSONWriter;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
@@ -302,7 +302,7 @@ public final class Response {
 		final String message = response.optString(ERROR, null);
 		final String code = response.optString(ERROR_CODE, null);
 		if (message != null || code != null) {
-			final Component component = parseComponent(code);
+			final EnumComponent component = parseComponent(code);
 			final int number = parseErrorNumber(code);
 			final int categoryCode = response.optInt(ERROR_CATEGORY, -1);
 			final Category category;
@@ -326,14 +326,14 @@ public final class Response {
 	 * 
 	 * @param code
 	 *            error code to parse.
-	 * @return the parsed component or {@link Component#NONE}.
+	 * @return the parsed component or {@link EnumComponent#NONE}.
 	 */
-	private static Component parseComponent(final String code) {
-		Component component = Component.NONE;
+	private static EnumComponent parseComponent(final String code) {
+		EnumComponent component = EnumComponent.NONE;
 		if (null != code && code.length() == 8) {
-			component = Component.byAbbreviation(code.substring(0, 3));
+			component = EnumComponent.byAbbreviation(code.substring(0, 3));
 			if (component == null) {
-				component = Component.NONE;
+				component = EnumComponent.NONE;
 			}
 		}
 		return component;

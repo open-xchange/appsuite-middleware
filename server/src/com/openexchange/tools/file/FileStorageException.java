@@ -50,7 +50,7 @@
 package com.openexchange.tools.file;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * Exceptions of the FileStorage.
@@ -84,7 +84,7 @@ public class FileStorageException extends AbstractOXException {
      */
     public FileStorageException(final Code code, final Throwable cause,
         final Object... messageArgs) {
-        super(Component.FILESTORE, code.category, code.detailNumber,
+        super(EnumComponent.FILESTORE, code.category, code.detailNumber,
             null == code.message ? cause.getMessage() : code.message,
             cause);
         setMessageArgs(messageArgs);
@@ -98,7 +98,7 @@ public class FileStorageException extends AbstractOXException {
      * @param message message of the exception.
      * @param cause the cause.
      */
-    protected FileStorageException(final Component component,
+    protected FileStorageException(final EnumComponent component,
         final Category category, final int detailNumber, final String message,
         final Throwable cause) {
         super(component, category, detailNumber, message, cause);

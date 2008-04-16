@@ -76,13 +76,13 @@ import com.openexchange.groupware.infostore.utils.MetadataSwitcher;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.infostore.Classes;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 import static com.openexchange.tools.sql.DBUtils.getStatement;
 
 @OXExceptionSource(
 		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INFODATABASEIMPL,
-		component = Component.INFOSTORE
+		component = EnumComponent.INFOSTORE
 )
 public class InfoDatabaseImpl  extends DBService implements InfoDatabase {
 	

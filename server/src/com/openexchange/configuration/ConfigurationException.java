@@ -52,7 +52,7 @@
 package com.openexchange.configuration;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * Exception if problems occur in configuration classes.
@@ -91,7 +91,7 @@ public class ConfigurationException extends AbstractOXException {
      */
     public ConfigurationException(final Code code, final Throwable cause,
         final Object... messageArgs) {
-        super(Component.CONFIGURATION, code.category, code.detailNumber,
+        super(EnumComponent.CONFIGURATION, code.category, code.detailNumber,
             code.message, cause);
         setMessageArgs(messageArgs);
     }

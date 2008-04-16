@@ -50,7 +50,7 @@
 package com.openexchange.cache;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 public class OXCachingException extends AbstractOXException {
 
@@ -67,7 +67,7 @@ public class OXCachingException extends AbstractOXException {
 	 *            arguments that will be formatted into the message.
 	 */
 	public OXCachingException(final Code code, final Throwable cause, final Object... messageArgs) {
-		super(Component.CACHE, code.category, code.detailNumber, null == code.message ? cause.getMessage()
+		super(EnumComponent.CACHE, code.category, code.detailNumber, null == code.message ? cause.getMessage()
 				: code.message, cause);
 		setMessageArgs(messageArgs);
 	}

@@ -59,5 +59,5 @@ import java.lang.annotation.ElementType;
 @Target(ElementType.TYPE)
 public @interface OXExceptionSource {
 	int classId();
-	Component component();
+	EnumComponent component();
 }

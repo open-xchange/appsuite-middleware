@@ -73,7 +73,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.sync.FolderSyncInterface;
 import com.openexchange.api2.sync.RdbFolderSyncInterface;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -184,7 +184,7 @@ public class SyncServlet extends PermissionServlet {
 			throws IOException {
 		try {
 			actionPutClearFolderContent(getSessionObject(req), resp.getWriter(), getBody(req), ParamContainer
-					.getInstance(req, Component.SYNCML, resp));
+					.getInstance(req, EnumComponent.SYNCML, resp));
 		} catch (final JSONException e) {
 			writeErrorResponse((HttpServletResponseWrapper) resp, e);
 		}
@@ -313,7 +313,7 @@ public class SyncServlet extends PermissionServlet {
 	}
 
 	private static final AbstractOXException getWrappingOXException(final Throwable cause) {
-		return new AbstractOXException(Component.SYNCML, Category.INTERNAL_ERROR, 9999, cause.getMessage(), cause);
+		return new AbstractOXException(EnumComponent.SYNCML, Category.INTERNAL_ERROR, 9999, cause.getMessage(), cause);
 	}
 
 	private static final String checkStringParam(final HttpServletRequest req, final String paramName)

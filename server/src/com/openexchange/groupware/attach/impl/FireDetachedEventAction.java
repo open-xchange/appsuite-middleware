@@ -53,7 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -64,7 +64,7 @@ import com.openexchange.groupware.attach.Classes;
 
 @OXExceptionSource(
 		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_FIREDETACHEDEVENTACTION,
-		component = Component.ATTACHMENT
+		component = EnumComponent.ATTACHMENT
 )
 public class FireDetachedEventAction extends AttachmentEventAction {
 

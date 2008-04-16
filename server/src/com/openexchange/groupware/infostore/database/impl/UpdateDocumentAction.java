@@ -51,7 +51,7 @@ package com.openexchange.groupware.infostore.database.impl;
 
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -62,7 +62,7 @@ import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 
 @OXExceptionSource(
 		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_UPDATEDOCUMENTACTION,
-		component = Component.INFOSTORE
+		component = EnumComponent.INFOSTORE
 )
 public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
 

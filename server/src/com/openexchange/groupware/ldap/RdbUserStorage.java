@@ -62,7 +62,7 @@ import java.util.List;
 
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
 
@@ -128,7 +128,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(context);
         } catch (DBPoolingException e) {
-            throw new LdapException(Component.USER, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -141,15 +141,15 @@ public class RdbUserStorage extends UserStorage {
             if (result.next()) {
                 userId = result.getInt(1);
             } else {
-                throw new LdapException(Component.USER, Code.USER_NOT_FOUND,
+                throw new LdapException(EnumComponent.USER, Code.USER_NOT_FOUND,
                     uid, Integer.valueOf(context.getContextId()));
             }
             if (result.next()) {
-                throw new LdapException(Component.USER, Code.USER_CONFLICT,
+                throw new LdapException(EnumComponent.USER, Code.USER_CONFLICT,
                     uid, Integer.valueOf(context.getContextId()));
             }
         } catch (SQLException e) {
-            throw new LdapException(Component.USER, Code.SQL_ERROR, e,
+            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -167,7 +167,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(context);
         } catch (DBPoolingException e) {
-            throw new LdapException(Component.USER, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         UserImpl retval = null;
         PreparedStatement stmt = null;
@@ -197,11 +197,11 @@ public class RdbUserStorage extends UserStorage {
                 retval.setPasswordMech(result.getString(pos++));
                 retval.setContactId(result.getInt(pos++));
             } else {
-                throw new LdapException(Component.USER,
+                throw new LdapException(EnumComponent.USER,
                     Code.USER_NOT_FOUND, Integer.valueOf(userId), Integer.valueOf(context.getContextId()));
             }
         } catch (SQLException e) {
-            throw new LdapException(Component.USER, Code.SQL_ERROR, e,
+            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -224,7 +224,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(context);
         } catch (DBPoolingException e) {
-            throw new LdapException(Component.USER, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -237,7 +237,7 @@ public class RdbUserStorage extends UserStorage {
                 user.setLoginInfo(result.getString(1));
             }
         } catch (SQLException e) {
-            throw new LdapException(Component.USER, Code.SQL_ERROR, e,
+            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -255,7 +255,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(context);
         } catch (DBPoolingException e) {
-            throw new LdapException(Component.USER, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -271,7 +271,7 @@ public class RdbUserStorage extends UserStorage {
                 user.setDisplayName(result.getString(pos++));
             }
         } catch (SQLException e) {
-            throw new LdapException(Component.USER, Code.SQL_ERROR, e,
+            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -289,7 +289,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(context);
         } catch (DBPoolingException e) {
-            throw new LdapException(Component.USER, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -311,7 +311,7 @@ public class RdbUserStorage extends UserStorage {
             }
             user.setGroups(groups);
         } catch (SQLException e) {
-            throw new LdapException(Component.USER, Code.SQL_ERROR, e,
+            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -329,7 +329,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(context);
         } catch (DBPoolingException e) {
-            throw new LdapException(Component.USER, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -346,7 +346,7 @@ public class RdbUserStorage extends UserStorage {
             }
             user.setAliases(aliases.toArray(new String[aliases.size()]));
         } catch (SQLException e) {
-            throw new LdapException(Component.USER, Code.SQL_ERROR, e,
+            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -363,7 +363,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickupWriteable(context);
         } catch (Exception e) {
-            throw new LdapException(Component.USER, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
         try {
@@ -377,7 +377,7 @@ public class RdbUserStorage extends UserStorage {
             stmt.setInt(pos++, user.getId());
             stmt.execute();
         } catch (SQLException e) {
-            throw new LdapException(Component.USER, Code.SQL_ERROR, e,
+            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
@@ -395,7 +395,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(context);
         } catch (DBPoolingException e) {
-            throw new LdapException(Component.USER, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         try {
             PreparedStatement stmt = null;
@@ -410,7 +410,7 @@ public class RdbUserStorage extends UserStorage {
                     userId = result.getInt(1);
                 }
             } catch (SQLException e) {
-                throw new LdapException(Component.USER, Code.SQL_ERROR, e,
+                throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                     e.getMessage());
             } finally {
                 closeSQLStuff(result, stmt);
@@ -430,12 +430,12 @@ public class RdbUserStorage extends UserStorage {
                     }
                 }
                 if (userId == -1) {
-                    throw new LdapException(Component.USER,
+                    throw new LdapException(EnumComponent.USER,
                         Code.NO_USER_BY_MAIL, email);
                 }
                 return getUser(userId, context);
             } catch (SQLException e) {
-                throw new LdapException(Component.USER, Code.SQL_ERROR, e,
+                throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                     e.getMessage());
             } finally {
                 closeSQLStuff(result, stmt);
@@ -455,7 +455,7 @@ public class RdbUserStorage extends UserStorage {
         try {
             con = DBPool.pickup(context);
         } catch (Exception e) {
-            throw new LdapException(Component.USER, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.USER, Code.NO_CONNECTION, e);
         }
         final String sql = "SELECT id FROM user LEFT JOIN prg_contacts ON "
             + "(user.cid=prg_contacts.cid AND "
@@ -478,7 +478,7 @@ public class RdbUserStorage extends UserStorage {
                 users[i] = tmp.get(i).intValue();
             }
         } catch (SQLException e) {
-            throw new LdapException(Component.USER, Code.SQL_ERROR, e,
+            throw new LdapException(EnumComponent.USER, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);

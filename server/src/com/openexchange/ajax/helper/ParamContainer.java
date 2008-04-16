@@ -58,7 +58,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
@@ -163,7 +163,7 @@ public abstract class ParamContainer {
 		}
 	};
 
-	private static final ErrorInfo getErrorInfo(final Component component) {
+	private static final ErrorInfo getErrorInfo(final EnumComponent component) {
 		switch (component) {
 		case FOLDER:
 			return FOLDER_ERR_INFO;
@@ -178,7 +178,7 @@ public abstract class ParamContainer {
 
 		private final HttpServletRequest req;
 
-		private final Component component;
+		private final EnumComponent component;
 
 		private final HttpServletResponse resp;
 
@@ -189,7 +189,7 @@ public abstract class ParamContainer {
 		 * @param component
 		 * @param resp
 		 */
-		public HttpParamContainer(final HttpServletRequest req, final Component component,
+		public HttpParamContainer(final HttpServletRequest req, final EnumComponent component,
 				final HttpServletResponse resp) {
 			this.req = req;
 			this.component = component;
@@ -325,7 +325,7 @@ public abstract class ParamContainer {
 
 		private final JSONObject jo;
 
-		private final Component component;
+		private final EnumComponent component;
 
 		private final ErrorInfo errorInfo;
 
@@ -333,7 +333,7 @@ public abstract class ParamContainer {
 		 * @param jo
 		 * @param component
 		 */
-		public JSONParamContainer(final JSONObject jo, final Component component) {
+		public JSONParamContainer(final JSONObject jo, final EnumComponent component) {
 			this.jo = jo;
 			this.component = component;
 			errorInfo = getErrorInfo(component);
@@ -484,12 +484,12 @@ public abstract class ParamContainer {
 
 	public static final int NOT_FOUND = -9999;
 
-	public static ParamContainer getInstance(final HttpServletRequest req, final Component component,
+	public static ParamContainer getInstance(final HttpServletRequest req, final EnumComponent component,
 			final HttpServletResponse resp) {
 		return new HttpParamContainer(req, component, resp);
 	}
 
-	public static ParamContainer getInstance(final JSONObject jo, final Component component) {
+	public static ParamContainer getInstance(final JSONObject jo, final EnumComponent component) {
 		return new JSONParamContainer(jo, component);
 	}
 

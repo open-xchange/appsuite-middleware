@@ -65,7 +65,7 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
@@ -643,7 +643,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			}
             throw new ReminderException(Code.NOT_FOUND, objectId, contextId);
 		} catch (final SQLException exc) {
-			throw new OXException(Component.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
+			throw new OXException(EnumComponent.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
 		}
 	}
 	
@@ -691,7 +691,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			final ResultSet rs = ps.executeQuery();
 			return new ReminderSearchIterator(rs, ps, readCon);
 		} catch (final Exception exc) {
-			throw new OXException(Component.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
+			throw new OXException(EnumComponent.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
 		}
 	}
 	
@@ -711,7 +711,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 		} catch (SearchIteratorException exc) {
 			throw new OXException(exc);
 		} catch (final SQLException exc) {
-			throw new OXException(Component.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
+			throw new OXException(EnumComponent.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
 		} catch (final DBPoolingException exc) {
 			throw new OXException(exc);
 		}
@@ -733,7 +733,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 		} catch (SearchIteratorException exc) {
 			throw new OXException(exc);
 		} catch (final SQLException exc) {
-			throw new OXException(Component.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
+			throw new OXException(EnumComponent.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
 		} catch (final DBPoolingException exc) {
 			throw new OXException(exc);
 		}
@@ -758,7 +758,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			} catch (final ReminderException exc) {
 				next = null;
 			} catch (final SQLException exc) {
-				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, exc, Component.REMINDER);
+				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, exc, EnumComponent.REMINDER);
 			}
 		}
 		
@@ -773,7 +773,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			} catch (final ReminderException exc) {
 				next = null;
 			} catch (final SQLException exc) {
-				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, exc, Component.REMINDER);
+				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, exc, EnumComponent.REMINDER);
 			}
 			return reminderObj;
 		}
@@ -790,7 +790,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 				
 				DBPool.closeReaderSilent(context,readCon);
 			} catch (final SQLException exc) {
-				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, exc, Component.REMINDER);
+				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, exc, EnumComponent.REMINDER);
 			}
 		}
 		

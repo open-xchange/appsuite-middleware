@@ -59,7 +59,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
 import com.openexchange.server.impl.DBPool;
@@ -88,7 +88,7 @@ public class RdbGroupStorage extends GroupStorage {
         try {
             con = DBPool.pickup(context);
         } catch (Exception e) {
-            throw new LdapException(Component.GROUP, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.GROUP, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -105,12 +105,12 @@ public class RdbGroupStorage extends GroupStorage {
                 group.setDisplayName(result.getString(pos++));
                 group.setLastModified(new Date(result.getLong(pos++)));
             } else {
-                throw new LdapException(Component.GROUP, Code.GROUP_NOT_FOUND,
+                throw new LdapException(EnumComponent.GROUP, Code.GROUP_NOT_FOUND,
                     Integer.valueOf(gid), Integer.valueOf(context.getContextId()));
             }
             group.setMember(selectMember(con, context, group.getIdentifier()));
         } catch (SQLException e) {
-            throw new LdapException(Component.GROUP, Code.SQL_ERROR, e,
+            throw new LdapException(EnumComponent.GROUP, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -129,7 +129,7 @@ public class RdbGroupStorage extends GroupStorage {
         try {
             con = DBPool.pickup(context);
         } catch (Exception e) {
-            throw new LdapException(Component.GROUP, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.GROUP, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -152,7 +152,7 @@ public class RdbGroupStorage extends GroupStorage {
             }
             groups = tmp.toArray(new Group[tmp.size()]);
         } catch (SQLException e) {
-            throw new LdapException(Component.GROUP, Code.SQL_ERROR, e,
+            throw new LdapException(EnumComponent.GROUP, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -170,7 +170,7 @@ public class RdbGroupStorage extends GroupStorage {
         try {
             con = DBPool.pickup(context);
         } catch (Exception e) {
-            throw new LdapException(Component.GROUP, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.GROUP, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -192,7 +192,7 @@ public class RdbGroupStorage extends GroupStorage {
                 groups.add(group);
             }
         } catch (SQLException e) {
-            throw new LdapException(Component.GROUP, Code.SQL_ERROR, e,
+            throw new LdapException(EnumComponent.GROUP, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -210,7 +210,7 @@ public class RdbGroupStorage extends GroupStorage {
         try {
             con = DBPool.pickup(context);
         } catch (Exception e) {
-            throw new LdapException(Component.GROUP, Code.NO_CONNECTION, e);
+            throw new LdapException(EnumComponent.GROUP, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -232,7 +232,7 @@ public class RdbGroupStorage extends GroupStorage {
             }
             groups = tmp.toArray(new Group[tmp.size()]);
         } catch (SQLException e) {
-            throw new LdapException(Component.GROUP, Code.SQL_ERROR, e,
+            throw new LdapException(EnumComponent.GROUP, Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);

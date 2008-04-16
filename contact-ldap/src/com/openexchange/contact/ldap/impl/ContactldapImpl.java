@@ -73,7 +73,7 @@ import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.contact.ldap.tools.LdapTools;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -108,7 +108,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 @OXExceptionSource(
 		classId=Classes.COM_OPENEXCHANGE_CONTACTS_LDAP_IMPL_CONTACTLDAPIMPL,
-		component=Component.CONTACT
+		component=EnumComponent.CONTACT
 )
 
 public class ContactldapImpl implements ContactInterface {

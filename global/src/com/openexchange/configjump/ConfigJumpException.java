@@ -50,7 +50,7 @@
 package com.openexchange.configjump;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * Exception that can appear when creating setup links.
@@ -88,7 +88,7 @@ public class ConfigJumpException extends AbstractOXException {
      */
     public ConfigJumpException(final Code code, final Throwable cause,
         final Object... messageArgs) {
-        super(Component.LOGIN, code.category, code.number, code.message, cause);
+        super(EnumComponent.LOGIN, code.category, code.number, code.message, cause);
         setMessageArgs(messageArgs);
     }
 

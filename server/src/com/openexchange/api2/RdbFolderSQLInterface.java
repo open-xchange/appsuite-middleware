@@ -65,7 +65,7 @@ import java.util.Set;
 
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -294,7 +294,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 				}
 				if (clientLastModified != null
 						&& oxfolderAccess.getFolderLastModified(folderobject.getObjectID()).after(clientLastModified)) {
-					throw new OXConcurrentModificationException(Component.FOLDER,
+					throw new OXConcurrentModificationException(EnumComponent.FOLDER,
 							OXFolderException.DETAIL_NUMBER_CONCURRENT_MODIFICATION, new Object[0]);
 				}
 				final EffectivePermission effectivePerm = oxfolderAccess.getFolderPermission(
@@ -351,7 +351,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 			}
 			if (clientLastModified != null
 					&& oxfolderAccess.getFolderLastModified(folderobject.getObjectID()).after(clientLastModified)) {
-				throw new OXConcurrentModificationException(Component.FOLDER,
+				throw new OXConcurrentModificationException(EnumComponent.FOLDER,
 						OXFolderException.DETAIL_NUMBER_CONCURRENT_MODIFICATION, new Object[0]);
 			}
 			final EffectivePermission effectivePerm = folderobject

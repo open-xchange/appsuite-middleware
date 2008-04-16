@@ -61,10 +61,10 @@ import com.openexchange.groupware.infostore.InfostoreException;
 import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 
-@OXExceptionSource(classId=0, component=Component.INFOSTORE)
+@OXExceptionSource(classId=0, component=EnumComponent.INFOSTORE)
 
 @OXThrows(category=Category.USER_INPUT, desc="", exceptionId=0, msg="Validation failed: %s")
 

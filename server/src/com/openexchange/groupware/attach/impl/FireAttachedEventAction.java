@@ -62,12 +62,12 @@ import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.attach.AttachmentExceptionFactory;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.Classes;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 @OXExceptionSource(
 		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_FIREDETACHEDEVENTACTION,
-		component = Component.ATTACHMENT
+		component = EnumComponent.ATTACHMENT
 )
 public class FireAttachedEventAction extends AttachmentEventAction {
 

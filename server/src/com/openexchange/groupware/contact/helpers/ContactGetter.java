@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.contact.helpers;
 
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -72,7 +72,7 @@ import com.openexchange.groupware.container.ContactObject;
 
 @OXExceptionSource(
 	classId=Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_HELPERS_CONTACTGETTER, 
-	component=Component.CONTACT)
+	component=EnumComponent.CONTACT)
 @OXThrowsMultiple(
 	category={Category.CODE_ERROR}, 
 	desc={""}, 

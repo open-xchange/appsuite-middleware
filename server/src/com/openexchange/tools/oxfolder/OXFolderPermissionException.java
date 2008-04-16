@@ -50,7 +50,7 @@
 package com.openexchange.tools.oxfolder;
 
 import com.openexchange.api.OXPermissionException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 
 /**
@@ -74,7 +74,7 @@ public class OXFolderPermissionException extends OXPermissionException {
 	}
 
 	public OXFolderPermissionException(final FolderCode code, final Exception cause, final Object... messageArgs) {
-		super(Component.FOLDER, Category.PERMISSION, code.getNumber(), code.getMessage(), cause, messageArgs);
+		super(EnumComponent.FOLDER, Category.PERMISSION, code.getNumber(), code.getMessage(), cause, messageArgs);
 	}
 
 }

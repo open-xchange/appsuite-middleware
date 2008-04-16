@@ -50,7 +50,7 @@
 package com.openexchange.groupware.update;
 
 import com.openexchange.database.ConfigDBStorage;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -66,7 +66,7 @@ import com.openexchange.server.impl.DBPoolingException;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-@OXExceptionSource(classId = Classes.UPDATER_IMPL, component = Component.UPDATE)
+@OXExceptionSource(classId = Classes.UPDATER_IMPL, component = EnumComponent.UPDATE)
 public class UpdaterImpl extends Updater {
 
 	/**

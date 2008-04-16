@@ -60,7 +60,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.infostore.Classes;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -70,7 +70,7 @@ import com.openexchange.groupware.infostore.utils.URLHelper;
 
 @OXExceptionSource(
 		classId = Classes.COM_OPENEXCHANGE_AJAX_PARSERL_JSONDOCUMENTMETADATA,
-		component = Component.INFOSTORE
+		component = EnumComponent.INFOSTORE
 )
 public class JSONDocumentMetadata implements DocumentMetadata {
 

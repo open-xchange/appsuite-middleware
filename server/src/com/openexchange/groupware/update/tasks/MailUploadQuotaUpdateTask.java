@@ -57,7 +57,7 @@ import java.sql.SQLException;
 
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -72,7 +72,7 @@ import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = Component.UPDATE)
+@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 public final class MailUploadQuotaUpdateTask implements UpdateTask {
 	
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory

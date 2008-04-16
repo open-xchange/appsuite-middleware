@@ -71,7 +71,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.infostore.Classes;
 
 import static com.openexchange.tools.sql.DBUtils.getStatement;
@@ -79,7 +79,7 @@ import static com.openexchange.tools.sql.DBUtils.getStatement;
 
 @OXExceptionSource(
 		classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_WEBDAV_LOCKMANAGERIMPL, 
-		component=Component.INFOSTORE
+		component=EnumComponent.INFOSTORE
 )
 public abstract class LockManagerImpl<T extends Lock> extends DBService implements LockManager{
 	

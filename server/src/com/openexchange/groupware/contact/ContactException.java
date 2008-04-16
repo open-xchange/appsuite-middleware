@@ -51,7 +51,7 @@ package com.openexchange.groupware.contact;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 public class ContactException extends OXException {
 	
@@ -66,7 +66,7 @@ public class ContactException extends OXException {
 	public static final String INIT_CONNECTION_FROM_DBPOOL = "Unable to pick up a connection from the DBPool";
 	
 	public ContactException(Category category, int id, String message, Throwable cause, Object...msgParams){
-		super(Component.CONTACT, category, id,message,cause,msgParams);
+		super(EnumComponent.CONTACT, category, id,message,cause,msgParams);
 	}
 
 	public ContactException(AbstractOXException cause){

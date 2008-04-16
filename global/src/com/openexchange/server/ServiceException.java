@@ -50,7 +50,7 @@
 package com.openexchange.server;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * {@link ServiceException}
@@ -152,7 +152,7 @@ public final class ServiceException extends AbstractOXException {
 	 *            The message arguments
 	 */
 	public ServiceException(final Code code, final Throwable cause, final Object... messageArgs) {
-		super(Component.SERVICE, code.getCategory(), code.getNumber(), code.getMessage(), cause);
+		super(EnumComponent.SERVICE, code.getCategory(), code.getNumber(), code.getMessage(), cause);
 		super.setMessageArgs(messageArgs);
 	}
 

@@ -76,7 +76,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -113,7 +113,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
-@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_DATABASEIMPL, component = Component.INFOSTORE)
+@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_DATABASEIMPL, component = EnumComponent.INFOSTORE)
 public class DatabaseImpl extends DBService {
 
 	private static final String TABLE_DEL_INFOSTORE_DOCUMENT = "del_infostore_document";
@@ -2290,7 +2290,7 @@ public class DatabaseImpl extends DBService {
 				}
 			} catch (final SQLException e) {
 				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR,
-						e, Component.INFOSTORE);
+						e, EnumComponent.INFOSTORE);
 			}
 		}
 
@@ -2337,7 +2337,7 @@ public class DatabaseImpl extends DBService {
 				return retval;
 			} catch (final SQLException exc) {
 				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR,
-						exc, Component.INFOSTORE);
+						exc, EnumComponent.INFOSTORE);
 			}
 		}
 
@@ -2354,7 +2354,7 @@ public class DatabaseImpl extends DBService {
 				stmt = null;
 			} catch (final SQLException e) {
 				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR,
-						e, Component.INFOSTORE);
+						e, EnumComponent.INFOSTORE);
 			} finally {
 				if (readCon != null) {
 					d.releaseReadConnection(ctx, readCon);

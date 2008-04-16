@@ -61,7 +61,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
 
 public abstract class AbstractOXExceptionFactory<T> {
     private int classId;
-    private Component component;
+    private EnumComponent component;
     
     private static final Log LOG = LogFactory.getLog(AbstractOXExceptionFactory.class);
 
@@ -173,6 +173,6 @@ public abstract class AbstractOXExceptionFactory<T> {
         return buildException(component, throwsInfo.category, classId * 100 + id, throwsInfo.message, cause, msgParams);
     }
 
-    protected abstract T buildException(Component component, Category category, int number, String message, Throwable cause, Object...msgArgs);
+    protected abstract T buildException(EnumComponent component, Category category, int number, String message, Throwable cause, Object...msgArgs);
     protected abstract int getClassId();
 }

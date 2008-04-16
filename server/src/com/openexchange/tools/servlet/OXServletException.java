@@ -50,7 +50,7 @@
 package com.openexchange.tools.servlet;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
@@ -167,7 +167,7 @@ public class OXServletException extends AbstractOXException {
 	}
 
 	public OXServletException(final Code code, final Throwable cause, final Object... messageArgs) {
-		super(Component.SERVLET, code.category, code.number, code.message, cause);
+		super(EnumComponent.SERVLET, code.category, code.number, code.message, cause);
 		setMessageArgs(messageArgs);
 	}
 

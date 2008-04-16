@@ -67,12 +67,12 @@ import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.tools.exceptions.LoggingLogic;
 
 @OXExceptionSource(
 		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_TX_DBSERVICE, 
-		component = Component.TRANSACTION
+		component = EnumComponent.TRANSACTION
 )
 public abstract class DBService implements Service, DBProviderUser, DBProvider{
 	private RequestDBProvider provider;

@@ -68,14 +68,14 @@ import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 import com.openexchange.groupware.tx.DBProvider;
 import com.openexchange.groupware.tx.DBService;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.infostore.Classes;
 
 import static com.openexchange.tools.sql.DBUtils.getStatement;
 
 @OXExceptionSource(
 		classId=Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_WEBDAV_PROPERTYSTOREIMPL, 
-		component=Component.INFOSTORE
+		component=EnumComponent.INFOSTORE
 )
 public class PropertyStoreImpl extends DBService implements PropertyStore {
 	

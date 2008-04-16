@@ -69,7 +69,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api2.OXException;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -129,7 +129,7 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  *         Otterbach</a>
  */
 
-@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_FACADE_IMPL_INFOSTOREFACADEIMPL, component = Component.INFOSTORE)
+@OXExceptionSource(classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_FACADE_IMPL_INFOSTOREFACADEIMPL, component = EnumComponent.INFOSTORE)
 public class InfostoreFacadeImpl extends DBService implements InfostoreFacade,
 		DBProviderUser {
 

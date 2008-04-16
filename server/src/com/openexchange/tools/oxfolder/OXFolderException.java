@@ -51,7 +51,7 @@ package com.openexchange.tools.oxfolder;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * OXFolderException
@@ -620,10 +620,10 @@ public class OXFolderException extends OXException {
 	}
 
 	public OXFolderException(final FolderCode folderCode, final Throwable cause, final Object... messageArgs) {
-		super(Component.FOLDER, folderCode.category, folderCode.detailNumber, folderCode.message, cause, messageArgs);
+		super(EnumComponent.FOLDER, folderCode.category, folderCode.detailNumber, folderCode.message, cause, messageArgs);
 	}
 
 	public OXFolderException(final FolderCode folderCode, final Category category, final Object... messageArgs) {
-		super(Component.FOLDER, category, folderCode.detailNumber, folderCode.message, null, messageArgs);
+		super(EnumComponent.FOLDER, category, folderCode.detailNumber, folderCode.message, null, messageArgs);
 	}
 }

@@ -6,7 +6,7 @@ import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.SchemaExceptionFactory;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.database.Database;
 
@@ -20,7 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 @OXExceptionSource(
 	    classId = Classes.UPDATE_TASK,
-	    component = Component.UPDATE
+	    component = EnumComponent.UPDATE
 	)
 public class InfostoreLongerURLFieldTask  implements UpdateTask {
 

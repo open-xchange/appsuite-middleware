@@ -50,7 +50,7 @@
 package com.openexchange.groupware.update.exception;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * Exception for reading or writing schema information from/to the database
@@ -81,7 +81,7 @@ public class SchemaException extends AbstractOXException {
      * @param cause the cause.
      * @param messageArgs arguments for the exception message.
      */
-    public SchemaException(final Component component, final Category category,
+    public SchemaException(final EnumComponent component, final Category category,
         final int detailNumber, final String message, final Throwable cause,
         final Object... messageArgs) {
         super(component, category, detailNumber, message, cause);

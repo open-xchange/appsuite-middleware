@@ -55,7 +55,7 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXExceptionFactory;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.tools.iterator.SearchIteratorException;
 
@@ -68,7 +68,7 @@ public class ContactExceptionFactory extends AbstractOXExceptionFactory{
 	private static final int CLASS = Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_CONTACTEXCEPTIONFACTORY;
 	
 	@Override
-	protected AbstractOXException buildException(final Component component, final Category category, final int number, final String message, final Throwable cause, final Object... msgArgs) {
+	protected AbstractOXException buildException(final EnumComponent component, final Category category, final int number, final String message, final Throwable cause, final Object... msgArgs) {
 		/*
 		if(component != Component.CONTACT || component != Component.LINKING) {
 			throw new IllegalArgumentException("This factory can only build exceptions for the Contacts");

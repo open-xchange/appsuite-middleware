@@ -3,7 +3,7 @@ package com.openexchange.groupware.infostore.database.impl;
 import java.sql.SQLException;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -13,7 +13,7 @@ import com.openexchange.groupware.infostore.InfostoreExceptionFactory;
 
 @OXExceptionSource(
 		classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_DELETEALLVERSIONSACTION,
-		component = Component.INFOSTORE
+		component = EnumComponent.INFOSTORE
 )
 public class DeleteAllVersionsAction extends AbstractDocumentListAction {
 

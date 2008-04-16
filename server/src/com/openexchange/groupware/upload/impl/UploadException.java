@@ -50,7 +50,7 @@
 package com.openexchange.groupware.upload.impl;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * UploadException
@@ -144,19 +144,19 @@ public final class UploadException extends AbstractOXException {
 	}
 
 	public UploadException(final UploadCode uploadCode, final String action, final Throwable cause) {
-		super(Component.UPLOAD, uploadCode.category, uploadCode.detailNumber, uploadCode.message, cause);
+		super(EnumComponent.UPLOAD, uploadCode.category, uploadCode.detailNumber, uploadCode.message, cause);
 		super.setMessageArgs(cause.getMessage());
 		this.action = action;
 	}
 	
 	public UploadException(final UploadCode uploadCode, final String action, final Object... messageArgs) {
-		super(Component.UPLOAD, uploadCode.category, uploadCode.detailNumber, uploadCode.message, null);
+		super(EnumComponent.UPLOAD, uploadCode.category, uploadCode.detailNumber, uploadCode.message, null);
 		super.setMessageArgs(messageArgs);
 		this.action = action;
 	}
 	
 	public UploadException(final UploadCode uploadCode, final String action) {
-		super(Component.UPLOAD, uploadCode.category, uploadCode.detailNumber, uploadCode.message, null);
+		super(EnumComponent.UPLOAD, uploadCode.category, uploadCode.detailNumber, uploadCode.message, null);
 		super.setMessageArgs(new Object[0]);
 		this.action = action;
 	}

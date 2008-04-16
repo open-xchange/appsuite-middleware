@@ -52,7 +52,7 @@
 package com.openexchange.groupware.ldap;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.ldap.UserException.Detail;
 
 /**
@@ -92,7 +92,7 @@ public class LdapException extends AbstractOXException {
      * @param code code for the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
-    public LdapException(final Component component, final Code code,
+    public LdapException(final EnumComponent component, final Code code,
         final Object... messageArgs) {
         this(component, code, null, messageArgs);
     }
@@ -104,7 +104,7 @@ public class LdapException extends AbstractOXException {
      * @param cause the cause of the exception.
      * @param messageArgs arguments that will be formatted into the message.
      */
-    public LdapException(final Component component, final Code code,
+    public LdapException(final EnumComponent component, final Code code,
         final Throwable cause, final Object... messageArgs) {
         super(component, code.category, code.detailNumber, code.message, cause);
         this.detail = code.detail;

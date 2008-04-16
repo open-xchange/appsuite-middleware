@@ -64,7 +64,7 @@ import javax.naming.ldap.LdapContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.configuration.DirectoryService;
 import com.openexchange.groupware.ldap.LdapException.Code;
 import com.openexchange.tools.file.TagFiller;
@@ -273,7 +273,7 @@ public final class LdapUtility {
        throws LdapException {
        final String retval = getCustomization().getProperty(propname);
        if (retval == null && mustExist) {
-           throw new LdapException(Component.LDAP, Code.PROPERTY_MISSING,
+           throw new LdapException(EnumComponent.LDAP, Code.PROPERTY_MISSING,
                propname);
        }
        return retval;
@@ -326,7 +326,7 @@ public final class LdapUtility {
         try {
             return Class.forName(className).asSubclass(clazz);
         } catch (ClassNotFoundException e) {
-            throw new LdapException(Component.LDAP, Code.CLASS_NOT_FOUND, e,
+            throw new LdapException(EnumComponent.LDAP, Code.CLASS_NOT_FOUND, e,
                 className);
         }
     }
@@ -345,22 +345,22 @@ public final class LdapUtility {
             final Constructor< ? extends T> cons = clazz.getConstructor(new Class[0]);
             return cons.newInstance(new Object[0]);
         } catch (SecurityException e) {
-            throw new LdapException(Component.LDAP, Code.INSTANTIATION_PROBLEM,
+            throw new LdapException(EnumComponent.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         } catch (NoSuchMethodException e) {
-            throw new LdapException(Component.LDAP, Code.INSTANTIATION_PROBLEM,
+            throw new LdapException(EnumComponent.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         } catch (InstantiationException e) {
-            throw new LdapException(Component.LDAP, Code.INSTANTIATION_PROBLEM,
+            throw new LdapException(EnumComponent.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         } catch (IllegalAccessException e) {
-            throw new LdapException(Component.LDAP, Code.INSTANTIATION_PROBLEM,
+            throw new LdapException(EnumComponent.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         } catch (IllegalArgumentException e) {
-            throw new LdapException(Component.LDAP, Code.INSTANTIATION_PROBLEM,
+            throw new LdapException(EnumComponent.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         } catch (InvocationTargetException e) {
-            throw new LdapException(Component.LDAP, Code.INSTANTIATION_PROBLEM,
+            throw new LdapException(EnumComponent.LDAP, Code.INSTANTIATION_PROBLEM,
                 e, clazz.getName());
         }
     }

@@ -50,7 +50,7 @@ package com.openexchange.consistency;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXThrows;
 
 import javax.management.*;
@@ -63,7 +63,7 @@ import java.io.IOException;
  * 
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-@OXExceptionSource(classId = ConsistencyClasses.MBEAN_CONSISTENCY, component = Component.CONSISTENCY)
+@OXExceptionSource(classId = ConsistencyClasses.MBEAN_CONSISTENCY, component = EnumComponent.CONSISTENCY)
 final class MBeanConsistency implements ConsistencyMBean {
 
     private static final ConsistencyExceptionFactory EXCEPTIONS = new ConsistencyExceptionFactory(MBeanConsistency.class);

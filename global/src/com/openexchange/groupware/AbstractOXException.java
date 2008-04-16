@@ -227,7 +227,7 @@ public class AbstractOXException extends Exception {
      * @deprecated use constructor with component, category and detail number.
      */
     public AbstractOXException() {
-        this(Component.NONE);
+        this(EnumComponent.NONE);
     }
 
     /**
@@ -244,7 +244,7 @@ public class AbstractOXException extends Exception {
      * @deprecated use constructor with component, category and detail number.
      */
     public AbstractOXException(final String message) {
-        this(Component.NONE, message);
+        this(EnumComponent.NONE, message);
     }
 
     /**
@@ -274,7 +274,7 @@ public class AbstractOXException extends Exception {
      * @deprecated use constructor with component, category and detail number.
      */
     public AbstractOXException(final Throwable cause) {
-        this(Component.NONE, cause);
+        this(EnumComponent.NONE, cause);
     }
 
     /**
@@ -291,7 +291,7 @@ public class AbstractOXException extends Exception {
      * @deprecated use constructor with component, category and detail number.
      */
     public AbstractOXException(final String message, final Throwable cause) {
-        this(Component.NONE, message, cause);
+        this(EnumComponent.NONE, message, cause);
     }
 
     /**

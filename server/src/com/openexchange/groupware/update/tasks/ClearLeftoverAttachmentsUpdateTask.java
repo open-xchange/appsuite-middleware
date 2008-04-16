@@ -2,7 +2,7 @@ package com.openexchange.groupware.update.tasks;
 
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.update.Schema;
@@ -29,7 +29,7 @@ import java.util.Map;
 
 @OXExceptionSource(
 	    classId = Classes.UPDATE_TASK,
-	    component = Component.UPDATE
+	    component = EnumComponent.UPDATE
 	)
 public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
 

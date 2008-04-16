@@ -50,7 +50,7 @@
 package com.openexchange.push.udp;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
@@ -75,7 +75,7 @@ public class PushUDPException extends AbstractOXException {
      * @param code code
      */
     public PushUDPException(final Code code) {
-        super(Component.PUSHUDP, code.getCategory(), code.getDetailNumber(), code.getMessage(), null);
+        super(EnumComponent.PUSHUDP, code.getCategory(), code.getDetailNumber(), code.getMessage(), null);
     }
     
     /**
@@ -85,7 +85,7 @@ public class PushUDPException extends AbstractOXException {
      * @param msgArgs arguments for the exception message.
      */
     public PushUDPException(Category category, String message, int detailNumber, Throwable cause) {
-        super(Component.PUSHUDP, category, detailNumber, message, cause);
+        super(EnumComponent.PUSHUDP, category, detailNumber, message, cause);
     }
     
     /**
@@ -96,11 +96,11 @@ public class PushUDPException extends AbstractOXException {
      */
     public PushUDPException(final Code code, final Throwable cause,
         final Object[] msgArgs) {
-        super(Component.SESSION, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
+        super(EnumComponent.SESSION, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
         setMessageArgs(msgArgs);
     }
     
-	public PushUDPException(Component component, Category category,
+	public PushUDPException(EnumComponent component, Category category,
 			int number, String message, Throwable cause, Object[] msgArgs) {
         super(component, category, number, message, cause);
         setMessageArgs(msgArgs);

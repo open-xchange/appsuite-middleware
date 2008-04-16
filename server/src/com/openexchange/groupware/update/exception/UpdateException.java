@@ -50,7 +50,7 @@
 package com.openexchange.groupware.update.exception;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * Exception class for the updater.
@@ -80,7 +80,7 @@ public class UpdateException extends AbstractOXException {
      * @param cause the cause.
      * @param msgArgs arguments for the exception message.
      */
-    public UpdateException(final Component component, final Category category,
+    public UpdateException(final EnumComponent component, final Category category,
         final int number, final String message, final Throwable cause,
         final Object[] msgArgs) {
         super(component, category, number, message, cause);

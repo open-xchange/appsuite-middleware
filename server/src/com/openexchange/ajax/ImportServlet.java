@@ -67,7 +67,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.Send;
 import com.openexchange.ajax.writer.ImportExportWriter;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -84,7 +84,7 @@ import com.openexchange.session.Session;
 
 @OXExceptionSource(
     classId=ImportExportExceptionClasses.IMPORTSERVLET, 
-    component=Component.IMPORT_EXPORT
+    component=EnumComponent.IMPORT_EXPORT
 )
 @OXThrowsMultiple(
 	category = { 

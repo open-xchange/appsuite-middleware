@@ -62,7 +62,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.container.FolderObject;
@@ -73,7 +73,7 @@ import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.server.impl.DBPoolingException;
 
-@OXExceptionSource(classId = Classes.UPDATE_TASK, component = Component.UPDATE)
+@OXExceptionSource(classId = Classes.UPDATE_TASK, component = EnumComponent.UPDATE)
 
 @OXThrowsMultiple(category={Category.CODE_ERROR}, desc={""}, exceptionId={0}, msg={"A SQL Error occurred while resolving folder name conflicts: %s"})
 

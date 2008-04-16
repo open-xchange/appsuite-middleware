@@ -74,6 +74,7 @@ import com.openexchange.groupware.tx.DBPoolProvider;
 import com.openexchange.groupware.tx.StaticDBPoolProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
@@ -412,8 +413,20 @@ public class OXFolderAccess {
 				switch (fo.getModule()) {
 				case FolderObject.TASK:
 					final Tasks tasks = Tasks.getInstance();
-					return readCon == null ? !tasks.containsNotSelfCreatedTasks(session, fo.getObjectID()) : !tasks
-							.containsNotSelfCreatedTasks(session, readCon, fo.getObjectID());
+					if (null == readCon) {
+						Connection rc = null;
+						try {
+							rc = DBPool.pickup(ctx);
+							return !tasks.containsNotSelfCreatedTasks(session, rc, fo.getObjectID());
+						} catch (final DBPoolingException e) {
+							throw new OXException(e);
+						} finally {
+							if (null != rc) {
+								DBPool.closeReaderSilent(ctx, rc);
+							}
+						}
+					}
+					return !tasks.containsNotSelfCreatedTasks(session, readCon, fo.getObjectID());
 				case FolderObject.CALENDAR:
 					final CalendarSql calSql = new CalendarSql(session);
 					return readCon == null ? !calSql.checkIfFolderContainsForeignObjects(userId, fo.getObjectID())

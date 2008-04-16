@@ -80,7 +80,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -117,7 +117,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 @OXExceptionSource(
 		classId=Classes.COM_OPENEXCHANGE_GROUPWARE_CONTACTS_CONTACTS,
-		component=Component.CONTACT
+		component=EnumComponent.CONTACT
 )
 
 public class Contacts implements DeleteListener {

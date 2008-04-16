@@ -52,7 +52,7 @@ import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.management.ManagementService;
 import org.apache.commons.logging.Log;
@@ -67,7 +67,7 @@ import javax.management.MalformedObjectNameException;
  */
 @OXExceptionSource(
         classId = ConsistencyClasses.CONSISTENCY_INIT,
-        component = Component.CONSISTENCY
+        component = EnumComponent.CONSISTENCY
         )
 public class ConsistencyInit implements Initialization {
 

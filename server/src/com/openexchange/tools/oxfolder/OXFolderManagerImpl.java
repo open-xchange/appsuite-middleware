@@ -1228,12 +1228,19 @@ public final class OXFolderManagerImpl implements OXFolderManager {
 	private void deleteContainedTasks(final int folderID) throws OXException {
 		final Tasks tasks = Tasks.getInstance();
 		if (null == writeCon) {
-			tasks.deleteTasksInFolder(session, folderID);
+			Connection wc = null;
+			try {
+				wc = DBPool.pickupWriteable(ctx);
+				tasks.deleteTasksInFolder(session, wc, folderID);
+			} catch (final DBPoolingException e) {
+				throw new OXException(e);
+			} finally {
+				if (null != wc) {
+					DBPool.closeWriterSilent(ctx, wc);
+				}
+			}
 		} else {
-			LOG.error("Clearing task folder with a given connection not possible", new Throwable());
-			// TODO: Uncomment following line to enable clearing task folder
-			// with a specified connection parameter
-			// tasks.deleteTasksInFolder(session, writeCon, folderID);
+			tasks.deleteTasksInFolder(session, writeCon, folderID);
 		}
 	}
 

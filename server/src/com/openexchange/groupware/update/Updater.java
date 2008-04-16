@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.update;
 
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -62,7 +62,7 @@ import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
  * Interface for the updater.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-@OXExceptionSource(classId = Classes.UPDATER, component = Component.UPDATE)
+@OXExceptionSource(classId = Classes.UPDATER, component = EnumComponent.UPDATE)
 public abstract class Updater {
 
     /**

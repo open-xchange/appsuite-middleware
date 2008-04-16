@@ -63,7 +63,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import com.openexchange.database.Database;
 import com.openexchange.database.Server;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -78,7 +78,7 @@ import com.openexchange.server.impl.DBPoolingException;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@OXExceptionSource(classId = Classes.SCHEMA_STORE_IMPL, component = Component.UPDATE)
+@OXExceptionSource(classId = Classes.SCHEMA_STORE_IMPL, component = EnumComponent.UPDATE)
 public class SchemaStoreImpl extends SchemaStore {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory

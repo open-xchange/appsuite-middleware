@@ -60,11 +60,11 @@ import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 
-@OXExceptionSource(classId=Classes.COM_OPENEXCHANGE_GROUPWARE_TX_DBPOOLPROVIDER, component=Component.TRANSACTION)
+@OXExceptionSource(classId=Classes.COM_OPENEXCHANGE_GROUPWARE_TX_DBPOOLPROVIDER, component=EnumComponent.TRANSACTION)
 public class DBPoolProvider implements DBProvider {
 
 	

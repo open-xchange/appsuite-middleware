@@ -51,7 +51,7 @@ package com.openexchange.groupware.importexport.exceptions;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXExceptionFactory;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
@@ -69,8 +69,8 @@ public class ImportExportExceptionFactory extends AbstractOXExceptionFactory {
 	private static final int CLASS = ImportExportExceptionClasses.IMPORTEXPORTEXCEPTIONFACTORY;
 		
 	@Override
-	protected AbstractOXException buildException(final Component component, final Category category, final int number, final String message, final Throwable cause, final Object... msgArgs) {
-		if(component != Component.IMPORT_EXPORT) {
+	protected AbstractOXException buildException(final EnumComponent component, final Category category, final int number, final String message, final Throwable cause, final Object... msgArgs) {
+		if(component != EnumComponent.IMPORT_EXPORT) {
 			throw new IllegalArgumentException("This factory can only build exceptions for importers or exporters");
 		}
 		return new ImportExportException(category,number,message,cause,msgArgs);

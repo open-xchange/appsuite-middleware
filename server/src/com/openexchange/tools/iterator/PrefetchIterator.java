@@ -55,7 +55,7 @@ import java.util.Queue;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * This iterator prefetches the delegating iterator results if the server
@@ -211,7 +211,7 @@ public class PrefetchIterator<T> implements SearchIterator<T> {
                     throw sie;
                 }
                 throw new SearchIteratorException(SearchIteratorException
-                    .SearchIteratorCode.NO_SUCH_ELEMENT, Component.APPOINTMENT);
+                    .SearchIteratorCode.NO_SUCH_ELEMENT, EnumComponent.APPOINTMENT);
             }
             return data.poll();
         }

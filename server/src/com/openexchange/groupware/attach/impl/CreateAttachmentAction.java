@@ -52,7 +52,7 @@ package com.openexchange.groupware.attach.impl;
 import java.sql.SQLException;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -60,7 +60,7 @@ import com.openexchange.groupware.attach.AttachmentExceptionFactory;
 import com.openexchange.groupware.attach.Classes;
 import com.openexchange.groupware.tx.UndoableAction;
 
-@OXExceptionSource(classId=Classes.COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_CREATEATTACHMENTACTION, component=Component.ATTACHMENT)
+@OXExceptionSource(classId=Classes.COM_OPENEXCHANGE_GROUPWARE_ATTACH_IMPL_CREATEATTACHMENTACTION, component=EnumComponent.ATTACHMENT)
 public class CreateAttachmentAction extends AttachmentListQueryAction implements UndoableAction{
 
 	private static final AttachmentExceptionFactory EXCEPTIONS = new AttachmentExceptionFactory(CreateAttachmentAction.class);

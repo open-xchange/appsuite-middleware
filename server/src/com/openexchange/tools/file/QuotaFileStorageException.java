@@ -50,7 +50,7 @@
 package com.openexchange.tools.file;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
@@ -84,7 +84,7 @@ public class QuotaFileStorageException extends FileStorageException {
      */
     public QuotaFileStorageException(Code code, Throwable cause,
         Object... messageArgs) {
-        super(Component.FILESTORE, code.category, code.detailNumber,
+        super(EnumComponent.FILESTORE, code.category, code.detailNumber,
             code.message, cause);
         setMessageArgs(messageArgs);
     }

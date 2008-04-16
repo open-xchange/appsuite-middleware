@@ -52,7 +52,7 @@
 package com.openexchange.tools.servlet;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
@@ -84,7 +84,7 @@ public class AjaxException extends AbstractOXException {
      */
     public AjaxException(final Code code, final Throwable cause,
         final Object... messageArgs) {
-        super(Component.SERVLET, code.category, code.number,
+        super(EnumComponent.SERVLET, code.category, code.number,
             null == code.message ? cause.getMessage() : code.message, cause);
         setMessageArgs(messageArgs);
     }
