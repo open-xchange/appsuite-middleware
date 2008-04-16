@@ -55,12 +55,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.Participant;
@@ -72,6 +72,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
 import com.openexchange.groupware.downgrade.DowngradeFailedException;
+import com.openexchange.groupware.downgrade.DowngradeListener;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
@@ -124,7 +125,7 @@ public class CalendarAdministration implements DeleteListener {
 
     private void removeAppointmentsWhereDowngradedUserIsTheOnlyParticipant(DowngradeEvent downgradeEvent) throws DowngradeFailedException {
         try {
-            removeAppointmentsWithOnlyTheUserAsParticipant(null,downgradeEvent.getContext(),downgradeEvent.getNewUserConfiguration().getUserId(), downgradeEvent.getWriteCon());
+            removeAppointmentsWithOnlyTheUserAsParticipant(downgradeEvent.getSession(),downgradeEvent.getContext(),downgradeEvent.getNewUserConfiguration().getUserId(), downgradeEvent.getWriteCon());
         } catch (SQLException e) {
             LOG.error(e);
             throw new DowngradeFailedException(DowngradeFailedException.Code.SQL_ERROR, e.getLocalizedMessage());
@@ -139,18 +140,50 @@ public class CalendarAdministration implements DeleteListener {
         final int user = downgradeEvent.getNewUserConfiguration().getUserId();
         final int cid = downgradeEvent.getContext().getContextId();
 
+        final Context ctx = downgradeEvent.getContext();
+        final Session session = downgradeEvent.getSession();
+
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
+            // Find all for event
+            List<int[]> idTuples = new ArrayList<int[]>();
+
+            stmt = con.prepareStatement("SELECT object_id, pfid FROM "+ CalendarSql.PARTICIPANT_TABLE_NAME+" WHERE member_uid = "+user+" AND cid = "+cid);
+            rs = stmt.executeQuery();
+            while(rs.next()) {
+                idTuples.add(new int[]{rs.getInt(1), rs.getInt(2)});
+            }
+
+            stmt.close();
+
             stmt = con.prepareStatement("DELETE FROM "+ CalendarSql.PARTICIPANT_TABLE_NAME+" WHERE member_uid = "+user+" AND cid = "+cid);
             stmt.executeUpdate();
             stmt.close();
 
             stmt = con.prepareStatement("DELETE FROM "+ CalendarSql.VIEW_TABLE_NAME+" WHERE id = "+user+" and cid = "+cid);
             stmt.executeUpdate();
+            stmt.close();
+
+
+            stmt = getUpdatePreparedStatement(con);
+            for(int[] tuple : idTuples) {
+                int object_id = tuple[0];
+                int folder_id = tuple[1];
+                addUpdateMasterObjectBatch(stmt, session.getUserId(), ctx.getContextId(), object_id);
+                eventHandling(object_id, folder_id, ctx, session, CalendarOperation.UPDATE, con);
+                                
+            }
+            stmt.executeBatch();
+
+
         } catch (SQLException e) {
             LOG.error(e);
             throw new DowngradeFailedException(DowngradeFailedException.Code.SQL_ERROR, e.getLocalizedMessage());
+        } catch (OXException e) {
+            throw new DowngradeFailedException(e);
         } finally {
+            CalendarCommonCollection.closeResultSet(rs);
             CalendarCommonCollection.closePreparedStatement(stmt);
         }
     }
@@ -163,10 +196,14 @@ public class CalendarAdministration implements DeleteListener {
         final List<PreparedStatement> statements = new LinkedList<PreparedStatement>();
         ResultSet rs = null;
 
+
+        final Connection con = downgradeEvent.getWriteCon();
+        final Session session = downgradeEvent.getSession();
+
         try {
             //TODO: Make it possible to supply a database connection!!!
             SearchIterator<FolderObject> iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(userId, userConfig.getGroups(), CALENDAR_MODULE, FolderObject.PRIVATE, CALENDAR_MODULE, ctx );
-            StringBuilder builder = new StringBuilder("SELECT object_id FROM ").append(CalendarSql.PARTICIPANT_TABLE_NAME).append(" WHERE pfid IN (");
+            StringBuilder builder = new StringBuilder("SELECT object_id, pfid FROM ").append(CalendarSql.PARTICIPANT_TABLE_NAME).append(" WHERE pfid IN (");
 
             while(iter.hasNext()) {
                 builder.append(iter.next().getObjectID()).append(",");
@@ -175,7 +212,7 @@ public class CalendarAdministration implements DeleteListener {
             builder.setCharAt(builder.length()-1,')');
             builder.append(" AND cid = ").append(ctx.getContextId());
 
-            PreparedStatement selectPrivate = downgradeEvent.getReadCon().prepareStatement(builder.toString());
+            PreparedStatement selectPrivate = con.prepareStatement(builder.toString());
             statements.add(selectPrivate);
             rs = selectPrivate.executeQuery();
 
@@ -184,7 +221,9 @@ public class CalendarAdministration implements DeleteListener {
             while(rs.next()) {
                 found = true;
                 int id = rs.getInt(1);
+                int folder = rs.getInt(2);
                 builder.append(id).append(",");
+                eventHandling(id, folder, ctx, session, CalendarOperation.DELETE, con);
             }
 
             if(found) {
@@ -192,13 +231,13 @@ public class CalendarAdministration implements DeleteListener {
                 builder.append(" AND cid = ").append(ctx.getContextId());
 
                 String oids = builder.toString();
-                PreparedStatement deleteFromDates = downgradeEvent.getReadCon().prepareStatement("DELETE FROM "+CalendarSql.DATES_TABLE_NAME+" WHERE intfield01 "+oids);
+                PreparedStatement deleteFromDates = con.prepareStatement("DELETE FROM "+CalendarSql.DATES_TABLE_NAME+" WHERE intfield01 "+oids);
                 statements.add(deleteFromDates);
 
-                PreparedStatement deleteFromParticipants = downgradeEvent.getReadCon().prepareStatement("DELETE FROM "+CalendarSql.PARTICIPANT_TABLE_NAME+" WHERE object_id "+oids);
+                PreparedStatement deleteFromParticipants = con.prepareStatement("DELETE FROM "+CalendarSql.PARTICIPANT_TABLE_NAME+" WHERE object_id "+oids);
                 statements.add(deleteFromParticipants);
 
-                PreparedStatement deleteFromView = downgradeEvent.getReadCon().prepareStatement("DELETE FROM "+CalendarSql.VIEW_TABLE_NAME+" WHERE object_id "+oids);
+                PreparedStatement deleteFromView = con.prepareStatement("DELETE FROM "+CalendarSql.VIEW_TABLE_NAME+" WHERE object_id "+oids);
                 statements.add(deleteFromView);
 
                 deleteFromDates.executeUpdate();
@@ -265,7 +304,7 @@ public class CalendarAdministration implements DeleteListener {
             PreparedStatement update = getUpdatePreparedStatement(writecon);
             while (rs.next()) {
                 int object_id = rs.getInt(1);
-                eventHandling(object_id, deleteEvent.getContext(), deleteEvent.getSession(), CalendarOperation.UPDATE, readcon);
+                eventHandling(object_id, 0, deleteEvent.getContext(), deleteEvent.getSession(), CalendarOperation.UPDATE, readcon);
                 rs.deleteRow();
                 addUpdateMasterObjectBatch(update, deleteEvent.getContext().getMailadmin(), deleteEvent.getContext().getContextId(), object_id);
             }
@@ -329,10 +368,7 @@ public class CalendarAdministration implements DeleteListener {
                 del_rights.addBatch();
 
 
-                //TODO: Need SessionObject in DowngradeEvent
-                if(session != null) {
-                    eventHandling(object_id, ctx, session, CalendarOperation.DELETE, con);                     
-                }
+                eventHandling(object_id, 0, ctx, session, CalendarOperation.DELETE, con);
 
             }
             if (del_dates != null) {
@@ -391,7 +427,7 @@ public class CalendarAdministration implements DeleteListener {
             while (rs2.next()) {
                 int object_id = rs2.getInt(1);
                 addUpdateMasterObjectBatch(update, deleteEvent.getContext().getMailadmin(), deleteEvent.getContext().getContextId(), object_id);
-                eventHandling(object_id, deleteEvent.getContext(), deleteEvent.getSession(), CalendarOperation.UPDATE, readcon);
+                eventHandling(object_id, 0, deleteEvent.getContext(), deleteEvent.getSession(), CalendarOperation.UPDATE, readcon);
             }
             update.executeBatch();
             update.close();
@@ -507,7 +543,7 @@ public class CalendarAdministration implements DeleteListener {
         u1.append(" = ?");
     }
     
-    private final void eventHandling(int object_id, Context context, Session so, int type, Connection readcon) throws SQLException, OXException {
+    private final void eventHandling(int object_id, int in_folder, Context context, Session so, int type, Connection readcon) throws SQLException, OXException {
         CalendarOperation co = new CalendarOperation();
         CalendarSql csql = new CalendarSql(so);
         CalendarSqlImp cimp = csql.getCalendarSqlImplementation();
@@ -519,6 +555,9 @@ public class CalendarAdministration implements DeleteListener {
             CalendarDataObject cdao = null;
             try {
                 cdao = co.loadAppointment(rs, object_id, 0, cimp, readcon, so, context, CalendarOperation.READ, 0, false);
+                if(0 == cdao.getParentFolderID())  {
+                    cdao.setParentFolderID(in_folder);
+                }
                 CalendarCommonCollection.triggerEvent(so, type, cdao);
 
             } catch (OXObjectNotFoundException ex) {
@@ -528,6 +567,21 @@ public class CalendarAdministration implements DeleteListener {
             CalendarCommonCollection.closeResultSet(rs);
             CalendarCommonCollection.closePreparedStatement(prep);
         }
+    }
+
+
+
+    public DowngradeListener getDowngradeListener() {
+        return new DowngradeListener() {
+
+            public void downgradePerformed(DowngradeEvent event) throws DowngradeFailedException {
+                CalendarAdministration.this.downgradePerformed(event);
+            }
+
+            public int getOrder() {
+                return 1;
+            }
+        };
     }
     
 }

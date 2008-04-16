@@ -73,6 +73,7 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderPermissionException;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * EventClient
@@ -103,11 +104,10 @@ public class EventClient {
 
 	public void create(final AppointmentObject appointmentObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
-		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
-		
-		final int folderId = appointmentObj.getParentFolderID();
+
+        final int folderId = appointmentObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject folderObj = folderSql.getFolderById(folderId);
+			FolderObject folderObj = getFolder(folderId, ctx);
 			create(appointmentObj, folderObj);
 		}
 	}
@@ -127,11 +127,10 @@ public class EventClient {
 	
 	public void modify(final AppointmentObject appointmentObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
-		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
-		
-		final int folderId = appointmentObj.getParentFolderID();
+
+        final int folderId = appointmentObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject folderObj = folderSql.getFolderById(folderId);
+			FolderObject folderObj = getFolder(folderId, ctx);
 			modify(appointmentObj, null, folderObj);
 		}
 	}
@@ -151,11 +150,10 @@ public class EventClient {
 
 	public void delete(final AppointmentObject appointmentObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
-		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
-		final int folderId = appointmentObj.getParentFolderID();
+        final int folderId = appointmentObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject folderObj = folderSql.getFolderById(folderId);
+			FolderObject folderObj = getFolder(folderId, ctx);
 			delete(appointmentObj, folderObj);
 		}
 	}
@@ -188,11 +186,11 @@ public class EventClient {
 
 	public void create(final Task taskObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
-		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
+
 		
 		final int folderId = taskObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject folderObj = folderSql.getFolderById(folderId);
+			FolderObject folderObj = getFolder(folderId, ctx);
 			create(taskObj, folderObj);
 		}
 	}
@@ -212,11 +210,11 @@ public class EventClient {
 
     public void modify(final Task taskObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
-		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
+
 		
 		final int folderId = taskObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject folderObj = folderSql.getFolderById(folderId);
+			FolderObject folderObj = getFolder(folderId, ctx);
 			modify(taskObj, folderObj);
 		}
 	}
@@ -236,11 +234,11 @@ public class EventClient {
 
     public void delete(final Task taskObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
-		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
+
 		
 		final int folderId = taskObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject folderObj = folderSql.getFolderById(folderId);
+			FolderObject folderObj = getFolder(folderId, ctx);
 			delete(taskObj, folderObj);
 		}
 	}
@@ -273,11 +271,10 @@ public class EventClient {
 
 	public void create(final ContactObject contactObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
-		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
-		
+
 		final int folderId = contactObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject folderObj = folderSql.getFolderById(folderId);
+			FolderObject folderObj = getFolder(folderId, ctx);
 			create(contactObj, folderObj);
 		}
 	}
@@ -297,11 +294,10 @@ public class EventClient {
 
 	public void modify(final ContactObject contactObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
-		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
-		
+
 		final int folderId = contactObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject folderObj = folderSql.getFolderById(folderId);
+			FolderObject folderObj = getFolder(folderId, ctx);
 			modify(contactObj, folderObj);
 		}
 	}
@@ -321,11 +317,10 @@ public class EventClient {
 
 	public void delete(final ContactObject contactObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
-		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
 		final int folderId = contactObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject folderObj = folderSql.getFolderById(folderId);
+			FolderObject folderObj = getFolder(folderId, ctx);
 			modify(contactObj, folderObj);
 		}
 	}
@@ -358,11 +353,10 @@ public class EventClient {
 	
 	public void create(final FolderObject folderObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
-		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
-		
+
 		final int folderId = folderObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject parentFolderObj = folderSql.getFolderById(folderId);
+			FolderObject parentFolderObj = getFolder(folderId, ctx);
 			create(folderObj, parentFolderObj);
 		}
 	}
@@ -382,11 +376,10 @@ public class EventClient {
 
 	public void modify(final FolderObject folderObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
-		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
-		
+
 		final int folderId = folderObj.getParentFolderID();
 		if (folderId > 0) {
-			FolderObject parentFolderObj = folderSql.getFolderById(folderId);
+			FolderObject parentFolderObj = getFolder(folderId, ctx);
 			modify(folderObj, parentFolderObj);
 		}
 	}
@@ -406,13 +399,12 @@ public class EventClient {
 
 	public void delete(final FolderObject folderObj) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
-		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
 		final int folderId = folderObj.getParentFolderID();
 		if (folderId > 0) {
 			FolderObject parentFolderObj = null;
 			try {
-				parentFolderObj = folderSql.getFolderById(folderId); 
+				parentFolderObj = getFolder(folderId, ctx); 
 			} catch (OXFolderPermissionException exc) {
 				LOG.error("cannot load folder", exc);
 			}
@@ -435,11 +427,10 @@ public class EventClient {
 
 	public void create(final DocumentMetadata document) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
-		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
 		final long folderId = document.getFolderId();
 		if (folderId > 0) {
-			FolderObject parentFolderObj = folderSql.getFolderById((int)folderId);
+			FolderObject parentFolderObj = getFolder((int)folderId, ctx);
 			create(document, parentFolderObj);
 		}	
 	}
@@ -459,11 +450,10 @@ public class EventClient {
 
 	public void modify(final DocumentMetadata document) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
-		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
 		final long folderId = document.getFolderId();
 		if (folderId > 0) {
-			FolderObject parentFolderObj = folderSql.getFolderById((int)folderId);
+			FolderObject parentFolderObj = getFolder((int)folderId, ctx);
 			modify(document, parentFolderObj);
 		}
 	}
@@ -487,7 +477,7 @@ public class EventClient {
 		
 		final long folderId = document.getFolderId();
 		if (folderId > 0) {
-			FolderObject parentFolderObj = folderSql.getFolderById((int)folderId);
+			FolderObject parentFolderObj = getFolder((int)folderId, ctx);
 			delete(document, parentFolderObj);
 		}
 	}
@@ -526,4 +516,9 @@ public class EventClient {
 			throw new EventException("event service not available");
 		}
 	}
+
+    private FolderObject getFolder(int folderId, Context ctx) throws OXException {
+        OXFolderAccess folders = new OXFolderAccess(ctx);
+        return folders.getFolderObject(folderId);
+    }
 }
