@@ -82,7 +82,7 @@ public class RequestDBProvider implements DBProvider {
 
 	private static final Log LOG = LogFactory.getLog(RequestDBProvider.class);
 	private static final TXExceptionFactory EXCEPTIONS = new TXExceptionFactory(RequestDBProvider.class);
-    private boolean commits = true;
+    private boolean commits;
 
 
     public static class DBTransaction {
