@@ -71,6 +71,7 @@ import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.tx.DBPoolProvider;
+import com.openexchange.groupware.tx.StaticDBPoolProvider;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPoolingException;
@@ -87,19 +88,39 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 public class OXFolderAccess {
 
 	/**
-	 * Readable connection
+	 * A connection with "read-only" capability
 	 */
 	private final Connection readCon;
 
 	/**
-	 * Associated Context
+	 * The associated context
 	 */
 	private final Context ctx;
 
+	/**
+	 * Initializes a new {@link OXFolderAccess}.
+	 * <p>
+	 * Since the access is created with a connection with "read-only"
+	 * capability, an appropriate connection is going to be fetched from DB pool
+	 * every time when needed.
+	 * 
+	 * @param ctx
+	 *            The context
+	 */
 	public OXFolderAccess(final Context ctx) {
 		this(null, ctx);
 	}
 
+	/**
+	 * Initializes a new {@link OXFolderAccess}
+	 * 
+	 * @param readCon
+	 *            A connection with "read-only" capability or <code>null</code>
+	 *            to let the access fetch an appropriate connection from DB pool
+	 *            every time when needed
+	 * @param ctx
+	 *            The context
+	 */
 	public OXFolderAccess(final Connection readCon, final Context ctx) {
 		super();
 		this.readCon = readCon;
@@ -152,7 +173,7 @@ public class OXFolderAccess {
 
 	/**
 	 * Creates a <code>java.util.List</code> of <code>FolderObject</code>
-	 * instances filles which match given folder IDs
+	 * instances fills which match given folder IDs
 	 * 
 	 * @param folderIDs -
 	 *            the folder IDs backed by a <code>java.util.Collection</code>
@@ -388,17 +409,21 @@ public class OXFolderAccess {
 				switch (fo.getModule()) {
 				case FolderObject.TASK:
 					final Tasks tasks = Tasks.getInstance();
-					return !tasks.containsNotSelfCreatedTasks(session, fo.getObjectID());
+					return readCon == null ? !tasks.containsNotSelfCreatedTasks(session, fo.getObjectID()) : !tasks
+							.containsNotSelfCreatedTasks(session, readCon, fo.getObjectID());
 				case FolderObject.CALENDAR:
 					final CalendarSql calSql = new CalendarSql(session);
-					return !calSql.checkIfFolderContainsForeignObjects(userId, fo.getObjectID());
+					return readCon == null ? !calSql.checkIfFolderContainsForeignObjects(userId, fo.getObjectID())
+							: !calSql.checkIfFolderContainsForeignObjects(userId, fo.getObjectID(), readCon);
 				case FolderObject.CONTACT:
-					return !Contacts.containsForeignObjectInFolder(fo.getObjectID(), userId, session);
+					return readCon == null ? !Contacts.containsForeignObjectInFolder(fo.getObjectID(), userId, session)
+							: !Contacts.containsForeignObjectInFolder(fo.getObjectID(), userId, session, readCon);
 				case FolderObject.PROJECT:
 					// TODO:
 					break;
 				case FolderObject.INFOSTORE:
-					final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
+					final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider()
+							: new StaticDBPoolProvider(readCon));
 					return !db.hasFolderForeignObjects(fo.getObjectID(), ctx, UserStorage.getStorageUser(session
 							.getUserId(), ctx), userConfig);
 				default:
@@ -412,16 +437,20 @@ public class OXFolderAccess {
 				switch (fo.getModule()) {
 				case FolderObject.TASK:
 					final Tasks tasks = Tasks.getInstance();
-					return tasks.isFolderEmpty(ctx, fo.getObjectID());
+					return readCon == null ? tasks.isFolderEmpty(ctx, fo.getObjectID()) : tasks.isFolderEmpty(ctx,
+							readCon, fo.getObjectID());
 				case FolderObject.CALENDAR:
 					final CalendarSql calSql = new CalendarSql(session);
-					return calSql.isFolderEmpty(userId, fo.getObjectID());
+					return readCon == null ? calSql.isFolderEmpty(userId, fo.getObjectID()) : calSql.isFolderEmpty(
+							userId, fo.getObjectID(), readCon);
 				case FolderObject.CONTACT:
-					return !Contacts.containsAnyObjectInFolder(fo.getObjectID(), ctx);
+					return readCon == null ? !Contacts.containsAnyObjectInFolder(fo.getObjectID(), ctx) : !Contacts
+							.containsAnyObjectInFolder(fo.getObjectID(), readCon, ctx);
 				case FolderObject.PROJECT:
 					break;
 				case FolderObject.INFOSTORE:
-					final InfostoreFacade db = new InfostoreFacadeImpl(new DBPoolProvider());
+					final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider()
+							: new StaticDBPoolProvider(readCon));
 					return db.isFolderEmpty(fo.getObjectID(), ctx);
 				default:
 					throw new OXFolderException(FolderCode.UNKNOWN_MODULE, folderModule2String(fo.getModule()), Integer

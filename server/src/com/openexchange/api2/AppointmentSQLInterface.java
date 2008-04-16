@@ -266,16 +266,34 @@ public interface AppointmentSQLInterface {
 	 * @param folderid
 	 * @throws OXException, SQLException
 	 */
-	public boolean checkIfFolderContainsForeignObjects(int user_id, int inFolder) throws OXException, SQLException;        
+	public boolean checkIfFolderContainsForeignObjects(int user_id, int inFolder) throws OXException, SQLException;
+	
+	/**
+	 * checks if the given folder contains any foreign objects using specified connection
+     * @param user_id
+	 * @param folderid
+	 * @param readCon
+	 * @throws OXException, SQLException
+	 */
+	public boolean checkIfFolderContainsForeignObjects(int user_id, int inFolder, Connection readCon) throws OXException, SQLException;
         
         
 	/**
 	 * returns true if the given folder is empty
-         * @param user_id
+     * @param user_id
 	 * @param folderid
 	 * @throws OXException, SQLException
 	 */        
-         public boolean isFolderEmpty(int uid, int fid) throws OXException, SQLException;
+     public boolean isFolderEmpty(int uid, int fid) throws OXException, SQLException;
+         
+    /**
+ 	 * returns true if the given folder is empty using specified connection
+     * @param user_id
+ 	 * @param folderid
+ 	 * @param readCon
+ 	 * @throws OXException, SQLException
+ 	 */        
+     public boolean isFolderEmpty(int uid, int fid, Connection readCon) throws OXException, SQLException;
         
 	/**
 	 * set the confirmation of the user

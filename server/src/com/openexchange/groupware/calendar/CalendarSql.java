@@ -815,10 +815,35 @@ public class CalendarSql implements AppointmentSQLInterface {
                     }
                 }
             }
-        } else {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
+        throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
     }
+    
+    public boolean checkIfFolderContainsForeignObjects(final int uid, final int fid, final Connection readCon) throws OXException,
+			SQLException {
+		if (session != null) {
+			final Context ctx = Tools.getContext(session);
+			try {
+				final OXFolderAccess ofa = new OXFolderAccess(readCon, ctx);
+				if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PRIVATE) {
+					return cimp.checkIfFolderContainsForeignObjects(uid, fid, ctx, readCon, FolderObject.PRIVATE);
+				} else if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PUBLIC) {
+					return cimp.checkIfFolderContainsForeignObjects(uid, fid, ctx, readCon, FolderObject.PUBLIC);
+				} else {
+					throw new OXCalendarException(OXCalendarException.Code.FOLDER_FOREIGN_INVALID_REQUEST);
+				}
+			} catch (final OXCalendarException oxc) {
+				throw oxc;
+			} catch (final SQLException sqle) {
+				throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+			} catch (final OXException oxe) {
+				throw oxe;
+			} catch (final Exception e) {
+				throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(30));
+			}
+		}
+		throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+	}
     
     public boolean isFolderEmpty(int uid, int fid) throws OXException, SQLException {
         if (session != null) {
@@ -853,11 +878,34 @@ public class CalendarSql implements AppointmentSQLInterface {
                     }
                 }
             }
-        } else {
-            throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
         }
+        throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
     }
-    
+
+    public boolean isFolderEmpty(final int uid, final int fid, final Connection readCon) throws OXException {
+		if (session != null) {
+			final Context ctx = Tools.getContext(session);
+			try {
+				final OXFolderAccess ofa = new OXFolderAccess(readCon, ctx);
+				if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PRIVATE) {
+					return cimp.checkIfFolderIsEmpty(uid, fid, ctx, readCon, FolderObject.PRIVATE);
+				} else if (ofa.getFolderType(fid, session.getUserId()) == FolderObject.PUBLIC) {
+					return cimp.checkIfFolderIsEmpty(uid, fid, ctx, readCon, FolderObject.PUBLIC);
+				} else {
+					throw new OXCalendarException(OXCalendarException.Code.FOLDER_IS_EMPTY_INVALID_REQUEST);
+				}
+			} catch (final OXCalendarException oxc) {
+				throw oxc;
+			} catch (final SQLException sqle) {
+				throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
+			} catch (final OXException oxe) {
+				throw oxe;
+			} catch (final Exception e) {
+				throw new OXCalendarException(OXCalendarException.Code.UNEXPECTED_EXCEPTION, e, Integer.valueOf(31));
+			}
+		}
+		throw new OXCalendarException(OXCalendarException.Code.ERROR_SESSIONOBJECT_IS_NULL);
+	}
     
     public void setUserConfirmation(int oid, int uid, int confirm, String confirm_message) throws OXException {
         if (session != null) {
