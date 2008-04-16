@@ -336,7 +336,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 	 * @throws OXException
 	 *             If deleting contents fails
 	 */
-	private static void deleteFoldersContent(int[] fuids, final DowngradeEvent event) throws OXException {
+	private static void deleteFoldersContent(final int[] fuids, final DowngradeEvent event) throws OXException {
 		final OXFolderAccess access = new OXFolderAccess(event.getWriteCon(), event.getContext());
 		for (int i = 0; i < fuids.length; i++) {
 			// Delete folder content
