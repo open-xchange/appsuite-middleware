@@ -90,7 +90,7 @@ public final class HTMLProcessing {
 	 * @return The HTML content conform to W3C standards
 	 */
 	public static String getConformHTML(final String htmlContentArg, final ContentType contentType) {
-		if (htmlContentArg == null || htmlContentArg.length() == 0) {
+		if ((htmlContentArg == null) || (htmlContentArg.length() == 0)) {
 			/*
 			 * Nothing to do...
 			 */

@@ -122,7 +122,8 @@ public abstract class UserSettingMailStorage {
 	 *            The context ID
 	 * @return The instance of {@link UserSettingMail} which matches given user
 	 *         ID and context or <code>null</code> on exception
-	 * @throws UserConfigurationException If context cannot be loaded
+	 * @throws UserConfigurationException
+	 *             If context cannot be loaded
 	 */
 	public final UserSettingMail getUserSettingMail(final int user, final int cid) throws UserConfigurationException {
 		try {

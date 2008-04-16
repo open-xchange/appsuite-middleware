@@ -84,7 +84,8 @@ public class UUEncodedPart extends UUEncodedMultiPart {
 	 * Constructs a UUEncodePart object containing all informations about the
 	 * attachment.
 	 */
-	UUEncodedPart(int startIndex, int endIndex, String bodyPart, String filename) throws Exception {
+	UUEncodedPart(final int startIndex, final int endIndex, final String bodyPart, final String filename)
+			throws Exception {
 		this.startIndex = startIndex;
 		this.endIndex = endIndex;
 		this.bodyPart = bodyPart;
@@ -110,7 +111,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
 	public int getFileSize() {
 		try {
 			return (bodyPart.getBytes().length);
-		} catch (NumberFormatException nfe) {
+		} catch (final NumberFormatException nfe) {
 			return (-1);
 		}
 	}
@@ -143,7 +144,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
 		try {
 			final InputStream inStreamPart = MimeUtility.decode(bStream, "uuencode");
 			return (inStreamPart);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 			return (null);
 		}
@@ -169,7 +170,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
 					br.close();
 				}
 			}
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
 		return (encodedPart);
@@ -192,7 +193,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
 			while ((iChar = in.read()) != -1) {
 				bos.write(iChar);
 			}
-		} catch (IOException ioe) {
+		} catch (final IOException ioe) {
 			LOG.error(ioe.getMessage(), ioe);
 			throw ioe;
 		} finally {

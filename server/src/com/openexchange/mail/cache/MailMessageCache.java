@@ -211,7 +211,7 @@ public final class MailMessageCache {
 		 *            The values to insert
 		 */
 		public void putValues(final K1 k1, final K2[] keys, final V[] values) {
-			if (k1 == null || keys == null || values == null) {
+			if ((k1 == null) || (keys == null) || (values == null)) {
 				throw new IllegalArgumentException("Argument must not be null");
 			}
 			Map<K2, V> innerMap = this.map.get(k1);
@@ -237,7 +237,7 @@ public final class MailMessageCache {
 		 *         <code>null</code> if none was bound before
 		 */
 		public V putValue(final K1 k1, final K2 k2, final V value) {
-			if (k1 == null || k2 == null || value == null) {
+			if ((k1 == null) || (k2 == null) || (value == null)) {
 				throw new IllegalArgumentException("Argument must not be null");
 			}
 			Map<K2, V> innerMap = this.map.get(k1);
@@ -298,7 +298,7 @@ public final class MailMessageCache {
 				return null;
 			}
 			final V retval = innerMap.remove(k2);
-			if (retval != null && innerMap.isEmpty()) {
+			if ((retval != null) && innerMap.isEmpty()) {
 				/*
 				 * Remove empty inner map
 				 */
@@ -501,7 +501,7 @@ public final class MailMessageCache {
 				return;
 			}
 			final MailMessage[] mails = map.getValues(fullname, getLongObjArr(uids));
-			if (mails != null && mails.length > 0) {
+			if ((mails != null) && (mails.length > 0)) {
 				final MailFieldUpdater[] updaters = createMailFieldUpdater(changedFields);
 				for (final MailMessage mail : mails) {
 					for (int i = 0; i < updaters.length; i++) {
@@ -689,7 +689,7 @@ public final class MailMessageCache {
 	 */
 	@SuppressWarnings(ANNOT_UNCHECKED)
 	public void putMessages(final MailMessage[] mails, final int userId, final Context ctx) throws OXCachingException {
-		if (mails == null || mails.length == 0) {
+		if ((mails == null) || (mails.length == 0)) {
 			return;
 		}
 		try {

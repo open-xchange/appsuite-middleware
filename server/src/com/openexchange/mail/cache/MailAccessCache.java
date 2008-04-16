@@ -243,8 +243,7 @@ public final class MailAccessCache {
 	 * @throws CacheException
 	 *             If put into cache fails
 	 */
-	public boolean putMailAccess(final Session session, final MailAccess<?, ?> mailConnection)
-			throws CacheException {
+	public boolean putMailAccess(final Session session, final MailAccess<?, ?> mailConnection) throws CacheException {
 		final CacheKey key;
 		try {
 			key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
@@ -306,7 +305,7 @@ public final class MailAccessCache {
 		final CacheKey key;
 		try {
 			key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
-		} catch (ContextException e) {
+		} catch (final ContextException e) {
 			throw new CacheException(e);
 		}
 		final Lock readLock = getLock(key).readLock();

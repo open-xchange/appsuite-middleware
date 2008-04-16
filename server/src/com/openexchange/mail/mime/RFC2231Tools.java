@@ -132,7 +132,7 @@ public final class RFC2231Tools {
 	 * @return The decoded string
 	 */
 	public static String rfc2231Decode(final String encoded, final String charset) {
-		if (encoded == null || encoded.length() == 0) {
+		if ((encoded == null) || (encoded.length() == 0)) {
 			return encoded;
 		} else if (!Charset.isSupported(charset)) {
 			return encoded;
@@ -141,7 +141,7 @@ public final class RFC2231Tools {
 		final ByteBuffer bb = ByteBuffer.allocateDirect(chars.length);
 		for (int i = 0; i < chars.length; i++) {
 			final char c = chars[i];
-			if (c == '%' && isHexDigit(chars[i + 1]) && isHexDigit(chars[i + 2])) {
+			if ((c == '%') && isHexDigit(chars[i + 1]) && isHexDigit(chars[i + 2])) {
 				bb.put((byte) ((Character.digit(chars[i + 1], 16) << 4) + Character.digit(chars[i + 2], 16)));
 				i += 2;
 			} else {
@@ -154,7 +154,7 @@ public final class RFC2231Tools {
 
 	private static boolean isHexDigit(final char c) {
 		final char ch = Character.toLowerCase(c);
-		return (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f');
+		return ((ch >= '0') && (ch <= '9')) || ((ch >= 'a') && (ch <= 'f'));
 	}
 
 	/**
@@ -196,7 +196,7 @@ public final class RFC2231Tools {
 	 */
 	public static String rfc2231Encode(final String toEncode, final String charset, final String language,
 			final boolean prepend, final boolean force) {
-		if (toEncode == null || toEncode.length() == 0) {
+		if ((toEncode == null) || (toEncode.length() == 0)) {
 			return toEncode;
 		} else if (!force && isAscii(toEncode)) {
 			return toEncode;
@@ -206,12 +206,12 @@ public final class RFC2231Tools {
 		final StringBuilder retval = new StringBuilder(toEncode.length() * 3);
 		if (prepend) {
 			retval.append(charset.toLowerCase(Locale.ENGLISH)).append('\'').append(
-					language == null || language.length() == 0 ? "" : language).append('\'');
+					(language == null) || (language.length() == 0) ? "" : language).append('\'');
 		}
 		final char[] chars = toEncode.toCharArray();
 		try {
 			for (int i = 0; i < chars.length; i++) {
-				if (!isAscii(chars[i]) || chars[i] == ' ') {
+				if (!isAscii(chars[i]) || (chars[i] == ' ')) {
 					final byte[] bytes = String.valueOf(chars[i]).getBytes(charset);
 					for (int j = 0; j < bytes.length; j++) {
 						retval.append('%').append(Integer.toHexString(bytes[j] & 0xFF).toUpperCase(Locale.ENGLISH));
@@ -240,7 +240,7 @@ public final class RFC2231Tools {
 	public static boolean isAscii(final String s) {
 		final char[] chars = s.toCharArray();
 		boolean isAscci = true;
-		for (int i = 0; i < chars.length && isAscci; i++) {
+		for (int i = 0; (i < chars.length) && isAscci; i++) {
 			isAscci &= (chars[i] < 128);
 		}
 		return isAscci;

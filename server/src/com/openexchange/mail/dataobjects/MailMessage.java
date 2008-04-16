@@ -751,7 +751,7 @@ public abstract class MailMessage extends MailPart {
 	 *             If an illegal flag argument is specified
 	 */
 	public void setFlag(final int flag, final boolean enable) throws MailException {
-		if (flag == 1 || (flag % 2) != 0) {
+		if ((flag == 1) || ((flag % 2) != 0)) {
 			throw new MailException(MailException.Code.ILLEGAL_FLAG_ARGUMENT, Integer.valueOf(flag));
 		}
 		flags = enable ? (flags | flag) : (flags & ~flag);
@@ -1015,7 +1015,7 @@ public abstract class MailMessage extends MailPart {
 	 * @return The user flags
 	 */
 	public String[] getUserFlags() {
-		if (containsUserFlags() && null != userFlags) {
+		if (containsUserFlags() && (null != userFlags)) {
 			final int size = userFlags.size();
 			final List<String> retval = new ArrayList<String>(size);
 			final Iterator<HeaderName> iter = userFlags.iterator();

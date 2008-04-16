@@ -179,7 +179,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
 			 * Body structure is available
 			 */
 			return MIMEMessageUtility.hasAttachments(bodystructure);
-		} else if (null != content || null != contentStream) {
+		} else if ((null != content) || (null != contentStream)) {
 			/*
 			 * Message body is available
 			 */

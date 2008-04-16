@@ -223,7 +223,7 @@ public final class MailAccessWatcher {
 						}
 					}
 				}
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}

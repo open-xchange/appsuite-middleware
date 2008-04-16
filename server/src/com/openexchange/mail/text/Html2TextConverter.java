@@ -219,7 +219,7 @@ public final class Html2TextConverter {
 					}
 				} else if (!pre && Character.isWhitespace((char) c)) {
 					final StringBuilder s = in_body ? result : result2;
-					if (s.length() > 0 && Character.isWhitespace(s.charAt(s.length() - 1))) {
+					if ((s.length() > 0) && Character.isWhitespace(s.charAt(s.length() - 1))) {
 						text = STR_EMPTY;
 					} else {
 						text = " ";
@@ -407,7 +407,7 @@ public final class Html2TextConverter {
 			} else {
 				href = STR_EMPTY;
 			}
-		} else if (isTag(t, "/a") && href.length() > 0) {
+		} else if (isTag(t, "/a") && (href.length() > 0)) {
 			final String anchorTitle = anchorBuilder.toString();
 			if (!PATTERN_HREF.matcher(anchorTitle).matches() && !href.equalsIgnoreCase(anchorTitle)) {
 				result = new StringBuilder(100).append(' ').append('[').append(href).append(']').toString();

@@ -102,7 +102,7 @@ public final class MailProviderRegistry {
 			provider = null;
 		}
 		final String protocol = extractProtocol(MailConfig.getMailServerURL(session), MailProvider.PROTOCOL_FALLBACK);
-		if (null != provider && !provider.isDeprecated() && provider.supportsProtocol(protocol)) {
+		if ((null != provider) && !provider.isDeprecated() && provider.supportsProtocol(protocol)) {
 			return provider;
 		}
 		provider = getMailProvider(protocol);

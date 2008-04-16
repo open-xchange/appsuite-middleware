@@ -62,7 +62,7 @@ public final class HeaderTerm extends SearchTerm<String[]> {
 	/**
 	 * Initializes a new {@link HeaderTerm}
 	 */
-	public HeaderTerm(String headerName, String headerValue) {
+	public HeaderTerm(final String headerName, final String headerValue) {
 		super();
 		hdr = new String[] { headerName, headerValue };
 	}

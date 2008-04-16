@@ -286,7 +286,7 @@ public abstract class MailConfig {
 			mailConfig.login = user.getMail();// or user.getLoginInfo()
 			mailConfig.password = masterPw;
 		} else if (LoginType.USER.equals(getLoginType())) {
-			if (getCredSrc() == null || CredSrc.SESSION.equals(getCredSrc())) {
+			if ((getCredSrc() == null) || CredSrc.SESSION.equals(getCredSrc())) {
 				mailConfig.login = getLocalMailLogin(session, user, false);
 				mailConfig.password = session.getPassword();
 			} else if (CredSrc.OTHER.equals(getCredSrc())) {
@@ -323,8 +323,8 @@ public abstract class MailConfig {
 	 */
 	private static final String getLocalMailLogin(final Session session, final User user, final boolean lookUp) {
 		String login = lookUp ? user.getImapLogin() : null;
-		if (login == null || login.length() == 0) {
-			login = session.getUserlogin() != null && session.getUserlogin().length() > 0 ? session.getUserlogin()
+		if ((login == null) || (login.length() == 0)) {
+			login = (session.getUserlogin() != null) && (session.getUserlogin().length() > 0) ? session.getUserlogin()
 					: String.valueOf(session.getUserId());
 		}
 		return login;
@@ -664,7 +664,7 @@ public abstract class MailConfig {
 	protected final static String[] parseProtocol(final String server) {
 		final int len = server.length();
 		char c = '\0';
-		for (int i = 0; i < len && ((c = server.charAt(i)) != '/'); i++) {
+		for (int i = 0; (i < len) && ((c = server.charAt(i)) != '/'); i++) {
 			if (c == ':') {
 				final String s = server.substring(0, i).toLowerCase();
 				if (isValidProtocol(s)) {
@@ -691,7 +691,7 @@ public abstract class MailConfig {
 		}
 		for (int i = 1; i < len; i++) {
 			c = protocol.charAt(i);
-			if (!Character.isLetterOrDigit(c) && c != '.' && c != '+' && c != '-') {
+			if (!Character.isLetterOrDigit(c) && (c != '.') && (c != '+') && (c != '-')) {
 				return false;
 			}
 		}

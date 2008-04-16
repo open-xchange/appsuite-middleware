@@ -98,7 +98,7 @@ public final class UUEncodedAttachmentMailPart extends MailPart {
 				contentType = getContentType();
 			} else {
 				String ct = MIMEType2ExtMap.getContentType(uuencPart.getFileName());
-				if (ct == null || ct.length() == 0) {
+				if ((ct == null) || (ct.length() == 0)) {
 					ct = MIMETypes.MIME_APPL_OCTET;
 				}
 				contentType = new ContentType(ct);

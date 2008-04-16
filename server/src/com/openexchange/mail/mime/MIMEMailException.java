@@ -350,9 +350,10 @@ public class MIMEMailException extends MailException {
 	 */
 	public static MIMEMailException handleMessagingException(final MessagingException e, final MailConfig mailConfig) {
 		try {
-			if (e instanceof AuthenticationFailedException
-					|| (e.getMessage() != null && e.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_AUTH_FAILED) != -1)) {
-				final boolean temporary = e.getMessage() != null
+			if ((e instanceof AuthenticationFailedException)
+					|| ((e.getMessage() != null) && (e.getMessage().toLowerCase(Locale.ENGLISH)
+							.indexOf(ERR_AUTH_FAILED) != -1))) {
+				final boolean temporary = (e.getMessage() != null)
 						&& ERR_TMP.equals(e.getMessage().toLowerCase(Locale.ENGLISH));
 				if (temporary) {
 					return new MIMEMailException(MIMEMailException.Code.LOGIN_FAILED, e, mailConfig == null ? STR_EMPTY
@@ -385,8 +386,8 @@ public class MIMEMailException extends MailException {
 				return new MIMEMailException(Code.SEARCH_ERROR, e, e.getMessage());
 			} else if (e instanceof SMTPSendFailedException) {
 				final SMTPSendFailedException exc = (SMTPSendFailedException) e;
-				if (exc.getReturnCode() == 552
-						|| exc.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_MSG_TOO_LARGE) > -1) {
+				if ((exc.getReturnCode() == 552)
+						|| (exc.getMessage().toLowerCase(Locale.ENGLISH).indexOf(ERR_MSG_TOO_LARGE) > -1)) {
 					return new MIMEMailException(Code.MESSAGE_TOO_LARGE, exc, new Object[0]);
 				}
 				return new MIMEMailException(Code.SEND_FAILED, exc, Arrays.toString(exc.getInvalidAddresses()));

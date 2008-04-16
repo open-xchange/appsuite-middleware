@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.mail.text;
 
 import javax.swing.text.MutableAttributeSet;
@@ -66,10 +64,11 @@ public class Html2Text extends HTMLEditorKit.ParserCallback {
 
 	private int quote;
 
-	public Html2Text(StringBuilder text) {
+	public Html2Text(final StringBuilder text) {
 		this.text = text;
 	}
 
+	@Override
 	public void handleStartTag(final HTML.Tag tag, final MutableAttributeSet a, final int pos) {
 
 		if (tag.equals(HTML.Tag.BLOCKQUOTE)) {
@@ -84,6 +83,7 @@ public class Html2Text extends HTMLEditorKit.ParserCallback {
 
 	}
 
+	@Override
 	public void handleEndTag(final HTML.Tag tag, final int pos) {
 
 		if (tag.equals(HTML.Tag.BLOCKQUOTE)) {
@@ -107,6 +107,7 @@ public class Html2Text extends HTMLEditorKit.ParserCallback {
 
 	}
 
+	@Override
 	public void handleSimpleTag(final HTML.Tag tag, final MutableAttributeSet a, final int pos) {
 
 		// we have to add line spaces manually
@@ -116,6 +117,7 @@ public class Html2Text extends HTMLEditorKit.ParserCallback {
 		}
 	}
 
+	@Override
 	public void handleText(final char[] data, final int pos) {
 
 		// add normal text

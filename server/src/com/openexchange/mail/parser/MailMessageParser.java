@@ -553,7 +553,7 @@ public final class MailMessageParser {
 		/*
 		 * DISPOSITION-NOTIFICATION-TO
 		 */
-		if (mail.containsDispositionNotification() && null != mail.getDispositionNotification()) {
+		if (mail.containsDispositionNotification() && (null != mail.getDispositionNotification())) {
 			handler.handleDispositionNotification(mail.getDispositionNotification(), mail.containsPrevSeen() ? mail
 					.isPrevSeen() : mail.isSeen());
 		}

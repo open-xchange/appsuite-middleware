@@ -185,7 +185,7 @@ public final class MIMEType2ExtMap {
 					}
 					{
 						String mimeTypesFile = SystemConfig.getProperty(SystemConfig.Property.MimeTypeFile);
-						if (mimeTypesFile != null && (mimeTypesFile = mimeTypesFile.trim()).length() > 0) {
+						if ((mimeTypesFile != null) && ((mimeTypesFile = mimeTypesFile.trim()).length() > 0)) {
 							final File file = new File(mimeTypesFile);
 							if (file.exists()) {
 								if (LOG.isInfoEnabled()) {
@@ -360,7 +360,7 @@ public final class MIMEType2ExtMap {
 		while ((line = reader.readLine()) != null) {
 			final int i = strBuilder.length();
 			strBuilder.append(line);
-			if (i > 0 && strBuilder.charAt(i - 1) == '\\') {
+			if ((i > 0) && (strBuilder.charAt(i - 1) == '\\')) {
 				strBuilder.delete(0, i - 1);
 			} else {
 				parseEntry(strBuilder.toString().trim());
@@ -382,8 +382,8 @@ public final class MIMEType2ExtMap {
 			final MimeTypeFileLineParser parser = new MimeTypeFileLineParser(entry);
 			final String type = parser.getType();
 			final List<String> exts = parser.getExtensions();
-			if (type != null && exts != null) {
-				for (String ext : exts) {
+			if ((type != null) && (exts != null)) {
+				for (final String ext : exts) {
 					type_hash.put(ext, type);
 				}
 				if (ext_hash.containsKey(type)) {

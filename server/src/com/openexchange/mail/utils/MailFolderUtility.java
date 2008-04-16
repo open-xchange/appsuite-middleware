@@ -108,7 +108,7 @@ public final class MailFolderUtility {
 	 * @return The groupware's mail folder fullname
 	 */
 	public static String prepareFullname(final String fullname, final char sep) {
-		if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || fullname.length() == 0) {
+		if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || (fullname.length() == 0)) {
 			return fullname;
 		} else if (fullname.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
 			return fullname;

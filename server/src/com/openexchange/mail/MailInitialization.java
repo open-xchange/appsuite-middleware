@@ -50,8 +50,8 @@
 package com.openexchange.mail;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.mail.cache.MailCacheConfiguration;
 import com.openexchange.mail.cache.MailAccessCache;
+import com.openexchange.mail.cache.MailCacheConfiguration;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailPropertiesInit;
 import com.openexchange.mail.mime.MIMEType2ExtMap;

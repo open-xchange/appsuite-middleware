@@ -226,7 +226,7 @@ public final class MailProperties {
 
 		{
 			final String credSrcStr = configuration.getProperty("com.openexchange.mail.credSrc");
-			if (credSrcStr == null || credSrcStr.equalsIgnoreCase(CredSrc.SESSION.toString())) {
+			if ((credSrcStr == null) || credSrcStr.equalsIgnoreCase(CredSrc.SESSION.toString())) {
 				credSrc = CredSrc.SESSION;
 			} else if (credSrcStr.equalsIgnoreCase(CredSrc.OTHER.toString())) {
 				credSrc = CredSrc.OTHER;

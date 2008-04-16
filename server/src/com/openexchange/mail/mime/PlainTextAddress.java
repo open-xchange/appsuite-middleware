@@ -71,7 +71,7 @@ public final class PlainTextAddress extends InternetAddress {
 	 * @return A newly allocated array of {@link PlainTextAddress}
 	 */
 	public static PlainTextAddress[] getAddresses(final String[] addresses) {
-		if (addresses == null || addresses.length == 0) {
+		if ((addresses == null) || (addresses.length == 0)) {
 			return new PlainTextAddress[0];
 		}
 		final PlainTextAddress[] retval = new PlainTextAddress[addresses.length];

@@ -82,7 +82,7 @@ public enum OrderDirection {
 	 */
 	public static final OrderDirection getOrderDirection(final int order) {
 		final OrderDirection[] orderDirections = OrderDirection.values();
-		for (OrderDirection direction : orderDirections) {
+		for (final OrderDirection direction : orderDirections) {
 			if (direction.order == order) {
 				return direction;
 			}

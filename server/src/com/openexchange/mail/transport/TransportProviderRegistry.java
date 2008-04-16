@@ -105,7 +105,7 @@ public final class TransportProviderRegistry {
 		}
 		final String protocol = extractProtocol(TransportConfig.getTransportServerURL(session),
 				TransportProvider.PROTOCOL_FALLBACK);
-		if (null != provider && !provider.isDeprecated() && provider.supportsProtocol(protocol)) {
+		if ((null != provider) && !provider.isDeprecated() && provider.supportsProtocol(protocol)) {
 			return provider;
 		}
 		provider = getTransportProvider(protocol);

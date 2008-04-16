@@ -258,7 +258,7 @@ public enum MailField {
 	 *         <code>int</code> values
 	 */
 	public static final MailField[] getFields(final int[] fields) {
-		if (fields == null || fields.length == 0) {
+		if ((fields == null) || (fields.length == 0)) {
 			return EMPTY_FIELDS;
 		}
 		final MailField[] retval = new MailField[fields.length];
@@ -287,7 +287,7 @@ public enum MailField {
 		final MailField[] fields = MailField.values();
 		for (final MailField mailField : fields) {
 			final MailListField listField = mailField.getListField();
-			if (listField != null && listField.getField() == field) {
+			if ((listField != null) && (listField.getField() == field)) {
 				return mailField;
 			}
 		}

@@ -75,6 +75,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
 
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -390,7 +391,7 @@ public final class MessageUtility {
 
 	private static int[] isLineBreakInsideHref(final int[] hrefIndices, final int linewrap) {
 		for (int i = 0; i < hrefIndices.length; i += 2) {
-			if (hrefIndices[i] <= linewrap && hrefIndices[i + 1] > linewrap) {
+			if ((hrefIndices[i] <= linewrap) && (hrefIndices[i + 1] > linewrap)) {
 				return new int[] { hrefIndices[i], hrefIndices[i + 1] };
 			}
 		}
@@ -460,7 +461,7 @@ public final class MessageUtility {
 	 */
 	private static String getLevelColor(final int quotelevel) {
 		final String[] colors = MailConfig.getQuoteLineColors();
-		return colors != null && colors.length > 0 ? (quotelevel >= colors.length ? colors[colors.length - 1]
+		return (colors != null) && (colors.length > 0) ? (quotelevel >= colors.length ? colors[colors.length - 1]
 				: colors[quotelevel]) : DEFAULT_COLOR;
 	}
 
@@ -490,13 +491,13 @@ public final class MessageUtility {
 				currentLevel++;
 				int pos = -1;
 				boolean next = true;
-				while (next && (pos = line.indexOf(STR_HTML_QUOTE, offset)) > -1) {
+				while (next && ((pos = line.indexOf(STR_HTML_QUOTE, offset)) > -1)) {
 					/*
 					 * Continue only if next starting position is equal to
 					 * offset or if just one whitespace character has been
 					 * skipped
 					 */
-					next = (offset == pos || (pos - offset == 1 && Character.isWhitespace(line.charAt(offset))));
+					next = ((offset == pos) || ((pos - offset == 1) && Character.isWhitespace(line.charAt(offset))));
 					if (next) {
 						currentLevel++;
 						offset = (pos + 4);
@@ -505,7 +506,7 @@ public final class MessageUtility {
 			}
 			if (offset > 0) {
 				try {
-					offset = offset < line.length() && Character.isWhitespace(line.charAt(offset)) ? offset + 1
+					offset = (offset < line.length()) && Character.isWhitespace(line.charAt(offset)) ? offset + 1
 							: offset;
 				} catch (final StringIndexOutOfBoundsException e) {
 					if (LOG.isTraceEnabled()) {
@@ -535,7 +536,7 @@ public final class MessageUtility {
 	private static int startsWithRegex(final String str, final String regex) {
 		final Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
 		final Matcher m = p.matcher(str);
-		if (m.find() && m.start() == 0) {
+		if (m.find() && (m.start() == 0)) {
 			return m.end();
 		}
 		return -1;
@@ -584,12 +585,14 @@ public final class MessageUtility {
 						if (m.find()) {
 							final StringBuilder linkBuilder = new StringBuilder(256);
 							final String filename = m.group(1);
-							linkBuilder.append("src=").append(STR_AJAX_MAIL).append(Mail.PARAMETER_SESSION).append('=')
-									.append(session.getSecret()).append('&').append(Mail.PARAMETER_ACTION).append('=')
-									.append(Mail.ACTION_MATTACH).append('&').append(Mail.PARAMETER_FOLDERID)
-									.append('=').append(urlEncodeSafe(msgUID.getFolder(), CHARSET_ISO8859)).append('&')
-									.append(Mail.PARAMETER_ID).append('=').append(msgUID.getUid()).append('&').append(
-											Mail.PARAMETER_MAILCID).append('=').append(filename).append('"');
+							linkBuilder.append("src=").append(STR_AJAX_MAIL).append(AJAXServlet.PARAMETER_SESSION)
+									.append('=').append(session.getSecret()).append('&').append(
+											AJAXServlet.PARAMETER_ACTION).append('=')
+									.append(AJAXServlet.ACTION_MATTACH).append('&').append(
+											AJAXServlet.PARAMETER_FOLDERID).append('=').append(
+											urlEncodeSafe(msgUID.getFolder(), CHARSET_ISO8859)).append('&').append(
+											AJAXServlet.PARAMETER_ID).append('=').append(msgUID.getUid()).append('&')
+									.append(Mail.PARAMETER_MAILCID).append('=').append(filename).append('"');
 							m.appendReplacement(cidBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
 						}
 						m.appendTail(cidBuffer);
@@ -616,11 +619,11 @@ public final class MessageUtility {
 			do {
 				final String cid = (cidMatcher.group(1) == null ? cidMatcher.group(2) : cidMatcher.group(1));
 				linkBuilder.setLength(0);
-				linkBuilder.append(STR_AJAX_MAIL).append(Mail.PARAMETER_SESSION).append('=')
-						.append(session.getSecret()).append('&').append(Mail.PARAMETER_ACTION).append('=').append(
-								Mail.ACTION_MATTACH).append('&').append(Mail.PARAMETER_FOLDERID).append('=').append(
-								urlEncodeSafe(msgUID.getFolder(), CHARSET_ISO8859)).append('&').append(
-								Mail.PARAMETER_ID).append('=').append(msgUID.getUid()).append('&').append(
+				linkBuilder.append(STR_AJAX_MAIL).append(AJAXServlet.PARAMETER_SESSION).append('=').append(
+						session.getSecret()).append('&').append(AJAXServlet.PARAMETER_ACTION).append('=').append(
+						AJAXServlet.ACTION_MATTACH).append('&').append(AJAXServlet.PARAMETER_FOLDERID).append('=')
+						.append(urlEncodeSafe(msgUID.getFolder(), CHARSET_ISO8859)).append('&').append(
+								AJAXServlet.PARAMETER_ID).append('=').append(msgUID.getUid()).append('&').append(
 								Mail.PARAMETER_MAILCID).append('=').append(cid).append('"');
 				cidMatcher.appendReplacement(cidBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
 			} while (cidMatcher.find());
@@ -787,7 +790,7 @@ public final class MessageUtility {
 			final StringBuilder tmp = new StringBuilder(200);
 			while (m.find()) {
 				final String nonHtmlLink = m.group(1);
-				if (nonHtmlLink == null || (isImgSrc(content, m.start(1)))) {
+				if ((nonHtmlLink == null) || (isImgSrc(content, m.start(1)))) {
 					m.appendReplacement(sb, Matcher.quoteReplacement(checkTarget(m.group())));
 				} else {
 					tmp.setLength(0);
@@ -833,7 +836,7 @@ public final class MessageUtility {
 	private static final String STR_IMG_SRC = "src=\"";
 
 	private static boolean isImgSrc(final String line, final int start) {
-		return start >= 5 && STR_IMG_SRC.equalsIgnoreCase(line.substring(start - 5, start));
+		return (start >= 5) && STR_IMG_SRC.equalsIgnoreCase(line.substring(start - 5, start));
 	}
 
 	/**

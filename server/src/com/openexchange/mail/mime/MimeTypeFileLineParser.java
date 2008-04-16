@@ -96,17 +96,17 @@ public final class MimeTypeFileLineParser {
 		if ((pos = entry.toLowerCase().indexOf(STR_TYPE)) != -1) {
 			final Matcher m = PAT_VAL.matcher(entry);
 			final int start = pos + 5;
-			if (m.find(start) && m.start() == start) {
+			if (m.find(start) && (m.start() == start)) {
 				type = m.group();
 			}
 		}
 		if ((pos = entry.toLowerCase().indexOf(STR_EXTS)) != -1) {
 			final Matcher m = PAT_VAL.matcher(entry);
 			final int start = pos + 5;
-			if (m.find(start) && m.start() == start) {
+			if (m.find(start) && (m.start() == start)) {
 				final String sExts = m.group();
 				final String[] exts;
-				if (sExts.charAt(0) == '"' && sExts.charAt(sExts.length() - 1) == '"') {
+				if ((sExts.charAt(0) == '"') && (sExts.charAt(sExts.length() - 1) == '"')) {
 					exts = sExts.substring(1, sExts.length() - 1).split("[ \t\n\r\f]*,[ \t\n\r\f]*");
 				} else {
 					exts = m.group().split("[ \t\n\r\f]*,[ \t\n\r\f]*");

@@ -143,8 +143,8 @@ public final class ParameterList implements Cloneable {
 		if (value == null) {
 			val = "";
 		} else {
-			val = value.charAt(0) == '"' && value.charAt(value.length() - 1) == '"' ? value.substring(1,
-					value.length() - 1) : value;
+			val = (value.charAt(0) == '"') && (value.charAt(value.length() - 1) == '"') ? value.substring(1, value
+					.length() - 1) : value;
 		}
 		int pos = name.indexOf('*');
 		if (pos == -1) {
@@ -214,7 +214,7 @@ public final class ParameterList implements Cloneable {
 	 *            The parameter value
 	 */
 	public void setParameter(final String name, final String value) {
-		if (null == name || containsSpecial(name)) {
+		if ((null == name) || containsSpecial(name)) {
 			final MailException me = new MailException(MailException.Code.INVALID_PARAMETER, name);
 			LOG.error(me.getLocalizedMessage(), me);
 			return;
@@ -232,7 +232,7 @@ public final class ParameterList implements Cloneable {
 	 *            The parameter value to add
 	 */
 	public void addParameter(final String name, final String value) {
-		if (null == name || containsSpecial(name)) {
+		if ((null == name) || containsSpecial(name)) {
 			final MailException me = new MailException(MailException.Code.INVALID_PARAMETER, name);
 			LOG.error(me.getLocalizedMessage(), me);
 			return;
@@ -346,7 +346,7 @@ public final class ParameterList implements Cloneable {
 	private static boolean containsSpecial(final String str) {
 		final char[] chars = str.toCharArray();
 		boolean quote = false;
-		for (int i = 0; i < chars.length && !quote; i++) {
+		for (int i = 0; (i < chars.length) && !quote; i++) {
 			quote |= (Arrays.binarySearch(SPECIALS, chars[i]) >= 0);
 		}
 		return quote;
@@ -405,7 +405,7 @@ public final class ParameterList implements Cloneable {
 			rfc2231 = false;
 			this.name = name;
 			contiguousValues = new ArrayList<String>(1);
-			if (null != value && value.length() > 0) {
+			if ((null != value) && (value.length() > 0)) {
 				contiguousValues.add(value);
 			}
 		}
@@ -470,7 +470,7 @@ public final class ParameterList implements Cloneable {
 			if (null != value) {
 				value = null;
 			}
-			if (null != contiguousValue && contiguousValue.length() > 0) {
+			if ((null != contiguousValue) && (contiguousValue.length() > 0)) {
 				contiguousValues.add(contiguousValue);
 			}
 		}
@@ -482,7 +482,7 @@ public final class ParameterList implements Cloneable {
 			if (num < 1) {
 				return;
 			}
-			if (null != contiguousValue && contiguousValue.length() > 0) {
+			if ((null != contiguousValue) && (contiguousValue.length() > 0)) {
 				final int index = num - 1;
 				while (index >= contiguousValues.size()) {
 					contiguousValues.add("");
@@ -520,7 +520,7 @@ public final class ParameterList implements Cloneable {
 					}
 				} else {
 					boolean needsEncoding = false;
-					for (int i = 0; i < size && !needsEncoding; i++) {
+					for (int i = 0; (i < size) && !needsEncoding; i++) {
 						needsEncoding |= !RFC2231Tools.isAscii(contiguousValues.get(i));
 					}
 					/*
@@ -578,7 +578,7 @@ public final class ParameterList implements Cloneable {
 					}
 				} else {
 					boolean needsEncoding = false;
-					for (int i = 0; i < size && !needsEncoding; i++) {
+					for (int i = 0; (i < size) && !needsEncoding; i++) {
 						needsEncoding |= !RFC2231Tools.isAscii(contiguousValues.get(i));
 					}
 					/*

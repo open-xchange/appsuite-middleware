@@ -108,7 +108,7 @@ public final class StorageUtility {
 	}
 
 	public static String getAllAddresses(final InternetAddress[] internetAddrs) {
-		if (internetAddrs == null || internetAddrs.length == 0) {
+		if ((internetAddrs == null) || (internetAddrs.length == 0)) {
 			return "";
 		}
 		final StringBuilder addressBuilder = new StringBuilder(32 * internetAddrs.length);
@@ -182,7 +182,7 @@ public final class StorageUtility {
 	 */
 	public static String[] getDefaultFolderNames(final UserSettingMail usm) throws MailConfigException {
 		final String[] names = new String[usm.isSpamEnabled() ? 6 : 4];
-		if (usm.getStdDraftsName() == null || usm.getStdDraftsName().length() == 0) {
+		if ((usm.getStdDraftsName() == null) || (usm.getStdDraftsName().length() == 0)) {
 			if (LOG.isWarnEnabled()) {
 				final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME,
 						UserSettingMail.STD_DRAFTS);
@@ -192,7 +192,7 @@ public final class StorageUtility {
 		} else {
 			names[INDEX_DRAFTS] = usm.getStdDraftsName();
 		}
-		if (usm.getStdSentName() == null || usm.getStdSentName().length() == 0) {
+		if ((usm.getStdSentName() == null) || (usm.getStdSentName().length() == 0)) {
 			if (LOG.isWarnEnabled()) {
 				final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME,
 						UserSettingMail.STD_SENT);
@@ -202,7 +202,7 @@ public final class StorageUtility {
 		} else {
 			names[INDEX_SENT] = usm.getStdSentName();
 		}
-		if (usm.getStdSpamName() == null || usm.getStdSpamName().length() == 0) {
+		if ((usm.getStdSpamName() == null) || (usm.getStdSpamName().length() == 0)) {
 			if (LOG.isWarnEnabled()) {
 				final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME,
 						UserSettingMail.STD_SPAM);
@@ -212,7 +212,7 @@ public final class StorageUtility {
 		} else {
 			names[INDEX_SPAM] = usm.getStdSpamName();
 		}
-		if (usm.getStdTrashName() == null || usm.getStdTrashName().length() == 0) {
+		if ((usm.getStdTrashName() == null) || (usm.getStdTrashName().length() == 0)) {
 			if (LOG.isWarnEnabled()) {
 				final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME,
 						UserSettingMail.STD_TRASH);
@@ -223,7 +223,7 @@ public final class StorageUtility {
 			names[INDEX_TRASH] = usm.getStdTrashName();
 		}
 		if (usm.isSpamEnabled()) {
-			if (usm.getConfirmedSpam() == null || usm.getConfirmedSpam().length() == 0) {
+			if ((usm.getConfirmedSpam() == null) || (usm.getConfirmedSpam().length() == 0)) {
 				if (LOG.isWarnEnabled()) {
 					final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME,
 							UserSettingMail.STD_CONFIRMED_SPAM);
@@ -233,7 +233,7 @@ public final class StorageUtility {
 			} else {
 				names[INDEX_CONFIRMED_SPAM] = usm.getConfirmedSpam();
 			}
-			if (usm.getConfirmedHam() == null || usm.getConfirmedHam().length() == 0) {
+			if ((usm.getConfirmedHam() == null) || (usm.getConfirmedHam().length() == 0)) {
 				if (LOG.isWarnEnabled()) {
 					final MailException e = new MailException(MailException.Code.MISSING_DEFAULT_FOLDER_NAME,
 							UserSettingMail.STD_CONFIRMED_HAM);

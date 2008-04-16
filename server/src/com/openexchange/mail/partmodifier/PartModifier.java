@@ -88,13 +88,13 @@ public abstract class PartModifier {
 			if (null == instance) {
 				try {
 					instance = (PartModifier) Class.forName(className).newInstance();
-				} catch (ClassNotFoundException e) {
+				} catch (final ClassNotFoundException e) {
 					throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
-				} catch (InstantiationException e) {
+				} catch (final InstantiationException e) {
 					throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
-				} catch (IllegalAccessException e) {
+				} catch (final IllegalAccessException e) {
 					throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
-				} catch (Throwable e) {
+				} catch (final Throwable e) {
 					throw new MailException(MailException.Code.PART_MODIFIER_CREATION_FAILED, e, className);
 				}
 			}

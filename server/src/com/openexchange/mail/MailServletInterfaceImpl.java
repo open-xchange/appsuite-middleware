@@ -192,7 +192,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			spamAction = SPAM_NOOP;
 		}
 		if (spamAction != SPAM_NOOP) {
-			final boolean locatedInSpamFolder = SPAM_HAM == spamAction || spamFullname.equals(sourceFullname);
+			final boolean locatedInSpamFolder = (SPAM_HAM == spamAction) || spamFullname.equals(sourceFullname);
 			if (spamAction == SPAM_SPAM) {
 				if (!locatedInSpamFolder) {
 					/*
@@ -445,7 +445,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			final boolean linkSearchTermsWithOR, final int[] fields) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		final SearchTerm<?> searchTerm = searchCols == null || searchCols.length == 0 ? null : SearchUtility
+		final SearchTerm<?> searchTerm = (searchCols == null) || (searchCols.length == 0) ? null : SearchUtility
 				.parseFields(searchCols, searchPatterns, linkSearchTermsWithOR);
 		/*
 		 * Identify and sort messages according to search term and sort criteria
@@ -614,7 +614,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			final int[] fields) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		final SearchTerm<?> searchTerm = searchCols == null || searchCols.length == 0 ? null : SearchUtility
+		final SearchTerm<?> searchTerm = (searchCols == null) || (searchCols.length == 0) ? null : SearchUtility
 				.parseFields(searchCols, searchPatterns, linkSearchTermsWithOR);
 		/*
 		 * Identify and thread-sort messages according to search term while only

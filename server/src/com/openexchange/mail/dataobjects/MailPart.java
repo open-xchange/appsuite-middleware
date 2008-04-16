@@ -557,7 +557,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * @return The header's value or <code>null</code>
 	 */
 	public String getHeader(final String name) {
-		if (containsHeaders() && null != headers) {
+		if (containsHeaders() && (null != headers)) {
 			return headers.get(HeaderName.valueOf(name));
 		}
 		return null;
@@ -569,7 +569,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * @return The header's value or <code>null</code>
 	 */
 	public Map<HeaderName, String> getHeaders() {
-		if (containsHeaders() && null != headers) {
+		if (containsHeaders() && (null != headers)) {
 			return headers;
 		}
 		return null;
@@ -583,7 +583,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * @return The non-matching headers as a map
 	 */
 	public Map<HeaderName, String> getNonMatchingHeaders(final String[] nonMatchingHeaders) {
-		if (containsHeaders() && null != headers) {
+		if (containsHeaders() && (null != headers)) {
 			final Set<HeaderName> set = new HashSet<HeaderName>(nonMatchingHeaders.length);
 			for (int i = 0; i < nonMatchingHeaders.length; i++) {
 				set.add(HeaderName.valueOf(nonMatchingHeaders[i]));
@@ -610,7 +610,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * @return The matching headers as a map
 	 */
 	public Map<HeaderName, String> getMatchingHeaders(final String[] matchingHeaders) {
-		if (containsHeaders() && null != headers) {
+		if (containsHeaders() && (null != headers)) {
 			final Set<HeaderName> set = new HashSet<HeaderName>(matchingHeaders.length);
 			for (int i = 0; i < matchingHeaders.length; i++) {
 				set.add(HeaderName.valueOf(matchingHeaders[i]));
@@ -637,7 +637,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * @return The header's former value or <code>null</code> if not found
 	 */
 	public String removeHeader(final String name) {
-		if (containsHeaders() && null != headers) {
+		if (containsHeaders() && (null != headers)) {
 			return headers.remove(HeaderName.valueOf(name));
 		}
 		return null;
@@ -767,10 +767,10 @@ public abstract class MailPart implements Serializable, Cloneable {
 				clone.headers = new HashMap<HeaderName, String>(headers);
 			}
 			return clone;
-		} catch (CloneNotSupportedException e) {
+		} catch (final CloneNotSupportedException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 			throw new InternalError(e.getLocalizedMessage());
-		} catch (MailException e) {
+		} catch (final MailException e) {
 			LOG.error(e.getLocalizedMessage(), e);
 			throw new InternalError(e.getLocalizedMessage());
 		}

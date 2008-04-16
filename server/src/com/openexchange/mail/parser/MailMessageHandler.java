@@ -56,8 +56,8 @@ import java.util.Map;
 import javax.mail.internet.InternetAddress;
 
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 
@@ -203,7 +203,8 @@ public interface MailMessageHandler {
 	 * <code>text/vcard</code>, <code>text/calendar</code> or
 	 * <code>text/x-vCalendar</code>
 	 */
-	public boolean handleSpecialPart(MailPart part, String baseContentType, String fileName, String id) throws MailException;
+	public boolean handleSpecialPart(MailPart part, String baseContentType, String fileName, String id)
+			throws MailException;
 
 	/**
 	 * Handle an image part (<code>image/*</code>)

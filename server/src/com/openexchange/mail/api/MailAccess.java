@@ -173,7 +173,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 		/*
 		 * No cached connection available, check if a new one may be established
 		 */
-		if (MailConfig.getMaxNumOfConnections() > 0 && COUNTER.get() > MailConfig.getMaxNumOfConnections()) {
+		if ((MailConfig.getMaxNumOfConnections() > 0) && (COUNTER.get() > MailConfig.getMaxNumOfConnections())) {
 			LOCK_CON.lock();
 			try {
 				while (COUNTER.get() > MailConfig.getMaxNumOfConnections()) {
@@ -232,17 +232,17 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 			final Session session) throws MailException {
 		try {
 			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { session });
-		} catch (SecurityException e) {
+		} catch (final SecurityException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (NoSuchMethodException e) {
+		} catch (final NoSuchMethodException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (IllegalArgumentException e) {
+		} catch (final IllegalArgumentException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (InstantiationException e) {
+		} catch (final InstantiationException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (IllegalAccessException e) {
+		} catch (final IllegalAccessException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (InvocationTargetException e) {
+		} catch (final InvocationTargetException e) {
 			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
 		}
 	}
@@ -305,7 +305,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 		 */
 		if (mailConfig.getServer() == null) {
 			throw new MailException(MailException.Code.MISSING_CONNECT_PARAM, "mail server");
-		} else if (checkMailServerPort() && mailConfig.getPort() <= 0) {
+		} else if (checkMailServerPort() && (mailConfig.getPort() <= 0)) {
 			throw new MailException(MailException.Code.MISSING_CONNECT_PARAM, "mail server port");
 		} else if (mailConfig.getLogin() == null) {
 			throw new MailException(MailException.Code.MISSING_CONNECT_PARAM, "login");
@@ -419,7 +419,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 		for (int i = 2; i < trace.length; i++) {
 			sBuilder.append("\tat ").append(trace[i]).append('\n');
 		}
-		if (null != usingThread && usingThread.isAlive()) {
+		if ((null != usingThread) && usingThread.isAlive()) {
 			sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append('\n');
 			final StackTraceElement[] trace = usingThread.getStackTrace();
 			sBuilder.append("\tat ").append(trace[0]);

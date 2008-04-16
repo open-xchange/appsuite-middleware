@@ -804,7 +804,7 @@ public class MailFolder implements Serializable {
 	 *            The permissions to add
 	 */
 	public void addPermissions(final OCLPermission[] permissions) {
-		if (null == permissions || permissions.length == 0) {
+		if ((null == permissions) || (permissions.length == 0)) {
 			return;
 		} else if (null == this.permissions) {
 			this.permissions = new ArrayList<OCLPermission>(permissions.length);

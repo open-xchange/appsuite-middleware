@@ -152,27 +152,36 @@ public final class SearchUtility {
 	 */
 	public static Iterator<SearchTerm<?>> splitSearchTerm(final SearchTerm<?> searchTerm) {
 		final List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>();
-		addSearchTerm(searchTerm, /*new HashSet<Class<? extends SearchTerm>>(),*/ terms);
+		addSearchTerm(searchTerm, /*
+		 * new HashSet<Class<? extends
+		 * SearchTerm>>(),
+		 */terms);
 		return terms.iterator();
 	}
 
-	private static void addSearchTerm(final SearchTerm<?> searchTerm, /*final Set<Class<? extends SearchTerm>> classes,*/
-			final List<SearchTerm<?>> terms) {
+	private static void addSearchTerm(final SearchTerm<?> searchTerm, /*
+	 * final
+	 * Set<Class<?
+	 * extends
+	 * SearchTerm>>
+	 * classes,
+	 */
+	final List<SearchTerm<?>> terms) {
 		if (searchTerm instanceof com.openexchange.mail.search.ANDTerm) {
 			final com.openexchange.mail.search.SearchTerm<?>[] andTerms = ((com.openexchange.mail.search.ANDTerm) searchTerm)
 					.getPattern();
-			addSearchTerm(andTerms[0], /*classes,*/ terms);
-			addSearchTerm(andTerms[1], /*classes,*/ terms);
+			addSearchTerm(andTerms[0], /* classes, */terms);
+			addSearchTerm(andTerms[1], /* classes, */terms);
 		} else if (searchTerm instanceof com.openexchange.mail.search.ORTerm) {
 			final com.openexchange.mail.search.SearchTerm<?>[] orTerms = ((com.openexchange.mail.search.ORTerm) searchTerm)
 					.getPattern();
-			addSearchTerm(orTerms[0], /*classes,*/ terms);
-			addSearchTerm(orTerms[1], /*classes,*/ terms);
+			addSearchTerm(orTerms[0], /* classes, */terms);
+			addSearchTerm(orTerms[1], /* classes, */terms);
 		} else {
-			/*if (classes.contains(searchTerm.getClass())) {
-				return;
-			}
-			classes.add(searchTerm.getClass());*/
+			/*
+			 * if (classes.contains(searchTerm.getClass())) { return; }
+			 * classes.add(searchTerm.getClass());
+			 */
 			terms.add(searchTerm);
 		}
 	}

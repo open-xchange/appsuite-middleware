@@ -83,7 +83,7 @@ public class UUEncodedBodyPart {
 	public UUEncodedBodyPart(final String bodyPart) throws MessagingException {
 		this(bodyPart, true);
 	}
-	
+
 	private UUEncodedBodyPart(final String bodyPart, final boolean initialize) throws MessagingException {
 		this.bodyPart = bodyPart;
 		if (initialize && findUUEncodedAttachmentPosition()) {
@@ -94,7 +94,7 @@ public class UUEncodedBodyPart {
 			bodyPartInputStream = null;
 		}
 	}
-	
+
 	public static final boolean findUUEncodedAttachmentPosition(final String bodyPart) throws MessagingException {
 		return new UUEncodedBodyPart(bodyPart, false).findUUEncodedAttachmentPosition();
 	}
@@ -122,12 +122,12 @@ public class UUEncodedBodyPart {
 				headerIndex = beginIndex;
 				endIndex = sSearch.indexOf(END, beginIndex);
 				return true;
-			} catch (NoSuchElementException nsee) {
+			} catch (final NoSuchElementException nsee) {
 				/*
 				 * there are no more tokens in this tokenizer's string
 				 */
 				LOG.error(nsee.getMessage(), nsee);
-			} catch (NumberFormatException nfe) {
+			} catch (final NumberFormatException nfe) {
 				/*
 				 * possibleFileSize was non-numeric
 				 */

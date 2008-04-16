@@ -126,17 +126,17 @@ public final class ContentType extends ParameterizedHeader implements Serializab
 	}
 
 	private void parseContentType(final String contentTypeArg, final boolean paramList) throws MailException {
-		if (null == contentTypeArg || contentTypeArg.length() == 0) {
+		if ((null == contentTypeArg) || (contentTypeArg.length() == 0)) {
 			setContentType(DEFAULT_CONTENT_TYPE);
 		}
 		final String contentType = prepareParameterizedHeader(contentTypeArg);
 		final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(contentType);
-		if (!ctMatcher.find() || ctMatcher.start() != 0) {
+		if (!ctMatcher.find() || (ctMatcher.start() != 0)) {
 			throw new MailException(MailException.Code.INVALID_CONTENT_TYPE, contentTypeArg);
 		}
 		primaryType = ctMatcher.group(1);
 		subType = ctMatcher.group(2);
-		if (subType == null || subType.length() == 0) {
+		if ((subType == null) || (subType.length() == 0)) {
 			subType = DEFAULT_SUBTYPE;
 		}
 		baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
@@ -346,7 +346,7 @@ public final class ContentType extends ParameterizedHeader implements Serializab
 		final Matcher m = PATTERN_CONTENT_TYPE.matcher(mimeType);
 		if (m.find()) {
 			String subType = m.group(2);
-			if (subType == null || subType.length() == 0) {
+			if ((subType == null) || (subType.length() == 0)) {
 				subType = DEFAULT_SUBTYPE;
 			}
 			return new StringBuilder(32).append(m.group(1)).append('/').append(subType).toString();

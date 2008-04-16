@@ -141,9 +141,8 @@ public final class RTF2HtmlConverter {
 		try {
 			final FileInputStream fi = new FileInputStream("/home/thorben/rtf.txt");
 			final ByteArrayOutputStream tmp = new ByteArrayOutputStream();
-			int count = -1;
 			final byte[] buf = new byte[8192];
-			while ((count = fi.read(buf)) != -1) {
+			while ((fi.read(buf)) != -1) {
 				tmp.write(buf);
 			}
 

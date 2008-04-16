@@ -104,7 +104,7 @@ public final class ContentDisposition extends ParameterizedHeader implements Ser
 	}
 
 	private void parseContentDisp(final String contentDispArg, final boolean paramList) throws MailException {
-		if (null == contentDispArg || contentDispArg.length() == 0) {
+		if ((null == contentDispArg) || (contentDispArg.length() == 0)) {
 			/*
 			 * Nothing to parse
 			 */

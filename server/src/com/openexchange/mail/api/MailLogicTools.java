@@ -102,7 +102,7 @@ public class MailLogicTools {
 	 */
 	public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll) throws MailException {
 		final MailMessage replyMail = MimeReply.getReplyMail(originalMail, replyAll, session);
-		if (originalMail.containsFolder() && originalMail.getMailId() > 0) {
+		if (originalMail.containsFolder() && (originalMail.getMailId() > 0)) {
 			replyMail.setMsgref(MailPath.getMailPath(originalMail.getFolder(), originalMail.getMailId()));
 		}
 		return replyMail;
@@ -130,11 +130,11 @@ public class MailLogicTools {
 		final MailMessage forwardMail = MimeForward.getFowardMail(originalMails, session);
 		{
 			final StringBuilder sb = new StringBuilder(originalMails.length * 16);
-			if (originalMails[0].containsFolder() && originalMails[0].getMailId() > 0) {
+			if (originalMails[0].containsFolder() && (originalMails[0].getMailId() > 0)) {
 				sb.append(MailPath.getMailPath(originalMails[0].getFolder(), originalMails[0].getMailId()));
 			}
 			for (int i = 1; i < originalMails.length; i++) {
-				if (originalMails[i].containsFolder() && originalMails[i].getMailId() > 0) {
+				if (originalMails[i].containsFolder() && (originalMails[i].getMailId() > 0)) {
 					sb.append(',').append(
 							MailPath.getMailPath(originalMails[i].getFolder(), originalMails[i].getMailId()));
 				}

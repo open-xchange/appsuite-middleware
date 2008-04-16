@@ -490,7 +490,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 				stmt.executeUpdate();
 				stmt.close();
 				final Signature[] signatures = usm.getSignatures();
-				if (signatures == null || signatures.length == 0) {
+				if ((signatures == null) || (signatures.length == 0)) {
 					return true;
 				}
 				/*
@@ -520,7 +520,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 
 	private static String getDisplayMsgHeadersString(final UserSettingMail usm) {
 		final String[] displayMsgHeaders = usm.getDisplayMsgHeaders();
-		if (displayMsgHeaders == null || displayMsgHeaders.length == 0) {
+		if ((displayMsgHeaders == null) || (displayMsgHeaders.length == 0)) {
 			return null;
 		}
 		final StringBuilder tmp = new StringBuilder(256);

@@ -217,7 +217,7 @@ public class Enriched2HtmlConverter {
 							if (c != EOF) {
 								tokenBuilder.append(Character.toLowerCase((char) c));
 							}
-							while ((c = input.read()) != EOF && c != CHAR_LT) {
+							while (((c = input.read()) != EOF) && (c != CHAR_LT)) {
 								tokenBuilder.append(Character.toLowerCase((char) c));
 							}
 							if (c == EOF) {
@@ -244,7 +244,7 @@ public class Enriched2HtmlConverter {
 									paraType = ParaType.PT_OUT.type;
 								}
 							}
-						} else if (c == CHAR_LF && nofill <= 0) {
+						} else if ((c == CHAR_LF) && (nofill <= 0)) {
 							if (++newlineCounter > 1) {
 								sb.append(HTML_BREAK);
 								if (excerpt > 0) {
@@ -274,7 +274,7 @@ public class Enriched2HtmlConverter {
 				}
 			}
 			return sb.toString();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.error(e.getMessage(), e);
 			return enrichedText;
 		}
