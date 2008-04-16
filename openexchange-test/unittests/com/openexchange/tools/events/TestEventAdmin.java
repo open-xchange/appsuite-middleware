@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.ArrayList;
 
+import com.openexchange.event.CommonEvent;
+
 public class TestEventAdmin implements EventAdmin {
 
     private static TestEventAdmin INSTANCE = new TestEventAdmin();
@@ -31,5 +33,16 @@ public class TestEventAdmin implements EventAdmin {
 
     public static TestEventAdmin getInstance() {
        return INSTANCE;
+    }
+
+    public int size() {
+        return events.size();
+    }
+
+    public CommonEvent getNewest() {
+        if(events.isEmpty()) {
+            throw new IndexOutOfBoundsException("No newest element, I'm afraid");
+        }
+        return (CommonEvent) events.get(events.size()-1).getProperty(CommonEvent.EVENT_KEY);
     }
 }
