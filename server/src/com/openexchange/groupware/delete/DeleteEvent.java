@@ -82,6 +82,7 @@ public class DeleteEvent extends EventObject {
 
 	/**
 	 * RESOURCE_GROUP type constant
+	 * TODO Remove because we do not have resource groups.
 	 */
 	public static final int TYPE_RESOURCE_GROUP = 4;
 
