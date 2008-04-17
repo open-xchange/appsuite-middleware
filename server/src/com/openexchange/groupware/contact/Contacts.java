@@ -592,7 +592,7 @@ public class Contacts implements DeleteListener {
 				try {
 					DBPool.closeWriterSilent(ct, writecon);
 				} catch (final Exception ex) {
-					LOG.error("Unable to set setAutoCommit = true");
+					LOG.error("Unable to close WRITE Connection");
 				}
 			}
 		}
