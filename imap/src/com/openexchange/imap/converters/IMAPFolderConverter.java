@@ -506,7 +506,7 @@ public final class IMAPFolderConverter {
 	}
 
 	/**
-	 * Adds current user's rights granted to IMAP folder as an ACL
+	 * Adds current user's rights granted to IMAP folder as an ACL permission
 	 * 
 	 * @param sessionUser
 	 *            The session user
@@ -523,7 +523,7 @@ public final class IMAPFolderConverter {
 	}
 
 	/**
-	 * Adds empty ACL to specified mail folder for given user
+	 * Adds empty ACL permission to specified mail folder for given user
 	 * 
 	 * @param sessionUser
 	 *            The session user
