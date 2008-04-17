@@ -250,18 +250,33 @@ public final class IMAPFolderConverter {
 				}
 			}
 			/*
+			 * Set type
+			 */
+			if (mailFolder.exists()) {
+				mailFolder.setHoldsFolders(((imapFolder.getType() & javax.mail.Folder.HOLDS_FOLDERS) > 0));
+				mailFolder.setHoldsMessages(((imapFolder.getType() & javax.mail.Folder.HOLDS_MESSAGES) > 0));
+			} else {
+				mailFolder.setHoldsFolders(false);
+				mailFolder.setHoldsMessages(false);
+			}
+			/*
 			 * Determine if subfolders exist
 			 */
-			if (mailFolder.exists() && ((imapFolder.getType() & javax.mail.Folder.HOLDS_FOLDERS) == 0)) {
+			if (!mailFolder.exists()) {
+				mailFolder.setSubfolders(false);
+				mailFolder.setSubscribedSubfolders(false);
+			} else if (!mailFolder.isHoldsFolders()) {
 				mailFolder.setSubfolders(false);
 				mailFolder.setSubscribedSubfolders(false);
 			} else {
 				if (!mailFolder.containsSubfolders()) {
 					mailFolder.setSubfolders(false);
-					Attribs: for (final String attribute : attrs) {
-						if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
-							mailFolder.setSubfolders(true);
-							break Attribs;
+					if (null != attrs) {
+						Attribs: for (final String attribute : attrs) {
+							if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
+								mailFolder.setSubfolders(true);
+								break Attribs;
+							}
 						}
 					}
 				}
@@ -285,12 +300,6 @@ public final class IMAPFolderConverter {
 					}
 				}
 			}
-			mailFolder
-					.setHoldsMessages(mailFolder.exists() ? ((imapFolder.getType() & javax.mail.Folder.HOLDS_MESSAGES) > 0)
-							: false);
-			mailFolder
-					.setHoldsFolders(mailFolder.exists() ? ((imapFolder.getType() & javax.mail.Folder.HOLDS_FOLDERS) > 0)
-							: false);
 			final Rights ownRights;
 			if (mailFolder.isRootFolder()) {
 				/*
@@ -499,6 +508,12 @@ public final class IMAPFolderConverter {
 	/**
 	 * Adds current user's rights granted to IMAP folder as an ACL
 	 * 
+	 * @param sessionUser
+	 *            The session user
+	 * @param mailFolder
+	 *            The mail folder
+	 * @param ownRights
+	 *            The user's rights
 	 */
 	private static void addOwnACL(final int sessionUser, final MailFolder mailFolder, final Rights ownRights) {
 		final ACLPermission aclPerm = new ACLPermission();
@@ -508,8 +523,12 @@ public final class IMAPFolderConverter {
 	}
 
 	/**
-	 * Adds empty ACL to specified mail folder
+	 * Adds empty ACL to specified mail folder for given user
 	 * 
+	 * @param sessionUser
+	 *            The session user
+	 * @param mailFolder
+	 *            The mail folder
 	 */
 	private static void addEmptyACL(final int sessionUser, final MailFolder mailFolder) {
 		final ACLPermission aclPerm = new ACLPermission();
@@ -625,8 +644,7 @@ public final class IMAPFolderConverter {
 	private static boolean hasChildren(final ListInfo[] li) {
 		if (null != li) {
 			for (int i = 0; i < li.length; i++) {
-				final String[] tmpAttrs = li[i].attrs;
-				for (final String attribute : tmpAttrs) {
+				for (final String attribute : li[i].attrs) {
 					if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
 						return true;
 					}
@@ -637,26 +655,28 @@ public final class IMAPFolderConverter {
 	}
 
 	/**
-	 * Which entry in <code>li</code> matches <code>lname</code>? If the
-	 * name contains wildcards, more than one entry may be returned.
+	 * Extracts the {@link ListInfo} item out of specified array <code>li</code>
+	 * whose name matches given name <code>lname</code>.
+	 * <p>
+	 * More than one item may be found, if the name contains wildcards. In this
+	 * case the items located at first position in array is returned.
+	 * 
+	 * @param li
+	 *            The array of {@link ListInfo} items
+	 * @param lname
+	 *            The name to look for
+	 * @return The index of the matching {@link ListInfo} item
 	 */
 	private static int findName(final ListInfo[] li, final String lname) {
-		int i;
-		/*
-		 * If the name contains a wildcard, there might be more than one
-		 */
-		for (i = 0; i < li.length; i++) {
+		for (int i = 0; i < li.length; i++) {
 			if (li[i].name.equals(lname)) {
-				break;
+				return i;
 			}
 		}
-		if (i >= li.length) {
-			/*
-			 * Nothing matched exactly. Use first one.
-			 */
-			i = 0;
-		}
-		return i;
+		/*
+		 * Nothing matched exactly. Use first one.
+		 */
+		return 0;
 	}
 
 }
