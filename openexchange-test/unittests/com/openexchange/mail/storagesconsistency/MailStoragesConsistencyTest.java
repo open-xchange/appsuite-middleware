@@ -70,7 +70,9 @@ import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
- * {@link MailStoragesConsistencyTest}
+ * {@link MailStoragesConsistencyTest} - This test class checks if changes made
+ * by folder storage are notified by corresponding message storage, so that both
+ * storages reflects the same view on mailing system.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
