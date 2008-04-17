@@ -62,7 +62,6 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
-import javax.swing.DebugGraphics;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
