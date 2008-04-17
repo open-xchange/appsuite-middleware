@@ -127,6 +127,7 @@ public class AppointmentRequest {
 		CalendarObject.RECURRENCE_TYPE,
 		CalendarObject.RECURRENCE_CALCULATOR,
 		CalendarObject.RECURRENCE_ID,
+		CalendarObject.RECURRENCE_POSITION,
 		CalendarObject.PARTICIPANTS,
 		CalendarObject.USERS,
 		AppointmentObject.SHOWN_AS,

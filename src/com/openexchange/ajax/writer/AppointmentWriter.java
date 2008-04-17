@@ -239,6 +239,9 @@ public class AppointmentWriter extends CalendarWriter {
 				writeValue(appointmentObject.getNote(), jsonArray);
 				break;
 				// modification for mobility support
+            case AppointmentObject.RECURRENCE_ID:
+            	writeValue(appointmentObject.getRecurrenceID(), jsonArray);
+            	break;				
 			case AppointmentObject.RECURRENCE_TYPE:
 				writeValue(appointmentObject.getRecurrenceType(), jsonArray);
 				break;
