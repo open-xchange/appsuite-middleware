@@ -1,3 +1,7 @@
+* 2008-04-17 - sebastian.kauss@open-xchange.com
+
+ - Bugfixes #10760: Missing recurrence attributes in appointment requests
+
 * 2008-04-14 - thorben.betten@open-xchange.com
 
  - Bugfixes #9914 and #10668: Fixed several encoding/decoding problems with
