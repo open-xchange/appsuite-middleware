@@ -160,8 +160,8 @@ public class Contacts implements DeleteListener {
 		}
 	}
 
-	@OXThrowsMultiple(category = { Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT }, desc = { "1", "2", "70" }, exceptionId = {
-			1, 2, 70 }, msg = {
+	@OXThrowsMultiple(category = { Category.USER_INPUT, Category.USER_INPUT, Category.USER_INPUT }, desc = { "1", "2",
+			"70" }, exceptionId = { 1, 2, 70 }, msg = {
 			"Unable to scale this contact image.  Either the file type is not supported or the image is too large. Your mime type is %1$s and your image size is %2$d. The max. allowed image size is %3$d.",
 			"This gif image is too large. It can not be scaled and will not be accepted", "Mime type is null" })
 	public static byte[] scaleContactImage(final byte[] img, String mime) throws OXConflictException, OXException,
@@ -550,13 +550,12 @@ public class Contacts implements DeleteListener {
 			}
 			throw ox;
 		} catch (final DBPoolingException oe) {
-			if (null != writecon) {
-				try {
-					writecon.rollback();
-				} catch (final SQLException see) {
-					LOG.error(ERR_UABLE_TO_ROLLBACK, see);
-				}
-			}
+			/*
+			 * A DBPoolingException occurs when trying to fetch a connection
+			 * from pool, therefore corresponding "writecon" variable can only
+			 * be null at this location: No rollback needed/possible on
+			 * connection
+			 */
 			throw EXCEPTIONS.create(53, oe);
 		} catch (final DataTruncation se) {
 			if (null != writecon) {
@@ -2875,7 +2874,7 @@ public class Contacts implements DeleteListener {
 			public boolean compare(final ContactObject co, final ContactObject original) {
 				final String x = co.getDisplayName();
 				final String y = original.getDisplayName();
-				
+
 				if (null == x) {
 					if (null == y) {
 						return true;
