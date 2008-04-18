@@ -93,6 +93,7 @@ import org.json.JSONException;
 import com.openexchange.api2.MailInterfaceImpl;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -252,9 +253,8 @@ public final class MessageFiller {
 		}
 	}
 
-	public void fillMessage(final JSONMessageObject msgObj, final MimeMessage newMimeMessage,
-			final int sendType) throws IOException, MessagingException, OXException,
-			JSONException {
+	public void fillMessage(final JSONMessageObject msgObj, final MimeMessage newMimeMessage, final int sendType)
+			throws IOException, MessagingException, OXException, JSONException {
 		/*
 		 * Set headers
 		 */
@@ -622,8 +622,8 @@ public final class MessageFiller {
 		return alternativeMultipart;
 	}
 
-	private static BodyPart createHtmlBodyPart(final String htmlContent, final int linewrap) throws IMAPPropertyException,
-			MessagingException {
+	private static BodyPart createHtmlBodyPart(final String htmlContent, final int linewrap)
+			throws IMAPPropertyException, MessagingException {
 		final String htmlCT = PAT_HTML_CT.replaceFirst(REPLACE_CS, IMAPProperties.getDefaultMimeCharset());
 		final MimeBodyPart html = new MimeBodyPart();
 		html.setContent(performLineWrap(insertColorQuotes(MailTools.formatHrefLinks(htmlContent)), true, linewrap),
@@ -701,12 +701,11 @@ public final class MessageFiller {
 						mao.getContentType())));
 				{
 					final ContentType tmp = new ContentType(mao.getContentType());
-					if (tmp.getParameter("charset") == null) {
+					if (tmp.getParameter("charset") == null && tmp.isMimeType("text/*")) {
 						/*
 						 * Add system charset
 						 */
-						tmp.addParameter("charset", System.getProperty("file.encoding", IMAPProperties
-								.getDefaultMimeCharset()));
+						tmp.addParameter("charset", ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding));
 					}
 					messageBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, tmp.toString());
 				}
@@ -954,8 +953,9 @@ public final class MessageFiller {
 
 	/**
 	 * <p>
-	 * Turns simple quotes ("> " or "&amp;gt; ") into html blockquotes when sending
-	 * messages. Thus other mail clients are able to properly display quotes.
+	 * Turns simple quotes ("> " or "&amp;gt; ") into html blockquotes when
+	 * sending messages. Thus other mail clients are able to properly display
+	 * quotes.
 	 * </p>
 	 * <p>
 	 * Thus other mail client which receive html content are able to properly

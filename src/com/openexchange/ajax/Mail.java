@@ -2609,14 +2609,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				mao.setContent(null);
 				mao.setContentID(JSONMessageAttachmentObject.CONTENT_NONE);
 				mao.setContentType(uf.getContentType());
-				try {
-					mao.setFileName(MimeUtility.encodeText(uf.getFileName(), IMAPProperties.getDefaultMimeCharset(),
-							ENC_Q));
-				} catch (UnsupportedEncodingException e) {
-					mao.setFileName(uf.getFileName());
-				} catch (IMAPPropertyException e) {
-					mao.setFileName(uf.getFileName());
-				}
+				mao.setFileName(uf.getPreparedFileName());
 				mao.setUniqueDiskFileName(uf.getTmpFile());
 				msgObj.addMessageAttachment((JSONMessageAttachmentObject) mao.clone());
 				mao.reset();
