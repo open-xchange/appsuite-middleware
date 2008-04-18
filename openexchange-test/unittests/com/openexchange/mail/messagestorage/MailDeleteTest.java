@@ -123,6 +123,15 @@ public final class MailDeleteTest extends AbstractMailTest {
 					prevIds.add(Long.valueOf(mail.getMailId()));
 				}
 
+				/*
+				 * Delete none existing mail
+				 */
+				try {
+					mailAccess.getMessageStorage().deleteMessages("INBOX", new long[] { System.currentTimeMillis() }, false);		
+				} catch (Exception e) {
+					fail("No Exception should be thrown here. Exception was " + e.getMessage());
+				}
+				
 				mailAccess.getMessageStorage().deleteMessages("INBOX", uids, false);
 				
 				try{
