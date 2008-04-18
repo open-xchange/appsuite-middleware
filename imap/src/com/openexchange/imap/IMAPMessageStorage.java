@@ -1030,7 +1030,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 					minVal = msgUIDs[i];
 				}
 			}
-			messageId = ((IMAPMessage) (imapFolder.getMessageByUID(msgUIDs[minIndex]))).getMessageID();
+			final IMAPMessage imapMessage = (IMAPMessage) (imapFolder.getMessageByUID(msgUIDs[minIndex]));
+			if (imapMessage == null) {
+				/*
+				 * No message found whose UID matches msgUIDs[minIndex]
+				 */
+				messageId = null;
+			} else {
+				messageId = imapMessage.getMessageID();
+			}
 		}
 		if (messageId != null) {
 			final IMAPFolder destFolder = (IMAPFolder) imapStore.getFolder(destFullname);
