@@ -49,135 +49,109 @@
 
 package com.openexchange.monitoring.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.management.ManagementService;
-import com.openexchange.management.ManagementServiceHolder;
 import com.openexchange.monitoring.MonitorService;
 import com.openexchange.monitoring.internal.MonitorImpl;
 import com.openexchange.monitoring.internal.MonitoringInit;
-import com.openexchange.server.ServiceHolderListener;
-import com.openexchange.server.osgiservice.BundleServiceTracker;
+import com.openexchange.monitoring.services.MonitoringServiceRegistry;
+import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link MonitoringActivator}
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * 
  */
-public final class MonitoringActivator implements BundleActivator {
+public final class MonitoringActivator extends DeferredActivator {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MonitoringActivator.class);
 
-	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
+	private final AtomicBoolean started;
 
 	private ServiceRegistration serviceRegistration;
-
-	private ManagementServiceHolder msh;
-
-	private ServiceHolderListener<ManagementService> listener;
 
 	/**
 	 * Initializes a new {@link MonitoringActivator}
 	 */
 	public MonitoringActivator() {
 		super();
+		started = new AtomicBoolean();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
-	public void start(final BundleContext context) throws Exception {
-		LOG.info("starting bundle: com.openexchange.monitoring");
-		
+	private static final Class<?>[] NEEDED_SERVICES = { ManagementService.class, SessiondService.class };
+
+	@Override
+	protected Class<?>[] getNeededServices() {
+		return NEEDED_SERVICES;
+	}
+
+	@Override
+	protected void handleUnavailability(final Class<?> clazz) {
+		/*
+		 * Never stop the server even if a needed service is absent
+		 */
+		if (LOG.isWarnEnabled()) {
+			LOG.warn("Absent service: " + clazz.getName());
+		}
+		MonitoringServiceRegistry.getServiceRegistry().removeService(clazz);
+	}
+
+	@Override
+	public void startBundle() throws Exception {
 		try {
-			msh = ManagementServiceHolder.newInstance();
-			MonitoringInit.getInstance().setManagementServiceHolder(msh);
-			/*
-			 * Init service trackers
-			 */
-			serviceTrackerList.add(new ServiceTracker(context, ManagementService.class.getName(),
-					new BundleServiceTracker<ManagementService>(context, msh, ManagementService.class)));
-			/*
-			 * Open service trackers
-			 */
-			for (final ServiceTracker tracker : serviceTrackerList) {
-				tracker.open();
+			final ServiceRegistry registry = MonitoringServiceRegistry.getServiceRegistry();
+			registry.clearRegistry();
+			final Class<?>[] classes = getNeededServices();
+			for (int i = 0; i < classes.length; i++) {
+				final Object service = getService(classes[i]);
+				if (null != service) {
+					registry.addService(classes[i], service);
+				}
 			}
+			
+			if (!started.compareAndSet(false, true)) {
+				/*
+				 * Don't start the server again. A duplicate call to
+				 * startBundle() is probably caused by temporary absent
+				 * service(s) whose re-availability causes to trigger this
+				 * method again.
+				 */
+				LOG.info("A temporary absent service is available again");
+				return;
+			}
+			
+			MonitoringInit.getInstance().start();
+
 			/*
-			 * Start monitoring when configuration service is available
+			 * Register monitor service
 			 */
-			listener = new ServiceHolderListener<ManagementService>() {
-
-				public void onServiceAvailable(final ManagementService service) throws AbstractOXException {
-					try {
-						if (MonitoringInit.getInstance().isStarted()) {
-							MonitoringInit.getInstance().stop();
-						}
-						MonitoringInit.getInstance().start();
-
-						/*
-						 * Register monitor service
-						 */
-						serviceRegistration = context.registerService(MonitorService.class.getCanonicalName(),
-								new MonitorImpl(), null);
-					} catch (final AbstractOXException e) {
-						LOG.error(e.getLocalizedMessage(), e);
-						MonitoringInit.getInstance().stop();
-					}
-				}
-
-				public void onServiceRelease() {
-
-				}
-			};
-
-			msh.addServiceHolderListener(listener);
+			serviceRegistration = context.registerService(MonitorService.class.getCanonicalName(),
+					new MonitorImpl(), null);
 		} catch (final Throwable t) {
-			LOG.error(t.getLocalizedMessage(), t);
+			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
-	public void stop(final BundleContext context) throws Exception {
-		LOG.info("stopping bundle: com.openexchange.monitoring");
-		
+	@Override
+	public void stopBundle() throws Exception {
 		try {
-		    if (null != serviceRegistration) {
-		        serviceRegistration.unregister();
-		        serviceRegistration = null;
-		    }
-
-            msh.removeServiceHolderListenerByName(listener.getClass().getName());
-			if (MonitoringInit.getInstance().isStarted()) {
-				MonitoringInit.getInstance().stop();
+			if (null != serviceRegistration) {
+				serviceRegistration.unregister();
+				serviceRegistration = null;
 			}
-			msh = null;
-			/*
-			 * Close service trackers
-			 */
-			for (final ServiceTracker tracker : serviceTrackerList) {
-				tracker.close();
-			}
-			serviceTrackerList.clear();
 		} catch (final Throwable t) {
-			LOG.error(t.getLocalizedMessage(), t);
+			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
+		} finally {
+			started.set(false);
 		}
 	}
 

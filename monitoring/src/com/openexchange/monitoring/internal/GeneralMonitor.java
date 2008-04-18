@@ -56,6 +56,8 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import com.openexchange.monitoring.MonitoringInfo;
+import com.openexchange.monitoring.services.MonitoringServiceRegistry;
+import com.openexchange.sessiond.SessiondService;
 
 /**
  * 
@@ -102,8 +104,11 @@ public class GeneralMonitor implements GeneralMonitorMBean, MBeanRegistration {
 	}
 
 	public int getNumberOfActiveSessions() {
-		// get values from sessiond service
-		return -1; 
+		final SessiondService sessiondService = MonitoringServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+		if (sessiondService != null) {
+			return sessiondService.getNumberOfActiveSessions();
+		}
+		return -1;
 	}
 
 	public int getNumberOfRunningAJPListeners() {

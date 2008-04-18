@@ -59,7 +59,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.management.ManagementService;
-import com.openexchange.management.ManagementServiceHolder;
+import com.openexchange.monitoring.services.MonitoringServiceRegistry;
 import com.openexchange.server.Initialization;
 
 /**
@@ -74,8 +74,6 @@ public final class MonitoringInit implements Initialization {
 
 	private ObjectName objectName;
 
-	private ManagementServiceHolder msh;
-
 	/**
 	 * Logger.
 	 */
@@ -86,16 +84,6 @@ public final class MonitoringInit implements Initialization {
 	 */
 	private MonitoringInit() {
 		super();
-	}
-
-	/**
-	 * Set the management service holder
-	 * 
-	 * @param msh
-	 *            The management service holder
-	 */
-	public void setManagementServiceHolder(final ManagementServiceHolder msh) {
-		this.msh = msh;
 	}
 
 	private ObjectName getObjectName() throws MalformedObjectNameException, NullPointerException {
@@ -123,24 +111,22 @@ public final class MonitoringInit implements Initialization {
 		/*
 		 * Create Beans and register them
 		 */
-		final ManagementService managementAgent = msh.getService();
+		final ManagementService managementAgent = MonitoringServiceRegistry.getServiceRegistry()
+				.getService(ManagementService.class);
+		final GeneralMonitor generalMonitorBean = new GeneralMonitor();
 		try {
-			final GeneralMonitor generalMonitorBean = new GeneralMonitor();
-			try {
-				managementAgent.registerMBean(getObjectName(), generalMonitorBean);
-			} catch (MalformedObjectNameException exc) {
-				LOG.error(exc.getLocalizedMessage(), exc);
-			} catch (NullPointerException exc) {
-				LOG.error(exc.getLocalizedMessage(), exc);
-			} catch (Exception exc) {
-				LOG.error(exc.getLocalizedMessage(), exc);
-			}
-			if (LOG.isInfoEnabled()) {
-				LOG.info("JMX Monitor applied");
-			}
-		} finally {
-			msh.ungetService(managementAgent);
+			managementAgent.registerMBean(getObjectName(), generalMonitorBean);
+		} catch (MalformedObjectNameException exc) {
+			LOG.error(exc.getLocalizedMessage(), exc);
+		} catch (NullPointerException exc) {
+			LOG.error(exc.getLocalizedMessage(), exc);
+		} catch (Exception exc) {
+			LOG.error(exc.getLocalizedMessage(), exc);
 		}
+		if (LOG.isInfoEnabled()) {
+			LOG.info("JMX Monitor applied");
+		}
+
 		started.set(true);
 	}
 
@@ -152,23 +138,20 @@ public final class MonitoringInit implements Initialization {
 			LOG.error(MonitoringInit.class.getName() + " has not been started");
 			return;
 		}
-		final ManagementService managementAgent = msh.getService();
+		final ManagementService managementAgent = MonitoringServiceRegistry.getServiceRegistry()
+				.getService(ManagementService.class);
 		if (managementAgent != null) {
 			try {
-				try {
-					managementAgent.unregisterMBean(getObjectName());
-				} catch (MalformedObjectNameException exc) {
-					LOG.error(exc.getLocalizedMessage(), exc);
-				} catch (NullPointerException exc) {
-					LOG.error(exc.getLocalizedMessage(), exc);
-				} catch (Exception exc) {
-					LOG.error(exc.getLocalizedMessage(), exc);
-				}
-				if (LOG.isInfoEnabled()) {
-					LOG.info("JMX Monitor removed");
-				}
-			} finally {
-				msh.ungetService(managementAgent);
+				managementAgent.unregisterMBean(getObjectName());
+			} catch (MalformedObjectNameException exc) {
+				LOG.error(exc.getLocalizedMessage(), exc);
+			} catch (NullPointerException exc) {
+				LOG.error(exc.getLocalizedMessage(), exc);
+			} catch (Exception exc) {
+				LOG.error(exc.getLocalizedMessage(), exc);
+			}
+			if (LOG.isInfoEnabled()) {
+				LOG.info("JMX Monitor removed");
 			}
 		}
 		started.set(false);
