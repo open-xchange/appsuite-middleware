@@ -107,7 +107,9 @@ public final class MailGetTest extends AbstractMailTest {
 				try {
 					mailAccess.getMessageStorage().getMessage("INBOX", System.currentTimeMillis(), true);	
 				} catch (MailException e) {
-					assertEquals("No or wrong Exception is thrown", "MSG-0032", e.getErrorCode());
+					assertEquals("Wrong Error Code in Exception", "MSG-0032", e.getErrorCode());
+				} catch (Exception e) {
+					fail("getMessage throws an exception: " + e.getMessage());
 				}
 				
 				MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID);
