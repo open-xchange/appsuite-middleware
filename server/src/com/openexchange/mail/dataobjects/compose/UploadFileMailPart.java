@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.dataobjects.compose;
 
+import static com.openexchange.mail.utils.CharsetDetector.detectCharset;
 import static com.openexchange.mail.utils.MessageUtility.readStream;
 
 import java.io.File;
@@ -56,14 +57,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
-
-import org.mozilla.intl.chardet.nsDetector;
-import org.mozilla.intl.chardet.nsICharsetDetectionObserver;
-import org.mozilla.intl.chardet.nsPSMDetector;
 
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
@@ -82,7 +78,7 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
  */
 public abstract class UploadFileMailPart extends MailPart implements ComposedMailPart {
 
-	private static final String STR_US_ASCII = "US-ASCII";
+	private static final long serialVersionUID = 257902073011243269L;
 
 	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(UploadFileMailPart.class);
@@ -120,7 +116,7 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
 					/*
 					 * Guess charset for textual attachment
 					 */
-					getContentType().setCharsetParameter(detectCharset());
+					getContentType().setCharsetParameter(detectCharset(new FileInputStream(uploadFile)));
 				}
 				dataSource = new MessageDataSource(new FileInputStream(uploadFile), getContentType());
 			} catch (final IOException e) {
@@ -129,78 +125,6 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
 			}
 		}
 		return dataSource;
-	}
-
-	private String detectCharset() {
-		final nsDetector det = new nsDetector(nsPSMDetector.ALL);
-		/*
-		 * Set an observer: The Notify() will be called when a matching charset
-		 * is found.
-		 */
-		final CharsetDetectionObserver observer = new CharsetDetectionObserver();
-		det.Init(observer);
-		try {
-			final InputStream in = new FileInputStream(uploadFile);
-			try {
-				final byte[] buf = new byte[1024];
-				int len;
-				boolean done = false;
-				boolean isAscii = true;
-
-				while ((len = in.read(buf, 0, buf.length)) != -1) {
-					/*
-					 * Check if the stream is only ascii.
-					 */
-					if (isAscii) {
-						isAscii = det.isAscii(buf, len);
-					}
-					/*
-					 * DoIt if non-ascii and not done yet.
-					 */
-					if (!isAscii && !done) {
-						done = det.DoIt(buf, len, false);
-					}
-				}
-				det.DataEnd();
-				/*
-				 * Check if content is ascii
-				 */
-				if (isAscii) {
-					return STR_US_ASCII;
-				}
-				{
-					/*
-					 * Check observer
-					 */
-					final String charset = observer.getCharset();
-					if (null != charset && Charset.isSupported(charset)) {
-						return charset;
-					}
-				}
-				/*
-				 * Choose first possible charset
-				 */
-				final String prob[] = det.getProbableCharsets();
-				for (int i = 0; i < prob.length; i++) {
-					if (Charset.isSupported(prob[i])) {
-						return prob[i];
-					}
-				}
-				return STR_US_ASCII;
-			} finally {
-				try {
-					in.close();
-				} catch (final IOException e) {
-					LOG.error(e.getLocalizedMessage(), e);
-				}
-			}
-		} catch (final FileNotFoundException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			return STR_US_ASCII;
-		} catch (final IOException e) {
-			LOG.error(e.getLocalizedMessage(), e);
-			return STR_US_ASCII;
-		}
 	}
 
 	/*
@@ -300,34 +224,6 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
 	 */
 	@Override
 	public void prepareForCaching() {
-	}
-
-	private static final class CharsetDetectionObserver implements nsICharsetDetectionObserver {
-
-		private String charset;
-
-		/**
-		 * Initializes a new {@link CharsetDetectionObserver}
-		 */
-		public CharsetDetectionObserver() {
-			super();
-		}
-
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see org.mozilla.intl.chardet.nsICharsetDetectionObserver#Notify(java.lang.String)
-		 */
-		public void Notify(final String charset) {
-			this.charset = charset;
-		}
-
-		/**
-		 * @return The charset applied to this observer
-		 */
-		public String getCharset() {
-			return charset;
-		}
 	}
 
 	/*

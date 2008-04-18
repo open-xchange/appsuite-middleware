@@ -479,15 +479,11 @@ public final class ParameterList implements Cloneable {
 			if (null != value) {
 				value = null;
 			}
-			if (num < 1) {
-				return;
-			}
 			if ((null != contiguousValue) && (contiguousValue.length() > 0)) {
-				final int index = num - 1;
-				while (index >= contiguousValues.size()) {
+				while (num >= contiguousValues.size()) {
 					contiguousValues.add("");
 				}
-				contiguousValues.set(num - 1, contiguousValue);
+				contiguousValues.set(num, contiguousValue);
 			}
 		}
 
