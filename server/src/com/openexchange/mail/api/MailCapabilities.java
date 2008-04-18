@@ -169,6 +169,9 @@ public abstract class MailCapabilities {
 
 	/**
 	 * Indicates if mail system supports subscription of mail folders.
+	 * <p>
+	 * Note: This capability is also takes the configuration setting
+	 * {@link MailConfig#isSupportSubscription()} into consideration.
 	 * 
 	 * @return <code>true</code> if mail system supports subscription;
 	 *         otherwise <code>false</code>

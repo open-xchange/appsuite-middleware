@@ -151,6 +151,12 @@ public abstract class MailFolderStorage {
 	 * Of course more folder attributes may be checked by implementation to
 	 * enhance update operations. The programmer may extend the
 	 * {@link MailFolderDescription} class to do so.
+	 * <p>
+	 * <b>Note</b>: If underlying mailing system does not support the
+	 * corresponding capability, the update is treated as a no-op. For example
+	 * if both {@link MailCapabilities#hasPermissions()} and
+	 * {@link MailCapabilities#hasSubscription()} indicate <code>false</code>,
+	 * the associated update operations are not going to be performed.
 	 * 
 	 * @param fullname
 	 *            The fullname of the mail folder to update

@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -519,6 +520,7 @@ public class MailFolder implements Serializable {
 	/**
 	 * Gets the separator
 	 * 
+	 * @see MailConfig#getDefaultSeparator()
 	 * @return the separator
 	 */
 	public char getSeparator() {
@@ -542,7 +544,10 @@ public class MailFolder implements Serializable {
 	}
 
 	/**
-	 * Sets the separator
+	 * Sets the separator.
+	 * <p>
+	 * If mailing system does not support a separator character,
+	 * {@link MailConfig#getDefaultSeparator()} should to be used.
 	 * 
 	 * @param separator
 	 *            the separator to set
