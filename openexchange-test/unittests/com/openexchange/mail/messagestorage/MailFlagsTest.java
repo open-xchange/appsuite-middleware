@@ -94,7 +94,13 @@ public final class MailFlagsTest extends AbstractMailTest {
 			mailAccess.connect();
 			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
 			try {
-
+				
+				try {
+					mailAccess.getMessageStorage().updateMessageFlags("INBOX", new long[] { System.currentTimeMillis() }, MailMessage.FLAG_SEEN, true);
+				} catch (Exception e) {
+					fail("No Exception should be thrown here but was " + e.getMessage());
+				}
+				
 				mailAccess.getMessageStorage().updateMessageFlags("INBOX", uids, MailMessage.FLAG_SEEN, true);
 				MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids,
 						FIELDS_ID_AND_FLAGS);
