@@ -206,7 +206,6 @@ public class SessionHandler {
 					LOG.debug("session TIMEOUT sessionid=" + sessionid);
 				}
 				sessions.remove(sessionid);
-				LOG.warn("TODO: MonitoringInfo still missing");
 				numberOfActiveSessions.decrementAndGet();
 
 				return false;
