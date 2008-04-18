@@ -78,19 +78,12 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
  */
 public final class MailAttachmentTest extends AbstractMailTest {
 
-	private static final MailField[] FIELDS_EVEN_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS,
-			MailField.FROM, MailField.TO, MailField.DISPOSITION_NOTIFICATION_TO, MailField.COLOR_LABEL,
-			MailField.HEADERS, MailField.SUBJECT, MailField.THREAD_LEVEL, MailField.SIZE, MailField.PRIORITY,
-			MailField.SENT_DATE, MailField.RECEIVED_DATE, MailField.CC, MailField.BCC, MailField.FOLDER_ID };
-
-	private static final MailField[] FIELDS_FULL = { MailField.FULL };
-
 	private static final MailField[] FIELDS_ID = { MailField.ID };
 
 	private static final MailField[] FIELDS_MORE = { MailField.ID, MailField.CONTENT_TYPE, MailField.FLAGS,
 			MailField.BODY };
 
-	private final String RFC822_WITH_ATTACH = "Return-Path: <thorben.betten@open-xchange.com>\n"
+	private static final String RFC822_WITH_ATTACH = "Return-Path: <thorben.betten@open-xchange.com>\n"
 			+ "Received: from ox.netline-is.de ([unix socket])\n"
 			+ "	by ox (Cyrus v2.2.3) with LMTP; Fri, 04 Apr 2008 00:12:36 +0200\n" + "X-Sieve: CMU Sieve 2.2\n"
 			+ "Received: by ox.netline-is.de (Postfix, from userid 65534)\n"
@@ -157,7 +150,7 @@ public final class MailAttachmentTest extends AbstractMailTest {
 			+ "CX0KKwkJCQl9CisJCQl9CisJCQljbGFzc2VzLnJlbW92ZShjbGF6eik7CiAJCX0gZmluYWxseSB7\n"
 			+ "CiAJCQlyZWdpc3RyeUxvY2sudW5sb2NrKCk7CiAJCX0K\n" + "------=_Part_582_17246096.1207260706746--\n";
 
-	private final String RFC822_WO_ATTACH = "Return-Path: <markus.strotkemper@open-xchange.com>\n"
+	private static final String RFC822_WO_ATTACH = "Return-Path: <markus.strotkemper@open-xchange.com>\n"
 			+ "Received: from ox.netline-is.de ([unix socket])\n"
 			+ "	by ox (Cyrus v2.2.3) with LMTP; Fri, 04 Apr 2008 11:37:57 +0200\n"
 			+ "X-Sieve: CMU Sieve 2.2\n"
@@ -213,7 +206,7 @@ public final class MailAttachmentTest extends AbstractMailTest {
 			+ "> Open-Xchange GmbH, Martinstr. 41, D-57462 Olpe\n"
 			+ "> _______________________________________________\n";
 
-	private final String RFC2231 = "From: Marcus Klein <m.klein@netline-is.de>\n"
+	private static final String RFC2231 = "From: Marcus Klein <m.klein@netline-is.de>\n"
 			+ "Organization: Netline Internet Service GmbH\n"
 			+ "X-KMail-Fcc: sent-mail\n"
 			+ "To: marcus@1337\n"
@@ -370,8 +363,7 @@ public final class MailAttachmentTest extends AbstractMailTest {
 			if (jObject.has(MailJSONField.ATTACHMENTS.getKey())) {
 				final JSONArray jArray = jObject.getJSONArray(MailJSONField.ATTACHMENTS.getKey());
 				final int len = jArray.length();
-				assertTrue("Missing attachments although existence indicated through 'hasAttachments()'",
-						len > 0);
+				assertTrue("Missing attachments although existence indicated through 'hasAttachments()'", len > 0);
 				for (int i = 0; i < len; i++) {
 					final JSONObject attachObj = jArray.getJSONObject(i);
 					if (attachObj.has(MailJSONField.ATTACHMENT_FILE_NAME.getKey())) {
@@ -382,8 +374,7 @@ public final class MailAttachmentTest extends AbstractMailTest {
 			} else {
 				fail("Missing attachments although existence indicated through 'hasAttachments()'");
 			}
-			
-			
+
 		} catch (final Exception e) {
 			e.printStackTrace();
 			fail(e.getLocalizedMessage());
