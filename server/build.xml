@@ -219,7 +219,7 @@
         <chmod perm="755" file="${bin.install.copy.dir}/open-xchange-groupware"/>
         <chmod perm="755" file="${bin.install.copy.dir}/checkconsistency"/>
 
-        <copy todir="${destdir}" overwrite="true">
+        <copy todir="${destdir}/" overwrite="true">
             <fileset dir="system"/>
             <mapper type="glob" from="*.${distribution}" to="*"/>
         </copy>
