@@ -49,134 +49,114 @@
 
 package com.openexchange.mail.filter.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Dictionary;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
-import org.osgi.util.tracker.ServiceTracker;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.mail.filter.MailFilterService;
-import com.openexchange.mail.filter.internal.MailFilterServletInit;
-import com.openexchange.server.ServiceHolderListener;
-import com.openexchange.server.osgiservice.BundleServiceTracker;
+import com.openexchange.mail.filter.internal.MailFilterPreferencesItem;
+import com.openexchange.mail.filter.services.MailFilterServletServiceRegistry;
+import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * OSGi bundle activator for the MailFilterServlet.
+ * {@link MailFilterServletActivator}
  * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public class MailFilterServletActivator implements BundleActivator {
+public final class MailFilterServletActivator extends DeferredActivator {
 
-	private static transient final Log LOG = LogFactory.getLog(MailFilterServletActivator.class);
-	
-	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
-	
-	private ServiceHolderListener<HttpService> httpServiceListener;
-	
-	private ServiceHolderListener<MailFilterService> mailFilterServiceListener;
-	
-	private ServiceTracker serviceTracker = null;
-	
-	private boolean mailFilterServiceAvailable = false;
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(MailFilterServletActivator.class);
 
-	private boolean httpServiceAvailable = false;
+	private final AtomicBoolean started;
+
+	private ServiceRegistration serviceRegistration;
 
 	/**
-	 * {@inheritDoc}
+	 * Initializes a new {@link MailFilterServletActivator}
 	 */
-	public void start(final BundleContext context) throws Exception {
-		LOG.info("starting bundle: com.openexchange.mail.filter.servlet");
-		/*
-		 * Init service tracker check availibility for services
-		 */
-		serviceTrackerList.add(new ServiceTracker(context, MailFilterService.class.getName(),
-				new BundleServiceTracker<MailFilterService>(context, MailFilterServiceHolder.getInstance(),
-						MailFilterService.class)));
-		serviceTrackerList.add(new ServiceTracker(context, HttpService.class.getName(),
-				new BundleServiceTracker<HttpService>(context, MailFilterHttpServiceHolder.getInstance(), HttpService.class)));
-		/*
-		 * Open service trackers
-		 */
-		for (final ServiceTracker tracker : serviceTrackerList) {
-			tracker.open();
-		}
-
-		/*
-		 * Start mail filter servlet when mail filter service is available
-		 */
-		mailFilterServiceListener = new ServiceHolderListener<MailFilterService>() {
-
-			public void onServiceAvailable(final MailFilterService service) throws AbstractOXException {
-				MailFilterServletInit mailFilterServletInit = MailFilterServletInit.getInstance();
-				try {
-					// check if http service is already available
-					if (httpServiceAvailable && !mailFilterServletInit.isStarted()) {
-						mailFilterServletInit.start();
-					}
-					mailFilterServiceAvailable = true;
-				} catch (final AbstractOXException e) {
-					LOG.error(e.getLocalizedMessage(), e);
-					mailFilterServletInit.stop();
-				}
-			}
-
-			public void onServiceRelease() {
-				mailFilterServiceAvailable = false;
-			}
-		};
-		
-		/*
-		 * Start mail filter servlet when http service is available
-		 */
-		httpServiceListener = new ServiceHolderListener<HttpService>() {
-
-			public void onServiceAvailable(final HttpService service) throws AbstractOXException {
-				MailFilterServletInit mailFilterServletInit = MailFilterServletInit.getInstance();
-				try {
-					// check if mail filter service is already available
-					if (mailFilterServiceAvailable && !mailFilterServletInit.isStarted()) {
-						mailFilterServletInit.start();
-					}
-					httpServiceAvailable = true;
-				} catch (final AbstractOXException e) {
-					LOG.error(e.getLocalizedMessage(), e);
-					mailFilterServletInit.stop();
-				}
-			}
-
-			public void onServiceRelease() {
-				httpServiceAvailable = false;
-			}
-		};
-
-		MailFilterHttpServiceHolder.getInstance().addServiceHolderListener(httpServiceListener);
-		MailFilterServiceHolder.getInstance().addServiceHolderListener(mailFilterServiceListener);
+	public MailFilterServletActivator() {
+		super();
+		started = new AtomicBoolean();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void stop(final BundleContext context) throws Exception {
-		LOG.info("stopping bundle: com.openexchange.mail.filter.servlet");
+	private static final Class<?>[] NEEDED_SERVICES = { MailFilterService.class, HttpService.class };
 
+	@Override
+	protected Class<?>[] getNeededServices() {
+		return NEEDED_SERVICES;
+	}
+
+	@Override
+	protected void handleUnavailability(final Class<?> clazz) {
+		/*
+		 * Never stop the server even if a needed service is absent
+		 */
+		if (LOG.isWarnEnabled()) {
+			LOG.warn("Absent service: " + clazz.getName());
+		}
+		MailFilterServletServiceRegistry.getServiceRegistry().removeService(clazz);
+	}
+
+	@Override
+	public void startBundle() throws Exception {
 		try {
-			serviceTracker.close();
-			MailFilterHttpServiceHolder.getInstance().removeService();
-			
-			if (MailFilterServletInit.getInstance().isStarted()) {
-				MailFilterServletInit.getInstance().stop();
+			/*
+			 * (Re-)Initialize server service registry with available services
+			 */
+			{
+				final ServiceRegistry registry = MailFilterServletServiceRegistry.getServiceRegistry();
+				registry.clearRegistry();
+				final Class<?>[] classes = getNeededServices();
+				for (int i = 0; i < classes.length; i++) {
+					final Object service = getService(classes[i]);
+					if (null != service) {
+						registry.addService(classes[i], service);
+					}
+				}
 			}
-		} catch (final Throwable e) {
-			LOG.error("MailFilterServletActivator: stop: ", e);
-			throw e instanceof Exception ? (Exception) e : new Exception(e.getMessage(), e);
+			if (!started.compareAndSet(false, true)) {
+				/*
+				 * Don't start the server again. A duplicate call to
+				 * startBundle() is probably caused by temporary absent
+				 * service(s) whose re-availability causes to trigger this
+				 * method again.
+				 */
+				LOG.info("A temporary absent service is available again");
+				return;
+			}
+			
+			serviceRegistration = context.registerService(PreferencesItemService.class.getName(), new MailFilterPreferencesItem(),
+					null);
+		} catch (final Throwable t) {
+			LOG.error(t.getMessage(), t);
+			throw t instanceof Exception ? (Exception) t : new Exception(t);
+		}
+
+	}
+
+	@Override
+	public void stopBundle() throws Exception {
+		try {
+			if (null != serviceRegistration) {
+				serviceRegistration.unregister();
+				serviceRegistration = null;
+			}
+			/*
+			 * Clear service registry
+			 */
+			MailFilterServletServiceRegistry.getServiceRegistry().clearRegistry();
+			
+		} catch (final Throwable t) {
+			LOG.error(t.getMessage(), t);
+			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		} finally {
-			serviceTracker.close();
-			serviceTracker = null;
+			started.set(false);
 		}
 	}
 
