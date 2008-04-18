@@ -68,7 +68,7 @@ import com.openexchange.mail.filter.ajax.parser.MailFilterParser;
 import com.openexchange.mail.filter.ajax.writer.MailFilterWriter;
 
 /**
- * JSONFileMailFilterImpl
+ * EmptyMailFilterImpl
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
