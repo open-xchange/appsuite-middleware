@@ -51,6 +51,7 @@ package com.openexchange.mail.messagestorage;
 
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.AbstractMailTest;
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.MailAccess;
@@ -139,8 +140,50 @@ public final class MailMoveTest extends AbstractMailTest {
 					mailAccess.getFolderStorage().createFolder(mfd);
 				}
 
+			
 				try {
 
+					/*
+					 * Move not existing message to valid folder
+					 */
+					{
+						long[] tmpCopy = null;
+						try {
+							tmpCopy = mailAccess.getMessageStorage().moveMessages("INBOX", fullname, new long[] { System.currentTimeMillis() }, false);
+						} catch (Exception e) {
+							fail("No exception should be thrown here");
+						}
+						assertNotNull("Move returned no IDs", tmpCopy);
+						assertTrue("Method moveMessages returned wrong id. Must be -1, but was" + tmpCopy[0], tmpCopy[0] == -1);
+					}
+					
+					
+					/*
+					 * Move messages to not existing folder
+					 */
+					{
+						final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
+						final String tmpFolderName = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
+							"MichGibtEsNicht").toString();
+						try {
+							assertNull("No ids should be returned", mailAccess.getMessageStorage().moveMessages("INBOX", tmpFolderName, uids, false)); 
+						} catch (MailException e) {
+							assertEquals("Wrong Exception is thrown.", "IMAP-1002", e.getErrorCode());
+						}
+					}
+					
+					/*
+					 * Move messages from not existing folder
+					 */
+					{
+						try {
+							assertNull("No ids should be returned", mailAccess.getMessageStorage().moveMessages("MichGibtEsHoffentlichNicht", fullname, uids, false));
+						} catch (MailException e) {
+							assertEquals("Wrong Exception is thrown.", "IMAP-1002", e.getErrorCode());
+						}
+					}
+					
+					
 					final long[] copied = mailAccess.getMessageStorage().moveMessages("INBOX", fullname, uids, false);
 					assertTrue("Missing copied mail IDs", copied != null);
 					assertTrue("Number of copied messages does not match", copied.length == uids.length);
