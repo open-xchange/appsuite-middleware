@@ -414,9 +414,9 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 		sBuilder.append(toString());
 		sBuilder.append("\nIMAP connection established (or fetched from cache) at: ").append('\n');
 		/*
-		 * Start at index 2
+		 * Start at index 3
 		 */
-		for (int i = 2; i < trace.length; i++) {
+		for (int i = 3; i < trace.length; i++) {
 			sBuilder.append("\tat ").append(trace[i]).append('\n');
 		}
 		if ((null != usingThread) && usingThread.isAlive()) {
