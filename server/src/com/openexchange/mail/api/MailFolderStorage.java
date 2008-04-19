@@ -115,13 +115,19 @@ public abstract class MailFolderStorage {
 	public abstract MailFolder[] getSubfolders(final String parentFullname, final boolean all) throws MailException;
 
 	/**
-	 * Gets the mailbox's default folder
+	 * Gets the mailbox's root folder.
+	 * <p>
+	 * This is a convenience method that invokes {@link #getFolder(String)} with
+	 * its parameter set to {@link MailFolder#DEFAULT_FOLDER_ID}. It may be
+	 * overridden if a faster way can be achieved by specific implementation.
 	 * 
-	 * @return The mailbox's default folder
+	 * @return The mailbox's root folder
 	 * @throws MailException
 	 *             If mailbox's default folder cannot be delivered
 	 */
-	public abstract MailFolder getRootFolder() throws MailException;
+	public MailFolder getRootFolder() throws MailException {
+		return getFolder(MailFolder.DEFAULT_FOLDER_ID);
+	}
 
 	/**
 	 * Checks user's default folder as defined in user's mail settings and
