@@ -1156,8 +1156,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		}
 	}
 
-	private static final MailFolder[] EMPTY_PATH = new MailFolder[0];
-
 	@Override
 	public MailFolder[] getPath2DefaultFolder(final String fullname) throws MailException {
 		try {

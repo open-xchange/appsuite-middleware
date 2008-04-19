@@ -66,6 +66,11 @@ import com.openexchange.mail.dataobjects.MailFolderDescription;
 public abstract class MailFolderStorage {
 
 	/**
+	 * The constant to return or represent an empty path.
+	 */
+	protected static final MailFolder[] EMPTY_PATH = new MailFolder[0];
+
+	/**
 	 * Checks if a folder exists whose fullname matches given
 	 * <code>fullname</code>
 	 * 
@@ -91,7 +96,10 @@ public abstract class MailFolderStorage {
 
 	/**
 	 * Gets the first level subfolders located below the folder whose fullname
-	 * matches given parameter <code>parentFullname</code>
+	 * matches given parameter <code>parentFullname</code>.
+	 * <p>
+	 * If no subfolders exist below identified folder the constant
+	 * {@link #EMPTY_PATH} should be returned.
 	 * 
 	 * @param parentFullname
 	 *            The parent fullname
