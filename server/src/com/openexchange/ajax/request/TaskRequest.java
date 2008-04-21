@@ -234,7 +234,7 @@ public class TaskRequest {
 		final Date requestedTimestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
         timestamp = new Date(requestedTimestamp.getTime());
 		final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
-		String ignore = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
+		String ignore = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
 		
 		if (ignore == null) {
 			ignore = "deleted";

@@ -237,7 +237,7 @@ public class ContactRequest {
 		timestamp = new Date(requestedTimestamp.getTime());
 
 		final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
-		String ignore = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
+		String ignore = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
 
 		if (ignore == null) {
 			ignore = "deleted";

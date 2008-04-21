@@ -302,7 +302,7 @@ public class AppointmentRequest {
 		final Date endUTC = DataParser.parseDate(jsonObj, AJAXServlet.PARAMETER_END);
 		final Date start = DataParser.parseTime(jsonObj, AJAXServlet.PARAMETER_START, timeZone);
 		final Date end = DataParser.parseTime(jsonObj, AJAXServlet.PARAMETER_END, timeZone);
-		final String ignore = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
+		final String ignore = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_IGNORE);
 		
 		final boolean bRecurrenceMaster = DataParser.parseBoolean(jsonObj, RECURRENCE_MASTER);
 		
