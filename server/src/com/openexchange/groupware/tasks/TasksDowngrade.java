@@ -104,6 +104,15 @@ public class TasksDowngrade extends DowngradeListener {
             // - All tasks in private folders.
             // - The participation of the user in all tasks.
             // -
+            try {
+                removeTasks(session, ctx, userConfig.getUserId(), con);
+            } catch (TaskException e) {
+                throw new DowngradeFailedException(e);
+            } catch (OXException e) {
+                throw new DowngradeFailedException(e);
+            } catch (SearchIteratorException e) {
+                throw new DowngradeFailedException(e);
+            }
         } else if (!userConfig.canDelegateTasks()) {
             // Remove all delegations of tasks that the user created.
             try {
@@ -118,11 +127,9 @@ public class TasksDowngrade extends DowngradeListener {
         }
     }
 
-    private void removeDelegations(final Session session, final Context ctx,
-        final int userId, final UserConfiguration userConfig,
-        final Connection con) throws TaskException, SearchIteratorException,
-        OXException {
+    private void removeTasks(final Session session, final Context ctx, final int userId, final Connection con) throws TaskException, OXException, SearchIteratorException {
         final User user = Tools.getUser(ctx, userId);
+        // Find private task folder.
         SearchIterator<FolderObject> iter = OXFolderIteratorSQL
             .getAllVisibleFoldersIteratorOfType(userId, user.getGroups(),
             new int[] { FolderObject.TASK }, FolderObject.PRIVATE,
@@ -130,12 +137,37 @@ public class TasksDowngrade extends DowngradeListener {
         try {
             while (iter.hasNext()) {
                 final FolderObject folder = iter.next();
+                // And remove tasks in there.
+                removeTaskInFolder(session, ctx, con, folder);
+            }
+        } finally {
+            iter.close();
+        }
+        // Remove all participations.
+        // FIXME continue here.
+    }
+
+    private void removeDelegations(final Session session, final Context ctx,
+        final int userId, final UserConfiguration userConfig,
+        final Connection con) throws TaskException, SearchIteratorException,
+        OXException {
+        final User user = Tools.getUser(ctx, userId);
+        // Find all private folder.
+        SearchIterator<FolderObject> iter = OXFolderIteratorSQL
+            .getAllVisibleFoldersIteratorOfType(userId, user.getGroups(),
+            new int[] { FolderObject.TASK }, FolderObject.PRIVATE,
+            new int[] { FolderObject.TASK }, ctx);
+        try {
+            while (iter.hasNext()) {
+                final FolderObject folder = iter.next();
+                // Remove the delegations of tasks in that folders.
                 removeDelegationsInFolder(session, ctx, userConfig, con, user,
                     folder);
             }
         } finally {
             iter.close();
         }
+        // Finad all public folder.
         iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(userId,
             user.getGroups(), new int[] { FolderObject.TASK },
             FolderObject.PUBLIC, new int[] { FolderObject.TASK }, ctx);
@@ -152,6 +184,8 @@ public class TasksDowngrade extends DowngradeListener {
                     }
                 }
                 if (!other) {
+                    // If no other user than the current downgraded is able
+                    // to edit the tasks, then remove the delegations.
                     removeDelegationsInFolder(session, ctx, userConfig, con,
                         user, folder);
                 }
@@ -162,6 +196,17 @@ public class TasksDowngrade extends DowngradeListener {
     }
 
     private static FolderStorage foldStor = FolderStorage.getInstance();
+
+    private void removeTaskInFolder(final Session session, final Context ctx, final Connection con, final FolderObject folder) throws TaskException {
+        for (StorageType type : StorageType.TYPES_AD) {
+            final int[] taskIds = foldStor.getTasksInFolder(ctx, con, folder
+                .getObjectID(), type);
+            for (int taskId : taskIds) {
+                TaskLogic.removeTask(session, ctx, con, folder.getObjectID(),
+                    taskId, type);
+            }
+        }        
+    }
 
     private void removeDelegationsInFolder(final Session session,
         final Context ctx, final UserConfiguration userConfig,
