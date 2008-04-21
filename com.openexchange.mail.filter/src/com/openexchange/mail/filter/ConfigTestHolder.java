@@ -50,7 +50,7 @@
 package com.openexchange.mail.filter;
 
 /**
- * ConfigTest
+ * ConfigTestHolder
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
