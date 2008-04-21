@@ -67,13 +67,11 @@ import com.openexchange.mail.filter.MailFilterConfig;
 import com.openexchange.mail.filter.MailFilterService;
 import com.openexchange.mail.filter.MailFilterSession;
 import com.openexchange.mail.filter.Rule;
-import com.openexchange.mail.filter.action.AbstractAction;
 import com.openexchange.mail.filter.ajax.fields.RuleFields;
 import com.openexchange.mail.filter.ajax.parser.MailFilterParser;
 import com.openexchange.mail.filter.ajax.writer.MailFilterWriter;
-import com.openexchange.mail.filter.comparison.AbstractComparison;
 import com.openexchange.mail.filter.internal.MailFilterSessionImpl;
-import com.openexchange.mail.filter.osgi.MailFilterServiceHolder;
+import com.openexchange.mail.filter.services.MailFilterServletServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.servlet.AjaxException;
@@ -108,30 +106,26 @@ public class MailFilterRequest {
 
 	public Object action(final String action, final JSONObject jsonObject)
 			throws AbstractOXException {
-		MailFilterService mailFilterService = null;
-		try {
-			mailFilterService = MailFilterServiceHolder.getInstance().getService();
-			if (mailFilterService == null) {
-				throw new AjaxException(AjaxException.Code.IOError, action);
+		MailFilterService mailFilterService = MailFilterServletServiceRegistry.getServiceRegistry()
+				.getService(MailFilterService.class);
+		if (mailFilterService == null) {
+			throw new AjaxException(AjaxException.Code.IOError, action);
+		} else {
+			if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
+				return actionNew(jsonObject, mailFilterService);
+			} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
+				return actionDelete(jsonObject, mailFilterService);
+			} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
+				return actionUpdate(jsonObject, mailFilterService);
+			} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
+				return actionAll(jsonObject, mailFilterService);
+			} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
+				return actionList(jsonObject, mailFilterService);
+			} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_CONFIG)) {
+				return actionConfig(jsonObject, mailFilterService);
 			} else {
-				if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
-					return actionNew(jsonObject, mailFilterService);
-				} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
-					return actionDelete(jsonObject, mailFilterService);
-				} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
-					return actionUpdate(jsonObject, mailFilterService);
-				} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
-					return actionAll(jsonObject, mailFilterService);
-				} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
-					return actionList(jsonObject, mailFilterService);
-				} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_CONFIG)) {
-					return actionConfig(jsonObject, mailFilterService);
-				} else {
-					throw new AjaxException(AjaxException.Code.UnknownAction, action);
-				}
+				throw new AjaxException(AjaxException.Code.UnknownAction, action);
 			}
-		} finally {
-			MailFilterServiceHolder.getInstance().ungetService(mailFilterService);
 		}
 	}
 
@@ -149,29 +143,29 @@ public class MailFilterRequest {
 		final JSONArray jsonTestArray = new JSONArray();
 		final JSONArray jsonActionArray = new JSONArray();
 		try {
-			// tests			
+			// tests
 			for (int a = 0; a < configTests.length; a++) {
 				final JSONObject jsonTestObj = new JSONObject();
 				jsonTestObj.put("test", configTests[a].getTest());
-				
+
 				final JSONArray jsonCompArray = new JSONArray();
 				final String[] comparisons = configTests[a].getComparisons();
 				for (int b = 0; b < comparisons.length; b++) {
 					jsonCompArray.put(comparisons[a]);
 				}
-				
+
 				jsonTestObj.put("comparison", jsonCompArray);
-				
+
 				jsonTestArray.put(jsonTestObj);
 			}
-			
+
 			jsonObj.put("tests", jsonTestArray);
-			
+
 			// actions
 			for (int a = 0; a < abstractActions.length; a++) {
 				jsonActionArray.put(abstractActions[a]);
 			}
-			
+
 			jsonObj.put("actioncommands", jsonActionArray);
 		} catch (JSONException exc) {
 			OXJSONException oxJsonException = new OXJSONException(
