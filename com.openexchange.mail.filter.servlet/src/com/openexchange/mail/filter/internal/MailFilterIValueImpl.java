@@ -51,7 +51,7 @@ package com.openexchange.mail.filter.internal;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -61,7 +61,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class MailFilterIValueImpl implements IValueHandler {
+public class MailFilterIValueImpl extends ReadOnlyValue {
 
     /**
      * Default constructor.
@@ -70,30 +70,12 @@ public class MailFilterIValueImpl implements IValueHandler {
         super();
     }
 
-	public int getId() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
 	public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig,
 			Setting setting) throws SettingException {
-		// TODO Auto-generated method stub
-		
+		setting.setSingleValue(Boolean.valueOf(true));
 	}
 
 	public boolean isAvailable(UserConfiguration userConfig) {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
-
-	public boolean isWritable() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public void writeValue(Context ctx, User user, Setting setting) throws SettingException {
-		// TODO Auto-generated method stub
-		
-	}
-
 }

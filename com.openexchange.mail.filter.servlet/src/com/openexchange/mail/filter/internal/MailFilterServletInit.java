@@ -100,7 +100,7 @@ import com.openexchange.mail.filter.ajax.writer.test.HeaderWriterImpl;
 import com.openexchange.mail.filter.ajax.writer.test.NotWriterImpl;
 import com.openexchange.mail.filter.ajax.writer.test.TestWriterFactory;
 import com.openexchange.mail.filter.ajax.writer.test.TrueWriterImpl;
-import com.openexchange.mail.filter.osgi.MailFilterHttpServiceHolder;
+import com.openexchange.mail.filter.services.MailFilterServletServiceRegistry;
 import com.openexchange.server.Initialization;
 
 /**
@@ -199,7 +199,7 @@ public class MailFilterServletInit implements Initialization {
 		ComparisonWriterFactory.addWriter("regex", new RegexWriterImpl());
 		ComparisonWriterFactory.addWriter("size", new SizeWriterImpl());
 		
-		final HttpService httpService = MailFilterHttpServiceHolder.getInstance().getService();
+		final HttpService httpService = MailFilterServletServiceRegistry.getServiceRegistry().getService(HttpService.class);
 		if (httpService == null) {
 			LOG.error("HTTP service is null. Mail Filter servlet cannot be registered");
 			return;
@@ -215,8 +215,6 @@ public class MailFilterServletInit implements Initialization {
 		} catch (final NamespaceException e) {
 			throw new MailFilterException(MailFilterException.Code.SERVLET_REGISTRATION_FAILED, e, e
 					.getLocalizedMessage());
-		} finally {
-			MailFilterHttpServiceHolder.getInstance().ungetService(httpService);
 		}
 	}
 
@@ -230,18 +228,14 @@ public class MailFilterServletInit implements Initialization {
 			LOG.error("Spell check has not been started.");
 			return;
 		}
-		final HttpService httpService = MailFilterHttpServiceHolder.getInstance().getService();
+		final HttpService httpService = MailFilterServletServiceRegistry.getServiceRegistry().getService(HttpService.class);
 		if (httpService == null) {
 			LOG.error("HTTP service is null. Mail Filter servlet cannot be unregistered");
 		} else {
-			try {
-				/*
-				 * Unregister mail filter servlet
-				 */
-				httpService.unregister(SC_SRVLT_ALIAS);
-			} finally {
-				MailFilterHttpServiceHolder.getInstance().ungetService(httpService);
-			}
+			/*
+			 * Unregister mail filter servlet
+			 */
+			httpService.unregister(SC_SRVLT_ALIAS);
 		}
 	}
 	

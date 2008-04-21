@@ -58,6 +58,7 @@ import org.osgi.service.http.HttpService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.mail.filter.MailFilterService;
 import com.openexchange.mail.filter.internal.MailFilterPreferencesItem;
+import com.openexchange.mail.filter.internal.MailFilterServletInit;
 import com.openexchange.mail.filter.services.MailFilterServletServiceRegistry;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
@@ -131,6 +132,8 @@ public final class MailFilterServletActivator extends DeferredActivator {
 				return;
 			}
 			
+			MailFilterServletInit.getInstance().start();
+			
 			serviceRegistration = context.registerService(PreferencesItemService.class.getName(), new MailFilterPreferencesItem(),
 					null);
 		} catch (final Throwable t) {
@@ -152,6 +155,7 @@ public final class MailFilterServletActivator extends DeferredActivator {
 			 */
 			MailFilterServletServiceRegistry.getServiceRegistry().clearRegistry();
 			
+			MailFilterServletInit.getInstance().stop();
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);

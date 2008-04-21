@@ -69,7 +69,7 @@ public class MailFilterPreferencesItem implements PreferencesItemService {
      * {@inheritDoc}
      */
     public String[] getPath() {
-        return new String[] { "modules", "mail", "mailfilter" };
+        return new String[] { "modules", "mailfilter" };
     }
 
     /**
