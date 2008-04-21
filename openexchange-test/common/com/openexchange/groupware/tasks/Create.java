@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.task;
+package com.openexchange.groupware.tasks;
 
 import java.util.Date;
 
@@ -93,6 +93,13 @@ public class Create {
     public static Task createWithDefaults() {
         final Task task = new Task();
         task.setPrivateFlag(false);
+        return task;
+    }
+
+    public static final Task createWithDefaults(final int folder, final String title) {
+        final Task task = createWithDefaults();
+        task.setParentFolderID(folder);
+        task.setTitle(title);
         return task;
     }
 }

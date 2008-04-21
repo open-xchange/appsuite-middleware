@@ -104,7 +104,7 @@ public class Bug9252Test extends AbstractTaskTest {
         folder.setObjectID(fInsertR.getId());
         try {
             // Create a task in there.
-            final Task task = com.openexchange.ajax.task.Create
+            final Task task = com.openexchange.groupware.tasks.Create
                 .createWithDefaults();
             task.setParentFolderID(folder.getObjectID());
             task.setTitle("Test bug #9295");
