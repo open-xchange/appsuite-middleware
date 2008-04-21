@@ -471,6 +471,9 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 	 * @return The stripped cookie value.
 	 */
 	private static String stripQuotes(final String cookieValue) {
+		if (null == cookieValue || cookieValue.length() == 0) {
+			return cookieValue;
+		}
 		final int mlen = cookieValue.length() - 1;
 		if ((cookieValue.charAt(0) == '"') && (cookieValue.charAt(mlen) == '"')) {
 			return cookieValue.substring(1, mlen);
