@@ -172,10 +172,6 @@ public class Starter implements Initialization {
 	 */
 	com.openexchange.groupware.update.UpdateTaskCollectionInit.getInstance(),
 	/**
-	 * Sets the caching system JCS up.
-	 */
-	//com.openexchange.cache.impl.Configuration.getInstance(),
-	/**
 	 * Connection pools for ConfigDB and database assignments for contexts.
 	 */
 	com.openexchange.database.DatabaseInit.getInstance(),
@@ -183,6 +179,10 @@ public class Starter implements Initialization {
 	 * Setup of ContextStorage and LoginInfo.
 	 */
 	com.openexchange.groupware.contexts.impl.ContextInit.getInstance(),
+    /**
+     * Folder initialization
+     */
+    com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
 	/**
 	 * User configuration init
 	 */
