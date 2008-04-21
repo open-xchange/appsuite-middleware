@@ -2,6 +2,7 @@
 
  - Bugfix #11173: Initialize folder component if server is in admin mode.
  - Bugfix #11174: Expect an OXFolder to be already deleted.
+ - Bugfix #11176: Do not inform a removed task from the deleted table.
 
 * 2008-04-15 - francisco.laguna@open-xchange.com
 

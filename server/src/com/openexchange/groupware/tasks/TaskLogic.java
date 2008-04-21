@@ -783,7 +783,9 @@ public final class TaskLogic {
         partStor.deleteExternal(ctx, writeCon, taskId, external, type, true);
         foldStor.deleteFolder(ctx, writeCon, taskId, folders, type);
         storage.delete(ctx, writeCon, taskId, task.getLastModified(), type);
-        informDelete(session, ctx, task);
+        if (StorageType.ACTIVE == type) {
+            informDelete(session, ctx, task);
+        }
     }
 
     static void setConfirmation(final Context ctx, final int taskId,
