@@ -69,12 +69,6 @@ import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
  */
 public class TasksDelete implements DeleteListener {
 
-    /**
-     * StorageTypes used for tasks.
-     */
-    private static final StorageType[] TYPES_AD = new StorageType[] {
-        StorageType.ACTIVE, StorageType.DELETED };
-
     private static final FolderStorage foldStor = FolderStorage.getInstance();
 
     private static final ParticipantStorage partStor = ParticipantStorage.getInstance();
@@ -169,7 +163,7 @@ public class TasksDelete implements DeleteListener {
         final Session session = getSession(event);
         final Context ctx = event.getContext();
         final int userId = event.getId();
-        for (StorageType type : TYPES_AD) {
+        for (StorageType type : StorageType.TYPES_AD) {
             final int[][] result = foldStor.searchFolderByUser(ctx, con,
                 userId, type);
             for (int[] folderAndTask : result) {
@@ -242,7 +236,7 @@ public class TasksDelete implements DeleteListener {
         final Context ctx = event.getContext();
         final int userId = event.getId();
         final TaskStorage stor = TaskStorage.getInstance();
-        for (StorageType type : TYPES_AD) {
+        for (StorageType type : StorageType.TYPES_AD) {
             final int[] tasks = TaskSearch.getInstance().findDelegatedTasks(ctx,
                 writeCon, userId, type);
             for  (int taskId : tasks) {

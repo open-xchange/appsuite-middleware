@@ -167,26 +167,32 @@ public class TasksDowngrade extends DowngradeListener {
         final Context ctx, final UserConfiguration userConfig,
         final Connection con, final User user, final FolderObject folder)
         throws TaskException {
-        final int[] taskIds = foldStor.getTasksInFolder(ctx, con, folder
-            .getObjectID(), StorageType.ACTIVE);
-        for (int taskId : taskIds) {
-            final Task task = new Task();
-            task.setObjectID(taskId);
-            task.setParentFolderID(folder.getObjectID());
-            task.setParticipants(new Participant[0]);
-            final UpdateData update = new UpdateData(ctx, user, userConfig,
-                folder, task, new Date());
-            update.prepareWithoutChecks();
-            update.doUpdate();
-            try {
-                update.sentEvent(session);
-            } catch (OXException e) {
-                LOG.error("Problem triggering event for updated task.", e);
-            }
-            try {
-                update.updateReminder();
-            } catch (OXException e) {
-                LOG.error("Problem while updating reminder for a task.", e);
+        for (StorageType type : StorageType.TYPES_AD) {
+            final int[] taskIds = foldStor.getTasksInFolder(ctx, con, folder
+                .getObjectID(), type);
+            for (int taskId : taskIds) {
+                final Task task = new Task();
+                task.setObjectID(taskId);
+                task.setParentFolderID(folder.getObjectID());
+                task.setParticipants(new Participant[0]);
+                final UpdateData update = new UpdateData(ctx, user, userConfig,
+                    folder, task, new Date(), type);
+                update.prepareWithoutChecks();
+                update.doUpdate();
+                if (StorageType.ACTIVE == type) {
+                    try {
+                        update.sentEvent(session);
+                    } catch (OXException e) {
+                        LOG.error("Problem triggering event for updated task.",
+                            e);
+                    }
+                    try {
+                        update.updateReminder();
+                    } catch (OXException e) {
+                        LOG.error("Problem while updating reminder for a task.",
+                            e);
+                    }
+                }
             }
         }
     }

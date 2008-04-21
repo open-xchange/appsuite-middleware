@@ -120,6 +120,11 @@ class UpdateData {
     private Date lastRead;
 
     /**
+     * Which type of task to update.
+     */
+    private StorageType type;
+
+    /**
      * The changed task.
      */
     private final Task changed;
@@ -211,6 +216,23 @@ class UpdateData {
     UpdateData(final Context ctx, final User user,
         final UserConfiguration userConfig, final FolderObject folder,
         final Task changed, final Date lastRead) {
+        this(ctx, user, userConfig, folder, changed, lastRead, StorageType
+            .ACTIVE);
+    }
+
+    /**
+     * Default constructor.
+     * @param ctx Context.
+     * @param user User.
+     * @param userConfig User configuration.
+     * @param folder folder throught that the task is changed.
+     * @param changed the changed task.
+     * @param lastRead timestamp when the to update task was read last.
+     * @param type ACTIVE or DELETED.
+     */
+    UpdateData(final Context ctx, final User user,
+        final UserConfiguration userConfig, final FolderObject folder,
+        final Task changed, final Date lastRead, final StorageType type) {
         super();
         this.ctx = ctx;
         this.user = user;
@@ -218,6 +240,7 @@ class UpdateData {
         this.folder = folder;
         this.changed = changed;
         this.lastRead = lastRead;
+        this.type = type;
     }
 
     /**
@@ -226,7 +249,7 @@ class UpdateData {
      */
     private Task getOrigTask() throws TaskException {
         if (null == origTask) {
-            origTask = storage.selectTask(ctx, getTaskId(), StorageType.ACTIVE);
+            origTask = storage.selectTask(ctx, getTaskId(), type);
             origTask.setParentFolderID(getFolderId());
         }
         return origTask;
@@ -251,7 +274,7 @@ class UpdateData {
     private Set<TaskParticipant> getOrigParticipants() throws TaskException {
         if (null == origParticipants) {
             origParticipants = partStor.selectParticipants(ctx, getTaskId(),
-                StorageType.ACTIVE);
+                type);
             if (Tools.isFolderPrivate(folder)) {
                 Tools.fillStandardFolders(getOrigParticipants(),
                     getOrigFolder(), true);
@@ -278,8 +301,7 @@ class UpdateData {
      */
     private Set<Folder> getOrigFolder() throws TaskException {
         if (null == origFolders) {
-            origFolders = foldStor.selectFolder(ctx, getTaskId(), StorageType
-                .ACTIVE);
+            origFolders = foldStor.selectFolder(ctx, getTaskId(), type);
         }
         return origFolders;
     }
@@ -452,10 +474,12 @@ class UpdateData {
             // one to get folder and confirmation information.
             // Only internal participants can be selected here because of
             // type REMOVED.
-            final Set<TaskParticipant> origRemovedParts = partStor
-                .selectParticipants(ctx, getTaskId(), StorageType.REMOVED);
-            origRemovedParts.retainAll(added);
-            added.addAll(origRemovedParts);
+            if (StorageType.ACTIVE == type) {
+                final Set<TaskParticipant> origRemovedParts = partStor
+                    .selectParticipants(ctx, getTaskId(), StorageType.REMOVED);
+                origRemovedParts.retainAll(added);
+                added.addAll(origRemovedParts);
+            }
             // Find removed participants
             removed.addAll(getOrigParticipants());
             removed.removeAll(getChangedParticipants());
@@ -584,7 +608,16 @@ class UpdateData {
      */
     void doUpdate() throws TaskException {
         updateTask(ctx, changed, lastRead, getModifiedFields(), getAdded(),
-            getRemoved(), getAddedFolder(), getRemovedFolder());
+            getRemoved(), getAddedFolder(), getRemovedFolder(), type);
+    }
+
+    static void updateTask(final Context ctx, final Task task,
+        final Date lastRead, final int[] modified,
+        final Set<TaskParticipant> add, final Set<TaskParticipant> remove,
+        final Set<Folder> addFolder, final Set<Folder> removeFolder)
+        throws TaskException {
+        updateTask(ctx, task, lastRead, modified, add, remove, addFolder,
+            removeFolder, StorageType.ACTIVE);
     }
 
     /**
@@ -604,8 +637,8 @@ class UpdateData {
     static void updateTask(final Context ctx, final Task task,
         final Date lastRead, final int[] modified,
         final Set<TaskParticipant> add, final Set<TaskParticipant> remove,
-        final Set<Folder> addFolder, final Set<Folder> removeFolder)
-        throws TaskException {
+        final Set<Folder> addFolder, final Set<Folder> removeFolder,
+        final StorageType type) throws TaskException {
         Connection con;
         try {
             con = DBPool.pickupWriteable(ctx);
@@ -615,7 +648,7 @@ class UpdateData {
         try {
             con.setAutoCommit(false);
             updateTask(ctx, con, task, lastRead, modified, add, remove,
-                addFolder, removeFolder);
+                addFolder, removeFolder, type);
             con.commit();
         } catch (SQLException e) {
             rollback(con);
@@ -631,6 +664,15 @@ class UpdateData {
             }
             DBPool.closeWriterSilent(ctx, con);
         }
+    }
+
+    static void updateTask(final Context ctx, final Connection con,
+        final Task task, final Date lastRead, final int[] modified,
+        final Set<TaskParticipant> add, final Set<TaskParticipant> remove,
+        final Set<Folder> addFolder, final Set<Folder> removeFolder)
+        throws TaskException {
+        updateTask(ctx, con, task, lastRead, modified, add, remove, addFolder,
+            removeFolder, StorageType.ACTIVE);
     }
 
     /**
@@ -650,30 +692,29 @@ class UpdateData {
     static void updateTask(final Context ctx, final Connection con,
         final Task task, final Date lastRead, final int[] modified,
         final Set<TaskParticipant> add, final Set<TaskParticipant> remove,
-        final Set<Folder> addFolder, final Set<Folder> removeFolder)
-        throws TaskException {
+        final Set<Folder> addFolder, final Set<Folder> removeFolder,
+        final StorageType type) throws TaskException {
         final int taskId = task.getObjectID();
-        storage.updateTask(ctx, con, task, lastRead, modified, StorageType
-            .ACTIVE);
+        storage.updateTask(ctx, con, task, lastRead, modified, type);
         if (null != add) {
-            partStor.insertParticipants(ctx, con, taskId, add, StorageType
-                .ACTIVE);
-            partStor.deleteParticipants(ctx, con, taskId, add, StorageType
-                .REMOVED, false);
+            partStor.insertParticipants(ctx, con, taskId, add, type);
+            if (StorageType.ACTIVE == type) {
+                partStor.deleteParticipants(ctx, con, taskId, add, StorageType
+                    .REMOVED, false);
+            }
         }
         if (null != remove) {
-            partStor.insertParticipants(ctx, con, taskId, remove,
-                StorageType.REMOVED);
-            partStor.deleteParticipants(ctx, con, taskId, remove,
-                StorageType.ACTIVE, true);
+            if (StorageType.ACTIVE == type) {
+                partStor.insertParticipants(ctx, con, taskId, remove,
+                    StorageType.REMOVED);
+            }
+            partStor.deleteParticipants(ctx, con, taskId, remove, type, true);
         }
         if (null != removeFolder) {
-            foldStor.deleteFolder(ctx, con, taskId, removeFolder,
-                StorageType.ACTIVE);
+            foldStor.deleteFolder(ctx, con, taskId, removeFolder, type);
         }
         if (null != addFolder) {
-            foldStor.insertFolder(ctx, con, taskId, addFolder, StorageType
-                .ACTIVE);
+            foldStor.insertFolder(ctx, con, taskId, addFolder, type);
         }
     }
 
