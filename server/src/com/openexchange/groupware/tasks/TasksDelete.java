@@ -60,6 +60,7 @@ import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.session.Session;
+import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 
 /**
  * This class implements the delete listener for deleting tasks and participants
@@ -73,6 +74,10 @@ public class TasksDelete implements DeleteListener {
      */
     private static final StorageType[] TYPES_AD = new StorageType[] {
         StorageType.ACTIVE, StorageType.DELETED };
+
+    private static final FolderStorage foldStor = FolderStorage.getInstance();
+
+    private static final ParticipantStorage partStor = ParticipantStorage.getInstance();
 
     /**
      * Default constructor.
@@ -89,7 +94,7 @@ public class TasksDelete implements DeleteListener {
         throws DeleteFailedException {
         switch (event.getType()) {
         case DeleteEvent.TYPE_USER:
-            deleteUser(event, readCon, writeCon);
+            deleteUser(event, writeCon);
             break;
         case DeleteEvent.TYPE_GROUP:
             deleteGroup(event, readCon, writeCon);
@@ -104,16 +109,15 @@ public class TasksDelete implements DeleteListener {
     /**
      * Delete a user from all tasks.
      * @param event Event.
-     * @param readCon readable database connection.
-     * @param writeCon writable database connection.
+     * @param con writable database connection.
      * @throws DeleteFailedException if the delete gives an error.
      */
-    private void deleteUser(final DeleteEvent event, final Connection readCon,
-        final Connection writeCon) throws DeleteFailedException {
+    private void deleteUser(final DeleteEvent event, final Connection con)
+        throws DeleteFailedException {
         try {
             // First remove the user from the participants of tasks. Then only
             // tasks exist that have other users as participants or no one.
-            removeUserFromParticipants(event, writeCon);
+            removeUserFromParticipants(event, con);
             // Check now the folder mappings. Find all folder mappings for the
             // user to delete. If tasks has participants and several folder
             // mappings(delegated in private folder) the folder mapping can be
@@ -124,9 +128,9 @@ public class TasksDelete implements DeleteListener {
             // changed to mailadmin. Remaining task with single folder mappings
             // must be private tasks that can be deleted.
             // Delete private task in private folders.
-            assignToAdmin(event, writeCon);
+            assignToAdmin(event, con);
             // Change createdFrom and modifiedBy attributes of left over tasks.
-            changeCFMB(event, writeCon);
+            changeCFMB(event, con);
         } catch (final TaskException e) {
             throw new DeleteFailedException(e);
         }
@@ -144,7 +148,6 @@ public class TasksDelete implements DeleteListener {
         throws TaskException {
         final Context ctx = event.getContext();
         final int userId = event.getId();
-        final ParticipantStorage partStor = ParticipantStorage.getInstance();
         for (StorageType type : StorageType.values()) {
             final int[] tasks = partStor.findTasksWithParticipant(ctx,
                 writeCon, userId, type);
@@ -158,45 +161,56 @@ public class TasksDelete implements DeleteListener {
     /**
      * Assigns all left tasks to mailadmin.
      * @param event Event.
-     * @param writeCon writable database connection.
+     * @param con writable database connection.
      * @throws TaskException if a problem occurs.
      */
     private void assignToAdmin(final DeleteEvent event,
-        final Connection writeCon) throws TaskException {
+        final Connection con) throws TaskException {
         final Session session = getSession(event);
         final Context ctx = event.getContext();
         final int userId = event.getId();
-        final FolderStorage foldStor = FolderStorage.getInstance();
         for (StorageType type : TYPES_AD) {
-            final int[][] result = foldStor.searchFolderByUser(ctx, writeCon,
+            final int[][] result = foldStor.searchFolderByUser(ctx, con,
                 userId, type);
             for (int[] folderAndTask : result) {
                 final int folderId = folderAndTask[0];
-                final FolderObject folder = Tools.getFolder(ctx, folderId);
+                FolderObject folder = null;
+                try {
+                    folder = Tools.getFolder(ctx, con, folderId);
+                } catch (final OXFolderNotFoundException e) {
+                    // Nothing to do.
+                }
                 final int taskId = folderAndTask[1];
-                final Set<Folder> folders = foldStor.selectFolder(ctx, writeCon,
+                final Set<Folder> folders = foldStor.selectFolder(ctx, con,
                     taskId, type);
                 if (folders.size() == 0) {
+                    final String folderName;
+                    if (null == folder) {
+                        folderName = "unknown";
+                    } else {
+                        folderName = folder.getFolderName();
+                    }
                     throw new TaskException(TaskException.Code.NO_PERMISSION,
-                        Integer.valueOf(taskId), folder.getFolderName(), Integer
+                        Integer.valueOf(taskId), folderName, Integer
                         .valueOf(folderId));
                 } else if (folders.size() > 1) {
-                    foldStor.deleteFolder(ctx, writeCon, taskId, folderId,
+                    // Participant with userId already removed by
+                    // removeUserFromParticipants()
+                    foldStor.deleteFolder(ctx, con, taskId, folderId,
                         type);
-                } else if (ctx.getMailadmin() == userId) {
-                    TaskLogic.removeTask(session, ctx, writeCon, folderId,
-                        taskId, type);
-                } else if (StorageType.DELETED == type) {
-                    TaskLogic.removeTask(session, ctx, writeCon, folderId,
+                } else if (ctx.getMailadmin() == userId
+                    || StorageType.DELETED == type
+                    || null == folder) {
+                    TaskLogic.removeTask(session, ctx, con, folderId,
                         taskId, type);
                 } else if (Tools.isFolderPublic(folder)) {
-                    foldStor.deleteFolder(ctx, writeCon, taskId, folderId,
+                    foldStor.deleteFolder(ctx, con, taskId, folderId,
                         type);
                     final Folder aFolder = new Folder(folderId, ctx
                         .getMailadmin());
-                    foldStor.insertFolder(ctx, writeCon, taskId, aFolder, type);
+                    foldStor.insertFolder(ctx, con, taskId, aFolder, type);
                 } else if (Tools.isFolderPrivate(folder)) {
-                    TaskLogic.removeTask(session, ctx, writeCon, folderId,
+                    TaskLogic.removeTask(session, ctx, con, folderId,
                         taskId, type);
                 } else {
                     throw new TaskException(Code.UNIMPLEMENTED);

@@ -78,6 +78,7 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 
 /**
  * This class contains some tools methods for tasks.
@@ -179,6 +180,30 @@ public final class Tools {
             throw new TaskException(e);
         } finally {
             DBPool.closeReaderSilent(ctx, con);
+        }
+        return folder;
+    }
+
+    /**
+     * Reads a folder.
+     * @param ctx Context.
+     * @param folderId unique identifier of the folder to read.
+     * @return the folder object.
+     * @throws TaskException if no database connection can be obtained or an
+     * error occurs while reading the folder.
+     * @throws OXFolderNotFoundException if the folder can not be found.
+     */
+    static FolderObject getFolder(final Context ctx, final Connection con,
+        final int folderId) throws TaskException, OXFolderNotFoundException {
+        FolderObject folder = null;
+        try {
+            folder = new OXFolderAccess(con, ctx).getFolderObject(folderId);
+        } catch (final FolderCacheNotEnabledException e) {
+            throw new TaskException(e);
+        } catch (final OXFolderNotFoundException e) {
+            throw e;
+        } catch (final OXException e) {
+            throw new TaskException(e);
         }
         return folder;
     }

@@ -1,8 +1,12 @@
+* 2008-04-21 - marcus.klein@open-xchange.com
+
+ - Bugfix #11173: Initialize folder component if server is in admin mode.
+ - Bugfix #11174: Expect an OXFolder to be already deleted.
+
 * 2008-04-15 - francisco.laguna@open-xchange.com
 
  - Delete/Modify calendar data on user downgrade.
  - Delete/Modify infostore data on user downgrade.
-
 
 * 2008-04-15 - thorben.betten@open-xchange.com
 
