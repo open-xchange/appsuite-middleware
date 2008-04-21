@@ -114,11 +114,11 @@ public class RdbParticipantStorage extends ParticipantStorage {
             }
             result = stmt.executeQuery();
             while (result.next()) {
-                final UserParticipant participant = new UserParticipant();
                 pos = 1;
                 final int taskId = result.getInt(pos++);
-                participant.setIdentifier(result.getInt(pos++));
-                Integer groupId = result.getInt(pos++);
+                final UserParticipant participant = new UserParticipant(
+                    result.getInt(pos++));
+                Integer groupId = Integer.valueOf(result.getInt(pos++));
                 if (result.wasNull()) {
                     groupId = null;
                 }
@@ -134,10 +134,11 @@ public class RdbParticipantStorage extends ParticipantStorage {
                         taskParticipant.setFolderId(folderId);
                     }
                 }
-                HashSet<InternalParticipant> participants = tmp.get(taskId);
+                HashSet<InternalParticipant> participants = tmp.get(Integer
+                    .valueOf(taskId));
                 if (null == participants) {
                     participants = new HashSet<InternalParticipant>();
-                    tmp.put(taskId, participants);
+                    tmp.put(Integer.valueOf(taskId), participants);
                 }
                 participants.add(taskParticipant);
             }

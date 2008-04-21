@@ -189,9 +189,9 @@ final class TasksImpl extends Tasks {
                 if (deleteTask.contains(Integer.valueOf(data.taskId))) {
                     continue;
                 }
-                TaskLogic.updateTask(ctx, data.task, data.lastRead,
-                    data.modified, data.add, data.remove, data.addFolder,
-                    data.removeFolder);
+                com.openexchange.groupware.tasks.UpdateData.updateTask(ctx,
+                    data.task, data.lastRead, data.modified, data.add,
+                    data.remove, data.addFolder, data.removeFolder);
             }
         } catch (TaskException e) {
             throw Tools.convert(e);

@@ -103,44 +103,12 @@ public final class Tools {
 
     /**
      * Checks if the folder is a public folder.
-     * @param ctx Context.
-     * @param folderId unique identifier of the folder.
-     * @return <code>true</code> if the folder is a public folder,
-     *         <code>false</code> otherwise.
-     * @throws TaskException if no database connection can be obtained or an
-     * error occurs while reading the folder.
-     * @deprecated Use {@link #isFolderPublic(FolderObject)}
-     */
-    static boolean isFolderPublic(final Context ctx, final int folderId)
-        throws TaskException {
-        final FolderObject folder = getFolder(ctx, folderId);
-        return isFolderPublic(folder);
-    }
-
-    /**
-     * Checks if the folder is a public folder.
      * @param folder folder object.
      * @return <code>true</code> if the folder is a public folder,
      * <code>false</code> otherwise.
      */
     static boolean isFolderPublic(final FolderObject folder) {
         return FolderObject.PUBLIC == folder.getType();
-    }
-
-    /**
-     * Checks if the folder is a private folder.
-     * @param ctx Context.
-     * @param folderId unique identifier of the folder.
-     * @return <code>true</code> if the folder is a private folder,
-     *         <code>false</code> otherwise.
-     * @throws TaskException if no database connection can be obtained or an
-     * error occurs while reading the folder.
-     * @deprecated Use {@link #isFolderPrivate(FolderObject)}
-     */
-    static boolean isFolderPrivate(final Context ctx, final int folderId)
-        throws TaskException {
-        final FolderObject folder = getFolder(ctx, folderId);
-        return isFolderPrivate(folder);
     }
 
     /**

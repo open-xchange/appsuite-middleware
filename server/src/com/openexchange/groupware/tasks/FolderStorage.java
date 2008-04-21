@@ -241,6 +241,18 @@ public abstract class FolderStorage {
     }
 
     /**
+     * Gets the identifier of tasks in a folder.
+     * @param ctx Context.
+     * @param con readonly database connection.
+     * @param folderId identifier of the folder.
+     * @param type ACTIVE or DELETED.
+     * @return an int array of tasks in that folder.
+     * @throws TaskException if a sql problem occurs.
+     */
+    abstract int[] getTasksInFolder(Context ctx, Connection con, int folderId,
+        StorageType type) throws TaskException;
+
+    /**
      * Selects all task folder mappings for a user.
      * @param ctx Context.
      * @param readCon readable database connection.

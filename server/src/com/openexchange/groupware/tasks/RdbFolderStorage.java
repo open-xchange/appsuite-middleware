@@ -66,6 +66,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.TaskException.Code;
+import com.openexchange.tools.Collections;
 
 /**
  * Implements the interface for storing task folders using a relational
@@ -218,9 +219,35 @@ public class RdbFolderStorage extends FolderStorage {
             closeSQLStuff(null, stmt);
         }
         if (folderIds.length != deleted) {
-            LOG.error(new TaskException(Code.FOLDER_DELETE_WRONG, folderIds
-                .length, deleted));
+            LOG.error(new TaskException(Code.FOLDER_DELETE_WRONG, Integer
+                .valueOf(folderIds.length), Integer.valueOf(deleted)));
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    int[] getTasksInFolder(final Context ctx, final Connection con,
+        int folderId, final StorageType type) throws TaskException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        final List<Integer> tasks = new ArrayList<Integer>();
+        try {
+             stmt = con.prepareStatement(SQL.TASK_IN_FOLDER.get(type));
+             int counter = 1;
+             stmt.setInt(counter++, ctx.getContextId());
+             stmt.setInt(counter++, folderId);
+             result = stmt.executeQuery();
+             while (result.next()) {
+                 tasks.add(Integer.valueOf(result.getInt(1)));
+             }
+        } catch (SQLException e) {
+            throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+        return Collections.toArray(tasks);
     }
 
     /**

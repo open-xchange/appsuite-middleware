@@ -69,11 +69,9 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskException.Code;
-import com.openexchange.groupware.tasks.mapping.Status;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
-import com.openexchange.tools.Arrays;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -284,6 +282,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
                 throw new TaskException(Code.PRIVATE_FLAG, Integer
                     .valueOf(folderId));
             }
+            // TODO create insert class
             // Create folder mappings
             Set<Folder> folders;
             if (Tools.isFolderPublic(folder)) {
@@ -338,72 +337,15 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         }
         final UpdateData update = new UpdateData(ctx, user, userConfig,
             folder, task, lastRead);
-        final Task updated;
-        final Set<TaskParticipant> removedParts;
-        final Set<TaskParticipant> updatedParts;
-        final Set<Folder> updatedFolder;
-        final boolean move;
         try {
             update.prepare();
-            removedParts = update.getRemoved();
-            TaskLogic.updateTask(ctx, task, lastRead, update.getModifiedFields(),
-                update.getAdded(), removedParts, update.getAddedFolder(),
-                update.getRemovedFolder());
-            updated = update.getUpdated();
-            updatedParts = update.getUpdatedParticipants();
-            updatedFolder = update.getUpdatedFolder();
-            move = update.isMove();
+            // TODO join doUpdate(), updateReminder() and makeNextRecurrence() in one transaction.
+            update.doUpdate();
+            update.sentEvent(session);
+            update.updateReminder();
+            update.makeNextRecurrence(session);
         } catch (TaskException e) {
             throw Tools.convert(e);
-        }
-        try {
-            new EventClient(session).modify(updated);
-        } catch (EventException e) {
-            throw Tools.convert(new TaskException(Code.EVENT, e));
-        } catch (ContextException e) {
-            throw Tools.convert(new TaskException(Code.EVENT, e));
-        }
-        if (updated.containsAlarm()) {
-            Reminder.updateAlarm(ctx, updated, user);
-        }
-        if (move) {
-            Reminder.fixAlarm(ctx, updated, removedParts, updatedFolder);
-        }
-        try {
-            if (Task.NO_RECURRENCE != updated.getRecurrenceType() && Task.DONE
-                == updated.getStatus() && Arrays.contains(update
-                    .getModifiedFields(), Status.SINGLETON.getId())) {
-                insertNextRecurrence(ctx, userId, userConfig, updated,
-                    updatedParts, updatedFolder);
-            }
-        } catch (TaskException e) {
-            throw Tools.convert(e);
-        }
-    }
-
-    /**
-     * Inserts a new task according to the recurrence.
-     * @param task recurring task.
-     * @param parts participants of the updated task.
-     * @param folders folders of the updated task.
-     * @throws TaskException if creating the new task fails.
-     * @throws OXException if sending an event about new task fails.
-     */
-    private void insertNextRecurrence(final Context ctx, final int userId,
-        final UserConfiguration userConfig, final Task task,
-        final Set<TaskParticipant> parts, final Set<Folder> folders)
-        throws TaskException, OXException {
-        final boolean next = TaskLogic.makeRecurrence(task);
-        if (next) {
-            TaskLogic.checkNewTask(task, userId, userConfig, parts);
-            TaskLogic.insertTask(ctx, task, parts, folders);
-            try {
-                new EventClient(session).create(task);
-            } catch (EventException e) {
-                throw Tools.convert(new TaskException(Code.EVENT, e));
-            } catch (ContextException e) {
-                throw Tools.convert(new TaskException(Code.EVENT, e));
-            }
         }
     }
 
@@ -437,6 +379,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             throw Tools.convert(e);
         }
         try {
+            // TODO create delete class
             TaskLogic.deleteTask(session, ctx, userId, task, lastModified);
         } catch (TaskException e) {
             throw Tools.convert(e);

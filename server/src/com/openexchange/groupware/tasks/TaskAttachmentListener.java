@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tasks;
 
+import java.sql.Connection;
 import java.util.Date;
 
 import org.apache.commons.logging.Log;
@@ -97,13 +98,14 @@ public class TaskAttachmentListener implements AttachmentListener {
         task.setObjectID(event.getAttachedId());
         task.setLastModified(lastModified);
         task.setModifiedBy(event.getUser().getId());
+        final Connection con = event.getWriteConnection();
         try {
-            final Task oldTask = storage.selectTask(ctx, event.getAttachedId(),
-                StorageType.ACTIVE);
+            final Task oldTask = storage.selectTask(ctx, con,
+                event.getAttachedId(), StorageType.ACTIVE);
             final Date lastRead = oldTask.getLastModified();
             task.setNumberOfAttachments(oldTask.getNumberOfAttachments() + 1);
-            TaskLogic.updateTask(ctx, task, lastRead, UPDATE_FIELDS, null, null,
-                null, null);
+            UpdateData.updateTask(ctx, con, task, lastRead, UPDATE_FIELDS, null,
+                null, null, null);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
@@ -126,19 +128,19 @@ public class TaskAttachmentListener implements AttachmentListener {
         final Date lastModified = new Date();
         task.setLastModified(lastModified);
         task.setModifiedBy(event.getUser().getId());
+        final Connection con = event.getWriteConnection();
         try {
-            final Task oldTask = storage.selectTask(ctx, event.getAttachedId(),
-                StorageType.ACTIVE);
+            final Task oldTask = storage.selectTask(ctx, con,
+                event.getAttachedId(), StorageType.ACTIVE);
             final Date lastRead = oldTask.getLastModified();
             final int numOfAttachments = oldTask.getNumberOfAttachments()
                 - event.getDetached().length;
             if (numOfAttachments < 0) {
                 throw new TaskException(Code.WRONG_ATTACHMENT_COUNT);
-            } else {
-                task.setNumberOfAttachments(numOfAttachments);
             }
-            TaskLogic.updateTask(ctx, task, lastRead, UPDATE_FIELDS, null, null,
-                null, null);
+            task.setNumberOfAttachments(numOfAttachments);
+            UpdateData.updateTask(ctx, con, task, lastRead, UPDATE_FIELDS, null,
+                null, null, null);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }

@@ -652,71 +652,6 @@ public final class TaskLogic {
         }
     }
 
-    static void updateTask(final Context ctx, final Task task,
-        final Date lastRead, final int[] modified,
-        final Set<TaskParticipant> add, final Set<TaskParticipant> remove,
-        final Set<Folder> addFolder, final Set<Folder> removeFolder)
-        throws TaskException {
-        Connection con;
-        try {
-            con = DBPool.pickupWriteable(ctx);
-        } catch (DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
-        try {
-            con.setAutoCommit(false);
-            updateTask(ctx, con, task, lastRead, modified, add, remove,
-                addFolder, removeFolder);
-            con.commit();
-        } catch (SQLException e) {
-            rollback(con);
-            throw new TaskException(Code.UPDATE_FAILED, e, e.getMessage());
-        } catch (TaskException e) {
-            rollback(con);
-            throw e;
-        } finally {
-            try {
-                con.setAutoCommit(true);
-            } catch (SQLException e) {
-                LOG.error("Problem setting auto commit to true.", e);
-            }
-            DBPool.closeWriterSilent(ctx, con);
-        }
-    }
-    
-    /**
-     * TODO Move this method to {@link UpdateData}.
-     */
-    static void updateTask(final Context ctx, final Connection con,
-        final Task task, final Date lastRead, final int[] modified,
-        final Set<TaskParticipant> add, final Set<TaskParticipant> remove,
-        final Set<Folder> addFolder, final Set<Folder> removeFolder)
-        throws TaskException {
-        final int taskId = task.getObjectID();
-        storage.updateTask(ctx, con, task, lastRead, modified, StorageType
-            .ACTIVE);
-        if (null != add) {
-            partStor.insertParticipants(ctx, con, taskId, add, StorageType
-                .ACTIVE);
-            partStor.deleteParticipants(ctx, con, taskId, add, StorageType
-                .REMOVED, false);
-        }
-        if (null != remove) {
-            partStor.insertParticipants(ctx, con, taskId, remove,
-                StorageType.REMOVED);
-            partStor.deleteParticipants(ctx, con, taskId, remove,
-                StorageType.ACTIVE, true);
-        }
-        if (null != removeFolder) {
-            foldStor.deleteFolder(ctx, con, taskId, removeFolder,
-                StorageType.ACTIVE);
-        }
-        if (null != addFolder) {
-            foldStor.insertFolder(ctx, con, taskId, addFolder, StorageType
-                .ACTIVE);
-        }
-    }
-
     /**
      * Deletes an ACTIVE task object. This stores the task as a DELETED task
      * object, deletes all reminders and sends the task delete event.
@@ -874,7 +809,7 @@ public final class TaskLogic {
             final Task load = storage.selectTask(ctx, con, taskId, StorageType
                 .ACTIVE);
             task.setLastModified(new Date());
-            TaskLogic.updateTask(ctx, con, task, load.getLastModified(),
+            UpdateData.updateTask(ctx, con, task, load.getLastModified(),
                 new int[] { Task.LAST_MODIFIED, Task.MODIFIED_BY }, null, null,
                 null, null);
             con.commit();

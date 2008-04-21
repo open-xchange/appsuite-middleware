@@ -125,13 +125,13 @@ public final class Status implements Mapper<Integer> {
      * {@inheritDoc}
      */
     public Integer get(final Task task) {
-        return task.getStatus();
+        return Integer.valueOf(task.getStatus());
     }
 
     /**
      * {@inheritDoc}
      */
     public void set(final Task task, final Integer value) {
-        task.setStatus(value);
+        task.setStatus(value.intValue());
     }
 }

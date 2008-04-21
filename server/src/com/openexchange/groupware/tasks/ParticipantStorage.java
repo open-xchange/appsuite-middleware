@@ -117,7 +117,7 @@ abstract class ParticipantStorage {
         final Connection con, final int taskId, final StorageType type)
         throws TaskException {
         Set<InternalParticipant> parts = selectInternal(ctx, con,
-            new int[] { taskId }, type).get(taskId);
+            new int[] { taskId }, type).get(Integer.valueOf(taskId));
         if (null == parts) {
             parts = Collections.emptySet();
         }
@@ -318,7 +318,7 @@ abstract class ParticipantStorage {
         final Connection con, final int taskId, final StorageType type)
         throws TaskException {
         Set<ExternalParticipant> parts = selectExternal(ctx, con,
-            new int[] { taskId }, type).get(taskId);
+            new int[] { taskId }, type).get(Integer.valueOf(taskId));
         if (null == parts) {
             parts = Collections.emptySet();
         }

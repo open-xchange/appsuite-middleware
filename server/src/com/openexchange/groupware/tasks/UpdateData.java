@@ -49,17 +49,33 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.tools.sql.DBUtils.rollback;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.api2.OXException;
+import com.openexchange.event.EventException;
+import com.openexchange.event.impl.EventClient;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Mapping.Mapper;
 import com.openexchange.groupware.tasks.TaskException.Code;
+import com.openexchange.groupware.tasks.mapping.Status;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.session.Session;
+import com.openexchange.tools.Arrays;
 
 /**
  * This class contains the logic for updating tasks. It calculates what is to
@@ -67,6 +83,11 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 class UpdateData {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(UpdateData.class);
 
     /**
      * Context.
@@ -166,17 +187,17 @@ class UpdateData {
     /**
      * The task storage.
      */
-    private final TaskStorage storage = TaskStorage.getInstance();
+    private static final TaskStorage storage = TaskStorage.getInstance();
 
     /**
      * The participant storage.
      */
-    private final ParticipantStorage partStor = ParticipantStorage.getInstance();
+    private static final ParticipantStorage partStor = ParticipantStorage.getInstance();
 
     /**
      * The folder storage.
      */
-    private final FolderStorage foldStor = FolderStorage.getInstance();
+    private static final FolderStorage foldStor = FolderStorage.getInstance();
 
     /**
      * Default constructor.
@@ -302,7 +323,7 @@ class UpdateData {
         prepareParticipants();
         prepareFolder();
     }
-    
+
     private boolean preparedFields;
 
     private void prepareFields() throws TaskException {
@@ -553,5 +574,174 @@ class UpdateData {
 
     private int getDestFolderId() throws TaskException {
         return getDestFolder().getObjectID();
+    }
+
+    /* ---------- Now the methods for doing the update stuff ---------- */
+
+    /**
+     * This method executes the prepared update.
+     * @throws TaskException 
+     */
+    void doUpdate() throws TaskException {
+        updateTask(ctx, changed, lastRead, getModifiedFields(), getAdded(),
+            getRemoved(), getAddedFolder(), getRemovedFolder());
+    }
+
+    /**
+     * This method execute the SQL statements on writable connection defined by
+     * the given data for the update. The database connection is put into
+     * transaction mode.
+     * @param ctx Context.
+     * @param task task object with changed values.
+     * @param lastRead when has this task object been read last.
+     * @param modified modified task attributes.
+     * @param add added participants.
+     * @param remove removed participants.
+     * @param addFolder added folder mappings for the participants.
+     * @param removeFolder removed folder mappings for the participants.
+     * @throws TaskException if some SQL command fails.
+     */
+    static void updateTask(final Context ctx, final Task task,
+        final Date lastRead, final int[] modified,
+        final Set<TaskParticipant> add, final Set<TaskParticipant> remove,
+        final Set<Folder> addFolder, final Set<Folder> removeFolder)
+        throws TaskException {
+        Connection con;
+        try {
+            con = DBPool.pickupWriteable(ctx);
+        } catch (DBPoolingException e) {
+            throw new TaskException(Code.NO_CONNECTION, e);
+        }
+        try {
+            con.setAutoCommit(false);
+            updateTask(ctx, con, task, lastRead, modified, add, remove,
+                addFolder, removeFolder);
+            con.commit();
+        } catch (SQLException e) {
+            rollback(con);
+            throw new TaskException(Code.UPDATE_FAILED, e, e.getMessage());
+        } catch (TaskException e) {
+            rollback(con);
+            throw e;
+        } finally {
+            try {
+                con.setAutoCommit(true);
+            } catch (SQLException e) {
+                LOG.error("Problem setting auto commit to true.", e);
+            }
+            DBPool.closeWriterSilent(ctx, con);
+        }
+    }
+
+    /**
+     * This method execute the SQL statements on the given connection defined by
+     * the given data for the update.
+     * @param ctx Context.
+     * @param con writable database connection.
+     * @param task task object with changed values.
+     * @param lastRead when has this task object been read last.
+     * @param modified modified task attributes.
+     * @param add added participants.
+     * @param remove removed participants.
+     * @param addFolder added folder mappings for the participants.
+     * @param removeFolder removed folder mappings for the participants.
+     * @throws TaskException if some SQL command fails.
+     */
+    static void updateTask(final Context ctx, final Connection con,
+        final Task task, final Date lastRead, final int[] modified,
+        final Set<TaskParticipant> add, final Set<TaskParticipant> remove,
+        final Set<Folder> addFolder, final Set<Folder> removeFolder)
+        throws TaskException {
+        final int taskId = task.getObjectID();
+        storage.updateTask(ctx, con, task, lastRead, modified, StorageType
+            .ACTIVE);
+        if (null != add) {
+            partStor.insertParticipants(ctx, con, taskId, add, StorageType
+                .ACTIVE);
+            partStor.deleteParticipants(ctx, con, taskId, add, StorageType
+                .REMOVED, false);
+        }
+        if (null != remove) {
+            partStor.insertParticipants(ctx, con, taskId, remove,
+                StorageType.REMOVED);
+            partStor.deleteParticipants(ctx, con, taskId, remove,
+                StorageType.ACTIVE, true);
+        }
+        if (null != removeFolder) {
+            foldStor.deleteFolder(ctx, con, taskId, removeFolder,
+                StorageType.ACTIVE);
+        }
+        if (null != addFolder) {
+            foldStor.insertFolder(ctx, con, taskId, addFolder, StorageType
+                .ACTIVE);
+        }
+    }
+
+    void sentEvent(final Session session) throws OXException, TaskException {
+        sentEvent(session, getUpdated());
+    }
+
+    static void sentEvent(final Session session, final Task updated)
+        throws TaskException, OXException {
+        try {
+            new EventClient(session).modify(updated);
+        } catch (EventException e) {
+            throw new TaskException(Code.EVENT, e);
+        } catch (ContextException e) {
+            throw new TaskException(Code.EVENT, e);
+        }
+    }
+
+    void updateReminder() throws OXException, TaskException {
+        updateReminder(ctx, getUpdated(), user, isMove(), getRemoved(),
+            getUpdatedFolder());
+    }
+
+    static void updateReminder(final Context ctx, final Task updated,
+        final User user, final boolean move, final Set<TaskParticipant> removed,
+        final Set<Folder> folders) throws OXException {
+        if (updated.containsAlarm()) {
+            Reminder.updateAlarm(ctx, updated, user);
+        }
+        if (move) {
+            Reminder.fixAlarm(ctx, updated, removed, folders);
+        }
+    }
+
+    void makeNextRecurrence(final Session session) throws TaskException,
+        OXException {
+        if (Task.NO_RECURRENCE != updated.getRecurrenceType() && Task.DONE
+            == updated.getStatus() && Arrays.contains(getModifiedFields(),
+                Status.SINGLETON.getId())) {
+            insertNextRecurrence(session, ctx, getUserId(), userConfig,
+                getUpdated(), getUpdatedParticipants(), getUpdatedFolder());
+        }
+    }
+
+    /**
+     * Inserts a new task according to the recurrence.
+     * @param task recurring task.
+     * @param parts participants of the updated task.
+     * @param folders folders of the updated task.
+     * @throws TaskException if creating the new task fails.
+     * @throws OXException if sending an event about new task fails.
+     */
+    private static void insertNextRecurrence(final Session session,
+        final Context ctx, final int userId, final UserConfiguration userConfig,
+        final Task task, final Set<TaskParticipant> parts,
+        final Set<Folder> folders) throws TaskException, OXException {
+        final boolean next = TaskLogic.makeRecurrence(task);
+        if (next) {
+            // TODO create insert class
+            TaskLogic.checkNewTask(task, userId, userConfig, parts);
+            TaskLogic.insertTask(ctx, task, parts, folders);
+            try {
+                new EventClient(session).create(task);
+            } catch (EventException e) {
+                throw Tools.convert(new TaskException(Code.EVENT, e));
+            } catch (ContextException e) {
+                throw Tools.convert(new TaskException(Code.EVENT, e));
+            }
+        }
     }
 }

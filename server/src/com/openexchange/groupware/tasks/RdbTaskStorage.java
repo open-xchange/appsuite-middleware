@@ -187,7 +187,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    TaskIterator list(final Context ctx, final int folderId,
+    TaskIterator list(final Context ctx, final Connection con, final int folderId,
         final int from, final int to, final int orderBy, final String orderDir,
         final int[] columns, final boolean onlyOwn, final int userId,
         final boolean noPrivate)
@@ -205,12 +205,6 @@ public class RdbTaskStorage extends TaskStorage {
         }
         sql.append(SQL.getOrder(orderBy, orderDir));
         sql.append(SQL.getLimit(from, to));
-        final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
         try {
             final PreparedStatement stmt = con.prepareStatement(sql.toString());
             int pos = 1;

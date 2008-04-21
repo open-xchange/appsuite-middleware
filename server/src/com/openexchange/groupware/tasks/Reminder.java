@@ -79,7 +79,7 @@ final class Reminder {
     private static final Log LOG = LogFactory.getLog(Reminder.class);
 
     /**
-     * Prevent instanciation.
+     * Prevent instantiation.
      */
     private Reminder() {
         super();
@@ -178,7 +178,7 @@ final class Reminder {
         final ReminderSQLInterface remStor = new ReminderHandler(ctx);
         final Map<Integer, Task> tmp = new HashMap<Integer, Task>();
         for (Task task : tasks) {
-            tmp.put(task.getObjectID(), task);
+            tmp.put(Integer.valueOf(task.getObjectID()), task);
         }
         final ReminderObject[] reminders;
         try {
@@ -188,7 +188,7 @@ final class Reminder {
             throw new TaskException(e);
         }
         for (ReminderObject reminder : reminders) {
-            tmp.get(Integer.parseInt(reminder.getTargetId())).setAlarm(reminder
+            tmp.get(Integer.valueOf(reminder.getTargetId())).setAlarm(reminder
                 .getDate());
         }
     }

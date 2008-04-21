@@ -214,7 +214,7 @@ public class TasksDelete implements DeleteListener {
     }
 
     /**
-     * Remove delete user from remaining tasks in the attributes createdFrom and
+     * Remove deleted user from remaining tasks in the attributes createdFrom and
      * lastModified.
      * @param event Event.
      * @param readCon readable database connection.

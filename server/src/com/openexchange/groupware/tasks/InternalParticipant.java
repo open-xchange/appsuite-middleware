@@ -180,6 +180,7 @@ public class InternalParticipant extends TaskParticipant {
     /**
      * {@inheritDoc}
      */
+    @Override
     public int hashCode() {
         return getIdentifier();
     }
@@ -187,6 +188,7 @@ public class InternalParticipant extends TaskParticipant {
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean equals(final Object obj) {
         if (!(obj instanceof InternalParticipant)) {
             return false;
@@ -205,6 +207,7 @@ public class InternalParticipant extends TaskParticipant {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String toString() {
         return "TaskParticipant: " + getIdentifier() + ", Group: " + groupId
             + ", Folder: " + getFolderId();
@@ -215,12 +218,5 @@ public class InternalParticipant extends TaskParticipant {
      */
     void setGroupId(final Integer groupId) {
         this.groupId = groupId;
-    }
-
-    /**
-     * @param identifier the identifier to set.
-     */
-    void setIdentifier(final int identifier) {
-        user.setIdentifier(identifier);
     }
 }
