@@ -1,13 +1,21 @@
 package com.openexchange.ajax.mail.filter;
 
+import java.util.Properties;
+
+import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.mail.filter.actions.ConfigRequest;
 import com.openexchange.ajax.mail.filter.actions.ConfigResponse;
 import com.openexchange.mail.filter.ConfigTestHolder;
+import com.openexchange.test.AjaxInit;
 
 public class ConfigTest extends AbstractMailFilterTest {
 
+	protected static final String HOSTNAME = "hostname";
+	
+	protected String hostname = null;
+	
 	public ConfigTest(String name) {
 		super(name);
 	}
@@ -32,5 +40,14 @@ public class ConfigTest extends AbstractMailFilterTest {
 		
 		assertTrue("config tests not > 0", configTests.length > 0);
 		assertTrue("actions not > 0", actions.length > 0);
+	}
+	
+	public void testPreferencesTree() throws Exception {
+		final AJAXSession ajaxSession = getSession();
+		
+		final boolean mailFilterValue = ConfigTools.getMailFilterValue(ajaxSession.getConversation(),
+				getHostName(), ajaxSession.getId());
+		
+		assertEquals("mail filter config value", true, mailFilterValue);
 	}
 }
