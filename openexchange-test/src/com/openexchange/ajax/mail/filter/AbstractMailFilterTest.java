@@ -64,6 +64,7 @@ import com.openexchange.mail.filter.ajax.writer.test.NotWriterImpl;
 import com.openexchange.mail.filter.ajax.writer.test.TestWriterFactory;
 import com.openexchange.mail.filter.ajax.writer.test.TrueWriterImpl;
 import com.openexchange.mail.filter.test.AbstractTest;
+import com.openexchange.test.AjaxInit;
 import com.openexchange.test.OXTestToolkit;
 
 public class AbstractMailFilterTest extends AbstractAJAXSession {
@@ -72,12 +73,18 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
 
 	public static final int[] cols = { DataObject.OBJECT_ID };
 
+	protected static final String HOSTNAME = "hostname";
+	
+	protected String hostname = null;
+	
 	public AbstractMailFilterTest(String name) {
 		super(name);
 	}
 
 	protected void setUp() throws Exception {
 		super.setUp();
+		
+		hostname = AjaxInit.getAJAXProperty(HOSTNAME);
 		
 		// parser
 		ActionParserFactory.addParser("addflags", new AddFlagsParserImpl());
@@ -126,6 +133,10 @@ public class AbstractMailFilterTest extends AbstractAJAXSession {
 		ComparisonWriterFactory.addWriter("contains", new ContainsWriterImpl());
 		ComparisonWriterFactory.addWriter("regex", new RegexWriterImpl());
 		ComparisonWriterFactory.addWriter("size", new SizeWriterImpl());
+	}
+	
+	public String getHostName() {
+		return hostname;
 	}
 	
 	public static void deleteAllExistingRules(final String forUser, final AJAXSession ajaxSession) throws Exception {
