@@ -57,6 +57,7 @@ public class UnitTests {
 		tests.addTestSuite(com.openexchange.groupware.infostore.validation.InfostoreInvalidCharactersCheckTest.class);
 		//tests.addTestSuite(com.openexchange.groupware.infostore.DelUserFolderDiscovererTest.class);
 
+		tests.addTestSuite(com.openexchange.groupware.tasks.DowngradeTest.class);
 
 		tests.addTestSuite(com.openexchange.groupware.infostore.PathResolverTest.class);
 		tests.addTestSuite(com.openexchange.groupware.infostore.webdav.FolderCollectionPermissionHandlingTest.class);
