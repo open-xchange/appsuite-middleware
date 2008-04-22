@@ -75,7 +75,7 @@ public final class MailAccessWatcher {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MailAccessWatcher.class);
 
-	private static final ConcurrentMap<MailAccess<?, ?>, Long> mailConnections = new ConcurrentHashMap<MailAccess<?, ?>, Long>();
+	private static final ConcurrentMap<MailAccess<?, ?>, Long> mailAccesses = new ConcurrentHashMap<MailAccess<?, ?>, Long>();
 
 	private static final AtomicBoolean initialized = new AtomicBoolean();
 
@@ -117,7 +117,7 @@ public final class MailAccessWatcher {
 				if (MailConfig.isWatcherEnabled()) {
 					watcherTask.cancel();
 					ServerTimer.getTimer().purge();
-					mailConnections.clear();
+					mailAccesses.clear();
 					initialized.set(false);
 					if (LOG.isInfoEnabled()) {
 						LOG.info("Mail connection watcher successfully stopped");
@@ -135,37 +135,37 @@ public final class MailAccessWatcher {
 	}
 
 	/**
-	 * Adds specified mail connection to this watcher's tracing if not already
-	 * added before. If already present its timestamp is updated.
+	 * Adds specified mail access to this watcher's tracing if not already added
+	 * before. If already present its timestamp is updated.
 	 * <p>
 	 * Watcher is established if not running, yet
 	 * 
-	 * @param mailConnection
-	 *            The mail connection to add
+	 * @param mailAccess
+	 *            The mail access to add
 	 */
-	public static void addMailConnection(final MailAccess<?, ?> mailConnection) {
+	public static void addMailAccess(final MailAccess<?, ?> mailAccess) {
 		if (!initialized.get()) {
-			LOG.error("Mail connection watcher is not running. Aborting addMailConnection()");
+			LOG.error("Mail connection watcher is not running. Aborting addMailAccess()");
 			return;
 		}
 		/*
 		 * Insert or update timestamp
 		 */
-		mailConnections.put(mailConnection, Long.valueOf(System.currentTimeMillis()));
+		mailAccesses.put(mailAccess, Long.valueOf(System.currentTimeMillis()));
 	}
 
 	/**
 	 * Removes specified mail access from this watcher's tracing
 	 * 
-	 * @param mailConnection
-	 *            The mail connection to remove
+	 * @param mailAccess
+	 *            The mail access to remove
 	 */
-	public static void removeMailAccess(final MailAccess<?, ?> mailConnection) {
+	public static void removeMailAccess(final MailAccess<?, ?> mailAccess) {
 		if (!initialized.get()) {
-			LOG.error("Mail connection watcher is not running. Aborting removeMailConnection()");
+			LOG.error("Mail connection watcher is not running. Aborting removeMailAccess()");
 			return;
 		}
-		mailConnections.remove(mailConnection);
+		mailAccesses.remove(mailAccess);
 	}
 
 	private static final String INFO_PREFIX = "UNCLOSED MAIL CONNECTION AFTER #N#msec:\n";
@@ -185,7 +185,7 @@ public final class MailAccessWatcher {
 			try {
 				final StringBuilder sb = new StringBuilder(512);
 				final List<MailAccess<?, ?>> exceededCons = new ArrayList<MailAccess<?, ?>>();
-				for (final Iterator<Entry<MailAccess<?, ?>, Long>> iter = mailConnections.entrySet().iterator(); iter
+				for (final Iterator<Entry<MailAccess<?, ?>, Long>> iter = mailAccesses.entrySet().iterator(); iter
 						.hasNext();) {
 					final Entry<MailAccess<?, ?>, Long> e = iter.next();
 					if (!e.getKey().isConnectedUnsafe()) {
@@ -205,21 +205,21 @@ public final class MailAccessWatcher {
 				}
 				if (!exceededCons.isEmpty()) {
 					/*
-					 * Remove/Close exceeded connections
+					 * Remove/Close exceeded accesses
 					 */
 					final int n = exceededCons.size();
 					for (int i = 0; i < n; i++) {
-						final MailAccess<?, ?> mailConnection = exceededCons.get(i);
+						final MailAccess<?, ?> mailAccess = exceededCons.get(i);
 						try {
 							if (MailConfig.isWatcherShallClose()) {
 								sb.setLength(0);
-								sb.append(INFO_PREFIX2).append(mailConnection.toString());
-								mailConnection.close(false);
+								sb.append(INFO_PREFIX2).append(mailAccess.toString());
+								mailAccess.close(false);
 								sb.append(INFO_PREFIX3);
 								LOG.info(sb.toString());
 							}
 						} finally {
-							mailConnections.remove(mailConnection);
+							mailAccesses.remove(mailAccess);
 						}
 					}
 				}

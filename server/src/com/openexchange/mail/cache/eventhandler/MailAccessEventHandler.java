@@ -55,22 +55,22 @@ import com.openexchange.caching.ElementEventHandler;
 import com.openexchange.mail.api.MailAccess;
 
 /**
- * {@link MailConnectionEventHandler} - The mail connection event handler which
- * preludes mail connection closure if an instance of {@link MailAccess} is
- * removed from mail connection cache.
+ * {@link MailAccessEventHandler} - The mail access event handler which preludes
+ * mail access closure if an instance of {@link MailAccess} is removed from mail
+ * access cache.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailConnectionEventHandler implements ElementEventHandler {
+public final class MailAccessEventHandler implements ElementEventHandler {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MailConnectionEventHandler.class);
+			.getLog(MailAccessEventHandler.class);
 
 	/**
 	 * Default constructor
 	 */
-	public MailConnectionEventHandler() {
+	public MailAccessEventHandler() {
 		super();
 	}
 
@@ -117,8 +117,8 @@ public final class MailConnectionEventHandler implements ElementEventHandler {
 	/**
 	 * Closes given instance of {@link MailAccess}
 	 */
-	private void close(final MailAccess<?, ?> mailConnection) {
-		mailConnection.close(false);
+	private void close(final MailAccess<?, ?> mailAccess) {
+		mailAccess.close(false);
 	}
 
 	public void handleElementEvent(final ElementEvent event) {

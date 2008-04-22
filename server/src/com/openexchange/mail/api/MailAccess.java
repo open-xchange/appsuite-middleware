@@ -153,14 +153,14 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	 */
 	public static final MailAccess<?, ?> getInstance(final Session session) throws MailException {
 		try {
-			if (MailAccessCache.getInstance().containsMailConnection(session)) {
-				final MailAccess<?, ?> mailAccess = MailAccessCache.getInstance().removeMailConnection(session);
+			if (MailAccessCache.getInstance().containsMailAccess(session)) {
+				final MailAccess<?, ?> mailAccess = MailAccessCache.getInstance().removeMailAccess(session);
 				if (mailAccess != null) {
 					/*
 					 * Apply new thread's trace information
 					 */
 					mailAccess.applyNewThread();
-					MailAccessWatcher.addMailConnection(mailAccess);
+					MailAccessWatcher.addMailAccess(mailAccess);
 					return mailAccess;
 				}
 			}
@@ -188,14 +188,14 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 				/*
 				 * Try to fetch from cache again
 				 */
-				if (MailAccessCache.getInstance().containsMailConnection(session)) {
-					final MailAccess<?, ?> mailAccess = MailAccessCache.getInstance().removeMailConnection(session);
+				if (MailAccessCache.getInstance().containsMailAccess(session)) {
+					final MailAccess<?, ?> mailAccess = MailAccessCache.getInstance().removeMailAccess(session);
 					if (mailAccess != null) {
 						/*
 						 * Apply new thread's trace information
 						 */
 						mailAccess.applyNewThread();
-						MailAccessWatcher.addMailConnection(mailAccess);
+						MailAccessWatcher.addMailAccess(mailAccess);
 						return mailAccess;
 					}
 				}
@@ -332,7 +332,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 		checkFieldsBeforeConnect(getMailConfig());
 		connectInternal();
 		getFolderStorage().checkDefaultFolders();
-		MailAccessWatcher.addMailConnection(this);
+		MailAccessWatcher.addMailAccess(this);
 	}
 
 	/**

@@ -67,7 +67,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.cache.eventhandler.MailConnectionEventHandler;
+import com.openexchange.mail.cache.eventhandler.MailAccessEventHandler;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -111,7 +111,7 @@ public final class MailAccessCache {
 		/*
 		 * Add element event handler to default element attributes
 		 */
-		final ElementEventHandler eventHandler = new MailConnectionEventHandler();
+		final ElementEventHandler eventHandler = new MailAccessEventHandler();
 		final ElementAttributes attributes = cache.getDefaultElementAttributes();
 		attributes.addElementEventHandler(eventHandler);
 		cache.setDefaultElementAttributes(attributes);
@@ -182,7 +182,7 @@ public final class MailAccessCache {
 	 * @throws CacheException
 	 *             If removing from cache fails
 	 */
-	public MailAccess<?, ?> removeMailConnection(final Session session) throws CacheException {
+	public MailAccess<?, ?> removeMailAccess(final Session session) throws CacheException {
 		final CacheKey key;
 		try {
 			key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
@@ -205,15 +205,15 @@ public final class MailAccessCache {
 			final Lock writeLock = getLock(key).writeLock();
 			writeLock.lock();
 			try {
-				final MailAccess<?, ?> mailConnection = (MailAccess<?, ?>) cache.get(key);
+				final MailAccess<?, ?> mailAccess = (MailAccess<?, ?>) cache.get(key);
 				/*
 				 * Still available?
 				 */
-				if (mailConnection == null) {
+				if (mailAccess == null) {
 					return null;
 				}
 				cache.remove(key);
-				return mailConnection;
+				return mailAccess;
 			} finally {
 				/*
 				 * Downgrade lock: reacquire read without giving up write lock
@@ -236,14 +236,14 @@ public final class MailAccessCache {
 	 * 
 	 * @param session
 	 *            The session
-	 * @param mailConnection
-	 *            The mail connection to put into cache
-	 * @return <code>true</code> if mail connection could be successfully
-	 *         cached; otherwise <code>false</code>
+	 * @param mailAccess
+	 *            The mail access to put into cache
+	 * @return <code>true</code> if mail access could be successfully cached;
+	 *         otherwise <code>false</code>
 	 * @throws CacheException
 	 *             If put into cache fails
 	 */
-	public boolean putMailAccess(final Session session, final MailAccess<?, ?> mailConnection) throws CacheException {
+	public boolean putMailAccess(final Session session, final MailAccess<?, ?> mailAccess) throws CacheException {
 		final CacheKey key;
 		try {
 			key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
@@ -273,7 +273,7 @@ public final class MailAccessCache {
 				if (cache.get(key) != null) {
 					return false;
 				}
-				cache.put(key, mailConnection);
+				cache.put(key, mailAccess);
 				return true;
 			} finally {
 				/*
@@ -301,7 +301,7 @@ public final class MailAccessCache {
 	 * @throws CacheException
 	 *             If context loading fails
 	 */
-	public boolean containsMailConnection(final Session session) throws CacheException {
+	public boolean containsMailAccess(final Session session) throws CacheException {
 		final CacheKey key;
 		try {
 			key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));

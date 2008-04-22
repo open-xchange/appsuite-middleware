@@ -270,11 +270,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.MailConnection#getFolderStorage()
-	 */
 	@Override
 	public IMAPFolderStorage getFolderStorage() throws MailException {
 		connected = (imapStore != null && imapStore.isConnected());
@@ -287,11 +282,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 		throw new IMAPException(IMAPException.Code.NOT_CONNECTED);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.MailConnection#getMessageStorage()
-	 */
 	@Override
 	public IMAPMessageStorage getMessageStorage() throws MailException {
 		connected = (imapStore != null && imapStore.isConnected());
@@ -304,11 +294,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 		throw new IMAPException(IMAPException.Code.NOT_CONNECTED);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.MailConnection#getLogicTools()
-	 */
 	@Override
 	public MailLogicTools getLogicTools() throws MailException {
 		connected = (imapStore != null && imapStore.isConnected());
@@ -321,11 +306,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 		throw new IMAPException(IMAPException.Code.NOT_CONNECTED);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.MailConnection#isConnected()
-	 */
 	@Override
 	public boolean isConnected() {
 		if (!connected) {
@@ -334,11 +314,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 		return (connected = (imapStore != null && imapStore.isConnected()));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.MailConnection#isConnectedUnsafe()
-	 */
 	@Override
 	public boolean isConnectedUnsafe() {
 		return connected;
@@ -380,11 +355,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 		IMAPSessionProperties.resetDefaultSessionProperties();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.MailConnection#checkMailServerPort()
-	 */
 	@Override
 	protected boolean checkMailServerPort() {
 		return true;
