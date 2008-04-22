@@ -91,6 +91,11 @@ public class GetResponse extends AbstractAJAXResponse {
         return ((Long) value).longValue();
     }
 
+    public boolean getBoolean() {
+        fetchValue();
+        return ((Boolean) value).booleanValue();
+    }
+
     public Object[] getArray() throws JSONException {
         fetchValue();
         final JSONArray array = (JSONArray) value;
