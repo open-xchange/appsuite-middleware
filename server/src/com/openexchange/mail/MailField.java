@@ -163,6 +163,18 @@ public enum MailField {
 	 */
 	FULL(null);
 
+	/**
+	 * All low cost fields
+	 */
+	public static final MailField[] FIELDS_LOW_COST = { ID, FOLDER_ID, CONTENT_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE,
+			SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL, DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL };
+
+	/**
+	 * All fields except {@link #BODY} and {@link #FULL}
+	 */
+	public static final MailField[] FIELDS_WO_BODY = { ID, FOLDER_ID, CONTENT_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE,
+			SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL, DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL, HEADERS };
+
 	private final MailListField listField;
 
 	private MailField(final MailListField listField) {
