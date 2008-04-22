@@ -122,6 +122,9 @@ public class CalendarSql implements AppointmentSQLInterface {
             try {
                 readcon = DBPool.pickup(ctx);
                 return cimp.getUserActiveAppointmentsRangeSQL(ctx, session.getUserId(), user.getGroups(), userConfiguration, d1, d2, readcon);
+            } catch (final OXException e) {
+                // Don't mask OX exceptions in a SQL exception. 
+                throw e;
             } catch(Exception e) {
                 throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, e);
             } finally {
