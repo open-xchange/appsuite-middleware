@@ -146,8 +146,6 @@ public final class SMTPTransport extends MailTransport {
 	 * 
 	 * @param session
 	 *            The session
-	 * @param mailConnection
-	 *            The mail connection (to access folders/messages)
 	 * @throws MailException
 	 *             If initialization fails
 	 */
