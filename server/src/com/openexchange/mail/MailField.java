@@ -112,12 +112,12 @@ public enum MailField {
 	 */
 	SIZE(MailListField.SIZE),
 	/**
-	 * Sent date<br>
+	 * Sent date corresponds to <code>Date</code> header<br>
 	 * <b>[low cost]</b>
 	 */
 	SENT_DATE(MailListField.SENT_DATE),
 	/**
-	 * Received date<br>
+	 * Received date represent the internal mail server's timestamp on arrival<br>
 	 * <b>[low cost]</b>
 	 */
 	RECEIVED_DATE(MailListField.RECEIVED_DATE),
