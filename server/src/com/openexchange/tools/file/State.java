@@ -67,6 +67,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+
 /**
  * This represents the state of the FileStorage. Only used and unused files are
  * saved.
@@ -172,7 +174,7 @@ class State {
      */
     InputStream saveState() throws FileStorageException {
         try {
-            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
             final OutputStreamWriter osw = new OutputStreamWriter(
                 baos, "ISO-8859-1");
             final BufferedWriter writer = new BufferedWriter(osw);

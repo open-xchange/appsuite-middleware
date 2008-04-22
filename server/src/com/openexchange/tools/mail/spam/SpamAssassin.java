@@ -60,6 +60,8 @@ import java.util.Map;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+
 /**
  * SpamAssassin - Offers methods for spam detection and learning.
  * 
@@ -208,7 +210,7 @@ public class SpamAssassin {
 	}
 
 	private static final InputStream getRawMessageInputStream(final Message msg) throws IOException, MessagingException {
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
 		msg.writeTo(baos);
 		return new ByteArrayInputStream(baos.toByteArray());
 	}

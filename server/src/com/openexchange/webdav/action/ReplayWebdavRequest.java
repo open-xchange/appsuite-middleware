@@ -49,6 +49,7 @@
 
 package com.openexchange.webdav.action;
 
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.webdav.action.ifheader.IfHeader;
 import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.protocol.*;
@@ -75,7 +76,7 @@ public class ReplayWebdavRequest implements WebdavRequest{
 			return new ByteArrayInputStream(this.body);
 		}
 		
-		final ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		final ByteArrayOutputStream bout = new UnsynchronizedByteArrayOutputStream();
 		InputStream in = null;
 		
 		in = delegate.getBody();

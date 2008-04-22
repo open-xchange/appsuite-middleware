@@ -67,6 +67,8 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.rtf.RTFEditorKit;
 
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+
 /**
  * {@link RTF2HtmlConverter}
  * 
@@ -140,7 +142,7 @@ public final class RTF2HtmlConverter {
 		// Load an RTF file into the editor
 		try {
 			final FileInputStream fi = new FileInputStream("/home/thorben/rtf.txt");
-			final ByteArrayOutputStream tmp = new ByteArrayOutputStream();
+			final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream();
 			final byte[] buf = new byte[8192];
 			while ((fi.read(buf)) != -1) {
 				tmp.write(buf);

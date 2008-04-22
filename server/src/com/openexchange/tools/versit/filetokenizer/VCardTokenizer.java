@@ -59,6 +59,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VCard;
 import com.openexchange.tools.versit.old.VCalendar10;
@@ -107,7 +108,7 @@ public class VCardTokenizer {
      * @throws IOException
      */
     public VCardTokenizer(InputStream is) throws IOException {
-        streamAsBytes = new ByteArrayOutputStream();
+        streamAsBytes = new UnsynchronizedByteArrayOutputStream();
         vcard = new BufferedInputStream(is);
     }
 
@@ -148,7 +149,7 @@ public class VCardTokenizer {
                     && (compLine.endsWith("VCARD") || compLine
                         .endsWith("VCALENDAR"))) {
                     currentChunk.setContent(streamAsBytes.toByteArray());
-                    streamAsBytes = new ByteArrayOutputStream();
+                    streamAsBytes = new UnsynchronizedByteArrayOutputStream();
                     chunks.add(currentChunk);
                     entriesFound++;
                     potentialCalendar = false;
@@ -190,7 +191,7 @@ public class VCardTokenizer {
         if (streamEnded) {
             return null;
         }
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
         final byte buf[] = new byte[1];
         int length = -1;
         while ((length = vcard.read(buf)) != -1) {

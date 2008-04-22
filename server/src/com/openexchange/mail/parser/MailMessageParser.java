@@ -88,6 +88,7 @@ import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MailMessageParser} - A callback parser to parse instances of
@@ -408,7 +409,7 @@ public final class MailMessageParser {
 				 */
 				final int s = message.getAttachments().size();
 				final Iterator<?> iter = message.getAttachments().iterator();
-				final ByteArrayOutputStream os = new ByteArrayOutputStream(1024);
+				final ByteArrayOutputStream os = new UnsynchronizedByteArrayOutputStream(1024);
 				for (int i = 0; i < s; i++) {
 					final Attachment attachment = (Attachment) iter.next();
 					final TNEFBodyPart bodyPart = new TNEFBodyPart();

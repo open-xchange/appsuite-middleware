@@ -64,6 +64,7 @@ import org.json.JSONObject;
 
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 public class ServletRequestAdapter implements SimpleRequest {
 	
@@ -100,7 +101,7 @@ public class ServletRequestAdapter implements SimpleRequest {
 		}
 		try {
 			final InputStream input = req.getInputStream();
-	        final ByteArrayOutputStream baos = new ByteArrayOutputStream(
+	        final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(
 	            input.available());
 	        final byte[] buf = new byte[512];
 	        int length = -1;

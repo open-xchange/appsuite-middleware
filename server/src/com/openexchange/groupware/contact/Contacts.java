@@ -108,6 +108,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * Contacts
@@ -315,7 +316,7 @@ public class Contacts implements DeleteListener {
 			g2d.drawImage(bi, 0, 0, sWd, sHd, null);
 			g2d.dispose();
 
-			final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
 			try {
 				ImageIO.write(scaledBufferedImage, fileType, baos);
 			} catch (final Exception fallback) {

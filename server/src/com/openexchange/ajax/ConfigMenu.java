@@ -76,6 +76,7 @@ import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONException;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * This class implements the servlet for sending and reading user specific
@@ -186,7 +187,7 @@ public class ConfigMenu extends SessionServlet {
         final HttpServletResponse resp) throws ServletException, IOException {
         final Session session = getSessionObject(req);
         final InputStream input = req.getInputStream();
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream(
+        final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(
             input.available());
         final byte[] buf = new byte[BUFFER_SIZE];
         int length = input.read(buf);

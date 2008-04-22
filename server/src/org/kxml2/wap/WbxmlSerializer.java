@@ -31,6 +31,8 @@ import java.util.List;
 
 import org.xmlpull.v1.XmlSerializer;
 
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+
 // TODO: make some of the "direct" WBXML token writing methods public??
 
 /** 
@@ -48,8 +50,8 @@ public class WbxmlSerializer implements XmlSerializer {
 
     OutputStream out;
 
-    ByteArrayOutputStream buf = new ByteArrayOutputStream();
-    ByteArrayOutputStream stringTableBuf = new ByteArrayOutputStream();
+    ByteArrayOutputStream buf = new UnsynchronizedByteArrayOutputStream();
+    ByteArrayOutputStream stringTableBuf = new UnsynchronizedByteArrayOutputStream();
 
     String pending;
     int depth;
@@ -244,8 +246,8 @@ public class WbxmlSerializer implements XmlSerializer {
         
         this.out = out;
 
-        buf = new ByteArrayOutputStream();
-        stringTableBuf = new ByteArrayOutputStream();
+        buf = new UnsynchronizedByteArrayOutputStream();
+        stringTableBuf = new UnsynchronizedByteArrayOutputStream();
 
         // ok, write header 
     }

@@ -57,6 +57,8 @@ import java.util.BitSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+
 /**
  * URL encoding and decoding. RFC 2396
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein </a>
@@ -83,7 +85,7 @@ public final class URLCoder {
     }
 
 	public static String decode(final String source, final Charset charset) {
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
 		int pos = 0;
 		while (pos < source.length()) {
 			final char chr = source.charAt(pos++);
