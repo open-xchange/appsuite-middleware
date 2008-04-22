@@ -132,12 +132,12 @@ public enum MailField {
 	 */
 	THREAD_LEVEL(MailListField.THREAD_LEVEL),
 	/**
-	 * <code>Disposition-Notification-To</code><br>
+	 * Email address in <code>Disposition-Notification-To</code> header<br>
 	 * <b>[low cost]</b>
 	 */
 	DISPOSITION_NOTIFICATION_TO(MailListField.DISPOSITION_NOTIFICATION_TO),
 	/**
-	 * Priority<br>
+	 * Integer value of <code>X-Priority</code> header<br>
 	 * <b>[low cost]</b>
 	 */
 	PRIORITY(MailListField.PRIORITY),

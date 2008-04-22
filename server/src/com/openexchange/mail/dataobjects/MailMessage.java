@@ -880,9 +880,9 @@ public abstract class MailMessage extends MailPart {
 	}
 
 	/**
-	 * Gets the sentDate
+	 * Gets the sent date which corresponds to <i>Date</i> header
 	 * 
-	 * @return the sentDate
+	 * @return the sent date
 	 */
 	public Date getSentDate() {
 		if (!b_sentDate) {
@@ -895,7 +895,7 @@ public abstract class MailMessage extends MailPart {
 	}
 
 	/**
-	 * @return <code>true</code> if sentDate is set; otherwise
+	 * @return <code>true</code> if sent date is set; otherwise
 	 *         <code>false</code>
 	 */
 	public boolean containsSentDate() {
@@ -903,7 +903,7 @@ public abstract class MailMessage extends MailPart {
 	}
 
 	/**
-	 * Removes the sentDate
+	 * Removes the sent date
 	 */
 	public void removeSentDate() {
 		sentDate = null;
@@ -911,10 +911,10 @@ public abstract class MailMessage extends MailPart {
 	}
 
 	/**
-	 * Sets the sentDate
+	 * Sets the sent date
 	 * 
 	 * @param sentDate
-	 *            the sentDate to set
+	 *            the sent date to set
 	 */
 	public void setSentDate(final Date sentDate) {
 		this.sentDate = sentDate == null ? null : new Date(sentDate.getTime());
@@ -922,16 +922,17 @@ public abstract class MailMessage extends MailPart {
 	}
 
 	/**
-	 * Gets the receivedDate
+	 * Gets the received date which represents the internal timestamp set by
+	 * mail server on arrival.
 	 * 
-	 * @return the receivedDate
+	 * @return the received date
 	 */
 	public Date getReceivedDate() {
 		return receivedDate == null ? null : new Date(receivedDate.getTime());
 	}
 
 	/**
-	 * @return <code>true</code> if receivedDate is set; otherwise
+	 * @return <code>true</code> if received date is set; otherwise
 	 *         <code>false</code>
 	 */
 	public boolean containsReceivedDate() {
@@ -939,7 +940,7 @@ public abstract class MailMessage extends MailPart {
 	}
 
 	/**
-	 * Removes the receivedDate
+	 * Removes the received date
 	 */
 	public void removeReceivedDate() {
 		receivedDate = null;
@@ -947,10 +948,10 @@ public abstract class MailMessage extends MailPart {
 	}
 
 	/**
-	 * Sets the receivedDate
+	 * Sets the received date
 	 * 
 	 * @param receivedDate
-	 *            the receivedDate to set
+	 *            the received date to set
 	 */
 	public void setReceivedDate(final Date receivedDate) {
 		this.receivedDate = receivedDate == null ? null : new Date(receivedDate.getTime());
