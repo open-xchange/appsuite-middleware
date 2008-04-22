@@ -53,10 +53,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 
 import javax.mail.MessagingException;
@@ -406,9 +409,14 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		}
 	}
 
+	private static final Set<String> COOKIE_PARAMS = new HashSet<String>(Arrays.asList(new String[] { "$Path",
+			"$Domain", "$Port" }));
+
 	private static Cookie[] parseCookieHeader(final String headerValue) throws AJPv13Exception {
 		final Matcher m = RFC2616Regex.COOKIE.matcher(headerValue);
 		final List<Cookie> cookieList = new ArrayList<Cookie>();
+		final StringBuilder valueBuilder = new StringBuilder(128);
+		int prevEnd = -1;
 		while (m.find()) {
 			// offset + 1 -> complete single cookie
 			int version = -1;
@@ -432,9 +440,26 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 				// Regex has always at minimum 2 cookies as groups.
 				continue;
 			}
-			if ((name.length() > 0) && (name.charAt(0) == '$') && LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(32).append("Special cookie ").append(name).append(" not handled, yet!"));
+			if ((name.length() > 0) && (name.charAt(0) == '$')) {
+				if (COOKIE_PARAMS.contains(name)) {
+					/*
+					 * A wrongly parsed cookie name which is actually a cookie
+					 * parameter. Force re-parse of previous cookie.
+					 */
+					continue;
+				}
+				if (LOG.isInfoEnabled()) {
+					LOG.info(new StringBuilder(32).append("Special cookie ").append(name).append(" not handled, yet!"));
+				}
 			}
+			if (prevEnd != -1) {
+				final int start = m.start();
+				if (start > prevEnd) {
+					// Last cookie skipped some characters
+					reparsePrevCookie(headerValue, prevEnd, start, valueBuilder, cookieList);
+				}
+			}
+			prevEnd = m.end();
 			final Cookie c = new Cookie(name, stripQuotes(m.group(4)));
 			c.setVersion(version);
 			String attr = m.group(5);
@@ -456,10 +481,67 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 			 */
 			cookieList.add(c);
 		}
+		final int len = headerValue.length();
+		if (len > prevEnd) {
+			// Last cookie skipped some characters
+			reparsePrevCookie(headerValue, prevEnd, len, valueBuilder, cookieList);
+		}
 		if ((headerValue.length() > 0) && cookieList.isEmpty()) {
 			throw new AJPv13Exception(AJPv13Exception.AJPCode.INVALID_COOKIE_HEADER, true, headerValue);
 		}
 		return cookieList.toArray(new Cookie[cookieList.size()]);
+	}
+
+	/**
+	 * Re-Parse previous cookie in list
+	 * 
+	 * @param headerValue
+	 *            The complete cookie header value
+	 * @param prevEnd
+	 *            The detected cookie's end position
+	 * @param realEnd
+	 *            The real cookie's end position
+	 * @param valueBuilder
+	 *            A string builder needed to compose proper cookie value
+	 * @param cookieList
+	 *            The cookie list
+	 */
+	private static void reparsePrevCookie(final String headerValue, final int prevEnd, final int realEnd,
+			final StringBuilder valueBuilder, final List<Cookie> cookieList) {
+		final String prevValue;
+		final Cookie prevCookie = cookieList.get(cookieList.size() - 1);
+		valueBuilder.append(prevCookie.getValue());
+		String prevAttr = prevCookie.getPath();
+		if (null != prevAttr) {
+			valueBuilder.append("; $Path=").append(prevAttr);
+		}
+		prevAttr = prevCookie.getDomain();
+		if (null != prevAttr) {
+			valueBuilder.append("; $Domain=").append(prevAttr);
+		}
+		valueBuilder.append(headerValue.substring(prevEnd, realEnd));
+		final String complVal = valueBuilder.toString();
+		valueBuilder.setLength(0);
+		int paramsStart = -1;
+		/*
+		 * Check for parameters except $Port
+		 */
+		Matcher paramMatcher = RFC2616Regex.COOKIE_PARAM_PATH.matcher(complVal);
+		if (paramMatcher.find()) {
+			paramsStart = paramMatcher.start();
+			prevCookie.setPath(paramMatcher.group(1));
+		}
+		paramMatcher = RFC2616Regex.COOKIE_PARAM_DOMAIN.matcher(complVal);
+		if (paramMatcher.find()) {
+			paramsStart = Math.min(paramMatcher.start(), paramsStart);
+			prevCookie.setDomain(paramMatcher.group(1));
+		}
+		if (paramsStart != -1) {
+			prevValue = complVal.substring(0, paramsStart);
+		} else {
+			prevValue = complVal;
+		}
+		prevCookie.setValue(prevValue);
 	}
 
 	/**

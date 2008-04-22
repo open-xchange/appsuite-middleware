@@ -1,3 +1,8 @@
+* 2008-04-22 - thorben.betten@open-xchange.com
+
+ - Bugfix #11169: Added support for strange cookie header which are not
+   conform to RFC 2616
+
 * 2008-04-21 - sebastian.kauss@open-xchange.com
 
  - Bugfix #10881: HTTP API incompatibility: 
