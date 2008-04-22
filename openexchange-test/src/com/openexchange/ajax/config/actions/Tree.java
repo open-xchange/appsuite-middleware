@@ -79,6 +79,8 @@ public enum Tree {
 
     PrivateTaskFolder("/folder/tasks"),
 
+    MailFilter("/modules/mailfilter"),
+    
     DefaultAddress("/mail/defaultaddress"),
 
     MailAddresses("/mail/addresses"),
