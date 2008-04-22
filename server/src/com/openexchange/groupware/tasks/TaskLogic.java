@@ -655,6 +655,26 @@ public final class TaskLogic {
     /**
      * Deletes an ACTIVE task object. This stores the task as a DELETED task
      * object, deletes all reminders and sends the task delete event.
+     * @param ctx Conetxt
+     * @param task fully loaded task object to delete.
+     * @param lastModified last modification timestamp for concurrent conflicts.
+     * @throws TaskException if an exception occurs.
+     */
+    public static void deleteTask(final Context ctx,
+        final Connection con, final int userId, final Task task,
+        final Date lastModified) throws TaskException {
+        task.setLastModified(new Date());
+        task.setModifiedBy(userId);
+        storage.insertTask(ctx, con, task, StorageType.DELETED);
+        deleteParticipants(ctx, con, task.getObjectID());
+        deleteFolder(ctx, con, task.getObjectID());
+        storage.delete(ctx, con, task.getObjectID(), lastModified,
+            StorageType.ACTIVE);
+    }
+
+    /**
+     * Deletes an ACTIVE task object. This stores the task as a DELETED task
+     * object, deletes all reminders and sends the task delete event.
      * @param session Session.
      * @param task fully loaded task object to delete.
      * @param lastModified last modification timestamp for concurrent conflicts.
@@ -671,13 +691,7 @@ public final class TaskLogic {
         }
         try {
             con.setAutoCommit(false);
-            task.setLastModified(new Date());
-            task.setModifiedBy(userId);
-            storage.insertTask(ctx, con, task, StorageType.DELETED);
-            deleteParticipants(ctx, con, task.getObjectID());
-            deleteFolder(ctx, con, task.getObjectID());
-            storage.delete(ctx, con, task.getObjectID(), lastModified,
-                StorageType.ACTIVE);
+            deleteTask(ctx, con, userId, task, lastModified);
             con.commit();
         } catch (SQLException e) {
             rollback(con);

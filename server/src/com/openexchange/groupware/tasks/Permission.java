@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.tasks;
 
+import java.sql.Connection;
+
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -56,6 +58,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
@@ -196,13 +200,39 @@ public final class Permission {
     static boolean canReadInFolder(final Context ctx, final User user,
         final UserConfiguration userConfig, final FolderObject folder)
         throws TaskException {
+        final Connection con;
+        try {
+            con = DBPool.pickup(ctx);
+        } catch (final DBPoolingException e) {
+            throw new TaskException(e);
+        }
+        try {
+            return canReadInFolder(ctx, con, user, userConfig, folder);
+        } finally {
+            DBPool.closeReaderSilent(ctx, con);
+        }
+    }
+
+    /**
+     * Checks if the user is allowed to read tasks in a folder. Beware that the
+     * private flag of tasks must be checked.
+     * @param ctx Context.
+     * @param con read only database connection.
+     * @param user User.
+     * @param userConfig Groupware configuration of the user.
+     * @param folder folder object that should be tested for read access.
+     * @throws TaskException if the reading is not okay.
+     */
+    static boolean canReadInFolder(final Context ctx, final Connection con,
+        final User user, final UserConfiguration userConfig,
+        final FolderObject folder) throws TaskException {
         if (!Tools.isFolderTask(folder)) {
             throw new TaskException(Code.NOT_TASK_FOLDER, folder
                 .getFolderName(), Integer.valueOf(folder.getObjectID()));
         }
         final OCLPermission permission;
         try {
-            permission = new OXFolderAccess(ctx).getFolderPermission(folder
+            permission = new OXFolderAccess(con, ctx).getFolderPermission(folder
                 .getObjectID(), user.getId(), userConfig);
         } catch (OXException e) {
             throw new TaskException(e);
@@ -229,7 +259,34 @@ public final class Permission {
     static void canReadInFolder(final Context ctx, final User user,
         final UserConfiguration userConfig, final FolderObject folder,
         final Task task) throws TaskException {
-        final boolean onlyOwn = canReadInFolder(ctx, user, userConfig, folder);
+        final Connection con;
+        try {
+            con = DBPool.pickup(ctx);
+        } catch (final DBPoolingException e) {
+            throw new TaskException(e);
+        }
+        try {
+            canReadInFolder(ctx, con, user, userConfig, folder, task);
+        } finally {
+            DBPool.closeReaderSilent(ctx, con);
+        }
+    }
+
+    /**
+     * Checks if the user is allowed to read the task.
+     * @param ctx Context.
+     * @param con read only database connection.
+     * @param user User.
+     * @param userConfig Groupware configuration of the user.
+     * @param folder folder object that should be tested for read access.
+     * @param task Task to read.
+     * @throws TaskException if the reading is not okay.
+     */
+    static void canReadInFolder(final Context ctx, final Connection con,
+        final User user, final UserConfiguration userConfig, final FolderObject folder,
+        final Task task) throws TaskException {
+        final boolean onlyOwn = canReadInFolder(ctx, con, user, userConfig,
+            folder);
         if (onlyOwn && (user.getId() != task.getCreatedBy())) {
             throw new TaskException(Code.NO_READ_PERMISSION, folder
                 .getFolderName(), Integer.valueOf(folder.getObjectID()));

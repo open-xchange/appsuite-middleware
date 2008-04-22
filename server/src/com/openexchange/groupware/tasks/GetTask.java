@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.tasks;
 
+import java.sql.Connection;
 import java.util.Set;
 
 import com.openexchange.groupware.container.FolderObject;
@@ -56,6 +57,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TaskException.Code;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
 
 /**
  * This class collects all information for getting tasks. It is also able to
@@ -65,6 +67,11 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 public final class GetTask {
 
     private final Context ctx;
+
+    /**
+     * read only database connection.
+     */
+    private final Connection con;
 
     private User user;
 
@@ -105,7 +112,17 @@ public final class GetTask {
     GetTask(final Context ctx, final User user,
         final UserConfiguration userConfig, final int folderId,
         final int taskId, final StorageType type) {
+        this(ctx, null, user, userConfig, folderId, taskId, type);
+    }
+
+    /**
+     * Use this constructor if you want permission checks.
+     */
+    GetTask(final Context ctx, final Connection con, final User user,
+        final UserConfiguration userConfig, final int folderId,
+        final int taskId, final StorageType type) {
         this.ctx = ctx;
+        this.con = con;
         this.user = user;
         this.userConfig = userConfig;
         this.folderId = folderId;
@@ -118,7 +135,16 @@ public final class GetTask {
      */
     GetTask(final Context ctx, final int folderId, final int taskId,
         final StorageType type) {
+        this(ctx, null, folderId, taskId, type);
+    }
+
+    /**
+     * This constructor can be used if permission checks should not be done.
+     */
+    GetTask(final Context ctx, final Connection con, final int folderId,
+        final int taskId, final StorageType type) {
         this.ctx = ctx;
+        this.con = con;
         this.folderId = folderId;
         this.taskId = taskId;
         this.type = type;
@@ -126,30 +152,57 @@ public final class GetTask {
 
     private FolderObject getFolder() throws TaskException {
         if (null == folder) {
-            folder = Tools.getFolder(ctx, folderId);
+            if (null == con) {
+                folder = Tools.getFolder(ctx, folderId);
+            } else {
+                try {
+                    folder = Tools.getFolder(ctx, con, folderId);
+                } catch (OXFolderNotFoundException e) {
+                    throw new TaskException(e);
+                }
+            }
         }
         return folder;
     }
 
     private Task getTask() throws TaskException {
         if (null == task) {
-            task = storage.selectTask(ctx, taskId, type);
+            if (null == con) {
+                task = storage.selectTask(ctx, taskId, type);
+            } else {
+                task = storage.selectTask(ctx, con, taskId, type);
+            }
         }
         return task;
     }
 
     private Set<TaskParticipant> getParticipants() throws TaskException {
         if (null == participants) {
-            participants = partStor.selectParticipants(ctx, taskId, type);
+            if (null == con) {
+                participants = partStor.selectParticipants(ctx, taskId, type);
+            } else {
+                participants = partStor.selectParticipants(ctx, con, taskId,
+                    type);
+            }
         }
         return participants;
     }
 
     private Set<Folder> getFolders() throws TaskException {
         if (null == folderMapping) {
-            folderMapping =  foldStor.selectFolder(ctx, taskId, type);
+            if (null == con) {
+                folderMapping =  foldStor.selectFolder(ctx, taskId, type);
+            } else {
+                folderMapping =  foldStor.selectFolder(ctx, con, taskId, type);
+            }
         }
         return folderMapping;
+    }
+
+    static Task load(final Context ctx, final Connection con,
+        final int folderId, final int taskId, final StorageType type)
+        throws TaskException {
+        return new GetTask(ctx, con, folderId, taskId, type).load();
     }
 
     static Task load(final Context ctx, final int folderId, final int taskId,
@@ -181,8 +234,13 @@ public final class GetTask {
         if (null == user || null == userConfig) {
             throw new TaskException(Code.UNIMPLEMENTED);
         }
-        Permission.canReadInFolder(ctx, user, userConfig, getFolder(),
-            getTask());
+        if (null == con) {
+            Permission.canReadInFolder(ctx, user, userConfig, getFolder(),
+                getTask());
+        } else {
+            Permission.canReadInFolder(ctx, con, user, userConfig, getFolder(),
+                getTask());
+        }
         final Folder check = FolderStorage.getFolder(getFolders(),
             folderId);
         if (null == check

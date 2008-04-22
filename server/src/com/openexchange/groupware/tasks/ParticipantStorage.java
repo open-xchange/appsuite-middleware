@@ -427,13 +427,28 @@ abstract class ParticipantStorage {
         } catch (DBPoolingException e) {
             throw new TaskException(Code.NO_CONNECTION, e);
         }
-        final Set<TaskParticipant> retval = new HashSet<TaskParticipant>();
         try {
-            retval.addAll(selectInternal(ctx, con, taskId, type));
-            retval.addAll(selectExternal(ctx, con, taskId, type));
+            return selectParticipants(ctx, con, taskId, type);
         } finally {
             DBPool.closeReaderSilent(ctx, con);
         }
+    }
+
+    /**
+     * Reads the participants of a task.
+     * @param ctx Context.
+     * @param con read only database connection.
+     * @param taskId unique identifier of the task.
+     * @param type type of participant that should be selected.
+     * @return a set of participants.
+     * @throws TaskException if an exception occurs.
+     */
+    final Set<TaskParticipant> selectParticipants(final Context ctx,
+        final Connection con, final int taskId, final StorageType type)
+        throws TaskException {
+        final Set<TaskParticipant> retval = new HashSet<TaskParticipant>();
+        retval.addAll(selectInternal(ctx, con, taskId, type));
+        retval.addAll(selectExternal(ctx, con, taskId, type));
         return retval;
     }
 

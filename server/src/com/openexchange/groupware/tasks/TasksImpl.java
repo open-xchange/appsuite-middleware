@@ -56,23 +56,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.SearchIteratorException;
 
 /**
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 final class TasksImpl extends Tasks {
-
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(TasksImpl.class);
 
     /**
      * Fields to update of a participant is removed from a task.
@@ -89,7 +80,6 @@ final class TasksImpl extends Tasks {
 
     /**
      * {@inheritDoc}
-     * TODO use given connection.
      */
     @Override
     public boolean containsNotSelfCreatedTasks(final Session session,
@@ -97,7 +87,7 @@ final class TasksImpl extends Tasks {
         try {
             final Context ctx = Tools.getContext(session.getContextId());
             return TaskStorage.getInstance().containsNotSelfCreatedTasks(ctx,
-                session.getUserId(), folderId);
+                con, session.getUserId(), folderId);
         } catch (TaskException e) {
             throw Tools.convert(e);
         }
@@ -105,55 +95,40 @@ final class TasksImpl extends Tasks {
 
     /**
      * {@inheritDoc}
-     * TODO use given connection.
      */
     @Override
-    public void deleteTasksInFolder(final Session session, Connection con,
+    public void deleteTasksInFolder(final Session session, final Connection con,
         final int folderId) throws OXException {
-        final TaskStorage storage = TaskStorage.getInstance();
         final ParticipantStorage partStor = ParticipantStorage.getInstance();
         final FolderStorage foldStor = FolderStorage.getInstance();
         final Context ctx;
         final int userId = session.getUserId();
         final List<Integer> deleteTask = new ArrayList<Integer>();
         final List<UpdateData> removeParticipant = new ArrayList<UpdateData>();
-        TaskIterator iter = null;
         try {
             ctx = Tools.getContext(session.getContextId());
-            iter = storage.list(ctx, folderId, 0, -1, 0,
-                null, new int[] { Task.OBJECT_ID }, false, userId, false);
-            while (iter.hasNext()) {
-                final Task task = iter.next();
+            final int[] taskIds = foldStor.getTasksInFolder(ctx, con, folderId,
+                StorageType.ACTIVE);
+            for (int taskId : taskIds) {
                 final UpdateData data = new UpdateData();
-                data.taskId = task.getObjectID();
-                data.lastRead = task.getLastModified();
+                data.taskId = taskId;
                 removeParticipant.add(data);
             }
         } catch (TaskException e) {
             throw Tools.convert(e);
-        } catch (SearchIteratorException e) {
-            throw new OXException(e);
-        } finally {
-            if (null != iter) {
-                try {
-                    iter.close();
-                } catch (SearchIteratorException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
         }
         try {
             for (UpdateData data : removeParticipant) {
-                final Set<Folder> folders = foldStor.selectFolder(ctx, data
-                    .taskId, StorageType.ACTIVE);
+                final Set<Folder> folders = foldStor.selectFolder(ctx, con,
+                    data.taskId, StorageType.ACTIVE);
                 if (folders.size() == 1) {
                     // Task is only in the folder that is deleted.
                     deleteTask.add(Integer.valueOf(data.taskId));
                     continue;
                 }
                 final Set<InternalParticipant> participants = ParticipantStorage
-                    .extractInternal(partStor.selectParticipants(ctx,
-                        data.taskId, StorageType.ACTIVE));
+                    .extractInternal(partStor.selectParticipants(ctx, con,
+                    data.taskId, StorageType.ACTIVE));
                 final Folder folder = FolderStorage.getFolder(folders, folderId);
                 final TaskParticipant participant = ParticipantStorage
                     .getParticipant(participants, folder.getUser());
@@ -180,17 +155,18 @@ final class TasksImpl extends Tasks {
         removeParticipant.removeAll(deleteTask);
         try {
             for (int taskId : deleteTask) {
-                final Task task = GetTask.load(ctx, folderId, taskId,
+                final Task task = GetTask.load(ctx, con, folderId, taskId,
                     StorageType.ACTIVE);
-                TaskLogic.deleteTask(session, ctx, userId, task,
+                TaskLogic.deleteTask(ctx, con, userId, task,
                     task.getLastModified());
+                TaskLogic.informDelete(session, ctx, task);
             }
             for (UpdateData data : removeParticipant) {
                 if (deleteTask.contains(Integer.valueOf(data.taskId))) {
                     continue;
                 }
-                com.openexchange.groupware.tasks.UpdateData.updateTask(ctx,
-                    data.task, data.lastRead, data.modified, data.add,
+                com.openexchange.groupware.tasks.UpdateData.updateTask(ctx, con,
+                    data.task, new Date(), data.modified, data.add,
                     data.remove, data.addFolder, data.removeFolder);
             }
         } catch (TaskException e) {
@@ -201,7 +177,6 @@ final class TasksImpl extends Tasks {
     private static class UpdateData {
         private int taskId;
         private Task task;
-        private Date lastRead;
         private int[] modified;
         private Set<TaskParticipant> add;
         private Set<TaskParticipant> remove;

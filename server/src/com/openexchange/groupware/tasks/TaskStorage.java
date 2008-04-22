@@ -259,7 +259,7 @@ abstract class TaskStorage {
         }
     }
 
-    public abstract boolean containsNotSelfCreatedTasks(Context ctx, int userId,
-        int folderId) throws TaskException;
+    public abstract boolean containsNotSelfCreatedTasks(Context ctx,
+        Connection con, int userId, int folderId) throws TaskException;
 
 }

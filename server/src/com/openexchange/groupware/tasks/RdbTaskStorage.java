@@ -506,17 +506,12 @@ public class RdbTaskStorage extends TaskStorage {
      */
     @Override
     public boolean containsNotSelfCreatedTasks(final Context ctx,
-        final int userId, final int folderId) throws TaskException {
+        final Connection con, final int userId, final int folderId)
+        throws TaskException {
         final String sql = "SELECT COUNT(id) FROM task JOIN task_folder "
             + "USING (cid,id) WHERE task.cid=? AND folder=? AND "
             + "created_from!=?";
         boolean retval = true;
-        Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
         try {
             final PreparedStatement stmt = con.prepareStatement(sql);
             int pos = 1;
@@ -533,8 +528,6 @@ public class RdbTaskStorage extends TaskStorage {
             stmt.close();
         } catch (SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
-        } finally {
-            DBPool.closeReaderSilent(ctx, con);
         }
         return retval;
     }
