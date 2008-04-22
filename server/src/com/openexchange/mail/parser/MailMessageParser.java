@@ -396,10 +396,11 @@ public final class MailMessageParser {
 					if (ris != null) {
 						final byte[] rtfBody = ris.toByteArray();
 						final TNEFBodyPart bodyPart = new TNEFBodyPart();
-						final String content = new String(TNEFUtils.decompressRTF(rtfBody), ServerConfig
-								.getProperty(Property.DefaultEncoding));
-						bodyPart.setText(content);
-						bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_TEXT_RTF);
+						final String defCharset = ServerConfig.getProperty(Property.DefaultEncoding);
+						final String content = new String(TNEFUtils.decompressRTF(rtfBody), defCharset);
+						bodyPart.setText(content, defCharset, "rtf");
+						bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new StringBuilder(MIMETypes.MIME_TEXT_RTF)
+								.append("; charset=").append(defCharset).toString());
 						bodyPart.setSize(content.length());
 						parseMailContent(new MIMEMailPart(bodyPart), handler, prefix, partCount++);
 					}
