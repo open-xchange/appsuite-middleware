@@ -51,9 +51,6 @@ package com.openexchange.groupware.upload.impl;
 
 import java.io.File;
 
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.tools.codec.CodecUtils;
-
 /**
  * UploadFile
  * 
@@ -142,8 +139,9 @@ public class UploadFile {
 			} else if ((pos = preparedFileName.lastIndexOf('/')) != -1) {
 				preparedFileName = preparedFileName.substring(pos + 1);
 			}
-			preparedFileName = CodecUtils.decode(preparedFileName, ServerConfig
-					.getProperty(ServerConfig.Property.DefaultEncoding));
+			// TODO: Ensure that filename is not transfer-encoded
+			//preparedFileName = CodecUtils.decode(preparedFileName, ServerConfig
+			//		.getProperty(ServerConfig.Property.DefaultEncoding));
 		}
 		return preparedFileName;
 	}
