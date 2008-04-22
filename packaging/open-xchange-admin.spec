@@ -4,7 +4,7 @@
 Name:           open-xchange-admin
 BuildArch:	noarch
 BuildRequires:  ant open-xchange-common open-xchange-server
-%if 0%{?suse_version} <= 1010
+%if 0%{?suse_version} <= 1010 && ! 0%{?rhel_version}
 # SLES10
 BuildRequires:  java-1_5_0-ibm java-1_5_0-ibm-devel java-1_5_0-ibm-alsa update-alternatives
 %endif
