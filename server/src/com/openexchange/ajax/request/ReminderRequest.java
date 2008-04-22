@@ -65,6 +65,7 @@ import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.writer.ReminderWriter;
 import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.groupware.AbstractOXException;
@@ -258,7 +259,14 @@ public class ReminderRequest {
                     final int inFolder = Integer.parseInt(reminderObj.getFolder());
                     final Date oldReminderDate = reminderObj.getDate();
                     
-                    final ReminderObject latestReminder = getLatestRecurringReminder(targetId, inFolder, sessionObj, end, oldReminderDate);
+                    ReminderObject latestReminder = null;
+                    
+                    try {
+                    	latestReminder = getLatestRecurringReminder(targetId, inFolder, sessionObj, end, oldReminderDate);
+                    } catch (OXObjectNotFoundException exc) {
+                    	LOG.warn("Cannot load target object of this reminder");
+                    	reminderSql.deleteReminder(targetId, userObj.getId(), reminderObj.getModule());
+                    }
                     
                     if (latestReminder == null) {
                         continue;
