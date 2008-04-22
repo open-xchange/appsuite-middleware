@@ -546,9 +546,9 @@ public final class MIMEMessageConverter {
 	}
 
 	private static final String[] NON_MATCHING_HEADERS = { MessageHeaders.HDR_FROM, MessageHeaders.HDR_TO,
-			MessageHeaders.HDR_CC, MessageHeaders.HDR_BCC, MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_SUBJECT,
-			MessageHeaders.HDR_DATE, MessageHeaders.HDR_X_PRIORITY, MessageHeaders.HDR_MESSAGE_ID,
-			MessageHeaders.HDR_IN_REPLY_TO, MessageHeaders.HDR_REFERENCES };
+			MessageHeaders.HDR_CC, MessageHeaders.HDR_BCC, MessageHeaders.HDR_DISP_NOT_TO, MessageHeaders.HDR_REPLY_TO,
+			MessageHeaders.HDR_SUBJECT, MessageHeaders.HDR_DATE, MessageHeaders.HDR_X_PRIORITY,
+			MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_IN_REPLY_TO, MessageHeaders.HDR_REFERENCES };
 
 	/**
 	 * Creates the field fillers and expects the messages to be instances of
@@ -613,6 +613,25 @@ public final class MIMEMessageConverter {
 								LOG.debug("Unparseable internet addresses" + addrs);
 							}
 							mailMessage.addBcc(PlainTextAddress.getAddresses(addrs));
+						}
+						/*
+						 * Disposition-Notification-To
+						 */
+						{
+							InternetAddress[] dispNotTo = null;
+							final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_DISP_NOT_TO, null);
+							if (null != addrStr) {
+								try {
+									dispNotTo = InternetAddress.parse(addrStr, true);
+								} catch (final AddressException e) {
+									dispNotTo = new InternetAddress[] { new PlainTextAddress(addrStr) };
+								}
+							}
+							if (null != dispNotTo && dispNotTo.length > 0) {
+								mailMessage.setDispositionNotification(dispNotTo[0]);
+							} else {
+								mailMessage.setDispositionNotification(null);
+							}
 						}
 						/*
 						 * Reply-To
@@ -759,8 +778,8 @@ public final class MIMEMessageConverter {
 										"Internet addresses could not be properly parsed, ").append(
 										"using plain addresses' string representation instead.").toString(), e);
 							}
-							mailMessage.addTo(PlainTextAddress
-									.getAddresses(extMimeMessage.getHeader(MessageHeaders.HDR_TO)));
+							mailMessage.addTo(PlainTextAddress.getAddresses(extMimeMessage
+									.getHeader(MessageHeaders.HDR_TO)));
 						}
 					}
 				};
@@ -777,8 +796,8 @@ public final class MIMEMessageConverter {
 										"Internet addresses could not be properly parsed, ").append(
 										"using plain addresses' string representation instead.").toString(), e);
 							}
-							mailMessage.addCc(PlainTextAddress
-									.getAddresses(extMimeMessage.getHeader(MessageHeaders.HDR_CC)));
+							mailMessage.addCc(PlainTextAddress.getAddresses(extMimeMessage
+									.getHeader(MessageHeaders.HDR_CC)));
 						}
 					}
 				};
@@ -938,6 +957,25 @@ public final class MIMEMessageConverter {
 							mailMessage.addBcc((InternetAddress[]) msg.getRecipients(Message.RecipientType.BCC));
 						} catch (final AddressException e) {
 							mailMessage.addBcc(PlainTextAddress.getAddresses(msg.getHeader(MessageHeaders.HDR_BCC)));
+						}
+						/*
+						 * Disposition-Notification-To
+						 */
+						{
+							InternetAddress[] dispNotTo = null;
+							final String[] addrStr = msg.getHeader(MessageHeaders.HDR_DISP_NOT_TO);
+							if (null != addrStr) {
+								try {
+									dispNotTo = InternetAddress.parse(addrStr[0], true);
+								} catch (final AddressException e) {
+									dispNotTo = new InternetAddress[] { new PlainTextAddress(addrStr[0]) };
+								}
+							}
+							if (null != dispNotTo && dispNotTo.length > 0) {
+								mailMessage.setDispositionNotification(dispNotTo[0]);
+							} else {
+								mailMessage.setDispositionNotification(null);
+							}
 						}
 						/*
 						 * Reply-To
