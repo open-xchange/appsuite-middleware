@@ -68,80 +68,80 @@ import com.openexchange.mail.search.SearchTerm;
 public enum MailField {
 
 	/**
-	 * The mail ID
+	 * The mail ID<br><b>[low cost]</b>
 	 */
 	ID(MailListField.ID),
 	/**
-	 * The folder ID
+	 * The folder ID<br><b>[low cost]</b>
 	 */
 	FOLDER_ID(MailListField.FOLDER_ID),
 	/**
-	 * The Content-Type; includes whether message contains attachments or not
+	 * The Content-Type; includes whether message contains attachments or not<br><b>[low cost]</b>
 	 */
 	CONTENT_TYPE(MailListField.ATTACHMENT),
 	/**
-	 * From
+	 * From<br><b>[low cost]</b>
 	 */
 	FROM(MailListField.FROM),
 	/**
-	 * To
+	 * To<br><b>[low cost]</b>
 	 */
 	TO(MailListField.TO),
 	/**
-	 * Cc
+	 * Cc<br><b>[low cost]</b>
 	 */
 	CC(MailListField.CC),
 	/**
-	 * Bcc
+	 * Bcc<br><b>[low cost]</b>
 	 */
 	BCC(MailListField.BCC),
 	/**
-	 * Subject
+	 * Subject<br><b>[low cost]</b>
 	 */
 	SUBJECT(MailListField.SUBJECT),
 	/**
-	 * Size
+	 * Size<br><b>[low cost]</b>
 	 */
 	SIZE(MailListField.SIZE),
 	/**
-	 * Sent date
+	 * Sent date<br><b>[low cost]</b>
 	 */
 	SENT_DATE(MailListField.SENT_DATE),
 	/**
-	 * Received date
+	 * Received date<br><b>[low cost]</b>
 	 */
 	RECEIVED_DATE(MailListField.RECEIVED_DATE),
 	/**
-	 * Flags
+	 * Flags<br><b>[low cost]</b>
 	 */
 	FLAGS(MailListField.FLAGS),
 	/**
-	 * Thread level
+	 * Thread level<br><b>[low cost]</b>
 	 */
 	THREAD_LEVEL(MailListField.THREAD_LEVEL),
 	/**
-	 * <code>Disposition-Notification-To</code>
+	 * <code>Disposition-Notification-To</code><br><b>[low cost]</b>
 	 */
 	DISPOSITION_NOTIFICATION_TO(MailListField.DISPOSITION_NOTIFICATION_TO),
 	/**
-	 * Priority
+	 * Priority<br><b>[low cost]</b>
 	 */
 	PRIORITY(MailListField.PRIORITY),
 	/**
-	 * Color Label
+	 * Color Label<br><b>[low cost]</b>
 	 */
 	COLOR_LABEL(MailListField.COLOR_LABEL),
 	/**
-	 * To peek the mail body (\Seen flag is left unchanged)
+	 * To peek the mail body (\Seen flag is left unchanged)<br><b>[high cost]</b>
 	 */
 	BODY(null),
 	/**
-	 * To fetch all message headers
+	 * To fetch all message headers<br><b>[high cost]</b>
 	 */
 	HEADERS(null),
 	/**
 	 * To fully pre-fill mail incl. headers and peeked body (\Seen flag is left
-	 * unchanged)
+	 * unchanged)<br><b>[high cost]</b>
 	 */
 	FULL(null);
 
