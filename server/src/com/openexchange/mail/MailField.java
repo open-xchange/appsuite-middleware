@@ -72,7 +72,7 @@ public enum MailField {
 	 */
 	ID(MailListField.ID),
 	/**
-	 * The folder ID<br>
+	 * The folder ID or fullname<br>
 	 * <b>[low cost]</b>
 	 */
 	FOLDER_ID(MailListField.FOLDER_ID),
