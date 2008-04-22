@@ -47,35 +47,34 @@
  *
  */
 
-package com.openexchange.spellcheck.serviceholder;
+package com.openexchange.spellcheck.services;
 
-import org.osgi.service.http.HttpService;
-
-import com.openexchange.server.ServiceHolder;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * {@link SpellCheckHttpService}
+ * {@link SpellCheckServiceRegistry} - A registry for services needed by spell
+ * check bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SpellCheckHttpService extends ServiceHolder<HttpService> {
+public final class SpellCheckServiceRegistry {
 
-	private static final SpellCheckHttpService instance = new SpellCheckHttpService();
+	private static final ServiceRegistry REGISTRY = new ServiceRegistry();
 
 	/**
-	 * Gets the http service holder instance.
+	 * Gets the service registry
 	 * 
-	 * @return The http service holder instance.
+	 * @return The service registry
 	 */
-	public static SpellCheckHttpService getInstance() {
-		return instance;
+	public static ServiceRegistry getServiceRegistry() {
+		return REGISTRY;
 	}
 
 	/**
-	 * Default constructor
+	 * Initializes a new {@link SpellCheckServiceRegistry}
 	 */
-	private SpellCheckHttpService() {
+	private SpellCheckServiceRegistry() {
 		super();
 	}
 

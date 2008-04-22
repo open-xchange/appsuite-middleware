@@ -49,17 +49,14 @@
 
 package com.openexchange.spellcheck.internal;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import javax.servlet.ServletException;
 
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 
-import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.server.Initialization;
 import com.openexchange.spellcheck.SpellCheckException;
-import com.openexchange.spellcheck.serviceholder.SpellCheckHttpService;
+import com.openexchange.spellcheck.services.SpellCheckServiceRegistry;
 import com.openexchange.spellcheck.servlet.SpellCheckServlet;
 
 /**
@@ -86,35 +83,11 @@ public class SpellCheckInit implements Initialization {
 		return instance;
 	}
 
-	private final AtomicBoolean started;
-
-	private ConfigurationServiceHolder csh;
-
 	/**
 	 * Initializes a new {@link SpellCheckInit}
 	 */
 	private SpellCheckInit() {
 		super();
-		started = new AtomicBoolean();
-	}
-
-	/**
-	 * Gets the configuration service holder
-	 * 
-	 * @return The configuration service holder
-	 */
-	public ConfigurationServiceHolder getConfigurationServiceHolder() {
-		return csh;
-	}
-
-	/**
-	 * Sets the configuration service holder
-	 * 
-	 * @param csh
-	 *            The configuration service holder to set
-	 */
-	public void setConfigurationServiceHolder(final ConfigurationServiceHolder csh) {
-		this.csh = csh;
 	}
 
 	/*
@@ -123,13 +96,9 @@ public class SpellCheckInit implements Initialization {
 	 * @see com.openexchange.server.Initialization#start()
 	 */
 	public void start() throws SpellCheckException {
-		if (!started.compareAndSet(false, true)) {
-			LOG.error("Spell check already started.");
-			return;
-		}
 		DictonaryStorage.loadDictionaries();
 		RdbUserSpellDictionary.start();
-		final HttpService httpService = SpellCheckHttpService.getInstance().getService();
+		final HttpService httpService = SpellCheckServiceRegistry.getServiceRegistry().getService(HttpService.class);
 		if (httpService == null) {
 			LOG.error("HTTP service is null. Spell check servlet cannot be registered");
 			return;
@@ -139,14 +108,15 @@ public class SpellCheckInit implements Initialization {
 			 * Register spell check servlet
 			 */
 			httpService.registerServlet(SC_SRVLT_ALIAS, new SpellCheckServlet(), null, null);
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Spell check servlet successfully registered");
+			}
 		} catch (final ServletException e) {
 			throw new SpellCheckException(SpellCheckException.Code.SERVLET_REGISTRATION_FAILED, e, e
 					.getLocalizedMessage());
 		} catch (final NamespaceException e) {
 			throw new SpellCheckException(SpellCheckException.Code.SERVLET_REGISTRATION_FAILED, e, e
 					.getLocalizedMessage());
-		} finally {
-			SpellCheckHttpService.getInstance().ungetService(httpService);
 		}
 	}
 
@@ -156,21 +126,16 @@ public class SpellCheckInit implements Initialization {
 	 * @see com.openexchange.server.Initialization#stop()
 	 */
 	public void stop() {
-		if (!started.compareAndSet(true, false)) {
-			LOG.error("Spell check has not been started.");
-			return;
-		}
-		final HttpService httpService = SpellCheckHttpService.getInstance().getService();
+		final HttpService httpService = SpellCheckServiceRegistry.getServiceRegistry().getService(HttpService.class);
 		if (httpService == null) {
 			LOG.error("HTTP service is null. Spell check servlet cannot be unregistered");
 		} else {
-			try {
-				/*
-				 * Unregister spell check servlet
-				 */
-				httpService.unregister(SC_SRVLT_ALIAS);
-			} finally {
-				SpellCheckHttpService.getInstance().ungetService(httpService);
+			/*
+			 * Unregister spell check servlet
+			 */
+			httpService.unregister(SC_SRVLT_ALIAS);
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Spell check servlet successfully unregistered");
 			}
 		}
 		RdbUserSpellDictionary.stop();

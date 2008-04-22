@@ -49,22 +49,16 @@
 
 package com.openexchange.spellcheck.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import static com.openexchange.spellcheck.services.SpellCheckServiceRegistry.getServiceRegistry;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.osgi.service.http.HttpService;
-import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.ConfigurationServiceHolder;
-import com.openexchange.server.ServiceHolderListener;
-import com.openexchange.server.osgiservice.BundleServiceTracker;
-import com.openexchange.spellcheck.SpellCheckException;
+import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.spellcheck.internal.SpellCheckInit;
-import com.openexchange.spellcheck.serviceholder.SpellCheckHttpService;
 
 /**
  * {@link SpellCheckActivator}
@@ -72,161 +66,114 @@ import com.openexchange.spellcheck.serviceholder.SpellCheckHttpService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SpellCheckActivator implements BundleActivator {
+public final class SpellCheckActivator extends DeferredActivator {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SpellCheckActivator.class);
 
-	private static final class SpellCheckListeners {
-
-		private final ServiceHolderListener<ConfigurationService> configListener;
-
-		private final ServiceHolderListener<HttpService> httpListener;
-
-		private final AtomicInteger mode;
-
-		public SpellCheckListeners() {
-			super();
-			mode = new AtomicInteger();
-			configListener = new ServiceHolderListener<ConfigurationService>() {
-
-				public void onServiceAvailable(final ConfigurationService service) throws Exception {
-					LOG.info("SpellCheck: Configuration service available.");
-					if (mode.compareAndSet(0, 1)) {
-						LOG.info("Waiting for HTTP service.");
-						return;
-					}
-					initSpellCheck();
-					if (LOG.isInfoEnabled()) {
-						LOG.info("Spell check bundle successfully started");
-					}
-				}
-
-				public void onServiceRelease() throws Exception {
-
-				}
-			};
-			httpListener = new ServiceHolderListener<HttpService>() {
-
-				public void onServiceAvailable(final HttpService service) throws Exception {
-					LOG.info("SpellCheck: HTTP service available.");
-					if (mode.compareAndSet(0, 1)) {
-						LOG.info("Waiting for configuration service.");
-						return;
-					}
-					initSpellCheck();
-					if (LOG.isInfoEnabled()) {
-						LOG.info("Spell check bundle successfully started");
-					}
-				}
-
-				public void onServiceRelease() throws Exception {
-
-				}
-			};
-		}
-
-		private static void initSpellCheck() throws SpellCheckException {
-			SpellCheckInit.getInstance().start();
-		}
-
-		public ServiceHolderListener<ConfigurationService> getConfigListener() {
-			return configListener;
-		}
-
-		public ServiceHolderListener<HttpService> getHttpListener() {
-			return httpListener;
-		}
-
-	}
-
-	private final List<ServiceTracker> serviceTrackerList;
-
-	private ConfigurationServiceHolder csh;
-
-	private SpellCheckListeners listeners;
+	private final AtomicBoolean started;
 
 	/**
 	 * Initializes a new {@link SpellCheckActivator}
 	 */
 	public SpellCheckActivator() {
 		super();
-		serviceTrackerList = new ArrayList<ServiceTracker>();
+		started = new AtomicBoolean();
+	}
+
+	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, HttpService.class };
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.osgiservice.DeferredActivator#getNeededServices()
+	 */
+	@Override
+	protected Class<?>[] getNeededServices() {
+		return NEEDED_SERVICES;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+	 * @see com.openexchange.server.osgiservice.DeferredActivator#handleUnavailability(java.lang.Class)
 	 */
-	public void start(final BundleContext context) throws Exception {
+	@Override
+	protected void handleUnavailability(Class<?> clazz) {
+		/*
+		 * Never stop the server even if a needed service is absent
+		 */
+		if (LOG.isWarnEnabled()) {
+			LOG.warn("Absent service: " + clazz.getName());
+		}
+		getServiceRegistry().removeService(clazz);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.server.osgiservice.DeferredActivator#startBundle()
+	 */
+	@Override
+	protected void startBundle() throws Exception {
 		try {
-			csh = ConfigurationServiceHolder.newInstance();
-			SpellCheckInit.getInstance().setConfigurationServiceHolder(csh);
 			/*
-			 * Add service listener for configuration service
+			 * (Re-)Initialize service registry with available services
 			 */
-			serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(),
-					new BundleServiceTracker<ConfigurationService>(context, csh, ConfigurationService.class)));
-			/*
-			 * Add service listener for HTTP service
-			 */
-			serviceTrackerList.add(new ServiceTracker(context, HttpService.class.getName(),
-					new BundleServiceTracker<HttpService>(context, SpellCheckHttpService.getInstance(),
-							HttpService.class)));
-			/*
-			 * Open service trackers
-			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
-				tracker.open();
+			{
+				final ServiceRegistry registry = getServiceRegistry();
+				registry.clearRegistry();
+				final Class<?>[] classes = getNeededServices();
+				for (int i = 0; i < classes.length; i++) {
+					final Object service = getService(classes[i]);
+					if (null != service) {
+						registry.addService(classes[i], service);
+					}
+				}
+			}
+			if (!started.compareAndSet(false, true)) {
+				/*
+				 * Don't start the bundle again. A duplicate call to
+				 * startBundle() is probably caused by temporary absent
+				 * service(s) whose re-availability causes to trigger this
+				 * method again.
+				 */
+				LOG.info("A temporary absent service is available again");
+				return;
 			}
 			/*
-			 * Create listener collection
+			 * Start spell check
 			 */
-			listeners = new SpellCheckListeners();
-			/*
-			 * Add listeners to specific service holders
-			 */
-			csh.addServiceHolderListener(listeners.getConfigListener());
-			SpellCheckHttpService.getInstance().addServiceHolderListener(listeners.getHttpListener());
-		} catch (final Throwable t) {
-			LOG.error("SpellCheckActivator.start: " + t.getLocalizedMessage(), t);
-			throw t instanceof Exception ? ((Exception) t) : new Exception(t);
+			SpellCheckInit.getInstance().start();
+		} catch (final Exception e) {
+			LOG.error(e.getMessage(), e);
+			throw e;
 		}
+
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+	 * @see com.openexchange.server.osgiservice.DeferredActivator#stopBundle()
 	 */
-	public void stop(final BundleContext context) throws Exception {
+	@Override
+	protected void stopBundle() throws Exception {
 		try {
 			/*
-			 * Remove listeners and reset collection
+			 * Stop spell check
 			 */
-			csh.removeServiceHolderListenerByName(
-					listeners.configListener.getClass().getName());
-			SpellCheckHttpService.getInstance().removeServiceHolderListenerByName(
-					listeners.httpListener.getClass().getName());
-			listeners = null;
 			SpellCheckInit.getInstance().stop();
-			csh = null;
 			/*
-			 * Close service trackers
+			 * Clear service registry
 			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
-				tracker.close();
-			}
-			serviceTrackerList.clear();
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Spell check bundle successfully stopped");
-			}
-		} catch (final Throwable t) {
-			LOG.error("SpellCheckActivator.stop: " + t.getLocalizedMessage(), t);
-			throw t instanceof Exception ? ((Exception) t) : new Exception(t);
+			getServiceRegistry().clearRegistry();
+		} catch (final Exception e) {
+			LOG.error(e.getMessage(), e);
+			throw e;
+		} finally {
+			started.set(false);
 		}
-
 	}
 
 }
