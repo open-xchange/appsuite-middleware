@@ -465,19 +465,19 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 			String attr = m.group(5);
 			if (attr != null) {
 				/*
-				 * Set path attribute
+				 * Set $Path parameter
 				 */
 				c.setPath(attr);
 			}
 			attr = m.group(6);
 			if (attr != null) {
 				/*
-				 * Set domain attribute
+				 * Set $Domain parameter
 				 */
 				c.setDomain(attr);
 			}
 			/*
-			 * Ignore port, apply version, and add to list
+			 * Ignore $Port, apply version, and add to list
 			 */
 			cookieList.add(c);
 		}
