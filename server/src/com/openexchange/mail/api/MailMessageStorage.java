@@ -457,12 +457,11 @@ public abstract class MailMessageStorage {
 
 	/**
 	 * Searches mails located in given folder. This method's purpose is to
-	 * return filtered mails' headers for a fast list view. See parameter
-	 * description to know which messages are going to be returned.
-	 * <p>
-	 * In contrast to {@link #getMessages(String, long[], MailField[])} the
-	 * returned instances of {@link MailMessage} are only pre-filled with the
-	 * fields specified through parameter <code>fields</code>.
+	 * return filtered mails' headers for a <b>fast</b> list view. Therefore
+	 * this method's <code>fields</code> parameter should only contain
+	 * instances of {@link MailField} which are marked as <b>[low cost]</b>.
+	 * Otherwise pre-filling of returned messages may take a long time and does
+	 * no more fit to generate a fast list view.
 	 * <p>
 	 * <b>Note</b> that sorting needs not to be supported by underlying mailing
 	 * system. This can be done on application side, too.<br>
