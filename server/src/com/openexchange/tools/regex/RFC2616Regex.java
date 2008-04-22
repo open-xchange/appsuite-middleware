@@ -132,7 +132,7 @@ public final class RFC2616Regex {
 	 * href="http://www.faqs.org/rfcs/rfc2616.html">RFC 2616</a>:
 	 * 
 	 * <pre>
-	 * value = token | quoted - string
+	 * value = token | quoted-string
 	 * </pre>
 	 */
 	public static final Pattern VALUE = Pattern.compile(valueRegex);
