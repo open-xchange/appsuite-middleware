@@ -324,7 +324,7 @@ public final class MailMessageParser {
 				 */
 				final Attr messageClass = message.getAttribute(Attr.attMessageClass);
 				final String messageClassName = messageClass == null ? "" : ((String) messageClass.getValue());
-				if ((messageClass != null) && TNEF_IPM_CONTACT.equalsIgnoreCase(messageClassName)) {
+				if (TNEF_IPM_CONTACT.equalsIgnoreCase(messageClassName)) {
 					/*
 					 * Convert contact to standard vCard. Resulting Multipart
 					 * object consists of only ONE BodyPart object which
