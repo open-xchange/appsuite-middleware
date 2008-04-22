@@ -50,7 +50,8 @@
 package com.openexchange.spellcheck;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.Component;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.server.ServiceException;
 
 /**
  * {@link SpellCheckException}
@@ -191,7 +192,7 @@ public final class SpellCheckException extends AbstractOXException {
 	 *            The message arguments
 	 */
 	public SpellCheckException(final Code code, final Throwable cause, final Object... messageArgs) {
-		super(Component.SERVICE, code.getCategory(), code.getNumber(), code.getMessage(), cause);
+		super(EnumComponent.SERVICE, code.getCategory(), code.getNumber(), code.getMessage(), cause);
 		super.setMessageArgs(messageArgs);
 	}
 }
