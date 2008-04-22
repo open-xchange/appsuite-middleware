@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.filter.osgi;
 
-import java.util.Dictionary;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.osgi.framework.ServiceRegistration;
@@ -150,12 +149,12 @@ public final class MailFilterServletActivator extends DeferredActivator {
 				serviceRegistration.unregister();
 				serviceRegistration = null;
 			}
+			MailFilterServletInit.getInstance().stop();
+			
 			/*
 			 * Clear service registry
 			 */
 			MailFilterServletServiceRegistry.getServiceRegistry().clearRegistry();
-			
-			MailFilterServletInit.getInstance().stop();
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
