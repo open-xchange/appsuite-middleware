@@ -225,7 +225,7 @@ public class MailFilterServletInit implements Initialization {
 	 */
 	public void stop() {
 		if (!started.compareAndSet(true, false)) {
-			LOG.error("Spell check has not been started.");
+			LOG.error("Mail filter servlet has not been started.");
 			return;
 		}
 		final HttpService httpService = MailFilterServletServiceRegistry.getServiceRegistry().getService(HttpService.class);
