@@ -1,3 +1,7 @@
+* 2008-04-22 - sebastian.kauss@open-xchange.com
+
+ - Bugfix #10825: [L3] Unclear object not found exceptions
+
 * 2008-04-22 - thorben.betten@open-xchange.com
 
  - Bugfix #11169: Added support for strange cookie header which are not
