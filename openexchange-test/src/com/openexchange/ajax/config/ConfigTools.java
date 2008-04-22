@@ -62,6 +62,8 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 
+import sun.security.action.GetLongAction;
+
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -203,6 +205,28 @@ public final class ConfigTools extends Assert {
             .TimeZone)).getString();
         return TimeZone.getTimeZone(value);
     }
+    
+    /**
+     * Reads the mail filter value.
+     * @param conversation web conversation.
+     * @param hostName host name of the server.
+     * @param sessionId session identifier of the user.
+     * @return the time zone configured by the user.
+     * @throws SAXException if parsing of the response fails.
+     * @throws IOException if getting the response fails.
+     * @throws JSONException if parsing the response fails.
+     * @throws ConfigurationException 
+     */
+    public static boolean getMailFilterValue(final WebConversation conversation,
+        final String hostName, final String sessionId) throws IOException,
+        SAXException, JSONException, AjaxException, ConfigurationException {
+        AJAXConfig.init();
+        final AJAXSession session = new AJAXSession(conversation, sessionId);
+        final Boolean value = ConfigTools.get(session, new GetRequest(Tree
+            .MailFilter)).getBoolean();
+        return value;
+    }
+
 
     public static GetResponse get(final AJAXClient client,
         final GetRequest request) throws AjaxException, IOException,
