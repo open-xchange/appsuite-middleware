@@ -74,7 +74,6 @@ import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
 
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -396,7 +395,7 @@ public final class MailMessageParser {
 					if (ris != null) {
 						final byte[] rtfBody = ris.toByteArray();
 						final TNEFBodyPart bodyPart = new TNEFBodyPart();
-						final String defCharset = ServerConfig.getProperty(Property.DefaultEncoding);
+						final String defCharset = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
 						final String content = new String(TNEFUtils.decompressRTF(rtfBody), defCharset);
 						bodyPart.setText(content, defCharset, "rtf");
 						bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new StringBuilder(MIMETypes.MIME_TEXT_RTF)
