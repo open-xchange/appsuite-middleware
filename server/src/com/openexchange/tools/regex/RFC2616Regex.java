@@ -70,7 +70,7 @@ public final class RFC2616Regex {
 		super();
 	}
 
-	private static final String tokenRegex = "[\\p{ASCII}&&[^\\p{Cntrl}()<>@,;:\\\"/\\[\\]?={}\\p{Blank}]]*";
+	private static final String tokenRegex = "[\\p{ASCII}&&[^\\p{Cntrl}()<>@,;:\\\"/\\[\\]?={}\\p{Blank}]]+";
 
 	/**
 	 * Regular expression that satisfies a <i>token</i> as per <a
@@ -124,7 +124,8 @@ public final class RFC2616Regex {
 	 */
 	public static final Pattern QUOTED_STRING = Pattern.compile(quotedStringRegex);
 
-	private static final String valueRegex = RegexUtility.OR(tokenRegex, quotedStringRegex);
+	private static final String valueRegex = RegexUtility.OR(RegexUtility.group(tokenRegex, false), RegexUtility.group(
+			quotedStringRegex, false));
 
 	/**
 	 * Regular expression that satisfies a <i>value</i> as per <a
@@ -137,25 +138,18 @@ public final class RFC2616Regex {
 	public static final Pattern VALUE = Pattern.compile(valueRegex);
 
 	/**
-	 * Additionally to the value we allow a simple slash character "/". This
-	 * is a quickfix for commons-httpclient. 
+	 * Additionally to the value we allow a simple slash character "/". This is
+	 * a quickfix for commons-httpclient.
 	 */
-	private static final String pathRegex =
-	    RegexUtility.concat(
-    	    ";\\p{Blank}*\\$Path=",
-    	    RegexUtility.group(
-	            RegexUtility.OR(
-	                valueRegex,
-	                "/"
-                ),
-                true
-            )
-        );
+	private static final String pathRegex = RegexUtility.concat(";\\p{Blank}*\\$Path=", RegexUtility.group(RegexUtility
+			.OR(RegexUtility.group(valueRegex, RegexUtility.GroupType.NON_CAPTURING), RegexUtility.group("/",
+					RegexUtility.GroupType.NON_CAPTURING)), RegexUtility.GroupType.CAPTURING));
 
-	private static final String domainRegex = RegexUtility.concat(";\\p{Blank}*\\$Domain=", RegexUtility.group(valueRegex, true));
+	private static final String domainRegex = RegexUtility.concat(";\\p{Blank}*\\$Domain=", RegexUtility.group(
+			valueRegex, true));
 
-	private static final String portRegex = RegexUtility.concat(";\\p{Blank}*\\$Port(=\"", RegexUtility.group(valueRegex, false),
-			"\")?");
+	private static final String portRegex = RegexUtility.concat(";\\p{Blank}*\\$Port(=\"", RegexUtility.group(
+			valueRegex, false), "\")?");
 
 	private static final String cookieValueRegex = RegexUtility.concat(RegexUtility.group(tokenRegex, true), "=",
 			RegexUtility.group(valueRegex, true), RegexUtility
@@ -202,28 +196,14 @@ public final class RFC2616Regex {
 	 * characters. This regular expression can be used to find the version with
 	 * separator in front of a cookie.
 	 */
-	private static final String cookieVersionWithSeperatorRegex =
-	    RegexUtility.group(
-	        RegexUtility.concat(
-	            cookieVersionRegex,
-	            "(?:;|,)\\p{Blank}*"
-	        ),
-	        false
-	    );
+	private static final String cookieVersionWithSeperatorRegex = RegexUtility.group(RegexUtility.concat(
+			cookieVersionRegex, "(?:;|,)\\p{Blank}*"), false);
 
 	/**
 	 * A cookie consists of the cookie itself preceded by its version.
 	 */
-	private static final String oneCookieRegex =
-        RegexUtility.group(
-            RegexUtility.concat(
-                RegexUtility.optional(
-                    cookieVersionWithSeperatorRegex
-                ),
-                cookieValueRegex
-            ),
-            true
-        );
+	private static final String oneCookieRegex = RegexUtility.group(RegexUtility.concat("(?:^|(?:[;,]\\p{Blank}*))",
+			RegexUtility.optional(cookieVersionWithSeperatorRegex), cookieValueRegex), true);
 
 	/**
 	 * This pattern matches exactly ONE cookie. It can be used to find cookies
@@ -232,34 +212,34 @@ public final class RFC2616Regex {
 	public static final Pattern COOKIE = Pattern.compile(oneCookieRegex);
 
 	/**
+	 * Regular expression that satisfies the <code>$Path</code> parameter
+	 * contained in a cookie's value
+	 */
+	public static final Pattern COOKIE_PARAM_PATH = Pattern.compile(pathRegex);
+
+	/**
+	 * Regular expression that satisfies the <code>$Domain</code> parameter
+	 * contained in a cookie's value
+	 */
+	public static final Pattern COOKIE_PARAM_DOMAIN = Pattern.compile(domainRegex);
+
+	/**
 	 * This regular expression should match one or more cookies. It does not
 	 * work well because the separator between complete cookies and its version,
 	 * path, domain and port are all &quot;,&quot; or &quot;;&quot;. So this
 	 * expression may find the domain as cookie key. Maybe look ahead or
 	 * something like that can fix this expression.
 	 */
-	private static final String cookiesRegex =
-	    RegexUtility.concat(
-	        oneCookieRegex,
-            RegexUtility.zeroOrMoreTimes(
-                RegexUtility.group(
-                    RegexUtility.concat(
-                        "(?:;|,)\\p{Blank}*",
-                        oneCookieRegex
-                    ),
-                    false
-                )
-            )
-        );
+	private static final String cookiesRegex = RegexUtility.concat(oneCookieRegex, RegexUtility
+			.zeroOrMoreTimes(RegexUtility.group(RegexUtility.concat("(?:;|,)\\p{Blank}*", oneCookieRegex), false)));
 
 	/*
 	 * Regular expression that satisfies <i>cookies</i> as per <a
 	 * href="http://www.faqs.org/rfcs/rfc2965.html">RFC 2965</a> except that
 	 * heading cookie version is optional instead of forced.
 	 * 
-	 * <pre>
-	 * cookie          =  [cookie-version] 1*((&quot;;&quot; | &quot;,&quot;) cookie-value)
-	 * </pre>
+	 * <pre> cookie = [cookie-version] 1*((&quot;;&quot; | &quot;,&quot;)
+	 * cookie-value) </pre>
 	 * 
 	 */
 	/**
