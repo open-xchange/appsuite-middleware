@@ -5,23 +5,20 @@
 Name:           open-xchange-config-hosting
 BuildArch:	noarch
 BuildRequires:  ant
-#%if 0%{?suse_version} <= 1010
+%if 0%{?suse_version} <= 1010
 # SLES10
-#BuildRequires:  java-1_5_0-ibm-devel java-1_5_0-ibm-alsa update-alternatives
-#%endif
-#%if 0%{?suse_version} >= 1020
-BuildRequires:  ant-trax ant-apache-regexp ant-nodeps
-%if 0%{?suse_version}
-BuildRequires:  java-1_5_0-sun-devel
+BuildRequires:  java-1_5_0-ibm java-1_5_0-ibm-devel java-1_5_0-ibm-alsa update-alternatives
+%endif
+%if 0%{?suse_version} > 1010 || 0%{?rhel_version}
+BuildRequires:  java-sdk-1.5.0-sun
 %endif
 %if 0%{?rhel_version}
 # libgcj seems to be installed whether we want or not and libgcj needs cairo
-BuildRequires:  cairo java-1.5.0-sun-devel
+BuildRequires:  cairo
 %endif
 %if 0%{?fedora_version}
-BuildRequires:  java-devel-icedtea saxon
+BuildRequires:  java-devel-icedtea
 %endif
-#%endif
 Version:        6.5.0
 Release:        1
 Group:          Applications/Productivity
