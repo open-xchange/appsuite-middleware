@@ -409,6 +409,7 @@ public abstract class MailMessageStorage {
 	 *            The draft mail as a composed mail
 	 * @return The stored draft mail
 	 * @throws MailException
+	 *             If saving specified draft message fails
 	 */
 	public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws MailException {
 		if (!draftMail.isDraft()) {

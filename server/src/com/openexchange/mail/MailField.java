@@ -58,9 +58,8 @@ import java.util.Set;
 import com.openexchange.mail.search.SearchTerm;
 
 /**
- * {@link MailField} - An enumeration of mail list fields as defined in <a
- * href="http://www.open-xchange.com/wiki/index.php?title=HTTP_API#Module_.22mail.22">HTTP
- * API's mail section</a>
+ * {@link MailField} - An enumeration of mail fields to define which fields to
+ * prefill.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -68,80 +67,99 @@ import com.openexchange.mail.search.SearchTerm;
 public enum MailField {
 
 	/**
-	 * The mail ID<br><b>[low cost]</b>
+	 * The mail ID<br>
+	 * <b>[low cost]</b>
 	 */
 	ID(MailListField.ID),
 	/**
-	 * The folder ID<br><b>[low cost]</b>
+	 * The folder ID<br>
+	 * <b>[low cost]</b>
 	 */
 	FOLDER_ID(MailListField.FOLDER_ID),
 	/**
-	 * The Content-Type; includes whether message contains attachments or not<br><b>[low cost]</b>
+	 * The Content-Type; includes whether message contains attachments or not<br>
+	 * <b>[low cost]</b>
 	 */
 	CONTENT_TYPE(MailListField.ATTACHMENT),
 	/**
-	 * From<br><b>[low cost]</b>
+	 * From<br>
+	 * <b>[low cost]</b>
 	 */
 	FROM(MailListField.FROM),
 	/**
-	 * To<br><b>[low cost]</b>
+	 * To<br>
+	 * <b>[low cost]</b>
 	 */
 	TO(MailListField.TO),
 	/**
-	 * Cc<br><b>[low cost]</b>
+	 * Cc<br>
+	 * <b>[low cost]</b>
 	 */
 	CC(MailListField.CC),
 	/**
-	 * Bcc<br><b>[low cost]</b>
+	 * Bcc<br>
+	 * <b>[low cost]</b>
 	 */
 	BCC(MailListField.BCC),
 	/**
-	 * Subject<br><b>[low cost]</b>
+	 * Subject<br>
+	 * <b>[low cost]</b>
 	 */
 	SUBJECT(MailListField.SUBJECT),
 	/**
-	 * Size<br><b>[low cost]</b>
+	 * Size<br>
+	 * <b>[low cost]</b>
 	 */
 	SIZE(MailListField.SIZE),
 	/**
-	 * Sent date<br><b>[low cost]</b>
+	 * Sent date<br>
+	 * <b>[low cost]</b>
 	 */
 	SENT_DATE(MailListField.SENT_DATE),
 	/**
-	 * Received date<br><b>[low cost]</b>
+	 * Received date<br>
+	 * <b>[low cost]</b>
 	 */
 	RECEIVED_DATE(MailListField.RECEIVED_DATE),
 	/**
-	 * Flags<br><b>[low cost]</b>
+	 * Flags<br>
+	 * <b>[low cost]</b>
 	 */
 	FLAGS(MailListField.FLAGS),
 	/**
-	 * Thread level<br><b>[low cost]</b>
+	 * Thread level<br>
+	 * <b>[low cost]</b>
 	 */
 	THREAD_LEVEL(MailListField.THREAD_LEVEL),
 	/**
-	 * <code>Disposition-Notification-To</code><br><b>[low cost]</b>
+	 * <code>Disposition-Notification-To</code><br>
+	 * <b>[low cost]</b>
 	 */
 	DISPOSITION_NOTIFICATION_TO(MailListField.DISPOSITION_NOTIFICATION_TO),
 	/**
-	 * Priority<br><b>[low cost]</b>
+	 * Priority<br>
+	 * <b>[low cost]</b>
 	 */
 	PRIORITY(MailListField.PRIORITY),
 	/**
-	 * Color Label<br><b>[low cost]</b>
+	 * Color Label<br>
+	 * <b>[low cost]</b>
 	 */
 	COLOR_LABEL(MailListField.COLOR_LABEL),
 	/**
-	 * To peek the mail body (\Seen flag is left unchanged)<br><b>[high cost]</b>
+	 * To peek the mail body (\Seen flag is left unchanged)<br>
+	 * <b>[high cost]</b>
 	 */
 	BODY(null),
 	/**
-	 * To fetch all message headers<br><b>[high cost]</b>
+	 * To fetch all message headers<br>
+	 * <b>[high cost]</b>
 	 */
 	HEADERS(null),
 	/**
 	 * To fully pre-fill mail incl. headers and peeked body (\Seen flag is left
-	 * unchanged)<br><b>[high cost]</b>
+	 * unchanged)<br>
+	 * <b>[high cost]</b>
 	 */
 	FULL(null);
 
