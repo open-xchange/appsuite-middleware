@@ -318,7 +318,7 @@ public interface OXUserInterface extends Remote {
      * Get current access combination name of an user!
      * 
      * @param ctx
-     * @þaram user 
+     * @param user 
      * @param auth
      * @return Access combination name or null if current access rights cannot be mapped to an access combination name.
      * @throws RemoteException
