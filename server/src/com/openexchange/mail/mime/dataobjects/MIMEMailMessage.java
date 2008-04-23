@@ -71,7 +71,7 @@ public final class MIMEMailMessage extends MailMessage {
 
 	private static final long serialVersionUID = 4593386724062676753L;
 
-	private final MailPart mailPart;
+	private MailPart mailPart;
 
 	private long uid = -1L;
 
@@ -95,6 +95,18 @@ public final class MIMEMailMessage extends MailMessage {
 	public MIMEMailMessage(final MimeMessage msg) throws MailException {
 		super();
 		this.mailPart = MIMEMessageConverter.convertPart(msg);
+	}
+
+	/**
+	 * Sets this mail message's content
+	 * 
+	 * @param msg
+	 *            The MIME message
+	 * @throws MailException
+	 *             If parsing mime message fails
+	 */
+	public void setContent(final MimeMessage msg) throws MailException {
+		this.mailPart = msg == null ? new MIMEMailPart(null) : MIMEMessageConverter.convertPart(msg);
 	}
 
 	/*

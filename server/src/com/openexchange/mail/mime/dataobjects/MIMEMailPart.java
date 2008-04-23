@@ -103,7 +103,7 @@ public final class MIMEMailPart extends MailPart {
 	/**
 	 * Whether this part's content is of MIME type <code>multipart/*</code>
 	 */
-	private final boolean isMulti;
+	private boolean isMulti;
 
 	/**
 	 * Indicates whether content has been loaded via {@link #loadContent()} or
@@ -116,6 +116,20 @@ public final class MIMEMailPart extends MailPart {
 	 * attributes
 	 */
 	public MIMEMailPart(final Part part) {
+		applyPart(part);
+	}
+
+	/**
+	 * Sets this mail part's content
+	 * 
+	 * @param part
+	 *            The part
+	 */
+	public void setContent(final Part part) {
+		applyPart(part);
+	}
+
+	private void applyPart(final Part part) {
 		this.part = part;
 		if (null != part) {
 			boolean tmp = false;
