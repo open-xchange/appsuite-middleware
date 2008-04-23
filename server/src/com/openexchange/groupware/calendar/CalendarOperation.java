@@ -1183,73 +1183,49 @@ public class CalendarOperation implements SearchIterator {
                     cdao.setRecurrenceCalculator(((int)((cdao.getEndDate().getTime()-cdao.getStartDate().getTime())/CalendarRecurringCollection.MILLI_DAY)));
                     
                     // Have to check if something in the pattern has been changed
-                    // and then modify the recurring. This means we have to look very
-                    // deep into our digital crystal ball because the GUI does not send
-                    // all information ...
-                    
-                    CalendarDataObject clone = (CalendarDataObject)edao.clone();
+                    // and then modify the recurring. Assume all data has been provided
                     boolean pattern_change = false;
-                    boolean time_change = false;
                     
                     if (cdao.containsInterval()) {
                         if (cdao.getInterval() != edao.getInterval()) {
-                            clone.setInterval(cdao.getInterval());
                             pattern_change = true;
                         }
                     }
                     if (cdao.containsDays()) {
                         if (cdao.getDays() != edao.getDays()) {
-                            clone.setDays(cdao.getDays());
                             pattern_change = true;
                         }
                     }
                     if (cdao.containsDayInMonth()) {
                         if (cdao.getDayInMonth() != edao.getDayInMonth()) {
-                            clone.setDayInMonth(cdao.getDayInMonth());
                             pattern_change = true;
                         }
                     }
                     if (cdao.containsMonth()) {
                         if (cdao.getMonth() != edao.getMonth()) {
-                            clone.setMonth(cdao.getMonth());
                             pattern_change = true;
                         }
                     }
                     if (cdao.containsOccurrence()) {
                         if (cdao.getOccurrence() != edao.getOccurrence()) {
-                            clone.setOccurrence(cdao.getOccurrence());
-                            clone.removeUntil();
                             cdao.removeUntil();
-                            edao.setUntil(new Date(CalendarRecurringCollection.normalizeLong(CalendarRecurringCollection.getOccurenceDate(clone).getTime())));
-                            
+                            edao.setUntil(new Date(CalendarRecurringCollection.normalizeLong(CalendarRecurringCollection.getOccurenceDate(cdao).getTime())));
+
                             pattern_change = true;
-                            time_change = true;
                         }
                     }
                     if (cdao.containsUntil()) {
                         if (CalendarCommonCollection.check(cdao.getUntil(), edao.getUntil())) {
-                            if (cdao.getUntil() == null) {
-                                clone.removeUntil();
-                            } else {
-                                clone.setUntil(cdao.getUntil());
-                                cdao.setEndDate(calculateRealRecurringEndDate(clone));
-                                pattern_change = true;
-                            }
+                            cdao.setEndDate(calculateRealRecurringEndDate(cdao));
+                            pattern_change = true;
                         }
                     }
                     
                     if (pattern_change) {
-                        clone.setRecurrence(null);
-                        if (time_change) {
-                            calculateAndSetRealRecurringStartAndEndDate(clone, edao);
-                            cdao.setStartDate(clone.getStartDate());
-                            cdao.setEndDate(clone.getEndDate());
-                        } else {
-                            cdao.setStartDate(edao.getStartDate());
-                            cdao.setEndDate(edao.getEndDate());
-                        }
-                        CalendarRecurringCollection.fillDAO(clone);
-                        cdao.setRecurrence(clone.getRecurrence());
+                        cdao.setRecurrence(null);
+
+                        CalendarRecurringCollection.checkRecurring(cdao);
+                        CalendarRecurringCollection.fillDAO(cdao);
                         cdao.setExceptions(null);
                         cdao.setDelExceptions(null);
                         return CalendarRecurringCollection.CHANGE_RECURRING_TYPE;

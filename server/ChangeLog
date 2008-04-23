@@ -1,3 +1,9 @@
+* 2008-04-23 - francisco.laguna@open-xchange.com
+
+ - Bugfix #11148:
+    Check recurrence pattern for validity on update.
+    Recalculate entire recurrence pattern on update (if any recurrence data was changed).
+
 * 2008-04-23 - thorben.betten@open-xchange.com
 
  - Bugfix #11175: Proper checking for invalid folder name on folder
