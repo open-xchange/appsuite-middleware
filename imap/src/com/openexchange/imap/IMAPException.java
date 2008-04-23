@@ -134,9 +134,9 @@ public final class IMAPException extends MIMEMailException {
 		 */
 		FOLDER_DOES_NOT_HOLD_FOLDERS("Folder %s does not allow subfolders.", Category.PERMISSION, 2012),
 		/**
-		 * Mail folder cannot be created. Name must not contain character '%s'
+		 * Mail folder cannot be created/rename. Name must not contain character '%s'
 		 */
-		INVALID_FOLDER_NAME("Mail folder cannot be created. Name must not contain character '%s'", Category.USER_INPUT,
+		INVALID_FOLDER_NAME("Mail folder cannot be created/renamed. Name must not contain character '%s'", Category.USER_INPUT,
 				2013),
 		/**
 		 * A folder named %s already exists
