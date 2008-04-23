@@ -5,16 +5,17 @@
 Name:           open-xchange-common
 BuildArch: 	noarch
 BuildRequires:  ant
-%if 0%{?suse_version} <= 1010 && ! 0%{?rhel_version}
+%if 0%{?suse_version}
+%if 0%{?suse_version} <= 1010
 # SLES10
 BuildRequires:  java-1_5_0-ibm java-1_5_0-ibm-devel java-1_5_0-ibm-alsa update-alternatives
-%endif
-%if 0%{?suse_version} > 1010 || 0%{?rhel_version}
+%else
 BuildRequires:  java-sdk-1.5.0-sun
+%endif
 %endif
 %if 0%{?rhel_version}
 # libgcj seems to be installed whether we want or not and libgcj needs cairo
-BuildRequires:  cairo
+BuildRequires:  java-sdk-1.5.0-sun cairo
 %endif
 %if 0%{?fedora_version}
 BuildRequires:  java-devel-icedtea
