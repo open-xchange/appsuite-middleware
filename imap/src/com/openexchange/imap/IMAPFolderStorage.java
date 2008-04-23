@@ -61,6 +61,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import javax.mail.Flags;
 import javax.mail.Folder;
@@ -473,6 +474,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				parent = (IMAPFolder) imapStore.getDefaultFolder();
 				parentFullname = parent.getFullName();
 			} else {
+				if (toCreate.containsSeparator() && !checkFolderPathValidity(parentFullname, toCreate.getSeparator())) {
+					throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(toCreate
+							.getSeparator()));
+				}
 				parent = (IMAPFolder) imapStore.getFolder(parentFullname);
 			}
 			if (!parent.exists()) {
@@ -661,7 +666,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 					newParent = "";
 					newName = newFullname;
 				} else {
+					if (pos == newFullname.length() - 1) {
+						throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(separator));
+					}
 					newParent = newFullname.substring(0, pos);
+					if (!checkFolderPathValidity(newParent, separator)) {
+						throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(separator));
+					}
 					newName = newFullname.substring(pos + 1);
 				}
 			}
@@ -686,7 +697,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				if (!destFolder.exists()) {
 					destFolder = checkForNamespaceFolder(newParent);
 					if (null == destFolder) {
-						throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, newParent);
+						/*
+						 * Destination folder could not be found, thus an
+						 * invalid name was specified by user
+						 */
+						throw new IMAPException(IMAPException.Code.INVALID_FOLDER_NAME, Character.valueOf(separator));
 					}
 				}
 				if (destFolder instanceof DefaultFolder) {
@@ -1740,4 +1755,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		}
 		return (pos == -1);
 	}
+
+	private static final String REGEX_TEMPL = "[\\p{ASCII}\\p{Blank}&&[^\\p{Cntrl}#SEP#]]+(?:\\Q#SEP#\\E[\\p{ASCII}\\p{Blank}&&[^\\p{Cntrl}#SEP#]]+)*";
+
+	private static boolean checkFolderPathValidity(final String path, final char separator) {
+		if (path != null && path.length() > 0) {
+			return Pattern.compile(REGEX_TEMPL.replaceAll("#SEP#", String.valueOf(separator))).matcher(path).matches();
+		}
+		return false;
+	}
+
 }

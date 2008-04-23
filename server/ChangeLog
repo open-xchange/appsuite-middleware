@@ -1,3 +1,8 @@
+* 2008-04-23 - thorben.betten@open-xchange.com
+
+ - Bugfix #11175: Proper checking for invalid folder name on folder
+   creation/rename
+
 * 2008-04-22 - thorben.betten@open-xchange.com
 
  - Bugfix #11139: The propagate method uses given connection if admin daemon.
