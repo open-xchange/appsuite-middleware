@@ -1,3 +1,9 @@
+open-xchange-charset (6.5.0-5) unstable; urgency=low
+
+  * Sixth internal Beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 23 Apr 2008 16:54:58 +0200
+
 open-xchange-charset (6.5.0-4) unstable; urgency=low
 
   * Fourth internal beta.

@@ -1,3 +1,9 @@
+open-xchange-configread (6.5.0-6) unstable; urgency=low
+
+  * Sixth internal Beta.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 23 Apr 2008 16:55:01 +0200
+
 open-xchange-configread (6.5.0-5) unstable; urgency=low
 
   * Fifth internal Beta.
