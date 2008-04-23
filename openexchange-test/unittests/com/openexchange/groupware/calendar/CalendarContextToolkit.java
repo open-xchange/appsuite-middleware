@@ -53,13 +53,20 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class CalendarContextToolkit {
+
+    public int resolveUser(String username) {
+        return resolveUser(username, getDefaultContext());
+    }
 
     public int resolveUser(String username, Context ctx) {
         UserStorage uStorage = null;
@@ -88,5 +95,10 @@ public class CalendarContextToolkit {
             e.printStackTrace();
             return new int[0];
         }
+    }
+
+    public Session getSessionForUser(String user, Context ctx) {
+        int userId = resolveUser(user, ctx);
+        return SessionObjectWrapper.createSessionObject(userId,ctx,"session for "+user);    
     }
 }

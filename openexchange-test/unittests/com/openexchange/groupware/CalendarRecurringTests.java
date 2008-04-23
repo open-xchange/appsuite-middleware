@@ -1243,6 +1243,8 @@ public class CalendarRecurringTests extends TestCase {
         update.setIgnoreConflicts(true);
         update.setTitle("testComplexOccurrence - Step 2");
         update.setOccurrence(5);
+        update.setRecurrenceType(CalendarObject.DAILY);
+        update.setInterval(1);
         update.setObjectID(object_id);
         
         //update.setStartDate(cdao.getStartDate());
@@ -1253,7 +1255,7 @@ public class CalendarRecurringTests extends TestCase {
         
         CalendarDataObject testobject2 = csql.getObjectById(object_id, folder_id);
         
-        assertTrue("Check that end date is different", testobject.getUntil().getTime() != testobject2.getUntil().getTime());
+        assertTrue("Check that until date is different", testobject.getUntil().getTime() != testobject2.getUntil().getTime());
         
     }
     
