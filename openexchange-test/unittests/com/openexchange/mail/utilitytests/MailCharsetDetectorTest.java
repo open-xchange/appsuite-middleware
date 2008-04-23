@@ -47,62 +47,58 @@
  *
  */
 
-package com.openexchange.mail;
+package com.openexchange.mail.utilitytests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.mail.AbstractMailTest;
+import com.openexchange.mail.utils.CharsetDetector;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
- * {@link MailAPITestSuite}
+ * {@link MailCharsetDetectorTest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailAPITestSuite extends TestSuite {
+public final class MailCharsetDetectorTest extends AbstractMailTest {
 
 	/**
-	 * Initializes a new {@link MailAPITestSuite}
+	 * 
 	 */
-	private MailAPITestSuite() {
+	public MailCharsetDetectorTest() {
 		super();
 	}
 
 	/**
-	 * @return a test suite containing smoke tests.
+	 * @param name
 	 */
-	public static Test suite() {
-		TestSuite mailSuite = new TestSuite();
-		/*
-		 * Storages consistency
-		 */
-		mailSuite.addTestSuite(com.openexchange.mail.storagesconsistency.MailStoragesConsistencyTest.class);
-		/*
-		 * Message storage
-		 */
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailAppendTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailAttachmentTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailColorLabelTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailCopyTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailDeleteTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailFlagsTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailGetTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailImageTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailMoveTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailSaveDraftTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailSearchTest.class);
-		/*
-		 * Reply/forward
-		 */
-		mailSuite.addTestSuite(com.openexchange.mail.replyforward.MailForwardTest.class);
-		mailSuite.addTestSuite(com.openexchange.mail.replyforward.MailReplyTest.class);
-		/*
-		 * Folder storage
-		 */
-		mailSuite.addTestSuite(com.openexchange.mail.folderstorage.MailFolderTest.class);
-		/*
-		 * Utility tests
-		 */
-		mailSuite.addTestSuite(com.openexchange.mail.utilitytests.MailCharsetDetectorTest.class);
-		return mailSuite;
+	public MailCharsetDetectorTest(String name) {
+		super(name);
 	}
+
+	public void testCharsetDetection() {
+		try {
+			String charset = null;
+			String usedCharset = null;
+
+			usedCharset = "US-ASCII";
+			charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream("A text line"
+					.getBytes(usedCharset)));
+			assertTrue(usedCharset + " not detected" + charset, usedCharset.equalsIgnoreCase(charset));
+
+			usedCharset = "UTF-8";
+			charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream("A text line ö ä ü ß"
+					.getBytes(usedCharset)));
+			assertTrue(usedCharset + " not detected" + charset, usedCharset.equalsIgnoreCase(charset));
+
+			usedCharset = "windows-1252";
+			charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream("A text line ö ä ü ß"
+					.getBytes(usedCharset)));
+			assertTrue(usedCharset + " not detected: " + charset, usedCharset.equalsIgnoreCase(charset));
+
+		} catch (final Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
+
 }
