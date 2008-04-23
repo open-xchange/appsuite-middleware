@@ -456,7 +456,7 @@ public final class MessageUtility {
 	 * Determines the quote color for given <code>quotelevel</code>
 	 * 
 	 * @param quotelevel -
-	 *            tho quote level
+	 *            the quote level
 	 * @return the color for given <code>quotelevel</code>
 	 */
 	private static String getLevelColor(final int quotelevel) {
@@ -467,8 +467,6 @@ public final class MessageUtility {
 
 	private static final String BLOCKQUOTE_END = "</blockquote>\n";
 
-	private static final String REGEX_HTML_QUOTE = "\\s*&gt;\\s*";
-
 	private static final String STR_HTML_QUOTE = "&gt;";
 
 	private static final String STR_SPLIT_BR = "<br/?>";
@@ -476,8 +474,12 @@ public final class MessageUtility {
 	private static final String HTML_BREAK = "<br>";
 
 	/**
-	 * Turns all simple quotes "&amp;gt; " to colored "&lt;blockquote&gt;" tags
-	 * according to configured quote colors in file "imap.properties"
+	 * Turns all simple quotes "&amp;gt; " occurring in specified HTML text to
+	 * colored "&lt;blockquote&gt;" tags according to configured quote colors
+	 * 
+	 * @param htmlText
+	 *            The HTML text
+	 * @return HTML text with simple quotes replaced with block quotes
 	 */
 	public static String replaceHTMLSimpleQuotesForDisplay(final String htmlText) {
 		final StringBuilder sb = new StringBuilder();
@@ -487,7 +489,7 @@ public final class MessageUtility {
 			String line = lines[i];
 			int currentLevel = 0;
 			int offset = 0;
-			if ((offset = startsWithRegex(line, REGEX_HTML_QUOTE)) != -1) {
+			if ((offset = startsWithQuote(line)) != -1) {
 				currentLevel++;
 				int pos = -1;
 				boolean next = true;
@@ -533,9 +535,10 @@ public final class MessageUtility {
 		return sb.toString();
 	}
 
-	private static int startsWithRegex(final String str, final String regex) {
-		final Pattern p = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-		final Matcher m = p.matcher(str);
+	private static final Pattern PAT_STARTS_WITH_QUOTE = Pattern.compile("\\s*&gt;\\s*", Pattern.CASE_INSENSITIVE);
+
+	private static int startsWithQuote(final String str) {
+		final Matcher m = PAT_STARTS_WITH_QUOTE.matcher(str);
 		if (m.find() && (m.start() == 0)) {
 			return m.end();
 		}
@@ -645,17 +648,18 @@ public final class MessageUtility {
 			Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
 	/**
-	 * onverts given HTML content into plain text, but keeps
+	 * Converts given HTML content into plain text, but keeps
 	 * <code>&lt;blockquote&gt;</code> tags if any present. <b>NOTE:</b>
-	 * returned content again is html content
+	 * returned content is again HTML content
 	 * 
 	 * @param htmlContent
-	 *            The html content
+	 *            The HTML content
 	 * @param converter
 	 *            The instance of {@link Html2TextConverter}
-	 * @return The partially converted plain text version of given html content
-	 *         as html content
+	 * @return The partially converted plain text version of given HTML content
+	 *         as HTML content
 	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
 	public static String convertAndKeepQuotes(final String htmlContent, final Html2TextConverter converter)
 			throws IOException {
