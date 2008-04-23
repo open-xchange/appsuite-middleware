@@ -115,11 +115,11 @@ public final class MessageUtility {
 	private static final Pattern PAT_QUOTABLE_CHAR = Pattern.compile("[.,:;<>\"]");
 
 	/**
-	 * Quotes given personal part of an internet address according to RFC 822
+	 * Quotes given personal part of an Internet address according to RFC 822
 	 * syntax if needed; otherwise the personal is returned unchanged.
 	 * <p>
 	 * This method guarantees that the resulting string can be used to build an
-	 * internet address according to RFC 822 syntax so that the
+	 * Internet address according to RFC 822 syntax so that the
 	 * <code>{@link InternetAddress#parse(String)}</code> constructor won't
 	 * throw an instance of <code>{@link AddressException}</code>.
 	 * 
@@ -137,7 +137,7 @@ public final class MessageUtility {
 	 * 
 	 * @param personalArg
 	 *            The personal's string representation
-	 * @return The properly quoted personal for building an internet address
+	 * @return The properly quoted personal for building an Internet address
 	 *         according to RFC 822 syntax
 	 */
 	public static String quotePersonal(final String personalArg) {
@@ -173,7 +173,7 @@ public final class MessageUtility {
 	 * parsing address headers in mail messages.
 	 * <p>
 	 * Additionally the personal parts are MIME encoded using default MIME
-	 * charset
+	 * charset.
 	 * 
 	 * @param addresslist -
 	 *            comma separated address strings
@@ -266,7 +266,7 @@ public final class MessageUtility {
 
 	/**
 	 * Performs the line folding after specified number of characters through
-	 * <code>linewrap</code>. Occurring html links are excluded.
+	 * <code>linewrap</code>. Occurring HTML links are excluded.
 	 * <p>
 	 * If parameter <code>isHtml</code> is set to <code>true</code> the
 	 * content is returned unchanged.
@@ -274,7 +274,7 @@ public final class MessageUtility {
 	 * @param content
 	 *            The content
 	 * @param isHtml
-	 *            <code>true</code> if content is html content; otherwise
+	 *            <code>true</code> if content is HTML content; otherwise
 	 *            <code>false</code>
 	 * @param linewrap
 	 *            The number of characters which may fit into a line
@@ -402,7 +402,7 @@ public final class MessageUtility {
 	}
 
 	/**
-	 * Performs all the formatting for both text and html content for a proper
+	 * Performs all the formatting for both text and HTML content for a proper
 	 * display according to user's configuration. The original content keeps
 	 * unaffected.
 	 * 
@@ -558,17 +558,17 @@ public final class MessageUtility {
 	private static final String CHARSET_ISO8859 = "ISO-8859-1";
 
 	/**
-	 * Replaces all occurences of <code>&lt;img cid:&quot;[cid]&quot;...</code>
+	 * Replaces all occurrences of <code>&lt;img cid:&quot;[cid]&quot;...</code>
 	 * with links to the image content to let the browser display the inlined
 	 * images
 	 * 
 	 * @param content
-	 *            The html content possibly containing inline images
+	 *            The HTML content possibly containing inline images
 	 * @param session
 	 *            The session providing needed user data
 	 * @param msgUID
 	 *            The message's unique path in mailbox
-	 * @return The html content with all inline images replaced with valid links
+	 * @return The HTML content with all inline images replaced with valid links
 	 */
 	public static String filterInlineImages(final String content, final Session session, final MailPath msgUID) {
 		String reval = content;
@@ -736,14 +736,14 @@ public final class MessageUtility {
 	private static final String REPL_LINEBREAK = "\r?\n";
 
 	/**
-	 * Formats plain text to html by escaping html special characters e.g.
+	 * Formats plain text to HTML by escaping HTML special characters e.g.
 	 * <code>&lt;</code> => <code>&amp;lt;</code>
 	 * 
 	 * @param plainText
 	 *            The plain text
 	 * @param withQuote
 	 *            Whether to escape quotes (<code>&quot;</code>) or not
-	 * @return properly escaped html content
+	 * @return properly escaped HTML content
 	 */
 	public static String htmlFormat(final String plainText, final boolean withQuote) {
 		/*
@@ -755,7 +755,7 @@ public final class MessageUtility {
 	}
 
 	/**
-	 * Formats plain text to html by escaping html special characters e.g.
+	 * Formats plain text to HTML by escaping HTML special characters e.g.
 	 * <code>&lt;</code> => <code>&amp;lt;</code>
 	 * <p>
 	 * This is just a convenience method which invokes
@@ -764,7 +764,7 @@ public final class MessageUtility {
 	 * 
 	 * @param plainText
 	 *            The plain text
-	 * @return properly escaped html content
+	 * @return properly escaped HTML content
 	 * @see #htmlFormat(String, boolean)
 	 */
 	public static String htmlFormat(final String plainText) {
@@ -777,14 +777,14 @@ public final class MessageUtility {
 					Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 
 	/**
-	 * Searches for non-html links and convert them to valid html links
+	 * Searches for non-HTML links and convert them to valid HTML links
 	 * <p>
 	 * Example: <code>http://www.somewhere.com</code> is converted to
 	 * <code>&lt;a&nbsp;href=&quot;http://www.somewhere.com&quot;&gt;http://www.somewhere.com&lt;/a&gt;</code>
 	 * 
 	 * @param content
 	 *            The content to search in
-	 * @return The given content with all non-html links converted to valid html
+	 * @return The given content with all non-HTML links converted to valid HTML
 	 *         links
 	 */
 	public static String formatHrefLinks(final String content) {
