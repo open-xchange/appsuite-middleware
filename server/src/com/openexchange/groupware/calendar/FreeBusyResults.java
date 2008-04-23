@@ -209,7 +209,7 @@ public class FreeBusyResults implements SearchIterator {
         } catch (SQLException sqle) {
             throw new OXCalendarException(OXCalendarException.Code.CALENDAR_SQL_ERROR, sqle);
         } catch(Exception e) {
-            LOG.error("FreeBusyResults calculation problem with oid "+oid+" / "+cdao == null ? "" : cdao.toString());
+            LOG.error("FreeBusyResults calculation problem with oid "+oid+" / "+cdao == null ? "" : cdao.toString() , e);
             throw new SearchIteratorException(SearchIteratorException.SearchIteratorCode.CALCULATION_ERROR, com.openexchange.groupware.EnumComponent.APPOINTMENT, oid, e);
         }
         if (ft != 0 && cdao != null) {
