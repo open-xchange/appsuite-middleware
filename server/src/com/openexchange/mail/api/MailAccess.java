@@ -156,11 +156,6 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 			if (MailAccessCache.getInstance().containsMailAccess(session)) {
 				final MailAccess<?, ?> mailAccess = MailAccessCache.getInstance().removeMailAccess(session);
 				if (mailAccess != null) {
-					/*
-					 * Apply new thread's trace information
-					 */
-					mailAccess.applyNewThread();
-					MailAccessWatcher.addMailAccess(mailAccess);
 					return mailAccess;
 				}
 			}
@@ -191,11 +186,6 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 				if (MailAccessCache.getInstance().containsMailAccess(session)) {
 					final MailAccess<?, ?> mailAccess = MailAccessCache.getInstance().removeMailAccess(session);
 					if (mailAccess != null) {
-						/*
-						 * Apply new thread's trace information
-						 */
-						mailAccess.applyNewThread();
-						MailAccessWatcher.addMailAccess(mailAccess);
 						return mailAccess;
 					}
 				}
@@ -320,18 +310,22 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	 * @throws MailException
 	 *             If the connection could not be established for various
 	 *             reasons
-	 * @throws IllegalArgumentException
-	 *             If specified mail configuration is <code>null</code>
 	 */
 	public final void connect() throws MailException {
 		applyNewThread();
 		if (isConnected()) {
 			getFolderStorage().checkDefaultFolders();
+			MailAccessWatcher.addMailAccess(this);
 			return;
 		}
 		checkFieldsBeforeConnect(getMailConfig());
 		connectInternal();
-		getFolderStorage().checkDefaultFolders();
+		try {
+			getFolderStorage().checkDefaultFolders();
+		} catch (final Exception e) {
+			LOG.error("Checking default folders on connect failed: " + e.getMessage(), e);
+			closeInternal();
+		}
 		MailAccessWatcher.addMailAccess(this);
 	}
 
@@ -348,8 +342,8 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	/**
 	 * Closes this access
 	 * <p>
-	 * An already closed connection is not going to be put into cache and is
-	 * treated as a no-op.
+	 * An already closed access is not going to be put into cache and is treated
+	 * as a no-op.
 	 * 
 	 * @param put2CacheArg
 	 *            <code>true</code> to try to put this mail connection into
@@ -433,6 +427,11 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	/**
 	 * Returns the mail configuration appropriate for current user. It provides
 	 * needed connection and login informations.
+	 * <p>
+	 * This method is supposed to invoke
+	 * {@link MailConfig#getConfig(Class, Session)} with the
+	 * implementation-specific subclass of {@link MailConfig} and member
+	 * {@link #session}.
 	 * 
 	 * @return The mail configuration
 	 */
