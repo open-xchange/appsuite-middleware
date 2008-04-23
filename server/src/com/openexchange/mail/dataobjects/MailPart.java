@@ -266,9 +266,9 @@ public abstract class MailPart implements Serializable, Cloneable {
 	}
 
 	/**
-	 * Gets the contentType
+	 * Gets the content type
 	 * 
-	 * @return the contentType
+	 * @return the content type
 	 */
 	public ContentType getContentType() {
 		if (!b_contentType) {
@@ -285,7 +285,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	}
 
 	/**
-	 * @return <code>true</code> if contentType is set; otherwise
+	 * @return <code>true</code> if content type is set; otherwise
 	 *         <code>false</code>
 	 */
 	public boolean containsContentType() {
@@ -293,7 +293,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	}
 
 	/**
-	 * Removes the contentType
+	 * Removes the content type
 	 */
 	public void removeContentType() {
 		try {
@@ -308,7 +308,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	}
 
 	/**
-	 * Sets the contentType
+	 * Sets the content type
 	 * 
 	 * @param contentType
 	 *            the contentType to set
@@ -319,10 +319,10 @@ public abstract class MailPart implements Serializable, Cloneable {
 	}
 
 	/**
-	 * Parses and sets the contentType
+	 * Parses and sets the content type
 	 * 
 	 * @param contentType
-	 *            the contentType to parse
+	 *            the content type to parse
 	 * @throws MailException
 	 *             If content type is invalid or could not be parsed
 	 */

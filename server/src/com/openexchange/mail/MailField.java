@@ -67,7 +67,7 @@ import com.openexchange.mail.search.SearchTerm;
 public enum MailField {
 
 	/**
-	 * The mail ID<br>
+	 * The implementation-specific unique mail ID<br>
 	 * <b>[low cost]</b>
 	 */
 	ID(MailListField.ID),
