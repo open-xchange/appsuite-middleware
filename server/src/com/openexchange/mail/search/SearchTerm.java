@@ -54,7 +54,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.mail.Message;
+
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link SearchTerm}
@@ -87,6 +91,39 @@ public abstract class SearchTerm<T> {
 	 *            The collection which gathers addressed fields
 	 */
 	public abstract void addMailField(Collection<MailField> col);
+
+	/**
+	 * Checks if given message matches this search term
+	 * 
+	 * @param msg
+	 *            The message to check
+	 * @return <code>true</code> if message matches this search term;
+	 *         otherwise <code>false</code>
+	 * @throws MailException
+	 *             If check fails
+	 */
+	public abstract boolean matches(Message msg) throws MailException;
+
+	/**
+	 * Checks if specified mail message matches this search term
+	 * 
+	 * @param mailMessage
+	 *            The mail message to check
+	 * @return <code>true</code> if specified mail message matches this search
+	 *         term; otherwise <code>false</code>
+	 * @throws MailException
+	 *             If checking mail message against search term fails
+	 */
+	public abstract boolean matches(final MailMessage mailMessage) throws MailException;
+
+	/**
+	 * Generates the corresponding instance of
+	 * {@link javax.mail.search.SearchTerm} from this search term
+	 * 
+	 * @return The corresponding instance of
+	 *         {@link javax.mail.search.SearchTerm}
+	 */
+	public abstract javax.mail.search.SearchTerm getJavaMailSearchTerm();
 
 	/**
 	 * Generates a search term with the unsupported search terms specified

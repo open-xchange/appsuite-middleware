@@ -50,8 +50,16 @@
 package com.openexchange.mail.search;
 
 import java.util.Collection;
+import java.util.Date;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.search.ComparisonTerm;
+
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MIMEMailException;
 
 /**
  * {@link ReceivedDateTerm}
@@ -94,5 +102,62 @@ public final class ReceivedDateTerm extends SearchTerm<long[]> {
 	@Override
 	public void addMailField(final Collection<MailField> col) {
 		col.add(MailField.RECEIVED_DATE);
+	}
+
+	@Override
+	public boolean matches(final MailMessage mailMessage) {
+		final Date receivedDate = mailMessage.getReceivedDate();
+		if (null == receivedDate) {
+			return false;
+		}
+		final long[] dat = getPattern();
+		if (dat[0] == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
+			return dat[1] == receivedDate.getTime();
+		} else if (dat[0] == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
+			return dat[1] > receivedDate.getTime();
+		} else if (dat[0] == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
+			return dat[1] < receivedDate.getTime();
+		} else {
+			return dat[1] == receivedDate.getTime();
+		}
+	}
+
+	@Override
+	public boolean matches(final Message msg) throws MailException {
+		final Date receivedDate;
+		try {
+			receivedDate = msg.getReceivedDate();
+		} catch (final MessagingException e) {
+			throw MIMEMailException.handleMessagingException(e);
+		}
+		if (null == receivedDate) {
+			return false;
+		}
+		final long[] dat = getPattern();
+		if (dat[0] == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
+			return dat[1] == receivedDate.getTime();
+		} else if (dat[0] == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
+			return dat[1] > receivedDate.getTime();
+		} else if (dat[0] == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
+			return dat[1] < receivedDate.getTime();
+		} else {
+			return dat[1] == receivedDate.getTime();
+		}
+	}
+
+	@Override
+	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
+		final long[] dat = getPattern();
+		final int ct;
+		if (dat[0] == com.openexchange.mail.search.ComparisonType.EQUALS.getType()) {
+			ct = ComparisonTerm.EQ;
+		} else if (dat[0] == com.openexchange.mail.search.ComparisonType.LESS_THAN.getType()) {
+			ct = ComparisonTerm.LT;
+		} else if (dat[0] == com.openexchange.mail.search.ComparisonType.GREATER_THAN.getType()) {
+			ct = ComparisonTerm.GT;
+		} else {
+			ct = ComparisonTerm.EQ;
+		}
+		return new javax.mail.search.ReceivedDateTerm(ct, new Date(dat[1]));
 	}
 }

@@ -51,7 +51,12 @@ package com.openexchange.mail.search;
 
 import java.util.Collection;
 
+import javax.mail.Message;
+import javax.mail.search.OrTerm;
+
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link ORTerm}
@@ -114,5 +119,20 @@ public final class ORTerm extends SearchTerm<SearchTerm<?>[]> {
 	public void addMailField(final Collection<MailField> col) {
 		terms[0].addMailField(col);
 		terms[1].addMailField(col);
+	}
+
+	@Override
+	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
+		return new OrTerm(terms[0].getJavaMailSearchTerm(), terms[1].getJavaMailSearchTerm());
+	}
+
+	@Override
+	public boolean matches(final Message msg) throws MailException {
+		return terms[0].matches(msg) || terms[1].matches(msg);
+	}
+
+	@Override
+	public boolean matches(final MailMessage mailMessage) throws MailException {
+		return terms[0].matches(mailMessage) || terms[1].matches(mailMessage);
 	}
 }

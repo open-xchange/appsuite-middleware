@@ -863,6 +863,26 @@ public final class MessageUtility {
 		if (null == charset) {
 			charset = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
 		}
+		return readMimePart(p, charset);
+	}
+
+	/**
+	 * Reads the string out of MIME part's input stream. On first try the input
+	 * stream retrieved by <code>javax.mail.Part.getInputStream()</code> is
+	 * used. If an I/O error occurs (<code>java.io.IOException</code>) then
+	 * the next try is with part's raw input stream. If everything fails an
+	 * empty string is returned.
+	 * 
+	 * @param p -
+	 *            the <code>javax.mail.Part</code> object
+	 * @param charset -
+	 *            the charset
+	 * @return the string read from part's input stream or the empty string ""
+	 *         if everything failed
+	 * @throws MessagingException -
+	 *             if an error occurs in part's getter methods
+	 */
+	public static String readMimePart(final Part p, final String charset) throws MessagingException {
 		try {
 			return readStream(p.getInputStream(), charset);
 		} catch (final IOException e) {

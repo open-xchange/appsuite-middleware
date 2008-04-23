@@ -50,8 +50,15 @@
 package com.openexchange.mail.search;
 
 import java.util.Collection;
+import java.util.Locale;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
+
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MIMEMailException;
 
 /**
  * {@link HeaderTerm}
@@ -85,5 +92,40 @@ public final class HeaderTerm extends SearchTerm<String[]> {
 	@Override
 	public void addMailField(final Collection<MailField> col) {
 		col.add(MailField.HEADERS);
+	}
+
+	@Override
+	public boolean matches(final MailMessage mailMessage) {
+		final String val = mailMessage.getHeader(hdr[0]);
+		if (val == null) {
+			if (hdr[1] == null) {
+				return true;
+			}
+			return false;
+		}
+		return (val.toLowerCase(Locale.ENGLISH).indexOf(hdr[1]) != -1);
+	}
+
+	@Override
+	public boolean matches(final Message msg) throws MailException {
+		final String[] val;
+		try {
+			val = msg.getHeader(hdr[0]);
+		} catch (final MessagingException e) {
+			throw MIMEMailException.handleMessagingException(e);
+		}
+		if ((val == null || val.length == 0) && (hdr[1] == null)) {
+			return true;
+		}
+		boolean found = false;
+		for (int i = 0; i < val.length && !found; i++) {
+			found = (val[i].toLowerCase(Locale.ENGLISH).indexOf(hdr[1]) != -1);
+		}
+		return found;
+	}
+
+	@Override
+	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
+		return new javax.mail.search.HeaderTerm(hdr[0], hdr[1]);
 	}
 }

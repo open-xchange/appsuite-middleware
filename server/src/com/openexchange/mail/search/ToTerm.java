@@ -49,12 +49,21 @@
 
 package com.openexchange.mail.search;
 
-import java.util.Collection;
+import static com.openexchange.mail.utils.StorageUtility.getAllAddresses;
 
+import java.util.Collection;
+import java.util.Locale;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.search.RecipientStringTerm;
 
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MIMEMailException;
 
 /**
  * {@link ToTerm}
@@ -89,5 +98,26 @@ public final class ToTerm extends SearchTerm<String> {
 	@Override
 	public void addMailField(final Collection<MailField> col) {
 		col.add(MailField.TO);
+	}
+
+	@Override
+	public boolean matches(final MailMessage mailMessage) {
+		return (getAllAddresses(mailMessage.getTo()).toLowerCase(Locale.ENGLISH).indexOf(
+				addr.toLowerCase(Locale.ENGLISH)) != -1);
+	}
+
+	@Override
+	public boolean matches(final Message msg) throws MailException {
+		try {
+			return (getAllAddresses((InternetAddress[]) msg.getRecipients(Message.RecipientType.TO)).toLowerCase()
+					.indexOf(addr.toLowerCase(Locale.ENGLISH)) != -1);
+		} catch (final MessagingException e) {
+			throw MIMEMailException.handleMessagingException(e);
+		}
+	}
+
+	@Override
+	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
+		return new RecipientStringTerm(Message.RecipientType.TO, addr);
 	}
 }

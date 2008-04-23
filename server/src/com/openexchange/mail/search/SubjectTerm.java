@@ -50,8 +50,15 @@
 package com.openexchange.mail.search;
 
 import java.util.Collection;
+import java.util.Locale;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
+
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MIMEMailException;
 
 /**
  * {@link SubjectTerm}
@@ -82,5 +89,39 @@ public final class SubjectTerm extends SearchTerm<String> {
 	@Override
 	public void addMailField(final Collection<MailField> col) {
 		col.add(MailField.SUBJECT);
+	}
+
+	@Override
+	public boolean matches(final Message msg) throws MailException {
+		final String subject;
+		try {
+			subject = msg.getSubject();
+		} catch (final MessagingException e) {
+			throw MIMEMailException.handleMessagingException(e);
+		}
+		if (subject != null) {
+			return (subject.toLowerCase(Locale.ENGLISH).indexOf(unicodeSubject.toLowerCase(Locale.ENGLISH)) != -1);
+		}
+		return false;
+	}
+
+	@Override
+	public boolean matches(final MailMessage mailMessage) {
+		final String subject = mailMessage.getSubject();
+		if (subject == null) {
+			if (null == unicodeSubject) {
+				return true;
+			}
+			return false;
+		}
+		if (null == unicodeSubject) {
+			return false;
+		}
+		return (subject.toLowerCase(Locale.ENGLISH).indexOf(unicodeSubject.toLowerCase(Locale.ENGLISH)) != -1);
+	}
+
+	@Override
+	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
+		return new javax.mail.search.SubjectTerm(unicodeSubject);
 	}
 }

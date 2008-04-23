@@ -51,7 +51,15 @@ package com.openexchange.mail.search;
 
 import java.util.Collection;
 
+import javax.mail.Flags;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 
 /**
  * {@link FlagTerm}
@@ -88,5 +96,28 @@ public final class FlagTerm extends SearchTerm<Integer> {
 	@Override
 	public void addMailField(final Collection<MailField> col) {
 		col.add(MailField.FLAGS);
+	}
+
+	@Override
+	public boolean matches(final MailMessage mailMessage) {
+		final int result = (mailMessage.getFlags() & flags);
+		return set ? (result == flags) : (result == 0);
+	}
+
+	@Override
+	public boolean matches(final Message msg) throws MailException {
+		final Flags flagsObj = MIMEMessageConverter.convertMailFlags(flags);
+		final Flags msgFlags;
+		try {
+			msgFlags = msg.getFlags();
+		} catch (final MessagingException e) {
+			throw MIMEMailException.handleMessagingException(e);
+		}
+		return set ? msgFlags.contains(flagsObj) : !msgFlags.contains(flagsObj);
+	}
+
+	@Override
+	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
+		return new javax.mail.search.FlagTerm(MIMEMessageConverter.convertMailFlags(flags), set);
 	}
 }

@@ -51,7 +51,11 @@ package com.openexchange.mail.search;
 
 import java.util.Collection;
 
+import javax.mail.Message;
+
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link BooleanTerm}
@@ -60,6 +64,32 @@ import com.openexchange.mail.MailField;
  * 
  */
 public final class BooleanTerm extends SearchTerm<Boolean> {
+
+	private static final class BooleanSearchTerm extends javax.mail.search.SearchTerm {
+
+		private static final BooleanSearchTerm TRUE = new BooleanSearchTerm(true);
+
+		private static final BooleanSearchTerm FALSE = new BooleanSearchTerm(false);
+
+		public static BooleanSearchTerm getInstance(final boolean value) {
+			return value ? TRUE : FALSE;
+		}
+
+		private static final long serialVersionUID = -8073302646525000957L;
+
+		private final boolean value;
+
+		private BooleanSearchTerm(final boolean value) {
+			super();
+			this.value = value;
+		}
+
+		@Override
+		public boolean match(final Message msg) {
+			return value;
+		}
+
+	}
 
 	/**
 	 * The boolean term for <code>true</code>
@@ -93,5 +123,20 @@ public final class BooleanTerm extends SearchTerm<Boolean> {
 
 	@Override
 	public void addMailField(final Collection<MailField> col) {
+	}
+
+	@Override
+	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
+		return BooleanSearchTerm.getInstance(value);
+	}
+
+	@Override
+	public boolean matches(final Message msg) throws MailException {
+		return value;
+	}
+
+	@Override
+	public boolean matches(final MailMessage mailMessage) {
+		return value;
 	}
 }
