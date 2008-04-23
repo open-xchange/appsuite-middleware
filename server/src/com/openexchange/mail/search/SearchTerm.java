@@ -81,10 +81,10 @@ public abstract class SearchTerm<T> {
 	public abstract T getPattern();
 
 	/**
-	 * Adds the affected MailField to specified collection
+	 * Adds the addressed MailField to specified collection
 	 * 
 	 * @param col
-	 *            The collection which gathers affected fields
+	 *            The collection which gathers addressed fields
 	 */
 	public abstract void addMailField(Collection<MailField> col);
 
