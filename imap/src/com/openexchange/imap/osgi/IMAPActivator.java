@@ -128,7 +128,7 @@ public final class IMAPActivator extends DeferredActivator {
 			}
 			if (!started.compareAndSet(false, true)) {
 				/*
-				 * Don't start the server again. A duplicate call to
+				 * Don't start the bundle again. A duplicate call to
 				 * startBundle() is probably caused by temporary absent
 				 * service(s) whose re-availability causes to trigger this
 				 * method again.
