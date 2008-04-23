@@ -1,0 +1,5 @@
+open-xchange-spamhandler-spamassassin (6.5.0-1) unstable; urgency=low
+
+  * Initial package.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 23 Apr 2008 12:07:50 +0200

@@ -1,0 +1,5 @@
+open-xchange-spamhandler-default (6.5.0-1) unstable; urgency=low
+
+  * Initial package.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 23 Apr 2008 12:04:50 +0200
