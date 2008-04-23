@@ -98,6 +98,7 @@ import com.openexchange.mail.text.Enriched2HtmlConverter;
 import com.openexchange.mail.text.Html2TextConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 import com.openexchange.session.Session;
@@ -812,13 +813,25 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 * @see com.openexchange.mail.parser.MailMessageHandler#handleSpecialPart(com.openexchange.mail.dataobjects.MailPart,
 	 *      java.lang.String, java.lang.String)
 	 */
-	public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id)
-			throws MailException {
+	public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName,
+			final String id) throws MailException {
+		if (!textAppended && part.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+			String charset = part.getContentType().getCharsetParameter();
+			if (null == charset) {
+				charset = CharsetDetector.detectCharset(part.getInputStream());
+			}
+			try {
+				return handleInlinePlainText(MessageUtility.readMailPart(part, charset), part.getContentType(), part
+						.getSize(), new StringBuilder("Part_").append(id).append(".dat").toString(), id);
+			} catch (final IOException e) {
+				throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+			}
+		}
 		/*
 		 * When creating a JSON message object from a message we do not
 		 * distinguish special parts or image parts from "usual" attachments.
 		 * Therefore invoke the handleAttachment method. Maybe we need a
-		 * seperate handling in the future for vcards.
+		 * separate handling in the future for vcards.
 		 */
 		return handleAttachment(part, false, baseContentType, fileName, id);
 	}

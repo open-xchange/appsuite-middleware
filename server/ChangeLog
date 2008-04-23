@@ -8,6 +8,7 @@
 
  - Bugfix #11175: Proper checking for invalid folder name on folder
    creation/rename
+ - Bugfix #11193: Proper display of vcard-only messages
 
 * 2008-04-22 - thorben.betten@open-xchange.com
 
