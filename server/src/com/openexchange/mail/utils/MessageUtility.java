@@ -298,21 +298,19 @@ public final class MessageUtility {
 	}
 
 	private static String foldTextLine(final String line, final int linewrap) {
-		return foldTextLineRecursive(line, linewrap, null, true);
+		return foldTextLineRecursive(line, linewrap, getQuotePrefix(line));
 	}
 
-	private static String foldTextLineRecursive(final String line, final int linewrap, final String quoteArg,
-			final boolean lookUpQuote) {
+	private static String foldTextLineRecursive(final String line, final int linewrap, final String quote) {
 		final int length = line.length();
 		if (length <= linewrap) {
 			return line;
 		}
 		final int[] hrefIndices = getHrefIndices(line);
-		final String quote = lookUpQuote ? getQuotePrefix(line) : quoteArg;
 		final int startPos = quote == null ? 0 : quote.length();
 		final char c = line.charAt(linewrap);
 		final StringBuilder sb = new StringBuilder(length + 5);
-		final StringBuilder sub = new StringBuilder();
+		final StringBuilder sub = new StringBuilder(64);
 		if (Character.isWhitespace(c)) {
 			/*
 			 * Find last non-whitespace character before
@@ -329,7 +327,7 @@ public final class MessageUtility {
 					sub.setLength(0);
 					return sb.append(line.substring(0, i + 1)).append(CHAR_BREAK).append(
 							foldTextLineRecursive(quote == null ? line.substring(linewrap + 1) : sub.append(quote)
-									.append(line.substring(i + 1)).toString(), linewrap, quote, false)).toString();
+									.append(line.substring(linewrap + 1)).toString(), linewrap, quote)).toString();
 				}
 				i--;
 			}
@@ -349,7 +347,7 @@ public final class MessageUtility {
 					sub.setLength(0);
 					return sb.append(line.substring(0, i)).append(CHAR_BREAK).append(
 							foldTextLineRecursive(quote == null ? line.substring(i + 1) : sub.append(quote).append(
-									line.substring(i + 1)).toString(), linewrap, quote, false)).toString();
+									line.substring(i + 1)).toString(), linewrap, quote)).toString();
 				}
 				i--;
 			}
@@ -358,18 +356,18 @@ public final class MessageUtility {
 		if (sep == null) {
 			return new StringBuilder(line.length() + 1).append(line.substring(0, linewrap)).append(CHAR_BREAK).append(
 					foldTextLineRecursive(quote == null ? line.substring(linewrap) : new StringBuilder().append(quote)
-							.append(line.substring(linewrap)).toString(), linewrap, quote, false)).toString();
+							.append(line.substring(linewrap)).toString(), linewrap, quote)).toString();
 		} else if (sep[1] == length) {
 			if (sep[0] == startPos) {
 				return line;
 			}
 			return new StringBuilder(line.length() + 1).append(line.substring(0, sep[0])).append(CHAR_BREAK).append(
 					foldTextLineRecursive(quote == null ? line.substring(sep[0]) : new StringBuilder().append(quote)
-							.append(line.substring(sep[0])).toString(), linewrap, quote, false)).toString();
+							.append(line.substring(sep[0])).toString(), linewrap, quote)).toString();
 		}
 		return new StringBuilder(line.length() + 1).append(line.substring(0, sep[1])).append(CHAR_BREAK).append(
 				foldTextLineRecursive(quote == null ? line.substring(sep[1]) : new StringBuilder().append(quote)
-						.append(line.substring(sep[1])).toString(), linewrap, quote, false)).toString();
+						.append(line.substring(sep[1])).toString(), linewrap, quote)).toString();
 	}
 
 	private static final Pattern PATTERN_QP = Pattern.compile("((?:\\s?>)+)(\\s?)(.*)");
