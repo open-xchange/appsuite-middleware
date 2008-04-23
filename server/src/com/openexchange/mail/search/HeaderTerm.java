@@ -49,6 +49,10 @@
 
 package com.openexchange.mail.search;
 
+import java.util.Collection;
+
+import com.openexchange.mail.MailField;
+
 /**
  * {@link HeaderTerm}
  * 
@@ -78,4 +82,8 @@ public final class HeaderTerm extends SearchTerm<String[]> {
 		return hdr;
 	}
 
+	@Override
+	public void addMailField(final Collection<MailField> col) {
+		col.add(MailField.HEADERS);
+	}
 }

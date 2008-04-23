@@ -50,8 +50,11 @@
 package com.openexchange.mail.search;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.openexchange.mail.MailField;
 
 /**
  * {@link SearchTerm}
@@ -76,6 +79,14 @@ public abstract class SearchTerm<T> {
 	 * @return The pattern
 	 */
 	public abstract T getPattern();
+
+	/**
+	 * Adds the affected MailField to specified collection
+	 * 
+	 * @param col
+	 *            The collection which gathers affected fields
+	 */
+	public abstract void addMailField(Collection<MailField> col);
 
 	/**
 	 * Generates a search term with the unsupported search terms specified

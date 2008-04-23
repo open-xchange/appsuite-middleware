@@ -333,39 +333,7 @@ public enum MailField {
 	 */
 	public static Set<MailField> getMailFieldsFromSearchTerm(final SearchTerm<?> searchTerm) {
 		final Set<MailField> set = new HashSet<MailField>();
-		if (searchTerm instanceof com.openexchange.mail.search.HeaderTerm) {
-			set.add(MailField.HEADERS);
-		} else if (searchTerm instanceof com.openexchange.mail.search.FlagTerm) {
-			set.add(MailField.FLAGS);
-		} else if (searchTerm instanceof com.openexchange.mail.search.FromTerm) {
-			set.add(MailField.FROM);
-		} else if (searchTerm instanceof com.openexchange.mail.search.ToTerm) {
-			set.add(MailField.TO);
-		} else if (searchTerm instanceof com.openexchange.mail.search.CcTerm) {
-			set.add(MailField.CC);
-		} else if (searchTerm instanceof com.openexchange.mail.search.BccTerm) {
-			set.add(MailField.BCC);
-		} else if (searchTerm instanceof com.openexchange.mail.search.SubjectTerm) {
-			set.add(MailField.SUBJECT);
-		} else if (searchTerm instanceof com.openexchange.mail.search.SizeTerm) {
-			set.add(MailField.SIZE);
-		} else if (searchTerm instanceof com.openexchange.mail.search.SentDateTerm) {
-			set.add(MailField.SENT_DATE);
-		} else if (searchTerm instanceof com.openexchange.mail.search.ReceivedDateTerm) {
-			set.add(MailField.RECEIVED_DATE);
-		} else if (searchTerm instanceof com.openexchange.mail.search.ANDTerm) {
-			final com.openexchange.mail.search.SearchTerm<?>[] terms = ((com.openexchange.mail.search.ANDTerm) searchTerm)
-					.getPattern();
-			set.addAll(getMailFieldsFromSearchTerm(terms[0]));
-			set.addAll(getMailFieldsFromSearchTerm(terms[1]));
-		} else if (searchTerm instanceof com.openexchange.mail.search.ORTerm) {
-			final com.openexchange.mail.search.SearchTerm<?>[] terms = ((com.openexchange.mail.search.ORTerm) searchTerm)
-					.getPattern();
-			set.addAll(getMailFieldsFromSearchTerm(terms[0]));
-			set.addAll(getMailFieldsFromSearchTerm(terms[1]));
-		} else if (searchTerm instanceof com.openexchange.mail.search.BodyTerm) {
-			set.add(MailField.BODY);
-		}
+		searchTerm.addMailField(set);
 		return set;
 	}
 }

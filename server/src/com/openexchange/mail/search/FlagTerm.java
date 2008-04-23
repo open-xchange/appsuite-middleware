@@ -49,6 +49,10 @@
 
 package com.openexchange.mail.search;
 
+import java.util.Collection;
+
+import com.openexchange.mail.MailField;
+
 /**
  * {@link FlagTerm}
  * 
@@ -81,4 +85,8 @@ public final class FlagTerm extends SearchTerm<Integer> {
 		return set ? Integer.valueOf(flags) : Integer.valueOf(flags * -1);
 	}
 
+	@Override
+	public void addMailField(final Collection<MailField> col) {
+		col.add(MailField.FLAGS);
+	}
 }

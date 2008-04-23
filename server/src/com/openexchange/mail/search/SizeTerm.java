@@ -49,6 +49,10 @@
 
 package com.openexchange.mail.search;
 
+import java.util.Collection;
+
+import com.openexchange.mail.MailField;
+
 /**
  * {@link SizeTerm}
  * 
@@ -87,4 +91,8 @@ public final class SizeTerm extends SearchTerm<int[]> {
 		}
 	}
 
+	@Override
+	public void addMailField(final Collection<MailField> col) {
+		col.add(MailField.SIZE);
+	}
 }

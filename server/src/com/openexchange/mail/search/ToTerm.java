@@ -49,8 +49,12 @@
 
 package com.openexchange.mail.search;
 
+import java.util.Collection;
+
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+
+import com.openexchange.mail.MailField;
 
 /**
  * {@link ToTerm}
@@ -82,4 +86,8 @@ public final class ToTerm extends SearchTerm<String> {
 		return addr;
 	}
 
+	@Override
+	public void addMailField(final Collection<MailField> col) {
+		col.add(MailField.TO);
+	}
 }

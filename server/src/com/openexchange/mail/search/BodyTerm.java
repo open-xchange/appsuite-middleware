@@ -49,6 +49,10 @@
 
 package com.openexchange.mail.search;
 
+import java.util.Collection;
+
+import com.openexchange.mail.MailField;
+
 /**
  * {@link BodyTerm}
  * 
@@ -72,4 +76,8 @@ public final class BodyTerm extends SearchTerm<String> {
 		return pattern;
 	}
 
+	@Override
+	public void addMailField(final Collection<MailField> col) {
+		col.add(MailField.BODY);
+	}
 }

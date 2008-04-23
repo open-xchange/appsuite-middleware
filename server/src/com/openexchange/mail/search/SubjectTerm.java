@@ -49,6 +49,10 @@
 
 package com.openexchange.mail.search;
 
+import java.util.Collection;
+
+import com.openexchange.mail.MailField;
+
 /**
  * {@link SubjectTerm}
  * 
@@ -75,4 +79,8 @@ public final class SubjectTerm extends SearchTerm<String> {
 		return unicodeSubject;
 	}
 
+	@Override
+	public void addMailField(final Collection<MailField> col) {
+		col.add(MailField.SUBJECT);
+	}
 }

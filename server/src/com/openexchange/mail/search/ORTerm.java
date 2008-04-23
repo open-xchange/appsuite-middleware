@@ -49,6 +49,10 @@
 
 package com.openexchange.mail.search;
 
+import java.util.Collection;
+
+import com.openexchange.mail.MailField;
+
 /**
  * {@link ORTerm}
  * 
@@ -106,4 +110,9 @@ public final class ORTerm extends SearchTerm<SearchTerm<?>[]> {
 		terms[1] = secondTerm;
 	}
 
+	@Override
+	public void addMailField(final Collection<MailField> col) {
+		terms[0].addMailField(col);
+		terms[1].addMailField(col);
+	}
 }

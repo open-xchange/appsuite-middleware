@@ -49,6 +49,10 @@
 
 package com.openexchange.mail.search;
 
+import java.util.Collection;
+
+import com.openexchange.mail.MailField;
+
 /**
  * {@link BooleanTerm}
  * 
@@ -87,4 +91,7 @@ public final class BooleanTerm extends SearchTerm<Boolean> {
 		return Boolean.valueOf(value);
 	}
 
+	@Override
+	public void addMailField(final Collection<MailField> col) {
+	}
 }
