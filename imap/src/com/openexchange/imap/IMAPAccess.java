@@ -99,8 +99,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
 	private transient javax.mail.Session imapSession;
 
-	private transient IMAPConfig imapConfig;
-
 	private boolean connected;
 
 	private boolean decrement;
@@ -180,11 +178,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 	}
 
 	@Override
-	public MailConfig getMailConfig() throws MailException {
-		if (null == imapConfig) {
-			imapConfig = MailConfig.getConfig(IMAPConfig.class, session);
-		}
-		return imapConfig;
+	protected Class<? extends MailConfig> getMailConfigClass() {
+		return IMAPConfig.class;
 	}
 
 	/**
@@ -193,7 +188,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 	 * @return The IMAP config
 	 */
 	IMAPConfig getIMAPConfig() {
-		return imapConfig;
+		return (IMAPConfig) mailConfig;
 	}
 
 	private static final String PROPERTY_SECURITY_PROVIDER = "ssl.SocketFactory.provider";
@@ -214,7 +209,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 			/*
 			 * Check if a secure IMAP connection should be established
 			 */
-			if (getMailConfig().isSecure()) {
+			if (mailConfig.isSecure()) {
 				imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_CLASS, CLASSNAME_SECURITY_FACTORY);
 				imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_PORT, String
 						.valueOf(getMailConfig().getPort()));
@@ -240,7 +235,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 			 * Get store
 			 */
 			imapStore = (IMAPStore) imapSession.getStore(IMAPProvider.PROTOCOL_IMAP.getName());
-			String tmpPass = getMailConfig().getPassword();
+			String tmpPass = mailConfig.getPassword();
 			if (tmpPass != null) {
 				try {
 					tmpPass = new String(tmpPass.getBytes(IMAPConfig.getImapAuthEnc()), CHARENC_ISO8859);
@@ -248,13 +243,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 					LOG.error(e.getMessage(), e);
 				}
 			}
-			imapStore.connect(getMailConfig().getServer(), getMailConfig().getPort(), getMailConfig().getLogin(),
-					tmpPass);
+			imapStore.connect(mailConfig.getServer(), mailConfig.getPort(), mailConfig.getLogin(), tmpPass);
 			connected = true;
 			/*
 			 * Add server's capabilities
 			 */
-			((IMAPConfig) getMailConfig()).initializeCapabilities(imapStore);
+			((IMAPConfig) mailConfig).initializeCapabilities(imapStore);
 			/*
 			 * Increase counter
 			 */
@@ -266,7 +260,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 			 */
 			decrement = true;
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConfig);
+			throw IMAPException.handleMessagingException(e, mailConfig);
 		}
 	}
 

@@ -92,6 +92,8 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 
 	protected final transient Session session;
 
+	protected transient MailConfig mailConfig;
+
 	private Properties mailProperties;
 
 	private transient Thread usingThread;
@@ -427,15 +429,26 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	/**
 	 * Returns the mail configuration appropriate for current user. It provides
 	 * needed connection and login informations.
-	 * <p>
-	 * This method is supposed to invoke
-	 * {@link MailConfig#getConfig(Class, Session)} with the
-	 * implementation-specific subclass of {@link MailConfig} and member
-	 * {@link #session}.
 	 * 
 	 * @return The mail configuration
 	 */
-	public abstract MailConfig getMailConfig() throws MailException;
+	public final MailConfig getMailConfig() throws MailException {
+		if (null == mailConfig) {
+			mailConfig = createMailConfig();
+		}
+		return mailConfig;
+	}
+
+	/**
+	 * Creates a new user-specific mail configuration
+	 * 
+	 * @return A new user-specific mail configuration
+	 * @throws MailException
+	 *             If creating a new mail configuration fails
+	 */
+	private final MailConfig createMailConfig() throws MailException {
+		return MailConfig.getConfig(getMailConfigClass(), session);
+	}
 
 	/**
 	 * Signals an available connection
@@ -461,6 +474,13 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 		usingThread = Thread.currentThread();
 		trace = usingThread.getStackTrace();
 	}
+
+	/**
+	 * Gets the implementation-specific subclass of {@link MailConfig}
+	 * 
+	 * @return The implementation-specific subclass of {@link MailConfig}
+	 */
+	protected abstract Class<? extends MailConfig> getMailConfigClass();
 
 	/**
 	 * Defines if mail server port has to be present in provided mail
