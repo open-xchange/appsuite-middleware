@@ -212,7 +212,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 			}
 		}
 		/*
-		 * Create a new mail connection through user's mail provider
+		 * Create a new mail access through user's mail provider
 		 */
 		return createNewMailAccess(MailProviderRegistry.getMailProviderBySession(session).getMailAccessClass(), session);
 	}
@@ -224,9 +224,9 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	 *            The mail access class
 	 * @param session
 	 *            The session providing needed user data
-	 * @return Newly created mail connection instance
+	 * @return Newly created mail access instance
 	 * @throws MailException
-	 *             If mail connection creation fails
+	 *             If mail access creation fails
 	 */
 	private static final MailAccess<?, ?> createNewMailAccess(final Class<? extends MailAccess<?, ?>> clazz,
 			final Session session) throws MailException {
