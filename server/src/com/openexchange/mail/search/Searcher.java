@@ -401,7 +401,7 @@ public final class Searcher {
 	 * Applies specified search term against given instances of
 	 * {@link MailMessage}
 	 * 
-	 * @param mailMessage
+	 * @param mailMessages
 	 *            The mail messages to check
 	 * @param searchTerm
 	 *            The search term to apply

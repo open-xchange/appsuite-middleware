@@ -79,7 +79,6 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.Component;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.sun.mail.iap.ConnectionException;
 import com.sun.mail.smtp.SMTPSendFailedException;
@@ -311,7 +310,7 @@ public class MIMEMailException extends MailException {
 	 * appropriate instance of {@link MIMEMailException}
 	 * <p>
 	 * This is just a convenience method that simply invokes
-	 * {@link #handleMessagingException(MessagingException, MailAccess)} with
+	 * {@link #handleMessagingException(MessagingException, MailConfig)} with
 	 * the latter parameter set to <code>null</code>.
 	 * 
 	 * @param e
