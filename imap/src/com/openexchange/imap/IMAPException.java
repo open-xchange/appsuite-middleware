@@ -144,10 +144,10 @@ public final class IMAPException extends MIMEMailException {
 		DUPLICATE_FOLDER("A folder named %s already exists", Category.PERMISSION, 2014),
 		/**
 		 * Mail folder "%s" could not be created (maybe due to insufficient
-		 * permission on parent folder %s)
+		 * permission on parent folder %s or due to an invalid folder name)
 		 */
 		FOLDER_CREATION_FAILED(
-				"Mail folder \"%s\" could not be created (maybe due to insufficient permission on parent folder %s)",
+				"Mail folder \"%s\" could not be created (maybe due to insufficient permission on parent folder %s or due to an invalid folder name)",
 				Category.CODE_ERROR, 2015),
 		/**
 		 * The composed rights could not be applied to new folder %s due to
