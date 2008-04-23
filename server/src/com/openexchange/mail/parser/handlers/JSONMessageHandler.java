@@ -822,7 +822,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			}
 			try {
 				return handleInlinePlainText(MessageUtility.readMailPart(part, charset), part.getContentType(), part
-						.getSize(), new StringBuilder("Part_").append(id).append(".dat").toString(), id);
+						.getSize(), fileName, id);
 			} catch (final IOException e) {
 				throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 			}
