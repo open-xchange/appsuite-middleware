@@ -71,7 +71,7 @@ public final class MailAPITestSuite extends TestSuite {
 	 * @return a test suite containing smoke tests.
 	 */
 	public static Test suite() {
-		TestSuite mailSuite = new TestSuite();
+		final TestSuite mailSuite = new TestSuite();
 		/*
 		 * Storages consistency
 		 */
