@@ -211,4 +211,119 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 			fail(e.getLocalizedMessage());
 		}
 	}
+
+	public void testFailIfSeparatorContained() {
+		try {
+			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
+					new ContextImpl(getCid()), "mail-test-session");
+			session.setPassword(getPassword());
+
+			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+			mailAccess.connect();
+
+			String fullname = null;
+			try {
+
+				String parentFullname = null;
+				final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
+				String invalidName = "Foo" + inbox.getSeparator() + "Bar";
+				if (inbox.isHoldsFolders()) {
+					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
+							invalidName).toString();
+					parentFullname = INBOX;
+				} else {
+					fullname = invalidName;
+					parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+				}
+
+				final MailFolderDescription mfd = new MailFolderDescription();
+				mfd.setExists(false);
+				mfd.setParentFullname(parentFullname);
+				mfd.setSeparator(inbox.getSeparator());
+				mfd.setSubscribed(false);
+				mfd.setName(invalidName);
+
+				final Class<? extends MailPermission> clazz = MailProviderRegistry
+						.getMailProviderBySession(session).getMailPermissionClass();
+				final MailPermission p = MailPermission.newInstance(clazz);
+				p.setEntity(getUser());
+				p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
+						OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
+				p.setFolderAdmin(true);
+				p.setGroupPermission(false);
+				mfd.addPermission(p);
+				MailException me = null;
+				try {
+					mailAccess.getFolderStorage().createFolder(mfd);
+				} catch (final MailException e) {
+					me = e;
+					fullname = null;
+				}
+				assertTrue("Folder created although an invalid name was specified", me != null);
+				
+				
+				invalidName = inbox.getSeparator() + "Foobar";
+				if (inbox.isHoldsFolders()) {
+					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
+							invalidName).toString();
+					parentFullname = INBOX;
+				} else {
+					fullname = invalidName;
+					parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+				}
+				mfd.setExists(false);
+				mfd.setParentFullname(parentFullname);
+				mfd.setSeparator(inbox.getSeparator());
+				mfd.setSubscribed(false);
+				mfd.setName(invalidName);
+				me = null;
+				try {
+					mailAccess.getFolderStorage().createFolder(mfd);
+				} catch (final MailException e) {
+					me = e;
+					fullname = null;
+				}
+				assertTrue("Folder created although an invalid name was specified", me != null);
+
+				
+				invalidName = "Foobar" + inbox.getSeparator();
+				if (inbox.isHoldsFolders()) {
+					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
+							invalidName).toString();
+					parentFullname = INBOX;
+				} else {
+					fullname = invalidName;
+					parentFullname = MailFolder.DEFAULT_FOLDER_ID;
+				}
+				mfd.setExists(false);
+				mfd.setParentFullname(parentFullname);
+				mfd.setSeparator(inbox.getSeparator());
+				mfd.setSubscribed(false);
+				mfd.setName(invalidName);
+				me = null;
+				try {
+					mailAccess.getFolderStorage().createFolder(mfd);
+				} catch (final MailException e) {
+					me = e;
+					fullname = null;
+				}
+				assertTrue("Folder created although an invalid name was specified", me != null);
+
+			} finally {
+				if (fullname != null) {
+					mailAccess.getFolderStorage().deleteFolder(fullname, true);
+					System.out.println("Temporary folder deleted: " + fullname);
+				}
+
+				/*
+				 * close
+				 */
+				mailAccess.close(false);
+			}
+
+		} catch (final Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
 }
