@@ -58,9 +58,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MessageUtilityInit} - Initialization implementation for
@@ -95,7 +98,16 @@ public final class MessageUtilityInit implements Initialization {
 		final Properties htmlEntities = new Properties();
 		InputStream in = null;
 		try {
-			in = new FileInputStream(SystemConfig.getProperty(SystemConfig.Property.HTMLEntities));
+			String propfile = SystemConfig.getProperty(SystemConfig.Property.HTMLEntities);
+			if (null == propfile) {
+				propfile = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(
+						SystemConfig.Property.HTMLEntities.getPropertyName());
+				if (null == propfile) {
+					throw new MailConfigException("Missing property: "
+							+ SystemConfig.Property.HTMLEntities.getPropertyName());
+				}
+			}
+			in = new FileInputStream(propfile);
 			htmlEntities.load(in);
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
