@@ -51,6 +51,7 @@ package com.openexchange.mail.cache;
 
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
@@ -87,14 +88,21 @@ public final class MailCacheConfiguration implements Initialization {
 	}
 
 	private void configure() throws ConfigurationException {
-		final String cacheConfigFile = SystemConfig.getProperty(SystemConfig.Property.MailCacheConfig);
+		String cacheConfigFile = SystemConfig.getProperty(SystemConfig.Property.MailCacheConfig);
 		if (cacheConfigFile == null) {
-			throw new ConfigurationException(ConfigurationException.Code.PROPERTY_MISSING,
+			/*
+			 * Not found via system config, try configuration service
+			 */
+			cacheConfigFile = ServerServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(
 					SystemConfig.Property.MailCacheConfig.getPropertyName());
+			if (cacheConfigFile == null) {
+				throw new ConfigurationException(ConfigurationException.Code.PROPERTY_MISSING,
+						SystemConfig.Property.MailCacheConfig.getPropertyName());
+			}
 		}
-		final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
 		try {
-			cacheService.loadConfiguration(cacheConfigFile.trim());
+			ServerServiceRegistry.getInstance().getService(CacheService.class)
+					.loadConfiguration(cacheConfigFile.trim());
 		} catch (final CacheException e) {
 			throw new ConfigurationException(e);
 		}
