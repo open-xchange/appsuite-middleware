@@ -447,6 +447,9 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	 * since an appropriate mail configuration is automatically initialized.
 	 * Thus there's no need to set the mail configuration if working in usual
 	 * mode.
+	 * <p>
+	 * To let the external mail configuration work, it has to be set prior to
+	 * invoking the {@link #connect()} method.
 	 * 
 	 * @param mailConfig
 	 *            The external mail configuration
