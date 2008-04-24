@@ -440,6 +440,22 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	}
 
 	/**
+	 * Convenience method to allow external assignment of this access' mail
+	 * configuration which contains individual connect and login informations.
+	 * <p>
+	 * <b>Note</b>: This method is only supposed to be used for testing purpose
+	 * since an appropriate mail configuration is automatically initialized.
+	 * Thus there's no need to set the mail configuration if working in usual
+	 * mode.
+	 * 
+	 * @param mailConfig
+	 *            The external mail configuration
+	 */
+	public final void setMailConfig(final MailConfig mailConfig) {
+		this.mailConfig = mailConfig;
+	}
+
+	/**
 	 * Creates a new user-specific mail configuration
 	 * 
 	 * @return A new user-specific mail configuration
