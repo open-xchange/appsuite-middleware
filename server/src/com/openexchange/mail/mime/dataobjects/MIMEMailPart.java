@@ -52,8 +52,11 @@ package com.openexchange.mail.mime.dataobjects;
 import static com.openexchange.mail.mime.ContentType.isMimeType;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
 import javax.activation.DataHandler;
@@ -91,6 +94,30 @@ public final class MIMEMailPart extends MailPart {
 	private static final String ERR_NULL_PART = "Underlying part is null";
 
 	/**
+	 * If delegate {@link Part} object is an instance of {@link MimeMessage}
+	 */
+	private static final int STYPE_MIME_MSG = 1;
+
+	/**
+	 * If delegate {@link Part} object is an instance of {@link MimeBodyPart}
+	 * whose content type signals a nested message: <code>message/rfc822</code>
+	 */
+	private static final int STYPE_MIME_BODY_MSG = 2;
+
+	/**
+	 * If delegate {@link Part} object is an instance of {@link MimeBodyPart}
+	 * whose content type signals a multipart content: code>multipart/*</code>
+	 */
+	private static final int STYPE_MIME_BODY_MULTI = 3;
+
+	/**
+	 * If delegate {@link Part} object is an instance of {@link MimeBodyPart}
+	 * whose content type is different from <code>message/rfc822</code> and
+	 * <code>multipart/*</code>
+	 */
+	private static final int STYPE_MIME_BODY = 4;
+
+	/**
 	 * The delegate {@link Part} object
 	 */
 	private transient Part part;
@@ -110,6 +137,21 @@ public final class MIMEMailPart extends MailPart {
 	 * not
 	 */
 	private boolean contentLoaded;
+
+	/**
+	 * Remembers serialize type on serialization
+	 */
+	private int serializeType;
+
+	/**
+	 * Remembers delegate {@link Part} object's serialized content
+	 */
+	private byte[] serializedContent;
+
+	/**
+	 * Remembers delegate {@link Part} object's content type
+	 */
+	private String serializedContentType;
 
 	/**
 	 * Constructor - Only applies specified part, but does not set any
@@ -360,6 +402,126 @@ public final class MIMEMailPart extends MailPart {
 			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+		}
+	}
+
+	/**
+	 * The writeObject method is responsible for writing the state of the object
+	 * for its particular class so that the corresponding readObject method can
+	 * restore it. The default mechanism for saving the Object's fields can be
+	 * invoked by calling {@link ObjectOutputStream#defaultWriteObject()}. The
+	 * method does not need to concern itself with the state belonging to its
+	 * super classes or subclasses. State is saved by writing the individual
+	 * fields to the ObjectOutputStream using the writeObject method or by using
+	 * the methods for primitive data types supported by {@link DataOutput}.
+	 * 
+	 * @param out
+	 *            The output stream
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 */
+	private void writeObject(final java.io.ObjectOutputStream out) throws IOException {
+		multipart = null;
+		if (part == null) {
+			serializeType = 0;
+			serializedContent = null;
+			out.defaultWriteObject();
+			return;
+		}
+		/*
+		 * Remember serialize type and content
+		 */
+		try {
+			if (part instanceof MimeBodyPart) {
+				final ContentType contentType = new ContentType(part.getContentType());
+				if (contentType.isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+					serializeType = STYPE_MIME_BODY_MSG;
+					serializedContent = getBytesFromPart((Message) part.getContent());
+				} else if (contentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+					serializeType = STYPE_MIME_BODY_MULTI;
+					serializedContent = getBytesFromMultipart((Multipart) part.getContent());
+					serializedContentType = contentType.toString();
+				} else {
+					serializeType = STYPE_MIME_BODY;
+					serializedContent = getBytesFromPart(part);
+				}
+			} else if (part instanceof MimeMessage) {
+				serializeType = STYPE_MIME_MSG;
+				serializedContent = getBytesFromPart(part);
+			}
+			part = null;
+			/*
+			 * Write common fields
+			 */
+			out.defaultWriteObject();
+		} catch (final MailException e) {
+			throw new IOException(e.getMessage());
+		} catch (final MessagingException e) {
+			throw new IOException(e.getMessage());
+		}
+	}
+
+	/**
+	 * The readObject method is responsible for reading from the stream and
+	 * restoring the classes fields. It may call in.defaultReadObject to invoke
+	 * the default mechanism for restoring the object's non-static and
+	 * non-transient fields. The {@link ObjectInputStream#defaultReadObject()}
+	 * method uses information in the stream to assign the fields of the object
+	 * saved in the stream with the correspondingly named fields in the current
+	 * object. This handles the case when the class has evolved to add new
+	 * fields. The method does not need to concern itself with the state
+	 * belonging to its super classes or subclasses. State is saved by writing
+	 * the individual fields to the ObjectOutputStream using the writeObject
+	 * method or by using the methods for primitive data types supported by
+	 * {@link DataOutput}.
+	 * 
+	 * @param in
+	 *            The input stream
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 * @throws ClassNotFoundException
+	 *             If a casting fails
+	 */
+	private void readObject(final java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		/*
+		 * Restore common fields
+		 */
+		in.defaultReadObject();
+		if (serializeType > 0) {
+			try {
+				/*
+				 * Restore part
+				 */
+				if (STYPE_MIME_BODY_MSG == serializeType) {
+					/*
+					 * Compose a new body part with message/rfc822 data
+					 */
+					final MimeBodyPart newPart = new MimeBodyPart();
+					newPart.setContent(new MimeMessage(MIMEDefaultSession.getDefaultSession(),
+							new UnsynchronizedByteArrayInputStream(serializedContent)), MIMETypes.MIME_MESSAGE_RFC822);
+					part = newPart;
+					contentLoaded = true;
+				} else if (STYPE_MIME_BODY_MULTI == serializeType) {
+					/*
+					 * Compose a new body part with multipart/* data
+					 */
+					final MimeBodyPart newPart = new MimeBodyPart();
+					newPart.setContent(new MimeMultipart(
+							new MessageDataSource(serializedContent, serializedContentType)));
+					part = newPart;
+					multipart = null;
+					contentLoaded = true;
+				} else if (STYPE_MIME_BODY == serializeType) {
+					part = new MimeBodyPart(new UnsynchronizedByteArrayInputStream(serializedContent));
+					contentLoaded = true;
+				} else if (STYPE_MIME_MSG == serializeType) {
+					part = new MimeMessage(MIMEDefaultSession.getDefaultSession(),
+							new UnsynchronizedByteArrayInputStream(serializedContent));
+					contentLoaded = true;
+				}
+			} catch (final MessagingException e) {
+				throw new IOException(e.getMessage());
+			}
 		}
 	}
 
