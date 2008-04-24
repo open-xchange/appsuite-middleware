@@ -59,21 +59,21 @@ import javax.swing.text.Document;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.spellcheck.SpellCheckError;
 import com.openexchange.spellcheck.SpellCheckException;
-import com.openexchange.spellcheck.SpellCheckService;
+import com.openexchange.spellcheck.SpellChecker;
 import com.swabunga.spell.engine.SpellDictionary;
 import com.swabunga.spell.event.DocumentWordTokenizer;
 import com.swabunga.spell.event.SpellCheckEvent;
 import com.swabunga.spell.event.SpellCheckListener;
-import com.swabunga.spell.event.SpellChecker;
 import com.swabunga.spell.event.StringWordTokenizer;
 
 /**
- * {@link SpellCheckImpl}
+ * {@link SpellCheckerImpl} - Implements {@link SpellChecker} based on <a
+ * href="http://jazzy.sourceforge.net/">jazzy</a> library.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SpellCheckImpl implements SpellCheckService {
+public final class SpellCheckerImpl implements SpellChecker {
 
 	/**
 	 * Creates a new spell check with only the user dictionary added
@@ -86,8 +86,8 @@ public final class SpellCheckImpl implements SpellCheckService {
 	 * @throws SpellCheckException
 	 *             If spell check creation fails
 	 */
-	public static SpellCheckService newSpellCheck(final int userId, final Context ctx) throws SpellCheckException {
-		return new SpellCheckImpl(null, new RdbUserSpellDictionary(userId, ctx));
+	public static SpellChecker newSpellCheck(final int userId, final Context ctx) throws SpellCheckException {
+		return new SpellCheckerImpl(null, new RdbUserSpellDictionary(userId, ctx));
 	}
 
 	/**
@@ -104,13 +104,13 @@ public final class SpellCheckImpl implements SpellCheckService {
 	 * @throws SpellCheckException
 	 *             If spell check creation fails
 	 */
-	public static SpellCheckService newSpellCheck(final int userId, final String localeStr, final Context ctx)
+	public static SpellChecker newSpellCheck(final int userId, final String localeStr, final Context ctx)
 			throws SpellCheckException {
 		final SpellDictionary localeDictionary = DictonaryStorage.getDictionary(localeStr);
 		if (localeDictionary == null) {
 			throw new SpellCheckException(SpellCheckException.Code.MISSING_LOCALE_DIC, localeStr);
 		}
-		return new SpellCheckImpl(localeDictionary, new RdbUserSpellDictionary(userId, ctx));
+		return new SpellCheckerImpl(localeDictionary, new RdbUserSpellDictionary(userId, ctx));
 	}
 
 	/**
@@ -126,44 +126,45 @@ public final class SpellCheckImpl implements SpellCheckService {
 	 * @throws SpellCheckException
 	 *             If spell check creation fails
 	 */
-	public static SpellCheckService newSpellCheck(final int userId, final Locale locale, final Context ctx)
+	public static SpellChecker newSpellCheck(final int userId, final Locale locale, final Context ctx)
 			throws SpellCheckException {
 		final SpellDictionary localeDictionary = DictonaryStorage.getDictionary(locale);
 		if (localeDictionary == null) {
 			throw new SpellCheckException(SpellCheckException.Code.MISSING_LOCALE_DIC, locale.toString());
 		}
-		return new SpellCheckImpl(localeDictionary, new RdbUserSpellDictionary(userId, ctx));
+		return new SpellCheckerImpl(localeDictionary, new RdbUserSpellDictionary(userId, ctx));
 	}
 
 	private static final SpellCheckError[] EMPTY_ERRORS = new SpellCheckError[0];
 
 	private final RdbUserSpellDictionary userDictionary;
 
-	private final SpellChecker spellChecker;
+	private final com.swabunga.spell.event.SpellChecker spellChecker;
 
 	private final _SpellCheckListener spellCheckListener;
 
 	/**
-	 * Initializes a new {@link SpellCheckImpl}
+	 * Initializes a new {@link SpellCheckerImpl}
 	 * 
 	 * @param localeDictionary
 	 *            The locale-specific dictionary
 	 */
-	private SpellCheckImpl(final SpellDictionary localeDictionary) {
+	private SpellCheckerImpl(final SpellDictionary localeDictionary) {
 		this(localeDictionary, null);
 	}
 
 	/**
-	 * Initializes a new {@link SpellCheckImpl}
+	 * Initializes a new {@link SpellCheckerImpl}
 	 * 
 	 * @param localeDictionary
 	 *            The locale-specific dictionary
 	 * @param userDictionary
 	 *            The user dictionary
 	 */
-	private SpellCheckImpl(final SpellDictionary localeDictionary, final RdbUserSpellDictionary userDictionary) {
+	private SpellCheckerImpl(final SpellDictionary localeDictionary, final RdbUserSpellDictionary userDictionary) {
 		super();
-		spellChecker = localeDictionary == null ? new SpellChecker() : new SpellChecker(localeDictionary);
+		spellChecker = localeDictionary == null ? new com.swabunga.spell.event.SpellChecker()
+				: new com.swabunga.spell.event.SpellChecker(localeDictionary);
 		if (null != userDictionary) {
 			spellChecker.setUserDictionary(userDictionary);
 		}

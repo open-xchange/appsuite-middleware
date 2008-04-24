@@ -47,64 +47,60 @@
  *
  */
 
-package com.openexchange.spellcheck;
+package com.openexchange.spellcheck.internal;
 
 import java.util.Locale;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.spellcheck.SpellCheckException;
+import com.openexchange.spellcheck.SpellCheckService;
+import com.openexchange.spellcheck.SpellChecker;
 
 /**
- * {@link SpellCheckService}
+ * {@link SpellCheckServiceImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public interface SpellCheckService {
+public final class SpellCheckServiceImpl implements SpellCheckService {
 
 	/**
-	 * Gets a spell checker with only the user dictionary added
-	 * 
-	 * @param userId
-	 *            The user ID
-	 * @param ctx
-	 *            The context
-	 * @return An appropriate spell checker
-	 * @throws SpellCheckException
-	 *             If spell check creation fails
+	 * Initializes a new {@link SpellCheckServiceImpl}
 	 */
-	public SpellChecker getSpellChecker(int userId, Context ctx) throws SpellCheckException;
+	public SpellCheckServiceImpl() {
+		super();
+	}
 
-	/**
-	 * Gets a spell checker
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param userId
-	 *            The user ID
-	 * @param localeStr
-	 *            The desired locale's string representation (determines the
-	 *            locale-specific dictionary)
-	 * @param ctx
-	 *            The context
-	 * @return An appropriate spell checker
-	 * @throws SpellCheckException
-	 *             If spell check creation fails
+	 * @see com.openexchange.spellcheck.SpellCheckService#getSpellChecker(int,
+	 *      com.openexchange.groupware.contexts.Context)
+	 */
+	public SpellChecker getSpellChecker(final int userId, final Context ctx) throws SpellCheckException {
+		return SpellCheckerImpl.newSpellCheck(userId, ctx);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.spellcheck.SpellCheckService#getSpellChecker(int,
+	 *      java.lang.String, com.openexchange.groupware.contexts.Context)
 	 */
 	public SpellChecker getSpellChecker(final int userId, final String localeStr, final Context ctx)
-			throws SpellCheckException;
+			throws SpellCheckException {
+		return SpellCheckerImpl.newSpellCheck(userId, localeStr, ctx);
+	}
 
-	/**
-	 * Gets a spell checker
+	/*
+	 * (non-Javadoc)
 	 * 
-	 * @param userId
-	 *            The user ID
-	 * @param locale
-	 *            The desired locale (determines the locale-specific dictionary)
-	 * @param ctx
-	 *            The context
-	 * @return An appropriate spell checker
-	 * @throws SpellCheckException
-	 *             If spell check creation fails
+	 * @see com.openexchange.spellcheck.SpellCheckService#getSpellChecker(int,
+	 *      java.util.Locale, com.openexchange.groupware.contexts.Context)
 	 */
 	public SpellChecker getSpellChecker(final int userId, final Locale locale, final Context ctx)
-			throws SpellCheckException;
+			throws SpellCheckException {
+		return SpellCheckerImpl.newSpellCheck(userId, locale, ctx);
+	}
 
 }

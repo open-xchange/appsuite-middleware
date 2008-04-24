@@ -53,12 +53,15 @@ import static com.openexchange.spellcheck.services.SpellCheckServiceRegistry.get
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.spellcheck.SpellCheckService;
 import com.openexchange.spellcheck.internal.SpellCheckInit;
+import com.openexchange.spellcheck.internal.SpellCheckServiceImpl;
 
 /**
  * {@link SpellCheckActivator}
@@ -72,6 +75,8 @@ public final class SpellCheckActivator extends DeferredActivator {
 			.getLog(SpellCheckActivator.class);
 
 	private final AtomicBoolean started;
+
+	private ServiceRegistration spellCheckServiceRegistration;
 
 	/**
 	 * Initializes a new {@link SpellCheckActivator}
@@ -145,6 +150,11 @@ public final class SpellCheckActivator extends DeferredActivator {
 			 * Start spell check
 			 */
 			SpellCheckInit.getInstance().start();
+			/*
+			 * Register its service
+			 */
+			spellCheckServiceRegistration = context.registerService(SpellCheckService.class.getName(),
+					new SpellCheckServiceImpl(), null);
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw e;
@@ -160,6 +170,13 @@ public final class SpellCheckActivator extends DeferredActivator {
 	@Override
 	protected void stopBundle() throws Exception {
 		try {
+			/*
+			 * Unregister its service
+			 */
+			if (null != spellCheckServiceRegistration) {
+				spellCheckServiceRegistration.unregister();
+				spellCheckServiceRegistration = null;
+			}
 			/*
 			 * Stop spell check
 			 */
