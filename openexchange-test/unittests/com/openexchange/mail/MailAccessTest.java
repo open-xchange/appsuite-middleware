@@ -163,7 +163,7 @@ public final class MailAccessTest extends AbstractMailTest {
 					Thread.sleep(1000);
 				}
 			}
-			System.out.println("All threds finished...");
+			System.out.println("All threads finished...");
 			Thread.sleep(10000);
 			System.out.println("\tEND: Active connections: " + MailAccess.getCounter());
 			assertTrue("Zero connections should be open", 0 == MailAccess.getCounter());
