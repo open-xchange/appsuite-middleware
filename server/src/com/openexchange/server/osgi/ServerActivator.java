@@ -101,10 +101,10 @@ public final class ServerActivator extends DeferredActivator {
 	 */
 	private static final String BUNDLE_ID_ADMIN = "open_xchange_admin";
 
-	private static final Class<?>[] NEEDED_SERIVICES_ADMIN = { ConfigurationService.class, CacheService.class,
+	private static final Class<?>[] NEEDED_SERVICES_ADMIN = { ConfigurationService.class, CacheService.class,
 			EventAdmin.class };
 
-	private static final Class<?>[] NEEDED_SERIVICES_SERVER = { ConfigurationService.class, CacheService.class,
+	private static final Class<?>[] NEEDED_SERVICES_SERVER = { ConfigurationService.class, CacheService.class,
 			EventAdmin.class, SessiondService.class };
 
 	private final Starter starter;
@@ -139,7 +139,7 @@ public final class ServerActivator extends DeferredActivator {
 		if (null == adminBundleInstalled) {
 			adminBundleInstalled = Boolean.valueOf(isAdminBundleInstalled(context));
 		}
-		return adminBundleInstalled.booleanValue() ? NEEDED_SERIVICES_ADMIN : NEEDED_SERIVICES_SERVER;
+		return adminBundleInstalled.booleanValue() ? NEEDED_SERVICES_ADMIN : NEEDED_SERVICES_SERVER;
 	}
 
 	@Override
