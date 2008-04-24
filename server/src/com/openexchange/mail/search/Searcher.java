@@ -78,6 +78,7 @@ public final class Searcher {
 	 *         search term; otherwise <code>false</code>
 	 * @throws MailException
 	 *             If checking mail message against search term fails
+	 * @deprecated Invoke {@link SearchTerm#matches(MailMessage)} instead
 	 */
 	public static boolean matches(final MailMessage mailMessage, final SearchTerm<?> searchTerm) throws MailException {
 		return searchTerm.matches(mailMessage);
