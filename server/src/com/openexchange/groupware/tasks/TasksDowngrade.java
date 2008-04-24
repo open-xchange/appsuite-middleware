@@ -51,6 +51,7 @@ package com.openexchange.groupware.tasks;
 
 import java.sql.Connection;
 import java.util.Date;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -127,6 +128,8 @@ public class TasksDowngrade extends DowngradeListener {
         }
     }
 
+    private static final ParticipantStorage partStor = ParticipantStorage.getInstance();
+
     private void removeTasks(final Session session, final Context ctx, final int userId, final Connection con) throws TaskException, OXException, SearchIteratorException {
         final User user = Tools.getUser(ctx, userId);
         // Find private task folder.
@@ -144,6 +147,35 @@ public class TasksDowngrade extends DowngradeListener {
             iter.close();
         }
         // Remove all participations.
+        for (StorageType type : StorageType.TYPES_AD) {
+            final int[] taskIds = partStor.findTasksWithParticipant(ctx, con,
+                userId, type);
+            for (int taskId : taskIds) {
+                partStor.deleteInternal(ctx, con, taskId, userId, type, true);
+                final Set<Folder> folders = foldStor.selectFolder(ctx, con,
+                    taskId, type);
+                if (folders.size() == 0) {
+                    // Inconsistent data
+                    throw new TaskException(TaskException.Code.MISSING_FOLDER,
+                        Integer.valueOf(taskId));
+                } else if (folders.size() > 1) {
+                    // Simply remove folder mapping for this user.
+                    final int folderId = FolderStorage.extractFolderOfUser(
+                        folders, userId).getIdentifier();
+                    foldStor.deleteFolder(ctx, con, taskId, folderId, type);
+                } else if (ctx.getMailadmin() == userId) {
+                    final Folder folder = folders.iterator().next();
+                    // Remove task if mailadmin even can't read them anymore.
+                    TaskLogic.removeTask(session, ctx, con,
+                        folder.getIdentifier(), taskId, type);
+                } else {
+                    final Folder folder = folders.iterator().next();
+                    foldStor.deleteFolder(ctx, con, taskId,
+                        folder.getIdentifier(), type);
+                    foldStor.insertFolder(ctx, con, taskId, folder, type);
+                }
+            }
+        }
         // FIXME continue here.
     }
 
@@ -167,7 +199,7 @@ public class TasksDowngrade extends DowngradeListener {
         } finally {
             iter.close();
         }
-        // Finad all public folder.
+        // Find all public folder.
         iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(userId,
             user.getGroups(), new int[] { FolderObject.TASK },
             FolderObject.PUBLIC, new int[] { FolderObject.TASK }, ctx);
@@ -197,7 +229,8 @@ public class TasksDowngrade extends DowngradeListener {
 
     private static FolderStorage foldStor = FolderStorage.getInstance();
 
-    private void removeTaskInFolder(final Session session, final Context ctx, final Connection con, final FolderObject folder) throws TaskException {
+    private void removeTaskInFolder(final Session session, final Context ctx,
+        final Connection con, final FolderObject folder) throws TaskException {
         for (StorageType type : StorageType.TYPES_AD) {
             final int[] taskIds = foldStor.getTasksInFolder(ctx, con, folder
                 .getObjectID(), type);

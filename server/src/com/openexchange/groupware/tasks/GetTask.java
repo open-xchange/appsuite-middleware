@@ -150,6 +150,9 @@ public final class GetTask {
         this.type = type;
     }
 
+    /**
+     * TODO instanciate this class with the normal folder object.
+     */
     private FolderObject getFolder() throws TaskException {
         if (null == folder) {
             if (null == con) {

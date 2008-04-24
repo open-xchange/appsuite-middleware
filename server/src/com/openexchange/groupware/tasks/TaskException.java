@@ -207,10 +207,10 @@ public class TaskException extends AbstractOXException {
         DELETE_FAILED("SQL problem while deleting task: %s.",
             Category.CODE_ERROR, Detail.OTHER, 11),
         /**
-         * Cannot find folder of task participant.
+         * Cannot find folder of task participant %1$d.
          */
         PARTICIPANT_FOLDER_INCONSISTENCY("Cannot find folder of task "
-            + "participant.", Category.CODE_ERROR, Detail.OTHER, 12),
+            + "participant %1$d.", Category.CODE_ERROR, Detail.OTHER, 12),
         /**
          * SQL problem while listing tasks: %s.
          */
@@ -315,6 +315,11 @@ public class TaskException extends AbstractOXException {
          */
         NO_SHARED_MOVE("Moving items from or into shared folder %1$s (%2$d) is "
             + "not allowed.", Category.PERMISSION, Detail.PERMISSION, 34),
+        /**
+         * Missing folder mapping for task %1$d.
+         */
+        MISSING_FOLDER("Missing folder mapping for task %1$d.", Category
+            .CODE_ERROR, Detail.OTHER, 35),
         /**
          * Unknown recurrence type %d.
          */

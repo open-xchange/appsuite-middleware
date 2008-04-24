@@ -74,8 +74,6 @@ import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
@@ -164,24 +162,13 @@ public final class Tools {
      */
     static FolderObject getFolder(final Context ctx, final int folderId)
         throws TaskException {
-        // TODO Move database connection to folder methods.
-        Connection con;
         try {
-            con = DBPool.pickup(ctx);
-        } catch (DBPoolingException e) {
-            throw new TaskException(Code.NO_CONNECTION, e);
-        }
-        FolderObject folder = null;
-        try {
-        	folder = new OXFolderAccess(con, ctx).getFolderObject(folderId);
+        	return new OXFolderAccess(ctx).getFolderObject(folderId);
         } catch (FolderCacheNotEnabledException e) {
             throw new TaskException(e);
         } catch (OXException e) {
             throw new TaskException(e);
-        } finally {
-            DBPool.closeReaderSilent(ctx, con);
         }
-        return folder;
     }
 
     /**
@@ -232,8 +219,8 @@ public final class Tools {
                 final Folder folder = folderByUser.get(Integer.valueOf(internal
                     .getIdentifier()));
                 if (null == folder && privat) {
-                    throw new TaskException(Code
-                        .PARTICIPANT_FOLDER_INCONSISTENCY);
+                    throw new TaskException(Code.PARTICIPANT_FOLDER_INCONSISTENCY,
+                        Integer.valueOf(internal.getIdentifier()));
                 }
                 internal.setFolderId(folder.getIdentifier());
             }

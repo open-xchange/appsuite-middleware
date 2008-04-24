@@ -168,7 +168,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 if (null == participant.getGroupId()) {
                     stmt.setNull(pos++, Types.INTEGER);
                 } else {
-                    stmt.setInt(pos++, participant.getGroupId());
+                    stmt.setInt(pos++, participant.getGroupId().intValue());
                 }
                 stmt.setInt(pos++, participant.getConfirm());
                 stmt.setString(pos++, participant.getConfirmMessage());
@@ -219,7 +219,8 @@ public class RdbParticipantStorage extends ParticipantStorage {
         }
         if (check && users.length != deleted) {
             final TaskException tske = new TaskException(Code
-                .PARTICIPANT_DELETE_WRONG, users.length, deleted);
+                .PARTICIPANT_DELETE_WRONG, Integer.valueOf(users.length),
+                Integer.valueOf(deleted));
             LOG.error(tske.getMessage(), tske);
         }
     }
@@ -239,7 +240,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             stmt.setInt(2, groupId);
             result = stmt.executeQuery();
             while (result.next()) {
-                tasks.add(result.getInt(1));
+                tasks.add(Integer.valueOf(result.getInt(1)));
             }
         } catch (SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
@@ -265,7 +266,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
             stmt.setInt(pos++, userId);
             result = stmt.executeQuery();
             while (result.next()) {
-                tasks.add(result.getInt(1));
+                tasks.add(Integer.valueOf(result.getInt(1)));
             }
         } catch (SQLException e) {
             throw new TaskException(Code.SQL_ERROR, e, e.getMessage());
@@ -302,15 +303,15 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 pos = 1;
                 final int taskId = result.getInt(pos++);
                 final ExternalUserParticipant external =
-                    new ExternalUserParticipant();
-                external.setEmailAddress(result.getString(pos++));
+                    new ExternalUserParticipant(result.getString(pos++));
                 external.setDisplayName(result.getString(pos++));
                 final ExternalParticipant participant =
                     new ExternalParticipant(external);
-                Set<ExternalParticipant> participants = retval.get(taskId);
+                Set<ExternalParticipant> participants = retval.get(Integer
+                    .valueOf(taskId));
                 if (null == participants) {
                     participants = new HashSet<ExternalParticipant>();
-                    retval.put(taskId, participants);
+                    retval.put(Integer.valueOf(taskId), participants);
                 }
                 participants.add(participant);
             }
@@ -351,7 +352,8 @@ public class RdbParticipantStorage extends ParticipantStorage {
         }
         if (check && addresses.length != deleted) {
             final TaskException exc = new TaskException(Code
-                .PARTICIPANT_DELETE_WRONG, addresses.length, deleted);
+                .PARTICIPANT_DELETE_WRONG, Integer.valueOf(addresses.length),
+                Integer.valueOf(deleted));
             LOG.error(exc.getMessage(), exc);
         }
     }
@@ -419,7 +421,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
                 if (null == participant.getGroupId()) {
                     stmt.setNull(pos++, java.sql.Types.INTEGER);
                 } else {
-                    stmt.setInt(pos++, participant.getGroupId());
+                    stmt.setInt(pos++, participant.getGroupId().intValue());
                 }
                 stmt.setInt(pos++, participant.getConfirm());
                 if (null == participant.getConfirmMessage()) {

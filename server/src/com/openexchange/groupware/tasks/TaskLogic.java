@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -666,8 +667,8 @@ public final class TaskLogic {
         task.setLastModified(new Date());
         task.setModifiedBy(userId);
         storage.insertTask(ctx, con, task, StorageType.DELETED);
-        deleteParticipants(ctx, con, task.getObjectID());
-        deleteFolder(ctx, con, task.getObjectID());
+        final Set<Folder> removed = deleteParticipants(ctx, con, task.getObjectID());
+        deleteFolder(ctx, con, task.getObjectID(), removed);
         storage.delete(ctx, con, task.getObjectID(), lastModified,
             StorageType.ACTIVE);
     }
@@ -710,7 +711,7 @@ public final class TaskLogic {
         informDelete(session, ctx, task);
     }
 
-    private static void deleteParticipants(final Context ctx,
+    private static Set<Folder> deleteParticipants(final Context ctx,
         final Connection con, final int taskId) throws TaskException {
         final Set<InternalParticipant> participants =
             new HashSet<InternalParticipant>(partStor.selectInternal(ctx,
@@ -721,6 +722,7 @@ public final class TaskLogic {
             con, taskId, StorageType.REMOVED);
         partStor.deleteInternal(ctx, con, taskId, removed, StorageType.REMOVED,
             true);
+        final Set<Folder> retval = TaskLogic.createFolderMapping(removed);
         participants.addAll(removed);
         partStor.insertInternals(ctx, con, taskId, participants, StorageType
             .DELETED);
@@ -730,14 +732,22 @@ public final class TaskLogic {
             .DELETED);
         partStor.deleteExternal(ctx, con, taskId, externals, StorageType.ACTIVE,
             true);
+        return retval;
     }
 
     private static void deleteFolder(final Context ctx, final Connection con,
-        final int taskId) throws TaskException {
+        final int taskId, final Set<Folder> removed) throws TaskException {
         final Set<Folder> folders = foldStor.selectFolder(ctx, con, taskId,
             StorageType.ACTIVE);
-        foldStor.insertFolder(ctx, con, taskId, folders, StorageType.DELETED);
         foldStor.deleteFolder(ctx, con, taskId, folders, StorageType.ACTIVE);
+        final Iterator<Folder> iter = removed.iterator();
+        while (iter.hasNext()) {
+            final Folder folder = iter.next();
+            if (folder.getIdentifier() > 0) {
+                folders.add(folder);
+            }
+        }
+        foldStor.insertFolder(ctx, con, taskId, folders, StorageType.DELETED);
     }
 
     /**
