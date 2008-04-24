@@ -157,75 +157,44 @@ public abstract class SearchTerm<T> {
 	 */
 	@SuppressWarnings(UNCHECKED)
 	public SearchTerm<?> filter(final Class<? extends SearchTerm>[] filter) {
-		return handleTerm(this, new HashSet<Class<? extends SearchTerm>>(Arrays.asList(filter)));
+		return filter(new HashSet<Class<? extends SearchTerm>>(Arrays.asList(filter)));
 	}
 
+	/**
+	 * Generates a search term with the unsupported search terms specified
+	 * through <code>filter</code> removed.
+	 * <p>
+	 * For each search term contained in this search term the following rule is
+	 * applied:
+	 * <ol>
+	 * <li>If search term is an instance of {@link ORTerm} or {@link ANDTerm}
+	 * replace the unsupported with:
+	 * <ul>
+	 * <li>the neutral element if it is the first element that has to be
+	 * replaced: {@link BooleanTerm#FALSE} for {@link ORTerm} and
+	 * {@link BooleanTerm#TRUE} for {@link ANDTerm}</li>
+	 * <li>the failing element if term's other element has already been
+	 * replaced to let the whole search term fail: {@link BooleanTerm#FALSE} for
+	 * both {@link ORTerm} and {@link ANDTerm}</li>
+	 * </ul>
+	 * </li>
+	 * <li>If search term is supported, return the search term itself</li>
+	 * <li>Otherwise replace with {@link BooleanTerm#FALSE}</li>
+	 * </ol>
+	 * <p>
+	 * <b>Note</b>: Only a shallow copy is generated; meaning further working
+	 * on this search term may influence return value's search term.
+	 * 
+	 * @param filterSet
+	 *            The filter set containing classes unsupported search terms
+	 * @return A new search term with the unsupported search terms removed
+	 */
 	@SuppressWarnings(UNCHECKED)
-	private static final SearchTerm<?> handleTerm(final SearchTerm<?> searchTerm,
-			final Set<Class<? extends SearchTerm>> filterSet) {
-		if (searchTerm instanceof ORTerm) {
-			return handleORTerm(((ORTerm) searchTerm).getPattern(), filterSet);
-		} else if (searchTerm instanceof ANDTerm) {
-			return handleANDTerm(((ANDTerm) searchTerm).getPattern(), filterSet);
-		} else if (filterSet.contains(searchTerm.getClass())) {
+	public SearchTerm<?> filter(final Set<Class<? extends SearchTerm>> filterSet) {
+		if (filterSet.contains(getClass())) {
 			return BooleanTerm.FALSE;
 		}
-		return searchTerm;
+		return this;
 	}
 
-	@SuppressWarnings(UNCHECKED)
-	private static final SearchTerm<?> handleORTerm(final SearchTerm<?>[] terms,
-			final Set<Class<? extends SearchTerm>> filterSet) {
-		final ORTerm orTerm = new ORTerm();
-		if (filterSet.contains(terms[0].getClass())) {
-			/*
-			 * Replace with neutral element
-			 */
-			orTerm.setFirstTerm(BooleanTerm.FALSE);
-		} else {
-			orTerm.setSecondTerm(handleTerm(terms[1], filterSet));
-		}
-		if (filterSet.contains(terms[1].getClass())) {
-			/*
-			 * Replace with neutral element which fits in any case no matter if
-			 * first element has already been replaced or not.
-			 */
-			orTerm.setSecondTerm(BooleanTerm.FALSE);
-		} else {
-			orTerm.setSecondTerm(handleTerm(terms[1], filterSet));
-		}
-		return orTerm;
-	}
-
-	@SuppressWarnings(UNCHECKED)
-	private static final SearchTerm<?> handleANDTerm(final SearchTerm<?>[] terms,
-			final Set<Class<? extends SearchTerm>> filterSet) {
-		final ANDTerm andTerm = new ANDTerm();
-		final boolean replaceFirst = filterSet.contains(terms[0].getClass());
-		if (replaceFirst) {
-			/*
-			 * Replace with neutral element
-			 */
-			andTerm.setFirstTerm(BooleanTerm.TRUE);
-		} else {
-			andTerm.setSecondTerm(handleTerm(terms[1], filterSet));
-		}
-		if (filterSet.contains(terms[1].getClass())) {
-			if (replaceFirst) {
-				/*
-				 * Replace with fail element since the first element has already
-				 * been replaced with neutral element.
-				 */
-				andTerm.setSecondTerm(BooleanTerm.FALSE);
-			} else {
-				/*
-				 * Replace with neutral element
-				 */
-				andTerm.setSecondTerm(BooleanTerm.TRUE);
-			}
-		} else {
-			andTerm.setSecondTerm(handleTerm(terms[1], filterSet));
-		}
-		return andTerm;
-	}
 }

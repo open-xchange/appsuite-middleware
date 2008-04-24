@@ -120,4 +120,5 @@ public final class BccTerm extends SearchTerm<String> {
 	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
 		return new RecipientStringTerm(Message.RecipientType.BCC, addr);
 	}
+
 }

@@ -50,6 +50,7 @@
 package com.openexchange.mail.search;
 
 import java.util.Collection;
+import java.util.Set;
 
 import javax.mail.Message;
 import javax.mail.search.AndTerm;
@@ -134,6 +135,41 @@ public final class ANDTerm extends SearchTerm<SearchTerm<?>[]> {
 	@Override
 	public boolean matches(final MailMessage mailMessage) throws MailException {
 		return terms[0].matches(mailMessage) && terms[1].matches(mailMessage);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public SearchTerm<?> filter(final Set<Class<? extends SearchTerm>> filterSet) {
+		if (filterSet.contains(getClass())) {
+			return BooleanTerm.FALSE;
+		}
+		final ANDTerm andTerm = new ANDTerm();
+		final boolean replaceFirst = filterSet.contains(terms[0].getClass());
+		if (replaceFirst) {
+			/*
+			 * Replace with neutral element
+			 */
+			andTerm.setFirstTerm(BooleanTerm.TRUE);
+		} else {
+			andTerm.setFirstTerm(terms[0].filter(filterSet));
+		}
+		if (filterSet.contains(terms[1].getClass())) {
+			if (replaceFirst) {
+				/*
+				 * Replace with fail element since the first element has already
+				 * been replaced with neutral element.
+				 */
+				andTerm.setSecondTerm(BooleanTerm.FALSE);
+			} else {
+				/*
+				 * Replace with neutral element
+				 */
+				andTerm.setSecondTerm(BooleanTerm.TRUE);
+			}
+		} else {
+			andTerm.setSecondTerm(terms[1].filter(filterSet));
+		}
+		return andTerm;
 	}
 
 }
