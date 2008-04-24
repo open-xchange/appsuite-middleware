@@ -187,4 +187,19 @@ public final class SMTPConfig extends TransportConfig {
 			}
 		}
 	}
+
+	@Override
+	public void setPort(final int smtpPort) {
+		this.smtpPort = smtpPort;
+	}
+
+	@Override
+	public void setSecure(final boolean secure) {
+		this.secure = secure;
+	}
+
+	@Override
+	public void setServer(final String smtpServer) {
+		this.smtpServer = smtpServer;
+	}
 }

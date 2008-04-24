@@ -529,12 +529,32 @@ public abstract class MailConfig {
 	}
 
 	/**
+	 * Sets the login (externally)
+	 * 
+	 * @param login
+	 *            The login
+	 */
+	public void setLogin(final String login) {
+		this.login = login;
+	}
+
+	/**
 	 * Gets the password
 	 * 
 	 * @return the password
 	 */
 	public final String getPassword() {
 		return password;
+	}
+
+	/**
+	 * Sets the password (externally)
+	 * 
+	 * @param password
+	 *            The password
+	 */
+	public void setPassword(final String password) {
+		this.password = password;
 	}
 
 	/**
@@ -562,16 +582,42 @@ public abstract class MailConfig {
 	public abstract String getServer();
 
 	/**
+	 * Sets the host name or IP address of the server (externally)
+	 * 
+	 * @param server
+	 *            The host name or IP address of the server
+	 */
+	public abstract void setServer(String server);
+
+	/**
 	 * @return The optional port of the server obtained via {@link #getServer()}
 	 *         or <code>-1</code> if no port needed.
 	 */
 	public abstract int getPort();
 
 	/**
+	 * Sets the port (externally)
+	 * 
+	 * @param port
+	 *            The port
+	 */
+	public abstract void setPort(int port);
+
+	/**
 	 * @return <code>true</code> if a secure connection should be established;
 	 *         otherwise <code>false</code>
 	 */
 	public abstract boolean isSecure();
+
+	/**
+	 * Sets (externally) whether a secure connection should be established or
+	 * not
+	 * 
+	 * @param secure
+	 *            <code>true</code> if a secure connection should be
+	 *            established; otherwise <code>false</code>
+	 */
+	public abstract void setSecure(boolean secure);
 
 	/**
 	 * @return Gets the mail system's capabilities

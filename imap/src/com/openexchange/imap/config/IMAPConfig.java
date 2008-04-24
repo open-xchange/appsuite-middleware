@@ -225,6 +225,11 @@ public final class IMAPConfig extends MailConfig {
 		return imapPort;
 	}
 
+	@Override
+	public void setPort(final int imapPort) {
+		this.imapPort = imapPort;
+	}
+
 	/**
 	 * Gets the imapServer
 	 * 
@@ -233,6 +238,11 @@ public final class IMAPConfig extends MailConfig {
 	@Override
 	public String getServer() {
 		return imapServer;
+	}
+
+	@Override
+	public void setServer(final String imapServer) {
+		this.imapServer = imapServer;
 	}
 
 	/**
@@ -311,6 +321,11 @@ public final class IMAPConfig extends MailConfig {
 	@Override
 	public boolean isSecure() {
 		return secure;
+	}
+
+	@Override
+	public void setSecure(final boolean secure) {
+		this.secure = secure;
 	}
 
 	/**
