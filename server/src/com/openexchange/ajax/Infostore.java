@@ -712,7 +712,7 @@ public class Infostore extends PermissionServlet {
 		if (metadata.getFileSize() <= 0) {
 			metadata.setFileSize(upload.getSize());
 		}
-		if (metadata.getFileMIMEType() == null || "".equals(metadata.getFileMIMEType())) {
+		if (metadata.getFileMIMEType() == null || "application/octet-stream".equals(metadata.getFileMIMEType())) {
 			metadata.setFileMIMEType(upload.getContentType());
 		}
 	}

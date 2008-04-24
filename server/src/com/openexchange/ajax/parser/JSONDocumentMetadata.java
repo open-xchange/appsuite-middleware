@@ -82,7 +82,8 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 	private JSONObject jsonObject;
 
 	private static final Log LOG = LogFactory.getLog(JSONDocumentMetadata.class);
-	//private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(JSONDocumentMetadata.class);
+    private static final String DEFAULT_MIMETYPE = "application/octet-stream";
+    //private static final InfostoreExceptionFactory EXCEPTIONS = new InfostoreExceptionFactory(JSONDocumentMetadata.class);
 	
 	public JSONDocumentMetadata(){
 		this.jsonObject = new JSONObject();
@@ -227,7 +228,7 @@ public class JSONDocumentMetadata implements DocumentMetadata {
 
 	public String getFileMIMEType() {
 		if(!jsonObject.has(Metadata.FILE_MIMETYPE_LITERAL.getName())) {
-			return null;
+			return DEFAULT_MIMETYPE;
 		}
 		return jsonObject.optString(Metadata.FILE_MIMETYPE_LITERAL.getName());
 	}

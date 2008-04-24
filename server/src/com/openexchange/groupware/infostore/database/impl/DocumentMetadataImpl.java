@@ -87,9 +87,10 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 
 
 	private Map<String,String> properties = new HashMap<String,String>();
+    private static final String DEFAULT_TYPE = "application/octet-stream";
 
-	
-	public DocumentMetadataImpl(){
+
+    public DocumentMetadataImpl(){
 		
 	}
 	
@@ -222,7 +223,10 @@ public class DocumentMetadataImpl implements DocumentMetadata {
 	}
 
 	public String getFileMIMEType() {
-		return contentType;
+        if(contentType == null) {
+            return DEFAULT_TYPE;
+        }
+        return contentType;
 	}
 
 	public void setFileMIMEType(final String contentType) {

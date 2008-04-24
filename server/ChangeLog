@@ -1,3 +1,7 @@
+* 2008-04-24 - francisco.laguna@open-xchange.com
+
+ - Bugfix #11202: Mimetypes default to application/octet-stream
+
 * 2008-04-23 - francisco.laguna@open-xchange.com
 
  - Bugfix #11148:
