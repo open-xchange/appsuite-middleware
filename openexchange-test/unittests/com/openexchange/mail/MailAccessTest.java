@@ -84,7 +84,6 @@ public final class MailAccessTest extends AbstractMailTest {
 					new ContextImpl(getCid()), "mail-test-session");
 			session.setPassword(getPassword());
 			MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-			MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
 			mailAccess.connect();
 			System.out.println("Active connections: " + MailAccess.getCounter());
 			/*
@@ -92,8 +91,31 @@ public final class MailAccessTest extends AbstractMailTest {
 			 */
 			mailAccess.close(true);
 
+			/*
+			 * Test with altered mail configuration
+			 */
+			try {
+				mailAccess = MailAccess.getInstance(session);
+				MailConfig mailConfig = mailAccess.getMailConfig();
+				mailConfig.setLogin(getLogin());
+				mailConfig.setPassword(getPassword());
+				mailConfig.setServer(getServer());
+				mailConfig.setPort(getPort());
+				mailAccess.connect();
+				System.out.println("Active connections: " + MailAccess.getCounter());
+			} catch (Exception e) {
+			} finally {
+				try {
+					/*
+					 * close
+					 */
+					mailAccess.close(false);
+				} catch (Exception e2) {
+				}
+			}
+			
+			
 			mailAccess = MailAccess.getInstance(session);
-			mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
 			mailAccess.connect();
 			System.out.println("Active connections: " + MailAccess.getCounter());
 			/*
@@ -115,7 +137,6 @@ public final class MailAccessTest extends AbstractMailTest {
 			System.out.println("Active connections: " + MailAccess.getCounter());
 			
 			
-			mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
 			session.setPassword(getPassword());
 			mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
@@ -187,7 +208,6 @@ public final class MailAccessTest extends AbstractMailTest {
 						new ContextImpl(testRef.getCid()), "mail-test-session");
 				session.setPassword(testRef.getPassword());
 				MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
-				MailConfig mailConfig = new MailConfigWrapper(testRef.getLogin(), testRef.getPassword(), testRef.getServer(), testRef.getPort());
 				mailAccess.connect();
 				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailAccess.getCounter());
 				/*
@@ -196,7 +216,6 @@ public final class MailAccessTest extends AbstractMailTest {
 				mailAccess.close(false);
 	
 				mailAccess = MailAccess.getInstance(session);
-				mailConfig = new MailConfigWrapper(testRef.getLogin(), testRef.getPassword(), testRef.getServer(), testRef.getPort());
 				mailAccess.connect();
 				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailAccess.getCounter());
 				/*
@@ -217,7 +236,6 @@ public final class MailAccessTest extends AbstractMailTest {
 				}
 				System.out.println(Thread.currentThread().getName()+"Active connections: " + MailAccess.getCounter());
 				
-				mailConfig = new MailConfigWrapper(testRef.getLogin(), testRef.getPassword(), testRef.getServer(), testRef.getPort());
 				session.setPassword(testRef.getPassword());
 				mailAccess = MailAccess.getInstance(session);
 				mailAccess.connect();

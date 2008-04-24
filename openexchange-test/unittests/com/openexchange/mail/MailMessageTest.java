@@ -90,7 +90,6 @@ public final class MailMessageTest extends AbstractMailTest {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
 					new ContextImpl(getCid()), "mail-test-session");
 			session.setPassword(getPassword());
-			final MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
 			final MailAccess<?, ?> mailConnection = MailAccess.getInstance(session);
 			mailConnection.connect(/* mailConfig */);
 			try {
@@ -159,7 +158,6 @@ public final class MailMessageTest extends AbstractMailTest {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
 					new ContextImpl(getCid()), "mail-test-session");
 			session.setPassword(getPassword());
-			final MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
 			final MailAccess<?, ?> mailConnection = MailAccess.getInstance(session);
 			mailConnection.connect(/* mailConfig */);
 			try {
@@ -175,8 +173,7 @@ public final class MailMessageTest extends AbstractMailTest {
 		}
 	}
 
-	private void checkSubfolders(final MailFolder parent, final MailAccess<?, ?> mailConnection)
-			throws MailException {
+	private void checkSubfolders(final MailFolder parent, final MailAccess<?, ?> mailConnection) throws MailException {
 		checkMessages(parent, mailConnection);
 		final MailFolder[] subfolders = mailConnection.getFolderStorage().getSubfolders(parent.getFullname(), true);
 		assertTrue("Has Subfolders is wrong!", parent.hasSubfolders() ? subfolders != null && subfolders.length > 0

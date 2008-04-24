@@ -51,7 +51,6 @@ package com.openexchange.mail;
 
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.DumperMessageHandler;
@@ -168,7 +167,6 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
 					new ContextImpl(getCid()), "mail-test-session");
 			session.setPassword(getPassword());
-			final MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect(/* mailConfig */);
 			try {
@@ -213,7 +211,6 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
 					new ContextImpl(getCid()), "mail-test-session");
 			session.setPassword(getPassword());
-			final MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
 			final MailAccess<?, ?> mailConnection = MailAccess.getInstance(session);
 			mailConnection.connect(/* mailConfig */);
 			try {
@@ -259,7 +256,6 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
 					new ContextImpl(getCid()), "mail-test-session");
 			session.setPassword(getPassword());
-			final MailConfig mailConfig = new MailConfigWrapper(getLogin(), getPassword(), getServer(), getPort());
 			final MailAccess<?, ?> mailConnection = MailAccess.getInstance(session);
 			mailConnection.connect(/* mailConfig */);
 			try {
