@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import java.io.Serializable;
 import java.util.Locale;
 
 /**
@@ -57,7 +58,9 @@ import java.util.Locale;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class HeaderName {
+public final class HeaderName implements Serializable {
+
+	private static final long serialVersionUID = -4841569785169326836L;
 
 	private final String s;
 
