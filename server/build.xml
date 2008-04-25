@@ -274,7 +274,7 @@
         <antcall target="patchFileLoggingProperties"/>
         <antcall target="patchScriptConf"/>
         <antcall target="patchSessiondProperties"/>
-        <antcall target="patchSystemProperties"/>
+        <antcall target="patchPathInProperties"/>
     </target>
 
     <target name="patchOSGiIni">
@@ -314,7 +314,13 @@
         </replace>
     </target>
 
-    <target name="patchSystemProperties">
+    <target name="patchPathInProperties">
+        <replace file="${patch.conf.dir}/ajp.properties">
+            <replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}"/>
+        </replace>
+        <replace file="${patch.conf.dir}/mail.properties">
+            <replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}"/>
+        </replace>
         <move tofile="${patch.conf.dir}/system.properties" file="${patch.conf.dir}/system.properties.in" overwrite="true"/>
         <replace file="${patch.conf.dir}/system.properties">
             <replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}"/>
