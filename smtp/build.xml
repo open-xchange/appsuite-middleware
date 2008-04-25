@@ -29,8 +29,8 @@
 	<property name="serverjar" value="com.openexchange.server.jar" />
 	<property name="configjar" value="com.openexchange.configread.jar"/>
 	
-	<property name="mailjar" value="mail.jar" />
-	<property name="activationjar" value="activation.jar" />
+	<property name="mailjar" value="mail-1.4.1.jar" />
+	<property name="activationjar" value="activation-1.1.1.jar" />
 
 
     <!-- Classpath -->
