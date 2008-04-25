@@ -449,7 +449,6 @@ public final class MIMEMailPart extends MailPart {
 				serializeType = STYPE_MIME_MSG;
 				serializedContent = getBytesFromPart(part);
 			}
-			part = null;
 			/*
 			 * Write common fields
 			 */
@@ -458,6 +457,13 @@ public final class MIMEMailPart extends MailPart {
 			throw new IOException(e.getMessage());
 		} catch (final MessagingException e) {
 			throw new IOException(e.getMessage());
+		} finally {
+			/*
+			 * Discard content created for serialization 
+			 */
+			serializeType = 0;
+			serializedContent = null;
+			serializedContentType = null;
 		}
 	}
 
@@ -521,6 +527,13 @@ public final class MIMEMailPart extends MailPart {
 				}
 			} catch (final MessagingException e) {
 				throw new IOException(e.getMessage());
+			} finally {
+				/*
+				 * Discard content created for serialization 
+				 */
+				serializeType = 0;
+				serializedContent = null;
+				serializedContentType = null;
 			}
 		}
 	}
