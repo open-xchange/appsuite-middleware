@@ -411,7 +411,7 @@ public final class MIMEMailPart extends MailPart {
 	 * the methods for primitive data types supported by {@link DataOutput}.
 	 * 
 	 * @param out
-	 *            The output stream
+	 *            The object output stream
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
@@ -477,7 +477,7 @@ public final class MIMEMailPart extends MailPart {
 	 * {@link DataOutput}.
 	 * 
 	 * @param in
-	 *            The input stream
+	 *            The object input stream
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 * @throws ClassNotFoundException
