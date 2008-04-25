@@ -228,7 +228,7 @@ public class DowngradeTest extends TestCase {
     private void downgradeNoTasks() throws DBPoolingException,
         DowngradeFailedException {
         final UserConfiguration userConfig = new UserConfiguration(
-            Integer.MAX_VALUE ^ (1 << 17 + 1 << 3), user.getId(),
+            Integer.MAX_VALUE ^ ((1 << 17) + (1 << 3)), user.getId(),
             user.getGroups(), ctx);
         final Connection con = Database.get(ctx, true);
         try {
