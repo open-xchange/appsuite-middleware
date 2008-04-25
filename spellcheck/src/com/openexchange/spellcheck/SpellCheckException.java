@@ -51,7 +51,6 @@ package com.openexchange.spellcheck;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.server.ServiceException;
 
 /**
  * {@link SpellCheckException}
@@ -150,7 +149,7 @@ public final class SpellCheckException extends AbstractOXException {
 	private static final Object[] EMPTY_ARGS = new Object[0];
 
 	/**
-	 * Initializes a new {@link ServiceException}
+	 * Initializes a new {@link SpellCheckException}
 	 * 
 	 * @param cause
 	 *            The cause
@@ -160,7 +159,7 @@ public final class SpellCheckException extends AbstractOXException {
 	}
 
 	/**
-	 * Initializes a new {@link ServiceException}
+	 * Initializes a new {@link SpellCheckException}
 	 * 
 	 * @param code
 	 *            The service error code
@@ -170,7 +169,7 @@ public final class SpellCheckException extends AbstractOXException {
 	}
 
 	/**
-	 * Initializes a new {@link ServiceException}
+	 * Initializes a new {@link SpellCheckException}
 	 * 
 	 * @param code
 	 *            The service error code
@@ -182,7 +181,7 @@ public final class SpellCheckException extends AbstractOXException {
 	}
 
 	/**
-	 * Initializes a new {@link ServiceException}
+	 * Initializes a new {@link SpellCheckException}
 	 * 
 	 * @param code
 	 *            The service error code
