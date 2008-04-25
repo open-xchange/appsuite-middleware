@@ -107,12 +107,15 @@ public abstract class DeferredActivator implements BundleActivator {
 		public void removedService(final ServiceReference reference, final Object service) {
 			try {
 				if (clazz.isInstance(service)) {
-					services.remove(clazz);
 					/*
 					 * Signal unavailability
 					 */
 					signalUnavailability(index);
 					handleUnavailability(clazz);
+					/*
+					 * ... and remove from services
+					 */
+					services.remove(clazz);
 				}
 			} finally {
 				context.ungetService(reference);
