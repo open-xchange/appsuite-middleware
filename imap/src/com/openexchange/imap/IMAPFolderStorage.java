@@ -1761,7 +1761,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		return (pos == -1);
 	}
 
-	private static final String REGEX_TEMPL = "[\\p{ASCII}\\p{Blank}&&[^\\p{Cntrl}#SEP#]]+(?:\\Q#SEP#\\E[\\p{ASCII}\\p{Blank}&&[^\\p{Cntrl}#SEP#]]+)*";
+	private static final String REGEX_TEMPL = "[\\S\\p{Blank}&&[^\\p{Cntrl}#SEP#]]+(?:\\Q#SEP#\\E[\\S\\p{Blank}&&[^\\p{Cntrl}#SEP#]]+)*";
 
 	private static boolean checkFolderPathValidity(final String path, final char separator) {
 		if (path != null && path.length() > 0) {

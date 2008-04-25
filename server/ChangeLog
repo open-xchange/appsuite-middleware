@@ -1,3 +1,8 @@
+* 2008-04-25 - thorben.betten@open-xchange.com
+
+ - Bugfix #11206: Fixed creation of mail folder below a folder containing
+   umlauts in its name
+
 * 2008-04-24 - francisco.laguna@open-xchange.com
 
  - Bugfix #11202: Mimetypes default to application/octet-stream
