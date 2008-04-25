@@ -459,7 +459,7 @@ public final class MIMEMailPart extends MailPart {
 			throw new IOException(e.getMessage());
 		} finally {
 			/*
-			 * Discard content created for serialization 
+			 * Discard content created for serialization
 			 */
 			serializeType = 0;
 			serializedContent = null;
@@ -529,7 +529,7 @@ public final class MIMEMailPart extends MailPart {
 				throw new IOException(e.getMessage());
 			} finally {
 				/*
-				 * Discard content created for serialization 
+				 * Discard content created for serialization
 				 */
 				serializeType = 0;
 				serializedContent = null;
