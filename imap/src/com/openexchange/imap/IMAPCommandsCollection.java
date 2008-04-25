@@ -743,7 +743,7 @@ public final class IMAPCommandsCollection {
 					 */
 					final Response response = r[r.length - 1];
 					Boolean retval = Boolean.FALSE;
-					if (response.isOK()) { // command succesful
+					if (response.isOK()) { // command successful
 						retval = Boolean.valueOf(response.toString().indexOf("READ-ONLY") != -1);
 					}
 					/* p.notifyResponseHandlers(r); */
