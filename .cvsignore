@@ -1,7 +1,3 @@
-build.properties
-.settings
-.classpath
-.project
 classes
 jar
 doc
