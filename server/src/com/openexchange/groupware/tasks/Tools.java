@@ -54,6 +54,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
@@ -83,6 +86,11 @@ import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Tools {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(Tools.class);
 
     /**
      * Prevent instantiation
@@ -216,11 +224,15 @@ public final class Tools {
             if (Type.INTERNAL == participant.getType()) {
                 final InternalParticipant internal = (InternalParticipant)
                     participant;
-                final Folder folder = folderByUser.get(Integer.valueOf(internal
+                Folder folder = folderByUser.get(Integer.valueOf(internal
                     .getIdentifier()));
-                if (null == folder && privat) {
-                    throw new TaskException(Code.PARTICIPANT_FOLDER_INCONSISTENCY,
-                        Integer.valueOf(internal.getIdentifier()));
+                if (null == folder) {
+                    if (privat) {
+                        LOG.error(new TaskException(Code
+                            .PARTICIPANT_FOLDER_INCONSISTENCY,
+                            Integer.valueOf(internal.getIdentifier())));
+                    }
+                    folder = new Folder(0, internal.getIdentifier());
                 }
                 internal.setFolderId(folder.getIdentifier());
             }

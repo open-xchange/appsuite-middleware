@@ -268,7 +268,8 @@ public abstract class FolderStorage {
     /**
      * @param folders Set of task folder mappings.
      * @param userId unique identifier of a user.
-     * @return the folder mapping for the user.
+     * @return the folder mapping for the user or <code>null</code> if it can't
+     * be found.
      */
     static Folder extractFolderOfUser(final Set<Folder> folders,
         final int userId) {

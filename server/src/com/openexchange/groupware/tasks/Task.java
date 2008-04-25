@@ -475,7 +475,13 @@ public class Task extends CalendarObject {
         bAlarm = false;
     }
 
-    public boolean isValid() {
-        return true;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Task ID: ");
+        sb.append(objectId);
+        return sb.toString();
     }
 }

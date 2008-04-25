@@ -102,9 +102,9 @@ public class TasksDowngrade extends DowngradeListener {
         final Connection con = event.getWriteCon();
         if (!userConfig.hasTask()) {
             // If the user completely loses tasks the following should be deleted:
-            // - All tasks in private folders.
+            // - All tasks in private folders if no other user sees them.
             // - The participation of the user in all tasks.
-            // -
+            // - All tasks in public folders that can be only edited by this user.
             try {
                 removeTasks(session, ctx, userConfig.getUserId(), con);
             } catch (TaskException e) {
@@ -161,18 +161,22 @@ public class TasksDowngrade extends DowngradeListener {
                         Integer.valueOf(taskId));
                 } else if (folders.size() > 1) {
                     // Simply remove folder mapping for this user.
-                    final int folderId = FolderStorage.extractFolderOfUser(
-                        folders, userId).getIdentifier();
-                    foldStor.deleteFolder(ctx, con, taskId, folderId, type);
+                    final Folder folder = FolderStorage.extractFolderOfUser(
+                        folders, userId);
+                    if (null != folder) {
+                        foldStor.deleteFolder(ctx, con, taskId,
+                            folder.getIdentifier(), type);
+                    }
                 } else if (ctx.getMailadmin() == userId) {
                     final Folder folder = folders.iterator().next();
                     // Remove task if mailadmin even can't read them anymore.
                     TaskLogic.removeTask(session, ctx, con,
                         folder.getIdentifier(), taskId, type);
                 } else {
-                    final Folder folder = folders.iterator().next();
+                    Folder folder = folders.iterator().next();
                     foldStor.deleteFolder(ctx, con, taskId,
                         folder.getIdentifier(), type);
+                    folder = new Folder(folder.getIdentifier(), ctx.getMailadmin());
                     foldStor.insertFolder(ctx, con, taskId, folder, type);
                 }
             }
@@ -193,7 +197,9 @@ public class TasksDowngrade extends DowngradeListener {
                     }
                 }
                 // If no other has write permission remove the tasks.
-                removeTaskInFolder(session, ctx, con, folder);
+                if (!other) {
+                    removeTaskInFolder(session, ctx, con, folder);
+                }
             }
         } finally {
             iter.close();
