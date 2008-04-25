@@ -51,7 +51,6 @@ package com.openexchange.groupware.tasks;
 
 import java.sql.Connection;
 import java.util.Iterator;
-import java.util.List;
 
 import com.mysql.jdbc.AssertionFailedException;
 import com.openexchange.api2.OXException;
@@ -59,7 +58,6 @@ import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.Database;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.calendar.update.UpdateFolderIdInReminder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -76,7 +74,6 @@ import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
-import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
 
@@ -178,12 +175,61 @@ public class DowngradeTest extends TestCase {
         }
     }
 
+    public void testRemovePrivateTasks() throws OXException, DBPoolingException,
+        DowngradeFailedException {
+        final int folderId = FolderToolkit.getStandardTaskFolder(user.getId(),
+            ctx);
+        final Task task = Create.createWithDefaults(folderId, "DowngradeTest");
+        final TasksSQLInterface taskSQL = new TasksSQLInterfaceImpl(session);
+        taskSQL.insertTaskObject(task);
+        downgradeNoTasks();
+        assertNoTask(task.getObjectID());
+        // Task should be gone by downgrade. No delete necessary.
+    }
+
+    public void testRemovePublicTask() throws DBPoolingException, OXException,
+        DowngradeFailedException {
+        final FolderObject folder = createPublicFolder();
+        final int folderId = folder.getObjectID();
+        final Task task = Create.createWithDefaults(folderId, "DowngradeTest");
+        task.setParticipants(new Participant[] {
+            new UserParticipant(user.getId()),
+            new UserParticipant(secondUser.getId())
+        });
+        final TasksSQLInterface taskSQL = new TasksSQLInterfaceImpl(session);
+        taskSQL.insertTaskObject(task);
+        try {
+            downgradeNoTasks();
+            assertParticipants(folderId, task.getObjectID());
+            updatePublicFolder(folder);
+            downgradeNoTasks();
+            assertNoTask(task.getObjectID());
+        } finally {
+            deletePublicFolder(folder);
+        }
+    }
+
     /* ----------------- Test help methods ---------------------*/
     
     private void downgradeDelegate() throws DBPoolingException,
         DowngradeFailedException {
         final UserConfiguration userConfig = new UserConfiguration(
             Integer.MAX_VALUE ^ (1 << 17), user.getId(), user.getGroups(), ctx);
+        final Connection con = Database.get(ctx, true);
+        try {
+            final DowngradeEvent event = new DowngradeEvent(userConfig, con,
+                ctx);
+            new TasksDowngrade().downgradePerformed(event);
+        } finally {
+            Database.back(ctx, true, con);
+        }
+    }
+    
+    private void downgradeNoTasks() throws DBPoolingException,
+        DowngradeFailedException {
+        final UserConfiguration userConfig = new UserConfiguration(
+            Integer.MAX_VALUE ^ (1 << 17 + 1 << 3), user.getId(),
+            user.getGroups(), ctx);
         final Connection con = Database.get(ctx, true);
         try {
             final DowngradeEvent event = new DowngradeEvent(userConfig, con,
@@ -217,6 +263,16 @@ public class DowngradeTest extends TestCase {
             }
         } catch (TaskException e) {
             throw new AssertionFailedException(e);
+        }
+    }
+
+    private void assertNoTask(final int objectId) {
+        try {
+            final TaskStorage stor = TaskStorage.getInstance();
+            stor.selectTask(ctx, objectId, StorageType.ACTIVE);
+            fail("Private task has not been removed on downgrade.");
+        } catch (final TaskException e) {
+            // Getting the exception is fine.
         }
     }
 
