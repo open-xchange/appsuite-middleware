@@ -115,11 +115,11 @@ public final class SpellCheckException extends AbstractOXException {
 		/**
 		 * A JSON error occurred: %s
 		 */
-		JSON_ERROR("A JSON error occurred: %s", Category.CODE_ERROR, 12),
+		JSON_ERROR("A JSON error occurred: %s", Category.CODE_ERROR, 13),
 		/**
 		 * Invalid locale string: %s
 		 */
-		INVALID_LOCALE_STR("Invalid locale string: %s", Category.CODE_ERROR, 13);
+		INVALID_LOCALE_STR("Invalid locale string: %s", Category.CODE_ERROR, 14);
 
 		private final String message;
 
