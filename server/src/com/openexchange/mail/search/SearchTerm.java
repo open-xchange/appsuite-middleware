@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.search;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -66,7 +67,9 @@ import com.openexchange.mail.dataobjects.MailMessage;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class SearchTerm<T> {
+public abstract class SearchTerm<T> implements Serializable {
+
+	private static final long serialVersionUID = -6443057148350714347L;
 
 	private static final String UNCHECKED = "unchecked";
 

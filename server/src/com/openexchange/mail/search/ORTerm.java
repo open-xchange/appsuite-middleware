@@ -67,6 +67,8 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public final class ORTerm extends SearchTerm<SearchTerm<?>[]> {
 
+	private static final long serialVersionUID = 2984060879603969678L;
+
 	private final SearchTerm<?>[] terms;
 
 	/**

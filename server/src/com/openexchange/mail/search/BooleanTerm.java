@@ -65,6 +65,8 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public final class BooleanTerm extends SearchTerm<Boolean> {
 
+	private static final long serialVersionUID = 5351872902045670432L;
+
 	private static final class BooleanSearchTerm extends javax.mail.search.SearchTerm {
 
 		private static final BooleanSearchTerm TRUE = new BooleanSearchTerm(true);

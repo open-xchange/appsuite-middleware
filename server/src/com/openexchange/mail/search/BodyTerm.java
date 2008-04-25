@@ -76,6 +76,8 @@ import com.openexchange.mail.utils.MessageUtility;
  */
 public final class BodyTerm extends SearchTerm<String> {
 
+	private static final long serialVersionUID = -7824562914196872458L;
+
 	private final String pattern;
 
 	/**

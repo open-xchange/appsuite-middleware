@@ -73,6 +73,8 @@ import com.openexchange.mail.mime.MIMEMailException;
  */
 public final class BccTerm extends SearchTerm<String> {
 
+	private static final long serialVersionUID = 7538351237246564736L;
+
 	private String addr;
 
 	/**

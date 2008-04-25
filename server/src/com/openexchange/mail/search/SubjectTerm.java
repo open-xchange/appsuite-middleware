@@ -68,6 +68,8 @@ import com.openexchange.mail.mime.MIMEMailException;
  */
 public final class SubjectTerm extends SearchTerm<String> {
 
+	private static final long serialVersionUID = 1462060457742619720L;
+
 	private final String unicodeSubject;
 
 	/**

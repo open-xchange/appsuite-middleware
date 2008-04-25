@@ -68,6 +68,8 @@ import com.openexchange.mail.mime.MIMEMailException;
  */
 public final class SizeTerm extends SearchTerm<int[]> {
 
+	private static final long serialVersionUID = 6011159685554702125L;
+
 	private final int size;
 
 	private final ComparisonType comparisonType;

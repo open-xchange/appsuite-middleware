@@ -69,6 +69,8 @@ import com.openexchange.mail.mime.MIMEMailException;
  */
 public final class SentDateTerm extends SearchTerm<long[]> {
 
+	private static final long serialVersionUID = -1602773060126517090L;
+
 	private final java.util.Date sentDate;
 
 	private final ComparisonType comparisonType;

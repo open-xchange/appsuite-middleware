@@ -69,6 +69,8 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
  */
 public final class FlagTerm extends SearchTerm<Integer> {
 
+	private static final long serialVersionUID = -6887694637971347838L;
+
 	private final boolean set;
 
 	private final int flags;
