@@ -1240,9 +1240,9 @@ public final class IMAPCommandsCollection {
 
 	private final static String REPLACEMENT_QUOTE = "\\\\\\\"";
 
-	private final static String REPLPAT_BACKSLASH = "(\\\\)([^\"])";
+	private final static String REPLPAT_BACKSLASH = "\\\\";
 
-	private final static String REPLACEMENT_BACKSLASH = "\\\\\\\\$2";
+	private final static String REPLACEMENT_BACKSLASH = "\\\\\\\\";
 
 	/**
 	 * First encodes given fullname by using
@@ -1266,8 +1266,8 @@ public final class IMAPCommandsCollection {
 		final boolean escape = PATTERN_ESCAPE_ARG.matcher(lfolder).find();
 		final StringBuilder sb = new StringBuilder(lfolder.length() + 8);
 		if (escape) {
-			sb.append(lfolder.replaceAll(REPLPAT_QUOTE, REPLACEMENT_QUOTE).replaceAll(REPLPAT_BACKSLASH,
-					REPLACEMENT_BACKSLASH));
+			sb.append(lfolder.replaceAll(REPLPAT_BACKSLASH, REPLACEMENT_BACKSLASH).replaceAll(REPLPAT_QUOTE,
+					REPLACEMENT_QUOTE));
 		} else {
 			sb.append(lfolder);
 		}

@@ -2,6 +2,8 @@
 
  - Bugfix #11206: Fixed creation of mail folder below a folder containing
    umlauts in its name
+ - Bugfix #11175: Fixed encoding, quoting and escaping mailbox names
+   according to RFC2060
 
 * 2008-04-24 - francisco.laguna@open-xchange.com
 
