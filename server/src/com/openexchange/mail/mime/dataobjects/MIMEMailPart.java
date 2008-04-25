@@ -375,27 +375,22 @@ public final class MIMEMailPart extends MailPart {
 					/*
 					 * Compose a new body part with message/rfc822 data
 					 */
-					final MimeBodyPart newPart = new MimeBodyPart();
-					newPart.setContent(new MimeMessage(MIMEDefaultSession.getDefaultSession(),
-							getInputStreamFromPart((Message) part.getContent())), MIMETypes.MIME_MESSAGE_RFC822);
-					part = newPart;
+					part = createBodyMessage(getBytesFromPart((Message) part.getContent()));
 					contentLoaded = true;
 				} else if (contentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
 					/*
 					 * Compose a new body part with multipart/* data
 					 */
-					final MimeBodyPart newPart = new MimeBodyPart();
-					newPart.setContent(new MimeMultipart(new MessageDataSource(getBytesFromMultipart((Multipart) part
-							.getContent()), contentType.toString())));
-					part = newPart;
+					part = createBodyMultipart(getBytesFromMultipart((Multipart) part.getContent()), contentType
+							.toString());
 					multipart = null;
 					contentLoaded = true;
 				} else {
-					part = new MimeBodyPart(getInputStreamFromPart(part));
+					part = createBodyPart(getBytesFromPart(part));
 					contentLoaded = true;
 				}
 			} else if (part instanceof MimeMessage) {
-				part = new MimeMessage(MIMEDefaultSession.getDefaultSession(), getInputStreamFromPart(part));
+				part = createMessage(getBytesFromPart(part));
 				contentLoaded = true;
 			}
 		} catch (final MessagingException e) {
@@ -502,27 +497,20 @@ public final class MIMEMailPart extends MailPart {
 					/*
 					 * Compose a new body part with message/rfc822 data
 					 */
-					final MimeBodyPart newPart = new MimeBodyPart();
-					newPart.setContent(new MimeMessage(MIMEDefaultSession.getDefaultSession(),
-							new UnsynchronizedByteArrayInputStream(serializedContent)), MIMETypes.MIME_MESSAGE_RFC822);
-					part = newPart;
+					part = createBodyMessage(serializedContent);
 					contentLoaded = true;
 				} else if (STYPE_MIME_BODY_MULTI == serializeType) {
 					/*
 					 * Compose a new body part with multipart/* data
 					 */
-					final MimeBodyPart newPart = new MimeBodyPart();
-					newPart.setContent(new MimeMultipart(
-							new MessageDataSource(serializedContent, serializedContentType)));
-					part = newPart;
+					part = createBodyMultipart(serializedContent, serializedContentType);
 					multipart = null;
 					contentLoaded = true;
 				} else if (STYPE_MIME_BODY == serializeType) {
-					part = new MimeBodyPart(new UnsynchronizedByteArrayInputStream(serializedContent));
+					part = createBodyPart(serializedContent);
 					contentLoaded = true;
 				} else if (STYPE_MIME_MSG == serializeType) {
-					part = new MimeMessage(MIMEDefaultSession.getDefaultSession(),
-							new UnsynchronizedByteArrayInputStream(serializedContent));
+					part = createMessage(serializedContent);
 					contentLoaded = true;
 				}
 			} catch (final MessagingException e) {
@@ -539,19 +527,64 @@ public final class MIMEMailPart extends MailPart {
 	}
 
 	/**
-	 * Gets the input stream of specified part's raw data.
+	 * Compose a new MIME body part with message/rfc822 data
 	 * 
-	 * @param part
-	 *            Either a message or a body part
-	 * @return The input stream of specified part's raw data (with the optional
-	 *         empty starting line omitted)
-	 * @throws IOException
-	 *             If an I/O error occurs
+	 * @param data
+	 *            The message/rfc822 data
+	 * @return A new MIME body part with message/rfc822 data
 	 * @throws MessagingException
 	 *             If a messaging error occurs
 	 */
-	private static InputStream getInputStreamFromPart(final Part part) throws IOException, MessagingException {
-		return new UnsynchronizedByteArrayInputStream(getBytesFromPart(part));
+	private static MimeBodyPart createBodyMessage(final byte[] data) throws MessagingException {
+		final MimeBodyPart mimeBodyPart = new MimeBodyPart();
+		mimeBodyPart.setContent(new MimeMessage(MIMEDefaultSession.getDefaultSession(),
+				new UnsynchronizedByteArrayInputStream(data)), MIMETypes.MIME_MESSAGE_RFC822);
+		return mimeBodyPart;
+	}
+
+	/**
+	 * Compose a new MIME body part with multipart/* data
+	 * 
+	 * @param data
+	 *            The multipart/* data
+	 * @param contentType
+	 *            The multipart's content type (containing important boundary
+	 *            parameter)
+	 * @return A new MIME body part with multipart/* data
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 */
+	private static MimeBodyPart createBodyMultipart(final byte[] data, final String contentType)
+			throws MessagingException {
+		final MimeBodyPart mimeBodyPart = new MimeBodyPart();
+		mimeBodyPart.setContent(new MimeMultipart(new MessageDataSource(data, contentType)));
+		return mimeBodyPart;
+	}
+
+	/**
+	 * Compose a new MIME body part directly from specified data
+	 * 
+	 * @param data
+	 *            The part's data
+	 * @return A new MIME body part
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 */
+	private static MimeBodyPart createBodyPart(final byte[] data) throws MessagingException {
+		return new MimeBodyPart(new UnsynchronizedByteArrayInputStream(data));
+	}
+
+	/**
+	 * Compose a new MIME message directly from specified data
+	 * 
+	 * @param data
+	 *            The message's data
+	 * @return A new MIME message
+	 * @throws MessagingException
+	 *             If a messaging error occurs
+	 */
+	private static MimeMessage createMessage(final byte[] data) throws MessagingException {
+		return new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(data));
 	}
 
 	/**
