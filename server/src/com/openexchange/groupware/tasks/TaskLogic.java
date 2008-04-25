@@ -772,7 +772,9 @@ public final class TaskLogic {
 
     /**
      * Removes a task object completely.
-     * @param session Session.
+     * @param session Session (for event handling)
+     * @param ctx Context.
+     * @param con writable database connection.
      * @param folderId unique identifier of the folder through that the task is
      * accessed.
      * @param taskId unique identifier of the task to remove.
@@ -781,32 +783,32 @@ public final class TaskLogic {
      * @throws TaskException if an exception occurs.
      */
     public static void removeTask(final Session session, final Context ctx,
-        final Connection writeCon, final int folderId, final int taskId,
+        final Connection con, final int folderId, final int taskId,
         final StorageType type) throws TaskException {
         // Load the task.
-        final Task task = storage.selectTask(ctx, writeCon, taskId, type);
+        final Task task = storage.selectTask(ctx, con, taskId, type);
         task.setParentFolderID(folderId);
         final Set<InternalParticipant> internal = partStor.selectInternal(ctx,
-            writeCon, taskId, type);
+            con, taskId, type);
         final Set<ExternalParticipant> external = partStor.selectExternal(ctx,
-            writeCon, taskId, type);
-        final Set<Folder> folders = foldStor.selectFolder(ctx, writeCon, taskId,
+            con, taskId, type);
+        final Set<Folder> folders = foldStor.selectFolder(ctx, con, taskId,
             type);
         final Set<TaskParticipant> parts = new HashSet<TaskParticipant>();
         parts.addAll(internal); parts.addAll(external);
         task.setParticipants(TaskLogic.createParticipants(parts));
         task.setUsers(TaskLogic.createUserParticipants(parts));
         // Now remove it.
-        partStor.deleteInternal(ctx, writeCon, taskId, internal, type, true);
+        partStor.deleteInternal(ctx, con, taskId, internal, type, true);
         if (StorageType.ACTIVE == type) {
             final Set<InternalParticipant> removed = partStor.selectInternal(
-                ctx, writeCon, taskId, StorageType.REMOVED);
-            partStor.deleteInternal(ctx, writeCon, taskId, removed, StorageType
+                ctx, con, taskId, StorageType.REMOVED);
+            partStor.deleteInternal(ctx, con, taskId, removed, StorageType
                 .REMOVED, true);
         }
-        partStor.deleteExternal(ctx, writeCon, taskId, external, type, true);
-        foldStor.deleteFolder(ctx, writeCon, taskId, folders, type);
-        storage.delete(ctx, writeCon, taskId, task.getLastModified(), type);
+        partStor.deleteExternal(ctx, con, taskId, external, type, true);
+        foldStor.deleteFolder(ctx, con, taskId, folders, type);
+        storage.delete(ctx, con, taskId, task.getLastModified(), type);
         if (StorageType.ACTIVE == type) {
             informDelete(session, ctx, task);
         }

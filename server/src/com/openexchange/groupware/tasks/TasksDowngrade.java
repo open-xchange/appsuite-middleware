@@ -130,7 +130,9 @@ public class TasksDowngrade extends DowngradeListener {
 
     private static final ParticipantStorage partStor = ParticipantStorage.getInstance();
 
-    private void removeTasks(final Session session, final Context ctx, final int userId, final Connection con) throws TaskException, OXException, SearchIteratorException {
+    private void removeTasks(final Session session, final Context ctx,
+        final int userId, final Connection con) throws TaskException,
+        OXException, SearchIteratorException {
         final User user = Tools.getUser(ctx, userId);
         // Find private task folder.
         SearchIterator<FolderObject> iter = OXFolderIteratorSQL
@@ -140,8 +142,7 @@ public class TasksDowngrade extends DowngradeListener {
         try {
             while (iter.hasNext()) {
                 final FolderObject folder = iter.next();
-                // And remove tasks in there.
-                removeTaskInFolder(session, ctx, con, folder);
+                removeTaskInPrivateFolder(session, ctx, con, userId, folder);        
             }
         } finally {
             iter.close();
@@ -154,7 +155,7 @@ public class TasksDowngrade extends DowngradeListener {
                 partStor.deleteInternal(ctx, con, taskId, userId, type, true);
                 final Set<Folder> folders = foldStor.selectFolder(ctx, con,
                     taskId, type);
-                if (folders.size() == 0) {
+                if (0 == folders.size()) {
                     // Inconsistent data
                     throw new TaskException(TaskException.Code.MISSING_FOLDER,
                         Integer.valueOf(taskId));
@@ -176,7 +177,57 @@ public class TasksDowngrade extends DowngradeListener {
                 }
             }
         }
-        // FIXME continue here.
+        // Iterate over all public folders
+        iter = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(userId,
+            user.getGroups(), new int[] { FolderObject.TASK },
+            FolderObject.PUBLIC, new int[] { FolderObject.TASK }, ctx);
+        try {
+            while (iter.hasNext()) {
+                final FolderObject folder = iter.next();
+                final OCLPermission[] ocls = folder.getPermissionsAsArray();
+                boolean other = false;
+                for (int i = 0; i < ocls.length && !other; i++) {
+                    final OCLPermission perm = ocls[i];
+                    if (perm.getEntity() != userId && perm.canWriteAllObjects()) {
+                        other = true;
+                    }
+                }
+                // If no other has write permission remove the tasks.
+                removeTaskInFolder(session, ctx, con, folder);
+            }
+        } finally {
+            iter.close();
+        }
+    }
+
+    private void removeTaskInPrivateFolder(final Session session,
+        final Context ctx, final Connection con, final int userId,
+        final FolderObject folder) throws TaskException {
+        for (StorageType type : StorageType.TYPES_AD) {
+            final int[] taskIds = foldStor.getTasksInFolder(ctx, con,
+                folder.getObjectID(), type);
+            for (int taskId : taskIds) {
+                final Set<Folder> folders = foldStor.selectFolder(ctx, con,
+                    taskId, type);
+                if (0 == folders.size()) {
+                    // Inconsistent data
+                    throw new TaskException(TaskException.Code.MISSING_FOLDER,
+                        Integer.valueOf(taskId));
+                } else if (folders.size() > 1) {
+                    // Simply remove folder mapping for this user.
+                    final int folderId = FolderStorage.extractFolderOfUser(
+                        folders, userId).getIdentifier();
+                    foldStor.deleteFolder(ctx, con, taskId, folderId, type);
+                    // And remove participation. No check because task can be
+                    // delegated.
+                    partStor.deleteInternal(ctx, con, taskId, userId, type,
+                        false);
+                } else {
+                    TaskLogic.removeTask(session, ctx, con, folder.getObjectID(),
+                        taskId, type);
+                }
+            }
+        }
     }
 
     private void removeDelegations(final Session session, final Context ctx,
@@ -210,8 +261,7 @@ public class TasksDowngrade extends DowngradeListener {
                 boolean other = false;
                 for (int i = 0; i < ocls.length && !other; i++) {
                     final OCLPermission perm = ocls[i];
-                    if (perm.getEntity() != userId 
-                        && perm.canWriteAllObjects()) {
+                    if (perm.getEntity() != userId && perm.canWriteAllObjects()) {
                         other = true;
                     }
                 }
