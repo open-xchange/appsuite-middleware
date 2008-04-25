@@ -65,8 +65,10 @@ import java.util.Set;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
 import javax.mail.Folder;
+import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.StoreClosedException;
 import javax.mail.internet.MimeMessage;
 
 import com.openexchange.groupware.ldap.UserStorage;
@@ -97,8 +99,6 @@ import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.CommandFailedException;
-import com.sun.mail.iap.ConnectionException;
-import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.AppendUID;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
@@ -171,8 +171,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		try {
 			imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_ONLY);
 			final long start = System.currentTimeMillis();
-			final Message[] msgs = new FetchIMAPCommand(imapFolder, mailIds, getFetchProfile(fields, IMAPConfig
-					.isFastFetch()), false, true, body).doCommand();
+			final Message[] msgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(),
+					mailIds, getFetchProfile(fields, IMAPConfig.isFastFetch()), false, true, body).doCommand();
 			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(mailIds.length).append(
@@ -350,7 +350,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			final FetchProfile fetchProfile = getFetchProfile(fields, null, IMAPConfig.isFastFetch());
 			usedFields.addAll(Arrays.asList(fields));
 			final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
-			msgs = new FetchIMAPCommand(imapFolder, msgs, fetchProfile, false, true, body).doCommand();
+			msgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), msgs,
+					fetchProfile, false, true, body).doCommand();
 			/*
 			 * Apply thread level
 			 */
@@ -516,13 +517,19 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		 */
 		try {
 			IMAPCommandsCollection.uidExpungeWithFallback(imapFolder, tmp);
-		} catch (final ConnectionException e) {
+		} catch (final FolderClosedException e) {
 			/*
-			 * Connection is broken. Not possible to retry.
+			 * Not possible to retry since connection is broken
 			 */
 			throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapAccess.getMailConfig().getServer(),
 					imapAccess.getMailConfig().getLogin());
-		} catch (final ProtocolException e) {
+		} catch (final StoreClosedException e) {
+			/*
+			 * Not possible to retry since connection is broken
+			 */
+			throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapAccess.getMailConfig().getServer(),
+					imapAccess.getMailConfig().getLogin());
+		} catch (final MessagingException e) {
 			throw new IMAPException(IMAPException.Code.UID_EXPUNGE_FAILED, e, Arrays.toString(tmp), imapFolder
 					.getFullName(), e.getMessage());
 		}
@@ -693,13 +700,19 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			}
 			try {
 				IMAPCommandsCollection.uidExpungeWithFallback(imapFolder, tmp);
-			} catch (final ConnectionException e) {
+			} catch (final FolderClosedException e) {
 				/*
-				 * Connection is broken. Not possible to retry.
+				 * Not possible to retry since connection is broken
 				 */
 				throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapAccess.getMailConfig().getServer(),
 						imapAccess.getMailConfig().getLogin());
-			} catch (final ProtocolException e) {
+			} catch (final StoreClosedException e) {
+				/*
+				 * Not possible to retry since connection is broken
+				 */
+				throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapAccess.getMailConfig().getServer(),
+						imapAccess.getMailConfig().getLogin());
+			} catch (final MessagingException e) {
 				throw new IMAPException(IMAPException.Code.UID_EXPUNGE_FAILED, e, Arrays.toString(tmp), imapFolder
 						.getFullName(), e.getMessage());
 			}
@@ -893,9 +906,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			resetIMAPFolder();
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapConfig);
-		} catch (final ProtocolException e) {
-			throw IMAPException
-					.handleMessagingException(new MessagingException(e.getLocalizedMessage(), e), imapConfig);
 		}
 	}
 

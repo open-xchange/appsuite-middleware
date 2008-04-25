@@ -408,7 +408,8 @@ public final class IMAPSort {
 				usedFields.addAll(Arrays.asList(fields));
 				final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
 				start = System.currentTimeMillis();
-				msgs = new FetchIMAPCommand(imapFolder, seqNums, fetchProfile, false, true, body).doCommand();
+				msgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), seqNums,
+						fetchProfile, false, true, body).doCommand();
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(seqNums.length).append(
@@ -435,9 +436,11 @@ public final class IMAPSort {
 			final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
 			final long start = System.currentTimeMillis();
 			if (filter == null) {
-				msgs = new FetchIMAPCommand(imapFolder, fetchProfile, size, body).doCommand();
+				msgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), fetchProfile,
+						size, body).doCommand();
 			} else {
-				msgs = new FetchIMAPCommand(imapFolder, filter, fetchProfile, false, false, body).doCommand();
+				msgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), filter,
+						fetchProfile, false, false, body).doCommand();
 			}
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(size).append(" messages took ")

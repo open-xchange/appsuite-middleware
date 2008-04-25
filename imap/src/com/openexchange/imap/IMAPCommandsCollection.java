@@ -51,27 +51,26 @@ package com.openexchange.imap;
 
 import static com.openexchange.imap.sort.IMAPSort.getMessageComparator;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
-import static javax.mail.internet.MimeUtility.unfold;
 
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.mail.Flags;
+import javax.mail.FolderClosedException;
 import javax.mail.Header;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Store;
+import javax.mail.StoreClosedException;
 import javax.mail.internet.InternetHeaders;
 
 import com.openexchange.imap.command.FetchIMAPCommand;
@@ -86,7 +85,6 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.CommandFailedException;
-import com.sun.mail.iap.ConnectionException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -188,78 +186,6 @@ public final class IMAPCommandsCollection {
 		});
 	}
 
-	private static final String STR_UID = "UID";
-
-	private static final String TMPL_FETCH_HEADER_REV1 = "FETCH %s (BODY.PEEK[HEADER])";
-
-	private static final String TMPL_FETCH_HEADER_NON_REV1 = "FETCH %s (RFC822.HEADER)";
-
-	private static final Pattern PATTERN_PARSE_HEADER = Pattern
-			.compile("(\\S+):\\s(.*)((?:\r?\n(?:\\s(?:.+)))*|(?:$))");
-
-	/**
-	 * Call this method if JavaMail's routine fails to load a message's header.
-	 * Headers are read in a safe manner and filled into a map which is then
-	 * returned
-	 * 
-	 * @param msg
-	 *            The message which headers shall be loaded
-	 * @param uid
-	 *            <code>true</code> to reference to message via its UID;
-	 *            otherwise via its sequence ID
-	 * @return A {@link Map} containing the headers
-	 * @throws MessagingException
-	 * @throws ProtocolException
-	 */
-	public static Map<String, String> loadHeadersIMAP(final Message msg, final boolean uid) throws MessagingException,
-			ProtocolException {
-		final IMAPFolder fld = (IMAPFolder) msg.getFolder();
-		final IMAPProtocol p = fld.getProtocol();
-		final String tmpl = p.isREV1() ? TMPL_FETCH_HEADER_REV1 : TMPL_FETCH_HEADER_NON_REV1;
-		final String cmd;
-		if (uid) {
-			cmd = new StringBuilder(64).append(STR_UID).append(' ').append(
-					String.format(tmpl, Long.valueOf(fld.getUID(msg)))).toString();
-		} else {
-			cmd = String.format(tmpl, Integer.valueOf(msg.getMessageNumber()));
-		}
-		final Map<String, String> retval = new HashMap<String, String>();
-		final Response[] r = p.command(cmd, null);
-		final Response response = r[r.length - 1];
-		try {
-			if (response.isOK()) {
-				final int len = r.length - 1;
-				final StringBuilder valBuilder = new StringBuilder();
-				NextResponse: for (int i = 0; i < len; i++) {
-					if (r[i] == null) {
-						continue NextResponse;
-					} else if (!(r[i] instanceof FetchResponse)) {
-						continue NextResponse;
-					}
-					final FetchResponse f = ((FetchResponse) r[i]);
-					if (f.getNumber() != msg.getMessageNumber()) {
-						continue NextResponse;
-					}
-					final Matcher m = PATTERN_PARSE_HEADER.matcher(unfold(f.toString()));
-					while (m.find()) {
-						valBuilder.append(m.group(2));
-						if (m.group(3) != null) {
-							valBuilder.append(unfold(m.group(3)));
-						}
-						retval.put(m.group(1), valBuilder.toString());
-						valBuilder.setLength(0);
-					}
-					r[i] = null;
-				}
-			}
-		} finally {
-			// dispatch remaining untagged responses
-			p.notifyResponseHandlers(r);
-			p.handleResult(response);
-		}
-		return null;
-	}
-
 	/**
 	 * The reason for this routine is because the javamail library checks for
 	 * existence when attempting to alter the subscription on the specified
@@ -315,45 +241,50 @@ public final class IMAPCommandsCollection {
 	 *            the message UIDs
 	 * @return <code>true</code> if everything went fine; otherwise
 	 *         <code>false</code>
-	 * @throws ProtocolException -
+	 * @throws MessagingException -
 	 *             if an error occurs in underlying protocol
 	 */
 	public static boolean clearAllColorLabels(final IMAPFolder imapFolder, final long[] msgUIDs)
-			throws ProtocolException {
-		final String[] args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false);
-		final IMAPProtocol p = imapFolder.getProtocol();
-		Response[] r = null;
-		Response response = null;
-		Next: for (int i = 0; i < args.length; i++) {
-			r = p.command(String.format(TEMPL_UID_STORE_FLAGS, args[i], "-", ALL_COLOR_LABELS), null);
-			response = r[r.length - 1];
-			try {
-				if (response.isOK()) {
-					continue Next;
-				} else if (response.isBAD() && response.getRest() != null
-						&& response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1) {
-					throw new ProtocolException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
-							ERR_INVALID_SYSTEM_FLAG_DETECTED));
-				} else {
-					throw new ProtocolException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
-							ERR_UID_STORE_NOT_SUPPORTED));
-				}
-			} finally {
-				p.notifyResponseHandlers(r);
-				try {
-					p.handleResult(response);
-				} catch (final CommandFailedException cfe) {
-					if (cfe.getMessage().indexOf(ERR_01) != -1) {
-						/*
-						 * Obviously this folder is empty
-						 */
-						return true;
+			throws MessagingException {
+		return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				final String[] args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false);
+				Response[] r = null;
+				Response response = null;
+				Next: for (int i = 0; i < args.length; i++) {
+					r = p.command(String.format(TEMPL_UID_STORE_FLAGS, args[i], "-", ALL_COLOR_LABELS), null);
+					response = r[r.length - 1];
+					try {
+						if (response.isOK()) {
+							continue Next;
+						} else if (response.isBAD() && response.getRest() != null
+								&& response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1) {
+							throw new ProtocolException(IMAPException.getFormattedMessage(
+									IMAPException.Code.PROTOCOL_ERROR, ERR_INVALID_SYSTEM_FLAG_DETECTED));
+						} else {
+							throw new ProtocolException(IMAPException.getFormattedMessage(
+									IMAPException.Code.PROTOCOL_ERROR, ERR_UID_STORE_NOT_SUPPORTED));
+						}
+					} finally {
+						p.notifyResponseHandlers(r);
+						try {
+							p.handleResult(response);
+						} catch (final CommandFailedException cfe) {
+							if (cfe.getMessage().indexOf(ERR_01) != -1) {
+								/*
+								 * Obviously this folder is empty
+								 */
+								return Boolean.TRUE;
+							}
+							throw cfe;
+						}
 					}
-					throw cfe;
 				}
+				return Boolean.TRUE;
 			}
-		}
-		return true;
+
+		}))).booleanValue();
 	}
 
 	/**
@@ -368,45 +299,49 @@ public final class IMAPCommandsCollection {
 	 *            the color label
 	 * @return <code>true</code> if everything went fine; otherwise
 	 *         <code>false</code>
-	 * @throws ProtocolException -
+	 * @throws MessagingException -
 	 *             if an error occurs in underlying protocol
 	 */
 	public static boolean setColorLabel(final IMAPFolder imapFolder, final long[] msgUIDs, final String colorLabelFlag)
-			throws ProtocolException {
-		final String[] args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false);
-		final IMAPProtocol p = imapFolder.getProtocol();
-		Response[] r = null;
-		Response response = null;
-		Next: for (int i = 0; i < args.length; i++) {
-			r = p.command(String.format(TEMPL_UID_STORE_FLAGS, args[i], "+", colorLabelFlag), null);
-			response = r[r.length - 1];
-			try {
-				if (response.isOK()) {
-					continue Next;
-				} else if (response.isBAD() && response.getRest() != null
-						&& response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1) {
-					throw new ProtocolException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
-							ERR_INVALID_SYSTEM_FLAG_DETECTED));
-				} else {
-					throw new ProtocolException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
-							ERR_UID_STORE_NOT_SUPPORTED));
-				}
-			} finally {
-				p.notifyResponseHandlers(r);
-				try {
-					p.handleResult(response);
-				} catch (final CommandFailedException cfe) {
-					if (cfe.getMessage().indexOf(ERR_01) != -1) {
-						/*
-						 * Obviously this folder is empty
-						 */
-						return true;
+			throws MessagingException {
+		return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				final String[] args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false);
+				Response[] r = null;
+				Response response = null;
+				Next: for (int i = 0; i < args.length; i++) {
+					r = p.command(String.format(TEMPL_UID_STORE_FLAGS, args[i], "+", colorLabelFlag), null);
+					response = r[r.length - 1];
+					try {
+						if (response.isOK()) {
+							continue Next;
+						} else if (response.isBAD() && response.getRest() != null
+								&& response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1) {
+							throw new ProtocolException(IMAPException.getFormattedMessage(
+									IMAPException.Code.PROTOCOL_ERROR, ERR_INVALID_SYSTEM_FLAG_DETECTED));
+						} else {
+							throw new ProtocolException(IMAPException.getFormattedMessage(
+									IMAPException.Code.PROTOCOL_ERROR, ERR_UID_STORE_NOT_SUPPORTED));
+						}
+					} finally {
+						p.notifyResponseHandlers(r);
+						try {
+							p.handleResult(response);
+						} catch (final CommandFailedException cfe) {
+							if (cfe.getMessage().indexOf(ERR_01) != -1) {
+								/*
+								 * Obviously this folder is empty
+								 */
+								return Boolean.TRUE;
+							}
+							throw cfe;
+						}
 					}
-					throw cfe;
 				}
+				return Boolean.TRUE;
 			}
-		}
-		return true;
+		}))).booleanValue();
 	}
 
 	private static final String COMMAND_NOOP = "NOOP";
@@ -639,7 +574,7 @@ public final class IMAPCommandsCollection {
 				try {
 					final Set<MailField> set = new HashSet<MailField>(Arrays.asList(fields));
 					final boolean body = set.contains(MailField.BODY) || set.contains(MailField.FULL);
-					newMsgs = new FetchIMAPCommand(folder, newMsgSeqNums, getFetchProfile(fields, MailField
+					newMsgs = new FetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, getFetchProfile(fields, MailField
 							.toField(sortField), IMAPConfig.isFastFetch()), false, false, body).doCommand();
 				} catch (final MessagingException e) {
 					throw new ProtocolException(e.getLocalizedMessage());
@@ -668,42 +603,45 @@ public final class IMAPCommandsCollection {
 	 *            the IMAP folder
 	 * @return <code>true</code> if everything went fine; otherwise
 	 *         <code>false</code>
-	 * @throws ProtocolException -
+	 * @throws MessagingException -
 	 *             if an error occurs in underlying protocol
 	 */
-	public static boolean fastExpunge(final IMAPFolder imapFolder) throws ProtocolException {
-		final IMAPProtocol p = imapFolder.getProtocol();
-		final Response[] r = p.command(COMMAND_EXPUNGE, null);
-		final Response response = r[r.length - 1];
-		try {
-			if (response.isOK()) {
-				return true;
-			} else if (response.isBAD() && response.getRest() != null
-					&& response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1) {
-				throw new ProtocolException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
-						ERR_INVALID_SYSTEM_FLAG_DETECTED));
-			} else {
-				throw new ProtocolException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
-						ERR_UID_STORE_NOT_SUPPORTED));
-			}
-		} finally {
-			/*
-			 * No invocation of notifyResponseHandlers() to avoid sequential (by
-			 * message) folder cache update
-			 */
-			/* p.notifyResponseHandlers(r); */
-			try {
-				p.handleResult(response);
-			} catch (final CommandFailedException cfe) {
-				if (cfe.getMessage().indexOf(ERR_01) != -1) {
+	public static boolean fastExpunge(final IMAPFolder imapFolder) throws MessagingException {
+		return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				final Response[] r = p.command(COMMAND_EXPUNGE, null);
+				final Response response = r[r.length - 1];
+				try {
+					if (response.isOK()) {
+						return Boolean.TRUE;
+					} else if (response.isBAD() && response.getRest() != null
+							&& response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1) {
+						throw new ProtocolException(IMAPException.getFormattedMessage(
+								IMAPException.Code.PROTOCOL_ERROR, ERR_INVALID_SYSTEM_FLAG_DETECTED));
+					} else {
+						throw new ProtocolException(IMAPException.getFormattedMessage(
+								IMAPException.Code.PROTOCOL_ERROR, ERR_UID_STORE_NOT_SUPPORTED));
+					}
+				} finally {
 					/*
-					 * Obviously this folder is empty
+					 * No invocation of notifyResponseHandlers() to avoid
+					 * sequential (by message) folder cache update
 					 */
-					return true;
+					/* p.notifyResponseHandlers(r); */
+					try {
+						p.handleResult(response);
+					} catch (final CommandFailedException cfe) {
+						if (cfe.getMessage().indexOf(ERR_01) != -1) {
+							/*
+							 * Obviously this folder is empty
+							 */
+							return Boolean.TRUE;
+						}
+						throw cfe;
+					}
 				}
-				throw cfe;
 			}
-		}
+		}))).booleanValue();
 	}
 
 	private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
@@ -729,11 +667,8 @@ public final class IMAPCommandsCollection {
 	 *            The UIDs
 	 * @throws MessagingException
 	 *             If a messaging error occurs
-	 * @throws ProtocolException
-	 *             If a protocol error occurs
 	 */
-	public static void uidExpungeWithFallback(final IMAPFolder imapFolder, final long[] uids)
-			throws MessagingException, ProtocolException {
+	public static void uidExpungeWithFallback(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
 		try {
 			final long start = System.currentTimeMillis();
 			IMAPCommandsCollection.uidExpunge(imapFolder, uids);
@@ -742,12 +677,17 @@ public final class IMAPCommandsCollection {
 				LOG.info(new StringBuilder(128).append(uids.length).append(" messages expunged in ").append(
 						(System.currentTimeMillis() - start)).append("msec").toString());
 			}
-		} catch (final ConnectionException e) {
+		} catch (final FolderClosedException e) {
 			/*
 			 * Not possible to retry since connection is broken
 			 */
 			throw e;
-		} catch (final ProtocolException e) {
+		} catch (final StoreClosedException e) {
+			/*
+			 * Not possible to retry since connection is broken
+			 */
+			throw e;
+		} catch (final MessagingException e) {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn(new StringBuilder(64).append("UID EXPUNGE failed: ").append(e.getLocalizedMessage()).append(
 						".\nPerforming fallback actions.").toString(), e);
@@ -830,65 +770,69 @@ public final class IMAPCommandsCollection {
 	 *            value
 	 * @return All messages marked as deleted in given IMAP folder filtered by
 	 *         specified <code>filter</code>
-	 * @throws ProtocolException
+	 * @throws MessagingException
 	 *             If a protocol error occurs
 	 */
-	private static long[] getDeletedMessages(final IMAPFolder imapFolder, final long[] filter) throws ProtocolException {
-		final IMAPProtocol p = imapFolder.getProtocol();
-		final Response[] r = p.command(FETCH_FLAGS, null);
-		final Response response = r[r.length - 1];
-		try {
-			if (response.isOK()) {
-				final Set<Long> set = new TreeSet<Long>();
-				final int mlen = r.length - 1;
-				for (int i = 0; i < mlen; i++) {
-					if (!(r[i] instanceof FetchResponse)) {
-						continue;
-					}
-					final Long uid;
-					{
-						final FetchResponse fr = (FetchResponse) r[0];
-						Item item = fr.getItem(1);
-						if (!(item instanceof UID)) {
-							item = fr.getItem(0);
+	private static long[] getDeletedMessages(final IMAPFolder imapFolder, final long[] filter)
+			throws MessagingException {
+		return (long[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				final Response[] r = p.command(FETCH_FLAGS, null);
+				final Response response = r[r.length - 1];
+				try {
+					if (response.isOK()) {
+						final Set<Long> set = new TreeSet<Long>();
+						final int mlen = r.length - 1;
+						for (int i = 0; i < mlen; i++) {
+							if (!(r[i] instanceof FetchResponse)) {
+								continue;
+							}
+							final Long uid;
+							{
+								final FetchResponse fr = (FetchResponse) r[0];
+								Item item = fr.getItem(1);
+								if (!(item instanceof UID)) {
+									item = fr.getItem(0);
+								}
+								uid = Long.valueOf(((UID) item).uid);
+							}
+							set.add(uid);
+							r[i] = null;
 						}
-						uid = Long.valueOf(((UID) item).uid);
+						if (filter != null && filter.length > 0) {
+							for (int i = 0; i < filter.length; i++) {
+								set.remove(Long.valueOf(filter[i]));
+							}
+						}
+						final long[] retval = new long[set.size()];
+						int i = 0;
+						for (final Long l : set) {
+							retval[i++] = l.longValue();
+						}
+						return retval;
 					}
-					set.add(uid);
-					r[i] = null;
-				}
-				if (filter != null && filter.length > 0) {
-					for (int i = 0; i < filter.length; i++) {
-						set.remove(Long.valueOf(filter[i]));
-					}
-				}
-				final long[] retval = new long[set.size()];
-				int i = 0;
-				for (final Long l : set) {
-					retval[i++] = l.longValue();
-				}
-				return retval;
-			}
-			throw new ProtocolException(new StringBuilder("FETCH command failed: ").append(getResponseType(response))
-					.append(' ').append(response.getRest()).toString());
-		} finally {
-			/*
-			 * No invocation of notifyResponseHandlers() to avoid sequential (by
-			 * message) folder cache update
-			 */
-			/* p.notifyResponseHandlers(r); */
-			try {
-				p.handleResult(response);
-			} catch (final CommandFailedException cfe) {
-				if (cfe.getMessage().indexOf(ERR_01) != -1) {
+					throw new ProtocolException(new StringBuilder("FETCH command failed: ").append(
+							getResponseType(response)).append(' ').append(response.getRest()).toString());
+				} finally {
 					/*
-					 * Obviously this folder is empty
+					 * No invocation of notifyResponseHandlers() to avoid
+					 * sequential (by message) folder cache update
 					 */
-					return new long[0];
+					/* p.notifyResponseHandlers(r); */
+					try {
+						p.handleResult(response);
+					} catch (final CommandFailedException cfe) {
+						if (cfe.getMessage().indexOf(ERR_01) != -1) {
+							/*
+							 * Obviously this folder is empty
+							 */
+							return new long[0];
+						}
+						throw cfe;
+					}
 				}
-				throw cfe;
 			}
-		}
+		}));
 	}
 
 	private static String getResponseType(final Response response) {
@@ -920,11 +864,11 @@ public final class IMAPCommandsCollection {
 	 * @param endSeqNum
 	 *            The ending sequence number
 	 * @return The corresponding UIDs
-	 * @throws ProtocolException
+	 * @throws MessagingException
 	 *             If an error occurs in underlying protocol
 	 */
 	public static long[] seqNums2UID(final IMAPFolder imapFolder, final int startSeqNum, final int endSeqNum)
-			throws ProtocolException {
+			throws MessagingException {
 		return _seqNums2UID(imapFolder, new String[] { new StringBuilder(16).append(startSeqNum).append(':').append(
 				endSeqNum).toString() }, endSeqNum - startSeqNum + 1);
 	}
@@ -938,51 +882,56 @@ public final class IMAPCommandsCollection {
 	 * @param seqNums
 	 *            The sequence numbers
 	 * @return The corresponding UIDs
-	 * @throws ProtocolException
+	 * @throws MessagingException
 	 *             If an error occurs in underlying protocol
 	 */
-	public static long[] seqNums2UID(final IMAPFolder imapFolder, final int[] seqNums) throws ProtocolException {
+	public static long[] seqNums2UID(final IMAPFolder imapFolder, final int[] seqNums) throws MessagingException {
 		return _seqNums2UID(imapFolder, IMAPNumArgSplitter.splitSeqNumArg(seqNums, true), seqNums.length);
 	}
 
 	private static long[] _seqNums2UID(final IMAPFolder imapFolder, final String[] args, final int size)
-			throws ProtocolException {
-		final IMAPProtocol p = imapFolder.getProtocol();
-		Response[] r = null;
-		Response response = null;
-		int index = 0;
-		final long[] uids = new long[size];
-		for (int i = 0; i < args.length && index < size; i++) {
-			r = p.command(String.format(TEMPL_FETCH_UID, args[i]), null);
-			final int len = r.length - 1;
-			response = r[len];
-			try {
-				if (response.isOK()) {
-					for (int j = 0; j < len; j++) {
-						uids[index++] = ((UID) ((FetchResponse) r[j]).getItem(0)).uid;
+			throws MessagingException {
+		return (long[]) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				Response[] r = null;
+				Response response = null;
+				int index = 0;
+				final long[] uids = new long[size];
+				for (int i = 0; i < args.length && index < size; i++) {
+					r = p.command(String.format(TEMPL_FETCH_UID, args[i]), null);
+					final int len = r.length - 1;
+					response = r[len];
+					try {
+						if (response.isOK()) {
+							for (int j = 0; j < len; j++) {
+								uids[index++] = ((UID) ((FetchResponse) r[j]).getItem(0)).uid;
+							}
+						}
+					} finally {
+						p.notifyResponseHandlers(r);
+						try {
+							p.handleResult(response);
+						} catch (final CommandFailedException cfe) {
+							if (cfe.getMessage().indexOf(ERR_01) != -1) {
+								/*
+								 * Obviously this folder is empty
+								 */
+								return new long[0];
+							}
+							throw cfe;
+						}
 					}
 				}
-			} finally {
-				p.notifyResponseHandlers(r);
-				try {
-					p.handleResult(response);
-				} catch (final CommandFailedException cfe) {
-					if (cfe.getMessage().indexOf(ERR_01) != -1) {
-						/*
-						 * Obviously this folder is empty
-						 */
-						return new long[0];
-					}
-					throw cfe;
+				if (index < size) {
+					final long[] trim = new long[index];
+					System.arraycopy(uids, 0, trim, 0, trim.length);
+					return trim;
 				}
+				return uids;
 			}
-		}
-		if (index < size) {
-			final long[] trim = new long[index];
-			System.arraycopy(uids, 0, trim, 0, trim.length);
-			return trim;
-		}
-		return uids;
+
+		}));
 	}
 
 	private static final String TEMPL_UID_EXPUNGE = "UID EXPUNGE %s";
@@ -1002,48 +951,51 @@ public final class IMAPCommandsCollection {
 	 *            the message UIDs
 	 * @return <code>true</code> if everything went fine; otherwise
 	 *         <code>false</code>
-	 * @throws ProtocolException -
+	 * @throws MessagingException -
 	 *             if an error occurs in underlying protocol
 	 */
-	public static boolean uidExpunge(final IMAPFolder imapFolder, final long[] uids) throws ProtocolException {
-		final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, false);
-		final IMAPProtocol p = imapFolder.getProtocol();
-		Response[] r = null;
-		Response response = null;
-		Next: for (int i = 0; i < args.length; i++) {
-			r = p.command(String.format(TEMPL_UID_EXPUNGE, args[i]), null);
-			response = r[r.length - 1];
-			try {
-				if (response.isOK()) {
-					continue Next;
-				} else if (response.isBAD() && response.getRest() != null
-						&& response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1) {
-					throw new ProtocolException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
-							ERR_INVALID_SYSTEM_FLAG_DETECTED));
-				} else {
-					throw new ProtocolException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
-							ERR_UID_STORE_NOT_SUPPORTED));
-				}
-			} finally {
-				/*
-				 * No invocation of notifyResponseHandlers() to avoid sequential
-				 * (by message) folder cache update
-				 */
-				/* p.notifyResponseHandlers(r); */
-				try {
-					p.handleResult(response);
-				} catch (final CommandFailedException cfe) {
-					if (cfe.getMessage().indexOf(ERR_01) != -1) {
+	public static boolean uidExpunge(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
+		return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, false);
+				Response[] r = null;
+				Response response = null;
+				Next: for (int i = 0; i < args.length; i++) {
+					r = p.command(String.format(TEMPL_UID_EXPUNGE, args[i]), null);
+					response = r[r.length - 1];
+					try {
+						if (response.isOK()) {
+							continue Next;
+						} else if (response.isBAD() && response.getRest() != null
+								&& response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1) {
+							throw new ProtocolException(IMAPException.getFormattedMessage(
+									IMAPException.Code.PROTOCOL_ERROR, ERR_INVALID_SYSTEM_FLAG_DETECTED));
+						} else {
+							throw new ProtocolException(IMAPException.getFormattedMessage(
+									IMAPException.Code.PROTOCOL_ERROR, ERR_UID_STORE_NOT_SUPPORTED));
+						}
+					} finally {
 						/*
-						 * Obviously this folder is empty
+						 * No invocation of notifyResponseHandlers() to avoid
+						 * sequential (by message) folder cache update
 						 */
-						return true;
+						/* p.notifyResponseHandlers(r); */
+						try {
+							p.handleResult(response);
+						} catch (final CommandFailedException cfe) {
+							if (cfe.getMessage().indexOf(ERR_01) != -1) {
+								/*
+								 * Obviously this folder is empty
+								 */
+								return Boolean.TRUE;
+							}
+							throw cfe;
+						}
 					}
-					throw cfe;
 				}
+				return Boolean.TRUE;
 			}
-		}
-		return true;
+		}))).booleanValue();
 	}
 
 	private static final Pattern PATTERN_PERMANENTFLAGS = Pattern

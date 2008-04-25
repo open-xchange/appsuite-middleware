@@ -65,10 +65,12 @@ import java.util.regex.Pattern;
 
 import javax.mail.Flags;
 import javax.mail.Folder;
+import javax.mail.FolderClosedException;
 import javax.mail.MessagingException;
 import javax.mail.MethodNotSupportedException;
 import javax.mail.Quota;
 import javax.mail.ReadOnlyFolderException;
+import javax.mail.StoreClosedException;
 import javax.mail.Quota.Resource;
 
 import com.openexchange.groupware.AbstractOXException;
@@ -94,9 +96,7 @@ import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.sun.mail.iap.CommandFailedException;
-import com.sun.mail.iap.ConnectionException;
 import com.sun.mail.iap.ParsingException;
-import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
@@ -1099,9 +1099,20 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 									"\" in ").append((System.currentTimeMillis() - startExpunge)).append("msec")
 									.toString());
 						}
-					} catch (final ConnectionException e) {
+					} catch (final FolderClosedException e) {
 						/*
-						 * Connection is broken. Not possible to retry.
+						 * Not possible to retry since connection is broken
+						 */
+						if (LOG.isDebugEnabled()) {
+							debug.setLength(0);
+							LOG.debug(debug.append("EXPUNGE command timed out in ").append(
+									(System.currentTimeMillis() - startExpunge)).append("msec").toString());
+						}
+						throw new IMAPException(IMAPException.Code.CONNECTION_ERROR, e, imapConfig.getServer(),
+								imapConfig.getLogin());
+					} catch (final StoreClosedException e) {
+						/*
+						 * Not possible to retry since connection is broken
 						 */
 						if (LOG.isDebugEnabled()) {
 							debug.setLength(0);
@@ -1147,13 +1158,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				/*
 				 * ... and perform EXPUNGE
 				 */
-				try {
-					final long start = System.currentTimeMillis();
-					IMAPCommandsCollection.fastExpunge(f);
-					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-				} catch (final ProtocolException pex) {
-					throw new MessagingException(pex.getMessage(), pex);
-				}
+				final long start = System.currentTimeMillis();
+				IMAPCommandsCollection.fastExpunge(f);
+				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				if (LOG.isDebugEnabled()) {
 					debug.setLength(0);
 					LOG.info(debug.append("Folder '").append(fullname).append("' cleared in ").append(
@@ -1164,8 +1171,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			}
 		} catch (final MessagingException e) {
 			throw IMAPException.handleMessagingException(e, imapConfig);
-		} catch (final ProtocolException e) {
-			throw IMAPException.handleMessagingException(new MessagingException(e.getMessage(), e), imapConfig);
 		} catch (final AbstractOXException e) {
 			throw new IMAPException(e);
 		}

@@ -117,7 +117,13 @@ public final class IMAPSearch {
 			try {
 				final SearchTerm term = searchTerm.getJavaMailSearchTerm();
 				final long start = System.currentTimeMillis();
-				final int[] matchSeqNums = imapFolder.getProtocol().search(term);
+				final Message[] msgs = imapFolder.search(term);
+				final int[] matchSeqNums = new int[msgs.length];
+				for (int i = 0; i < msgs.length; i++) {
+					matchSeqNums[i] = msgs[i].getMessageNumber();
+				}
+				// final int[] matchSeqNums =
+				// imapFolder.getProtocol().search(term);
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(new StringBuilder(128).append("IMAP search took ").append(
 							(System.currentTimeMillis() - start)).append("msec").toString());
@@ -139,8 +145,8 @@ public final class IMAPSearch {
 		final Message[] allMsgs;
 		{
 			final long start = System.currentTimeMillis();
-			allMsgs = new FetchIMAPCommand(imapFolder, getFetchProfile(searchFields, IMAPConfig.isFastFetch()),
-					msgCount).doCommand();
+			allMsgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(),
+					getFetchProfile(searchFields, IMAPConfig.isFastFetch()), msgCount).doCommand();
 			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 		}
 		final SmartIntArray sia = new SmartIntArray(allMsgs.length / 2);

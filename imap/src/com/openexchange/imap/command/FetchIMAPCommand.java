@@ -94,7 +94,6 @@ import com.sun.mail.imap.protocol.BODY;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 import com.sun.mail.imap.protocol.ENVELOPE;
 import com.sun.mail.imap.protocol.FetchResponse;
-import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.INTERNALDATE;
 import com.sun.mail.imap.protocol.Item;
 import com.sun.mail.imap.protocol.RFC822DATA;
@@ -178,6 +177,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 * 
 	 * @param imapFolder -
 	 *            the IMAP folder
+	 * @param isRev1
+	 *            Whether IMAP server has <i>IMAP4rev1</i> capability or not
 	 * @param arr -
 	 *            the source array (either <code>long</code> UIDs,
 	 *            <code>int</code> SeqNums or instances of
@@ -193,9 +194,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 *            <code>int[]</code>
 	 * @throws MessagingException
 	 */
-	public FetchIMAPCommand(final IMAPFolder imapFolder, final Object arr, final FetchProfile fp,
+	public FetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final Object arr, final FetchProfile fp,
 			final boolean isSequential, final boolean keepOrder) throws MessagingException {
-		this(imapFolder, arr, fp, isSequential, keepOrder, false);
+		this(imapFolder, isRev1, arr, fp, isSequential, keepOrder, false);
 	}
 
 	/**
@@ -203,6 +204,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 * 
 	 * @param imapFolder -
 	 *            the IMAP folder
+	 * @param isRev1
+	 *            Whether IMAP server has <i>IMAP4rev1</i> capability or not
 	 * @param arr -
 	 *            the source array (either <code>long</code> UIDs,
 	 *            <code>int</code> SeqNums or instances of
@@ -221,12 +224,12 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 *            otherwise <code>false</code>
 	 * @throws MessagingException
 	 */
-	public FetchIMAPCommand(final IMAPFolder imapFolder, final Object arr, final FetchProfile fp,
+	public FetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final Object arr, final FetchProfile fp,
 			final boolean isSequential, final boolean keepOrder, final boolean loadBody) throws MessagingException {
 		super(imapFolder);
 		this.loadBody = loadBody;
 		this.separator = imapFolder.getSeparator();
-		command = getFetchCommand(imapFolder, fp, loadBody);
+		command = getFetchCommand(imapFolder, isRev1, fp, loadBody);
 		set(arr, isSequential, keepOrder);
 	}
 
@@ -291,6 +294,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 * 
 	 * @param imapFolder -
 	 *            the IMAP folder
+	 * @param isRev1
+	 *            Whether IMAP server has <i>IMAP4rev1</i> capability or not
 	 * @param fp -
 	 *            the fetch profile
 	 * @param fetchLen -
@@ -298,9 +303,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 * @throws MessagingException
 	 *             If a messaging error occurs
 	 */
-	public FetchIMAPCommand(final IMAPFolder imapFolder, final FetchProfile fp, final int fetchLen)
+	public FetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final FetchProfile fp, final int fetchLen)
 			throws MessagingException {
-		this(imapFolder, fp, fetchLen, false);
+		this(imapFolder, isRev1, fp, fetchLen, false);
 	}
 
 	/**
@@ -308,6 +313,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 * 
 	 * @param imapFolder -
 	 *            the IMAP folder
+	 * @param isRev1
+	 *            Whether IMAP server has <i>IMAP4rev1</i> capability or not
 	 * @param fp -
 	 *            the fetch profile
 	 * @param fetchLen -
@@ -318,8 +325,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	 * @throws MessagingException
 	 *             If a messaging error occurs
 	 */
-	public FetchIMAPCommand(final IMAPFolder imapFolder, final FetchProfile fp, final int fetchLen,
-			final boolean loadBody) throws MessagingException {
+	public FetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final FetchProfile fp,
+			final int fetchLen, final boolean loadBody) throws MessagingException {
 		super(imapFolder);
 		this.loadBody = loadBody;
 		this.separator = imapFolder.getSeparator();
@@ -329,7 +336,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		args = AbstractIMAPCommand.ARGS_ALL;
 		uid = false;
 		length = fetchLen;
-		command = getFetchCommand(imapFolder, fp, loadBody);
+		command = getFetchCommand(imapFolder, isRev1, fp, loadBody);
 		retval = new ArrayList<ExtendedMimeMessage>(length);
 		index = 0;
 	}
@@ -955,7 +962,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 
 	private static final String EnvelopeCmd = "ENVELOPE INTERNALDATE RFC822.SIZE";
 
-	private static String getFetchCommand(final IMAPFolder imapFolder, final FetchProfile fp, final boolean loadBody) {
+	private static String getFetchCommand(final IMAPFolder imapFolder, final boolean isRev1, final FetchProfile fp,
+			final boolean loadBody) {
 		final StringBuilder command = new StringBuilder(128);
 		final boolean envelope;
 		if (fp.contains(FetchProfile.Item.ENVELOPE)) {
@@ -982,7 +990,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		boolean allHeaders = false;
 		if (fp.contains(IMAPFolder.FetchProfileItem.HEADERS) && !loadBody) {
 			allHeaders = true;
-			if (imapFolder.getProtocol().isREV1()) {
+			if (isRev1) {
 				command.append(" BODY.PEEK[HEADER]");
 			} else {
 				command.append(" RFC822.HEADER");
@@ -998,14 +1006,14 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 			final String[] hdrs = fp.getHeaderNames();
 			if (hdrs.length > 0) {
 				command.append(' ');
-				command.append(createHeaderCmd(imapFolder.getProtocol(), hdrs));
+				command.append(createHeaderCmd(isRev1, hdrs));
 			}
 		}
 		if (loadBody) {
 			/*
 			 * Load full message
 			 */
-			if (imapFolder.getProtocol().isREV1()) {
+			if (isRev1) {
 				command.append(" BODY.PEEK[]");
 			} else {
 				command.append(" RFC822");
@@ -1014,9 +1022,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		return command.toString();
 	}
 
-	private static String createHeaderCmd(final IMAPProtocol p, final String[] hdrs) {
+	private static String createHeaderCmd(final boolean isREV1, final String[] hdrs) {
 		final StringBuilder sb;
-		if (p.isREV1()) {
+		if (isREV1) {
 			sb = new StringBuilder("BODY.PEEK[HEADER.FIELDS (");
 		} else {
 			sb = new StringBuilder("RFC822.HEADER.LINES (");
@@ -1026,7 +1034,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 			sb.append(' ');
 			sb.append(hdrs[i]);
 		}
-		if (p.isREV1()) {
+		if (isREV1) {
 			sb.append(")]");
 		} else {
 			sb.append(')');
