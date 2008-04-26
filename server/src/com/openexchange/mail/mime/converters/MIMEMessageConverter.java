@@ -59,8 +59,10 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -91,6 +93,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.FullnameFolder;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.MIMEDefaultSession;
@@ -1421,6 +1424,45 @@ public final class MIMEMessageConverter {
 			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
+		}
+	}
+
+	/**
+	 * Creates a message data object from given MIME message filled with desired
+	 * fields.
+	 * 
+	 * @param msg
+	 *            The MIME message
+	 * @param uid
+	 *            The UID in folder
+	 * @param fullname
+	 *            The folder fullname
+	 * @param separator
+	 *            The folder separator character
+	 * @param fields
+	 *            The desired fields to fill
+	 * @return An instance of {@link MailMessage} filled with desired fields
+	 * @throws MailException
+	 *             If conversion fails
+	 */
+	public static MailMessage convertMessage(final MimeMessage msg, final long uid, final String fullname,
+			final char separator, final MailField[] fields) throws MailException {
+		final Set<MailField> set = new HashSet<MailField>(Arrays.asList(fields));
+		if (set.contains(MailField.FULL)) {
+			final MailMessage mail = convertMessage(msg);
+			mail.setMailId(uid);
+			mail.setFolder(fullname);
+			mail.setSeparator(separator);
+			return mail;
+		}
+		try {
+			final MailMessageFieldFiller[] fillers = createFieldFillers(new FullnameFolder(fullname, separator, uid),
+					fields);
+			final MailMessage mail = (set.contains(MailField.BODY)) ? new MIMEMailMessage(msg) : new MIMEMailMessage();
+			fillMessage(fillers, mail, msg);
+			return mail;
+		} catch (final MessagingException e) {
+			throw new MailException(MailException.Code.MESSAGING_ERROR, e, e.getLocalizedMessage());
 		}
 	}
 
