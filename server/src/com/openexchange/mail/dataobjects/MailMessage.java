@@ -1373,7 +1373,7 @@ public abstract class MailMessage extends MailPart {
 	 * folder. The ID returned by this method is used in storages to refer to a
 	 * mail.
 	 * 
-	 * @return The ID of this mail
+	 * @return The ID of this mail or <code>-1</code> if not available.
 	 */
 	public abstract long getMailId();
 
@@ -1383,7 +1383,7 @@ public abstract class MailMessage extends MailPart {
 	 * mail.
 	 * 
 	 * @param id
-	 *            The mail ID
+	 *            The mail ID or <code>-1</code> to indicate its absence
 	 */
 	public abstract void setMailId(long id);
 

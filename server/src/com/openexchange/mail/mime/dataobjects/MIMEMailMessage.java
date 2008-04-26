@@ -99,11 +99,15 @@ public final class MIMEMailMessage extends MailMessage {
 
 	/**
 	 * Sets this mail message's content
+	 * <p>
+	 * Through providing a <code>null</code> reference the body is cleared
+	 * from this mail.
 	 * 
 	 * @param msg
-	 *            The MIME message
+	 *            The MIME message or <code>null</code> to clear any body
+	 *            references
 	 * @throws MailException
-	 *             If parsing mime message fails
+	 *             If parsing MIME message fails
 	 */
 	public void setContent(final MimeMessage msg) throws MailException {
 		this.mailPart = msg == null ? new MIMEMailPart(null) : MIMEMessageConverter.convertPart(msg);
