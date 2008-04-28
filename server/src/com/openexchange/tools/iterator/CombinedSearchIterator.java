@@ -47,12 +47,17 @@
  *
  */
 
-
-
 package com.openexchange.tools.iterator;
 
 import com.openexchange.api2.OXException;
 
+/**
+ * {@link CombinedSearchIterator} - Combines one or more instances of
+ * {@link SearchIterator}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * 
+ */
 public class CombinedSearchIterator implements SearchIterator {
 
 	private final SearchIterator[] iterators;
