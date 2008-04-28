@@ -81,13 +81,14 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.contact.Contacts;
+import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
@@ -538,6 +539,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 folder_update.close();
             }
 
+            if(usrdata.getDisplay_name()!=null){
+                //  update folder name via ox api if displayname was changed 
+                int[] changedfields = new int[]{ContactObject.DISPLAY_NAME};
+                
+                OXFolderAdminHelper.propagateUserModification(usrdata.getId(), changedfields, System.currentTimeMillis(), write_ox_con,write_ox_con, ctx.getId().intValue());
+            }
+            
             // update last modified column
             changeLastModified(user_id, ctx, write_ox_con);
             
@@ -633,7 +641,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 log.error("Error doing rollback", e2);
             }
             throw e;
-        } finally {
+        } catch (OXException e) {
+            log.error("Error", e);
+            try {
+                write_ox_con.rollback();
+            } catch (final SQLException e2) {
+                log.error("Error doing rollback", e2);
+            }
+            throw new StorageException(e);
+		} finally {
             try {
                 if (folder_update != null) {
                     folder_update.close();
