@@ -52,7 +52,6 @@ package com.openexchange.ajax.container;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -71,6 +70,7 @@ import com.openexchange.groupware.AbstractOXException.Category;
  * Response data object.
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Response {
 
@@ -138,6 +138,11 @@ public final class Response {
 	private AbstractOXException exception;
 
 	/**
+	 * Whether to communicate exception as a warning to front-end or as an error
+	 */
+	private boolean isWarning;
+
+	/**
 	 * This constructor parses a server response into an object.
 	 * 
 	 * @param response
@@ -180,7 +185,7 @@ public final class Response {
 				}
 				json.put(ERROR_PARAMS, array);
 			}
-			json.put(ERROR_CATEGORY, exception.getCategory().getCode());
+			json.put(ERROR_CATEGORY, isWarning ? Category.WARNING.getCode() : exception.getCategory().getCode());
 			json.put(ERROR_CODE, exception.getErrorCode());
 			json.put(ERROR_ID, exception.getExceptionID());
 			if (exception.getTruncatedIds().length > 0) {
@@ -202,6 +207,7 @@ public final class Response {
 		data = null;
 		timestamp = null;
 		exception = null;
+		isWarning = false;
 	}
 
 	/**
@@ -226,6 +232,10 @@ public final class Response {
 	}
 
 	/**
+	 * Returns the error message.
+	 * <p>
+	 * For testing only
+	 * 
 	 * @return Returns the errorMessage.
 	 */
 	public String getErrorMessage() {
@@ -239,15 +249,19 @@ public final class Response {
 	}
 
 	/**
+	 * Returns the error parameters.
+	 * <p>
+	 * For testing only
+	 * 
 	 * @return Returns the errorParams.
 	 */
 	public JSONArray getErrorParams() {
 		final JSONArray array = new JSONArray();
 		if (exception != null && null != exception.getMessageArgs()) {
-			for(Object arg : exception.getMessageArgs()) {
-                array.put(arg);
-            }
-        }
+			for (Object arg : exception.getMessageArgs()) {
+				array.put(arg);
+			}
+		}
 		return array;
 	}
 
@@ -275,10 +289,22 @@ public final class Response {
 	}
 
 	/**
-	 * @return <code>true</code> if the response contains an error message.
+	 * Checks if if the response contains an error message or a warning.
+	 * <p>
+	 * For testing only.
+	 * 
+	 * @return <code>true</code> if the response contains an error message or
+	 *         a warning.
 	 */
 	public boolean hasError() {
 		return exception != null;
+	}
+
+	/**
+	 * @return <code>true</code> if the response contains a warning.
+	 */
+	public boolean hasWarning() {
+		return exception != null && isWarning;
 	}
 
 	/**
@@ -312,6 +338,7 @@ public final class Response {
 				category = Category.byCode(categoryCode);
 			}
 			retval.exception = new AbstractOXException(component, category, number, message, null);
+			retval.isWarning = (Category.WARNING.equals(category));
 			if (response.has(ERROR_ID)) {
 				retval.exception.overrideExceptionID(response.getString(ERROR_ID));
 			}
@@ -448,7 +475,8 @@ public final class Response {
 	 * @throws JSONException -
 	 *             if writing fails
 	 */
-	public static void writeException(final AbstractOXException exception, final JSONWriter writer) throws JSONException {
+	public static void writeException(final AbstractOXException exception, final JSONWriter writer)
+			throws JSONException {
 		writer.key(ERROR).value(exception.getOrigMessage());
 		if (exception.getMessageArgs() != null) {
 			final JSONArray array = new JSONArray();
@@ -470,6 +498,39 @@ public final class Response {
 	}
 
 	/**
+	 * Writes given instance of <code>AbstractOXException</code> as a warning
+	 * into given instance of <code>JSONWriter</code> assuming that writer's
+	 * mode is already set to writing a JSON object
+	 * 
+	 * @param warning -
+	 *            the warning to write
+	 * @param writer -
+	 *            the writer to write to
+	 * @throws JSONException -
+	 *             if writing fails
+	 */
+	public static void writeWarning(final AbstractOXException warning, final JSONWriter writer) throws JSONException {
+		writer.key(ERROR).value(warning.getOrigMessage());
+		if (warning.getMessageArgs() != null) {
+			final JSONArray array = new JSONArray();
+			for (Object tmp : warning.getMessageArgs()) {
+				array.put(tmp);
+			}
+			writer.key(ERROR_PARAMS).value(array);
+		}
+		writer.key(ERROR_CATEGORY).value(Category.WARNING.getCode());
+		writer.key(ERROR_CODE).value(warning.getErrorCode());
+		writer.key(ERROR_ID).value(warning.getExceptionID());
+		if (warning.getTruncatedIds().length > 0) {
+			final JSONArray array = new JSONArray();
+			for (int i : warning.getTruncatedIds()) {
+				array.put(i);
+			}
+			writer.key(TRUNCATED).value(array);
+		}
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -484,17 +545,49 @@ public final class Response {
 	}
 
 	/**
+	 * Sets this response object's exception.
+	 * <p>
+	 * <b>Note</b>: If exception's category is set to {@link Category#WARNING}
+	 * it is treated as a warning only.
+	 * 
 	 * @param exception
-	 *            the exception to set
+	 *            The exception to set
+	 * @see #setWarning(AbstractOXException)
 	 */
 	public void setException(final AbstractOXException exception) {
 		this.exception = exception;
+		isWarning = Category.WARNING.equals(exception.getCategory());
 	}
 
 	/**
-	 * @return the exception
+	 * Sets this response object's warning.
+	 * <p>
+	 * <b>Note</b>: Resulting response object's category is implicitly set to
+	 * {@link Category#WARNING}.
+	 * 
+	 * @param warning
+	 *            The warning to set
+	 */
+	public void setWarning(final AbstractOXException warning) {
+		this.exception = warning;
+		isWarning = true;
+	}
+
+	/**
+	 * Gets this response object's exception/warning.
+	 * 
+	 * @return the exception or <code>null</code>
 	 */
 	public AbstractOXException getException() {
 		return exception;
+	}
+
+	/**
+	 * Gets this response object's warning
+	 * 
+	 * @return the warning or <code>null</code>
+	 */
+	public AbstractOXException getWarning() {
+		return isWarning ? exception : null;
 	}
 }
