@@ -1594,6 +1594,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.executeUpdate();
                 stmt.close();
 
+                stmt = write_ox_con
+                .prepareStatement("DELETE FROM user_setting WHERE cid = ? AND user_id = ?");
+                stmt.setInt(1, ctx.getId());
+                stmt.setInt(2, user_id);
+                stmt.executeUpdate();
+                stmt.close();
+
                 // delete from user_setting_admin if user is mailadmin
                 final OXToolStorageInterface tools = OXToolStorageInterface
                         .getInstance();
@@ -1721,6 +1728,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     stmt.close();
                     is_admin = true;
                 }
+                
+                stmt = write_ox_con
+                .prepareStatement("DELETE FROM user_setting WHERE cid = ? AND user_id = ?");
+                stmt.setInt(1, ctx.getId());
+                stmt.setInt(2, user_id);
+                stmt.executeUpdate();
+                stmt.close();
                 
                 // when table ready, enable this
                 createRecoveryData(ctx, user_id, write_ox_con);
