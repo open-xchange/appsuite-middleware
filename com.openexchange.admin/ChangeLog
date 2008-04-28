@@ -3,6 +3,7 @@
   - Bugfix ID#11139 "No admin user found in context" on changeuser execution
   - Bugfix ID#11179 deleteuser doesn't delete user configuration
   - Bugfix ID#11147 "Last modified from" should not be 0
+  - Bugfix ID#11185 No protocol identifier created when adding a user with --imap/smtpserver attribute
   
 * 2008-01-21 - dennis.sieben@open-xchange.com
 

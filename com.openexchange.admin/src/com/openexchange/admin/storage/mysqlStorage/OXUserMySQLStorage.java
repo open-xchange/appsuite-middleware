@@ -137,9 +137,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     // DEFAULTS FOR USER CREATE; SHOULD BE MOVED TO PROPERTIES FILE
     private static final String DEFAULT_TIMEZONE_CREATE = "Europe/Berlin";
 
-    private static final String DEFAULT_SMTP_SERVER_CREATE = "localhost";
+    private static final String DEFAULT_SMTP_SERVER_CREATE = "smtp://localhost";
 
-    private static final String DEFAULT_IMAP_SERVER_CREATE = "localhost";
+    private static final String DEFAULT_IMAP_SERVER_CREATE = "imap://localhost";
 
     public OXUserMySQLStorage() {
     }
@@ -769,14 +769,14 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 // imap and smtp server
                 if (usrdata.getImapServer() != null) {
                     // TODO: This should be fixed in the future so that we don't split it up before we concatenate it here
-                    stmt.setString(10, usrdata.getImapServer() + ":" + usrdata.getImapPort());
+                    stmt.setString(10, usrdata.getImapSchema() + usrdata.getImapServer() + ":" + usrdata.getImapPort());
                 } else {
                     stmt.setString(10, DEFAULT_IMAP_SERVER_CREATE);
                 }
 
                 if (usrdata.getSmtpServer() != null) {
                     // TODO: This should be fixed in the future so that we don't split it up before we concatenate it here
-                    stmt.setString(11, usrdata.getSmtpServer() + ":" + usrdata.getSmtpPort());
+                    stmt.setString(11, usrdata.getSmtpSchema() + usrdata.getSmtpServer() + ":" + usrdata.getSmtpPort());
                 } else {
                     stmt.setString(11, DEFAULT_SMTP_SERVER_CREATE);
                 }

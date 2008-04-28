@@ -2185,6 +2185,21 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
     
     /**
+     * Returns the schema part of the imap server url of this user object
+     * 
+     * @return A {@link String} containing the schema of the imap server url
+     */
+    final public String getImapSchema() {
+        if (this.imapServer != null) {
+            final Matcher matcher = URL_PATTERN.matcher(this.imapServer);
+            if (matcher.matches() && null != matcher.group(1)) {
+                return matcher.group(1);
+            }
+        }
+        return "imap://";
+    }
+
+    /**
      * Sets the users imap server if not localhost should be used. Syntax of
      * imap server String: HOSTNAME[:PORT] if PORT is omitted, the default port
      * is used
@@ -2237,6 +2252,21 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
             }
         }
         return null;
+    }
+
+    /**
+     * Returns the schema part of the smtp server url of this user object
+     * 
+     * @return A {@link String} containing the schema of the smtp server url
+     */
+    final public String getSmtpSchema() {
+        if (this.smtpServer != null) {
+            final Matcher matcher = URL_PATTERN.matcher(this.smtpServer);
+            if (matcher.matches() && null != matcher.group(1)) {
+                return matcher.group(1);
+            }
+        }
+        return "smtp://";
     }
 
     /**
