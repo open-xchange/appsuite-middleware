@@ -128,11 +128,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 
 	private static final Flags FLAGS_DELETED = new Flags(Flags.Flag.DELETED);
 
-	/*
-	 * Empty return value
-	 */
-	private static final transient MailMessage[] EMPTY_RETVAL = new MailMessage[0];
-
 	/**
 	 * Initializes a new {@link IMAPMessageStorage}
 	 * 
