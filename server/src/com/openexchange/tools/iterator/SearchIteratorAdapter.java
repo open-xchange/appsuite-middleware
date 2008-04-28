@@ -47,8 +47,6 @@
  *
  */
 
-
-
 package com.openexchange.tools.iterator;
 
 import java.lang.reflect.Array;
@@ -57,23 +55,31 @@ import java.util.Iterator;
 import com.openexchange.api2.OXException;
 
 /**
- * SearchIteratorAdapter
+ * {@link SearchIteratorAdapter} - An implementation of {@link SearchIterator}
+ * backed by a common instance of {@link Iterator} to which calls are delegated.
+ * <p>
+ * Moreover this class provides several convenience implementations of
+ * {@link SearchIterator} accessible via {@link #createEmptyIterator()},
+ * {@link #createArrayIterator(Object)} and {@link #toIterable(SearchIterator)}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SearchIteratorAdapter implements SearchIterator {
+public class SearchIteratorAdapter implements SearchIterator<Object> {
 
-    private Iterator delegate;
-	
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(SearchIteratorAdapter.class);
+
+	private final Iterator<?> delegate;
+
 	private int size;
-	
+
 	private boolean b_size;
 
-	public SearchIteratorAdapter(Iterator iter) {
+	public SearchIteratorAdapter(final Iterator<?> iter) {
 		delegate = iter;
 	}
-	
-	public SearchIteratorAdapter(Iterator iter, int size) {
+
+	public SearchIteratorAdapter(final Iterator<?> iter, final int size) {
 		delegate = iter;
 		this.size = size;
 		b_size = true;
@@ -89,20 +95,20 @@ public class SearchIteratorAdapter implements SearchIterator {
 
 	public void close() {
 	}
-	
-	public int size() throws UnsupportedOperationException {
+
+	public int size() {
 		if (!b_size) {
 			throw new UnsupportedOperationException("Size has not been set for this iterator");
 		}
 		return size;
 	}
-	
+
 	public boolean hasSize() {
 		return b_size;
 	}
-	
-	public static SearchIterator createEmptyIterator() {
-		return new SearchIterator() {
+
+	public static SearchIterator<?> createEmptyIterator() {
+		return new SearchIterator<Object>() {
 
 			public boolean hasNext() {
 				return false;
@@ -114,23 +120,23 @@ public class SearchIteratorAdapter implements SearchIterator {
 
 			public void close() throws SearchIteratorException {
 			}
-			
+
 			public int size() {
 				return 0;
 			}
-			
+
 			public boolean hasSize() {
 				return true;
 			}
 
 		};
 	}
-	
-	public static SearchIterator createArrayIterator(final Object array) {
+
+	public static SearchIterator<?> createArrayIterator(final Object array) {
 		/*
 		 * Tiny iterator implementation for arrays
 		 */
-		class ArrayIterator implements SearchIterator {
+		class ArrayIterator implements SearchIterator<Object> {
 
 			private final int size;
 
@@ -138,8 +144,8 @@ public class SearchIteratorAdapter implements SearchIterator {
 
 			private final Object array;
 
-			ArrayIterator(Object array) {
-				final Class type = array.getClass();
+			ArrayIterator(final Object array) {
+				final Class<?> type = array.getClass();
 				if (!type.isArray()) {
 					throw new IllegalArgumentException(
 							new StringBuilder("Can not create an array iterator from type: ").append(type).toString());
@@ -163,11 +169,11 @@ public class SearchIteratorAdapter implements SearchIterator {
 
 			public void close() throws SearchIteratorException {
 			}
-			
+
 			public int size() {
 				return Array.getLength(array);
 			}
-			
+
 			public boolean hasSize() {
 				return true;
 			}
@@ -176,34 +182,34 @@ public class SearchIteratorAdapter implements SearchIterator {
 		return new ArrayIterator(array);
 	}
 
-    public static <T> Iterable<T> toIterable(final SearchIterator<T> iterator) {
-        class SIIterator implements Iterator<T> {
+	public static <T> Iterable<T> toIterable(final SearchIterator<T> iterator) {
+		class SIIterator implements Iterator<T> {
 
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
+			public boolean hasNext() {
+				return iterator.hasNext();
+			}
 
-            public T next() {
-                try {
-                    return iterator.next();
-                } catch (SearchIteratorException e) {
-                   //IGNORE
-                } catch (OXException e) {
-                   //IGNORE
-                }
-                return null;
-            }
+			public T next() {
+				try {
+					return iterator.next();
+				} catch (final SearchIteratorException e) {
+					LOG.error(e.getMessage(), e);
+				} catch (final OXException e) {
+					LOG.error(e.getMessage(), e);
+				}
+				return null;
+			}
 
-            public void remove() {
-                throw new UnsupportedOperationException();
-            }
-        }
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+		}
 
-        return new Iterable<T>() {
+		return new Iterable<T>() {
 
-            public Iterator<T> iterator() {
-                return new SIIterator();
-            }
-        };
-    }
+			public Iterator<T> iterator() {
+				return new SIIterator();
+			}
+		};
+	}
 }
