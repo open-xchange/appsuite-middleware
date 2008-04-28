@@ -90,16 +90,13 @@ import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.admin.tools.SHACrypt;
 import com.openexchange.admin.tools.UnixCrypt;
-import com.openexchange.api2.OXException;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 /**
  * @author d7
  * @author cutmasta
@@ -347,18 +344,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 	        } finally {
 	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
 	        }
-        }
-        
-        if(usrdata.getDisplay_name()!=null){
-            //  update folder name via ox api if displayname was changed 
-            int[] changedfields = new int[]{ContactObject.DISPLAY_NAME};
-            
-            try {
-                OXFolderAdminHelper.propagateUserModification(usrdata.getId(), changedfields, System.currentTimeMillis(), null,null, ctx.getId().intValue());
-            } catch (OXException e) {
-                log.error("Error propagatinguser modification",e);
-                throw new StorageException(e.getMessage());
-            }
         }
         
     }
