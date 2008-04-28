@@ -141,7 +141,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
 	private ElementAttributes attribs;
 
-	private final boolean remainInCache;
+	private final boolean resideInCache;
 
 	private static final String[] selectFields = { "fuid", "parent", "fname", "module", "type", "creating_date",
 			"created_from", "changing_date", "changed_from", "permission_flag", "subfolder_flag", "default_flag" };
@@ -150,23 +150,24 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 	 * Gets all necessary fields in right order to be used in an SQL <i>SELECT</i>
 	 * statement needed to create instances of {@link FolderObject}.
 	 * 
-	 * @param tableName
-	 *            The folder table name
+	 * @param tableAlias
+	 *            The table alias used throughout corresponding SQL <i>SELECT</i>
+	 *            statement or <code>null</code> if no alias used.
 	 * @return All necessary fields in right order to be used in an SQL
 	 *         <i>SELECT</i> statement
 	 */
-	public static final String getFieldsForSQL(final String tableName) {
+	public static final String getFieldsForSQL(final String tableAlias) {
 		final StringBuilder fields = new StringBuilder();
-		final boolean useTableName = (tableName != null);
+		final boolean useTableName = (tableAlias != null);
 		if (useTableName) {
-			fields.append(tableName);
+			fields.append(tableAlias);
 			fields.append('.');
 		}
 		fields.append(selectFields[0]);
 		for (int i = 1; i < selectFields.length; i++) {
 			fields.append(", ");
 			if (useTableName) {
-				fields.append(tableName);
+				fields.append(tableAlias);
 				fields.append('.');
 			}
 			fields.append(selectFields[i]);
@@ -175,24 +176,35 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 	}
 
 	/**
-	 * Default constructor
+	 * Initializes a new {@link FolderObjectIterator}
 	 */
 	private FolderObjectIterator() {
 		this.closeCon = false;
-		this.remainInCache = false;
+		this.resideInCache = false;
 		this.ctx = null;
 		this.prefetchQueue = null;
 		this.folderIds = null;
 	}
 
-	public FolderObjectIterator(final Collection<FolderObject> col, final boolean remainInCache)
+	/**
+	 * Initializes a new {@link FolderObjectIterator} from specified collection.
+	 * 
+	 * @param col
+	 *            The collection containing instances of {@link FolderObject}
+	 * @param resideInCache
+	 *            If objects shall reside in cache permanently or shall be
+	 *            removed according to cache policy
+	 * @throws SearchIteratorException
+	 *             If an unsupported collection is specified
+	 */
+	public FolderObjectIterator(final Collection<FolderObject> col, final boolean resideInCache)
 			throws SearchIteratorException {
 		this.folderIds = null;
 		this.rs = null;
 		this.stmt = null;
 		this.ctx = null;
 		this.closeCon = false;
-		this.remainInCache = remainInCache;
+		this.resideInCache = resideInCache;
 		if (col == null || col.isEmpty()) {
 			this.next = null;
 			prefetchQueue = null;
@@ -223,7 +235,26 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 	 * resulting instances of <code>FolderObject</code> are going to remain in
 	 * folder cache by specifying different cache element attributes.
 	 */
-	public FolderObjectIterator(final ResultSet rs, final Statement stmt, final boolean remainInCache,
+	/**
+	 * Initializes a new {@link FolderObjectIterator}
+	 * 
+	 * @param rs
+	 *            The result set providing selected folder data
+	 * @param stmt
+	 *            The fired statement (to release all resources on iterator end)
+	 * @param resideInCache
+	 *            If objects shall reside in cache permanently or shall be
+	 *            removed according to cache policy
+	 * @param ctx
+	 *            The context
+	 * @param readCon
+	 *            A connection holding at least read capability
+	 * @param closeCon
+	 *            Whether to close given connection or not
+	 * @throws SearchIteratorException
+	 *             If instantiation fails.
+	 */
+	public FolderObjectIterator(final ResultSet rs, final Statement stmt, final boolean resideInCache,
 			final Context ctx, final Connection readCon, final boolean closeCon) throws SearchIteratorException {
 		if (OXFolderProperties.isEnableDBGrouping()) {
 			this.folderIds = null;
@@ -235,7 +266,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 		this.readCon = readCon;
 		this.ctx = ctx;
 		this.closeCon = closeCon;
-		this.remainInCache = remainInCache;
+		this.resideInCache = resideInCache;
 		/*
 		 * Set next to first result set entry
 		 */
@@ -245,10 +276,10 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 			} else if (!prefetchEnabled) {
 				closeResources();
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e
 					.getLocalizedMessage());
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e
 					.getLocalizedMessage());
 		}
@@ -268,10 +299,10 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 						prefetchQueue.offer(fo);
 					}
 				}
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e
 						.getLocalizedMessage());
-			} catch (DBPoolingException e) {
+			} catch (final DBPoolingException e) {
 				throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e
 						.getLocalizedMessage());
 			} finally {
@@ -280,6 +311,17 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 		} else {
 			prefetchQueue = null;
 		}
+	}
+
+	private final ElementAttributes getEternalAttributes() throws FolderCacheNotEnabledException, CacheException,
+			OXException {
+		if (attribs == null) {
+			attribs = FolderCacheManager.getInstance().getDefaultFolderObjectAttributes();
+			attribs.setIdleTime(-1); // eternal
+			attribs.setMaxLifeSeconds(-1); // eternal
+			attribs.setIsEternal(true);
+		}
+		return attribs.copy();
 	}
 
 	/**
@@ -304,18 +346,14 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 				if (fld != null) {
 					return fld;
 				}
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}
 		/*
 		 * Not in cache; create from read data
 		 */
-		final String folderName = rs.getString(3);
-		final int module = rs.getInt(4);
-		final int type = rs.getInt(5);
-		final int createdBy = rs.getInt(7);
-		final FolderObject fo = new FolderObject(folderName, folderId, module, type, createdBy);
+		final FolderObject fo = new FolderObject(rs.getString(3), folderId, rs.getInt(4), rs.getInt(5), rs.getInt(7));
 		fo.setParentFolderID(rs.getInt(2)); // parent
 		long tStmp = rs.getLong(6); // creating_date
 		if (rs.wasNull()) {
@@ -351,14 +389,8 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 		 */
 		if (FolderCacheManager.isInitialized()) {
 			try {
-				if (remainInCache) {
-					if (attribs == null) {
-						attribs = FolderCacheManager.getInstance().getDefaultFolderObjectAttributes();
-						attribs.setIdleTime(-1); // eternal
-						attribs.setMaxLifeSeconds(-1); // eternal
-						attribs.setIsEternal(true);
-					}
-					FolderCacheManager.getInstance().putFolderObject(fo, ctx, false, attribs.copy());
+				if (resideInCache) {
+					FolderCacheManager.getInstance().putFolderObject(fo, ctx, false, getEternalAttributes());
 				} else {
 					FolderCacheManager.getInstance().putFolderObject(fo, ctx, false, null);
 				}
@@ -381,14 +413,14 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 		if (rs != null) {
 			try {
 				rs.close();
-				rs = null;
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				if (LOG.isErrorEnabled()) {
 					LOG.error(e.getMessage(), e);
 				}
 				error = new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e
 						.getLocalizedMessage());
 			}
+			rs = null;
 		}
 		/*
 		 * Close Statement
@@ -396,8 +428,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 		if (stmt != null) {
 			try {
 				stmt.close();
-				stmt = null;
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				if (LOG.isErrorEnabled()) {
 					LOG.error(e.getMessage(), e);
 				}
@@ -406,6 +437,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 							.getLocalizedMessage());
 				}
 			}
+			stmt = null;
 		}
 		/*
 		 * Close connection
@@ -413,13 +445,13 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 		if (closeCon && readCon != null) {
 			try {
 				DBPool.push(ctx, readCon);
-				readCon = null;
-			} catch (DBPoolingException e) {
+			} catch (final DBPoolingException e) {
 				if (error == null) {
 					error = new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e
 							.getLocalizedMessage());
 				}
 			}
+			readCon = null;
 		}
 		if (error != null) {
 			throw error;
@@ -477,10 +509,10 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 				}
 			}
 			return retval;
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e
 					.getLocalizedMessage());
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e
 					.getLocalizedMessage());
 		}
@@ -556,17 +588,17 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 				}
 			}
 			return retval;
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new SearchIteratorException(SearchIteratorCode.DBPOOLING_ERROR, e, EnumComponent.FOLDER, e
 					.getLocalizedMessage());
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new SearchIteratorException(SearchIteratorCode.SQL_ERROR, e, EnumComponent.FOLDER, e
 					.getLocalizedMessage());
 		} finally {
 			next = null;
 			try {
 				closeResources();
-			} catch (SearchIteratorException e) {
+			} catch (final SearchIteratorException e) {
 				LOG.error(e.getMessage(), e);
 			}
 			isClosed = true;
