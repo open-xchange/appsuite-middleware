@@ -80,8 +80,6 @@ public abstract class OXResourceSQLStorage extends OXResourceStorageInterface {
 
     abstract public void deleteRecoveryData(final int resource_id, final Context ctx, final Connection con) throws StorageException;
 
-    abstract public Resource get(final Context ctx, int resource_id) throws StorageException;
-
     abstract public Resource[] list(final Context ctx, final String pattern) throws StorageException;
 
 }

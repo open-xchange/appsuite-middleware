@@ -130,75 +130,6 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         basicauth = new BasicAuthenticator();
     }
 
-    @Deprecated
-    public void addMember(final Context ctx, final Group grp,
-            final int[] member_ids, final Credentials auth)
-            throws RemoteException, StorageException,
-            InvalidCredentialsException, NoSuchContextException,
-            InvalidDataException, DatabaseUpdateException, NoSuchUserException,
-            NoSuchGroupException {
-        try {
-            doNullCheck(grp, member_ids, grp.getId());
-        } catch (final InvalidDataException e3) {
-            log.error("One of the arguments for addMember is null", e3);
-            throw e3;
-        }
-
-        try {
-            basicauth.doAuthentication(auth, ctx);
-        } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-
-        final int grp_id = grp.getId();
-
-        if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + grp_id + " - "
-                    + Arrays.toString(member_ids) + " - " + auth.toString());
-        }
-
-        checkSchemaBeingLocked(ctx, tool);
-
-        if (!tool.existsGroup(ctx, grp_id)) {
-            throw new NoSuchGroupException("No such group");
-        }
-
-        if (!tool.existsUser(ctx, member_ids)) {
-            throw new NoSuchUserException("No such user");
-        }
-
-        try {
-            if (tool.existsGroupMember(ctx, grp_id, member_ids)) {
-                throw new InvalidDataException("Member already exists in group");
-            }
-        } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-
-        final User[] user_objs = getUsersFromIds(member_ids);
-        oxGroup.addMember(ctx, grp_id, user_objs);
-
-        // JCS
-        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
-				CacheService.class);
-		if (null != cacheService) {
-	        try {
-	        	final Cache cache = cacheService.getCache("User");
-	            for (final int user_id : member_ids) {
-	                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.valueOf(user_id)));
-	            }
-	        } catch (final CacheException e) {
-	            log.error(e.getMessage(), e);
-	        } finally {
-	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
-	        }
-        }
-        // OXFolderAdminHelper.propagateGroupModification()
-        // END OF JCS
-    }
-
     public void addMember(final Context ctx, final Group grp,
             final User[] members, final Credentials auth)
             throws RemoteException, StorageException,
@@ -715,14 +646,6 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
     }
 
-    @Deprecated
-    public Group get(final Context ctx, final Group grp, final Credentials auth)
-            throws RemoteException, StorageException,
-            InvalidCredentialsException, NoSuchContextException,
-            InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
-        return getData(ctx, grp, auth);
-    }
-
     public Group getData(final Context ctx, final Group grp,
             final Credentials auth) throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
@@ -894,40 +817,6 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
     }
 
-    @Deprecated
-    public Group[] getGroupsForUser(final Context ctx, final User usr,
-            final Credentials auth) throws RemoteException,
-            InvalidCredentialsException, NoSuchContextException,
-            StorageException, InvalidDataException, DatabaseUpdateException,
-            NoSuchUserException {
-        try {
-            doNullCheck(usr, usr.getId());
-        } catch (final InvalidDataException e3) {
-            log.error("One of the given arguments for getMembers is null", e3);
-            throw e3;
-        }
-
-        try {
-            basicauth.doAuthentication(auth, ctx);
-        } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + usr.getId().intValue() + " - "
-                    + auth.toString());
-        }
-
-        checkSchemaBeingLocked(ctx, tool);
-
-        if (!tool.existsUser(ctx, usr.getId().intValue())) {
-            throw new NoSuchUserException("No such user");
-        }
-
-        return oxGroup.getGroupsForUser(ctx, usr);
-    }
-
     public User[] getMembers(final Context ctx, final Group grp,
             final Credentials auth) throws RemoteException, StorageException,
             InvalidCredentialsException, NoSuchContextException,
@@ -1031,70 +920,6 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         }
 
         return oxGroup.getGroupsForUser(ctx, usr);
-    }
-
-    @Deprecated
-    public void removeMember(final Context ctx, final Group grp,
-            final int[] member_ids, final Credentials auth)
-            throws RemoteException, StorageException,
-            InvalidCredentialsException, NoSuchContextException,
-            InvalidDataException, DatabaseUpdateException,
-            NoSuchGroupException, NoSuchUserException {
-        try {
-            doNullCheck(grp, member_ids, grp.getId());
-        } catch (final InvalidDataException e3) {
-            log
-                    .error(
-                            "One of the given arguments for removeMember is null",
-                            e3);
-            throw e3;
-        }
-
-        try {
-            basicauth.doAuthentication(auth, ctx);
-
-        } catch (final InvalidDataException e) {
-            log.error(e.getMessage(), e);
-            throw e;
-        }
-
-        final int grp_id = grp.getId();
-        if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + grp_id + " - "
-                    + Arrays.toString(member_ids) + " - " + auth.toString());
-        }
-
-        checkSchemaBeingLocked(ctx, tool);
-
-        if (!tool.existsUser(ctx, member_ids)) {
-            throw new NoSuchUserException("No such user");
-        }
-
-        if (!tool.existsGroup(ctx, grp_id)) {
-            throw new NoSuchGroupException("No such group");
-        }
-
-        final User[] user_objs = getUsersFromIds(member_ids);
-        oxGroup.removeMember(ctx, grp_id, user_objs);
-        
-        
-        // JCS
-        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
-				CacheService.class);
-		if (null != cacheService) {
-	        try {
-	        	final Cache cache = cacheService.getCache("User");
-	        	for (final User user : user_objs) {
-	                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId()));
-	            }
-	        } catch (final CacheException e) {
-	            log.error(e.getMessage(), e);
-	        } finally {
-	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
-	        }
-        }
-        // END OF JCS
-        
     }
 
     public void removeMember(final Context ctx, final Group grp,

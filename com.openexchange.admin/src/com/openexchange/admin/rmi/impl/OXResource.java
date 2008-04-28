@@ -390,10 +390,6 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         oxRes.delete(ctx, res);
     }
     
-    public Resource get(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        return getData(ctx, res, auth);
-    }
-
     public Resource getData(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         try {
             doNullCheck(res);
