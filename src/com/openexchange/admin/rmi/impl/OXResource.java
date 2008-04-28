@@ -47,7 +47,7 @@
  *
  */
 /*
- * $Id: OXResource.java,v 1.56 2007/10/29 09:56:54 choeger Exp $
+ * $Id: OXResource.java,v 1.57 2008/04/28 09:21:00 choeger Exp $
  */
 package com.openexchange.admin.rmi.impl;
 
@@ -390,10 +390,6 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         oxRes.delete(ctx, res);
     }
     
-    public Resource get(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        return getData(ctx, res, auth);
-    }
-
     public Resource getData(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         try {
             doNullCheck(res);

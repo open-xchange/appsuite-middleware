@@ -254,16 +254,6 @@ public abstract class OXUserSQLStorage extends OXUserStorageInterface {
     /**
      * 
      */
-    abstract public void delete(final Context ctx, final int[] user_ids, final Connection write_ox_con) throws StorageException;
-
-    /**
-     * 
-     */
-    abstract public void delete(final Context ctx, final int[] user_ids) throws StorageException;
-
-    /**
-     * 
-     */
     abstract public int[] getAll(final Context ctx) throws StorageException;
 
     /**

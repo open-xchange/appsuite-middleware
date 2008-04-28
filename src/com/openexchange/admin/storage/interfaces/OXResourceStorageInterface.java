@@ -144,16 +144,7 @@ public abstract class OXResourceStorageInterface {
 
     public abstract void changeLastModified(final int resource_id, final Context ctx, final Connection write_ox_con) throws StorageException;
 
-    @Deprecated
-    public abstract void delete(final Context ctx, final int resource_id) throws StorageException;
-    
     public abstract void delete(final Context ctx, final Resource resource) throws StorageException;
-
-    /**
-     * get resource data
-     */
-    @Deprecated
-    public abstract Resource get(final Context ctx, final int resource_id) throws StorageException;
 
     public abstract Resource getData(final Context ctx, final Resource resource) throws StorageException;
     
