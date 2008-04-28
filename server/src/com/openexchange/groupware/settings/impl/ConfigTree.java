@@ -240,6 +240,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.interfaces.SyncML.class,
             com.openexchange.groupware.settings.tree.modules.interfaces.VCard.class,
             com.openexchange.groupware.settings.tree.modules.mail.Addresses.class,
+            com.openexchange.groupware.settings.tree.modules.mail.AllowHTMLImages.class,
             com.openexchange.groupware.settings.tree.modules.mail.AppendMailText.class,
             com.openexchange.groupware.settings.tree.modules.mail.Colorquoted.class,
             com.openexchange.groupware.settings.tree.modules.mail.DefaultAddress.class,

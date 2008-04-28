@@ -545,7 +545,7 @@ public final class MessageUtility {
 
 	private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-	private static final Pattern CID_PATTERN = Pattern.compile("cid:([^\\s>]*)|\"cid:([^\"]*)\"",
+	private static final Pattern CID_PATTERN = Pattern.compile("(?:src=cid:([^\\s>]*))|(?:src=\"cid:([^\"]*)\")",
 			Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
 	private static final Pattern FILENAME_PATTERN = Pattern.compile(
@@ -574,10 +574,12 @@ public final class MessageUtility {
 			final Matcher imgMatcher = IMG_PATTERN.matcher(reval);
 			final StringBuffer sb = new StringBuffer(reval.length());
 			if (imgMatcher.find()) {
+				final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(
+						session.getUserId(), session.getContextId());
 				final StringBuffer cidBuffer = new StringBuffer(256);
 				do {
 					final String imgTag = imgMatcher.group();
-					if (!replaceImgSrc(session, msgUID, imgTag, cidBuffer)) {
+					if (!replaceImgSrc(session, usm, msgUID, imgTag, cidBuffer)) {
 						/*
 						 * No cid found, try with filename
 						 */
@@ -586,10 +588,10 @@ public final class MessageUtility {
 						if (m.find()) {
 							final StringBuilder linkBuilder = new StringBuilder(256);
 							final String filename = m.group(1);
-							linkBuilder.append("src=").append(STR_AJAX_MAIL).append(AJAXServlet.PARAMETER_SESSION)
-									.append('=').append(session.getSecret()).append('&').append(
-											AJAXServlet.PARAMETER_ACTION).append('=')
-									.append(AJAXServlet.ACTION_MATTACH).append('&').append(
+							linkBuilder.append(usm.isAllowHTMLImages() ? "src=" : "oxsrc=").append(STR_AJAX_MAIL)
+									.append(AJAXServlet.PARAMETER_SESSION).append('=').append(session.getSecret())
+									.append('&').append(AJAXServlet.PARAMETER_ACTION).append('=').append(
+											AJAXServlet.ACTION_MATTACH).append('&').append(
 											AJAXServlet.PARAMETER_FOLDERID).append('=').append(
 											urlEncodeSafe(msgUID.getFolder(), CHARSET_ISO8859)).append('&').append(
 											AJAXServlet.PARAMETER_ID).append('=').append(msgUID.getUid()).append('&')
@@ -610,8 +612,8 @@ public final class MessageUtility {
 		return reval;
 	}
 
-	private static boolean replaceImgSrc(final Session session, final MailPath msgUID, final String imgTag,
-			final StringBuffer cidBuffer) {
+	private static boolean replaceImgSrc(final Session session, final UserSettingMail usm, final MailPath msgUID,
+			final String imgTag, final StringBuffer cidBuffer) {
 		boolean retval = false;
 		final Matcher cidMatcher = CID_PATTERN.matcher(imgTag);
 		if (cidMatcher.find()) {
@@ -620,10 +622,11 @@ public final class MessageUtility {
 			do {
 				final String cid = (cidMatcher.group(1) == null ? cidMatcher.group(2) : cidMatcher.group(1));
 				linkBuilder.setLength(0);
-				linkBuilder.append(STR_AJAX_MAIL).append(AJAXServlet.PARAMETER_SESSION).append('=').append(
-						session.getSecret()).append('&').append(AJAXServlet.PARAMETER_ACTION).append('=').append(
-						AJAXServlet.ACTION_MATTACH).append('&').append(AJAXServlet.PARAMETER_FOLDERID).append('=')
-						.append(urlEncodeSafe(msgUID.getFolder(), CHARSET_ISO8859)).append('&').append(
+				linkBuilder.append(usm.isAllowHTMLImages() ? "src=" : "oxsrc=").append(STR_AJAX_MAIL).append(
+						AJAXServlet.PARAMETER_SESSION).append('=').append(session.getSecret()).append('&').append(
+						AJAXServlet.PARAMETER_ACTION).append('=').append(AJAXServlet.ACTION_MATTACH).append('&')
+						.append(AJAXServlet.PARAMETER_FOLDERID).append('=').append(
+								urlEncodeSafe(msgUID.getFolder(), CHARSET_ISO8859)).append('&').append(
 								AJAXServlet.PARAMETER_ID).append('=').append(msgUID.getUid()).append('&').append(
 								Mail.PARAMETER_MAILCID).append('=').append(cid).append('"');
 				cidMatcher.appendReplacement(cidBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
