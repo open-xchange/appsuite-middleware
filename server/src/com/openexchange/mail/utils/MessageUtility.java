@@ -553,6 +553,10 @@ public final class MessageUtility {
 
 	private static final String STR_AJAX_MAIL = "\"/ajax/mail?";
 
+	private static final String STR_SRC = "src=";
+
+	private static final String STR_OXSRC = "oxsrc=";
+
 	private static final String CHARSET_ISO8859 = "ISO-8859-1";
 
 	/**
@@ -588,7 +592,7 @@ public final class MessageUtility {
 						if (m.find()) {
 							final StringBuilder linkBuilder = new StringBuilder(256);
 							final String filename = m.group(1);
-							linkBuilder.append(usm.isAllowHTMLImages() ? "src=" : "oxsrc=").append(STR_AJAX_MAIL)
+							linkBuilder.append(usm.isAllowHTMLImages() ? STR_SRC : STR_OXSRC).append(STR_AJAX_MAIL)
 									.append(AJAXServlet.PARAMETER_SESSION).append('=').append(session.getSecret())
 									.append('&').append(AJAXServlet.PARAMETER_ACTION).append('=').append(
 											AJAXServlet.ACTION_MATTACH).append('&').append(
@@ -622,7 +626,7 @@ public final class MessageUtility {
 			do {
 				final String cid = (cidMatcher.group(1) == null ? cidMatcher.group(2) : cidMatcher.group(1));
 				linkBuilder.setLength(0);
-				linkBuilder.append(usm.isAllowHTMLImages() ? "src=" : "oxsrc=").append(STR_AJAX_MAIL).append(
+				linkBuilder.append(usm.isAllowHTMLImages() ? STR_SRC : STR_OXSRC).append(STR_AJAX_MAIL).append(
 						AJAXServlet.PARAMETER_SESSION).append('=').append(session.getSecret()).append('&').append(
 						AJAXServlet.PARAMETER_ACTION).append('=').append(AJAXServlet.ACTION_MATTACH).append('&')
 						.append(AJAXServlet.PARAMETER_FOLDERID).append('=').append(
