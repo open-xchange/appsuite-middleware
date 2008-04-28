@@ -231,11 +231,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 	}
 
 	/**
-	 * FolderObjectIterator constructor. If <code>remainInCache</code> is set,
-	 * resulting instances of <code>FolderObject</code> are going to remain in
-	 * folder cache by specifying different cache element attributes.
-	 */
-	/**
 	 * Initializes a new {@link FolderObjectIterator}
 	 * 
 	 * @param rs
