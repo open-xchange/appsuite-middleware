@@ -348,40 +348,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         
     }
 
-    public void changeModuleAccess(final Context ctx, final int user_id, final UserModuleAccess moduleAccess, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        try {
-            doNullCheck(moduleAccess);
-        } catch (final InvalidDataException e1) {
-            log.error("One of the given arguments for changeModuleAccess is null", e1);
-            throw e1;
-        }
-        
-        if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + user_id + " - "+ moduleAccess.toString() + " - " + auth.toString());
-        }
-
-        basicauth.doAuthentication(auth,ctx);
-        
-        checkSchemaBeingLocked(ctx);
-
-        if (!tool.existsUser(ctx, user_id)) {
-            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
-            log.error(noSuchUserException.getMessage(), noSuchUserException);
-            throw noSuchUserException;
-        }
-
-        oxu.changeModuleAccess(ctx, user_id, moduleAccess);
-        
-        
-        // JCS
-        try {
-            UserConfigurationStorage.getInstance().removeUserConfiguration(user_id, new ContextImpl(ctx.getId()));
-        } catch (UserConfigurationException e) {
-            log.error("Error removing user "+user_id+" in context "+ctx.getId()+" from configuration storage",e);            
-        }        
-        // END OF JCS
-    }
-
     public void changeModuleAccess(final Context ctx, final User user, final UserModuleAccess moduleAccess, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         try {
             doNullCheck(user,moduleAccess);
@@ -841,37 +807,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
     }
 
-    public int[] getAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + auth.toString());
-        }
-        
-        basicauth.doAuthentication(auth,ctx);
-        
-        checkSchemaBeingLocked(ctx);
-
-        return oxu.getAll(ctx);
-    }
-
-    public User getData(final Context ctx, final int user_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
-        return getData(ctx, new int[]{user_id}, auth)[0];
-    }
-
-    public User[] getData(final Context ctx, final int[] user_ids, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
-        if (null == user_ids) {
-            final InvalidDataException invalidDataException = new InvalidDataException("Array of user ids is empty");
-            log.error(invalidDataException.getMessage(), invalidDataException);
-            throw invalidDataException;
-        }
-        
-        final User[] users = new User[user_ids.length];
-        for (int i = 0; i < user_ids.length; i++) {
-            users[i] = new User(user_ids[i]);
-        }
-
-        return getData(ctx, users, auth);
-    }
-
     public User getData(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         return getData(ctx, new User[]{user}, auth)[0];
     }
@@ -1005,24 +940,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return retusers;
     }
     
-    public UserModuleAccess getModuleAccess(final Context ctx, final int user_id, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        if (log.isDebugEnabled()) {
-            log.debug(ctx.toString() + " - " + user_id + " - " + auth.toString());
-        }        
-        
-        basicauth.doAuthentication(auth,ctx);
-        
-        checkSchemaBeingLocked(ctx);
-
-        if (!tool.existsUser(ctx, user_id)) {
-            final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
-            log.error(noSuchUserException.getMessage(), noSuchUserException);
-            throw noSuchUserException;
-        }
-
-        return oxu.getModuleAccess(ctx, user_id);
-    }
-
     public UserModuleAccess getModuleAccess(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         try {
             doNullCheck(user);

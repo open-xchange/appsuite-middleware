@@ -230,22 +230,7 @@ public abstract class OXUserStorageInterface {
     /**
      * Delete an user or multiple from given context in given connection
      */
-    /**
-     * Delete an user or multiple from given context in given connection
-     */
-    @Deprecated
-    public abstract void delete(final Context ctx, final int[] user_ids, final Connection write_ox_con ) throws StorageException;
-
-    /**
-     * Delete an user or multiple from given context in given connection
-     */
     public abstract void delete(final Context ctx, final User[] user_ids, final Connection write_ox_con ) throws StorageException;
-    
-    /**
-     * Delete users in given context
-     */
-    @Deprecated
-    public abstract void delete( final Context ctx, final int[] user_ids) throws StorageException;
     
     /**
      * Delete users in given context
