@@ -47,32 +47,24 @@
  *
  */
 
-package com.openexchange.groupware.settings.tree;
+package com.openexchange.groupware.settings.tree.modules.extras;
 
-import com.openexchange.configuration.ConfigurationException;
-import com.openexchange.configuration.ServerConfig;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.configjump.ConfigJumpService;
+import com.openexchange.configjump.client.ConfigJump;
+import com.openexchange.configjump.client.ConfigJumpHolder;
+import com.openexchange.groupware.settings.tree.AbstractModules;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.session.Session;
 
 /**
- * 
+ * Contains initialization for the modules configuration tree setting tasks.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class MaxUploadIdleTimeout implements PreferencesItemService {
-
-    private static final String NAME = "maxUploadIdleTimeout";
+public class Module extends AbstractModules {
 
     /**
      * Default constructor.
      */
-    public MaxUploadIdleTimeout() {
+    public Module() {
         super();
     }
 
@@ -80,27 +72,20 @@ public final class MaxUploadIdleTimeout implements PreferencesItemService {
      * {@inheritDoc}
      */
     public String[] getPath() {
-        return new String[] { NAME };
+        return new String[] { "modules", "com.openexchange.extras", "module" };
     }
 
     /**
      * {@inheritDoc}
      */
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return true;
-            }
-            public void getValue(final Session session, final Context ctx,
-                final User user, final UserConfiguration userConfig,
-                final Setting setting) throws SettingException {
-                try {
-                    setting.setSingleValue(Integer.valueOf(ServerConfig
-                        .getInteger(ServerConfig.Property.MaxUploadIdleTimeMillis)));
-                } catch (ConfigurationException e) {
-                    throw new SettingException(e);
-                }
-            }
-        };
-    }
+    @Override
+    protected boolean getModule(final UserConfiguration userConfig) {
+        final ConfigJumpHolder holder = ConfigJump.getHolder();
+		final ConfigJumpService service = holder.getService();
+		try {
+		    return null != service;
+		} finally {
+		    holder.ungetService(service);
+		}
+	}
 }

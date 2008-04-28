@@ -158,9 +158,8 @@ public final class ConfigTree {
                 final Integer tmp = Integer.valueOf(shared.getId());
                 if (dbIdentifier.contains(tmp)) {
                     throw new SettingException(Code.DUPLICATE_ID, tmp);
-                } else {
-                    dbIdentifier.add(tmp);
                 }
+                dbIdentifier.add(tmp);
             }
             actual.addElement(new Setting(path[0], shared.getId(), shared));
         } else {
@@ -233,6 +232,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.calendar.CalendarFreeBusy.class,
             com.openexchange.groupware.settings.tree.modules.calendar.CalendarTeamView.class,
             com.openexchange.groupware.settings.tree.modules.contacts.Module.class,
+            com.openexchange.groupware.settings.tree.modules.extras.Module.class,
             com.openexchange.groupware.settings.tree.modules.folder.PublicFolders.class,
             com.openexchange.groupware.settings.tree.modules.folder.SharedFolders.class,
             com.openexchange.groupware.settings.tree.modules.infostore.Module.class,
