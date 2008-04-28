@@ -62,6 +62,7 @@ import com.openexchange.api2.OXException;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -118,13 +119,13 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             user = Tools.getUser(ctx, userId);
             configuration = Tools.getUserConfiguration(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
         boolean onlyOwn;
         try {
             onlyOwn = Permission.canReadInFolder(ctx, user, configuration, folder);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
         final boolean noPrivate = Tools.isFolderShared(folder, user);
@@ -132,7 +133,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         try {
             count = TaskStorage.getInstance().countTasks(ctx, userId, folderId,
                 onlyOwn, noPrivate);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
         return count;
@@ -155,19 +156,19 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             user = Tools.getUser(ctx, userId);
             configuration = Tools.getUserConfiguration(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
         try {
             onlyOwn = Permission.canReadInFolder(ctx, user, configuration, folder);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
         final boolean noPrivate = Tools.isFolderShared(folder, user);
         try {
             return TaskStorage.getInstance().list(ctx, folderId, from, until,
                 orderBy, orderDir, columns, onlyOwn, userId, noPrivate);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
     }
@@ -188,7 +189,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             final GetTask get = new GetTask(ctx, user, userConfig, folderId,
                 taskId, StorageType.ACTIVE);
             return get.loadAndCheck();
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
     }
@@ -208,20 +209,20 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             user = Tools.getUser(ctx, userId);
             userConfig = Tools.getUserConfiguration(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
         boolean onlyOwn;
         try {
             onlyOwn = Permission.canReadInFolder(ctx, user, userConfig, folder);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
         final boolean noPrivate = Tools.isFolderShared(folder, user);
         try {
             return TaskSearch.getInstance().listModifiedTasks(ctx, folderId,
                 StorageType.ACTIVE, columns, since, onlyOwn, userId, noPrivate);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
     }
@@ -241,13 +242,13 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             user = Tools.getUser(ctx, userId);
             userConfig = Tools.getUserConfiguration(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
         boolean onlyOwn;
         try {
             onlyOwn = Permission.canReadInFolder(ctx, user, userConfig, folder);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
         final boolean noPrivate = Tools.isFolderShared(folder, user);
@@ -255,7 +256,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             return TaskSearch.getInstance().listModifiedTasks(ctx, folderId,
                 StorageType.DELETED, columns, since, onlyOwn, userId,
                 noPrivate);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
     }
@@ -300,7 +301,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             }
             // Insert task
             TaskLogic.insertTask(ctx, task, parts, folders);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
         if (task.containsAlarm()) {
@@ -310,9 +311,9 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         task.setUsers(TaskLogic.createUserParticipants(parts));
         try {
             new EventClient(session).create(task);
-        } catch (EventException e) {
+        } catch (final EventException e) {
             throw Tools.convert(new TaskException(Code.EVENT, e));
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             throw Tools.convert(new TaskException(Code.EVENT, e));
         }
     }
@@ -332,7 +333,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             user = Tools.getUser(ctx, userId);
             userConfig = Tools.getUserConfiguration(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
         final UpdateData update = new UpdateData(ctx, user, userConfig,
@@ -344,7 +345,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             update.sentEvent(session);
             update.updateReminder();
             update.makeNextRecurrence(session);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
     }
@@ -375,13 +376,13 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             // TODO Switch to only delete the participant from task
             // Check delete permission
             Permission.checkDelete(ctx, user, userConfig, folder, task);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
         try {
             // TODO create delete class
             TaskLogic.deleteTask(session, ctx, userId, task, lastModified);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
     }
@@ -395,7 +396,7 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         try {
             final Context ctx = Tools.getContext(session.getContextId());
             TaskLogic.setConfirmation(ctx, taskId, userId, confirm, message);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
     }
@@ -418,12 +419,12 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
         }
         // TODO Improve performance
         final List<Task> tasks = new ArrayList<Task>();
-        for (int[] objectAndFolderId : ids) {
+        for (final int[] objectAndFolderId : ids) {
             final GetTask get = new GetTask(ctx, user, userConfig,
                 objectAndFolderId[1], objectAndFolderId[0], StorageType.ACTIVE);
             try {
                 tasks.add(get.loadAndCheck());
-            } catch (TaskException e) {
+            } catch (final TaskException e) {
                 LOG.debug(e.getMessage(), e);
             }
         }
@@ -482,9 +483,9 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
             all = Collections.unmodifiableList(all);
             own = Collections.unmodifiableList(own);
             shared = Collections.unmodifiableList(shared);
-        } catch (SearchIteratorException e) {
+        } catch (final SearchIteratorException e) {
             throw new OXException(e);
-        } catch (TaskException e) {
+        } catch (final TaskException e) {
             throw Tools.convert(e);
         }
         if (LOG.isTraceEnabled()) {
@@ -509,12 +510,20 @@ public class TasksSQLInterfaceImpl implements TasksSQLInterface {
                 public int size() {
                     return 0;
                 }
+                public void addWarning(final AbstractOXException warning) {
+        		}
+        		public AbstractOXException[] getWarnings() {
+        			return null;
+        		}
+        		public boolean hasWarnings() {
+        			return false;
+        		}
             };
         } else {
             try {
                 retval = TaskStorage.getInstance().search(ctx, userId, search,
                     orderBy, orderDir, columns, all, own, shared);
-            } catch (TaskException e) {
+            } catch (final TaskException e) {
                 throw Tools.convert(e);
             }
         }

@@ -49,7 +49,12 @@
 
 package com.openexchange.tools.iterator;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 
 /**
  * {@link CombinedSearchIterator} - Combines one or more instances of
@@ -63,6 +68,10 @@ public class CombinedSearchIterator implements SearchIterator<Object> {
 	private final SearchIterator<?>[] iterators;
 
 	private int i;
+
+	private AbstractOXException[] warnings;
+
+	private Boolean hasWarnings;
 
 	/**
 	 * Initializes a new {@link CombinedSearchIterator}
@@ -78,7 +87,7 @@ public class CombinedSearchIterator implements SearchIterator<Object> {
 		if (iterators.length == 0) {
 			return false;
 		}
-		for (; i < iterators.length && !iterators[i].hasNext(); i++) {
+		for (; (i < iterators.length) && !iterators[i].hasNext(); i++) {
 		}
 		if (i >= iterators.length) {
 			return false;
@@ -106,6 +115,44 @@ public class CombinedSearchIterator implements SearchIterator<Object> {
 
 	public boolean hasSize() {
 		return false;
+	}
+
+	public void addWarning(final AbstractOXException warning) {
+		throw new UnsupportedOperationException("Mehtod addWarning() not implemented");
+	}
+
+	public AbstractOXException[] getWarnings() {
+		if (null == warnings) {
+			if (iterators.length == 0) {
+				warnings = new AbstractOXException[0];
+			} else {
+				final List<AbstractOXException> list = new ArrayList<AbstractOXException>(iterators.length * 2);
+				for (final SearchIterator<?> iter : iterators) {
+					if (iter.hasWarnings()) {
+						list.addAll(Arrays.asList(iterators[i].getWarnings()));
+					}
+				}
+				warnings = list.toArray(new AbstractOXException[list.size()]);
+			}
+		}
+		return warnings.length == 0 ? null : warnings;
+	}
+
+	public boolean hasWarnings() {
+		if (null == hasWarnings) {
+			if (iterators.length == 0) {
+				hasWarnings = Boolean.FALSE;
+			} else {
+				hasWarnings = Boolean.FALSE;
+				for (final SearchIterator<?> iter : iterators) {
+					if (iter.hasWarnings()) {
+						hasWarnings = Boolean.TRUE;
+						break;
+					}
+				}
+			}
+		}
+		return hasWarnings.booleanValue();
 	}
 
 }

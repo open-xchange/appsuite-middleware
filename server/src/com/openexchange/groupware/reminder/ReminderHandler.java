@@ -54,9 +54,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,6 +67,7 @@ import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.ReminderSQLInterface;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.AbstractOXException.Category;
@@ -73,7 +76,6 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.reminder.ReminderException.Code;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCode;
@@ -130,7 +132,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 		this.reminderDeleteInterface = reminderDeleteInterface;
 	}
 	
-	public void setReminderDeleteInterface(ReminderDeleteInterface reminderDeleteInterface) {
+	public void setReminderDeleteInterface(final ReminderDeleteInterface reminderDeleteInterface) {
 		this.reminderDeleteInterface = reminderDeleteInterface;
 	}
 	
@@ -152,7 +154,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			if (writeCon != null) {
 				try {
 					writeCon.setAutoCommit(true);
-				} catch (SQLException exc) {
+				} catch (final SQLException exc) {
 					LOG.warn("cannot set autocommit to true on connection", exc);
 				}
 			}
@@ -202,7 +204,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			if (ps != null) {
 				try {
 					ps.close();
-				} catch (SQLException exc) {
+				} catch (final SQLException exc) {
 					LOG.warn("cannot close prepared statement", exc);
 				}
 			}
@@ -226,7 +228,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			if (writeCon != null) {
 				try {
 					writeCon.setAutoCommit(true);
-				} catch (SQLException exc) {
+				} catch (final SQLException exc) {
 					LOG.warn("cannot set autocommit to true on connection", exc);
 				}
 			}
@@ -278,7 +280,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			if (ps != null) {
 				try {
 					ps.close();
-				} catch (SQLException exc) {
+				} catch (final SQLException exc) {
 					LOG.warn("cannot close prepared statement", exc);
 				}
 			}
@@ -310,7 +312,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			if (ps != null) {
 				try {
 					ps.close();
-				} catch (SQLException exc) {
+				} catch (final SQLException exc) {
 					LOG.warn("cannot close prepared statement", exc);
 				}
 			}
@@ -318,7 +320,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			if (writeCon != null) {
 				try {
 					writeCon.setAutoCommit(true);
-				} catch (SQLException exc) {
+				} catch (final SQLException exc) {
 					LOG.warn("cannot set autocommit to true on connection", exc);
 				}
 			}
@@ -348,7 +350,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			if (writeCon != null) {
 				try {
 					writeCon.setAutoCommit(true);
-				} catch (SQLException exc) {
+				} catch (final SQLException exc) {
 					LOG.warn("cannot set autocommit to true on connection", exc);
 				}
 			}
@@ -394,7 +396,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			if (ps != null) {
 				try {
 					ps.close();
-				} catch (SQLException exc) {
+				} catch (final SQLException exc) {
 					LOG.warn("cannot close prepared statement", exc);
 				}
 			}
@@ -422,7 +424,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			if (writeCon != null) {
 				try {
 					writeCon.setAutoCommit(true);
-				} catch (SQLException exc) {
+				} catch (final SQLException exc) {
 					LOG.warn("cannot set autocommit to true on connection", exc);
 				}
 			}
@@ -463,7 +465,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			if (ps != null) {
 				try {
 					ps.close();
-				} catch (SQLException exc) {
+				} catch (final SQLException exc) {
 					LOG.warn("cannot close prepared statement", exc);
 				}
 			}
@@ -535,7 +537,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 		Connection con = null;
 		try {
 			con = DBPool.pickup(context);
-		} catch (DBPoolingException e) {
+		} catch (final DBPoolingException e) {
 			throw new OXException(e);
 		}
 		try {
@@ -566,12 +568,12 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			stmt.setInt(pos++, context.getContextId());
 			stmt.setInt(pos++, module);
 			stmt.setInt(pos++, userId);
-			for (int targetId : targetIds) {
+			for (final int targetId : targetIds) {
 				stmt.setInt(pos++, targetId);
 			}
 			result = stmt.executeQuery();
 			return convertResult2Reminder(result);
-		} catch (SQLException exc) {
+		} catch (final SQLException exc) {
 			throw new ReminderException(ReminderException.Code.LOAD_EXCEPTION, exc);
 		} finally {
 			DBUtils.closeSQLStuff(result, stmt);
@@ -603,7 +605,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 				reminder.setFolder(result.getString(pos++));
 				reminder.setLastModified(new Date(result.getLong(pos++)));
 				retval.add(reminder);
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				// Nothing to do here. Missed one reminder.
 				LOG.error(e.getMessage(), e);
 			}
@@ -708,7 +710,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			
 			final ResultSet rs = ps.executeQuery();
 			return new ReminderSearchIterator(rs, ps, readCon);
-		} catch (SearchIteratorException exc) {
+		} catch (final SearchIteratorException exc) {
 			throw new OXException(exc);
 		} catch (final SQLException exc) {
 			throw new OXException(EnumComponent.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
@@ -730,7 +732,7 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 			
 			final ResultSet rs = ps.executeQuery();
 				return new ReminderSearchIterator(rs, ps, readCon);
-		} catch (SearchIteratorException exc) {
+		} catch (final SearchIteratorException exc) {
 			throw new OXException(exc);
 		} catch (final SQLException exc) {
 			throw new OXException(EnumComponent.REMINDER, Category.CODE_ERROR, -1, "SQL Problem.", exc);
@@ -743,13 +745,16 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 		
 		private ReminderObject next;
 		
-		private ResultSet rs;
+		private final ResultSet rs;
 		
-		private PreparedStatement preparedStatement;
+		private final PreparedStatement preparedStatement;
 		
-		private Connection readCon;
+		private final Connection readCon;
+
+		private final List<AbstractOXException> warnings;
 		
 		private ReminderSearchIterator(final ResultSet rs, final PreparedStatement preparedStatement, final Connection readCon) throws SearchIteratorException {
+			this.warnings =  new ArrayList<AbstractOXException>(2);
 			this.rs = rs;
 			this.readCon = readCon;
 			this.preparedStatement = preparedStatement;
@@ -800,6 +805,18 @@ public class ReminderHandler implements Types, ReminderSQLInterface {
 		
 		public boolean hasSize() {
 			return false;
+		}
+
+		public void addWarning(final AbstractOXException warning) {
+			warnings.add(warning);
+		}
+
+		public AbstractOXException[] getWarnings() {
+			return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+		}
+
+		public boolean hasWarnings() {
+			return !warnings.isEmpty();
 		}
 	}
 }

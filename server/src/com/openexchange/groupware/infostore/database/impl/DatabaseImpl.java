@@ -2265,15 +2265,18 @@ public class DatabaseImpl extends DBService {
 
 		private final int[] columns;
 
-		private DatabaseImpl d;
+		private final DatabaseImpl d;
 
 		private Context ctx;
 
 		private Connection readCon;
 
+		private final List<AbstractOXException> warnings;
+
 		public InfostoreIterator(final ResultSet rs, final Statement stmt, final int[] columns,
 				final DatabaseImpl d, final Context ctx, final Connection readCon)
 				throws SearchIteratorException {
+			this.warnings =  new ArrayList<AbstractOXException>(2);
 			this.rs = rs;
 			this.stmt = stmt;
 			this.columns = columns;
@@ -2295,6 +2298,7 @@ public class DatabaseImpl extends DBService {
 		}
 
 		public InfostoreIterator(final ResultSet rs, final int[] columns, final DatabaseImpl d) {
+			this.warnings =  new ArrayList<AbstractOXException>(2);
 			this.rs = rs;
 			this.columns = columns;
 			this.d = d;
@@ -2360,6 +2364,18 @@ public class DatabaseImpl extends DBService {
 					d.releaseReadConnection(ctx, readCon);
 				}
 			}
+		}
+
+		public void addWarning(final AbstractOXException warning) {
+			warnings.add(warning);
+		}
+
+		public AbstractOXException[] getWarnings() {
+			return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+		}
+
+		public boolean hasWarnings() {
+			return !warnings.isEmpty();
 		}
 	}
 

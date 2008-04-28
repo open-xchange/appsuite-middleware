@@ -49,6 +49,8 @@
 
 package com.openexchange.tools.iterator;
 
+import com.openexchange.groupware.AbstractOXException;
+
 /**
  * {@link ArrayIterator} - A {@link SearchIterator} implementation backed by an
  * array.
@@ -91,5 +93,16 @@ public class ArrayIterator<T> implements SearchIterator<T> {
 
 	public boolean hasSize() {
 		return true;
+	}
+
+	public void addWarning(final AbstractOXException warning) {
+	}
+
+	public AbstractOXException[] getWarnings() {
+		return null;
+	}
+
+	public boolean hasWarnings() {
+		return false;
 	}
 }

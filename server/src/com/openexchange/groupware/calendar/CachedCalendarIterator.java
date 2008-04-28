@@ -53,6 +53,7 @@ import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
@@ -64,6 +65,9 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -73,7 +77,8 @@ import org.apache.commons.logging.LogFactory;
  */
 
 public class CachedCalendarIterator implements SearchIterator {
-    
+
+	private final List<AbstractOXException> warnings;
     private final ArrayList<CalendarDataObject> list;
     private final SearchIterator non_cached_iterator;
     private final boolean cache;
@@ -92,7 +97,8 @@ public class CachedCalendarIterator implements SearchIterator {
     private static final Log LOG = LogFactory.getLog(CachedCalendarIterator.class);
     
     public CachedCalendarIterator(SearchIterator non_cached_iterator, Context c, int uid) throws SearchIteratorException, OXException, SQLException, DBPoolingException {
-        list = new ArrayList<CalendarDataObject>(16);
+    	this.warnings =  new ArrayList<AbstractOXException>(2);
+    	list = new ArrayList<CalendarDataObject>(16);
         this.non_cached_iterator = non_cached_iterator;
         this.c = c;
         this.uid = uid;
@@ -103,7 +109,11 @@ public class CachedCalendarIterator implements SearchIterator {
     }
     
     public CachedCalendarIterator(SearchIterator non_cached_iterator, Context c, int uid, int[][] oids) throws SearchIteratorException, OXException, SQLException, DBPoolingException {
-        list = new ArrayList<CalendarDataObject>(16);
+    	this.warnings =  new ArrayList<AbstractOXException>(2);
+    	if (non_cached_iterator.hasWarnings()) {
+    		warnings.addAll(Arrays.asList(non_cached_iterator.getWarnings()));
+    	}
+    	list = new ArrayList<CalendarDataObject>(16);
         this.non_cached_iterator = non_cached_iterator;
         this.c = c;
         this.uid = uid;
@@ -171,6 +181,18 @@ public class CachedCalendarIterator implements SearchIterator {
     public boolean hasSize() {
         return non_cached_iterator.hasSize();
     }
+
+    public void addWarning(final AbstractOXException warning) {
+		warnings.add(warning);
+	}
+
+	public AbstractOXException[] getWarnings() {
+		return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+	}
+
+	public boolean hasWarnings() {
+		return !warnings.isEmpty();
+	}
     
     private final void fillCachedResultSet() throws SearchIteratorException, OXException {
         try {

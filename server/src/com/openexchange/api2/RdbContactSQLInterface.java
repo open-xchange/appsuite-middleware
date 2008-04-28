@@ -57,7 +57,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,6 +69,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.event.EventException;
 import com.openexchange.event.impl.EventClient;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
@@ -1221,6 +1224,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
         private int[] cols; 
         private boolean first = true;
         private boolean securecheck; 
+        private final List<AbstractOXException> warnings;
 
 
     	@OXThrowsMultiple(
@@ -1235,7 +1239,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
     						}
     	)
 		private ContactObjectIterator(ResultSet rs,Statement stmt, int[] cols, boolean securecheck, Connection readcon) throws SearchIteratorException {
-			this.rs = rs;
+    		this.warnings =  new ArrayList<AbstractOXException>(2);
+    		this.rs = rs;
 			this.stmt = stmt;
 			this.cols = cols;
 			this.readcon = readcon;
@@ -1338,6 +1343,18 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 		
 		public boolean hasSize() {
 			return false;
+		}
+
+		public void addWarning(final AbstractOXException warning) {
+			warnings.add(warning);
+		}
+
+		public AbstractOXException[] getWarnings() {
+			return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+		}
+
+		public boolean hasWarnings() {
+			return !warnings.isEmpty();
 		}
 	}
 

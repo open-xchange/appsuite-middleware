@@ -84,7 +84,7 @@ import com.openexchange.tools.sql.DBUtils;
 	classId = Classes.COM_OPENEXCHANGE_GROUPWARE_INFOSTORE_DATABASE_IMPL_INFOSTOREITERATOR,
 	component = EnumComponent.INFOSTORE
 )
-public class InfostoreIterator implements SearchIterator {
+public class InfostoreIterator implements SearchIterator<Object> {
 	
 	private static final InfostoreQueryCatalog QUERIES = InfostoreFacadeImpl.QUERIES;
 	
@@ -170,6 +170,7 @@ public class InfostoreIterator implements SearchIterator {
 	private ResultSet rs;
 	private boolean next;
 	private AbstractOXException exception;
+	private final List<AbstractOXException> warnings;
 
 	private Context ctx;
 
@@ -179,6 +180,7 @@ public class InfostoreIterator implements SearchIterator {
 
 	
 	protected InfostoreIterator(final String query,final DBProvider provider, final Context ctx, final Metadata[] fields, final FieldChooser chooser, final Object...args){
+		this.warnings =  new ArrayList<AbstractOXException>(2);
 		this.query = query;
 		this.provider = provider;
 		this.args = args;
@@ -235,6 +237,18 @@ public class InfostoreIterator implements SearchIterator {
 		}
 		initNext = false;
 		return next;
+	}
+
+	public void addWarning(final AbstractOXException warning) {
+		warnings.add(warning);
+	}
+
+	public AbstractOXException[] getWarnings() {
+		return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+	}
+
+	public boolean hasWarnings() {
+		return !warnings.isEmpty();
 	}
 	
 	

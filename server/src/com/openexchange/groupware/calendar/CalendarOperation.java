@@ -55,8 +55,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,6 +66,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -95,6 +98,8 @@ public class CalendarOperation implements SearchIterator {
     
     public static final int MAX_RESULT_LIMIT = -1;
     private int result_counter;
+
+    private final List<AbstractOXException> warnings = new ArrayList<AbstractOXException>(2);
     
     private boolean has_next;
     private static final Log LOG = LogFactory.getLog(CalendarOperation.class);
@@ -576,6 +581,18 @@ public class CalendarOperation implements SearchIterator {
     public boolean hasSize() {
         return false;
     }
+
+    public void addWarning(final AbstractOXException warning) {
+		warnings.add(warning);
+	}
+
+	public AbstractOXException[] getWarnings() {
+		return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+	}
+
+	public boolean hasWarnings() {
+		return !warnings.isEmpty();
+	}
     
     private void rsNext(final boolean first) {
         if (co_rs != null) {

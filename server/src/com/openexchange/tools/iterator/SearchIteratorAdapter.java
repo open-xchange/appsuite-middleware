@@ -50,9 +50,12 @@
 package com.openexchange.tools.iterator;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 
 /**
  * {@link SearchIteratorAdapter} - An implementation of {@link SearchIterator}
@@ -75,13 +78,17 @@ public class SearchIteratorAdapter implements SearchIterator<Object> {
 
 	private boolean b_size;
 
+	private final List<AbstractOXException> warnings;
+
 	public SearchIteratorAdapter(final Iterator<?> iter) {
 		delegate = iter;
+		warnings = new ArrayList<AbstractOXException>(2);
 	}
 
 	public SearchIteratorAdapter(final Iterator<?> iter, final int size) {
 		delegate = iter;
 		this.size = size;
+		warnings = new ArrayList<AbstractOXException>(2);
 		b_size = true;
 	}
 
@@ -107,6 +114,18 @@ public class SearchIteratorAdapter implements SearchIterator<Object> {
 		return b_size;
 	}
 
+	public void addWarning(final AbstractOXException warning) {
+		warnings.add(warning);
+	}
+
+	public AbstractOXException[] getWarnings() {
+		return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+	}
+
+	public boolean hasWarnings() {
+		return !warnings.isEmpty();
+	}
+
 	public static SearchIterator<?> createEmptyIterator() {
 		return new SearchIterator<Object>() {
 
@@ -129,6 +148,16 @@ public class SearchIteratorAdapter implements SearchIterator<Object> {
 				return true;
 			}
 
+			public void addWarning(final AbstractOXException warning) {
+			}
+
+			public AbstractOXException[] getWarnings() {
+				return null;
+			}
+
+			public boolean hasWarnings() {
+				return false;
+			}
 		};
 	}
 
@@ -144,6 +173,8 @@ public class SearchIteratorAdapter implements SearchIterator<Object> {
 
 			private final Object array;
 
+			private final List<AbstractOXException> warnings;
+
 			ArrayIterator(final Object array) {
 				final Class<?> type = array.getClass();
 				if (!type.isArray()) {
@@ -152,6 +183,7 @@ public class SearchIteratorAdapter implements SearchIterator<Object> {
 				}
 				this.array = array;
 				this.size = Array.getLength(array);
+				warnings = new ArrayList<AbstractOXException>(2);
 			}
 
 			@SuppressWarnings("unused")
@@ -176,6 +208,18 @@ public class SearchIteratorAdapter implements SearchIterator<Object> {
 
 			public boolean hasSize() {
 				return true;
+			}
+
+			public void addWarning(final AbstractOXException warning) {
+				warnings.add(warning);
+			}
+
+			public AbstractOXException[] getWarnings() {
+				return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+			}
+
+			public boolean hasWarnings() {
+				return !warnings.isEmpty();
 			}
 
 		}

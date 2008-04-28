@@ -50,6 +50,7 @@
 package com.openexchange.groupware.calendar;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
@@ -66,6 +67,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -78,7 +81,8 @@ import org.apache.commons.logging.LogFactory;
 public class FreeBusyResults implements SearchIterator {
     
     public final static int MAX_SHOW_USER_PARTICIPANTS = 5;
-    
+
+    private final List<AbstractOXException> warnings;
     private final ResultSet rs;
     private final Connection con;
     private final Context c;
@@ -114,7 +118,8 @@ public class FreeBusyResults implements SearchIterator {
     private static final Log LOG = LogFactory.getLog(FreeBusyResults.class);
     
     public FreeBusyResults(ResultSet rs, PreparedStatement prep, Context c, Connection con, long range_start, long range_end) throws OXException {
-        this.rs = rs;
+    	this.warnings =  new ArrayList<AbstractOXException>(2);
+    	this.rs = rs;
         this.prep = prep;
         this.con = con;
         this.c = c;
@@ -125,7 +130,8 @@ public class FreeBusyResults implements SearchIterator {
     }
     
     public FreeBusyResults(ResultSet rs, PreparedStatement prep, Context c, int uid, int groups[], UserConfiguration uc, Connection con, boolean show_details, Participant conflict_objects[], PreparedStatement private_folder_information) throws OXException {
-        this.rs = rs;
+    	this.warnings =  new ArrayList<AbstractOXException>(2);
+    	this.rs = rs;
         this.prep = prep;
         this.con = con;
         this.c = c;
@@ -229,6 +235,18 @@ public class FreeBusyResults implements SearchIterator {
     public boolean hasSize() {
         return false;
     }
+
+    public void addWarning(final AbstractOXException warning) {
+		warnings.add(warning);
+	}
+
+	public AbstractOXException[] getWarnings() {
+		return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+	}
+
+	public boolean hasWarnings() {
+		return !warnings.isEmpty();
+	}
     
     private final CalendarDataObject recurringDAO(final RecurringResult rr) throws OXException {
         if (rr != null) {

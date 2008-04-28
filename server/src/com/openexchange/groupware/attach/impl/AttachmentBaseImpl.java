@@ -948,22 +948,24 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 	
 	public class AttachmentIterator implements SearchIterator {
 
-		private String sql;
-		private AttachmentField[] columns;
+		private final String sql;
+		private final AttachmentField[] columns;
 		private boolean queried;
-		private Context ctx;
+		private final Context ctx;
 		private Connection readCon;
 		private PreparedStatement stmt;
 		private ResultSet rs;
 		private Exception exception;
 		private boolean initNext;
 		private boolean hasNext;
-		private Object[] values;
-		private int folderId;
-		private FetchMode mode;
+		private final Object[] values;
+		private final int folderId;
+		private final FetchMode mode;
 		private SearchIteratorAdapter delegate;
+		private final List<AbstractOXException> warnings;
 		
 		public AttachmentIterator(final String sql, final AttachmentField[] columns, final Context ctx, final int folderId, final FetchMode mode, final Object...values) {
+			this.warnings =  new ArrayList<AbstractOXException>(2);
 			this.sql = sql;
 			this.columns = columns;
 			this.ctx = ctx;
@@ -1062,6 +1064,18 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 				return delegate.hasSize();
 			}
 			return false;
+		}
+
+		public void addWarning(final AbstractOXException warning) {
+			warnings.add(warning);
+		}
+
+		public AbstractOXException[] getWarnings() {
+			return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+		}
+
+		public boolean hasWarnings() {
+			return !warnings.isEmpty();
 		}
 		
 		private void query() {

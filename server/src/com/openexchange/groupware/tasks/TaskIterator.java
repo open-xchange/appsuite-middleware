@@ -70,6 +70,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Mapping.Mapper;
 import com.openexchange.server.impl.DBPool;
@@ -124,7 +125,7 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
     /**
      * ACTIVE or DELETED.
      */
-    private StorageType type;
+    private final StorageType type;
 
     /**
      * Pre read tasks.
@@ -148,6 +149,11 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
         .getInstance();
 
     /**
+     * Warnings
+     */
+    private final List<AbstractOXException> warnings;
+
+    /**
      * Default constructor.
      * @param ctx Context.
      * @param userId unique identifier of the user if we have to load reminders.
@@ -160,13 +166,14 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
     TaskIterator(final Context ctx, final int userId, final ResultSet result,
         final int folderId, final int[] attributes, final StorageType type) {
         super();
+        this.warnings =  new ArrayList<AbstractOXException>(2);
         this.ctx = ctx;
         this.userId = userId;
         this.result = result;
         this.folderId = folderId;
         final List<Integer> tmp1 = new ArrayList<Integer>(attributes.length);
         final List<Integer> tmp2 = new ArrayList<Integer>(attributes.length);
-        for (int column : attributes) {
+        for (final int column : attributes) {
             if (null == Mapping.getMapping(column)
                 && Task.FOLDER_ID != column) {
                 tmp2.add(Integer.valueOf(column));
@@ -201,7 +208,7 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
     public void close() throws SearchIteratorException {
         try {
             runner.join();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             throw new SearchIteratorException(new TaskException(TaskException
                 .Code.THREAD_ISSUE, e));
         }
@@ -228,23 +235,23 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
         if (ready.isEmpty()) {
             try {
                 final Map<Integer, Task> tasks = new HashMap<Integer, Task>();
-                for (Task task : preread.take(
+                for (final Task task : preread.take(
                     additionalAttributes.length > 0)) {
                     tasks.put(Integer.valueOf(task.getObjectID()), task);
                 }
-                for (int attribute : additionalAttributes) {
+                for (final int attribute : additionalAttributes) {
                     switch (attribute) {
                     case Task.PARTICIPANTS:
                         try {
                             readParticipants(tasks);
-                        } catch (TaskException e) {
+                        } catch (final TaskException e) {
                             throw new SearchIteratorException(e);
                         }
                         break;
                     case Task.ALARM:
                         try {
                             Reminder.loadReminder(ctx, userId, tasks.values());
-                        } catch (TaskException e) {
+                        } catch (final TaskException e) {
                             throw new SearchIteratorException(e);
                         }
                         break;
@@ -255,13 +262,34 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
                     }
                 }
                 ready.addAll(tasks.values());
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 throw new SearchIteratorException(new TaskException(
                     TaskException.Code.THREAD_ISSUE, e));
             }
         }
         return ready.poll();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void addWarning(final AbstractOXException warning) {
+		warnings.add(warning);
+	}
+
+    /**
+     * {@inheritDoc}
+     */
+	public AbstractOXException[] getWarnings() {
+		return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+	}
+
+	/**
+     * {@inheritDoc}
+     */
+	public boolean hasWarnings() {
+		return !warnings.isEmpty();
+	}
 
     /**
      * Reads the participants for the tasks.
@@ -272,7 +300,7 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
         throws TaskException {
         final Map<Integer, Set<TaskParticipant>> parts = partStor
             .selectParticipants(ctx, Collections.toArray(tasks.keySet()), type);
-        for (Entry<Integer, Set<TaskParticipant>> entry : parts.entrySet()) {
+        for (final Entry<Integer, Set<TaskParticipant>> entry : parts.entrySet()) {
             final Task task = tasks.get(entry.getKey());
             final Set<TaskParticipant> participants = entry.getValue();
             task.setParticipants(TaskLogic.createParticipants(participants));
@@ -293,9 +321,9 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
     public void run() {
         try {
             while (result.next()) {
-                Task task = new Task();
+                final Task task = new Task();
                 int pos = 1;
-                for (int taskField : taskAttributes) {
+                for (final int taskField : taskAttributes) {
                     final Mapper<?> mapper = Mapping.getMapping(taskField);
                     if (Task.FOLDER_ID == taskField) {
                         if (-1 == folderId) {
@@ -310,7 +338,7 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
                 preread.offer(task);
             }
             preread.finished();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
         }
         Connection con = null;
@@ -318,7 +346,7 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
         try {
             stmt = result.getStatement();
             con = stmt.getConnection();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             LOG.error(e.getMessage(), e);
         }
         DBUtils.closeSQLStuff(result, stmt);
@@ -432,7 +460,7 @@ public final class TaskIterator implements SearchIterator<Task>, Runnable {
                     LOG.debug("Waiting for state.");
                     try {
                         waitForPreReader.await();
-                    } catch (InterruptedException e) {
+                    } catch (final InterruptedException e) {
                         // Nothing to do. Continue with normal work.
                         LOG.debug(e.getMessage(), e);
                     }

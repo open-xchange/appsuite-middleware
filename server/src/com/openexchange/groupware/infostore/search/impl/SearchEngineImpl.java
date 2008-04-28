@@ -62,6 +62,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
@@ -359,8 +360,10 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 		private Context ctx;
 		private Connection readCon;
 		private Statement stmt;
+		private final List<AbstractOXException> warnings;
 		
 		public InfostoreSearchIterator(final ResultSet rs, final SearchEngineImpl s, final Metadata[] columns, final Context ctx, final Connection readCon, final Statement stmt) throws SearchIteratorException {
+			this.warnings =  new ArrayList<AbstractOXException>(2);
 			this.rs = rs;
 			this.s = s;
 			this.columns = columns;
@@ -436,6 +439,18 @@ public class SearchEngineImpl extends DBService implements SearchEngine {
 		
 		public boolean hasSize() {
 			return false;
+		}
+
+		public void addWarning(final AbstractOXException warning) {
+			warnings.add(warning);
+		}
+
+		public AbstractOXException[] getWarnings() {
+			return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+		}
+
+		public boolean hasWarnings() {
+			return !warnings.isEmpty();
 		}
 		
 		private DocumentMetadataImpl fillDocumentMetadata(final DocumentMetadataImpl retval, final Metadata[] columns, final ResultSet result) throws SQLException {

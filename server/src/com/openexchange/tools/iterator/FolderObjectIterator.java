@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -68,6 +69,7 @@ import com.openexchange.caching.CacheException;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -117,6 +119,19 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 			return true;
 		}
 
+		@Override
+		public boolean hasWarnings() {
+			return false;
+		}
+
+		@Override
+		public AbstractOXException[] getWarnings() {
+			return null;
+		}
+
+		@Override
+		public void addWarning(final AbstractOXException warning) {
+		}
 	};
 
 	private static final boolean prefetchEnabled = ServerConfig.getBoolean(Property.PrefetchEnabled);
@@ -142,6 +157,8 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 	private ElementAttributes attribs;
 
 	private final boolean resideInCache;
+
+	private final List<AbstractOXException> warnings;
 
 	private static final String[] selectFields = { "fuid", "parent", "fname", "module", "type", "creating_date",
 			"created_from", "changing_date", "changed_from", "permission_flag", "subfolder_flag", "default_flag" };
@@ -184,6 +201,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 		this.ctx = null;
 		this.prefetchQueue = null;
 		this.folderIds = null;
+		this.warnings = new ArrayList<AbstractOXException>(2);
 	}
 
 	/**
@@ -200,12 +218,13 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 	public FolderObjectIterator(final Collection<FolderObject> col, final boolean resideInCache)
 			throws SearchIteratorException {
 		this.folderIds = null;
+		this.warnings = new ArrayList<AbstractOXException>(2);
 		this.rs = null;
 		this.stmt = null;
 		this.ctx = null;
 		this.closeCon = false;
 		this.resideInCache = resideInCache;
-		if (col == null || col.isEmpty()) {
+		if ((col == null) || col.isEmpty()) {
 			this.next = null;
 			prefetchQueue = null;
 		} else {
@@ -256,6 +275,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 		} else {
 			this.folderIds = new HashSet<Integer>();
 		}
+		this.warnings = new ArrayList<AbstractOXException>(2);
 		this.rs = rs;
 		this.stmt = stmt;
 		this.readCon = readCon;
@@ -287,7 +307,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 			try {
 				while (this.rs.next()) {
 					FolderObject fo = createFolderObjectFromSelectedEntry();
-					while (fo == null && this.rs.next()) {
+					while ((fo == null) && this.rs.next()) {
 						fo = createFolderObjectFromSelectedEntry();
 					}
 					if (fo != null) {
@@ -437,7 +457,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 		/*
 		 * Close connection
 		 */
-		if (closeCon && readCon != null) {
+		if (closeCon && (readCon != null)) {
 			try {
 				DBPool.push(ctx, readCon);
 			} catch (final DBPoolingException e) {
@@ -483,7 +503,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 				 */
 				if (!prefetchQueue.isEmpty()) {
 					next = prefetchQueue.poll();
-					while (next == null && !prefetchQueue.isEmpty()) {
+					while ((next == null) && !prefetchQueue.isEmpty()) {
 						next = prefetchQueue.poll();
 					}
 				}
@@ -493,7 +513,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 				 */
 				if (rs.next()) {
 					next = createFolderObjectFromSelectedEntry();
-					while (next == null && rs.next()) {
+					while ((next == null) && rs.next()) {
 						next = createFolderObjectFromSelectedEntry();
 					}
 					if (next == null) {
@@ -551,6 +571,18 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 		return (prefetchQueue != null);
 	}
 
+	public void addWarning(final AbstractOXException warning) {
+		warnings.add(warning);
+	}
+
+	public AbstractOXException[] getWarnings() {
+		return warnings.isEmpty() ? null : warnings.toArray(new AbstractOXException[warnings.size()]);
+	}
+
+	public boolean hasWarnings() {
+		return !warnings.isEmpty();
+	}
+
 	/**
 	 * Creates a <code>java.util.Queue</code> containing all iterator's
 	 * elements. All resources are closed immediately.
@@ -575,7 +607,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 			}
 			while (rs.next()) {
 				FolderObject fo = createFolderObjectFromSelectedEntry();
-				while (fo == null && this.rs.next()) {
+				while ((fo == null) && this.rs.next()) {
 					fo = createFolderObjectFromSelectedEntry();
 				}
 				if (fo != null) {

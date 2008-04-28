@@ -50,48 +50,117 @@
 package com.openexchange.tools.iterator;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
 
 /**
- * SearchIterator.
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * {@link SearchIterator} - An extended iterator over a collection.
+ * 
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SearchIterator<T> {
 
-    SearchIterator<?> EMPTY_ITERATOR = new SearchIterator<Object>() {
+	SearchIterator<?> EMPTY_ITERATOR = new SearchIterator<Object>() {
 
-        public boolean hasNext() {
-            return false;
-        }
+		public boolean hasNext() {
+			return false;
+		}
 
-        public Object next() throws SearchIteratorException, OXException {
-            return null;
-        }
+		public Object next() throws SearchIteratorException, OXException {
+			return null;
+		}
 
-        public void close() throws SearchIteratorException {
-        }
+		public void close() throws SearchIteratorException {
+		}
 
-        public int size() {
-            return 0;
-        }
+		public int size() {
+			return 0;
+		}
 
-        public boolean hasSize() {
-            return true;
-        }
+		public boolean hasSize() {
+			return true;
+		}
 
-    };
+		public void addWarning(final AbstractOXException warning) {
+		}
 
-    boolean hasNext();
+		public AbstractOXException[] getWarnings() {
+			return null;
+		}
 
-    T next() throws SearchIteratorException, OXException;
+		public boolean hasWarnings() {
+			return false;
+		}
 
-    void close() throws SearchIteratorException;
+	};
 
-    int size();
+	/**
+	 * Returns <code>true</code> if the iteration has more elements. (In other
+	 * words, returns <code>true</code> if {@link #next()} would return an
+	 * element.)
+	 * 
+	 * @return <code>true</code> if the iterator has more elements; otherwise
+	 *         <code>false</code>
+	 */
+	boolean hasNext();
 
-    boolean hasSize();
+	/**
+	 * Returns the next element in the iteration. Calling this method repeatedly
+	 * until the {@link #hasNext()} method returns <code>false</code> will
+	 * return each element in the underlying collection exactly once.
+	 * 
+	 * @return The next element in the iteration.
+	 * @exception SearchIteratorException
+	 *                If next element cannot be returned
+	 * @throws OXException
+	 *             If next element cannot be returned
+	 */
+	T next() throws SearchIteratorException, OXException;
+
+	/**
+	 * Closes the search iterator
+	 * 
+	 * @throws SearchIteratorException
+	 *             If closing the search iterator fails
+	 */
+	void close() throws SearchIteratorException;
+
+	/**
+	 * This iterator's size
+	 * 
+	 * @return The size
+	 */
+	int size();
+
+	/**
+	 * Indicates if this iterator's size is accessible via {@link #size()}
+	 * 
+	 * @return <code>true</code> if this iterator's size is accessible via
+	 *         {@link #size()}; otherwise <code>false</code>
+	 */
+	boolean hasSize();
+
+	/**
+	 * Indicates if this iterator has warnings
+	 * 
+	 * @return <code>true</code> if this iterator has warnings; otherwise
+	 *         <code>false</code>
+	 */
+	boolean hasWarnings();
+
+	/**
+	 * Adds specified warning to this iterator's warnings
+	 * 
+	 * @param warning
+	 *            The warning to add
+	 */
+	void addWarning(AbstractOXException warning);
+
+	/**
+	 * Gets the iterator's warnings as an array
+	 * 
+	 * @return The iterator's warnings as an array or <code>null</code>
+	 */
+	AbstractOXException[] getWarnings();
 
 }
-
-
-
-
