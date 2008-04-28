@@ -1428,6 +1428,34 @@ public final class MIMEMessageConverter {
 	}
 
 	/**
+	 * Creates a message data object from given message/rfc822 content filled
+	 * with desired fields.
+	 * 
+	 * @param asciiBytes
+	 *            The message/rfc822 content
+	 * @param uid
+	 *            The UID or <code>-1</code>
+	 * @param fullname
+	 *            The folder's fullname
+	 * @param separator
+	 *            The folder's separator
+	 * @param fields
+	 *            The desired fields to fill
+	 * @return An instance of {@link MailMessage} filled with desired fields
+	 * @throws MailException
+	 *             If conversion fails
+	 */
+	public static MailMessage convertMessage(final byte[] asciiBytes, final long uid, final String fullname,
+			final char separator, final MailField[] fields) throws MailException {
+		try {
+			return convertMessage(new MimeMessage(MIMEDefaultSession.getDefaultSession(),
+					new UnsynchronizedByteArrayInputStream(asciiBytes)), uid, fullname, separator, fields);
+		} catch (final MessagingException e) {
+			throw MIMEMailException.handleMessagingException(e);
+		}
+	}
+
+	/**
 	 * Creates a message data object from given MIME message filled with desired
 	 * fields.
 	 * 
