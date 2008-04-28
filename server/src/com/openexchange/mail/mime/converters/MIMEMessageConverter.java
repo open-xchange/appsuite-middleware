@@ -1428,11 +1428,11 @@ public final class MIMEMessageConverter {
 	}
 
 	/**
-	 * Creates a message data object from given message/rfc822 content filled
-	 * with desired fields.
+	 * Creates a message data object from given <code>message/rfc822</code>
+	 * content filled with desired fields.
 	 * 
 	 * @param asciiBytes
-	 *            The message/rfc822 content
+	 *            The <code>message/rfc822</code> content
 	 * @param uid
 	 *            The UID or <code>-1</code>
 	 * @param fullname
