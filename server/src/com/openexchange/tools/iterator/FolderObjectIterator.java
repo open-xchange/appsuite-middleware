@@ -150,24 +150,23 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 	 * Gets all necessary fields in right order to be used in an SQL <i>SELECT</i>
 	 * statement needed to create instances of {@link FolderObject}.
 	 * 
-	 * @param tableAlias
-	 *            The table alias used throughout corresponding SQL <i>SELECT</i>
-	 *            statement or <code>null</code> if no alias used.
+	 * @param tableName
+	 *            The folder table name
 	 * @return All necessary fields in right order to be used in an SQL
 	 *         <i>SELECT</i> statement
 	 */
-	public static final String getFieldsForSQL(final String tableAlias) {
+	public static final String getFieldsForSQL(final String tableName) {
 		final StringBuilder fields = new StringBuilder();
-		final boolean useTableName = (tableAlias != null);
+		final boolean useTableName = (tableName != null);
 		if (useTableName) {
-			fields.append(tableAlias);
+			fields.append(tableName);
 			fields.append('.');
 		}
 		fields.append(selectFields[0]);
 		for (int i = 1; i < selectFields.length; i++) {
 			fields.append(", ");
 			if (useTableName) {
-				fields.append(tableAlias);
+				fields.append(tableName);
 				fields.append('.');
 			}
 			fields.append(selectFields[i]);
