@@ -78,6 +78,12 @@ import com.openexchange.spamhandler.SpamHandler;
 public abstract class MailMessageStorage {
 
 	/**
+	 * The empty return value; e.g. may be used to indicate no result on
+	 * {@link #searchMessages(String, IndexRange, MailListField, OrderDirection, SearchTerm, MailField[])}.
+	 */
+	protected static final transient MailMessage[] EMPTY_RETVAL = new MailMessage[0];
+
+	/**
 	 * The fields containing {@link MailField#FULL}.
 	 */
 	private static final MailField[] FIELDS_FULL = new MailField[] { MailField.FULL };
@@ -279,7 +285,8 @@ public abstract class MailMessageStorage {
 
 	/**
 	 * Gets the mails located in given folder whose mail ID matches specified
-	 * ID.
+	 * ID. The constant {@link #EMPTY_RETVAL} may be returned, if folder
+	 * contains no messages.
 	 * <p>
 	 * The returned instances of {@link MailMessage} are pre-filled with
 	 * specified fields through argument <code>fields</code>.
@@ -331,7 +338,8 @@ public abstract class MailMessageStorage {
 
 	/**
 	 * Gets all unread messages located in given folder; meaning messages that
-	 * do not have the \Seen flag set.
+	 * do not have the \Seen flag set. The constant {@link #EMPTY_RETVAL} may be
+	 * returned if no unseen messages available in specified folder.
 	 * <p>
 	 * This is a convenience method that may be overridden if a faster way can
 	 * be achieved.
@@ -457,10 +465,11 @@ public abstract class MailMessageStorage {
 	}
 
 	/**
-	 * Searches mails located in given folder. This method's purpose is to
-	 * return filtered mails' headers for a <b>fast</b> list view. Therefore
-	 * this method's <code>fields</code> parameter should only contain
-	 * instances of {@link MailField} which are marked as <b>[low cost]</b>.
+	 * Searches mails located in given folder. If the search yields no results,
+	 * the constant {@link #EMPTY_RETVAL} may be returned. This method's purpose
+	 * is to return filtered mails' headers for a <b>fast</b> list view.
+	 * Therefore this method's <code>fields</code> parameter should only
+	 * contain instances of {@link MailField} which are marked as <b>[low cost]</b>.
 	 * Otherwise pre-filling of returned messages may take a long time and does
 	 * no more fit to generate a fast list view.
 	 * <p>
