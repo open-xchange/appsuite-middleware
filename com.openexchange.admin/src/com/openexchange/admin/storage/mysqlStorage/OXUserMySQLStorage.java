@@ -835,7 +835,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 final ArrayList<MethodAndNames> methodlist = getGetters(theMethods);
 
                 final StringBuilder contact_query = new StringBuilder(
-                        "INSERT INTO prg_contacts (cid, userid, creating_date, created_from, changing_date, fid, ");
+                        "INSERT INTO prg_contacts (cid, userid, creating_date, created_from, changing_date, changed_from, fid, ");
                 for (int i = 1; i < 9; i++) {
                     contact_query.append("intfield0");
                     contact_query.append(i);
@@ -893,7 +893,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
                 questionmarks.deleteCharAt(questionmarks.length() - 2);
                 contact_query.deleteCharAt(contact_query.length() - 2);
-                contact_query.append(") VALUES (?,?,?,?,?,?,");
+                contact_query.append(") VALUES (?,?,?,?,?,?,?,");
                 for (int i = 1; i < 9; i++) {
                     contact_query.append("?,");
                 }
@@ -907,14 +907,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.setLong(3, System.currentTimeMillis());
                 stmt.setInt(4, internal_user_id);
                 stmt.setLong(5, System.currentTimeMillis());
-                stmt.setLong(6, 6); // fid = 6 cause internal user
+                stmt.setLong(6, internal_user_id);
+                stmt.setLong(7, 6); // fid = 6 cause internal user
 
-                stmt.setInt(7, contact_id);
-                for (int i = 8; i < 15; i++) {
+                stmt.setInt(8, contact_id);
+                for (int i = 9; i < 16; i++) {
                     stmt.setNull(i, java.sql.Types.INTEGER);
                 }
                 for (int i = 0; i < methodlist2.size(); i++) {
-                    final int overhead = 15; // How much the index goes ahead
+                    final int overhead = 16; // How much the index goes ahead
                     final int index = overhead + i;
                     final Method method = methodlist2.get(i);
                     final String returntype = method.getReturnType().getName();
