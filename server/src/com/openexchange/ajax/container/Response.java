@@ -545,7 +545,8 @@ public final class Response {
 	}
 
 	/**
-	 * Sets this response object's exception.
+	 * Sets this response object's exception and implicitly overwrites any
+	 * existing warning/error.
 	 * <p>
 	 * <b>Note</b>: If exception's category is set to {@link Category#WARNING}
 	 * it is treated as a warning only.
@@ -560,7 +561,8 @@ public final class Response {
 	}
 
 	/**
-	 * Sets this response object's warning.
+	 * Sets this response object's warning and implicitly overwrites any
+	 * existing warning/error.
 	 * <p>
 	 * <b>Note</b>: Resulting response object's category is implicitly set to
 	 * {@link Category#WARNING}.
