@@ -1462,7 +1462,7 @@ public final class MIMEMessageConverter {
 	 * @param msg
 	 *            The MIME message
 	 * @param uid
-	 *            The UID in folder
+	 *            The UID or <code>-1</code>
 	 * @param fullname
 	 *            The folder fullname
 	 * @param separator
