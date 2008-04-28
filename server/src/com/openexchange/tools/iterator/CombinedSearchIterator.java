@@ -58,13 +58,13 @@ import com.openexchange.api2.OXException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * 
  */
-public class CombinedSearchIterator implements SearchIterator {
+public class CombinedSearchIterator implements SearchIterator<Object> {
 
-	private final SearchIterator[] iterators;
+	private final SearchIterator<?>[] iterators;
 
 	private int i;
 
-	public CombinedSearchIterator(final SearchIterator... iterators) {
+	public CombinedSearchIterator(final SearchIterator<?>... iterators) {
 		this.iterators = iterators;
 	}
 
@@ -88,7 +88,7 @@ public class CombinedSearchIterator implements SearchIterator {
 	}
 
 	public void close() throws SearchIteratorException {
-		for (SearchIterator iter : iterators) {
+		for (final SearchIterator<?> iter : iterators) {
 			iter.close();
 		}
 
