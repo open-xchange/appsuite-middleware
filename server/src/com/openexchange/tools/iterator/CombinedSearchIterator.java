@@ -64,6 +64,12 @@ public class CombinedSearchIterator implements SearchIterator<Object> {
 
 	private int i;
 
+	/**
+	 * Initializes a new {@link CombinedSearchIterator}
+	 * 
+	 * @param iterators
+	 *            The instances of {@link SearchIterator}
+	 */
 	public CombinedSearchIterator(final SearchIterator<?>... iterators) {
 		this.iterators = iterators;
 	}

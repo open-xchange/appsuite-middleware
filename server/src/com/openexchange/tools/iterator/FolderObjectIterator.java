@@ -77,7 +77,8 @@ import com.openexchange.tools.iterator.SearchIteratorException.SearchIteratorCod
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
- * FolderObjectIterator
+ * {@link FolderObjectIterator} - A {@link SearchIterator} especially for
+ * instances of {@link FolderObject}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -146,23 +147,27 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 			"created_from", "changing_date", "changed_from", "permission_flag", "subfolder_flag", "default_flag" };
 
 	/**
-	 * @param tableName
-	 * @return all necessary fields in proper order needed to create instances
-	 *         of <code>FolderObject</code> from <code>ResultSet.next()</code>
-	 *         data
+	 * Gets all necessary fields in right order to be used in an SQL <i>SELECT</i>
+	 * statement needed to create instances of {@link FolderObject}.
+	 * 
+	 * @param tableAlias
+	 *            The table alias used throughout corresponding SQL <i>SELECT</i>
+	 *            statement or <code>null</code> if no alias used.
+	 * @return All necessary fields in right order to be used in an SQL
+	 *         <i>SELECT</i> statement
 	 */
-	public static final String getFieldsForSQL(final String tableName) {
+	public static final String getFieldsForSQL(final String tableAlias) {
 		final StringBuilder fields = new StringBuilder();
-		final boolean useTableName = (tableName != null);
+		final boolean useTableName = (tableAlias != null);
 		if (useTableName) {
-			fields.append(tableName);
+			fields.append(tableAlias);
 			fields.append('.');
 		}
 		fields.append(selectFields[0]);
 		for (int i = 1; i < selectFields.length; i++) {
 			fields.append(", ");
 			if (useTableName) {
-				fields.append(tableName);
+				fields.append(tableAlias);
 				fields.append('.');
 			}
 			fields.append(selectFields[i]);

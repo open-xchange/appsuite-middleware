@@ -50,22 +50,30 @@
 package com.openexchange.tools.iterator;
 
 /**
- * ArrayIterator.
+ * {@link ArrayIterator} - A {@link SearchIterator} implementation backed by an
+ * array.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class ArrayIterator<T> implements SearchIterator<T> {
 
 	private int index;
+
 	private final T[] array;
-	
+
+	/**
+	 * Initializes a new {@link ArrayIterator}
+	 * 
+	 * @param array
+	 *            The underlying array
+	 */
 	public ArrayIterator(final T[] array) {
-	    super();
-	    // Solution to create a generic array copied from java.util.ArrayList.
-	    this.array = (T[]) java.lang.reflect.Array.
-            newInstance(array.getClass().getComponentType(), array.length);
+		super();
+		// Solution to create a generic array copied from java.util.ArrayList.
+		this.array = (T[]) java.lang.reflect.Array.newInstance(array.getClass().getComponentType(), array.length);
 		System.arraycopy(array, 0, this.array, 0, array.length);
 	}
-	
+
 	public boolean hasNext() {
 		return index < array.length;
 	}
@@ -73,14 +81,14 @@ public class ArrayIterator<T> implements SearchIterator<T> {
 	public T next() throws SearchIteratorException {
 		return array[index++];
 	}
-	
+
 	public void close() {
 	}
-	
+
 	public int size() {
 		return array.length;
 	}
-	
+
 	public boolean hasSize() {
 		return true;
 	}
