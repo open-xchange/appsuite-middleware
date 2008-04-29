@@ -1,3 +1,8 @@
+* 2008-04-29 - choeger@open-xchange.com
+
+ - Bugfix #11147: "Last modified from" should not be 0
+   added new UpdateTask ContactsChangedFromUpdateTask
+
 * 2008-04-25 - thorben.betten@open-xchange.com
 
  - Bugfix #11206: Fixed creation of mail folder below a folder containing
