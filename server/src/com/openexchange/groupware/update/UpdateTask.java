@@ -80,8 +80,8 @@ public interface UpdateTask {
      * Returns the database schema version with that this update task was
      * introduced. This version is compared with the schema version of the
      * database. This update will only be applied if the database schema version
-     * is lower than this version. The most actual version is defined here
-     * {@link Version}.
+     * is lower than this version. Remember to register your update task in the
+     * configuration file for update tasks.
      * @return the schema version with that this update task was introduced.
      */
     int addedWithVersion();
