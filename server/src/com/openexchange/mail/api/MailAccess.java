@@ -92,7 +92,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 
 	protected final transient Session session;
 
-	protected transient MailConfig mailConfig;
+	private transient MailConfig mailConfig;
 
 	private Properties mailProperties;
 

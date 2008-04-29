@@ -185,10 +185,17 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 	/**
 	 * Simple getter for config field
 	 * 
-	 * @return The IMAP config
+	 * @return The IMAP configs
 	 */
 	IMAPConfig getIMAPConfig() {
-		return (IMAPConfig) mailConfig;
+		try {
+			return (IMAPConfig) getMailConfig();
+		} catch (final MailException e) {
+			/*
+			 * Cannot occur since already initialized
+			 */
+			return null;
+		}
 	}
 
 	private static final String PROPERTY_SECURITY_PROVIDER = "ssl.SocketFactory.provider";
@@ -209,7 +216,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 			/*
 			 * Check if a secure IMAP connection should be established
 			 */
-			if (mailConfig.isSecure()) {
+			if (getMailConfig().isSecure()) {
 				imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_CLASS, CLASSNAME_SECURITY_FACTORY);
 				imapProps.put(MIMESessionPropertyNames.PROP_MAIL_IMAP_SOCKET_FACTORY_PORT, String
 						.valueOf(getMailConfig().getPort()));
@@ -235,7 +242,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 			 * Get store
 			 */
 			imapStore = (IMAPStore) imapSession.getStore(IMAPProvider.PROTOCOL_IMAP.getName());
-			String tmpPass = mailConfig.getPassword();
+			String tmpPass = getMailConfig().getPassword();
 			if (tmpPass != null) {
 				try {
 					tmpPass = new String(tmpPass.getBytes(IMAPConfig.getImapAuthEnc()), CHARENC_ISO8859);
@@ -243,12 +250,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 					LOG.error(e.getMessage(), e);
 				}
 			}
-			imapStore.connect(mailConfig.getServer(), mailConfig.getPort(), mailConfig.getLogin(), tmpPass);
+			imapStore.connect(getMailConfig().getServer(), getMailConfig().getPort(), getMailConfig().getLogin(),
+					tmpPass);
 			connected = true;
 			/*
 			 * Add server's capabilities
 			 */
-			((IMAPConfig) mailConfig).initializeCapabilities(imapStore);
+			((IMAPConfig) getMailConfig()).initializeCapabilities(imapStore);
 			/*
 			 * Increase counter
 			 */
@@ -260,7 +268,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 			 */
 			decrement = true;
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, mailConfig);
+			throw IMAPException.handleMessagingException(e, getMailConfig());
 		}
 	}
 
