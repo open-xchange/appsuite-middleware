@@ -87,8 +87,8 @@ public final class Collections {
 	 * 
 	 * @return
 	 */
-	public static <T> T findFirst(Collection<T> collection, Filter<T> filter) {
-		for(T object : collection) {
+	public static <T> T findFirst(final Collection<T> collection, final Filter<T> filter) {
+		for(final T object : collection) {
 			if(filter.accept(object))
 				return object;
 		}
@@ -98,8 +98,8 @@ public final class Collections {
 	/**
 	 * Adds all elements from input that satisfy the filter to output
 	 */
-	public static <T> void collect(Collection<T> input, Filter<T> filter, Collection<T> output) {
-		for(T object : input) {
+	public static <T> void collect(final Collection<T> input, final Filter<T> filter, final Collection<T> output) {
+		for(final T object : input) {
 			if(filter.accept(object)) {
 				output.add(object);
 			}
@@ -246,7 +246,7 @@ public final class Collections {
 		/**
 		 * Constructs a stream with the given initial size
 		 */
-		public FastByteArrayOutputStream(int initSize) {
+		public FastByteArrayOutputStream(final int initSize) {
 			this.size = 0;
 			this.buf = new byte[initSize];
 		}
@@ -329,7 +329,7 @@ public final class Collections {
 		 */
 		protected int pos = 0;
 
-		public FastByteArrayInputStream(byte[] buf, int count) {
+		public FastByteArrayInputStream(final byte[] buf, final int count) {
 			this.buf = new byte[buf.length];
 			System.arraycopy(buf, 0, this.buf, 0, buf.length);
 			this.count = count;
@@ -393,10 +393,10 @@ public final class Collections {
 			 */
 			final ObjectInputStream in = new ObjectInputStream(fbos.getInputStream());
 			return in.readObject();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.error(e.getMessage(), e);
 			return null;
-		} catch (ClassNotFoundException cnfe) {
+		} catch (final ClassNotFoundException cnfe) {
 			LOG.error(cnfe.getMessage(), cnfe);
 			return null;
 		}
@@ -410,7 +410,7 @@ public final class Collections {
 
 		private final Iterator<T> iter;
 
-		public IteratorEnumeration(Iterator<T> iter) {
+		public IteratorEnumeration(final Iterator<T> iter) {
 			this.iter = iter;
 		}
 
