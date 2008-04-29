@@ -215,6 +215,8 @@ public final class MailProperties {
 				loginType = LoginType.GLOBAL;
 			} else if (LoginType.USER.toString().equalsIgnoreCase(loginTypeStr)) {
 				loginType = LoginType.USER;
+			} else if (LoginType.CONFIG.toString().equalsIgnoreCase(loginTypeStr)) {
+				loginType = LoginType.CONFIG;
 			} else if (LoginType.ANONYMOUS.toString().equalsIgnoreCase(loginTypeStr)) {
 				loginType = LoginType.ANONYMOUS;
 			} else {
