@@ -431,7 +431,7 @@ public final class MessageUtility {
 			 * Filter inline images
 			 */
 			if (displayVersion && usm.isDisplayHtmlInlineContent()) {
-				retval = filterInlineImages(retval, session, mailPath);
+				retval = filterImages(retval, session, usm, mailPath);
 			}
 		} else {
 			/*
@@ -551,6 +551,8 @@ public final class MessageUtility {
 	private static final Pattern FILENAME_PATTERN = Pattern.compile(
 			"src=\"?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)\"?", Pattern.CASE_INSENSITIVE);
 
+	private static final Pattern SRC_PATTERN = Pattern.compile("src=", Pattern.CASE_INSENSITIVE);
+
 	private static final String STR_AJAX_MAIL = "\"/ajax/mail?";
 
 	private static final String STR_SRC = "src=";
@@ -560,52 +562,82 @@ public final class MessageUtility {
 	private static final String CHARSET_ISO8859 = "ISO-8859-1";
 
 	/**
-	 * Replaces all occurrences of <code>&lt;img cid:&quot;[cid]&quot;...</code>
-	 * with links to the image content to let the browser display the inlined
-	 * images
+	 * Filters images occurring in HTML content of a message:
+	 * <ul>
+	 * <li>Inline images<br>
+	 * The source of inline images is in the message itself. Thus loading the
+	 * inline image is redirected to the appropriate message (image) attachment
+	 * identified through header <code>Content-Id</code>; e.g.:
+	 * <code>&lt;img src=&quot;cid:[cid-value]&quot; ... /&gt;</code>.</li>
+	 * <li>Non-Inline images<br>
+	 * The source of non-inline images is somewhere in the internet and
+	 * therefore loading such an image should be done with extreme caution.
+	 * That's why the user is able to generally deny/allow loading of non-inline
+	 * images. If denied the <i>"src"</i> attribute of corresponding <i>"img"</i>
+	 * tag is replaced with <i>"oxsrc"</i> to suppress image loading but also
+	 * allow front-end load them on demand. </li>
+	 * </ul>
 	 * 
 	 * @param content
-	 *            The HTML content possibly containing inline images
+	 *            The HTML content possibly containing images
 	 * @param session
 	 *            The session providing needed user data
+	 * @param usm
+	 *            The user's mail settings
 	 * @param msgUID
 	 *            The message's unique path in mailbox
 	 * @return The HTML content with all inline images replaced with valid links
 	 */
-	public static String filterInlineImages(final String content, final Session session, final MailPath msgUID) {
+	public static String filterImages(final String content, final Session session, final UserSettingMail usm,
+			final MailPath msgUID) {
 		String reval = content;
 		try {
 			final Matcher imgMatcher = IMG_PATTERN.matcher(reval);
 			final StringBuffer sb = new StringBuffer(reval.length());
 			if (imgMatcher.find()) {
-				final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(
-						session.getUserId(), session.getContextId());
-				final StringBuffer cidBuffer = new StringBuffer(256);
+				final StringBuffer strBuffer = new StringBuffer(256);
+				/*
+				 * Replace inline images with Content-ID
+				 */
 				do {
 					final String imgTag = imgMatcher.group();
-					if (!replaceImgSrc(session, usm, msgUID, imgTag, cidBuffer)) {
+					boolean isInline = false;
+					if (!(isInline = replaceImgSrc(session, msgUID, imgTag, strBuffer))) {
 						/*
-						 * No cid found, try with filename
+						 * No cid pattern found, try with filename
 						 */
-						cidBuffer.setLength(0);
+						strBuffer.setLength(0);
 						final Matcher m = FILENAME_PATTERN.matcher(imgTag);
 						if (m.find()) {
+							isInline = true;
 							final StringBuilder linkBuilder = new StringBuilder(256);
 							final String filename = m.group(1);
-							linkBuilder.append(usm.isAllowHTMLImages() ? STR_SRC : STR_OXSRC).append(STR_AJAX_MAIL)
-									.append(AJAXServlet.PARAMETER_SESSION).append('=').append(session.getSecret())
-									.append('&').append(AJAXServlet.PARAMETER_ACTION).append('=').append(
-											AJAXServlet.ACTION_MATTACH).append('&').append(
+							linkBuilder.append(STR_SRC).append(STR_AJAX_MAIL).append(AJAXServlet.PARAMETER_SESSION)
+									.append('=').append(session.getSecret()).append('&').append(
+											AJAXServlet.PARAMETER_ACTION).append('=')
+									.append(AJAXServlet.ACTION_MATTACH).append('&').append(
 											AJAXServlet.PARAMETER_FOLDERID).append('=').append(
 											urlEncodeSafe(msgUID.getFolder(), CHARSET_ISO8859)).append('&').append(
 											AJAXServlet.PARAMETER_ID).append('=').append(msgUID.getUid()).append('&')
 									.append(Mail.PARAMETER_MAILCID).append('=').append(filename).append('"');
-							m.appendReplacement(cidBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
+							m.appendReplacement(strBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
 						}
-						m.appendTail(cidBuffer);
+						m.appendTail(strBuffer);
 					}
-					imgMatcher.appendReplacement(sb, Matcher.quoteReplacement(cidBuffer.toString()));
-					cidBuffer.setLength(0);
+					if (!isInline && !(usm.isAllowHTMLImages())) {
+						/*
+						 * User does not allow to display images by default:
+						 * Replace "src" with "oxsrc"
+						 */
+						strBuffer.setLength(0);
+						final Matcher m = SRC_PATTERN.matcher(imgTag);
+						if (m.find()) {
+							m.appendReplacement(strBuffer, Matcher.quoteReplacement(STR_OXSRC));
+						}
+						m.appendTail(strBuffer);
+					}
+					imgMatcher.appendReplacement(sb, Matcher.quoteReplacement(strBuffer.toString()));
+					strBuffer.setLength(0);
 				} while (imgMatcher.find());
 			}
 			imgMatcher.appendTail(sb);
@@ -616,8 +648,8 @@ public final class MessageUtility {
 		return reval;
 	}
 
-	private static boolean replaceImgSrc(final Session session, final UserSettingMail usm, final MailPath msgUID,
-			final String imgTag, final StringBuffer cidBuffer) {
+	private static boolean replaceImgSrc(final Session session, final MailPath msgUID, final String imgTag,
+			final StringBuffer cidBuffer) {
 		boolean retval = false;
 		final Matcher cidMatcher = CID_PATTERN.matcher(imgTag);
 		if (cidMatcher.find()) {
@@ -626,11 +658,10 @@ public final class MessageUtility {
 			do {
 				final String cid = (cidMatcher.group(1) == null ? cidMatcher.group(2) : cidMatcher.group(1));
 				linkBuilder.setLength(0);
-				linkBuilder.append(usm.isAllowHTMLImages() ? STR_SRC : STR_OXSRC).append(STR_AJAX_MAIL).append(
-						AJAXServlet.PARAMETER_SESSION).append('=').append(session.getSecret()).append('&').append(
-						AJAXServlet.PARAMETER_ACTION).append('=').append(AJAXServlet.ACTION_MATTACH).append('&')
-						.append(AJAXServlet.PARAMETER_FOLDERID).append('=').append(
-								urlEncodeSafe(msgUID.getFolder(), CHARSET_ISO8859)).append('&').append(
+				linkBuilder.append(STR_SRC).append(STR_AJAX_MAIL).append(AJAXServlet.PARAMETER_SESSION).append('=')
+						.append(session.getSecret()).append('&').append(AJAXServlet.PARAMETER_ACTION).append('=')
+						.append(AJAXServlet.ACTION_MATTACH).append('&').append(AJAXServlet.PARAMETER_FOLDERID).append(
+								'=').append(urlEncodeSafe(msgUID.getFolder(), CHARSET_ISO8859)).append('&').append(
 								AJAXServlet.PARAMETER_ID).append('=').append(msgUID.getUid()).append('&').append(
 								Mail.PARAMETER_MAILCID).append('=').append(cid).append('"');
 				cidMatcher.appendReplacement(cidBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
