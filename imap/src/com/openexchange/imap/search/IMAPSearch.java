@@ -118,17 +118,26 @@ public final class IMAPSearch {
 				final SearchTerm term = searchTerm.getJavaMailSearchTerm();
 				final long start = System.currentTimeMillis();
 				final Message[] msgs = imapFolder.search(term);
-				final int[] matchSeqNums = new int[msgs.length];
-				for (int i = 0; i < msgs.length; i++) {
-					matchSeqNums[i] = msgs[i].getMessageNumber();
-				}
-				// final int[] matchSeqNums =
-				// imapFolder.getProtocol().search(term);
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(new StringBuilder(128).append("IMAP search took ").append(
 							(System.currentTimeMillis() - start)).append("msec").toString());
 				}
-				return matchSeqNums;
+				final int[] matchMsgNums = new int[msgs.length];
+				for (int i = 0; i < matchMsgNums.length; i++) {
+					matchMsgNums[i] = msgs[i].getMessageNumber();
+				}
+				return matchMsgNums;
+				// /*
+				// * Filter matches which occur in result since IMAP search
+				// * ignores umlauts
+				// */
+				// final SmartIntArray sia = new SmartIntArray(msgs.length);
+				// for (int i = 0; i < msgs.length; i++) {
+				// if (searchTerm.matches(msgs[i])) {
+				// sia.append(msgs[i].getMessageNumber());
+				// }
+				// }
+				// return sia.toArray();
 			} catch (final Throwable t) {
 				if (LOG.isWarnEnabled()) {
 					final IMAPException imapException = new IMAPException(IMAPException.Code.IMAP_SEARCH_FAILED, t, t
