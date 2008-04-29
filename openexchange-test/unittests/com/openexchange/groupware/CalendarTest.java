@@ -114,7 +114,7 @@ public class CalendarTest extends TestCase {
         return new ContextImpl(contextid);
     }
     
-    static final void fillDatesInDao(CalendarDataObject cdao) {
+    public static final void fillDatesInDao(CalendarDataObject cdao) {
         long s = System.currentTimeMillis();
         long cals = s;
         long calsmod = s%CalendarRecurringCollection.MILLI_DAY;

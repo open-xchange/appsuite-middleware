@@ -51,9 +51,7 @@ package com.openexchange.groupware.calendar;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.*;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.session.Session;
@@ -74,7 +72,37 @@ public class CalendarContextToolkit {
             uStorage = UserStorage.getInstance();
             return uStorage.getUserId(username, ctx);
         } catch (LdapException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    public int resolveResource(String resource) {
+        return resolveResource(resource, getDefaultContext());
+    }
+
+    public int resolveResource(String resource, Context ctx) {
+        ResourceStorage rStorage = null;
+        try {
+            rStorage = ResourceStorage.getInstance();
+            return rStorage.searchResources(resource, ctx)[0].getIdentifier();
+        } catch (LdapException e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    public int resolveGroup(String group) {
+        return resolveGroup(group, getDefaultContext());
+    }
+
+    public int resolveGroup(String group, Context ctx) {
+       GroupStorage gStorage = null;
+        try {
+            gStorage = GroupStorage.getInstance();
+            return gStorage.searchGroups(group, ctx)[0].getIdentifier();
+        } catch (LdapException e) {
+            e.printStackTrace();
             return -1;
         }
     }
@@ -100,5 +128,27 @@ public class CalendarContextToolkit {
     public Session getSessionForUser(String user, Context ctx) {
         int userId = resolveUser(user, ctx);
         return SessionObjectWrapper.createSessionObject(userId,ctx,"session for "+user);    
+    }
+
+    public Group loadGroup(int id, Context ctx) {
+        GroupStorage gStorage = null;
+        try {
+            gStorage = GroupStorage.getInstance();
+            return gStorage.getGroup(id, ctx);
+        } catch (LdapException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public User loadUser(int userId, Context ctx) {
+        UserStorage uStorage = null;
+        try {
+            uStorage = UserStorage.getInstance();
+            return uStorage.getUser(userId, ctx);
+        } catch (LdapException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

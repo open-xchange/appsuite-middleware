@@ -51,13 +51,12 @@ package com.openexchange.groupware.calendar;
 import junit.framework.TestCase;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.Init;
-import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.CalendarTest;
+import com.openexchange.groupware.container.*;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.configuration.AJAXConfig;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.*;
 import java.sql.SQLException;
 
 /**
@@ -70,22 +69,45 @@ public class CalendarSqlTest extends TestCase {
     private int privateFolder;
     private Context ctx;
 
+    private String participant1, participant2, participant3;
+    private String resource1, resource2, resource3;
+
+    private String group,member;
+
+    private final long FUTURE = System.currentTimeMillis()+24*3600000;
+    private String user;
+    private String secondUser;
+
     public void setUp() throws Exception {
         Init.startServer();
         AJAXConfig.init();
 
-        String user = AJAXConfig.getProperty(AJAXConfig.Property.LOGIN);
+        user = AJAXConfig.getProperty(AJAXConfig.Property.LOGIN);
+        secondUser = AJAXConfig.getProperty(AJAXConfig.Property.SECONDUSER);
+
         CalendarContextToolkit tools = new CalendarContextToolkit();
         ctx = tools.getDefaultContext();
-        int userId = tools.resolveUser(user,ctx);
-        privateFolder = new CalendarFolderToolkit().getStandardFolder(userId, ctx);
-        calendar = new CalendarSql( tools.getSessionForUser(user, ctx) );
-        
+
+        switchUser( user );
+
+        participant1 = AJAXConfig.getProperty(AJAXConfig.Property.USER_PARTICIPANT1);
+        participant2 = AJAXConfig.getProperty(AJAXConfig.Property.USER_PARTICIPANT2);
+        participant3 = AJAXConfig.getProperty(AJAXConfig.Property.USER_PARTICIPANT3);
+
+        resource1 = AJAXConfig.getProperty(AJAXConfig.Property.RESOURCE_PARTICIPANT1);
+        resource2 = AJAXConfig.getProperty(AJAXConfig.Property.RESOURCE_PARTICIPANT2);
+        resource3 = AJAXConfig.getProperty(AJAXConfig.Property.RESOURCE_PARTICIPANT3);
+
+        group = AJAXConfig.getProperty(AJAXConfig.Property.GROUP_PARTICIPANT);
+        int groupid = tools.resolveGroup(group, ctx);
+        int memberid = tools.loadGroup(groupid, ctx).getMember()[0];
+        member = tools.loadUser(memberid, ctx).getLoginInfo();
     }
 
     public void tearDown() throws OXException, SQLException {
+        switchUser( user );
         for(CalendarDataObject cdao : clean) {
-            //calendar.deleteAppointmentObject(cdao,privateFolder,new Date(Long.MAX_VALUE));
+            calendar.deleteAppointmentObject(cdao,privateFolder,new Date(Long.MAX_VALUE));
         }
         Init.stopServer();
     }
@@ -108,9 +130,6 @@ public class CalendarSqlTest extends TestCase {
             fail("Could save invalid dayInMonth value");
         } catch (OXException x) {
             // Passed. The invalid value wasn't accepted.       
-        } catch (SQLException x) {
-            x.printStackTrace();
-            fail(x.toString());
         }
     }
 
@@ -175,11 +194,98 @@ public class CalendarSqlTest extends TestCase {
         }
     }
 
-    private void save(CalendarDataObject cdao) throws OXException, SQLException {
+    // Node 1077
+    public void testShouldSupplyConflictingUserParticipants() throws SQLException, OXException {
+        CalendarDataObject appointment = buildAppointmentWithUserParticipants(participant1, participant2);
+        save( appointment ); clean.add( appointment );
+        CalendarDataObject conflictingAppointment = buildAppointmentWithUserParticipants(participant1, participant3);
+        conflictingAppointment.setIgnoreConflicts(false);
+        CalendarDataObject[] conflicts = save( conflictingAppointment );
+
+        assertNotNull(conflicts);
+        assertEquals(1, conflicts.length);
+        CalendarDataObject conflict = conflicts[0];
+        assertEquals(appointment.getObjectID(), conflict.getObjectID());
+        assertUserParticipants(conflict, participant1);
+    }
+
+    // Node 1077
+    public void testShouldSupplyConflictingResourceParticipants() throws SQLException, OXException {
+        CalendarDataObject appointment = buildAppointmentWithResourceParticipants(resource1, resource2);
+        save( appointment );  clean.add( appointment );
+        CalendarDataObject conflictingAppointment = buildAppointmentWithResourceParticipants(resource1, resource3);
+        conflictingAppointment.setIgnoreConflicts(false);
+        CalendarDataObject[] conflicts = save( conflictingAppointment );
+
+        assertNotNull(conflicts);
+        assertEquals(1, conflicts.length);
+        CalendarDataObject conflict = conflicts[0];
+        assertEquals(appointment.getObjectID(), conflict.getObjectID());
+        assertResourceParticipants(conflict, resource1);
+    }
+
+    // Node 1077
+    public void testShouldSupplyConflictingUserParticipantsInGroup() throws OXException {
+        CalendarDataObject appointment = buildAppointmentWithGroupParticipants(group);
+        save( appointment ); clean.add( appointment );
+
+        CalendarDataObject conflictingAppointment = buildAppointmentWithUserParticipants( member );
+        conflictingAppointment.setIgnoreConflicts( false );
+
+        CalendarDataObject[] conflicts = save( conflictingAppointment );
+
+        assertNotNull(conflicts);
+        assertEquals(1, conflicts.length);
+        CalendarDataObject conflict = conflicts[0];
+        assertEquals(appointment.getObjectID(), conflict.getObjectID());
+        assertUserParticipants(conflict, member );
+    
+    }
+
+
+    // Node 1077
+    public void testShouldSupplyTitleIfPermissionsAllowIt() throws OXException {
+        CalendarDataObject appointment = buildAppointmentWithUserParticipants(participant1, participant2);
+        save( appointment ); clean.add( appointment );
+        CalendarDataObject conflictingAppointment = buildAppointmentWithUserParticipants(participant1, participant3);
+        conflictingAppointment.setIgnoreConflicts(false);
+        CalendarDataObject[] conflicts = save( conflictingAppointment );
+
+        assertNotNull(conflicts);
+        assertEquals(1, conflicts.length);
+        CalendarDataObject conflict = conflicts[0];
+        assertEquals(appointment.getTitle(), conflict.getTitle());
+    }
+
+    // Node 1077    
+    public void testShouldSuppressTitleIfPermissionsDenyIt() throws OXException {
+        CalendarDataObject appointment = buildAppointmentWithUserParticipants(participant1, participant2);
+        save( appointment ); clean.add( appointment );
+
+        switchUser( secondUser );
+        
+        CalendarDataObject conflictingAppointment = buildAppointmentWithUserParticipants(participant1, participant3);
+        conflictingAppointment.setIgnoreConflicts(false);
+        CalendarDataObject[] conflicts = save( conflictingAppointment );
+
+        assertNotNull(conflicts);
+        assertEquals(1, conflicts.length);
+        CalendarDataObject conflict = conflicts[0];
+        assertNull(conflict.getTitle());
+    }
+
+    private void switchUser(String user) {
+        CalendarContextToolkit tools = new CalendarContextToolkit();
+        int userId = tools.resolveUser(user,ctx);
+        privateFolder = new CalendarFolderToolkit().getStandardFolder(userId, ctx);
+        calendar = new CalendarSql( tools.getSessionForUser(user, ctx) );
+    }
+
+    private CalendarDataObject[] save(CalendarDataObject cdao) throws OXException {
         if(cdao.containsObjectID()) {
-            calendar.updateAppointmentObject(cdao, cdao.getParentFolderID(), new Date(Long.MAX_VALUE));
+            return calendar.updateAppointmentObject(cdao, cdao.getParentFolderID(), new Date(Long.MAX_VALUE));
         } else {
-            calendar.insertAppointmentObject(cdao);            
+            return calendar.insertAppointmentObject(cdao);            
         }
     }
 
@@ -192,8 +298,7 @@ public class CalendarSqlTest extends TestCase {
         cdao.setTitle("recurring");
         cdao.setParentFolderID(privateFolder);
         cdao.setIgnoreConflicts(true);
-        cdao.setStartDate(new Date(0));
-        cdao.setEndDate(new Date(60*60*1000));
+        CalendarTest.fillDatesInDao(cdao);
         cdao.setRecurrenceType(CalendarObject.MONTHLY);
         cdao.setRecurrenceCount(5);
         cdao.setDayInMonth(3);
@@ -203,6 +308,109 @@ public class CalendarSqlTest extends TestCase {
 
         cdao.setContext(ctx);
         return cdao;
+    }
+
+    private CalendarDataObject buildAppointmentWithUserParticipants(String...usernames) {
+        return buildAppointmentWithParticipants(usernames, new String[0], new String[0]);
+    }
+
+    private CalendarDataObject buildAppointmentWithResourceParticipants(String...resources) {
+        return buildAppointmentWithParticipants(new String[0], resources, new String[0]);
+    }
+
+    private CalendarDataObject buildAppointmentWithGroupParticipants(String...groups) {
+        return buildAppointmentWithParticipants(new String[0], new String[0], groups);
+    }
+
+    private CalendarDataObject buildAppointmentWithParticipants(String[] users, String[] resources, String[] groups) {
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setTitle("with participants");
+        cdao.setParentFolderID(privateFolder);
+        cdao.setIgnoreConflicts(true);
+
+        long FIVE_DAYS = 5l*24l*3600000l;
+        long THREE_HOURS = 3l*3600000l;
+
+        cdao.setStartDate(new Date(FUTURE + FIVE_DAYS));
+        cdao.setEndDate(new Date(FUTURE + FIVE_DAYS + THREE_HOURS));
+        cdao.setContext(ctx);
+
+        List<Participant> participants = new ArrayList<Participant>(users.length+resources.length+groups.length);
+        participants.addAll( users(users) );
+        participants.addAll( resources(resources) );
+        participants.addAll( groups(groups) );
+
+        cdao.setParticipants(participants);
+        return cdao;
+    }
+
+    private void assertUserParticipants(CalendarDataObject cdao, String...users) {
+        assertParticipants(cdao, users, new String[0]);    
+    }
+
+    private void assertResourceParticipants(CalendarDataObject cdao, String...resources) {
+        assertParticipants(cdao, new String[0], resources);    
+    }
+
+    private void assertParticipants(CalendarDataObject cdao, String[] users, String[] resources) {
+        assertNotNull("Participants should be set! ", cdao.getParticipants());
+
+        Set<UserParticipant> userParticipants = new HashSet<UserParticipant>(users(users));
+        Set<ResourceParticipant> resourceParticipants = new HashSet<ResourceParticipant>(resources(resources));
+        Set<Participant> unexpected = new HashSet<Participant>();
+        for(Participant participant : cdao.getParticipants()) {
+            if(!(userParticipants.remove(participant)) && !(resourceParticipants.remove(participant))) {
+               unexpected.add( participant );
+            }
+        }
+        StringBuilder problems = new StringBuilder();
+        boolean mustFail = false;
+        if(!unexpected.isEmpty()) {
+            mustFail = true;
+            problems.append("Didn't expect: ").append(unexpected).append(". ");
+        }
+        if(!userParticipants.isEmpty()) {
+            mustFail = true;
+            problems.append("Missing user participants: ").append(userParticipants).append(". ");
+        }
+        if(!resourceParticipants.isEmpty()) {
+            mustFail = true;
+            problems.append("Missing resource participants: ").append(resourceParticipants).append(". ");
+        }
+        if( mustFail ) { fail( problems.toString() ); }
+    }
+
+    private List<UserParticipant> users(String...users) {
+        List<UserParticipant> participants = new ArrayList<UserParticipant>(users.length);
+        CalendarContextToolkit tools = new CalendarContextToolkit();
+        for(String user : users) {
+            int id = tools.resolveUser(user, ctx);
+            UserParticipant participant = new UserParticipant(id);
+            participants.add( participant );
+        }
+        return participants;
+    }
+
+    private List<ResourceParticipant> resources(String...resources) {
+        List<ResourceParticipant> participants = new ArrayList<ResourceParticipant>(resources.length);
+        CalendarContextToolkit tools = new CalendarContextToolkit();
+        for(String resource : resources) {
+            int id = tools.resolveResource(resource, ctx);
+            ResourceParticipant participant = new ResourceParticipant(id);
+            participants.add( participant );
+        }
+        return participants;
+    }
+
+    private List<GroupParticipant> groups(String...groups) {
+        List<GroupParticipant> participants = new ArrayList<GroupParticipant>(groups.length);
+        CalendarContextToolkit tools = new CalendarContextToolkit();
+        for(String group : groups) {
+            int id = tools.resolveGroup(group, ctx);
+            GroupParticipant participant = new GroupParticipant(id);
+            participants.add( participant );
+        }
+        return participants;
     }
 
 }
