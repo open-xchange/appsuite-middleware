@@ -65,8 +65,10 @@ import java.util.Set;
 import javax.mail.Address;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
+import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.StoreClosedException;
 import javax.mail.internet.InternetAddress;
 
 import com.openexchange.imap.IMAPCommandsCollection;
@@ -78,6 +80,7 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -419,9 +422,21 @@ public final class IMAPSort {
 					return EMPTY_MSGS;
 				}
 				applicationSort = false;
-			} catch (final Throwable t) {
+			} catch (final FolderClosedException e) {
+				/*
+				 * Caused by a protocol error such as a socket error. No retry
+				 * in this case.
+				 */
+				throw e;
+			} catch (final StoreClosedException e) {
+				/*
+				 * Caused by a protocol error such as a socket error. No retry
+				 * in this case.
+				 */
+				throw e;
+			} catch (final MessagingException e) {
 				if (LOG.isWarnEnabled()) {
-					final IMAPException imapException = new IMAPException(IMAPException.Code.IMAP_SORT_FAILED, t, t
+					final IMAPException imapException = new IMAPException(IMAPException.Code.IMAP_SORT_FAILED, e, e
 							.getMessage());
 					LOG.warn(imapException.getLocalizedMessage(), imapException);
 				}

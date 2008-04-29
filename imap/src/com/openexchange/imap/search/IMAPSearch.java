@@ -54,8 +54,10 @@ import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfil
 
 import java.util.Set;
 
+import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.StoreClosedException;
 import javax.mail.search.SearchTerm;
 
 import com.openexchange.imap.IMAPCapabilities;
@@ -147,9 +149,21 @@ public final class IMAPSearch {
 				// matchSeqNums = sia.toArray();
 				// }
 				// return matchSeqNums;
-			} catch (final Throwable t) {
+			} catch (final FolderClosedException e) {
+				/*
+				 * Caused by a protocol error such as a socket error. No retry
+				 * in this case.
+				 */
+				throw e;
+			} catch (final StoreClosedException e) {
+				/*
+				 * Caused by a protocol error such as a socket error. No retry
+				 * in this case.
+				 */
+				throw e;
+			} catch (final MessagingException e) {
 				if (LOG.isWarnEnabled()) {
-					final IMAPException imapException = new IMAPException(IMAPException.Code.IMAP_SEARCH_FAILED, t, t
+					final IMAPException imapException = new IMAPException(IMAPException.Code.IMAP_SEARCH_FAILED, e, e
 							.getMessage());
 					LOG.warn(imapException.getLocalizedMessage(), imapException);
 				}
