@@ -1,3 +1,7 @@
+* 2008-04-29 - choeger@open-xchange.com
+
+  - Bugfix ID#11194 getaccesscombinationnameforuser throws NoClassDefFoundError
+
 * 2008-03-05 - choeger@open-xchange.com
 
   - Bugfix ID#10414 oxinstaller sets read db connection to the wrong server for master/slave setups
