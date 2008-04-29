@@ -113,6 +113,7 @@ public class PushOutputQueue implements Runnable {
 			isRunning = true;
 
 			final Thread th = new Thread(this);
+			th.setName(this.getClass().getName());
 			th.start();
 		} else {
 			if (LOG.isInfoEnabled()) {
