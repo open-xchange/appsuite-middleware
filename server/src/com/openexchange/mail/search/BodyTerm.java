@@ -133,6 +133,11 @@ public final class BodyTerm extends SearchTerm<String> {
 		return new javax.mail.search.BodyTerm(pattern);
 	}
 
+	@Override
+	public boolean isAscii() {
+		return isAscii(pattern);
+	}
+
 	/**
 	 * Extracts textual content out of given message's body
 	 * 

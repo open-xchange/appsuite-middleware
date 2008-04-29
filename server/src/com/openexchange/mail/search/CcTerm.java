@@ -122,4 +122,9 @@ public final class CcTerm extends SearchTerm<String> {
 	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
 		return new RecipientStringTerm(Message.RecipientType.CC, addr);
 	}
+
+	@Override
+	public boolean isAscii() {
+		return isAscii(addr);
+	}
 }

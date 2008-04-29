@@ -122,4 +122,9 @@ public final class FromTerm extends SearchTerm<String> {
 	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
 		return new FromStringTerm(addr);
 	}
+
+	@Override
+	public boolean isAscii() {
+		return isAscii(addr);
+	}
 }

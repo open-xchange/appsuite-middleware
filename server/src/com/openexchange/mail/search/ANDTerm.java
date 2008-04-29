@@ -174,4 +174,9 @@ public final class ANDTerm extends SearchTerm<SearchTerm<?>[]> {
 		return andTerm;
 	}
 
+	@Override
+	public boolean isAscii() {
+		return terms[0].isAscii() && terms[1].isAscii();
+	}
+
 }

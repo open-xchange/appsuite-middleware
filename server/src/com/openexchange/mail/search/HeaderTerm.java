@@ -130,4 +130,9 @@ public final class HeaderTerm extends SearchTerm<String[]> {
 	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
 		return new javax.mail.search.HeaderTerm(hdr[0], hdr[1]);
 	}
+
+	@Override
+	public boolean isAscii() {
+		return isAscii(hdr[1]);
+	}
 }

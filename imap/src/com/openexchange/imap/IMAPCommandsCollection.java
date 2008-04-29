@@ -396,7 +396,7 @@ public final class IMAPCommandsCollection {
 	 */
 	public static int[] getServerSortList(final IMAPFolder folder, final String sortCrit, final int[] toSort)
 			throws MessagingException {
-		return getServerSortList(folder, sortCrit, IMAPNumArgSplitter.splitSeqNumArg(toSort, false));
+		return getServerSortList(folder, sortCrit, IMAPNumArgSplitter.getSeqNumArg(toSort, false, false));
 	}
 
 	private static final String[] RANGE_ALL = { "ALL" };

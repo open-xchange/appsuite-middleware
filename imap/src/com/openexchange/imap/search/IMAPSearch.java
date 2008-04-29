@@ -122,22 +122,31 @@ public final class IMAPSearch {
 					LOG.debug(new StringBuilder(128).append("IMAP search took ").append(
 							(System.currentTimeMillis() - start)).append("msec").toString());
 				}
-				final int[] matchMsgNums = new int[msgs.length];
-				for (int i = 0; i < matchMsgNums.length; i++) {
-					matchMsgNums[i] = msgs[i].getMessageNumber();
+				final int[] matchSeqNums = new int[msgs.length];
+				for (int i = 0; i < msgs.length; i++) {
+					matchSeqNums[i] = msgs[i].getMessageNumber();
 				}
-				return matchMsgNums;
+				return matchSeqNums;
 				// /*
 				// * Filter matches which occur in result since IMAP search
 				// * ignores umlauts
 				// */
+				// final int[] matchSeqNums;
+				// if (searchTerm.isAscii()) {
+				// matchSeqNums = new int[msgs.length];
+				// for (int i = 0; i < msgs.length; i++) {
+				// matchSeqNums[i] = msgs[i].getMessageNumber();
+				// }
+				// } else {
 				// final SmartIntArray sia = new SmartIntArray(msgs.length);
 				// for (int i = 0; i < msgs.length; i++) {
 				// if (searchTerm.matches(msgs[i])) {
 				// sia.append(msgs[i].getMessageNumber());
 				// }
 				// }
-				// return sia.toArray();
+				// matchSeqNums = sia.toArray();
+				// }
+				// return matchSeqNums;
 			} catch (final Throwable t) {
 				if (LOG.isWarnEnabled()) {
 					final IMAPException imapException = new IMAPException(IMAPException.Code.IMAP_SEARCH_FAILED, t, t

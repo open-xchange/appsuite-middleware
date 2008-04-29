@@ -150,6 +150,28 @@ public final class IMAPNumArgSplitter {
 	 * @return an appropriate array of command arguments
 	 */
 	public static String[] splitSeqNumArg(final int[] arr, final boolean keepOrder) {
+		return getSeqNumArg(arr, keepOrder, true);
+	}
+
+	/**
+	 * Given array of sequence numbers is first transformed into a valid IMAP
+	 * command's number argument and then split into max. IMAP command length
+	 * pieces if desired.
+	 * 
+	 * @param arr -
+	 *            the array of sequence numbers
+	 * @param keepOrder -
+	 *            whether the values' ordering in array parameter
+	 *            <code>arr</code> shall be kept or not; if ordering does not
+	 *            care a more compact number argument for IMAP command is going
+	 *            to be created by grouping sequential numbers e.g.
+	 *            <code>1,2,3,4,5 -> 1:5</code>
+	 * @param split
+	 *            Whether to split number argument according to max. allowed
+	 *            IMAP command length
+	 * @return an appropriate array of command arguments
+	 */
+	public static String[] getSeqNumArg(final int[] arr, final boolean keepOrder, final boolean split) {
 		final List<Integer> l = new ArrayList<Integer>(arr.length);
 		for (int i = 0; i < arr.length; i++) {
 			l.add(Integer.valueOf(arr[i]));
@@ -157,7 +179,7 @@ public final class IMAPNumArgSplitter {
 		if (!keepOrder) {
 			Collections.sort(l);
 		}
-		return split(getNumArg(l), MAX_IMAP_COMMAND_LENGTH);
+		return split ? split(getNumArg(l), MAX_IMAP_COMMAND_LENGTH) : new String[] { getNumArg(l) };
 	}
 
 	/**
@@ -217,8 +239,8 @@ public final class IMAPNumArgSplitter {
 	 * Generates a number argument valid for IMAP commands expecting message's
 	 * sequence numbers or UIDs. That is contiguous numbers may be abbreviated
 	 * as a sequence representation e.g. <code>5:24</code> meaning all numbers
-	 * beginning from 5 ending with 24. Non-contiguous numbers must be
-	 * delimited using a comma.
+	 * beginning from 5 ending with 24. Non-contiguous numbers must be delimited
+	 * using a comma.
 	 * <p>
 	 * <b>NOTE:</b> This routine does not take care if the resulting argument
 	 * in addition to rest of IMAP command exceeds the max. length of 16384

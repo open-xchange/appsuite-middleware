@@ -200,4 +200,35 @@ public abstract class SearchTerm<T> implements Serializable {
 		return this;
 	}
 
+	/**
+	 * Checks if this search term's pattern only consists of ASCII 7 bit
+	 * characters.
+	 * <p>
+	 * This method implies that this search is some kind of string search term.
+	 * Returns <code>true</code> if not appropriate.
+	 * 
+	 * @return <code>true</code> if search term's pattern only consists of
+	 *         ASCII 7 bit characters; otherwise <code>false</code>
+	 */
+	public boolean isAscii() {
+		return true;
+	}
+
+	/**
+	 * Checks whether the specified string only consists of ASCII 7 bit
+	 * characters.
+	 * 
+	 * @param s
+	 *            the string to check
+	 * @return <code>true</code> if less than 128; otherwise
+	 *         <code>false</code>
+	 */
+	protected static boolean isAscii(final String s) {
+		final char[] chars = s.toCharArray();
+		boolean isAscii = true;
+		for (int i = 0; i < chars.length && isAscii; i++) {
+			isAscii = (chars[i] < 128);
+		}
+		return isAscii;
+	}
 }

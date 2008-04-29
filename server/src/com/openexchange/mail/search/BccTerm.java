@@ -123,4 +123,8 @@ public final class BccTerm extends SearchTerm<String> {
 		return new RecipientStringTerm(Message.RecipientType.BCC, addr);
 	}
 
+	@Override
+	public boolean isAscii() {
+		return isAscii(addr);
+	}
 }

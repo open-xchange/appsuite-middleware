@@ -165,4 +165,9 @@ public final class ORTerm extends SearchTerm<SearchTerm<?>[]> {
 		}
 		return orTerm;
 	}
+
+	@Override
+	public boolean isAscii() {
+		return terms[0].isAscii() && terms[1].isAscii();
+	}
 }

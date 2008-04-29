@@ -126,4 +126,9 @@ public final class SubjectTerm extends SearchTerm<String> {
 	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
 		return new javax.mail.search.SubjectTerm(unicodeSubject);
 	}
+
+	@Override
+	public boolean isAscii() {
+		return isAscii(unicodeSubject);
+	}
 }

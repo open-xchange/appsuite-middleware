@@ -122,4 +122,9 @@ public final class ToTerm extends SearchTerm<String> {
 	public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
 		return new RecipientStringTerm(Message.RecipientType.TO, addr);
 	}
+
+	@Override
+	public boolean isAscii() {
+		return isAscii(addr);
+	}
 }
