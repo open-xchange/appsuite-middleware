@@ -118,6 +118,7 @@
 			<test name="com.openexchange.ajax.GroupTest" todir="${test.xml.dir}" />
 			<test name="com.openexchange.ajax.ResourceTest" todir="${test.xml.dir}" />
 			<test name="com.openexchange.ajax.LinkTest" todir="${test.xml.dir}" />
+            <test name="com.openexchange.ajax.links.LinksTestSuite" todir="${test.xml.dir}" />
 			<test name="com.openexchange.ajax.MultipleTest" todir="${test.xml.dir}" />
 
 			<test name="com.openexchange.groupware.importexport.ImportExportServerSuite" todir="${test.xml.dir}" />

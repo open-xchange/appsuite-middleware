@@ -161,4 +161,14 @@ public class FunctionTests extends AbstractAJAXSession {
         }
         LOG.info(sb.toString());
     }
+
+    /**
+     * Checks if the new preferences entry extras works.
+     */
+    public void testConfigJumpFlag() throws Throwable {
+        final AJAXClient client = getClient();
+        final GetResponse get = ConfigTools.get(client, new GetRequest(Tree
+            .Extras));
+        LOG.info("Should extras link be displayed: " + get.getBoolean());
+    }
 }

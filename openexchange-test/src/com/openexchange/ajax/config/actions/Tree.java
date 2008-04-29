@@ -81,17 +81,19 @@ public enum Tree {
 
     MailFilter("/modules/mailfilter"),
     
-    DefaultAddress("/mail/defaultaddress"),
+    DefaultAddress("/modules/mail/defaultaddress"),
 
-    MailAddresses("/mail/addresses"),
+    MailAddresses("/modules//mail/addresses"),
 
-    SendAddress("/mail/sendaddress"),
+    SendAddress("/modules//mail/sendaddress"),
     
-    InboxFolder("/mail/folder/inbox"),
+    InboxFolder("/modules/mail/defaultFolder/inbox"),
     
-    SentFolder("/mail/folder/sent"),
+    SentFolder("/modules/mail/defaultFolder/sent"),
     
-    TrashFolder("/mail/folder/trash");
+    TrashFolder("/modules/mail/defaultFolder/trash"),
+
+    Extras("/modules/com.openexchange.extras/module");
 
     private final String path;
 
