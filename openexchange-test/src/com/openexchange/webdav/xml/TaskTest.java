@@ -85,7 +85,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	public static void compareObject(Task taskObj1, Task taskObj2) throws Exception {
 		assertEquals("id is not equals", taskObj1.getObjectID(), taskObj2.getObjectID());
 		assertEqualsAndNotNull("title is not equals", taskObj1.getTitle(), taskObj2.getTitle());
-		assertEqualsAndNotNull("start is not equals", taskObj1.getStartDate(), taskObj2.getStartDate());
+		assertEqualsAndNotNull("start is not equals", taskObj1.getStartDate(), taskObj2.getStartDate());		
 		assertEqualsAndNotNull("end is not equals", taskObj1.getEndDate(), taskObj2.getEndDate());
 		assertEquals("folder id is not equals", taskObj1.getParentFolderID(), taskObj2.getParentFolderID());
 		assertEquals("private flag is not equals", taskObj1.getPrivateFlag(), taskObj2.getPrivateFlag());

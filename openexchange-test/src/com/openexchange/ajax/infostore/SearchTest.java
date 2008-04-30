@@ -174,7 +174,7 @@ public class SearchTest extends InfostoreAJAXTest {
 		assertTitles(res,"Test 1", "Test 10", "Test 11", "Test 12", "Test 13", "Test 14", "Test 15", "Test 16", "Test 17", "Test 18", "Test 19", "Test 21");
 	}
 		
-	public void notestEscape() throws Exception{
+	public void testEscape() throws Exception{
 		int id = clean.get(0);
 		Response res = update(getWebConversation(),getHostName(),sessionId,id, System.currentTimeMillis(), m("title" , "The mysterious ?"));
 		assertNoError(res);

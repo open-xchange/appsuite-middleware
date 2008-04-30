@@ -42,7 +42,7 @@ public class UpdateTest extends TaskTest {
 		deleteTask(getWebConversation(), objectId, taskFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 	}
 	
-	public void _testUpdateTaskWithParticipants() throws Exception {
+	public void testUpdateTaskWithParticipants() throws Exception {
 		Task taskObj = createTask("testUpdateTask");
 		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		

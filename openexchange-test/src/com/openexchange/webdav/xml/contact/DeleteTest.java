@@ -23,7 +23,7 @@ public class DeleteTest extends ContactTest {
 		deleteContact(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
 	}
 	
-	public void _notestDeleteConcurentConflict() throws Exception {
+	public void testDeleteConcurentConflict() throws Exception {
 		ContactObject contactObj = createContactObject("testDeleteConcurentConflict");
 		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		

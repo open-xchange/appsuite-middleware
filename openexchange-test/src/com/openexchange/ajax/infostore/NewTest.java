@@ -97,7 +97,7 @@ public class NewTest extends InfostoreAJAXTest {
 	}
 	
 	
-	public void notestLargeFileUpload() throws Exception{
+	public void testLargeFileUpload() throws Exception{
 		File largeFile = File.createTempFile("test","bin");
 		largeFile.deleteOnExit();
 		

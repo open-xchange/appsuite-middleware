@@ -28,7 +28,7 @@ public class NewTest extends ContactTest {
 		compareObject(contactObj, loadContact);		
 	}
 	
-	public void _noestNewContactWithAttachment() throws Exception {
+	public void testNewContactWithAttachment() throws Exception {
 		ContactObject contactObj = createContactObject("testNewContactWithAttachment");
 		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		contactObj.setNumberOfAttachments(2);
@@ -53,7 +53,7 @@ public class NewTest extends ContactTest {
 		compareObject(contactObj, loadContact);	
 	}
 	
-	public void _notestContactInPrivateFlagInPublicFolder() throws Exception {
+	public void testContactInPrivateFlagInPublicFolder() throws Exception {
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testContactInPrivateFlagInPublicFolder" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CONTACT);
