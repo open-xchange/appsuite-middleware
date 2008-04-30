@@ -54,6 +54,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.List;
+import java.util.ArrayList;
 
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -72,10 +74,7 @@ import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.contact.LdapServer;
 import com.openexchange.contact.ldap.tools.LdapTools;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.OXThrowsMultiple;
+import com.openexchange.groupware.*;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contact.Classes;
 import com.openexchange.groupware.contact.ContactException;
@@ -578,7 +577,9 @@ public class ContactldapImpl implements ContactInterface {
         private NamingEnumeration<?> ne;
         private javax.naming.Context ctx;
 
-		private ContactLdapIterator(NamingEnumeration<?> ne, int[] cols, javax.naming.Context ctx) throws OXException, NamingException {
+        private List<AbstractOXException> warnings = new ArrayList<AbstractOXException>();
+
+        private ContactLdapIterator(NamingEnumeration<?> ne, int[] cols, javax.naming.Context ctx) throws OXException, NamingException {
 			this.cols = cols;
 			this.ne = ne;
 			this.ctx = ctx;
@@ -613,7 +614,19 @@ public class ContactldapImpl implements ContactInterface {
 			return false;
 		}
 
-		@OXThrows(
+        public boolean hasWarnings() {
+            return !warnings.isEmpty();
+        }
+
+        public void addWarning(AbstractOXException warning) {
+            warnings.add( warning );
+        }
+
+        public AbstractOXException[] getWarnings() {
+            return warnings.toArray(new AbstractOXException[warnings.size()]);
+        }
+
+        @OXThrows(
 				category=Category.CODE_ERROR,
 				desc="17",
 				exceptionId=17,
