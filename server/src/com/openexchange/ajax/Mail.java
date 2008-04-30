@@ -134,6 +134,7 @@ import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Helper;
@@ -248,6 +249,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public static final String PARAMETER_SEND_TYPE = "sendtype";
 
+	public static final String PARAMETER_ALLOW_IMAGES = "allowimages";
+
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		resp.setContentType(CONTENTTYPE_JAVASCRIPT);
@@ -338,14 +341,15 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionGetUpdates(final Session session, final JSONWriter writer, final JSONObject requestObj,
 			final MailServletInterface mi) throws JSONException {
-		Response.write(actionGetUpdates(session, ParamContainer.getInstance(requestObj, EnumComponent.MAIL), mi), writer);
+		Response.write(actionGetUpdates(session, ParamContainer.getInstance(requestObj, EnumComponent.MAIL), mi),
+				writer);
 	}
 
 	private final void actionGetUpdates(final HttpServletRequest req, final HttpServletResponse resp)
 			throws IOException, ServletException {
 		try {
-			Response.write(actionGetUpdates(getSessionObject(req), ParamContainer
-					.getInstance(req, EnumComponent.MAIL, resp), null), resp.getWriter());
+			Response.write(actionGetUpdates(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.MAIL,
+					resp), null), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		}
@@ -370,14 +374,15 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionGetMailCount(final Session session, final JSONWriter writer, final JSONObject requestObj,
 			final MailServletInterface mi) throws JSONException {
-		Response.write(actionGetMailCount(session, ParamContainer.getInstance(requestObj, EnumComponent.MAIL), mi), writer);
+		Response.write(actionGetMailCount(session, ParamContainer.getInstance(requestObj, EnumComponent.MAIL), mi),
+				writer);
 	}
 
 	private final void actionGetMailCount(final HttpServletRequest req, final HttpServletResponse resp)
 			throws IOException, ServletException {
 		try {
-			Response.write(actionGetMailCount(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.MAIL,
-					resp), null), resp.getWriter());
+			Response.write(actionGetMailCount(getSessionObject(req), ParamContainer.getInstance(req,
+					EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		}
@@ -429,7 +434,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionGetAllMails(final Session session, final JSONWriter writer, final JSONObject requestObj,
 			final MailServletInterface mi) throws SearchIteratorException, JSONException {
-		Response.write(actionGetAllMails(session, ParamContainer.getInstance(requestObj, EnumComponent.MAIL), mi), writer);
+		Response.write(actionGetAllMails(session, ParamContainer.getInstance(requestObj, EnumComponent.MAIL), mi),
+				writer);
 	}
 
 	private final void actionGetAllMails(final HttpServletRequest req, final HttpServletResponse resp)
@@ -557,9 +563,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionGetReply(final Session session, final JSONWriter writer, final JSONObject jo,
 			final boolean reply2all, final MailServletInterface mailInterface) throws JSONException {
-		Response.write(
-				actionGetReply(session, reply2all, ParamContainer.getInstance(jo, EnumComponent.MAIL), mailInterface),
-				writer);
+		Response.write(actionGetReply(session, reply2all, ParamContainer.getInstance(jo, EnumComponent.MAIL),
+				mailInterface), writer);
 	}
 
 	private final void actionGetReply(final HttpServletRequest req, final HttpServletResponse resp,
@@ -599,7 +604,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					closeMailInterface = true;
 				}
 				data = MessageWriter.writeMailMessage(mailInterface.getReplyMessageForDisplay(folderPath, uid,
-						reply2all), false, session);
+						reply2all), DisplayMode.MODIFYABLE, session, null);
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
@@ -625,16 +630,15 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionGetForward(final Session session, final JSONWriter writer, final JSONObject requestObj,
 			final MailServletInterface mailInterface) throws JSONException {
-		Response.write(
-				actionGetForward(session, ParamContainer.getInstance(requestObj, EnumComponent.MAIL), mailInterface),
-				writer);
+		Response.write(actionGetForward(session, ParamContainer.getInstance(requestObj, EnumComponent.MAIL),
+				mailInterface), writer);
 	}
 
 	private final void actionGetForward(final HttpServletRequest req, final HttpServletResponse resp)
 			throws IOException, ServletException {
 		try {
-			Response.write(actionGetForward(getSessionObject(req), ParamContainer
-					.getInstance(req, EnumComponent.MAIL, resp), null), resp.getWriter());
+			Response.write(actionGetForward(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.MAIL,
+					resp), null), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		}
@@ -667,7 +671,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 					closeMailInterface = true;
 				}
 				data = MessageWriter.writeMailMessage(mailInterface.getForwardMessageForDisplay(folderPath,
-						new long[] { uid }), false, session);
+						new long[] { uid }), DisplayMode.MODIFYABLE, session, null);
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
@@ -693,14 +697,15 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public void actionGetMessage(final Session session, final JSONWriter writer, final JSONObject requestObj,
 			final MailServletInterface mi) throws JSONException {
-		Response.write(actionGetMessage(session, ParamContainer.getInstance(requestObj, EnumComponent.MAIL), mi), writer);
+		Response.write(actionGetMessage(session, ParamContainer.getInstance(requestObj, EnumComponent.MAIL), mi),
+				writer);
 	}
 
 	private final void actionGetMessage(final HttpServletRequest req, final HttpServletResponse resp)
 			throws IOException, ServletException {
 		try {
-			Response.write(actionGetMessage(getSessionObject(req), ParamContainer
-					.getInstance(req, EnumComponent.MAIL, resp), null), resp.getWriter());
+			Response.write(actionGetMessage(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.MAIL,
+					resp), null), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		}
@@ -731,6 +736,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 			final boolean showMessageHeaders = (STR_1.equals(tmp) || Boolean.parseBoolean(tmp));
 			tmp = paramContainer.getStringParam(PARAMETER_SAVE);
 			final boolean saveToDisk = (tmp != null && tmp.length() > 0 && Integer.parseInt(tmp) > 0);
+			tmp = paramContainer.getStringParam(PARAMETER_ALLOW_IMAGES);
+			final Boolean allowImages = null == tmp ? null : Boolean.valueOf(tmp);
 			tmp = null;
 			/*
 			 * Get message
@@ -779,7 +786,20 @@ public class Mail extends PermissionServlet implements UploadListener {
 				} else if (showMessageHeaders) {
 					data = formatMessageHeaders(mail.getHeadersIterator());
 				} else {
-					data = MessageWriter.writeMailMessage(mail, !editDraft, session);
+					final UserSettingMail usmNoSave = UserSettingMailStorage.getInstance().getUserSettingMail(
+							session.getUserId(), session.getContextId());
+					/*
+					 * Deny saving for this request-specific settings
+					 */
+					usmNoSave.setNoSave(true);
+					/*
+					 * Overwrite settings with request's parameters
+					 */
+					if (null != allowImages) {
+						usmNoSave.setAllowHTMLImages(allowImages.booleanValue());
+					}
+					data = MessageWriter.writeMailMessage(mail, editDraft ? DisplayMode.MODIFYABLE
+							: DisplayMode.DISPLAY, session, usmNoSave);
 				}
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
@@ -821,8 +841,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 	private final void actionGetNew(final HttpServletRequest req, final HttpServletResponse resp) throws IOException,
 			ServletException {
 		try {
-			Response.write(actionGetNew(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.MAIL, resp),
-					null), resp.getWriter());
+			Response.write(actionGetNew(getSessionObject(req), ParamContainer
+					.getInstance(req, EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		} catch (final SearchIteratorException e) {

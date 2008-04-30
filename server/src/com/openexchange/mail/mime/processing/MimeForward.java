@@ -52,12 +52,12 @@ package com.openexchange.mail.mime.processing;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.mail.BodyPart;
-import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Message.RecipientType;
@@ -75,21 +75,20 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.dataobjects.UUEncodedAttachmentMailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
-import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.parser.MailMessageParser;
+import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.mail.uuencode.UUEncodedMultiPart;
-import com.openexchange.mail.uuencode.UUEncodedPart;
 import com.openexchange.session.Session;
 
 /**
@@ -238,20 +237,19 @@ public final class MimeForward {
 					forwardMsg.setContent(multipart);
 					forwardMsg.saveChanges();
 				}
+				final CompositeMailMessage compositeMail = new CompositeMailMessage(MIMEMessageConverter
+						.convertMessage(forwardMsg));
 				/*
-				 * Add all non-inline parts
+				 * Add all non-inline parts through a handler to keep original
+				 * sequence IDs
 				 */
-				addNonInlineParts((Multipart) originalMsgs[0].getContent(), multipart);
-				forwardMsg.setContent(multipart);
-				forwardMsg.saveChanges();
-				forwardMail = MIMEMessageConverter.convertMessage(forwardMsg);
-				// forwardMail = new
-				// CompositeMailMessage(MIMEMessageConverter.convertMessage(forwardMsg));
-				/*
-				 * Add all non-inline parts
-				 */
-				// addNonInlineParts(originalMsgs[0], (CompositeMailMessage)
-				// forwardMail);
+				final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
+				new MailMessageParser().parseMailMessage(MIMEMessageConverter.convertMessage(originalMsgs[0]), handler);
+				final List<MailPart> parts = handler.getNonInlineParts();
+				for (final MailPart mailPart : parts) {
+					compositeMail.addAdditionalParts(mailPart);
+				}
+				forwardMail = compositeMail;
 			} else if (originalContentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
 				/*
 				 * Original message is a simple text mail: Add message body
@@ -280,54 +278,6 @@ public final class MimeForward {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		} catch (final ContextException e) {
 			throw new MailException(e);
-		}
-	}
-
-	private static void addNonInlineParts(final Multipart sourceMultipart, final Multipart attachToMe)
-			throws MessagingException, MailException, IOException {
-		final int count = sourceMultipart.getCount();
-		nextpart: for (int i = 0; i < count; i++) {
-			final BodyPart part = sourceMultipart.getBodyPart(i);
-			final ContentType ct = new ContentType(part.getContentType());
-			if (ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
-				addNonInlineParts((Multipart) part.getContent(), attachToMe);
-				continue nextpart;
-			}
-			if (!MimeProcessingUtility.isInline(part)) {
-				attachToMe.addBodyPart(part);
-				continue nextpart;
-			}
-			if (ct.isMimeType(MIMETypes.MIME_TEXT_PLAIN)) {
-				final String content = MessageUtility.readMimePart(part, ct);
-				final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
-				if (uuencodedMP.isUUEncoded()) {
-					/*
-					 * Look for uuencoded attachments
-					 */
-					final int uuencCount = uuencodedMP.getCount();
-					for (int a = 0; a < uuencCount; a++) {
-						final UUEncodedPart uuencPart = uuencodedMP.getBodyPart(a);
-						final MailPart mailPart = new UUEncodedAttachmentMailPart(uuencPart);
-						String cts = MIMEType2ExtMap.getContentType(uuencPart.getFileName());
-						if (cts == null || cts.length() == 0) {
-							cts = MIMETypes.MIME_APPL_OCTET;
-						}
-						mailPart.setContentType(cts);
-						mailPart.setSize(uuencPart.getFileSize());
-						mailPart.setFileName(uuencPart.getFileName());
-						attachToMe.addBodyPart((BodyPart) MIMEMessageConverter.convertMailPart(mailPart));
-					}
-					continue nextpart;
-				}
-			}
-			if (part.getHeader(MessageHeaders.HDR_CONTENT_ID) != null) {
-				attachToMe.addBodyPart(part);
-			} else if (ContentType.isMimeType(part.getContentType(), MIMETypes.MIME_MESSAGE_RFC822)) {
-				final Message m = (Message) part.getContent();
-				if (ContentType.isMimeType(m.getContentType(), MIMETypes.MIME_MULTIPART_ALL)) {
-					addNonInlineParts((Multipart) m.getContent(), attachToMe);
-				}
-			}
 		}
 	}
 

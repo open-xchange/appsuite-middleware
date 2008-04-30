@@ -78,8 +78,6 @@ import javax.mail.internet.MimeUtility;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailConfig;
@@ -87,7 +85,6 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.text.Html2TextConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.Collections.SmartIntArray;
 
@@ -405,8 +402,22 @@ public final class MessageUtility {
 
 	/**
 	 * Performs all the formatting for both text and HTML content for a proper
-	 * display according to user's configuration. The original content keeps
-	 * unaffected.
+	 * display according to specified user's mail settings.
+	 * <p>
+	 * If content is <b>plain text</b>:<br>
+	 * <ol>
+	 * <li>Plain text content is converted to valid HTML if at least
+	 * {@link DisplayMode#MODIFYABLE} is given</li>
+	 * <li>If enabled by settings simple quotes are turned to colored block
+	 * quotes if {@link DisplayMode#DISPLAY} is given</li>
+	 * <li>HTML links and URLs found in content are going to be prepared for
+	 * proper display if {@link DisplayMode#DISPLAY} is given</li>
+	 * </ol>
+	 * If content is <b>HTML</b>:<br>
+	 * <ol>
+	 * <li>Both inline and non-inline images found in HTML content are prepared
+	 * according to settings if {@link DisplayMode#DISPLAY} is given</li>
+	 * </ol>
 	 * 
 	 * @param content
 	 *            The content
@@ -417,35 +428,29 @@ public final class MessageUtility {
 	 *            The session providing needed user data
 	 * @param mailPath
 	 *            The message's unique path in mailbox
-	 * @param displayVersion
-	 *            <code>true</code> to prepare content ready for display-only
-	 *            purpose; otherwise to prepare content for some kind of
-	 *            editable display
+	 * @param usm
+	 *            The settings used for formatting content
+	 * @param mode
+	 *            The display mode
 	 * @return The formatted content
-	 * @throws ContextException
-	 *             If context cannot be loaded
 	 */
 	public static String formatContentForDisplay(final String content, final boolean isHtml, final Session session,
-			final MailPath mailPath, final boolean displayVersion) throws ContextException {
-		final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
-				ContextStorage.getStorageContext(session.getContextId()));
+			final MailPath mailPath, final UserSettingMail usm, final DisplayMode mode) {
 		String retval = content;
 		if (isHtml) {
-			/*
-			 * Filter inline images
-			 */
-			if (displayVersion && usm.isDisplayHtmlInlineContent()) {
+			if (DisplayMode.DISPLAY.equals(mode) && usm.isDisplayHtmlInlineContent()) {
 				retval = filterImages(retval, session, usm, mailPath);
 			}
 		} else {
-			/*
-			 * Replace special characters and insert color quotes
-			 */
-			retval = htmlFormat(retval);
-			if (usm.isUseColorQuote()) {
-				retval = replaceHTMLSimpleQuotesForDisplay(retval);
+			if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
+				retval = htmlFormat(retval);
 			}
-			retval = formatHrefLinks(retval);
+			if (DisplayMode.DISPLAY.equals(mode)) {
+				if (usm.isUseColorQuote()) {
+					retval = replaceHTMLSimpleQuotesForDisplay(retval);
+				}
+				retval = formatHrefLinks(retval);
+			}
 		}
 		return retval;
 	}

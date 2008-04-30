@@ -135,6 +135,12 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	@Override
 	public void saveUserSettingMail(final UserSettingMail usm, final int user, final Context ctx,
 			final Connection writeConArg) throws UserConfigurationException {
+		if (usm.isNoSave()) {
+			/*
+			 * Saving to storage denied
+			 */
+			return;
+		}
 		try {
 			Connection writeCon = writeConArg;
 			boolean closeCon = false;
@@ -177,6 +183,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 				 */
 				cacheWriteLock.lock();
 				try {
+					usm.setNoSave(false);
 					cache.put(ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
 							ctx.getContextId(), user), (Serializable) usm.clone());
 				} catch (final CacheException e) {
@@ -274,7 +281,8 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	 * @param ctx
 	 *            the context
 	 * @param readConArg
-	 *            the readable connection
+	 *            the readable connection; may be <code>null</code> to fetch
+	 *            own connection.
 	 * @throws UserConfigurationException
 	 *             if loading fails
 	 */
@@ -334,11 +342,12 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 						usm.setModifiedDuringSession(false);
 						if (useCache) {
 							/*
-							 * Put clone into cache
+							 * Put into cache
 							 */
+							usm.setNoSave(false);
 							try {
 								cache.put(ServerServiceRegistry.getInstance().getService(CacheService.class)
-										.newCacheKey(ctx.getContextId(), user), (Serializable) usm.clone());
+										.newCacheKey(ctx.getContextId(), user), usm);
 							} catch (final CacheException e) {
 								LOG.error("UserSettingMail could not be put into cache", e);
 							}
@@ -347,7 +356,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 						closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
 					}
 				}
-				return usm;
+				return (UserSettingMail) usm.clone();
 			} finally {
 				cacheWriteLock.unlock();
 			}

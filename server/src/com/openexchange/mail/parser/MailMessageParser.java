@@ -289,6 +289,9 @@ public final class MailMessageParser {
 				return;
 			}
 		} else if (contentType.isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+			if (!mailPart.containsSequenceId()) {
+				mailPart.setSequenceId(getSequenceId(prefix, partCount));
+			}
 			if (isInline) {
 				final MailMessage nestedMail = (MailMessage) mailPart.getContent();
 				if (!handler.handleNestedMessage(nestedMail, getSequenceId(prefix, partCount))) {
@@ -296,9 +299,6 @@ public final class MailMessageParser {
 					return;
 				}
 			} else {
-				if (!mailPart.containsSequenceId()) {
-					mailPart.setSequenceId(getSequenceId(prefix, partCount));
-				}
 				if (!handler.handleAttachment(mailPart, isInline, MIMETypes.MIME_MESSAGE_RFC822, filename, mailPart
 						.getSequenceId())) {
 					stop = true;

@@ -68,6 +68,7 @@ import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -76,6 +77,9 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
 
@@ -102,16 +106,21 @@ public final class MessageWriter {
 	 * 
 	 * @param mail
 	 *            The mail to write
-	 * @param displayVersion
-	 *            <code>true</code> to create a version for displaying
-	 *            purpose; otherwise <code>false</code>
+	 * @param displayMode
+	 *            The display mode
 	 * @param session
 	 *            The session
+	 * @param settings
+	 *            The user's mail settings used for writing message; if
+	 *            <code>null</code> the settings are going to be fetched from
+	 *            storage, thus no request-specific preparations will take
+	 *            place.
 	 * @return The written JSON object
 	 * @throws MailException
+	 *             If writing message fails
 	 */
-	public static JSONObject writeMailMessage(final MailMessage mail, final boolean displayVersion,
-			final Session session) throws MailException {
+	public static JSONObject writeMailMessage(final MailMessage mail, final DisplayMode displayMode,
+			final Session session, final UserSettingMail settings) throws MailException {
 		final MailPath mailPath;
 		if (mail.getFolder() != null && mail.getMailId() != 0) {
 			mailPath = new MailPath(mail.getFolder(), mail.getMailId());
@@ -120,7 +129,14 @@ public final class MessageWriter {
 		} else {
 			mailPath = MailPath.NULL;
 		}
-		final JSONMessageHandler handler = new JSONMessageHandler(mailPath, mail, displayVersion, session);
+		final UserSettingMail usm;
+		try {
+			usm = null == settings ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+					session.getContextId()) : settings;
+		} catch (final UserConfigurationException e) {
+			throw new MailException(e);
+		}
+		final JSONMessageHandler handler = new JSONMessageHandler(mailPath, mail, displayMode, session, usm);
 		new MailMessageParser().parseMailMessage(mail, handler);
 		return handler.getJSONObject();
 	}

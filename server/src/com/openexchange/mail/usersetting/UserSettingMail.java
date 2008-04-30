@@ -298,6 +298,8 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
 	private Boolean spamHandlerFound;
 
+	private boolean noSave;
+
 	/**
 	 * Initializes a new {@link UserSettingMail}
 	 */
@@ -692,6 +694,18 @@ public final class UserSettingMail implements Cloneable, Serializable {
 	}
 
 	/**
+	 * Checks if this instance of {@link UserSettingMail} is allowed to being
+	 * saved to storage
+	 * 
+	 * @return <code>true</code> if this instance of {@link UserSettingMail}
+	 *         is allowed to being saved to storage; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isNoSave() {
+		return noSave;
+	}
+
+	/**
 	 * Parses given bit pattern and applies it to this settings
 	 * 
 	 * @param onOffOptions
@@ -871,5 +885,18 @@ public final class UserSettingMail implements Cloneable, Serializable {
 	public void setUseColorQuote(final boolean useColorQuote) {
 		this.useColorQuote = useColorQuote;
 		modifiedDuringSession = true;
+	}
+
+	/**
+	 * Sets the <code>no-save</code> attribute. If set to <code>true</code>
+	 * this instance of {@link UserSettingMail} cannot be saved to storage.
+	 * 
+	 * @param noSave
+	 *            <code>true</code> to deny saving this instance of
+	 *            {@link UserSettingMail} to storage; otherwise
+	 *            <code>false</code>
+	 */
+	public void setNoSave(final boolean noSave) {
+		this.noSave = noSave;
 	}
 }

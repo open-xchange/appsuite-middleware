@@ -66,7 +66,6 @@ import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.parser.MailMessageHandler;
-import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 
 /**
@@ -81,7 +80,7 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
 	private final List<MailPart> nonInlineParts;
 
 	/**
-	 * Constructor
+	 * Initializes a new {@link NonInlineForwardPartHandler}
 	 */
 	public NonInlineForwardPartHandler() {
 		super();
@@ -89,12 +88,12 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
 	}
 
 	/**
-	 * Private constructor
+	 * Initializes a new {@link NonInlineForwardPartHandler}
 	 * 
 	 * @param nonInlineParts
 	 *            The container for non-inline parts
 	 */
-	private NonInlineForwardPartHandler(final List<MailPart> nonInlineParts) {
+	public NonInlineForwardPartHandler(final List<MailPart> nonInlineParts) {
 		super();
 		this.nonInlineParts = nonInlineParts;
 	}
@@ -292,8 +291,10 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
 	 *      java.lang.String)
 	 */
 	public boolean handleNestedMessage(final MailMessage nestedMail, final String id) throws MailException {
-		final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler(nonInlineParts);
-		new MailMessageParser().parseMailMessage(nestedMail, handler, id);
+		nonInlineParts.add(nestedMail);
+		// final NonInlineForwardPartHandler handler = new
+		// NonInlineForwardPartHandler(nonInlineParts);
+		// new MailMessageParser().parseMailMessage(nestedMail, handler, id);
 		return true;
 	}
 

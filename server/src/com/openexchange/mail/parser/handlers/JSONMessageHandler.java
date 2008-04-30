@@ -83,7 +83,6 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.writer.MessageWriter;
@@ -97,8 +96,8 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.text.Enriched2HtmlConverter;
 import com.openexchange.mail.text.Html2TextConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.CharsetDetector;
+import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 import com.openexchange.session.Session;
@@ -122,7 +121,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
 	private final UserSettingMail usm;
 
-	private final boolean displayVersion;
+	private final DisplayMode displayMode;
 
 	private final MailPath mailPath;
 
@@ -145,16 +144,19 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 * 
 	 * @param mailPath
 	 *            The unique mail path
-	 * @param displayVersion
-	 *            <code>true</code> to create a version for display; otherwise
-	 *            <code>false</code>
+	 * @param displayMode
+	 *            The display mode
 	 * @param session
-	 *            The session
+	 *            The session providing needed user data
+	 * @param usm
+	 *            The mail settings used for preparing message content if
+	 *            <code>displayVersion</code> is set to <code>true</code>;
+	 *            otherwise it is ignored.
 	 * @throws MailException
-	 *             If context loading fails
+	 *             If JSON message handler cannot be initialized
 	 */
-	public JSONMessageHandler(final String mailPath, final boolean displayVersion, final Session session)
-			throws MailException {
+	public JSONMessageHandler(final String mailPath, final DisplayMode displayMode, final Session session,
+			final UserSettingMail usm) throws MailException {
 		super();
 		this.session = session;
 		try {
@@ -162,8 +164,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		} catch (final ContextException e) {
 			throw new MailException(e);
 		}
-		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
-		this.displayVersion = displayVersion;
+		this.usm = usm;
+		this.displayMode = displayMode;
 		this.mailPath = new MailPath(mailPath);
 		jsonObject = new JSONObject();
 	}
@@ -176,30 +178,44 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 * @param mail
 	 *            The mail message to add JSON fields not set by message parser
 	 *            traversal
-	 * @param displayVersion
-	 *            <code>true</code> to create a version for display; otherwise
-	 *            <code>false</code> to disable any display-specific
-	 *            preparations of message's content.
+	 * @param displayMode
+	 *            The display mode
 	 * @param session
 	 *            The session providing needed user data
+	 * @param usm
+	 *            The mail settings used for preparing message content if
+	 *            <code>displayVersion</code> is set to <code>true</code>;
+	 *            otherwise it is ignored.
 	 * @throws MailException
-	 *             If a JSON error occurs
+	 *             If JSON message handler cannot be initialized
 	 */
-	public JSONMessageHandler(final MailPath mailPath, final MailMessage mail, final boolean displayVersion,
-			final Session session) throws MailException {
-		super();
-		this.session = session;
+	public JSONMessageHandler(final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode,
+			final Session session, final UserSettingMail usm) throws MailException {
+		this(mailPath, mail, displayMode, session, usm, getContext(session));
+	}
+
+	private static Context getContext(final Session session) throws MailException {
 		try {
-			this.ctx = ContextStorage.getStorageContext(session.getContextId());
+			return ContextStorage.getStorageContext(session.getContextId());
 		} catch (final ContextException e) {
 			throw new MailException(e);
 		}
-		usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
-		this.displayVersion = displayVersion;
+	}
+
+	/**
+	 * Initializes a new {@link JSONMessageHandler} for internal usage
+	 */
+	private JSONMessageHandler(final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode,
+			final Session session, final UserSettingMail usm, final Context ctx) throws MailException {
+		super();
+		this.session = session;
+		this.ctx = ctx;
+		this.usm = usm;
+		this.displayMode = displayMode;
 		this.mailPath = mailPath;
 		jsonObject = new JSONObject();
 		try {
-			if (!displayVersion && null != mailPath) {
+			if (DisplayMode.MODIFYABLE.equals(this.displayMode) && null != mailPath) {
 				jsonObject.put(MailJSONField.MSGREF.getKey(), mailPath.toString());
 			}
 			if (null != mail) {
@@ -315,28 +331,31 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			/*
 			 * Content
 			 */
-			if (isInline && part.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
-				// TODO: Add rtf2html conversion here!
-				if (part.getContentType().isMimeType(MIMETypes.MIME_TEXT_RTF)) {
-					jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
-				} else {
-					final String charset = part.getContentType().containsCharsetParameter() ? part.getContentType()
-							.getCharsetParameter() : MailConfig.getDefaultMimeCharset();
-					jsonObject.put(MailJSONField.CONTENT.getKey(), MessageUtility.formatContentForDisplay(
-							MessageUtility.readMailPart(part, charset), part.getContentType().isMimeType(
-									MIMETypes.MIME_TEXT_HTM_ALL), session, mailPath, displayVersion));
-				}
-			} else {
-				jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
-			}
+			jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
+			// if (isInline &&
+			// part.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+			// // TODO: Add rtf2html conversion here!
+			// if (part.getContentType().isMimeType(MIMETypes.MIME_TEXT_RTF)) {
+			// jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
+			// } else {
+			// final String charset =
+			// part.getContentType().containsCharsetParameter() ?
+			// part.getContentType()
+			// .getCharsetParameter() : MailConfig.getDefaultMimeCharset();
+			// jsonObject.put(MailJSONField.CONTENT.getKey(),
+			// MessageUtility.formatContentForDisplay(
+			// MessageUtility.readMailPart(part, charset),
+			// part.getContentType().isMimeType(
+			// MIMETypes.MIME_TEXT_HTM_ALL), session, mailPath,
+			// displayVersion));
+			// }
+			// } else {
+			// jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
+			// }
 			getAttachmentsArr().put(jsonObject);
 			return true;
 		} catch (final JSONException e) {
 			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-		} catch (final IOException e) {
-			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		} catch (final ContextException e) {
-			throw new MailException(e);
 		}
 	}
 
@@ -496,7 +515,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			 * A text part has already been detected as message's body
 			 */
 			if (isAlternative) {
-				if (displayVersion) {
+				if (DisplayMode.DISPLAY.equals(displayMode)) {
 					/*
 					 * Add html alternative part as attachment
 					 */
@@ -517,10 +536,24 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			/*
 			 * No text part was present before
 			 */
-			if (usm.isDisplayHtmlInlineContent()) {
-				asHtml(id, contentType.getBaseType(), htmlContent);
+			if (DisplayMode.MODIFYABLE.getMode() <= displayMode.getMode()) {
+				if (usm.isDisplayHtmlInlineContent()) {
+					asDisplayHtml(id, contentType.getBaseType(), htmlContent);
+				} else {
+					asDisplayText(id, contentType.getBaseType(), htmlContent, fileName);
+				}
 			} else {
-				asText(id, contentType.getBaseType(), htmlContent, fileName);
+				try {
+					final JSONObject jsonObject = new JSONObject();
+					jsonObject.put(MailListField.ID.getKey(), id);
+					jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), contentType.getBaseType());
+					jsonObject.put(MailJSONField.SIZE.getKey(), htmlContent.length());
+					jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
+					jsonObject.put(MailJSONField.CONTENT.getKey(), htmlContent);
+					getAttachmentsArr().put(jsonObject);
+				} catch (final JSONException e) {
+					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
+				}
 			}
 		}
 		return true;
@@ -554,12 +587,11 @@ public final class JSONMessageHandler implements MailMessageHandler {
 					|| contentType.isMimeType(MIMETypes.MIME_TEXT_RICHTEXT)
 					|| contentType.isMimeType(MIMETypes.MIME_TEXT_RTF)) {
 				if (textAppended) {
-					if (displayVersion) {
+					if (DisplayMode.DISPLAY.equals(displayMode)) {
 						/*
 						 * Add alternative part as attachment
 						 */
-						asAttachment(id, contentType.getBaseType(), getHtmlVersion(contentType, plainTextContentArg)
-								.length(), fileName);
+						asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName);
 						return true;
 					}
 					/*
@@ -570,18 +602,29 @@ public final class JSONMessageHandler implements MailMessageHandler {
 				/*
 				 * No text part was present before
 				 */
-				if (usm.isDisplayHtmlInlineContent()) {
-					asHtml(id, contentType.getBaseType(), getHtmlVersion(contentType, plainTextContentArg));
-					return true;
+				if (DisplayMode.MODIFYABLE.getMode() <= displayMode.getMode()) {
+					if (usm.isDisplayHtmlInlineContent()) {
+						asDisplayHtml(id, contentType.getBaseType(), getHtmlDisplayVersion(contentType,
+								plainTextContentArg));
+						return true;
+					}
+					asDisplayText(id, contentType.getBaseType(),
+							getHtmlDisplayVersion(contentType, plainTextContentArg), fileName);
+				} else {
+					jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
+					jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), contentType.getBaseType());
+					jsonObject.put(MailJSONField.SIZE.getKey(), plainTextContentArg.length());
+					jsonObject.put(MailJSONField.CONTENT.getKey(), plainTextContentArg);
+					getAttachmentsArr().put(jsonObject);
 				}
-				asText(id, contentType.getBaseType(), getHtmlVersion(contentType, plainTextContentArg), fileName);
+				textAppended = true;
 				return true;
 			}
 			/*
-			 * Just common plain text
+			 * Just usual plain text
 			 */
 			final String content = MessageUtility.formatContentForDisplay(plainTextContentArg, false, session,
-					mailPath, displayVersion);
+					mailPath, usm, displayMode);
 			jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
 			jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), contentType.getBaseType());
 			jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
@@ -591,24 +634,22 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			return true;
 		} catch (final JSONException e) {
 			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-		} catch (final ContextException e) {
-			throw new MailException(e);
 		}
 	}
 
-	private String getHtmlVersion(final ContentType contentType, final String src) throws ContextException {
+	private String getHtmlDisplayVersion(final ContentType contentType, final String src) {
 		if (contentType.isMimeType(MIMETypes.MIME_TEXT_ENRICHED)
 				|| contentType.isMimeType(MIMETypes.MIME_TEXT_RICHTEXT)) {
-			return MessageUtility
-					.formatContentForDisplay(ENRCONV.convert(src), true, session, mailPath, displayVersion);
+			return MessageUtility.formatContentForDisplay(ENRCONV.convert(src), true, session, mailPath, usm,
+					displayMode);
 		} else if (contentType.isMimeType(MIMETypes.MIME_TEXT_RTF)) {
 			// TODO: return
 			// MessageUtils.formatContentForDisplay(RTFCONV.convert2HTML(src),
 			// true, session, mailPath,
 			// displayVersion);
-			return MessageUtility.formatContentForDisplay(src, false, session, mailPath, displayVersion);
+			return MessageUtility.formatContentForDisplay(src, false, session, mailPath, usm, displayMode);
 		}
-		return MessageUtility.formatContentForDisplay(src, false, session, mailPath, displayVersion);
+		return MessageUtility.formatContentForDisplay(src, false, session, mailPath, usm, displayMode);
 	}
 
 	/*
@@ -727,7 +768,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 */
 	public boolean handleNestedMessage(final MailMessage nestedMsg, final String id) throws MailException {
 		try {
-			final JSONMessageHandler msgHandler = new JSONMessageHandler(mailPath, null, displayVersion, session);
+			final JSONMessageHandler msgHandler = new JSONMessageHandler(mailPath, null, displayMode, session, usm, ctx);
 			new MailMessageParser().parseMailMessage(nestedMsg, msgHandler, id);
 			getNestedMsgsArr().put(msgHandler.getJSONObject());
 			return true;
@@ -945,12 +986,13 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		}
 	}
 
-	private void asHtml(final String id, final String baseContentType, final String htmlContent) throws MailException {
+	private void asDisplayHtml(final String id, final String baseContentType, final String htmlContent)
+			throws MailException {
 		try {
 			final JSONObject jsonObject = new JSONObject();
 			jsonObject.put(MailListField.ID.getKey(), id);
-			final String content = MessageUtility.formatContentForDisplay(htmlContent, true, session, mailPath,
-					displayVersion);
+			final String content = MessageUtility.formatContentForDisplay(htmlContent, true, session, mailPath, usm,
+					displayMode);
 			jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
 			jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
 			jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
@@ -958,13 +1000,11 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			getAttachmentsArr().put(jsonObject);
 		} catch (final JSONException e) {
 			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
-		} catch (final ContextException e) {
-			throw new MailException(e);
 		}
 	}
 
-	private void asText(final String id, final String baseContentType, final String htmlContent, final String fileName)
-			throws MailException {
+	private void asDisplayText(final String id, final String baseContentType, final String htmlContent,
+			final String fileName) throws MailException {
 		try {
 			final JSONObject jsonObject = new JSONObject();
 			jsonObject.put(MailListField.ID.getKey(), id);
@@ -973,47 +1013,42 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			 * Try to convert the given html to regular text
 			 */
 			final String content;
-			if (displayVersion && usm.isUseColorQuote()) {
+			if (usm.isUseColorQuote()) {
 				content = MessageUtility.formatHrefLinks(MessageUtility
 						.replaceHTMLSimpleQuotesForDisplay(MessageUtility.convertAndKeepQuotes(htmlContent,
 								getConverter())));
 			} else {
 				final String convertedHtml = getConverter().convertWithQuotes(htmlContent);
-				content = MessageUtility.formatContentForDisplay(convertedHtml, false, session, mailPath,
-						displayVersion);
+				content = MessageUtility.formatContentForDisplay(convertedHtml, false, session, mailPath, usm,
+						displayMode);
 			}
 			jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
 			jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
 			jsonObject.put(MailJSONField.CONTENT.getKey(), content);
 			getAttachmentsArr().put(jsonObject);
-			if (displayVersion) {
-				/*
-				 * Create attachment object for original html content
-				 */
-				final JSONObject originalVersion = new JSONObject();
-				originalVersion.put(MailListField.ID.getKey(), id);
-				originalVersion.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
-				originalVersion.put(MailJSONField.DISPOSITION.getKey(), Part.ATTACHMENT);
-				originalVersion.put(MailJSONField.SIZE.getKey(), htmlContent.length());
-				originalVersion.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
-				if (fileName != null) {
-					try {
-						originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), MimeUtility
-								.decodeText(fileName));
-					} catch (final UnsupportedEncodingException e) {
-						originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), fileName);
-					}
-				} else {
-					originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), JSONObject.NULL);
+			/*
+			 * Create attachment object for original html content
+			 */
+			final JSONObject originalVersion = new JSONObject();
+			originalVersion.put(MailListField.ID.getKey(), id);
+			originalVersion.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
+			originalVersion.put(MailJSONField.DISPOSITION.getKey(), Part.ATTACHMENT);
+			originalVersion.put(MailJSONField.SIZE.getKey(), htmlContent.length());
+			originalVersion.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
+			if (fileName != null) {
+				try {
+					originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), MimeUtility.decodeText(fileName));
+				} catch (final UnsupportedEncodingException e) {
+					originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), fileName);
 				}
-				getAttachmentsArr().put(originalVersion);
+			} else {
+				originalVersion.put(MailJSONField.ATTACHMENT_FILE_NAME.getKey(), JSONObject.NULL);
 			}
+			getAttachmentsArr().put(originalVersion);
 		} catch (final JSONException e) {
 			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		} catch (final ContextException e) {
-			throw new MailException(e);
 		}
 	}
 
