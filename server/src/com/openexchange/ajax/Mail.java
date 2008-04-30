@@ -711,7 +711,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private final Response actionGetMessage(final Session session, final ParamContainer paramContainer,
 			final MailServletInterface mailInterfaceArg) {
 		/*
