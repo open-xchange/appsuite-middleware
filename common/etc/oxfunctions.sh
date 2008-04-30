@@ -252,7 +252,7 @@ ox_update_config_init() {
     local bpath=
     for bundle in $bdir/*.ini; do
 	read bpath < $bundle
-	dirbundles+=( "reference\:file\:${bpath}@start" )
+	dirbundles=( ${dirbundles[*]} "reference\:file\:${bpath}@start" )
     done
 
     if [ -f $cini ]; then

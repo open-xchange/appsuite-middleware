@@ -1,3 +1,7 @@
+* 2008-04-30 - choeger@open-xchange.com
+
+ - Bugfix ID#11236 ox common functions shell script does not run on debian sarge
+
 * 2008-01-09 - thorben.betten@open-xchange.com
 
  - Bugfix #10214: Using "Java port of Mozilla charset detector" to guess
