@@ -262,10 +262,12 @@ public enum MailField {
 	public static final MailField toField(final MailListField listField) {
 		if (null == listField) {
 			return null;
+		} else if (MailListField.FLAG_SEEN.equals(listField)) {
+			return MailField.FLAGS;
 		}
 		final MailField[] fields = MailField.values();
 		for (final MailField mailField : fields) {
-			if (mailField.getListField().equals(listField)) {
+			if (listField.equals(mailField.getListField())) {
 				return mailField;
 			}
 		}

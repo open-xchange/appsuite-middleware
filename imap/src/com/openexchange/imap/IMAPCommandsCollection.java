@@ -380,6 +380,8 @@ public final class IMAPCommandsCollection {
 		}
 	}
 
+	private static final String[] RANGE_ALL = { "ALL" };
+
 	/**
 	 * Sorts given messages according to specified sort field and specified sort
 	 * direction
@@ -389,17 +391,17 @@ public final class IMAPCommandsCollection {
 	 * @param sortCrit
 	 *            The IMAP sort criteria
 	 * @param toSort
-	 *            The messages' sequence numbers to sort
+	 *            The messages' sequence numbers to sort or <code>null</code>
+	 *            to sort all
 	 * @return An array of <code>int</code> representing sorted messages'
 	 *         sequence numbers
 	 * @throws MessagingException
 	 */
 	public static int[] getServerSortList(final IMAPFolder folder, final String sortCrit, final int[] toSort)
 			throws MessagingException {
-		return getServerSortList(folder, sortCrit, IMAPNumArgSplitter.getSeqNumArg(toSort, false, false));
+		return getServerSortList(folder, sortCrit, null == toSort ? RANGE_ALL : IMAPNumArgSplitter.getSeqNumArg(toSort,
+				false, false));
 	}
-
-	private static final String[] RANGE_ALL = { "ALL" };
 
 	/**
 	 * Sorts all messages according to specified sort field and specified sort
@@ -426,7 +428,8 @@ public final class IMAPCommandsCollection {
 	 * @param sortCrit
 	 *            The sort criteria
 	 * @param mdat
-	 *            The sort range
+	 *            The sort range; if <code>null</code> all messages located in
+	 *            given folder are sorted
 	 * @return An array of <code>int</code> representing sorted messages'
 	 *         sequence numbers
 	 * @throws MessagingException
@@ -434,10 +437,15 @@ public final class IMAPCommandsCollection {
 	 */
 	public static int[] getServerSortList(final IMAPFolder imapFolder, final String sortCrit, final String[] mdat)
 			throws MessagingException {
-		if (mdat == null || mdat.length == 0) {
+		final String numArgument;
+		if (mdat == null) {
+			numArgument = RANGE_ALL[0];
+		} else if (mdat.length == 0) {
 			throw new MessagingException("IMAP sort failed: Empty message num argument.");
 		} else if (mdat.length > 1) {
 			throw new MessagingException("IMAP sort failed: Message num argumet too long.");
+		} else {
+			numArgument = mdat[0];
 		}
 		/*
 		 * Call the IMAPFolder.doCommand() method with inner class definition of
@@ -445,8 +453,8 @@ public final class IMAPCommandsCollection {
 		 */
 		final Object val = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-				final Response[] r = p.command(new StringBuilder(mdat[0].length() + 16).append("SORT (").append(
-						sortCrit).append(") UTF-8 ").append(mdat[0]).toString(), null);
+				final Response[] r = p.command(new StringBuilder(numArgument.length() + 16).append("SORT (").append(
+						sortCrit).append(") UTF-8 ").append(numArgument).toString(), null);
 				final Response response = r[r.length - 1];
 				final SmartIntArray sia = new SmartIntArray(32);
 				try {

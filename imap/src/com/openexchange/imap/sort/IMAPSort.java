@@ -80,7 +80,6 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -384,25 +383,19 @@ public final class IMAPSort {
 		if (imapConfig.isImapSort()
 				|| (imapConfig.getCapabilities().hasSort() && (size >= MailConfig.getMailFetchLimit()))) {
 			try {
-				long start = System.currentTimeMillis();
 				final int[] seqNums;
-				if (filter == null) {
+				{
 					/*
-					 * Sort all
+					 * Get IMAP sort criteria
 					 */
-					seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, getSortCritForIMAPCommand(sortField,
-							orderDir == OrderDirection.DESC));
-				} else {
-					/*
-					 * Only sort pre-selected messages
-					 */
-					seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, getSortCritForIMAPCommand(sortField,
-							orderDir == OrderDirection.DESC), filter);
-				}
-				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-				if (LOG.isDebugEnabled()) {
-					LOG.debug(new StringBuilder(128).append("IMAP sort took ").append(
-							(System.currentTimeMillis() - start)).append("msec").toString());
+					final String sortCriteria = getSortCritForIMAPCommand(sortField, orderDir == OrderDirection.DESC);
+					final long start = System.currentTimeMillis();
+					seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, filter);
+					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+					if (LOG.isDebugEnabled()) {
+						LOG.debug(new StringBuilder(128).append("IMAP sort took ").append(
+								(System.currentTimeMillis() - start)).append("msec").toString());
+					}
 				}
 				if ((seqNums == null) || (seqNums.length == 0)) {
 					return EMPTY_MSGS;
@@ -410,7 +403,7 @@ public final class IMAPSort {
 				final FetchProfile fetchProfile = getFetchProfile(fields, IMAPConfig.isFastFetch());
 				usedFields.addAll(Arrays.asList(fields));
 				final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
-				start = System.currentTimeMillis();
+				final long start = System.currentTimeMillis();
 				msgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), seqNums,
 						fetchProfile, false, true, body).doCommand();
 				mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
@@ -472,8 +465,32 @@ public final class IMAPSort {
 	}
 
 	/**
-	 * Generates the sort criteria corresponding to specified sort field and
-	 * order direction.
+	 * Generates an appropriate <i>SORT</i> command as defined through the IMAP
+	 * SORT EXTENSION corresponding to specified sort field and order direction.
+	 * <p>
+	 * The supported sort criteria are:
+	 * <ul>
+	 * <li><b>ARRIVAL</b><br>
+	 * Internal date and time of the message. This differs from the ON criteria
+	 * in SEARCH, which uses just the internal date.</li>
+	 * <li><b>CC</b><br>
+	 * RFC-822 local-part of the first "Cc" address.</li>
+	 * <li><b>DATE</b><br>
+	 * Sent date and time from the Date: header, adjusted by time zone. This
+	 * differs from the SENTON criteria in SEARCH, which uses just the date and
+	 * not the time, nor adjusts by time zone.</li>
+	 * <li><b>FROM</b><br>
+	 * RFC-822 local-part of the "From" address.</li>
+	 * <li><b>REVERSE</b><br>
+	 * Followed by another sort criterion, has the effect of that criterion but
+	 * in reverse order.</li>
+	 * <li><b>SIZE</b><br>
+	 * Size of the message in octets.</li>
+	 * <li><b>SUBJECT</b><br>
+	 * Extracted subject text.</li>
+	 * <li><b>TO</b><br>
+	 * RFC-822 local-part of the first "To" address.</li>
+	 * </ul>
 	 * <p>
 	 * Example:<br>
 	 * {@link MailListField#SENT_DATE} in descending order is turned to
@@ -504,11 +521,11 @@ public final class IMAPSort {
 		case TO:
 			imapSortCritBuilder.append("TO");
 			break;
+		case CC:
+			imapSortCritBuilder.append("CC");
+			break;
 		case SUBJECT:
 			imapSortCritBuilder.append("SUBJECT");
-			break;
-		case FOLDER:
-			imapSortCritBuilder.append("FOLDER");
 			break;
 		case SIZE:
 			imapSortCritBuilder.append("SIZE");

@@ -2,6 +2,7 @@
 
  - Bugfix #11235: Fixed possible StackOverflowError when parsing large HTML
    links or URLs occurring in a message content
+ - Bugfix #11158: Fixed sorting messages by unread/read
 
 * 2008-04-29 - choeger@open-xchange.com
 
