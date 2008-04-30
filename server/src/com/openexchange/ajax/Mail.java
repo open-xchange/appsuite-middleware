@@ -1568,7 +1568,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 			idRegex, commaRegex, fldRegex), false), RegexUtility.group(RegexUtility.concat(fldRegex, commaRegex,
 			idRegex), false)));
 
-	@SuppressWarnings("null")
 	private static final void fillMap(final Map<String, SmartLongArray> idMap, final String requestBody,
 			final int length) {
 		final Matcher m = PATTERN_IDS.matcher(requestBody);
