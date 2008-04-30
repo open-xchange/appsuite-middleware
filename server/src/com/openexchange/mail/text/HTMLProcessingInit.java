@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.utils;
+package com.openexchange.mail.text;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -66,20 +66,20 @@ import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link MessageUtilityInit} - Initialization implementation for
+ * {@link HTMLProcessingInit} - Initialization implementation for
  * {@link MessageUtility} class
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MessageUtilityInit implements Initialization {
+public final class HTMLProcessingInit implements Initialization {
 
-	private static final MessageUtilityInit instance = new MessageUtilityInit();
+	private static final HTMLProcessingInit instance = new HTMLProcessingInit();
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(MessageUtilityInit.class);
+			.getLog(HTMLProcessingInit.class);
 
-	public static MessageUtilityInit getInstance() {
+	public static HTMLProcessingInit getInstance() {
 		return instance;
 	}
 
@@ -88,7 +88,7 @@ public final class MessageUtilityInit implements Initialization {
 	/**
 	 * No instantiation
 	 */
-	private MessageUtilityInit() {
+	private HTMLProcessingInit() {
 		super();
 	}
 
@@ -132,32 +132,32 @@ public final class MessageUtilityInit implements Initialization {
 			htmlEntityMap.put((String) entry.getKey(), c);
 			htmlCharMap.put(c, (String) entry.getKey());
 		}
-		MessageUtility.setMaps(htmlCharMap, htmlEntityMap);
+		HTMLProcessing.setMaps(htmlCharMap, htmlEntityMap);
 	}
 
 	private void resetMaps() {
-		MessageUtility.setMaps(null, null);
+		HTMLProcessing.setMaps(null, null);
 	}
 
 	public void start() throws MailException {
 		if (started.get()) {
-			LOG.error("MessageUtility has already been started", new Throwable());
+			LOG.error("HTMLProcessing has already been started", new Throwable());
 		}
 		initMaps();
 		started.set(true);
 		if (LOG.isInfoEnabled()) {
-			LOG.info("MessageUtility successfully started");
+			LOG.info("HTMLProcessing successfully started");
 		}
 	}
 
 	public void stop() throws MailException {
 		if (!started.get()) {
-			LOG.error("MessageUtility cannot be stopped since it has not been started before", new Throwable());
+			LOG.error("HTMLProcessing cannot be stopped since it has not been started before", new Throwable());
 		}
 		resetMaps();
 		started.set(false);
 		if (LOG.isInfoEnabled()) {
-			LOG.info("MessageUtility successfully stopped");
+			LOG.info("HTMLProcessing successfully stopped");
 		}
 	}
 }

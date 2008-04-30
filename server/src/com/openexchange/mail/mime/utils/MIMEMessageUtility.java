@@ -49,7 +49,10 @@
 
 package com.openexchange.mail.mime.utils;
 
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -58,10 +61,14 @@ import java.util.regex.Pattern;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.ContentDisposition;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
 
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
@@ -238,7 +245,7 @@ public final class MIMEMessageUtility {
 	 */
 	private static final String MULTI_SUBTYPE_ALTERNATIVE = "ALTERNATIVE";
 
-	//private static final String MULTI_SUBTYPE_MIXED = "MIXED";
+	// private static final String MULTI_SUBTYPE_MIXED = "MIXED";
 
 	private static final String MULTI_SUBTYPE_SIGNED = "SIGNED";
 
@@ -307,5 +314,154 @@ public final class MIMEMessageUtility {
 			}
 		}
 		return false;
+	}
+
+	private static final Pattern ENC_PATTERN = Pattern.compile("(=\\?\\S+?\\?\\S+?\\?)(\\S+?)(\\?=)");
+
+	/**
+	 * Decodes a multi-mime-encoded header value using the algorithm specified
+	 * in RFC 2047, Section 6.1
+	 * <p>
+	 * If the charset-conversion fails for any sequence, an
+	 * {@link UnsupportedEncodingException} is thrown.
+	 * <p>
+	 * If the String is not an RFC 2047 style encoded header, it is returned
+	 * as-is
+	 * 
+	 * @param headerValArg
+	 *            The possibly encoded header value
+	 * @return The possibly decoded header value
+	 */
+	public static String decodeMultiEncodedHeader(final String headerValArg) {
+		if (headerValArg == null) {
+			return null;
+		}
+		final String hdrVal = MimeUtility.unfold(headerValArg);
+		final Matcher m = ENC_PATTERN.matcher(hdrVal);
+		if (m.find()) {
+			final StringBuilder sb = new StringBuilder(hdrVal.length());
+			int lastMatch = 0;
+			do {
+				try {
+					sb.append(hdrVal.substring(lastMatch, m.start()));
+					sb.append(Matcher.quoteReplacement(MimeUtility.decodeText(m.group())));
+					lastMatch = m.end();
+				} catch (final UnsupportedEncodingException e) {
+					LOG.error("Unsupported encoding in a message detected and monitored.", e);
+					sb.append(hdrVal.substring(lastMatch));
+					return sb.toString();
+				}
+			} while (m.find());
+			sb.append(hdrVal.substring(lastMatch));
+			return sb.toString();
+		}
+		return hdrVal;
+	}
+
+	/**
+	 * Parse the given sequence of addresses into InternetAddress objects by
+	 * invoking <code>{@link InternetAddress#parse(String, boolean)}</code>.
+	 * If <code>strict</code> is false, simple email addresses separated by
+	 * spaces are also allowed. If <code>strict</code> is true, many (but not
+	 * all) of the RFC822 syntax rules are enforced. In particular, even if
+	 * <code>strict</code> is true, addresses composed of simple names (with
+	 * no "@domain" part) are allowed. Such "illegal" addresses are not uncommon
+	 * in real messages.
+	 * <p>
+	 * Non-strict parsing is typically used when parsing a list of mail
+	 * addresses entered by a human. Strict parsing is typically used when
+	 * parsing address headers in mail messages.
+	 * <p>
+	 * Additionally the personal parts are MIME encoded using default MIME
+	 * charset.
+	 * 
+	 * @param addresslist -
+	 *            comma separated address strings
+	 * @param strict -
+	 *            <code>true</code> to enforce RFC822 syntax; otherwise
+	 *            <code>false</code>
+	 * @return array of <code>InternetAddress</code> objects
+	 * @throws AddressException -
+	 *             if parsing fails
+	 */
+	public static InternetAddress[] parseAddressList(final String addresslist, final boolean strict)
+			throws AddressException {
+		final InternetAddress[] addrs = InternetAddress
+				.parse(replaceWithComma(MimeUtility.unfold(addresslist)), strict);
+		try {
+			for (int i = 0; i < addrs.length; i++) {
+				addrs[i].setPersonal(addrs[i].getPersonal(), MailConfig.getDefaultMimeCharset());
+			}
+		} catch (final UnsupportedEncodingException e) {
+			/*
+			 * Cannot occur since default charset is checked on global mail
+			 * configuration initialization
+			 */
+			LOG.error(e.getLocalizedMessage(), e);
+		}
+		return addrs;
+	}
+
+	private static final Pattern PATTERN_REPLACE = Pattern.compile("([^\"]\\S+?)(\\s*)([;])(\\s*)");
+
+	private static String replaceWithComma(final String addressList) {
+		final StringBuilder sb = new StringBuilder(addressList.length());
+		final Matcher m = PATTERN_REPLACE.matcher(addressList);
+		int lastMatch = 0;
+		while (m.find()) {
+			sb.append(addressList.substring(lastMatch, m.start()));
+			sb.append(m.group(1)).append(m.group(2)).append(',').append(m.group(4));
+			lastMatch = m.end();
+		}
+		sb.append(addressList.substring(lastMatch));
+		return sb.toString();
+	}
+
+	private static final Pattern PAT_QUOTED = Pattern.compile("(^\")([^\"]+?)(\"$)");
+
+	private static final Pattern PAT_QUOTABLE_CHAR = Pattern.compile("[.,:;<>\"]");
+
+	/**
+	 * Quotes given personal part of an Internet address according to RFC 822
+	 * syntax if needed; otherwise the personal is returned unchanged.
+	 * <p>
+	 * This method guarantees that the resulting string can be used to build an
+	 * Internet address according to RFC 822 syntax so that the
+	 * <code>{@link InternetAddress#parse(String)}</code> constructor won't
+	 * throw an instance of <code>{@link AddressException}</code>.
+	 * 
+	 * <pre>
+	 * final String quotedPersonal = quotePersonal(&quot;Doe, Jane&quot;);
+	 * 
+	 * final String buildAddr = quotedPersonal + &quot; &lt;someone@somewhere.com&gt;&quot;;
+	 * System.out.println(buildAddr);
+	 * //Plain Address: &quot;=?UTF-8?Q?Doe=2C_Jan=C3=A9?=&quot; &lt;someone@somewhere.com&gt;
+	 * 
+	 * final InternetAddress ia = new InternetAddress(buildAddr);
+	 * System.out.println(ia.toUnicodeString());
+	 * //Unicode Address: &quot;Doe, Jane&quot; &lt;someone@somewhere.com&gt;
+	 * </pre>
+	 * 
+	 * @param personalArg
+	 *            The personal's string representation
+	 * @return The properly quoted personal for building an Internet address
+	 *         according to RFC 822 syntax
+	 */
+	public static String quotePersonal(final String personalArg) {
+		try {
+			final String personal = MimeUtility.encodeWord(personalArg);
+			if (PAT_QUOTED.matcher(personal).matches() ? false : PAT_QUOTABLE_CHAR.matcher(personal).find()) {
+				/*
+				 * Quote
+				 */
+				return new StringBuilder(personal.length() + 2).append('"').append(
+						personal.replaceAll("\"", "\\\\\\\"")).append('"').toString();
+			}
+			return personal;
+		} catch (final UnsupportedEncodingException e) {
+			LOG.error("Unsupported encoding in a message detected and monitored.", e);
+			mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+			return personalArg;
+		}
 	}
 }

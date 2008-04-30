@@ -49,6 +49,9 @@
 
 package com.openexchange.mail.json.parser;
 
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.quotePersonal;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -81,7 +84,6 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
 
 /**
@@ -465,7 +467,7 @@ public final class MessageParser {
 				value = jo.getString(key);
 			}
 		}
-		return MessageUtility.parseAddressList(value, false);
+		return parseAddressList(value, false);
 	}
 
 	/**
@@ -492,7 +494,7 @@ public final class MessageParser {
 			final String personal = persAndAddr.getString(0);
 			final boolean hasPersonal = (personal != null && !"null".equals(personal));
 			if (hasPersonal) {
-				sb.append(MessageUtility.quotePersonal(personal)).append(" <");
+				sb.append(quotePersonal(personal)).append(" <");
 			}
 			sb.append(persAndAddr.getString(1));
 			if (hasPersonal) {
@@ -505,7 +507,7 @@ public final class MessageParser {
 			final String personal = persAndAddr.getString(0);
 			final boolean hasPersonal = (personal != null && !"null".equals(personal));
 			if (hasPersonal) {
-				sb.append(MessageUtility.quotePersonal(personal)).append(" <");
+				sb.append(quotePersonal(personal)).append(" <");
 			}
 			sb.append(persAndAddr.getString(1));
 			if (hasPersonal) {

@@ -49,8 +49,8 @@
 
 package com.openexchange.mail.text;
 
-import static com.openexchange.mail.utils.MessageUtility.PATTERN_HREF;
-import static com.openexchange.mail.utils.MessageUtility.getHTMLEntity;
+import static com.openexchange.mail.text.HTMLProcessing.PATTERN_HREF;
+import static com.openexchange.mail.text.HTMLProcessing.getHTMLEntity;
 
 import java.io.IOException;
 import java.io.Reader;

@@ -65,6 +65,9 @@ import com.openexchange.mail.api.MailConfig;
  */
 public final class MIMEDefaultSession {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(MIMEDefaultSession.class);
+
 	/**
 	 * No instance
 	 */
@@ -79,6 +82,8 @@ public final class MIMEDefaultSession {
 	private static final String STR_TRUE = "true";
 
 	private static final String STR_FALSE = "false";
+
+	private static final String STR_UTF8 = "UTF-8";
 
 	/**
 	 * Applies basic properties to system properties and instantiates the
@@ -99,8 +104,16 @@ public final class MIMEDefaultSession {
 				System.getProperties().put(MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_TRUE);
 				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_ENCODEEOL_STRICT, STR_TRUE);
 				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_DECODETEXT_STRICT, STR_FALSE);
-				System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET,
-						MailConfig.getDefaultMimeCharset());
+				final String defaultMimeCharset = MailConfig.getDefaultMimeCharset();
+				if (null == defaultMimeCharset) {
+					if (LOG.isWarnEnabled()) {
+						LOG.warn("Missing default MIME charset in mail configuration. "
+								+ "Mail configuration is probably not initialized. Using fallback 'UTF-8' instead");
+					}
+					System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, STR_UTF8);
+				} else {
+					System.getProperties().put(MIMESessionPropertyNames.PROP_MAIL_MIME_CHARSET, defaultMimeCharset);
+				}
 				if (MailConfig.getJavaMailProperties() != null) {
 					/*
 					 * Overwrite current JavaMail-Specific properties with the

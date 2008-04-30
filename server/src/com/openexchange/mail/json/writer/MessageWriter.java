@@ -75,6 +75,7 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -282,10 +283,10 @@ public final class MessageWriter {
 							throws MailException {
 						try {
 							if (withKey) {
-								((JSONObject) jsonContainer).put(MailJSONField.SUBJECT.getKey(), MessageUtility
+								((JSONObject) jsonContainer).put(MailJSONField.SUBJECT.getKey(), MIMEMessageUtility
 										.decodeMultiEncodedHeader(mail.getSubject()));
 							} else {
-								((JSONArray) jsonContainer).put(MessageUtility.decodeMultiEncodedHeader(mail
+								((JSONArray) jsonContainer).put(MIMEMessageUtility.decodeMultiEncodedHeader(mail
 										.getSubject()));
 							}
 						} catch (final JSONException e) {
@@ -641,11 +642,11 @@ public final class MessageWriter {
 			/*
 			 * Surround with double-quotes
 			 */
-			final String pp = MessageUtility.decodeMultiEncodedHeader(personal);
+			final String pp = MIMEMessageUtility.decodeMultiEncodedHeader(personal);
 			return new StringBuilder(pp.length()).append('"').append(pp.replaceAll("\"", "\\\\\\\"")).append('"')
 					.toString();
 		}
-		return MessageUtility.decodeMultiEncodedHeader(personal);
+		return MIMEMessageUtility.decodeMultiEncodedHeader(personal);
 	}
 
 	private static final String DUMMY_DOMAIN = "@unspecified-domain";
@@ -660,7 +661,7 @@ public final class MessageWriter {
 		} catch (final UnsupportedEncodingException e) {
 			LOG.error("Unsupported encoding in a message detected and monitored.", e);
 			mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-			return MessageUtility.decodeMultiEncodedHeader(address);
+			return MIMEMessageUtility.decodeMultiEncodedHeader(address);
 		}
 	}
 

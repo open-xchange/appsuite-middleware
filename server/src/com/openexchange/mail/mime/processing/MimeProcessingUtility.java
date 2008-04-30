@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.mime.processing;
 
-import static com.openexchange.mail.utils.MessageUtility.htmlFormat;
+import static com.openexchange.mail.text.HTMLProcessing.htmlFormat;
 
 import java.io.IOException;
 

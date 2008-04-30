@@ -65,8 +65,8 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.utils.DateUtils;
-import com.openexchange.mail.utils.MessageUtility;
 
 /**
  * {@link MailMessage} - Abstract super class for all {@link MailMessage}
@@ -846,7 +846,7 @@ public abstract class MailMessage extends MailPart {
 		if (!b_subject) {
 			final String subjectStr = getHeader(MessageHeaders.HDR_SUBJECT);
 			if (subjectStr != null) {
-				setSubject(MessageUtility.decodeMultiEncodedHeader(subjectStr));
+				setSubject(MIMEMessageUtility.decodeMultiEncodedHeader(subjectStr));
 			}
 		}
 		return subject;

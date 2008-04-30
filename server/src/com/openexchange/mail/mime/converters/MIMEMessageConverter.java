@@ -49,8 +49,8 @@
 
 package com.openexchange.mail.mime.converters;
 
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.hasAttachments;
-import static com.openexchange.mail.utils.MessageUtility.decodeMultiEncodedHeader;
 import static javax.mail.internet.MimeUtility.unfold;
 
 import java.io.ByteArrayOutputStream;
@@ -93,18 +93,17 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.FullnameFolder;
-import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
+import com.openexchange.mail.mime.FullnameFolder;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
-import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -1370,7 +1369,7 @@ public final class MIMEMessageConverter {
 			{
 				final ContentType ct = mail.getContentType();
 				mail.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)
-						&& (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || MIMEMessageUtility.hasAttachments(
+						&& (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || hasAttachments(
 								(Multipart) msg.getContent(), ct.getSubType())));
 			}
 			{

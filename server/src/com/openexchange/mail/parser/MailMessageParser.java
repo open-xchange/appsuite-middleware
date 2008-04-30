@@ -85,6 +85,7 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -513,7 +514,7 @@ public final class MailMessageParser {
 		/*
 		 * SUBJECT
 		 */
-		handler.handleSubject(MessageUtility.decodeMultiEncodedHeader(mail.getSubject()));
+		handler.handleSubject(MIMEMessageUtility.decodeMultiEncodedHeader(mail.getSubject()));
 		/*
 		 * SENT DATE
 		 */

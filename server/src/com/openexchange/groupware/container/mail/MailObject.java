@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.container.mail;
 
-import static com.openexchange.mail.utils.MessageUtility.parseAddressList;
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
 
 import java.io.IOException;
 import java.io.InputStream;

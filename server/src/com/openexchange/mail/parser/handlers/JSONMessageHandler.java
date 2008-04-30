@@ -94,6 +94,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.text.Enriched2HtmlConverter;
+import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.text.Html2TextConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.CharsetDetector;
@@ -623,7 +624,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			/*
 			 * Just usual plain text
 			 */
-			final String content = MessageUtility.formatContentForDisplay(plainTextContentArg, false, session,
+			final String content = HTMLProcessing.formatContentForDisplay(plainTextContentArg, false, session,
 					mailPath, usm, displayMode);
 			jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
 			jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), contentType.getBaseType());
@@ -640,16 +641,16 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	private String getHtmlDisplayVersion(final ContentType contentType, final String src) {
 		if (contentType.isMimeType(MIMETypes.MIME_TEXT_ENRICHED)
 				|| contentType.isMimeType(MIMETypes.MIME_TEXT_RICHTEXT)) {
-			return MessageUtility.formatContentForDisplay(ENRCONV.convert(src), true, session, mailPath, usm,
+			return HTMLProcessing.formatContentForDisplay(ENRCONV.convert(src), true, session, mailPath, usm,
 					displayMode);
 		} else if (contentType.isMimeType(MIMETypes.MIME_TEXT_RTF)) {
 			// TODO: return
 			// MessageUtils.formatContentForDisplay(RTFCONV.convert2HTML(src),
 			// true, session, mailPath,
 			// displayVersion);
-			return MessageUtility.formatContentForDisplay(src, false, session, mailPath, usm, displayMode);
+			return HTMLProcessing.formatContentForDisplay(src, false, session, mailPath, usm, displayMode);
 		}
-		return MessageUtility.formatContentForDisplay(src, false, session, mailPath, usm, displayMode);
+		return HTMLProcessing.formatContentForDisplay(src, false, session, mailPath, usm, displayMode);
 	}
 
 	/*
@@ -991,7 +992,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		try {
 			final JSONObject jsonObject = new JSONObject();
 			jsonObject.put(MailListField.ID.getKey(), id);
-			final String content = MessageUtility.formatContentForDisplay(htmlContent, true, session, mailPath, usm,
+			final String content = HTMLProcessing.formatContentForDisplay(htmlContent, true, session, mailPath, usm,
 					displayMode);
 			jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
 			jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
@@ -1014,12 +1015,12 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			 */
 			final String content;
 			if (usm.isUseColorQuote()) {
-				content = MessageUtility.formatHrefLinks(MessageUtility
-						.replaceHTMLSimpleQuotesForDisplay(MessageUtility.convertAndKeepQuotes(htmlContent,
+				content = HTMLProcessing.formatHrefLinks(HTMLProcessing
+						.replaceHTMLSimpleQuotesForDisplay(HTMLProcessing.convertAndKeepQuotes(htmlContent,
 								getConverter())));
 			} else {
 				final String convertedHtml = getConverter().convertWithQuotes(htmlContent);
-				content = MessageUtility.formatContentForDisplay(convertedHtml, false, session, mailPath, usm,
+				content = HTMLProcessing.formatContentForDisplay(convertedHtml, false, session, mailPath, usm,
 						displayMode);
 			}
 			jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);

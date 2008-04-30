@@ -84,8 +84,10 @@ import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
+import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
@@ -170,8 +172,8 @@ public final class MimeForward {
 				if (origSubject != null) {
 					final String subjectPrefix = new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx)
 							.getLocale()).getString(MailStrings.FORWARD_SUBJECT_PREFIX);
-					final String subject = MessageUtility.decodeMultiEncodedHeader(origSubject.regionMatches(true, 0,
-							subjectPrefix, 0, subjectPrefix.length()) ? origSubject : new StringBuilder().append(
+					final String subject = MIMEMessageUtility.decodeMultiEncodedHeader(origSubject.regionMatches(true,
+							0, subjectPrefix, 0, subjectPrefix.length()) ? origSubject : new StringBuilder().append(
 							subjectPrefix).append(origSubject).toString());
 					forwardMsg.setSubject(subject, MailConfig.getDefaultMimeCharset());
 				}
@@ -396,10 +398,10 @@ public final class MimeForward {
 			}
 
 		}
-		forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", MessageUtility.decodeMultiEncodedHeader(msg
+		forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", MIMEMessageUtility.decodeMultiEncodedHeader(msg
 				.getSubject()));
 		if (html) {
-			forwardPrefix = MessageUtility.htmlFormat(forwardPrefix);
+			forwardPrefix = HTMLProcessing.htmlFormat(forwardPrefix);
 		}
 		final String doubleBreak = html ? "<br><br>" : "\r\n\r\n";
 		if (html) {

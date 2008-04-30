@@ -50,6 +50,7 @@
 package com.openexchange.mail.mime.processing;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -96,6 +97,7 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.InlineContentHandler;
+import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
@@ -181,7 +183,7 @@ public final class MimeReply {
 			}
 			final String rawSubject = MimeUtility.unfold(subjectHdrValue);
 			try {
-				final String decodedSubject = MessageUtility.decodeMultiEncodedHeader(MimeUtility
+				final String decodedSubject = MIMEMessageUtility.decodeMultiEncodedHeader(MimeUtility
 						.decodeText(rawSubject));
 				final String newSubject = decodedSubject.regionMatches(true, 0, subjectPrefix, 0, 4) ? decodedSubject
 						: new StringBuilder().append(subjectPrefix).append(decodedSubject).toString();
@@ -237,7 +239,7 @@ public final class MimeReply {
 				 */
 				final String alternates = mailSession.getProperty(MIMESessionPropertyNames.PROP_MAIL_ALTERNATES);
 				if (alternates != null) {
-					filter.addAll(Arrays.asList(MessageUtility.parseAddressList(alternates, false)));
+					filter.addAll(Arrays.asList(parseAddressList(alternates, false)));
 				}
 				/*
 				 * Add user's aliases to filter
@@ -249,7 +251,7 @@ public final class MimeReply {
 					for (int i = 1; i < userAddrs.length; i++) {
 						addrBuilder.append(',').append(userAddrs[i]);
 					}
-					filter.addAll(Arrays.asList(MessageUtility.parseAddressList(addrBuilder.toString(), false)));
+					filter.addAll(Arrays.asList(parseAddressList(addrBuilder.toString(), false)));
 				}
 				/*
 				 * Determine if other original recipients should be added to Cc
@@ -266,7 +268,7 @@ public final class MimeReply {
 				String hdrVal = originalMsg.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
 				InternetAddress[] toAddrs = null;
 				if (hdrVal != null) {
-					filteredAddrs.addAll(filter(filter, (toAddrs = MessageUtility.parseAddressList(hdrVal, true))));
+					filteredAddrs.addAll(filter(filter, (toAddrs = parseAddressList(hdrVal, true))));
 				}
 				/*
 				 * ... and add filtered addresses to either 'To' or 'Cc' field
@@ -297,8 +299,7 @@ public final class MimeReply {
 				filteredAddrs.clear();
 				hdrVal = originalMsg.getHeader(MessageHeaders.HDR_CC, MessageHeaders.HDR_ADDR_DELIM);
 				if (hdrVal != null) {
-					filteredAddrs.addAll(filter(filter, MessageUtility.parseAddressList(MimeUtility.unfold(hdrVal),
-							true)));
+					filteredAddrs.addAll(filter(filter, parseAddressList(MimeUtility.unfold(hdrVal), true)));
 				}
 				if (!filteredAddrs.isEmpty()) {
 					replyMsg.addRecipients(RecipientType.CC, filteredAddrs.toArray(new InternetAddress[filteredAddrs
@@ -310,8 +311,7 @@ public final class MimeReply {
 				filteredAddrs.clear();
 				hdrVal = originalMsg.getHeader(MessageHeaders.HDR_BCC, MessageHeaders.HDR_ADDR_DELIM);
 				if (hdrVal != null) {
-					filteredAddrs.addAll(filter(filter, MessageUtility.parseAddressList(MimeUtility.unfold(hdrVal),
-							true)));
+					filteredAddrs.addAll(filter(filter, parseAddressList(MimeUtility.unfold(hdrVal), true)));
 				}
 				if (!filteredAddrs.isEmpty()) {
 					replyMsg.addRecipients(RecipientType.BCC, filteredAddrs.toArray(new InternetAddress[filteredAddrs
@@ -497,7 +497,7 @@ public final class MimeReply {
 			{
 				final String nextLine = "\n\n";
 				if (isHtml) {
-					replyPrefix = MessageUtility.htmlFormat(new StringBuilder(replyPrefix.length() + 4)
+					replyPrefix = HTMLProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 4)
 							.append(nextLine).append(replyPrefix).append(nextLine).toString());
 				} else {
 					replyPrefix = new StringBuilder(replyPrefix.length() + 4).append(nextLine).append(replyPrefix)

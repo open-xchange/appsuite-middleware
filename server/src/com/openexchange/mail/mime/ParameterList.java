@@ -63,7 +63,7 @@ import java.util.regex.Pattern;
 import javax.mail.internet.MimeUtility;
 
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 
 /**
  * {@link ParameterList}
@@ -148,7 +148,7 @@ public final class ParameterList implements Cloneable {
 		}
 		int pos = name.indexOf('*');
 		if (pos == -1) {
-			parameters.put(name, new Parameter(name, MessageUtility.decodeMultiEncodedHeader(val)));
+			parameters.put(name, new Parameter(name, MIMEMessageUtility.decodeMultiEncodedHeader(val)));
 		} else {
 			Parameter p = null;
 			final String soleName = name.substring(0, pos);

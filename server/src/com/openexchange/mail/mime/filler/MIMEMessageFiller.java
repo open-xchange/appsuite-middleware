@@ -49,11 +49,11 @@
 
 package com.openexchange.mail.mime.filler;
 
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
+import static com.openexchange.mail.text.HTMLProcessing.formatHrefLinks;
 import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
-import static com.openexchange.mail.utils.MessageUtility.formatHrefLinks;
-import static com.openexchange.mail.utils.MessageUtility.parseAddressList;
-import static com.openexchange.mail.utils.MessageUtility.performLineFolding;
-import static com.openexchange.mail.utils.MessageUtility.replaceHTMLSimpleQuotesForDisplay;
+import static com.openexchange.mail.text.HTMLProcessing.replaceHTMLSimpleQuotesForDisplay;
+import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

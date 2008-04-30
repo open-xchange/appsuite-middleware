@@ -49,8 +49,6 @@
 
 package com.openexchange.imap.command;
 
-import static com.openexchange.mail.utils.MessageUtility.decodeMultiEncodedHeader;
-
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
@@ -87,7 +85,6 @@ import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
-import com.openexchange.mail.utils.MessageUtility;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.BODY;
@@ -719,7 +716,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 				itemHandler.hdrHandlers.put(MessageHeaders.HDR_SUBJECT, new HeaderHandler() {
 					public void handleHeader(final String hdrValue, final ExtendedMimeMessage msg)
 							throws MessagingException {
-						String decVal = decodeMultiEncodedHeader(hdrValue);
+						String decVal = MIMEMessageUtility.decodeMultiEncodedHeader(hdrValue);
 						if (decVal.indexOf("=?") == -1) {
 							/*
 							 * Something went wrong during decoding
@@ -835,7 +832,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 						} catch (final UnsupportedEncodingException e) {
 							LOG.error("Unsupported encoding in a message detected and monitored.", e);
 							MailServletInterface.mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-							msg.setSubject(MessageUtility.decodeMultiEncodedHeader(env.subject));
+							msg.setSubject(MIMEMessageUtility.decodeMultiEncodedHeader(env.subject));
 						}
 						msg.setSentDate(env.date);
 					}
