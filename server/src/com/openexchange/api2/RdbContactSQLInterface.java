@@ -995,7 +995,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 			}
 			
 			//try{
-			if ( (client_date != null && client_date.getTime() > 0) && (changing_date != null && client_date.before(changing_date))) {
+			if ( (client_date != null && client_date.getTime() >= 0) && (changing_date != null && client_date.before(changing_date))) {
 				throw EXCEPTIONS.createOXConcurrentModificationException(40,Integer.valueOf(ctx.getContextId()), Integer.valueOf(fuid), Integer.valueOf(userId), Integer.valueOf(oid));
 				//throw new OXConflictException("CONTACT HAS CHANGED ON SERVER SIDE SINCE THE LAST VISIT (cid="+sessionobject.getContext().getContextId()+" fid="+fuid+" oid="+oid+')');
 			}

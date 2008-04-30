@@ -341,14 +341,14 @@ public class Contacts implements DeleteListener {
 
 	@OXThrowsMultiple(category = { Category.PERMISSION, Category.PERMISSION, Category.PERMISSION, Category.CODE_ERROR,
 			Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR, Category.CODE_ERROR,
-			Category.TRY_AGAIN, Category.TRY_AGAIN }, desc = { "3", "4", "5", "6", "7", "8", "9", "51", "53", "58",
-			"62" }, exceptionId = { 3, 4, 5, 6, 7, 8, 9, 51, 53, 58, 62 }, msg = {
+			Category.TRY_AGAIN, Category.TRY_AGAIN, Category.USER_INPUT }, desc = { "3", "4", "5", "6", "7", "8", "9", "51", "53", "58",
+			"62","71" }, exceptionId = { 3, 4, 5, 6, 7, 8, 9, 51, 53, 58, 62, 71 }, msg = {
 			ContactException.NON_CONTACT_FOLDER_MSG, ContactException.NO_PERMISSION_MSG,
 			ContactException.NO_PERMISSION_MSG, "Unable to insert contacts! Context: %d",
 			"Got a -1 ID from IDGenerator", "Unable to scale image down.", "Unable to insert Contact. Context: %d",
 			ContactException.INIT_CONNECTION_FROM_DBPOOL, ContactException.INIT_CONNECTION_FROM_DBPOOL,
 			"The image you tried to attach is not a valid picture. It may be broken or is not a valid file.",
-			"Mandatory field last name is not set." })
+			"Mandatory field last name is not set.",ContactException.PFLAG_IN_PUBLIC_FOLDER })
 	public static void performContactStorageInsert(final ContactObject co, final int user, final int[] group,
 			final Session so) throws OXConflictException, OXException {
 
@@ -401,7 +401,11 @@ public class Contacts implements DeleteListener {
 			}
 
 			if ((contactFolder.getType() != FolderObject.PRIVATE) && co.getPrivateFlag()) {
-				co.setPrivateFlag(false);
+				throw EXCEPTIONS.createOXConflictException(71, 
+						                                   Integer.valueOf(fid), 
+						                                   Integer.valueOf(so.getContextId()),
+						                                   Integer.valueOf(user));
+				//co.setPrivateFlag(false);
 			}
 			/*
 			 * if (!co.containsDisplayName() || co.getDisplayName() == null ||

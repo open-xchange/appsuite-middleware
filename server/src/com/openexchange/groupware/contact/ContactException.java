@@ -64,6 +64,7 @@ public class ContactException extends OXException {
 	public static final String NO_DELETE_PERMISSION_MSG = "You do not have permission to delete objects from folder %1$d in context %2$d with user %3$d";
 	public static final String EVENT_QUEUE = "Unable to initialize Event queue";
 	public static final String INIT_CONNECTION_FROM_DBPOOL = "Unable to pick up a connection from the DBPool";
+	public static final String PFLAG_IN_PUBLIC_FOLDER = "A contact with private flag cannot be stored in a public folder. Folder: %1$d context %2$d user %3$d";
 	
 	public ContactException(Category category, int id, String message, Throwable cause, Object...msgParams){
 		super(EnumComponent.CONTACT, category, id,message,cause,msgParams);

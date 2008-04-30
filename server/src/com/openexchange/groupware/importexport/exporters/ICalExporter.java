@@ -193,7 +193,7 @@ public class ICalExporter implements Exporter {
 				return false;
 			}
 		} else if (module == FolderObject.TASK) {
-			if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasTask()) {
+			if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessObj.getUserId(), sessObj.getContext()).hasTask()) {
 				return false;
 			}
 		} else {
