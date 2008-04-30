@@ -141,7 +141,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	private boolean textAppended;
 
 	/**
-	 * Constructor
+	 * Initializes a new {@link JSONMessageHandler}
 	 * 
 	 * @param mailPath
 	 *            The unique mail path
@@ -169,7 +169,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	}
 
 	/**
-	 * Constructor
+	 * Initializes a new {@link JSONMessageHandler}
 	 * 
 	 * @param mailPath
 	 *            The unique mail path
@@ -178,9 +178,10 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 *            traversal
 	 * @param displayVersion
 	 *            <code>true</code> to create a version for display; otherwise
-	 *            <code>false</code>
+	 *            <code>false</code> to disable any display-specific
+	 *            preparations of message's content.
 	 * @param session
-	 *            The session
+	 *            The session providing needed user data
 	 * @throws MailException
 	 *             If a JSON error occurs
 	 */
@@ -259,7 +260,11 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 */
 	public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType,
 			final String fileName, final String id) throws MailException {
-		if (Part.INLINE.equalsIgnoreCase(part.getContentDisposition().getDisposition()) /*&& part.getFileName() == null*/
+		if (Part.INLINE.equalsIgnoreCase(part.getContentDisposition().getDisposition()) /*
+																						 * &&
+																						 * part.getFileName() ==
+																						 * null
+																						 */
 				&& MIMETypes.MIME_PGP_SIGN.equalsIgnoreCase(baseContentType)) {
 			/*
 			 * Ignore inline PGP signatures
