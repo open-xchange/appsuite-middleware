@@ -574,6 +574,15 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	}
 
 	/**
+	 * Calculates if the user configuration allows the participant dialog.
+	 * @return <code>true</code> if the participant dialog should be shown.
+	 */
+	public boolean hasParticipantsDialog() {
+	    return (hasCalendar() || hasTask()) && hasInfostore()
+            && hasFullPublicFolderAccess() && hasFullSharedFolderAccess();
+	}
+
+	/**
 	 * Detects if user configuration allows portal page in GUI
 	 * 
 	 * @return <code>true</code> if portal page is allowed;otherwise
