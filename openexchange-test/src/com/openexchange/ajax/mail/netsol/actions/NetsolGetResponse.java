@@ -71,7 +71,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
-import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 
 /**
  * {@link NetsolGetResponse}
@@ -295,7 +295,7 @@ public class NetsolGetResponse extends AbstractAJAXResponse {
 				final String personal = persAndAddr.getString(0);
 				final boolean hasPersonal = (personal != null && !"null".equals(personal));
 				if (hasPersonal) {
-					sb.append(MessageUtility.quotePersonal(personal)).append(" <");
+					sb.append(MIMEMessageUtility.quotePersonal(personal)).append(" <");
 				}
 				sb.append(persAndAddr.getString(1));
 				if (hasPersonal) {
@@ -308,7 +308,7 @@ public class NetsolGetResponse extends AbstractAJAXResponse {
 				final String personal = persAndAddr.getString(0);
 				final boolean hasPersonal = (personal != null && !"null".equals(personal));
 				if (hasPersonal) {
-					sb.append(MessageUtility.quotePersonal(personal)).append(" <");
+					sb.append(MIMEMessageUtility.quotePersonal(personal)).append(" <");
 				}
 				sb.append(persAndAddr.getString(1));
 				if (hasPersonal) {
