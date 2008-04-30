@@ -93,7 +93,9 @@ public enum Tree {
     
     TrashFolder("/modules/mail/defaultFolder/trash"),
 
-    Extras("/modules/com.openexchange.extras/module");
+    Extras("/modules/com.openexchange.extras/module"),
+
+    ShowParticipantDialog("/participants/showDialog");
 
     private final String path;
 

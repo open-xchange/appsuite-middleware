@@ -171,4 +171,15 @@ public class FunctionTests extends AbstractAJAXSession {
             .Extras));
         LOG.info("Should extras link be displayed: " + get.getBoolean());
     }
+
+    /**
+     * Checks if the new preferences entry flag for showing participants dialog
+     * works.
+     */
+    public void testShowParticipantsDialogFlag() throws Throwable {
+        final AJAXClient client = getClient();
+        final GetResponse get = ConfigTools.get(client, new GetRequest(Tree
+            .ShowParticipantDialog));
+        LOG.info("Should participant dialog be displayed: " + get.getBoolean());
+    }
 }
