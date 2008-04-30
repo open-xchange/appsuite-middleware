@@ -160,7 +160,12 @@ public class ResourceRequest {
 		
 		final ResourceStorage resourceStorage = ResourceStorage.getInstance();
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
-		com.openexchange.groupware.ldap.Resource r = resourceStorage.getResource(id, ctx);
+		com.openexchange.groupware.ldap.Resource r = null;
+		try {
+			r = resourceStorage.getResource(id, ctx);
+		} catch (LdapException exc) {
+			LOG.debug("resource not found try to find id in user table", exc);
+		}
 		
 		UserStorage userStorage = null;
 		
