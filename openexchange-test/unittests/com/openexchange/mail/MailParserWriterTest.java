@@ -55,6 +55,8 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.writer.FolderWriter;
 import com.openexchange.mail.json.writer.MessageWriter;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
@@ -80,59 +82,60 @@ public final class MailParserWriterTest extends AbstractMailTest {
 		super(name);
 	}
 
-	private static final MailField[] COMMON_LIST_FIELDS = { MailField.ID, MailField.FOLDER_ID,
-			MailField.SIZE, MailField.FROM, MailField.TO, MailField.RECEIVED_DATE,
-			MailField.SENT_DATE, MailField.SUBJECT, MailField.CONTENT_TYPE, MailField.FLAGS,
-			MailField.PRIORITY, MailField.COLOR_LABEL };
+	private static final MailField[] COMMON_LIST_FIELDS = { MailField.ID, MailField.FOLDER_ID, MailField.SIZE,
+			MailField.FROM, MailField.TO, MailField.RECEIVED_DATE, MailField.SENT_DATE, MailField.SUBJECT,
+			MailField.CONTENT_TYPE, MailField.FLAGS, MailField.PRIORITY, MailField.COLOR_LABEL };
 
 	public void testMessageWriter() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()),
-					"mail-test-session");
+			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
+					new ContextImpl(getCid()), "mail-test-session");
 			session.setPassword(getPassword());
 			final MailAccess<?, ?> mailConnection = MailAccess.getInstance(session);
-			mailConnection.connect(/*mailConfig*/);
+			mailConnection.connect(/* mailConfig */);
 			try {
 				final MailMessage[] mails = mailConnection.getMessageStorage().getAllMessages("INBOX", null, null,
 						null, new MailField[] { MailField.ID, MailField.CONTENT_TYPE });
 
 				for (final MailMessage mail : mails) {
 					if (mail.getContentType().isMimeType("multipart/mixed")) {
-						System.out.println(MessageWriter.writeMailMessage(mailConnection.getMessageStorage().getMessage(
-								"default.INBOX", mail.getMailId(), true), true, session));
+						System.out.println(MessageWriter.writeMailMessage(mailConnection.getMessageStorage()
+								.getMessage("default.INBOX", mail.getMailId(), true), DisplayMode.DISPLAY, session,
+								UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+										session.getContextId())));
 						break;
 					}
 				}
-				
+
 				for (final MailMessage mail : mails) {
 					if (mail.getContentType().isMimeType("multipart/alternative")) {
-						System.out.println(MessageWriter.writeMailMessage(mailConnection.getMessageStorage().getMessage(
-								"default.INBOX", mail.getMailId(), true), true, session));
+						System.out.println(MessageWriter.writeMailMessage(mailConnection.getMessageStorage()
+								.getMessage("default.INBOX", mail.getMailId(), true), DisplayMode.DISPLAY, session,
+								UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+										session.getContextId())));
 						break;
 					}
 				}
 			} finally {
 				mailConnection.close(true);
 			}
-		} catch (final MailException e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testFolderWriter() {
 		try {
-			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(), new ContextImpl(getCid()),
-					"mail-test-session");
+			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
+					new ContextImpl(getCid()), "mail-test-session");
 			session.setPassword(getPassword());
 			final MailAccess<?, ?> mailConnection = MailAccess.getInstance(session);
-			mailConnection.connect(/*mailConfig*/);
+			mailConnection.connect(/* mailConfig */);
 			try {
 				final MailFolder root = mailConnection.getFolderStorage().getRootFolder();
 				writeFolder(root, mailConnection);
-				
-				
-				
+
 			} finally {
 				mailConnection.close(true);
 			}
@@ -141,7 +144,7 @@ public final class MailParserWriterTest extends AbstractMailTest {
 			fail(e.getMessage());
 		}
 	}
-	
+
 	private static void writeFolder(final MailFolder f, final MailAccess<?, ?> mailConnection) throws MailException {
 		System.out.println(FolderWriter.writeMailFolder(f, mailConnection.getMailConfig()));
 		MailFolder[] flds = mailConnection.getFolderStorage().getSubfolders(f.getFullname(), true);

@@ -64,6 +64,8 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
@@ -190,7 +192,9 @@ public final class MailImageTest extends AbstractMailTest {
 			try {
 				final MailMessage mail = mailAccess.getMessageStorage().getMessage("INBOX", uid, true);
 
-				final JSONMessageHandler messageHandler = new JSONMessageHandler(null, mail, true, session);
+				final JSONMessageHandler messageHandler = new JSONMessageHandler(null, mail, DisplayMode.DISPLAY,
+						session, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+								session.getContextId()));
 				new MailMessageParser().parseMailMessage(mail, messageHandler);
 				final JSONObject jObject = messageHandler.getJSONObject();
 

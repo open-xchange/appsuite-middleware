@@ -67,6 +67,8 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
@@ -307,7 +309,9 @@ public final class MailAttachmentTest extends AbstractMailTest {
 					final MailMessage mail = mailAccess.getMessageStorage().getMessage("INBOX", id.longValue(), true);
 					final MailPath mailPath = new MailPath(mail.getFolder(), mail.getMailId());
 
-					final JSONMessageHandler messageHandler = new JSONMessageHandler(mailPath, mail, true, session);
+					final JSONMessageHandler messageHandler = new JSONMessageHandler(mailPath, mail,
+							DisplayMode.DISPLAY, session, UserSettingMailStorage.getInstance().getUserSettingMail(
+									session.getUserId(), session.getContextId()));
 					new MailMessageParser().parseMailMessage(mail, messageHandler);
 					final JSONObject jObject = messageHandler.getJSONObject();
 					if (jObject.has(MailJSONField.ATTACHMENTS.getKey())) {
@@ -357,7 +361,9 @@ public final class MailAttachmentTest extends AbstractMailTest {
 			session.setPassword(getPassword());
 
 			final MailMessage rfc2231Mail = MIMEMessageConverter.convertMessage(RFC2231.getBytes("US-ASCII"));
-			final JSONMessageHandler messageHandler = new JSONMessageHandler(null, rfc2231Mail, true, session);
+			final JSONMessageHandler messageHandler = new JSONMessageHandler(null, rfc2231Mail, DisplayMode.DISPLAY,
+					session, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+							session.getContextId()));
 			new MailMessageParser().parseMailMessage(rfc2231Mail, messageHandler);
 			final JSONObject jObject = messageHandler.getJSONObject();
 			if (jObject.has(MailJSONField.ATTACHMENTS.getKey())) {

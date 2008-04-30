@@ -59,6 +59,8 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.JSONMessageHandler;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 
@@ -301,7 +303,9 @@ public final class MailRFC2231Test extends AbstractMailTest {
 			session.setPassword(getPassword());
 
 			final MailMessage rfc2231Mail = MIMEMessageConverter.convertMessage(RFC2231_1.getBytes("US-ASCII"));
-			final JSONMessageHandler messageHandler = new JSONMessageHandler(null, rfc2231Mail, true, session);
+			final JSONMessageHandler messageHandler = new JSONMessageHandler(null, rfc2231Mail, DisplayMode.DISPLAY,
+					session, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+							session.getContextId()));
 			new MailMessageParser().parseMailMessage(rfc2231Mail, messageHandler);
 			final JSONObject jObject = messageHandler.getJSONObject();
 			if (jObject.has(MailJSONField.ATTACHMENTS.getKey())) {
@@ -332,7 +336,9 @@ public final class MailRFC2231Test extends AbstractMailTest {
 			session.setPassword(getPassword());
 
 			final MailMessage rfc2231Mail = MIMEMessageConverter.convertMessage(RFC2231_2.getBytes("US-ASCII"));
-			final JSONMessageHandler messageHandler = new JSONMessageHandler(null, rfc2231Mail, true, session);
+			final JSONMessageHandler messageHandler = new JSONMessageHandler(null, rfc2231Mail, DisplayMode.DISPLAY,
+					session, UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(),
+							session.getContextId()));
 			new MailMessageParser().parseMailMessage(rfc2231Mail, messageHandler);
 			final JSONObject jObject = messageHandler.getJSONObject();
 			if (jObject.has(MailJSONField.ATTACHMENTS.getKey())) {
