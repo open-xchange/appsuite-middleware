@@ -160,7 +160,22 @@ public class ResourceRequest {
 		
 		final ResourceStorage resourceStorage = ResourceStorage.getInstance();
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
-		final com.openexchange.groupware.ldap.Resource r = resourceStorage.getResource(id, ctx);
+		com.openexchange.groupware.ldap.Resource r = resourceStorage.getResource(id, ctx);
+		
+		UserStorage userStorage = null;
+		
+		if (r == null) {
+			if (userStorage == null) {
+				userStorage = UserStorage.getInstance();
+			}
+			
+			final User u = userStorage.getUser(id, ctx);
+			
+			r = new com.openexchange.groupware.ldap.Resource();
+			r.setIdentifier(u.getId());
+			r.setDisplayName(u.getDisplayName());
+			r.setLastModified(new Date(0));
+		}
 		
 		final ResourceWriter resourceWriter = new ResourceWriter();
 		final JSONObject jsonResourceObj = new JSONObject();
