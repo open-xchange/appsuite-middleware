@@ -379,10 +379,14 @@ public final class MessageUtility {
 
 	private static int[] getHrefIndices(final String line) {
 		final SmartIntArray sia = new SmartIntArray(10);
-		final Matcher m = PATTERN_HREF.matcher(line);
-		while (m.find()) {
-			sia.append(m.start());
-			sia.append(m.end());
+		try {
+			final Matcher m = PATTERN_HREF.matcher(line);
+			while (m.find()) {
+				sia.append(m.start());
+				sia.append(m.end());
+			}
+		} catch (final StackOverflowError error) {
+			LOG.error(StackOverflowError.class.getName(), error);
 		}
 		return sia.toArray();
 	}
@@ -480,7 +484,7 @@ public final class MessageUtility {
 	 * @return HTML text with simple quotes replaced with block quotes
 	 */
 	public static String replaceHTMLSimpleQuotesForDisplay(final String htmlText) {
-		final StringBuilder sb = new StringBuilder();
+		final StringBuilder sb = new StringBuilder(htmlText.length());
 		final String[] lines = htmlText.split(STR_SPLIT_BR);
 		int levelBefore = 0;
 		for (int i = 0; i < lines.length; i++) {
@@ -807,6 +811,13 @@ public final class MessageUtility {
 		return htmlFormat(plainText, true);
 	}
 
+	/**
+	 * The regular expression to match links inside both plain text and HTML
+	 * content.
+	 * <p>
+	 * <b>WARNING</b>: May throw a {@link StackOverflowError} if a matched link
+	 * is too large. Usages should handle this case.
+	 */
 	public static final Pattern PATTERN_HREF = Pattern
 			.compile(
 					"<a\\s+href[^>]+>.*?</a>|((?:https?://|ftp://|mailto:|news\\.|www\\.)(?:[-A-Z0-9+@#/%?=~_|!:,.;]|&amp;|&(?!\\w+;))*(?:[-A-Z0-9+@#/%=~_|]|&amp;|&(?!\\w+;)))",
@@ -827,7 +838,7 @@ public final class MessageUtility {
 		try {
 			final Matcher m = PATTERN_HREF.matcher(content);
 			final StringBuffer sb = new StringBuffer(content.length());
-			final StringBuilder tmp = new StringBuilder(200);
+			final StringBuilder tmp = new StringBuilder(256);
 			while (m.find()) {
 				final String nonHtmlLink = m.group(1);
 				if ((nonHtmlLink == null) || (isImgSrc(content, m.start(1)))) {
@@ -843,6 +854,8 @@ public final class MessageUtility {
 			return sb.toString();
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
+		} catch (final StackOverflowError error) {
+			LOG.error(StackOverflowError.class.getName(), error);
 		}
 		return content;
 	}

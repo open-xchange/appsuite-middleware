@@ -66,6 +66,9 @@ import java.util.regex.Pattern;
  */
 public final class Html2TextConverter {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(Html2TextConverter.class);
+
 	private static final String STR_EMPTY = "";
 
 	private static final String LINEBREAK = "\n";
@@ -394,8 +397,15 @@ public final class Html2TextConverter {
 				sb.append(matcher.group(1));
 			}
 			matcher = PATTERN_SRC_CONTENT.matcher(t);
-			if (matcher.find() && PATTERN_HREF.matcher(matcher.group(1)).matches()) {
-				sb.append(' ').append('[').append(matcher.group(1)).append(']');
+			try {
+				if (matcher.find() && PATTERN_HREF.matcher(matcher.group(1)).matches()) {
+					sb.append(' ').append('[').append(matcher.group(1)).append(']');
+				}
+			} catch (final StackOverflowError error) {
+				/*
+				 * Ignore on error
+				 */
+				LOG.error(StackOverflowError.class.getName(), error);
 			}
 			result = sb.toString();
 		} else if (isTag(t, "a")) {

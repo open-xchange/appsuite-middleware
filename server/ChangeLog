@@ -1,3 +1,8 @@
+* 2008-04-30 - thorben.betten@open-xchange.com
+
+ - Bugfix #11235: Fixed possible StackOverflowError when parsing large HTML
+   links or URLs occurring in a message content
+
 * 2008-04-29 - choeger@open-xchange.com
 
  - Bugfix #11147: "Last modified from" should not be 0
