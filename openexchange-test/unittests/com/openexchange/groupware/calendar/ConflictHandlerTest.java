@@ -123,6 +123,7 @@ public class ConflictHandlerTest extends TestCase {
         assertNotNull(conflicts);
         assertEquals(1, conflicts.length);
         CalendarDataObject conflict = conflicts[0];
+                
         assertEquals(appointment.getObjectID(), conflict.getObjectID());
         assertUserParticipants(conflict, participant1);
     }
@@ -133,7 +134,7 @@ public class ConflictHandlerTest extends TestCase {
         appointments.save( appointment );  clean.add( appointment );
         CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithResourceParticipants(resource1, resource3);
         conflictingAppointment.setIgnoreConflicts(false);
-        CalendarDataObject[] conflicts = getConflicts( conflictingAppointment );;
+        CalendarDataObject[] conflicts = getConflicts( conflictingAppointment );
 
         assertNotNull(conflicts);
         assertEquals(1, conflicts.length);
@@ -161,9 +162,11 @@ public class ConflictHandlerTest extends TestCase {
 
     // Node 1077
     public void testShouldSupplyTitleIfPermissionsAllowIt() throws OXException {
-        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2);
+        // Permissions of the current user are only relevant if he is also a participant.
+        // Can someone create a private appointment where she is not a participant? Where is this rule enforced?
+        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant2);
         appointments.save( appointment ); clean.add( appointment );
-        CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(participant1, participant3);
+        CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant3);
         conflictingAppointment.setIgnoreConflicts(false);
         CalendarDataObject[] conflicts = getConflicts( conflictingAppointment );;
 
@@ -175,12 +178,12 @@ public class ConflictHandlerTest extends TestCase {
 
     // Node 1077
     public void testShouldSuppressTitleIfPermissionsDenyIt() throws OXException {
-        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2);
+        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant2);
         appointments.save( appointment ); clean.add( appointment );
 
         appointments.switchUser( secondUser );
 
-        CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(participant1, participant3);
+        CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant3);
         conflictingAppointment.setIgnoreConflicts(false);
         CalendarDataObject[] conflicts = getConflicts( conflictingAppointment );
 
@@ -192,7 +195,11 @@ public class ConflictHandlerTest extends TestCase {
 
     private CalendarDataObject[] getConflicts(CalendarDataObject conflictingAppointment) throws OXException {
         ConflictHandler ch = new ConflictHandler(conflictingAppointment, appointments.getSession(), false);
-        return ch.getConflicts();
+        CalendarDataObject[] conflicts = ch.getConflicts();
+        for(CalendarDataObject conflict : conflicts) {
+            conflict.setContext(ctx);
+        }
+        return conflicts;
     }
 
 }

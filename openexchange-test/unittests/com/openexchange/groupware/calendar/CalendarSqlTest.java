@@ -201,9 +201,9 @@ public class CalendarSqlTest extends TestCase {
 
     // Node 1077
     public void testShouldSupplyConflictingUserParticipants() throws SQLException, OXException {
-        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2);
+        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant2);
         appointments.save( appointment ); clean.add( appointment );
-        CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(participant1, participant3);
+        CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant3);
         conflictingAppointment.setIgnoreConflicts(false);
         CalendarDataObject[] conflicts = appointments.save( conflictingAppointment );
 
@@ -211,7 +211,7 @@ public class CalendarSqlTest extends TestCase {
         assertEquals(1, conflicts.length);
         CalendarDataObject conflict = conflicts[0];
         assertEquals(appointment.getObjectID(), conflict.getObjectID());
-        assertUserParticipants(conflict, participant1);
+        assertUserParticipants(conflict, user, participant1);
     }
 
     // Node 1077
@@ -243,7 +243,7 @@ public class CalendarSqlTest extends TestCase {
         assertEquals(1, conflicts.length);
         CalendarDataObject conflict = conflicts[0];
         assertEquals(appointment.getObjectID(), conflict.getObjectID());
-        assertUserParticipants(conflict, member );
+        assertUserParticipants(conflict, user, member ); // Current User is added by default, so always conflicts
     }
 
     // Node 1077

@@ -138,6 +138,7 @@ public class CommonAppointments {
 
         cdao.setParticipants(participants);
         cdao.setUsers(userParticipants);
+        cdao.setContainsResources(resources.length > 0);
         
         return cdao;
     }
@@ -151,11 +152,19 @@ public class CommonAppointments {
     }
 
     public CalendarDataObject[] save(CalendarDataObject cdao) throws OXException {
+        CalendarDataObject[] conflicts = null;
         if(cdao.containsObjectID()) {
-            return calendar.updateAppointmentObject(cdao, cdao.getParentFolderID(), new Date(Long.MAX_VALUE));
+            conflicts = calendar.updateAppointmentObject(cdao, cdao.getParentFolderID(), new Date(Long.MAX_VALUE));
         } else {
-            return calendar.insertAppointmentObject(cdao);
+            conflicts = calendar.insertAppointmentObject(cdao);
         }
+        if(conflicts == null) {
+            return null;
+        }
+        for (CalendarDataObject conflict : conflicts) {
+            conflict.setContext(cdao.getContext());
+        }
+        return conflicts;
     }
 
     public CalendarDataObject reload(CalendarDataObject which) throws SQLException, OXException {

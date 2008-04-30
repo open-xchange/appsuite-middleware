@@ -27,7 +27,12 @@ public class UnitTests {
 		// tests.addTestSuite(com.openexchange.groupware.CalendarTest.class);
 	   // tests.addTestSuite(com.openexchange.tools.file.FileStorageTest.class);
 
-		tests.addTestSuite(com.openexchange.tools.file.QuotaFileStorageTest.class);
+        tests.addTestSuite(com.openexchange.groupware.calendar.CalendarSqlTest.class);
+        tests.addTestSuite(com.openexchange.groupware.calendar.ConflictHandlerTest.class);
+        tests.addTestSuite(com.openexchange.groupware.calendar.CalendarDowngradeUserTest.class);
+
+
+        tests.addTestSuite(com.openexchange.tools.file.QuotaFileStorageTest.class);
 		tests.addTestSuite(com.openexchange.tools.file.SaveFileActionTest.class);
 		tests.addTestSuite(com.openexchange.tools.update.IndexTest.class);
 
