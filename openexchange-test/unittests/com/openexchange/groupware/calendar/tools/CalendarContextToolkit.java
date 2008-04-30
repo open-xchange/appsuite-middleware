@@ -46,7 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.groupware.calendar;
+package com.openexchange.groupware.calendar.tools;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -54,8 +54,14 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.*;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.ResourceParticipant;
+import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -151,4 +157,38 @@ public class CalendarContextToolkit {
             return null;
         }
     }
+
+    public List<UserParticipant> users(Context ctx, String...users) {
+        List<UserParticipant> participants = new ArrayList<UserParticipant>(users.length);
+        CalendarContextToolkit tools = new CalendarContextToolkit();
+        for(String user : users) {
+            int id = tools.resolveUser(user, ctx);
+            UserParticipant participant = new UserParticipant(id);
+            participants.add( participant );
+        }
+        return participants;
+    }
+
+    public List<ResourceParticipant> resources(Context ctx, String...resources) {
+        List<ResourceParticipant> participants = new ArrayList<ResourceParticipant>(resources.length);
+        CalendarContextToolkit tools = new CalendarContextToolkit();
+        for(String resource : resources) {
+            int id = tools.resolveResource(resource, ctx);
+            ResourceParticipant participant = new ResourceParticipant(id);
+            participants.add( participant );
+        }
+        return participants;
+    }
+
+    public List<GroupParticipant> groups(Context ctx, String...groups) {
+        List<GroupParticipant> participants = new ArrayList<GroupParticipant>(groups.length);
+        CalendarContextToolkit tools = new CalendarContextToolkit();
+        for(String group : groups) {
+            int id = tools.resolveGroup(group, ctx);
+            GroupParticipant participant = new GroupParticipant(id);
+            participants.add( participant );
+        }
+        return participants;
+    }
+
 }

@@ -52,9 +52,10 @@ import junit.framework.TestCase;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderManagerImpl;
-import com.openexchange.tools.oxfolder.OXFolderException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.Init;
+import com.openexchange.groupware.calendar.tools.CalendarContextToolkit;
+import com.openexchange.groupware.calendar.tools.CalendarFolderToolkit;
 import com.openexchange.groupware.container.*;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
@@ -74,8 +75,6 @@ import java.util.LinkedList;
 import java.util.Date;
 import java.sql.SQLException;
 import java.sql.Connection;
-
-import org.osgi.service.event.Event;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

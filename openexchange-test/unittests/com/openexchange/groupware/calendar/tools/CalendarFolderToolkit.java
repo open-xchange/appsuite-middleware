@@ -46,7 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.groupware.calendar;
+package com.openexchange.groupware.calendar.tools;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.container.FolderObject;
