@@ -31,7 +31,7 @@
 	<property name="configjar" value="com.openexchange.configread.jar"/>
     <property name="monitoringjar" value="com.openexchange.monitoring.jar"/>
 	
-	<property name="mailjar" value="mail.jar" />
+	<property name="mailjar" value="mail-1.4.1.jar" />
 
 
     <!-- Classpath -->
