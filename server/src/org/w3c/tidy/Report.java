@@ -53,8 +53,6 @@
  */
 package org.w3c.tidy;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -68,7 +66,7 @@ import java.util.ResourceBundle;
 
 import org.w3c.tidy.TidyMessage.Level;
 
-import com.openexchange.configuration.SystemConfig;
+import com.openexchange.mail.text.HTMLProcessing;
 
 
 /**
@@ -77,7 +75,7 @@ import com.openexchange.configuration.SystemConfig;
  * @author Dave Raggett <a href="mailto:dsr@w3.org">dsr@w3.org </a>
  * @author Andy Quick <a href="mailto:ac.quick@sympatico.ca">ac.quick@sympatico.ca </a> (translation to Java)
  * @author Fabrizio Giustina
- * @version $Revision: 1.2 $ ($Author: thorben $)
+ * @version $Revision: 1.3 $ ($Author: thorben $)
  */
 public final class Report
 {
@@ -652,8 +650,7 @@ public final class Report
         	InputStream in = null;
     		try
     		{
-    			in = new BufferedInputStream(new FileInputStream(
-    					SystemConfig.getProperty(SystemConfig.Property.TidyMessages)));
+    			in = HTMLProcessing.getTidyMessages();
     			res = new PropertyResourceBundle(in);
     		}
     		catch (final FileNotFoundException e)
