@@ -82,6 +82,8 @@ import com.openexchange.mail.mime.ContentType;
  */
 public final class MessageUtility {
 
+	private static final String STR_EMPTY = "";
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(MessageUtility.class);
 
@@ -142,34 +144,22 @@ public final class MessageUtility {
 			/*
 			 * Try to get data from raw input stream
 			 */
-			final InputStream inStream;
+			final InputStream rawIn;
 			if (p instanceof MimeBodyPart) {
-				final MimeBodyPart mpb = (MimeBodyPart) p;
-				inStream = mpb.getRawInputStream();
+				rawIn = ((MimeBodyPart) p).getRawInputStream();
 			} else if (p instanceof MimeMessage) {
-				final MimeMessage mm = (MimeMessage) p;
-				inStream = mm.getRawInputStream();
+				rawIn = ((MimeMessage) p).getRawInputStream();
 			} else {
-				inStream = null;
-			}
-			if (inStream == null) {
 				/*
 				 * Neither a MimeBodyPart nor a MimeMessage
 				 */
-				return "";
+				return STR_EMPTY;
 			}
 			try {
-				return readStream(inStream, charset);
+				return readStream(rawIn, charset);
 			} catch (final IOException e1) {
 				LOG.error(e1.getLocalizedMessage(), e1);
-				return e1.getLocalizedMessage();
-				// return STR_EMPTY;
-			} finally {
-				try {
-					inStream.close();
-				} catch (final IOException e1) {
-					LOG.error(e1.getLocalizedMessage(), e1);
-				}
+				return STR_EMPTY;
 			}
 		}
 	}
@@ -218,11 +208,11 @@ public final class MessageUtility {
 				} while ((count = isr.read(c)) > 0);
 				return sb.toString();
 			}
-			return "";
+			return STR_EMPTY;
 		} catch (final UnsupportedEncodingException e) {
 			LOG.error("Unsupported encoding in a message detected and monitored.", e);
 			mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
-			return "";
+			return STR_EMPTY;
 		} finally {
 			if (null != isr) {
 				try {
