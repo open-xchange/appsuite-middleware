@@ -55,13 +55,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.text.DateFormatSymbols;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.mail.MessagingException;
 import javax.mail.Part;
@@ -224,76 +217,4 @@ public final class MessageUtility {
 		}
 	}
 
-	private static final Lock LOCK_DATE_FORMAT = new ReentrantLock();
-
-	private static final SimpleDateFormat dateFormat;
-
-	static {
-		dateFormat = new SimpleDateFormat("dd'-'MMM'-'yyyy");
-		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-		final DateFormatSymbols dfs = dateFormat.getDateFormatSymbols();
-		final String[] shortMonths = new String[12];
-		shortMonths[Calendar.JANUARY] = "Jan";
-		shortMonths[Calendar.FEBRUARY] = "Feb";
-		shortMonths[Calendar.MARCH] = "Mar";
-		shortMonths[Calendar.APRIL] = "Apr";
-		shortMonths[Calendar.MAY] = "May";
-		shortMonths[Calendar.JUNE] = "Jun";
-		shortMonths[Calendar.JULY] = "Jul";
-		shortMonths[Calendar.AUGUST] = "Aug";
-		shortMonths[Calendar.SEPTEMBER] = "Sep";
-		shortMonths[Calendar.OCTOBER] = "Oct";
-		shortMonths[Calendar.NOVEMBER] = "Nov";
-		shortMonths[Calendar.DECEMBER] = "Dec";
-		dfs.setShortMonths(shortMonths);
-		dateFormat.setDateFormatSymbols(dfs);
-	}
-
-	/**
-	 * Formats given time argument to a date argument ready for being used in a
-	 * IMAP VERSION 4rev1 <code>SEARCH</code> command (as per RFC 3501). Note
-	 * that only day-related informations are allowed, other informations are
-	 * discarded.
-	 * <p>
-	 * Example:
-	 * 
-	 * <pre>
-	 * SEARCH SINCE 01-Jan-2001
-	 * </pre>
-	 * 
-	 * @param time
-	 *            The time argument to format
-	 * @return The RFC 3501 string representation of specified time
-	 */
-	public static String formatDateForIMAPSearch(final long time) {
-		return formatDateForIMAPSearch(new Date(time));
-	}
-
-	/**
-	 * Formats given date argument to a date argument ready for being used in a
-	 * IMAP VERSION 4rev1 <code>SEARCH</code> command (as per RFC 3501). Note
-	 * that only day-related informations are allowed, other informations are
-	 * discarded.
-	 * <p>
-	 * Example:
-	 * 
-	 * <pre>
-	 * SEARCH SINCE 01-Jan-2001
-	 * </pre>
-	 * 
-	 * @param date
-	 *            The date to format
-	 * @return The RFC 3501 string representation of specified time
-	 */
-	public static String formatDateForIMAPSearch(final Date date) {
-		/*
-		 * Only exclusive access to date format instance
-		 */
-		LOCK_DATE_FORMAT.lock();
-		try {
-			return dateFormat.format(date);
-		} finally {
-			LOCK_DATE_FORMAT.unlock();
-		}
-	}
 }
