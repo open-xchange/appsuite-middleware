@@ -72,7 +72,7 @@ import javax.swing.text.html.parser.ParserDelegator;
 
 /**
  * {@link HTMLFilter} - Filters a specified HTML content against a given white
- * list or black list of HTML tags and tag's attributes.
+ * list or black list of HTML tags and their attributes.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
