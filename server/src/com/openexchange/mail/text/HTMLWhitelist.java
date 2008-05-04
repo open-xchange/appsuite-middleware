@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -74,6 +73,49 @@ import javax.swing.text.html.parser.ParserDelegator;
  */
 public final class HTMLWhitelist {
 
+	private static final class HTMLTag extends HTML.Tag {
+
+		/**
+		 * Initializes a new {@link HTMLTag}
+		 * 
+		 * @param name
+		 *            The name
+		 */
+		public HTMLTag(String name) {
+			super(name);
+		}
+
+	}
+
+	private static final Set<HTML.Tag> DEFAULT_ALLOWED_TAGS = new HashSet<HTML.Tag>(Arrays.asList(new HTML.Tag[] {
+			HTML.Tag.A, new HTMLTag("abbr"), new HTMLTag("acronym"), HTML.Tag.ADDRESS, HTML.Tag.AREA, HTML.Tag.B,
+			HTML.Tag.BIG, HTML.Tag.BLOCKQUOTE, HTML.Tag.BODY, HTML.Tag.BR, new HTMLTag("button"), HTML.Tag.CAPTION,
+			HTML.Tag.CENTER, HTML.Tag.CITE, HTML.Tag.CODE, new HTMLTag("col"), new HTMLTag("colgroup"), HTML.Tag.DD,
+			new HTMLTag("del"), HTML.Tag.DFN, HTML.Tag.DIR, HTML.Tag.DIV, HTML.Tag.DL, HTML.Tag.DT, HTML.Tag.EM,
+			new HTMLTag("fieldset"), HTML.Tag.FONT, HTML.Tag.FORM, HTML.Tag.H1, HTML.Tag.H2, HTML.Tag.H3, HTML.Tag.H4,
+			HTML.Tag.H5, HTML.Tag.H6, HTML.Tag.HEAD, HTML.Tag.HR, HTML.Tag.HTML, HTML.Tag.I, HTML.Tag.IMG,
+			HTML.Tag.INPUT, new HTMLTag("ins"), HTML.Tag.KBD, new HTMLTag("label"), new HTMLTag("legend"), HTML.Tag.LI,
+			HTML.Tag.MAP, HTML.Tag.MENU, HTML.Tag.OL, new HTMLTag("optgroup"), HTML.Tag.OPTION, HTML.Tag.P,
+			HTML.Tag.PRE, new HTMLTag("q"), HTML.Tag.S, HTML.Tag.SAMP, HTML.Tag.SELECT, HTML.Tag.SMALL, HTML.Tag.SPAN,
+			HTML.Tag.STRIKE, HTML.Tag.STRONG, HTML.Tag.SUB, HTML.Tag.TABLE, new HTMLTag("tbody"), HTML.Tag.TD,
+			HTML.Tag.TEXTAREA, new HTMLTag("tfoot"), HTML.Tag.TH, new HTMLTag("thead"), HTML.Tag.TR, HTML.Tag.TT,
+			HTML.Tag.U, HTML.Tag.UL, HTML.Tag.VAR }));
+
+	private static final Set<HTML.Attribute> DEFAULT_ALLOWED_ATTRIBUTES = new HashSet<HTML.Attribute>(Arrays
+			.asList(new HTML.Attribute[] { HTML.Attribute.ACTION, HTML.Attribute.ALIGN, HTML.Attribute.ALT,
+					HTML.Attribute.BORDER, HTML.Attribute.CELLPADDING, HTML.Attribute.CELLSPACING,
+					HTML.Attribute.CHECKED, HTML.Attribute.CLASS, HTML.Attribute.CLEAR, HTML.Attribute.COLS,
+					HTML.Attribute.COLSPAN, HTML.Attribute.COLOR, HTML.Attribute.COMPACT, HTML.Attribute.COORDS,
+					HTML.Attribute.DIR, HTML.Attribute.ENCTYPE, HTML.Attribute.HEIGHT, HTML.Attribute.HREF,
+					HTML.Attribute.HSPACE, HTML.Attribute.ID, HTML.Attribute.ISMAP, HTML.Attribute.LANG,
+					HTML.Attribute.MAXLENGTH, HTML.Attribute.METHOD, HTML.Attribute.MULTIPLE, HTML.Attribute.NAME,
+					HTML.Attribute.NOHREF, HTML.Attribute.NOSHADE, HTML.Attribute.NOWRAP, HTML.Attribute.PROMPT,
+					HTML.Attribute.REL, HTML.Attribute.REV, HTML.Attribute.ROWS, HTML.Attribute.ROWSPAN,
+					HTML.Attribute.SELECTED, HTML.Attribute.SHAPE, HTML.Attribute.SIZE, HTML.Attribute.SRC,
+					HTML.Attribute.START, HTML.Attribute.TARGET, HTML.Attribute.TITLE, HTML.Attribute.TYPE,
+					HTML.Attribute.USEMAP, HTML.Attribute.VALIGN, HTML.Attribute.VALUE, HTML.Attribute.VSPACE,
+					HTML.Attribute.WIDTH }));
+
 	private static final HTMLEditorKit.Parser PARSER = new ParserDelegator();
 
 	private static final String CRLF = "\r\n";
@@ -89,36 +131,6 @@ public final class HTMLWhitelist {
 	public HTMLWhitelist(final int capacity) {
 		super();
 		this.capacity = capacity;
-	}
-
-	public static void main(final String[] args) {
-		String html = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">\n"
-				+ "<html>\n"
-				+ " <head>\n"
-				+ "  <title>Index of /~thorben</title>\n"
-				+ " </head>\n"
-				+ " <body>\n"
-				+ "<h1>Index of /~thorben</h1>\n"
-				+ "<table><tr><th><img src=\"/icons/blank.gif\" alt=\"[ICO]\"></th><th><a href=\"?C=N;O=D\">Name</a></th><th><a href=\"?C=M;O=A\">Last modified</a></th><th><a href=\"?C=S;O=A\">Size</a></th><th><a href=\"?C=D;O=A\">Description</a></th></tr><tr><th colspan=\"5\"><hr></th></tr>\n"
-				+ "\n"
-				+ "<tr><td valign=\"top\"><img src=\"/icons/back.gif\" alt=\"[DIR]\"></td><td><a href=\"/\">Parent Directory</a></td><td>&nbsp;</td><td align=\"right\">  - </td></tr>\n"
-				+ "<tr><td valign=\"top\"><img src=\"/icons/text.gif\" alt=\"[TXT]\"></td><td><a href=\"irc-links.html\">irc-links.html</a></td><td align=\"right\">03-Apr-2008 23:21  </td><td align=\"right\"> 99 </td></tr>\n"
-				+ "<tr><td valign=\"top\"><img src=\"/icons/folder.gif\" alt=\"[DIR]\"></td><td><a href=\"open-xchange-gui/\">open-xchange-gui/</a></td><td align=\"right\">14-Apr-2008 17:07  </td><td align=\"right\">  - </td></tr>\n"
-				+ "<tr><th colspan=\"5\"><hr></th></tr>\n" + "</table>\n" + "<img alt=\"fist\" src=\"faust\" />"
-				+ "<address>Apache/2.2.4 (Ubuntu) mod_jk/1.2.23 Server at localhost Port 80</address>\n" + "\n"
-				+ "</body></html>";
-		html = HTMLProcessing.validate(html, "UTF-8");
-		html = html.replaceAll(" />", ">");
-
-		final HTMLWhitelist obj = new HTMLWhitelist(8192);
-		final Map<HTML.Tag, Set<HTML.Attribute>> m = new HashMap<HTML.Tag, Set<HTML.Attribute>>();
-		m.put(HTML.Tag.IMG, new HashSet<HTML.Attribute>(Arrays.asList(new HTML.Attribute[] { HTML.Attribute.ALT,
-				HTML.Attribute.SRC })));
-		try {
-			System.out.println(obj.applyWhitelist(html, m));
-		} catch (final IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	private static final Pattern PATTERN_DOCTYPE = Pattern.compile("<!DOCTYPE[^>]+>", Pattern.CASE_INSENSITIVE);
@@ -152,9 +164,6 @@ public final class HTMLWhitelist {
 	}
 
 	private static final class HTMLWhitelistParserCallback extends ParserCallback {
-
-		private static final Set<HTML.Tag> COMMON_TAGS = new HashSet<HTML.Tag>(Arrays.asList(new HTML.Tag[] {
-				HTML.Tag.HTML, HTML.Tag.HEAD, HTML.Tag.BODY, HTML.Tag.TABLE, HTML.Tag.TR, HTML.Tag.TH, HTML.Tag.TD }));
 
 		private final StringBuilder htmlBuilder;
 
@@ -190,18 +199,20 @@ public final class HTMLWhitelist {
 				htmlBuilder.append(CRLF).append("<").append(tag.toString());
 				for (final Enumeration<?> e = a.getAttributeNames(); e.hasMoreElements();) {
 					final Object attributeName = e.nextElement();
-					if (attribs.contains(attributeName)) {
+					if (attribs.contains(attributeName) || DEFAULT_ALLOWED_ATTRIBUTES.contains(attributeName)) {
 						htmlBuilder.append(' ').append(attributeName.toString()).append("=\"").append(
 								a.getAttribute(attributeName).toString()).append('"');
 					}
 				}
 				htmlBuilder.append('>');
-			} else if (COMMON_TAGS.contains(tag)) {
+			} else if (DEFAULT_ALLOWED_TAGS.contains(tag)) {
 				htmlBuilder.append(CRLF).append("<").append(tag.toString());
 				for (final Enumeration<?> e = a.getAttributeNames(); e.hasMoreElements();) {
 					final Object attributeName = e.nextElement();
-					htmlBuilder.append(' ').append(attributeName.toString()).append("=\"").append(
-							a.getAttribute(attributeName).toString()).append('"');
+					if (DEFAULT_ALLOWED_ATTRIBUTES.contains(attributeName)) {
+						htmlBuilder.append(' ').append(attributeName.toString()).append("=\"").append(
+								a.getAttribute(attributeName).toString()).append('"');
+					}
 				}
 				htmlBuilder.append('>');
 			} else {
@@ -228,12 +239,22 @@ public final class HTMLWhitelist {
 				htmlBuilder.append(CRLF).append("<").append(tag.toString());
 				for (final Enumeration<?> e = a.getAttributeNames(); e.hasMoreElements();) {
 					final Object attributeName = e.nextElement();
-					if (attribs.contains(attributeName)) {
+					if (attribs.contains(attributeName) || DEFAULT_ALLOWED_ATTRIBUTES.contains(attributeName)) {
 						htmlBuilder.append(' ').append(attributeName.toString()).append("=\"").append(
 								a.getAttribute(attributeName).toString()).append('"');
 					}
 				}
 				htmlBuilder.append("/>");
+			} else if (DEFAULT_ALLOWED_TAGS.contains(tag)) {
+				htmlBuilder.append(CRLF).append("<").append(tag.toString());
+				for (final Enumeration<?> e = a.getAttributeNames(); e.hasMoreElements();) {
+					final Object attributeName = e.nextElement();
+					if (DEFAULT_ALLOWED_ATTRIBUTES.contains(attributeName)) {
+						htmlBuilder.append(' ').append(attributeName.toString()).append("=\"").append(
+								a.getAttribute(attributeName).toString()).append('"');
+					}
+				}
+				htmlBuilder.append('>');
 			}
 		}
 
