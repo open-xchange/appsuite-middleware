@@ -50,6 +50,7 @@
 package com.openexchange.mail.text;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -77,6 +78,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link HTMLProcessing} - Various methods for HTML processing
@@ -518,6 +520,46 @@ public final class HTMLProcessing {
 		final StringWriter writer = new StringWriter(htmlContent.length());
 		tidy.parse(new StringReader(htmlContent), writer);
 		return writer.toString();
+	}
+
+	/**
+	 * Pretty prints specified HTML content
+	 * 
+	 * @param htmlContent
+	 *            The HTML content
+	 * @param charset
+	 *            The character set encoding
+	 * @return Pretty printed HTML content
+	 */
+	public static String prettyPrint(final String htmlContent, final String charset) {
+		try {
+			/*
+			 * Obtain a new Tidy instance
+			 */
+			final Tidy tidy = new Tidy();
+			/*
+			 * Set desired configuration options using tidy setters
+			 */
+			tidy.setXHTML(true);
+			tidy.setConfigurationFromProps(getTidyConfiguration());
+			tidy.setForceOutput(true);
+			tidy.setOutputEncoding(charset);
+			/*
+			 * Suppress tidy outputs
+			 */
+			tidy.setShowErrors(0);
+			tidy.setShowWarnings(false);
+			tidy.setErrout(TIDY_DUMMY_PRINT_WRITER);
+			/*
+			 * Pretty print document
+			 */
+			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(htmlContent.length());
+			tidy.parseDOM(new UnsynchronizedByteArrayInputStream(htmlContent.getBytes(charset)), out);
+			return new String(out.toByteArray(), charset);
+		} catch (final UnsupportedEncodingException e) {
+			LOG.error(e.getMessage(), e);
+			return htmlContent;
+		}
 	}
 
 	private static final Pattern PATTERN_BLOCKQUOTE = Pattern.compile("(?:(<blockquote.*?>)|(</blockquote>))",

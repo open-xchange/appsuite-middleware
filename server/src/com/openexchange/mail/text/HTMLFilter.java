@@ -49,9 +49,11 @@
 
 package com.openexchange.mail.text;
 
+import static com.openexchange.mail.text.HTMLProcessing.prettyPrint;
+import static java.util.Arrays.asList;
+
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Map;
@@ -66,12 +68,13 @@ import javax.swing.text.html.HTMLEditorKit.ParserCallback;
 import javax.swing.text.html.parser.ParserDelegator;
 
 /**
- * {@link HTMLWhitelist}
+ * {@link HTMLFilter} - Filters a specified HTML content against a given white
+ * list or black list of HTML tags and tag's attributes.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class HTMLWhitelist {
+public final class HTMLFilter {
 
 	private static final class HTMLTag extends HTML.Tag {
 
@@ -81,13 +84,13 @@ public final class HTMLWhitelist {
 		 * @param name
 		 *            The name
 		 */
-		public HTMLTag(String name) {
+		public HTMLTag(final String name) {
 			super(name);
 		}
 
 	}
 
-	private static final Set<HTML.Tag> DEFAULT_ALLOWED_TAGS = new HashSet<HTML.Tag>(Arrays.asList(new HTML.Tag[] {
+	private static final Set<HTML.Tag> DEFAULT_WHITELIST_TAGS = new HashSet<HTML.Tag>(asList(new HTML.Tag[] {
 			HTML.Tag.A, new HTMLTag("abbr"), new HTMLTag("acronym"), HTML.Tag.ADDRESS, HTML.Tag.AREA, HTML.Tag.B,
 			HTML.Tag.BIG, HTML.Tag.BLOCKQUOTE, HTML.Tag.BODY, HTML.Tag.BR, new HTMLTag("button"), HTML.Tag.CAPTION,
 			HTML.Tag.CENTER, HTML.Tag.CITE, HTML.Tag.CODE, new HTMLTag("col"), new HTMLTag("colgroup"), HTML.Tag.DD,
@@ -101,8 +104,8 @@ public final class HTMLWhitelist {
 			HTML.Tag.TEXTAREA, new HTMLTag("tfoot"), HTML.Tag.TH, new HTMLTag("thead"), HTML.Tag.TR, HTML.Tag.TT,
 			HTML.Tag.U, HTML.Tag.UL, HTML.Tag.VAR }));
 
-	private static final Set<HTML.Attribute> DEFAULT_ALLOWED_ATTRIBUTES = new HashSet<HTML.Attribute>(Arrays
-			.asList(new HTML.Attribute[] { HTML.Attribute.ACTION, HTML.Attribute.ALIGN, HTML.Attribute.ALT,
+	private static final Set<HTML.Attribute> DEFAULT_WHITELIST_ATTRIBUTES = new HashSet<HTML.Attribute>(
+			asList(new HTML.Attribute[] { HTML.Attribute.ACTION, HTML.Attribute.ALIGN, HTML.Attribute.ALT,
 					HTML.Attribute.BORDER, HTML.Attribute.CELLPADDING, HTML.Attribute.CELLSPACING,
 					HTML.Attribute.CHECKED, HTML.Attribute.CLASS, HTML.Attribute.CLEAR, HTML.Attribute.COLS,
 					HTML.Attribute.COLSPAN, HTML.Attribute.COLOR, HTML.Attribute.COMPACT, HTML.Attribute.COORDS,
@@ -118,17 +121,15 @@ public final class HTMLWhitelist {
 
 	private static final HTMLEditorKit.Parser PARSER = new ParserDelegator();
 
-	private static final String CRLF = "\r\n";
-
 	private final int capacity;
 
 	/**
-	 * Initializes a new {@link HTMLWhitelist}
+	 * Initializes a new {@link HTMLFilter}
 	 * 
 	 * @param capacity
 	 *            The initial capacity
 	 */
-	public HTMLWhitelist(final int capacity) {
+	public HTMLFilter(final int capacity) {
 		super();
 		this.capacity = capacity;
 	}
@@ -158,30 +159,62 @@ public final class HTMLWhitelist {
 		} else {
 			doctype = null;
 		}
-		final HTMLWhitelistParserCallback parserCallback = new HTMLWhitelistParserCallback(capacity, whitelist);
+		final HTMLFilterParserCallback parserCallback = new HTMLFilterParserCallback(true, capacity, whitelist);
 		PARSER.parse(new StringReader(html), parserCallback, true);
 		return parserCallback.getHTML(doctype);
 	}
 
-	private static final class HTMLWhitelistParserCallback extends ParserCallback {
+	/**
+	 * Applies specified black list to given HTML content
+	 * 
+	 * @param html
+	 *            The HTML content
+	 * @param blacklist
+	 *            The black list
+	 * @return The stripped HTML content according to specified black list
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 */
+	public String applyBlacklist(final String html, final Map<HTML.Tag, Set<HTML.Attribute>> blacklist)
+			throws IOException {
+		/*
+		 * Determine doctype
+		 */
+		final Matcher m = PATTERN_DOCTYPE.matcher(html);
+		final String doctype;
+		if (m.find()) {
+			doctype = m.group();
+		} else {
+			doctype = null;
+		}
+		final HTMLFilterParserCallback parserCallback = new HTMLFilterParserCallback(false, capacity, blacklist);
+		PARSER.parse(new StringReader(html), parserCallback, true);
+		return parserCallback.getHTML(doctype);
+	}
+
+	private static final class HTMLFilterParserCallback extends ParserCallback {
 
 		private final StringBuilder htmlBuilder;
 
-		private final Map<HTML.Tag, Set<HTML.Attribute>> whitelist;
+		private final boolean isWhitelist;
+
+		private final Map<HTML.Tag, Set<HTML.Attribute>> filter;
 
 		private int level;
 
-		public HTMLWhitelistParserCallback(final int capacity, final Map<HTML.Tag, Set<HTML.Attribute>> whitelist) {
+		public HTMLFilterParserCallback(final boolean isWhitelist, final int capacity,
+				final Map<HTML.Tag, Set<HTML.Attribute>> filter) {
 			super();
+			this.isWhitelist = isWhitelist;
 			this.htmlBuilder = new StringBuilder(capacity);
-			this.whitelist = whitelist;
+			this.filter = filter;
 		}
 
 		public String getHTML(final String doctype) {
 			if (null != doctype) {
 				htmlBuilder.insert(0, doctype);
 			}
-			return htmlBuilder.toString();
+			return prettyPrint(htmlBuilder.toString(), "UTF-8");
 		}
 
 		public void reset() {
@@ -194,29 +227,20 @@ public final class HTMLWhitelist {
 				level++;
 				return;
 			}
-			final Set<HTML.Attribute> attribs = whitelist.get(tag);
-			if (attribs != null) {
-				htmlBuilder.append(CRLF).append("<").append(tag.toString());
-				for (final Enumeration<?> e = a.getAttributeNames(); e.hasMoreElements();) {
-					final Object attributeName = e.nextElement();
-					if (attribs.contains(attributeName) || DEFAULT_ALLOWED_ATTRIBUTES.contains(attributeName)) {
-						htmlBuilder.append(' ').append(attributeName.toString()).append("=\"").append(
-								a.getAttribute(attributeName).toString()).append('"');
-					}
+			if (isWhitelist) {
+				if (filter.containsKey(tag)) {
+					addStartTag(tag, a, false, filter.get(tag));
+				} else if (DEFAULT_WHITELIST_TAGS.contains(tag)) {
+					addDefaultStartTag(tag, a, false);
+				} else {
+					level++;
 				}
-				htmlBuilder.append('>');
-			} else if (DEFAULT_ALLOWED_TAGS.contains(tag)) {
-				htmlBuilder.append(CRLF).append("<").append(tag.toString());
-				for (final Enumeration<?> e = a.getAttributeNames(); e.hasMoreElements();) {
-					final Object attributeName = e.nextElement();
-					if (DEFAULT_ALLOWED_ATTRIBUTES.contains(attributeName)) {
-						htmlBuilder.append(' ').append(attributeName.toString()).append("=\"").append(
-								a.getAttribute(attributeName).toString()).append('"');
-					}
-				}
-				htmlBuilder.append('>');
 			} else {
-				level++;
+				if (filter.containsKey(tag)) {
+					level++;
+				} else {
+					addCompleteStartTag(tag, a, false);
+				}
 			}
 		}
 
@@ -234,27 +258,16 @@ public final class HTMLWhitelist {
 			if (level > 0) {
 				return;
 			}
-			final Set<HTML.Attribute> attribs = whitelist.get(tag);
-			if (attribs != null) {
-				htmlBuilder.append(CRLF).append("<").append(tag.toString());
-				for (final Enumeration<?> e = a.getAttributeNames(); e.hasMoreElements();) {
-					final Object attributeName = e.nextElement();
-					if (attribs.contains(attributeName) || DEFAULT_ALLOWED_ATTRIBUTES.contains(attributeName)) {
-						htmlBuilder.append(' ').append(attributeName.toString()).append("=\"").append(
-								a.getAttribute(attributeName).toString()).append('"');
-					}
+			if (isWhitelist) {
+				if (filter.containsKey(tag)) {
+					addStartTag(tag, a, true, filter.get(tag));
+				} else if (DEFAULT_WHITELIST_TAGS.contains(tag)) {
+					addDefaultStartTag(tag, a, true);
 				}
-				htmlBuilder.append("/>");
-			} else if (DEFAULT_ALLOWED_TAGS.contains(tag)) {
-				htmlBuilder.append(CRLF).append("<").append(tag.toString());
-				for (final Enumeration<?> e = a.getAttributeNames(); e.hasMoreElements();) {
-					final Object attributeName = e.nextElement();
-					if (DEFAULT_ALLOWED_ATTRIBUTES.contains(attributeName)) {
-						htmlBuilder.append(' ').append(attributeName.toString()).append("=\"").append(
-								a.getAttribute(attributeName).toString()).append('"');
-					}
+			} else {
+				if (!filter.containsKey(tag)) {
+					addCompleteStartTag(tag, a, true);
 				}
-				htmlBuilder.append('>');
 			}
 		}
 
@@ -267,7 +280,93 @@ public final class HTMLWhitelist {
 
 		@Override
 		public void handleComment(final char[] data, final int pos) {
+			System.out.println("Comment: " + new String(data));
 			htmlBuilder.append(data);
+		}
+
+		/**
+		 * Adds complete tag to HTML result with all attributes.
+		 * 
+		 * @param tag
+		 *            The tag to add
+		 * @param a
+		 *            The tag's attribute set
+		 * @param simple
+		 *            <code>true</code> to write a simple tag; otherwise
+		 *            <code>false</code>
+		 */
+		private void addCompleteStartTag(final HTML.Tag tag, final MutableAttributeSet a, final boolean simple) {
+			htmlBuilder.append('<').append(tag.toString());
+			for (final Enumeration<?> e = a.getAttributeNames(); e.hasMoreElements();) {
+				final Object attributeName = e.nextElement();
+				htmlBuilder.append(' ').append(attributeName.toString()).append("=\"").append(
+						a.getAttribute(attributeName).toString()).append('"');
+			}
+			if (simple) {
+				htmlBuilder.append('/');
+			}
+			htmlBuilder.append('>');
+		}
+
+		/**
+		 * Adds tag occurring in default white list to HTML result only with
+		 * attributes contained in default allowed attributes.
+		 * 
+		 * @param tag
+		 *            The tag to add
+		 * @param a
+		 *            The tag's attribute set
+		 * @param simple
+		 *            <code>true</code> to write a simple tag; otherwise
+		 *            <code>false</code>
+		 */
+		private void addDefaultStartTag(final HTML.Tag tag, final MutableAttributeSet a, final boolean simple) {
+			htmlBuilder.append('<').append(tag.toString());
+			for (final Enumeration<?> e = a.getAttributeNames(); e.hasMoreElements();) {
+				final Object attributeName = e.nextElement();
+				if (DEFAULT_WHITELIST_ATTRIBUTES.contains(attributeName)) {
+					htmlBuilder.append(' ').append(attributeName.toString()).append("=\"").append(
+							a.getAttribute(attributeName).toString()).append('"');
+				}
+			}
+			if (simple) {
+				htmlBuilder.append('/');
+			}
+			htmlBuilder.append('>');
+		}
+
+		/**
+		 * Adds tag occurring in white list to HTML result
+		 * 
+		 * @param tag
+		 *            The tag to add
+		 * @param a
+		 *            The tag's attribute set
+		 * @param simple
+		 *            <code>true</code> to write a simple tag; otherwise
+		 *            <code>false</code>
+		 * @param attribs
+		 *            The allowed tag's attributes or <code>null</code> to
+		 *            refer to default allowed attributes
+		 */
+		private void addStartTag(final HTML.Tag tag, final MutableAttributeSet a, final boolean simple,
+				final Set<HTML.Attribute> attribs) {
+			if (null == attribs) {
+				addDefaultStartTag(tag, a, simple);
+			} else {
+				htmlBuilder.append('<').append(tag.toString());
+				for (final Enumeration<?> e = a.getAttributeNames(); e.hasMoreElements();) {
+					final Object attributeName = e.nextElement();
+					if (attribs.contains(attributeName) || DEFAULT_WHITELIST_ATTRIBUTES.contains(attributeName)) {
+						htmlBuilder.append(' ').append(attributeName.toString()).append("=\"").append(
+								a.getAttribute(attributeName).toString()).append('"');
+					}
+				}
+				if (simple) {
+					htmlBuilder.append('/');
+				}
+				htmlBuilder.append('>');
+			}
 		}
 	}
 
