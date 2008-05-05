@@ -210,13 +210,13 @@ public final class HTMLFilter {
 				return;
 			}
 			if (isWhitelist) {
-				if (filter.containsKey(tag)) {
-					addStartTag(tag, a, true, filter.get(tag));
-				} else if (DEFAULT_WHITELIST_TAGS.contains(tag)) {
+				if (filter.containsKey(tag.toString())) {
+					addStartTag(tag, a, true, filter.get(tag.toString()));
+				} else if (DEFAULT_WHITELIST_TAGS.contains(tag.toString())) {
 					addDefaultStartTag(tag, a, true);
 				}
 			} else {
-				if (!filter.containsKey(tag)) {
+				if (!filter.containsKey(tag.toString())) {
 					addCompleteStartTag(tag, a, true);
 				}
 			}
@@ -229,15 +229,15 @@ public final class HTMLFilter {
 				return;
 			}
 			if (isWhitelist) {
-				if (filter.containsKey(tag)) {
-					addStartTag(tag, a, false, filter.get(tag));
-				} else if (DEFAULT_WHITELIST_TAGS.contains(tag)) {
+				if (filter.containsKey(tag.toString())) {
+					addStartTag(tag, a, false, filter.get(tag.toString()));
+				} else if (DEFAULT_WHITELIST_TAGS.contains(tag.toString())) {
 					addDefaultStartTag(tag, a, false);
 				} else {
 					level++;
 				}
 			} else {
-				if (filter.containsKey(tag)) {
+				if (filter.containsKey(tag.toString())) {
 					level++;
 				} else {
 					addCompleteStartTag(tag, a, false);
