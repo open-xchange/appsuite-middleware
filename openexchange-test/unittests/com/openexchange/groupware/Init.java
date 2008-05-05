@@ -228,8 +228,8 @@ public final class Init {
 	}
 
 	private static void startAndInjectPushUDPBundle() throws Exception {
-		ServerServiceRegistry.getInstance().addService(EventAdmin.class, new TestEventAdmin());
-		EventAdminService.getInstance().setService(new TestEventAdmin());
+		ServerServiceRegistry.getInstance().addService(EventAdmin.class, TestEventAdmin.getInstance());
+		EventAdminService.getInstance().setService(TestEventAdmin.getInstance());
 
 		// SessiondService.getInstance().setService(new
 		// SessiondConnectorImpl());
