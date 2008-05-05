@@ -139,11 +139,16 @@ public class CalendarDowngradeUserTest extends TestCase {
     }
 
     public void testRemovePrivate() throws OXException {
+        System.out.println("\n\n\n -------> TEST REMOVE PRIVATE!");
         CalendarDataObject cdao = createPrivateAppointment(user);
+        System.out.println("\n\n\n -------> CREATED APPOINTMENT! "+cdao);
         runDelete(user);
+        System.out.println("DELETE RUN!");
 
         assertAppointmentNotFound(cdao.getParentFolderID(), cdao.getObjectID());
+        System.out.println("NOT FOUND");
         assertDeleteEvent(cdao.getParentFolderID(), cdao.getObjectID());
+        System.out.println("DELETE EVENT!\n\n");
     }
 
     public void testRemoveFromParticipants() throws OXException{
