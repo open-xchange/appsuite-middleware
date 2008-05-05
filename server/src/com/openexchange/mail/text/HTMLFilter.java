@@ -351,6 +351,55 @@ public final class HTMLFilter {
 		return map;
 	}
 
+	private static final Pattern PATTERN_TAG_LINE = Pattern.compile(
+			"_map\\[\"(\\p{Alnum}+)\"\\]\\s*=\\s*\"(\\p{Print}+)\"", Pattern.CASE_INSENSITIVE);
+
+	private static final Pattern PATTERN_ATTRIBUTE = Pattern.compile("(\\p{Alnum}+)(?:\\[(\\p{Print}+?)\\])?");
+
+	/**
+	 * Parses specified list; e.g:
+	 * 
+	 * <pre>
+	 * _map[&quot;a&quot;] = &quot;,href,name,tabindex,target,type,&quot;;
+	 * _map[&quot;area&quot;] = &quot;,alt,coords,href,nohref[nohref],shape[:rect:circle:poly:default:],tabindex,target,&quot;;
+	 * _map[&quot;basefont&quot;] = &quot;,color,face,size,&quot;;
+	 * _map[&quot;bdo&quot;] = &quot;,dir[:ltr:rtl:]&quot;;
+	 * _map[&quot;blockquote&quot;] = &quot;,type,&quot;;
+	 * _map[&quot;body&quot;] = &quot;,alink,background,bgcolor,link,text,vlink,&quot;;
+	 * _map[&quot;br&quot;] = &quot;,clear[:left:right:all:none:]&quot;;
+	 * _map[&quot;button&quot;] = &quot;,disabled[disabled],name,tabindex,type[:button:submit:reset:],value,&quot;;
+	 * _map[&quot;caption&quot;] = &quot;,align[:top:bottom:left:right:]&quot;;
+	 * </pre>
+	 * 
+	 * @param list
+	 *            The list string
+	 * @return The parsed map
+	 */
+	private static Map<String, Map<String, Set<String>>> parseList(final String list) {
+		final Matcher m = PATTERN_TAG_LINE.matcher(list);
+		final Map<String, Map<String, Set<String>>> tagMap = new HashMap<String, Map<String, Set<String>>>();
+		while (m.find()) {
+			final Matcher attribMatcher = PATTERN_ATTRIBUTE.matcher(m.group(2));
+			final Map<String, Set<String>> attribMap = new HashMap<String, Set<String>>();
+			while (attribMatcher.find()) {
+				final String values = attribMatcher.group(2);
+				if (null == values) {
+					attribMap.put(attribMatcher.group(1).toLowerCase(Locale.ENGLISH), null);
+				} else {
+					final Set<String> valueSet = new HashSet<String>();
+					final String[] valArr = values.charAt(0) == ':' ? values.substring(1).split("\\s*:\\s*") : values
+							.split("\\s*:\\s*");
+					for (final String value : valArr) {
+						valueSet.add(value);
+					}
+					attribMap.put(attribMatcher.group(1).toLowerCase(Locale.ENGLISH), valueSet);
+				}
+			}
+			tagMap.put(m.group(1).toLowerCase(Locale.ENGLISH), attribMap);
+		}
+		return tagMap;
+	}
+
 	private final int capacity;
 
 	/**
