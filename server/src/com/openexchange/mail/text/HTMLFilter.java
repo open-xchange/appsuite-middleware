@@ -257,23 +257,26 @@ public final class HTMLFilter {
 		}
 	}
 
-	private static final Set<String> DEFAULT_WHITELIST_ATTRIBUTES = new HashSet<String>(asList(new String[] {
-			HTML.Attribute.ACTION.toString(), HTML.Attribute.ALIGN.toString(), HTML.Attribute.ALT.toString(),
-			HTML.Attribute.BORDER.toString(), HTML.Attribute.CELLPADDING.toString(),
-			HTML.Attribute.CELLSPACING.toString(), HTML.Attribute.CHECKED.toString(), HTML.Attribute.CLASS.toString(),
+	private static final Set<String> DEFAULT_WHITELIST_ATTRIBUTES = new HashSet<String>(asList(new String[] { "abbr",
+			"accept", "accept-charset", "accesskey", HTML.Attribute.ACTION.toString(), HTML.Attribute.ALIGN.toString(),
+			HTML.Attribute.ALT.toString(), "axis", HTML.Attribute.BORDER.toString(),
+			HTML.Attribute.CELLPADDING.toString(), HTML.Attribute.CELLSPACING.toString(), "char", "charoff", "charset",
+			HTML.Attribute.CHECKED.toString(), "class", HTML.Attribute.CLASS.toString(),
 			HTML.Attribute.CLEAR.toString(), HTML.Attribute.COLS.toString(), HTML.Attribute.COLSPAN.toString(),
 			HTML.Attribute.COLOR.toString(), HTML.Attribute.COMPACT.toString(), HTML.Attribute.COORDS.toString(),
-			HTML.Attribute.DIR.toString(), HTML.Attribute.ENCTYPE.toString(), HTML.Attribute.HEIGHT.toString(),
-			HTML.Attribute.HREF.toString(), HTML.Attribute.HSPACE.toString(), HTML.Attribute.ID.toString(),
-			HTML.Attribute.ISMAP.toString(), HTML.Attribute.LANG.toString(), HTML.Attribute.MAXLENGTH.toString(),
+			"datetime", HTML.Attribute.DIR.toString(), "disabled", HTML.Attribute.ENCTYPE.toString(), "for", "frame",
+			"headers", HTML.Attribute.HEIGHT.toString(), HTML.Attribute.HREF.toString(), "hreflang",
+			HTML.Attribute.HSPACE.toString(), HTML.Attribute.ID.toString(), HTML.Attribute.ISMAP.toString(), "label",
+			HTML.Attribute.LANG.toString(), "longdesc", HTML.Attribute.MAXLENGTH.toString(),
 			HTML.Attribute.METHOD.toString(), HTML.Attribute.MULTIPLE.toString(), HTML.Attribute.NAME.toString(),
 			HTML.Attribute.NOHREF.toString(), HTML.Attribute.NOSHADE.toString(), HTML.Attribute.NOWRAP.toString(),
-			HTML.Attribute.PROMPT.toString(), HTML.Attribute.REL.toString(), HTML.Attribute.REV.toString(),
-			HTML.Attribute.ROWS.toString(), HTML.Attribute.ROWSPAN.toString(), HTML.Attribute.SELECTED.toString(),
-			HTML.Attribute.SHAPE.toString(), HTML.Attribute.SIZE.toString(), HTML.Attribute.SRC.toString(),
-			HTML.Attribute.START.toString(), HTML.Attribute.TARGET.toString(), HTML.Attribute.TITLE.toString(),
-			HTML.Attribute.TYPE.toString(), HTML.Attribute.USEMAP.toString(), HTML.Attribute.VALIGN.toString(),
-			HTML.Attribute.VALUE.toString(), HTML.Attribute.VSPACE.toString(), HTML.Attribute.WIDTH.toString() }));
+			HTML.Attribute.PROMPT.toString(), HTML.Attribute.REL.toString(), "readonly", HTML.Attribute.REV.toString(),
+			HTML.Attribute.ROWS.toString(), HTML.Attribute.ROWSPAN.toString(), "rules", "scope",
+			HTML.Attribute.SELECTED.toString(), HTML.Attribute.SHAPE.toString(), HTML.Attribute.SIZE.toString(),
+			HTML.Attribute.SRC.toString(), HTML.Attribute.START.toString(), "summary", "tabindex",
+			HTML.Attribute.TARGET.toString(), HTML.Attribute.TITLE.toString(), HTML.Attribute.TYPE.toString(),
+			HTML.Attribute.USEMAP.toString(), HTML.Attribute.VALIGN.toString(), HTML.Attribute.VALUE.toString(),
+			HTML.Attribute.VSPACE.toString(), HTML.Attribute.WIDTH.toString() }));
 
 	private static final Set<String> DEFAULT_WHITELIST_TAGS = new HashSet<String>(asList(new String[] {
 			HTML.Tag.A.toString(), "abbr", "acronym", HTML.Tag.ADDRESS.toString(), HTML.Tag.AREA.toString(),
