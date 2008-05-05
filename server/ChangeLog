@@ -1,3 +1,8 @@
+* 2008-05-05 - francisco.laguna@open-xchange.com
+
+ - Node 1077: Conflicts contains conflicting members
+              Conflicts contain title if user has read access
+
 * 2008-05-05 - marcus.klein@open-xchange.com
 
  - Bugfix #11242: Not throwing an exception if a read only preferences item is

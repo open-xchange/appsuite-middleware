@@ -77,7 +77,9 @@ public interface CalendarSqlImp {
     public PreparedStatement getAllAppointmentsForUser(Context c, int uid, int groups[], UserConfiguration uc, java.util.Date d1, java.util.Date d2, String select, Connection readcon, Date since, int orderBy, String orderDir) throws OXException, SQLException;
     
     public PreparedStatement getConflicts(Context c, java.util.Date d1, java.util.Date d2, java.util.Date d3, java.util.Date d4, Connection readcon, String member_sql_in, boolean free_busy_select) throws SQLException;
-    
+
+    public PreparedStatement getAllPrivateAppointmentAndFolderIdsForUser(Context c, int id, Connection readcon) throws SQLException;
+
     public PreparedStatement getResourceConflicts(Context c, java.util.Date d1, java.util.Date d2, java.util.Date d3, java.util.Date d4, Connection readcon, String resource_sql_in) throws SQLException;
     
     public PreparedStatement getResourceConflictsPrivateFolderInformation(Context c, java.util.Date d1, java.util.Date d2, java.util.Date d3, java.util.Date d4, Connection readcon, String resource_sql_in) throws SQLException;

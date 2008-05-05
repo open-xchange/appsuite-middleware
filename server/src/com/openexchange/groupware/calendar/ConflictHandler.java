@@ -187,7 +187,7 @@ public class ConflictHandler {
                 whole_day_end = whole_day_start+CalendarRecurringCollection.MILLI_DAY;
             }
             prep = calendarsqlimp.getConflicts(ctx, start, end, new Date(whole_day_start), new Date(whole_day_end), readcon, sql_in, true);
-            private_folder_information = calendarsqlimp.getConflicts(ctx, start, end, null, null, readcon, sql_in, false);
+            private_folder_information = calendarsqlimp.getAllPrivateAppointmentAndFolderIdsForUser(ctx, user.getId(), readcon);
             rs = calendarsqlimp.getResultSet(prep);
             si = new FreeBusyResults(rs, prep, ctx, user.getId(), user.getGroups(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx), readcon, true, cdao.getUsers(), private_folder_information);
             ArrayList<CalendarDataObject> li = null;

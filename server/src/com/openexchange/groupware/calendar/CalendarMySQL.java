@@ -106,7 +106,9 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 class CalendarMySQL implements CalendarSqlImp {
 
-	private static final String PDM_AND_PD_FID = " AND pd.fid = ";
+    private static final String SELECT_ALL_PRIVATE_FOLDERS_IN_WHICH_A_USER_IS_A_PARTICIPANT = "SELECT object_id, pfid, member_uid FROM prg_dates_members WHERE member_uid = ? and cid = ?";
+
+    private static final String PDM_AND_PD_FID = " AND pd.fid = ";
 
 	private static final String select = "SELECT intfield01, timestampfield01, timestampfield02, field01 FROM prg_dates ";
 
@@ -244,7 +246,14 @@ class CalendarMySQL implements CalendarSqlImp {
 		return pst;
 	}
 
-	public final PreparedStatement getResourceConflictsPrivateFolderInformation(final Context c, final java.util.Date d1, final java.util.Date d2, final java.util.Date d3, final java.util.Date d4, final Connection readcon, final String resource_sql_in) throws SQLException {
+    public final PreparedStatement getAllPrivateAppointmentAndFolderIdsForUser(Context c, int id, Connection readcon) throws SQLException {
+        PreparedStatement stmt = readcon.prepareStatement(SELECT_ALL_PRIVATE_FOLDERS_IN_WHICH_A_USER_IS_A_PARTICIPANT);
+        stmt.setInt(1, id);
+        stmt.setInt(2, c.getContextId());
+        return stmt;
+    }
+
+    public final PreparedStatement getResourceConflictsPrivateFolderInformation(final Context c, final java.util.Date d1, final java.util.Date d2, final java.util.Date d3, final java.util.Date d4, final Connection readcon, final String resource_sql_in) throws SQLException {
 		final StringBuilder sb = new StringBuilder(184);
 		sb.append("SELECT pdm.object_id, pdm.pfid, pdm.member_uid FROM prg_dates ");
 		sb.append(JOIN_PARTICIPANTS);

@@ -210,6 +210,7 @@ public class FreeBusyResults implements SearchIterator {
                         rsNext();
                         return null;
                     }
+
                 }
             }
         } catch (SQLException sqle) {
@@ -221,9 +222,7 @@ public class FreeBusyResults implements SearchIterator {
         if (ft != 0 && cdao != null) {
             cdao.setFullTime(true);
         }
-        if (show_details && checkPermissions() && cdao != null) {
-            cdao.setTitle(title);
-        }
+        fillDetails(cdao);
         rsNext();
         return cdao;
     }
@@ -259,16 +258,22 @@ public class FreeBusyResults implements SearchIterator {
             }
             cdao.setRecurrencePosition(rr.getPosition());
             cdao.setObjectID(oid);
-            if (show_details && checkPermissions()) {
-                cdao.setTitle(title);
-                final Participants ret = resolveConflictingUserParticipants();
-                cdao.setParticipants(ret.getList());
-            }
+            fillDetails(cdao);
             seq--;
             return cdao;
         }
         rsNext();
         return null;
+    }
+
+    private void fillDetails(CalendarDataObject cdao) throws OXException {
+        if (show_details) {
+            if(checkPermissions()) {
+                cdao.setTitle(title);
+            }
+            final Participants ret = resolveConflictingUserParticipants();
+            cdao.setParticipants(ret.getList());
+        }
     }
     
     public boolean hasNext() {
