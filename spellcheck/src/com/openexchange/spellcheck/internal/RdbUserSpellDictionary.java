@@ -352,7 +352,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 	private JSONArray getUserWords() {
 		final Set<String> keySet = getUserDict(key).keySet();
 		final JSONArray jsonArray = new JSONArray();
-		for (String word : keySet) {
+		for (final String word : keySet) {
 			jsonArray.put(word);
 		}
 		return jsonArray;
@@ -465,7 +465,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 		if (rs != null) {
 			try {
 				rs.close();
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				if (LOG.isErrorEnabled()) {
 					LOG.error(e.getMessage(), e);
 				}
@@ -477,7 +477,7 @@ public final class RdbUserSpellDictionary implements SpellDictionary {
 		if (stmt != null) {
 			try {
 				stmt.close();
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				if (LOG.isErrorEnabled()) {
 					LOG.error(e.getMessage(), e);
 				}

@@ -54,7 +54,6 @@ import static com.openexchange.spellcheck.services.SpellCheckServiceRegistry.get
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.http.HttpService;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.osgiservice.DeferredActivator;
@@ -86,7 +85,7 @@ public final class SpellCheckActivator extends DeferredActivator {
 		started = new AtomicBoolean();
 	}
 
-	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, HttpService.class };
+	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
 
 	/*
 	 * (non-Javadoc)
@@ -104,9 +103,9 @@ public final class SpellCheckActivator extends DeferredActivator {
 	 * @see com.openexchange.server.osgiservice.DeferredActivator#handleUnavailability(java.lang.Class)
 	 */
 	@Override
-	protected void handleUnavailability(Class<?> clazz) {
+	protected void handleUnavailability(final Class<?> clazz) {
 		/*
-		 * Never stop the server even if a needed service is absent
+		 * Ignore absent configuration service
 		 */
 		if (LOG.isWarnEnabled()) {
 			LOG.warn("Absent service: " + clazz.getName());
@@ -155,6 +154,9 @@ public final class SpellCheckActivator extends DeferredActivator {
 			 */
 			spellCheckServiceRegistration = context.registerService(SpellCheckService.class.getName(),
 					new SpellCheckServiceImpl(), null);
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Spell check service successfully started");
+			}
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw e;
@@ -185,6 +187,9 @@ public final class SpellCheckActivator extends DeferredActivator {
 			 * Clear service registry
 			 */
 			getServiceRegistry().clearRegistry();
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Spell check service successfully stopped");
+			}
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw e;

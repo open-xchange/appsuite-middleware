@@ -158,7 +158,7 @@ public final class DictonaryStorage {
 			return retval;
 		}
 		final CombinedSpellDictionary dic = new CombinedSpellDictionary();
-		if (null == locale.getCountry() || locale.getCountry().length() == 0) {
+		if ((null == locale.getCountry()) || (locale.getCountry().length() == 0)) {
 			/*
 			 * Gather all locales with same language
 			 */
@@ -168,7 +168,7 @@ public final class DictonaryStorage {
 					dic.addSpellDictionaries(dictionaries.get(key));
 				}
 			}
-		} else if (null == locale.getVariant() || locale.getVariant().length() == 0) {
+		} else if ((null == locale.getVariant()) || (locale.getVariant().length() == 0)) {
 			/*
 			 * Gather all locales with same language
 			 */
@@ -280,7 +280,7 @@ public final class DictonaryStorage {
 				return false;
 			}
 		});
-		if (subdirs == null || subdirs.length == 0) {
+		if ((subdirs == null) || (subdirs.length == 0)) {
 			throw new SpellCheckException(SpellCheckException.Code.NO_LOCALE_FOUND);
 		}
 		for (int i = 0; i < subdirs.length; i++) {
@@ -302,7 +302,7 @@ public final class DictonaryStorage {
 		final File phonFile;
 		{
 			final File[] files = dir.listFiles(new FilenameFilter() {
-				public boolean accept(File dir, String name) {
+				public boolean accept(final File dir, final String name) {
 					return PAT_FILENAME_PHON.matcher(name).matches();
 				}
 			});
@@ -321,11 +321,11 @@ public final class DictonaryStorage {
 		 * Iterate word list files
 		 */
 		final File[] files = dir.listFiles(new FilenameFilter() {
-			public boolean accept(File dir, String name) {
+			public boolean accept(final File dir, final String name) {
 				return PAT_FILENAME_WL.matcher(name).matches();
 			}
 		});
-		if (files != null && files.length > 0) {
+		if ((files != null) && (files.length > 0)) {
 			SpellDictionary spellDictionary;
 			try {
 				spellDictionary = generateSpellDictionary(files[0], phonFile);
@@ -367,14 +367,14 @@ public final class DictonaryStorage {
 			if (null != wordListReader) {
 				try {
 					wordListReader.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOG.error(e.getLocalizedMessage(), e);
 				}
 			}
 			if (null != phonetReader) {
 				try {
 					phonetReader.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOG.error(e.getLocalizedMessage(), e);
 				}
 			}
@@ -421,7 +421,7 @@ public final class DictonaryStorage {
 				 * Check observer
 				 */
 				final String charset = observer.getCharset();
-				if (null != charset && Charset.isSupported(charset)) {
+				if ((null != charset) && Charset.isSupported(charset)) {
 					return charset;
 				}
 			}

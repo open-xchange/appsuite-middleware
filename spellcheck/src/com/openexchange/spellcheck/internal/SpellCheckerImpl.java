@@ -182,7 +182,7 @@ public final class SpellCheckerImpl implements SpellChecker {
 	 * @see com.openexchange.spellcheck.SpellCheck#addWord(java.lang.String[])
 	 */
 	public void addWord(final String... words) {
-		if (userDictionary != null && words.length > 0) {
+		if ((userDictionary != null) && (words.length > 0)) {
 			final int mlen = words.length - 1;
 			for (int i = 0; i < mlen; i++) {
 				userDictionary.addWord(words[i], false);
@@ -197,7 +197,7 @@ public final class SpellCheckerImpl implements SpellChecker {
 	 * @see com.openexchange.spellcheck.SpellCheck#removeWord(java.lang.String[])
 	 */
 	public void removeWord(final String... words) {
-		if (userDictionary != null && words.length > 0) {
+		if ((userDictionary != null) && (words.length > 0)) {
 			final int mlen = words.length - 1;
 			for (int i = 0; i < mlen; i++) {
 				userDictionary.removeWord(words[i], false);

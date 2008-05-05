@@ -49,15 +49,8 @@
 
 package com.openexchange.spellcheck.internal;
 
-import javax.servlet.ServletException;
-
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
-
 import com.openexchange.server.Initialization;
 import com.openexchange.spellcheck.SpellCheckException;
-import com.openexchange.spellcheck.services.SpellCheckServiceRegistry;
-import com.openexchange.spellcheck.servlet.SpellCheckServlet;
 
 /**
  * {@link SpellCheckInit}
@@ -66,11 +59,6 @@ import com.openexchange.spellcheck.servlet.SpellCheckServlet;
  * 
  */
 public class SpellCheckInit implements Initialization {
-
-	private static final String SC_SRVLT_ALIAS = "ajax/spellcheck";
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(SpellCheckInit.class);
 
 	private static final SpellCheckInit instance = new SpellCheckInit();
 
@@ -98,26 +86,6 @@ public class SpellCheckInit implements Initialization {
 	public void start() throws SpellCheckException {
 		DictonaryStorage.loadDictionaries();
 		RdbUserSpellDictionary.start();
-		final HttpService httpService = SpellCheckServiceRegistry.getServiceRegistry().getService(HttpService.class);
-		if (httpService == null) {
-			LOG.error("HTTP service is null. Spell check servlet cannot be registered");
-			return;
-		}
-		try {
-			/*
-			 * Register spell check servlet
-			 */
-			httpService.registerServlet(SC_SRVLT_ALIAS, new SpellCheckServlet(), null, null);
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Spell check servlet successfully registered");
-			}
-		} catch (final ServletException e) {
-			throw new SpellCheckException(SpellCheckException.Code.SERVLET_REGISTRATION_FAILED, e, e
-					.getLocalizedMessage());
-		} catch (final NamespaceException e) {
-			throw new SpellCheckException(SpellCheckException.Code.SERVLET_REGISTRATION_FAILED, e, e
-					.getLocalizedMessage());
-		}
 	}
 
 	/*
@@ -126,18 +94,6 @@ public class SpellCheckInit implements Initialization {
 	 * @see com.openexchange.server.Initialization#stop()
 	 */
 	public void stop() {
-		final HttpService httpService = SpellCheckServiceRegistry.getServiceRegistry().getService(HttpService.class);
-		if (httpService == null) {
-			LOG.error("HTTP service is null. Spell check servlet cannot be unregistered");
-		} else {
-			/*
-			 * Unregister spell check servlet
-			 */
-			httpService.unregister(SC_SRVLT_ALIAS);
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Spell check servlet successfully unregistered");
-			}
-		}
 		RdbUserSpellDictionary.stop();
 		DictonaryStorage.clearDictionaries();
 	}

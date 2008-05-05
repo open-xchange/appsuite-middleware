@@ -153,7 +153,7 @@ public final class CombinedSpellDictionary implements SpellDictionary {
 	public boolean isCorrect(final String word) {
 		final int size = dicts.size();
 		boolean correct = false;
-		for (int i = 0; i < size && !correct; i++) {
+		for (int i = 0; (i < size) && !correct; i++) {
 			correct = dicts.get(i).isCorrect(word);
 		}
 		return correct;
