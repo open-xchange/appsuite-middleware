@@ -1,3 +1,8 @@
+* 2008-05-05 - marcus.klein@open-xchange.com
+
+ - Bugfix #11242: Not throwing an exception if a read only preferences item is
+   written. 
+
 * 2008-04-30 - thorben.betten@open-xchange.com
 
  - Bugfix #11235: Fixed possible StackOverflowError when parsing large HTML

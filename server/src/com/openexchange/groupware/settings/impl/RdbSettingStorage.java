@@ -144,7 +144,9 @@ public class RdbSettingStorage extends SettingStorage {
             if (null != value && value.isWritable()) {
                 value.writeValue(ctx, user, setting);
             } else {
-                throw new SettingException(Code.NO_WRITE, setting.getName());
+                final SettingException e = new SettingException(Code.NO_WRITE,
+                    setting.getName());
+                LOG.warn(e.getMessage(), e);
             }
         } else {
             final int userId = session.getUserId();

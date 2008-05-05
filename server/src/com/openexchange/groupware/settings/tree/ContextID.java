@@ -49,13 +49,11 @@
 
 package com.openexchange.groupware.settings.tree;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -69,8 +67,6 @@ import com.openexchange.session.Session;
 public final class ContextID implements PreferencesItemService {
 
     private static final String NAME = "context_id";
-
-    private static final Log LOG = LogFactory.getLog(ContextID.class);
 
     /**
      * Default constructor.
@@ -90,25 +86,14 @@ public final class ContextID implements PreferencesItemService {
      * {@inheritDoc}
      */
     public IValueHandler getSharedValue() {
-        // TODO Make this a ReadOnlyValue
-        return new IValueHandler() {
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return true;
-            }
+        return new ReadOnlyValue() {
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
                 setting.setSingleValue(Integer.valueOf(ctx.getContextId()));
             }
-            public boolean isWritable() {
+            public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
-            }
-            public void writeValue(final Context ctx,
-                User user, final Setting setting) {
-                LOG.warn(NAME + " written.");
-            }
-            public int getId() {
-                return -1;
             }
         };
     }
