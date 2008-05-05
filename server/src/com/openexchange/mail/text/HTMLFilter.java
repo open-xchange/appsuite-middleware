@@ -111,9 +111,7 @@ public final class HTMLFilter {
 		private void addCompleteStartTag(final HTML.Tag tag, final MutableAttributeSet a, final boolean simple) {
 			htmlBuilder.append('<').append(tag.toString());
 			for (final Enumeration<?> e = a.getAttributeNames(); e.hasMoreElements();) {
-				final Object attributeName = e.nextElement();
-				htmlBuilder.append(' ').append(attributeName.toString()).append("=\"").append(
-						a.getAttribute(attributeName).toString()).append('"');
+				addAttribute(e.nextElement(), a);
 			}
 			if (simple) {
 				htmlBuilder.append('/');
@@ -138,8 +136,7 @@ public final class HTMLFilter {
 			for (final Enumeration<?> e = a.getAttributeNames(); e.hasMoreElements();) {
 				final Object attributeName = e.nextElement();
 				if (DEFAULT_WHITELIST_ATTRIBUTES.contains(attributeName.toString())) {
-					htmlBuilder.append(' ').append(attributeName.toString()).append("=\"").append(
-							a.getAttribute(attributeName).toString()).append('"');
+					addAttribute(attributeName, a);
 				}
 			}
 			if (simple) {
@@ -172,14 +169,24 @@ public final class HTMLFilter {
 					final Object attributeName = e.nextElement();
 					if (attribs.contains(attributeName.toString())
 							|| DEFAULT_WHITELIST_ATTRIBUTES.contains(attributeName.toString())) {
-						htmlBuilder.append(' ').append(attributeName.toString()).append("=\"").append(
-								a.getAttribute(attributeName).toString()).append('"');
+						addAttribute(attributeName, a);
 					}
 				}
 				if (simple) {
 					htmlBuilder.append('/');
 				}
 				htmlBuilder.append('>');
+			}
+		}
+
+		private void addAttribute(final Object attributeName, final MutableAttributeSet a) {
+			htmlBuilder.append(' ').append(attributeName.toString());
+			final Object attribute = a.getAttribute(attributeName);
+			if (!HTML.NULL_ATTRIBUTE_VALUE.equals(attribute)) {
+				/*
+				 * A non-empty attribute
+				 */
+				htmlBuilder.append("=\"").append(attribute.toString()).append('"');
 			}
 		}
 
