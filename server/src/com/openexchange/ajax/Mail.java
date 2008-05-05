@@ -2067,6 +2067,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 			MailServletInterface mailInterface = mailInterfaceArg;
 			boolean closeMailInterface = false;
 			final InfostoreFacade db = Infostore.FACADE;
+			boolean performRollback = false;
 			try {
 				final Context ctx = ContextStorage.getStorageContext(session.getContextId());
 				if (!UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)
@@ -2123,11 +2124,14 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 * Start writing to infostore folder
 				 */
 				db.startTransaction();
+				performRollback = true;
 				db.saveDocument(docMetaData, mailPart.getInputStream(), System.currentTimeMillis(),
 						new ServerSessionAdapter(session, ctx));
 				db.commit();
 			} catch (final Exception e) {
-				db.rollback();
+				if (performRollback) {
+					db.rollback();
+				}
 				throw e;
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
