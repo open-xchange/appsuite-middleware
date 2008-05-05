@@ -192,7 +192,9 @@ public final class HTMLFilter {
 
 		@Override
 		public void handleComment(final char[] data, final int pos) {
-			// TODO: htmlBuilder.append(data);
+			if (level == 0) {
+				htmlBuilder.append("<!--").append(data).append("-->");
+			}
 		}
 
 		@Override
