@@ -55,6 +55,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 
 import com.openexchange.mail.MailException;
@@ -333,6 +334,11 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
 	 */
 	public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName,
 			final String id) throws MailException {
+		final String disposition = part.getContentDisposition() == null ? (part.getFileName() == null ? Part.INLINE
+				: Part.ATTACHMENT) : part.getContentDisposition().getDisposition();
+		if (!Part.INLINE.equalsIgnoreCase(disposition)) {
+			nonInlineParts.add(part);
+		}
 		return true;
 	}
 
