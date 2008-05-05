@@ -57,11 +57,16 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.api2.OXException;
 import com.openexchange.session.Session;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
+
 
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 import java.sql.SQLException;
+import java.sql.Connection;
+import java.sql.Statement;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -85,7 +90,9 @@ public class CommonAppointments {
         cdao.setTitle("recurring");
         cdao.setParentFolderID(privateFolder);
         cdao.setIgnoreConflicts(true);
-        CalendarTest.fillDatesInDao(cdao);
+        //CalendarTest.fillDatesInDao(cdao);
+        cdao.setStartDate(new Date(100));
+        cdao.setEndDate(new Date(36000100));
         cdao.setRecurrenceType(CalendarObject.MONTHLY);
         cdao.setRecurrenceCount(5);
         cdao.setDayInMonth(3);
@@ -173,5 +180,25 @@ public class CommonAppointments {
 
     public Session getSession() {
         return session;
+    }
+
+    public void deleteAll(Context ctx) throws SQLException, DBPoolingException {
+        Statement stmt = null;
+        Connection writeCon = null;
+        try {
+            writeCon = DBPool.pickupWriteable(ctx);
+            stmt = writeCon.createStatement();
+            for(String tablename : new String[]{"prg_dates", "prg_dates_members", "prg_date_rights"}) {
+                stmt.executeUpdate("DELETE FROM "+tablename+" WHERE cid = "+ctx.getContextId());
+            }
+        } finally {
+            if(stmt != null) {
+                stmt.close();                    
+            }
+            if(writeCon != null) {
+                DBPool.closeWriterSilent(ctx, writeCon);                    
+            }
+        }
+
     }
 }

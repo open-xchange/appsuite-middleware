@@ -108,6 +108,8 @@ public class CalendarSqlTest extends TestCase {
         int groupid = tools.resolveGroup(group, ctx);
         int memberid = tools.loadGroup(groupid, ctx).getMember()[0];
         member = tools.loadUser(memberid, ctx).getLoginInfo();
+
+        appointments.deleteAll(ctx);
     }
 
     public void tearDown() throws OXException, SQLException {
