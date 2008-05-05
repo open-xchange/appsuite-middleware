@@ -207,7 +207,7 @@ public final class Init {
 		IMAPServiceRegistry.getServiceRegistry().addService(CacheService.class, services.get(CacheService.class));
 		
 		/*
-		 * Register IMAP bundle
+		 * Register IMAP bundle         
 		 */
 		MailProviderRegistry.registerMailProvider("imap_imaps", IMAPProvider.getInstance());
 	}

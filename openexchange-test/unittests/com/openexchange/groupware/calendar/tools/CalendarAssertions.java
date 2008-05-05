@@ -91,17 +91,25 @@ public class CalendarAssertions {
         boolean mustFail = false;
         if(!unexpected.isEmpty()) {
             mustFail = true;
-            problems.append("Didn't expect: ").append(unexpected).append(". ");
+            problems.append("Didn't expect: ").append(stringify(unexpected)).append(". ");
         }
         if(!userParticipants.isEmpty()) {
             mustFail = true;
-            problems.append("Missing user participants: ").append(userParticipants).append(". ");
+            problems.append("Missing user participants: ").append(stringify(userParticipants)).append(". ");
         }
         if(!resourceParticipants.isEmpty()) {
             mustFail = true;
-            problems.append("Missing resource participants: ").append(resourceParticipants).append(". ");
+            problems.append("Missing resource participants: ").append(stringify(resourceParticipants)).append(". ");
         }
         if( mustFail ) { fail( problems.toString() ); }
+    }
+
+    private static String stringify(Set<? extends Participant> unexpected) {
+        StringBuilder bob = new StringBuilder();
+        for(Participant p : unexpected) {
+            bob.append(p.getIdentifier()).append(": ").append(p.getDisplayName()).append(" | ");    
+        }
+        return bob.toString();
     }
 
 }
