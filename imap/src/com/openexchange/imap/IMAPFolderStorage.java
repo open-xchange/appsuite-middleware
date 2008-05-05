@@ -1086,7 +1086,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 					/*
 					 * Delete through storing \Deleted flag...
 					 */
-					new FlagsIMAPCommand(f, INT_1, blockSize, FLAGS_DELETED, true).doCommand();
+					new FlagsIMAPCommand(f, INT_1, blockSize, FLAGS_DELETED, true, true).doCommand();
 					/*
 					 * ... and perform EXPUNGE
 					 */
@@ -1154,7 +1154,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				/*
 				 * Delete through storing \Deleted flag...
 				 */
-				new FlagsIMAPCommand(f, FLAGS_DELETED, true).doCommand();
+				new FlagsIMAPCommand(f, FLAGS_DELETED, true, true).doCommand();
 				/*
 				 * ... and perform EXPUNGE
 				 */

@@ -74,6 +74,8 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 
 	private final boolean uid;
 
+	private final boolean silent;
+
 	private Boolean retval = Boolean.TRUE;
 
 	/**
@@ -85,6 +87,9 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	 *            the UIDs
 	 * @param flags -
 	 *            the system flags
+	 * @param silent
+	 *            <code>true</code> to suppress returning the new value;
+	 *            otherwise <code>false</code>
 	 * @param enable -
 	 *            whether to enable or disable affected system flags
 	 * @param isSequential -
@@ -93,7 +98,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	 *             if an unknown system flag is used
 	 */
 	public FlagsIMAPCommand(final IMAPFolder imapFolder, final long[] uids, final Flags flags, final boolean enable,
-			final boolean isSequential) throws MessagingException {
+			final boolean silent, final boolean isSequential) throws MessagingException {
 		super(imapFolder);
 		if (uids == null || uids.length == 0) {
 			returnDefaultValue = true;
@@ -116,6 +121,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 			}
 		}
 		this.enable = enable;
+		this.silent = silent;
 		this.uid = true;
 	}
 
@@ -128,10 +134,13 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	 *            the system flags
 	 * @param enable -
 	 *            whether to enable or disable affected system flags
+	 * @param silent
+	 *            <code>true</code> to suppress returning the new value;
+	 *            otherwise <code>false</code>
 	 * @throws MessagingException -
 	 *             if an unknown system flag is used
 	 */
-	public FlagsIMAPCommand(final IMAPFolder imapFolder, final Flags flags, final boolean enable)
+	public FlagsIMAPCommand(final IMAPFolder imapFolder, final Flags flags, final boolean enable, final boolean silent)
 			throws MessagingException {
 		super(imapFolder);
 		args = ARGS_ALL;
@@ -148,6 +157,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 			flagsStr = flagBuilder.toString();
 		}
 		this.enable = enable;
+		this.silent = silent;
 		this.uid = false;
 	}
 
@@ -166,11 +176,14 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	 *            the system flags
 	 * @param enable -
 	 *            whether to enable or disable affected system flags
+	 * @param silent
+	 *            <code>true</code> to suppress returning the new value;
+	 *            otherwise <code>false</code>
 	 * @throws MessagingException -
 	 *             if an unknown system flag is used
 	 */
 	public FlagsIMAPCommand(final IMAPFolder imapFolder, final int startSeqNum, final int endSeqNum, final Flags flags,
-			final boolean enable) throws MessagingException {
+			final boolean enable, final boolean silent) throws MessagingException {
 		super(imapFolder);
 		args = new String[] { new StringBuilder(16).append(startSeqNum).append(':').append(endSeqNum).toString() };
 		final Flag[] systemFlags;
@@ -187,6 +200,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 		}
 		this.enable = enable;
 		this.uid = false;
+		this.silent = silent;
 	}
 
 	public static final String FLAG_ANSWERED = "\\Answered";
@@ -257,7 +271,11 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 		sb.append("STORE ");
 		sb.append(args[argsIndex]);
 		sb.append(' ').append(enable ? '+' : '-');
-		sb.append("FLAGS (").append(flagsStr).append(')');
+		sb.append("FLAGS");
+		if (silent) {
+			sb.append(".SILENT");
+		}
+		sb.append(" (").append(flagsStr).append(')');
 		return sb.toString();
 	}
 

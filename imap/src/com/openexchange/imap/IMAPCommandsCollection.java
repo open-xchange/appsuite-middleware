@@ -709,9 +709,9 @@ public final class IMAPCommandsCollection {
 				 * Temporary remove flag \Deleted, perform expunge & restore
 				 * flag \Deleted
 				 */
-				new FlagsIMAPCommand(imapFolder, excUIDs, FLAGS_DELETED, false, false).doCommand();
+				new FlagsIMAPCommand(imapFolder, excUIDs, FLAGS_DELETED, false, true, false).doCommand();
 				IMAPCommandsCollection.fastExpunge(imapFolder);
-				new FlagsIMAPCommand(imapFolder, excUIDs, FLAGS_DELETED, true, false).doCommand();
+				new FlagsIMAPCommand(imapFolder, excUIDs, FLAGS_DELETED, true, true, false).doCommand();
 			} else {
 				IMAPCommandsCollection.fastExpunge(imapFolder);
 			}

@@ -501,7 +501,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		 * Mark messages as \DELETED...
 		 */
 		final long start = System.currentTimeMillis();
-		new FlagsIMAPCommand(imapFolder, tmp, FLAGS_DELETED, true, false).doCommand();
+		new FlagsIMAPCommand(imapFolder, tmp, FLAGS_DELETED, true, true, false).doCommand();
 		if (LOG.isDebugEnabled()) {
 			sb.setLength(0);
 			LOG.debug(sb.append(tmp.length).append(" messages marked as deleted (through system flag \\DELETED) in ")
@@ -635,7 +635,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				final IMAPFolder destFolder = setAndOpenFolder(destFullname, Folder.READ_WRITE);
 				try {
 					final long start = System.currentTimeMillis();
-					new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, true).doCommand();
+					new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, true, true).doCommand();
 					if (LOG.isDebugEnabled()) {
 						LOG.debug(new StringBuilder(128).append(
 								"A copy/move to default drafts folder => All messages' \\Draft flag in ").append(
@@ -652,7 +652,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				final IMAPFolder destFolder = setAndOpenFolder(destFullname, Folder.READ_WRITE);
 				try {
 					final long start = System.currentTimeMillis();
-					new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, false).doCommand();
+					new FlagsIMAPCommand(destFolder, FLAGS_DRAFT, false, true).doCommand();
 					if (LOG.isDebugEnabled()) {
 						LOG.debug(new StringBuilder(128).append(
 								"A copy/move from default drafts folder => All messages' \\Draft flag in ").append(
@@ -686,7 +686,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 		}
 		if (move) {
 			start = System.currentTimeMillis();
-			new FlagsIMAPCommand(imapFolder, tmp, FLAGS_DELETED, true, false).doCommand();
+			new FlagsIMAPCommand(imapFolder, tmp, FLAGS_DELETED, true, true, false).doCommand();
 			if (LOG.isDebugEnabled()) {
 				sb.setLength(0);
 				LOG.debug(sb.append(tmp.length).append(
@@ -825,7 +825,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			}
 			if (affectedFlags.getSystemFlags().length > 0) {
 				final long start = System.currentTimeMillis();
-				new FlagsIMAPCommand(imapFolder, msgUIDs, affectedFlags, set, false).doCommand();
+				new FlagsIMAPCommand(imapFolder, msgUIDs, affectedFlags, set, false, false).doCommand();
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(new StringBuilder(128).append("System Flags applied to ").append(msgUIDs.length).append(
 							" messages in ").append((System.currentTimeMillis() - start)).append("msec").toString());
