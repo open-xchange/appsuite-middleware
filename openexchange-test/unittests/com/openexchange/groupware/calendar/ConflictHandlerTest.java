@@ -116,9 +116,9 @@ public class ConflictHandlerTest extends TestCase {
 
      // Node 1077
     public void testShouldSupplyConflictingUserParticipants() throws SQLException, OXException {
-        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(participant1, participant2);
+        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants( user, participant1, participant2);  // User is added in private folder anyway
         appointments.save( appointment ); clean.add( appointment );
-        CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(participant1, participant3);
+        CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants( user, participant1, participant3);
         conflictingAppointment.setIgnoreConflicts(false);
         CalendarDataObject[] conflicts = getConflicts( conflictingAppointment );
 
@@ -127,7 +127,7 @@ public class ConflictHandlerTest extends TestCase {
         CalendarDataObject conflict = conflicts[0];
                 
         assertEquals(appointment.getObjectID(), conflict.getObjectID());
-        assertUserParticipants(conflict, participant1);
+        assertUserParticipants(conflict, user, participant1);
     }
 
     // Node 1077
