@@ -82,7 +82,7 @@ public final class NetsolFolderResponse extends AbstractAJAXResponse {
 				final JSONArray iArray = array.getJSONArray(i);
 				final int iLen = iArray.length();
 				retval[i] = new Object[iLen];
-				for (int k = 0; k < len; k++) {
+				for (int k = 0; k < iLen; k++) {
 					retval[i][k] = iArray.get(k);
 				}
 			}
