@@ -257,7 +257,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static final String PARAMETER_DATA = "data";
 
 	/**
-	 * The parameter 'folderid' indicates the current active folder of user
+	 * The parameter 'folder' indicates the current active folder of user
 	 */
 	public static final String PARAMETER_FOLDERID = "folder";
 
