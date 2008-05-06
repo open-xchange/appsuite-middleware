@@ -214,7 +214,9 @@ public final class ContentDisposition extends ParameterizedHeader implements Ser
 	public String toString() {
 		final StringBuilder sb = new StringBuilder(64);
 		sb.append(disposition);
-		parameterList.appendUnicodeString(sb);
+		if (null != parameterList) {
+			parameterList.appendUnicodeString(sb);
+		}
 		return sb.toString();
 	}
 }

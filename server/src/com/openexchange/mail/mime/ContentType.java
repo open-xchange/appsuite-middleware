@@ -363,7 +363,9 @@ public final class ContentType extends ParameterizedHeader implements Serializab
 	public String toString() {
 		final StringBuilder sb = new StringBuilder(64);
 		sb.append(primaryType).append(DELIMITER).append(subType);
-		parameterList.appendUnicodeString(sb);
+		if (null != parameterList) {
+			parameterList.appendUnicodeString(sb);
+		}
 		return sb.toString();
 	}
 
