@@ -74,6 +74,7 @@ CONFIGDB_DBNAME_LONG=configdb-dbname
 
 # default is NOT to create sql admin user
 CREATEADMIN=
+DLETETECONFIGDB=
 
 MUSTOPTS="CONFIGDB_PASS"
 LONGOPTS='$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_HOST_LONG:,$CONFIGDB_PORT_LONG:,$CONFIGDB_DBNAME_LONG:'
@@ -95,7 +96,7 @@ usage() {
     echo
     echo
     echo 'NOTE: use "-a" to create SQL admin user using GRANT command'
-    echo
+    echo        use "-i" to automatically delete the configdb if exists
     echo
     echo
 cat<<EOF
@@ -104,10 +105,9 @@ Example:
   $0 --configdb-pass=secret
 EOF
     echo
-    exit 1
 }
 
-TEMP=$(POSIXLY_CORRECT=true getopt -o ap:h --long "$(eval echo $LONGOPTS),help" -- "$@")
+TEMP=$(POSIXLY_CORRECT=true getopt -o iap:h --long "$(eval echo $LONGOPTS),help" -- "$@")
 eval set -- "$TEMP"
 
 while true; do
@@ -136,8 +136,13 @@ while true; do
 	    CREATEADMIN=true
 	    shift
 	    ;;
+	-i) 
+	    DLETETECONFIGDB=true
+	    shift
+	    ;;
 	-h|--help)
 	    usage
+        exit 1 
 	    shift
 	    ;;
 	--)
@@ -157,6 +162,7 @@ for opt in $MUSTOPTS; do
     opt_var_long=$(eval echo \$${opt}_LONG)
     opt_var_values=$(eval echo \$${opt}_VALUES)
     if [ -z "$opt_var" ]; then
+	usage
 	die "missing required option --$opt_var_long"
     fi
     if [ -n "$opt_var_values" ]; then
@@ -176,6 +182,10 @@ if [ -n "$CREATEADMIN" ]; then
     if [ "$USER" != "root" ]; then
 	die "need to be root in order to setup the system"
     fi
+fi
+
+if [ "$(mysql -h $CONFIGDB_HOST -P $CONFIGDB_PORT -u $CONFIGDB_USER -p${CONFIGDB_PASS} -e "show databases;" -B | grep ${CONFIGDB_DBNAME})" == ${CONFIGDB_DBNAME} ] && [ "$DLETETECONFIGDB" != "true" ]; then 
+	die "the database $CONFIGDB_DBNAME exists, use the -i switch if you want to automatically delete it"
 fi
 
 echo -n "initializing configdb from scratch..."
