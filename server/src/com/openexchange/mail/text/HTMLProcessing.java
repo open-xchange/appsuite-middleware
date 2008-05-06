@@ -60,6 +60,8 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -598,9 +600,117 @@ public final class HTMLProcessing {
 
 	private static Map<String, Character> htmlEntityMap;
 
+	private static Map<Character, String> defaultHtmlCharMap;
+
+	private static Map<String, Character> defaultHtmlEntityMap;
+
 	static void setMaps(final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
 		HTMLProcessing.htmlCharMap = htmlCharMap;
 		HTMLProcessing.htmlEntityMap = htmlEntityMap;
+	}
+
+	private static final byte[] HTML_ENTITIES = String.valueOf(
+			"# character map for HTML emails\n" + "weierp=8472\n" + "supe=8839\n" + "image=8465\n" + "ecirc=234\n"
+					+ "Otilde=213\n" + "uacute=250\n" + "diams=9830\n" + "ntilde=241\n" + "dArr=8659\n" + "Ecirc=202\n"
+					+ "ograve=242\n" + "yacute=253\n" + "times=215\n" + "iuml=239\n" + "rArr=8658\n" + "micro=181\n"
+					+ "rceil=8969\n" + "plusmn=177\n" + "there4=8756\n" + "nabla=8711\n" + "lsaquo=8249\n"
+					+ "rang=9002\n" + "Iuml=207\n" + "real=8476\n" + "sup3=179\n" + "sube=8838\n" + "acirc=226\n"
+					+ "sup2=178\n" + "sup1=185\n" + "lsquo=8216\n" + "Acirc=194\n" + "sect=167\n" + "notin=8713\n"
+					+ "radic=8730\n" + "ocirc=244\n" + "oplus=8853\n" + "euml=235\n" + "Oacute=211\n" + "rfloor=8971\n"
+					+ "rdquo=8221\n" + "Ocirc=212\n" + "Igrave=204\n" + "minus=8722\n" + "trade=8482\n" + "szlig=223\n"
+					+ "Agrave=192\n" + "forall=8704\n" + "laquo=171\n" + "cedil=184\n" + "Euml=203\n" + "ensp=8194\n"
+					+ "Egrave=200\n" + "otilde=245\n" + "lowast=8727\n" + "uml=168\n" + "perp=8869\n" + "int=8747\n"
+					+ "nbsp=160\n" + "Oslash=216\n" + "Ugrave=217\n" + "auml=228\n" + "part=8706\n" + "gt=62\n"
+					+ "ouml=246\n" + "ge=8805\n" + "para=182\n" + "empty=8709\n" + "Auml=196\n" + "isin=8712\n"
+					+ "ang=8736\n" + "uarr=8593\n" + "agrave=224\n" + "Ouml=214\n" + "and=8743\n" + "cap=8745\n"
+					+ "exist=8707\n" + "oline=8254\n" + "egrave=232\n" + "rsquo=8217\n" + "oacute=243\n"
+					+ "frac34=190\n" + "larr=8592\n" + "amp=38\n" + "lrm=8206\n" + "Atilde=195\n" + "iquest=191\n"
+					+ "infin=8734\n" + "reg=174\n" + "igrave=236\n" + "sbquo=8218\n" + "ucirc=251\n" + "Ucirc=219\n"
+					+ "yuml=255\n" + "copy=169\n" + "nsub=8836\n" + "prime=8242\n" + "raquo=187\n" + "Ccedil=199\n"
+					+ "Prime=8243\n" + "hearts=9829\n" + "oslash=248\n" + "ugrave=249\n" + "harr=8596\n"
+					+ "brvbar=166\n" + "Dagger=8225\n" + "equiv=8801\n" + "quot=34\n" + "ordm=186\n" + "deg=176\n"
+					+ "bull=8226\n" + "alefsym=8501\n" + "frac14=188\n" + "frac12=189\n" + "ordf=170\n"
+					+ "Iacute=205\n" + "sim=8764\n" + "zwnj=8204\n" + "lfloor=8970\n" + "otimes=8855\n"
+					+ "rsaquo=8250\n" + "Aacute=193\n" + "uuml=252\n" + "ndash=8211\n" + "clubs=9827\n" + "sup=8835\n"
+					+ "atilde=227\n" + "spades=9824\n" + "sum=8721\n" + "not=172\n" + "loz=9674\n" + "curren=164\n"
+					+ "shy=173\n" + "Eacute=201\n" + "or=8744\n" + "thinsp=8201\n" + "sdot=8901\n" + "aring=229\n"
+					+ "sub=8834\n" + "uArr=8657\n" + "pound=163\n" + "bdquo=8222\n" + "Aring=197\n" + "Uuml=220\n"
+					+ "darr=8595\n" + "Uacute=218\n" + "cong=8773\n" + "Ntilde=209\n" + "ccedil=231\n" + "aelig=230\n"
+					+ "lArr=8656\n" + "emsp=8195\n" + "rarr=8594\n" + "Ograve=210\n" + "lceil=8968\n" + "thorn=254\n"
+					+ "Yacute=221\n" + "euro=8364\n" + "permil=8240\n" + "dagger=8224\n" + "ni=8715\n" + "cent=162\n"
+					+ "ne=8800\n" + "cup=8746\n" + "lang=9001\n" + "asymp=8776\n" + "THORN=222\n" + "aacute=225\n"
+					+ "AElig=198\n" + "crarr=8629\n" + "acute=180\n" + "ETH=208\n" + "iexcl=161\n" + "icirc=238\n"
+					+ "eacute=233\n" + "divide=247\n" + "eth=240\n" + "hArr=8660\n" + "ldquo=8220\n" + "Icirc=206\n"
+					+ "macr=175\n" + "rlm=8207\n" + "yen=165\n" + "iacute=237\n" + "hellip=8230\n" + "middot=183\n"
+					+ "prop=8733\n" + "lt=60\n" + "frasl=8260\n" + "mdash=8212\n" + "zwj=8205\n" + "prod=8719\n"
+					+ "le=8804").getBytes();
+
+	static {
+		final Map<Character, String> htmlCharMap = new HashMap<Character, String>();
+		final Map<String, Character> htmlEntityMap = new HashMap<String, Character>();
+		final Properties htmlEntities = new Properties();
+		try {
+			htmlEntities.load(new UnsynchronizedByteArrayInputStream(HTML_ENTITIES));
+		} catch (final IOException e) {
+			/*
+			 * Cannot occur
+			 */
+			LOG.error(e.getMessage(), e);
+		}
+		/*
+		 * Build up map
+		 */
+		final Iterator<Map.Entry<Object, Object>> iter = htmlEntities.entrySet().iterator();
+		final int size = htmlEntities.size();
+		for (int i = 0; i < size; i++) {
+			final Map.Entry<Object, Object> entry = iter.next();
+			final Character c = Character.valueOf((char) Integer.parseInt((String) entry.getValue()));
+			htmlEntityMap.put((String) entry.getKey(), c);
+			htmlCharMap.put(c, (String) entry.getKey());
+		}
+		defaultHtmlCharMap = htmlCharMap;
+		defaultHtmlEntityMap = htmlEntityMap;
+	}
+
+	private static Map<Character, String> getHTMLCharMap() {
+		if (htmlCharMap == null) {
+			return defaultHtmlCharMap;
+		}
+		return htmlCharMap;
+	}
+
+	private static Map<String, Character> getHTMLEntityMap() {
+		if (htmlEntityMap == null) {
+			return defaultHtmlEntityMap;
+		}
+		return htmlEntityMap;
+	}
+
+	private static final Pattern PAT_HTML_ENTITIES = Pattern.compile("&(?:#([0-9]+)|([a-zA-Z]+));");
+
+	/**
+	 * Replaces all HTML entities occurring in specified content
+	 * 
+	 * @param content
+	 *            The content
+	 * @return The content with HTML entities replaced
+	 */
+	public static String replaceHTMLEntities(final String content) {
+		final Matcher m = PAT_HTML_ENTITIES.matcher(content);
+		final StringBuffer sb = new StringBuffer(content.length());
+		while (m.find()) {
+			final String numEntity = m.group(1);
+			if (null == numEntity) {
+				final Character entity = getHTMLEntity(m.group());
+				if (null != entity) {
+					m.appendReplacement(sb, entity.toString());
+				}
+			} else {
+				m.appendReplacement(sb, Character.valueOf((char) Integer.parseInt(numEntity)).toString());
+			}
+		}
+		m.appendTail(sb);
+		return sb.toString();
 	}
 
 	/**
@@ -625,7 +735,7 @@ public final class HTMLProcessing {
 				key = key.substring(0, lastPos);
 			}
 		}
-		final Character tmp = htmlEntityMap.get(key);
+		final Character tmp = getHTMLEntityMap().get(key);
 		if (tmp != null) {
 			return tmp;
 		}
@@ -640,8 +750,9 @@ public final class HTMLProcessing {
 		 */
 		for (int i = 0; i < len; i++) {
 			final Character c = Character.valueOf(s.charAt(i));
-			if (withQuote ? htmlCharMap.containsKey(c) : (c.charValue() == '"' ? false : htmlCharMap.containsKey(c))) {
-				sb.append('&').append(htmlCharMap.get(c)).append(';');
+			if (withQuote ? getHTMLCharMap().containsKey(c) : (c.charValue() == '"' ? false : getHTMLCharMap()
+					.containsKey(c))) {
+				sb.append('&').append(getHTMLCharMap().get(c)).append(';');
 			} else {
 				sb.append(c);
 			}

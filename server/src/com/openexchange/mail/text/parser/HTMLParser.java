@@ -1,0 +1,195 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.mail.text.parser;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.kxml2.io.KXmlParser;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+/**
+ * {@link HTMLParser} - Parses a well-formed HTML document based on
+ * {@link XmlPullParser}. The corresponding events are delegated to a given
+ * instance of {@link HTMLHandler}.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
+public final class HTMLParser {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(HTMLParser.class);
+
+	private static final int INT_IS_EMPTY_TAG = 1;
+
+	/**
+	 * Initializes a new {@link HTMLParser}
+	 */
+	private HTMLParser() {
+		super();
+	}
+
+	/**
+	 * Parses specified well-formed HTML document and delegates events to given
+	 * instance of {@link HTMLHandler}
+	 * 
+	 * @param html
+	 *            The well-formed HTML document
+	 * @param handler
+	 *            The HTML handler
+	 */
+	public static void parse(final String html, final HTMLHandler handler) {
+		final XmlPullParser parser = new KXmlParser();
+		try {
+			parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+			parser.setInput(new StringReader(html));
+			int event = XmlPullParser.END_DOCUMENT;
+			int[] holderForStartAndLength = null;
+			final StringBuilder textBuilder = new StringBuilder(1024);
+			int[] depthInfo = new int[8];
+			boolean ignoreWhitespace = false;
+			while ((event = parser.nextToken()) != XmlPullParser.END_DOCUMENT) {
+				if (event == XmlPullParser.CDSECT || event == XmlPullParser.TEXT) {
+					/*
+					 * Gather subsequent text inside CDATA (ex. 'fo<o' from
+					 * <!CDATA[fo<o]]>) or inside element's content
+					 */
+					if (!parser.isWhitespace()) {
+						ignoreWhitespace = false;
+					}
+					textBuilder.append(parser.getText());
+				} else if (event == XmlPullParser.ENTITY_REF) {
+					/*
+					 * Entity reference, such as "&amp;"
+					 */
+					if (null == holderForStartAndLength) {
+						holderForStartAndLength = new int[2];
+					}
+					ignoreWhitespace = false;
+					textBuilder.append('&').append(parser.getTextCharacters(holderForStartAndLength)).append(';');
+				} else {
+					/*
+					 * A non-text event
+					 */
+					if (textBuilder.length() > 0) {
+						handler.handleText(textBuilder.toString(), ignoreWhitespace);
+						textBuilder.setLength(0);
+					}
+					if (event == XmlPullParser.COMMENT) {
+						handler.handleComment(parser.getText());
+					} else if (event == XmlPullParser.DOCDECL) {
+						handler.handleDocDeclaration(parser.getText());
+					} else if (event == XmlPullParser.END_TAG) {
+						if ((depthInfo[parser.getDepth()] & INT_IS_EMPTY_TAG) == 0) {
+							handler.handleEndTag(parser.getName());
+						}
+						ignoreWhitespace = true;
+					} else if (event == XmlPullParser.IGNORABLE_WHITESPACE) {
+						// Ignore
+						if (LOG.isDebugEnabled()) {
+							LOG.debug("IGNORABLE_WHITESPACE: " + parser.getText());
+						}
+					} else if (event == XmlPullParser.PROCESSING_INSTRUCTION) {
+						// Ignore
+						if (LOG.isDebugEnabled()) {
+							LOG.debug("PROCESSING_INSTRUCTION: " + parser.getText());
+						}
+					} else if (event == XmlPullParser.START_DOCUMENT) {
+						/*
+						 * Cannot occur since initial nextToken() has already
+						 * been invoked
+						 */
+						if (LOG.isDebugEnabled()) {
+							LOG.debug("START_DOCUMENT: " + parser.getText());
+						}
+					} else if (event == XmlPullParser.START_TAG) {
+						final Map<String, String> attributes = new HashMap<String, String>();
+						final int count = parser.getAttributeCount();
+						for (int i = 0; i < count; i++) {
+							attributes.put(parser.getAttributeName(i), parser.getAttributeValue(i));
+						}
+						final int depth = parser.getDepth();
+						if (depth >= depthInfo.length) {
+							/*
+							 * Increase array
+							 */
+							final int[] tmp = depthInfo;
+							depthInfo = new int[tmp.length * 2];
+							System.arraycopy(tmp, 0, depthInfo, 0, tmp.length);
+						}
+						if (parser.isEmptyElementTag()) {
+							depthInfo[depth] = (depthInfo[depth] | INT_IS_EMPTY_TAG);
+							handler.handleSimpleTag(parser.getName(), Collections.unmodifiableMap(attributes));
+						} else {
+							depthInfo[depth] = (depthInfo[depth] & ~INT_IS_EMPTY_TAG);
+							handler.handleStartTag(parser.getName(), Collections.unmodifiableMap(attributes));
+						}
+						ignoreWhitespace = true;
+					} else {
+						handler.handleError(new StringBuilder(32).append("Unknown event type: ").append(event)
+								.toString());
+					}
+				}
+			}
+		} catch (final XmlPullParserException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			handler.handleError(e.getLocalizedMessage());
+		} catch (final IOException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			handler.handleError(e.getLocalizedMessage());
+		}
+
+	}
+}
