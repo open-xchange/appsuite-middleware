@@ -47,7 +47,7 @@
 #    Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 #
-
+#set -x
 
 OXFUNCTIONS=@oxfunctions@
 SERVERCONF=@absserverconfdir@
@@ -62,20 +62,24 @@ test -f $OXFUNCTIONS || {
 . $OXFUNCTIONS
 
 # some defaults
-SERVER_NAME=
+SERVER_NAME=oxhe
 SERVER_NAME_LONG=servername
 IMAP_SERVER=localhost
 IMAP_SERVER_LONG=imapserver
 IMAP_LOGIN_TYPE=user
 IMAP_LOGIN_TYPE_LONG=imaplogintype
-IMAP_LOGIN_TYPE_VALUES="global user"
-LOGIN_IMPL_TYPE=database
-LOGIN_IMPL_TYPE_LONG=logintype
-LOGIN_IMPL_TYPE_VALUES="database"
+IMAP_LOGIN_TYPE_VALUES="user config global"
 SERVER_MEMORY=50
 SERVER_MEMORY_LONG=servermemory
 TMPDIR_PATH=/tmp
 TMPDIR_PATH_LONG=tmpdir-path
+AJP_JVM_ROUTE=APP1
+AJP_JVM_ROUTE_LONG="jkroute"
+AJP_BIND_ADDR="*"
+AJP_BIND_ADDR_LONG="ajpbindport"
+CREDSRC="user.imapLogin"
+CREDSRC_LONG="imapcredentials"
+CREDSRC_VALUES="session user.imapLogin"
 #
 CONFIGDB_USER=openexchange
 CONFIGDB_USER_LONG=configdb-user
@@ -99,25 +103,31 @@ MASTER_USER=oxadminmaster
 MASTER_USER_LONG=master-user
 DISABLE_RMI_AUTH=
 DISABLE_RMI_AUTH_LONG=disableauth
+URL="http://localhost/?cid=%c&login=%u&pass=%p"
+URL_LONG="extraslink"
+EMAIL_LINK='http://localhost/#m=[module]&i=[object]&f=[folder]'
+EMAIL_LINK_LONG="email_link"
 
 
 MUSTOPTS="SERVER_NAME CONFIGDB_PASS"
-LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$IMAP_LOGIN_TYPE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_POOL_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$LOGIN_IMPL_TYPE_LONG:,$SERVER_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:,$DISABLE_RMI_AUTH_LONG'
+LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$IMAP_LOGIN_TYPE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_POOL_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$SERVER_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:,$DISABLE_RMI_AUTH_LONG:,$AJP_JVM_ROUTE_LONG:,$AJP_BIND_ADDR_LONG:,$CREDSRC_LONG:,$EMAIL_LINK_LONG:,$URL_LONG:,'
 
 usage() {
     echo
     echo "$0 currently knows the following parameters:"
     echo
     local lopts=$(echo $LONGOPTS | sed -e 's/[:,]/ /g')
-    printf '%-25s | %-20s | %-s\n' "Parameter" "Default value" "Possible values"
-    echo "----------------------------------------------------------------------"
+    printf '%-20s | %-50s | %-s\n' "Parameter" "Default value" "Possible values"
+    echo "-----------------------------------------------------------------------------------------------"
     for opt in $lopts; do
 	local rvar=${opt%_LONG}
-	local default=$(eval echo $rvar)
+	GLOBIGNORE='*'
+	local default="$(eval echo "$rvar")"
 	local possible=$(eval echo ${opt%_LONG}_VALUES)
 	local lopt=$(eval echo $opt)
-	#echo $opt $rvar $default $lopt
-	printf '%-25s | %-20s | %-s\n' "--$lopt" "$default" "$possible"
+    # echo $opt $rvar $default $lopt
+	printf '%-20s | %-50s | %-s\n' "--$lopt" $default "$possible"
+	GLOBIGNORE=
     done
     echo
     echo
@@ -127,7 +137,7 @@ Example:
   $0 --servername=ox6 --configdb-pass=secret --master-pass=secret --configdb-poolsize=10
 EOF
     echo
-    exit 1
+#    exit 1
 }
 
 v_setprop() {
@@ -155,10 +165,10 @@ while true; do
 	    IMAP_LOGIN_TYPE=$2
 	    shift 2
 	    ;;
-	-l|--$LOGIN_IMPL_TYPE_LONG)
-	    LOGIN_IMPL_TYPE=$2
-	    shift 2
-	    ;;
+#	-l|--$LOGIN_IMPL_TYPE_LONG)
+#	    LOGIN_IMPL_TYPE=$2
+#	    shift 2
+#	    ;;
 	--$CONFIGDB_USER_LONG)
 	    CONFIGDB_USER=$2
 	    shift 2
@@ -211,6 +221,27 @@ while true; do
 	    DISABLE_RMI_AUTH=true
 	    shift
 	    ;;
+	--$AJP_JVM_ROUTE_LONG)
+	    AJP_JVM_ROUTE=$2
+	    shift 2
+	    ;;
+	--$AJP_BIND_ADDR_LONG)
+	    AJP_BIND_ADDR=$2
+	    shift 2
+	    ;;
+	--$CREDSRC_LONG)
+	     CREDSRC=$2
+	     shift 2
+	     ;;
+	--$EMAIL_LINK_LONG)
+	     EMAIL_LINK=$2
+	     shift 2
+	     ;;
+	--$URL_LONG)
+	    URL=$2
+	    echo internal?? $1 $2
+	    shift 2
+	    ;;
 	-h|--help)
 	    usage
 	    exit
@@ -237,7 +268,8 @@ for opt in $MUSTOPTS; do
     opt_var=$(eval echo \$$opt)
     opt_var_long=$(eval echo \$${opt}_LONG)
     if [ -z "$opt_var" ]; then
-	die "missing required option --$opt_var_long"
+        usage;
+	    die "missing required option --$opt_var_long"
     fi
 done
 
@@ -270,6 +302,17 @@ SQLOPTS=$SQLOPTS
 NSIZE=$(( ${SERVER_MEMORY} / 2 ))
 SERVEROPTS="-Xms${SERVER_MEMORY}m -Xmx${SERVER_MEMORY}m -XX:+UseConcMarkSweepGC -XX:NewSize=${NSIZE}m -XX:MaxNewSize=${NSIZE}m -XX:SurvivorRatio=6"
 
+GLOBIGNORE='*'
+v_setprop AJP_JVM_ROUTE "$AJP_JVM_ROUTE" ${SERVERCONF}/ajp.properties
+v_setprop AJP_BIND_ADDR "$AJP_BIND_ADDR" ${SERVERCONF}/ajp.properties
+GLOBIGNORE=
+
+v_setprop object_link $EMAIL_LINK ${SERVERCONF}/notification.properties
+
+v_setprop URL "$URL" ${SERVERCONF}/configjump.properties
+
+v_setprop com.openexchange.mail.credSrc "$CREDSRC" ${SERVERCONF}/mail.properties
+
 v_setprop JAVA_XTRAOPTS "$SERVEROPTS" ${SERVERCONF}/ox-scriptconf.sh
 
 SQLHOST=$CONFIGDB_READ
@@ -293,15 +336,16 @@ v_setprop writeProperty.1 "user=$CONFIGDB_USER" ${SERVERCONF}/configdb.propertie
 v_setprop writeProperty.2 "password=$CONFIGDB_PASS" ${SERVERCONF}/configdb.properties
 
 v_setprop SERVER_NAME $SERVER_NAME ${SERVERCONF}/system.properties
-v_setprop imapServer $IMAP_SERVER ${SERVERCONF}/imap.properties
-v_setprop imapLoginType $IMAP_LOGIN_TYPE ${SERVERCONF}/imap.properties
+v_setprop com.openexchange.mail.mailServer $IMAP_SERVER ${SERVERCONF}/mail.properties
+v_setprop com.openexchange.mail.loginType  $IMAP_LOGIN_TYPE ${SERVERCONF}/mail.properties
 
-case $LOGIN_IMPL_TYPE in
-    database)
-	v_setprop LoginInfo com.openexchange.groupware.contexts.RdbLoginInfo ${SERVERCONF}/system.properties
-	v_setprop checkPassword true ${SERVERCONF}/ldap.properties
-	;;
-esac
+#case $LOGIN_IMPL_TYPE in
+#    database)
+#	v_setprop LoginInfo com.openexchange.groupware.contexts.RdbLoginInfo ${SERVERCONF}/system.properties
+#	v_setprop checkPassword true ${SERVERCONF}/ldap.properties
+#	;;
+#    
+#esac
 
 v_setprop UPLOAD_DIRECTORY "$TMPDIR_PATH" ${SERVERCONF}/server.properties
 
@@ -313,12 +357,14 @@ v_setprop SERVER_NAME $SERVER_NAME ${ADMINCONF}/AdminDaemon.properties
 SQLHOST=$CONFIGDB_WRITE
 SQLPORT=$CONFIGDB_WRITE_PORT
 EVAL_SQL_URL=$(eval echo $SQL_URL)
-v_setprop writeUrl $EVAL_SQL_URL ${ADMINCONF}/configdb.properties
 v_setprop readUrl $EVAL_SQL_URL ${ADMINCONF}/configdb.properties
 
-if [ "$CONFIGDB_READ" != "$CONFIGDB_WRITE" ]; then
-    v_setprop useSeparateWrite "false" ${ADMINCONF}/configdb.properties
-fi
+SQLHOST=$CONFIGDB_WRITE
+SQLPORT=$CONFIGDB_WRITE_PORT
+EVAL_SQL_URL=$(eval echo $SQL_URL)
+v_setprop writeUrl $EVAL_SQL_URL ${ADMINCONF}/configdb.properties
+
+v_setprop useSeparateWrite "false" ${ADMINCONF}/configdb.properties
 
 v_setprop readProperty.1 "user=$CONFIGDB_USER" ${ADMINCONF}/configdb.properties
 v_setprop readProperty.2 "password=$CONFIGDB_PASS" ${ADMINCONF}/configdb.properties
