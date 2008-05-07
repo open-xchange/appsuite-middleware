@@ -152,7 +152,8 @@ public final class MailMessageParser {
 		/*
 		 * Part modifier
 		 */
-		final MailPart mailPart = MailConfig.getPartModifier().modifyPart(mailPartArg);
+		final MailPart mailPart = MailConfig.getPartModifier() == null ? mailPartArg : MailConfig.getPartModifier()
+				.modifyPart(mailPartArg);
 		/*
 		 * Proceed
 		 */
