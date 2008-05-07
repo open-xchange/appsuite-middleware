@@ -342,21 +342,26 @@ public final class AJPv13RequestHandler {
 				 */
 				prefixCode = ajpCon.getInputStream().read();
 				if (prefixCode == FORWARD_REQUEST_PREFIX_CODE) {
-					/*
-					 * Clone bytes from forward request
-					 */
-					final byte[] payload = getPayloadData(dataLength - 1, ajpCon.getInputStream(), true);
-					clonedForwardPackage = new byte[payload.length + 5];
-					clonedForwardPackage[0] = 0x12;
-					clonedForwardPackage[1] = 0x34;
-					clonedForwardPackage[2] = (byte) (dataLength >> 8);
-					clonedForwardPackage[3] = (byte) (dataLength & (255));
-					clonedForwardPackage[4] = FORWARD_REQUEST_PREFIX_CODE;
-					System.arraycopy(payload, 0, clonedForwardPackage, 5, payload.length);
-					/*
-					 * Create forward request with payload data
-					 */
-					ajpRequest = new AJPv13ForwardRequest(payload);
+					if (AJPv13Config.isLogForwardRequest()) {
+						/*
+						 * Clone bytes from forward request
+						 */
+						final byte[] payload = getPayloadData(dataLength - 1, ajpCon.getInputStream(), true);
+						clonedForwardPackage = new byte[payload.length + 5];
+						clonedForwardPackage[0] = 0x12;
+						clonedForwardPackage[1] = 0x34;
+						clonedForwardPackage[2] = (byte) (dataLength >> 8);
+						clonedForwardPackage[3] = (byte) (dataLength & (255));
+						clonedForwardPackage[4] = FORWARD_REQUEST_PREFIX_CODE;
+						System.arraycopy(payload, 0, clonedForwardPackage, 5, payload.length);
+						/*
+						 * Create forward request with payload data
+						 */
+						ajpRequest = new AJPv13ForwardRequest(payload);
+					} else {
+						ajpRequest = new AJPv13ForwardRequest(getPayloadData(dataLength - 1, ajpCon.getInputStream(),
+								true));
+					}
 				} else if (prefixCode == SHUTDOWN_PREFIX_CODE) {
 					LOG.error("AJPv13 Shutdown command NOT supported");
 					return;
@@ -450,12 +455,13 @@ public final class AJPv13RequestHandler {
 	}
 
 	/**
-	 * Gets the forward request's bytes as a formatted string
+	 * Gets the forward request's bytes as a formatted string or "&lt;not
+	 * enabled&gt;" if not enabled via configuration
 	 * 
 	 * @return The forward request's bytes as a formatted string
 	 */
 	String getForwardRequest() {
-		return dumpBytes(clonedForwardPackage);
+		return AJPv13Config.isLogForwardRequest() ? dumpBytes(clonedForwardPackage) : "<not enabled>";
 	}
 
 	/**

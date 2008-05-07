@@ -123,6 +123,8 @@ public final class AJPv13Config implements Initialization {
 
 	private InetAddress ajpBindAddr;
 
+	private boolean logForwardRequest;
+
 	public void start() throws AbstractOXException {
 		if (started.get()) {
 			LOG.error(this.getClass().getName() + " already started");
@@ -164,6 +166,7 @@ public final class AJPv13Config implements Initialization {
 		checkMagicBytesStrict = false;
 		servletConfigs = null;
 		ajpBindAddr = null;
+		logForwardRequest = false;
 		/*
 		 * Switch flag
 		 */
@@ -316,6 +319,11 @@ public final class AJPv13Config implements Initialization {
 				ajpBindAddr = bindAddr.charAt(0) == '*' ? null : InetAddress.getByName(ajpProperties.getProperty(
 						"AJP_BIND_ADDR", "localhost"));
 				/*
+				 * AJP_LOG_FORWARD_REQUEST
+				 */
+				logForwardRequest = trueStr.equalsIgnoreCase(ajpProperties.getProperty("AJP_LOG_FORWARD_REQUEST",
+						falseStr).trim());
+				/*
 				 * Switch flag
 				 */
 				initialized.set(true);
@@ -352,6 +360,7 @@ public final class AJPv13Config implements Initialization {
 			logBuilder.append("\tSERVLET_POOL_SIZE=").append(instance.servletPoolSize).append('\n');
 			logBuilder.append("\tAJP_JVM_ROUTE=").append(instance.jvmRoute).append('\n');
 			logBuilder.append("\tAJP_CHECK_MAGIC_BYTES_STRICT=").append(instance.checkMagicBytesStrict).append('\n');
+			logBuilder.append("\tAJP_LOG_FORWARD_REQUEST=").append(instance.logForwardRequest).append('\n');
 			logBuilder.append("\tAJP_SERVLET_CONFIG_DIR=").append(instance.servletConfigs).append('\n');
 			logBuilder.append("\tAJP_BIND_ADDR=").append(
 					instance.ajpBindAddr == null ? "* (all interfaces)" : instance.ajpBindAddr.toString());
@@ -429,6 +438,10 @@ public final class AJPv13Config implements Initialization {
 
 	public static boolean getCheckMagicBytesStrict() {
 		return instance.checkMagicBytesStrict;
+	}
+
+	public static boolean isLogForwardRequest() {
+		return instance.logForwardRequest;
 	}
 
 	public static String getServletConfigs() {
