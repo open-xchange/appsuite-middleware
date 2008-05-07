@@ -1,3 +1,8 @@
+* 2008-05-07 - thorben.betten@open-xchange.com
+
+ - Bugfix #11244: Added logging of corresponding AJP forward request on an
+   unexpected empty body request
+
 * 2008-05-05 - francisco.laguna@open-xchange.com
 
  - Node 1077: Conflicts contains conflicting members

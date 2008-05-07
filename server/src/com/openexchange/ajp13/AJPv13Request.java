@@ -188,7 +188,7 @@ public abstract class AJPv13Request {
 	}
 
 	protected int parseInt() {
-		return (unsignedByte2Int(nextByte()) << 8) + unsignedByte2Int(nextByte());
+		return ((nextByte() & 0xff) << 8) + (nextByte() & 0xff);
 	}
 
 	protected final byte[] getByteSequence(final int numOfBytes) {
@@ -200,10 +200,6 @@ public abstract class AJPv13Request {
 
 	protected final byte nextByte() {
 		return payloadData[payloadDataIndex++];
-		// if (payloadDataIndex < payloadData.length) {
-		// return payloadData[payloadDataIndex++];
-		// }
-		// return -1;
 	}
 
 	protected final boolean compareNextByte(final int compareTo) {

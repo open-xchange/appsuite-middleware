@@ -94,7 +94,8 @@ public final class AJPv13RequestBody extends AJPv13Request {
 				if (LOG.isWarnEnabled()) {
 					final AJPv13Exception ajpExc = new AJPv13Exception(AJPCode.UNEXPECTED_EMPTY_DATA_PACKAGE, true,
 							Integer.valueOf(ajpRequestHandler.getTotalRequestedContentLength()), Integer
-									.valueOf(ajpRequestHandler.getContentLength()));
+									.valueOf(ajpRequestHandler.getContentLength()), ajpRequestHandler
+									.getForwardRequest());
 					ajpExc.fillInStackTrace();
 					LOG.warn(ajpExc.getMessage(), ajpExc);
 				}

@@ -70,22 +70,25 @@ public class AJPv13Exception extends AbstractOXException {
 		 */
 		INTERNAL_EXCEPTION("", Category.INTERNAL_ERROR, 1),
 		/**
-		 * Corrupt AJP package #%d: First two bytes do not indicate a package from server to container:
-		 * %s %s\nWrong AJP package's data:\n%s
+		 * Corrupt AJP package #%d: First two bytes do not indicate a package
+		 * from server to container: %s %s\nWrong AJP package's data:\n%s
 		 * <p>
 		 * Invalid byte sequence
 		 * </p>
 		 */
-		INVALID_BYTE_SEQUENCE("Corrupt AJP package #%d: First two bytes do not indicate a package from server to container: %s %s\nWrong AJP package's data:\n%s",
+		INVALID_BYTE_SEQUENCE(
+				"Corrupt AJP package #%d: First two bytes do not indicate a package from server to container: %s %s\nWrong AJP package's data:\n%s",
 				Category.SOCKET_CONNECTION, 2),
 		/**
 		 * Socket closed by web server. Wait for input data of package #%d took
 		 * %dmsec.
 		 */
-		SOCKET_CLOSED_BY_WEB_SERVER("Socket closed by web server. Wait for input data of package #%d took %dmsec.", Category.SOCKET_CONNECTION, 3),
+		SOCKET_CLOSED_BY_WEB_SERVER("Socket closed by web server. Wait for input data of package #%d took %dmsec.",
+				Category.SOCKET_CONNECTION, 3),
 		/**
 		 * No data provided from web server: input stream returned \"-1\" while
-		 * reading AJP magic bytes in package #%d. Wait for input data took %dmsec.
+		 * reading AJP magic bytes in package #%d. Wait for input data took
+		 * %dmsec.
 		 */
 		EMPTY_INPUT_STREAM(
 				"No data provided from web server: input stream returned \"-1\" while reading AJP magic bytes in package #%d. Wait for input data took %dmsec.",
@@ -115,14 +118,15 @@ public class AJPv13Exception extends AbstractOXException {
 		 */
 		INTEGER_VALUE_TOO_BIG(new StringBuilder("Integer value exceeds max allowed value (").append(
 				AJPv13Response.MAX_INT_VALUE).append("): %d").toString(), Category.CODE_ERROR, 10),
-		/**		
+		/**
 		 * Invalid content-type header value: %s
 		 */
 		INVALID_CONTENT_TYPE("Invalid content-type header value: %s", Category.CODE_ERROR, 11),
 		/**
 		 * Unparseable header field %s in forward request package
 		 */
-		UNPARSEABLE_HEADER_FIELD("Unparseable header field %s in forward request package", Category.SOCKET_CONNECTION, 12),
+		UNPARSEABLE_HEADER_FIELD("Unparseable header field %s in forward request package", Category.SOCKET_CONNECTION,
+				12),
 		/**
 		 * String parse exception: No ending 0x00 found
 		 */
@@ -154,10 +158,11 @@ public class AJPv13Exception extends AbstractOXException {
 				Category.SOCKET_CONNECTION, 19),
 		/**
 		 * Unexpected empty body package received from web server.
-		 * Total-Received: %d | Content-Length: %d
+		 * Total-Received: %d | Content-Length: %d. Corresponding AJP forward
+		 * package:\n%s
 		 */
 		UNEXPECTED_EMPTY_DATA_PACKAGE(
-				"Unexpected empty body package received from web server. Total-Received: %d | Content-Length: %d",
+				"Unexpected empty body package received from web server. Total-Received: %d | Content-Length: %d.\nCorresponding AJP forward package:\n%s",
 				Category.SOCKET_CONNECTION, 20),
 		/**
 		 * AJP server socket could not be bind to port %d. Probably another
@@ -200,8 +205,8 @@ public class AJPv13Exception extends AbstractOXException {
 		}
 	}
 
-protected static final Object[] EMPTY_ARGS = new Object[0];
-	
+	protected static final Object[] EMPTY_ARGS = new Object[0];
+
 	/**
 	 * Determines if AJP connection shall be kept alive or closed
 	 */

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajp13;
 
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -142,7 +143,7 @@ public class AJPv13Response {
 
 	private int dataLength = -1;
 
-	private UnsynchronizedByteArrayOutputStream byteArray;
+	private ByteArrayOutputStream byteArray;
 
 	private int contentLength = -1;
 
@@ -524,8 +525,8 @@ public class AJPv13Response {
 		return retval;
 	}
 
-	private static void writeHeader(final String name, final String value,
-			final UnsynchronizedByteArrayOutputStream byteArray) throws AJPv13Exception {
+	private static void writeHeader(final String name, final String value, final ByteArrayOutputStream byteArray)
+			throws AJPv13Exception {
 		if (headerMap.containsKey(name)) {
 			final int code = (0xA0 << 8) + (headerMap.get(name)).intValue();
 			writeInt(code, byteArray);
@@ -546,37 +547,35 @@ public class AJPv13Response {
 	 * @throws AJPv13Exception
 	 */
 	private static final void fillStartBytes(final int prefixCode, final int dataLength,
-			final UnsynchronizedByteArrayOutputStream byteArray) throws AJPv13Exception {
+			final ByteArrayOutputStream byteArray) throws AJPv13Exception {
 		writeByte(PACKAGE_FROM_CONTAINER_TO_SERVER[0], byteArray);
 		writeByte(PACKAGE_FROM_CONTAINER_TO_SERVER[1], byteArray);
 		writeInt(dataLength, byteArray);
 		writeByte(prefixCode, byteArray);
 	}
 
-	private static final void writeByte(final int byteValue, final UnsynchronizedByteArrayOutputStream byteArray) {
+	private static final void writeByte(final int byteValue, final ByteArrayOutputStream byteArray) {
 		byteArray.write(byteValue);
 	}
 
-	private static final void writeByteArray(final byte[] bytes, final UnsynchronizedByteArrayOutputStream byteArray) {
+	private static final void writeByteArray(final byte[] bytes, final ByteArrayOutputStream byteArray) {
 		byteArray.write(bytes, 0, bytes.length);
 	}
 
-	private static final void writeInt(final int intValue, final UnsynchronizedByteArrayOutputStream byteArray)
+	private static final void writeInt(final int intValue, final ByteArrayOutputStream byteArray)
 			throws AJPv13Exception {
 		if (intValue > MAX_INT_VALUE) {
 			throw new AJPv13Exception(AJPCode.INTEGER_VALUE_TOO_BIG, true, Integer.valueOf(intValue));
 		}
-		final int high = (intValue >> 8);
-		final int low = (intValue & (255));
-		byteArray.write(high);
-		byteArray.write(low);
+		byteArray.write((intValue >> 8)); // high
+		byteArray.write((intValue & (255))); // low
 	}
 
-	private static final void writeBoolean(final boolean boolValue, final UnsynchronizedByteArrayOutputStream byteArray) {
+	private static final void writeBoolean(final boolean boolValue, final ByteArrayOutputStream byteArray) {
 		byteArray.write(boolValue ? 1 : 0);
 	}
 
-	private static final void writeString(final String strValue, final UnsynchronizedByteArrayOutputStream byteArray)
+	private static final void writeString(final String strValue, final ByteArrayOutputStream byteArray)
 			throws AJPv13Exception {
 		final int strLength = strValue.length();
 		writeInt(strLength, byteArray);

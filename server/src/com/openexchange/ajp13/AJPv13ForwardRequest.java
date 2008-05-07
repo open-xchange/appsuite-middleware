@@ -260,10 +260,16 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		/*
 		 * Set important header CONTENT_LENGTH which decides whether to further
 		 * process an upcoming body request from web server or to terminate
-		 * communication after this forward request. Since this header is always
-		 * set in servlet request we don't need to check if it's present.
+		 * communication after this forward request. If this header is missing
+		 * the getIntHeader() method returns -1 which represents a missing
+		 * content length in request handler, too.
 		 */
-		ajpRequestHandler.setContentLength(servletRequest.getIntHeader(HDR_CONTENT_LENGTH));
+		final int contentLength = servletRequest.getIntHeader(HDR_CONTENT_LENGTH);
+		if (contentLength == -1) {
+			ajpRequestHandler.setContentLength(AJPv13RequestHandler.NOT_SET);
+		} else {
+			ajpRequestHandler.setContentLength(contentLength);
+		}
 		/*
 		 * Determine if content type indicates form data
 		 */

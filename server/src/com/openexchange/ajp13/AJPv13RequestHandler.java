@@ -127,7 +127,12 @@ public final class AJPv13RequestHandler {
 	 */
 	private static final int CPING_PREFIX_CODE = 10;
 
-	private static final int NOT_SET = -1;
+	/**
+	 * The value for a missing <i>Content-Length</i> header
+	 * 
+	 * @value -1
+	 */
+	static final int NOT_SET = -1;
 
 	public static final String JSESSIONID_COOKIE = "JSESSIONID";
 
@@ -170,6 +175,8 @@ public final class AJPv13RequestHandler {
 	private String servletPath;
 
 	private State state;
+
+	private byte[] clonedForwardPackage;
 
 	public AJPv13RequestHandler() {
 		super();
@@ -242,6 +249,38 @@ public final class AJPv13RequestHandler {
 		return (magic[0] == PACKAGE_FROM_SERVER_TO_CONTAINER[0] || magic[1] == PACKAGE_FROM_SERVER_TO_CONTAINER[1]);
 	}
 
+	private static String dumpBytes(final byte[] bytes) {
+		if (bytes == null || bytes.length == 0) {
+			return "";
+		}
+		final String space = "    ";
+		final StringBuilder sb = new StringBuilder(1024);
+		int c = 0;
+		int l = 0;
+		for (int k = 0; k < bytes.length; k++) {
+			if (c % 16 == 0) {
+				sb.append('\r').append('\n');
+				c = 0;
+				final String hex = Integer.toHexString(l).toUpperCase();
+				l += 16;
+				final int nOZ = 4 - hex.length();
+				for (int i = 0; i < nOZ; i++) {
+					sb.append('0');
+				}
+				sb.append(hex).append(space);
+			} else {
+				sb.append(' ');
+			}
+			final String s = Integer.toHexString(bytes[k] & 0xff).toUpperCase();
+			if (s.length() == 1) {
+				sb.append('0');
+			}
+			sb.append(s);
+			c++;
+		}
+		return sb.toString();
+	}
+
 	private static String dumpBytes(final byte magic1, final byte magic2, final byte[] bytes) {
 		if (bytes == null) {
 			return "";
@@ -302,20 +341,31 @@ public final class AJPv13RequestHandler {
 				 * Read Prefix Code from Input Stream
 				 */
 				prefixCode = ajpCon.getInputStream().read();
-				switch (prefixCode) {
-				case FORWARD_REQUEST_PREFIX_CODE:
-					ajpRequest = new AJPv13ForwardRequest(getPayloadData(dataLength - 1, ajpCon.getInputStream(), true));
-					break;
-				case SHUTDOWN_PREFIX_CODE:
+				if (prefixCode == FORWARD_REQUEST_PREFIX_CODE) {
+					/*
+					 * Clone bytes from forward request
+					 */
+					final byte[] payload = getPayloadData(dataLength - 1, ajpCon.getInputStream(), true);
+					clonedForwardPackage = new byte[payload.length + 5];
+					clonedForwardPackage[0] = 0x12;
+					clonedForwardPackage[1] = 0x34;
+					clonedForwardPackage[2] = (byte) (dataLength >> 8);
+					clonedForwardPackage[3] = (byte) (dataLength & (255));
+					clonedForwardPackage[4] = FORWARD_REQUEST_PREFIX_CODE;
+					System.arraycopy(payload, 0, clonedForwardPackage, 5, payload.length);
+					/*
+					 * Create forward request with payload data
+					 */
+					ajpRequest = new AJPv13ForwardRequest(payload);
+				} else if (prefixCode == SHUTDOWN_PREFIX_CODE) {
 					LOG.error("AJPv13 Shutdown command NOT supported");
 					return;
-				case PING_PREFIX_CODE:
+				} else if (prefixCode == PING_PREFIX_CODE) {
 					LOG.error("AJPv13 Ping command NOT supported");
 					return;
-				case CPING_PREFIX_CODE:
+				} else if (prefixCode == CPING_PREFIX_CODE) {
 					ajpRequest = new AJPv13CPingRequest(getPayloadData(dataLength - 1, ajpCon.getInputStream(), true));
-					break;
-				default:
+				} else {
 					/*
 					 * Unknown prefix code in first package: Leave routine
 					 */
@@ -362,7 +412,8 @@ public final class AJPv13RequestHandler {
 			ajpCon.incrementPackageNumber();
 			/*
 			 * Processed package is an AJP forward request which indicates
-			 * presence of a following request body package.
+			 * presence of a following request body package. Create a copy for
+			 * logging on a possible error.
 			 */
 			dataLength = readInitialBytes(false);
 			ajpRequest = new AJPv13RequestBody(getPayloadData(dataLength, ajpCon.getInputStream(), true));
@@ -396,6 +447,15 @@ public final class AJPv13RequestHandler {
 		} catch (final IOException e) {
 			throw new AJPv13Exception(AJPCode.IO_ERROR, false, e, e.getMessage());
 		}
+	}
+
+	/**
+	 * Gets the forward request's bytes as a formatted string
+	 * 
+	 * @return The forward request's bytes as a formatted string
+	 */
+	String getForwardRequest() {
+		return dumpBytes(clonedForwardPackage);
 	}
 
 	/**
@@ -525,6 +585,7 @@ public final class AJPv13RequestHandler {
 		httpSessionJoined = false;
 		servletPath = null;
 		state = State.IDLE;
+		clonedForwardPackage = null;
 		if (discardConnection) {
 			ajpCon = null;
 		}
