@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,9 +72,14 @@ import com.openexchange.mail.mime.utils.MIMEMessageUtility;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ParameterList implements Cloneable {
+public final class ParameterList implements Cloneable, Serializable {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+	/**
+	 * Serial version UID
+	 */
+	private static final long serialVersionUID = 1085330725813918879L;
+
+	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ParameterList.class);
 
 	/**
@@ -86,7 +92,7 @@ public final class ParameterList implements Cloneable {
 
 	private static final String CHARSET_UTF_8 = "utf-8";
 
-	private Map<String, Parameter> parameters;
+	private HashMap<String, Parameter> parameters;
 
 	/**
 	 * Initializes a new, empty parameter list
