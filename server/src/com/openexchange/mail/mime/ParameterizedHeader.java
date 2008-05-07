@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 /**
@@ -58,7 +59,12 @@ import java.util.Iterator;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class ParameterizedHeader {
+public abstract class ParameterizedHeader implements Serializable {
+
+	/**
+	 * Serial version UID
+	 */
+	private static final long serialVersionUID = -1094716342843794294L;
 
 	protected ParameterList parameterList;
 

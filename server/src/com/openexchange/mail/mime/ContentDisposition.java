@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.mime;
 
-import java.io.Serializable;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,7 +63,7 @@ import com.openexchange.mail.MailException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ContentDisposition extends ParameterizedHeader implements Serializable {
+public final class ContentDisposition extends ParameterizedHeader {
 
 	private static final long serialVersionUID = 310827213193290169L;
 

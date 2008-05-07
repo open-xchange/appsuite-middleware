@@ -371,13 +371,15 @@ public final class ParameterList implements Cloneable, Serializable {
 	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
 	 * 
 	 */
-	private static final class Parameter implements Cloneable {
+	private static final class Parameter implements Cloneable, Serializable {
+
+		private static final long serialVersionUID = 7978948703870567515L;
 
 		private boolean rfc2231;
 
 		private final String name;
 
-		private List<String> contiguousValues;
+		private ArrayList<String> contiguousValues;
 
 		private String charset;
 
