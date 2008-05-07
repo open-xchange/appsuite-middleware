@@ -254,13 +254,22 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     public Properties getPropertiesInFolder(String folderName) {
+        return getPropertiesInFolder(folderName, null);
+    }
+
+    public Properties getPropertiesInFolder(String folderName, PropertyListener listener) {
         final Properties retval = new Properties();
         final Iterator<Entry<String,String>> iter = propertiesFiles.entrySet().iterator();
-        folderName = dir.getAbsolutePath()+"/"+folderName; 
+        folderName = dir.getAbsolutePath()+"/"+folderName+"/"; 
         while (iter.hasNext()) {
             final Entry<String,String> entry = iter.next();
                 if (entry.getValue().startsWith(folderName)) {
-                final String value = getProperty(entry.getKey());
+                final String value;
+                if (null == listener) {
+                    value = getProperty(entry.getKey());
+                } else {
+                    value = getProperty(entry.getKey(), listener);
+                }  // FIXME: this could have been overriden by some property external to the requested folder.
                 retval.put(entry.getKey(), value);
             }
         }
