@@ -78,8 +78,9 @@ public final class ConfigurationImpl implements ConfigurationService {
 	private static final Log LOG = LogFactory.getLog(ConfigurationImpl.class);
 
 	private static final String EXT = ".properties";
+    private File dir;
 
-	private static final class PropertyFileFilter implements FileFilter {
+    private static final class PropertyFileFilter implements FileFilter {
 
 		public boolean accept(final File pathname) {
 			return pathname.isDirectory() || pathname.getName().toLowerCase().endsWith(EXT);
@@ -110,7 +111,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 		if (null == directory) {
 			throw new IllegalArgumentException("directory is null. Missing system property \"openexchange.propdir\".");
 		}
-		final File dir = new File(directory);
+		dir = new File(directory);
 		if (!dir.exists()) {
 			throw new IllegalArgumentException("Not found: " + directory);
 		} else if (!dir.isDirectory()) {
@@ -252,6 +253,19 @@ public final class ConfigurationImpl implements ConfigurationService {
         return retval;
     }
 
+    public Properties getPropertiesInFolder(String folderName) {
+        final Properties retval = new Properties();
+        final Iterator<Entry<String,String>> iter = propertiesFiles.entrySet().iterator();
+        folderName = dir.getAbsolutePath()+"/"+folderName; 
+        while (iter.hasNext()) {
+            final Entry<String,String> entry = iter.next();
+                if (entry.getValue().startsWith(folderName)) {
+                final String value = getProperty(entry.getKey());
+                retval.put(entry.getKey(), value);
+            }
+        }
+        return retval;
+    }
     /*
 	 * (non-Javadoc)
 	 * 

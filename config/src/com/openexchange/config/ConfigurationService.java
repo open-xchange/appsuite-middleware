@@ -151,7 +151,16 @@ public interface ConfigurationService {
 	 */
 	//public Properties getFile(String filename, PropertyListener listener);
 
-	/**
+    /**
+     * Retrieves and merges all properties files in below the given folder name and its subfolders (recursively).
+     * All properties discovered this way are aggregated in the returned properties object.
+     * @param folderName
+     * @return Aggregated properties of all properties files below this folder. 
+     */
+     public Properties getPropertiesInFolder(String folderName);
+
+
+    /**
 	 * Searches for the property with the specified name in this property list.
 	 * If the name is found in this property list, it is supposed to be a
 	 * boolean value. If conversion fails or name is not found, the default
