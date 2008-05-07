@@ -170,7 +170,7 @@ public class ConflictHandlerTest extends TestCase {
         appointments.save( appointment ); clean.add( appointment );
         CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(user, participant1, participant3);
         conflictingAppointment.setIgnoreConflicts(false);
-        CalendarDataObject[] conflicts = getConflicts( conflictingAppointment );;
+        CalendarDataObject[] conflicts = getConflicts( conflictingAppointment );
 
         assertNotNull(conflicts);
         assertEquals(1, conflicts.length);
