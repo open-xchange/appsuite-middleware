@@ -207,6 +207,9 @@ public final class ContentType extends ParameterizedHeader implements Serializab
 
 	private void parseBaseType(final String baseType) throws MailException {
 		parseContentType(baseType, false);
+		if (parameterList == null) {
+			parameterList = new ParameterList();
+		}
 	}
 
 	/**
