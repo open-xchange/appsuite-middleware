@@ -85,9 +85,8 @@ public final class ParameterList implements Cloneable, Serializable {
 	 * The regular expression to parse parameters
 	 */
 	private static final Pattern PATTERN_PARAM_LIST = Pattern
-			.compile("(?:\\s*;\\s*|\\s+)([\\p{ASCII}&&[^=\"\\s;]]+)(?:=((?:[^\"][\\p{ASCII}&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)|(?:\"\\p{ASCII}+?\")))?");
-
-	// "(?:\\s*;\\s*|\\s+)([\\p{ASCII}&&[^=\"\\s;]]+)(?:=((?:[^\"][\\p{ASCII}&&[^\\s,;:\\\\\"/\\[\\]?=()<>@]]*)|(?:\"\\p{ASCII}+?\")))?"
+			.compile("(?:\\s*;\\s*|\\s+)([\\p{ASCII}&&[^=\"\\s;]]+)(?:=((?:[^\"][\\S&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)|(?:\".+?\")))?");
+	// "(?:\\s*;\\s*|\\s+)([\\p{ASCII}&&[^=\"\\s;]]+)(?:=((?:[^\"][\\p{ASCII}&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)|(?:\"\\p{ASCII}+?\")))?"
 
 	private static final String CHARSET_UTF_8 = "utf-8";
 
