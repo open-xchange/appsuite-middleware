@@ -227,7 +227,11 @@ public final class HTMLFilterHandler implements HTMLHandler {
 						}
 					}
 				}
-				shtmlMap = Collections.unmodifiableMap(parseHTMLMap(mapStr));
+				shtmlMap = parseHTMLMap(mapStr);
+				if (!shtmlMap.containsKey(HEAD)) {
+					shtmlMap.put(HEAD, null);
+				}
+				shtmlMap = Collections.unmodifiableMap(shtmlMap);
 				sstyleMap = Collections.unmodifiableMap(parseStyleMap(mapStr));
 			}
 		}
