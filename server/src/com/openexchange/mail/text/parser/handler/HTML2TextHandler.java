@@ -115,7 +115,13 @@ public final class HTML2TextHandler implements HTMLHandler {
 
 	private static final String TAG_TR = "tr";
 
+	private static final String TAG_STYLE = "style";
+
+	private static final String TAG_SCRIPT = "script";
+
 	private boolean insideBody;
+
+	private boolean ignore;
 
 	private boolean anchorTag;
 
@@ -214,6 +220,10 @@ public final class HTML2TextHandler implements HTMLHandler {
 				quoteText();
 				preTag = false;
 			}
+		} else if (TAG_STYLE.equalsIgnoreCase(tag)) {
+			ignore = false;
+		} else if (TAG_SCRIPT.equalsIgnoreCase(tag)) {
+			ignore = false;
 		} else if (tag.equalsIgnoreCase(TAG_H1) || tag.equalsIgnoreCase(TAG_H2) || tag.equalsIgnoreCase(TAG_H3)
 				|| tag.equalsIgnoreCase(TAG_H4) || tag.equalsIgnoreCase(TAG_H5) || tag.equalsIgnoreCase(TAG_H6)
 				|| tag.equalsIgnoreCase(TAG_ADDRESS)) {
@@ -308,6 +318,10 @@ public final class HTML2TextHandler implements HTMLHandler {
 					}
 				}
 			}
+		} else if (TAG_STYLE.equalsIgnoreCase(tag)) {
+			ignore = true;
+		} else if (TAG_SCRIPT.equalsIgnoreCase(tag)) {
+			ignore = true;
 		}
 	}
 
@@ -317,7 +331,7 @@ public final class HTML2TextHandler implements HTMLHandler {
 	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleCDATA(java.lang.String)
 	 */
 	public void handleCDATA(final String text) {
-		if (insideBody) {
+		if (insideBody && !ignore) {
 			textBuilder.append(text);
 		}
 	}
@@ -328,7 +342,7 @@ public final class HTML2TextHandler implements HTMLHandler {
 	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleText(java.lang.String)
 	 */
 	public void handleText(final String text, final boolean ignorable) {
-		if (insideBody) {
+		if (insideBody && !ignore) {
 			/*
 			 * Add normal text
 			 */
