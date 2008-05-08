@@ -268,7 +268,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 			if (null != encoding) {
 				htmlBuilder.append(" encoding=\"").append("encoding").append('"');
 			}
-			htmlBuilder.append("?>").append("\r\n");
+			htmlBuilder.append("?>").append(CRLF);
 		}
 	}
 
