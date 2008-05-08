@@ -70,4 +70,8 @@ public final class FolderAndID {
 		this.id = id;
 	}
 
+	@Override
+	public String toString() {
+		return new StringBuilder(16).append("folder=").append(folderId).append(" id=").append(id).toString();
+	}
 }
