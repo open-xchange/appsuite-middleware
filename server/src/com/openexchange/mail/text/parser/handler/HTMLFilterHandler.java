@@ -389,9 +389,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 					 * Handle style attribute
 					 */
 					final String checkedCSS = checkCSS(text, styleMap, true);
-					// if (containsCSSElement(checkedCSS)) {
 					htmlBuilder.append(checkedCSS);
-					// }
 				}
 			} else {
 				htmlBuilder.append(text);
