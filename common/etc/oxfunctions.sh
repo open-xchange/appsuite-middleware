@@ -176,13 +176,12 @@ ox_set_property() {
     local val="$2"
     local propfile="$3"
     test -z "$prop"     && die "ox_set_property: missing prop argument (arg 1)"
-    test -z "$val"      && die "ox_set_property: missing val argument (arg 2)"
     test -z "$propfile" && die "ox_set_property: missing propfile argument (arg 3)"
     test -e "$propfile" || die "ox_set_property: $propfile does not exist"
     local tmp=${propfile}.tmp$$
     rm -f $tmp
     # quote & in URLs to make sed happy
-    val="$(echo $val | sed 's/\&/\\\&/g')"
+    test -n "$val" && val="$(echo $val | sed 's/\&/\\\&/g')"
     # some values need quoting, so leave quotes, if already present
     local q=
     if grep -E "^.*$prop[:=].*\".*\".*$" $propfile >/dev/null; then
