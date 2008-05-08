@@ -203,6 +203,42 @@ EOF
     fi
 }
 
+# usage:
+# ox_handle_hash property action /path/to/file
+# where action can be add/remove
+#
+ox_handle_hash(){
+    local prop="$1"
+    local action="$2"
+    local propfile="$3"
+    test -z "$prop"     && die "ox_set_property: missing prop argument (arg 1)"
+    test -z "$action"      && die "ox_set_property: missing val argument (arg 2)"
+    test -z "$propfile" && die "ox_set_property: missing propfile argument (arg 3)"
+    test -e "$propfile" || die "ox_set_property: $propfile does not exist"
+    local tmp=${propfile}.tmp$$
+    rm -f $tmp;
+    if [ $action == "add" ]; then
+	cat $propfile | sed "s/^$prop/# $prop/" > $tmp;
+        if [ $? -gt 0 ]; then
+            rm -f $tmp
+            die "ox_handle_hash: FATAL: could not add hash in file $probfile to $prob"
+        else
+            mv $tmp $propfile
+        fi
+    elif [ $action == "remove" ];then
+        cat $propfile | sed "s/^#.*$prop/$prop/" > $tmp;
+        if [ $? -gt 0 ]; then
+            rm -f $tmp
+            die "ox_handle_hash: FATAL: could not remove hash in file $probfile for $prob"
+        else
+            mv $tmp $propfile
+        fi
+    else
+        die "ox_handle_hash: action must be add or remove while it is $action"
+    fi
+}
+
+
 # common functions
 
 die() {
