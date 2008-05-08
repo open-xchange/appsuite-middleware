@@ -62,7 +62,7 @@ test -f $OXFUNCTIONS || {
 . $OXFUNCTIONS
 
 # some defaults
-SERVER_NAME=oxhe
+SERVER_NAME=
 SERVER_NAME_LONG=servername
 IMAP_SERVER=localhost
 IMAP_SERVER_LONG=imapserver
@@ -76,10 +76,17 @@ TMPDIR_PATH_LONG=tmpdir-path
 AJP_JVM_ROUTE=APP1
 AJP_JVM_ROUTE_LONG="jkroute"
 AJP_BIND_ADDR="*"
-AJP_BIND_ADDR_LONG="ajpbindport"
+AJP_BIND_ADDR_LONG="ajp-bind-port"
 CREDSRC="user.imapLogin"
-CREDSRC_LONG="imapcredentials"
+CREDSRC_LONG="imap-credentials"
 CREDSRC_VALUES="session user.imapLogin"
+UDPDISCOVERYADDR="224.0.0.1"
+UDPDISCOVERYADDR_LONG="cache-udp-disc-addr"
+UDPDISCOVERYPORT="6780"
+UDPDISCOVERYPORT_LONG="cache-udp-disc-port"
+CACHEPORT="57462"
+CACHEPORT_LONG="cache-listener-port"
+
 #
 CONFIGDB_USER=openexchange
 CONFIGDB_USER_LONG=configdb-user
@@ -104,32 +111,38 @@ MASTER_USER_LONG=master-user
 DISABLE_RMI_AUTH=
 DISABLE_RMI_AUTH_LONG=disableauth
 URL="http://localhost/?cid=%c&login=%u&pass=%p"
-URL_LONG="extraslink"
-EMAIL_LINK='http://localhost/#m=[module]&i=[object]&f=[folder]'
-EMAIL_LINK_LONG="email_link"
+URL_LONG="extras-link"
+OXURL=
+OXURL_LONG="ox-cluster-url"
+OXCLUSTERIP=" "
+OXCLUSTERIP_LONG="ip-of-oxcluster"
+PUSHMCPORT=9982
+PUSHMCPORT_LONG="push-udp-disc-port"
+OLPORT=44335
+OLPORT_LONG="push-outlook-port"
 
-
-MUSTOPTS="SERVER_NAME CONFIGDB_PASS"
-LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$IMAP_LOGIN_TYPE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_POOL_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$SERVER_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:,$DISABLE_RMI_AUTH_LONG:,$AJP_JVM_ROUTE_LONG:,$AJP_BIND_ADDR_LONG:,$CREDSRC_LONG:,$EMAIL_LINK_LONG:,$URL_LONG:,'
+MUSTOPTS="SERVER_NAME CONFIGDB_PASS OXURL"
+LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$IMAP_LOGIN_TYPE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_POOL_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$SERVER_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:,$AJP_JVM_ROUTE_LONG:,$AJP_BIND_ADDR_LONG:,$CREDSRC_LONG:,$OXURL_LONG:,$URL_LONG:,$UDPDISCOVERYADDR_LONG:,$UDPDISCOVERYPORT_LONG:,$CACHEPORT_LONG:,$OXCLUSTERIP_LONG:,$PUSHMCPORT_LONG:,$OLPORT_LONG:,$DISABLE_RMI_AUTH_LONG'
 
 usage() {
     echo
     echo "$0 currently knows the following parameters:"
     echo
     local lopts=$(echo $LONGOPTS | sed -e 's/[:,]/ /g')
-    printf '%-20s | %-50s | %-s\n' "Parameter" "Default value" "Possible values"
-    echo "-----------------------------------------------------------------------------------------------"
+    printf '%-22s | %-45s | %-s\n' "Parameter" "Default value" "Possible values"
+    echo "--------------------------------------------------------------------------------------------"
     for opt in $lopts; do
 	local rvar=${opt%_LONG}
 	GLOBIGNORE='*'
 	local default="$(eval echo "$rvar")"
 	local possible=$(eval echo ${opt%_LONG}_VALUES)
 	local lopt=$(eval echo $opt)
-    # echo $opt $rvar $default $lopt
-	printf '%-20s | %-50s | %-s\n' "--$lopt" $default "$possible"
+        # echo $opt $rvar $default $lopt
+	printf '%-22s | %-45s | %-s\n' "--$lopt" $default "$possible"
 	GLOBIGNORE=
     done
     echo
+    echo Mandatory parameters are: --servername --configdb-pass --ox-cluster-url
     echo
 cat<<EOF
 Example:
@@ -146,6 +159,27 @@ v_setprop() {
     local propfile="$3"
     echo setting $prop in $propfile
     ox_set_property "$prop" "$val" "$propfile"
+}
+
+v_handlehash() {
+    local prop="$1"
+    local action="$2"
+    local propfile="$3"
+    echo $action hash for $prop in $propfile
+    ox_handle_hash "$prop" "$action" "$propfile"
+}
+
+v_cache_hosting(){
+    local propfile="$1"
+    v_handlehash jcs.auxiliary.LTCP.attributes.TcpServers add $propfile
+    v_handlehash jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnabled remove $propfile
+    v_handlehash jcs.auxiliary.LTCP.attributes.UdpDiscoveryAddr remove $propfile
+    v_handlehash jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort remove $propfile
+    v_handlehash jcs.auxiliary.LTCP.attributes.TcpListenerPort remove $propfile
+    v_setprop jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnabled true $propfile
+    v_setprop jcs.auxiliary.LTCP.attributes.UdpDiscoveryAddr $UDPDISCOVERYADDR $propfile 
+    v_setprop jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort $UDPDISCOVERYPORT $propfile
+    v_setprop jcs.auxiliary.LTCP.attributes.TcpListenerPort $CACHEPORT $propfile
 }
 
 TEMP=$(POSIXLY_CORRECT=true getopt -o s:i:l:h --long "$(eval echo $LONGOPTS),help" -- "$@")
@@ -168,7 +202,7 @@ while true; do
 #	-l|--$LOGIN_IMPL_TYPE_LONG)
 #	    LOGIN_IMPL_TYPE=$2
 #	    shift 2
-#	    ;;
+#       ;;
 	--$CONFIGDB_USER_LONG)
 	    CONFIGDB_USER=$2
 	    shift 2
@@ -233,13 +267,36 @@ while true; do
 	     CREDSRC=$2
 	     shift 2
 	     ;;
-	--$EMAIL_LINK_LONG)
-	     EMAIL_LINK=$2
+	--$OXURL_LONG)
+	     OXURL=$2
 	     shift 2
 	     ;;
 	--$URL_LONG)
 	    URL=$2
-	    echo internal?? $1 $2
+	    shift 2
+	    ;;
+	--$UDPDISCOVERYADDR_LONG)
+	    UDPDISCOVERYADDR=$2
+	    shift 2
+	    ;;
+	--$UDPDISCOVERYPORT_LONG)
+	    UDPDISCOVERYPORT=$2
+	    shift 2
+	    ;;
+	--$CACHEPORT_LONG)
+	    CACHEPORT=$2
+	    shift 2
+	    ;;
+	--$OXCLUSTERIP_LONG)
+	    OXCLUSTERIP=$2
+	    shift 2
+	    ;;
+	--$PUSHMCPORT_LONG)
+	    PUSHMCPORT=$2
+	    shift 2
+	    ;;
+	--$OLPORT_LONG)
+	    OLPORT=$2
 	    shift 2
 	    ;;
 	-h|--help)
@@ -307,7 +364,7 @@ v_setprop AJP_JVM_ROUTE "$AJP_JVM_ROUTE" ${SERVERCONF}/ajp.properties
 v_setprop AJP_BIND_ADDR "$AJP_BIND_ADDR" ${SERVERCONF}/ajp.properties
 GLOBIGNORE=
 
-v_setprop object_link $EMAIL_LINK ${SERVERCONF}/notification.properties
+v_setprop object_link "http://$OXURL/#m=[module]&i=[object]&f=[folder]" ${SERVERCONF}/notification.properties
 
 v_setprop URL "$URL" ${SERVERCONF}/configjump.properties
 
@@ -349,7 +406,21 @@ v_setprop com.openexchange.mail.loginType  $IMAP_LOGIN_TYPE ${SERVERCONF}/mail.p
 
 v_setprop UPLOAD_DIRECTORY "$TMPDIR_PATH" ${SERVERCONF}/server.properties
 
+v_cache_hosting ${SERVERCONF}/cache.ccf
+
+v_setprop com.openexchange.push.udp.senderAddress "$OXCLUSTERIP" ${SERVERCONF}/push.properties
+v_setprop com.openexchange.push.udp.multicastAddress "$UDPDISCOVERYADDR" ${SERVERCONF}/push.properties
+v_setprop com.openexchange.push.udp.multicastPort "$PUSHMCPORT" ${SERVERCONF}/push.properties
+v_setprop com.openexchange.push.udp.multicastEnabled true ${SERVERCONF}/push.properties
+v_setprop com.openexchange.push.udp.pushEnabled true ${SERVERCONF}/push.properties
+v_setprop com.openexchange.push.udp.registerPort $OLPORT ${SERVERCONF}/push.properties
+v_setprop com.openexchange.push.udp.registerDistributionEnabled false  ${SERVERCONF}/push.properties
+v_setprop com.openexchange.push.udp.eventDistributionEnabled true ${SERVERCONF}/push.properties
+
+
+#
 # admin daemon
+#
 
 v_setprop SERVER_NAME $SERVER_NAME ${ADMINCONF}/system.properties
 v_setprop SERVER_NAME $SERVER_NAME ${ADMINCONF}/AdminDaemon.properties
@@ -371,6 +442,8 @@ v_setprop readProperty.2 "password=$CONFIGDB_PASS" ${ADMINCONF}/configdb.propert
 
 v_setprop writeProperty.1 "user=$CONFIGDB_USER" ${ADMINCONF}/configdb.properties
 v_setprop writeProperty.2 "password=$CONFIGDB_PASS" ${ADMINCONF}/configdb.properties
+
+v_cache_hosting ${ADMINCONF}/cache.ccf
 
 if [ -z "$DISABLE_RMI_AUTH" ]; then
     echo
