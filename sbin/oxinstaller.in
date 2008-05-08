@@ -47,7 +47,6 @@
 #    Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 #
-#set -x
 
 OXFUNCTIONS=@oxfunctions@
 SERVERCONF=@absserverconfdir@
@@ -74,18 +73,18 @@ SERVER_MEMORY_LONG=servermemory
 TMPDIR_PATH=/tmp
 TMPDIR_PATH_LONG=tmpdir-path
 AJP_JVM_ROUTE=APP1
-AJP_JVM_ROUTE_LONG="jkroute"
+AJP_JVM_ROUTE_LONG=jkroute
 AJP_BIND_ADDR="*"
-AJP_BIND_ADDR_LONG="ajp-bind-port"
-CREDSRC="user.imapLogin"
-CREDSRC_LONG="imap-credentials"
+AJP_BIND_ADDR_LONG=ajp-bind-port
+CREDSRC=user.imapLogin
+CREDSRC_LONG=imap-credentials
 CREDSRC_VALUES="session user.imapLogin"
-UDPDISCOVERYADDR="224.0.0.1"
-UDPDISCOVERYADDR_LONG="cache-udp-disc-addr"
-UDPDISCOVERYPORT="6780"
-UDPDISCOVERYPORT_LONG="cache-udp-disc-port"
-CACHEPORT="57462"
-CACHEPORT_LONG="cache-listener-port"
+UDPDISCOVERYADDR=224.0.0.1
+UDPDISCOVERYADDR_LONG=cache-udp-disc-addr
+UDPDISCOVERYPORT=6780
+UDPDISCOVERYPORT_LONG=cache-udp-disc-port
+CACHEPORT=57462
+CACHEPORT_LONG=cache-listener-port
 
 #
 CONFIGDB_USER=openexchange
@@ -111,18 +110,18 @@ MASTER_USER_LONG=master-user
 DISABLE_RMI_AUTH=
 DISABLE_RMI_AUTH_LONG=disableauth
 URL="http://localhost/?cid=%c&login=%u&pass=%p"
-URL_LONG="extras-link"
-OXURL=
-OXURL_LONG="ox-cluster-url"
-OXCLUSTERIP=" "
-OXCLUSTERIP_LONG="ip-of-oxcluster"
+URL_LONG=extras-link
+OXOBJECT_LINK_HOSTNAME="$(hostname -f)"
+OXOBJECT_LINK_HOSTNAME_LONG=object-link-hostname
+OXCLUSTERIP=
+OXCLUSTERIP_LONG=ip-of-oxcluster
 PUSHMCPORT=9982
-PUSHMCPORT_LONG="push-udp-disc-port"
+PUSHMCPORT_LONG=push-udp-disc-port
 OLPORT=44335
-OLPORT_LONG="push-outlook-port"
+OLPORT_LONG=push-outlook-port
 
-MUSTOPTS="SERVER_NAME CONFIGDB_PASS OXURL"
-LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$IMAP_LOGIN_TYPE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_POOL_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$SERVER_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:,$AJP_JVM_ROUTE_LONG:,$AJP_BIND_ADDR_LONG:,$CREDSRC_LONG:,$OXURL_LONG:,$URL_LONG:,$UDPDISCOVERYADDR_LONG:,$UDPDISCOVERYPORT_LONG:,$CACHEPORT_LONG:,$OXCLUSTERIP_LONG:,$PUSHMCPORT_LONG:,$OLPORT_LONG:,$DISABLE_RMI_AUTH_LONG'
+MUSTOPTS="SERVER_NAME CONFIGDB_PASS OXOBJECT_LINK_HOSTNAME"
+LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$IMAP_LOGIN_TYPE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_POOL_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$SERVER_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:,$AJP_JVM_ROUTE_LONG:,$AJP_BIND_ADDR_LONG:,$CREDSRC_LONG:,$OXOBJECT_LINK_HOSTNAME_LONG:,$URL_LONG:,$UDPDISCOVERYADDR_LONG:,$UDPDISCOVERYPORT_LONG:,$CACHEPORT_LONG:,$OXCLUSTERIP_LONG:,$PUSHMCPORT_LONG:,$OLPORT_LONG:,$DISABLE_RMI_AUTH_LONG'
 
 usage() {
     echo
@@ -141,13 +140,16 @@ usage() {
 	printf '%-22s | %-45s | %-s\n' "--$lopt" $default "$possible"
 	GLOBIGNORE=
     done
-    echo
-    echo Mandatory parameters are: --servername --configdb-pass --ox-cluster-url
-    echo
 cat<<EOF
+
+Mandatory parameters are: --servername --configdb-pass --ox-cluster-url
+
 Example:
 
   $0 --servername=ox6 --configdb-pass=secret --master-pass=secret --configdb-poolsize=10
+
+use -D for Debug mode
+
 EOF
     echo
 #    exit 1
@@ -182,7 +184,9 @@ v_cache_hosting(){
     v_setprop jcs.auxiliary.LTCP.attributes.TcpListenerPort $CACHEPORT $propfile
 }
 
-TEMP=$(POSIXLY_CORRECT=true getopt -o s:i:l:h --long "$(eval echo $LONGOPTS),help" -- "$@")
+TEMP=$(POSIXLY_CORRECT=true getopt -o s:i:l:hD --long "$(eval echo $LONGOPTS),help" -- "$@") \
+	|| die "exiting"
+
 eval set -- "$TEMP"
 
 while true; do
@@ -199,10 +203,6 @@ while true; do
 	    IMAP_LOGIN_TYPE=$2
 	    shift 2
 	    ;;
-#	-l|--$LOGIN_IMPL_TYPE_LONG)
-#	    LOGIN_IMPL_TYPE=$2
-#	    shift 2
-#       ;;
 	--$CONFIGDB_USER_LONG)
 	    CONFIGDB_USER=$2
 	    shift 2
@@ -264,13 +264,13 @@ while true; do
 	    shift 2
 	    ;;
 	--$CREDSRC_LONG)
-	     CREDSRC=$2
-	     shift 2
-	     ;;
-	--$OXURL_LONG)
-	     OXURL=$2
-	     shift 2
-	     ;;
+	    CREDSRC=$2
+	    shift 2
+	    ;;
+	--$OXOBJECT_LINK_HOSTNAME_LONG)
+	    OXOBJECT_LINK_HOSTNAME=$2
+	    shift 2
+	    ;;
 	--$URL_LONG)
 	    URL=$2
 	    shift 2
@@ -302,6 +302,10 @@ while true; do
 	-h|--help)
 	    usage
 	    exit
+	    shift
+	    ;;
+	-D)
+	    set -x
 	    shift
 	    ;;
 	--)
@@ -364,7 +368,7 @@ v_setprop AJP_JVM_ROUTE "$AJP_JVM_ROUTE" ${SERVERCONF}/ajp.properties
 v_setprop AJP_BIND_ADDR "$AJP_BIND_ADDR" ${SERVERCONF}/ajp.properties
 GLOBIGNORE=
 
-v_setprop object_link "http://$OXURL/#m=[module]&i=[object]&f=[folder]" ${SERVERCONF}/notification.properties
+v_setprop object_link "http://$OXOBJECT_LINK_HOSTNAME/#m=[module]&i=[object]&f=[folder]" ${SERVERCONF}/notification.properties
 
 v_setprop URL "$URL" ${SERVERCONF}/configjump.properties
 
