@@ -164,7 +164,9 @@ public final class HTMLFilterHandler implements HTMLHandler {
 		super();
 		htmlBuilder = new StringBuilder(capacity);
 		attrBuilder = new StringBuilder(128);
-		loadWhitelist();
+		if (null == shtmlMap) {
+			loadWhitelist();
+		}
 		htmlMap = shtmlMap;
 		styleMap = sstyleMap;
 		checkHTMLMap();
