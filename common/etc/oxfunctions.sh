@@ -300,7 +300,7 @@ ox_update_config_init() {
     # check if amount of bundles installed in bundles directory does not
     # match and if that's the case, generate new config.ini
     #
-    if [ ${#dirbundles[@]} -ne ${#configbundles[@]} ]; then
+    if [ "${dirbundles[*]}" != "${configbundles[*]}" ]; then
 	echo "updating $cini"
 	cp $cinitemplate $cini
 	echo "osgi.bundles=$(echo ${dirbundles[@]} | sed 's; ;,;g')" >> $cini

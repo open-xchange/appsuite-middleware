@@ -1,3 +1,8 @@
+* 2008-05-08 - choeger@open-xchange.com
+
+ - Bugfix ID#11245 config.ini shoudn't be only created if the number of bundle
+ in bundles.d directory are changed
+
 * 2008-04-30 - choeger@open-xchange.com
 
  - Bugfix ID#11236 ox common functions shell script does not run on debian sarge
