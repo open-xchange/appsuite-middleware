@@ -355,7 +355,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
      */
     protected final ArrayList<MethodAndNames> getGetters(final Method[] theMethods, final HashSet<String> notallowed) {
         // Define the returntypes we search for
-        final HashSet<String> returntypes = new HashSet<String>(7);
+        final HashSet<String> returntypes = new HashSet<String>();
         returntypes.add(JAVA_LANG_STRING);
         returntypes.add(JAVA_LANG_INTEGER);
         returntypes.add(JAVA_LANG_BOOLEAN);
@@ -364,6 +364,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         returntypes.add(JAVA_UTIL_TIME_ZONE);
         returntypes.add(JAVA_UTIL_LOCALE);
         returntypes.add(PASSWORDMECH_CLASS);
+        returntypes.add(SIMPLE_INT);
         
         return getGetterGeneral(theMethods, notallowed, returntypes);
     }
