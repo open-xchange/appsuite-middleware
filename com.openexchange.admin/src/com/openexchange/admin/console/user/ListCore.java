@@ -300,6 +300,8 @@ public abstract class ListCore extends UserAbstraction {
                     datarow.add(timezonetostring((TimeZone)methodandnames.getMethod().invoke(user, (Object[]) null)));
                 } else if (returntype.equals(JAVA_UTIL_LOCALE)) {
                     datarow.add(((Locale)methodandnames.getMethod().invoke(user, (Object[]) null)).toString());
+                } else if (returntype.equals(SIMPLE_INT)) {
+                    datarow.add(((Integer)methodandnames.getMethod().invoke(user, (Object[]) null)).toString());
                 }
             }
             datarow.addAll(getDataOfAllExtensions(user));
