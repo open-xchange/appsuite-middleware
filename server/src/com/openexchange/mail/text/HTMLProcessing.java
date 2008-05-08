@@ -438,7 +438,7 @@ public final class HTMLProcessing {
 
 	private static final AtomicBoolean TIDY_CONFIG = new AtomicBoolean();
 
-	private static Properties properties = null;
+	private static Properties properties;
 
 	/**
 	 * Gets the configuration for JTidy either read from file if
