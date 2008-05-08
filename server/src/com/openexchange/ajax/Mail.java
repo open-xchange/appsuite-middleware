@@ -1508,6 +1508,13 @@ public class Mail extends PermissionServlet implements UploadListener {
 				final Map<String, SmartLongArray> idMap = new HashMap<String, SmartLongArray>();
 				fillMap(idMap, body, length);
 				final int size = idMap.size();
+				if (size == 0 && LOG.isErrorEnabled()) {
+					/*
+					 * Must not be zero since JSON array's length is greater
+					 * than zero.
+					 */
+					LOG.error("Parsing of folder-and-ID-pairs failed", new Throwable());
+				}
 				MailServletInterface mailInterface = mailInterfaceArg;
 				boolean closeMailInterface = false;
 				try {
@@ -1558,9 +1565,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 		return response;
 	}
 
-	private static final String idRegex = "\"id\":([0-9]+)";
+	private static final String idRegex = "\"id\":\"?([0-9]+)\"?";
 
-	private static final String fldRegex = "\"folder\":\"([^\"]+)\"";
+	private static final String fldRegex = "\"folder\":\"(.+?)\"";
 
 	private static final String commaRegex = "\\p{Blank}*,\\p{Blank}*";
 
