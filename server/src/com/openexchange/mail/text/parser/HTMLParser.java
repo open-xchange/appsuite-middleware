@@ -69,6 +69,10 @@ import org.xmlpull.v1.XmlPullParserException;
  */
 public final class HTMLParser {
 
+	private static final String PROPERTY_XMLDECL_STANDALONE = "http://xmlpull.org/v1/doc/features.html#xmldecl-standalone";
+
+	private static final String PROPERTY_XMLDECL_VERSION = "http://xmlpull.org/v1/doc/properties.html#xmldecl-version";
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HTMLParser.class);
 
@@ -97,15 +101,42 @@ public final class HTMLParser {
 			parser.setInput(new StringReader(html));
 			int event = XmlPullParser.END_DOCUMENT;
 			int[] holderForStartAndLength = null;
-			final StringBuilder textBuilder = new StringBuilder(1024);
+			final StringBuilder textBuilder = new StringBuilder(512);
+			final StringBuilder cdataBuilder = new StringBuilder(512);
+			int prevEvent = XmlPullParser.END_DOCUMENT;
 			int[] depthInfo = new int[8];
 			boolean ignoreWhitespace = false;
+			boolean obtainXMLDecl = true;
 			while ((event = parser.nextToken()) != XmlPullParser.END_DOCUMENT) {
-				if (event == XmlPullParser.CDSECT || event == XmlPullParser.TEXT) {
+				if (obtainXMLDecl) {
+					final Object version = parser.getProperty(PROPERTY_XMLDECL_VERSION);
+					if (null != version) {
+						final Object standalone = parser.getProperty(PROPERTY_XMLDECL_STANDALONE);
+						handler.handleXMLDeclaration(version.toString(), standalone == null ? null
+								: (Boolean) standalone, parser.getInputEncoding());
+					}
+					obtainXMLDecl = false;
+				}
+				if (event == XmlPullParser.CDSECT) {
 					/*
 					 * Gather subsequent text inside CDATA (ex. 'fo<o' from
-					 * <!CDATA[fo<o]]>) or inside element's content
+					 * <!CDATA[fo<o]]>)
 					 */
+					if (prevEvent != XmlPullParser.CDSECT && textBuilder.length() > 0) {
+						handler.handleText(textBuilder.toString(), ignoreWhitespace);
+						textBuilder.setLength(0);
+					}
+					prevEvent = XmlPullParser.CDSECT;
+					cdataBuilder.append(parser.getText());
+				} else if (event == XmlPullParser.TEXT) {
+					if (prevEvent != XmlPullParser.TEXT && cdataBuilder.length() > 0) {
+						handler.handleCDATA(cdataBuilder.toString());
+						cdataBuilder.setLength(0);
+					}
+					/*
+					 * Gather subsequent text inside element's content
+					 */
+					prevEvent = XmlPullParser.TEXT;
 					if (!parser.isWhitespace()) {
 						ignoreWhitespace = false;
 					}
@@ -118,15 +149,30 @@ public final class HTMLParser {
 						holderForStartAndLength = new int[2];
 					}
 					ignoreWhitespace = false;
-					textBuilder.append('&').append(parser.getTextCharacters(holderForStartAndLength)).append(';');
+					if (prevEvent == XmlPullParser.TEXT) {
+						textBuilder.append('&').append(parser.getTextCharacters(holderForStartAndLength)).append(';');
+					} else if (prevEvent == XmlPullParser.CDSECT) {
+						cdataBuilder.append('&').append(parser.getTextCharacters(holderForStartAndLength)).append(';');
+					} else {
+						if (LOG.isWarnEnabled()) {
+							LOG.warn("Unexpected entity occurring inside non-text and non-CDATA area");
+						}
+					}
 				} else {
 					/*
-					 * A non-text event
+					 * Check for text/CDATA
 					 */
 					if (textBuilder.length() > 0) {
 						handler.handleText(textBuilder.toString(), ignoreWhitespace);
 						textBuilder.setLength(0);
 					}
+					if (cdataBuilder.length() > 0) {
+						handler.handleCDATA(cdataBuilder.toString());
+						textBuilder.setLength(0);
+					}
+					/*
+					 * Handle non-text event
+					 */
 					if (event == XmlPullParser.COMMENT) {
 						handler.handleComment(parser.getText());
 					} else if (event == XmlPullParser.DOCDECL) {
@@ -192,4 +238,5 @@ public final class HTMLParser {
 		}
 
 	}
+
 }

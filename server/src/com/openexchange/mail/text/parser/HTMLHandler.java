@@ -60,6 +60,19 @@ import java.util.Map;
 public interface HTMLHandler {
 
 	/**
+	 * Handle the <i>&lt;?xml... ?&gt;</i> declaration
+	 * 
+	 * @param version
+	 *            The version; either "1.0" or <code>null</code>
+	 * @param standalone
+	 *            The standalone boolean value; either {@link Boolean#TRUE},
+	 *            {@link Boolean#FALSE}, or <code>null</code>
+	 * @param encoding
+	 *            The encoding; the charset name or <code>null</code>
+	 */
+	public void handleXMLDeclaration(String version, Boolean standalone, String encoding);
+
+	/**
 	 * Handle the DOCTYPE declaration. Specified value is without leading
 	 * "&lt;!DOCTYPE" and without trailing "&gt;"; e.g.
 	 * 
@@ -78,6 +91,14 @@ public interface HTMLHandler {
 	 * @param docDecl
 	 */
 	public void handleDocDeclaration(String docDecl);
+
+	/**
+	 * Handle specified CDATA segment's text; e.g. '<i>fo&lt;o</i>' from '<i>&lt;![CDATA[fo&lt;o]]&gt;</i>'.
+	 * 
+	 * @param text
+	 *            The CDATA segment's text
+	 */
+	public void handleCDATA(String text);
 
 	/**
 	 * Handle specified text.

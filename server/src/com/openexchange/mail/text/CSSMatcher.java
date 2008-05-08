@@ -49,6 +49,12 @@
 
 package com.openexchange.mail.text;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.openexchange.tools.regex.RegexUtility;
@@ -71,8 +77,7 @@ public final class CSSMatcher {
 	/**
 	 * Initializes a new {@link CSSMatcher}
 	 */
-	public CSSMatcher() {
-		// TODO Auto-generated constructor stub
+	private CSSMatcher() {
 		super();
 	}
 
@@ -101,8 +106,21 @@ public final class CSSMatcher {
 	private static final String STR_PERCENTAGE = RegexUtility.group(RegexUtility.concat(STR_NUMBER, "%"),
 			GroupType.NON_CAPTURING);
 
-	private static final String STR_LENGTH_OR_PERC = RegexUtility.group(RegexUtility.OR(STR_LENGTH, STR_PERCENTAGE),
-			GroupType.NON_CAPTURING);
+	private static final String STR_LENGTH_OR_PERCENTAGE = RegexUtility.group(RegexUtility.OR(STR_LENGTH,
+			STR_PERCENTAGE), GroupType.NON_CAPTURING);
+
+	// private static final String STR_MULTIPLE_LENGTH =
+	// RegexUtility.concat(STR_LENGTH, RegexUtility.group(RegexUtility
+	// .concat("\\p{Blank}+", STR_LENGTH), GroupType.NON_CAPTURING), "*");
+	//
+	// private static final String STR_MULTIPLE_PERCENTAGE =
+	// RegexUtility.concat(STR_PERCENTAGE, RegexUtility.group(
+	// RegexUtility.concat("\\p{Blank}+", STR_PERCENTAGE),
+	// GroupType.NON_CAPTURING), "*");
+	//
+	// private static final String STR_MULTIPLE =
+	// RegexUtility.group(RegexUtility.OR(STR_MULTIPLE_LENGTH,
+	// STR_MULTIPLE_PERCENTAGE), GroupType.NON_CAPTURING);
 
 	private static final String STR_URL = "url\\(\"?\\p{ASCII}+\"?\\)";
 
@@ -116,13 +134,14 @@ public final class CSSMatcher {
 			+ "InfoBackground|InfoText|Menu|MenuText|Scrollbar|ThreeDDarkShadow|"
 			+ "ThreeDFace|ThreeDHighlight|ThreeDLightShadow|ThreeDShadow|Window|WindowFrame|WindowText";
 
-	private static final String STR_COLOR_RGB_HEX = "#\\p{XDigit}{3,6}";
+	private static final String STR_COLOR_RGB_HEX = "#?\\p{XDigit}{3,6}";
 
-	private static final String STR_COLOR_RGB_FUNC = RegexUtility.concat("rgb\\(", RegexUtility
-			.group(RegexUtility.OR(
-					RegexUtility.concat(STR_INTEGER, "\\s*,\\s*", STR_INTEGER, "\\s*,\\s*", STR_INTEGER), RegexUtility
-							.concat(STR_PERCENTAGE, "\\s*,\\s*", STR_PERCENTAGE, "\\s*,\\s*", STR_PERCENTAGE)),
-					GroupType.NON_CAPTURING), "\\)");
+	private static final String STR_CSV_DELIM = "\\s*,\\s*";
+
+	private static final String STR_COLOR_RGB_FUNC = RegexUtility.concat("rgb\\(", RegexUtility.group(RegexUtility.OR(
+			RegexUtility.concat(STR_INTEGER, STR_CSV_DELIM, STR_INTEGER, STR_CSV_DELIM, STR_INTEGER), RegexUtility
+					.concat(STR_PERCENTAGE, STR_CSV_DELIM, STR_PERCENTAGE, STR_CSV_DELIM, STR_PERCENTAGE)),
+			GroupType.NON_CAPTURING), "\\)");
 
 	private static final String STR_COLOR = RegexUtility.group(RegexUtility.concat(STR_COLOR_KEYWORD, "|",
 			STR_COLOR_SYSTEM, "|", STR_COLOR_RGB_HEX, "|", STR_COLOR_RGB_FUNC), GroupType.NON_CAPTURING);
@@ -131,22 +150,218 @@ public final class CSSMatcher {
 	 * The patterns for values
 	 */
 
-	private static final Pattern N = Pattern.compile(STR_LENGTH_OR_PERC);
+	private static final Pattern PAT_N = Pattern.compile(STR_LENGTH_OR_PERCENTAGE);
 
-	private static final Pattern N_WO_PERCENTAGE = Pattern.compile(STR_LENGTH);
+	private static final Pattern PAT_n = Pattern.compile(STR_LENGTH);
 
-	private static final Pattern C = Pattern.compile(STR_COLOR, Pattern.CASE_INSENSITIVE);
+	private static final Pattern PAT_c = Pattern.compile(STR_COLOR, Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern U = Pattern.compile(STR_URL, Pattern.CASE_INSENSITIVE);
+	private static final Pattern PAT_u = Pattern.compile(STR_URL, Pattern.CASE_INSENSITIVE);
 
-	public static void main(String[] args) {
-		Pattern p = Pattern.compile(STR_COLOR);
-		System.out.println(p.matcher("maroon").matches());
-		System.out.println(p.matcher("MenuText").matches());
-		System.out.println(p.matcher("#f00").matches());
-		System.out.println(p.matcher("#ff0000").matches());
-		System.out.println(p.matcher("rgb(255,0,0)").matches());
-		System.out.println(p.matcher("rgb(110%, 0%, 0%)").matches());
+	private static final Pattern PATTERN_IS_PATTERN = Pattern.compile("[unNcd*]+");
+
+	/**
+	 * Checks if specified CSS value is matched by given allowed values
+	 * <p>
+	 * The allowed values may contain following patterns to cover certain CSS
+	 * types:
+	 * <ul>
+	 * <li><b>u</b>:&nbsp;url(&lt;URL&gt;)</li>
+	 * <li><b>n</b>:&nbsp;number string without %</li>
+	 * <li><b>N</b>:&nbsp;number string</li>
+	 * <li><b>c</b>:&nbsp;color</li>
+	 * <li><b>d</b>:&nbsp;delete</li>
+	 * <li><b>*</b>:&nbsp;any value</li>
+	 * </ul>
+	 * 
+	 * @param value
+	 *            The value
+	 * @param allowedValuesSet
+	 *            The allowed values
+	 * @return <code>true</code> if value is matched by given allowed values;
+	 *         otherwise <code>false</code>
+	 */
+	public static boolean matches(final String value, final Set<String> allowedValuesSet) {
+		final int size = allowedValuesSet.size();
+		final String[] allowedValues = allowedValuesSet.toArray(new String[size]);
+		/*
+		 * Ensure to check against pattern first
+		 */
+		final Set<Integer> patIndices = new HashSet<Integer>(2);
+		for (int i = 0; i < size; i++) {
+			final String allowedValue = allowedValues[i];
+			if (PATTERN_IS_PATTERN.matcher(allowedValue).matches()) {
+				patIndices.add(Integer.valueOf(i));
+				final char[] chars = allowedValue.toCharArray();
+				Arrays.sort(chars);
+				if (Arrays.binarySearch(chars, 'd') >= 0) {
+					return false;
+				}
+				if (Arrays.binarySearch(chars, '*') >= 0) {
+					return true;
+				}
+				for (int j = 0; j < chars.length; j++) {
+					if (matchesPattern(chars[j], value)) {
+						return true;
+					}
+				}
+			}
+		}
+		/*
+		 * Now check against values
+		 */
+		boolean retval = false;
+		for (int i = 0; i < size && !retval; i++) {
+			if (!patIndices.contains(Integer.valueOf(i))) {
+				/*
+				 * Check against non-pattern allowed value
+				 */
+				retval = allowedValues[i].equalsIgnoreCase(value);
+			}
+		}
+		return retval;
 	}
 
+	private static boolean matchesPattern(final char pattern, final String value) {
+		// u: url(<URL>);
+		// n: number string without %
+		// N: number string
+		// c: color
+		// d: delete
+		switch (pattern) {
+		case 'u':
+			return PAT_u.matcher(value).matches();
+		case 'n':
+			return PAT_n.matcher(value).matches();
+		case 'N':
+			return PAT_N.matcher(value).matches();
+		case 'c':
+			return PAT_c.matcher(value).matches();
+		case 'd':
+			return false;
+		default:
+			return false;
+		}
+	}
+
+	private static final Pattern PATTERN_STYLE_BLOCK = Pattern.compile("(\\p{Print}+\\s*\\{)([^}]+)\\}");
+
+	/**
+	 * Iterates over CSS blocks contained in specified string argument and
+	 * checks each block against given style map
+	 * 
+	 * @param css
+	 *            The CSS string
+	 * @param styleMap
+	 *            The style map
+	 * @param findBlocks
+	 *            <code>true</code> to iterate over CSS blocks; otherwise
+	 *            <code>false</code> to iterate over CSS elements
+	 * @return The checked CSS string
+	 */
+	public static String checkCSS(final String css, final Map<String, Set<String>> styleMap, final boolean findBlocks) {
+		if (findBlocks) {
+			final StringBuffer sb = new StringBuffer(css.length());
+			final StringBuilder cssBuilder = new StringBuilder(128);
+			final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
+			while (m.find()) {
+				final String checkedCSS = checkCSS(m.group(2), styleMap);
+				cssBuilder.setLength(0);
+				m.appendReplacement(sb, cssBuilder.append(m.group(1)).append(checkedCSS).append('}').toString());
+			}
+			m.appendTail(sb);
+			return sb.toString();
+		}
+		return checkCSS(css, styleMap);
+	}
+
+	private static final Pattern PATTERN_STYLE_LINE = Pattern.compile(
+			"([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}&&[^;]]+);?", Pattern.CASE_INSENSITIVE);
+
+	/**
+	 * Iterates over CSS elements contained in specified string argument and
+	 * checks each element and its value against given style map
+	 * 
+	 * @param css
+	 *            The CSS string
+	 * @param styleMap
+	 *            The style map
+	 * @return The checked CSS string
+	 */
+	public static String checkCSS(final String css, final Map<String, Set<String>> styleMap) {
+		final Matcher m = PATTERN_STYLE_LINE.matcher(css);
+		final StringBuffer sb = new StringBuffer(css.length());
+		final StringBuilder elemBuilder = new StringBuilder(128);
+		while (m.find()) {
+			final String elementName = m.group(1);
+			if (styleMap.containsKey(elementName.toLowerCase(Locale.ENGLISH))) {
+				elemBuilder.append(elementName).append(':').append(' ');
+				final Set<String> allowedValuesSet = styleMap.get(elementName.toLowerCase(Locale.ENGLISH));
+				final String elementValues = m.group(2);
+				boolean hasValues = false;
+				if (matches(elementValues, allowedValuesSet)) {
+					/*
+					 * Direct match
+					 */
+					elemBuilder.append(elementValues);
+					hasValues = true;
+				} else {
+					final String[] tokens = elementValues.split("\\s+");
+					for (int j = 0; j < tokens.length; j++) {
+						if (matches(tokens[j], allowedValuesSet)) {
+							if (j > 0) {
+								elemBuilder.append(' ');
+							}
+							elemBuilder.append(tokens[j]);
+							hasValues = true;
+						}
+					}
+				}
+				if (hasValues) {
+					elemBuilder.append(';');
+					m.appendReplacement(sb, Matcher.quoteReplacement(elemBuilder.toString()));
+				} else {
+					/*
+					 * Remove element since none of its values is allowed
+					 */
+					m.appendReplacement(sb, "");
+				}
+				elemBuilder.setLength(0);
+			} else {
+				/*
+				 * Remove forbidden element
+				 */
+				m.appendReplacement(sb, "");
+			}
+		}
+		m.appendTail(sb);
+		return sb.toString();
+	}
+
+	/**
+	 * Checks if specified string argument contains at least one CSS element
+	 * 
+	 * @param css
+	 *            The CSS string
+	 * @return <code>true</code> if specified string argument contains at
+	 *         least one CSS element; otherwise <code>false</code>
+	 */
+	public static boolean containsCSSElement(final String css) {
+		if (null == css || isEmpty(css)) {
+			return false;
+		}
+		return PATTERN_STYLE_LINE.matcher(css).find();
+	}
+
+	private static boolean isEmpty(final String s) {
+		if (s.length() == 0) {
+			return true;
+		}
+		boolean retval = true;
+		final char[] chars = s.toCharArray();
+		for (int i = 0; i < chars.length && retval; i++) {
+			retval = Character.isWhitespace(chars[i]);
+		}
+		return retval;
+	}
 }

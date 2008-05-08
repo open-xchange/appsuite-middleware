@@ -84,6 +84,8 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class HTMLFilterHandler implements HTMLHandler {
 
+	private static final String WARN_USING_DEFAULT_WHITE_LIST = "Using default white list";
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HTMLFilterHandler.class);
 
@@ -187,7 +189,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 						}
 						if (null == whitelist) {
 							if (LOG.isWarnEnabled()) {
-								LOG.warn("Using default white list");
+								LOG.warn(WARN_USING_DEFAULT_WHITE_LIST);
 							}
 							mapStr = DEFAULT_WHITELIST;
 						} else {
@@ -203,17 +205,17 @@ public final class HTMLFilterHandler implements HTMLHandler {
 								mapStr = sb.toString();
 							} catch (final UnsupportedEncodingException e) {
 								if (LOG.isWarnEnabled()) {
-									LOG.warn("Using default white list", e);
+									LOG.warn(WARN_USING_DEFAULT_WHITE_LIST, e);
 								}
 								mapStr = DEFAULT_WHITELIST;
 							} catch (final FileNotFoundException e) {
 								if (LOG.isWarnEnabled()) {
-									LOG.warn("Using default white list", e);
+									LOG.warn(WARN_USING_DEFAULT_WHITE_LIST, e);
 								}
 								mapStr = DEFAULT_WHITELIST;
 							} catch (final IOException e) {
 								if (LOG.isWarnEnabled()) {
-									LOG.warn("Using default white list", e);
+									LOG.warn(WARN_USING_DEFAULT_WHITE_LIST, e);
 								}
 								mapStr = DEFAULT_WHITELIST;
 							} finally {

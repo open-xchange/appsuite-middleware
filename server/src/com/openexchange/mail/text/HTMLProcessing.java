@@ -226,13 +226,20 @@ public final class HTMLProcessing {
 		return (start >= 5) && STR_IMG_SRC.equalsIgnoreCase(line.substring(start - 5, start));
 	}
 
-	private static final String HTML_META_TEMPLATE = "\r\n    <meta content=\"#CT#\" http-equiv=\"Content-Type\">";
+	private static final String RPL_CT = "#CT#";
+
+	private static final String HTML_META_TEMPLATE = "\r\n    <meta content=\"" + RPL_CT
+			+ "\" http-equiv=\"Content-Type\">";
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HTMLProcessing.class);
 
 	private static final Pattern PAT_META_CT = Pattern.compile("<meta[^>]*?http-equiv=\"?content-type\"?[^>]*?>",
 			Pattern.CASE_INSENSITIVE);
+
+	private static final String RPL_CS = "#CS#";
+
+	private static final String CT_TEXT_HTML = "text/html; charset=" + RPL_CS;
 
 	private static final String TAG_E_HEAD = "</head>";
 
@@ -248,6 +255,19 @@ public final class HTMLProcessing {
 	 * @return The HTML content conform to W3C standards
 	 */
 	public static String getConformHTML(final String htmlContentArg, final ContentType contentType) {
+		return getConformHTML(htmlContentArg, contentType.getCharsetParameter());
+	}
+
+	/**
+	 * Creates valid HTML from specified HTML content conform to W3C standards.
+	 * 
+	 * @param htmlContentArg
+	 *            The HTML content
+	 * @param charset
+	 *            The charset parameter
+	 * @return The HTML content conform to W3C standards
+	 */
+	public static String getConformHTML(final String htmlContentArg, final String charset) {
 		if ((htmlContentArg == null) || (htmlContentArg.length() == 0)) {
 			/*
 			 * Nothing to do...
@@ -258,17 +278,14 @@ public final class HTMLProcessing {
 		 * Validate with JTidy library
 		 */
 		final String htmlContent;
-		{
-			String charset = contentType.getCharsetParameter();
-			if (null == charset) {
-				if (LOG.isWarnEnabled()) {
-					LOG.warn("Missing charset in HTML content type. Using fallback \"US-ASCII\" instead.");
-				}
-				charset = "US-ASCII";
-				contentType.setCharsetParameter(charset);
+		String cs = charset;
+		if (null == cs) {
+			if (LOG.isWarnEnabled()) {
+				LOG.warn("Missing charset. Using fallback \"US-ASCII\" instead.");
 			}
-			htmlContent = validate(htmlContentArg, charset);
+			cs = "US-ASCII";
 		}
+		htmlContent = validate(htmlContentArg, cs);
 		/*
 		 * Check for meta tag in validated html content which indicates
 		 * documents content type. Add if missing.
@@ -278,7 +295,7 @@ public final class HTMLProcessing {
 			final Matcher m = PAT_META_CT.matcher(htmlContent.substring(start, htmlContent.indexOf(TAG_E_HEAD)));
 			if (!m.find()) {
 				final StringBuilder sb = new StringBuilder(htmlContent);
-				sb.insert(start, HTML_META_TEMPLATE.replaceFirst("#CT#", contentType.toString()));
+				sb.insert(start, HTML_META_TEMPLATE.replaceFirst(RPL_CT, CT_TEXT_HTML.replaceFirst(RPL_CS, cs)));
 				return sb.toString();
 			}
 		}

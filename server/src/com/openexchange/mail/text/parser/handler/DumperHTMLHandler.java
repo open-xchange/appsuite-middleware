@@ -78,6 +78,21 @@ public final class DumperHTMLHandler implements HTMLHandler {
 		html = new StringBuilder(1024);
 	}
 
+	public void handleXMLDeclaration(final String version, final Boolean standalone, final String encoding) {
+		if (null != version) {
+			sb.append(CRLF).append("XML Declaration: Version=").append(version).append(" standalone=").append(
+					standalone).append(" encoding=").append(encoding);
+			html.append("<?xml version=\"").append(version).append('"');
+			if (null != standalone) {
+				html.append(" standalone=\"").append(Boolean.TRUE.equals(standalone) ? "yes" : "no").append('"');
+			}
+			if (null != encoding) {
+				html.append(" encoding=\"").append("encoding").append('"');
+			}
+			html.append("?>");
+		}
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -86,6 +101,16 @@ public final class DumperHTMLHandler implements HTMLHandler {
 	public void handleComment(final String comment) {
 		sb.append(CRLF).append("Comment: ").append(comment);
 		html.append("<!--").append(comment).append("-->");
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleCDATA(java.lang.String)
+	 */
+	public void handleCDATA(final String text) {
+		sb.append(CRLF).append("CDATA: ").append(text);
+		html.append("<![CDATA[").append(text).append("]]>");
 	}
 
 	/*
