@@ -57,6 +57,7 @@ import com.openexchange.mail.config.MailPropertiesInit;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.text.HTMLProcessingInit;
+import com.openexchange.mail.text.parser.handler.HTMLFilterHandler;
 import com.openexchange.server.Initialization;
 
 /**
@@ -95,6 +96,7 @@ public final class MailInitialization implements Initialization {
 		MailCacheConfiguration.getInstance().start();
 		MailAccessWatcher.init();
 		HTMLProcessingInit.getInstance().start();
+		HTMLFilterHandler.loadWhitelist();
 		/*
 		 * TODO: Remove Simulate bundle availability
 		 */
@@ -113,6 +115,7 @@ public final class MailInitialization implements Initialization {
 		 * Stop global mail system
 		 */
 		MIMEType2ExtMap.reset();
+		HTMLFilterHandler.resetWhitelist();
 		HTMLProcessingInit.getInstance().stop();
 		MailAccessCache.releaseInstance();
 		MailMessageCache.releaseInstance();
