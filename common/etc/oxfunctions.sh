@@ -216,16 +216,16 @@ ox_handle_hash(){
     test -e "$propfile" || die "ox_set_property: $propfile does not exist"
     local tmp=${propfile}.tmp$$
     rm -f $tmp;
-    if [ $action == "add" ]; then
-	cat $propfile | sed "s/^$prop/# $prop/" > $tmp;
+    if [ "$action" == "add" ]; then
+	sed "s/^$prop/# $prop/" < $propfile > $tmp;
         if [ $? -gt 0 ]; then
             rm -f $tmp
             die "ox_handle_hash: FATAL: could not add hash in file $probfile to $prob"
         else
             mv $tmp $propfile
         fi
-    elif [ $action == "remove" ];then
-        cat $propfile | sed "s/^#.*$prop/$prop/" > $tmp;
+    elif [ "$action" == "remove" ];then
+        sed "s/^#.*$prop/$prop/" < $propfile > $tmp;
         if [ $? -gt 0 ]; then
             rm -f $tmp
             die "ox_handle_hash: FATAL: could not remove hash in file $probfile for $prob"
