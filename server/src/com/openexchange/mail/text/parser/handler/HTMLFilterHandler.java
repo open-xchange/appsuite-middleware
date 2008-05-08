@@ -66,7 +66,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -98,8 +97,6 @@ public final class HTMLFilterHandler implements HTMLHandler {
 	private static final String META = "meta";
 
 	private static final String HTTP_EQUIV = "http-equiv";
-
-	private static final AtomicBoolean WHITELIST = new AtomicBoolean();
 
 	private static Map<String, Map<String, Set<String>>> shtmlMap;
 
@@ -176,64 +173,62 @@ public final class HTMLFilterHandler implements HTMLHandler {
 	 * Loads the white list
 	 */
 	public static void loadWhitelist() {
-		if (!WHITELIST.get()) {
-			synchronized (WHITELIST) {
-				if (!WHITELIST.get()) {
-					String mapStr = null;
-					{
-						String whitelist = SystemConfig.getProperty(SystemConfig.Property.Whitelist);
-						if (null == whitelist) {
-							final ConfigurationService cs = ServerServiceRegistry.getInstance().getService(
-									ConfigurationService.class);
-							if (null != cs) {
-								whitelist = cs.getProperty(SystemConfig.Property.Whitelist.getPropertyName());
-							}
+		synchronized (HTMLFilterHandler.class) {
+			if (null == shtmlMap) {
+				String mapStr = null;
+				{
+					String whitelist = SystemConfig.getProperty(SystemConfig.Property.Whitelist);
+					if (null == whitelist) {
+						final ConfigurationService cs = ServerServiceRegistry.getInstance().getService(
+								ConfigurationService.class);
+						if (null != cs) {
+							whitelist = cs.getProperty(SystemConfig.Property.Whitelist.getPropertyName());
 						}
-						if (null == whitelist) {
+					}
+					if (null == whitelist) {
+						if (LOG.isWarnEnabled()) {
+							LOG.warn(WARN_USING_DEFAULT_WHITE_LIST);
+						}
+						mapStr = DEFAULT_WHITELIST;
+					} else {
+						BufferedReader reader = null;
+						try {
+							reader = new BufferedReader(new InputStreamReader(new FileInputStream(whitelist),
+									"US-ASCII"));
+							final StringBuilder sb = new StringBuilder();
+							String line = null;
+							while ((line = reader.readLine()) != null) {
+								sb.append(line).append(CRLF);
+							}
+							mapStr = sb.toString();
+						} catch (final UnsupportedEncodingException e) {
 							if (LOG.isWarnEnabled()) {
-								LOG.warn(WARN_USING_DEFAULT_WHITE_LIST);
+								LOG.warn(WARN_USING_DEFAULT_WHITE_LIST, e);
 							}
 							mapStr = DEFAULT_WHITELIST;
-						} else {
-							BufferedReader reader = null;
-							try {
-								reader = new BufferedReader(new InputStreamReader(new FileInputStream(whitelist),
-										"US-ASCII"));
-								final StringBuilder sb = new StringBuilder();
-								String line = null;
-								while ((line = reader.readLine()) != null) {
-									sb.append(line).append(CRLF);
-								}
-								mapStr = sb.toString();
-							} catch (final UnsupportedEncodingException e) {
-								if (LOG.isWarnEnabled()) {
-									LOG.warn(WARN_USING_DEFAULT_WHITE_LIST, e);
-								}
-								mapStr = DEFAULT_WHITELIST;
-							} catch (final FileNotFoundException e) {
-								if (LOG.isWarnEnabled()) {
-									LOG.warn(WARN_USING_DEFAULT_WHITE_LIST, e);
-								}
-								mapStr = DEFAULT_WHITELIST;
-							} catch (final IOException e) {
-								if (LOG.isWarnEnabled()) {
-									LOG.warn(WARN_USING_DEFAULT_WHITE_LIST, e);
-								}
-								mapStr = DEFAULT_WHITELIST;
-							} finally {
-								if (null != reader) {
-									try {
-										reader.close();
-									} catch (final IOException e) {
-										LOG.error(e.getMessage(), e);
-									}
+						} catch (final FileNotFoundException e) {
+							if (LOG.isWarnEnabled()) {
+								LOG.warn(WARN_USING_DEFAULT_WHITE_LIST, e);
+							}
+							mapStr = DEFAULT_WHITELIST;
+						} catch (final IOException e) {
+							if (LOG.isWarnEnabled()) {
+								LOG.warn(WARN_USING_DEFAULT_WHITE_LIST, e);
+							}
+							mapStr = DEFAULT_WHITELIST;
+						} finally {
+							if (null != reader) {
+								try {
+									reader.close();
+								} catch (final IOException e) {
+									LOG.error(e.getMessage(), e);
 								}
 							}
 						}
 					}
-					shtmlMap = Collections.unmodifiableMap(parseHTMLMap(mapStr));
-					sstyleMap = Collections.unmodifiableMap(parseStyleMap(mapStr));
 				}
+				shtmlMap = Collections.unmodifiableMap(parseHTMLMap(mapStr));
+				sstyleMap = Collections.unmodifiableMap(parseStyleMap(mapStr));
 			}
 		}
 	}
@@ -242,13 +237,9 @@ public final class HTMLFilterHandler implements HTMLHandler {
 	 * Resets the white list
 	 */
 	public static void resetWhitelist() {
-		if (WHITELIST.get()) {
-			synchronized (WHITELIST) {
-				if (WHITELIST.get()) {
-					shtmlMap = null;
-					sstyleMap = null;
-				}
-			}
+		synchronized (HTMLFilterHandler.class) {
+			shtmlMap = null;
+			sstyleMap = null;
 		}
 	}
 
