@@ -17,7 +17,7 @@ serviceUsageTimeout=10000
 MimeTypeFile=@oxgroupwaresysconfdir@/mime.types
 
 # Name of the class implementing the UserConfigurationStorage.
-# Currenlty known aliases: Caching, DB
+# Currently known aliases: Caching, DB
 UserConfigurationStorage=Caching
 
 # Switch for enabling caching in the groupware. Normally this should be set to
@@ -85,4 +85,9 @@ TidyMessages=@oxgroupwaresysconfdir@/TidyMessages.properties
 # Location of tidy configuration file
 TidyConfiguration=@oxgroupwaresysconfdir@/TidyConfiguration.properties
 
-SERVER_NAME=dev-prototyp
+# Location of white list for both HTML tags/attributes and CSS key-value-pairs
+Whitelist=@oxgroupwaresysconfdir@/whitelist.txt
+
+# Server name registered by registerserver in the configuration database
+# can be read with listservers
+SERVER_NAME=local
