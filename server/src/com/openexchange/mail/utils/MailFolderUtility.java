@@ -87,6 +87,9 @@ public final class MailFolderUtility {
 		} else if (MailFolder.DEFAULT_FOLDER_ID.equals(folderStringArg)) {
 			return folderStringArg;
 		} else if (folderStringArg.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+			/*
+			 * Cut off prefix "default" plus separator character
+			 */
 			return folderStringArg.substring(8);
 		}
 		return folderStringArg;
