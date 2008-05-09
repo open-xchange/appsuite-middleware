@@ -49,6 +49,8 @@
 
 package com.openexchange.session;
 
+import java.io.Serializable;
+
 import com.openexchange.groupware.upload.ManagedUploadFile;
 
 /**
@@ -57,12 +59,12 @@ import com.openexchange.groupware.upload.ManagedUploadFile;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public interface Session {
-	
+public interface Session extends Serializable {
+
 	/**
 	 * @return the context identifier.
 	 */
-    int getContextId();
+	int getContextId();
 
 	/**
 	 * Gets the local IP address
@@ -94,7 +96,7 @@ public interface Session {
 	 * @return The password
 	 */
 	public String getPassword();
-	
+
 	/**
 	 * Gets the random token
 	 * 
@@ -172,6 +174,10 @@ public interface Session {
 	/**
 	 * Sets the parameter. Any existing parameters bound to specified name are
 	 * replaced with given value.
+	 * <p>
+	 * <code>Note</code>: To ensure set parameter will reside in session on
+	 * remote distribution the {@link Serializable} interface should be
+	 * implemented for specified value.
 	 * 
 	 * @param name
 	 *            The parameter name
@@ -190,6 +196,6 @@ public interface Session {
 	 *         successfully touched; otherwise <code>false</code>
 	 */
 	public boolean touchUploadedFile(String id);
-	
+
 	public void removeRandomToken();
 }
