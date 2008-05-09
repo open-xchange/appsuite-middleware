@@ -78,7 +78,7 @@ public class SessiondException extends AbstractOXException {
     public SessiondException(final Code code) {
         super(EnumComponent.SESSION, code.getCategory(), code.getDetailNumber(), code.getMessage(), null);
     }
-    
+
     /**
      * Constructor with all parameters.
      * @param code code
@@ -88,7 +88,7 @@ public class SessiondException extends AbstractOXException {
     public SessiondException(Category category, String message, int detailNumber, Throwable cause) {
         super(EnumComponent.SESSION, category, detailNumber, message, cause);
     }
-    
+
     /**
      * Constructor with all parameters.
      * @param code code
@@ -96,13 +96,13 @@ public class SessiondException extends AbstractOXException {
      * @param msgArgs arguments for the exception message.
      */
     public SessiondException(final Code code, final Throwable cause,
-        final Object[] msgArgs) {
+        final Object... msgArgs) {
         super(EnumComponent.SESSION, code.getCategory(), code.getDetailNumber(), code.getMessage(), cause);
         setMessageArgs(msgArgs);
     }
-    
+
 	public SessiondException(EnumComponent component, Category category,
-			int number, String message, Throwable cause, Object[] msgArgs) {
+			int number, String message, Throwable cause, Object... msgArgs) {
         super(component, category, number, message, cause);
         setMessageArgs(msgArgs);
 	}
@@ -114,7 +114,8 @@ public class SessiondException extends AbstractOXException {
             "Max Session size reached", 2,
             AbstractOXException.Category.CODE_ERROR),
     	SESSIOND_CONFIG_EXCEPTION("Sessiond Config Exception", 3,
-    	            AbstractOXException.Category.CODE_ERROR);
+    	            AbstractOXException.Category.CODE_ERROR),
+    	MISSING_PROPERTY("Missing property '%s'", 4, AbstractOXException.Category.SETUP_ERROR);
 
 		/**
 		 * Message of the exception.
