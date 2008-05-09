@@ -94,14 +94,14 @@ public final class JCSCacheService implements CacheService {
 	 */
 	public void freeCache(final String name) {
 		JCSCacheServiceInit.getInstance().freeCache(name);
-		try {
+		/*try {
 			final Cache c = getCache(name);
 			if (null != c) {
 				c.dispose();
 			}
 		} catch (final CacheException e) {
 			LOG.error(e.getMessage(), e);
-		}
+		}*/
 	}
 
 	/*
