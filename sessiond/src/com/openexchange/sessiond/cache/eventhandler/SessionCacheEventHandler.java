@@ -49,6 +49,8 @@
 
 package com.openexchange.sessiond.cache.eventhandler;
 
+import java.io.Serializable;
+
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.ElementEvent;
 import com.openexchange.caching.ElementEventHandler;
@@ -59,7 +61,9 @@ import com.openexchange.caching.ElementEventHandler;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class SessionCacheEventHandler implements ElementEventHandler {
+public final class SessionCacheEventHandler implements ElementEventHandler, Serializable {
+
+	private static final long serialVersionUID = -2665608481772455883L;
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SessionCacheEventHandler.class);
