@@ -139,7 +139,7 @@ public final class FolderQueryCacheManager {
 
 	/**
 	 * Releases the singleton instance of {@link FolderQueryCacheManager} and
-	 * frees its cache resources through {@link Configuration#freeCache(String)}
+	 * frees its cache resources
 	 * 
 	 * @throws OXException
 	 *             If cache cannot be freed
