@@ -88,7 +88,10 @@ public final class HTML2Text {
 	 * 
 	 * @param appendHref
 	 *            <code>true</code> to append <i>href</i> and <i>src</i>
-	 *            attributes' content in brackets; otherwise <code>false</code>
+	 *            attributes' content in brackets; otherwise <code>false</code>.<br>
+	 *            Example:
+	 *            <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code>
+	 *            would be <code>Link&nbsp;[www.somewhere.com]</code>
 	 */
 	public HTML2Text(final boolean appendHref) {
 		this(DEFAULT_CAPACITY, appendHref);
@@ -101,7 +104,10 @@ public final class HTML2Text {
 	 *            The initial capacity.
 	 * @param appendHref
 	 *            <code>true</code> to append <i>href</i> and <i>src</i>
-	 *            attributes' content in brackets; otherwise <code>false</code>
+	 *            attributes' content in brackets; otherwise <code>false</code>.<br>
+	 *            Example:
+	 *            <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code>
+	 *            would be <code>Link&nbsp;[www.somewhere.com]</code>
 	 */
 	public HTML2Text(final int capacity, final boolean appendHref) {
 		super();

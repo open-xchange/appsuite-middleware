@@ -142,7 +142,10 @@ public final class HTML2TextHandler implements HTMLHandler {
 	 *            The initial capacity
 	 * @param appendHref
 	 *            <code>true</code> to append URLs contained in <i>href</i>s
-	 *            and <i>src</i>s; otherwise <code>false</code>
+	 *            and <i>src</i>s; otherwise <code>false</code>.<br>
+	 *            Example:
+	 *            <code>&lt;a&nbsp;href=\"www.somewhere.com\"&gt;Link&lt;a&gt;</code>
+	 *            would be <code>Link&nbsp;[www.somewhere.com]</code>
 	 */
 	public HTML2TextHandler(final int capacity, final boolean appendHref) {
 		super();
