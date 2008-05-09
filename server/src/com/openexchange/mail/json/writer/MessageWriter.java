@@ -81,7 +81,6 @@ import com.openexchange.mail.parser.handlers.JSONMessageHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
-import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
 
 /**
