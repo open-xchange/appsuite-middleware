@@ -238,7 +238,7 @@ public abstract class DeferredActivator implements BundleActivator {
 			 */
 			try {
 				startBundle();
-			} catch (final Throwable t) {
+			} catch (final Exception t) {
 				LOG.error(t.getMessage(), t);
 			}
 		}
@@ -265,9 +265,9 @@ public abstract class DeferredActivator implements BundleActivator {
 		try {
 			this.context = context;
 			init();
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
+		} catch (final Exception e) {
+			LOG.error(e.getMessage(), e);
+			throw e;
 		}
 	}
 
@@ -300,9 +300,9 @@ public abstract class DeferredActivator implements BundleActivator {
 	public final void stop(final BundleContext context) throws Exception {
 		try {
 			stopBundle();
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
+		} catch (final Exception e) {
+			LOG.error(e.getMessage(), e);
+			throw e;
 		} finally {
 			reset();
 		}
