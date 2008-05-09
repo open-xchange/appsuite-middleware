@@ -174,7 +174,7 @@ public final class MailAccessCache {
 	}
 
 	/**
-	 * Removes and returns a mail connection from cache
+	 * Removes and returns a mail access from cache
 	 * 
 	 * @param session
 	 *            The session
@@ -292,11 +292,11 @@ public final class MailAccessCache {
 	}
 
 	/**
-	 * Checks if cache already holds a user-bound mail connection
+	 * Checks if cache already holds a user-bound mail access
 	 * 
 	 * @param session
 	 *            The session
-	 * @return <code>true</code> if a user-bound mail connection is already
+	 * @return <code>true</code> if a user-bound mail access is already
 	 *         present in cache; otherwise <code>false</code>
 	 * @throws CacheException
 	 *             If context loading fails
