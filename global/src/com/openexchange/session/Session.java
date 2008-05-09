@@ -59,7 +59,7 @@ import com.openexchange.groupware.upload.ManagedUploadFile;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public interface Session extends Serializable {
+public interface Session {
 
 	/**
 	 * @return the context identifier.
