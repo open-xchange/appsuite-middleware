@@ -138,11 +138,10 @@ public final class IMAPActivator extends DeferredActivator {
 			}
 			imapServiceRegistration = context.registerService(MailProvider.class.getName(), IMAPProvider.getInstance(),
 					dictionary);
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
+		} catch (final Exception e) {
+			LOG.error(e.getMessage(), e);
+			throw e;
 		}
-
 	}
 
 	@Override
@@ -156,9 +155,9 @@ public final class IMAPActivator extends DeferredActivator {
 			 * Clear service registry
 			 */
 			getServiceRegistry().clearRegistry();
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
+		} catch (final Exception e) {
+			LOG.error(e.getMessage(), e);
+			throw e;
 		} finally {
 			started.set(false);
 		}
