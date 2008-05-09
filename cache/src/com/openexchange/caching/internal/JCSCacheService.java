@@ -66,6 +66,9 @@ import com.openexchange.caching.CacheService;
  */
 public final class JCSCacheService implements CacheService {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(JCSCacheService.class);
+
 	private static final JCSCacheService SINGLETON = new JCSCacheService();
 
 	/**
@@ -91,6 +94,14 @@ public final class JCSCacheService implements CacheService {
 	 */
 	public void freeCache(final String name) {
 		JCSCacheServiceInit.getInstance().freeCache(name);
+		try {
+			final Cache c = getCache(name);
+			if (null != c) {
+				c.dispose();
+			}
+		} catch (final CacheException e) {
+			LOG.error(e.getMessage(), e);
+		}
 	}
 
 	/*
