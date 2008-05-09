@@ -96,13 +96,13 @@ public final class SessionCache {
 	private SessionCache() throws CacheException {
 		super();
 		cache = getServiceRegistry().getService(CacheService.class).getCache(REGION_NAME);
-		/*
-		 * Add element event handler to default element attributes
-		 */
-		final ElementEventHandler eventHandler = new SessionCacheEventHandler();
-		final ElementAttributes attributes = cache.getDefaultElementAttributes();
-		attributes.addElementEventHandler(eventHandler);
-		cache.setDefaultElementAttributes(attributes);
+//		/*
+//		 * Add element event handler to default element attributes
+//		 */
+//		final ElementEventHandler eventHandler = new SessionCacheEventHandler();
+//		final ElementAttributes attributes = cache.getDefaultElementAttributes();
+//		attributes.addElementEventHandler(eventHandler);
+//		cache.setDefaultElementAttributes(attributes);
 	}
 
 	/**
