@@ -31,6 +31,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondConnectorImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
+import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
@@ -223,7 +224,8 @@ public final class Init {
 		// ConfigurationService.getInstance().setService((Configuration)services.get(Configuration.class));
 		// SessiondService.getInstance().setService(new
 		// SessiondConnectorImpl());
-		SessiondInit.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
+		SessiondServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, services.get(ConfigurationService.class));
+		//SessiondInit.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
 		ServerServiceRegistry.getInstance().addService(SessiondService.class, new SessiondConnectorImpl());
 	}
 
