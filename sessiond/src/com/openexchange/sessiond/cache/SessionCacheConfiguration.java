@@ -47,89 +47,104 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.cache;
 
 import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
-import com.openexchange.sessiond.cache.SessionCache;
-import com.openexchange.sessiond.cache.SessionCacheConfiguration;
 import com.openexchange.sessiond.exception.SessiondException;
 
 /**
- * {@link SessiondInit} - Initializes sessiond service
+ * {@link SessionCacheConfiguration} - Configures the session cache
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public class SessiondInit implements Initialization {
+public final class SessionCacheConfiguration implements Initialization {
 
-	private static final Log LOG = LogFactory.getLog(SessiondInit.class);
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(SessionCacheConfiguration.class);
 
-	private SessiondConfigImpl config;
+	private static final SessionCacheConfiguration instance = new SessionCacheConfiguration();
 
-	private final AtomicBoolean started = new AtomicBoolean();
+	/**
+	 * No instantiation
+	 */
+	private SessionCacheConfiguration() {
+		super();
+	}
 
-	private static final SessiondInit singleton = new SessiondInit();
-
-	public static SessiondInit getInstance() {
-		return singleton;
+	/**
+	 * Gets the singleton instance of {@link SessionCacheConfiguration}
+	 * 
+	 * @return The singleton instance of {@link SessionCacheConfiguration}
+	 */
+	public static SessionCacheConfiguration getInstance() {
+		return instance;
 	}
 
 	public void start() throws AbstractOXException {
-		if (started.get()) {
-			LOG.error(SessiondInit.class.getName() + " started");
+		final ConfigurationService configurationService = getServiceRegistry().getService(ConfigurationService.class);
+		if (null == configurationService) {
+			throw new SessiondException(SessiondException.Code.SESSIOND_CONFIG_EXCEPTION);
+		}
+		final String cacheConfigFile = configurationService.getProperty("com.openexchange.sessiond.sessionCacheConfig");
+		if (cacheConfigFile == null) {
+			/*
+			 * Not found
+			 */
+			final SessiondException exc = new SessiondException(SessiondException.Code.MISSING_PROPERTY, null,
+					"com.openexchange.sessiond.sessionCacheConfig");
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(new StringBuilder(128).append("Cannot setup lateral session cache: ").append(exc.getMessage())
+						.toString(), exc);
+			}
 			return;
 		}
 		if (LOG.isInfoEnabled()) {
-			LOG.info("Parse Sessiond properties");
+			LOG.info(new StringBuilder("Sessiond property: com.openexchange.sessiond.sessionCacheConfig=").append(
+					cacheConfigFile).toString());
 		}
-
-		final ConfigurationService conf = getServiceRegistry().getService(ConfigurationService.class);
-		if (conf != null) {
-			config = new SessiondConfigImpl(conf);
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Starting Sessiond");
+		final CacheService cacheService = getServiceRegistry().getService(CacheService.class);
+		if (null != cacheService) {
+			try {
+				cacheService.loadConfiguration(cacheConfigFile.trim());
+			} catch (final CacheException e) {
+				throw new SessiondException(e);
 			}
+		}
+	}
 
-			if (config != null) {
-				final Sessiond sessiond = Sessiond.getInstance(config);
-				sessiond.start();
-				started.set(true);
-			} else {
-				throw new SessiondException(SessiondException.Code.SESSIOND_CONFIG_EXCEPTION);
+	/**
+	 * Delegates to {@link CacheService#freeCache(String)}
+	 * 
+	 * @param cacheName
+	 *            The name of the cache region that ought to be freed
+	 */
+	public void freeCache(final String cacheName) {
+		final CacheService cacheService = getServiceRegistry().getService(CacheService.class);
+		if (null != cacheService) {
+			try {
+				cacheService.freeCache(cacheName);
+			} catch (final CacheException e) {
+				LOG.error(e.getLocalizedMessage(), e);
 			}
-
-			SessionCacheConfiguration.getInstance().start();
 		}
 	}
 
 	public void stop() throws AbstractOXException {
-		if (!started.get()) {
-			LOG.error(SessiondInit.class.getName() + " has not been started");
-			return;
+		final CacheService cacheService = getServiceRegistry().getService(CacheService.class);
+		if (null != cacheService) {
+			try {
+				cacheService.freeCache(SessionCache.LATERAL_REGION_NAME);
+				cacheService.freeCache(SessionCache.REGION_NAME);
+			} catch (final CacheException e) {
+				LOG.error(e.getLocalizedMessage(), e);
+			}
 		}
-		SessionCacheConfiguration.getInstance().stop();
-		SessionCache.releaseInstance();
-		Sessiond s = Sessiond.getInstance(config);
-		s.close();
-		started.set(false);
-	}
-
-	/**
-	 * Checks if {@link SessiondInit} is started
-	 * 
-	 * @return <code>true</code> if {@link SessiondInit} is started; otherwise
-	 *         <code>false</code>
-	 */
-	public boolean isStarted() {
-		return started.get();
 	}
 }

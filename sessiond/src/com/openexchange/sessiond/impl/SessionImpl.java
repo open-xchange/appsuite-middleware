@@ -49,6 +49,8 @@
 
 package com.openexchange.sessiond.impl;
 
+import java.io.Serializable;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -57,39 +59,62 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.ManagedUploadFile;
+import com.openexchange.session.CachedSession;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.cache.SessionCache;
 
 /**
- * SessionImpl
+ * {@link SessionImpl} - Implements interface {@link Session}
  * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SessionImpl implements Session {
+public final class SessionImpl implements Session {
 
-	protected String loginName;
+	private static final transient Log LOG = LogFactory.getLog(SessionImpl.class);
 
-	protected String password;
+	private final String loginName;
 
-	protected int contextId;
+	private final String password;
 
-	protected int userId;
+	private final int contextId;
 
-	protected String sessionId;
+	private final int userId;
 
-	protected String secret;
+	private final String sessionId;
 
-	protected String randomToken;
+	private final String secret;
 
-	protected String localIp;
+	private String randomToken;
 
-	private static final Log LOG = LogFactory.getLog(SessionImpl.class);
+	private final String localIp;
 
-	private final transient Map<String, ManagedUploadFile> ajaxUploadFiles;
+	private final ConcurrentHashMap<String, ManagedUploadFile> managedUploadFiles;
 
-	private final Map<String, Object> parameters;
+	private final ConcurrentHashMap<String, Object> parameters;
 
-	public SessionImpl(int userId, String loginName, String password, Context context, String sessionId, String secret,
-			String randomToken, String localIp) {
+	/**
+	 * Initializes a new {@link SessionImpl}
+	 * 
+	 * @param userId
+	 *            The user ID
+	 * @param loginName
+	 *            The login name
+	 * @param password
+	 *            The password
+	 * @param contextId
+	 *            The context ID
+	 * @param sessionId
+	 *            The session ID
+	 * @param secret
+	 *            The secret (cookie identifier)
+	 * @param randomToken
+	 *            The random token
+	 * @param localIp
+	 *            The local IP
+	 */
+	public SessionImpl(final int userId, final String loginName, final String password, final int contextId,
+			final String sessionId, final String secret, final String randomToken, final String localIp) {
 		this.userId = userId;
 		this.loginName = loginName;
 		this.password = password;
@@ -97,18 +122,52 @@ public class SessionImpl implements Session {
 		this.secret = secret;
 		this.randomToken = randomToken;
 		this.localIp = localIp;
-
-		contextId = context.getContextId();
-
+		this.contextId = contextId;
 		parameters = new ConcurrentHashMap<String, Object>();
-		ajaxUploadFiles = new ConcurrentHashMap<String, ManagedUploadFile>();
+		managedUploadFiles = new ConcurrentHashMap<String, ManagedUploadFile>();
+	}
+
+	/**
+	 * Initializes a new {@link SessionImpl} from specified cached session.
+	 * 
+	 * @param cachedSession
+	 *            The cached session
+	 */
+	public SessionImpl(final CachedSession cachedSession) {
+		super();
+		this.userId = cachedSession.getUserId();
+		this.contextId = cachedSession.getContextId();
+		this.loginName = cachedSession.getLoginName();
+		this.password = cachedSession.getPassword();
+		this.sessionId = cachedSession.getSessionId();
+		this.secret = cachedSession.getSecret();
+		this.randomToken = cachedSession.getRandomToken();
+		this.localIp = cachedSession.getLocalIp();
+		final Map<String, Serializable> params = cachedSession.getParameters();
+		parameters = new ConcurrentHashMap<String, Object>(params.size());
+		for (final Iterator<Map.Entry<String, Serializable>> iter = params.entrySet().iterator(); iter.hasNext();) {
+			final Map.Entry<String, Serializable> entry = iter.next();
+			parameters.put(entry.getKey(), entry.getValue());
+		}
+		managedUploadFiles = new ConcurrentHashMap<String, ManagedUploadFile>();
+	}
+
+	/**
+	 * Creates a new instance of {@link CachedSession} holding this session's
+	 * state and informations ready for being put into {@link SessionCache}.
+	 * 
+	 * @return An appropriate instance of {@link CachedSession}
+	 */
+	public CachedSession createCachedSession() {
+		return new CachedSession(userId, loginName, password, contextId, sessionId, secret, randomToken, localIp,
+				parameters);
 	}
 
 	public int getContextId() {
 		return contextId;
 	}
 
-	public Object getParameter(String name) {
+	public Object getParameter(final String name) {
 		return parameters.get(name);
 	}
 
@@ -124,8 +183,8 @@ public class SessionImpl implements Session {
 		return sessionId;
 	}
 
-	public ManagedUploadFile getUploadedFile(String id) {
-		final ManagedUploadFile uploadFile = ajaxUploadFiles.get(id);
+	public ManagedUploadFile getUploadedFile(final String id) {
+		final ManagedUploadFile uploadFile = managedUploadFiles.get(id);
 		if (null != uploadFile) {
 			uploadFile.touch();
 		}
@@ -136,17 +195,17 @@ public class SessionImpl implements Session {
 		return userId;
 	}
 
-	public void putUploadedFile(String id, ManagedUploadFile uploadFile) {
-		ajaxUploadFiles.put(id, uploadFile);
-		uploadFile.startTimerTask(id, ajaxUploadFiles);
+	public void putUploadedFile(final String id, final ManagedUploadFile uploadFile) {
+		managedUploadFiles.put(id, uploadFile);
+		uploadFile.startTimerTask(id, managedUploadFiles);
 		if (LOG.isInfoEnabled()) {
 			LOG.info(new StringBuilder(256).append("Upload file \"").append(uploadFile).append("\" with ID=")
 					.append(id).append(" added to session and timer task started").toString());
 		}
 	}
 
-	public ManagedUploadFile removeUploadedFile(String id) {
-		final ManagedUploadFile uploadFile = ajaxUploadFiles.remove(id);
+	public ManagedUploadFile removeUploadedFile(final String id) {
+		final ManagedUploadFile uploadFile = managedUploadFiles.remove(id);
 		if (null != uploadFile) {
 			/*
 			 * Cancel timer task
@@ -164,15 +223,15 @@ public class SessionImpl implements Session {
 		return uploadFile;
 	}
 
-	public void removeUploadedFileOnly(String id) {
+	public void removeUploadedFileOnly(final String id) {
 	}
 
-	public void setParameter(String name, Object value) {
+	public void setParameter(final String name, final Object value) {
 		parameters.put(name, value);
 	}
 
-	public boolean touchUploadedFile(String id) {
-		final ManagedUploadFile uploadFile = ajaxUploadFiles.get(id);
+	public boolean touchUploadedFile(final String id) {
+		final ManagedUploadFile uploadFile = managedUploadFiles.get(id);
 		if (null != uploadFile) {
 			uploadFile.touch();
 			return true;
@@ -203,4 +262,5 @@ public class SessionImpl implements Session {
 	public String getPassword() {
 		return password;
 	}
+
 }

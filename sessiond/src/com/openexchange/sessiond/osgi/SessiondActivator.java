@@ -49,130 +49,154 @@
 
 package com.openexchange.sessiond.osgi;
 
-import java.util.ArrayList;
+import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
+
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 
+import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.ConfigurationServiceHolder;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.ServiceHolderListener;
-import com.openexchange.server.osgiservice.BundleServiceTracker;
+import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.cache.SessionCache;
+import com.openexchange.sessiond.impl.SessionControlObject;
+import com.openexchange.sessiond.impl.SessionHandler;
+import com.openexchange.sessiond.impl.SessionImpl;
 import com.openexchange.sessiond.impl.SessiondConnectorImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 
 /**
- * OSGi bundle activator for the sesssiond.
+ * {@link SessiondActivator} - Activator for sessiond bundle
  * 
- * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SessiondActivator implements BundleActivator {
+public final class SessiondActivator extends DeferredActivator {
 
-	private static transient final Log LOG = LogFactory.getLog(SessiondActivator.class);
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(SessiondActivator.class);
 
-	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
+	private final AtomicBoolean started;
 
-	private SessiondService sessiondConInterface;
+	private ServiceRegistration sessiondServiceRegistration;
 
-	private ServiceRegistration serviceRegister = null;
-
-	private ConfigurationServiceHolder csh;
-
-	private ServiceHolderListener<ConfigurationService> listener;
+	private boolean reconfigureCache;
 
 	/**
-	 * {@inheritDoc}
+	 * Initializes a new {@link SessiondActivator}
 	 */
-	public void start(final BundleContext context) throws Exception {
-		LOG.info("starting bundle: com.openexchange.sessiond");
-		
-		SessiondInit sessiondInit = null;
+	public SessiondActivator() {
+		super();
+		started = new AtomicBoolean();
+	}
 
+	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, CacheService.class };
+
+	@Override
+	protected Class<?>[] getNeededServices() {
+		return NEEDED_SERVICES;
+	}
+
+	@Override
+	protected void handleUnavailability(final Class<?> clazz) {
+		/*
+		 * Don't stop the sessiond
+		 */
+		if (LOG.isWarnEnabled()) {
+			LOG.warn("Absent service: " + clazz.getName());
+		}
+		if (CacheService.class.equals(clazz)) {
+			// TODO: free affected cache regions
+
+			reconfigureCache = true;
+		}
+		getServiceRegistry().removeService(clazz);
+	}
+
+	@Override
+	protected void startBundle() throws Exception {
 		try {
-			csh = ConfigurationServiceHolder.newInstance();
-			SessiondInit.getInstance().setConfigurationServiceHolder(csh);
 			/*
-			 * Init service trackers
+			 * (Re-)Initialize service registry with available services
 			 */
-			serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(),
-					new BundleServiceTracker<ConfigurationService>(context, csh, ConfigurationService.class)));
-			/*
-			 * Open service trackers
-			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
-				tracker.open();
-			}
-			/*
-			 * Start sessiond when configuration service is available
-			 */
-			listener = new ServiceHolderListener<ConfigurationService>() {
-
-				public void onServiceAvailable(final ConfigurationService service) throws AbstractOXException {
-					try {
-						if (!SessiondInit.getInstance().isStarted()) {
-							SessiondInit.getInstance().start();
-						}
-					} catch (final AbstractOXException e) {
-						LOG.error(e.getLocalizedMessage(), e);
-						SessiondInit.getInstance().stop();
+			{
+				final ServiceRegistry registry = getServiceRegistry();
+				registry.clearRegistry();
+				final Class<?>[] classes = getNeededServices();
+				for (int i = 0; i < classes.length; i++) {
+					final Object service = getService(classes[i]);
+					if (null != service) {
+						registry.addService(classes[i], service);
 					}
 				}
-
-				public void onServiceRelease() {
-
+			}
+			if (!started.compareAndSet(false, true)) {
+				/*
+				 * Don't start the bundle again. A duplicate call to
+				 * startBundle() is probably caused by temporary absent
+				 * service(s) whose re-availability causes to trigger this
+				 * method again.
+				 */
+				LOG.info("A temporary absent service is available again");
+				if (reconfigureCache) {
+					// TODO: re-configure affected cache regions
+					reconfigureCache = false;
 				}
-			};
-			csh.addServiceHolderListener(listener);
-
-			// sessiondInit = SessiondInit.getInstance();
-			// sessiondInit.start();
-			sessiondConInterface = new SessiondConnectorImpl();
-			serviceRegister = context.registerService(SessiondService.class.getName(), sessiondConInterface,
-					null);
-		} catch (final Throwable e) {
+				return;
+			}
+			if (LOG.isInfoEnabled()) {
+				LOG.info("starting bundle: com.openexchange.sessiond");
+			}
+			SessiondInit.getInstance().start();
+			sessiondServiceRegistration = context.registerService(SessiondService.class.getName(),
+					new SessiondConnectorImpl(), null);
+		} catch (final Exception e) {
 			LOG.error("SessiondActivator: start: ", e);
 			// Try to stop what already has been started.
-			if (null != sessiondInit) {
-				sessiondInit.stop();
-			}
-			throw e instanceof Exception ? (Exception) e : new Exception(e);
+			SessiondInit.getInstance().stop();
+			throw e;
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public void stop(final BundleContext context) throws Exception {
-		LOG.info("stopping bundle: com.openexchange.sessiond");
-
+	@Override
+	protected void stopBundle() throws Exception {
+		if (LOG.isInfoEnabled()) {
+			LOG.info("stopping bundle: com.openexchange.sessiond");
+		}
 		try {
-			csh.removeServiceHolderListenerByName(listener.getClass().getName());
-			csh = null;
-			
-			if (SessiondInit.getInstance().isStarted()) {
-				SessiondInit.getInstance().stop();
+			if (null != sessiondServiceRegistration) {
+				sessiondServiceRegistration.unregister();
+				sessiondServiceRegistration = null;
 			}
-			
-			serviceRegister.unregister();
-			sessiondConInterface = null;
-			serviceRegister = null;
 			/*
-			 * Close service trackers
+			 * Put remaining sessions into cache for remote distribution
 			 */
-			for (ServiceTracker tracker : serviceTrackerList) {
-				tracker.close();
+			final List<SessionControlObject> sessions = SessionHandler.getSessions();
+			for (final SessionControlObject sessionControlObject : sessions) {
+				if (null != sessionControlObject) {
+					SessionCache.getInstance().putCachedSession(
+							((SessionImpl) (sessionControlObject.getSession())).createCachedSession());
+				}
 			}
-			serviceTrackerList.clear();
-		} catch (final Throwable e) {
-			LOG.error("SessiondActivator: start: ", e);
-			throw e instanceof Exception ? (Exception) e : new Exception(e);
+			if (LOG.isInfoEnabled()) {
+				LOG.info("stopping bundle: "
+						+ "Remaining active sessions were put into session cache for remote distribution");
+			}
+			/*
+			 * Stop sessiond
+			 */
+			SessiondInit.getInstance().stop();
+			/*
+			 * Clear service registry
+			 */
+			getServiceRegistry().clearRegistry();
+		} catch (final Exception e) {
+			LOG.error("SessiondActivator: stop: ", e);
+			throw e;
+		} finally {
+			started.set(false);
 		}
 	}
 

@@ -47,89 +47,35 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.services;
 
-import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.server.Initialization;
-import com.openexchange.sessiond.cache.SessionCache;
-import com.openexchange.sessiond.cache.SessionCacheConfiguration;
-import com.openexchange.sessiond.exception.SessiondException;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * {@link SessiondInit} - Initializes sessiond service
+ * {@link SessiondServiceRegistry} - The {@link ServiceRegistry} for sessiond
+ * bundle
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-public class SessiondInit implements Initialization {
+public final class SessiondServiceRegistry {
 
-	private static final Log LOG = LogFactory.getLog(SessiondInit.class);
+	private static final ServiceRegistry REGISTRY = new ServiceRegistry();
 
-	private SessiondConfigImpl config;
-
-	private final AtomicBoolean started = new AtomicBoolean();
-
-	private static final SessiondInit singleton = new SessiondInit();
-
-	public static SessiondInit getInstance() {
-		return singleton;
-	}
-
-	public void start() throws AbstractOXException {
-		if (started.get()) {
-			LOG.error(SessiondInit.class.getName() + " started");
-			return;
-		}
-		if (LOG.isInfoEnabled()) {
-			LOG.info("Parse Sessiond properties");
-		}
-
-		final ConfigurationService conf = getServiceRegistry().getService(ConfigurationService.class);
-		if (conf != null) {
-			config = new SessiondConfigImpl(conf);
-			if (LOG.isInfoEnabled()) {
-				LOG.info("Starting Sessiond");
-			}
-
-			if (config != null) {
-				final Sessiond sessiond = Sessiond.getInstance(config);
-				sessiond.start();
-				started.set(true);
-			} else {
-				throw new SessiondException(SessiondException.Code.SESSIOND_CONFIG_EXCEPTION);
-			}
-
-			SessionCacheConfiguration.getInstance().start();
-		}
-	}
-
-	public void stop() throws AbstractOXException {
-		if (!started.get()) {
-			LOG.error(SessiondInit.class.getName() + " has not been started");
-			return;
-		}
-		SessionCacheConfiguration.getInstance().stop();
-		SessionCache.releaseInstance();
-		Sessiond s = Sessiond.getInstance(config);
-		s.close();
-		started.set(false);
+	/**
+	 * Gets the service registry
+	 * 
+	 * @return The service registry
+	 */
+	public static ServiceRegistry getServiceRegistry() {
+		return REGISTRY;
 	}
 
 	/**
-	 * Checks if {@link SessiondInit} is started
-	 * 
-	 * @return <code>true</code> if {@link SessiondInit} is started; otherwise
-	 *         <code>false</code>
+	 * Initializes a new {@link SessiondServiceRegistry}
 	 */
-	public boolean isStarted() {
-		return started.get();
+	private SessiondServiceRegistry() {
+		super();
 	}
+
 }

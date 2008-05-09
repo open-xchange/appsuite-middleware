@@ -49,10 +49,12 @@
 
 package com.openexchange.sessiond.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -60,9 +62,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.caching.CacheException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServerTimer;
+import com.openexchange.session.CachedSession;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.sessiond.exception.SessiondException.Code;
 
@@ -90,7 +95,7 @@ public class SessionHandler {
 	private static boolean isInit = false;
 
 	private static final Log LOG = LogFactory.getLog(SessionHandler.class);
-	
+
 	private static AtomicInteger numberOfActiveSessions = new AtomicInteger();
 
 	public SessionHandler() {
@@ -103,10 +108,10 @@ public class SessionHandler {
 		if (!isInit) {
 			try {
 				sessionIdGenerator = SessionIdGenerator.getInstance();
-			} catch (SessiondException exc) {
+			} catch (final SessiondException exc) {
 				LOG.error("create instance of SessionIdGenerator", exc);
 			}
-			
+
 			numberOfSessionContainers = config.getNumberOfSessionContainers();
 
 			for (int a = 0; a < numberOfSessionContainers; a++) {
@@ -118,8 +123,7 @@ public class SessionHandler {
 
 		final SessiondTimer sessiondTimer = new SessiondTimer();
 		final Timer t = ServerTimer.getTimer();
-		t.schedule(sessiondTimer, config.getSessionContainerTimeout(), config
-				.getSessionContainerTimeout());
+		t.schedule(sessiondTimer, config.getSessionContainerTimeout(), config.getSessionContainerTimeout());
 	}
 
 	private static void prependContainer() {
@@ -134,20 +138,33 @@ public class SessionHandler {
 		randomList.removeLast();
 	}
 
-	protected static String addSession(final int userId, String loginName, String password,
+	protected static String addSession(final int userId, final String loginName, final String password,
 			final Context context, final String clientHost) throws SessiondException {
 		final String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
-		final String secret = sessionIdGenerator.createSecretId(loginName, String.valueOf(System
-				.currentTimeMillis()));
+		final String secret = sessionIdGenerator.createSecretId(loginName, String.valueOf(System.currentTimeMillis()));
 		final String randomToken = sessionIdGenerator.createRandomId();
 
-		final Session session = new SessionImpl(userId, loginName, password, context, sessionId,
-				secret, randomToken, clientHost);
+		final Session session = new SessionImpl(userId, loginName, password, context.getContextId(), sessionId, secret,
+				randomToken, clientHost);
 
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("addSession <" + sessionId + '>');
 		}
 
+		addSessionInternal(session);
+
+		return sessionId;
+	}
+
+	private static void addCachedSession(final CachedSession cachedSession) throws SessiondException {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("addCachedSession <" + cachedSession.getSessionId() + '>');
+		}
+		addSessionInternal(new SessionImpl(cachedSession));
+	}
+
+	private static SessionControlObject addSessionInternal(final Session session) throws SessiondException {
+		final String sessionId = session.getSessionID();
 		Map<String, SessionControlObject> sessions = null;
 		Map<String, String> userMap = null;
 		Map<String, String> randomMap = null;
@@ -162,18 +179,16 @@ public class SessionHandler {
 			}
 		}
 
-		final SessionControlObject sessionControlObject = new SessionControlObject(session, config
-				.getLifeTime());
+		final SessionControlObject sessionControlObject = new SessionControlObject(session, config.getLifeTime());
 		if (sessions.containsKey(sessionId) && LOG.isDebugEnabled()) {
 			LOG.debug("session REBORN sessionid=" + sessionId);
 		}
 
 		sessions.put(sessionId, sessionControlObject);
-		randomMap.put(randomToken, sessionId);
-		userMap.put(loginName, sessionId);
+		randomMap.put(session.getRandomToken(), sessionId);
+		userMap.put(session.getLoginName(), sessionId);
 		numberOfActiveSessions.incrementAndGet();
-
-		return sessionId;
+		return sessionControlObject;
 	}
 
 	protected static boolean refreshSession(final String sessionid) {
@@ -252,8 +267,7 @@ public class SessionHandler {
 
 				final long now = System.currentTimeMillis();
 
-				if (sessionControlObject.getCreationTime().getTime()
-						+ config.getRandomTokenTimeout() >= now) {
+				if (sessionControlObject.getCreationTime().getTime() + config.getRandomTokenTimeout() >= now) {
 					final Session session = sessionControlObject.getSession();
 					session.removeRandomToken();
 					random.remove(randomToken);
@@ -265,17 +279,19 @@ public class SessionHandler {
 	}
 
 	protected static SessionControlObject getSession(final String sessionid, final boolean refresh) {
-		LOG.debug("getSession <" + sessionid + ">");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("getSession <" + sessionid + ">");
+		}
 
 		Map<String, SessionControlObject> sessions = null;
 
-		final Date timestamp = new Date();
+		// final Date timestamp = new Date();
 
 		for (int a = 0; a < numberOfSessionContainers; a++) {
 			sessions = sessionList.get(a);
 
 			if (sessions.containsKey(sessionid)) {
-				SessionControlObject sessionControlObject = sessions.get(sessionid);
+				final SessionControlObject sessionControlObject = sessions.get(sessionid);
 
 				if (sessionControlObject != null && isValid(sessionControlObject)) {
 					sessionControlObject.updateTimestamp();
@@ -290,17 +306,56 @@ public class SessionHandler {
 				return null;
 			}
 		}
+		/*
+		 * Not found in local session containers, check cache
+		 */
+		try {
+			final CachedSession cachedSession = SessionCache.getInstance().removeCachedSession(sessionid);
+			if (null != cachedSession) {
+				/*
+				 * A cache hit!
+				 */
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("getCachedSession <" + sessionid + ">");
+				}
+				return addSessionInternal(new SessionImpl(cachedSession));
+			}
+		} catch (final CacheException e) {
+			LOG.error(e.getMessage(), e);
+		} catch (final SessiondException e) {
+			LOG.error(e.getMessage(), e);
+		}
 		return null;
 	}
 
+	/**
+	 * Gets all available instances of {@link SessionControlObject}
+	 * 
+	 * @return All available instances of {@link SessionControlObject}
+	 */
+	public static List<SessionControlObject> getSessions() {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("getSessions");
+		}
+		final List<SessionControlObject> retval = new ArrayList<SessionControlObject>(numberOfActiveSessions.get());
+		for (int a = 0; a < numberOfSessionContainers; a++) {
+			retval.addAll(sessionList.get(a).values());
+		}
+		return retval;
+	}
+
 	protected static void cleanUp() {
-		LOG.debug("session cleanup");
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("session cleanup");
+		}
 
 		if (LOG.isDebugEnabled()) {
 			final Map<String, SessionControlObject> hashMap = sessionList.getLast();
 			final Iterator<String> iterator = hashMap.keySet().iterator();
 			while (iterator.hasNext()) {
-				LOG.debug("session timeout for id: " + iterator.next());
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("session timeout for id: " + iterator.next());
+				}
 			}
 		}
 		prependContainer();
@@ -323,7 +378,7 @@ public class SessionHandler {
 
 		return true;
 	}
-	
+
 	public static void close() {
 		numberOfSessionContainers = 4;
 		sessionList = new LinkedList<Map<String, SessionControlObject>>();
@@ -338,8 +393,8 @@ public class SessionHandler {
 	public static int getNumberOfActiveSessions() {
 		return numberOfActiveSessions.get();
 	}
-	
-	protected static void decrementNumberOfActiveSessions(int amount) {
+
+	protected static void decrementNumberOfActiveSessions(final int amount) {
 		for (int a = 0; a < amount; a++) {
 			numberOfActiveSessions.decrementAndGet();
 		}
