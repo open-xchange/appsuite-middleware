@@ -63,9 +63,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.caching.CacheException;
+import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServerTimer;
-import com.openexchange.session.CachedSession;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.sessiond.exception.SessiondException;

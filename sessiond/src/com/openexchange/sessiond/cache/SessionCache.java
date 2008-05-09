@@ -59,7 +59,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.session.CachedSession;
+import com.openexchange.caching.objects.CachedSession;
 
 /**
  * {@link SessionCache} - A cache for instances of {@link CachedSession}

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.session;
+package com.openexchange.caching.objects;
 
 import java.io.Serializable;
 import java.util.Collections;
