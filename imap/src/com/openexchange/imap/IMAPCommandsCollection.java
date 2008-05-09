@@ -167,7 +167,7 @@ public final class IMAPCommandsCollection {
 				 * Encode the mbox as per RFC2060
 				 */
 				final Argument args = new Argument();
-				args.writeString(prepareStringArgument(imapFolder.getFullName()));
+				args.writeString(BASE64MailboxEncoder.encode(imapFolder.getFullName()));
 				/*
 				 * Perform command
 				 */
@@ -204,7 +204,7 @@ public final class IMAPCommandsCollection {
 	 * <P>
 	 */
 	public static void forceSetSubscribed(final Store store, final String folder, final boolean subscribe) {
-		final String lfolder = prepareStringArgument(folder);
+		final String lfolder = BASE64MailboxEncoder.encode(folder);
 		final String cmd = (subscribe ? "SUBSCRIBE" : "UNSUBSCRIBE");
 		try {
 			final IMAPFolder f = (IMAPFolder) store.getDefaultFolder();
@@ -741,7 +741,7 @@ public final class IMAPCommandsCollection {
 					 * Encode the mbox as per RFC2060
 					 */
 					final Argument args = new Argument();
-					args.writeString(prepareStringArgument(f.getFullName()));
+					args.writeString(BASE64MailboxEncoder.encode(f.getFullName()));
 					/*
 					 * Perform command
 					 */
