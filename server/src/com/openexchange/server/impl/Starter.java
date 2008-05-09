@@ -208,7 +208,7 @@ public class Starter implements Initialization {
 	 */
 	public void start() throws AbstractOXException {
 
-		dumbServerInfos();
+		dumpServerInfos();
 
 		for (Initialization init : inits) {
 			init.start();
@@ -235,7 +235,7 @@ public class Starter implements Initialization {
 	 */
 	public void adminStart() throws AbstractOXException {
 
-		dumbServerInfos();
+		dumpServerInfos();
 
 		for (Initialization init : adminInits) {
 			init.start();
@@ -249,9 +249,9 @@ public class Starter implements Initialization {
 	}
 
 	/**
-	 * Dumb server informations
+	 * Dump server informations
 	 */
-	private static final void dumbServerInfos() {
+	private static final void dumpServerInfos() {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Open-Xchange 6.0");
 			LOG.info("(c) Open-Xchange Inc. , Open-Xchange GmbH");
