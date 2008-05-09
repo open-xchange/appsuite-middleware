@@ -54,7 +54,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * {@link CachedSession} - Holding cache-able informations of a {@link Session}.
@@ -111,7 +110,7 @@ public final class CachedSession implements Serializable {
 	 */
 	public CachedSession(final int userId, final String loginName, final String password, final int contextId,
 			final String sessionId, final String secret, final String randomToken, final String localIp,
-			final ConcurrentHashMap<String, Object> parameters) {
+			final Map<String, Object> parameters) {
 		super();
 		this.userId = userId;
 		this.loginName = loginName;
