@@ -143,11 +143,11 @@ public final class FolderWriter {
 						try {
 							if (withKey) {
 
-								((JSONObject) jsonContainer).put(FolderFields.ID, prepareFullname(
-										fullName == null ? folder.getFullname() : fullName, folder.getSeparator()));
+								((JSONObject) jsonContainer).put(FolderFields.ID,
+										prepareFullname(fullName == null ? folder.getFullname() : fullName));
 							} else {
 								((JSONArray) jsonContainer).put(prepareFullname(fullName == null ? folder.getFullname()
-										: fullName, folder.getSeparator()));
+										: fullName));
 							}
 						} catch (final JSONException e) {
 							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
@@ -238,7 +238,7 @@ public final class FolderWriter {
 							if (null == folder.getParentFullname()) {
 								parent = JSONObject.NULL;
 							} else {
-								parent = prepareFullname(folder.getParentFullname(), folder.getSeparator());
+								parent = prepareFullname(folder.getParentFullname());
 							}
 							if (withKey) {
 								((JSONObject) jsonContainer).put(FolderFields.FOLDER_ID, parent);

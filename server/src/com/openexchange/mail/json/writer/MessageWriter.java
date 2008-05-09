@@ -181,9 +181,9 @@ public final class MessageWriter {
 						try {
 							if (withKey) {
 								((JSONObject) jsonContainer).put(FolderChildFields.FOLDER_ID, prepareFullname(mail
-										.getFolder(), mail.getSeparator()));
+										.getFolder()));
 							} else {
-								((JSONArray) jsonContainer).put(prepareFullname(mail.getFolder(), mail.getSeparator()));
+								((JSONArray) jsonContainer).put(prepareFullname(mail.getFolder()));
 							}
 						} catch (final JSONException e) {
 							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());

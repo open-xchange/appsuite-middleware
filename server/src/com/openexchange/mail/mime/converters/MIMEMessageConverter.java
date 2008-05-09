@@ -728,7 +728,6 @@ public final class MIMEMessageConverter {
 			case FOLDER_ID:
 				fillers[i] = new MailMessageFieldFiller() {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setSeparator(((ExtendedMimeMessage) msg).getSeparator());
 						mailMessage.setFolder(((ExtendedMimeMessage) msg).getFullname());
 					}
 				};
@@ -1080,7 +1079,6 @@ public final class MIMEMessageConverter {
 			case FOLDER_ID:
 				fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
 					public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-						mailMessage.setSeparator(folder.getSeparator());
 						mailMessage.setFolder(folder.getFullName());
 					}
 				};
@@ -1328,7 +1326,6 @@ public final class MIMEMessageConverter {
 				 */
 				final Folder f = msg.getFolder();
 				mail.setFolder(f.getFullName());
-				mail.setSeparator(f.getSeparator());
 				mail.setMailId(((UIDFolder) f).getUID(msg));
 				mail.setUnreadMessages(f.getUnreadMessageCount());
 			}
@@ -1369,8 +1366,8 @@ public final class MIMEMessageConverter {
 			{
 				final ContentType ct = mail.getContentType();
 				mail.setHasAttachment(ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)
-						&& (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || hasAttachments(
-								(Multipart) msg.getContent(), ct.getSubType())));
+						&& (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || hasAttachments((Multipart) msg
+								.getContent(), ct.getSubType())));
 			}
 			{
 				final String[] tmp = msg.getHeader(MessageHeaders.HDR_CONTENT_ID);
@@ -1479,7 +1476,6 @@ public final class MIMEMessageConverter {
 			final MailMessage mail = convertMessage(msg);
 			mail.setMailId(uid);
 			mail.setFolder(fullname);
-			mail.setSeparator(separator);
 			return mail;
 		}
 		try {

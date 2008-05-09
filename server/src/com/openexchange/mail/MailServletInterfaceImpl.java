@@ -233,7 +233,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	public String deleteFolder(final String folder) throws MailException {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
-		return prepareFullname(mailAccess.getFolderStorage().deleteFolder(fullname, false), getSeparator());
+		return prepareFullname(mailAccess.getFolderStorage().deleteFolder(fullname, false));
 	}
 
 	@Override
@@ -284,19 +284,19 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	@Override
 	public String getConfirmedHamFolder() throws MailException {
 		if (isDefaultFoldersChecked()) {
-			return prepareFullname(getDefaultMailFolder(StorageUtility.INDEX_CONFIRMED_HAM), getSeparator());
+			return prepareFullname(getDefaultMailFolder(StorageUtility.INDEX_CONFIRMED_HAM));
 		}
 		initConnection();
-		return prepareFullname(mailAccess.getFolderStorage().getConfirmedHamFolder(), getSeparator());
+		return prepareFullname(mailAccess.getFolderStorage().getConfirmedHamFolder());
 	}
 
 	@Override
 	public String getConfirmedSpamFolder() throws MailException {
 		if (isDefaultFoldersChecked()) {
-			return prepareFullname(getDefaultMailFolder(StorageUtility.INDEX_CONFIRMED_SPAM), getSeparator());
+			return prepareFullname(getDefaultMailFolder(StorageUtility.INDEX_CONFIRMED_SPAM));
 		}
 		initConnection();
-		return prepareFullname(mailAccess.getFolderStorage().getConfirmedSpamFolder(), getSeparator());
+		return prepareFullname(mailAccess.getFolderStorage().getConfirmedSpamFolder());
 	}
 
 	private String getDefaultMailFolder(final int index) {
@@ -314,10 +314,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	@Override
 	public String getDraftsFolder() throws MailException {
 		if (isDefaultFoldersChecked()) {
-			return prepareFullname(getDefaultMailFolder(StorageUtility.INDEX_DRAFTS), getSeparator());
+			return prepareFullname(getDefaultMailFolder(StorageUtility.INDEX_DRAFTS));
 		}
 		initConnection();
-		return prepareFullname(mailAccess.getFolderStorage().getDraftsFolder(), getSeparator());
+		return prepareFullname(mailAccess.getFolderStorage().getDraftsFolder());
 	}
 
 	@Override
@@ -340,10 +340,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	@Override
 	public String getInboxFolder() throws MailException {
 		if (isDefaultFoldersChecked()) {
-			return prepareFullname(INBOX_ID, getSeparator());
+			return prepareFullname(INBOX_ID);
 		}
 		initConnection();
-		return prepareFullname(mailAccess.getFolderStorage().getFolder(INBOX_ID).getFullname(), getSeparator());
+		return prepareFullname(mailAccess.getFolderStorage().getFolder(INBOX_ID).getFullname());
 	}
 
 	@Override
@@ -585,27 +585,19 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	@Override
 	public String getSentFolder() throws MailException {
 		if (isDefaultFoldersChecked()) {
-			return prepareFullname(getDefaultMailFolder(StorageUtility.INDEX_SENT), getSeparator());
+			return prepareFullname(getDefaultMailFolder(StorageUtility.INDEX_SENT));
 		}
 		initConnection();
-		return prepareFullname(mailAccess.getFolderStorage().getSentFolder(), getSeparator());
-	}
-
-	private char getSeparator() {
-		final Object c = session.getParameter(MailSessionParameterNames.PARAM_SEPARATOR);
-		if (null == c) {
-			return MailConfig.getDefaultSeparator();
-		}
-		return ((Character) c).charValue();
+		return prepareFullname(mailAccess.getFolderStorage().getSentFolder());
 	}
 
 	@Override
 	public String getSpamFolder() throws MailException {
 		if (isDefaultFoldersChecked()) {
-			return prepareFullname(getDefaultMailFolder(StorageUtility.INDEX_SPAM), getSeparator());
+			return prepareFullname(getDefaultMailFolder(StorageUtility.INDEX_SPAM));
 		}
 		initConnection();
-		return prepareFullname(mailAccess.getFolderStorage().getSpamFolder(), getSeparator());
+		return prepareFullname(mailAccess.getFolderStorage().getSpamFolder());
 	}
 
 	@Override
@@ -673,10 +665,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	@Override
 	public String getTrashFolder() throws MailException {
 		if (isDefaultFoldersChecked()) {
-			return prepareFullname(getDefaultMailFolder(StorageUtility.INDEX_TRASH), getSeparator());
+			return prepareFullname(getDefaultMailFolder(StorageUtility.INDEX_TRASH));
 		}
 		initConnection();
-		return prepareFullname(mailAccess.getFolderStorage().getTrashFolder(), getSeparator());
+		return prepareFullname(mailAccess.getFolderStorage().getTrashFolder());
 	}
 
 	@Override
@@ -787,12 +779,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			/*
 			 * Handle update of permission or subscription
 			 */
-			return prepareFullname(mailAccess.getFolderStorage().updateFolder(fullname, mailFolder), getSeparator());
+			return prepareFullname(mailAccess.getFolderStorage().updateFolder(fullname, mailFolder));
 		}
 		/*
 		 * Insert
 		 */
-		return prepareFullname(mailAccess.getFolderStorage().createFolder(mailFolder), getSeparator());
+		return prepareFullname(mailAccess.getFolderStorage().createFolder(mailFolder));
 	}
 
 	@Override

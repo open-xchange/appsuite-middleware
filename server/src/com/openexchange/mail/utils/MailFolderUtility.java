@@ -67,8 +67,8 @@ public final class MailFolderUtility {
 	}
 
 	/**
-	 * Cuts off starting {@link MailFolder#DEFAULT_FOLDER_ID} from specified
-	 * folder fullname argument only if fullname argument is not
+	 * Cuts off starting {@link MailFolder#DEFAULT_FOLDER_ID} plus "." from
+	 * specified folder fullname argument only if fullname argument is not
 	 * <code>null</code> and is not equal to
 	 * {@link MailFolder#DEFAULT_FOLDER_ID}. <br>
 	 * Example:
@@ -96,8 +96,8 @@ public final class MailFolderUtility {
 	}
 
 	/**
-	 * Prepends {@link MailFolder#DEFAULT_FOLDER_ID} and given separator
-	 * character to given folder fullname. <br>
+	 * Prepends {@link MailFolder#DEFAULT_FOLDER_ID} plus "." to given folder
+	 * fullname. <br>
 	 * Example:
 	 * 
 	 * <pre>
@@ -106,16 +106,14 @@ public final class MailFolderUtility {
 	 * 
 	 * @param fullname
 	 *            The folder fullname
-	 * @param sep
-	 *            The folder's separator character
 	 * @return The groupware's mail folder fullname
 	 */
-	public static String prepareFullname(final String fullname, final char sep) {
+	public static String prepareFullname(final String fullname) {
 		if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || (fullname.length() == 0)) {
 			return fullname;
 		} else if (fullname.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
 			return fullname;
 		}
-		return new StringBuilder(32).append(MailFolder.DEFAULT_FOLDER_ID).append(sep).append(fullname).toString();
+		return new StringBuilder(32).append(MailFolder.DEFAULT_FOLDER_ID).append('.').append(fullname).toString();
 	}
 }

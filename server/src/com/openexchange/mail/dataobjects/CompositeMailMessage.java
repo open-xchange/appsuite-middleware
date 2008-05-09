@@ -152,9 +152,6 @@ public final class CompositeMailMessage extends MailMessage {
 		if (delegate.containsSentDate()) {
 			setSentDate(delegate.getSentDate());
 		}
-		if (delegate.containsSeparator()) {
-			setSeparator(delegate.getSeparator());
-		}
 		if (delegate.containsSequenceId()) {
 			setSequenceId(delegate.getSequenceId());
 		}

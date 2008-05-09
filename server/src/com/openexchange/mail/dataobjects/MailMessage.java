@@ -338,13 +338,6 @@ public abstract class MailMessage extends MailPart {
 	private boolean b_folder;
 
 	/**
-	 * The folder's separator
-	 */
-	private char separator;
-
-	private boolean b_separator;
-
-	/**
 	 * Whether an attachment is present or not
 	 */
 	private boolean hasAttachment;
@@ -1321,42 +1314,6 @@ public abstract class MailMessage extends MailPart {
 	public void setAppendVCard(final boolean appendVCard) {
 		this.appendVCard = appendVCard;
 		b_appendVCard = true;
-	}
-
-	/**
-	 * Gets the separator
-	 * 
-	 * @return the separator
-	 */
-	public char getSeparator() {
-		return separator;
-	}
-
-	/**
-	 * @return <code>true</code> if separator is set; otherwise
-	 *         <code>false</code>
-	 */
-	public boolean containsSeparator() {
-		return b_separator;
-	}
-
-	/**
-	 * Removes the separator
-	 */
-	public void removeSeparator() {
-		this.separator = '0';
-		b_separator = false;
-	}
-
-	/**
-	 * Sets the separator
-	 * 
-	 * @param separator
-	 *            the separator to set
-	 */
-	public void setSeparator(final char separator) {
-		this.separator = separator;
-		b_separator = true;
 	}
 
 	/**
