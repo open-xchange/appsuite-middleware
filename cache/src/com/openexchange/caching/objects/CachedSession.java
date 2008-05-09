@@ -214,4 +214,19 @@ public final class CachedSession implements Serializable {
 		return parameters;
 	}
 
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder(256);
+		sb.append(super.toString()).append("\nuserId=").append(userId);
+		sb.append(" loginName=").append(loginName);
+		sb.append(" password=").append(password);
+		sb.append(" sessionId=").append(sessionId);
+		sb.append(" secret=").append(secret);
+		sb.append(" randomToken=").append(randomToken);
+		sb.append(" localIp=").append(localIp);
+		sb.append(" contextId=").append(contextId);
+		sb.append("\nparameters=").append(parameters.toString());
+		return sb.toString();
+	}
+
 }
