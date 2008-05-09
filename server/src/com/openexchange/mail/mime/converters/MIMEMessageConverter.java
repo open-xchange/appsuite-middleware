@@ -1772,19 +1772,7 @@ public final class MIMEMessageConverter {
 	 *            The mail message to fill
 	 */
 	public static void parsePriority(final String priorityStr, final MailMessage mailMessage) {
-		int priority = MailMessage.PRIORITY_NORMAL;
-		if (null != priorityStr) {
-			final String[] tmp = priorityStr.split(" +");
-			try {
-				priority = Integer.parseInt(tmp[0]);
-			} catch (final NumberFormatException nfe) {
-				if (LOG.isWarnEnabled()) {
-					LOG.warn("Strange X-Priority header: " + tmp[0], nfe);
-				}
-				priority = MailMessage.PRIORITY_NORMAL;
-			}
-		}
-		mailMessage.setPriority(priority);
+		mailMessage.setPriority(parsePriority(priorityStr));
 	}
 
 	/**
