@@ -44,6 +44,9 @@ com.openexchange.sessiond.isSecureSocketConnectionEnabled:false
 # request.
 com.openexchange.sessiond.sessionDefaultLifeTime:3600000
 
+# The configuration file for session cache
+com.openexchange.sessiond.sessionCacheConfig:@oxgroupwaresysconfdir@/sessioncache.ccf
+
 # CA File
 com.openexchange.sessiond.caFile:
 
