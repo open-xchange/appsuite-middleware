@@ -156,13 +156,6 @@ public class SessionHandler {
 		return sessionId;
 	}
 
-	private static void addCachedSession(final CachedSession cachedSession) throws SessiondException {
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("addCachedSession <" + cachedSession.getSessionId() + '>');
-		}
-		addSessionInternal(new SessionImpl(cachedSession));
-	}
-
 	private static SessionControlObject addSessionInternal(final Session session) throws SessiondException {
 		final String sessionId = session.getSessionID();
 		Map<String, SessionControlObject> sessions = null;
