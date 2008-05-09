@@ -316,7 +316,7 @@
 
     <target name="patchPathInProperties">
         <move tofile="${patch.conf.dir}/system.properties" file="${patch.conf.dir}/system.properties.in" overwrite="true"/>
-        <replace file="${patch.conf.dir}/*.properties">
+        <replace dir="${patch.conf.dir}" includes="*.properties">
             <replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}"/>
         </replace>
     </target>
