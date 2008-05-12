@@ -145,6 +145,8 @@ public final class MailSearchTest extends AbstractMailTest {
 					assertFalse("Missing mail ID", fetchedMails[i].getMailId() == -1);
 					assertTrue("Missing content type", fetchedMails[i].containsContentType());
 					assertTrue("Missing flags", fetchedMails[i].containsFlags());
+					assertTrue("Message contains flag \\Seen although only unseen messages should have been returned",
+							(fetchedMails[i].getFlags() & MailMessage.FLAG_SEEN) == 0);
 				}
 
 				/*
