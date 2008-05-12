@@ -56,6 +56,7 @@ import org.apache.jcs.access.exception.ObjectExistsException;
 
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.caching.internal.cache2jcs.ElementAttributes2JCS;
 import com.openexchange.caching.internal.jcs2cache.JCSElementAttributesDelegator;
@@ -253,4 +254,11 @@ public final class JCSCache implements Cache {
 		}
 	}
 
+	public CacheKey newCacheKey(int contextId, int objectId) {
+		return new CacheKeyImpl(contextId, objectId);
+	}
+
+	public CacheKey newCacheKey(int contextId, Serializable obj) {
+		return new CacheKeyImpl(contextId, obj);
+	}
 }

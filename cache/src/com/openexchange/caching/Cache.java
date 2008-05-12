@@ -235,4 +235,34 @@ public interface Cache {
 	 *             If default element attributes cannot be applied.
 	 */
 	public void setDefaultElementAttributes(ElementAttributes attr) throws CacheException;
+
+	/**
+	 * Creates a new instance of {@link CacheKey} consisting of specified
+	 * context ID and object ID.
+	 * <p>
+	 * This is a convenience method that delegates to
+	 * {@link CacheService#newCacheKey(int, int)}.
+	 * 
+	 * @param contextId
+	 *            The context ID
+	 * @param objectId
+	 *            The object ID
+	 * @return The new instance of {@link CacheKey}
+	 */
+	public CacheKey newCacheKey(int contextId, int objectId);
+
+	/**
+	 * Creates a new instance of {@link CacheKey} consisting of specified
+	 * context ID and serializable object.
+	 * <p>
+	 * This is a convenience method that delegates to
+	 * {@link CacheService#newCacheKey(int, Serializable)}.
+	 * 
+	 * @param contextId
+	 *            The context ID
+	 * @param obj
+	 *            The serializable object
+	 * @return new instance of {@link CacheKey}
+	 */
+	public CacheKey newCacheKey(int contextId, Serializable obj);
 }
