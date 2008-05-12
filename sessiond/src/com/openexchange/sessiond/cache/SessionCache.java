@@ -59,10 +59,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.caching.ElementAttributes;
-import com.openexchange.caching.ElementEventHandler;
 import com.openexchange.caching.objects.CachedSession;
-import com.openexchange.sessiond.cache.eventhandler.SessionCacheEventHandler;
 
 /**
  * {@link SessionCache} - A cache for instances of {@link CachedSession}
@@ -96,13 +93,15 @@ public final class SessionCache {
 	private SessionCache() throws CacheException {
 		super();
 		cache = getServiceRegistry().getService(CacheService.class).getCache(REGION_NAME);
-//		/*
-//		 * Add element event handler to default element attributes
-//		 */
-//		final ElementEventHandler eventHandler = new SessionCacheEventHandler();
-//		final ElementAttributes attributes = cache.getDefaultElementAttributes();
-//		attributes.addElementEventHandler(eventHandler);
-//		cache.setDefaultElementAttributes(attributes);
+		// /*
+		// * Add element event handler to default element attributes
+		// */
+		// final ElementEventHandler eventHandler = new
+		// SessionCacheEventHandler();
+		// final ElementAttributes attributes =
+		// cache.getDefaultElementAttributes();
+		// attributes.addElementEventHandler(eventHandler);
+		// cache.setDefaultElementAttributes(attributes);
 	}
 
 	/**
@@ -261,8 +260,8 @@ public final class SessionCache {
 
 	private static final int DUMMY = 1;
 
-	private static CacheKey createKey(final String sessionId) {
-		return getServiceRegistry().getService(CacheService.class).newCacheKey(DUMMY, sessionId);
+	private CacheKey createKey(final String sessionId) {
+		return cache.newCacheKey(DUMMY, sessionId);
 	}
 
 }

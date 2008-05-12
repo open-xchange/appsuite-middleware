@@ -109,9 +109,8 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 		ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(CACHE_REGION_NAME);
 	}
 
-	private static final CacheKey getKey(final int userId, final Context ctx) {
-		return ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(ctx.getContextId(),
-				userId);
+	private final CacheKey getKey(final int userId, final Context ctx) {
+		return cache.newCacheKey(ctx.getContextId(), userId);
 	}
 
 	/*

@@ -74,181 +74,179 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class CachingUserStorage extends UserStorage {
 
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(CachingUserStorage.class);
+	/**
+	 * Logger.
+	 */
+	private static final Log LOG = LogFactory.getLog(CachingUserStorage.class);
 
-    /**
-     * Proxy attribute for the object implementing the persistent methods.
-     */
-    private UserStorage delegate;
+	/**
+	 * Proxy attribute for the object implementing the persistent methods.
+	 */
+	private UserStorage delegate;
 
-    /**
-     * Cache.
-     */
-    private static final Cache CACHE;
+	/**
+	 * Cache.
+	 */
+	private static final Cache CACHE;
 
-    /**
-     * Lock for the cache.
-     */
-    private static final Lock CACHE_LOCK;
+	/**
+	 * Lock for the cache.
+	 */
+	private static final Lock CACHE_LOCK;
 
-    /**
-     * Default constructor.
-     */
-    public CachingUserStorage() {
-        super();
-    }
+	/**
+	 * Default constructor.
+	 */
+	public CachingUserStorage() {
+		super();
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public User getUser(final int uid, final Context context) throws LdapException {
-        final OXObjectFactory<User> factory = new OXObjectFactory<User>() {
-            public Object getKey() {
-				return ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
-						context.getContextId(), uid);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public User getUser(final int uid, final Context context) throws LdapException {
+		final OXObjectFactory<User> factory = new OXObjectFactory<User>() {
+			public Object getKey() {
+				return CACHE.newCacheKey(context.getContextId(), uid);
 			}
-            public User load() throws LdapException {
-                return getUserStorage().getUser(uid, context);
-            }
-            public Lock getCacheLock() {
-                return CACHE_LOCK;
-            }
-        };
-        if (null == CACHE.get((Serializable) factory.getKey())) {
-            getUserStorage().getUser(uid, context);
-        }
-        return CacheProxy.getCacheProxy(factory, CACHE, User.class);
-    }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void updateUser(final User user, final Context context) throws LdapException {
-        getUserStorage().updateUser(user, context);
-        try {
-			CACHE.remove(ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
-					context.getContextId(), user.getId()));
+			public User load() throws LdapException {
+				return getUserStorage().getUser(uid, context);
+			}
+
+			public Lock getCacheLock() {
+				return CACHE_LOCK;
+			}
+		};
+		if (null == CACHE.get((Serializable) factory.getKey())) {
+			getUserStorage().getUser(uid, context);
+		}
+		return CacheProxy.getCacheProxy(factory, CACHE, User.class);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void updateUser(final User user, final Context context) throws LdapException {
+		getUserStorage().updateUser(user, context);
+		try {
+			CACHE.remove(CACHE.newCacheKey(context.getContextId(), user.getId()));
 		} catch (final CacheException e) {
 			throw new LdapException(EnumComponent.USER, Code.CACHE_PROBLEM, e);
 		}
-    }
+	}
 
-    /**
+	/**
 	 * {@inheritDoc}
 	 */
-    @Override
+	@Override
 	public int getUserId(final String uid, final Context context) throws LdapException {
-        final CacheKey key = ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
-				context.getContextId(), uid);
+		final CacheKey key = CACHE.newCacheKey(context.getContextId(), uid);
 		int identifier = -1;
-        final Integer tmp = (Integer) CACHE.get(key);
-        if (null == tmp) {
-            if (LOG.isTraceEnabled()) {
+		final Integer tmp = (Integer) CACHE.get(key);
+		if (null == tmp) {
+			if (LOG.isTraceEnabled()) {
 				LOG.trace("Cache MISS. Context: " + context.getContextId() + " User: " + uid);
 			}
-            identifier = getUserStorage().getUserId(uid, context);
-            try {
-                CACHE.put(key, Integer.valueOf(identifier));
-            } catch (CacheException e) {
-                throw new LdapException(EnumComponent.USER, Code.CACHE_PROBLEM, e);
-            }
-        } else {
-            if (LOG.isTraceEnabled()) {
+			identifier = getUserStorage().getUserId(uid, context);
+			try {
+				CACHE.put(key, Integer.valueOf(identifier));
+			} catch (CacheException e) {
+				throw new LdapException(EnumComponent.USER, Code.CACHE_PROBLEM, e);
+			}
+		} else {
+			if (LOG.isTraceEnabled()) {
 				LOG.trace("Cache HIT. Context: " + context.getContextId() + " User: " + uid);
 			}
-            identifier = tmp.intValue();
-        }
-        return identifier;
-    }
+			identifier = tmp.intValue();
+		}
+		return identifier;
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int[] listModifiedUser(final Date modifiedSince, final Context context)
-        throws LdapException {
-        // Caching doesn't make any sense here.
-        return getUserStorage().listModifiedUser(modifiedSince, context);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int[] listModifiedUser(final Date modifiedSince, final Context context) throws LdapException {
+		// Caching doesn't make any sense here.
+		return getUserStorage().listModifiedUser(modifiedSince, context);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public User searchUser(final String email, final Context context) throws LdapException {
-        return getUserStorage().searchUser(email, context);
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public User searchUser(final String email, final Context context) throws LdapException {
+		return getUserStorage().searchUser(email, context);
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int[] listAllUser(final Context context) throws UserException {
-        try {
-            return getUserStorage().listAllUser(context);
-        } catch (LdapException e) {
-            throw new UserException(e);
-        }
-    }
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int[] listAllUser(final Context context) throws UserException {
+		try {
+			return getUserStorage().listAllUser(context);
+		} catch (LdapException e) {
+			throw new UserException(e);
+		}
+	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
-        final CacheKey key = ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
-				context.getContextId(), imapLogin);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
+		final CacheKey key = CACHE.newCacheKey(context.getContextId(), imapLogin);
 		final int identifier;
 		final Integer tmp = (Integer) CACHE.get(key);
-        if (null == tmp) {
-            try {
-                identifier = getUserStorage().resolveIMAPLogin(imapLogin, context);
-            } catch (LdapException e) {
-                throw new UserException(e);
-            }
-            try {
-                CACHE.put(key, Integer.valueOf(identifier));
-            } catch (CacheException e) {
-                throw new UserException(UserException.Code.CACHE_PROBLEM, e);
-            }
-        } else {
-            identifier = tmp.intValue();
-        }
-        return identifier;
-    }
+		if (null == tmp) {
+			try {
+				identifier = getUserStorage().resolveIMAPLogin(imapLogin, context);
+			} catch (LdapException e) {
+				throw new UserException(e);
+			}
+			try {
+				CACHE.put(key, Integer.valueOf(identifier));
+			} catch (CacheException e) {
+				throw new UserException(UserException.Code.CACHE_PROBLEM, e);
+			}
+		} else {
+			identifier = tmp.intValue();
+		}
+		return identifier;
+	}
 
-    /**
-     * Creates a the instance implementing the user storage interface with
-     * persistent storing.
-     * @return an instance implementing the user storage interface.
-     * @throws LdapException if the instance can't be created.
-     */
-    private UserStorage getUserStorage() throws LdapException {
-        if (null == delegate) {
-            final String className = LdapUtility.findProperty(Names.
-                USERSTORAGE_IMPL);
-            final Class< ? extends UserStorage> clazz = LdapUtility
-                .getImplementation(className, UserStorage.class);
-            delegate = LdapUtility.getInstance(clazz);
-        }
-        return delegate;
-    }
+	/**
+	 * Creates a the instance implementing the user storage interface with
+	 * persistent storing.
+	 * 
+	 * @return an instance implementing the user storage interface.
+	 * @throws LdapException
+	 *             if the instance can't be created.
+	 */
+	private UserStorage getUserStorage() throws LdapException {
+		if (null == delegate) {
+			final String className = LdapUtility.findProperty(Names.USERSTORAGE_IMPL);
+			final Class<? extends UserStorage> clazz = LdapUtility.getImplementation(className, UserStorage.class);
+			delegate = LdapUtility.getInstance(clazz);
+		}
+		return delegate;
+	}
 
-    static {
-        try {
-            /*Configuration.load();*/
-            CACHE = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache("User");
-        } catch (CacheException e) {
-            throw new RuntimeException("Cannot create user cache.", e);
-        }
-        /*catch (ConfigurationException e) {
-        	 throw new RuntimeException("Cannot load cache configuration.", e);
-		}*/
-        CACHE_LOCK = new ReentrantLock(true);
-    }
+	static {
+		try {
+			/* Configuration.load(); */
+			CACHE = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache("User");
+		} catch (CacheException e) {
+			throw new RuntimeException("Cannot create user cache.", e);
+		}
+		/*
+		 * catch (ConfigurationException e) { throw new RuntimeException("Cannot
+		 * load cache configuration.", e); }
+		 */
+		CACHE_LOCK = new ReentrantLock(true);
+	}
 }

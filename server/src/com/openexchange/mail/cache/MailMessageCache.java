@@ -726,9 +726,8 @@ public final class MailMessageCache {
 		return retval;
 	}
 
-	private static CacheKey getMapKey(final int userId, final Context ctx) {
-		return ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(ctx.getContextId(),
-				userId);
+	private CacheKey getMapKey(final int userId, final Context ctx) {
+		return cache.newCacheKey(ctx.getContextId(), userId);
 	}
 
 }

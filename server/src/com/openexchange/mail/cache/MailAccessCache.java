@@ -317,7 +317,7 @@ public final class MailAccessCache {
 		}
 	}
 
-	private static CacheKey getUserKey(final int user, final Context ctx) {
-		return ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(ctx.getContextId(), user);
+	private CacheKey getUserKey(final int user, final Context ctx) {
+		return cache.newCacheKey(ctx.getContextId(), user);
 	}
 }

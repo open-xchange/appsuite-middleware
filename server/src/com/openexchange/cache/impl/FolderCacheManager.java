@@ -175,8 +175,8 @@ public class FolderCacheManager {
 		return l;
 	}
 
-	private static final CacheKey getCacheKey(final int cid, final int objectId) {
-		return ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(cid, objectId);
+	private final CacheKey getCacheKey(final int cid, final int objectId) {
+		return folderCache.newCacheKey(cid, objectId);
 	}
 
 	/**

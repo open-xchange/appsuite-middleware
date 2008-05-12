@@ -184,8 +184,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 				cacheWriteLock.lock();
 				try {
 					usm.setNoSave(false);
-					cache.put(ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
-							ctx.getContextId(), user), (Serializable) usm.clone());
+					cache.put(cache.newCacheKey(ctx.getContextId(), user), (Serializable) usm.clone());
 				} catch (final CacheException e) {
 					LOG.error("UserSettingMail could not be put into cache", e);
 				} finally {
@@ -252,8 +251,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 					 */
 					cacheWriteLock.lock();
 					try {
-						cache.remove(ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
-								ctx.getContextId(), user));
+						cache.remove(cache.newCacheKey(ctx.getContextId(), user));
 					} catch (final CacheException e) {
 						LOG.error("UserSettingMail could not be removed from cache", e);
 					} finally {
@@ -290,8 +288,8 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	public UserSettingMail loadUserSettingMail(final int user, final Context ctx, final Connection readConArg)
 			throws UserConfigurationException {
 		try {
-			UserSettingMail usm = useCache ? (UserSettingMail) cache.get(ServerServiceRegistry.getInstance()
-					.getService(CacheService.class).newCacheKey(ctx.getContextId(), user)) : null;
+			UserSettingMail usm = useCache ? (UserSettingMail) cache.get(cache.newCacheKey(ctx.getContextId(), user))
+					: null;
 			if (null != usm) {
 				return (UserSettingMail) usm.clone();
 			}
@@ -303,8 +301,8 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 				/*
 				 * Still not in cache?
 				 */
-				if (null == (usm = useCache ? (UserSettingMail) cache.get(ServerServiceRegistry.getInstance()
-						.getService(CacheService.class).newCacheKey(ctx.getContextId(), user)) : null)) {
+				if (null == (usm = useCache ? (UserSettingMail) cache.get(cache.newCacheKey(ctx.getContextId(), user))
+						: null)) {
 					usm = new UserSettingMail(user, ctx.getContextId());
 					Connection readCon = readConArg;
 					boolean closeCon = false;
@@ -346,8 +344,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 							 */
 							usm.setNoSave(false);
 							try {
-								cache.put(ServerServiceRegistry.getInstance().getService(CacheService.class)
-										.newCacheKey(ctx.getContextId(), user), usm);
+								cache.put(cache.newCacheKey(ctx.getContextId(), user), usm);
 							} catch (final CacheException e) {
 								LOG.error("UserSettingMail could not be put into cache", e);
 							}
@@ -587,8 +584,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 			 */
 			cacheWriteLock.lock();
 			try {
-				cache.remove(ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
-						ctx.getContextId(), user));
+				cache.remove(cache.newCacheKey(ctx.getContextId(), user));
 			} catch (final CacheException e) {
 				LOG.error("UserSettingMail could not be removed from cache", e);
 			} finally {
