@@ -52,6 +52,7 @@ package com.openexchange.caching.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 
 import com.openexchange.caching.CacheService;
@@ -61,7 +62,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.osgiservice.DeferredActivator;
 
 /**
- * {@link CacheActivator}
+ * {@link CacheActivator} - The {@link BundleActivator} implementation for cache
+ * bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
