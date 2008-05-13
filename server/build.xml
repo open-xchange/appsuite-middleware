@@ -80,7 +80,7 @@
     <property name="mysqljdbcjar" value="mysql-connector-java-3.1.13-bin.jar" />
     <property name="springbeanjar" value="spring-beans_1.2.7.jar" />
     <property name="springcorejar" value="spring-core_1.2.7.jar" />
-    <property name="tnefjar" value="tnef.jar" />
+    <property name="tnefjar" value="tnef-1.4.0.jar" />
 	<property name="chardetjar" value="chardet-1.0.jar" />
 
     <!-- Classpath -->

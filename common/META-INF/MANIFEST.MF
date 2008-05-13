@@ -30,7 +30,7 @@ Bundle-ClassPath: .,
  lib/mysql-connector-java-5.1.6-bin.jar,
  lib/spring-beans_1.2.7.jar,
  lib/spring-core_1.2.7.jar,
- lib/tnef.jar,
+ lib/tnef-1.4.0.jar,
  lib/xerces.jar
 Export-Package: com.mysql.jdbc;version="5.1.6",
  com.openexchange.tools.ssl,
