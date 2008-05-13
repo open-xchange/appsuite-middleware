@@ -74,7 +74,7 @@
     <property name="commonshttpclientjar" value="commons-httpclient-3.1.jar" />
     <property name="commonsiojar" value="commons-io-1.4.jar" />
     <property name="jakartawebdavjar" value="jakarta-slide-webdavlib-2.1.jar" />
-    <property name="jdomjar" value="jdom.jar" />
+    <property name="jdomjar" value="jdom-1.1.jar" />
     <property name="jsonjar" value="json.jar" />
     <property name="mailjar" value="mail-1.4.1.jar" />
     <property name="mysqljdbcjar" value="mysql-connector-java-3.1.13-bin.jar" />
