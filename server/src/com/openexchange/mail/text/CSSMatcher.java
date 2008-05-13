@@ -246,6 +246,8 @@ public final class CSSMatcher {
 
 	private static final Pattern PATTERN_STYLE_BLOCK = Pattern.compile("(\\p{Print}+\\s*\\{)([^}]+)\\}");
 
+	private static final Pattern PATTERN_COLOR_RGB = Pattern.compile(STR_COLOR_RGB_FUNC, Pattern.CASE_INSENSITIVE);
+
 	/**
 	 * Iterates over CSS blocks contained in specified string argument and
 	 * checks each block against given style map
@@ -257,40 +259,78 @@ public final class CSSMatcher {
 	 * @param findBlocks
 	 *            <code>true</code> to iterate over CSS blocks; otherwise
 	 *            <code>false</code> to iterate over CSS elements
-	 * @return The checked CSS string
+	 * @param removeIfAbsent
+	 *            <code>true</code> to completely remove CSS element if not
+	 *            contained in specified style map; otherwise <code>false</code>
+	 * @param result
+	 *            An array of {@link String} with length <code>1</code> to
+	 *            store modified CSS string.
+	 * @return <code>true</code> if modified; otherwise <code>false</code>
 	 */
-	public static String checkCSS(final String css, final Map<String, Set<String>> styleMap, final boolean findBlocks) {
+	public static boolean checkCSS(final String css, final Map<String, Set<String>> styleMap, final boolean findBlocks,
+			final boolean removeIfAbsent, final String[] result) {
 		if (findBlocks) {
+			boolean modified = false;
 			final StringBuffer sb = new StringBuffer(css.length());
 			final StringBuilder cssBuilder = new StringBuilder(128);
 			final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
 			while (m.find()) {
-				final String checkedCSS = checkCSS(m.group(2), styleMap);
+				modified |= checkCSSElements(m.group(2), styleMap, removeIfAbsent, result);
+				final String checkedCSS = result[0];
 				cssBuilder.setLength(0);
 				m.appendReplacement(sb, cssBuilder.append(m.group(1)).append(checkedCSS).append('}').toString());
 			}
 			m.appendTail(sb);
-			return sb.toString();
+			result[0] = sb.toString();
+			return modified;
 		}
-		return checkCSS(css, styleMap);
+		return checkCSSElements(css, styleMap, removeIfAbsent, result);
 	}
 
 	private static final Pattern PATTERN_STYLE_LINE = Pattern.compile(
 			"([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}&&[^;]]+);?", Pattern.CASE_INSENSITIVE);
 
 	/**
-	 * Iterates over CSS elements contained in specified string argument and
-	 * checks each element and its value against given style map
+	 * Corrects rgb functions; e.g.<br>"<i>rgb(238,&nbsp;239,&nbsp;240)</i>"&nbsp;-&gt;&nbsp;"<i>rgb(238,239,240)</i>"
 	 * 
 	 * @param css
 	 *            The CSS string
+	 * @param sb
+	 *            A string buffer
+	 * @return Corrected CSS string
+	 */
+	private static String correctRGBFunc(final String css, final StringBuffer sb) {
+		final Matcher rgb = PATTERN_COLOR_RGB.matcher(css);
+		while (rgb.find()) {
+			rgb.appendReplacement(sb, rgb.group().replaceAll("\\s+", ""));
+		}
+		rgb.appendTail(sb);
+		return sb.toString();
+	}
+
+	/**
+	 * Iterates over CSS elements contained in specified string argument and
+	 * checks each element and its value against given style map
+	 * 
+	 * @param cssArg
+	 *            The CSS string
 	 * @param styleMap
 	 *            The style map
-	 * @return The checked CSS string
+	 * @param removeIfAbsent
+	 *            <code>true</code> to completely remove CSS element if not
+	 *            contained in specified style map; otherwise <code>false</code>
+	 * @param result
+	 *            An array of {@link String} with length <code>1</code> to
+	 *            store modified CSS string.
+	 * @return <code>true</code> if modified; otherwise <code>false</code>
 	 */
-	public static String checkCSS(final String css, final Map<String, Set<String>> styleMap) {
+	public static boolean checkCSSElements(final String cssArg, final Map<String, Set<String>> styleMap,
+			final boolean removeIfAbsent, final String[] result) {
+		boolean modified = false;
+		final StringBuffer sb = new StringBuffer(cssArg.length());
+		final String css = correctRGBFunc(cssArg, sb);
+		sb.setLength(0);
 		final Matcher m = PATTERN_STYLE_LINE.matcher(css);
-		final StringBuffer sb = new StringBuffer(css.length());
 		final StringBuilder elemBuilder = new StringBuilder(128);
 		while (m.find()) {
 			final String elementName = m.group(1);
@@ -314,6 +354,8 @@ public final class CSSMatcher {
 							}
 							elemBuilder.append(tokens[j]);
 							hasValues = true;
+						} else {
+							modified = true;
 						}
 					}
 				}
@@ -324,18 +366,21 @@ public final class CSSMatcher {
 					/*
 					 * Remove element since none of its values is allowed
 					 */
+					modified = true;
 					m.appendReplacement(sb, "");
 				}
 				elemBuilder.setLength(0);
-			} else {
+			} else if (removeIfAbsent) {
 				/*
 				 * Remove forbidden element
 				 */
+				modified = true;
 				m.appendReplacement(sb, "");
 			}
 		}
 		m.appendTail(sb);
-		return sb.toString();
+		result[0] = sb.toString();
+		return modified;
 	}
 
 	/**

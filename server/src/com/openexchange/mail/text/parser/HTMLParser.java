@@ -51,7 +51,6 @@ package com.openexchange.mail.text.parser;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -217,10 +216,10 @@ public final class HTMLParser {
 						}
 						if (parser.isEmptyElementTag()) {
 							depthInfo[depth] = (depthInfo[depth] | INT_IS_EMPTY_TAG);
-							handler.handleSimpleTag(parser.getName(), Collections.unmodifiableMap(attributes));
+							handler.handleSimpleTag(parser.getName(), attributes);
 						} else {
 							depthInfo[depth] = (depthInfo[depth] & ~INT_IS_EMPTY_TAG);
-							handler.handleStartTag(parser.getName(), Collections.unmodifiableMap(attributes));
+							handler.handleStartTag(parser.getName(), attributes);
 						}
 						ignoreWhitespace = true;
 					} else {
