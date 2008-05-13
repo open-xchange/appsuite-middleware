@@ -142,8 +142,6 @@ usage() {
     done
 cat<<EOF
 
-Mandatory parameters are: --servername --configdb-pass --ox-cluster-url
-
 Example:
 
   $0 --servername=ox6 --configdb-pass=secret --master-pass=secret --configdb-poolsize=10
