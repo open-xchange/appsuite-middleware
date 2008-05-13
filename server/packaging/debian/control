@@ -17,8 +17,9 @@ Package: open-xchange-config-standard
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: open-xchange
-Provides: open-xchange-config
+Provides: open-xchange-config-hosting, open-xchange-config
 Conflicts: open-xchange-config-hosting
+Replaces: open-xchange-config-hosting
 Description: Open-Xchange server standard configuration
 
 Package: open-xchange
