@@ -88,9 +88,9 @@ public final class SessionImpl implements Session {
 
 	private final String localIp;
 
-	private final ConcurrentHashMap<String, ManagedUploadFile> managedUploadFiles;
+	private final Map<String, ManagedUploadFile> managedUploadFiles;
 
-	private final ConcurrentHashMap<String, Object> parameters;
+	private final Map<String, Object> parameters;
 
 	/**
 	 * Initializes a new {@link SessionImpl}
