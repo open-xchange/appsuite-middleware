@@ -13,7 +13,7 @@ jcs.region.SessionCache.elementattributes.MaxLifeSeconds=3600
 jcs.region.SessionCache.elementattributes.IdleTime=60
 # NOT APPLICABLE TO ANY AUXILIARY (NEITHER DISK, REMOTE NOR TCP)
 jcs.region.SessionCache.elementattributes.IsSpool=false
-jcs.region.SessionCache.elementattributes.IsRemote=false
+jcs.region.SessionCache.elementattributes.IsRemote=true
 jcs.region.SessionCache.elementattributes.IsLateral=true
 
 # Auxiliary cache configuration for synchronizing SessionD caches in a cluster.
