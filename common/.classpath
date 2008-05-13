@@ -10,7 +10,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/commons-codec-1.3.jar" sourcepath="source/commons-codec-1.3-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-httpclient-3.1.jar" sourcepath="source/commons-httpclient-3.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jakarta-slide-webdavlib-2.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/json.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/json.jar" sourcepath="source/json-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/mysql-connector-java-5.1.6-bin.jar" sourcepath="source/mysql-connector-java-5.1.6-source.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/spring-beans_1.2.7.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/spring-core_1.2.7.jar"/>
