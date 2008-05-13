@@ -119,8 +119,8 @@ public class Login extends AJAXServlet {
 	 *      javax.servlet.http.HttpServletResponse)
 	 */
 	@Override
-	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp)
-			throws ServletException, IOException {
+	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
+			IOException {
 		final String action = req.getParameter(PARAMETER_ACTION);
 		if (action == null) {
 			resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
@@ -137,7 +137,7 @@ public class Login extends AJAXServlet {
 			Session sessionObj = null;
 			final Response response = new Response();
 			try {
-                final Authenticated authed = Authentication.login(name, password);
+				final Authenticated authed = Authentication.login(name, password);
 
 				final String contextname = authed.getContextInfo();
 				final String username = authed.getUserInfo();
@@ -159,7 +159,7 @@ public class Login extends AJAXServlet {
 					final UserStorage us = UserStorage.getInstance();
 					userId = us.getUserId(username, context);
 					u = us.getUser(userId, context);
-				} catch (LdapException ex) {
+				} catch (final LdapException ex) {
 					switch (ex.getDetail()) {
 					case ERROR:
 						throw new LoginException(LoginException.Code.UNKNOWN, ex);
@@ -177,47 +177,45 @@ public class Login extends AJAXServlet {
 					throw new UserNotActivatedException("user is not activated!");
 				}
 
-				final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
+				final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(
 						SessiondService.class);
 
-				if (sessiondCon == null) {
+				if (sessiondService == null) {
 					throw new LoginException(LoginException.Code.COMMUNICATION);
 				}
 
-				final String sessionId = sessiondCon.addSession(userId, name, password, context, req.getRemoteAddr());
-				sessionObj = sessiondCon.getSession(sessionId);
+				final String sessionId = sessiondService.addSession(userId, name, password, context, req
+						.getRemoteAddr());
+				sessionObj = sessiondService.getSession(sessionId);
 
 				try {
 					if (!context.isEnabled() || !u.isMailEnabled()) {
 						throw new LoginException(LoginException.Code.INVALID_CREDENTIALS);
 					}
-				} catch (UndeclaredThrowableException e) {
+				} catch (final UndeclaredThrowableException e) {
 					throw new LoginException(LoginException.Code.UNKNOWN, e);
 				}
-				
-			} catch (LoginException e) {
+
+			} catch (final LoginException e) {
 				if (LoginException.Source.USER == e.getSource()) {
 					LOG.debug(e.getMessage(), e);
 				} else {
 					LOG.error(e.getMessage(), e);
 				}
 				response.setException(e);
-			} catch (UserNotFoundException e) {
+			} catch (final UserNotFoundException e) {
 				LOG.debug(ERROR_USER_NOT_FOUND, e);
-				response
-						.setException(new LoginException(LoginException.Code.INVALID_CREDENTIALS, e));
-			} catch (UserNotActivatedException e) {
+				response.setException(new LoginException(LoginException.Code.INVALID_CREDENTIALS, e));
+			} catch (final UserNotActivatedException e) {
 				LOG.debug(ERROR_USER_NOT_ACTIVE, e);
-				response
-						.setException(new LoginException(LoginException.Code.INVALID_CREDENTIALS, e));
-			} catch (PasswordExpiredException e) {
+				response.setException(new LoginException(LoginException.Code.INVALID_CREDENTIALS, e));
+			} catch (final PasswordExpiredException e) {
 				LOG.debug(ERROR_PASSWORD_EXPIRED, e);
-				response
-						.setException(new LoginException(LoginException.Code.INVALID_CREDENTIALS, e));
-			} catch (ContextException e) {
+				response.setException(new LoginException(LoginException.Code.INVALID_CREDENTIALS, e));
+			} catch (final ContextException e) {
 				LOG.error("Error looking up context.", e);
 				response.setException(e);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				LOG.error("Error", e);
 			}
 			SessionServlet.rememberSession(req, sessionObj);
@@ -228,9 +226,8 @@ public class Login extends AJAXServlet {
 			if (!response.hasError()) {
 				try {
 					login = writeLogin(sessionObj);
-				} catch (JSONException e) {
-					final OXJSONException oje = new OXJSONException(
-							OXJSONException.Code.JSON_WRITE_ERROR, e);
+				} catch (final JSONException e) {
+					final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 					LOG.error(oje.getMessage(), oje);
 					response.setException(oje);
 				}
@@ -249,7 +246,7 @@ public class Login extends AJAXServlet {
 				} else {
 					login.write(resp.getWriter());
 				}
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				log(RESPONSE_ERROR, e);
 				sendError(resp);
 			}
@@ -275,8 +272,8 @@ public class Login extends AJAXServlet {
 						resp.addCookie(respCookie);
 						break;
 					} else if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(cookie[a].getName())) {
-						final Cookie jsessionIdCookie = new Cookie(
-								AJPv13RequestHandler.JSESSIONID_COOKIE, cookie[a].getValue());
+						final Cookie jsessionIdCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, cookie[a]
+								.getValue());
 						jsessionIdCookie.setPath("/");
 						jsessionIdCookie.setMaxAge(0); // delete
 						resp.addCookie(jsessionIdCookie);
@@ -301,8 +298,7 @@ public class Login extends AJAXServlet {
 				resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
 				return;
 			}
-			final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
-					SessiondService.class);
+			final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
 			final Session sessionObj = sessiondCon.getSessionByRandomToken(randomToken);
 
 			try {
@@ -311,11 +307,11 @@ public class Login extends AJAXServlet {
 				if (!context.isEnabled() || !user.isMailEnabled()) {
 					resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 				}
-			} catch (UndeclaredThrowableException e) {
+			} catch (final UndeclaredThrowableException e) {
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-			} catch (ContextException e) {
+			} catch (final ContextException e) {
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
-			} catch (LdapException e) {
+			} catch (final LdapException e) {
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN);
 			}
 			if (null == sessionObj) {
@@ -333,7 +329,7 @@ public class Login extends AJAXServlet {
 				}
 				final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
 						SessiondService.class);
-				for (Cookie cookie : cookies) {
+				for (final Cookie cookie : cookies) {
 					final String cookieName = cookie.getName();
 					if (cookieName.startsWith(cookiePrefix)) {
 						final String session = cookie.getValue();
@@ -347,7 +343,7 @@ public class Login extends AJAXServlet {
 								if (!ctx.isEnabled() || !user.isMailEnabled()) {
 									throw new LoginException(LoginException.Code.INVALID_CREDENTIALS);
 								}
-							} catch (UndeclaredThrowableException e) {
+							} catch (final UndeclaredThrowableException e) {
 								throw new LoginException(LoginException.Code.UNKNOWN, e);
 							}
 
@@ -363,24 +359,23 @@ public class Login extends AJAXServlet {
 				if (null == response.getData()) {
 					throw new OXJSONException(OXJSONException.Code.INVALID_COOKIE);
 				}
-			} catch (SessiondException e) {
+			} catch (final SessiondException e) {
 				LOG.debug(e.getMessage(), e);
 				response.setException(e);
-			} catch (OXJSONException e) {
+			} catch (final OXJSONException e) {
 				LOG.debug(e.getMessage(), e);
 				response.setException(e);
-			} catch (JSONException e) {
-				final OXJSONException oje = new OXJSONException(
-						OXJSONException.Code.JSON_WRITE_ERROR, e);
+			} catch (final JSONException e) {
+				final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
 				LOG.error(oje.getMessage(), oje);
 				response.setException(oje);
-            } catch (final ContextException e) {
-                LOG.debug(e.getMessage(), e);
-                response.setException(e);
-            } catch (final LdapException e) {
-                LOG.debug(e.getMessage(), e);
-                response.setException(e);
-			} catch (LoginException e) {
+			} catch (final ContextException e) {
+				LOG.debug(e.getMessage(), e);
+				response.setException(e);
+			} catch (final LdapException e) {
+				LOG.debug(e.getMessage(), e);
+				response.setException(e);
+			} catch (final LoginException e) {
 				if (LoginException.Source.USER == e.getSource()) {
 					LOG.debug(e.getMessage(), e);
 				} else {
@@ -400,7 +395,7 @@ public class Login extends AJAXServlet {
 				} else {
 					((JSONObject) response.getData()).write(resp.getWriter());
 				}
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				log(RESPONSE_ERROR, e);
 				sendError(resp);
 			}
@@ -413,27 +408,35 @@ public class Login extends AJAXServlet {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp)
-			throws ServletException, IOException {
+	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
+			IOException {
 		doGet(req, resp);
 	}
 
-	protected void writeCookie(final HttpServletResponse resp, final Session sessionObj) {
-		final Cookie cookie = new Cookie(cookiePrefix + sessionObj.getSecret(), sessionObj
-				.getSessionID());
+	/**
+	 * Writes the (groupware's) session cookie to specified HTTP servlet
+	 * response whose name is composed by cookie prefix
+	 * <code>"open-xchange-session-"</code> and a secret cookie identifier
+	 * 
+	 * @param resp
+	 *            The HTTP servlet response
+	 * @param session
+	 *            The session providing the secret cookie identifier
+	 */
+	protected static void writeCookie(final HttpServletResponse resp, final Session session) {
+		final Cookie cookie = new Cookie(cookiePrefix + session.getSecret(), session.getSessionID());
 		cookie.setPath("/");
 		resp.addCookie(cookie);
 	}
 
-	private void writeError(final HttpServletResponse resp, final String message)
-			throws IOException {
+	private void writeError(final HttpServletResponse resp, final String message) throws IOException {
 		try {
 			final JSONObject retval = new JSONObject();
 			retval.put(_error, message);
 			resp.setStatus(HttpServletResponse.SC_OK);
 			resp.setContentType(CONTENTTYPE_JAVASCRIPT);
 			retval.write(resp.getWriter());
-		} catch (JSONException exc) {
+		} catch (final JSONException exc) {
 			log(exc.getMessage(), exc);
 		}
 	}

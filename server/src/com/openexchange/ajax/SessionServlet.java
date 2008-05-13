@@ -85,26 +85,29 @@ import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
- * Overriden service method that checks if a valid session can be found for the
+ * Overridden service method that checks if a valid session can be found for the
  * request.
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 @OXExceptionSource(classId = Classes.SESSION_SERVLET, component = EnumComponent.SESSION)
 public abstract class SessionServlet extends AJAXServlet {
 
 	/**
+	 * Serial version UID for serialization
+	 */
+	private static final long serialVersionUID = -8308340875362868795L;
+
+	/**
 	 * Logger.
 	 */
-	private static transient final Log LOG = LogFactory
-			.getLog(SessionServlet.class);
+	private static transient final Log LOG = LogFactory.getLog(SessionServlet.class);
 
 	/**
 	 * Factory for creating exceptions.
 	 */
-	private static transient final SessionExceptionFactory EXCEPTION = new SessionExceptionFactory(
-			SessionServlet.class);
+	private static transient final SessionExceptionFactory EXCEPTION = new SessionExceptionFactory(SessionServlet.class);
 
 	/**
 	 * Name of the key to remember the session for the request.
@@ -124,14 +127,25 @@ public abstract class SessionServlet extends AJAXServlet {
 	 */
 	@Override
 	@OXThrows(category = Category.TRY_AGAIN, desc = "", exceptionId = 4, msg = "Context is locked.")
-	protected void service(final HttpServletRequest req,
-			final HttpServletResponse resp) throws ServletException,
+	protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
 			IOException {
 		Tools.disableCaching(resp);
 		try {
-			final String cookieId = getCookieId(req);
-			final String sessionId = getSessionId(req, cookieId);
-			final Session session = getSession(sessionId);
+			Session session = null;
+			final String sessionId;
+			{
+				final String cookieId = getCookieId(req);
+				final String[] sessionIdHolder = new String[1];
+				session = getSessionId(req, resp, cookieId, sessionIdHolder);
+				sessionId = sessionIdHolder[0];
+				if (null == session) {
+					/*
+					 * Not obtained from session cache: get from local session
+					 * containers
+					 */
+					session = getSession(sessionId);
+				}
+			}
 			checkIP(session.getLocalIp(), req.getRemoteAddr());
 			rememberSession(req, session);
 			final Context ctx = ContextStorage.getStorageContext(session.getContextId());
@@ -142,7 +156,7 @@ public abstract class SessionServlet extends AJAXServlet {
 				throw EXCEPTION.create(4);
 			}
 			super.service(req, resp);
-		} catch (SessiondException e) {
+		} catch (final SessiondException e) {
 			LOG.debug(e.getMessage(), e);
 			final Response response = new Response();
 			response.setException(e);
@@ -152,11 +166,11 @@ public abstract class SessionServlet extends AJAXServlet {
 			try {
 				Response.write(response, writer);
 				writer.flush();
-			} catch (JSONException e1) {
+			} catch (final JSONException e1) {
 				log(RESPONSE_ERROR, e1);
 				sendError(resp);
 			}
-		} catch (ContextException e) {
+		} catch (final ContextException e) {
 			LOG.debug(e.getMessage(), e);
 			final Response response = new Response();
 			response.setException(e);
@@ -166,7 +180,7 @@ public abstract class SessionServlet extends AJAXServlet {
 			try {
 				Response.write(response, writer);
 				writer.flush();
-			} catch (JSONException e1) {
+			} catch (final JSONException e1) {
 				log(RESPONSE_ERROR, e1);
 				sendError(resp);
 			}
@@ -186,8 +200,7 @@ public abstract class SessionServlet extends AJAXServlet {
 	 */
 	@OXThrows(category = Category.PERMISSION, desc = "If a session exists every request is checked for its client IP "
 			+ "address to match the one while creating the session.", exceptionId = 5, msg = "Wrong client IP address.")
-	public static void checkIP(final String remembered, final String actual)
-			throws SessiondException {
+	public static void checkIP(final String remembered, final String actual) throws SessiondException {
 		if (null == actual || !actual.equals(remembered)) {
 			throw EXCEPTION.create(5);
 		}
@@ -204,8 +217,7 @@ public abstract class SessionServlet extends AJAXServlet {
 	 */
 	@OXThrows(category = Category.CODE_ERROR, desc = "Every AJAX request must contain a parameter named session "
 			+ "that value contains the identifier of the session cookie.", exceptionId = 1, msg = "The session parameter is missing.")
-	private static String getCookieId(final ServletRequest req)
-			throws SessiondException {
+	private static String getCookieId(final ServletRequest req) throws SessiondException {
 		final String retval = req.getParameter(PARAMETER_SESSION);
 		if (null == retval) {
 			if (LOG.isDebugEnabled()) {
@@ -231,42 +243,62 @@ public abstract class SessionServlet extends AJAXServlet {
 	 * 
 	 * @param req
 	 *            HTTP servlet request.
+	 * @param resp
+	 *            HTTP servlet response
 	 * @param cookieId
 	 *            Identifier of the cookie.
-	 * @return the session identifier.
+	 * @param sessionIdHolder
+	 *            An array of {@link String} with length <code>1</code> for
+	 *            storing the session identifier
+	 * @return The session if fetched from cache; otherwise <code>null</code>.
 	 * @throws SessionException
 	 *             if the session identifier can not be found in a cookie.
 	 */
 	@OXThrows(category = Category.CODE_ERROR, desc = "Your browser does not send the cookie for identifying your "
 			+ "session.", exceptionId = 2, msg = "The cookie with the session identifier is missing.")
-	private static String getSessionId(final HttpServletRequest req,
-			final String cookieId) throws SessiondException {
+	private static Session getSessionId(final HttpServletRequest req, final HttpServletResponse resp,
+			final String cookieId, final String[] sessionIdHolder) throws SessiondException {
 		final Cookie[] cookies = req.getCookies();
-		String retval = null;
 		if (cookies != null) {
-			final String cookieName = Login.cookiePrefix + cookieId;
-			for (int a = 0; a < cookies.length && retval == null; a++) {
+			final String cookieName = new StringBuilder(Login.cookiePrefix).append(cookieId).toString();
+			for (int a = 0; a < cookies.length; a++) {
 				if (cookieName.equals(cookies[a].getName())) {
-					retval = cookies[a].getValue();
+					sessionIdHolder[0] = cookies[a].getValue();
+					return null;
 				}
 			}
 		}
-		if (null == retval) {
-			if (LOG.isDebugEnabled() && cookies != null) {
-				final StringBuilder debug = new StringBuilder();
-				debug.append("No cookie for ID: ");
-				debug.append(cookieId);
-				debug.append(". Cookie names: ");
-				for (Cookie cookie : cookies) {
-					debug.append(cookie.getName());
-					debug.append(',');
-				}
-				debug.setCharAt(debug.length() - 1, '.');
-				LOG.debug(debug.toString());
+		/*
+		 * No appropriate cookie found: check session cache
+		 */
+		final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+		if (null != sessiondService) {
+			final Session session = sessiondService.getCachedSession(cookieId);
+			if (null != session) {
+				sessionIdHolder[0] = session.getSessionID();
+				/*
+				 * Adapt cookie
+				 */
+				Login.writeCookie(resp, session);
+				return session;
 			}
-			throw EXCEPTION.create(2);
 		}
-		return retval;
+		/*
+		 * A cache miss: throw error
+		 */
+		if (LOG.isDebugEnabled() && cookies != null) {
+			final StringBuilder debug = new StringBuilder(256);
+			debug.append("No cookie for ID: ");
+			debug.append(cookieId);
+			debug.append(". Cookie names: ");
+			for (final Cookie cookie : cookies) {
+				debug.append(cookie.getName());
+				debug.append(',');
+			}
+			debug.setCharAt(debug.length() - 1, '.');
+			LOG.debug(debug.toString());
+		}
+		throw EXCEPTION.create(2);
 	}
 
 	/**
@@ -279,28 +311,27 @@ public abstract class SessionServlet extends AJAXServlet {
 	 *             if the session can not be found.
 	 */
 	@OXThrows(category = Category.TRY_AGAIN, desc = "A session with the given identifier can not be found.", exceptionId = 3, msg = "Your session %s expired. Please start a new browser session.")
-	private static Session getSession(final String sessionId)
-			throws SessiondException {
-		final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
-				SessiondService.class);
-		if (sessiondCon == null) {
-			throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, SessiondService.class.getName()));
+	private static Session getSession(final String sessionId) throws SessiondException {
+		final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+		if (sessiondService == null) {
+			throw new SessiondException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
+					SessiondService.class.getName()));
 		}
-		final Session retval = sessiondCon.getSession(sessionId);
+		final Session retval = sessiondService.getSession(sessionId);
 		if (null == retval) {
 			throw EXCEPTION.create(3, sessionId);
 		}
-        try {
-        	final Context context = ContextStorage.getStorageContext(retval.getContextId());
-            final User user = UserStorage.getStorageUser(retval.getUserId(), context);
-            if (!context.isEnabled() ||!user.isMailEnabled()) {
-                throw EXCEPTION.create(3, sessionId);
-            }
-        } catch (UndeclaredThrowableException e) {
-            throw EXCEPTION.create(3, sessionId);
-        } catch (AbstractOXException e) {
-            throw EXCEPTION.create(3, sessionId);
-        }
+		try {
+			final Context context = ContextStorage.getStorageContext(retval.getContextId());
+			final User user = UserStorage.getStorageUser(retval.getUserId(), context);
+			if (!context.isEnabled() || !user.isMailEnabled()) {
+				throw EXCEPTION.create(3, sessionId);
+			}
+		} catch (final UndeclaredThrowableException e) {
+			throw EXCEPTION.create(3, sessionId);
+		} catch (final AbstractOXException e) {
+			throw EXCEPTION.create(3, sessionId);
+		}
 		return retval;
 	}
 
@@ -313,8 +344,7 @@ public abstract class SessionServlet extends AJAXServlet {
 	 * @param session
 	 *            session to remember.
 	 */
-	public static void rememberSession(final ServletRequest req,
-			final Session session) {
+	public static void rememberSession(final ServletRequest req, final Session session) {
 		req.setAttribute(SESSION_KEY, session);
 	}
 

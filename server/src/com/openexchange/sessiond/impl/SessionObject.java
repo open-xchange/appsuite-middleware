@@ -59,7 +59,7 @@ import com.openexchange.groupware.ldap.Credentials;
 import com.openexchange.groupware.upload.ManagedUploadFile;
 
 /**
- * SessionObject
+ * {@link SessionObject} - Implemets {@link com.openexchange.session.Session}
  * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -298,4 +298,5 @@ public class SessionObject implements com.openexchange.session.Session {
 	public void removeRandomToken() {
 		randomToken = null;
 	}
+
 }
