@@ -137,14 +137,14 @@ public final class SessionCacheConfiguration implements Initialization {
 	}
 
 	public void stop() throws AbstractOXException {
-		final CacheService cacheService = getServiceRegistry().getService(CacheService.class);
-		if (null != cacheService) {
-			try {
-				cacheService.freeCache(SessionCache.LATERAL_REGION_NAME);
-				cacheService.freeCache(SessionCache.REGION_NAME);
-			} catch (final CacheException e) {
-				LOG.error(e.getLocalizedMessage(), e);
-			}
-		}
+//		final CacheService cacheService = getServiceRegistry().getService(CacheService.class);
+//		if (null != cacheService) {
+//			try {
+//				cacheService.freeCache(SessionCache.LATERAL_REGION_NAME);
+//				cacheService.freeCache(SessionCache.REGION_NAME);
+//			} catch (final CacheException e) {
+//				LOG.error(e.getLocalizedMessage(), e);
+//			}
+//		}
 	}
 }
