@@ -108,7 +108,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 
 	private HttpServlet servletInstance;
 
-	public HttpServletRequestWrapper(AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception {
+	public HttpServletRequestWrapper(final AJPv13RequestHandler ajpRequestHandler) throws AJPv13Exception {
 		super();
 		this.ajpRequestHandler = ajpRequestHandler;
 	}
@@ -332,10 +332,10 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 		 * First look-up HttpSessionManagement if a session already exists
 		 */
 		final String id = ajpRequestHandler.getHttpSessionId();
-		final HttpSession httpSession = HttpSessionManagement.getHttpSession(id);
+		final HttpSessionWrapper httpSession = HttpSessionManagement.getHttpSession(id);
 		if (httpSession != null) {
 			if (!HttpSessionManagement.isHttpSessionExpired(httpSession)) {
-				session = (HttpSessionWrapper) httpSession;
+				session = httpSession;
 				session.setNew(false);
 				session.setServletContext(getServletContext());
 				return session;
@@ -353,7 +353,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 			/*
 			 * Create new session
 			 */
-			session = (HttpSessionWrapper) HttpSessionManagement.createHttpSession(id);
+			session = (HttpSessionWrapper) HttpSessionManagement.createAndGetHttpSession(id);
 			session.setNew(true);
 			session.setServletContext(getServletContext());
 		}
@@ -428,7 +428,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper implements 
 	private static final long getDateValueFromHeaderField(final String headerValue) {
 		try {
 			return Tools.parseHeaderDate(headerValue).getTime();
-		} catch (ParseException e) {
+		} catch (final ParseException e) {
 			LOG.error(e.getMessage(), e);
 			throw new IllegalArgumentException(e.getMessage());
 		}

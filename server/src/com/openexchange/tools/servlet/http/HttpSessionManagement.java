@@ -74,7 +74,7 @@ public final class HttpSessionManagement {
 
 	private static final AtomicBoolean initialized = new AtomicBoolean();
 
-	private static Map<String, HttpSession> sessions;
+	private static Map<String, HttpSessionWrapper> sessions;
 
 	private static SessionRemover sessionRemover;
 
@@ -85,7 +85,7 @@ public final class HttpSessionManagement {
 		if (!initialized.get()) {
 			synchronized (initialized) {
 				if (!initialized.get()) {
-					sessions = new ConcurrentHashMap<String, HttpSession>();
+					sessions = new ConcurrentHashMap<String, HttpSessionWrapper>();
 					ServerTimer.getTimer().schedule((sessionRemover = new SessionRemover()), 100, 3600000);
 					initialized.set(true);
 				}
@@ -127,7 +127,7 @@ public final class HttpSessionManagement {
 	 * @return The HTTP session whose unique ID matches given
 	 *         <code>sessionId</code>.
 	 */
-	public static HttpSession getHttpSession(final String sessionId) {
+	public static HttpSessionWrapper getHttpSession(final String sessionId) {
 		return sessions.get(sessionId);
 	}
 
@@ -137,7 +137,7 @@ public final class HttpSessionManagement {
 	 * @param httpSession
 	 *            The HTTP session to add
 	 */
-	public static void putHttpSession(final HttpSession httpSession) {
+	public static void putHttpSession(final HttpSessionWrapper httpSession) {
 		sessions.put(httpSession.getId(), httpSession);
 	}
 
@@ -166,25 +166,44 @@ public final class HttpSessionManagement {
 	}
 
 	/**
-	 * Creates a new HTTP session with given unique ID
+	 * Creates and gets a new HTTP session with given unique ID
 	 * 
 	 * @param uniqueId
 	 *            The unique ID to apply to HTTP session
 	 * @return The new HTTP session
 	 */
-	public static HttpSession createHttpSession(final String uniqueId) {
-		final HttpSessionWrapper httpSession = new HttpSessionWrapper(uniqueId);
-		putHttpSession(httpSession);
+	public static HttpSession createAndGetHttpSession(final String uniqueId) {
+		final HttpSessionWrapper httpSession;
+		if (sessions.containsKey(uniqueId)) {
+			httpSession = sessions.get(uniqueId);
+		} else {
+			httpSession = new HttpSessionWrapper(uniqueId);
+			sessions.put(uniqueId, httpSession);
+		}
 		return httpSession;
 	}
 
 	/**
-	 * Creates a new HTTP session
+	 * Creates a new HTTP session with given unique ID
 	 * 
-	 * @return The new HTTP session
+	 * @param uniqueId
+	 *            The unique ID to apply to HTTP session
 	 */
-	public static HttpSession createHttpSession() {
-		return createHttpSession(getNewUniqueId());
+	public static void createHttpSession(final String uniqueId) {
+		HttpSessionWrapper httpSession = sessions.get(uniqueId);
+		if (null != httpSession) {
+			return;
+		}
+		httpSession = new HttpSessionWrapper(uniqueId);
+		sessions.put(uniqueId, httpSession);
+		;
+	}
+
+	/**
+	 * Creates a new HTTP session
+	 */
+	public static void createHttpSession() {
+		createHttpSession(getNewUniqueId());
 	}
 
 	/**
@@ -196,7 +215,7 @@ public final class HttpSessionManagement {
 	 * @return <code>true</code> if given HTTP session has expired; otherwise
 	 *         <code>false</code>
 	 */
-	public static boolean isHttpSessionExpired(final HttpSession httpSession) {
+	public static boolean isHttpSessionExpired(final HttpSessionWrapper httpSession) {
 		return httpSession.getMaxInactiveInterval() > 0 ? ((System.currentTimeMillis() - httpSession
 				.getLastAccessedTime()) / 1000) > httpSession.getMaxInactiveInterval() : false;
 	}
@@ -209,8 +228,8 @@ public final class HttpSessionManagement {
 	 * @return <code>true</code> if valid; otherwise <code>false</code>
 	 */
 	public static boolean isHttpSessionValid(final String sessionId) {
-		final HttpSession httpSession = sessions.get(sessionId);
-		return ((httpSession != null) && !isHttpSessionExpired(httpSession));
+		final HttpSessionWrapper httpSession = sessions.get(sessionId);
+		return ((httpSession == null) || (!isHttpSessionExpired(httpSession)));
 	}
 
 	private static final char[] digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e',
@@ -245,9 +264,9 @@ public final class HttpSessionManagement {
 		@Override
 		public void run() {
 			try {
-				for (final Iterator<Map.Entry<String, HttpSession>> iter = sessions.entrySet().iterator(); iter
+				for (final Iterator<Map.Entry<String, HttpSessionWrapper>> iter = sessions.entrySet().iterator(); iter
 						.hasNext();) {
-					final Map.Entry<String, HttpSession> entry = iter.next();
+					final Map.Entry<String, HttpSessionWrapper> entry = iter.next();
 					if (isHttpSessionExpired(entry.getValue())) {
 						entry.getValue().invalidate();
 						iter.remove();

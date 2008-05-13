@@ -76,7 +76,7 @@ public class HttpSessionWrapper implements HttpSession {
 
 	private long lastAccessedTime = new Date(0).getTime();
 
-	private String id;
+	private final String id;
 
 	private int maxInactiveIntervall = -1;
 
@@ -84,9 +84,13 @@ public class HttpSessionWrapper implements HttpSession {
 
 	private HttpSessionContext sessionContext;
 
+	/**
+	 * Indicates if the client does not yet know about the session or if the
+	 * client chooses not to join the session
+	 */
 	private boolean newSession = true;
 
-	public HttpSessionWrapper(String id) {
+	public HttpSessionWrapper(final String id) {
 		super();
 		attributes = new HashMap<String, Object>();
 		values = new HashMap<String, Object>();
@@ -145,7 +149,7 @@ public class HttpSessionWrapper implements HttpSession {
 	public String[] getValueNames() {
 		lastAccessedTime = System.currentTimeMillis();
 		final int size = values.size();
-		String[] valueNames = new String[size];
+		final String[] valueNames = new String[size];
 		final Iterator<String> iter = values.keySet().iterator();
 		for (int i = 0; i < size; i++) {
 			valueNames[i] = iter.next();
@@ -227,7 +231,7 @@ public class HttpSessionWrapper implements HttpSession {
 
 		private final Iterator<?> iter;
 
-		private IteratorEnumeration(Iterator<?> iter) {
+		private IteratorEnumeration(final Iterator<?> iter) {
 			this.iter = iter;
 		}
 
