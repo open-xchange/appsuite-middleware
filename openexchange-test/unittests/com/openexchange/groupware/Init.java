@@ -29,7 +29,7 @@ import com.openexchange.push.udp.EventAdminService;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.impl.SessiondConnectorImpl;
+import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
@@ -226,7 +226,7 @@ public final class Init {
 		// SessiondConnectorImpl());
 		SessiondServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, services.get(ConfigurationService.class));
 		//SessiondInit.getInstance().setConfigurationServiceHolder(getConfigurationServiceHolder());
-		ServerServiceRegistry.getInstance().addService(SessiondService.class, new SessiondConnectorImpl());
+		ServerServiceRegistry.getInstance().addService(SessiondService.class, new SessiondServiceImpl());
 	}
 
 	private static void startAndInjectPushUDPBundle() throws Exception {
