@@ -693,6 +693,9 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
 		jsessionIDCookie.setMaxAge(-1); // session cookie
 		ajpRequestHandler.setHttpSessionId(jsessionIdVal, join);
 		resp.addCookie(jsessionIDCookie);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(new StringBuilder("\n\tSetting JSESSIONID cookie to: ").append(jsessionIdVal));
+		}
 	}
 
 	private String parseString() throws AJPv13Exception {
