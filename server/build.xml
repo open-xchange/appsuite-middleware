@@ -70,7 +70,7 @@
 
     <property name="activationjar" value="activation-1.1.1.jar" />
     <property name="commonscodecjar" value="commons-codec-1.3.jar" />
-    <property name="commonsfileuploadjar" value="commons-fileupload.jar" />
+    <property name="commonsfileuploadjar" value="commons-fileupload-1.2.1.jar" />
     <property name="commonshttpclientjar" value="commons-httpclient-3.1.jar" />
     <property name="commonsiojar" value="commons-io.jar" />
     <property name="jakartawebdavjar" value="jakarta-slide-webdavlib-2.1.jar" />
