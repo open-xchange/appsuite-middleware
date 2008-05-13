@@ -197,5 +197,9 @@ public interface Session {
 	 */
 	public boolean touchUploadedFile(String id);
 
+	/**
+	 * Removes the random token
+	 */
 	public void removeRandomToken();
+
 }
