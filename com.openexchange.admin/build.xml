@@ -45,7 +45,7 @@
 
 	<!-- non-osgi jars -->
 	<property name="oxlanguages"        value="ox_languages.jar"/>
-	<property name="commons-fileupload" value="commons-fileupload.jar"/>
+	<property name="commons-fileupload" value="commons-fileupload-1.2.1.jar"/>
 	<property name="commons-httpclient" value="commons-httpclient-2.0.2.jar"/>
 	<property name="commons-io"         value="commons-io.jar"/>
 	<property name="concurrent"         value="concurrent.jar"/>
