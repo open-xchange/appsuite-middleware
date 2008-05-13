@@ -196,7 +196,6 @@ public final class HttpSessionManagement {
 		}
 		httpSession = new HttpSessionWrapper(uniqueId);
 		sessions.put(uniqueId, httpSession);
-		;
 	}
 
 	/**
