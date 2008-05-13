@@ -36,10 +36,10 @@
 	<property name="sessiondbundle"       value="com.openexchange.sessiond.jar"/>
 
 	<!-- non-osgi jars -->
-	<property name="commons-io"         value="commons-io.jar"/>
+	<property name="commons-io"         value="commons-io-1.4.jar"/>
 	<property name="junit"              value="junit-4.1.jar"/>
 	<property name="mysql-connector"    value="mysql-connector-java-3.1.13-bin.jar"/>
-	<property name="jdom"               value="jdom.jar"/>
+	<property name="jdom"               value="jdom-1.1.jar"/>
 
 	<path id="project.classpath">
         <pathelement location="${bundlesdir}/${commonBundle}/lib/${commons-io}"/>
