@@ -26,7 +26,7 @@
     <property name="globaljar" value="com.openexchange.global.jar"/>
     <property name="serverjar" value="com.openexchange.server.jar"/>
 	
-	<property name="chardetjar" value="chardet.jar" />
+	<property name="chardetjar" value="chardet-1.0.jar" />
 	
 	<!-- Bundle dependencies -->
 	<property name="commonBundle" value="com.openexchange.common"/>
