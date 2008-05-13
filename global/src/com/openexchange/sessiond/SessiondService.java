@@ -54,7 +54,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.exception.SessiondException;
 
 /**
- * SessiondConnectorInterface
+ * {@link SessiondService}
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
@@ -131,9 +131,11 @@ public interface SessiondService {
 	 * @param secret
 	 *            The secret cookie identifier (which is sent as
 	 *            <i>"session=..."</i> in every request)
+	 * @param localIP
+	 *            The host's local IP address
 	 * @return The cached session or <code>null</code> on cache miss.
 	 */
-	public Session getCachedSession(final String secret);
+	public Session getCachedSession(final String secret, final String localIP);
 
 	/**
 	 * The number of active sessions

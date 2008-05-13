@@ -86,8 +86,8 @@ public class SessiondServiceImpl implements SessiondService {
 		return null;
 	}
 
-	public Session getCachedSession(final String secret) {
-		final SessionControlObject sessionControlObject = SessionHandler.getCachedSession(secret);
+	public Session getCachedSession(final String secret, final String localIP) {
+		final SessionControlObject sessionControlObject = SessionHandler.getCachedSession(secret, localIP);
 		if (sessionControlObject != null) {
 			return sessionControlObject.getSession();
 		}

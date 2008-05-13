@@ -131,8 +131,10 @@ public final class SessionImpl implements Session {
 	 * 
 	 * @param cachedSession
 	 *            The cached session
+	 * @param localIP
+	 *            The host's local IP
 	 */
-	public SessionImpl(final CachedSession cachedSession) {
+	public SessionImpl(final CachedSession cachedSession, final String localIP) {
 		super();
 		this.userId = cachedSession.getUserId();
 		this.contextId = cachedSession.getContextId();
@@ -141,7 +143,7 @@ public final class SessionImpl implements Session {
 		this.sessionId = cachedSession.getSessionId();
 		this.secret = cachedSession.getSecret();
 		this.randomToken = cachedSession.getRandomToken();
-		this.localIp = cachedSession.getLocalIp();
+		this.localIp = localIP;
 		final Map<String, Serializable> params = cachedSession.getParameters();
 		parameters = new ConcurrentHashMap<String, Object>(params.size());
 		for (final Iterator<Map.Entry<String, Serializable>> iter = params.entrySet().iterator(); iter.hasNext();) {

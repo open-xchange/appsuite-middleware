@@ -310,10 +310,12 @@ public class SessionHandler {
 	 * 
 	 * @param secret
 	 *            The secret cookie identifier
+	 * @param localIP
+	 *            The host's local IP
 	 * @return A wrapping instance of {@link SessionControlObject} or
 	 *         <code>null</code>
 	 */
-	public static SessionControlObject getCachedSession(final String secret) {
+	public static SessionControlObject getCachedSession(final String secret, final String localIP) {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("getCachedSession <" + secret + ">");
 		}
@@ -323,7 +325,7 @@ public class SessionHandler {
 				/*
 				 * A cache hit! Add to local session containers
 				 */
-				return addSessionInternal(new SessionImpl(cachedSession));
+				return addSessionInternal(new SessionImpl(cachedSession, localIP));
 			}
 		} catch (final CacheException e) {
 			LOG.error(e.getMessage(), e);

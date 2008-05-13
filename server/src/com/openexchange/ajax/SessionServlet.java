@@ -273,11 +273,11 @@ public abstract class SessionServlet extends AJAXServlet {
 		 */
 		final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
 		if (null != sessiondService) {
-			final Session session = sessiondService.getCachedSession(cookieId);
+			final Session session = sessiondService.getCachedSession(cookieId, req.getRemoteAddr());
 			if (null != session) {
 				sessionIdHolder[0] = session.getSessionID();
 				/*
-				 * Adapt cookie
+				 * Adapt cookie and local IP
 				 */
 				Login.writeCookie(resp, session);
 				return session;
