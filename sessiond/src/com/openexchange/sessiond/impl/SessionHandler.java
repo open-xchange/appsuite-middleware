@@ -50,7 +50,6 @@
 package com.openexchange.sessiond.impl;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -72,21 +71,22 @@ import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.sessiond.exception.SessiondException.Code;
 
 /**
- * SessionHandler
+ * {@link SessionHandler}
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SessionHandler {
 
-	protected static int numberOfSessionContainers = 4;
+	private static int numberOfSessionContainers = 4;
 
-	protected static LinkedList<Map<String, SessionControlObject>> sessionList = new LinkedList<Map<String, SessionControlObject>>();
+	private static LinkedList<Map<String, SessionControlObject>> sessionList = new LinkedList<Map<String, SessionControlObject>>();
 
-	protected static LinkedList<Map<String, String>> userList = new LinkedList<Map<String, String>>();
+	private static LinkedList<Map<String, String>> userList = new LinkedList<Map<String, String>>();
 
-	protected static LinkedList<Map<String, String>> randomList = new LinkedList<Map<String, String>>();
+	private static LinkedList<Map<String, String>> randomList = new LinkedList<Map<String, String>>();
 
-	protected static SessionIdGenerator sessionIdGenerator;
+	private static SessionIdGenerator sessionIdGenerator;
 
 	private static SessiondConfigInterface config;
 
@@ -191,7 +191,7 @@ public class SessionHandler {
 
 		Map<String, SessionControlObject> sessions = null;
 
-		final Date timestamp = new Date();
+		// final Date timestamp = new Date();
 
 		for (int a = 0; a < numberOfSessionContainers; a++) {
 			sessions = sessionList.get(a);
@@ -299,18 +299,30 @@ public class SessionHandler {
 				return null;
 			}
 		}
-		/*
-		 * Not found in local session containers, check cache
-		 */
+		return null;
+	}
+
+	/**
+	 * Gets (and removes) the session bound to given secret cookie identifier in
+	 * cache.
+	 * <p>
+	 * Session is going to be added to local session containers on a cache hit.
+	 * 
+	 * @param secret
+	 *            The secret cookie identifier
+	 * @return A wrapping instance of {@link SessionControlObject} or
+	 *         <code>null</code>
+	 */
+	public static SessionControlObject getCachedSession(final String secret) {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("getCachedSession <" + secret + ">");
+		}
 		try {
-			final CachedSession cachedSession = SessionCache.getInstance().removeCachedSession(sessionid);
+			final CachedSession cachedSession = SessionCache.getInstance().removeCachedSession(secret);
 			if (null != cachedSession) {
 				/*
-				 * A cache hit!
+				 * A cache hit! Add to local session containers
 				 */
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("getCachedSession <" + sessionid + ">");
-				}
 				return addSessionInternal(new SessionImpl(cachedSession));
 			}
 		} catch (final CacheException e) {

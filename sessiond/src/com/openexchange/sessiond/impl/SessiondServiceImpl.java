@@ -49,57 +49,56 @@
 
 package com.openexchange.sessiond.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.exception.SessiondException;
 
 /**
- * SessiondConnectorImpl
- *
+ * {@link SessiondServiceImpl} - Implementation of {@link SessiondService}
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class SessiondConnectorImpl implements SessiondService {
-	
-	private static final Log LOG = LogFactory.getLog(SessiondConnectorImpl.class);
-	
-	public SessiondConnectorImpl() {
-		
+public class SessiondServiceImpl implements SessiondService {
+
+	public SessiondServiceImpl() {
+		super();
 	}
-	
-    public String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost) throws SessiondException {
-        return SessionHandler.addSession(userId, loginName, password, context, clientHost);
-    }
 
-    public boolean refreshSession(final String sessionId) {
-        return SessionHandler.refreshSession(sessionId);
-    }
+	public String addSession(final int userId, final String loginName, final String password, final Context context,
+			final String clientHost) throws SessiondException {
+		return SessionHandler.addSession(userId, loginName, password, context, clientHost);
+	}
 
-    public boolean removeSession(final String sessionId) {
-        return SessionHandler.clearSession(sessionId);
-    }
+	public boolean refreshSession(final String sessionId) {
+		return SessionHandler.refreshSession(sessionId);
+	}
 
-    public Session getSession(final String sessionId) {
-        final SessionControlObject sessionControlObject = SessionHandler.getSession(sessionId, true);
-        if (sessionControlObject != null) {
-            return  sessionControlObject.getSession();
-        } 
-        return null;
-    }
+	public boolean removeSession(final String sessionId) {
+		return SessionHandler.clearSession(sessionId);
+	}
 
-    public Session getSessionByRandomToken(final String randomToken) {
-        return SessionHandler.getSessionByRandomToken(randomToken);
-    }
+	public Session getSession(final String sessionId) {
+		final SessionControlObject sessionControlObject = SessionHandler.getSession(sessionId, true);
+		if (sessionControlObject != null) {
+			return sessionControlObject.getSession();
+		}
+		return null;
+	}
 
-    public int getNumberOfActiveSessions() {
-        return SessionHandler.getNumberOfActiveSessions();
-    }
+	public Session getCachedSession(final String secret) {
+		final SessionControlObject sessionControlObject = SessionHandler.getCachedSession(secret);
+		if (sessionControlObject != null) {
+			return sessionControlObject.getSession();
+		}
+		return null;
+	}
+
+	public Session getSessionByRandomToken(final String randomToken) {
+		return SessionHandler.getSessionByRandomToken(randomToken);
+	}
+
+	public int getNumberOfActiveSessions() {
+		return SessionHandler.getNumberOfActiveSessions();
+	}
 }
-
-
-
-
-

@@ -65,7 +65,7 @@ import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.sessiond.impl.SessionControlObject;
 import com.openexchange.sessiond.impl.SessionHandler;
 import com.openexchange.sessiond.impl.SessionImpl;
-import com.openexchange.sessiond.impl.SessiondConnectorImpl;
+import com.openexchange.sessiond.impl.SessiondServiceImpl;
 import com.openexchange.sessiond.impl.SessiondInit;
 
 /**
@@ -151,7 +151,7 @@ public final class SessiondActivator extends DeferredActivator {
 			}
 			SessiondInit.getInstance().start();
 			sessiondServiceRegistration = context.registerService(SessiondService.class.getName(),
-					new SessiondConnectorImpl(), null);
+					new SessiondServiceImpl(), null);
 		} catch (final Exception e) {
 			LOG.error("SessiondActivator: start: ", e);
 			// Try to stop what already has been started.

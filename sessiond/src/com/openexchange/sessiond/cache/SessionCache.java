@@ -140,18 +140,19 @@ public final class SessionCache {
 	/**
 	 * Removes and returns a cached session from cache
 	 * 
-	 * @param sessionId
-	 *            The session ID
+	 * @param secret
+	 *            The secret cookie identifier (which is sent as
+	 *            <i>"session=..."</i> in every request)
 	 * @param contextId
 	 *            The context ID
 	 * @return A cached session or <code>null</code>
 	 * @throws CacheException
 	 *             If removing from cache fails
 	 */
-	public CachedSession removeCachedSession(final String sessionId) throws CacheException {
+	public CachedSession removeCachedSession(final String secret) throws CacheException {
 		READ_WRITE_LOCK.readLock().lock();
 		try {
-			final CacheKey key = createKey(sessionId);
+			final CacheKey key = createKey(secret);
 			if (cache.get(key) == null) {
 				/*
 				 * Cached session is not available. Return immediately.
@@ -191,7 +192,10 @@ public final class SessionCache {
 
 	/**
 	 * Puts given cache-able session into cache if none user-bound session is
-	 * already contained in cache
+	 * already contained in cache.
+	 * <p>
+	 * The secret cookie identifier obtained by
+	 * {@link CachedSession#getSecret()} is used as key.
 	 * 
 	 * @param cachedSession
 	 *            The cache-able session to put into cache
@@ -203,7 +207,7 @@ public final class SessionCache {
 	public boolean putCachedSession(final CachedSession cachedSession) throws CacheException {
 		READ_WRITE_LOCK.readLock().lock();
 		try {
-			final CacheKey key = createKey(cachedSession.getSessionId());
+			final CacheKey key = createKey(cachedSession.getSecret());
 			if (cache.get(key) != null) {
 				/*
 				 * Key is already in use and therefore an IMAP connection is
@@ -244,15 +248,16 @@ public final class SessionCache {
 	/**
 	 * Checks if cache already holds a user-bound cached session
 	 * 
-	 * @param sessionId
-	 *            The session ID
+	 * @param secret
+	 *            The secret cookie identifier (which is sent as
+	 *            <i>"session=..."</i> in every request)
 	 * @return <code>true</code> if a user-bound cached session is already
 	 *         present in cache; otherwise <code>false</code>
 	 */
-	public boolean containsCachedSession(final String sessionId) {
+	public boolean containsCachedSession(final String secret) {
 		READ_WRITE_LOCK.readLock().lock();
 		try {
-			return (cache.get(createKey(sessionId)) != null);
+			return (cache.get(createKey(secret)) != null);
 		} finally {
 			READ_WRITE_LOCK.readLock().unlock();
 		}

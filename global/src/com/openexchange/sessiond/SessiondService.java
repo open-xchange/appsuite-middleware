@@ -60,9 +60,10 @@ import com.openexchange.sessiond.exception.SessiondException;
  */
 
 public interface SessiondService {
-	
+
 	/**
-	 * Creates a new session object in the sessiond storage with the given session parameters
+	 * Creates a new session object in the sessiond storage with the given
+	 * session parameters
 	 * 
 	 * @param userId -
 	 *            The User ID
@@ -74,53 +75,71 @@ public interface SessiondService {
 	 *            The context of the user
 	 * @param clientHost -
 	 *            The hostname of the incoming client
-	 * @return The session ID of the newly created session as a <code>String</code>
+	 * @return The session ID of the newly created session as a
+	 *         <code>String</code>
 	 * @throws SessiondException
 	 */
-    public String addSession(final int userId, final String loginName, final String password, final Context context, final String clientHost) throws SessiondException;
-    
+	public String addSession(final int userId, final String loginName, final String password, final Context context,
+			final String clientHost) throws SessiondException;
+
 	/**
 	 * Refreshes the timestamp of the session with the given session ID
 	 * 
 	 * @param sessionId -
 	 *            The Session ID
-	 * @return True if the session timestamp was updated or false if the session ID was invalid or exired
+	 * @return True if the session timestamp was updated or false if the session
+	 *         ID was invalid or exired
 	 */
-    public boolean refreshSession(final String sessionId);
-    
+	public boolean refreshSession(final String sessionId);
+
 	/**
 	 * Removes the session with the given session ID
 	 * 
 	 * @param sessionId -
 	 *            The Session ID
-	 * @return True if the session was removed or false if the session ID doesn't exist
+	 * @return True if the session was removed or false if the session ID
+	 *         doesn't exist
 	 */
-    public boolean removeSession(final String sessionId);
-    
+	public boolean removeSession(final String sessionId);
+
 	/**
 	 * Get the session object related to the given session ID
 	 * 
 	 * @param sessionId -
 	 *            The Session ID
-	 * @return Return the session object or null if no session exists for the given ID or if the session is expired
+	 * @return Return the session object or null if no session exists for the
+	 *         given ID or if the session is expired
 	 */
-    public Session getSession(final String sessionId);
+	public Session getSession(final String sessionId);
 
 	/**
 	 * Get the session object related to the given random token
 	 * 
 	 * @param randomToken -
 	 *            The random token of the session
-	 * @return Return the session object or null if no session exists for the given random token or if 
-	 * the random token is already expired
+	 * @return Return the session object or null if no session exists for the
+	 *         given random token or if the random token is already expired
 	 */
-    public Session getSessionByRandomToken(final String randomToken);
-    
+	public Session getSessionByRandomToken(final String randomToken);
+
+	/**
+	 * Gets (and removes) the session bound to given secret cookie identifier in
+	 * cache.
+	 * <p>
+	 * Session is going to be added to local session containers on a cache hit.
+	 * 
+	 * @param secret
+	 *            The secret cookie identifier (which is sent as
+	 *            <i>"session=..."</i> in every request)
+	 * @return The cached session or <code>null</code> on cache miss.
+	 */
+	public Session getCachedSession(final String secret);
+
 	/**
 	 * The number of active sessions
 	 * 
-	 * @return Return the number of active sessions 
+	 * @return Return the number of active sessions
 	 */
-    public int getNumberOfActiveSessions();
+	public int getNumberOfActiveSessions();
 
-} 
+}
