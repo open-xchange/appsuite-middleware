@@ -278,4 +278,22 @@ public class CalendarSqlTest extends TestCase {
         CalendarDataObject conflict = conflicts[0];
         assertNull(conflict.getTitle());
     }
+
+    //Bug 11269
+
+    public void testShouldIncludeCurrentUserInConflictsWithCurrentUserOnly() throws OXException {
+        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user);
+        appointments.save( appointment ); clean.add( appointment );
+
+        CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(user);
+        conflictingAppointment.setIgnoreConflicts(false);
+        CalendarDataObject[] conflicts = appointments.save( conflictingAppointment );
+
+        assertNotNull(conflicts);
+        assertEquals(1, conflicts.length);
+        CalendarDataObject conflict = conflicts[0];
+        assertEquals(appointment.getTitle(), conflict.getTitle());
+        assertUserParticipants(conflict, user ); 
+
+    }
 }

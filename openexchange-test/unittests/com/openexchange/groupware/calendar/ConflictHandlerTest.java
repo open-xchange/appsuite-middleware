@@ -195,6 +195,24 @@ public class ConflictHandlerTest extends TestCase {
         assertNull(conflict.getTitle());
     }
 
+    //Bug 11269
+
+    public void testShouldIncludeCurrentUserInConflictsWithCurrentUserOnly() throws OXException {
+        CalendarDataObject appointment = appointments.buildAppointmentWithUserParticipants(user);
+        appointments.save( appointment ); clean.add( appointment );
+
+        CalendarDataObject conflictingAppointment = appointments.buildAppointmentWithUserParticipants(user);
+        conflictingAppointment.setIgnoreConflicts(false);
+        CalendarDataObject[] conflicts = getConflicts( conflictingAppointment );
+        
+        assertNotNull(conflicts);
+        assertEquals(1, conflicts.length);
+        CalendarDataObject conflict = conflicts[0];
+        assertEquals(appointment.getTitle(), conflict.getTitle());
+        assertUserParticipants(conflict, user );
+
+    }
+
     private CalendarDataObject[] getConflicts(CalendarDataObject conflictingAppointment) throws OXException {
         ConflictHandler ch = new ConflictHandler(conflictingAppointment, appointments.getSession(), false);
         CalendarDataObject[] conflicts = ch.getConflicts();
