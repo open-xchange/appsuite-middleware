@@ -25,22 +25,6 @@ postFix() {
   local version=$1
 }
 
-isrunning() {
-    local pidfile=/var/run/open-xchange-admin.pid
-    if [ ! -f $pidfile ]; then
-        # not running
-        return 1
-    fi
-    read PID < $pidfile
-    running=$(ps $PID | grep $PID)
-    if [ -n "$running" ]; then
-        # running
-        return 0
-    else
-        # not running
-        return 1
-    fi
-}
 
 case "$1" in
     configure)
