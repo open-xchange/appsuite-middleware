@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Theme Publisher Bundle
-Bundle-SymbolicName: com.openexchange.themes
+Bundle-Name: Dynamic ConfigTree Settings
+Bundle-SymbolicName: com.openexchange.groupware.settings.extensions
 Bundle-Version: 6.5.0
-Bundle-Activator: com.openexchange.themes.ThemesActivator
+Bundle-Activator: com.openexchange.groupware.settings.extensions.osgi.Activator
 Bundle-Vendor: Open-Xchange GmbH
 Import-Package: com.openexchange.config,
  com.openexchange.groupware.contexts,

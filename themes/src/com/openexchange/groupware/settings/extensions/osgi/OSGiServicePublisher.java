@@ -46,66 +46,42 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.groupware.settings.extensions.osgi;
 
-package com.openexchange.themes;
+import com.openexchange.groupware.settings.extensions.ServicePublisher;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.BundleContext;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.settings.SettingException;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.session.Session;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
- * This class is used to add new themes to the preferences item tree.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class ThemeSetting implements PreferencesItemService {
+public class OSGiServicePublisher implements ServicePublisher {
 
-	/**
-	 * Identifier and name of theme.
-	 */
-	private final String id, name;
+    private Map<Object, ServiceRegistration> serviceRegistrations = new HashMap<Object, ServiceRegistration>();
+    private BundleContext context = null;
 
-	/**
-	 * Default constructor.
-	 * @param id identifier of theme.
-	 * @param name displayed name of theme.
-	 */
-	public ThemeSetting(final String id, final String name) {
-		this.id = id;
-		this.name = name;
-	}
+    public OSGiServicePublisher(BundleContext context) {
+        this.context = context;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public String[] getPath() {
-		return new String[] { "modules", "themes", id };
-	}
+    public void publishService(Class clazz, Object service) {
+        ServiceRegistration registration = context.registerService(clazz.getName(), service, null);
+        serviceRegistrations.put(service, registration);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public IValueHandler getSharedValue() {
-		return new ReadOnlyValue() {
-			/**
-			 * {@inheritDoc}
-			 */
-			public void getValue(Session session, Context ctx, User user,
-					UserConfiguration userConfig, Setting setting)
-					throws SettingException {
-				setting.setSingleValue(name);
-			}
-			/**
-			 * {@inheritDoc}
-			 */
-			public boolean isAvailable(UserConfiguration userConfig) {
-				return true;
-			}
-		};
-	}
+    public void removeService(Class clazz, Object service) {
+        ServiceRegistration registration = serviceRegistrations.get(service);
+        serviceRegistrations.remove(service);
+        registration.unregister();
+    }
+
+    public void removeAllServices() {
+        for(ServiceRegistration registration : serviceRegistrations.values()) {
+            registration.unregister();
+        }
+        serviceRegistrations.clear();
+    }
 }

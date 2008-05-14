@@ -1,4 +1,4 @@
-<project name="com.openexchange.themes" default="install" basedir=".">
+<project name="com.openexchange.groupware.settings.extensions" default="install" basedir=".">
 
     <description>
         Open-Xchange Themes

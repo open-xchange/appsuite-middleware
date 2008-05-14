@@ -1,0 +1,137 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+package com.openexchange.groupware.settings.extensions.osgi;
+
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.groupware.settings.extensions.PropertiesPublisher;
+import com.openexchange.groupware.settings.extensions.ServicePublisher;
+import com.openexchange.config.ConfigurationService;
+
+import java.util.Properties;
+
+/**
+ * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ */
+public class Activator implements BundleActivator {
+
+    private PropertiesPublisher propPublisher;
+    private ServicePublisher services;
+    private static final String SETTINGS_FOLDER = "settings";
+    private BundleContext context;
+    private ServiceTracker serviceTracker;
+
+    private static final Log LOG = LogFactory.getLog(Activator.class);
+
+    public void start(BundleContext bundleContext) throws Exception {
+        services = new OSGiServicePublisher(bundleContext);
+        propPublisher = new PropertiesPublisher();
+        propPublisher.setServicePublisher(services);
+        this.context = bundleContext;
+        registerListenerForConfigurationService();
+    }
+
+    public void stop(BundleContext bundleContext) throws Exception {
+        unregisterListenerForConfigurationService();
+        services.removeAllServices();
+    }
+
+    public void handleConfigurationUpdate(ConfigurationService configuration) {
+        LOG.info("Updating configtree");
+        Properties propertiesToPublishInConfigTree = configuration.getPropertiesInFolder(SETTINGS_FOLDER);
+        propPublisher.publish( propertiesToPublishInConfigTree );
+    }
+
+    private void registerListenerForConfigurationService() {
+        ServiceReference reference = context.getServiceReference(ConfigurationService.class.getName());
+        if(reference != null) {
+            ConfigurationService configuration = (ConfigurationService) context.getService(reference);
+            handleConfigurationUpdate( configuration );
+        }
+        this.serviceTracker = new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationTracker(context, this));
+    }
+
+    private void unregisterListenerForConfigurationService() {
+        this.serviceTracker.close();
+    }
+
+
+    private static final class ConfigurationTracker implements ServiceTrackerCustomizer {
+        private BundleContext context;
+        private Activator activator;
+
+        public ConfigurationTracker(BundleContext context, Activator activator) {
+            this.context = context;
+            this.activator = activator;
+
+        }
+
+        public Object addingService(ServiceReference serviceReference) {
+            final Object addedService = context.getService(serviceReference);
+            if(ConfigurationService.class.isAssignableFrom(serviceReference.getClass())) {
+                activator.handleConfigurationUpdate((ConfigurationService) addedService);
+            }
+            return addedService;
+        }
+
+        public void modifiedService(ServiceReference serviceReference, Object o) {
+            // IGNORE
+        }
+
+        public void removedService(ServiceReference serviceReference, Object o) {
+            // IGNORE
+        }
+    }
+
+}
