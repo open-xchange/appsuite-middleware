@@ -1291,8 +1291,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 						LOG.warn("Missing \\Draft flag on action=autosave in JSON message object", new Throwable());
 						composedMail.setFlag(MailMessage.FLAG_DRAFT, true);
 					}
-					if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT
-							&& (composedMail.getMsgref() != null)) {
+					if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT) {
 						/*
 						 * ... and autosave draft
 						 */

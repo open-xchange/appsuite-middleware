@@ -749,19 +749,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		if (!draftMail.isDraft()) {
 			draftMail.setFlag(MailMessage.FLAG_DRAFT, true);
 		}
-		/*
-		 * Check for attachments and add them
-		 */
-		final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
-		new MailMessageParser().parseMailMessage(draftMail.getReferencedMail(), handler);
-		final List<MailPart> parts = handler.getNonInlineParts();
-		final TransportProvider tp = TransportProviderRegistry.getTransportProviderBySession(session);
-		for (final MailPart mailPart : parts) {
-			/*
-			 * Create and add a referenced part from original draft mail
-			 */
-			draftMail.addEnclosedPart(tp.getNewReferencedPart(mailPart.getSequenceId()));
-		}
+		if (null != draftMail.getReferencedMail()) {
+            /*
+             * Check for attachments and add them
+             */
+            final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
+            new MailMessageParser().parseMailMessage(draftMail.getReferencedMail(), handler);
+            final List<MailPart> parts = handler.getNonInlineParts();
+            final TransportProvider tp = TransportProviderRegistry.getTransportProviderBySession(session);
+            for (final MailPart mailPart : parts) {
+                /*
+                 * Create and add a referenced part from original draft mail
+                 */
+                draftMail.addEnclosedPart(tp.getNewReferencedPart(mailPart.getSequenceId()));
+            }
+        }
 		/*
 		 * Load referenced mail parts from original message
 		 */
