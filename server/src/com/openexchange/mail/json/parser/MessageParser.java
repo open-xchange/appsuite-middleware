@@ -130,7 +130,7 @@ public final class MessageParser {
 			 * Parse transport message plus its text body
 			 */
 			final ComposedMailMessage composedMail = parse(jsonObj, session, provider);
-			{
+			if (null != uploadEvent) {
 				/*
 				 * Uploaded files
 				 */
