@@ -52,6 +52,8 @@ package com.openexchange.mail;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 
+import java.util.List;
+
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
@@ -67,9 +69,15 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
+import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.parser.MailMessageParser;
+import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.SearchUtility;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.TransportProvider;
+import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
@@ -713,7 +721,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	}
 
 	@Override
-	public String saveDraft(final ComposedMailMessage draftMail) throws MailException {
+	public String saveDraft(final ComposedMailMessage draftMail, final boolean autosave) throws MailException {
+		if (autosave) {
+			return autosaveDraft(draftMail);
+		}
 		initConnection();
 		if (draftMail.getMsgref() != null) {
 			final MailPath path = new MailPath(draftMail.getMsgref());
@@ -722,6 +733,69 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		}
 		final String draftsFullname = prepareMailFolderParam(mailAccess.getFolderStorage().getDraftsFolder());
 		return mailAccess.getMessageStorage().saveDraft(draftsFullname, draftMail).getMailPath().toString();
+	}
+
+	private String autosaveDraft(final ComposedMailMessage draftMail) throws MailException {
+		initConnection();
+		if (draftMail.getMsgref() != null) {
+			final MailPath path = new MailPath(draftMail.getMsgref());
+			draftMail.setReferencedMail(mailAccess.getMessageStorage().getMessage(path.getFolder(), path.getUid(),
+					false));
+		} else {
+			throw new MailException(MailException.Code.MISSING_FIELD, "msgref");
+		}
+		final String draftFullname = prepareMailFolderParam(mailAccess.getFolderStorage().getDraftsFolder());
+		/*
+		 * Autosave draft
+		 */
+		if (!draftMail.isDraft()) {
+			draftMail.setFlag(MailMessage.FLAG_DRAFT, true);
+		}
+		/*
+		 * Check for attachments and add them
+		 */
+		final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
+		new MailMessageParser().parseMailMessage(draftMail.getReferencedMail(), handler);
+		final List<MailPart> parts = handler.getNonInlineParts();
+		final TransportProvider tp = TransportProviderRegistry.getTransportProviderBySession(session);
+		for (final MailPart mailPart : parts) {
+			/*
+			 * Create and add a referenced part from original draft mail
+			 */
+			draftMail.addEnclosedPart(tp.getNewReferencedPart(mailPart.getSequenceId()));
+		}
+		/*
+		 * Load referenced mail parts from original message
+		 */
+		final List<String> tempIds = ReferencedMailPart.loadReferencedParts(draftMail, draftMail.getSession());
+		final long uid;
+		try {
+			final MailMessage filledMail = MIMEMessageConverter.fillComposedMailMessage(draftMail);
+			filledMail.setFlag(MailMessage.FLAG_DRAFT, true);
+			/*
+			 * Append message to draft folder
+			 */
+			uid = mailAccess.getMessageStorage().appendMessages(draftFullname, new MailMessage[] { filledMail })[0];
+		} finally {
+			draftMail.release();
+			for (final String id : tempIds) {
+				draftMail.getSession().removeUploadedFile(id);
+			}
+		}
+		/*
+		 * Check for draft-edit operation: Delete old version
+		 */
+		if (draftMail.getReferencedMail() != null) {
+			if (draftMail.getReferencedMail().isDraft()) {
+				deleteMessages(draftMail.getReferencedMail().getFolder(), new long[] { draftMail.getReferencedMail()
+						.getMailId() }, true);
+			}
+			draftMail.setMsgref(null);
+		}
+		/*
+		 * Return draft mail
+		 */
+		return mailAccess.getMessageStorage().getMessage(draftFullname, uid, true).getMailPath().toString();
 	}
 
 	@Override

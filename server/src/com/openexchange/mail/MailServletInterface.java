@@ -229,10 +229,13 @@ public abstract class MailServletInterface {
 	 * 
 	 * @param draftMail
 	 *            The draft mail
+	 * @param autosave
+	 *            <code>true</code> to indicate an auto-save operation;
+	 *            otherwise <code>false</code>
 	 * @return The stored draft's mail path
 	 * @throws MailException
 	 */
-	public abstract String saveDraft(ComposedMailMessage draftMail) throws MailException;
+	public abstract String saveDraft(ComposedMailMessage draftMail, boolean autosave) throws MailException;
 
 	/**
 	 * Sends a read acknowledgement to given message

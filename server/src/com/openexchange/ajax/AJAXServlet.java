@@ -107,6 +107,7 @@ import com.openexchange.tools.servlet.UploadServletException;
 
 /**
  * This is a super class of all AJAX servlets providing common methods.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class AJAXServlet extends HttpServlet implements UploadRegistry {
@@ -135,7 +136,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	// Action Values
 	public static final String ACTION_APPEND = "append";
 
+	public static final String ACTION_AUTOSAVE = "autosave";
+
 	public static final String ACTION_NEW = "new";
+
+	public static final String ACTION_EDIT = "edit";
 
 	public static final String ACTION_CONFIG = "config";
 
@@ -768,11 +773,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			final String key = substitutions[i];
 			String value = substitutions[++i];
 			value = value.replaceAll("\\\\", "\\\\\\\\"); // fix for 7583:
-															// replaces \ with
-															// \\, because \\ is
-															// later replaced
-															// with \ in
-															// String.replaceAll()
+			// replaces \ with
+			// \\, because \\ is
+			// later replaced
+			// with \ in
+			// String.replaceAll()
 			value = value.replaceAll("\\$", "\\\\\\$"); // Escape-O-Rama. Turn
 			// all $ in \$
 			s = s.replaceAll("\\*\\*" + key + "\\*\\*", value);

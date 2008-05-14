@@ -151,7 +151,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.utility.VersitUtility;
 
 /**
- * Mail - the servlet to handle mail requests
+ * {@link Mail} - The servlet to handle mail requests
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -334,6 +334,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 			actionPutMailSearch(req, resp);
 		} else if (actionStr.equalsIgnoreCase(ACTION_CLEAR)) {
 			actionPutClear(req, resp);
+		} else if (actionStr.equalsIgnoreCase(ACTION_AUTOSAVE)) {
+			actionPutAutosave(req, resp);
 		} else {
 			throw new Exception("Unknown value in parameter " + PARAMETER_ACTION + " through PUT command");
 		}
@@ -1249,6 +1251,91 @@ public class Mail extends PermissionServlet implements UploadListener {
 			}
 		}
 		return tmp.toString();
+	}
+
+	private final void actionPutAutosave(final HttpServletRequest req, final HttpServletResponse resp)
+			throws IOException, ServletException {
+		try {
+			actionPutAutosave(getSessionObject(req), getBody(req), ParamContainer.getInstance(req, EnumComponent.MAIL,
+					resp), null, resp.getWriter());
+		} catch (final JSONException e) {
+			sendErrorAsJS(resp, RESPONSE_ERROR);
+		}
+	}
+
+	private final void actionPutAutosave(final Session session, final String body,
+			final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg, final PrintWriter writer) throws JSONException {
+		/*
+		 * Some variables
+		 */
+		final Response response = new Response();
+		try {
+			/*
+			 * Autosave draft
+			 */
+			MailServletInterface mailInterface = mailInterfaceArg;
+			boolean closeMailInterface = false;
+			try {
+				if (mailInterface == null) {
+					mailInterface = MailServletInterface.getInstance(session);
+					closeMailInterface = true;
+				}
+				String msgIdentifier = null;
+				{
+					final JSONObject jsonMailObj = new JSONObject(body);
+					/*
+					 * Parse
+					 */
+					final ComposedMailMessage composedMail = MessageParser.parse(jsonMailObj, (UploadEvent) null, session);
+					if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == 0) {
+						LOG.warn("Missing \\Draft flag on action=autosave in JSON message object", new Throwable());
+						composedMail.setFlag(MailMessage.FLAG_DRAFT, true);
+					}
+					if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT
+							&& (composedMail.getMsgref() != null)) {
+						/*
+						 * ... and autosave draft
+						 */
+						msgIdentifier = mailInterface.saveDraft(composedMail, true);
+					} else {
+						throw new MailException(MailException.Code.UNEXPECTED_ERROR,
+								"No new message on action=edit");
+					}
+				}
+				if (msgIdentifier == null) {
+					throw new MailException(MailException.Code.SEND_FAILED_UNKNOWN);
+				}
+				/*
+				 * Fill JSON response object
+				 */
+				response.setData(msgIdentifier);
+				final String jsResponse = JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
+						Matcher.quoteReplacement(response.getJSON().toString())).replaceFirst(JS_FRAGMENT_ACTION,
+						ACTION_AUTOSAVE);
+				writer.write(jsResponse);
+				writer.flush();
+			} finally {
+				if (closeMailInterface && mailInterface != null) {
+					mailInterface.close(true);
+				}
+			}
+		} catch (final AbstractOXException e) {
+			LOG.error(e.getMessage(), e);
+			response.setException(e);
+			final String jsResponse = JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
+					Matcher.quoteReplacement(response.getJSON().toString())).replaceFirst(JS_FRAGMENT_ACTION,
+							ACTION_AUTOSAVE);
+			writer.write(jsResponse);
+			writer.flush();
+		} catch (final Exception e) {
+			LOG.error("actionPutAutosave", e);
+			response.setException(getWrappingOXException(e));
+			final String jsResponse = JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
+					Matcher.quoteReplacement(response.getJSON().toString())).replaceFirst(JS_FRAGMENT_ACTION,
+							ACTION_AUTOSAVE);
+			writer.write(jsResponse);
+			writer.flush();
+		}
 	}
 
 	public void actionPutClear(final Session session, final JSONWriter writer, final JSONObject jsonObj,
@@ -2372,7 +2459,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 							 * ... and save draft
 							 */
 							msgIdentifier = ((MailServletInterface) uploadEvent
-									.getParameter(UPLOAD_PARAM_MAILINTERFACE)).saveDraft(composedMail);
+									.getParameter(UPLOAD_PARAM_MAILINTERFACE)).saveDraft(composedMail, false);
 						} else {
 							/*
 							 * ... and send message
@@ -2382,6 +2469,44 @@ public class Mail extends PermissionServlet implements UploadListener {
 									.getInt(PARAMETER_SEND_TYPE)) : ComposeType.NEW;
 							msgIdentifier = ((MailServletInterface) uploadEvent
 									.getParameter(UPLOAD_PARAM_MAILINTERFACE)).sendMessage(composedMail, sendType);
+						}
+					}
+					if (msgIdentifier == null) {
+						throw new MailException(MailException.Code.SEND_FAILED_UNKNOWN);
+					}
+					/*
+					 * Create JSON response object
+					 */
+					final Response response = new Response();
+					response.setData(msgIdentifier);
+					final String jsResponse = JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
+							Matcher.quoteReplacement(response.getJSON().toString())).replaceFirst(JS_FRAGMENT_ACTION,
+							actionStr);
+					writer.write(jsResponse);
+					writer.flush();
+					return true;
+				} else if (uploadEvent.getAction().equals(ACTION_EDIT)) {
+					/*
+					 * Edit draft
+					 */
+					String msgIdentifier = null;
+					{
+						final JSONObject jsonMailObj = new JSONObject(uploadEvent.getFormField(UPLOAD_FORMFIELD_MAIL));
+						/*
+						 * Parse
+						 */
+						final ComposedMailMessage composedMail = MessageParser.parse(jsonMailObj, uploadEvent,
+								(Session) uploadEvent.getParameter(UPLOAD_PARAM_SESSION));
+						if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == MailMessage.FLAG_DRAFT
+								&& (composedMail.getMsgref() != null)) {
+							/*
+							 * ... and edit draft
+							 */
+							msgIdentifier = ((MailServletInterface) uploadEvent
+									.getParameter(UPLOAD_PARAM_MAILINTERFACE)).saveDraft(composedMail, false);
+						} else {
+							throw new MailException(MailException.Code.UNEXPECTED_ERROR,
+									"No new message on action=edit");
 						}
 					}
 					if (msgIdentifier == null) {
