@@ -228,6 +228,27 @@ ox_read_property() {
     sed -n -e "/^$prop/Is/^$prop[:=]\(.*\).*$/\1/p" < $propfile
 }
 
+# usage:
+# ox_remove_property property /path/to/file
+# 
+ox_remove_property() {
+    local prop="$1"
+    local propfile="$2"
+    test -z "$prop"     && die "ox_remove_property: missing prop argument (arg 1)"
+    test -z "$propfile" && die "ox_remove_property: missing propfile argument (arg 2)"
+    test -e "$propfile" || die "ox_remove_property: $propfile does not exist"
+
+    local tmp=${propfile}.tmp$$
+    rm -f $tmp
+    grep -v -E "^$prop[:=]" $propfile > $tmp
+    if [ $? -gt 0 ]; then
+	rm -f $tmp
+	die "ox_remove_property: FATAL: error removing property $prop from $propfile"
+    else
+	mv $tmp $propfile
+    fi
+}
+
 # adding or removing comment (ONLY # supported)
 #
 # usage:
