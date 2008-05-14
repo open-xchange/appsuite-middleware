@@ -53,6 +53,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.cache.impl.FolderCacheNotEnabledException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -189,6 +191,22 @@ public class OXFolderDeleteListener implements DeleteListener {
 					 */
 					OXFolderSQL.updateLastModified(FolderObject.SYSTEM_SHARED_FOLDER_ID, lastModified, mailadmin,
 							writeCon, ctx);
+					/*
+					 * Remove from cache
+					 */
+					if (FolderCacheManager.isInitialized()) {
+						/*
+						 * Invalidate cache
+						 */
+						try {
+							FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID,
+									ctx);
+						} catch (final FolderCacheNotEnabledException e) {
+							LOG.error(e.getMessage(), e);
+						} catch (final OXException e) {
+							LOG.error(e.getMessage(), e);
+						}
+					}
 				}
 			} catch (final OXException e) {
 				LOG.error(e.getMessage(), e);
@@ -232,6 +250,22 @@ public class OXFolderDeleteListener implements DeleteListener {
 						ctx);
 				OXFolderSQL.updateLastModified(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, lastModified, mailadmin, writeCon,
 						ctx);
+				/*
+				 * Remove from cache
+				 */
+				if (FolderCacheManager.isInitialized()) {
+					/*
+					 * Invalidate cache
+					 */
+					try {
+						FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_SHARED_FOLDER_ID, ctx);
+						FolderCacheManager.getInstance().removeFolderObject(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, ctx);
+					} catch (final FolderCacheNotEnabledException e) {
+						LOG.error(e.getMessage(), e);
+					} catch (final OXException e) {
+						LOG.error(e.getMessage(), e);
+					}
+				}
 			} catch (final OXException e) {
 				LOG.error(e.getMessage(), e);
 				throw new DeleteFailedException(e);
