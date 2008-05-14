@@ -76,9 +76,10 @@ import com.openexchange.configuration.SystemConfig;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.text.parser.HTMLParser;
+import com.openexchange.mail.text.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
-import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -89,6 +90,53 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  * 
  */
 public final class HTMLProcessing {
+
+	/**
+	 * Performs all the formatting for text content for a proper display
+	 * according to specified user's mail settings.
+	 * 
+	 * @param content
+	 *            The plain text content
+	 * @param usm
+	 *            The settings used for formatting content
+	 * @param mode
+	 *            The display mode
+	 * @see #formatContentForDisplay(String, String, boolean, String, MailPath,
+	 *      UserSettingMail, boolean[], DisplayMode)
+	 * @return The formatted content
+	 */
+	public static String formatTextForDisplay(final String content, final UserSettingMail usm, final DisplayMode mode) {
+		return formatContentForDisplay(content, null, false, null, null, usm, null, mode);
+	}
+
+	/**
+	 * Performs all the formatting for HTML content for a proper display
+	 * according to specified user's mail settings.
+	 * 
+	 * @param content
+	 *            The HTML content
+	 * @param charset
+	 *            The character encoding
+	 * @param secretCookieID
+	 *            The session's secret cookie identifier (used to compose valid
+	 *            URLs)
+	 * @param mailPath
+	 *            The message's unique path in mailbox
+	 * @param usm
+	 *            The settings used for formatting content
+	 * @param modified
+	 *            A <code>boolean</code> array with length <code>1</code> to
+	 *            store modified status of external images filter
+	 * @param mode
+	 *            The display mode
+	 * @see #formatContentForDisplay(String, String, boolean, String, MailPath,
+	 *      UserSettingMail, boolean[], DisplayMode)
+	 * @return The formatted content
+	 */
+	public static String formatHTMLForDisplay(final String content, final String charset, final String secretCookieID,
+			final MailPath mailPath, final UserSettingMail usm, final boolean[] modified, final DisplayMode mode) {
+		return formatContentForDisplay(content, charset, true, secretCookieID, mailPath, usm, modified, mode);
+	}
 
 	/**
 	 * Performs all the formatting for both text and HTML content for a proper
@@ -111,25 +159,37 @@ public final class HTMLProcessing {
 	 * 
 	 * @param content
 	 *            The content
+	 * @param charset
+	 *            The character encoding (only needed by HTML content; may be
+	 *            <code>null</code> on plain text)
 	 * @param isHtml
 	 *            <code>true</code> if content is of type
 	 *            <code>text/html</code>; otherwise <code>false</code>
-	 * @param session
-	 *            The session providing needed user data
+	 * @param secretCookieID
+	 *            The session's secret cookie identifier (used to compose valid
+	 *            URLs)
 	 * @param mailPath
 	 *            The message's unique path in mailbox
 	 * @param usm
 	 *            The settings used for formatting content
+	 * @param modified
+	 *            A <code>boolean</code> array with length <code>1</code> to
+	 *            store modified status of external images filter (only needed
+	 *            by HTML content; may be <code>null</code> on plain text)
 	 * @param mode
 	 *            The display mode
 	 * @return The formatted content
 	 */
-	public static String formatContentForDisplay(final String content, final boolean isHtml, final Session session,
-			final MailPath mailPath, final UserSettingMail usm, final DisplayMode mode) {
-		String retval = content;
+	public static String formatContentForDisplay(final String content, final String charset, final boolean isHtml,
+			final String secretCookieID, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified,
+			final DisplayMode mode) {
+		String retval = isHtml ? getConformHTML(content, charset == null ? "UTF-8" : charset) : content;
 		if (isHtml) {
 			if (DisplayMode.DISPLAY.equals(mode) && usm.isDisplayHtmlInlineContent()) {
-				retval = filterImages(retval, session, usm, mailPath);
+				if (!usm.isAllowHTMLImages()) {
+					retval = filterExternalImages(retval, modified);
+				}
+				retval = filterInlineImages(retval, secretCookieID, usm, mailPath);
 			}
 		} else {
 			if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
@@ -229,7 +289,7 @@ public final class HTMLProcessing {
 	private static final String RPL_CT = "#CT#";
 
 	private static final String HTML_META_TEMPLATE = "\r\n    <meta content=\"" + RPL_CT
-			+ "\" http-equiv=\"Content-Type\">";
+			+ "\" http-equiv=\"Content-Type\" />";
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HTMLProcessing.class);
@@ -914,6 +974,23 @@ public final class HTMLProcessing {
 		return -1;
 	}
 
+	/**
+	 * Filters externally loaded images out of specified HTML content
+	 * 
+	 * @param htmlContent
+	 *            The HTML content
+	 * @param modified
+	 *            A <code>boolean</code> array with length <code>1</code> to
+	 *            store modified status
+	 * @return The filtered HTML content
+	 */
+	public static String filterExternalImages(final String htmlContent, final boolean[] modified) {
+		final HTMLImageFilterHandler handler = new HTMLImageFilterHandler(htmlContent.length());
+		HTMLParser.parse(htmlContent, handler);
+		modified[0] |= handler.isImageURLFound();
+		return handler.getHTML();
+	}
+
 	private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
 	private static final Pattern CID_PATTERN = Pattern.compile("(?:src=cid:([^\\s>]*))|(?:src=\"cid:([^\"]*)\")",
@@ -922,45 +999,35 @@ public final class HTMLProcessing {
 	private static final Pattern FILENAME_PATTERN = Pattern.compile(
 			"src=\"?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)\"?", Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern SRC_PATTERN = Pattern.compile("src=", Pattern.CASE_INSENSITIVE);
-
 	private static final String STR_AJAX_MAIL = "\"/ajax/mail?";
 
 	private static final String STR_SRC = "src=";
 
-	private static final String STR_OXSRC = "oxsrc=";
-
 	private static final String CHARSET_ISO8859 = "ISO-8859-1";
 
 	/**
-	 * Filters images occurring in HTML content of a message:
+	 * Filters inline images occurring in HTML content of a message:
 	 * <ul>
 	 * <li>Inline images<br>
 	 * The source of inline images is in the message itself. Thus loading the
 	 * inline image is redirected to the appropriate message (image) attachment
 	 * identified through header <code>Content-Id</code>; e.g.:
 	 * <code>&lt;img src=&quot;cid:[cid-value]&quot; ... /&gt;</code>.</li>
-	 * <li>Non-Inline images<br>
-	 * The source of non-inline images is somewhere in the internet and
-	 * therefore loading such an image should be done with extreme caution.
-	 * That's why the user is able to generally deny/allow loading of non-inline
-	 * images. If denied the <i>"src"</i> attribute of corresponding <i>"img"</i>
-	 * tag is replaced with <i>"oxsrc"</i> to suppress image loading but also
-	 * allow front-end load them on demand. </li>
 	 * </ul>
 	 * 
 	 * @param content
 	 *            The HTML content possibly containing images
-	 * @param session
-	 *            The session providing needed user data
+	 * @param secretCookieID
+	 *            The session's secret cookie identifier (used to compose valid
+	 *            URLs)
 	 * @param usm
 	 *            The user's mail settings
 	 * @param msgUID
 	 *            The message's unique path in mailbox
 	 * @return The HTML content with all inline images replaced with valid links
 	 */
-	public static String filterImages(final String content, final Session session, final UserSettingMail usm,
-			final MailPath msgUID) {
+	public static String filterInlineImages(final String content, final String secretCookieID,
+			final UserSettingMail usm, final MailPath msgUID) {
 		String reval = content;
 		try {
 			final Matcher imgMatcher = IMG_PATTERN.matcher(reval);
@@ -972,38 +1039,24 @@ public final class HTMLProcessing {
 				 */
 				do {
 					final String imgTag = imgMatcher.group();
-					boolean isInline = false;
-					if (!(isInline = replaceImgSrc(session, msgUID, imgTag, strBuffer))) {
+					if (!(replaceImgSrc(secretCookieID, msgUID, imgTag, strBuffer))) {
 						/*
 						 * No cid pattern found, try with filename
 						 */
 						strBuffer.setLength(0);
 						final Matcher m = FILENAME_PATTERN.matcher(imgTag);
 						if (m.find()) {
-							isInline = true;
 							final StringBuilder linkBuilder = new StringBuilder(256);
 							final String filename = m.group(1);
 							linkBuilder.append(STR_SRC).append(STR_AJAX_MAIL).append(AJAXServlet.PARAMETER_SESSION)
-									.append('=').append(session.getSecret()).append('&').append(
-											AJAXServlet.PARAMETER_ACTION).append('=')
+									.append('=').append(secretCookieID).append('&')
+									.append(AJAXServlet.PARAMETER_ACTION).append('=')
 									.append(AJAXServlet.ACTION_MATTACH).append('&').append(
 											AJAXServlet.PARAMETER_FOLDERID).append('=').append(
 											urlEncodeSafe(msgUID.getFolder(), CHARSET_ISO8859)).append('&').append(
 											AJAXServlet.PARAMETER_ID).append('=').append(msgUID.getUid()).append('&')
 									.append(Mail.PARAMETER_MAILCID).append('=').append(filename).append('"');
 							m.appendReplacement(strBuffer, Matcher.quoteReplacement(linkBuilder.toString()));
-						}
-						m.appendTail(strBuffer);
-					}
-					if (!isInline && !(usm.isAllowHTMLImages())) {
-						/*
-						 * User does not allow to display images by default:
-						 * Replace "src" with "oxsrc"
-						 */
-						strBuffer.setLength(0);
-						final Matcher m = SRC_PATTERN.matcher(imgTag);
-						if (m.find()) {
-							m.appendReplacement(strBuffer, Matcher.quoteReplacement(STR_OXSRC));
 						}
 						m.appendTail(strBuffer);
 					}
@@ -1019,7 +1072,7 @@ public final class HTMLProcessing {
 		return reval;
 	}
 
-	private static boolean replaceImgSrc(final Session session, final MailPath msgUID, final String imgTag,
+	private static boolean replaceImgSrc(final String secretCookieID, final MailPath msgUID, final String imgTag,
 			final StringBuffer cidBuffer) {
 		boolean retval = false;
 		final Matcher cidMatcher = CID_PATTERN.matcher(imgTag);
@@ -1030,8 +1083,8 @@ public final class HTMLProcessing {
 				final String cid = (cidMatcher.group(1) == null ? cidMatcher.group(2) : cidMatcher.group(1));
 				linkBuilder.setLength(0);
 				linkBuilder.append(STR_SRC).append(STR_AJAX_MAIL).append(AJAXServlet.PARAMETER_SESSION).append('=')
-						.append(session.getSecret()).append('&').append(AJAXServlet.PARAMETER_ACTION).append('=')
-						.append(AJAXServlet.ACTION_MATTACH).append('&').append(AJAXServlet.PARAMETER_FOLDERID).append(
+						.append(secretCookieID).append('&').append(AJAXServlet.PARAMETER_ACTION).append('=').append(
+								AJAXServlet.ACTION_MATTACH).append('&').append(AJAXServlet.PARAMETER_FOLDERID).append(
 								'=').append(urlEncodeSafe(msgUID.getFolder(), CHARSET_ISO8859)).append('&').append(
 								AJAXServlet.PARAMETER_ID).append('=').append(msgUID.getUid()).append('&').append(
 								Mail.PARAMETER_MAILCID).append('=').append(cid).append('"');

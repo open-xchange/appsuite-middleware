@@ -52,6 +52,7 @@ package com.openexchange.mail.text.parser.handler;
 import static com.openexchange.mail.text.CSSMatcher.checkCSS;
 import static com.openexchange.mail.text.CSSMatcher.checkCSSElements;
 import static com.openexchange.mail.text.CSSMatcher.containsCSSElement;
+import static com.openexchange.mail.text.HTMLProcessing.PATTERN_HREF;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -59,12 +60,25 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
-import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.mail.text.parser.HTMLHandler;
 
 /**
- * {@link HTMLImageFilterHandler}
+ * {@link HTMLImageFilterHandler} - Removes all possible sources of externally
+ * loaded images inside HTML content.
+ * <p>
+ * By now the following possible sources are handled:
+ * <ol>
+ * <li> <code>'&lt;img src=&quot;...&quot; /&gt;'</code> --&gt;
+ * <code>'&lt;img src=&quot;&quot; /&gt;'</code> </li>
+ * <li> <code>'&lt;input src=&quot;...&quot; /&gt;'</code> --&gt;
+ * <code>'&lt;input src=&quot;&quot; /&gt;'</code> </li>
+ * <li> <code>'&lt;sometag background=&quot;an-url&quot;&gt;'</code> --&gt;
+ * <code>'&lt;sometag background=&quot;&quot;&gt;'</code> </li>
+ * <li> Removed CSS: <code>background: url(an-url);</code> </li>
+ * <li> Removed CSS: <code>background-image: url(an-url);</code> </li>
+ * </ol>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -85,6 +99,8 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 	private static final String STYLE = "style";
 
 	private static final String IMG = "img";
+
+	private static final String INPUT = "input";
 
 	private static final Map<String, Set<String>> STYLE_MAP;
 
@@ -124,11 +140,11 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 
 	private boolean imageURLFound;
 
-	private final String[] result;
+	private final StringBuffer cssBuffer;
 
 	public HTMLImageFilterHandler(final int capacity) {
 		super();
-		result = new String[1];
+		cssBuffer = new StringBuffer(256);
 		htmlBuilder = new StringBuilder(capacity);
 		attrBuilder = new StringBuilder(128);
 	}
@@ -144,9 +160,9 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 			/*
 			 * Handle style attribute
 			 */
-			imageURLFound |= checkCSS(text, STYLE_MAP, true, false, result);
-			final String checkedCSS = result[0];
-			htmlBuilder.append(checkedCSS);
+			imageURLFound |= checkCSS(cssBuffer.append(text), STYLE_MAP, true, false);
+			htmlBuilder.append(cssBuffer.toString());
+			cssBuffer.setLength(0);
 		} else {
 			htmlBuilder.append(text);
 		}
@@ -168,7 +184,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleDocDeclaration(java.lang.String)
 	 */
 	public void handleDocDeclaration(final String docDecl) {
-		htmlBuilder.append("<!DOCTYPE").append(docDecl).append('>');
+		htmlBuilder.append("<!DOCTYPE").append(docDecl).append('>').append(CRLF).append(CRLF);
 	}
 
 	/*
@@ -191,6 +207,10 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 	public void handleError(final String errorMsg) {
 	}
 
+	private static final String CID = "cid:";
+
+	private static final Pattern PATTERN_FILENAME = Pattern.compile("([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)");
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -198,15 +218,24 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 	 *      java.util.Map)
 	 */
 	public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
-		if (IMG.equals(tag)) {
-			attributes.put(SRC, BLANK);
+		if (IMG.equals(tag) || INPUT.equals(tag)) {
+			final String src = attributes.get(SRC);
+			if (null == src) {
+				attributes.put(SRC, BLANK);
+			} else if (!(src.regionMatches(true, 0, CID, 0, 4)) && !(PATTERN_FILENAME.matcher(src).matches())) {
+				/*
+				 * Don't replace inline images
+				 */
+				attributes.put(SRC, BLANK);
+			}
 			imageURLFound = true;
 		} else if (attributes.containsKey(BACKGROUND)) {
+			final String val = attributes.get(BACKGROUND);
 			/*
 			 * Check for URL inside background attribute
 			 */
 			try {
-				if (HTMLProcessing.PATTERN_HREF.matcher(attributes.get(BACKGROUND)).matches()) {
+				if (PATTERN_HREF.matcher(attributes.get(BACKGROUND)).matches()) {
 					attributes.put(BACKGROUND, BLANK);
 					imageURLFound = true;
 				}
@@ -225,18 +254,23 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 	 *      java.util.Map)
 	 */
 	public void handleStartTag(final String tag, final Map<String, String> attributes) {
-		if (attributes.containsKey(BACKGROUND)) {
-			/*
-			 * Check for URL inside background attribute
-			 */
-			try {
-				if (HTMLProcessing.PATTERN_HREF.matcher(attributes.get(BACKGROUND)).matches()) {
-					attributes.put(BACKGROUND, BLANK);
-					imageURLFound = true;
+		if (STYLE.equals(tag)) {
+			isCss = true;
+		} else {
+			if (attributes.containsKey(BACKGROUND)) {
+				final String val = attributes.get(BACKGROUND);
+				/*
+				 * Check for URL inside background attribute
+				 */
+				try {
+					if (PATTERN_HREF.matcher(attributes.get(BACKGROUND)).matches()) {
+						attributes.put(BACKGROUND, BLANK);
+						imageURLFound = true;
+					}
+				} catch (final StackOverflowError e) {
+					LOG.error(e.getMessage(), e);
+					attributes.remove(BACKGROUND);
 				}
-			} catch (final StackOverflowError e) {
-				LOG.error(e.getMessage(), e);
-				attributes.remove(BACKGROUND);
 			}
 		}
 		handleStart(tag, attributes, false);
@@ -254,8 +288,9 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 				/*
 				 * Handle style attribute
 				 */
-				imageURLFound |= checkCSSElements(e.getValue(), STYLE_MAP, false, result);
-				final String checkedCSS = result[0];
+				imageURLFound |= checkCSSElements(cssBuffer.append(e.getValue()), STYLE_MAP, false);
+				final String checkedCSS = cssBuffer.toString();
+				cssBuffer.setLength(0);
 				if (containsCSSElement(checkedCSS)) {
 					attrBuilder.append(' ').append(STYLE).append(VAL_START).append(checkedCSS).append('"');
 				}
@@ -265,7 +300,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 		}
 		if (simple) {
 			if (attrBuilder.length() > 0) {
-				htmlBuilder.append('<').append(tag).append(attrBuilder.toString()).append('/').append('>');
+				htmlBuilder.append('<').append(tag).append(attrBuilder.toString()).append(' ').append('/').append('>');
 			}
 		} else {
 			htmlBuilder.append('<').append(tag).append(attrBuilder.toString()).append('>');
@@ -286,9 +321,9 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 				/*
 				 * Handle style attribute
 				 */
-				imageURLFound |= checkCSS(text, STYLE_MAP, true, false, result);
-				final String checkedCSS = result[0];
-				htmlBuilder.append(checkedCSS);
+				imageURLFound |= checkCSS(cssBuffer.append(text), STYLE_MAP, true, false);
+				htmlBuilder.append(cssBuffer.toString());
+				cssBuffer.setLength(0);
 			}
 		} else {
 			htmlBuilder.append(text);
@@ -324,9 +359,10 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 	}
 
 	/**
-	 * Gets the imageURLFound
+	 * Indicates if an image source has been found (and suppressed)
 	 * 
-	 * @return the imageURLFound
+	 * @return <code>true</code> if an image source has been found; otherwise
+	 *         <code>false</code>
 	 */
 	public boolean isImageURLFound() {
 		return imageURLFound;

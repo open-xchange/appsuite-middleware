@@ -252,8 +252,8 @@ public final class CSSMatcher {
 	 * Iterates over CSS blocks contained in specified string argument and
 	 * checks each block against given style map
 	 * 
-	 * @param css
-	 *            The CSS string
+	 * @param cssBuffer
+	 *            A {@link StringBuffer} containing CSS content
 	 * @param styleMap
 	 *            The style map
 	 * @param findBlocks
@@ -262,29 +262,30 @@ public final class CSSMatcher {
 	 * @param removeIfAbsent
 	 *            <code>true</code> to completely remove CSS element if not
 	 *            contained in specified style map; otherwise <code>false</code>
-	 * @param result
-	 *            An array of {@link String} with length <code>1</code> to
-	 *            store modified CSS string.
 	 * @return <code>true</code> if modified; otherwise <code>false</code>
 	 */
-	public static boolean checkCSS(final String css, final Map<String, Set<String>> styleMap, final boolean findBlocks,
-			final boolean removeIfAbsent, final String[] result) {
+	public static boolean checkCSS(final StringBuffer cssBuffer, final Map<String, Set<String>> styleMap,
+			final boolean findBlocks, final boolean removeIfAbsent) {
 		if (findBlocks) {
 			boolean modified = false;
-			final StringBuffer sb = new StringBuffer(css.length());
+			final StringBuffer cssElemsBuffer = new StringBuffer(128);
 			final StringBuilder cssBuilder = new StringBuilder(128);
-			final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
+			/*
+			 * Feed matcher with buffer's content and reset
+			 */
+			final Matcher m = PATTERN_STYLE_BLOCK.matcher(cssBuffer.toString());
+			cssBuffer.setLength(0);
 			while (m.find()) {
-				modified |= checkCSSElements(m.group(2), styleMap, removeIfAbsent, result);
-				final String checkedCSS = result[0];
+				modified |= checkCSSElements(cssElemsBuffer.append(m.group(2)), styleMap, removeIfAbsent);
 				cssBuilder.setLength(0);
-				m.appendReplacement(sb, cssBuilder.append(m.group(1)).append(checkedCSS).append('}').toString());
+				m.appendReplacement(cssBuffer, Matcher.quoteReplacement(cssBuilder.append(m.group(1)).append(
+						cssElemsBuffer.toString()).append('}').toString()));
+				cssElemsBuffer.setLength(0);
 			}
-			m.appendTail(sb);
-			result[0] = sb.toString();
+			m.appendTail(cssBuffer);
 			return modified;
 		}
-		return checkCSSElements(css, styleMap, removeIfAbsent, result);
+		return checkCSSElements(cssBuffer, styleMap, removeIfAbsent);
 	}
 
 	private static final Pattern PATTERN_STYLE_LINE = Pattern.compile(
@@ -293,44 +294,40 @@ public final class CSSMatcher {
 	/**
 	 * Corrects rgb functions; e.g.<br>"<i>rgb(238,&nbsp;239,&nbsp;240)</i>"&nbsp;-&gt;&nbsp;"<i>rgb(238,239,240)</i>"
 	 * 
-	 * @param css
-	 *            The CSS string
-	 * @param sb
-	 *            A string buffer
-	 * @return Corrected CSS string
+	 * @param cssBuffer
+	 *            A {@link StringBuffer} containing CSS content
 	 */
-	private static String correctRGBFunc(final String css, final StringBuffer sb) {
-		final Matcher rgb = PATTERN_COLOR_RGB.matcher(css);
+	private static void correctRGBFunc(final StringBuffer cssBuffer) {
+		final Matcher rgb = PATTERN_COLOR_RGB.matcher(cssBuffer.toString());
+		cssBuffer.setLength(0);
 		while (rgb.find()) {
-			rgb.appendReplacement(sb, rgb.group().replaceAll("\\s+", ""));
+			rgb.appendReplacement(cssBuffer, Matcher.quoteReplacement(rgb.group().replaceAll("\\s+", "")));
 		}
-		rgb.appendTail(sb);
-		return sb.toString();
+		rgb.appendTail(cssBuffer);
 	}
 
 	/**
 	 * Iterates over CSS elements contained in specified string argument and
 	 * checks each element and its value against given style map
 	 * 
-	 * @param cssArg
-	 *            The CSS string
+	 * @param cssBuffer
+	 *            A {@link StringBuffer} containing the CSS content
 	 * @param styleMap
 	 *            The style map
 	 * @param removeIfAbsent
 	 *            <code>true</code> to completely remove CSS element if not
 	 *            contained in specified style map; otherwise <code>false</code>
-	 * @param result
-	 *            An array of {@link String} with length <code>1</code> to
-	 *            store modified CSS string.
 	 * @return <code>true</code> if modified; otherwise <code>false</code>
 	 */
-	public static boolean checkCSSElements(final String cssArg, final Map<String, Set<String>> styleMap,
-			final boolean removeIfAbsent, final String[] result) {
+	public static boolean checkCSSElements(final StringBuffer cssBuffer, final Map<String, Set<String>> styleMap,
+			final boolean removeIfAbsent) {
 		boolean modified = false;
-		final StringBuffer sb = new StringBuffer(cssArg.length());
-		final String css = correctRGBFunc(cssArg, sb);
-		sb.setLength(0);
-		final Matcher m = PATTERN_STYLE_LINE.matcher(css);
+		correctRGBFunc(cssBuffer);
+		/*
+		 * Feed matcher with buffer's content and reset
+		 */
+		final Matcher m = PATTERN_STYLE_LINE.matcher(cssBuffer.toString());
+		cssBuffer.setLength(0);
 		final StringBuilder elemBuilder = new StringBuilder(128);
 		while (m.find()) {
 			final String elementName = m.group(1);
@@ -361,13 +358,13 @@ public final class CSSMatcher {
 				}
 				if (hasValues) {
 					elemBuilder.append(';');
-					m.appendReplacement(sb, Matcher.quoteReplacement(elemBuilder.toString()));
+					m.appendReplacement(cssBuffer, Matcher.quoteReplacement(elemBuilder.toString()));
 				} else {
 					/*
 					 * Remove element since none of its values is allowed
 					 */
 					modified = true;
-					m.appendReplacement(sb, "");
+					m.appendReplacement(cssBuffer, "");
 				}
 				elemBuilder.setLength(0);
 			} else if (removeIfAbsent) {
@@ -375,11 +372,10 @@ public final class CSSMatcher {
 				 * Remove forbidden element
 				 */
 				modified = true;
-				m.appendReplacement(sb, "");
+				m.appendReplacement(cssBuffer, "");
 			}
 		}
-		m.appendTail(sb);
-		result[0] = sb.toString();
+		m.appendTail(cssBuffer);
 		return modified;
 	}
 

@@ -115,7 +115,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
 	private boolean isCss;
 
-	private final String[] result;
+	private final StringBuffer cssBuffer;
 
 	/**
 	 * Initializes a new {@link HTMLFilterHandler}
@@ -130,7 +130,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 	public HTMLFilterHandler(final int capacity, final Map<String, Map<String, Set<String>>> htmlMap,
 			final Map<String, Set<String>> styleMap) {
 		super();
-		result = new String[1];
+		cssBuffer = new StringBuffer(256);
 		htmlBuilder = new StringBuilder(capacity);
 		attrBuilder = new StringBuilder(128);
 		this.htmlMap = htmlMap;
@@ -148,7 +148,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 	 */
 	public HTMLFilterHandler(final int capacity, final String mapStr) {
 		super();
-		result = new String[1];
+		cssBuffer = new StringBuffer(256);
 		htmlBuilder = new StringBuilder(capacity);
 		attrBuilder = new StringBuilder(128);
 		htmlMap = parseHTMLMap(mapStr);
@@ -165,7 +165,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 	 */
 	public HTMLFilterHandler(final int capacity) {
 		super();
-		result = new String[1];
+		cssBuffer = new StringBuffer(256);
 		htmlBuilder = new StringBuilder(capacity);
 		attrBuilder = new StringBuilder(128);
 		if (null == shtmlMap) {
@@ -369,9 +369,9 @@ public final class HTMLFilterHandler implements HTMLHandler {
 				/*
 				 * Handle style attribute
 				 */
-				checkCSS(text, styleMap, true, true, result);
-				final String checkedCSS = result[0];
-				htmlBuilder.append(checkedCSS);
+				checkCSS(cssBuffer.append(text), styleMap, true, true);
+				htmlBuilder.append(cssBuffer.toString());
+				cssBuffer.setLength(0);
 			} else {
 				htmlBuilder.append(text);
 			}
@@ -394,9 +394,9 @@ public final class HTMLFilterHandler implements HTMLHandler {
 					/*
 					 * Handle style attribute
 					 */
-					checkCSS(text, styleMap, true, true, result);
-					final String checkedCSS = result[0];
-					htmlBuilder.append(checkedCSS);
+					checkCSS(cssBuffer.append(text), styleMap, true, true);
+					htmlBuilder.append(cssBuffer.toString());
+					cssBuffer.setLength(0);
 				}
 			} else {
 				htmlBuilder.append(text);
@@ -445,8 +445,9 @@ public final class HTMLFilterHandler implements HTMLHandler {
 				/*
 				 * Handle style attribute
 				 */
-				checkCSSElements(e.getValue(), styleMap, true, result);
-				final String checkedCSS = result[0];
+				checkCSSElements(cssBuffer.append(e.getValue()), styleMap, true);
+				final String checkedCSS = cssBuffer.toString();
+				cssBuffer.setLength(0);
 				if (containsCSSElement(checkedCSS)) {
 					attrBuilder.append(' ').append(STYLE).append(VAL_START).append(checkedCSS).append('"');
 				}

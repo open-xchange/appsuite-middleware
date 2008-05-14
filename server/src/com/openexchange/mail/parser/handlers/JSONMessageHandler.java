@@ -140,6 +140,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
 	private boolean textAppended;
 
+	private final boolean[] modified;
+
 	/**
 	 * Initializes a new {@link JSONMessageHandler}
 	 * 
@@ -159,6 +161,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	public JSONMessageHandler(final String mailPath, final DisplayMode displayMode, final Session session,
 			final UserSettingMail usm) throws MailException {
 		super();
+		modified = new boolean[1];
 		this.session = session;
 		try {
 			this.ctx = ContextStorage.getStorageContext(session.getContextId());
@@ -209,6 +212,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	private JSONMessageHandler(final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode,
 			final Session session, final UserSettingMail usm, final Context ctx) throws MailException {
 		super();
+		modified = new boolean[1];
 		this.session = session;
 		this.ctx = ctx;
 		this.usm = usm;
@@ -539,7 +543,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			 */
 			if (DisplayMode.MODIFYABLE.getMode() <= displayMode.getMode()) {
 				if (usm.isDisplayHtmlInlineContent()) {
-					asDisplayHtml(id, contentType.getBaseType(), htmlContent);
+					asDisplayHtml(id, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
 				} else {
 					asDisplayText(id, contentType.getBaseType(), htmlContent, fileName);
 				}
@@ -606,7 +610,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 				if (DisplayMode.MODIFYABLE.getMode() <= displayMode.getMode()) {
 					if (usm.isDisplayHtmlInlineContent()) {
 						asDisplayHtml(id, contentType.getBaseType(), getHtmlDisplayVersion(contentType,
-								plainTextContentArg));
+								plainTextContentArg), contentType.getCharsetParameter());
 						return true;
 					}
 					asDisplayText(id, contentType.getBaseType(),
@@ -624,8 +628,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 			/*
 			 * Just usual plain text
 			 */
-			final String content = HTMLProcessing.formatContentForDisplay(plainTextContentArg, false, session,
-					mailPath, usm, displayMode);
+			final String content = HTMLProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode);
 			jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
 			jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), contentType.getBaseType());
 			jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
@@ -641,16 +644,16 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	private String getHtmlDisplayVersion(final ContentType contentType, final String src) {
 		if (contentType.isMimeType(MIMETypes.MIME_TEXT_ENRICHED)
 				|| contentType.isMimeType(MIMETypes.MIME_TEXT_RICHTEXT)) {
-			return HTMLProcessing.formatContentForDisplay(ENRCONV.convert(src), true, session, mailPath, usm,
-					displayMode);
+			return HTMLProcessing.formatHTMLForDisplay(ENRCONV.convert(src), contentType.getCharsetParameter(), session
+					.getSecret(), mailPath, usm, modified, displayMode);
 		} else if (contentType.isMimeType(MIMETypes.MIME_TEXT_RTF)) {
 			// TODO: return
 			// MessageUtils.formatContentForDisplay(RTFCONV.convert2HTML(src),
 			// true, session, mailPath,
 			// displayVersion);
-			return HTMLProcessing.formatContentForDisplay(src, false, session, mailPath, usm, displayMode);
+			return HTMLProcessing.formatTextForDisplay(src, usm, displayMode);
 		}
-		return HTMLProcessing.formatContentForDisplay(src, false, session, mailPath, usm, displayMode);
+		return HTMLProcessing.formatTextForDisplay(src, usm, displayMode);
 	}
 
 	/*
@@ -959,6 +962,16 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 * @return The filled instance of {@link JSONObject}
 	 */
 	public JSONObject getJSONObject() {
+		if (!jsonObject.has(MailJSONField.MODIFIED.getKey())) {
+			try {
+				jsonObject.put(MailJSONField.MODIFIED.getKey(), modified[0] ? 1 : 0);
+			} catch (final JSONException e) {
+				/*
+				 * Cannot occur
+				 */
+				LOG.error(e.getMessage(), e);
+			}
+		}
 		return jsonObject;
 	}
 
@@ -987,13 +1000,13 @@ public final class JSONMessageHandler implements MailMessageHandler {
 		}
 	}
 
-	private void asDisplayHtml(final String id, final String baseContentType, final String htmlContent)
-			throws MailException {
+	private void asDisplayHtml(final String id, final String baseContentType, final String htmlContent,
+			final String charset) throws MailException {
 		try {
 			final JSONObject jsonObject = new JSONObject();
 			jsonObject.put(MailListField.ID.getKey(), id);
-			final String content = HTMLProcessing.formatContentForDisplay(htmlContent, true, session, mailPath, usm,
-					displayMode);
+			final String content = HTMLProcessing.formatHTMLForDisplay(htmlContent, charset, session.getSecret(),
+					mailPath, usm, modified, displayMode);
 			jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
 			jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
 			jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
@@ -1020,8 +1033,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 								getConverter())));
 			} else {
 				final String convertedHtml = getConverter().convertWithQuotes(htmlContent);
-				content = HTMLProcessing.formatContentForDisplay(convertedHtml, false, session, mailPath, usm,
-						displayMode);
+				content = HTMLProcessing.formatTextForDisplay(convertedHtml, usm, displayMode);
 			}
 			jsonObject.put(MailJSONField.DISPOSITION.getKey(), Part.INLINE);
 			jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
