@@ -741,8 +741,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			final MailPath path = new MailPath(draftMail.getMsgref());
 			draftMail.setReferencedMail(mailAccess.getMessageStorage().getMessage(path.getFolder(), path.getUid(),
 					false));
-		} else {
-			throw new MailException(MailException.Code.MISSING_FIELD, "msgref");
 		}
 		final String draftFullname = prepareMailFolderParam(mailAccess.getFolderStorage().getDraftsFolder());
 		/*
@@ -767,7 +765,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		/*
 		 * Load referenced mail parts from original message
 		 */
-		final List<String> tempIds = ReferencedMailPart.loadReferencedParts(draftMail, draftMail.getSession());
+		final List<String> tempIds;
+		if (draftMail.getMsgref() != null) {
+			/*
+			 * Load referenced mail parts from original message
+			 */
+			tempIds = ReferencedMailPart.loadReferencedParts(draftMail, draftMail.getSession());
+		} else {
+			tempIds = null;
+		}
 		final long uid;
 		try {
 			final MailMessage filledMail = MIMEMessageConverter.fillComposedMailMessage(draftMail);
@@ -778,8 +784,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			uid = mailAccess.getMessageStorage().appendMessages(draftFullname, new MailMessage[] { filledMail })[0];
 		} finally {
 			draftMail.release();
-			for (final String id : tempIds) {
-				draftMail.getSession().removeUploadedFile(id);
+			if (null != tempIds) {
+				for (final String id : tempIds) {
+					draftMail.getSession().removeUploadedFile(id);
+				}
 			}
 		}
 		/*
