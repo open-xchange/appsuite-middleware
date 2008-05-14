@@ -161,21 +161,21 @@ v_setprop() {
     ox_set_property "$prop" "$val" "$propfile"
 }
 
-v_handlehash() {
+v_comment() {
     local prop="$1"
     local action="$2"
     local propfile="$3"
     echo $action hash for $prop in $propfile
-    ox_handle_hash "$prop" "$action" "$propfile"
+    ox_comment "$prop" "$action" "$propfile"
 }
 
 v_cache_hosting(){
     local propfile="$1"
-    v_handlehash jcs.auxiliary.LTCP.attributes.TcpServers add $propfile
-    v_handlehash jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnabled remove $propfile
-    v_handlehash jcs.auxiliary.LTCP.attributes.UdpDiscoveryAddr remove $propfile
-    v_handlehash jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort remove $propfile
-    v_handlehash jcs.auxiliary.LTCP.attributes.TcpListenerPort remove $propfile
+    v_comment jcs.auxiliary.LTCP.attributes.TcpServers add $propfile
+    v_comment jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnabled remove $propfile
+    v_comment jcs.auxiliary.LTCP.attributes.UdpDiscoveryAddr remove $propfile
+    v_comment jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort remove $propfile
+    v_comment jcs.auxiliary.LTCP.attributes.TcpListenerPort remove $propfile
     v_setprop jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnabled true $propfile
     v_setprop jcs.auxiliary.LTCP.attributes.UdpDiscoveryAddr $UDPDISCOVERYADDR $propfile 
     v_setprop jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort $UDPDISCOVERYPORT $propfile
