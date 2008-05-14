@@ -17,25 +17,132 @@ set -e
 # the debian-policy package
 #
 
-isrunning() {
-    local pidfile=/var/run/open-xchange-groupware.pid
-    if [ ! -f $pidfile ]; then
-        # not running
-        return 1
-    fi
-    read PID < $pidfile
-    running=$(ps $PID | grep $PID)
-    if [ -n "$running" ]; then
-        # running
-        return 0
-    else
-        # not running
-        return 1
-    fi
+. /opt/open-xchange/etc/oxfunctions.sh
+
+
+v_setprop() {
+    local prop="$1"
+    local val="$2"
+    local propfile="$3"
+    echo setting $prop in $propfile
+    ox_set_property "$prop" "$val" "$propfile"
+}
+
+v_delprop() {
+    local prop="$1"
+    local propfile="$2"
+    echo removing $prop in $propfile
+    ox_remove_property "$prop" "$propfile"
+}
+
+postFix() {
+  local version=${1%-*}
+  version=${version//[-.]/}
+
+  # we're updating from pre sp4
+  if [ $version -lt 650 ]; then
+
+      # --------------------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/groupware/ox-scriptconf.sh
+      ox_exists_property PROPERTIESDIR $pfile || {
+	  v_setprop PROPERTIESDIR /opt/open-xchange/etc/groupware $pfile
+      }
+      ox_exists_property OSGIPATH $pfile || {
+	  v_setprop OSGIPATH /opt/open-xchange/etc/groupware/osgi $pfile
+      }
+      
+      # --------------------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/groupware/system.properties
+      ox_exists_property com.openexchange.caching.configfile $pfile || {
+	  v_setprop com.openexchange.caching.configfile /opt/open-xchange/etc/groupware/cache.ccf $pfile
+      }
+      ox_exists_property serviceUsageInspection $pfile || {
+	  v_setprop serviceUsageInspection false $pfile
+      }
+      ox_exists_property serviceUsageTimeout $pfile || {
+	  v_setprop serviceUsageTimeout 10000 $pfile
+      }
+      ox_exists_property MimeTypeFile $pfile || {
+	  v_setprop MimeTypeFile /opt/open-xchange/etc/groupware/mime.types $pfile
+      }
+      ox_exists_property MailCacheConfig $pfile || {
+	  v_setprop MailCacheConfig /opt/open-xchange/etc/groupware/mailcache.ccf $pfile
+      }
+      ox_exists_property TidyMessages $pfile || {
+	  v_setprop TidyMessages /opt/open-xchange/etc/groupware/TidyMessages.properties $pfile
+      }
+      ox_exists_property TidyConfiguration $pfile || {
+	  v_setprop TidyConfiguration /opt/open-xchange/etc/groupware/TidyConfiguration.properties $pfile
+      }
+      ox_exists_property Whitelist $pfile || {
+	  v_setprop Whitelist /opt/open-xchange/etc/groupware/whitelist.txt $pfile
+      }
+
+      # --------------------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/groupware/imap.properties
+      local pftemp=${pfile}.$$
+      local modprops="imapSort\|imapSearch\|imapFastFetch\|imapSupportsACL\|imapTimeout\|imapConnectionTimeout\|imapAuthEnc\|maxIMAPConnectionIdleTime"
+      sed -e "s;^\($modprops\);com.openexchange.imap.\1;" < $pfile > $pftemp
+      if [ ! -s $pftemp ]; then
+	  echo "unable to append com.openexchange.imap. to $modprops in $pfile"
+	  rm -f $pftemp
+      else
+	  mv $pftemp $pfile
+      fi
+      ox_exists_property com.openexchange.imap.User2ACLImpl $pfile || {
+	  v_setprop com.openexchange.imap.User2ACLImpl auto $pfile
+      }
+      ox_exists_property com.openexchange.imap.mboxEnabled $pfile || {
+	  v_setprop com.openexchange.imap.mboxEnabled false $pfile
+      }
+      ox_exists_property com.openexchange.imap.blockSize $pfile || {
+	  v_setprop com.openexchange.imap.blockSize 1000 $pfile
+      }
+
+      # --------------------------------------------------------------------------------
+      # move key/values from imap.properties to mail.properties
+      local imap=/opt/open-xchange/etc/groupware/imap.properties
+      local mail=/opt/open-xchange/etc/groupware/mail.properties
+      ox_exists_property imapLoginType $imap && {
+	  local val=$(ox_read_property imapLoginType $imap)
+	  v_delprop imapLoginType $imap
+	  v_setprop com.openexchange.mail.loginType $val $mail
+      }
+      ox_exists_property imapMasterPassword $imap && {
+	  local val=$(ox_read_property imapMasterPassword $imap)
+	  v_delprop imapMasterPassword $imap
+	  v_setprop com.openexchange.mail.masterPassword $val $mail
+      }
+      ox_exists_property imapCredSrc $imap && {
+	  local val=$(ox_read_property imapCredSrc $imap)
+	  v_delprop imapCredSrc $imap
+	  v_setprop com.openexchange.mail.credSrc $val $mail
+      }
+      ox_exists_property imapServer $imap && {
+	  local val=$(ox_read_property imapServer $imap)
+	  v_delprop imapServer $imap
+	  v_setprop com.openexchange.mail.mailServer $val $mail
+      }
+      ox_exists_property smtpServer $imap && {
+	  local val=$(ox_read_property smtpServer $imap)
+	  v_delprop smtpServer $imap
+	  v_setprop com.openexchange.mail.transportServer $val $mail
+      }
+      ox_exists_property mail.mime.charset $imap && {
+	  local val=$(ox_read_property mail.mime.charset $imap)
+	  v_delprop mail.mime.charset $imap
+	  v_setprop mail.mime.charset $val $mail
+      }
+  fi
 }
 
 case "$1" in
     configure)
+        test -n "$2" && {
+                # we are in update mode, run postFix to apply fixes
+                postFix "$2"
+                exit 0
+        }
 
     ;;
 
@@ -62,6 +169,7 @@ chown open-xchange: /var/log/open-xchange
 chown open-xchange: /opt/open-xchange/etc/groupware/osgi
 
 update-rc.d open-xchange-groupware defaults > /dev/null
+
 # if isrunning; then
 #     invoke-rc.d open-xchange-groupware restart
 # else
