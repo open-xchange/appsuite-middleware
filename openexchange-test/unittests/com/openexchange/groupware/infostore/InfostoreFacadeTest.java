@@ -55,7 +55,7 @@ public class InfostoreFacadeTest extends TestCase {
 
         TestInit.loadTestProperties();
 		Init.startServer();
-		ContextStorage.init();
+		ContextStorage.start();
 		
 		final ContextStorage ctxstor = ContextStorage.getInstance();
         final UserConfigurationStorage userConfigStorage = UserConfigurationStorage.getInstance();

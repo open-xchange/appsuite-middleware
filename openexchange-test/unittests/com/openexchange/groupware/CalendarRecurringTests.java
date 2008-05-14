@@ -64,7 +64,7 @@ public class CalendarRecurringTests extends TestCase {
         EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
         this.userid = getUserId();
-        ContextStorage.init();
+        ContextStorage.start();
     }
     
     protected void tearDown() throws Exception {

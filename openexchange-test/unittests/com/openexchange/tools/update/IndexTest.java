@@ -18,7 +18,7 @@ public class IndexTest extends TestCase {
 	
 	public void setUp() throws Exception {
 		Init.startServer();
-		ContextStorage.init();
+		ContextStorage.start();
 		final ContextStorage ctxstor = ContextStorage.getInstance();
         final int contextId = ctxstor.getContextId("defaultcontext");
         ctx = ctxstor.getContext(contextId);

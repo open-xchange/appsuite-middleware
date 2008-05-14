@@ -72,7 +72,7 @@ public class CalendarTest extends TestCase {
         EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
         userid = getUserId();
-        ContextStorage.init();
+        ContextStorage.start();
     }
     
     protected void tearDown() throws Exception {

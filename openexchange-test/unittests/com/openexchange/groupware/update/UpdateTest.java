@@ -26,7 +26,7 @@ public class UpdateTest extends TestCase {
 
     public void setUp() throws Exception {
         Init.startServer();
-        ContextStorage.init();
+        ContextStorage.start();
 
         existing_ctx_id = ContextStorage.getInstance().getContextId("defaultcontext");
         ctx = ContextStorage.getInstance().getContext(existing_ctx_id);

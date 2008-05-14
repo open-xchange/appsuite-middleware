@@ -35,7 +35,7 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
 
 	public void setUp() throws Exception {
 		Init.startServer();
-		ContextStorage.init();
+		ContextStorage.start();
 		provider = new DBPoolProvider();
 		queryCatalog = new InfostoreQueryCatalog();
 		ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));

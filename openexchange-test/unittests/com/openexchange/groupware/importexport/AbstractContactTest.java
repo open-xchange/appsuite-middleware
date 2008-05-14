@@ -396,7 +396,7 @@ public class AbstractContactTest {
     @BeforeClass
 	public static void initialize() throws Exception {
 		Init.startServer();
-		ContextStorage.init();
+		ContextStorage.start();
 		final UserStorage uStorage = UserStorage.getInstance();
         Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
         userId = uStorage.getUserId(AjaxInit.getAJAXProperty("login"), ctx);
@@ -494,7 +494,7 @@ public class AbstractContactTest {
 	 */
 	public static User getUserParticipant() throws Exception{
 		Init.startServer();
-		ContextStorage.init();
+		ContextStorage.start();
 		final UserStorage uStorage = UserStorage.getInstance();
 		final Context ctx = new ContextImpl(1);
 		final int uid = uStorage.getUserId(AjaxInit.getAJAXProperty("user_participant1"), ctx);
