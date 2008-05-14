@@ -72,6 +72,8 @@ public final class HTMLParser {
 
 	private static final String PROPERTY_XMLDECL_VERSION = "http://xmlpull.org/v1/doc/properties.html#xmldecl-version";
 
+	private static final String FEATURE_PRESERVE_TEXT = "open-xchange.org/preserveText";
+
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(HTMLParser.class);
 
@@ -97,6 +99,7 @@ public final class HTMLParser {
 		final XmlPullParser parser = new KXmlParser();
 		try {
 			parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+			parser.setFeature(FEATURE_PRESERVE_TEXT, true);
 			parser.setInput(new StringReader(html));
 			int event = XmlPullParser.END_DOCUMENT;
 			int[] holderForStartAndLength = null;
