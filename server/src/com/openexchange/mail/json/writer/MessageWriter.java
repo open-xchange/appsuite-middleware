@@ -283,10 +283,10 @@ public final class MessageWriter {
 						try {
 							if (withKey) {
 								((JSONObject) jsonContainer).put(MailJSONField.SUBJECT.getKey(), MIMEMessageUtility
-										.decodeMultiEncodedHeader(mail.getSubject()));
+										.decodeMultiEncodedHeader(mail.getSubject().trim()));
 							} else {
 								((JSONArray) jsonContainer).put(MIMEMessageUtility.decodeMultiEncodedHeader(mail
-										.getSubject()));
+										.getSubject().trim()));
 							}
 						} catch (final JSONException e) {
 							throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());

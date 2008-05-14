@@ -893,7 +893,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 */
 	public boolean handleSubject(final String subject) throws MailException {
 		try {
-			jsonObject.put(MailJSONField.SUBJECT.getKey(), subject == null ? JSONObject.NULL : subject);
+			jsonObject.put(MailJSONField.SUBJECT.getKey(), subject == null ? JSONObject.NULL : subject.trim());
 			return true;
 		} catch (final JSONException e) {
 			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
