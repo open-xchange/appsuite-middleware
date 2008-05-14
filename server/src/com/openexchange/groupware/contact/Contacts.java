@@ -1094,7 +1094,15 @@ public class Contacts implements DeleteListener {
 		int[] groups = UserStorage.getStorageUser(session.getUserId(), ctx).getGroups();
 		Connection readCon = DBPool.pickup(ctx);
 		UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),ctx);
-		return getContactById(objectId, session.getUserId(), groups, ctx, uc, readCon);
+		ContactObject co = getContactById(objectId, session.getUserId(), groups, ctx, uc, readCon);
+		
+		try {
+			DBPool.closeReaderSilent(ctx, readCon);
+		} catch (final Exception ex) {
+			LOG.error("Unable to close READ Connection", ex);
+		}
+		
+		return co;
 	}
 
 	public static ContactObject getContactById(final int objectId, final int userId, final int[] memberInGroups,
