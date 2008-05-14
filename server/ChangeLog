@@ -1,3 +1,7 @@
+* 2008-05-08 - francisco.laguna@open-xchange.com
+
+ - Bugfix #11269: When the current user is the only participant, conflicts must contain her.
+
 * 2008-05-08 - thorben.betten@open-xchange.com
 
  - Bugfix #11256: Supporting non-ascii characters inside a parameterized

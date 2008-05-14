@@ -401,7 +401,7 @@ public class FreeBusyResults implements SearchIterator {
                 } else {
                     op = last_up;
                 }
-                if (op != null && op.length > 1) {
+                if (op != null && op.length > 0) {
                     final  UserParticipant up[] = (UserParticipant[])conflict_objects;
                     for (int a = 0; a < up.length; a++) {
                         for (int b = 0; b < op.length; b++) {
