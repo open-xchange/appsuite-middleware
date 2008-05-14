@@ -47,10 +47,9 @@
  *
  */
 
-
-
 package com.openexchange.cache.dynamic.impl;
 
+import java.io.Serializable;
 import java.util.concurrent.locks.Lock;
 
 import com.openexchange.groupware.AbstractOXException;
@@ -67,7 +66,7 @@ public interface OXObjectFactory<T> {
     /**
      * @return the key for identifying the cached object.
      */
-    Object getKey();
+    Serializable getKey();
 
     /**
      * @return the object loaded from the database that will be put into cache

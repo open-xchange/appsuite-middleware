@@ -107,7 +107,7 @@ public class CachingUserStorage extends UserStorage {
 	@Override
 	public User getUser(final int uid, final Context context) throws LdapException {
 		final OXObjectFactory<User> factory = new OXObjectFactory<User>() {
-			public Object getKey() {
+			public Serializable getKey() {
 				return CACHE.newCacheKey(context.getContextId(), uid);
 			}
 
@@ -119,7 +119,7 @@ public class CachingUserStorage extends UserStorage {
 				return CACHE_LOCK;
 			}
 		};
-		if (null == CACHE.get((Serializable) factory.getKey())) {
+		if (null == CACHE.get(factory.getKey())) {
 			getUserStorage().getUser(uid, context);
 		}
 		return CacheProxy.getCacheProxy(factory, CACHE, User.class);

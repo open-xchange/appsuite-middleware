@@ -92,7 +92,7 @@ public class CachingFilestoreStorage extends FilestoreStorage {
 		if(cache == null) {
 			throw new IllegalStateException("Cache not initialised! Not caching");
 		}
-        if (null == cache.get((Serializable) factory.getKey())) {
+        if (null == cache.get(factory.getKey())) {
             factory.load();
         }
 		return CacheProxy.getCacheProxy(factory, cache, Filestore.class);
@@ -101,20 +101,20 @@ public class CachingFilestoreStorage extends FilestoreStorage {
 	private static final class FilestoreFactory implements
         OXObjectFactory<Filestore> {
 
-		private final int id;
+		private final Integer id;
 		private final FilestoreStorage delegate;
 
 		public FilestoreFactory(final int id, final FilestoreStorage delegate) {
-			this.id = id;
+			this.id = Integer.valueOf(id);
 			this.delegate = delegate;
 		}
 		
-		public Object getKey() {
+		public Serializable getKey() {
 			return id;
 		}
 
 		public Filestore load() throws FilestoreException {
-		    return delegate.getFilestore(id);
+		    return delegate.getFilestore(id.intValue());
 		}
 
         public Lock getCacheLock() {

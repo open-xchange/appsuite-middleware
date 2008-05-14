@@ -57,7 +57,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.cache.dynamic.impl.CacheProxy;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
@@ -78,8 +77,7 @@ public class CachingContextStorage extends ContextStorage {
     /**
      * Logger.
      */
-    private static final Log LOG = LogFactory.getLog(
-        CachingContextStorage.class);
+    private static final Log LOG = LogFactory.getLog(CachingContextStorage.class);
 
     /**
      * Lock for the cache.
@@ -146,7 +144,7 @@ public class CachingContextStorage extends ContextStorage {
         throws ContextException {
         final OXObjectFactory<ContextExtended> factory =
         new OXObjectFactory<ContextExtended>() {
-            public Object getKey() {
+            public Serializable getKey() {
                 return Integer.valueOf(contextId);
             }
             public ContextExtended load() throws AbstractOXException {
@@ -165,17 +163,14 @@ public class CachingContextStorage extends ContextStorage {
                 return CACHE_LOCK;
             }
         };
-        // Initial check if context exists.
-        if (null == cache.get((Serializable) factory.getKey())) {
-            try {
-                cache.put((Serializable) factory.getKey(), (Serializable) factory.load());
-            } catch (CacheException e) {
-                throw new ContextException(Code.CACHE_PUT, e);
-            } catch (AbstractOXException e) {
-                throw new ContextException(e);
+        try {
+            return new ContextReloader(factory, cache);
+        } catch (final AbstractOXException e) {
+            if (e instanceof ContextException) {
+                throw (ContextException) e;
             }
+            throw new ContextException(e);
         }
-    	return CacheProxy.getCacheProxy(factory, cache, ContextExtended.class);
     }
 
     /**
@@ -201,7 +196,7 @@ public class CachingContextStorage extends ContextStorage {
             throw new ContextException(Code.CACHE_INIT, e);
         }
     }
-
+ 
     /**
      * Shuts this class down.
      */
