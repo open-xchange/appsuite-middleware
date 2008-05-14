@@ -98,6 +98,7 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -1086,6 +1087,14 @@ public class Contacts implements DeleteListener {
 		co = fillContactObject(contactSQL.getSqlCommand(), user, memberInGroups, ctx, uc, readCon);
 
 		return co;
+	}
+
+	public static ContactObject getContactById(final int objectId, final Session session) throws OXException, ContextException, DBPoolingException{
+		Context ctx = ContextStorage.getStorageContext(session);
+		int[] groups = UserStorage.getStorageUser(session.getUserId(), ctx).getGroups();
+		Connection readCon = DBPool.pickup(ctx);
+		UserConfiguration uc = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),ctx);
+		return getContactById(objectId, session.getUserId(), groups, ctx, uc, readCon);
 	}
 
 	public static ContactObject getContactById(final int objectId, final int userId, final int[] memberInGroups,
