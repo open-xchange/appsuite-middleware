@@ -203,7 +203,21 @@ EOF
 }
 
 # usage:
+# ox_exists_property property /path/to/file
+# 
+ox_exists_property() {
+    local prop="$1"
+    local propfile="$2"
+    test -z "$prop"     && die "ox_exists_property: missing prop argument (arg 1)"
+    test -z "$propfile" && die "ox_exists_property: missing propfile argument (arg 2)"
+    test -e "$propfile" || die "ox_set_property: $propfile does not exist"
+
+    grep -E "^$prop" $propfile >/dev/null || return 1
+}
+
 # adding or removing comment (ONLY # supported)
+#
+# usage:
 # ox_comment property action /path/to/file
 # where action can be add/remove
 #
