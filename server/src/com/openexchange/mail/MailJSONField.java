@@ -196,7 +196,11 @@ public enum MailJSONField {
 	/**
 	 * Flag \SEEN
 	 */
-	SEEN("seen");
+	SEEN("seen"),
+	/**
+	 * modified
+	 */
+	MODIFIED("modified");
 
 	private final String key;
 
