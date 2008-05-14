@@ -203,24 +203,25 @@ EOF
 }
 
 # usage:
-# ox_handle_hash property action /path/to/file
+# adding or removing comment (ONLY # supported)
+# ox_comment property action /path/to/file
 # where action can be add/remove
 #
-ox_handle_hash(){
+ox_comment(){
     local prop="$1"
     local action="$2"
     local propfile="$3"
-    test -z "$prop"     && die "ox_set_property: missing prop argument (arg 1)"
-    test -z "$action"      && die "ox_set_property: missing val argument (arg 2)"
-    test -z "$propfile" && die "ox_set_property: missing propfile argument (arg 3)"
-    test -e "$propfile" || die "ox_set_property: $propfile does not exist"
+    test -z "$prop"     && die "ox_comment: missing prop argument (arg 1)"
+    test -z "$action"      && die "ox_comment: missing action argument (arg 2)"
+    test -z "$propfile" && die "ox_comment: missing propfile argument (arg 3)"
+    test -e "$propfile" || die "ox_comment: $propfile does not exist"
     local tmp=${propfile}.tmp$$
     rm -f $tmp;
     if [ "$action" == "add" ]; then
 	sed "s/^$prop/# $prop/" < $propfile > $tmp;
         if [ $? -gt 0 ]; then
             rm -f $tmp
-            die "ox_handle_hash: FATAL: could not add hash in file $probfile to $prob"
+            die "ox_comment: FATAL: could not add comment in file $propfile to $prop"
         else
             mv $tmp $propfile
         fi
@@ -228,7 +229,7 @@ ox_handle_hash(){
         sed "s/^#.*$prop/$prop/" < $propfile > $tmp;
         if [ $? -gt 0 ]; then
             rm -f $tmp
-            die "ox_handle_hash: FATAL: could not remove hash in file $probfile for $prob"
+            die "ox_comment: FATAL: could not remove comment in file $propfile for $prop"
         else
             mv $tmp $propfile
         fi
