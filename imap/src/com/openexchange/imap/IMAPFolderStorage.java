@@ -51,7 +51,6 @@ package com.openexchange.imap;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
-import static com.openexchange.mail.utils.StorageUtility.getDefaultFolderNames;
 import static java.util.regex.Matcher.quoteReplacement;
 
 import java.io.Serializable;
@@ -444,10 +443,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 					/*
 					 * Check default folders
 					 */
-					final String[] defaultFolderNames = getDefaultFolderNames(UserSettingMailStorage.getInstance()
-							.getUserSettingMail(session.getUserId(), ctx));
+					final String[] defaultFolderNames = StorageUtility.getDefaultFolderNames(UserSettingMailStorage
+							.getInstance().getUserSettingMail(session.getUserId(), ctx));
 					for (int i = 0; i < defaultFolderNames.length; i++) {
-						setDefaultMailFolder(i, checkDefaultFolder(prefix, defaultFolderNames[i], type, tmp));
+						setDefaultMailFolder(i, checkDefaultFolder(prefix, defaultFolderNames[i], type,
+								i != StorageUtility.INDEX_CONFIRMED_HAM && i != StorageUtility.INDEX_CONFIRMED_SPAM,
+								tmp));
 					}
 					setSeparator(inboxFolder.getSeparator());
 					setDefaultFoldersChecked(true);
@@ -1682,8 +1683,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		return true;
 	}
 
-	private String checkDefaultFolder(final String prefix, final String name, final int type, final StringBuilder tmp)
-			throws MessagingException {
+	private String checkDefaultFolder(final String prefix, final String name, final int type, final boolean subscribe,
+			final StringBuilder tmp) throws MessagingException {
 		/*
 		 * Check default folder
 		 */
@@ -1697,13 +1698,23 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			LOG.error(oxme.getMessage(), oxme);
 			checkSubscribed = false;
 		}
-		if (checkSubscribed && !f.isSubscribed()) {
-			try {
-				f.setSubscribed(true);
-			} catch (final MethodNotSupportedException e) {
-				LOG.error(e.getMessage(), e);
-			} catch (final MessagingException e) {
-				LOG.error(e.getMessage(), e);
+		if (checkSubscribed) {
+			if (subscribe && !f.isSubscribed()) {
+				try {
+					f.setSubscribed(true);
+				} catch (final MethodNotSupportedException e) {
+					LOG.error(e.getMessage(), e);
+				} catch (final MessagingException e) {
+					LOG.error(e.getMessage(), e);
+				}
+			} else if (!subscribe && f.isSubscribed()) {
+				try {
+					f.setSubscribed(false);
+				} catch (final MethodNotSupportedException e) {
+					LOG.error(e.getMessage(), e);
+				} catch (final MessagingException e) {
+					LOG.error(e.getMessage(), e);
+				}
 			}
 		}
 		if (LOG.isDebugEnabled()) {
