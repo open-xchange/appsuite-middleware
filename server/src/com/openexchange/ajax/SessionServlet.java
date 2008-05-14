@@ -324,7 +324,7 @@ public abstract class SessionServlet extends AJAXServlet {
 		try {
 			final Context context = ContextStorage.getStorageContext(retval.getContextId());
 			final User user = UserStorage.getStorageUser(retval.getUserId(), context);
-			if (!context.isEnabled() || !user.isMailEnabled()) {
+			if (!user.isMailEnabled()) {
 				throw EXCEPTION.create(3, sessionId);
 			}
 		} catch (final UndeclaredThrowableException e) {
