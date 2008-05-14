@@ -210,9 +210,22 @@ ox_exists_property() {
     local propfile="$2"
     test -z "$prop"     && die "ox_exists_property: missing prop argument (arg 1)"
     test -z "$propfile" && die "ox_exists_property: missing propfile argument (arg 2)"
-    test -e "$propfile" || die "ox_set_property: $propfile does not exist"
+    test -e "$propfile" || die "ox_exists_property: $propfile does not exist"
 
     grep -E "^$prop" $propfile >/dev/null || return 1
+}
+
+# usage:
+# ox_read_property property /path/to/file
+# 
+ox_read_property() {
+    local prop="$1"
+    local propfile="$2"
+    test -z "$prop"     && die "ox_read_property: missing prop argument (arg 1)"
+    test -z "$propfile" && die "ox_read_property: missing propfile argument (arg 2)"
+    test -e "$propfile" || die "ox_read_property: $propfile does not exist"
+
+    sed -n -e "/^$prop/Is/^$prop[:=]\(.*\).*$/\1/p" < $propfile
 }
 
 # adding or removing comment (ONLY # supported)
