@@ -1234,18 +1234,6 @@ public class OXFolderSQL {
 				} else {
 					reassignPerms.add(Integer.valueOf(fuid));
 				}
-				if (FolderCacheManager.isInitialized()) {
-					/*
-					 * Invalidate cache
-					 */
-					try {
-						FolderCacheManager.getInstance().removeFolderObject(fuid, ctx);
-					} catch (final FolderCacheNotEnabledException e) {
-						LOG.error(e.getMessage(), e);
-					} catch (final OXException e) {
-						LOG.error(e.getMessage(), e);
-					}
-				}
 			}
 			rs.close();
 			rs = null;
@@ -1261,6 +1249,26 @@ public class OXFolderSQL {
 				 */
 				reassignPermissions(reassignPerms, entity, mailAdmin.intValue(), lastModified, folderTable, permTable,
 						readCon, writeConArg, ctx);
+			}
+			/*
+			 * Remove from cache
+			 */
+			if (FolderCacheManager.isInitialized()) {
+				/*
+				 * Invalidate cache
+				 */
+				try {
+					for (final Integer fuid : deletePerms) {
+						FolderCacheManager.getInstance().removeFolderObject(fuid.intValue(), ctx);
+					}
+					for (final Integer fuid : reassignPerms) {
+						FolderCacheManager.getInstance().removeFolderObject(fuid.intValue(), ctx);
+					}
+				} catch (final FolderCacheNotEnabledException e) {
+					LOG.error(e.getMessage(), e);
+				} catch (final OXException e) {
+					LOG.error(e.getMessage(), e);
+				}
 			}
 		} finally {
 			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
@@ -1295,7 +1303,7 @@ public class OXFolderSQL {
 		}
 	}
 
-	private static final String SQL_REASSIGN_PERMS = "UPDATE #PERM# SET permission_id = ? WHERE cid = ? AND fuid = ? AND permission_id = ?";
+	private static final String SQL_REASSIGN_PERMS = "UPDATE #PERM# SET permission_id = ?, group_flag = 0 WHERE cid = ? AND fuid = ? AND permission_id = ?";
 
 	private static final String SQL_REASSIGN_UPDATE_TIMESTAMP = "UPDATE #FOLDER# SET changed_from = ?, changing_date = ? WHERE cid = ? AND fuid = ?";
 
@@ -1567,18 +1575,6 @@ public class OXFolderSQL {
 				} else {
 					reassignFolders.add(Integer.valueOf(fuid));
 				}
-				if (FolderCacheManager.isInitialized()) {
-					/*
-					 * Invalidate cache
-					 */
-					try {
-						FolderCacheManager.getInstance().removeFolderObject(fuid, ctx);
-					} catch (final FolderCacheNotEnabledException e) {
-						LOG.error(e.getMessage(), e);
-					} catch (final OXException e) {
-						LOG.error(e.getMessage(), e);
-					}
-				}
 			}
 			rs.close();
 			rs = null;
@@ -1596,6 +1592,26 @@ public class OXFolderSQL {
 						ctx);
 			}
 			/*
+			 * Remove from cache
+			 */
+			if (FolderCacheManager.isInitialized()) {
+				/*
+				 * Invalidate cache
+				 */
+				try {
+					for (final Integer fuid : deleteFolders) {
+						FolderCacheManager.getInstance().removeFolderObject(fuid.intValue(), ctx);
+					}
+					for (final Integer fuid : reassignFolders) {
+						FolderCacheManager.getInstance().removeFolderObject(fuid.intValue(), ctx);
+					}
+				} catch (final FolderCacheNotEnabledException e) {
+					LOG.error(e.getMessage(), e);
+				} catch (final OXException e) {
+					LOG.error(e.getMessage(), e);
+				}
+			}
+			/*
 			 * Check column "changed_from"
 			 */
 			stmt = readCon.prepareStatement(SQL_SEL_FOLDERS2.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
@@ -1611,18 +1627,6 @@ public class OXFolderSQL {
 				} else {
 					reassignFolders.add(Integer.valueOf(fuid));
 				}
-				if (FolderCacheManager.isInitialized()) {
-					/*
-					 * Invalidate cache
-					 */
-					try {
-						FolderCacheManager.getInstance().removeFolderObject(fuid, ctx);
-					} catch (final FolderCacheNotEnabledException e) {
-						LOG.error(e.getMessage(), e);
-					} catch (final OXException e) {
-						LOG.error(e.getMessage(), e);
-					}
-				}
 			}
 			/*
 			 * Delete
@@ -1634,6 +1638,26 @@ public class OXFolderSQL {
 				 */
 				reassignFolders(reassignFolders, entity, mailAdmin.intValue(), lastModified, folderTable, writeConArg,
 						ctx);
+			}
+			/*
+			 * Remove from cache
+			 */
+			if (FolderCacheManager.isInitialized()) {
+				/*
+				 * Invalidate cache
+				 */
+				try {
+					for (final Integer fuid : deleteFolders) {
+						FolderCacheManager.getInstance().removeFolderObject(fuid.intValue(), ctx);
+					}
+					for (final Integer fuid : reassignFolders) {
+						FolderCacheManager.getInstance().removeFolderObject(fuid.intValue(), ctx);
+					}
+				} catch (final FolderCacheNotEnabledException e) {
+					LOG.error(e.getMessage(), e);
+				} catch (final OXException e) {
+					LOG.error(e.getMessage(), e);
+				}
 			}
 		} finally {
 			closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
