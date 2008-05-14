@@ -1253,18 +1253,24 @@ public class Mail extends PermissionServlet implements UploadListener {
 		return tmp.toString();
 	}
 
+	public void actionPutAutosave(final Session session, final JSONWriter writer, final JSONObject jsonObj,
+			final MailServletInterface mi) throws JSONException {
+		Response.write(actionPutAutosave(session, jsonObj.getString(Response.DATA), ParamContainer.getInstance(jsonObj,
+				EnumComponent.MAIL), mi), writer);
+	}
+
 	private final void actionPutAutosave(final HttpServletRequest req, final HttpServletResponse resp)
 			throws IOException, ServletException {
 		try {
-			actionPutAutosave(getSessionObject(req), getBody(req), ParamContainer.getInstance(req, EnumComponent.MAIL,
-					resp), null, resp.getWriter());
+			Response.write(actionPutAutosave(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
+					EnumComponent.MAIL, resp), null), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		}
 	}
 
-	private final void actionPutAutosave(final Session session, final String body,
-			final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg, final PrintWriter writer) throws JSONException {
+	private final Response actionPutAutosave(final Session session, final String body,
+			final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) throws JSONException {
 		/*
 		 * Some variables
 		 */
@@ -1286,7 +1292,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 					/*
 					 * Parse
 					 */
-					final ComposedMailMessage composedMail = MessageParser.parse(jsonMailObj, (UploadEvent) null, session);
+					final ComposedMailMessage composedMail = MessageParser.parse(jsonMailObj, (UploadEvent) null,
+							session);
 					if ((composedMail.getFlags() & MailMessage.FLAG_DRAFT) == 0) {
 						LOG.warn("Missing \\Draft flag on action=autosave in JSON message object", new Throwable());
 						composedMail.setFlag(MailMessage.FLAG_DRAFT, true);
@@ -1297,8 +1304,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 						 */
 						msgIdentifier = mailInterface.saveDraft(composedMail, true);
 					} else {
-						throw new MailException(MailException.Code.UNEXPECTED_ERROR,
-								"No new message on action=edit");
+						throw new MailException(MailException.Code.UNEXPECTED_ERROR, "No new message on action=edit");
 					}
 				}
 				if (msgIdentifier == null) {
@@ -1308,11 +1314,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 				 * Fill JSON response object
 				 */
 				response.setData(msgIdentifier);
-				final String jsResponse = JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
-						Matcher.quoteReplacement(response.getJSON().toString())).replaceFirst(JS_FRAGMENT_ACTION,
-						ACTION_AUTOSAVE);
-				writer.write(jsResponse);
-				writer.flush();
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
@@ -1321,20 +1322,15 @@ public class Mail extends PermissionServlet implements UploadListener {
 		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-			final String jsResponse = JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
-					Matcher.quoteReplacement(response.getJSON().toString())).replaceFirst(JS_FRAGMENT_ACTION,
-							ACTION_AUTOSAVE);
-			writer.write(jsResponse);
-			writer.flush();
 		} catch (final Exception e) {
 			LOG.error("actionPutAutosave", e);
 			response.setException(getWrappingOXException(e));
-			final String jsResponse = JS_FRAGMENT.replaceFirst(JS_FRAGMENT_JSON,
-					Matcher.quoteReplacement(response.getJSON().toString())).replaceFirst(JS_FRAGMENT_ACTION,
-							ACTION_AUTOSAVE);
-			writer.write(jsResponse);
-			writer.flush();
 		}
+		/*
+		 * Close response and flush print writer
+		 */
+		response.setTimestamp(null);
+		return response;
 	}
 
 	public void actionPutClear(final Session session, final JSONWriter writer, final JSONObject jsonObj,
