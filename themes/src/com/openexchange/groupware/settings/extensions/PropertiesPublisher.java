@@ -76,7 +76,7 @@ public class PropertiesPublisher {
 
         for(Object key : properties.keySet()) {
             String pathString = key.toString();
-            String[] path = pathString.split("\\.");
+            String[] path = pathString.split("/");
             String value = properties.getProperty(key.toString());
 
 
