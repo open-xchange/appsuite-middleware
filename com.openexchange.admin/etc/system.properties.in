@@ -85,4 +85,9 @@ TidyMessages=@serverconfdir@/TidyMessages.properties
 # Location of tidy configuration file
 TidyConfiguration=@serverconfdir@/TidyConfiguration.properties
 
+# Location of white list for both HTML tags/attributes and CSS key-value-pairs
+Whitelist=@serverconfdir@/whitelist.txt
+
+# Server name registered by registerserver in the configuration database
+# can be read with listservers
 SERVER_NAME=local
