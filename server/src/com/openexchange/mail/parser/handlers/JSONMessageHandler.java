@@ -578,7 +578,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 */
 	public boolean handleInlinePlainText(final String plainTextContentArg, final ContentType contentType,
 			final long size, final String fileName, final String id) throws MailException {
-		if (isAlternative && usm.isDisplayHtmlInlineContent()) {
+		if (isAlternative && usm.isDisplayHtmlInlineContent() && contentType.isMimeType(MIMETypes.MIME_TEXT_PLAIN)) {
 			/*
 			 * User wants to see message's alternative content
 			 */
