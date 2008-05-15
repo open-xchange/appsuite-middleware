@@ -71,7 +71,7 @@ public final class HTML2TextHandler implements HTMLHandler {
 
 	private static final String TAG_LI = "li";
 
-	private static final String ATG_IMG = "img";
+	private static final String TAG_IMG = "img";
 
 	private static final String ATTR_ALT = "alt";
 
@@ -259,7 +259,7 @@ public final class HTML2TextHandler implements HTMLHandler {
 				textBuilder.append(CRLF);
 				quoteText();
 			}
-		} else if (tag.equalsIgnoreCase(ATG_IMG)) {
+		} else if (tag.equalsIgnoreCase(TAG_IMG)) {
 			if (insideBody) {
 				final int size = attributes.size();
 				if (size > 0) {
