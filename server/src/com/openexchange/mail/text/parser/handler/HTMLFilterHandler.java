@@ -467,7 +467,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 			}
 		}
 		if (simple) {
-			if (attrBuilder.length() > 0) {
+			if (attrBuilder.length() > 0 || size == 0) {
 				htmlBuilder.append('<').append(tag).append(attrBuilder.toString()).append('/').append('>');
 			}
 		} else {
