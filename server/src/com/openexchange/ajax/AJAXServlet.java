@@ -370,16 +370,16 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	// Javascript
 
 	public static final String JS_FRAGMENT = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\""
-			+ "\"http://www.w3.org/TR/html4/strict.dtd\"> " + "<html> " + "<head>"
+			+ "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>"
 			+ "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> "
-			+ "<script type=\"text/javascript\"> " + "callback (**json**);" + "function callback(arg) " + "{ "
-			+ "  parent.callback_**action**(arg); " + '}' + "</script> " + "</head>" + "</html> ";
+			+ "<script type=\"text/javascript\"> function callback(arg) { "
+			+ "parent.callback_**action**(arg); }; callback(**json**);</script></head></html> ";
 
 	protected static final String JS_FRAGMENT_POPUP = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\""
-			+ "\"http://www.w3.org/TR/html4/strict.dtd\"> " + "<html> " + "<head>"
+			+ "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>"
 			+ "<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"> "
-			+ "<script type=\"text/javascript\"> " + "callback (**json**);" + "function callback(arg) " + "{ "
-			+ "  window.opener.callback_**action**(arg); " + '}' + "</script> " + "</head>" + "</html> ";
+			+ "<script type=\"text/javascript\"> function callback(arg) { "
+			+ "window.opener.callback_**action**(arg); }; callback(**json**);</script></head></html> ";
 
 	protected static final String SAVE_AS_TYPE = "application/octet-stream";
 
