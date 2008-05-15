@@ -5,8 +5,6 @@
 
 set -e
 
-. /opt/open-xchange/etc/oxfunctions.sh
-
 # summary of how this script can be called:
 #        * <postinst> `configure' <most-recently-configured-version>
 #        * <old-postinst> `abort-upgrade' <new version>
@@ -21,8 +19,65 @@ set -e
 # this function contains all stuff that must be applied to the package
 # when installing updates
 
+. /opt/open-xchange/etc/oxfunctions.sh
+
+v_setprop() {
+    local prop="$1"
+    local val="$2"
+    local propfile="$3"
+    echo setting $prop in $propfile
+    ox_set_property "$prop" "$val" "$propfile"
+}
+
+
 postFix() {
-  local version=$1
+  local version=${1%-*}
+  version=${version//[-.]/}
+
+  # we're updating from pre sp4
+  if [ $version -lt 650 ]; then
+      # -----------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
+      ox_exists_property OSGIBUNDLE $pfile || {
+	  v_setprop OSGIBUNDLE /opt/open-xchange/bundles/org.eclipse.osgi_3.3.0.v20070530.jar $pfile
+      }
+      ox_exists_property BUNDLELIBPATH $pfile || {
+	  v_setprop BUNDLELIBPATH /opt/open-xchange/bundles/com.openexchange.common/lib $pfile
+      }
+
+      # -----------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/admindaemon/system.properties
+      ox_exists_property com.openexchange.caching.configfile $pfile || {
+	  v_setprop com.openexchange.caching.configfile etc/groupware/cache.ccf $pfile
+      }
+      ox_exists_property serviceUsageInspection $pfile || {
+	  v_setprop serviceUsageInspection false $pfile
+      }
+      ox_exists_property serviceUsageTimeout $pfile || {
+	  v_setprop serviceUsageTimeout 10000 $pfile
+      }
+      ox_exists_property MimeTypeFile $pfile || {
+	  v_setprop MimeTypeFile etc/groupware/mime.types $pfile
+      }
+      ox_exists_property MailCacheConfig $pfile || {
+	  v_setprop MailCacheConfig etc/groupware/mailcache.ccf $pfile
+      }
+      ox_exists_property TidyMessages $pfile || {
+	  v_setprop TidyMessages etc/groupware/TidyMessages.properties $pfile
+      }
+      ox_exists_property TidyConfiguration $pfile || {
+	  v_setprop TidyConfiguration etc/groupware/TidyConfiguration.properties $pfile
+      }
+      ox_exists_property Whitelist $pfile || {
+	  v_setprop Whitelist etc/groupware/whitelist.txt $pfile
+      }
+      
+      # -----------------------------------------------------------------------
+      local pfile=/opt/open-xchange/etc/admindaemon/AdminDaemon.properties
+      ox_exists_property ACCESS_COMBINATIONS_FILE $pfile || {
+	  v_setprop ACCESS_COMBINATIONS_FILE '$PWD/etc/admindaemon/ModuleAccessDefinitions.properties' $pfile
+      }
+  fi
 }
 
 
