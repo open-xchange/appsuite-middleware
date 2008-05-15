@@ -180,14 +180,14 @@ public class Enriched2HtmlConverter {
 				reset();
 			} else {
 				/*
-				 * First invokation
+				 * First invocation
 				 */
 				doReset = true;
 			}
 			final StringBuilder sb = new StringBuilder(enrichedText.length());
 			StringReader input = null;
 			try {
-				input = new StringReader(enrichedText);
+				input = new StringReader(enrichedText.replaceAll("\r\n", "\n"));
 				int c = EOF;
 				final StringBuilder tokenBuilder = new StringBuilder();
 				/*
