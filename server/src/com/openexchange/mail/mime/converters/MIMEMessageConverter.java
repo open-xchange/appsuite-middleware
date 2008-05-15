@@ -1512,7 +1512,12 @@ public final class MIMEMessageConverter {
 			 * Set all cacheable data
 			 */
 			setHeaders(part, mailPart);
-			mailPart.setContentType(part.getContentType());
+			{
+				final String[] contentTypeHdr = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+				if (null != contentTypeHdr && contentTypeHdr.length > 0) {
+					mailPart.setContentType(unfold(contentTypeHdr[0]));
+				}
+			}
 			{
 				final String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_ID);
 				if ((tmp != null) && (tmp.length > 0)) {
