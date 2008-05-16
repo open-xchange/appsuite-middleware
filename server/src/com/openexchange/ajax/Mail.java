@@ -249,7 +249,13 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	public static final String PARAMETER_SEND_TYPE = "sendtype";
 
-	public static final String PARAMETER_ALLOW_IMAGES = "allowimages";
+	public static final String PARAMETER_VIEW = "view";
+
+	private static final String VIEW_TEXT = "text";
+
+	private static final String VIEW_HTML = "html";
+
+	private static final String VIEW_HTML_BLOCKED_IMAGES = "noimg";
 
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -737,8 +743,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 			final boolean showMessageHeaders = (STR_1.equals(tmp) || Boolean.parseBoolean(tmp));
 			tmp = paramContainer.getStringParam(PARAMETER_SAVE);
 			final boolean saveToDisk = (tmp != null && tmp.length() > 0 && Integer.parseInt(tmp) > 0);
-			tmp = paramContainer.getStringParam(PARAMETER_ALLOW_IMAGES);
-			final Boolean allowImages = null == tmp ? null : Boolean.valueOf(tmp);
+			tmp = paramContainer.getStringParam(PARAMETER_VIEW);
+			final String view = null == tmp ? null : tmp.toLowerCase(Locale.ENGLISH);
 			tmp = null;
 			/*
 			 * Get message
@@ -796,8 +802,19 @@ public class Mail extends PermissionServlet implements UploadListener {
 					/*
 					 * Overwrite settings with request's parameters
 					 */
-					if (null != allowImages) {
-						usmNoSave.setAllowHTMLImages(allowImages.booleanValue());
+					if (null != view) {
+						if (VIEW_TEXT.equals(view)) {
+							usmNoSave.setDisplayHtmlInlineContent(false);
+						} else if (VIEW_HTML.equals(view)) {
+							usmNoSave.setDisplayHtmlInlineContent(true);
+							usmNoSave.setAllowHTMLImages(true);
+						} else if (VIEW_HTML_BLOCKED_IMAGES.equals(view)) {
+							usmNoSave.setDisplayHtmlInlineContent(true);
+							usmNoSave.setAllowHTMLImages(false);
+						} else {
+							LOG.warn(new StringBuilder(64).append("Unknown value in parameter ").append(PARAMETER_VIEW)
+									.append(": ").append(view).append(". Using user's mail settings as fallback."));
+						}
 					}
 					data = MessageWriter.writeMailMessage(mail, editDraft ? DisplayMode.MODIFYABLE
 							: DisplayMode.DISPLAY, session, usmNoSave);
