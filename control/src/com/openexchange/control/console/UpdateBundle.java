@@ -49,10 +49,6 @@
 
 package com.openexchange.control.console;
 
-import javax.management.MBeanException;
-import javax.management.MBeanInfo;
-import javax.management.MBeanOperationInfo;
-import javax.management.MBeanParameterInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 
@@ -85,10 +81,7 @@ public class UpdateBundle extends AbstractConsoleHandler {
 				if (valueObjectArray.length > 1) {
 					autorefresh = Boolean.parseBoolean(valueObjectArray[1].getValue());
 				}
-
-				final ObjectName objectName = getObjectName();
-				final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-				mBeanServerConnection.invoke(objectName, "update", new Object[] { bundleName, autorefresh }, new String[] { "java.lang.String", "boolean" });
+				update(bundleName, autorefresh);
 			} else {
 				showHelp();
 				exit();
@@ -112,6 +105,16 @@ public class UpdateBundle extends AbstractConsoleHandler {
 				exc.printStackTrace();
 			}
 		}
+	}
+	
+	public UpdateBundle(String jmxHost, int jmxPort) throws Exception {
+		initJMX(jmxHost, jmxPort);
+	}
+	
+	public void update(String bundleName, boolean autorefresh) throws Exception {
+		final ObjectName objectName = getObjectName();
+		final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
+		mBeanServerConnection.invoke(objectName, "update", new Object[] { bundleName, autorefresh }, new String[] { "java.lang.String", "boolean" });
 	}
 	
 	public static void main(String args[]) {

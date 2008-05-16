@@ -111,19 +111,22 @@ public abstract class AbstractConsoleHandler {
 					}
 				}
 
-				final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://"
-						+ jmxHost + ":" + jmxPort + "/server");
-
-				// System.out.println("jmxUrl: " + url);
-				jmxConnector = JMXConnectorFactory.connect(url, null);
-
-				mBeanServerConnection = jmxConnector.getMBeanServerConnection();
-
-				objectName = ObjectName.getInstance("com.openexchange.control", "name", "Control");
+				initJMX(jmxHost, jmxPort);
 			} catch (Exception exc) {
 				throw new ConsoleException(exc);
 			}
 		}
+	}
+	
+	protected void initJMX(String jmxHost, int jmxPort) throws Exception {
+		final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://"
+				+ jmxHost + ":" + jmxPort + "/server");
+
+		jmxConnector = JMXConnectorFactory.connect(url, null);
+
+		mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+
+		objectName = ObjectName.getInstance("com.openexchange.control", "name", "Control");
 	}
 
 	protected abstract void showHelp();

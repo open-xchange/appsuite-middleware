@@ -76,9 +76,7 @@ public class RefreshBundles extends AbstractConsoleHandler {
 	public RefreshBundles(String args[]) {
 		try {
 			init(args, true);
-			final ObjectName objectName = getObjectName();
-			final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-			mBeanServerConnection.invoke(objectName, "refresh", new Object[] {}, new String[] {});
+			refresh();
 		} catch (Exception exc) {
 			final Throwable cause = exc.getCause();
 			if (cause != null) {
@@ -98,6 +96,16 @@ public class RefreshBundles extends AbstractConsoleHandler {
 				exc.printStackTrace();
 			}
 		}
+	}
+	
+	public RefreshBundles(String jmxHost, int jmxPort) throws Exception {
+		initJMX(jmxHost, jmxPort);
+	}
+	
+	public void refresh() throws Exception {
+		final ObjectName objectName = getObjectName();
+		final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
+		mBeanServerConnection.invoke(objectName, "refresh", new Object[] {}, new String[] {});
 	}
 
 	public static void main(String args[]) {

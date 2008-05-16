@@ -80,10 +80,6 @@ public class UninstallBundle extends AbstractConsoleHandler {
 			final ValueObject[] valueObjectArray = valueParser.getValueObjects();
 			if (valueObjectArray.length > 0) {
 				bundleName = valueObjectArray[0].getValue();
-				final ObjectName objectName = getObjectName();
-				final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-				mBeanServerConnection.invoke(objectName, "uninstall", new Object[] { bundleName },
-						new String[] { "java.lang.String" });
 			} else {
 				showHelp();
 				exit();
@@ -109,6 +105,17 @@ public class UninstallBundle extends AbstractConsoleHandler {
 		}
 	}
 
+	public UninstallBundle(String jmxHost, int jmxPort) throws Exception {
+		initJMX(jmxHost, jmxPort);
+	}
+	
+	public void Stop(String bundleName) throws Exception {
+		final ObjectName objectName = getObjectName();
+		final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
+		mBeanServerConnection.invoke(objectName, "uninstall", new Object[] { bundleName },
+				new String[] { "java.lang.String" });
+	}
+	
 	public static void main(String args[]) {
 		new UninstallBundle(args);
 	}

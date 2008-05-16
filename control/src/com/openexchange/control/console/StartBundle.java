@@ -64,27 +64,6 @@ import com.openexchange.control.internal.BundleNotFoundException;
  */
 public class StartBundle extends AbstractConsoleHandler {
 
-	/*
-	 * operations: uninstall parameter: java.lang.String
-	 * 
-	 * operations: start parameter: java.lang.String
-	 * 
-	 * operations: stop parameter: java.lang.String
-	 * 
-	 * operations: list
-	 * 
-	 * operations: update parameter: java.lang.String parameter: boolean
-	 * 
-	 * operations: install parameter: java.lang.String
-	 * 
-	 * operations: refresh
-	 * 
-	 * operations: restart parameter: java.lang.String
-	 * 
-	 * operations: services
-	 * 
-	 */
-
 	protected String bundleName;
 
 	/**
@@ -97,10 +76,7 @@ public class StartBundle extends AbstractConsoleHandler {
 			final ValueObject[] valueObjectArray = valueParser.getValueObjects();
 			if (valueObjectArray.length > 0) {
 				bundleName = valueObjectArray[0].getValue();
-				final ObjectName objectName = getObjectName();
-				final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-				mBeanServerConnection.invoke(objectName, "start", new Object[] { bundleName },
-						new String[] { "java.lang.String" });
+				start(bundleName);
 			} else {
 				showHelp();
 				exit();
@@ -124,6 +100,17 @@ public class StartBundle extends AbstractConsoleHandler {
 				exc.printStackTrace();
 			}
 		}
+	}
+	
+	public StartBundle(String jmxHost, int jmxPort) throws Exception {
+		initJMX(jmxHost, jmxPort);
+	}
+	
+	public void start(String bundle) throws Exception {
+		final ObjectName objectName = getObjectName();
+		final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
+		mBeanServerConnection.invoke(objectName, "start", new Object[] { bundleName },
+				new String[] { "java.lang.String" });
 	}
 
 	public static void main(String args[]) {

@@ -80,10 +80,7 @@ public class StopBundle extends AbstractConsoleHandler {
 			final ValueObject[] valueObjectArray = valueParser.getValueObjects();
 			if (valueObjectArray.length > 0) {
 				bundleName = valueObjectArray[0].getValue();
-				final ObjectName objectName = getObjectName();
-				final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
-				mBeanServerConnection.invoke(objectName, "stop", new Object[] { bundleName },
-						new String[] { "java.lang.String" });
+				stop(bundleName);
 			} else {
 				showHelp();
 				exit();
@@ -107,6 +104,17 @@ public class StopBundle extends AbstractConsoleHandler {
 				exc.printStackTrace();
 			}
 		}
+	}
+	
+	public StopBundle(String jmxHost, int jmxPort) throws Exception {
+		initJMX(jmxHost, jmxPort);
+	}
+	
+	public void stop(String bundleName) throws Exception {
+		final ObjectName objectName = getObjectName();
+		final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
+		mBeanServerConnection.invoke(objectName, "stop", new Object[] { bundleName },
+				new String[] { "java.lang.String" });
 	}
 
 	public static void main(String args[]) {
