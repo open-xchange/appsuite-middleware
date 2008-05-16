@@ -83,6 +83,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.MIMEMailException;
+import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.sun.mail.iap.Response;
@@ -790,13 +791,6 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 				MailException;
 	}
 
-	/**
-	 * Default value for message header 'Content-Type'
-	 * 
-	 * @value text/plain; charset=us-ascii
-	 */
-	private static final String DEFAULT_CONTENT_TYPE = "text/plain; charset=us-ascii";
-
 	private static final String MULTI_SUBTYPE_MIXED = "MIXED";
 
 	private static FetchItemHandler[] createItemHandlers(final int itemCount, final FetchResponse f,
@@ -868,7 +862,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 							if (LOG.isWarnEnabled()) {
 								LOG.warn(e.getMessage(), e);
 							}
-							msg.setContentType(new ContentType(DEFAULT_CONTENT_TYPE));
+							msg.setContentType(new ContentType(MIMETypes.MIME_DEFAULT));
 						}
 						msg.setHasAttachment(bs.isMulti()
 								&& (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MIMEMessageUtility
