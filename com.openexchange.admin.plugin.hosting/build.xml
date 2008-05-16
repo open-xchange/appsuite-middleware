@@ -107,24 +107,27 @@
     </target>
 
     <target name="doc">
-        <mkdir dir="doc"/>
+    	<mkdir dir="doc"/>
+    	<copy todir="doc/resources" file="javadoc/OX_Logo.jpg"/>
         <javadoc
             failonerror="true"
-            sourcepath="src"
-            destdir="doc"
+			sourcepath="src"
+        	destdir="doc"
             author="true"
             public="true"
             Windowtitle="ox_admin_interface">
+        	<Header><![CDATA[<img src="{@docRoot}/resources/OX_Logo.jpg">]]></Header>
+            <classpath>
+                <path refid="project.classpath"/>
+            </classpath>
             <fileset dir="src/com/openexchange/admin/rmi" defaultexcludes="yes">
 				<include name="*Interface*"/>
 				<include name="dataobjects/*"/>
             	<exclude name="*ResourceGroup*"/>
             </fileset>
-<!--            <fileset dir="src/com/openexchange/admin/rmi/exceptions" defaultexcludes="yes">
-            </fileset> -->
-            <classpath>
-                <path refid="project.classpath"/>
-            </classpath>
+            <fileset dir="src/com/openexchange/admin/rmi/exceptions" defaultexcludes="yes">
+            </fileset>
+        	<link href="http://java.sun.com/j2se/1.5.0/docs/api/"/>
         </javadoc>
     </target>
 
@@ -150,6 +153,13 @@
 	<target name="install-client" depends="client">
         <mkdir dir="${destdir}/${prefix}/lib"/>
         <copy file="jar/${client.jar}" todir="${destdir}/${prefix}/lib"/>
+    </target>
+
+	<target name="install-doc" depends="doc">
+        <mkdir dir="${destdir}/${prefix}/doc/oxadmin-hosting"/>
+        <copy todir="${destdir}/${prefix}/doc/oxadmin-hosting">
+            <fileset dir="doc"/>
+        </copy>
     </target>
 
     <target name="install" depends="jar,doc,replacer">

@@ -10,3 +10,9 @@ Architecture: all
 Conflicts: open-xchange-admin-plugin-context-light
 Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-admin (>= 6.5.0-0)
 Description: Open Xchange Admin Hosting Plugin
+
+Package: open-xchange-admin-plugin-hosting-doc
+Architecture: all
+Section: doc
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Documentation for the Open Xchange RMI client library.
