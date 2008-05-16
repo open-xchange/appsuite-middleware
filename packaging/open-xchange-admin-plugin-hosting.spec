@@ -43,6 +43,17 @@ Requires:  jre-icedtea
 Conflicts:	open-xchange-admin-plugin-context-light
 #
 
+%package -n     open-xchange-admin-plugin-hosting-doc
+Group:          Applications/Productivity
+Summary:        Documentation for the Open Xchange RMI client library.
+
+
+%description -n open-xchange-admin-plugin-hosting-doc
+Documentation for the Open Xchange RMI client library.
+
+Authors:
+--------
+    Open-Xchange
 
 %description
 Open Xchange Admin Hosting Plugin
@@ -62,7 +73,8 @@ Authors:
 %define oxprefix	/opt/open-xchange
 
 ant -Dadmin.classpath=%{oxprefix}/bundles/%{adminbundle} \
-    -Ddestdir=%{buildroot} -Dprefix=%{oxprefix} install install-client
+    -Ddestdir=%{buildroot} -Dprefix=%{oxprefix} doc install install-client
+mv doc javadoc
 
 
 %clean
@@ -83,3 +95,6 @@ ant -Dadmin.classpath=%{oxprefix}/bundles/%{adminbundle} \
 /opt/open-xchange/lib/*
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/*
 
+%files -n open-xchange-admin-plugin-hosting-doc
+%defattr(-,root,root)
+%doc javadoc

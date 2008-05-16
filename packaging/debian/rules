@@ -58,7 +58,8 @@ install: build
 	# Add here commands to install the package into debian/open-xchange-admin.
 	ant 	-Dadmin.classpath=$(oxprefix)/bundles/$(adminbundle) \
 		-Dprefix=$(oxprefix) \
-		-Ddestdir=$(pkgroot) install install-client
+		-Ddestdir=$(pkgroot) doc install install-client
+	mv doc javadoc
 
 # Build architecture-independent files here.
 binary-indep: build install
