@@ -59,7 +59,7 @@ import org.mozilla.intl.chardet.nsPSMDetector;
 
 /**
  * {@link CharsetDetector} - A charset detector based on <a
- * href="http://jchardet.sourceforge.net/">jcharset</a> library.
+ * href="http://jchardet.sourceforge.net/">jchardet</a> library.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
