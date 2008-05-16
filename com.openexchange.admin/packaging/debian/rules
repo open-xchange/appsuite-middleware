@@ -57,8 +57,9 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/open-xchange-admin.
-	ant -Dprefix=$(oxprefix) -Ddestdir=$(adminroot) install
+	ant -Dprefix=$(oxprefix) -Ddestdir=$(adminroot) doc install
 	ant -Dprefix=$(oxprefix) -Ddestdir=$(clientroot) install-client
+	mv doc javadoc
 
 
 # Build architecture-independent files here.
