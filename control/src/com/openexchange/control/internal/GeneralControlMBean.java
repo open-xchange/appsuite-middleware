@@ -76,6 +76,8 @@ public interface GeneralControlMBean {
 	public void update(final String name, final boolean autorefresh) throws BundleNotFoundException;
 
 	public void refresh();
+	
+	public void shutdown();
 
 	public List services();
 

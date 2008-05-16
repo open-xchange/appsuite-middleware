@@ -176,6 +176,10 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		freshPackages(bundleContext);
 	}
 
+	public void shutdown() {
+		LOG.info("control command: shutdown");
+	}
+
 	public List<Map <String, Object>> services() {
 		LOG.info("control command: services");
 		final List<Map <String, Object>> serviceList = new ArrayList<Map <String, Object>>();
