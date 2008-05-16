@@ -1,3 +1,8 @@
+* 2008-05-16 - thorben.betten@open-xchange.com
+
+ - Bugfix #11270: Reliable check for subscribed subfolders through a LSUB
+   command instead of checking folder's attributes
+
 * 2008-05-08 - francisco.laguna@open-xchange.com
 
  - Bugfix #11269: When the current user is the only participant, conflicts must contain her.

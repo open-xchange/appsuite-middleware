@@ -401,8 +401,6 @@ public final class IMAPFolderConverter {
 		} else {
 			mailFolder.setSubfolders(li != null && li.length > 0);
 		}
-
-		mailFolder.setSubfolders(li != null && li.length > 0);
 	}
 
 	private static boolean isDefaultFoldersChecked(final Session session) {
