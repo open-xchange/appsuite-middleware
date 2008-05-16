@@ -232,8 +232,8 @@ public final class JSONMessageHandler implements MailMessageHandler {
 					jsonObject.put(DataFields.ID, mail.getMailId());
 				}
 				jsonObject.put(MailJSONField.UNREAD.getKey(), mail.getUnreadMessages());
-				jsonObject.put(MailJSONField.HAS_ATTACHMENTS.getKey(), mail.getContentType().isMimeType(
-						MIMETypes.MIME_MULTIPART_MIXED));
+				jsonObject.put(MailJSONField.HAS_ATTACHMENTS.getKey(), mail.containsHasAttachment() ? mail
+						.hasAttachment() : mail.getContentType().isMimeType(MIMETypes.MIME_MULTIPART_MIXED));
 				jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), mail.getContentType().getBaseType());
 				jsonObject.put(MailJSONField.SIZE.getKey(), mail.getSize());
 				jsonObject.put(MailJSONField.THREAD_LEVEL.getKey(), mail.getThreadLevel());

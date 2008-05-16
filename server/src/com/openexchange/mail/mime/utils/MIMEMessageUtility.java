@@ -268,24 +268,39 @@ public final class MIMEMessageUtility {
 	public static boolean hasAttachments(final Multipart mp, final String subtype) throws MessagingException,
 			MailException, IOException {
 		if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(subtype)) {
-			return (mp.getCount() > 2);
+			if (mp.getCount() > 2) {
+				return true;
+			}
+			return hasAttachments0(mp);
 		} else if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) {
-			return (mp.getCount() > 2);
+			if (mp.getCount() > 2) {
+				return true;
+			}
+			return hasAttachments0(mp);
 		} else if (mp.getCount() > 1) {
 			return true;
 		} else {
-			boolean found = false;
-			final int count = mp.getCount();
-			final ContentType ct = new ContentType();
-			for (int i = 0; i < count && !found; i++) {
-				final BodyPart part = mp.getBodyPart(i);
-				ct.setContentType(part.getContentType());
-				if (ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
-					found |= hasAttachments((Multipart) part.getContent(), ct.getSubType());
-				}
-			}
-			return found;
+			return hasAttachments0(mp);
 		}
+	}
+
+	private static boolean hasAttachments0(final Multipart mp) throws MessagingException, MailException, IOException {
+		boolean found = false;
+		final int count = mp.getCount();
+		final ContentType ct = new ContentType();
+		for (int i = 0; i < count && !found; i++) {
+			final BodyPart part = mp.getBodyPart(i);
+			final String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+			if (tmp != null && tmp.length > 0) {
+				ct.setContentType(MimeUtility.unfold(tmp[0]));
+			} else {
+				ct.setContentType(MIMETypes.MIME_DEFAULT);
+			}
+			if (ct.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+				found |= hasAttachments((Multipart) part.getContent(), ct.getSubType());
+			}
+		}
+		return found;
 	}
 
 	/**
@@ -300,20 +315,30 @@ public final class MIMEMessageUtility {
 	public static boolean hasAttachments(final BODYSTRUCTURE bodystructure) {
 		if (bodystructure.isMulti()) {
 			if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(bodystructure.subtype)) {
-				return (bodystructure.bodies.length > 2);
+				if (bodystructure.bodies.length > 2) {
+					return true;
+				}
+				return hasAttachments0(bodystructure);
 			} else if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(bodystructure.subtype)) {
-				return (bodystructure.bodies.length > 2);
+				if (bodystructure.bodies.length > 2) {
+					return true;
+				}
+				return hasAttachments0(bodystructure);
 			} else if (bodystructure.bodies.length > 1) {
 				return true;
 			} else {
-				boolean found = false;
-				for (int i = 0; (i < bodystructure.bodies.length) && !found; i++) {
-					found |= hasAttachments(bodystructure.bodies[i]);
-				}
-				return found;
+				return hasAttachments0(bodystructure);
 			}
 		}
 		return false;
+	}
+
+	private static boolean hasAttachments0(final BODYSTRUCTURE bodystructure) {
+		boolean found = false;
+		for (int i = 0; (i < bodystructure.bodies.length) && !found; i++) {
+			found |= hasAttachments(bodystructure.bodies[i]);
+		}
+		return found;
 	}
 
 	private static final Pattern ENC_PATTERN = Pattern.compile("(=\\?\\S+?\\?\\S+?\\?)(\\S+?)(\\?=)");
