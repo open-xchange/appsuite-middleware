@@ -109,6 +109,11 @@ public final class CSSMatcher {
 	private static final String STR_LENGTH_OR_PERCENTAGE = RegexUtility.group(RegexUtility.OR(STR_LENGTH,
 			STR_PERCENTAGE), GroupType.NON_CAPTURING);
 
+	private static final String STR_TIME_UNITS = "(?:ms|s)";
+
+	private static final String STR_TIME = RegexUtility.group(RegexUtility.concat(STR_NUMBER, STR_TIME_UNITS),
+			GroupType.NON_CAPTURING);
+
 	// private static final String STR_MULTIPLE_LENGTH =
 	// RegexUtility.concat(STR_LENGTH, RegexUtility.group(RegexUtility
 	// .concat("\\p{Blank}+", STR_LENGTH), GroupType.NON_CAPTURING), "*");
@@ -158,7 +163,9 @@ public final class CSSMatcher {
 
 	private static final Pattern PAT_u = Pattern.compile(STR_URL, Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern PATTERN_IS_PATTERN = Pattern.compile("[unNcd*]+");
+	private static final Pattern PAT_t = Pattern.compile(STR_TIME, Pattern.CASE_INSENSITIVE);
+
+	private static final Pattern PATTERN_IS_PATTERN = Pattern.compile("[unNcd*t]+");
 
 	/**
 	 * Checks if specified CSS value is matched by given allowed values
@@ -172,6 +179,7 @@ public final class CSSMatcher {
 	 * <li><b>c</b>:&nbsp;color</li>
 	 * <li><b>d</b>:&nbsp;delete</li>
 	 * <li><b>*</b>:&nbsp;any value</li>
+	 * <li><b>t</b>:&nbsp;time</li>
 	 * </ul>
 	 * 
 	 * @param value
@@ -228,6 +236,7 @@ public final class CSSMatcher {
 		// N: number string
 		// c: color
 		// d: delete
+		// t: time
 		switch (pattern) {
 		case 'u':
 			return PAT_u.matcher(value).matches();
@@ -239,6 +248,8 @@ public final class CSSMatcher {
 			return PAT_c.matcher(value).matches();
 		case 'd':
 			return false;
+		case 't':
+			return PAT_t.matcher(value).matches();
 		default:
 			return false;
 		}
