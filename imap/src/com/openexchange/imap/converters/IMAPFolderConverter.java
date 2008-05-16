@@ -95,6 +95,10 @@ import com.sun.mail.imap.protocol.ListInfo;
  */
 public final class IMAPFolderConverter {
 
+	private static final String STRING_PERC = "%";
+
+	private static final String STR_EMPTY = "";
+
 	private static final class _User2ACLArgs implements User2ACLArgs {
 
 		private final int sessionUser;
@@ -194,45 +198,34 @@ public final class IMAPFolderConverter {
 				attrs = imapFolder.getAttributes();
 			} catch (final NullPointerException e) {
 				/*
-				 * No attributes available. Try to determine them manually.
+				 * No attributes available.
 				 */
-				attrs = new String[0];
-				ListInfo[] li = (ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-					public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-						try {
-							return protocol.list("", new StringBuilder().append(imapFolder.getFullName()).append(
-									imapFolder.getSeparator()).append('%').toString());
-						} catch (final MessagingException e) {
-							LOG.error(e.getLocalizedMessage(), e);
-							throw new ProtocolException(e.getLocalizedMessage());
-						}
-					}
-				});
-				mailFolder.setSubfolders(hasChildren(li));
-				li = (ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-					public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-						try {
-							return protocol.lsub("", new StringBuilder().append(imapFolder.getFullName()).append(
-									imapFolder.getSeparator()).append('%').toString());
-						} catch (final MessagingException e) {
-							LOG.error(e.getLocalizedMessage(), e);
-							throw new ProtocolException(e.getLocalizedMessage());
-						}
-					}
-				});
-				mailFolder.setSubscribedSubfolders(hasChildren(li));
+				attrs = null;
 			}
 			if (null != attrs) {
-				Attribs: for (final String attribute : attrs) {
+				for (final String attribute : attrs) {
 					if (ATTRIBUTE_NON_EXISTENT.equalsIgnoreCase(attribute)) {
 						mailFolder.setNonExistent(true);
-						break Attribs;
+					} else if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
+						mailFolder.setSubfolders(true);
 					}
 				}
+			}
+			if (!mailFolder.containsSubfolders()) {
+				/*
+				 * No \HasChildren attribute found; check for subfolders through
+				 * a LIST command
+				 */
+				checkSubfoldersByCommands(imapFolder, mailFolder, false);
 			}
 			if (!mailFolder.containsNonExistent()) {
 				mailFolder.setNonExistent(false);
 			}
+			/*
+			 * Check reliably for subscribed subfolders through LSUB command
+			 * since folder attributes need not to to be present as per RFC 3501
+			 */
+			checkSubfoldersByCommands(imapFolder, mailFolder, true);
 			mailFolder.setSeparator(imapFolder.getSeparator());
 			if (mailFolder.isRootFolder()) {
 				mailFolder.setFullname(MailFolder.DEFAULT_FOLDER_ID);
@@ -268,37 +261,6 @@ public final class IMAPFolderConverter {
 			} else if (!mailFolder.isHoldsFolders()) {
 				mailFolder.setSubfolders(false);
 				mailFolder.setSubscribedSubfolders(false);
-			} else {
-				if (!mailFolder.containsSubfolders()) {
-					mailFolder.setSubfolders(false);
-					if (null != attrs) {
-						Attribs: for (final String attribute : attrs) {
-							if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
-								mailFolder.setSubfolders(true);
-								break Attribs;
-							}
-						}
-					}
-				}
-				if (!mailFolder.containsSubscribedSubfolders()) {
-					mailFolder.setSubscribedSubfolders(false);
-					if (mailFolder.hasSubfolders()) {
-						final ListInfo[] li = (ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-							public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-								return protocol.lsub("", imapFolder.getFullName());
-							}
-						});
-						if (null != li) {
-							final String[] lsubAttrs = li[findName(li, imapFolder.getFullName())].attrs;
-							Attribs: for (final String attribute : lsubAttrs) {
-								if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
-									mailFolder.setSubscribedSubfolders(true);
-									break Attribs;
-								}
-							}
-						}
-					}
-				}
 			}
 			final Rights ownRights;
 			if (mailFolder.isRootFolder()) {
@@ -415,6 +377,32 @@ public final class IMAPFolderConverter {
 		} catch (final ContextException e) {
 			throw new IMAPException(e);
 		}
+	}
+
+	private static void checkSubfoldersByCommands(final IMAPFolder imapFolder, final IMAPMailFolder mailFolder,
+			final boolean checkSubscribed) throws MessagingException {
+		final ListInfo[] li = (ListInfo[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+			public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+				try {
+					final String pattern = mailFolder.isRootFolder() ? STRING_PERC : new StringBuilder().append(
+							imapFolder.getFullName()).append(imapFolder.getSeparator()).append('%').toString();
+					if (checkSubscribed) {
+						return protocol.lsub(STR_EMPTY, pattern);
+					}
+					return protocol.list(STR_EMPTY, pattern);
+				} catch (final MessagingException e) {
+					LOG.error(e.getLocalizedMessage(), e);
+					throw new ProtocolException(e.getLocalizedMessage());
+				}
+			}
+		});
+		if (checkSubscribed) {
+			mailFolder.setSubscribedSubfolders(li != null && li.length > 0);
+		} else {
+			mailFolder.setSubfolders(li != null && li.length > 0);
+		}
+
+		mailFolder.setSubfolders(li != null && li.length > 0);
 	}
 
 	private static boolean isDefaultFoldersChecked(final Session session) {
@@ -631,52 +619,6 @@ public final class IMAPFolderConverter {
 			retval = new Rights(STR_FULL_RIGHTS);
 		}
 		return retval;
-	}
-
-	/**
-	 * Looks for attribute <code>\HasChildren</code> in provided attributes
-	 * 
-	 * @param li
-	 *            The list info
-	 * @return <code>true</code> if attribute <code>\HasChildren</code> is
-	 *         present; otherwise <code>false</code>
-	 */
-	private static boolean hasChildren(final ListInfo[] li) {
-		if (null != li) {
-			for (int i = 0; i < li.length; i++) {
-				for (final String attribute : li[i].attrs) {
-					if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Extracts the {@link ListInfo} item out of specified array <code>li</code>
-	 * whose name matches given name <code>lname</code>.
-	 * <p>
-	 * More than one item may be found, if the name contains wildcards. In this
-	 * case the items located at first position in array is returned.
-	 * 
-	 * @param li
-	 *            The array of {@link ListInfo} items
-	 * @param lname
-	 *            The name to look for
-	 * @return The index of the matching {@link ListInfo} item
-	 */
-	private static int findName(final ListInfo[] li, final String lname) {
-		for (int i = 0; i < li.length; i++) {
-			if (li[i].name.equals(lname)) {
-				return i;
-			}
-		}
-		/*
-		 * Nothing matched exactly. Use first one.
-		 */
-		return 0;
 	}
 
 }
