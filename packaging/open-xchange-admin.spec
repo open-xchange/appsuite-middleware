@@ -55,6 +55,19 @@ Authors:
 --------
     Open-Xchange
 
+%package -n	open-xchange-admin-doc
+Group:          Applications/Productivity
+Summary:	Documentation for the Open Xchange RMI client library.
+
+
+%description -n open-xchange-admin-doc
+Documentation for the Open Xchange RMI client library.
+
+Authors:
+--------
+    Open-Xchange
+
+
 
 %description
 Open Xchange Admin Daemon containing commandline tools and provisioning
@@ -74,9 +87,9 @@ Authors:
 %install
 mkdir -p %{buildroot}/sbin
 
-ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange -Ddistribution=lsb install
+ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange -Ddistribution=lsb doc install
 ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange -Ddistribution=lsb install-client
-
+mv doc javadoc
 ln -sf ../etc/init.d/open-xchange-admin %{buildroot}/sbin/rcopen-xchange-admin
 
 
@@ -111,3 +124,7 @@ ln -sf ../etc/init.d/open-xchange-admin %{buildroot}/sbin/rcopen-xchange-admin
 %defattr(-,root,root)
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/*
+
+%files -n open-xchange-admin-doc
+%defattr(-,root,root)
+%doc javadoc
