@@ -193,21 +193,23 @@ public final class IMAPFolderConverter {
 			final IMAPMailFolder mailFolder = new IMAPMailFolder();
 			mailFolder.setRootFolder(imapFolder instanceof DefaultFolder);
 			mailFolder.setExists(imapFolder.exists());
-			String[] attrs;
-			try {
-				attrs = imapFolder.getAttributes();
-			} catch (final NullPointerException e) {
-				/*
-				 * No attributes available.
-				 */
-				attrs = null;
-			}
-			if (null != attrs) {
-				for (final String attribute : attrs) {
-					if (ATTRIBUTE_NON_EXISTENT.equalsIgnoreCase(attribute)) {
-						mailFolder.setNonExistent(true);
-					} else if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
-						mailFolder.setSubfolders(true);
+			{
+				String[] attrs;
+				try {
+					attrs = imapFolder.getAttributes();
+				} catch (final NullPointerException e) {
+					/*
+					 * No attributes available.
+					 */
+					attrs = null;
+				}
+				if (null != attrs) {
+					for (final String attribute : attrs) {
+						if (ATTRIBUTE_NON_EXISTENT.equalsIgnoreCase(attribute)) {
+							mailFolder.setNonExistent(true);
+						} else if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
+							mailFolder.setSubfolders(true);
+						}
 					}
 				}
 			}
