@@ -526,10 +526,10 @@ public abstract class MailMessageStorage {
 	}
 
 	/**
-	 * Updates the system flags of the messages specified by given mail IDs
-	 * located in given folder. If parameter <code>set</code> is
-	 * <code>true</code> the affected flags denoted by <code>flags</code>
-	 * are added; otherwise removed.
+	 * Updates the flags of the messages specified by given mail IDs located in
+	 * given folder. If parameter <code>set</code> is <code>true</code> the
+	 * affected flags denoted by <code>flags</code> are added; otherwise
+	 * removed.
 	 * <p>
 	 * If no mail could be found for a given mail ID, it is treated as a no-op.
 	 * <p>
@@ -553,6 +553,10 @@ public abstract class MailMessageStorage {
 	 * <li>USER - A special flag that indicates that this folder supports user
 	 * defined flags. </li>
 	 * </ul>
+	 * <p>
+	 * If mail folder in question supports user flags (storing individual
+	 * strings per message) the virtual flags can also be updated through this
+	 * routine; e.g. {@link MailMessage#FLAG_FORWARDED}.
 	 * <p>
 	 * Moreover this routine checks for any spam related actions; meaning the
 	 * {@link MailMessage#FLAG_SPAM} shall be enabled/disabled. Thus the
