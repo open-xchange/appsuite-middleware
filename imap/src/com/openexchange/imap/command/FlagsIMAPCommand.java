@@ -58,8 +58,8 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
- * {@link FlagsIMAPCommand} - Enables/disables message's system flags e.g. \SEEN
- * or \DELETED
+ * {@link FlagsIMAPCommand} - Enables/disables message's system e.g. \SEEN or
+ * \DELETED and user flags as well.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -79,19 +79,19 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	private Boolean retval = Boolean.TRUE;
 
 	/**
-	 * Constructor
+	 * Constructor to set flags in messages identified through given UIDs.
 	 * 
 	 * @param imapFolder -
 	 *            the imap folder
 	 * @param uids -
 	 *            the UIDs
 	 * @param flags -
-	 *            the system flags
+	 *            the flags
 	 * @param silent
 	 *            <code>true</code> to suppress returning the new value;
 	 *            otherwise <code>false</code>
 	 * @param enable -
-	 *            whether to enable or disable affected system flags
+	 *            whether to enable or disable affected flags
 	 * @param isSequential -
 	 *            whether supplied UIDs are in sequential order or not
 	 * @throws MessagingException -
@@ -107,17 +107,19 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 		} else {
 			args = isSequential ? new String[] { new StringBuilder(64).append(uids[0]).append(':').append(
 					uids[uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(uids, true);
-			final Flag[] systemFlags;
-			if (flags == null || (systemFlags = flags.getSystemFlags()).length == 0) {
+			if (flags == null) {
 				returnDefaultValue = true;
 				flagsStr = null;
 			} else {
-				final StringBuilder flagBuilder = new StringBuilder(200);
-				flagBuilder.append(getFlagString(systemFlags[0]));
-				for (int i = 1; i < systemFlags.length; i++) {
-					flagBuilder.append(' ').append(getFlagString(systemFlags[i]));
+				final StringBuilder flagsStrBuilder = new StringBuilder(16);
+				appendSystemFlags(flags.getSystemFlags(), flagsStrBuilder);
+				appendUserFlags(flags.getUserFlags(), flagsStrBuilder);
+				if (flagsStrBuilder.length() == 0) {
+					returnDefaultValue = true;
+					flagsStr = null;
+				} else {
+					flagsStr = flagsStrBuilder.toString();
 				}
-				flagsStr = flagBuilder.toString();
 			}
 		}
 		this.enable = enable;
@@ -125,15 +127,34 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 		this.uid = true;
 	}
 
+	private void appendSystemFlags(final Flag[] systemFlags, final StringBuilder flagsStrBuilder)
+			throws MessagingException {
+		if (systemFlags.length > 0) {
+			flagsStrBuilder.append(getFlagString(systemFlags[0]));
+			for (int i = 1; i < systemFlags.length; i++) {
+				flagsStrBuilder.append(' ').append(getFlagString(systemFlags[i]));
+			}
+		}
+	}
+
+	private void appendUserFlags(final String[] userFlags, final StringBuilder flagsStrBuilder) {
+		if (userFlags.length > 0) {
+			flagsStrBuilder.append(userFlags[0]);
+			for (int i = 1; i < userFlags.length; i++) {
+				flagsStrBuilder.append(' ').append(userFlags[i]);
+			}
+		}
+	}
+
 	/**
-	 * Constructor to set system flags in all messages
+	 * Constructor to set flags in all messages
 	 * 
 	 * @param imapFolder -
 	 *            the imap folder
 	 * @param flags -
-	 *            the system flags
+	 *            the flags
 	 * @param enable -
-	 *            whether to enable or disable affected system flags
+	 *            whether to enable or disable affected flags
 	 * @param silent
 	 *            <code>true</code> to suppress returning the new value;
 	 *            otherwise <code>false</code>
@@ -144,17 +165,19 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 			throws MessagingException {
 		super(imapFolder);
 		args = ARGS_ALL;
-		final Flag[] systemFlags;
-		if (flags == null || (systemFlags = flags.getSystemFlags()).length == 0) {
+		if (flags == null) {
 			returnDefaultValue = true;
 			flagsStr = null;
 		} else {
-			final StringBuilder flagBuilder = new StringBuilder(200);
-			flagBuilder.append(getFlagString(systemFlags[0]));
-			for (int i = 1; i < systemFlags.length; i++) {
-				flagBuilder.append(' ').append(getFlagString(systemFlags[i]));
+			final StringBuilder flagsStrBuilder = new StringBuilder(16);
+			appendSystemFlags(flags.getSystemFlags(), flagsStrBuilder);
+			appendUserFlags(flags.getUserFlags(), flagsStrBuilder);
+			if (flagsStrBuilder.length() == 0) {
+				returnDefaultValue = true;
+				flagsStr = null;
+			} else {
+				flagsStr = flagsStrBuilder.toString();
 			}
-			flagsStr = flagBuilder.toString();
 		}
 		this.enable = enable;
 		this.silent = silent;
@@ -162,7 +185,7 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	}
 
 	/**
-	 * Constructor to set system flags starting at message whose sequence number
+	 * Constructor to set flags starting at message whose sequence number
 	 * matches specified <code>startSeqNum</code> and ending at message whose
 	 * sequence number matches specified <code>endSeqNum</code>
 	 * 
@@ -173,9 +196,9 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	 * @param endSeqNum
 	 *            The end sequence number
 	 * @param flags -
-	 *            the system flags
+	 *            the flags
 	 * @param enable -
-	 *            whether to enable or disable affected system flags
+	 *            whether to enable or disable affected flags
 	 * @param silent
 	 *            <code>true</code> to suppress returning the new value;
 	 *            otherwise <code>false</code>
@@ -186,17 +209,19 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 			final boolean enable, final boolean silent) throws MessagingException {
 		super(imapFolder);
 		args = new String[] { new StringBuilder(16).append(startSeqNum).append(':').append(endSeqNum).toString() };
-		final Flag[] systemFlags;
-		if (flags == null || (systemFlags = flags.getSystemFlags()).length == 0) {
+		if (flags == null) {
 			returnDefaultValue = true;
 			flagsStr = null;
 		} else {
-			final StringBuilder flagBuilder = new StringBuilder(256);
-			flagBuilder.append(getFlagString(systemFlags[0]));
-			for (int i = 1; i < systemFlags.length; i++) {
-				flagBuilder.append(' ').append(getFlagString(systemFlags[i]));
+			final StringBuilder flagsStrBuilder = new StringBuilder(16);
+			appendSystemFlags(flags.getSystemFlags(), flagsStrBuilder);
+			appendUserFlags(flags.getUserFlags(), flagsStrBuilder);
+			if (flagsStrBuilder.length() == 0) {
+				returnDefaultValue = true;
+				flagsStr = null;
+			} else {
+				flagsStr = flagsStrBuilder.toString();
 			}
-			flagsStr = flagBuilder.toString();
 		}
 		this.enable = enable;
 		this.uid = false;
