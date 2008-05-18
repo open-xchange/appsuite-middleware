@@ -63,7 +63,7 @@ public final class MailAPITestSuite extends TestSuite {
 	/**
 	 * Initializes a new {@link MailAPITestSuite}
 	 */
-	private MailAPITestSuite() {
+	public MailAPITestSuite() {
 		super();
 	}
 

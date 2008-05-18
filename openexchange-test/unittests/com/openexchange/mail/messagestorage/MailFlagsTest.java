@@ -79,8 +79,6 @@ public final class MailFlagsTest extends AbstractMailTest {
 		super(name);
 	}
 
-	private static final MailField[] FIELDS_ID = { MailField.ID };
-
 	private static final MailField[] FIELDS_ID_AND_FLAGS = { MailField.ID, MailField.FLAGS };
 
 	public void testMailFlags() {
@@ -94,13 +92,14 @@ public final class MailFlagsTest extends AbstractMailTest {
 			mailAccess.connect();
 			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
 			try {
-				
+
 				try {
-					mailAccess.getMessageStorage().updateMessageFlags("INBOX", new long[] { System.currentTimeMillis() }, MailMessage.FLAG_SEEN, true);
+					mailAccess.getMessageStorage().updateMessageFlags("INBOX",
+							new long[] { System.currentTimeMillis() }, MailMessage.FLAG_SEEN, true);
 				} catch (final Exception e) {
 					fail("No Exception should be thrown here but was " + e.getMessage());
 				}
-				
+
 				mailAccess.getMessageStorage().updateMessageFlags("INBOX", uids, MailMessage.FLAG_SEEN, true);
 				MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids,
 						FIELDS_ID_AND_FLAGS);
@@ -130,7 +129,7 @@ public final class MailFlagsTest extends AbstractMailTest {
 		}
 	}
 
-	public void testMailFlagsForwarded() {
+	public void testMailFlagsUserFlags() {
 		try {
 			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
 					new ContextImpl(getCid()), "mail-test-session");
@@ -139,20 +138,26 @@ public final class MailFlagsTest extends AbstractMailTest {
 
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
-			
+
 			if (!mailAccess.getFolderStorage().getFolder("INBOX").isSupportsUserFlags()) {
 				System.err.println("User flags not supported. Skipping test for user flag $Forwarded...");
 				return;
 			}
-			
+
 			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
 			try {
-				
+
 				mailAccess.getMessageStorage().updateMessageFlags("INBOX", uids, MailMessage.FLAG_FORWARDED, true);
-				final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids,
+				MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids,
 						FIELDS_ID_AND_FLAGS);
 				for (int i = 0; i < fetchedMails.length; i++) {
 					assertTrue("Mail is not marked as $Forwarded", fetchedMails[i].isForwarded());
+				}
+
+				mailAccess.getMessageStorage().updateMessageFlags("INBOX", uids, MailMessage.FLAG_READ_ACK, true);
+				fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID_AND_FLAGS);
+				for (int i = 0; i < fetchedMails.length; i++) {
+					assertTrue("Mail is not marked as $MDNSent", fetchedMails[i].isReadAcknowledgment());
 				}
 
 			} finally {
