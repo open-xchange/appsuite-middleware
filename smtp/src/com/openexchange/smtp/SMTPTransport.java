@@ -101,7 +101,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.sun.mail.smtp.SMTPMessage;
 
 /**
- * {@link SMTPTransport}
+ * {@link SMTPTransport} - The SMTP mail transport.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
