@@ -168,6 +168,13 @@ public final class SMTPTransport extends MailTransport {
 		}
 	}
 
+	private SMTPMessageFiller getMessageFiller() {
+		if (smtpFiller == null) {
+			smtpFiller = new SMTPMessageFiller(session, ctx, usm);
+		}
+		return smtpFiller;
+	}
+
 	private void clearUp() {
 		if (smtpFiller != null) {
 			smtpFiller.deleteReferencedUploadFiles();
@@ -282,28 +289,32 @@ public final class SMTPTransport extends MailTransport {
 				final int offset = TimeZone.getTimeZone(u.getTimeZone()).getOffset(sentDate.getTime());
 				sentDate.setTime(sentDate.getTime() + offset);
 			}
-			final MimeBodyPart text = new MimeBodyPart();
-			text.setText(performLineFolding(strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT).replaceFirst(
-					"#DATE#",
-					sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale)
-							.format(sentDate))).replaceFirst("#RECIPIENT#", quoteReplacement(from)).replaceFirst(
-					"#SUBJECT#", quoteReplacement(srcMail.getSubject())), false, usm.getAutoLinebreak()), MailConfig
-					.getDefaultMimeCharset());
-			text.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-			text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
-			mixedMultipart.addBodyPart(text);
+			{
+				final MimeBodyPart text = new MimeBodyPart();
+				text.setText(performLineFolding(strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT).replaceFirst(
+						"#DATE#",
+						sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale)
+								.format(sentDate))).replaceFirst("#RECIPIENT#", quoteReplacement(from)).replaceFirst(
+						"#SUBJECT#", quoteReplacement(srcMail.getSubject())), false, usm.getAutoLinebreak()),
+						MailConfig.getDefaultMimeCharset());
+				text.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+				text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
+				mixedMultipart.addBodyPart(text);
+			}
 			/*
 			 * Define ack
 			 */
 			ct.setContentType("message/disposition-notification; name=MDNPart1.txt; charset=UTF-8");
-			final MimeBodyPart ack = new MimeBodyPart();
-			final String msgId = srcMail.getHeader(MessageHeaders.HDR_MESSAGE_ID);
-			ack.setText(strHelper.getString(ACK_TEXT).replaceFirst("#FROM#", quoteReplacement(from)).replaceFirst(
-					"#MSG ID#", quoteReplacement(msgId)), MailConfig.getDefaultMimeCharset());
-			ack.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-			ack.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
-			ack.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, "attachment; filename=MDNPart1.txt");
-			mixedMultipart.addBodyPart(ack);
+			{
+				final MimeBodyPart ack = new MimeBodyPart();
+				final String msgId = srcMail.getHeader(MessageHeaders.HDR_MESSAGE_ID);
+				ack.setText(strHelper.getString(ACK_TEXT).replaceFirst("#FROM#", quoteReplacement(from)).replaceFirst(
+						"#MSG ID#", quoteReplacement(msgId)), MailConfig.getDefaultMimeCharset());
+				ack.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+				ack.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
+				ack.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, "attachment; filename=MDNPart1.txt");
+				mixedMultipart.addBodyPart(ack);
+			}
 			/*
 			 * Set message content
 			 */
@@ -387,7 +398,7 @@ public final class SMTPTransport extends MailTransport {
 			 * Fill message dependent on send type
 			 */
 			final long startPrep = System.currentTimeMillis();
-			smtpFiller = new SMTPMessageFiller(session, ctx, usm);
+			final SMTPMessageFiller smtpFiller = getMessageFiller();
 			if (composedMail.getReferencedMailsSize() == 1) {
 				tempIds = ReferencedMailPart.loadReferencedParts(composedMail, session);
 			}
