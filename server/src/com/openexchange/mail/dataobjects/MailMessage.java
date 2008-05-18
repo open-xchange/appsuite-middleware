@@ -148,6 +148,23 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public static final int FLAG_SPAM = 128;
 
+	/**
+	 * Virtual forwarded flag that marks this message as being forwarded.
+	 * 
+	 * @value 256
+	 */
+	public static final int FLAG_FORWARDED = 256;
+
+	/*
+	 * ------------------- User Flags ------------------------------
+	 */
+	/**
+	 * The value of virtual forwarded flag.
+	 * 
+	 * @value $Forwarded
+	 */
+	public static final String USER_FORWARDED = "$Forwarded";
+
 	/*
 	 * ------------------- Priority ------------------------------
 	 */
@@ -697,6 +714,14 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public boolean isSpam() {
 		return ((flags & FLAG_SPAM) == FLAG_SPAM);
+	}
+
+	/**
+	 * @return <code>true</code> if forwarded flag is set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isForwarded() {
+		return ((flags & FLAG_FORWARDED) == FLAG_FORWARDED);
 	}
 
 	/**
