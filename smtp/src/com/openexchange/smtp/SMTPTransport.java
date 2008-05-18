@@ -347,8 +347,8 @@ public final class SMTPTransport extends MailTransport {
 	public MailMessage sendRawMessage(final byte[] asciiBytes) throws MailException {
 		try {
 			clearUp();
-			final SMTPMessage smtpMessage = new SMTPMessage(javax.mail.Session.getInstance(SMTPSessionProperties
-					.getDefaultSessionProperties(), null), new UnsynchronizedByteArrayInputStream(asciiBytes));
+			final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession(), new UnsynchronizedByteArrayInputStream(
+					asciiBytes));
 			/*
 			 * Check recipients
 			 */
