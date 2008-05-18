@@ -97,7 +97,7 @@ public final class MailFlagsTest extends AbstractMailTest {
 				
 				try {
 					mailAccess.getMessageStorage().updateMessageFlags("INBOX", new long[] { System.currentTimeMillis() }, MailMessage.FLAG_SEEN, true);
-				} catch (Exception e) {
+				} catch (final Exception e) {
 					fail("No Exception should be thrown here but was " + e.getMessage());
 				}
 				
@@ -112,6 +112,47 @@ public final class MailFlagsTest extends AbstractMailTest {
 				fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids, FIELDS_ID_AND_FLAGS);
 				for (int i = 0; i < fetchedMails.length; i++) {
 					assertTrue("Mail is not marked as \\Answered", fetchedMails[i].isAnswered());
+				}
+
+			} finally {
+
+				mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
+
+				/*
+				 * close
+				 */
+				mailAccess.close(false);
+			}
+
+		} catch (final Exception e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
+		}
+	}
+
+	public void testMailFlagsForwarded() {
+		try {
+			final SessionObject session = SessionObjectWrapper.createSessionObject(getUser(),
+					new ContextImpl(getCid()), "mail-test-session");
+			session.setPassword(getPassword());
+			final MailMessage[] mails = getMessages(getTestMailDir(), -1);
+
+			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+			mailAccess.connect();
+			
+			if (!mailAccess.getFolderStorage().getFolder("INBOX").isSupportsUserFlags()) {
+				System.err.println("User flags not supported. Skipping test for user flag $Forwarded...");
+				return;
+			}
+			
+			final long[] uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
+			try {
+				
+				mailAccess.getMessageStorage().updateMessageFlags("INBOX", uids, MailMessage.FLAG_FORWARDED, true);
+				final MailMessage[] fetchedMails = mailAccess.getMessageStorage().getMessages("INBOX", uids,
+						FIELDS_ID_AND_FLAGS);
+				for (int i = 0; i < fetchedMails.length; i++) {
+					assertTrue("Mail is not marked as $Forwarded", fetchedMails[i].isForwarded());
 				}
 
 			} finally {
