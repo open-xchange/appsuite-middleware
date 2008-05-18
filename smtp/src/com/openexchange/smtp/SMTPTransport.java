@@ -229,6 +229,14 @@ public final class SMTPTransport extends MailTransport {
 	private static final String ACK_TEXT = "Reporting-UA: OPEN-XCHANGE - WebMail\r\nFinal-Recipient: rfc822; #FROM#\r\n"
 			+ "Original-Message-ID: #MSG ID#\r\nDisposition: manual-action/MDN-sent-manually; displayed\r\n";
 
+	private static final String CT_TEXT_PLAIN = "text/plain; charset=#CS#";
+
+	private static final String CT_READ_ACK = "message/disposition-notification; name=MDNPart1.txt; charset=UTF-8";
+
+	private static final String CD_READ_ACK = "attachment; filename=MDNPart1.txt";
+
+	private static final String MULTI_SUBTYPE_REPORT = "report; report-type=disposition-notification";
+
 	@Override
 	public void sendReceiptAck(final MailMessage srcMail, final String fromAddr) throws MailException {
 		try {
@@ -277,8 +285,9 @@ public final class SMTPTransport extends MailTransport {
 			/*
 			 * Compose body
 			 */
-			final ContentType ct = new ContentType("text/plain; charset=UTF-8");
-			final Multipart mixedMultipart = new MimeMultipart("report; report-type=disposition-notification");
+			final String defaultMimeCS = MailConfig.getDefaultMimeCharset();
+			final ContentType ct = new ContentType(CT_TEXT_PLAIN.replaceFirst("#CS#", defaultMimeCS));
+			final Multipart mixedMultipart = new MimeMultipart(MULTI_SUBTYPE_REPORT);
 			/*
 			 * Define text content
 			 */
@@ -290,7 +299,7 @@ public final class SMTPTransport extends MailTransport {
 						sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale)
 								.format(sentDate))).replaceFirst("#RECIPIENT#", quoteReplacement(from)).replaceFirst(
 						"#SUBJECT#", quoteReplacement(srcMail.getSubject())), false, usm.getAutoLinebreak()),
-						MailConfig.getDefaultMimeCharset());
+						defaultMimeCS);
 				text.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
 				text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
 				mixedMultipart.addBodyPart(text);
@@ -298,15 +307,15 @@ public final class SMTPTransport extends MailTransport {
 			/*
 			 * Define ack
 			 */
-			ct.setContentType("message/disposition-notification; name=MDNPart1.txt; charset=UTF-8");
+			ct.setContentType(CT_READ_ACK);
 			{
 				final MimeBodyPart ack = new MimeBodyPart();
 				final String msgId = srcMail.getHeader(MessageHeaders.HDR_MESSAGE_ID);
 				ack.setText(strHelper.getString(ACK_TEXT).replaceFirst("#FROM#", quoteReplacement(from)).replaceFirst(
-						"#MSG ID#", quoteReplacement(msgId)), MailConfig.getDefaultMimeCharset());
+						"#MSG ID#", quoteReplacement(msgId)), defaultMimeCS);
 				ack.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
 				ack.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
-				ack.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, "attachment; filename=MDNPart1.txt");
+				ack.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, CD_READ_ACK);
 				mixedMultipart.addBodyPart(ack);
 			}
 			/*
