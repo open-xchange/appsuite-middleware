@@ -840,6 +840,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				affectedFlags.add(MailMessage.USER_FORWARDED);
 				applyFlags = true;
 			}
+			/*
+			 * Check for read acknowledgment flag (supported through user flags)
+			 */
+			if (((flags & MailMessage.FLAG_READ_ACK) == MailMessage.FLAG_READ_ACK)
+					&& UserFlagsCache.supportsUserFlags(imapFolder, true, session)) {
+				if (imapConfig.isSupportsACLs() && !myRights.contains(Rights.Right.WRITE)) {
+					throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
+				}
+				affectedFlags.add(MailMessage.USER_READ_ACK);
+				applyFlags = true;
+			}
 			if (applyFlags) {
 				final long start = System.currentTimeMillis();
 				new FlagsIMAPCommand(imapFolder, msgUIDs, affectedFlags, set, true, false).doCommand();
