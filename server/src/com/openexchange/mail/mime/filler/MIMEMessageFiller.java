@@ -378,6 +378,20 @@ public class MIMEMessageFiller {
 		if (mail.isUser()) {
 			msgFlags.add(Flags.Flag.USER);
 		}
+		if (mail.isForwarded()) {
+			msgFlags.add(MailMessage.USER_FORWARDED);
+		}
+		if (mail.getColorLabel() != MailMessage.COLOR_LABEL_NONE) {
+			msgFlags.add(new StringBuilder(MailMessage.COLOR_LABEL_PREFIX).append(mail.getColorLabel()).toString());
+		}
+		{
+			final String[] userFlags = mail.getUserFlags();
+			if (null != userFlags && userFlags.length > 0) {
+				for (final String userFlag : userFlags) {
+					msgFlags.add(userFlag);
+				}
+			}
+		}
 		/*
 		 * Finally, apply flags to message
 		 */
