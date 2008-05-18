@@ -155,6 +155,14 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public static final int FLAG_FORWARDED = 256;
 
+	/**
+	 * Virtual read acknowledgment flag that marks this message as being
+	 * forwarded.
+	 * 
+	 * @value 512
+	 */
+	public static final int FLAG_READ_ACK = 512;
+
 	/*
 	 * ------------------- User Flags ------------------------------
 	 */
@@ -164,6 +172,13 @@ public abstract class MailMessage extends MailPart {
 	 * @value $Forwarded
 	 */
 	public static final String USER_FORWARDED = "$Forwarded";
+
+	/**
+	 * The value of virtual read acknowledgment flag.
+	 * 
+	 * @value $MDNSent
+	 */
+	public static final String USER_READ_ACK = "$MDNSent";
 
 	/*
 	 * ------------------- Priority ------------------------------
@@ -722,6 +737,14 @@ public abstract class MailMessage extends MailPart {
 	 */
 	public boolean isForwarded() {
 		return ((flags & FLAG_FORWARDED) == FLAG_FORWARDED);
+	}
+
+	/**
+	 * @return <code>true</code> if read acknowledgment flag is set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isReadAcknowledgment() {
+		return ((flags & FLAG_READ_ACK) == FLAG_READ_ACK);
 	}
 
 	/**

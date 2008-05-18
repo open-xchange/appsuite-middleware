@@ -446,6 +446,9 @@ public final class MIMEMessageConverter {
 		if ((flags & MailMessage.FLAG_FORWARDED) > 0) {
 			flagsObj.add(MailMessage.USER_FORWARDED);
 		}
+		if ((flags & MailMessage.FLAG_READ_ACK) > 0) {
+			flagsObj.add(MailMessage.USER_READ_ACK);
+		}
 		msg.setFlags(flagsObj, true);
 	}
 
@@ -1699,6 +1702,8 @@ public final class MIMEMessageConverter {
 					mailMessage.setColorLabel(MailMessage.getColorLabelIntValue(userFlags[i]));
 				} else if (MailMessage.USER_FORWARDED.equalsIgnoreCase(userFlags[i])) {
 					retval |= MailMessage.FLAG_FORWARDED;
+				} else if (MailMessage.USER_READ_ACK.equalsIgnoreCase(userFlags[i])) {
+					retval |= MailMessage.FLAG_READ_ACK;
 				} else {
 					mailMessage.addUserFlag(userFlags[i]);
 				}
