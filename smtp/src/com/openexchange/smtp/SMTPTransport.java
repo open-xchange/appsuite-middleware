@@ -62,7 +62,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
-import java.util.TimeZone;
 
 import javax.mail.Address;
 import javax.mail.MessagingException;
@@ -77,7 +76,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
@@ -241,17 +239,17 @@ public final class SMTPTransport extends MailTransport {
 						Long.valueOf(srcMail.getMailId()));
 			}
 			final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession());
-			final User u = UserStorage.getStorageUser(session.getUserId(), ctx);
+			final String userMail = UserStorage.getStorageUser(session.getUserId(), ctx).getMail();
 			/*
 			 * Set from
 			 */
 			final String from;
 			if (fromAddr != null) {
 				from = fromAddr;
-			} else if (usm.getSendAddr() == null && u.getMail() == null) {
+			} else if (usm.getSendAddr() == null && userMail == null) {
 				throw new SMTPException(SMTPException.Code.NO_SEND_ADDRESS_FOUND);
 			} else {
-				from = usm.getSendAddr() == null ? u.getMail() : usm.getSendAddr();
+				from = usm.getSendAddr() == null ? userMail : usm.getSendAddr();
 			}
 			smtpMessage.addFrom(parseAddressList(from, false));
 			/*
@@ -285,10 +283,6 @@ public final class SMTPTransport extends MailTransport {
 			 * Define text content
 			 */
 			final Date sentDate = srcMail.getSentDate();
-			if (sentDate != null) {
-				final int offset = TimeZone.getTimeZone(u.getTimeZone()).getOffset(sentDate.getTime());
-				sentDate.setTime(sentDate.getTime() + offset);
-			}
 			{
 				final MimeBodyPart text = new MimeBodyPart();
 				text.setText(performLineFolding(strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT).replaceFirst(
