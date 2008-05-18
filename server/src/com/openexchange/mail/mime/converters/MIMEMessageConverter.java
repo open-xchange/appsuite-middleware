@@ -224,6 +224,19 @@ public final class MIMEMessageConverter {
 			if (mail.containsFlags()) {
 				parseMimeFlags(mail.getFlags(), mimeMsg);
 			}
+			if (mail.containsColorLabel()) {
+				final Flags flags = new Flags();
+				flags.add(new StringBuilder(MailMessage.COLOR_LABEL_PREFIX).append(mail.getColorLabel()).toString());
+				mimeMsg.setFlags(flags, true);
+			}
+			if (mail.containsUserFlags()) {
+				final Flags flags = new Flags();
+				final String[] userFlags = mail.getUserFlags();
+				for (final String userFlag : userFlags) {
+					flags.add(userFlag);
+				}
+				mimeMsg.setFlags(flags, true);
+			}
 			if (mail.getSentDate() != null) {
 				mimeMsg.setSentDate(mail.getSentDate());
 			}
@@ -429,6 +442,9 @@ public final class MIMEMessageConverter {
 		}
 		if ((flags & MailMessage.FLAG_USER) > 0) {
 			flagsObj.add(Flags.Flag.USER);
+		}
+		if ((flags & MailMessage.FLAG_FORWARDED) > 0) {
+			flagsObj.add(MailMessage.USER_FORWARDED);
 		}
 		msg.setFlags(flagsObj, true);
 	}
@@ -1647,30 +1663,27 @@ public final class MIMEMessageConverter {
 	private static final String[] EMPTY_STRS = new String[0];
 
 	private static void parseFlags(final Flags flags, final MailMessage mailMessage) throws MailException {
-		{
-			int retval = 0;
-			if (flags.contains(Flags.Flag.ANSWERED)) {
-				retval |= MailMessage.FLAG_ANSWERED;
-			}
-			if (flags.contains(Flags.Flag.DELETED)) {
-				retval |= MailMessage.FLAG_DELETED;
-			}
-			if (flags.contains(Flags.Flag.DRAFT)) {
-				retval |= MailMessage.FLAG_DRAFT;
-			}
-			if (flags.contains(Flags.Flag.FLAGGED)) {
-				retval |= MailMessage.FLAG_FLAGGED;
-			}
-			if (flags.contains(Flags.Flag.RECENT)) {
-				retval |= MailMessage.FLAG_RECENT;
-			}
-			if (flags.contains(Flags.Flag.SEEN)) {
-				retval |= MailMessage.FLAG_SEEN;
-			}
-			if (flags.contains(Flags.Flag.USER)) {
-				retval |= MailMessage.FLAG_USER;
-			}
-			mailMessage.setFlags(retval);
+		int retval = 0;
+		if (flags.contains(Flags.Flag.ANSWERED)) {
+			retval |= MailMessage.FLAG_ANSWERED;
+		}
+		if (flags.contains(Flags.Flag.DELETED)) {
+			retval |= MailMessage.FLAG_DELETED;
+		}
+		if (flags.contains(Flags.Flag.DRAFT)) {
+			retval |= MailMessage.FLAG_DRAFT;
+		}
+		if (flags.contains(Flags.Flag.FLAGGED)) {
+			retval |= MailMessage.FLAG_FLAGGED;
+		}
+		if (flags.contains(Flags.Flag.RECENT)) {
+			retval |= MailMessage.FLAG_RECENT;
+		}
+		if (flags.contains(Flags.Flag.SEEN)) {
+			retval |= MailMessage.FLAG_SEEN;
+		}
+		if (flags.contains(Flags.Flag.USER)) {
+			retval |= MailMessage.FLAG_USER;
 		}
 		final String[] userFlags = flags.getUserFlags();
 		if (userFlags != null) {
@@ -1684,11 +1697,17 @@ public final class MIMEMessageConverter {
 				 */
 				if (userFlags[i].startsWith(MailMessage.COLOR_LABEL_PREFIX)) {
 					mailMessage.setColorLabel(MailMessage.getColorLabelIntValue(userFlags[i]));
+				} else if (MailMessage.USER_FORWARDED.equalsIgnoreCase(userFlags[i])) {
+					retval |= MailMessage.FLAG_FORWARDED;
 				} else {
 					mailMessage.addUserFlag(userFlags[i]);
 				}
 			}
 		}
+		/*
+		 * Set system flags
+		 */
+		mailMessage.setFlags(retval);
 	}
 
 	private static final int DEFAULT_MESSAGE_SIZE = 8192;
