@@ -793,41 +793,58 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			final Rights myRights = imapConfig.isSupportsACLs() ? RightsCache
 					.getCachedRights(imapFolder, true, session) : null;
 			final Flags affectedFlags = new Flags();
+			boolean applyFlags = false;
 			if (((flags & MailMessage.FLAG_ANSWERED) > 0)) {
 				if (imapConfig.isSupportsACLs() && !myRights.contains(Rights.Right.WRITE)) {
 					throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
 				}
 				affectedFlags.add(Flags.Flag.ANSWERED);
+				applyFlags = true;
 			}
 			if (((flags & MailMessage.FLAG_DELETED) > 0)) {
 				if (imapConfig.isSupportsACLs() && !myRights.contains(Rights.Right.DELETE)) {
 					throw new IMAPException(IMAPException.Code.NO_DELETE_ACCESS, imapFolder.getFullName());
 				}
 				affectedFlags.add(Flags.Flag.DELETED);
+				applyFlags = true;
 			}
 			if (((flags & MailMessage.FLAG_DRAFT) > 0)) {
 				if (imapConfig.isSupportsACLs() && !myRights.contains(Rights.Right.WRITE)) {
 					throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
 				}
 				affectedFlags.add(Flags.Flag.DRAFT);
+				applyFlags = true;
 			}
 			if (((flags & MailMessage.FLAG_FLAGGED) > 0)) {
 				if (imapConfig.isSupportsACLs() && !myRights.contains(Rights.Right.WRITE)) {
 					throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
 				}
 				affectedFlags.add(Flags.Flag.FLAGGED);
+				applyFlags = true;
 			}
 			if (((flags & MailMessage.FLAG_SEEN) > 0)) {
 				if (imapConfig.isSupportsACLs() && !myRights.contains(Rights.Right.KEEP_SEEN)) {
 					throw new IMAPException(IMAPException.Code.NO_KEEP_SEEN_ACCESS, imapFolder.getFullName());
 				}
 				affectedFlags.add(Flags.Flag.SEEN);
+				applyFlags = true;
 			}
-			if (affectedFlags.getSystemFlags().length > 0) {
+			/*
+			 * Check for forwarded flag (supported through user flags)
+			 */
+			if (((flags & MailMessage.FLAG_FORWARDED) == MailMessage.FLAG_FORWARDED)
+					&& UserFlagsCache.supportsUserFlags(imapFolder, true, session)) {
+				if (imapConfig.isSupportsACLs() && !myRights.contains(Rights.Right.WRITE)) {
+					throw new IMAPException(IMAPException.Code.NO_WRITE_ACCESS, imapFolder.getFullName());
+				}
+				affectedFlags.add(MailMessage.USER_FORWARDED);
+				applyFlags = true;
+			}
+			if (applyFlags) {
 				final long start = System.currentTimeMillis();
-				new FlagsIMAPCommand(imapFolder, msgUIDs, affectedFlags, set, false, false).doCommand();
+				new FlagsIMAPCommand(imapFolder, msgUIDs, affectedFlags, set, true, false).doCommand();
 				if (LOG.isDebugEnabled()) {
-					LOG.debug(new StringBuilder(128).append("System Flags applied to ").append(msgUIDs.length).append(
+					LOG.debug(new StringBuilder(128).append("Flags applied to ").append(msgUIDs.length).append(
 							" messages in ").append((System.currentTimeMillis() - start)).append("msec").toString());
 				}
 			}
