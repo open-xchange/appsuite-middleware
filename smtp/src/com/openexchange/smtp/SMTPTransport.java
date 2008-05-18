@@ -385,12 +385,6 @@ public final class SMTPTransport extends MailTransport {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.transport.MailTransport#sendMailMessage(com.openexchange.mail.dataobjects.MailMessage,
-	 *      com.openexchange.mail.transport.SendType)
-	 */
 	@Override
 	public MailMessage sendMailMessage(final ComposedMailMessage composedMail, final ComposeType sendType)
 			throws MailException {
