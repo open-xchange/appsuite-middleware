@@ -381,6 +381,9 @@ public class MIMEMessageFiller {
 		if (mail.isForwarded()) {
 			msgFlags.add(MailMessage.USER_FORWARDED);
 		}
+		if (mail.isReadAcknowledgment()) {
+			msgFlags.add(MailMessage.USER_READ_ACK);
+		}
 		if (mail.getColorLabel() != MailMessage.COLOR_LABEL_NONE) {
 			msgFlags.add(new StringBuilder(MailMessage.COLOR_LABEL_PREFIX).append(mail.getColorLabel()).toString());
 		}
