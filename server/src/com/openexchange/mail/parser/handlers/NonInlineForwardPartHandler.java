@@ -291,8 +291,12 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
 	 * @see com.openexchange.mail.parser.MailMessageHandler#handleNestedMessage(com.openexchange.mail.dataobjects.MailMessage,
 	 *      java.lang.String)
 	 */
-	public boolean handleNestedMessage(final MailMessage nestedMail, final String id) throws MailException {
-		nonInlineParts.add(nestedMail);
+	public boolean handleNestedMessage(final MailPart mailPart, final String id) throws MailException {
+		/*
+		 * Force to add as attachment
+		 */
+		mailPart.getContentDisposition().setDisposition(Part.ATTACHMENT);
+		nonInlineParts.add(mailPart);
 		// final NonInlineForwardPartHandler handler = new
 		// NonInlineForwardPartHandler(nonInlineParts);
 		// new MailMessageParser().parseMailMessage(nestedMail, handler, id);

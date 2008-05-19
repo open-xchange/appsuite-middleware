@@ -136,7 +136,7 @@ public final class MailMessageParser {
 	public void parseMailMessage(final MailMessage mail, final MailMessageHandler handler, final String prefix)
 			throws MailException {
 		try {
-			parseMailContent(mail, handler, prefix, 1);
+			parseMailContent(mail, handler, prefix, 1, false);
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.UNREADBALE_PART_CONTENT, e, Long.valueOf(mail.getMailId()), mail
 					.getFolder());
@@ -145,7 +145,7 @@ public final class MailMessageParser {
 	}
 
 	private void parseMailContent(final MailPart mailPartArg, final MailMessageHandler handler, final String prefix,
-			final int partCountArg) throws MailException, IOException {
+			final int partCountArg, final boolean recursiveCall) throws MailException, IOException {
 		if (stop) {
 			return;
 		}
@@ -157,7 +157,7 @@ public final class MailMessageParser {
 		/*
 		 * Proceed
 		 */
-		if (mailPart instanceof MailMessage) {
+		if (!recursiveCall && mailPart instanceof MailMessage) {
 			parseEnvelope((MailMessage) mailPart, handler);
 		}
 		/*
@@ -279,7 +279,7 @@ public final class MailMessageParser {
 			}
 			for (int i = 0; i < count; i++) {
 				final MailPart enclosedContent = mailPart.getEnclosedMailPart(i);
-				parseMailContent(enclosedContent, handler, mpPrefix, i + 1);
+				parseMailContent(enclosedContent, handler, mpPrefix, i + 1, true);
 			}
 		} else if (contentType.isMimeType(MIMETypes.MIME_IMAGE_ALL)) {
 			if (!mailPart.containsSequenceId()) {
@@ -295,8 +295,7 @@ public final class MailMessageParser {
 				mailPart.setSequenceId(getSequenceId(prefix, partCount));
 			}
 			if (isInline) {
-				final MailMessage nestedMail = (MailMessage) mailPart.getContent();
-				if (!handler.handleNestedMessage(nestedMail, getSequenceId(prefix, partCount))) {
+				if (!handler.handleNestedMessage(mailPart, getSequenceId(prefix, partCount))) {
 					stop = true;
 					return;
 				}
@@ -348,7 +347,7 @@ public final class MailMessageParser {
 						 * instance of IMAPMailContent regardless of the mail
 						 * implementation
 						 */
-						parseMailContent(new MIMEMailPart(mp.getBodyPart(i)), handler, prefix, partCount++);
+						parseMailContent(new MIMEMailPart(mp.getBodyPart(i)), handler, prefix, partCount++, true);
 					}
 					/*
 					 * Stop to further process tnef attachment
@@ -374,7 +373,7 @@ public final class MailMessageParser {
 						 * instance of IMAPMailContent regardless of the mail
 						 * implementation
 						 */
-						parseMailContent(new MIMEMailPart(mp.getBodyPart(i)), handler, prefix, partCount++);
+						parseMailContent(new MIMEMailPart(mp.getBodyPart(i)), handler, prefix, partCount++, true);
 					}
 					/*
 					 * Stop to further process tnef attachment
@@ -389,7 +388,7 @@ public final class MailMessageParser {
 					final TNEFBodyPart bodyPart = new TNEFBodyPart();
 					bodyPart.setText((String) attrBody.getValue());
 					bodyPart.setSize(((String) attrBody.getValue()).length());
-					parseMailContent(new MIMEMailPart(bodyPart), handler, prefix, partCount++);
+					parseMailContent(new MIMEMailPart(bodyPart), handler, prefix, partCount++, true);
 				}
 				if (message.getMAPIProps() != null) {
 					final RawInputStream ris = (RawInputStream) message.getMAPIProps().getPropValue(
@@ -403,7 +402,7 @@ public final class MailMessageParser {
 						bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new StringBuilder(MIMETypes.MIME_TEXT_RTF)
 								.append("; charset=").append(defCharset).toString());
 						bodyPart.setSize(content.length());
-						parseMailContent(new MIMEMailPart(bodyPart), handler, prefix, partCount++);
+						parseMailContent(new MIMEMailPart(bodyPart), handler, prefix, partCount++, true);
 					}
 				}
 				/*
@@ -440,7 +439,7 @@ public final class MailMessageParser {
 						os.reset();
 						attachment.writeTo(os);
 						bodyPart.setSize(os.size());
-						parseMailContent(new MIMEMailPart(bodyPart), handler, prefix, partCount++);
+						parseMailContent(new MIMEMailPart(bodyPart), handler, prefix, partCount++, true);
 					} else {
 						/*
 						 * Nested message
@@ -449,7 +448,7 @@ public final class MailMessageParser {
 								attachment.getNestedMessage());
 						bodyPart.setDataHandler(new DataHandler(nestedMessage, MIMETypes.MIME_MESSAGE_RFC822));
 						bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_MESSAGE_RFC822);
-						parseMailContent(new MIMEMailPart(bodyPart), handler, prefix, partCount++);
+						parseMailContent(new MIMEMailPart(bodyPart), handler, prefix, partCount++, true);
 					}
 				}
 			} catch (final IOException tnefExc) {

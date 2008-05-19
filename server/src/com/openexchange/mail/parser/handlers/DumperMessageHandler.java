@@ -314,7 +314,8 @@ public class DumperMessageHandler implements MailMessageHandler {
 	 * @see com.openexchange.mail.parser.MailMessageHandler#handleNestedMessage(com.openexchange.mail.dataobjects.MailMessage,
 	 *      java.lang.String)
 	 */
-	public boolean handleNestedMessage(final MailMessage nestedMail, final String id) throws MailException {
+	public boolean handleNestedMessage(final MailPart mailPart, final String id) throws MailException {
+		final MailMessage nestedMail = (MailMessage) mailPart.getContent();
 		final DumperMessageHandler handler = new DumperMessageHandler(bodyOnly);
 		new MailMessageParser().parseMailMessage(nestedMail, handler, id);
 		strBuilder.append(handler.getString());

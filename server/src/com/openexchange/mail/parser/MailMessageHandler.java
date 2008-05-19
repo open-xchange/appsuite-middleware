@@ -219,8 +219,14 @@ public interface MailMessageHandler {
 
 	/**
 	 * Handle a nested message (<code>message/rfc822</code>)
+	 * <p>
+	 * Get the message via:
+	 * 
+	 * <pre>
+	 * MailMessage nestedMail = (MailMessage) mailPart.getContent();
+	 * </pre>
 	 */
-	public boolean handleNestedMessage(MailMessage nestedMail, String id) throws MailException;
+	public boolean handleNestedMessage(MailPart mailPart, String id) throws MailException;
 
 	/**
 	 * Perform some optional finishing operations

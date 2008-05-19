@@ -243,7 +243,7 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 	private String handleReferencedPart(final MailPart referencedPart, final Session session) throws MailException,
 			IOException {
 		final long size = referencedPart.getSize();
-		if (size <= TransportConfig.getReferencedPartLimit()) {
+		if (size > 0 && size <= TransportConfig.getReferencedPartLimit()) {
 			copy2ByteArr(referencedPart.getInputStream());
 			return null;
 		}

@@ -770,11 +770,17 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	 * @see com.openexchange.mail.parser.MailMessageHandler#handleNestedMessage(com.openexchange.mail.dataobjects.MailMessage,
 	 *      java.lang.String)
 	 */
-	public boolean handleNestedMessage(final MailMessage nestedMsg, final String id) throws MailException {
+	public boolean handleNestedMessage(final MailPart mailPart, final String id) throws MailException {
 		try {
+			final MailMessage nestedMail = (MailMessage) mailPart.getContent();
 			final JSONMessageHandler msgHandler = new JSONMessageHandler(mailPath, null, displayMode, session, usm, ctx);
-			new MailMessageParser().parseMailMessage(nestedMsg, msgHandler, id);
-			getNestedMsgsArr().put(msgHandler.getJSONObject());
+			new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
+			final JSONObject nestedObject = msgHandler.getJSONObject();
+			/*
+			 * Sequence ID
+			 */
+			nestedObject.put(MailListField.ID.getKey(), mailPart.containsSequenceId() ? mailPart.getSequenceId() : id);
+			getNestedMsgsArr().put(nestedObject);
 			return true;
 		} catch (final JSONException e) {
 			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());

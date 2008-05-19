@@ -946,16 +946,18 @@ public class MIMEMessageFiller {
 		 * Set content disposition
 		 */
 		origMsgPart.setDisposition(Part.INLINE);
-		/*
-		 * Determine nested message's filename
-		 */
-		try {
-			origMsgPart.setFileName(MimeUtility.encodeText(filename, MailConfig.getDefaultMimeCharset(), "Q"));
-		} catch (final UnsupportedEncodingException e) {
+		if (null != filename) {
 			/*
-			 * Cannot occur
+			 * Determine nested message's filename
 			 */
-			origMsgPart.setFileName(filename);
+			try {
+				origMsgPart.setFileName(MimeUtility.encodeText(filename, MailConfig.getDefaultMimeCharset(), "Q"));
+			} catch (final UnsupportedEncodingException e) {
+				/*
+				 * Cannot occur
+				 */
+				origMsgPart.setFileName(filename);
+			}
 		}
 		mp.addBodyPart(origMsgPart);
 	}

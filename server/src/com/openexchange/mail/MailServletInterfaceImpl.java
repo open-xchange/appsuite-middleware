@@ -750,20 +750,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			draftMail.setFlag(MailMessage.FLAG_DRAFT, true);
 		}
 		if (null != draftMail.getReferencedMail()) {
-            /*
-             * Check for attachments and add them
-             */
-            final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
-            new MailMessageParser().parseMailMessage(draftMail.getReferencedMail(), handler);
-            final List<MailPart> parts = handler.getNonInlineParts();
-            final TransportProvider tp = TransportProviderRegistry.getTransportProviderBySession(session);
-            for (final MailPart mailPart : parts) {
-                /*
-                 * Create and add a referenced part from original draft mail
-                 */
-                draftMail.addEnclosedPart(tp.getNewReferencedPart(mailPart.getSequenceId()));
-            }
-        }
+			/*
+			 * Check for attachments and add them
+			 */
+			final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
+			new MailMessageParser().parseMailMessage(draftMail.getReferencedMail(), handler);
+			final List<MailPart> parts = handler.getNonInlineParts();
+			final TransportProvider tp = TransportProviderRegistry.getTransportProviderBySession(session);
+			for (final MailPart mailPart : parts) {
+				/*
+				 * Create and add a referenced part from original draft mail
+				 */
+				draftMail.addEnclosedPart(tp.getNewReferencedPart(mailPart.getSequenceId()));
+			}
+		}
 		/*
 		 * Load referenced mail parts from original message
 		 */
@@ -896,12 +896,22 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 				paths = null;
 			}
 			sentMail = transport.sendMailMessage(composedMail, type);
-			if ((paths != null) && ComposeType.REPLY.equals(type)) {
-				/*
-				 * Mark referenced mail as answered
-				 */
-				mailAccess.getMessageStorage().updateMessageFlags(paths[0].getFolder(),
-						new long[] { paths[0].getUid() }, MailMessage.FLAG_ANSWERED, true);
+			if ((paths != null)) {
+				if (ComposeType.REPLY.equals(type)) {
+					/*
+					 * Mark referenced mail as answered
+					 */
+					mailAccess.getMessageStorage().updateMessageFlags(paths[0].getFolder(),
+							new long[] { paths[0].getUid() }, MailMessage.FLAG_ANSWERED, true);
+				} else if (ComposeType.FORWARD.equals(type)) {
+					for (final MailPath mailPath : paths) {
+						/*
+						 * Mark referenced mails as forwarded
+						 */
+						mailAccess.getMessageStorage().updateMessageFlags(mailPath.getFolder(),
+								new long[] { mailPath.getUid() }, MailMessage.FLAG_FORWARDED, true);
+					}
+				}
 			}
 			if (UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx)
 					.isNoCopyIntoStandardSentFolder()) {
@@ -959,6 +969,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		} finally {
 			transport.close();
 		}
+		mailAccess.getMessageStorage().updateMessageFlags(fullname, new long[] { msgUID }, MailMessage.FLAG_READ_ACK,
+				true);
 	}
 
 	private static final MailListField[] FIELDS_COLOR_LABEL = new MailListField[] { MailListField.COLOR_LABEL };

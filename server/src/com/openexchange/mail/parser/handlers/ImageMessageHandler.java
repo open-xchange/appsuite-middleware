@@ -293,7 +293,8 @@ public final class ImageMessageHandler implements MailMessageHandler {
 	 * @see com.openexchange.mail.parser.MailMessageHandler#handleNestedMessage(com.openexchange.mail.dataobjects.MailMessage,
 	 *      java.lang.String)
 	 */
-	public boolean handleNestedMessage(final MailMessage nestedMail, final String id) throws MailException {
+	public boolean handleNestedMessage(final MailPart mailPart, final String id) throws MailException {
+		final MailMessage nestedMail = (MailMessage) mailPart.getContent();
 		final ImageMessageHandler handler = new ImageMessageHandler(cid);
 		new MailMessageParser().parseMailMessage(nestedMail, handler, id);
 		if (handler.getImagePart() != null) {
