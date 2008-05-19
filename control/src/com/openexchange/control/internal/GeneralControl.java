@@ -66,6 +66,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
+ * {@link GeneralControl} - Provides several methods to manage OSGi application.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -77,7 +78,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 
 	private MBeanServer server;
 
-	private BundleContext bundleContext;
+	private final BundleContext bundleContext;
 
 	public GeneralControl(final BundleContext bundleContext) {
 		super();
@@ -107,7 +108,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 			} else {
 				throw new BundleNotFoundException("bundle " + name + " not found");
 			}
-		} catch (BundleException exc) {
+		} catch (final BundleException exc) {
 			LOG.error("cannot start bundle: " + name, exc);
 		}
 	}
@@ -121,7 +122,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 			} else {
 				throw new BundleNotFoundException("bundle " + name + " not found");
 			}
-		} catch (BundleException exc) {
+		} catch (final BundleException exc) {
 			LOG.error("cannot stop bundle: " + name, exc);
 		}
 	}
@@ -135,7 +136,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		LOG.info("install package: " + location);
 		try {
 			bundleContext.installBundle(location);
-		} catch (BundleException exc) {
+		} catch (final BundleException exc) {
 			LOG.error("cannot install bundle: " + location, exc);
 		}
 	}
@@ -149,7 +150,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 			} else {
 				throw new BundleNotFoundException("bundle " + name + " not found");
 			}
-		} catch (BundleException exc) {
+		} catch (final BundleException exc) {
 			LOG.error("cannot uninstall bundle: " + name, exc);
 		}
 	}
@@ -166,7 +167,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 			} else {
 				throw new BundleNotFoundException("bundle " + name + " not found");
 			}
-		} catch (BundleException exc) {
+		} catch (final BundleException exc) {
 			LOG.error("cannot update bundle: " + name, exc);
 		}
 	}
@@ -178,27 +179,35 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 
 	public void shutdown() {
 		LOG.info("control command: shutdown");
+		try {
+			/*
+			 * Simply shut-down the system bundle
+			 */
+			bundleContext.getBundle(0).stop();
+		} catch (final BundleException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		}
 	}
 
-	public List<Map <String, Object>> services() {
+	public List<Map<String, Object>> services() {
 		LOG.info("control command: services");
-		final List<Map <String, Object>> serviceList = new ArrayList<Map <String, Object>>();
+		final List<Map<String, Object>> serviceList = new ArrayList<Map<String, Object>>();
 
 		ServiceReference[] services;
 		try {
 			services = bundleContext.getServiceReferences(null, null);
 			if (services != null) {
-				int size = services.length;
+				final int size = services.length;
 				if (size > 0) {
 					for (int j = 0; j < size; j++) {
 						final Map<String, Object> hashMap = new HashMap<String, Object>();
 
-						ServiceReference service = services[j];
+						final ServiceReference service = services[j];
 
 						hashMap.put("service", service.toString());
 						hashMap.put("registered_by", service.getBundle().toString());
 
-						Bundle[] usedByBundles = (Bundle[]) service.getUsingBundles();
+						final Bundle[] usedByBundles = (Bundle[]) service.getUsingBundles();
 						final List<String> bundleList = new ArrayList<String>();
 						if (usedByBundles != null) {
 							for (int a = 0; a < usedByBundles.length; a++) {
@@ -217,8 +226,8 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 					}
 				}
 			}
-		} catch (InvalidSyntaxException exc) {
-			exc.printStackTrace();
+		} catch (final InvalidSyntaxException exc) {
+			LOG.error(exc.getMessage(), exc);
 		}
 
 		return serviceList;
@@ -233,12 +242,11 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		return null;
 	}
 
-	public ObjectName preRegister(final MBeanServer server, final ObjectName nameArg)
-			throws Exception {
+	public ObjectName preRegister(final MBeanServer server, final ObjectName nameArg) throws Exception {
 		ObjectName name = nameArg;
 		if (name == null) {
-			name = new ObjectName(new StringBuilder(server.getDefaultDomain()).append(":name=")
-					.append(this.getClass().getName()).toString());
+			name = new ObjectName(new StringBuilder(server.getDefaultDomain()).append(":name=").append(
+					this.getClass().getName()).toString());
 		}
 		this.server = server;
 		return name;
@@ -265,7 +273,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 	public Integer getNbObjects() {
 		try {
 			return Integer.valueOf((server.queryMBeans(new ObjectName("*:*"), null)).size());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return Integer.valueOf(-1);
 		}
 	}
@@ -288,10 +296,10 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		}
 	}
 
-	protected void freshPackages(BundleContext bundleContext) {
-		ServiceReference serviceReference = bundleContext
+	protected void freshPackages(final BundleContext bundleContext) {
+		final ServiceReference serviceReference = bundleContext
 				.getServiceReference("org.osgi.service.packageadmin.PackageAdmin");
-		PackageAdmin packageAdmin = (PackageAdmin) bundleContext.getService(serviceReference);
+		final PackageAdmin packageAdmin = (PackageAdmin) bundleContext.getService(serviceReference);
 		packageAdmin.refreshPackages(null);
 	}
 }
