@@ -151,8 +151,10 @@ public class UpdateTest extends AppointmentTest {
 		
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
-	
-	public void testShiftRecurrenceAppointment() throws Exception {
+
+    // Node 356
+
+    public void testShiftRecurrenceAppointment() throws Exception {
 		Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
 		Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
 		
