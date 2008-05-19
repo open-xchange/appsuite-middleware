@@ -273,7 +273,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 				htmlBuilder.append(" standalone=\"").append(Boolean.TRUE.equals(standalone) ? "yes" : "no").append('"');
 			}
 			if (null != encoding) {
-				htmlBuilder.append(" encoding=\"").append("encoding").append('"');
+				htmlBuilder.append(" encoding=\"").append(encoding).append('"');
 			}
 			htmlBuilder.append("?>").append(CRLF);
 		}
