@@ -62,6 +62,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.session.Session;
 
@@ -445,6 +446,26 @@ public abstract class MailConfig {
 	 */
 	public static final int getMailFetchLimit() {
 		return MailProperties.getInstance().getMailFetchLimit();
+	}
+
+	private static Boolean usePartModifier;
+
+	/**
+	 * Checks if a part modifier shall be used that is
+	 * {@link PartModifier#getInstance()} is not <code>null</code> and not
+	 * assignment-compatible to {@link DummyPartModifier} (which does nothing at
+	 * all).
+	 * 
+	 * @return <code>true</code> if part modifier shall be used; otherwise
+	 *         <code>false</code>
+	 */
+	public static final boolean usePartModifier() {
+		// TODO: Improve unsafe lazy initialization
+		if (null == usePartModifier) {
+			final PartModifier pm = PartModifier.getInstance();
+			usePartModifier = Boolean.valueOf(pm != null && !DummyPartModifier.class.isInstance(pm));
+		}
+		return usePartModifier.booleanValue();
 	}
 
 	/**
