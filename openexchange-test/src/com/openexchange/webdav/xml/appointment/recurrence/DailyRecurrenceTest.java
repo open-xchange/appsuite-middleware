@@ -10,8 +10,6 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 	}
 
 	public void testDailyRecurrenceFromWinter2SummerTime() throws Exception {
-		Date modified = new Date();
-		
 		Date until = simpleDateFormatUTC.parse("2007-04-01 00:00:00");
 		
 		Date startDate = simpleDateFormatUTC.parse("2007-03-01 08:00:00");
@@ -33,6 +31,8 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
+		final Date modified = loadAppointment.getLastModified();
+		
 		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
@@ -40,8 +40,6 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 	}	
 	
 	public void testDailyRecurrenceFromSummer2WinterTime() throws Exception {
-		Date modified = new Date();
-		
 		Date until = simpleDateFormatUTC.parse("2007-11-01 00:00:00");
 		
 		Date startDate = simpleDateFormatUTC.parse("2007-10-01 08:00:00");
@@ -62,6 +60,8 @@ public class DailyRecurrenceTest extends AbstractRecurrenceTest {
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
+		
+		final Date modified = loadAppointment.getLastModified();
 		
 		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
