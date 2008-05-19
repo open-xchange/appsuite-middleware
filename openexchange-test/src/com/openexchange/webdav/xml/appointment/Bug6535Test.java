@@ -22,8 +22,6 @@ public class Bug6535Test extends AppointmentTest {
 	}
 	
 	public void testBug6535() throws Exception {
-		Date modified = new Date();
-		
 		TimeZone timeZoneUTC = TimeZone.getTimeZone("UTC");
 		
 		Calendar calendar = Calendar.getInstance(timeZoneUTC);
@@ -52,8 +50,7 @@ public class Bug6535Test extends AppointmentTest {
 		appointmentObj.setIgnoreConflicts(true);
 		
 		UserParticipant[] users = new UserParticipant[1];
-		users[0] = new UserParticipant();
-		users[0].setIdentifier(userId);
+		users[0] = new UserParticipant(userId);
 		users[0].setConfirm(AppointmentObject.ACCEPT);
 		
 		appointmentObj.setUsers(users);
@@ -75,6 +72,8 @@ public class Bug6535Test extends AppointmentTest {
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
+		
+		final Date modified = loadAppointment.getLastModified();
 		
 		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
