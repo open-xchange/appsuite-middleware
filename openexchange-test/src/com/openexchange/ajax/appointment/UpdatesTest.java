@@ -140,31 +140,6 @@ public class UpdatesTest extends AppointmentTest {
 		deleteAppointment(getWebConversation(), objectId2, appointmentFolderId, getHostName(), getSessionId());
 	}
 	
-	public void testModifiedWithoutFolderIdNoResponse() throws Exception {
-		Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
-		Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
-		
-		AppointmentObject appointmentObj = createAppointmentObject("testModifiedWithoutFolderIdNoResponse");
-		appointmentObj.setIgnoreConflicts(true);
-		int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
-		
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
-		Date modified = loadAppointment.getLastModified();	
-		
-		AppointmentObject[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, modified, _appointmentFields, timeZone, PROTOCOL + getHostName(), getSessionId());
-		
-		boolean found = false;
-		
-		for (int a = 0; a < appointmentArray.length; a++) {
-			if (appointmentArray[a].getObjectID() == objectId) {
-				found = true;
-			}
-		}
-		
-		assertFalse("created object found in response", found);
-		
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
-	}
 	
 	public void testModifiedWithoutFolderIdWithFutureTimestamp() throws Exception {
 		Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
