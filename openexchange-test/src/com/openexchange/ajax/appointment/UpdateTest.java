@@ -11,8 +11,13 @@ import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.GroupTest;
 import com.openexchange.ajax.ResourceTest;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
@@ -21,6 +26,32 @@ import com.openexchange.groupware.container.UserParticipant;
 public class UpdateTest extends AppointmentTest {
 
 	private static final Log LOG = LogFactory.getLog(UpdateTest.class);
+	
+	private final static int[] _appointmentFields = {
+		DataObject.OBJECT_ID,
+		DataObject.CREATED_BY,
+		DataObject.CREATION_DATE,
+		DataObject.LAST_MODIFIED,
+		DataObject.MODIFIED_BY,
+		FolderChildObject.FOLDER_ID,
+		CommonObject.PRIVATE_FLAG,
+		CommonObject.CATEGORIES,
+		CalendarObject.TITLE,
+		AppointmentObject.LOCATION,
+		CalendarObject.START_DATE,
+		CalendarObject.END_DATE,
+		CalendarObject.NOTE,
+		CalendarObject.RECURRENCE_TYPE,
+		CalendarObject.INTERVAL,
+		CalendarObject.RECURRING_OCCURRENCE,
+		CalendarObject.PARTICIPANTS,
+		CalendarObject.USERS,
+		AppointmentObject.SHOWN_AS,
+		AppointmentObject.FULL_TIME,
+		AppointmentObject.COLOR_LABEL,
+		CalendarDataObject.TIMEZONE,
+		CalendarDataObject.RECURRENCE_START
+	};
 	
 	public UpdateTest(String name) {
 		super(name);
@@ -60,14 +91,10 @@ public class UpdateTest extends AppointmentTest {
 		int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 		
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[4];
-		participants[0] = new UserParticipant();
-		participants[0].setIdentifier(userId);
-		participants[1] = new UserParticipant();
-		participants[1].setIdentifier(userParticipantId);
-		participants[2] = new GroupParticipant();
-		participants[2].setIdentifier(groupParticipantId);
-		participants[3] = new ResourceParticipant();
-		participants[3].setIdentifier(resourceParticipantId);
+		participants[0] = new UserParticipant(userId);
+		participants[1] = new UserParticipant(userParticipantId);
+		participants[2] = new GroupParticipant(groupParticipantId);
+		participants[3] = new ResourceParticipant(resourceParticipantId);
 		
 		appointmentObj.setParticipants(participants);
 		
@@ -125,6 +152,66 @@ public class UpdateTest extends AppointmentTest {
 		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	
+	public void _notestShiftRecurrenceAppointment() throws Exception {
+		Date start = new Date(System.currentTimeMillis() - (7 * dayInMillis));
+		Date end = new Date(System.currentTimeMillis() + (7 * dayInMillis));
+		
+		AppointmentObject appointmentObj = createAppointmentObject("testShiftRecurrenceAppointment");
+		appointmentObj.setRecurrenceType(AppointmentObject.DAILY);
+		appointmentObj.setInterval(1);
+		appointmentObj.setOccurrence(5);
+		appointmentObj.setIgnoreConflicts(true);
+		int objectId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
+		
+		appointmentObj.setObjectID(objectId);
+		
+		Date startDate = appointmentObj.getStartDate();
+		Date endDate = appointmentObj.getEndDate();
+		
+		final Calendar calendarStart = Calendar.getInstance(timeZone);
+		final Calendar calendarEnd = Calendar.getInstance(timeZone);
+		
+		calendarStart.setTime(startDate);
+		calendarStart.add(Calendar.DAY_OF_MONTH, 2);
+		
+		calendarEnd.setTime(endDate);
+		calendarEnd.add(Calendar.DAY_OF_MONTH, 2);
+		
+		appointmentObj.setStartDate(calendarStart.getTime());
+		appointmentObj.setEndDate(calendarEnd.getTime());
+		
+		final Calendar recurrenceStart = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+		final int startDay = calendarStart.get(Calendar.DAY_OF_MONTH);
+		final int startMonth = calendarStart.get(Calendar.MONTH);
+		final int startYear = calendarStart.get(Calendar.YEAR);
+		recurrenceStart.set(startYear, startMonth, startDay, 0, 0, 0);
+		recurrenceStart.set(Calendar.MILLISECOND, 0);
+		
+		appointmentObj.setRecurringStart(recurrenceStart.getTimeInMillis());
+		
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
+		final Date modified = loadAppointment.getLastModified();
+		
+		updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, modified, timeZone, getHostName(), getSessionId());
+
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, timeZone, getHostName(), getSessionId());
+		compareObject(appointmentObj, loadAppointment);
+		
+		AppointmentObject[] appointmentArray = AppointmentTest.listModifiedAppointment(getWebConversation(), start, end, new Date(0), _appointmentFields, timeZone, getHostName(), getSessionId());
+		
+		boolean found = false;
+		
+		for (int a = 0; a < appointmentArray.length; a++) {
+			if (objectId == appointmentArray[a].getObjectID()) {
+				compareObject(appointmentObj, appointmentArray[a]);
+				found = true;
+				break;
+			}
+		}
+		
+		assertTrue("object with object_id: " + objectId + " not found in response", found);
+		
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, getHostName(), getSessionId());
+	}
 }
 
