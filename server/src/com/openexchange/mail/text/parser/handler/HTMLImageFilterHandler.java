@@ -350,9 +350,9 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 	}
 
 	/**
-	 * Gets the filtered HTML content
+	 * Gets the HTML content with external image content removed
 	 * 
-	 * @return The filtered HTML content
+	 * @return The HTML content with external image content removed
 	 */
 	public String getHTML() {
 		return htmlBuilder.toString();
