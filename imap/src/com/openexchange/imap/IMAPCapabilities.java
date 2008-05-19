@@ -108,6 +108,11 @@ public class IMAPCapabilities extends MailCapabilities {
 	 */
 	public static final String CAP_IDLE = "IDLE";
 
+	/**
+	 * CHILDREN
+	 */
+	public static final String CAP_CHILDREN = "CHILDREN";
+
 	/*
 	 * IMAP bit constants
 	 */
@@ -122,6 +127,8 @@ public class IMAPCapabilities extends MailCapabilities {
 	private static final int BIT_NAMESPACE = 512;
 
 	private static final int BIT_IDLE = 1024;
+
+	private static final int BIT_CHILDREN = 2048;
 
 	/*
 	 * Members
@@ -147,6 +154,8 @@ public class IMAPCapabilities extends MailCapabilities {
 	private boolean hasNamespace;
 
 	private boolean hasIdle;
+
+	private boolean hasChildren;
 
 	/**
 	 * Initializes a new {@link IMAPCapabilities}
@@ -248,6 +257,14 @@ public class IMAPCapabilities extends MailCapabilities {
 		this.hasIdle = hasIdle;
 	}
 
+	public boolean hasChildren() {
+		return hasChildren;
+	}
+
+	public void setChildren(final boolean hasChildren) {
+		this.hasChildren = hasChildren;
+	}
+
 	@Override
 	public final int getCapabilities() {
 		int retval = 0;
@@ -262,6 +279,7 @@ public class IMAPCapabilities extends MailCapabilities {
 		retval |= hasSubscription ? BIT_SUBSCRIPTION : 0;
 		retval |= hasNamespace ? BIT_NAMESPACE : 0;
 		retval |= hasIdle ? BIT_IDLE : 0;
+		retval |= hasChildren ? BIT_CHILDREN : 0;
 		return retval;
 	}
 
@@ -277,6 +295,7 @@ public class IMAPCapabilities extends MailCapabilities {
 		hasSubscription = ((caps & BIT_SUBSCRIPTION) > 0);
 		hasNamespace = ((caps & BIT_NAMESPACE) > 0);
 		hasIdle = ((caps & BIT_IDLE) > 0);
+		hasChildren = ((caps & BIT_CHILDREN) > 0);
 	}
 
 }

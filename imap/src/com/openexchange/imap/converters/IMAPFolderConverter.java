@@ -206,13 +206,17 @@ public final class IMAPFolderConverter {
 					attrs = null;
 				}
 				if (null != attrs) {
+					final boolean hasChildren = imapConfig.getImapCapabilities().hasChildren();
 					for (final String attribute : attrs) {
 						if (ATTRIBUTE_NON_EXISTENT.equalsIgnoreCase(attribute)) {
 							mailFolder.setNonExistent(true);
-						} else if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
-							mailFolder.setSubfolders(true);
-						} else if (ATTRIBUTE_HAS_NO_CHILDREN.equalsIgnoreCase(attribute)) {
-							mailFolder.setSubfolders(false);
+						}
+						if (hasChildren) {
+							if (ATTRIBUTE_HAS_CHILDREN.equalsIgnoreCase(attribute)) {
+								mailFolder.setSubfolders(true);
+							} else if (ATTRIBUTE_HAS_NO_CHILDREN.equalsIgnoreCase(attribute)) {
+								mailFolder.setSubfolders(false);
+							}
 						}
 					}
 				}
