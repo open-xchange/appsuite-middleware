@@ -72,7 +72,7 @@ public class PropertiesPublisher {
 
     public void publish(Properties properties) {
 
-        Set previousKeys = new HashSet<Object>(this.properties.keySet());
+        Set<Object> previousKeys = new HashSet<Object>(this.properties.keySet());
 
         for(Object key : properties.keySet()) {
             String pathString = key.toString();
@@ -213,6 +213,7 @@ public class PropertiesPublisher {
             }
         }
 
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -224,6 +225,7 @@ public class PropertiesPublisher {
             return true;
         }
 
+        @Override
         public String toString() {
             StringBuilder bob = new StringBuilder();
             bob.append("Path: ").append(Arrays.asList(path));
@@ -235,6 +237,7 @@ public class PropertiesPublisher {
             return bob.toString();
         }
 
+        @Override
         public int hashCode() {
             int result;
             result = (path != null ? Arrays.hashCode(path) : 0);

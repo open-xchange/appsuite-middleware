@@ -67,12 +67,12 @@ public class OSGiServicePublisher implements ServicePublisher {
         this.context = context;
     }
 
-    public void publishService(Class clazz, Object service) {
+    public void publishService(Class<?> clazz, Object service) {
         ServiceRegistration registration = context.registerService(clazz.getName(), service, null);
         serviceRegistrations.put(service, registration);
     }
 
-    public void removeService(Class clazz, Object service) {
+    public void removeService(Class<?> clazz, Object service) {
         ServiceRegistration registration = serviceRegistrations.get(service);
         serviceRegistrations.remove(service);
         registration.unregister();
