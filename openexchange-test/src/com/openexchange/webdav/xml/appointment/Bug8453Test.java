@@ -1,13 +1,15 @@
 package com.openexchange.webdav.xml.appointment;
 
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.webdav.xml.AppointmentTest;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.groupware.container.AppointmentObject;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.webdav.xml.AppointmentTest;
 
 public class Bug8453Test extends AppointmentTest {
 	
@@ -22,8 +24,6 @@ public class Bug8453Test extends AppointmentTest {
 	}
 	
 	public void testBug8453() throws Exception {
-		Date modified = new Date();
-		
 		TimeZone timeZoneUTC = TimeZone.getTimeZone("UTC");
 		
 		Calendar calendar = Calendar.getInstance(timeZoneUTC);
@@ -52,8 +52,7 @@ public class Bug8453Test extends AppointmentTest {
 		appointmentObj.setIgnoreConflicts(true);
 		
 		UserParticipant[] users = new UserParticipant[1];
-		users[0] = new UserParticipant();
-		users[0].setIdentifier(userId);
+		users[0] = new UserParticipant(userId);
 		users[0].setConfirm(AppointmentObject.ACCEPT);
 		
 		appointmentObj.setUsers(users);
@@ -76,6 +75,8 @@ public class Bug8453Test extends AppointmentTest {
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
+		
+		final Date modified = loadAppointment.getLastModified();
 		
 		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);

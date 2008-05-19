@@ -1,11 +1,15 @@
 package com.openexchange.webdav.xml.appointment;
 
+import java.io.ByteArrayInputStream;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.ExternalGroupParticipant;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
@@ -20,11 +24,6 @@ import com.openexchange.webdav.xml.AttachmentTest;
 import com.openexchange.webdav.xml.FolderTest;
 import com.openexchange.webdav.xml.GroupUserTest;
 import com.openexchange.webdav.xml.XmlServlet;
-
-import java.io.ByteArrayInputStream;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
 
 public class NewTest extends AppointmentTest {
 	
@@ -79,10 +78,8 @@ public class NewTest extends AppointmentTest {
 		int groupParticipantId = groupArray[0].getIdentifier();
 		
 		com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
-		participants[0] = new UserParticipant();
-		participants[0].setIdentifier(userId);
-		participants[1] = new GroupParticipant();
-		participants[1].setIdentifier(groupParticipantId);
+		participants[0] = new UserParticipant(userId);
+		participants[1] = new GroupParticipant(groupParticipantId);
 		
 		appointmentObj.setParticipants(participants);
 		
@@ -108,11 +105,9 @@ public class NewTest extends AppointmentTest {
 		assertTrue("user participant not found", userParticipantId != -1);
 		
 		UserParticipant[] users = new UserParticipant[2];
-		users[0] = new UserParticipant();
-		users[0].setIdentifier(userId);
+		users[0] = new UserParticipant(userId);
 		users[0].setConfirm(CalendarObject.ACCEPT);
-		users[1] = new UserParticipant();
-		users[1].setIdentifier(userParticipantId);
+		users[1] = new UserParticipant(userParticipantId);
 		users[1].setConfirm(CalendarObject.DECLINE);
 		
 		appointmentObj.setUsers(users);
@@ -143,12 +138,9 @@ public class NewTest extends AppointmentTest {
 		assertTrue("user participant not found", userParticipantId != -1);
 		
 		Participant[] participant = new Participant[3];
-		participant[0] = new UserParticipant();
-		participant[0].setIdentifier(userId);
-		participant[1] = new ExternalUserParticipant();
-		participant[1].setEmailAddress("externaluser@example.org");
-		participant[2] = new ExternalGroupParticipant();
-		participant[2].setEmailAddress("externalgroup@example.org");
+		participant[0] = new UserParticipant(userId);
+		participant[1] = new ExternalUserParticipant("externaluser@example.org");
+		participant[2] = new ExternalGroupParticipant("externalgroup@example.org");
 		
 		appointmentObj.setParticipants(participant);
 		
@@ -165,8 +157,6 @@ public class NewTest extends AppointmentTest {
 	}
 	
 	public void testDailyRecurrence() throws Exception {
-		Date modified = new Date();
-		
 		Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
@@ -190,6 +180,8 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
+		
+		final Date modified = loadAppointment.getLastModified();
 		
 		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
@@ -278,8 +270,6 @@ public class NewTest extends AppointmentTest {
 	}
 	
 	public void testAppointmentInPrivateFlagInPublicFolder() throws Exception {
-		Date modified = new Date();
-		
 		FolderObject folderObj = new FolderObject();
 		folderObj.setFolderName("testAppointmentInPrivateFlagInPublicFolder" + System.currentTimeMillis());
 		folderObj.setModule(FolderObject.CALENDAR);
@@ -315,8 +305,6 @@ public class NewTest extends AppointmentTest {
 	}
 	
 	public void testDailyRecurrenceWithDeletingFirstOccurrence() throws Exception {
-		Date modified = new Date();
-		
 		Calendar c = Calendar.getInstance();
 		c.setTimeZone(TimeZone.getTimeZone("UTC"));
 		c.set(Calendar.HOUR_OF_DAY, 0);
@@ -351,6 +339,8 @@ public class NewTest extends AppointmentTest {
 		appointmentObj.setDeleteExceptions(new Date[] { recurrenceDatePosition } );
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
+		
+		final Date modified = loadAppointment.getLastModified();
 		
 		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);

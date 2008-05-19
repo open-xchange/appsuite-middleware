@@ -102,8 +102,6 @@ public class DeleteTest extends AppointmentTest {
 		
 		int changeExceptionPosition = 3;
 		
-		Date modified = new Date();
-		
 		AppointmentObject appointmentObj = new AppointmentObject();
 		appointmentObj.setTitle("testDeleteRecurrenceWithDeleteExceptions");
 		appointmentObj.setStartDate(startTime);
@@ -116,7 +114,11 @@ public class DeleteTest extends AppointmentTest {
 		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(webCon, appointmentObj, PROTOCOL + hostName, login, password);
 		appointmentObj.setObjectID(objectId);
-		AppointmentObject loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, modified, PROTOCOL + hostName, login, password);
+		
+		AppointmentObject loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
+		final Date modified = loadAppointment.getLastModified();
+		
+		loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, modified, PROTOCOL + hostName, login, password);
 		compareObject(appointmentObj, loadAppointment);
 		
 		appointmentObj.setDeleteExceptions(new Date[] { new Date(c.getTimeInMillis() + changeExceptionPosition * dayInMillis) } );

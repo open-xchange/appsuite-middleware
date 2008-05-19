@@ -1,13 +1,11 @@
 package com.openexchange.webdav.xml.appointment.recurrence;
 
-import com.openexchange.groupware.container.AppointmentObject;
-import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.webdav.xml.AppointmentTest;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.groupware.container.AppointmentObject;
 
 public class Bug7915Test extends AbstractRecurrenceTest {
 	
@@ -19,8 +17,6 @@ public class Bug7915Test extends AbstractRecurrenceTest {
 	}
 	
 	public void testBug7915() throws Exception {
-		Date modified = new Date();
-
 		final Date startDate = simpleDateFormatUTC.parse("2007-06-01 00:00:00");
 		final Date endDate = simpleDateFormatUTC.parse("2007-06-02 00:00:00");
 
@@ -60,6 +56,8 @@ public class Bug7915Test extends AbstractRecurrenceTest {
 		appointmentObj.setObjectID(objectId);
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
+		
+		final Date modified = appointmentObj.getLastModified();
 		
 		exceptionAppointmentObject.setObjectID(exceptionObjectId);
 		loadAppointment = loadAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
