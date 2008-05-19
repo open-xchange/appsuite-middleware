@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.mail.Flags;
@@ -1006,14 +1005,20 @@ public final class IMAPCommandsCollection {
 		}))).booleanValue();
 	}
 
-	private static final Pattern PATTERN_PERMANENTFLAGS = Pattern
-			.compile("(\\[PERMANENTFLAGS\\s\\()([^\\)\\]]*)(\\)\\]\\s*)");
+	private static final String ATOM_PERMANENTFLAGS = "[PERMANENTFLAGS";
 
-	private static final Pattern PATTERN_USER_FLAG = Pattern.compile("(?:\\\\\\*|(?:(^|\\s)([^\\\\]\\S+)($|\\s)))");
+	private static final Pattern PATTERN_USER_FLAGS = Pattern.compile("(?:\\(|\\s)(?:\\\\\\*)(?:\\)|\\s)");
 
 	/**
 	 * Applies the IMAPv4 SELECT command on given folder and returns whether its
-	 * permanent flags supports user-defined flags or not
+	 * permanent flags supports user-defined flags or not.
+	 * <p>
+	 * User flags are supported if untagged <i>PERMANENTFLAGS</i> response
+	 * contains "\*", e.g.:
+	 * 
+	 * <pre>
+	 * * OK [PERMANENTFLAGS (\Answered \Flagged \Draft \Deleted \Seen \*)] 
+	 * </pre>
 	 * 
 	 * @param imapFolder
 	 *            The IMAP folder to check
@@ -1041,10 +1046,16 @@ public final class IMAPCommandsCollection {
 							if (!(r[i] instanceof IMAPResponse)) {
 								continue;
 							}
-							final Matcher matcher = PATTERN_PERMANENTFLAGS.matcher(((IMAPResponse) r[i]).getRest());
-							if (matcher.find() && PATTERN_USER_FLAG.matcher(matcher.group(2)).find()) {
-								retval = Boolean.TRUE;
-								break NextResp;
+							final IMAPResponse ir = (IMAPResponse) r[i];
+							if (ir.isUnTagged() && ir.isOK()) {
+								/*
+								 * "* OK [PERMANENTFLAGS (\Deleted \*)]"
+								 */
+								ir.skipSpaces();
+								if (ATOM_PERMANENTFLAGS.equals(ir.readAtom('\0'))) {
+									retval = Boolean.valueOf(PATTERN_USER_FLAGS.matcher(ir.getRest()).find());
+									break NextResp;
+								}
 							}
 							r[i] = null;
 						}

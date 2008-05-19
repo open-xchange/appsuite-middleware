@@ -52,6 +52,7 @@ package com.openexchange.imap.cache;
 import static com.openexchange.imap.IMAPCommandsCollection.supportsUserDefinedFlags;
 import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
 
+import javax.mail.Flags;
 import javax.mail.MessagingException;
 
 import com.openexchange.caching.CacheKey;
@@ -97,7 +98,11 @@ public final class UserFlagsCache {
 		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
 		mailCache.get(entry);
 		if (load && null == entry.getValue()) {
-			entry.setValue(Boolean.valueOf(supportsUserDefinedFlags(f)));
+			if (f.isOpen() && IMAPFolder.READ_WRITE == f.getMode()) {
+				entry.setValue(Boolean.valueOf(f.getPermanentFlags().contains(Flags.Flag.USER)));
+			} else {
+				entry.setValue(Boolean.valueOf(supportsUserDefinedFlags(f)));
+			}
 			mailCache.put(entry);
 		}
 		return entry.getValue() == null ? false : entry.getValue().booleanValue();
