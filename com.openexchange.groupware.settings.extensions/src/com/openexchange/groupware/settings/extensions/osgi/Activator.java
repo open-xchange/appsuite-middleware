@@ -97,7 +97,11 @@ public class Activator implements BundleActivator {
         ServiceReference reference = context.getServiceReference(ConfigurationService.class.getName());
         if(reference != null) {
             ConfigurationService configuration = (ConfigurationService) context.getService(reference);
-            handleConfigurationUpdate( configuration );
+            try {
+                handleConfigurationUpdate( configuration );
+            } finally {
+                context.ungetService(reference);                          
+            }
         }
         this.serviceTracker = new ServiceTracker(context, ConfigurationService.class.getName(), new ConfigurationTracker(context, this));
     }
