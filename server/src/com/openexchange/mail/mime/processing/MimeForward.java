@@ -185,6 +185,9 @@ public final class MimeForward {
 				forwardMsg.setFrom(new InternetAddress(usm.getSendAddr(), true));
 			}
 			if (usm.isForwardAsAttachment() || originalMsgs.length > 1) {
+				/*
+				 * Attachment-Forward 
+				 */
 				final Multipart multipart = new MimeMultipart();
 				{
 					/*
@@ -212,6 +215,9 @@ public final class MimeForward {
 				forwardMsg.saveChanges();
 				return MIMEMessageConverter.convertMessage(forwardMsg);
 			}
+			/*
+			 * Inline-Forward
+			 */
 			final ContentType originalContentType = new ContentType(originalMsgs[0].getContentType());
 			final MailMessage forwardMail;
 			if (originalContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
