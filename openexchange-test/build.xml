@@ -101,7 +101,7 @@
 				<pathelement location="test-common.jar" />
 	    	</classpath>
 
-	    	<test name="com.openexchange.mail.MailTestSuite" todir="${test.xml.dir}" />
+	    	<test name="com.openexchange.ajax.mail.MailTestSuite" todir="${test.xml.dir}" />
 
 			<formatter type="brief" usefile="false" /> 
 			<formatter type="xml" /> 
