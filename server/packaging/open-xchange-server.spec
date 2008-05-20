@@ -106,7 +106,7 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 /opt/open-xchange/etc/admindaemon/osgi/bundle.d/*
 /opt/open-xchange/bundles/*
 
-%files -n open-xchange
+%files -n open-xchange -f %{configfiles}
 %defattr(-,root,root)
 %dir %attr(750,open-xchange,open-xchange) /opt/open-xchange/etc/groupware/osgi
 %dir /opt/open-xchange/sbin
