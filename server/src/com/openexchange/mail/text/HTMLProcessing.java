@@ -189,7 +189,9 @@ public final class HTMLProcessing {
 				if (!usm.isAllowHTMLImages()) {
 					retval = filterExternalImages(retval, modified);
 				}
-				retval = filterInlineImages(retval, secretCookieID, usm, mailPath);
+				if (mailPath != null && secretCookieID != null) {
+					retval = filterInlineImages(retval, secretCookieID, usm, mailPath);
+				}
 			}
 		} else {
 			if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
