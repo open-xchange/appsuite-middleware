@@ -773,9 +773,15 @@ public final class JSONMessageHandler implements MailMessageHandler {
 	public boolean handleNestedMessage(final MailPart mailPart, final String id) throws MailException {
 		try {
 			final MailMessage nestedMail = (MailMessage) mailPart.getContent();
-			final JSONMessageHandler msgHandler = new JSONMessageHandler(mailPath, null, displayMode, session, usm, ctx);
+			final JSONMessageHandler msgHandler = new JSONMessageHandler(null, null, displayMode, session, usm, ctx);
 			new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
 			final JSONObject nestedObject = msgHandler.getJSONObject();
+			/*
+			 * Message reference
+			 */
+			if (null != nestedMail.getMsgref()) {
+				nestedObject.put(MailListField.MSG_REF.getKey(), nestedMail.getMsgref());
+			}
 			/*
 			 * Sequence ID
 			 */

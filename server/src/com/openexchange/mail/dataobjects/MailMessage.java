@@ -1148,35 +1148,47 @@ public abstract class MailMessage extends MailPart {
 	}
 
 	/**
-	 * Gets the msgref
+	 * Gets the message reference
 	 * 
-	 * @return the msgref
+	 * @return the message reference
 	 */
 	public String getMsgref() {
+		if (b_msgref) {
+			return msgref;
+		}
+		final String xMsgref = removeHeader(MessageHeaders.HDR_X_OXMSGREF);
+		if (null != xMsgref) {
+			b_msgref = true;
+			msgref = xMsgref;
+		}
 		return msgref;
 	}
 
 	/**
-	 * @return <code>true</code> if msgref is set; otherwise
+	 * @return <code>true</code> if message reference is set; otherwise
 	 *         <code>false</code>
 	 */
 	public boolean containsMsgref() {
-		return b_msgref;
+		if (b_msgref) {
+			return true;
+		}
+		return getHeader(MessageHeaders.HDR_X_OXMSGREF) != null;
 	}
 
 	/**
-	 * Removes the msgref
+	 * Removes the message reference
 	 */
 	public void removeMsgref() {
 		msgref = null;
 		b_msgref = false;
+		removeHeader(MessageHeaders.HDR_X_OXMSGREF);
 	}
 
 	/**
-	 * Sets the msgref
+	 * Sets the message reference
 	 * 
 	 * @param msgref
-	 *            the msgref to set
+	 *            the message reference to set
 	 */
 	public void setMsgref(final String msgref) {
 		this.msgref = msgref;
