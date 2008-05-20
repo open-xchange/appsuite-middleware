@@ -128,7 +128,10 @@ public class MailLogicTools {
 	 */
 	public MailMessage getFowardMessage(final MailMessage[] originalMails) throws MailException {
 		final MailMessage forwardMail = MimeForward.getFowardMail(originalMails, session);
-		if (originalMails.length == 1) {
+		if ((originalMails.length == 1) && originalMails[0].containsFolder() && (originalMails[0].getMailId() > 0)) {
+			/*
+			 * Allow message reference on root level
+			 */
 			forwardMail.setMsgref(MailPath.getMailPath(originalMails[0].getFolder(), originalMails[0].getMailId()));
 		}
 		return forwardMail;
