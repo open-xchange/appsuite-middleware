@@ -52,8 +52,10 @@ package com.openexchange.control.osgi;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.control.internal.ControlInit;
@@ -80,6 +82,8 @@ public final class ControlActivator implements BundleActivator {
 
 	private ServiceHolderListener<ManagementService> listener;
 
+	private Thread shutdownHookThread;
+
 	/**
 	 * Initializes a new {@link ControlActivator}
 	 */
@@ -94,7 +98,7 @@ public final class ControlActivator implements BundleActivator {
 	 */
 	public void start(final BundleContext context) throws Exception {
 		LOG.info("starting bundle: com.openexchange.control");
-		
+
 		try {
 			msh = ManagementServiceHolder.newInstance();
 			ControlInit.getInstance().setManagementServiceHolder(msh);
@@ -134,9 +138,16 @@ public final class ControlActivator implements BundleActivator {
 			};
 
 			msh.addServiceHolderListener(listener);
-		} catch (final Throwable t) {
-			LOG.error(t.getLocalizedMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
+
+			/*
+			 * Add shutdown hook
+			 */
+			shutdownHookThread = new ControlShutdownHookThread(context);
+			Runtime.getRuntime().addShutdownHook(shutdownHookThread);
+
+		} catch (final Exception e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			throw e;
 		}
 	}
 
@@ -147,8 +158,18 @@ public final class ControlActivator implements BundleActivator {
 	 */
 	public void stop(final BundleContext context) throws Exception {
 		LOG.info("stopping bundle: com.openexchange.control");
-		
+
 		try {
+			/*
+			 * Remove shutdown hook
+			 */
+			if (null != shutdownHookThread) {
+				if (!Runtime.getRuntime().removeShutdownHook(shutdownHookThread)) {
+					LOG.error("com.openexchange.control shutdown hook could not be deregistered");
+				}
+				shutdownHookThread = null;
+			}
+
 			msh.removeServiceHolderListenerByName(listener.getClass().getName());
 			if (ControlInit.getInstance().isStarted()) {
 				ControlInit.getInstance().stop();
@@ -161,10 +182,48 @@ public final class ControlActivator implements BundleActivator {
 				tracker.close();
 			}
 			serviceTrackerList.clear();
-		} catch (final Throwable t) {
-			LOG.error(t.getLocalizedMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
+		} catch (final Exception e) {
+			LOG.error(e.getLocalizedMessage(), e);
+			throw e;
 		}
 	}
 
+	/**
+	 * {@link ControlShutdownHookThread} - The shutdown hook thread of control
+	 * bundle
+	 * 
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 */
+	private static final class ControlShutdownHookThread extends Thread {
+
+		private final BundleContext bundleContext;
+
+		/**
+		 * Initializes a new {@link ControlShutdownHookThread}
+		 * 
+		 * @param bundleContext
+		 *            The bundle context
+		 */
+		public ControlShutdownHookThread(final BundleContext bundleContext) {
+			super();
+			this.bundleContext = bundleContext;
+		}
+
+		@Override
+		public void run() {
+			try {
+				/*
+				 * Simply shut-down the system bundle to enforce invocation of
+				 * close() method on all running bundles
+				 */
+				final Bundle systemBundle = bundleContext.getBundle(0);
+				if (null != systemBundle && systemBundle.getState() == Bundle.ACTIVE) {
+					systemBundle.stop();
+				}
+			} catch (final BundleException e) {
+				LOG.error("Shutdown failed: " + e.getMessage(), e);
+			}
+		}
+
+	}
 }
