@@ -216,13 +216,13 @@ public final class ContentType extends ParameterizedHeader {
 	 * 
 	 * @param contentType
 	 *            The content type to apply
-	 * @throws MailException
 	 */
-	public void setContentType(final ContentType contentType) throws MailException {
+	public void setContentType(final ContentType contentType) {
 		if (contentType == this) {
 			return;
 		}
-		setBaseType(contentType.getBaseType());
+		primaryType = contentType.getPrimaryType();
+		subType = contentType.getSubType();
 		this.parameterList = (ParameterList) contentType.parameterList.clone();
 	}
 

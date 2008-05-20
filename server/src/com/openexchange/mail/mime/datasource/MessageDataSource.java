@@ -149,11 +149,7 @@ public final class MessageDataSource implements DataSource {
 		final ContentType ct;
 		if (!contentType.containsCharsetParameter()) {
 			ct = new ContentType();
-			try {
-				ct.setContentType(contentType);
-			} catch (final MailException e) {
-				// Cannot occur
-			}
+			ct.setContentType(contentType);
 			ct.setCharsetParameter(MailConfig.getDefaultMimeCharset());
 		} else {
 			ct = contentType;
