@@ -368,11 +368,6 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 		return dataSource;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#getContent()
-	 */
 	@Override
 	public Object getContent() throws MailException {
 		if (cachedContent != null) {
@@ -426,41 +421,21 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#getDataHandler()
-	 */
 	@Override
 	public DataHandler getDataHandler() throws MailException {
 		return new DataHandler(getDataSource());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedCount()
-	 */
 	@Override
 	public int getEnclosedCount() throws MailException {
 		return NO_ENCLOSED_PARTS;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#getEnclosedMailPart(int)
-	 */
 	@Override
 	public MailPart getEnclosedMailPart(final int index) throws MailException {
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#getInputStream()
-	 */
 	@Override
 	public InputStream getInputStream() throws MailException {
 		try {
@@ -475,20 +450,10 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#loadContent()
-	 */
 	@Override
 	public void loadContent() {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.dataobjects.MailPart#prepareForCaching()
-	 */
 	@Override
 	public void prepareForCaching() {
 	}
@@ -533,11 +498,6 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 		return resultString.toString();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.mail.transport.smtp.dataobjects.SMTPMailPart#getType()
-	 */
 	public ComposedPartType getType() {
 		return ComposedMailPart.ComposedPartType.REFERENCE;
 	}
