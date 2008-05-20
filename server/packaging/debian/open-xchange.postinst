@@ -42,7 +42,7 @@ postFix() {
   # we're updating from pre sp4
   if [ $version -lt 650 ]; then
 
-      # --------------------------------------------------------------------------------
+      # -----------------------------------------------------------------------
       local pfile=/opt/open-xchange/etc/groupware/ox-scriptconf.sh
       ox_exists_property PROPERTIESDIR $pfile || {
 	  v_setprop PROPERTIESDIR /opt/open-xchange/etc/groupware $pfile
@@ -51,7 +51,7 @@ postFix() {
 	  v_setprop OSGIPATH /opt/open-xchange/etc/groupware/osgi $pfile
       }
       
-      # --------------------------------------------------------------------------------
+      # -----------------------------------------------------------------------
       local pfile=/opt/open-xchange/etc/groupware/system.properties
       ox_exists_property com.openexchange.caching.configfile $pfile || {
 	  v_setprop com.openexchange.caching.configfile /opt/open-xchange/etc/groupware/cache.ccf $pfile
@@ -78,7 +78,7 @@ postFix() {
 	  v_setprop Whitelist /opt/open-xchange/etc/groupware/whitelist.txt $pfile
       }
 
-      # --------------------------------------------------------------------------------
+      # -----------------------------------------------------------------------
       local pfile=/opt/open-xchange/etc/groupware/imap.properties
       local pftemp=${pfile}.$$
       local modprops="imapSort\|imapSearch\|imapFastFetch\|imapSupportsACL\|imapTimeout\|imapConnectionTimeout\|imapAuthEnc\|maxIMAPConnectionIdleTime"
@@ -99,7 +99,7 @@ postFix() {
 	  v_setprop com.openexchange.imap.blockSize 1000 $pfile
       }
 
-      # --------------------------------------------------------------------------------
+      # -----------------------------------------------------------------------
       # move key/values from imap.properties to mail.properties
       local imap=/opt/open-xchange/etc/groupware/imap.properties
       local mail=/opt/open-xchange/etc/groupware/mail.properties
@@ -107,32 +107,32 @@ postFix() {
 	  local val=$(ox_read_property imapLoginType $imap)
 	  v_delprop imapLoginType $imap
 	  v_setprop com.openexchange.mail.loginType $val $mail
-      }
+      } || true
       ox_exists_property imapMasterPassword $imap && {
 	  local val=$(ox_read_property imapMasterPassword $imap)
 	  v_delprop imapMasterPassword $imap
 	  v_setprop com.openexchange.mail.masterPassword $val $mail
-      }
+      } || true
       ox_exists_property imapCredSrc $imap && {
 	  local val=$(ox_read_property imapCredSrc $imap)
 	  v_delprop imapCredSrc $imap
 	  v_setprop com.openexchange.mail.credSrc $val $mail
-      }
+      } || true
       ox_exists_property imapServer $imap && {
 	  local val=$(ox_read_property imapServer $imap)
 	  v_delprop imapServer $imap
 	  v_setprop com.openexchange.mail.mailServer $val $mail
-      }
+      } || true
       ox_exists_property smtpServer $imap && {
 	  local val=$(ox_read_property smtpServer $imap)
 	  v_delprop smtpServer $imap
 	  v_setprop com.openexchange.mail.transportServer $val $mail
-      }
+      } || true
       ox_exists_property mail.mime.charset $imap && {
 	  local val=$(ox_read_property mail.mime.charset $imap)
 	  v_delprop mail.mime.charset $imap
 	  v_setprop mail.mime.charset $val $mail
-      }
+      } || true
   fi
 }
 

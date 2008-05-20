@@ -43,25 +43,12 @@ Requires:  jre-icedtea
 %endif
 #
 
-%package -n	open-xchange-config-standard
-Group:          Applications/Productivity
-Summary:	Open-Xchange server standard configuration
-Provides:	open-xchange-config
-Requires:	open-xchange
-
 %package -n	open-xchange
 Group:          Applications/Productivity
 Summary:	Open-Xchange server scripts
 Prereq:		/usr/sbin/useradd
 Requires:	open-xchange-authentication open-xchange-cache open-xchange-charset open-xchange-common open-xchange-config open-xchange-configjump open-xchange-configread open-xchange-control open-xchange-global open-xchange-i18n open-xchange-mailstore open-xchange-jcharset open-xchange-management open-xchange-monitoring open-xchange-push-udp open-xchange-server open-xchange-sessiond open-xchange-smtp open-xchange-spamhandler open-xchange-spellcheck open-xchange-themes, mysql >= 5.0.0
 
-
-%description -n open-xchange-config-standard
-Open-Xchange server standard configuration
-
-Authors:
---------
-    Open-Xchange
 
 %description -n open-xchange
 Open-Xchange server scripts
@@ -128,9 +115,6 @@ ln -sf ../etc/init.d/open-xchange-groupware %{buildroot}/sbin/rcopen-xchange-gro
 /opt/open-xchange/sbin/*
 %dir %attr(750,open-xchange,open-xchange) /var/log/open-xchange
 /etc/init.d/open-xchange-groupware
-
-%files -n open-xchange-config-standard -f %{configfiles}
-%defattr(-,root,root)
 %dir /opt/open-xchange/etc/groupware/servletmappings
 %dir /opt/open-xchange/etc/groupware
 /opt/open-xchange/etc/groupware/servletmappings/*

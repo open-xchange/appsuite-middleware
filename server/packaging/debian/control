@@ -13,17 +13,10 @@ Conflicts: open-xchange-libs
 Replaces: open-xchange-libs
 Description: The Open-Xchange Server Bundle
 
-Package: open-xchange-config-standard
-Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Suggests: open-xchange
-Provides: open-xchange-config-hosting, open-xchange-config
-Conflicts: open-xchange-config-hosting
-Replaces: open-xchange-config-hosting
-Description: Open-Xchange server standard configuration
-
 Package: open-xchange
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-server, open-xchange-config, adduser
+Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-server, adduser
 Suggests: open-xchange-authentication, open-xchange-control, open-xchange-configjump, open-xchange-charset, open-xchange-sessiond, open-xchange-mailstore, open-xchange-smtp, open-xchange-push-udp, open-xchange-i18n, open-xchange-jcharset
-Description: Open-Xchange server scripts
+Description: Open-Xchange server scripts and configuration
+Conflicts: open-xchange-config-hosting, open-xchange-config-standard
+Replaces: open-xchange-config-hosting, open-xchange-config-standard

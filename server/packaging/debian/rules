@@ -5,7 +5,6 @@
 #export DH_VERBOSE=1
 
 serverroot=$(CURDIR)/debian/open-xchange-server
-configroot=$(CURDIR)/debian/open-xchange-config-standard
 scriptroot=$(CURDIR)/debian/open-xchange
 
 configure: configure-stamp
@@ -34,8 +33,7 @@ install: build
 	dh_clean -k 
 	dh_installdirs
 	ant -Ddestdir=$(serverroot) installJars
-	ant -Ddestdir=$(configroot) installConfig
-	ant -Ddestdir=$(scriptroot) installExceptJars
+	ant -Ddestdir=$(scriptroot) installExceptJars installConfig
 	
 # Build architecture-independent files here.
 binary-indep: build install
