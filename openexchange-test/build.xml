@@ -91,6 +91,26 @@
 		<jar jarfile="open-xchange-unit-tests.jar" basedir="${build}" includes="**"/>
 	</target>
 
+	<target name="run-mail-tests" depends="interface-jar">
+		<delete dir="${test.xml.dir}"/> 
+		<mkdir dir="${test.xml.dir}"/> 
+		<junit errorProperty="test.failed" failureProperty="test.failed"  showoutput="yes" printsummary="yes"> 
+			<classpath>
+				<path refid="project.classpath" />
+				<pathelement location="open-xchange-iface-tests.jar"/>
+				<pathelement location="test-common.jar" />
+	    	</classpath>
+
+	    	<test name="com.openexchange.mail.MailTestSuite" todir="${test.xml.dir}" />
+
+			<formatter type="brief" usefile="false" /> 
+			<formatter type="xml" /> 
+			<sysproperty key="test.propfile" value="${conf.dir}/test.properties" />
+		</junit> 
+
+		<fail message="Tests failed!" if="test.failed" />
+	</target>
+
 	<target name="run-interface-tests" depends="interface-jar">
 		<delete dir="${test.xml.dir}"/> 
 		<mkdir dir="${test.xml.dir}"/> 
@@ -143,7 +163,10 @@
 
 		<fail message="Tests failed!" if="test.failed" />
 	</target>
-	
+
+
+
+
 	<target name="run-unit-tests" depends="unit-jar">
 		<antcall target="run-tests">
 			<param name="test.jar" value="open-xchange-unit-tests.jar" />
