@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.settings.impl;
 
+import java.sql.Connection;
+
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingException;
 import com.openexchange.session.Session;
@@ -71,8 +73,16 @@ public abstract class SettingStorage {
      * @param setting the setting to store.
      * @throws SettingException if an error occurs while saving the setting.
      */
-    public abstract void save(Setting setting)
-        throws SettingException;
+    public abstract void save(Setting setting) throws SettingException;
+
+    /**
+     * This method stores a specific setting.
+     * @param con writable database connection.
+     * @param setting the setting to store.
+     * @throws SettingException if an error occurs while saving the setting.
+     */
+    public abstract void save(Connection con, Setting setting) throws
+        SettingException;
 
     /**
      * This method reads the setting and its subsettings from the database.
@@ -89,6 +99,20 @@ public abstract class SettingStorage {
     public static SettingStorage getInstance(final Session session) {
         try {
             return new RdbSettingStorage(session);
+        } catch (SettingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @param contextId unique identifier of the context.
+     * @param userId unique identifier of the user.
+     * @return an instance implementing this storage interface.
+     */
+    public static SettingStorage getInstance(final int contextId,
+        final int userId) {
+        try {
+            return new RdbSettingStorage(contextId, userId);
         } catch (SettingException e) {
             throw new RuntimeException(e);
         }

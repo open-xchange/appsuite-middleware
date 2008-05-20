@@ -190,7 +190,11 @@ public class Starter implements Initialization {
 	/**
 	 * Notification Configuration
 	 */
-	com.openexchange.groupware.notify.NotificationConfig.getInstance() };
+	com.openexchange.groupware.notify.NotificationConfig.getInstance(),
+    /**
+     * Sets up the configuration tree.
+     */
+    com.openexchange.groupware.settings.impl.ConfigTreeInit.getInstance() };
 
 	private static final Log LOG = LogFactory.getLog(Starter.class);
 

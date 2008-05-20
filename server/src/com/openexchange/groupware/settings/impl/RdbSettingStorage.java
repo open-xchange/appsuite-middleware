@@ -131,11 +131,38 @@ public class RdbSettingStorage extends SettingStorage {
         userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
     }
 
+    RdbSettingStorage(final int contextId, final int userId) throws SettingException {
+        super();
+        this.session = null;
+        ctx = Tools.getContext(contextId);
+        user = Tools.getUser(ctx, userId);
+        userConfig = Tools.getUserConfiguration(ctx, userId);
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     public void save(final Setting setting) throws SettingException {
+        final Connection con;
+        try {
+            con = DBPool.pickupWriteable(ctx);
+        } catch (DBPoolingException e) {
+            throw new SettingException(Code.NO_CONNECTION, e);
+        }
+        try {
+            save(con, setting);
+        } finally {
+            DBPool.closeWriterSilent(ctx, con);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void save(final Connection con, final Setting setting) throws
+        SettingException {
         if (!setting.isLeaf()) {
             throw new SettingException(Code.NOT_LEAF, setting.getName());
         }
@@ -149,14 +176,8 @@ public class RdbSettingStorage extends SettingStorage {
                 LOG.warn(e.getMessage(), e);
             }
         } else {
-            final int userId = session.getUserId();
+            final int userId = user.getId();
             final boolean update = settingExists(userId, setting);
-            Connection con;
-            try {
-                con = DBPool.pickupWriteable(ctx);
-            } catch (DBPoolingException e) {
-                throw new SettingException(Code.NO_CONNECTION, e);
-            }
             PreparedStatement stmt = null;
             try {
                 if (update) {
@@ -174,7 +195,6 @@ public class RdbSettingStorage extends SettingStorage {
                 throw new SettingException(Code.SQL_ERROR, e);
             } finally {
                 closeSQLStuff(null, stmt);
-                DBPool.closeWriterSilent(ctx, con);
             }
         }
     }
@@ -204,7 +224,7 @@ public class RdbSettingStorage extends SettingStorage {
                     SELECT_VALUE);
                 int pos = 1;
                 stmt.setInt(pos++, ctx.getContextId());
-                stmt.setInt(pos++, session.getUserId());
+                stmt.setInt(pos++, user.getId());
                 stmt.setInt(pos++, setting.getId());
                 result = stmt.executeQuery();
                 if (result.next()) {

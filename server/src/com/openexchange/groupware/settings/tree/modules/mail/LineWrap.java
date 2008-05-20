@@ -91,7 +91,7 @@ public class LineWrap implements PreferencesItemService {
                 final User user, UserConfiguration userConfig,
                 final Setting setting) throws SettingException {
                 final UserSettingMail settings = UserSettingMailStorage
-                    .getInstance().getUserSettingMail(session.getUserId(), ctx);
+                    .getInstance().getUserSettingMail(user.getId(), ctx);
                 if (null != settings) {
                     setting.setSingleValue(Integer.valueOf(settings
                         .getAutoLinebreak()));

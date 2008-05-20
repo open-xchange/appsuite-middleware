@@ -82,7 +82,7 @@ public abstract class AbstractMailFuncs implements IValueHandler {
         final UserSettingMail settings;
         try {
             settings = UserSettingMailStorage.getInstance().loadUserSettingMail(
-                session.getUserId(), ctx);
+                user.getId(), ctx);
         } catch (final UserConfigurationException e) {
             throw new SettingException(e);
         }
