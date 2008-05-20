@@ -136,6 +136,10 @@ public final class MessageHeaders {
 
 	public static final HeaderName X_MAILER = HeaderName.valueOf(HDR_X_MAILER);
 
+	public static final String HDR_X_OXMSGREF = "X-OXMsgref";
+
+	public static final HeaderName X_OXMSGREF = HeaderName.valueOf(HDR_X_OXMSGREF);
+
 	public static final String HDR_ADDR_DELIM = ",";
 
 	public static final String HDR_X_SPAM_FLAG = "X-Spam-Flag";
