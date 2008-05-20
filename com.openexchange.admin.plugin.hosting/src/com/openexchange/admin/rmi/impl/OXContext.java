@@ -87,6 +87,8 @@ import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.downgrade.DowngradeEvent;
+import com.openexchange.groupware.downgrade.DowngradeRegistry;
 
 public class OXContext extends OXContextCommonImpl implements OXContextInterface {
 
@@ -740,12 +742,33 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 		
 	}
 
-	public void downgrade(Context ctx, Credentials auth)
-		throws RemoteException, InvalidCredentialsException,NoSuchContextException, StorageException, DatabaseUpdateException,InvalidDataException {
-		
-		// TODO: OX GROUPWARE MUST SUPPLY AN API FUNCTION FOR DOWNGRADE!
-		
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public void downgrade(final Context ctx, final Credentials auth) throws
+        RemoteException, InvalidCredentialsException,NoSuchContextException,
+        StorageException, DatabaseUpdateException,InvalidDataException {
+        try {
+            doNullCheck(ctx);
+        } catch (final InvalidDataException e1) {
+            final InvalidDataException invalidDataException
+                = new InvalidDataException("Context is invalid");
+            log.error(invalidDataException.getMessage(), invalidDataException);
+            throw invalidDataException;
+        }
+        new BasicAuthenticator().doAuthentication(auth);
+
+        setIdOrGetIDFromNameAndIdObject(null, ctx);
+
+        log.debug(ctx);
+
+        if (!tool.existsContext(ctx)) {
+            throw new NoSuchContextException();
+        }
+
+        final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+        oxcox.downgrade(ctx);
+    }
 
 	public String getAccessCombinationName(Context ctx, Credentials auth)
 		throws RemoteException, InvalidCredentialsException,NoSuchContextException, StorageException, InvalidDataException {

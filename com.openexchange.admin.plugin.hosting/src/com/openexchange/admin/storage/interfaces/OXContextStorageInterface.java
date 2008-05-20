@@ -247,5 +247,12 @@ public abstract class OXContextStorageInterface {
      * @throws StorageException
      */
     public abstract Context[] searchContextByFilestore(final Filestore filestore) throws StorageException;
-    
+
+    /**
+     * This method deletes all inaccessible data in a context.
+     * @param ctx Context.
+     * @throws StorageException if some problem occurs.
+     */
+    public abstract void downgrade(final Context ctx) throws StorageException;
+
 }

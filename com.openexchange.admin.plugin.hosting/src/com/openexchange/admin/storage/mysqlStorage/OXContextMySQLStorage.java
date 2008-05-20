@@ -88,6 +88,7 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXUser;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
+import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXContextSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
@@ -95,7 +96,15 @@ import com.openexchange.admin.tools.database.TableColumnObject;
 import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.admin.tools.database.TableRowObject;
 import com.openexchange.api2.OXException;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.downgrade.DowngradeEvent;
+import com.openexchange.groupware.downgrade.DowngradeFailedException;
+import com.openexchange.groupware.downgrade.DowngradeRegistry;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationException;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 /**
@@ -2147,6 +2156,73 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
         }
 
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void downgrade(final Context ctx) throws StorageException {
+        final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
+        final User[] users = oxu.list(ctx, "*");
+        final DowngradeRegistry registry = DowngradeRegistry.getInstance();
+        final UserConfigurationStorage uConfStorage = UserConfigurationStorage.getInstance();
+        final ContextStorage cStor = ContextStorage.getInstance();
+        final Connection con;
+        final com.openexchange.groupware.contexts.Context gCtx;
+        try {
+            gCtx = cStor.getContext(ctx.getId().intValue());
+            con = cache.getConnectionForContext(ctx.getId().intValue());
+        } catch (final ContextException e) {
+            log.error("Can't get groupware context object.", e);
+            throw new StorageException(e);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+        try {
+            con.setAutoCommit(false);
+            for (User user : users) {
+                final UserConfiguration uConf = uConfStorage.getUserConfiguration(user.getId().intValue(), gCtx);
+                final DowngradeEvent event = new DowngradeEvent(uConf, con, gCtx);
+                registry.fireDowngradeEvent(event);
+
+            }
+            con.commit();
+        } catch (final UserConfigurationException e) {
+            try {
+                con.rollback();
+            } catch (final SQLException e1) {
+                log.error("Error in rollback of database connection.", e1);
+                throw new StorageException(e1);
+            }
+            log.error("Can't get user configuration.", e);
+            throw new StorageException(e);
+        } catch (final DowngradeFailedException e) {
+            try {
+                con.rollback();
+            } catch (final SQLException e1) {
+                log.error("Error in rollback of database connection.", e1);
+                throw new StorageException(e1);
+            }
+            log.error("Deleting not viewable data failed.", e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            try {
+                con.rollback();
+            } catch (final SQLException e1) {
+                log.error("Error in rollback of configdb connection", e1);
+                throw new StorageException(e1);
+            }
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            try {
+                cache.pushConnectionForContext(ctx.getId().intValue(), con);
+            } catch (final PoolException exp) {
+                log.error("Error pushing configdb connection to pool!", exp);
+            }
+        }
     }
 
     private void changeQuotaForContext(final Context ctx, final Connection configdb_con) throws SQLException {
