@@ -97,7 +97,7 @@ public abstract class MailMessage extends MailPart {
 	 * 
 	 * @value 2
 	 */
-	public static final int FLAG_DELETED = 2;
+	public static final int FLAG_DELETED = 1 << 1;
 
 	/**
 	 * This message is a draft. This flag is set by clients to indicate that the
@@ -105,7 +105,7 @@ public abstract class MailMessage extends MailPart {
 	 * 
 	 * @value 4
 	 */
-	public static final int FLAG_DRAFT = 4;
+	public static final int FLAG_DRAFT = 1 << 2;
 
 	/**
 	 * This message is flagged. No semantic is defined for this flag. Clients
@@ -113,7 +113,7 @@ public abstract class MailMessage extends MailPart {
 	 * 
 	 * @value 8
 	 */
-	public static final int FLAG_FLAGGED = 8;
+	public static final int FLAG_FLAGGED = 1 << 3;
 
 	/**
 	 * This message is recent. Folder implementations set this flag to indicate
@@ -123,7 +123,7 @@ public abstract class MailMessage extends MailPart {
 	 * @value 16
 	 * 
 	 */
-	public static final int FLAG_RECENT = 16;
+	public static final int FLAG_RECENT = 1 << 4;
 
 	/**
 	 * This message is seen. This flag is implicitly set by the implementation
@@ -131,7 +131,7 @@ public abstract class MailMessage extends MailPart {
 	 * 
 	 * @value 32
 	 */
-	public static final int FLAG_SEEN = 32;
+	public static final int FLAG_SEEN = 1 << 5;
 
 	/**
 	 * A special flag that indicates that this folder supports user defined
@@ -139,29 +139,29 @@ public abstract class MailMessage extends MailPart {
 	 * 
 	 * @value 64
 	 */
-	public static final int FLAG_USER = 64;
+	public static final int FLAG_USER = 1 << 6;
 
 	/**
 	 * Virtual Spam flag
 	 * 
 	 * @value 128
 	 */
-	public static final int FLAG_SPAM = 128;
+	public static final int FLAG_SPAM = 1 << 7;
 
 	/**
 	 * Virtual forwarded flag that marks this message as being forwarded.
 	 * 
 	 * @value 256
 	 */
-	public static final int FLAG_FORWARDED = 256;
+	public static final int FLAG_FORWARDED = 1 << 8;
 
 	/**
 	 * Virtual read acknowledgment flag that marks this message as being
-	 * forwarded.
+	 * notified for delivery.
 	 * 
 	 * @value 512
 	 */
-	public static final int FLAG_READ_ACK = 512;
+	public static final int FLAG_READ_ACK = 1 << 9;
 
 	/*
 	 * ------------------- User Flags ------------------------------
