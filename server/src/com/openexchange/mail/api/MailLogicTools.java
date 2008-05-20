@@ -128,20 +128,8 @@ public class MailLogicTools {
 	 */
 	public MailMessage getFowardMessage(final MailMessage[] originalMails) throws MailException {
 		final MailMessage forwardMail = MimeForward.getFowardMail(originalMails, session);
-		{
-			final StringBuilder sb = new StringBuilder(originalMails.length * 16);
-			if (originalMails[0].containsFolder() && (originalMails[0].getMailId() > 0)) {
-				sb.append(MailPath.getMailPath(originalMails[0].getFolder(), originalMails[0].getMailId()));
-			}
-			for (int i = 1; i < originalMails.length; i++) {
-				if (originalMails[i].containsFolder() && (originalMails[i].getMailId() > 0)) {
-					sb.append(',').append(
-							MailPath.getMailPath(originalMails[i].getFolder(), originalMails[i].getMailId()));
-				}
-			}
-			if (sb.length() > 0) {
-				forwardMail.setMsgref(sb.toString());
-			}
+		if (originalMails.length == 1) {
+			forwardMail.setMsgref(MailPath.getMailPath(originalMails[0].getFolder(), originalMails[0].getMailId()));
 		}
 		return forwardMail;
 	}
