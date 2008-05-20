@@ -179,16 +179,19 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 
 	public void shutdown() {
 		LOG.info("control command: shutdown");
-		shutdown(bundleContext);
+		shutdown(bundleContext, false);
 	}
 
 	/**
-	 * Shutdown of active bundles
+	 * Shutdown of active bundles through closing system bundle
 	 * 
 	 * @param bundleContext
 	 *            The bundle context
+	 * @param waitForExit
+	 *            <code>true</code> to wait for the OSGi framework being
+	 *            shutdown completely; otherwise <code>false</code>
 	 */
-	public static final void shutdown(final BundleContext bundleContext) {
+	public static final void shutdown(final BundleContext bundleContext, final boolean waitForExit) {
 		try {
 			/*
 			 * Simply shut-down the system bundle to enforce invocation of
@@ -197,7 +200,15 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 			final Bundle systemBundle = bundleContext.getBundle(0);
 			if (null != systemBundle && systemBundle.getState() == Bundle.ACTIVE) {
 				LOG.info("Stopping system bundle...");
+				// Note that stopping process is done in a separate thread
 				systemBundle.stop();
+				if (waitForExit) {
+					try {
+						Thread.sleep(2000);
+					} catch (final InterruptedException e) {
+						LOG.error(e.getLocalizedMessage(), e);
+					}
+				}
 			}
 		} catch (final BundleException e) {
 			LOG.error(e.getLocalizedMessage(), e);

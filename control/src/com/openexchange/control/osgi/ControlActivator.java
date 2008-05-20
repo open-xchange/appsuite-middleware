@@ -213,7 +213,7 @@ public final class ControlActivator implements BundleActivator {
 
 		@Override
 		public void run() {
-			shutdown(bundleContext);
+			shutdown(bundleContext, true);
 		}
 
 	}
