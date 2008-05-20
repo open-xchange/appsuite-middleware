@@ -74,6 +74,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -130,8 +131,17 @@ public final class MimeForward {
 	public static MailMessage getFowardMail(final MailMessage[] originalMails, final Session session)
 			throws MailException {
 		final MimeMessage[] mimeMessages = new MimeMessage[originalMails.length];
-		for (int i = 0; i < mimeMessages.length; i++) {
-			mimeMessages[i] = (MimeMessage) MIMEMessageConverter.convertMailMessage(originalMails[i]);
+		try {
+			for (int i = 0; i < mimeMessages.length; i++) {
+				final MailMessage cur = originalMails[i];
+				mimeMessages[i] = (MimeMessage) MIMEMessageConverter.convertMailMessage(cur);
+				if (cur.getMailId() != -1 && cur.getFolder() != null) {
+					mimeMessages[i].setHeader(MessageHeaders.HDR_X_OXMSGREF, MailPath.getMailPath(cur.getFolder(), cur
+							.getMailId()));
+				}
+			}
+		} catch (final MessagingException e) {
+			throw MIMEMailException.handleMessagingException(e);
 		}
 		return getFowardMail(mimeMessages, session);
 	}
@@ -186,100 +196,14 @@ public final class MimeForward {
 			}
 			if (usm.isForwardAsAttachment() || originalMsgs.length > 1) {
 				/*
-				 * Attachment-Forward 
+				 * Attachment-Forward
 				 */
-				final Multipart multipart = new MimeMultipart();
-				{
-					/*
-					 * Add empty text content as message's body
-					 */
-					final MimeBodyPart textPart = new MimeBodyPart();
-					textPart.setText("", MailConfig.getDefaultMimeCharset(), "plain");
-					textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-					textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst(
-							"#CS#", MailConfig.getDefaultMimeCharset()));
-					multipart.addBodyPart(textPart);
-				}
-				/*
-				 * Attach messages
-				 */
-				for (final MimeMessage originalMsg : originalMsgs) {
-					final MimeBodyPart bodyPart = new MimeBodyPart();
-					bodyPart.setContent(originalMsg, MIMETypes.MIME_MESSAGE_RFC822);
-					multipart.addBodyPart(bodyPart);
-				}
-				/*
-				 * Add multipart to message
-				 */
-				forwardMsg.setContent(multipart);
-				forwardMsg.saveChanges();
-				return MIMEMessageConverter.convertMessage(forwardMsg);
+				return asAttachmentForward(originalMsgs, forwardMsg);
 			}
 			/*
 			 * Inline-Forward
 			 */
-			final ContentType originalContentType = new ContentType(originalMsgs[0].getContentType());
-			final MailMessage forwardMail;
-			if (originalContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
-				final Multipart multipart = new MimeMultipart();
-				{
-					/*
-					 * Grab first seen text from original message
-					 */
-					final ContentType contentType = new ContentType();
-					final String firstSeenText = getFirstSeenText((Multipart) originalMsgs[0].getContent(),
-							contentType, usm);
-					if (contentType.getCharsetParameter() == null) {
-						contentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
-					}
-					/*
-					 * Add appropriate text part prefixed with forward text
-					 */
-					final MimeBodyPart textPart = new MimeBodyPart();
-					textPart.setText(generateForwardText(firstSeenText, UserStorage.getStorageUser(session.getUserId(),
-							ctx).getLocale(), originalMsgs[0], contentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)),
-							contentType.getCharsetParameter(), contentType.getSubType());
-					textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-					textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType.toString());
-					multipart.addBodyPart(textPart);
-					forwardMsg.setContent(multipart);
-					forwardMsg.saveChanges();
-				}
-				final CompositeMailMessage compositeMail = new CompositeMailMessage(MIMEMessageConverter
-						.convertMessage(forwardMsg));
-				/*
-				 * Add all non-inline parts through a handler to keep original
-				 * sequence IDs
-				 */
-				final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
-				new MailMessageParser().parseMailMessage(MIMEMessageConverter.convertMessage(originalMsgs[0]), handler);
-				final List<MailPart> parts = handler.getNonInlineParts();
-				for (final MailPart mailPart : parts) {
-					compositeMail.addAdditionalParts(mailPart);
-				}
-				forwardMail = compositeMail;
-			} else if (originalContentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
-				/*
-				 * Original message is a simple text mail: Add message body
-				 * prefixed with forward text
-				 */
-				if (originalContentType.getCharsetParameter() == null) {
-					originalContentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
-				}
-				forwardMsg.setText(generateForwardText(MessageUtility
-						.readMimePart(originalMsgs[0], originalContentType), UserStorage.getStorageUser(
-						session.getUserId(), ctx).getLocale(), originalMsgs[0], originalContentType
-						.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)), originalContentType.getCharsetParameter(),
-						originalContentType.getSubType());
-				forwardMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-				forwardMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, originalContentType.toString());
-				forwardMsg.saveChanges();
-				forwardMail = MIMEMessageConverter.convertMessage(forwardMsg);
-			} else {
-				throw new IllegalStateException("Odd message for forward operation: Content-Type="
-						+ originalContentType.toString());
-			}
-			return forwardMail;
+			return asInlineForward(originalMsgs, session, ctx, usm, forwardMsg);
 		} catch (final MessagingException e) {
 			throw MIMEMailException.handleMessagingException(e);
 		} catch (final IOException e) {
@@ -287,6 +211,103 @@ public final class MimeForward {
 		} catch (final ContextException e) {
 			throw new MailException(e);
 		}
+	}
+
+	private static MailMessage asInlineForward(final MimeMessage[] originalMsgs, final Session session,
+			final Context ctx, final UserSettingMail usm, final MimeMessage forwardMsg) throws MailException,
+			MessagingException, IOException {
+		final ContentType originalContentType = new ContentType(originalMsgs[0].getContentType());
+		final MailMessage forwardMail;
+		if (originalContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
+			final Multipart multipart = new MimeMultipart();
+			{
+				/*
+				 * Grab first seen text from original message
+				 */
+				final ContentType contentType = new ContentType();
+				final String firstSeenText = getFirstSeenText((Multipart) originalMsgs[0].getContent(), contentType,
+						usm);
+				if (contentType.getCharsetParameter() == null) {
+					contentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+				}
+				/*
+				 * Add appropriate text part prefixed with forward text
+				 */
+				final MimeBodyPart textPart = new MimeBodyPart();
+				textPart.setText(generateForwardText(firstSeenText, UserStorage
+						.getStorageUser(session.getUserId(), ctx).getLocale(), originalMsgs[0], contentType
+						.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)), contentType.getCharsetParameter(), contentType
+						.getSubType());
+				textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+				textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType.toString());
+				multipart.addBodyPart(textPart);
+				forwardMsg.setContent(multipart);
+				forwardMsg.saveChanges();
+			}
+			final CompositeMailMessage compositeMail = new CompositeMailMessage(MIMEMessageConverter
+					.convertMessage(forwardMsg));
+			/*
+			 * Add all non-inline parts through a handler to keep original
+			 * sequence IDs
+			 */
+			final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
+			new MailMessageParser().parseMailMessage(MIMEMessageConverter.convertMessage(originalMsgs[0]), handler);
+			final List<MailPart> parts = handler.getNonInlineParts();
+			for (final MailPart mailPart : parts) {
+				compositeMail.addAdditionalParts(mailPart);
+			}
+			forwardMail = compositeMail;
+		} else if (originalContentType.isMimeType(MIMETypes.MIME_TEXT_ALL)) {
+			/*
+			 * Original message is a simple text mail: Add message body prefixed
+			 * with forward text
+			 */
+			if (originalContentType.getCharsetParameter() == null) {
+				originalContentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
+			}
+			forwardMsg.setText(generateForwardText(MessageUtility.readMimePart(originalMsgs[0], originalContentType),
+					UserStorage.getStorageUser(session.getUserId(), ctx).getLocale(), originalMsgs[0],
+					originalContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)), originalContentType
+					.getCharsetParameter(), originalContentType.getSubType());
+			forwardMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+			forwardMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, originalContentType.toString());
+			forwardMsg.saveChanges();
+			forwardMail = MIMEMessageConverter.convertMessage(forwardMsg);
+		} else {
+			throw new IllegalStateException("Odd message for forward operation: Content-Type="
+					+ originalContentType.toString());
+		}
+		return forwardMail;
+	}
+
+	private static MailMessage asAttachmentForward(final MimeMessage[] originalMsgs, final MimeMessage forwardMsg)
+			throws MessagingException, MailException {
+		final Multipart multipart = new MimeMultipart();
+		{
+			/*
+			 * Add empty text content as message's body
+			 */
+			final MimeBodyPart textPart = new MimeBodyPart();
+			textPart.setText("", MailConfig.getDefaultMimeCharset(), "plain");
+			textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+			textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst("#CS#",
+					MailConfig.getDefaultMimeCharset()));
+			multipart.addBodyPart(textPart);
+		}
+		/*
+		 * Attach messages
+		 */
+		for (final MimeMessage originalMsg : originalMsgs) {
+			final MimeBodyPart bodyPart = new MimeBodyPart();
+			bodyPart.setContent(originalMsg, MIMETypes.MIME_MESSAGE_RFC822);
+			multipart.addBodyPart(bodyPart);
+		}
+		/*
+		 * Add multipart to message
+		 */
+		forwardMsg.setContent(multipart);
+		forwardMsg.saveChanges();
+		return MIMEMessageConverter.convertMessage(forwardMsg);
 	}
 
 	/**
