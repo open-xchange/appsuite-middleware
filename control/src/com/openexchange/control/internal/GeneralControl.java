@@ -179,6 +179,16 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 
 	public void shutdown() {
 		LOG.info("control command: shutdown");
+		shutdown(bundleContext);
+	}
+
+	/**
+	 * Shutdown of active bundles
+	 * 
+	 * @param bundleContext
+	 *            The bundle context
+	 */
+	public static final void shutdown(final BundleContext bundleContext) {
 		try {
 			/*
 			 * Simply shut-down the system bundle to enforce invocation of
@@ -186,6 +196,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 			 */
 			final Bundle systemBundle = bundleContext.getBundle(0);
 			if (null != systemBundle && systemBundle.getState() == Bundle.ACTIVE) {
+				LOG.info("Stopping system bundle...");
 				systemBundle.stop();
 			}
 		} catch (final BundleException e) {

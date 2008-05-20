@@ -49,6 +49,8 @@
 
 package com.openexchange.control.osgi;
 
+import static com.openexchange.control.internal.GeneralControl.shutdown;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -211,18 +213,7 @@ public final class ControlActivator implements BundleActivator {
 
 		@Override
 		public void run() {
-			try {
-				/*
-				 * Simply shut-down the system bundle to enforce invocation of
-				 * close() method on all running bundles
-				 */
-				final Bundle systemBundle = bundleContext.getBundle(0);
-				if (null != systemBundle && systemBundle.getState() == Bundle.ACTIVE) {
-					systemBundle.stop();
-				}
-			} catch (final BundleException e) {
-				LOG.error("Shutdown failed: " + e.getMessage(), e);
-			}
+			shutdown(bundleContext);
 		}
 
 	}
