@@ -136,6 +136,10 @@ public final class MimeForward {
 				final MailMessage cur = originalMails[i];
 				mimeMessages[i] = (MimeMessage) MIMEMessageConverter.convertMailMessage(cur);
 				if (cur.getMailId() != -1 && cur.getFolder() != null) {
+					/*
+					 * Temporary store message reference in MIME message's
+					 * headers
+					 */
 					mimeMessages[i].setHeader(MessageHeaders.HDR_X_OXMSGREF, MailPath.getMailPath(cur.getFolder(), cur
 							.getMailId()));
 				}
