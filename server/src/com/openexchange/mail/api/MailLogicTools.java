@@ -117,7 +117,7 @@ public class MailLogicTools {
 	 * If mailing system deals with common RFC822 messages, this convenience
 	 * method only delegates its request to
 	 * {@link MimeForward#getFowardMail(MailMessage[], Session)} and can be left
-	 * unchanged. Otherwise an message data specific implementation is needed.
+	 * unchanged. Otherwise a message data specific implementation is needed.
 	 * 
 	 * @param originalMails
 	 *            The original mails
