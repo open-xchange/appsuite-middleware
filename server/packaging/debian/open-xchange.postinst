@@ -1,5 +1,5 @@
 #! /bin/bash
-# postinst script for open-xchange-admin
+# postinst script for open-xchange
 #
 # see: dh_installdeb(1)
 
@@ -42,6 +42,9 @@ postFix() {
   # we're updating from pre sp4
   if [ $version -lt 650 ]; then
 
+      # did not exist in SP3
+      chown -R open-xchange: /opt/open-xchange/etc/groupware/osgi || true
+
       # -----------------------------------------------------------------------
       local pfile=/opt/open-xchange/etc/groupware/ox-scriptconf.sh
       ox_exists_property PROPERTIESDIR $pfile || {
@@ -77,6 +80,28 @@ postFix() {
       ox_exists_property Whitelist $pfile || {
 	  v_setprop Whitelist /opt/open-xchange/etc/groupware/whitelist.txt $pfile
       }
+
+      ox_exists_property LoginInfo $pfile && {
+	  v_delprop LoginInfo $pfile
+      } || true
+      ox_exists_property SetupLink $pfile && {
+	  v_delprop SetupLink $pfile
+      } || true
+      ox_exists_property ConfigJumpConf $pfile && {
+	  v_delprop ConfigJumpConf $pfile
+      } || true
+      ox_exists_property User2IMAPImpl $pfile && {
+	  v_delprop User2IMAPImpl $pfile
+      } || true
+      ox_exists_property WEBDAVOVERRIDES $pfile && {
+	  v_delprop WEBDAVOVERRIDES $pfile
+      } || true
+      ox_exists_property IMAPPROPERTIES $pfile && {
+	  v_delprop IMAPPROPERTIES $pfile
+      } || true
+      ox_exists_property JAVAMAILPROPERTIES $pfile && {
+	  v_delprop JAVAMAILPROPERTIES $pfile
+      } || true
 
       # -----------------------------------------------------------------------
       local pfile=/opt/open-xchange/etc/groupware/imap.properties
@@ -132,6 +157,54 @@ postFix() {
 	  local val=$(ox_read_property mail.mime.charset $imap)
 	  v_delprop mail.mime.charset $imap
 	  v_setprop mail.mime.charset $val $mail
+      } || true
+      ox_exists_property imapMessageFetchLimit $imap && {
+	  local val=$(ox_read_property imapMessageFetchLimit $imap)
+	  v_delprop imapMessageFetchLimit $imap
+	  v_setprop com.openexchange.mail.mailFetchLimit $val $mail
+      } || true
+      ox_exists_property imapAttachmentDisplaySizeLimit $imap && {
+	  local val=$(ox_read_property imapAttachmentDisplaySizeLimit $imap)
+	  v_delprop imapAttachmentDisplaySizeLimit $imap
+	  v_setprop com.openexchange.mail.attachmentDisplaySizeLimit $val $mail
+      } || true
+      ox_exists_property imapMaxNumOfConnections $imap && {
+	  local val=$(ox_read_property imapMaxNumOfConnections $imap)
+	  v_delprop imapMaxNumOfConnections $imap
+	  v_setprop com.openexchange.mail.maxNumOfConnections $val $mail
+      } || true
+      ox_exists_property imapQuoteLineColors $imap && {
+	  local val=$(ox_read_property imapQuoteLineColors $imap)
+	  v_delprop imapQuoteLineColors $imap
+	  v_setprop com.openexchange.mail.quoteLineColors $val $mail
+      } || true
+      for key in userFlagsEnabled allowNestedDefaultFolderOnAltNamespace \
+	  ignoreSubscription watcherEnabled watcherFrequency watcherTime \
+	  watcherShallClose smtpLocalhost smtpAuthentication setSMTPEnvelopeFrom; do
+	  ox_exists_property $key $imap && {
+	      local val=$(ox_read_property $key $imap)
+	      v_delprop $key $imap
+	      v_setprop "com.openexchange.mail.${key}" $val $mail
+	  } || true
+      done
+      # delete non-existing params
+      ox_exists_property partModifierImpl $imap && {
+	  v_delprop partModifierImpl $imap
+      } || true
+      ox_exists_property imaps $imap && {
+	  v_delprop imaps $imap
+      } || true
+      ox_exists_property smtps $imap && {
+	  v_delprop smtps $imap
+      } || true
+      ox_exists_property spamEnabled $imap && {
+	  v_delprop spamEnabled $imap
+      } || true
+      ox_exists_property imapMessageFetchLimit $imap && {
+	  v_delprop imapMessageFetchLimit $imap
+      } || true
+      ox_exists_property imapAttachmentDisplaySizeLimit $imap && {
+	  v_delprop imapAttachmentDisplaySizeLimit $imap
       } || true
   fi
 }
