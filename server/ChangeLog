@@ -1,3 +1,7 @@
+* 2008-05-21 - thorben.betten@open-xchange.com
+
+ - Bugfix #11292: Secure SMTP works with gmail
+
 * 2008-05-16 - thorben.betten@open-xchange.com
 
  - Bugfix #11270: Reliable check for subscribed subfolders through a LSUB

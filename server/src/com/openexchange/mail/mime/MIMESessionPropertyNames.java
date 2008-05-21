@@ -89,6 +89,7 @@ public final class MIMESessionPropertyNames {
 
 	public static final String PROP_MAIL_IMAP_TIMEOUT = "mail.imap.timeout";
 
+
 	public static final String PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK = "mail.smtp.socketFactory.fallback";
 
 	public static final String PROP_MAIL_SMTP_SOCKET_FACTORY_PORT = "mail.smtp.socketFactory.port";
@@ -96,6 +97,11 @@ public final class MIMESessionPropertyNames {
 	public static final String PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS = "mail.smtp.socketFactory.class";
 
 	public static final String PROP_MAIL_SMTP_STARTTLS_ENABLE = "mail.smtp.starttls.enable";
+
+	public static final String PROP_MAIL_SMTP_SSL_PROTOCOLS = "mail.smtp.ssl.protocols";
+
+	public static final String PROP_MAIL_SMTP_SSL = "mail.smtp.ssl";
+
 
 	public static final String PROP_MAIL_IMAP_SOCKET_FACTORY_FALLBACK = "mail.imap.socketFactory.fallback";
 

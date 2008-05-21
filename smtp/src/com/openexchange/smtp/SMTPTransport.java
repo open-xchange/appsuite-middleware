@@ -205,6 +205,12 @@ public final class SMTPTransport extends MailTransport {
 				smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK, "false");
 				smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_STARTTLS_ENABLE, "true");
 				/*
+				 * Specify protocols
+				 */
+				smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SSL_PROTOCOLS, "SSLv3 TLSv1");
+				smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SSL, "true");
+
+				/*
 				 * Needed for JavaMail >= 1.4
 				 */
 				Security.setProperty(PROPERTY_SECURITY_PROVIDER, CLASSNAME_SECURITY_FACTORY);
@@ -423,8 +429,8 @@ public final class SMTPTransport extends MailTransport {
 				final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
 				if (SMTPConfig.isSmtpAuth()) {
 					final SMTPConfig config = getTransportConfig();
-					transport.connect(config.getServer(), config.getPort(), config.getLogin(), encodePassword(config
-							.getPassword()));
+					final String encPass = encodePassword(config.getPassword());
+					transport.connect(config.getServer(), config.getPort(), config.getLogin(), encPass);
 				} else {
 					transport.connect();
 				}
