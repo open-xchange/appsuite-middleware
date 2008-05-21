@@ -60,33 +60,36 @@ public enum ComposeType {
 	/**
 	 * New
 	 */
-	NEW,
+	NEW(0),
 	/**
 	 * Forward
 	 */
-	FORWARD,
+	FORWARD(2),
 	/**
 	 * Reply
 	 */
-	REPLY;
+	REPLY(1);
+
+	private final int type;
+
+	private ComposeType(final int type) {
+		this.type = type;
+	}
 
 	/**
 	 * Gets the corresponding {@link ComposeType}
 	 * 
 	 * @param type
 	 *            The send type as <code>int</code>
-	 * @return The corresponding {@link ComposeType}
+	 * @return The corresponding {@link ComposeType} or <code>null</code>
 	 */
 	public static final ComposeType getType(final int type) {
-		switch (type) {
-		case 0:
-			return NEW;
-		case 1:
-			return REPLY;
-		case 2:
-			return FORWARD;
-		default:
-			return null;
+		final ComposeType[] types = ComposeType.values();
+		for (final ComposeType composeType : types) {
+			if (composeType.type == type) {
+				return composeType;
+			}
 		}
+		return null;
 	}
 }
