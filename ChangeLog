@@ -1,3 +1,7 @@
+* 2008-05-21 - francisco.laguna@open-xchange.com
+
+ - Bugfixes #11012: Freebusy result must return appointment dates with UTC timezone.
+
 * 2008-04-17 - sebastian.kauss@open-xchange.com
 
  - Bugfixes #10760: Missing recurrence attributes in appointment requests
