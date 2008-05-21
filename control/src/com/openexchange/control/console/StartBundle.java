@@ -106,7 +106,7 @@ public class StartBundle extends AbstractConsoleHandler {
 		initJMX(jmxHost, jmxPort);
 	}
 	
-	public void start(String bundle) throws Exception {
+	public void start(String bundleName) throws Exception {
 		final ObjectName objectName = getObjectName();
 		final MBeanServerConnection mBeanServerConnection = getMBeanServerConnection();
 		mBeanServerConnection.invoke(objectName, "start", new Object[] { bundleName },
