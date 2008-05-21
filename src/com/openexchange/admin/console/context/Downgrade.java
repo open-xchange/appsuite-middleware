@@ -46,32 +46,59 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.console.user;
+package com.openexchange.admin.console.context;
+
+import java.rmi.Naming;
 
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.ObjectNamingAbstraction;
-import com.openexchange.admin.console.CmdLineParser.Option;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.rmi.OXContextInterface;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 
-public class UserHostingAbstraction extends ObjectNamingAbstraction {
-    
-    // which access rights template should be used
-    private Option accessRightsCombinationName = null;
+public class Downgrade extends ContextAbstraction {
 
-    private static final String OPT_ACCESSRIGHTS_COMBINATION_NAME = "access-combination-name";
+    private final ContextHostingAbstraction ctxabs = new ContextHostingAbstraction();
     
-    public static final String ACCESS_COMBINATION_NAME_AND_ACCESS_RIGHTS_DETECTED_ERROR = "You can\u00b4t specify access combination name AND single access attributes simultaneously!";
-    
-    @Override
-    protected String getObjectName() {
-        return "user";
+    public Downgrade(final String[] args2) {
+
+        final AdminParser parser = new AdminParser("downgradecontext");
+
+        setOptions(parser);
+
+        String successtext = null;
+        try {
+
+            parser.ownparse(args2);
+            final Context ctx = contextparsing(parser);
+
+            parseAndSetContextName(parser, ctx);
+            
+            successtext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
+            
+            final Credentials auth = credentialsparsing(parser);
+
+            // get rmi ref
+            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
+
+            /*final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
+            oxres.disable(ctx, mr, auth); */
+            oxres.downgrade(ctx, auth);
+
+            ctxabs.displayDowngradedMessage(successtext, null, parser);
+            sysexit(0);
+        } catch (final Exception e) {
+            printErrors(successtext, null, e, parser);
+        }
     }
 
-    public void setAddAccessRightCombinationNameOption(final AdminParser parser, final boolean required) {
-        this.accessRightsCombinationName = setLongOpt(parser,OPT_ACCESSRIGHTS_COMBINATION_NAME,"Access combination name", true, false,false);
+    public static void main(final String args[]) {
+        new Downgrade(args);
     }
 
-    public String parseAndSetAccessCombinationName(final AdminParser parser) {
-        return (String) parser.getOptionValue(this.accessRightsCombinationName);
+    private void setOptions(final AdminParser parser) {
+        setDefaultCommandLineOptionsWithoutContextID(parser);
+        setContextOption(parser, NeededQuadState.eitheror);
+        setContextNameOption(parser, NeededQuadState.eitheror);
     }
-
 }

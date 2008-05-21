@@ -96,6 +96,9 @@ case "${BNAME}" in
     "enableallcontext")
     ACTION="context.EnableAll"
     ;;
+    "downgradecontext")
+    ACTION="context.Downgrade"
+    ;;
     "movecontextdatabase")
     ACTION="context.MoveContextDatabase"
     ;;

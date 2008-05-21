@@ -149,10 +149,14 @@ public class ContextHostingAbstraction extends UserHostingAbstraction {
         createMessageForStdout(id, ctxid, "enabled", parser);
     }
 
+    protected final void displayDowngradedMessage(final String id, final Integer ctxid, final AdminParser parser) {
+        createMessageForStdout(id, ctxid, "downgraded", parser);
+    }
+
     protected final void displayMovedMessage(final String id, final Integer ctxid, final String text, final AdminParser parser) {
         createMessageForStdout(id, ctxid, text, parser);
     }
-
+    
     public void parseAndSetRemoveLoginMapping(AdminParser parser) {
         if (parser.getOptionValue(this.removeLoginMappingOption) != null) {
             this.remove_mappings = ((String) parser.getOptionValue(this.removeLoginMappingOption)).split(",");

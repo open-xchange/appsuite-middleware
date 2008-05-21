@@ -5,6 +5,7 @@ disablecontext
 disableallcontext
 enablecontext
 enableallcontext
+downgradecontext
 movecontextdatabase
 movecontextfilestore
 listcontext
