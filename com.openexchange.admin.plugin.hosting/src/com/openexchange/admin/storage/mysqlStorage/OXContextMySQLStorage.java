@@ -2186,7 +2186,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 final UserConfiguration uConf = uConfStorage.getUserConfiguration(user.getId().intValue(), gCtx);
                 final DowngradeEvent event = new DowngradeEvent(uConf, con, gCtx);
                 registry.fireDowngradeEvent(event);
-
             }
             con.commit();
         } catch (final UserConfigurationException e) {
