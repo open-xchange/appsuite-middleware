@@ -76,6 +76,7 @@ import org.mozilla.intl.chardet.nsPSMDetector;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.ServiceException;
 import com.openexchange.spellcheck.SpellCheckException;
+import com.openexchange.spellcheck.SpellCheckService;
 import com.openexchange.spellcheck.services.SpellCheckServiceRegistry;
 import com.swabunga.spell.engine.SpellDictionary;
 import com.swabunga.spell.engine.SpellDictionaryHashMap;
@@ -263,7 +264,8 @@ public final class DictonaryStorage {
 				}
 				spellCheckDir = new File(dirPath);
 			} else {
-				throw new SpellCheckException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE));
+				throw new SpellCheckException(new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE,
+						SpellCheckService.class.getName()));
 			}
 		}
 		if (!spellCheckDir.exists() || !spellCheckDir.isDirectory()) {

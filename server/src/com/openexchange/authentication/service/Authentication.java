@@ -87,8 +87,8 @@ public final class Authentication {
         throws LoginException, ServiceException {
         final AuthenticationService auth = service;
         if (null == auth) {
-            throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE);
-        }
+			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, AuthenticationService.class.getName());
+		}
         return auth.handleLoginInfo(new LoginInfo() {
             public String getPassword() {
                 return pass;
