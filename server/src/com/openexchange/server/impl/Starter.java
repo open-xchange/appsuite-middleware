@@ -194,7 +194,12 @@ public class Starter implements Initialization {
     /**
      * Sets up the configuration tree.
      */
-    com.openexchange.groupware.settings.impl.ConfigTreeInit.getInstance() };
+    com.openexchange.groupware.settings.impl.ConfigTreeInit.getInstance(),
+    /**
+     * Downgrade registry start-up
+     */
+    com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance()
+    };
 
 	private static final Log LOG = LogFactory.getLog(Starter.class);
 
