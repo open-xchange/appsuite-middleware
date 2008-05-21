@@ -4,7 +4,6 @@
 package com.openexchange.ajax.session;
 
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
  * 
@@ -28,7 +27,7 @@ public class LoginRequest extends AbstractRequest {
     /**
      * {@inheritDoc}
      */
-    public AbstractAJAXParser getParser() {
+    public LoginResponseParser getParser() {
         return new LoginResponseParser();
     }
 }

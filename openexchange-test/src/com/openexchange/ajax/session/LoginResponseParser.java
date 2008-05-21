@@ -3,6 +3,8 @@
  */
 package com.openexchange.ajax.session;
 
+import java.io.IOException;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,7 +17,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class LoginResponseParser extends AbstractAJAXParser {
+public class LoginResponseParser extends AbstractAJAXParser<LoginResponse> {
 
     private String jvmRoute;
     
@@ -32,6 +34,14 @@ public class LoginResponseParser extends AbstractAJAXParser {
     @Override
     public void checkResponse(final WebResponse resp) {
         super.checkResponse(resp);
+        // Check for error messages
+        try {
+            super.getResponse(resp.getText());
+        } catch (final JSONException e) {
+            fail(e.getMessage());
+        } catch (final IOException e) {
+            fail(e.getMessage());
+        }
         final String[] newCookies = resp.getNewCookieNames();
         boolean oxCookieFound = false;
         for (String newCookie : newCookies) {
@@ -54,8 +64,9 @@ public class LoginResponseParser extends AbstractAJAXParser {
      */
     @Override
     public LoginResponse parse(final String body) throws JSONException {
-        final Response response = new Response();
-        response.setData(new JSONObject(body));
+        final JSONObject json = new JSONObject(body);
+        final Response response = getResponse(body);
+        response.setData(json);
         return createResponse(response);
     }
 
@@ -65,10 +76,10 @@ public class LoginResponseParser extends AbstractAJAXParser {
     @Override
     protected LoginResponse createResponse(final Response response)
         throws JSONException {
-        LoginResponse retval = new LoginResponse(response);
+        final LoginResponse retval = new LoginResponse(response);
         final JSONObject json = (JSONObject) response.getData();
-        if (json.has("error")) {
-            retval = new LoginResponse(Response.parse(json.toString()));
+        if (response.hasError()) {
+            response.setData(null);
         } else {
             retval.setJvmRoute(jvmRoute);
             retval.setSessionId(json.getString(Login.PARAMETER_SESSION));

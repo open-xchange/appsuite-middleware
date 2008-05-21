@@ -7,8 +7,6 @@ import java.io.UnsupportedEncodingException;
 
 import junit.framework.Assert;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 
@@ -28,11 +26,6 @@ import com.openexchange.tools.URLParameter;
 import com.openexchange.tools.servlet.AjaxException;
 
 public class Executor extends Assert {
-
-    /**
-     * Logger.
-     */
-    private static final Log LOG = LogFactory.getLog(Executor.class);
 
     /**
      * To use character encoding.
@@ -163,7 +156,7 @@ public class Executor extends Assert {
     }
 
     private static InputStream createBody(final Object body)
-        throws JSONException, UnsupportedEncodingException {
+        throws UnsupportedEncodingException {
         return new ByteArrayInputStream(body.toString().getBytes(ENCODING));
     }
 }
