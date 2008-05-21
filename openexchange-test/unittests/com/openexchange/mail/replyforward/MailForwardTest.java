@@ -273,44 +273,54 @@ public final class MailForwardTest extends AbstractMailTest {
 								MIMETypes.MIME_TEXT_ALL));
 						final Object content = part.getContent();
 						assertTrue("Missing content", content != null);
+						
+						if (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isForwardAsAttachment()) {
 
-						String forwardPrefix = stringHelper.getString(MailStrings.FORWARD_PREFIX);
-						{
-							final InternetAddress[] from = sourceMail.getFrom();
-							forwardPrefix = forwardPrefix.replaceFirst("#FROM#", from == null || from.length == 0 ? ""
-									: from[0].toUnicodeString());
-						}
-						{
-							final InternetAddress[] to = sourceMail.getTo();
-							forwardPrefix = forwardPrefix.replaceFirst("#TO#", to == null || to.length == 0 ? ""
-									: addrs2String(to));
-						}
-						{
-							final Date date = sourceMail.getSentDate();
-							try {
-								forwardPrefix = forwardPrefix.replaceFirst("#DATE#", date == null ? "" : DateFormat
-										.getDateInstance(DateFormat.LONG, locale).format(date));
-							} catch (final Throwable t) {
-								t.printStackTrace();
-								forwardPrefix = forwardPrefix.replaceFirst("#DATE#", "");
+							String forwardPrefix = stringHelper.getString(MailStrings.FORWARD_PREFIX);
+							{
+								final InternetAddress[] from = sourceMail.getFrom();
+								forwardPrefix = forwardPrefix.replaceFirst("#FROM#", from == null || from.length == 0 ? ""
+										: from[0].toUnicodeString());
 							}
-							try {
-								forwardPrefix = forwardPrefix.replaceFirst("#TIME#", date == null ? "" : DateFormat
-										.getTimeInstance(DateFormat.SHORT, locale).format(date));
-							} catch (final Throwable t) {
-								t.printStackTrace();
-								forwardPrefix = forwardPrefix.replaceFirst("#TIME#", "");
+							{
+								final InternetAddress[] to = sourceMail.getTo();
+								forwardPrefix = forwardPrefix.replaceFirst("#TO#", to == null || to.length == 0 ? ""
+										: addrs2String(to));
 							}
-
+							{
+								final Date date = sourceMail.getSentDate();
+								try {
+									forwardPrefix = forwardPrefix.replaceFirst("#DATE#", date == null ? "" : DateFormat
+											.getDateInstance(DateFormat.LONG, locale).format(date));
+								} catch (final Throwable t) {
+									t.printStackTrace();
+									forwardPrefix = forwardPrefix.replaceFirst("#DATE#", "");
+								}
+								try {
+									forwardPrefix = forwardPrefix.replaceFirst("#TIME#", date == null ? "" : DateFormat
+											.getTimeInstance(DateFormat.SHORT, locale).format(date));
+								} catch (final Throwable t) {
+									t.printStackTrace();
+									forwardPrefix = forwardPrefix.replaceFirst("#TIME#", "");
+								}
+	
+							}
+							forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", sourceMail.getSubject());
+							forwardPrefix = new StringBuilder(forwardPrefix.length() + 4).append("\r\n\r\n").append(
+									forwardPrefix).toString();
+							assertTrue("Missing forward prefix", content.toString().startsWith(forwardPrefix));
+						} else {
+							assertTrue("Unexpected forward prefix", content.toString().trim().length() == 0);
 						}
-						forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", sourceMail.getSubject());
-						forwardPrefix = new StringBuilder(forwardPrefix.length() + 4).append("\r\n\r\n").append(
-								forwardPrefix).toString();
-						assertTrue("Missing forward prefix", content.toString().startsWith(forwardPrefix));
 
 					} else {
-						assertTrue("Unexpected content type in file attachment", part.getContentType().isMimeType(
-								MIMETypes.MIME_TEXT_ALL_CARD));
+						if (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isForwardAsAttachment()) {
+							assertTrue("Unexpected content type in file attachment", part.getContentType().isMimeType(
+									MIMETypes.MIME_TEXT_ALL_CARD));
+						} else {
+							assertTrue("Unexpected content type in file attachment", part.getContentType().isMimeType(
+									MIMETypes.MIME_MESSAGE_RFC822));
+						}
 					}
 				}
 
@@ -359,48 +369,63 @@ public final class MailForwardTest extends AbstractMailTest {
 							.getSubject()));
 				}
 
-				assertTrue("Header 'Content-Type' does not carry expected value", forwardMail.getContentType()
-						.isMimeType(MIMETypes.MIME_TEXT_PLAIN));
+				final boolean isInlineForward = (!UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isForwardAsAttachment());
+				
+				if (isInlineForward) {
+					assertTrue("Header 'Content-Type' does not carry expected value", forwardMail.getContentType()
+							.isMimeType(MIMETypes.MIME_TEXT_PLAIN));
+				} else {
+					assertTrue("Header 'Content-Type' does not carry expected value", forwardMail.getContentType()
+							.isMimeType(MIMETypes.MIME_MULTIPART_ALL));
+				}
 
 				final int count = forwardMail.getEnclosedCount();
-				assertTrue("Unexpected number of enclosed parts: " + count, count == MailPart.NO_ENCLOSED_PARTS);
+				if (isInlineForward) {
+					assertTrue("Unexpected number of enclosed parts: " + count, count == MailPart.NO_ENCLOSED_PARTS);
+				} else {
+					assertTrue("Unexpected number of enclosed parts: " + count, count == 2);
+				}
 
 				final Object content = forwardMail.getContent();
-				assertTrue("Missing content", content != null);
+				if (isInlineForward) {
+					assertTrue("Missing content", content != null);
+				}
 
-				String forwardPrefix = stringHelper.getString(MailStrings.FORWARD_PREFIX);
-				{
-					final InternetAddress[] from = sourceMail.getFrom();
-					forwardPrefix = forwardPrefix.replaceFirst("#FROM#", from == null || from.length == 0 ? ""
-							: from[0].toUnicodeString());
-				}
-				{
-					final InternetAddress[] to = sourceMail.getTo();
-					forwardPrefix = forwardPrefix.replaceFirst("#TO#", to == null || to.length == 0 ? ""
-							: addrs2String(to));
-				}
-				{
-					final Date date = sourceMail.getSentDate();
-					try {
-						forwardPrefix = forwardPrefix.replaceFirst("#DATE#", date == null ? "" : DateFormat
-								.getDateInstance(DateFormat.LONG, locale).format(date));
-					} catch (final Throwable t) {
-						t.printStackTrace();
-						forwardPrefix = forwardPrefix.replaceFirst("#DATE#", "");
+				if (isInlineForward) {
+					String forwardPrefix = stringHelper.getString(MailStrings.FORWARD_PREFIX);
+					{
+						final InternetAddress[] from = sourceMail.getFrom();
+						forwardPrefix = forwardPrefix.replaceFirst("#FROM#", from == null || from.length == 0 ? ""
+								: from[0].toUnicodeString());
 					}
-					try {
-						forwardPrefix = forwardPrefix.replaceFirst("#TIME#", date == null ? "" : DateFormat
-								.getTimeInstance(DateFormat.SHORT, locale).format(date));
-					} catch (final Throwable t) {
-						t.printStackTrace();
-						forwardPrefix = forwardPrefix.replaceFirst("#TIME#", "");
+					{
+						final InternetAddress[] to = sourceMail.getTo();
+						forwardPrefix = forwardPrefix.replaceFirst("#TO#", to == null || to.length == 0 ? ""
+								: addrs2String(to));
 					}
-
+					{
+						final Date date = sourceMail.getSentDate();
+						try {
+							forwardPrefix = forwardPrefix.replaceFirst("#DATE#", date == null ? "" : DateFormat
+									.getDateInstance(DateFormat.LONG, locale).format(date));
+						} catch (final Throwable t) {
+							t.printStackTrace();
+							forwardPrefix = forwardPrefix.replaceFirst("#DATE#", "");
+						}
+						try {
+							forwardPrefix = forwardPrefix.replaceFirst("#TIME#", date == null ? "" : DateFormat
+									.getTimeInstance(DateFormat.SHORT, locale).format(date));
+						} catch (final Throwable t) {
+							t.printStackTrace();
+							forwardPrefix = forwardPrefix.replaceFirst("#TIME#", "");
+						}
+	
+					}
+					forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", sourceMail.getSubject());
+					forwardPrefix = new StringBuilder(forwardPrefix.length() + 4).append("\r\n\r\n").append(forwardPrefix)
+							.toString();
+					assertTrue("Missing forward prefix", content.toString().startsWith(forwardPrefix));
 				}
-				forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", sourceMail.getSubject());
-				forwardPrefix = new StringBuilder(forwardPrefix.length() + 4).append("\r\n\r\n").append(forwardPrefix)
-						.toString();
-				assertTrue("Missing forward prefix", content.toString().startsWith(forwardPrefix));
 
 			} finally {
 				/*
