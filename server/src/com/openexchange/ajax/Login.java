@@ -67,6 +67,7 @@ import com.openexchange.ajp13.AJPv13RequestHandler;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginException;
 import com.openexchange.authentication.service.Authentication;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -215,9 +216,13 @@ public class Login extends AJAXServlet {
 			} catch (final ContextException e) {
 				LOG.error("Error looking up context.", e);
 				response.setException(e);
-			} catch (final Exception e) {
+			} catch (final AbstractOXException e) {
 				LOG.error("Error", e);
+				response.setException(e);
 			}
+//			catch (final Exception e) {
+//				LOG.error("Error", e);
+//			}
 			SessionServlet.rememberSession(req, sessionObj);
 			/*
 			 * Write response
