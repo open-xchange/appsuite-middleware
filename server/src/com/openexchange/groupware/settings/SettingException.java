@@ -143,7 +143,12 @@ public class SettingException extends AbstractOXException {
          * Found duplicate database identifier %d. Not adding preferences item.
          */
         DUPLICATE_ID("Found duplicate database identifier %d. Not adding "
-            + "preferences item.", Category.CODE_ERROR, 10);
+            + "preferences item.", Category.CODE_ERROR, 10),
+        /**
+         * Exception while writing JSON object.
+         */
+        JSON_WRITE_ERROR("Exception while writing JSON object.",
+            Category.CODE_ERROR, 11);
 
         /**
          * Message of the exception.
