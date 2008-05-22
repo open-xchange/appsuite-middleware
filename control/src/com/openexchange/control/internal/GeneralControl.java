@@ -237,7 +237,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 						hashMap.put("service", service.toString());
 						hashMap.put("registered_by", service.getBundle().toString());
 
-						final Bundle[] usedByBundles = (Bundle[]) service.getUsingBundles();
+						final Bundle[] usedByBundles = service.getUsingBundles();
 						final List<String> bundleList = new ArrayList<String>();
 						if (usedByBundles != null) {
 							for (int a = 0; a < usedByBundles.length; a++) {
