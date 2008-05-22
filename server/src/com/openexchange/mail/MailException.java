@@ -300,7 +300,12 @@ public class MailException extends AbstractOXException {
 		/**
 		 * Root folder must not be modified or deleted
 		 */
-		NO_ROOT_FOLDER_MODIFY_DELETE("Root folder must not be modified or deleted", Category.CODE_ERROR, 52);
+		NO_ROOT_FOLDER_MODIFY_DELETE("Root folder must not be modified or deleted", Category.CODE_ERROR, 52),
+		/**
+		 * No transport provider could be found for protocol/URL "%s"
+		 */
+		UNKNOWN_TRANSPORT_PROTOCOL("No transport provider could be found for protocol/URL \"%s\"",
+				Category.SETUP_ERROR, 53);
 
 		private final String message;
 

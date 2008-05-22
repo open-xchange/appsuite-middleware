@@ -110,7 +110,8 @@ public final class TransportProviderRegistry {
 		}
 		provider = getTransportProvider(protocol);
 		if (null == provider) {
-			throw new MailException(MailException.Code.UNKNOWN_PROTOCOL, TransportConfig.getTransportServerURL(session));
+			throw new MailException(MailException.Code.UNKNOWN_TRANSPORT_PROTOCOL, TransportConfig
+					.getTransportServerURL(session));
 		}
 		session.setParameter(MailSessionParameterNames.PARAM_TRANSPORT_PROVIDER, provider);
 		return provider;
