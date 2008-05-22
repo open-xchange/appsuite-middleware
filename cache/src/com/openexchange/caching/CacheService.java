@@ -61,6 +61,9 @@ public interface CacheService {
 
 	/**
 	 * Gets a cache which accesses the provided region.
+	 * <p>
+	 * An already initialized cache for specified region is kept in a map to
+	 * avoid multiple instantiations for the same region.
 	 * 
 	 * @param name
 	 *            The region name
