@@ -50,57 +50,48 @@
 package com.openexchange.test.osgi;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
 
+import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.meterware.httpunit.cookies.CookieJar;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.LoginTest;
-import com.openexchange.tools.URLParameter;
+import com.openexchange.ajax.Mail;
 
 /**
- * {@link BundleTestSMTP} - Text absence of SMTP bundle
+ * {@link BundleTestIMAP} - Text absence of IMAP bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class BundleTestSMTP extends AbstractBundleTest {
+public final class BundleTestIMAP extends AbstractBundleTest {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(BundleTestSMTP.class);
+			.getLog(BundleTestIMAP.class);
 
-	private static final String BUNDLE_ID = "com.openexchange.smtp";
+	private static final String BUNDLE_ID = "com.openexchange.imap";
 
 	private static final String LOGIN_URL = "/ajax/login";
 
 	private static final String MAIL_URL = "/ajax/mail";
 
 	/**
-	 * Initializes a new {@link BundleTestSMTP}
+	 * Initializes a new {@link BundleTestIMAP}
 	 */
-	public BundleTestSMTP(final String name) {
+	public BundleTestIMAP(final String name) {
 		super(name);
 	}
 
-	private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy.MM.dd 'at' HH:mm:ss", Locale.GERMAN);
-
-	public void testSMTPAbsence() {
+	public void testIMAPAbsence() {
 		try {
 			final LoginTest loginTest = new LoginTest("LoginTest");
 			final JSONObject jsonObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(),
@@ -118,12 +109,11 @@ public final class BundleTestSMTP extends AbstractBundleTest {
 			assertTrue("Missing session ID", jsonObject.has("session") && !jsonObject.isNull("session"));
 
 			/*
-			 * Try to send mail
+			 * Try to access mail
 			 */
 			final String sessionId = jsonObject.getString("session");
-			final JSONObject mailObj = createSimpleMailObject(loginTest);
-			final JSONObject mailObject = sendMail(getWebConversation(), loginTest.getHostName(), sessionId, mailObj,
-					true);
+			final JSONObject mailObject = getAllMails(getWebConversation(), loginTest.getHostName(), sessionId,
+					"INBOX", null, true);
 
 			/*
 			 * Check for error
@@ -132,34 +122,16 @@ public final class BundleTestSMTP extends AbstractBundleTest {
 					&& !mailObject.isNull("error"));
 
 			/*
-			 * Check for code "MSG-0053": No transport provider found.
+			 * Check for code "MSG-0044": No provider found.
 			 */
 			assertTrue("Missing error code", mailObject.has("code") && !mailObject.isNull("code"));
-			assertTrue("Unexpected error code: " + mailObject.getString("code"), "MSG-0053".equals(mailObject
+			assertTrue("Unexpected error code: " + mailObject.getString("code"), "MSG-0044".equals(mailObject
 					.get("code")));
 
 		} catch (final Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-	}
-
-	private static JSONObject createSimpleMailObject(final AbstractAJAXTest ajaxTest) throws JSONException {
-		final JSONObject mailObj = new JSONObject();
-		mailObj.put("from", ajaxTest.getSeconduser());
-		mailObj.put("to", ajaxTest.getLogin());
-		mailObj.put("subject", "JUnit Test Mail: " + SDF.format(new Date()));
-		final JSONArray attachments = new JSONArray();
-		/*
-		 * Mail text
-		 */
-		final JSONObject attach = new JSONObject();
-		attach.put("content", "This is mail text!<br>Next line<br/><br/>best regards,<br>Max Mustermann");
-		attach.put("content_type", "text/plain");
-		attachments.put(attach);
-
-		mailObj.put("attachments", attachments);
-		return mailObj;
 	}
 
 	private static JSONObject login(final WebConversation conversation, final String hostname, final String login,
@@ -181,49 +153,39 @@ public final class BundleTestSMTP extends AbstractBundleTest {
 		return json;
 	}
 
-	private static JSONObject sendMail(final WebConversation conversation, final String hostname,
-			final String sessionId, JSONObject mailObj, final boolean setCookie) throws Exception {
-		return sendMail(conversation, hostname, sessionId, mailObj.toString(), setCookie);
-	}
-
-	private static JSONObject sendMail(final WebConversation conversation, final String hostname,
-			final String sessionId, final String mailObjStr, final boolean setCookie) throws Exception {
-		final URLParameter parameter = new URLParameter();
-		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
-
-		WebRequest req = null;
-		WebResponse resp = null;
-
+	private static JSONObject getAllMails(final WebConversation conversation, final String hostname,
+			final String sessionId, final String folder, final int[] cols, final boolean setCookie) throws IOException,
+			SAXException, JSONException {
+		final GetMethodWebRequest getReq = new GetMethodWebRequest(PROTOCOL + hostname + MAIL_URL);
 		if (setCookie) {
 			/*
-			 * Add cookie
+			 * Set cookie cause a request has already been fired before with the
+			 * same session id.
 			 */
 			CookieJar cookieJar = new CookieJar();
 			cookieJar.putCookie(Login.cookiePrefix + sessionId, sessionId);
 		}
-
-		final PostMethodWebRequest postReq = new PostMethodWebRequest(PROTOCOL + hostname + MAIL_URL
-				+ parameter.getURLParameters());
-		postReq.setMimeEncoded(true);
-		postReq.setParameter("json_0", mailObjStr);
-
-		JSONObject jResponse = null;
-		req = postReq;
-		resp = conversation.getResource(req);
-		jResponse = extractFromCallback(resp.getText());
-		return jResponse;
-	}
-
-	private static Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\((\\{.*?)\\);");
-
-	private static JSONObject extractFromCallback(String html) throws JSONException {
-		Matcher matcher = CALLBACK_ARG_PATTERN.matcher(html);
-		if (matcher.find()) {
-			final String jsonString = matcher.group(1);
-			return new JSONObject(jsonString);
+		getReq.setParameter(Mail.PARAMETER_SESSION, sessionId);
+		getReq.setParameter(Mail.PARAMETER_ACTION, Mail.ACTION_ALL);
+		getReq.setParameter(Mail.PARAMETER_MAILFOLDER, folder);
+		final String colsStr;
+		if (cols != null && cols.length > 0) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(cols[0]);
+			for (int i = 1; i < cols.length; i++) {
+				// sb.append("%2C").append(cols[i]);
+				sb.append(",").append(cols[i]);
+			}
+			colsStr = sb.toString();
+		} else {
+			colsStr = "600,601,602,612,603,607,610,608,611,614,102";
 		}
-		return null;
+		getReq.setParameter(Mail.PARAMETER_COLUMNS, colsStr);
+		getReq.setParameter(Mail.PARAMETER_SORT, "610");
+		getReq.setParameter(Mail.PARAMETER_ORDER, "asc");
+		WebResponse resp = conversation.getResponse(getReq);
+		final JSONObject jResponse = new JSONObject(resp.getText());
+		return jResponse;
 	}
 
 	@Override
