@@ -176,7 +176,6 @@ public final class BundleTestSessionD extends AbstractBundleTest {
 			 */
 			final String sessionId = loginObject.getString("session");
 			final JSONObject jsonObject = getRootFolders(getWebConversation(), loginTest.getHostName(), sessionId);
-			;
 
 			/*
 			 * Check for error
