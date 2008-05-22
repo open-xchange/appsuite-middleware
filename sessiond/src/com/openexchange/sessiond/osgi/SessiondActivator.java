@@ -58,6 +58,7 @@ import org.osgi.framework.ServiceRegistration;
 
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.server.ServiceException;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -174,15 +175,20 @@ public final class SessiondActivator extends DeferredActivator {
 			 * Put remaining sessions into cache for remote distribution
 			 */
 			final List<SessionControlObject> sessions = SessionHandler.getSessions();
-			for (final SessionControlObject sessionControlObject : sessions) {
-				if (null != sessionControlObject) {
-					SessionCache.getInstance().putCachedSession(
-							((SessionImpl) (sessionControlObject.getSession())).createCachedSession());
+			try {
+				for (final SessionControlObject sessionControlObject : sessions) {
+					if (null != sessionControlObject) {
+						SessionCache.getInstance().putCachedSession(
+								((SessionImpl) (sessionControlObject.getSession())).createCachedSession());
+					}
 				}
-			}
-			if (LOG.isInfoEnabled()) {
-				LOG.info("stopping bundle: "
-						+ "Remaining active sessions were put into session cache for remote distribution");
+				if (LOG.isInfoEnabled()) {
+					LOG.info("stopping bundle: "
+							+ "Remaining active sessions were put into session cache for remote distribution");
+				}
+			} catch (final ServiceException e) {
+				LOG.warn("Missing caching service."
+						+ " Remaining active sessions could not be put into session cache for remote distribution", e);
 			}
 			/*
 			 * Stop sessiond

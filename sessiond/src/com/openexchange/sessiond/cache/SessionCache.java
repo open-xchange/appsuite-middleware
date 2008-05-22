@@ -60,6 +60,7 @@ import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.objects.CachedSession;
+import com.openexchange.server.ServiceException;
 
 /**
  * {@link SessionCache} - A cache for instances of {@link CachedSession}
@@ -79,11 +80,6 @@ public final class SessionCache {
 
 	private static SessionCache singleton;
 
-	/*
-	 * Field members
-	 */
-	private final Cache cache;
-
 	/**
 	 * Initializes a new {@link SessionCache}
 	 * 
@@ -92,7 +88,6 @@ public final class SessionCache {
 	 */
 	private SessionCache() throws CacheException {
 		super();
-		cache = getServiceRegistry().getService(CacheService.class).getCache(REGION_NAME);
 		// /*
 		// * Add element event handler to default element attributes
 		// */
@@ -102,6 +97,14 @@ public final class SessionCache {
 		// cache.getDefaultElementAttributes();
 		// attributes.addElementEventHandler(eventHandler);
 		// cache.setDefaultElementAttributes(attributes);
+	}
+
+	private Cache getCache() throws ServiceException, CacheException {
+		final CacheService cacheService = getServiceRegistry().getService(CacheService.class);
+		if (null == cacheService) {
+			throw new ServiceException(ServiceException.Code.SERVICE_UNAVAILABLE, CacheService.class.getName());
+		}
+		return cacheService.getCache(REGION_NAME);
 	}
 
 	/**
@@ -148,12 +151,14 @@ public final class SessionCache {
 	 * @return A cached session or <code>null</code>
 	 * @throws CacheException
 	 *             If removing from cache fails
+	 * @throws ServiceException
+	 *             If caching service is not available
 	 */
-	public CachedSession removeCachedSession(final String secret) throws CacheException {
+	public CachedSession removeCachedSession(final String secret) throws CacheException, ServiceException {
 		READ_WRITE_LOCK.readLock().lock();
 		try {
 			final CacheKey key = createKey(secret);
-			if (cache.get(key) == null) {
+			if (getCache().get(key) == null) {
 				/*
 				 * Cached session is not available. Return immediately.
 				 */
@@ -165,14 +170,14 @@ public final class SessionCache {
 			READ_WRITE_LOCK.readLock().unlock();
 			READ_WRITE_LOCK.writeLock().lock();
 			try {
-				final CachedSession cachedSession = (CachedSession) cache.get(key);
+				final CachedSession cachedSession = (CachedSession) getCache().get(key);
 				/*
 				 * Still available?
 				 */
 				if (cachedSession == null) {
 					return null;
 				}
-				cache.remove(key);
+				getCache().remove(key);
 				return cachedSession;
 			} finally {
 				/*
@@ -203,12 +208,14 @@ public final class SessionCache {
 	 *         cached; otherwise <code>false</code>
 	 * @throws CacheException
 	 *             If put into cache fails
+	 * @throws ServiceException
+	 *             If caching service is not available
 	 */
-	public boolean putCachedSession(final CachedSession cachedSession) throws CacheException {
+	public boolean putCachedSession(final CachedSession cachedSession) throws CacheException, ServiceException {
 		READ_WRITE_LOCK.readLock().lock();
 		try {
 			final CacheKey key = createKey(cachedSession.getSecret());
-			if (cache.get(key) != null) {
+			if (getCache().get(key) != null) {
 				/*
 				 * Key is already in use and therefore an IMAP connection is
 				 * already in cache for current user
@@ -224,10 +231,10 @@ public final class SessionCache {
 				/*
 				 * Still not present?
 				 */
-				if (cache.get(key) != null) {
+				if (getCache().get(key) != null) {
 					return false;
 				}
-				cache.put(key, cachedSession);
+				getCache().put(key, cachedSession);
 				return true;
 			} finally {
 				/*
@@ -253,11 +260,15 @@ public final class SessionCache {
 	 *            <i>"session=..."</i> in every request)
 	 * @return <code>true</code> if a user-bound cached session is already
 	 *         present in cache; otherwise <code>false</code>
+	 * @throws CacheException
+	 *             If a caching error occurs
+	 * @throws ServiceException
+	 *             If caching service is not available
 	 */
-	public boolean containsCachedSession(final String secret) {
+	public boolean containsCachedSession(final String secret) throws ServiceException, CacheException {
 		READ_WRITE_LOCK.readLock().lock();
 		try {
-			return (cache.get(createKey(secret)) != null);
+			return (getCache().get(createKey(secret)) != null);
 		} finally {
 			READ_WRITE_LOCK.readLock().unlock();
 		}
@@ -265,8 +276,8 @@ public final class SessionCache {
 
 	private static final int DUMMY = 1;
 
-	private CacheKey createKey(final String sessionId) {
-		return cache.newCacheKey(DUMMY, sessionId);
+	private CacheKey createKey(final String sessionId) throws ServiceException, CacheException {
+		return getCache().newCacheKey(DUMMY, sessionId);
 	}
 
 }

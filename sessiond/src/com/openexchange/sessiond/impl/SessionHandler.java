@@ -65,6 +65,7 @@ import com.openexchange.caching.CacheException;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServerTimer;
+import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.cache.SessionCache;
 import com.openexchange.sessiond.exception.SessiondException;
@@ -330,6 +331,8 @@ public class SessionHandler {
 		} catch (final CacheException e) {
 			LOG.error(e.getMessage(), e);
 		} catch (final SessiondException e) {
+			LOG.error(e.getMessage(), e);
+		} catch (final ServiceException e) {
 			LOG.error(e.getMessage(), e);
 		}
 		return null;
