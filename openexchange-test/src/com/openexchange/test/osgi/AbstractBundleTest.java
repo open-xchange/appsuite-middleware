@@ -49,13 +49,28 @@
 
 package com.openexchange.test.osgi;
 
-import com.meterware.httpunit.HttpUnitOptions;
-import com.meterware.httpunit.WebConversation;
-import com.openexchange.control.console.StartBundle;
-import com.openexchange.control.console.StopBundle;
-import com.openexchange.test.JMXInit;
+import java.io.IOException;
+import java.net.MalformedURLException;
+
+import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.xml.sax.SAXException;
+
+import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.HttpUnitOptions;
+import com.meterware.httpunit.PostMethodWebRequest;
+import com.meterware.httpunit.WebConversation;
+import com.meterware.httpunit.WebRequest;
+import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.control.console.StartBundle;
+import com.openexchange.control.console.StopBundle;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.test.JMXInit;
 
 /**
  * {@link AbstractBundleTest} - Abstract super class for a test class that
@@ -132,4 +147,48 @@ public abstract class AbstractBundleTest extends TestCase {
 	}
 
 	protected abstract String getBundleName();
+
+	private static final String LOGIN_URL = "/ajax/login";
+
+	protected static JSONObject login(final WebConversation conversation, final String hostname, final String login,
+			final String password) throws IOException, SAXException, JSONException {
+		final WebRequest req = new PostMethodWebRequest(PROTOCOL + hostname + LOGIN_URL);
+		req.setParameter("action", "login");
+		req.setParameter("name", login);
+		req.setParameter("password", password);
+		final WebResponse resp = conversation.getResponse(req);
+		assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
+		final String body = resp.getText();
+		final JSONObject json;
+		try {
+			json = new JSONObject(body);
+		} catch (final JSONException e) {
+			LOG.error("Can't parse this body to JSON: \"" + body + '\"');
+			throw e;
+		}
+		return json;
+	}
+
+	private static final String FOLDER_URL = "/ajax/folders";
+
+	protected static JSONObject getRootFolders(final WebConversation conversation, final String hostname,
+			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException {
+		final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostname + FOLDER_URL);
+		req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+		req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ROOT);
+		final String columns = FolderObject.OBJECT_ID + "," + FolderObject.MODULE + "," + FolderObject.FOLDER_NAME
+				+ "," + FolderObject.SUBFOLDERS;
+		req.setParameter(AJAXServlet.PARAMETER_COLUMNS, columns);
+		final WebResponse resp = conversation.getResponse(req);
+		assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
+		final String body = resp.getText();
+		final JSONObject json;
+		try {
+			json = new JSONObject(body);
+		} catch (final JSONException e) {
+			LOG.error("Can't parse this body to JSON: \"" + body + '\"');
+			throw e;
+		}
+		return json;
+	}
 }

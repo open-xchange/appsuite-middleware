@@ -49,19 +49,15 @@
 
 package com.openexchange.test.osgi;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.xml.sax.SAXException;
 
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -82,12 +78,7 @@ import com.openexchange.tools.URLParameter;
  */
 public final class BundleTestSMTP extends AbstractBundleTest {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(BundleTestSMTP.class);
-
 	private static final String BUNDLE_ID = "com.openexchange.smtp";
-
-	private static final String LOGIN_URL = "/ajax/login";
 
 	private static final String MAIL_URL = "/ajax/mail";
 
@@ -160,25 +151,6 @@ public final class BundleTestSMTP extends AbstractBundleTest {
 
 		mailObj.put("attachments", attachments);
 		return mailObj;
-	}
-
-	private static JSONObject login(final WebConversation conversation, final String hostname, final String login,
-			final String password) throws IOException, SAXException, JSONException {
-		final WebRequest req = new PostMethodWebRequest(PROTOCOL + hostname + LOGIN_URL);
-		req.setParameter("action", "login");
-		req.setParameter("name", login);
-		req.setParameter("password", password);
-		final WebResponse resp = conversation.getResponse(req);
-		assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
-		final String body = resp.getText();
-		final JSONObject json;
-		try {
-			json = new JSONObject(body);
-		} catch (final JSONException e) {
-			LOG.error("Can't parse this body to JSON: \"" + body + '\"');
-			throw e;
-		}
-		return json;
 	}
 
 	private static JSONObject sendMail(final WebConversation conversation, final String hostname,

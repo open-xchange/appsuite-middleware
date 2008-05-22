@@ -49,19 +49,8 @@
 
 package com.openexchange.test.osgi;
 
-import java.io.IOException;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.xml.sax.SAXException;
 
-import com.meterware.httpunit.PostMethodWebRequest;
-import com.meterware.httpunit.WebConversation;
-import com.meterware.httpunit.WebRequest;
-import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.LoginTest;
 
 /**
@@ -72,12 +61,7 @@ import com.openexchange.ajax.LoginTest;
  */
 public final class BundleTestCache extends AbstractBundleTest {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(BundleTestCache.class);
-
 	private static final String BUNDLE_ID = "com.openexchange.caching";
-
-	private static final String LOGIN_URL = "/ajax/login";
 
 	/**
 	 * Initializes a new {@link BundleTestCache}
@@ -105,38 +89,19 @@ public final class BundleTestCache extends AbstractBundleTest {
 			 */
 			assertTrue("Missing session ID", jsonObject.has("session") && !jsonObject.isNull("session"));
 			final String sessionId = jsonObject.getString("session");
-			
+
 			stopBundle.stop("com.openexchange.sessiond");
-			
+
 			startBundle.start("com.openexchange.sessiond");
-			
+
 			/*
-			 * Access folder, user, ....
+			 * TODO: Access folder, user, ....
 			 */
 
 		} catch (final Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-	}
-
-	private static JSONObject login(final WebConversation conversation, final String hostname, final String login,
-			final String password) throws IOException, SAXException, JSONException {
-		final WebRequest req = new PostMethodWebRequest(PROTOCOL + hostname + LOGIN_URL);
-		req.setParameter("action", "login");
-		req.setParameter("name", login);
-		req.setParameter("password", password);
-		final WebResponse resp = conversation.getResponse(req);
-		assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
-		final String body = resp.getText();
-		final JSONObject json;
-		try {
-			json = new JSONObject(body);
-		} catch (final JSONException e) {
-			LOG.error("Can't parse this body to JSON: \"" + body + '\"');
-			throw e;
-		}
-		return json;
 	}
 
 	@Override

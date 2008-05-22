@@ -49,24 +49,10 @@
 
 package com.openexchange.test.osgi;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-
-import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.xml.sax.SAXException;
 
-import com.meterware.httpunit.GetMethodWebRequest;
-import com.meterware.httpunit.PostMethodWebRequest;
-import com.meterware.httpunit.WebConversation;
-import com.meterware.httpunit.WebRequest;
-import com.meterware.httpunit.WebResponse;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginTest;
-import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link BundleTestSessionD} - Test absence of SessionD bundle
@@ -76,14 +62,7 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public final class BundleTestSessionD extends AbstractBundleTest {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(BundleTestSessionD.class);
-
 	private static final String BUNDLE_ID = "com.openexchange.sessiond";
-
-	private static final String LOGIN_URL = "/ajax/login";
-
-	private static final String FOLDER_URL = "/ajax/folders";
 
 	/**
 	 * Initializes a new {@link BundleTestSessionD}
@@ -122,25 +101,6 @@ public final class BundleTestSessionD extends AbstractBundleTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-	}
-
-	private static JSONObject login(final WebConversation conversation, final String hostname, final String login,
-			final String password) throws IOException, SAXException, JSONException {
-		final WebRequest req = new PostMethodWebRequest(PROTOCOL + hostname + LOGIN_URL);
-		req.setParameter("action", "login");
-		req.setParameter("name", login);
-		req.setParameter("password", password);
-		final WebResponse resp = conversation.getResponse(req);
-		assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
-		final String body = resp.getText();
-		final JSONObject json;
-		try {
-			json = new JSONObject(body);
-		} catch (final JSONException e) {
-			LOG.error("Can't parse this body to JSON: \"" + body + '\"');
-			throw e;
-		}
-		return json;
 	}
 
 	public void testSessionDAbsence() {
@@ -204,24 +164,4 @@ public final class BundleTestSessionD extends AbstractBundleTest {
 		}
 	}
 
-	private static JSONObject getRootFolders(final WebConversation conversation, final String hostname,
-			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException {
-		final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostname + FOLDER_URL);
-		req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-		req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ROOT);
-		final String columns = FolderObject.OBJECT_ID + "," + FolderObject.MODULE + "," + FolderObject.FOLDER_NAME
-				+ "," + FolderObject.SUBFOLDERS;
-		req.setParameter(AJAXServlet.PARAMETER_COLUMNS, columns);
-		final WebResponse resp = conversation.getResponse(req);
-		assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
-		final String body = resp.getText();
-		final JSONObject json;
-		try {
-			json = new JSONObject(body);
-		} catch (final JSONException e) {
-			LOG.error("Can't parse this body to JSON: \"" + body + '\"');
-			throw e;
-		}
-		return json;
-	}
 }
