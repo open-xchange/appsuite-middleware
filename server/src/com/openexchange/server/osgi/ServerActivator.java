@@ -150,7 +150,27 @@ public final class ServerActivator extends DeferredActivator {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn("Absent service: " + clazz.getName());
 		}
+		if (CacheService.class.equals(clazz)) {
+			/*
+			 * TODO: Handle unavailability of cache service
+			 */
+
+		}
 		ServerServiceRegistry.getInstance().removeService(clazz);
+	}
+
+	@Override
+	protected void handleAvailability(final Class<?> clazz) {
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Re-available service: " + clazz.getName());
+		}
+		ServerServiceRegistry.getInstance().addService(clazz, getService(clazz));
+		if (CacheService.class.equals(clazz)) {
+			/*
+			 * TODO: Handle re-availability of cache service
+			 */
+
+		}
 	}
 
 	@Override
@@ -202,8 +222,7 @@ public final class ServerActivator extends DeferredActivator {
 		serviceTrackerList.add(new ServiceTracker(context, ContactInterface.class.getName(),
 				new ContactServiceListener(context)));
 		// Add cache dynamically to database pooling. it works without, too.
-		serviceTrackerList.add(new ServiceTracker(context, CacheService.class.getName(),
-		    new CacheCustomizer(context)));
+		serviceTrackerList.add(new ServiceTracker(context, CacheService.class.getName(), new CacheCustomizer(context)));
 		/*
 		 * Start server dependent on whether admin bundle is available or not
 		 */
@@ -224,7 +243,7 @@ public final class ServerActivator extends DeferredActivator {
 
 			// Search for AuthenticationService
 			serviceTrackerList.add(new ServiceTracker(context, AuthenticationService.class.getName(),
-				new AuthenticationCustomizer(context)));
+					new AuthenticationCustomizer(context)));
 			// Search for ConfigJumpService
 			serviceTrackerList.add(new ServiceTracker(context, ConfigJumpService.class.getName(),
 					new BundleServiceTracker<ConfigJumpService>(context, ConfigJump.getHolder(),

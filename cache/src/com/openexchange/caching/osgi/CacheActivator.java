@@ -95,13 +95,15 @@ public final class CacheActivator extends DeferredActivator {
 		return NEEDED_SERVICES;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.osgiservice.DeferredActivator#handleUnavailability(java.lang.Class)
-	 */
 	@Override
 	protected void handleUnavailability(final Class<?> clazz) {
+	}
+
+	@Override
+	protected void handleAvailability(final Class<?> clazz) {
+		/*
+		 * TODO: Reconfigure with newly available configuration service?
+		 */
 	}
 
 	/*

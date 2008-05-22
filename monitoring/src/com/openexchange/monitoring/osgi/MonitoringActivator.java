@@ -104,6 +104,14 @@ public final class MonitoringActivator extends DeferredActivator {
 	}
 
 	@Override
+	protected void handleAvailability(final Class<?> clazz) {
+		if (LOG.isWarnEnabled()) {
+			LOG.warn("Re-available service: " + clazz.getName());
+		}
+		MonitoringServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
+	}
+
+	@Override
 	public void startBundle() throws Exception {
 		try {
 			final ServiceRegistry registry = MonitoringServiceRegistry.getServiceRegistry();
@@ -115,7 +123,7 @@ public final class MonitoringActivator extends DeferredActivator {
 					registry.addService(classes[i], service);
 				}
 			}
-			
+
 			if (!started.compareAndSet(false, true)) {
 				/*
 				 * Don't start the server again. A duplicate call to
@@ -126,14 +134,14 @@ public final class MonitoringActivator extends DeferredActivator {
 				LOG.info("A temporary absent service is available again");
 				return;
 			}
-			
+
 			MonitoringInit.getInstance().start();
 
 			/*
 			 * Register monitor service
 			 */
-			serviceRegistration = context.registerService(MonitorService.class.getCanonicalName(),
-					new MonitorImpl(), null);
+			serviceRegistration = context.registerService(MonitorService.class.getCanonicalName(), new MonitorImpl(),
+					null);
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);

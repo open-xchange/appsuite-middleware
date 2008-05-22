@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -96,7 +97,7 @@ public abstract class DeferredActivator implements BundleActivator {
 				/*
 				 * Signal availability
 				 */
-				signalAvailability(index);
+				signalAvailability(index, clazz);
 			}
 			return addedService;
 		}
@@ -110,8 +111,7 @@ public abstract class DeferredActivator implements BundleActivator {
 					/*
 					 * Signal unavailability
 					 */
-					signalUnavailability(index);
-					handleUnavailability(clazz);
+					signalUnavailability(index, clazz);
 					/*
 					 * ... and remove from services
 					 */
@@ -126,7 +126,12 @@ public abstract class DeferredActivator implements BundleActivator {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(DeferredActivator.class);
 
-	protected int availability;
+	/**
+	 * An atomic boolean to keep track of started/stopped status
+	 */
+	protected final AtomicBoolean started;
+
+	private int availability;
 
 	private int allAvailable;
 
@@ -135,15 +140,22 @@ public abstract class DeferredActivator implements BundleActivator {
 	 */
 	protected BundleContext context;
 
-	protected ServiceTracker[] serviceTrackers;
+	/**
+	 * The initialized service trackers for needed services
+	 */
+	private ServiceTracker[] serviceTrackers;
 
-	protected Map<Class<?>, Object> services;
+	/**
+	 * The available service instances
+	 */
+	private Map<Class<?>, Object> services;
 
 	/**
 	 * Initializes a new {@link DeferredActivator}
 	 */
-	public DeferredActivator() {
+	protected DeferredActivator() {
 		super();
+		started = new AtomicBoolean();
 	}
 
 	/**
@@ -168,6 +180,16 @@ public abstract class DeferredActivator implements BundleActivator {
 	 *            The service's class
 	 */
 	protected abstract void handleUnavailability(final Class<?> clazz);
+
+	/**
+	 * Handles the re-availability of a needed service. The specific activator
+	 * may decide which actions are further done dependent on given service's
+	 * class.
+	 * 
+	 * @param clazz
+	 *            The service's class
+	 */
+	protected abstract void handleAvailability(final Class<?> clazz);
 
 	/**
 	 * Initializes this deferred activator's members
@@ -224,36 +246,52 @@ public abstract class DeferredActivator implements BundleActivator {
 	 * {@link #getNeededServices()} is equal to given <code>index</code>
 	 * argument.
 	 * <p>
-	 * If all needed services are available, then the {@link #startBundle()}
-	 * method is invoked.
+	 * If not started, yet, and all needed services are available, then the
+	 * {@link #startBundle()} method is invoked. If already started the
+	 * service's re-availability is propagated.
 	 * 
 	 * @param index
 	 *            The class' index
+	 * @param clazz
+	 *            The service's class
 	 */
-	private final void signalAvailability(final int index) {
+	private final void signalAvailability(final int index, final Class<?> clazz) {
 		availability |= (1 << index);
-		if (availability == allAvailable) {
+		if (started.get()) {
 			/*
-			 * Start bundle
+			 * Signal availability of single service
 			 */
-			try {
-				startBundle();
-			} catch (final Exception t) {
-				LOG.error(t.getMessage(), t);
+			handleAvailability(clazz);
+		} else {
+			if (availability == allAvailable) {
+				/*
+				 * Start bundle
+				 */
+				try {
+					startBundle();
+					started.set(true);
+				} catch (final Exception t) {
+					LOG.error(t.getMessage(), t);
+				}
 			}
 		}
 	}
 
 	/**
-	 * Only marks the class whose index in array provided by
+	 * Marks the class whose index in array provided by
 	 * {@link #getNeededServices()} is equal to given <code>index</code>
-	 * argument as absent.
+	 * argument as absent and notifies its unavailability.
 	 * 
 	 * @param index
 	 *            The class' index
+	 * @param clazz
+	 *            The service's class
 	 */
-	private final void signalUnavailability(final int index) {
+	private final void signalUnavailability(final int index, final Class<?> clazz) {
 		availability &= ~(1 << index);
+		if (started.get()) {
+			handleUnavailability(clazz);
+		}
 	}
 
 	/*
@@ -278,11 +316,6 @@ public abstract class DeferredActivator implements BundleActivator {
 	 * services or to allocate any resources that this bundle needs.
 	 * <p>
 	 * This method must complete and return to its caller in a timely manner.
-	 * <p>
-	 * <b>Note</b>: This method is possibly called multiple times. This is
-	 * related to the possibility that a temporary absent service is available
-	 * again and signals its availability. The implementing class should deal
-	 * with this issue in an appropriate manner.
 	 * 
 	 * @throws Exception
 	 *             If this method throws an exception, this bundle is marked as
@@ -300,6 +333,7 @@ public abstract class DeferredActivator implements BundleActivator {
 	public final void stop(final BundleContext context) throws Exception {
 		try {
 			stopBundle();
+			started.set(false);
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw e;

@@ -95,12 +95,20 @@ public final class MailFilterServletActivator extends DeferredActivator {
 	@Override
 	protected void handleUnavailability(final Class<?> clazz) {
 		/*
-		 * Never stop the server even if a needed service is absent
+		 * Don't stop even if a needed service is absent
 		 */
 		if (LOG.isWarnEnabled()) {
 			LOG.warn("Absent service: " + clazz.getName());
 		}
 		MailFilterServletServiceRegistry.getServiceRegistry().removeService(clazz);
+	}
+
+	@Override
+	protected void handleAvailability(final Class<?> clazz) {
+		if (LOG.isWarnEnabled()) {
+			LOG.warn("Absent service: " + clazz.getName());
+		}
+		MailFilterServletServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
 	}
 
 	@Override
@@ -130,11 +138,11 @@ public final class MailFilterServletActivator extends DeferredActivator {
 				LOG.info("A temporary absent service is available again");
 				return;
 			}
-			
+
 			MailFilterServletInit.getInstance().start();
-			
-			serviceRegistration = context.registerService(PreferencesItemService.class.getName(), new MailFilterPreferencesItem(),
-					null);
+
+			serviceRegistration = context.registerService(PreferencesItemService.class.getName(),
+					new MailFilterPreferencesItem(), null);
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -150,7 +158,7 @@ public final class MailFilterServletActivator extends DeferredActivator {
 				serviceRegistration = null;
 			}
 			MailFilterServletInit.getInstance().stop();
-			
+
 			/*
 			 * Clear service registry
 			 */

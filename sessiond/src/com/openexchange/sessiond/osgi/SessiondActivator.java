@@ -117,6 +117,19 @@ public final class SessiondActivator extends DeferredActivator {
 	}
 
 	@Override
+	protected void handleAvailability(final Class<?> clazz) {
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Re-available service: " + clazz.getName());
+		}
+		getServiceRegistry().addService(clazz, getService(clazz));
+		if (CacheService.class.equals(clazz)) {
+			// TODO: free affected cache regions
+
+			reconfigureCache = true;
+		}
+	}
+
+	@Override
 	protected void startBundle() throws Exception {
 		try {
 			/*

@@ -98,13 +98,12 @@ public final class DefaultSpamHandlerActivator extends DeferredActivator {
 		return NEEDED_SERVICES;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.osgiservice.DeferredActivator#handleUnavailability(java.lang.Class)
-	 */
 	@Override
 	protected void handleUnavailability(final Class<?> clazz) {
+	}
+
+	@Override
+	protected void handleAvailability(final Class<?> clazz) {
 	}
 
 	/*
