@@ -69,7 +69,7 @@ import com.openexchange.ajax.LoginTest;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
- * {@link BundleTestSessionD}
+ * {@link BundleTestSessionD} - Test absence of SessionD bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
