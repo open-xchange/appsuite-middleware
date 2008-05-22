@@ -50,6 +50,8 @@
 package com.openexchange.caching.internal;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.jcs.JCS;
 
@@ -59,15 +61,12 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 
 /**
- * {@link JCSCacheService}
+ * {@link JCSCacheService} - Cache service implementation through JCS cache.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public final class JCSCacheService implements CacheService {
-
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(JCSCacheService.class);
 
 	private static final JCSCacheService SINGLETON = new JCSCacheService();
 
@@ -80,11 +79,14 @@ public final class JCSCacheService implements CacheService {
 		return SINGLETON;
 	}
 
+	private final Map<String, JCSCache> initializedCaches;
+
 	/**
 	 * Initializes a new {@link JCSCacheService}
 	 */
 	private JCSCacheService() {
 		super();
+		initializedCaches = new ConcurrentHashMap<String, JCSCache>();
 	}
 
 	/*
@@ -94,14 +96,11 @@ public final class JCSCacheService implements CacheService {
 	 */
 	public void freeCache(final String name) {
 		JCSCacheServiceInit.getInstance().freeCache(name);
-		/*try {
-			final Cache c = getCache(name);
-			if (null != c) {
-				c.dispose();
-			}
-		} catch (final CacheException e) {
-			LOG.error(e.getMessage(), e);
-		}*/
+		initializedCaches.remove(name);
+		/*
+		 * try { final Cache c = getCache(name); if (null != c) { c.dispose(); } }
+		 * catch (final CacheException e) { LOG.error(e.getMessage(), e); }
+		 */
 	}
 
 	/*
@@ -111,7 +110,16 @@ public final class JCSCacheService implements CacheService {
 	 */
 	public Cache getCache(final String name) throws CacheException {
 		try {
-			return new JCSCache(JCS.getInstance(name));
+			JCSCache retval = initializedCaches.get(name);
+			if (null == retval) {
+				synchronized (this) {
+					if (null == (retval = initializedCaches.get(name))) {
+						retval = new JCSCache(JCS.getInstance(name));
+						initializedCaches.put(name, retval);
+					}
+				}
+			}
+			return retval;
 		} catch (final org.apache.jcs.access.exception.CacheException e) {
 			throw new CacheException(CacheException.Code.CACHE_ERROR, e, e.getLocalizedMessage());
 		}
