@@ -50,8 +50,6 @@
 package com.openexchange.caching.internal;
 
 import java.io.Serializable;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.jcs.JCS;
 
@@ -79,14 +77,11 @@ public final class JCSCacheService implements CacheService {
 		return SINGLETON;
 	}
 
-	private final Map<String, JCSCache> initializedCaches;
-
 	/**
 	 * Initializes a new {@link JCSCacheService}
 	 */
 	private JCSCacheService() {
 		super();
-		initializedCaches = new ConcurrentHashMap<String, JCSCache>();
 	}
 
 	/*
@@ -96,7 +91,6 @@ public final class JCSCacheService implements CacheService {
 	 */
 	public void freeCache(final String name) {
 		JCSCacheServiceInit.getInstance().freeCache(name);
-		initializedCaches.remove(name);
 		/*
 		 * try { final Cache c = getCache(name); if (null != c) { c.dispose(); } }
 		 * catch (final CacheException e) { LOG.error(e.getMessage(), e); }
@@ -110,16 +104,11 @@ public final class JCSCacheService implements CacheService {
 	 */
 	public Cache getCache(final String name) throws CacheException {
 		try {
-			JCSCache retval = initializedCaches.get(name);
-			if (null == retval) {
-				synchronized (this) {
-					if (null == (retval = initializedCaches.get(name))) {
-						retval = new JCSCache(JCS.getInstance(name));
-						initializedCaches.put(name, retval);
-					}
-				}
-			}
-			return retval;
+			/*
+			 * The JCS cache manager already tracks initialized caches though
+			 * the same region name always points to the same cache
+			 */
+			return new JCSCache(JCS.getInstance(name));
 		} catch (final org.apache.jcs.access.exception.CacheException e) {
 			throw new CacheException(CacheException.Code.CACHE_ERROR, e, e.getLocalizedMessage());
 		}
