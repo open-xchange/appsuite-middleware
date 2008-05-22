@@ -160,20 +160,22 @@ public final class ControlActivator implements BundleActivator {
 		LOG.info("stopping bundle: com.openexchange.control");
 
 		try {
-			/*
-			 * Remove shutdown hook if not running. Otherwise stop() is invoked
-			 * by the thread itself.
-			 */
-			if (null != shutdownHookThread && !shutdownHookThread.isAlive()) {
-				try {
-					if (!Runtime.getRuntime().removeShutdownHook(shutdownHookThread)) {
-						LOG.error("com.openexchange.control shutdown hook could not be deregistered");
-					}
-				} catch (final IllegalStateException e) {
+			if (null != shutdownHookThread) {
+				if (!shutdownHookThread.isAlive()) {
 					/*
-					 * Just for safety reason...
+					 * Remove shutdown hook if not running. Otherwise stop() is
+					 * invoked by the thread itself.
 					 */
-					LOG.error("Virtual machine is already in the process of shutting down!", e);
+					try {
+						if (!Runtime.getRuntime().removeShutdownHook(shutdownHookThread)) {
+							LOG.error("com.openexchange.control shutdown hook could not be deregistered");
+						}
+					} catch (final IllegalStateException e) {
+						/*
+						 * Just for safety reason...
+						 */
+						LOG.error("Virtual machine is already in the process of shutting down!", e);
+					}
 				}
 				shutdownHookThread = null;
 			}

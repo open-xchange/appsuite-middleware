@@ -203,6 +203,10 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 				// Note that stopping process is done in a separate thread
 				systemBundle.stop();
 				if (waitForExit) {
+					/*
+					 * TODO: This a bad solution for waiting for thread
+					 * termination.
+					 */
 					try {
 						Thread.sleep(2000);
 					} catch (final InterruptedException e) {
