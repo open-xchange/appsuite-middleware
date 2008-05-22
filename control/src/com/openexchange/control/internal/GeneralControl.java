@@ -188,8 +188,8 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 	 * @param bundleContext
 	 *            The bundle context
 	 * @param waitForExit
-	 *            <code>true</code> to wait for the OSGi framework being
-	 *            shutdown completely; otherwise <code>false</code>
+	 *            <code>true</code> to wait for the OSGi framework being shut
+	 *            down completely; otherwise <code>false</code>
 	 */
 	public static final void shutdown(final BundleContext bundleContext, final boolean waitForExit) {
 		try {
