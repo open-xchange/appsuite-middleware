@@ -68,7 +68,7 @@ import com.openexchange.ajax.LoginTest;
 import com.openexchange.ajax.Mail;
 
 /**
- * {@link BundleTestIMAP} - Text absence of IMAP bundle
+ * {@link BundleTestIMAP} - Test absence of IMAP bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

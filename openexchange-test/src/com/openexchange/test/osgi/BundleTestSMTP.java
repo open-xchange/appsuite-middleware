@@ -75,7 +75,7 @@ import com.openexchange.ajax.LoginTest;
 import com.openexchange.tools.URLParameter;
 
 /**
- * {@link BundleTestSMTP} - Text absence of SMTP bundle
+ * {@link BundleTestSMTP} - Test absence of SMTP bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

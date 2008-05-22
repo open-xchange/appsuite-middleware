@@ -65,7 +65,7 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.LoginTest;
 
 /**
- * {@link BundleTestAuthentication} - Text absence of authentication bundle
+ * {@link BundleTestAuthentication} - Test absence of authentication bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
