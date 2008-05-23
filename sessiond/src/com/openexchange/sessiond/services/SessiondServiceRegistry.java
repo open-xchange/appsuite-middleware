@@ -60,7 +60,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  */
 public final class SessiondServiceRegistry {
 
-	private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+	private static final ServiceRegistry REGISTRY = new ServiceRegistry(2);
 
 	/**
 	 * Gets the service registry
