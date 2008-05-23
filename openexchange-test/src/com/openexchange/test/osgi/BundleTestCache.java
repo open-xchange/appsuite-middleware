@@ -49,9 +49,27 @@
 
 package com.openexchange.test.osgi;
 
-import org.json.JSONObject;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.xml.sax.SAXException;
+
+import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.PutMethodWebRequest;
+import com.meterware.httpunit.WebConversation;
+import com.meterware.httpunit.WebRequest;
+import com.meterware.httpunit.WebResponse;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.LoginTest;
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.groupware.container.DataObject;
+import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.tools.URLParameter;
 
 /**
  * {@link BundleTestCache} - Test absence of cache bundle
@@ -60,6 +78,9 @@ import com.openexchange.ajax.LoginTest;
  * 
  */
 public final class BundleTestCache extends AbstractBundleTest {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(BundleTestCache.class);
 
 	private static final String BUNDLE_ID = "com.openexchange.caching";
 
@@ -76,8 +97,6 @@ public final class BundleTestCache extends AbstractBundleTest {
 			final JSONObject jsonObject = login(getWebConversation(), loginTest.getHostName(), loginTest.getLogin(),
 					loginTest.getPassword());
 
-			System.out.println(jsonObject);
-
 			/*
 			 * Login should succeed
 			 */
@@ -90,18 +109,120 @@ public final class BundleTestCache extends AbstractBundleTest {
 			assertTrue("Missing session ID", jsonObject.has("session") && !jsonObject.isNull("session"));
 			final String sessionId = jsonObject.getString("session");
 
-			stopBundle.stop("com.openexchange.sessiond");
-
-			startBundle.start("com.openexchange.sessiond");
+			/*
+			 * Temporary stop sessionD bundle to check if session cache fails
+			 * (due to missing cache service)
+			 */
+			// stopBundle.stop("com.openexchange.sessiond");
+			/*
+			 * Hmm... Tricky to check this behavior here... By now a manual
+			 * check of server log has to be done to ensure an appropriate error
+			 * message appears.
+			 */
+			// startBundle.start("com.openexchange.sessiond");
+			/*
+			 * Access to user storage should further work
+			 */
+			final JSONObject userObject = searchUser(getWebConversation(), "*", loginTest.getHostName(), sessionId);
+			/*
+			 * Should succeed
+			 */
+			assertTrue("Error contained in returned JSON object", !userObject.has("error")
+					|| userObject.isNull("error"));
 
 			/*
-			 * TODO: Access folder, user, ....
+			 * Access to infostore should further work
 			 */
+			final JSONObject infostoreObject = allInfostoreItems(getWebConversation(), loginTest.getHostName(),
+					sessionId, getStandardInfostoreFolder(getWebConversation(), loginTest.getHostName(), sessionId),
+					new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL, Metadata.FOLDER_ID });
+			/*
+			 * Should succeed
+			 */
+			assertTrue("Error contained in returned JSON object", !infostoreObject.has("error")
+					|| infostoreObject.isNull("error"));
 
 		} catch (final Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
+	}
+
+	private static final String USER_URL = "/ajax/contacts";
+
+	private final static int[] CONTACT_FIELDS = { DataObject.OBJECT_ID, ContactObject.INTERNAL_USERID,
+			ContactObject.EMAIL1, };
+
+	private static JSONObject searchUser(final WebConversation webCon, final String searchpattern, final String host,
+			final String session) throws Exception {
+
+		final URLParameter parameter = new URLParameter();
+		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
+		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
+
+		final StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append(CONTACT_FIELDS[0]);
+		for (int a = 1; a < CONTACT_FIELDS.length; a++) {
+			stringBuilder.append(',').append(CONTACT_FIELDS[a]);
+		}
+
+		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, stringBuilder.toString());
+
+		final JSONObject jsonObj = new JSONObject();
+		jsonObj.put("pattern", searchpattern);
+
+		final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
+		final WebRequest req = new PutMethodWebRequest(PROTOCOL + host + USER_URL + parameter.getURLParameters(), bais,
+				"text/javascript");
+		final WebResponse resp = webCon.getResponse(req);
+
+		assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
+		final String body = resp.getText();
+		final JSONObject json;
+		try {
+			json = new JSONObject(body);
+		} catch (final JSONException e) {
+			LOG.error("Can't parse this body to JSON: \"" + body + '\"');
+			throw e;
+		}
+		return json;
+	}
+
+	private static StringBuffer getUrl(final String sessionId, final String action, final String hostname) {
+		final StringBuffer url = new StringBuffer(PROTOCOL);
+		url.append(hostname);
+		url.append("/ajax/infostore?session=");
+		url.append(sessionId);
+		url.append("&action=");
+		url.append(action);
+		return url;
+	}
+
+	private static JSONObject allInfostoreItems(final WebConversation webConv, final String hostname,
+			final String sessionId, final int folderId, final int[] columns) throws MalformedURLException,
+			JSONException, IOException, SAXException {
+		final StringBuffer url = getUrl(sessionId, "all", hostname);
+		url.append("&folder=");
+		url.append(folderId);
+		url.append("&columns=");
+		for (final int col : columns) {
+			url.append(col);
+			url.append(",");
+		}
+		url.deleteCharAt(url.length() - 1);
+
+		final GetMethodWebRequest m = new GetMethodWebRequest(url.toString());
+		final WebResponse resp = webConv.getResponse(m);
+		assertEquals("Response code is not okay.", HttpServletResponse.SC_OK, resp.getResponseCode());
+		final String body = resp.getText();
+		final JSONObject json;
+		try {
+			json = new JSONObject(body);
+		} catch (final JSONException e) {
+			LOG.error("Can't parse this body to JSON: \"" + body + '\"');
+			throw e;
+		}
+		return json;
 	}
 
 	@Override

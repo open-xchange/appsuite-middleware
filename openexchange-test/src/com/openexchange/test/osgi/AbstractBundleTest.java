@@ -51,11 +51,15 @@ package com.openexchange.test.osgi;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
 import junit.framework.TestCase;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
@@ -67,6 +71,8 @@ import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.parser.FolderParser;
+import com.openexchange.api2.OXException;
 import com.openexchange.control.console.StartBundle;
 import com.openexchange.control.console.StopBundle;
 import com.openexchange.groupware.container.FolderObject;
@@ -190,5 +196,80 @@ public abstract class AbstractBundleTest extends TestCase {
 			throw e;
 		}
 		return json;
+	}
+
+	protected static int getStandardCalendarFolder(final WebConversation conversation, final String hostname,
+			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
+		final List<FolderObject> subfolders = getSubfolders(conversation, hostname, sessionId, ""
+				+ FolderObject.SYSTEM_PRIVATE_FOLDER_ID, false, true);
+		for (final Iterator<FolderObject> iter = subfolders.iterator(); iter.hasNext();) {
+			final FolderObject subfolder = iter.next();
+			if (subfolder.getModule() == FolderObject.CALENDAR && subfolder.isDefaultFolder()) {
+				return subfolder.getObjectID();
+			}
+		}
+		return -1;
+	}
+
+	protected static int getStandardInfostoreFolder(final WebConversation conversation, final String hostname,
+			final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException {
+		final List<FolderObject> subfolders = getSubfolders(conversation, hostname, sessionId, ""
+				+ FolderObject.SYSTEM_PRIVATE_FOLDER_ID, false, true);
+		for (final Iterator<FolderObject> iter = subfolders.iterator(); iter.hasNext();) {
+			final FolderObject subfolder = iter.next();
+			if (subfolder.getModule() == FolderObject.INFOSTORE && subfolder.isDefaultFolder()) {
+				return subfolder.getObjectID();
+			}
+		}
+		return -1;
+	}
+
+	protected static List<FolderObject> getSubfolders(final WebConversation conversation, final String hostname,
+			final String sessionId, final String parentIdentifier, final boolean printOutput,
+			final boolean ignoreMailfolder) throws MalformedURLException, IOException, SAXException, JSONException,
+			OXException {
+		final WebRequest req = new GetMethodWebRequest(PROTOCOL + hostname + FOLDER_URL);
+		req.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
+		req.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST);
+		req.setParameter("parent", parentIdentifier);
+		final String columns = FolderObject.OBJECT_ID + "," + FolderObject.MODULE + "," + FolderObject.FOLDER_NAME
+				+ "," + FolderObject.SUBFOLDERS + "," + FolderObject.STANDARD_FOLDER + "," + FolderObject.CREATED_BY;
+		req.setParameter(AJAXServlet.PARAMETER_COLUMNS, columns);
+
+		if (ignoreMailfolder) {
+			req.setParameter(AJAXServlet.PARAMETER_IGNORE, "mailfolder");
+		}
+
+		final WebResponse resp = conversation.getResponse(req);
+		final JSONObject respObj = new JSONObject(resp.getText());
+		if (printOutput)
+			System.out.println(respObj.toString());
+		if (respObj.has("error") && !respObj.isNull("error")) {
+			throw new OXException("Error occured: " + respObj.getString("error"));
+		}
+		if (!respObj.has("data") || respObj.isNull("data")) {
+			throw new OXException("Error occured: Missing key \"data\"");
+		}
+		final JSONArray data = respObj.getJSONArray("data");
+		final List<FolderObject> folders = new ArrayList<FolderObject>();
+		for (int i = 0; i < data.length(); i++) {
+			final JSONArray arr = data.getJSONArray(i);
+			final FolderObject subfolder = new FolderObject();
+			try {
+				subfolder.setObjectID(arr.getInt(0));
+			} catch (final JSONException exc) {
+				subfolder.removeObjectID();
+				subfolder.setFullName(arr.getString(0));
+			}
+			subfolder.setModule(FolderParser.getModuleFromString(arr.getString(1),
+					subfolder.containsObjectID() ? subfolder.getObjectID() : -1));
+			subfolder.setFolderName(arr.getString(2));
+			subfolder.setSubfolderFlag(arr.getBoolean(3));
+			subfolder.setDefaultFolder(arr.getBoolean(4));
+			if (!arr.isNull(5))
+				subfolder.setCreatedBy(arr.getInt(5));
+			folders.add(subfolder);
+		}
+		return folders;
 	}
 }
