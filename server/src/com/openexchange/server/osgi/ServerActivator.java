@@ -85,7 +85,7 @@ import com.openexchange.spamhandler.osgi.SpamHandlerServiceTracker;
 import com.openexchange.tools.servlet.http.osgi.HttpServiceImpl;
 
 /**
- * {@link ServerActivator}
+ * {@link ServerActivator} - The activator for server bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
