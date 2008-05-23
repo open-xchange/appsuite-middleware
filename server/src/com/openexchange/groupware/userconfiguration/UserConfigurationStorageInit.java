@@ -99,6 +99,11 @@ public final class UserConfigurationStorageInit implements Initialization {
 
 	private static UserConfigurationStorageInit instance = new UserConfigurationStorageInit();
 
+	/**
+	 * Gets the singleton instance of {@link UserConfigurationStorageInit}
+	 * 
+	 * @return The singleton instance of {@link UserConfigurationStorageInit}
+	 */
 	public static UserConfigurationStorageInit getInstance() {
 		return instance;
 	}

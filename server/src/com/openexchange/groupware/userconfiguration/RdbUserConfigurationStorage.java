@@ -78,10 +78,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 			.getLog(RdbUserConfigurationStorage.class);
 
 	/**
-	 * Constructor
-	 * 
-	 * @param context -
-	 *            the context
+	 * Initializes a new {@link RdbUserConfigurationStorage}
 	 */
 	public RdbUserConfigurationStorage() {
 		super();
