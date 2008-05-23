@@ -59,10 +59,13 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.cache.dynamic.impl.CacheProxy;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
+import com.openexchange.cache.registry.CacheAvailabilityListener;
+import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
@@ -85,30 +88,77 @@ public class CachingUserStorage extends UserStorage {
 	private UserStorage delegate;
 
 	/**
+	 * The cache availability listener
+	 */
+	private final CacheAvailabilityListener cacheAvailabilityListener;
+
+	/**
 	 * Cache.
 	 */
-	private static final Cache CACHE;
+	private Cache cache;
 
 	/**
 	 * Lock for the cache.
 	 */
-	private static final Lock CACHE_LOCK;
+	private final Lock cacheLock;
 
 	/**
 	 * Default constructor.
 	 */
 	public CachingUserStorage() {
 		super();
+		cacheLock = new ReentrantLock(true);
+		cacheAvailabilityListener = new CacheAvailabilityListener() {
+			public void handleAbsence() throws AbstractOXException {
+				releaseCache();
+			}
+			public void handleAvailability() throws AbstractOXException {
+				initCache();
+			}
+		};
+		initCache();
 	}
 
+	/**
+	 * Initializes cache reference
+	 */
+	private void initCache() {
+		if (cache != null) {
+			return;
+		}
+		try {
+			cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache("User");
+		} catch (CacheException e) {
+			throw new RuntimeException("Cannot create user cache.", e);
+		}
+	}
+
+	/**
+	 * Releases cache reference
+	 */
+	private void releaseCache() {
+		if (cache == null) {
+			return;
+		}
+		try {
+			cache.clear();
+		} catch (final CacheException e) {
+			throw new RuntimeException("Cannot clear user cache.", e);
+		}
+		cache = null;
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public User getUser(final int uid, final Context context) throws LdapException {
+		if (null == cache) {
+			return getUserStorage().getUser(uid, context);
+		}
 		final OXObjectFactory<User> factory = new OXObjectFactory<User>() {
 			public Serializable getKey() {
-				return CACHE.newCacheKey(context.getContextId(), uid);
+				return cache.newCacheKey(context.getContextId(), uid);
 			}
 
 			public User load() throws LdapException {
@@ -116,13 +166,20 @@ public class CachingUserStorage extends UserStorage {
 			}
 
 			public Lock getCacheLock() {
-				return CACHE_LOCK;
+				return cacheLock;
 			}
 		};
-		if (null == CACHE.get(factory.getKey())) {
-			getUserStorage().getUser(uid, context);
+		if (null == cache.get(factory.getKey())) {
+			/*
+			 * Check existence through a load
+			 */
+			try {
+				cache.putSafe(factory.getKey(), (Serializable) getUserStorage().getUser(uid, context));
+			} catch (final CacheException e) {
+				throw new LdapException(e);
+			}
 		}
-		return CacheProxy.getCacheProxy(factory, CACHE, User.class);
+		return CacheProxy.getCacheProxy(factory, cache, User.class);
 	}
 
 	/**
@@ -131,10 +188,12 @@ public class CachingUserStorage extends UserStorage {
 	@Override
 	public void updateUser(final User user, final Context context) throws LdapException {
 		getUserStorage().updateUser(user, context);
-		try {
-			CACHE.remove(CACHE.newCacheKey(context.getContextId(), user.getId()));
-		} catch (final CacheException e) {
-			throw new LdapException(EnumComponent.USER, Code.CACHE_PROBLEM, e);
+		if (null != cache) {
+			try {
+				cache.remove(cache.newCacheKey(context.getContextId(), user.getId()));
+			} catch (final CacheException e) {
+				throw new LdapException(EnumComponent.USER, Code.CACHE_PROBLEM, e);
+			}
 		}
 	}
 
@@ -143,16 +202,19 @@ public class CachingUserStorage extends UserStorage {
 	 */
 	@Override
 	public int getUserId(final String uid, final Context context) throws LdapException {
-		final CacheKey key = CACHE.newCacheKey(context.getContextId(), uid);
+		if (null == cache) {
+			return getUserStorage().getUserId(uid, context);
+		}
+		final CacheKey key = cache.newCacheKey(context.getContextId(), uid);
 		int identifier = -1;
-		final Integer tmp = (Integer) CACHE.get(key);
+		final Integer tmp = (Integer) cache.get(key);
 		if (null == tmp) {
 			if (LOG.isTraceEnabled()) {
 				LOG.trace("Cache MISS. Context: " + context.getContextId() + " User: " + uid);
 			}
 			identifier = getUserStorage().getUserId(uid, context);
 			try {
-				CACHE.put(key, Integer.valueOf(identifier));
+				cache.put(key, Integer.valueOf(identifier));
 			} catch (CacheException e) {
 				throw new LdapException(EnumComponent.USER, Code.CACHE_PROBLEM, e);
 			}
@@ -199,9 +261,16 @@ public class CachingUserStorage extends UserStorage {
 	 */
 	@Override
 	public int resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
-		final CacheKey key = CACHE.newCacheKey(context.getContextId(), imapLogin);
+		if (null == cache) {
+			try {
+				return getUserStorage().resolveIMAPLogin(imapLogin, context);
+			} catch (LdapException e) {
+				throw new UserException(e);
+			}
+		}
+		final CacheKey key = cache.newCacheKey(context.getContextId(), imapLogin);
 		final int identifier;
-		final Integer tmp = (Integer) CACHE.get(key);
+		final Integer tmp = (Integer) cache.get(key);
 		if (null == tmp) {
 			try {
 				identifier = getUserStorage().resolveIMAPLogin(imapLogin, context);
@@ -209,7 +278,7 @@ public class CachingUserStorage extends UserStorage {
 				throw new UserException(e);
 			}
 			try {
-				CACHE.put(key, Integer.valueOf(identifier));
+				cache.put(key, Integer.valueOf(identifier));
 			} catch (CacheException e) {
 				throw new UserException(UserException.Code.CACHE_PROBLEM, e);
 			}
@@ -236,17 +305,24 @@ public class CachingUserStorage extends UserStorage {
 		return delegate;
 	}
 
-	static {
-		try {
-			/* Configuration.load(); */
-			CACHE = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache("User");
-		} catch (CacheException e) {
-			throw new RuntimeException("Cannot create user cache.", e);
+	@Override
+	protected void startInternal() throws UserException {
+		final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+		if (null != reg && !reg.registerListener(cacheAvailabilityListener)) {
+			LOG.error("Cache availability listener could not be registered", new Throwable());
 		}
-		/*
-		 * catch (ConfigurationException e) { throw new RuntimeException("Cannot
-		 * load cache configuration.", e); }
-		 */
-		CACHE_LOCK = new ReentrantLock(true);
+	}
+
+	@Override
+	protected void stopInternal() throws UserException {
+		final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+		if (null != reg) {
+			reg.unregisterListener(cacheAvailabilityListener);
+		}
+		try {
+			ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache("User");
+		} catch (final CacheException e) {
+			throw new UserException(e);
+		}
 	}
 }

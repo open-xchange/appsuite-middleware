@@ -137,6 +137,10 @@ public class Starter implements Initialization {
 	 */
 	com.openexchange.groupware.attach.AttachmentConfig.getInstance(),
 	/**
+	 * User storage init
+	 */
+	com.openexchange.groupware.ldap.UserStorageInit.getInstance(),
+	/**
 	 * User configuration init
 	 */
 	com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
@@ -191,6 +195,10 @@ public class Starter implements Initialization {
      * Folder initialization
      */
     com.openexchange.tools.oxfolder.OXFolderProperties.getInstance(),
+    /**
+	 * User storage init
+	 */
+	com.openexchange.groupware.ldap.UserStorageInit.getInstance(),
 	/**
 	 * User configuration init
 	 */

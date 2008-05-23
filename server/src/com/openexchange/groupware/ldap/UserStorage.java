@@ -238,6 +238,18 @@ public abstract class UserStorage {
     public abstract int resolveIMAPLogin(String imapLogin, Context context) throws UserException;
 
     /**
+     * Performs internal start-up
+     * @throws UserException If internal start-up fails
+     */
+    protected abstract void startInternal() throws UserException;
+
+    /**
+     * Performs internal shut-down
+     * @throws UserException If internal shut-down fails
+     */
+    protected abstract void stopInternal() throws UserException;
+
+    /**
      * Searches users who where modified later than the given date.
      * @param modifiedSince Date after that the returned users are modified.
      * @param context The context.
@@ -289,12 +301,29 @@ public abstract class UserStorage {
     }
 
     /**
-     * Reads the data from a user from the underlying persistent data storage.
-     * 
-     * @param uid User identifier.
-     * @param context Context.
-     * @return a user object or <code>null</code> on exception.
-     */
+	 * Releases the former initialized instance implementing the user storage
+	 * interface.
+	 */
+	static void releaseInstance() {
+		if (initialized.get()) {
+			synchronized (UserStorage.class) {
+				if (initialized.get()) {
+					instance = null;
+					initialized.set(false);
+				}
+			}
+		}
+	}
+
+    /**
+	 * Reads the data from a user from the underlying persistent data storage.
+	 * 
+	 * @param uid
+	 *            User identifier.
+	 * @param context
+	 *            Context.
+	 * @return a user object or <code>null</code> on exception.
+	 */
     public static User getStorageUser(final int uid, final Context context) {
 		try {
 			return getInstance().getUser(uid, context);

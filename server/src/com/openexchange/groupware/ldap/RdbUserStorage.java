@@ -564,4 +564,12 @@ public class RdbUserStorage extends UserStorage {
         }
         return user;
     }
+
+	@Override
+	protected void startInternal() throws UserException {
+	}
+
+	@Override
+	protected void stopInternal() throws UserException {
+	}
 }
