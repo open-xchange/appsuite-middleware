@@ -52,6 +52,7 @@ package com.openexchange.mail.usersetting;
 import java.sql.Connection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -63,7 +64,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class UserSettingMailStorage {
+public abstract class UserSettingMailStorage implements CacheAvailabilityListener {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(UserSettingMailStorage.class);

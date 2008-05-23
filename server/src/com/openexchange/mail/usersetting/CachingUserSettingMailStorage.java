@@ -131,12 +131,6 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	}
 
 	private boolean useCache() {
-		try {
-			cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
-		} catch (final CacheException e) {
-			LOG.error(e.getMessage(), e);
-			return false;
-		}
 		return (cache != null);
 	}
 
