@@ -64,7 +64,9 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationException.U
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * CachingUserConfigurationStorage
+ * {@link CachingUserConfigurationStorage} - A cache-based implementation of
+ * {@link UserConfigurationStorage} with a fallback to
+ * {@link RdbUserConfigurationStorage}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -83,6 +85,8 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 	private final Lock WRITE_LOCK;
 
 	private Cache cache;
+
+	private UserConfigurationStorage fallback;
 
 	/**
 	 * Initializes a new {@link CachingUserConfigurationStorage}
@@ -105,6 +109,13 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 			}
 		};
 		initCache();
+	}
+
+	private UserConfigurationStorage getFallback() {
+		if (null == fallback) {
+			fallback = new RdbUserConfigurationStorage();
+		}
+		return fallback;
 	}
 
 	@Override
@@ -175,7 +186,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 	public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx)
 			throws UserConfigurationException {
 		if (cache == null) {
-			return null;
+			return getFallback().getUserConfiguration(userId, groups, ctx);
 		}
 		final CacheKey key = getKey(userId, ctx);
 		UserConfiguration userConfig = (UserConfiguration) cache.get(key);
