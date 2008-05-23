@@ -62,11 +62,13 @@ import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
 import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.client.ConfigJump;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nTools;
@@ -151,10 +153,14 @@ public final class ServerActivator extends DeferredActivator {
 			LOG.warn("Absent service: " + clazz.getName());
 		}
 		if (CacheService.class.equals(clazz)) {
-			/*
-			 * TODO: Handle unavailability of cache service
-			 */
-
+			final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+			if (null != reg) {
+				try {
+					reg.notifyAbsence();
+				} catch (final AbstractOXException e) {
+					LOG.error(e.getMessage(), e);
+				}
+			}
 		}
 		ServerServiceRegistry.getInstance().removeService(clazz);
 	}
@@ -166,10 +172,14 @@ public final class ServerActivator extends DeferredActivator {
 		}
 		ServerServiceRegistry.getInstance().addService(clazz, getService(clazz));
 		if (CacheService.class.equals(clazz)) {
-			/*
-			 * TODO: Handle re-availability of cache service
-			 */
-
+			final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+			if (null != reg) {
+				try {
+					reg.notifyAvailability();
+				} catch (final AbstractOXException e) {
+					LOG.error(e.getMessage(), e);
+				}
+			}
 		}
 	}
 

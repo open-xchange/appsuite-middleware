@@ -97,7 +97,7 @@ public final class MailAccessCache {
 	/*
 	 * Field members
 	 */
-	private final Cache cache;
+	private Cache cache;
 
 	/**
 	 * Prevent instantiation
@@ -107,14 +107,7 @@ public final class MailAccessCache {
 	 */
 	private MailAccessCache() throws CacheException {
 		super();
-		cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
-		/*
-		 * Add element event handler to default element attributes
-		 */
-		final ElementEventHandler eventHandler = new MailAccessEventHandler();
-		final ElementAttributes attributes = cache.getDefaultElementAttributes();
-		attributes.addElementEventHandler(eventHandler);
-		cache.setDefaultElementAttributes(attributes);
+		initCache();
 	}
 
 	/**
@@ -174,6 +167,40 @@ public final class MailAccessCache {
 	}
 
 	/**
+	 * Initializes cache reference
+	 * 
+	 * @throws CacheException
+	 *             If initializing the cache reference fails
+	 */
+	public void initCache() throws CacheException {
+		if (cache != null) {
+			return;
+		}
+		cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
+		/*
+		 * Add element event handler to default element attributes
+		 */
+		final ElementEventHandler eventHandler = new MailAccessEventHandler();
+		final ElementAttributes attributes = cache.getDefaultElementAttributes();
+		attributes.addElementEventHandler(eventHandler);
+		cache.setDefaultElementAttributes(attributes);
+	}
+
+	/**
+	 * Releases cache reference
+	 * 
+	 * @throws CacheException
+	 *             If clearing cache fails
+	 */
+	public void releaseCache() throws CacheException {
+		if (cache == null) {
+			return;
+		}
+		cache.clear();
+		cache = null;
+	}
+
+	/**
 	 * Removes and returns a mail access from cache
 	 * 
 	 * @param session
@@ -183,6 +210,9 @@ public final class MailAccessCache {
 	 *             If removing from cache fails
 	 */
 	public MailAccess<?, ?> removeMailAccess(final Session session) throws CacheException {
+		if (null == cache) {
+			return null;
+		}
 		final CacheKey key;
 		try {
 			key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
@@ -244,6 +274,9 @@ public final class MailAccessCache {
 	 *             If put into cache fails
 	 */
 	public boolean putMailAccess(final Session session, final MailAccess<?, ?> mailAccess) throws CacheException {
+		if (null == cache) {
+			return false;
+		}
 		final CacheKey key;
 		try {
 			key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));
@@ -302,6 +335,9 @@ public final class MailAccessCache {
 	 *             If context loading fails
 	 */
 	public boolean containsMailAccess(final Session session) throws CacheException {
+		if (null == cache) {
+			return false;
+		}
 		final CacheKey key;
 		try {
 			key = getUserKey(session.getUserId(), ContextStorage.getStorageContext(session.getContextId()));

@@ -151,7 +151,11 @@ public class Starter implements Initialization {
 	/**
 	 * Downgrade registry start-up
 	 */
-	com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance()
+	com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance(),
+	/**
+     * Cache availability registry start-up
+     */
+    com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance()
 	};
 
 	/**
@@ -198,7 +202,11 @@ public class Starter implements Initialization {
     /**
      * Downgrade registry start-up
      */
-    com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance()
+    com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance(),
+    /**
+     * Cache availability registry start-up
+     */
+    com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance()
     };
 
 	private static final Log LOG = LogFactory.getLog(Starter.class);

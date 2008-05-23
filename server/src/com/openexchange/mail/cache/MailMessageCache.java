@@ -414,7 +414,7 @@ public final class MailMessageCache {
 	/*
 	 * Field members
 	 */
-	private final Cache cache;
+	private Cache cache;
 
 	/**
 	 * Singleton instantiation
@@ -424,11 +424,43 @@ public final class MailMessageCache {
 	 */
 	private MailMessageCache() throws OXCachingException {
 		super();
+		initCache();
+	}
+
+	/**
+	 * Initializes cache reference
+	 * 
+	 * @throws OXCachingException
+	 *             If initializing the cache reference fails
+	 */
+	public void initCache() throws OXCachingException {
+		if (cache != null) {
+			return;
+		}
 		try {
 			cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
 		} catch (final CacheException e) {
 			LOG.error(e.getMessage(), e);
 			throw new OXCachingException(OXCachingException.Code.FAILED_INIT, e, REGION_NAME, e.getMessage());
+		}
+	}
+
+	/**
+	 * Releases cache reference
+	 * 
+	 * @throws OXCachingException
+	 *             If clearing cache fails
+	 */
+	public void releaseCache() throws OXCachingException {
+		if (cache == null) {
+			return;
+		}
+		try {
+			cache.clear();
+		} catch (final CacheException e) {
+			throw new OXCachingException(OXCachingException.Code.FAILED_REMOVE, e, e.getMessage());
+		} finally {
+			cache = null;
 		}
 	}
 
@@ -491,6 +523,9 @@ public final class MailMessageCache {
 	@SuppressWarnings(ANNOT_UNCHECKED)
 	public void updateCachedMessages(final long[] uids, final String fullname, final int userId, final Context ctx,
 			final MailListField[] changedFields, final Object[] newValues) {
+		if (null == cache) {
+			return;
+		}
 		final CacheKey mapKey = getMapKey(userId, ctx);
 		final Lock writeLock = getLock(mapKey).writeLock();
 		writeLock.lock();
@@ -525,6 +560,9 @@ public final class MailMessageCache {
 	 *         <code>false</code>
 	 */
 	public boolean containsUserMessages(final int userId, final Context ctx) {
+		if (null == cache) {
+			return false;
+		}
 		return cache.get(getMapKey(userId, ctx)) != null;
 	}
 
@@ -542,6 +580,9 @@ public final class MailMessageCache {
 	 */
 	@SuppressWarnings(ANNOT_UNCHECKED)
 	public boolean containsFolderMessages(final String fullname, final int userId, final Context ctx) {
+		if (null == cache) {
+			return false;
+		}
 		final CacheKey mapKey = getMapKey(userId, ctx);
 		final DoubleKeyMap<String, Long, MailMessage> map = (DoubleKeyMap<String, Long, MailMessage>) cache.get(mapKey);
 		if (map == null) {
@@ -560,6 +601,9 @@ public final class MailMessageCache {
 	 * @throws OXCachingException
 	 */
 	public void removeUserMessages(final int userId, final Context ctx) throws OXCachingException {
+		if (null == cache) {
+			return;
+		}
 		try {
 			final CacheKey mapKey = getMapKey(userId, ctx);
 			final Lock writeLock = getLock(mapKey).writeLock();
@@ -586,6 +630,9 @@ public final class MailMessageCache {
 	 */
 	@SuppressWarnings(ANNOT_UNCHECKED)
 	public void removeFolderMessages(final String fullname, final int userId, final Context ctx) {
+		if (null == cache) {
+			return;
+		}
 		final CacheKey mapKey = getMapKey(userId, ctx);
 		final Lock writeLock = getLock(mapKey).writeLock();
 		writeLock.lock();
@@ -614,6 +661,9 @@ public final class MailMessageCache {
 	 */
 	@SuppressWarnings(ANNOT_UNCHECKED)
 	public void removeMessages(final long[] uids, final String fullname, final int userId, final Context ctx) {
+		if (null == cache) {
+			return;
+		}
 		final CacheKey mapKey = getMapKey(userId, ctx);
 		final Lock writeLock = getLock(mapKey).writeLock();
 		writeLock.lock();
@@ -642,9 +692,13 @@ public final class MailMessageCache {
 	 * @param ctx
 	 *            The context
 	 * @return An array of {@link MailMessage} containing the fetched messages
+	 *         or <code>null</code>
 	 */
 	@SuppressWarnings(ANNOT_UNCHECKED)
 	public MailMessage[] getMessages(final long[] uids, final String fullname, final int userId, final Context ctx) {
+		if (null == cache) {
+			return null;
+		}
 		final CacheKey mapKey = getMapKey(userId, ctx);
 		final Lock readLock = getLock(mapKey).readLock();
 		readLock.lock();
@@ -689,7 +743,9 @@ public final class MailMessageCache {
 	 */
 	@SuppressWarnings(ANNOT_UNCHECKED)
 	public void putMessages(final MailMessage[] mails, final int userId, final Context ctx) throws OXCachingException {
-		if ((mails == null) || (mails.length == 0)) {
+		if (null == cache) {
+			return;
+		} else if ((mails == null) || (mails.length == 0)) {
 			return;
 		}
 		try {

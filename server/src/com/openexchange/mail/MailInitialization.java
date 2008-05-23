@@ -49,6 +49,8 @@
 
 package com.openexchange.mail;
 
+import com.openexchange.cache.registry.CacheAvailabilityListener;
+import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.cache.MailAccessCache;
 import com.openexchange.mail.cache.MailCacheConfiguration;
@@ -67,7 +69,7 @@ import com.openexchange.server.Initialization;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailInitialization implements Initialization {
+public final class MailInitialization implements Initialization, CacheAvailabilityListener {
 
 	private static final MailInitialization instance = new MailInitialization();
 
@@ -98,6 +100,14 @@ public final class MailInitialization implements Initialization {
 		HTMLProcessingInit.getInstance().start();
 		HTMLFilterHandler.loadWhitelist();
 		/*
+		 * Add to cache availability registry
+		 */
+		final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+		if (null != reg) {
+			reg.registerDowngradeListener(this);
+		}
+		
+		/*
 		 * TODO: Remove Simulate bundle availability
 		 */
 		// MailProvider.initMailProvider();
@@ -112,6 +122,13 @@ public final class MailInitialization implements Initialization {
 		 */
 		// MailProvider.resetMailProvider();
 		/*
+		 * Remove from cache availability registry
+		 */
+		final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+		if (null != reg) {
+			reg.unregisterDowngradeListener(this);
+		}
+		/*
 		 * Stop global mail system
 		 */
 		MIMEType2ExtMap.reset();
@@ -125,4 +142,35 @@ public final class MailInitialization implements Initialization {
 		MailPropertiesInit.getInstance().stop();
 	}
 
+	/**
+	 * Handles the (possibly temporary) unavailability of caching service
+	 * 
+	 * @throws AbstractOXException
+	 *             If mail caches shut-down fails
+	 */
+	public void shutDownCaches() throws AbstractOXException {
+		MailAccessCache.getInstance().releaseCache();
+		MailMessageCache.getInstance().releaseCache();
+		MailCacheConfiguration.getInstance().stop();
+	}
+
+	/**
+	 * Handles the re-availability of caching service
+	 * 
+	 * @throws AbstractOXException
+	 *             If mail caches start-up fails
+	 */
+	public void startUpCaches() throws AbstractOXException {
+		MailCacheConfiguration.getInstance().start();
+		MailAccessCache.getInstance().initCache();
+		MailMessageCache.getInstance().initCache();
+	}
+
+	public void handleAbsence() throws AbstractOXException {
+		shutDownCaches();
+	}
+
+	public void handleAvailability() throws AbstractOXException {
+		startUpCaches();
+	}
 }
