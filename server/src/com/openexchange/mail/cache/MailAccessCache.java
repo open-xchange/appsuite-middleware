@@ -141,7 +141,7 @@ public final class MailAccessCache {
 	}
 
 	/**
-	 * Get the singleton instance
+	 * Gets the singleton instance
 	 * 
 	 * @return The singleton instance
 	 * @throws CacheException
