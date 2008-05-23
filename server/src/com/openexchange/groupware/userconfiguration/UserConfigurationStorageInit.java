@@ -108,11 +108,6 @@ public final class UserConfigurationStorageInit implements Initialization {
 		return instance;
 	}
 
-	/**
-	 * Proxy attribute for storage
-	 */
-	private Class<? extends UserConfigurationStorage> implementingClass;
-
 	private final AtomicBoolean started = new AtomicBoolean();
 
 	/**
@@ -138,7 +133,7 @@ public final class UserConfigurationStorageInit implements Initialization {
 			return;
 		}
 		synchronized (started) {
-			if (null != implementingClass) {
+			if (started.get()) {
 				return;
 			}
 			final String classNameProp = SystemConfig.getProperty(Property.USER_CONF_STORAGE);
@@ -148,12 +143,13 @@ public final class UserConfigurationStorageInit implements Initialization {
 			}
 			try {
 				final String className = getUserConfigurationImpl(classNameProp);
-				implementingClass = Class.forName(className == null ? classNameProp : className).asSubclass(
-						UserConfigurationStorage.class);
+				final Class<? extends UserConfigurationStorage> implementingClass = Class.forName(
+						className == null ? classNameProp : className).asSubclass(UserConfigurationStorage.class);
 				if (LOG.isInfoEnabled()) {
 					LOG.info("UserConfigurationStorage implementation: " + implementingClass.getName());
 				}
 				UserConfigurationStorage.setInstance(implementingClass.newInstance());
+				started.set(true);
 			} catch (final ClassNotFoundException e) {
 				throw new UserConfigurationException(UserConfigurationCode.CLASS_NOT_FOUND, e, classNameProp);
 			} catch (final ClassCastException e) {
@@ -164,7 +160,6 @@ public final class UserConfigurationStorageInit implements Initialization {
 				throw new UserConfigurationException(UserConfigurationCode.CLASS_NOT_FOUND, e, classNameProp);
 			}
 		}
-		started.set(true);
 	}
 
 	public void stop() throws AbstractOXException {
@@ -173,17 +168,13 @@ public final class UserConfigurationStorageInit implements Initialization {
 					+ " cannot be stopped since it has not been started before");
 			return;
 		}
-		UserConfigurationStorage.releaseInstance();
-		implementingClass = null;
-		started.set(false);
+		synchronized (started) {
+			if (!started.get()) {
+				return;
+			}
+			UserConfigurationStorage.releaseInstance();
+			started.set(false);
+		}
 	}
 
-	/**
-	 * Getter for implementing class
-	 * 
-	 * @return The implementing class
-	 */
-	public Class<? extends UserConfigurationStorage> getImplementingClass() {
-		return implementingClass;
-	}
 }
