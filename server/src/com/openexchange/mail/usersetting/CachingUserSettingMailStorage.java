@@ -66,6 +66,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCode;
@@ -98,14 +99,35 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	 */
 	protected CachingUserSettingMailStorage() {
 		super();
+		cacheWriteLock = new ReentrantLock();
+		try {
+			initCache();
+		} catch (final UserConfigurationException e) {
+			LOG.error(e.getLocalizedMessage(), e);
+		}
+	}
+
+	private void initCache() throws UserConfigurationException {
+		if (null != cache) {
+			return;
+		}
 		try {
 			cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
-			cacheWriteLock = new ReentrantLock();
 		} catch (final CacheException e) {
-			final UserConfigurationException ue = new UserConfigurationException(
-					UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
-			LOG.error(ue.getLocalizedMessage(), ue);
+			throw new UserConfigurationException(e);
 		}
+	}
+
+	private void releaseCache() throws UserConfigurationException {
+		if (null == cache) {
+			return;
+		}
+		try {
+			cache.clear();
+		} catch (final CacheException e) {
+			throw new UserConfigurationException(e);
+		}
+		cache = null;
 	}
 
 	private boolean useCache() {
@@ -610,4 +632,11 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 		}
 	}
 
+	public void handleAbsence() throws AbstractOXException {
+		releaseCache();
+	}
+
+	public void handleAvailability() throws AbstractOXException {
+		initCache();
+	}
 }
