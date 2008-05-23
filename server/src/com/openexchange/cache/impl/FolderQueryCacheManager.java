@@ -86,7 +86,7 @@ public final class FolderQueryCacheManager {
 
 	private static final AtomicBoolean initialized = new AtomicBoolean();
 
-	private final Cache folderQueryCache;
+	private Cache folderQueryCache;
 
 	private static ReadWriteLock getContextLock(final int cid) {
 		final Integer key = Integer.valueOf(cid);
@@ -107,12 +107,7 @@ public final class FolderQueryCacheManager {
 
 	private FolderQueryCacheManager() throws OXException {
 		super();
-		try {
-			folderQueryCache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
-		} catch (final CacheException e) {
-			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e
-					.getLocalizedMessage());
-		}
+		initCache();
 	}
 
 	public static boolean isInitialized() {
@@ -135,6 +130,43 @@ public final class FolderQueryCacheManager {
 			}
 		}
 		return instance;
+	}
+
+	/**
+	 * Initializes cache reference
+	 * 
+	 * @throws OXFolderException
+	 *             If initializing the cache reference fails
+	 */
+	public void initCache() throws OXFolderException {
+		if (folderQueryCache != null) {
+			return;
+		}
+		try {
+			folderQueryCache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(REGION_NAME);
+		} catch (final CacheException e) {
+			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e
+					.getLocalizedMessage());
+		}
+	}
+
+	/**
+	 * Releases cache reference
+	 * 
+	 * @throws OXFolderException
+	 *             If clearing cache fails
+	 */
+	public void releaseCache() throws OXFolderException {
+		if (folderQueryCache == null) {
+			return;
+		}
+		try {
+			folderQueryCache.clear();
+		} catch (final CacheException e) {
+			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, REGION_NAME, e
+					.getLocalizedMessage());
+		}
+		folderQueryCache = null;
 	}
 
 	/**
@@ -178,6 +210,9 @@ public final class FolderQueryCacheManager {
 	 */
 	@SuppressWarnings("unchecked")
 	public LinkedList<Integer> getFolderQuery(final int queryNum, final int userId, final int cid) {
+		if (null == folderQueryCache) {
+			return null;
+		}
 		final Lock ctxReadLock = getContextLock(cid).readLock();
 		ctxReadLock.lock();
 		try {
@@ -241,7 +276,9 @@ public final class FolderQueryCacheManager {
 	@SuppressWarnings("unchecked")
 	public void putFolderQuery(final int queryNum, final LinkedList<Integer> q, final int userId, final int cid,
 			final boolean append) throws OXException {
-		if (q == null) {
+		if (null == folderQueryCache) {
+			return;
+		} else if (q == null) {
 			return;
 		}
 		final Lock ctxWriteLock = getContextLock(cid).writeLock();
@@ -282,6 +319,9 @@ public final class FolderQueryCacheManager {
 	 * Clears all cache entries belonging to given context
 	 */
 	public void invalidateContextQueries(final int cid) {
+		if (null == folderQueryCache) {
+			return;
+		}
 		final Lock ctxWriteLock = getContextLock(cid).writeLock();
 		ctxWriteLock.lock();
 		try {
