@@ -61,14 +61,26 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ServiceRegistry {
 
+	static final int DEFAULT_INITIAL_CAPACITY = 16;
+
 	private final Map<Class<?>, Object> services;
 
 	/**
-	 * Initializes a new {@link ServiceRegistry}
+	 * Initializes a new {@link ServiceRegistry} with default initial capacity
 	 */
 	public ServiceRegistry() {
+		this(DEFAULT_INITIAL_CAPACITY);
+	}
+
+	/**
+	 * Initializes a new {@link ServiceRegistry}
+	 * 
+	 * @param initialCapacity
+	 *            The initial capacity
+	 */
+	public ServiceRegistry(final int initialCapacity) {
 		super();
-		services = new ConcurrentHashMap<Class<?>, Object>();
+		services = new ConcurrentHashMap<Class<?>, Object>(initialCapacity);
 	}
 
 	/**
