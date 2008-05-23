@@ -94,7 +94,7 @@ public class FolderCacheManager {
 
 	private static final AtomicBoolean initialized = new AtomicBoolean();
 
-	private final Cache folderCache;
+	private Cache folderCache;
 
 	private ElementAttributes initialAttribs;
 
@@ -102,13 +102,7 @@ public class FolderCacheManager {
 
 	private FolderCacheManager() throws OXException {
 		super();
-		final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-		try {
-			folderCache = cacheService.getCache(FOLDER_CACHE_REGION_NAME);
-		} catch (final CacheException e) {
-			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e
-					.getLocalizedMessage());
-		}
+		initCache();
 	}
 
 	public static boolean isInitialized() {
@@ -152,6 +146,44 @@ public class FolderCacheManager {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Initializes cache reference
+	 * 
+	 * @throws OXFolderException
+	 *             If initializing the cache reference fails
+	 */
+	public void initCache() throws OXFolderException {
+		if (folderCache != null) {
+			return;
+		}
+		try {
+			folderCache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(
+					FOLDER_CACHE_REGION_NAME);
+		} catch (final CacheException e) {
+			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e
+					.getLocalizedMessage());
+		}
+	}
+
+	/**
+	 * Releases cache reference
+	 * 
+	 * @throws OXFolderException
+	 *             If clearing cache fails
+	 */
+	public void releaseCache() throws OXFolderException {
+		if (folderCache == null) {
+			return;
+		}
+		try {
+			folderCache.clear();
+		} catch (final CacheException e) {
+			throw new OXFolderException(FolderCode.FOLDER_CACHE_INITIALIZATION_FAILED, e, FOLDER_CACHE_REGION_NAME, e
+					.getLocalizedMessage());
+		}
+		folderCache = null;
 	}
 
 	private static final ReadWriteLock getContextLock(final Context ctx) {
@@ -200,7 +232,7 @@ public class FolderCacheManager {
 		ctxReadLock.lock();
 		try {
 			FolderObject folderObj = null;
-			if (fromCache) {
+			if (fromCache && null != folderCache) {
 				folderObj = (FolderObject) folderCache.get(getCacheKey(ctx.getContextId(), objectId));
 			}
 			/*
@@ -250,6 +282,9 @@ public class FolderCacheManager {
 	 *         <code>null</code>
 	 */
 	public FolderObject getFolderObject(final int objectId, final Context ctx) {
+		if (null == folderCache) {
+			return null;
+		}
 		final Lock ctxReadLock = getContextLock(ctx).readLock();
 		ctxReadLock.lock();
 		try {
@@ -316,21 +351,23 @@ public class FolderCacheManager {
 		final FolderObject folderObj;
 		try {
 			folderObj = FolderObject.loadFolderObjectFromDB(folderId, ctx, readCon);
-			final CacheKey key = getCacheKey(ctx.getContextId(), folderId);
-			/*
-			 * Do not propagate an initial PUT
-			 */
-			final ElementAttributes attribs = getAppliedAttributes(key, null);
-			if (attribs == null) {
+			if (null != folderCache) {
+				final CacheKey key = getCacheKey(ctx.getContextId(), folderId);
 				/*
-				 * Put folder into cache
+				 * Do not propagate an initial PUT
 				 */
-				folderCache.put(key, folderObj);
-			} else {
-				/*
-				 * Disable lateral distribution for this element
-				 */
-				folderCache.put(key, folderObj, attribs);
+				final ElementAttributes attribs = getAppliedAttributes(key, null);
+				if (attribs == null) {
+					/*
+					 * Put folder into cache
+					 */
+					folderCache.put(key, folderObj);
+				} else {
+					/*
+					 * Disable lateral distribution for this element
+					 */
+					folderCache.put(key, folderObj, attribs);
+				}
 			}
 		} catch (final CacheException e) {
 			throw new OXException(e);
@@ -390,11 +427,13 @@ public class FolderCacheManager {
 	 */
 	public void putFolderObject(final FolderObject folderObj, final Context ctx, final boolean overwrite,
 			final ElementAttributes elemAttribs) throws OXException {
+		if (null == folderCache) {
+			return;
+		} else if (!folderObj.containsObjectID()) {
+			throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.ID, Integer.valueOf(-1),
+					Integer.valueOf(ctx.getContextId()));
+		}
 		try {
-			if (!folderObj.containsObjectID()) {
-				throw new OXFolderException(FolderCode.MISSING_FOLDER_ATTRIBUTE, FolderFields.ID, Integer.valueOf(-1),
-						Integer.valueOf(ctx.getContextId()));
-			}
 			final CacheKey ck = getCacheKey(ctx.getContextId(), folderObj.getObjectID());
 			if (!overwrite) {
 				if (folderCache.get(ck) != null) {
@@ -465,6 +504,9 @@ public class FolderCacheManager {
 	 *             If a caching error occurs
 	 */
 	public void removeFolderObject(final int key, final Context ctx) throws OXException {
+		if (null == folderCache) {
+			return;
+		}
 		/*
 		 * Remove object from cache if exist
 		 */
@@ -492,7 +534,9 @@ public class FolderCacheManager {
 	 *             If a caching error occurs
 	 */
 	public void removeFolderObjects(final int[] keys, final Context ctx) throws OXException {
-		if (keys == null || keys.length == 0) {
+		if (null == folderCache) {
+			return;
+		} else if (keys == null || keys.length == 0) {
 			return;
 		}
 		/*
@@ -541,11 +585,14 @@ public class FolderCacheManager {
 	/**
 	 * Returns default element attributes for this cache
 	 * 
-	 * @return default element attributes for this cache
+	 * @return default element attributes for this cache or <code>null</code>
 	 * @throws OXCachingException
 	 *             If a caching error occurs
 	 */
 	public ElementAttributes getDefaultFolderObjectAttributes() throws CacheException {
+		if (null == folderCache) {
+			return null;
+		}
 		/*
 		 * Returns a copy NOT a reference
 		 */
