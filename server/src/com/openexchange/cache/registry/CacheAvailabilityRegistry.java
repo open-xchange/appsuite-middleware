@@ -188,7 +188,7 @@ public final class CacheAvailabilityRegistry {
 	 * @return <code>true</code> if specified downgrade listener has been
 	 *         added to registry; otherwise <code>false</code>
 	 */
-	public boolean registerDowngradeListener(final CacheAvailabilityListener listener) {
+	public boolean registerListener(final CacheAvailabilityListener listener) {
 		registryLock.lock();
 		try {
 			if (classes.contains(listener.getClass())) {
@@ -209,7 +209,7 @@ public final class CacheAvailabilityRegistry {
 	 * @param listener -
 	 *            the listener to remove
 	 */
-	public void unregisterDowngradeListener(final CacheAvailabilityListener listener) {
+	public void unregisterListener(final CacheAvailabilityListener listener) {
 		registryLock.lock();
 		try {
 			final Class<? extends CacheAvailabilityListener> clazz = listener.getClass();

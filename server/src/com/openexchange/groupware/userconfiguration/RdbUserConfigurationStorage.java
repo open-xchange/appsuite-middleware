@@ -63,7 +63,6 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationException.UserConfigurationCode;
-import com.openexchange.server.Initialization;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 
@@ -73,7 +72,7 @@ import com.openexchange.server.impl.DBPoolingException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public class RdbUserConfigurationStorage extends UserConfigurationStorage implements Initialization {
+public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(RdbUserConfigurationStorage.class);

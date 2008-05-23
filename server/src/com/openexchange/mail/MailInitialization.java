@@ -104,7 +104,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
 		 */
 		final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
 		if (null != reg) {
-			reg.registerDowngradeListener(this);
+			reg.registerListener(this);
 		}
 		
 		/*
@@ -126,7 +126,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
 		 */
 		final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
 		if (null != reg) {
-			reg.unregisterDowngradeListener(this);
+			reg.unregisterListener(this);
 		}
 		/*
 		 * Stop global mail system

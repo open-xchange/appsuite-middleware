@@ -113,7 +113,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 		init();
 		final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
 		if (reg != null) {
-			reg.registerDowngradeListener(this);
+			reg.registerListener(this);
 		}
 		started.set(true);
 	}
@@ -125,7 +125,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 		}
 		final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
 		if (reg != null) {
-			reg.unregisterDowngradeListener(this);
+			reg.unregisterListener(this);
 		}
 		reset();
 		FolderCacheManager.releaseInstance();

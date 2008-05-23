@@ -52,6 +52,8 @@ package com.openexchange.groupware.userconfiguration;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.openexchange.cache.registry.CacheAvailabilityListener;
+import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
@@ -69,26 +71,73 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(CachingUserConfigurationStorage.class);
+
 	private static final String CACHE_REGION_NAME = "UserConfiguration";
+
+	private final CacheAvailabilityListener cacheAvailabilityListener;
 
 	private transient final UserConfigurationStorage delegateStorage;
 
 	private final Lock WRITE_LOCK;
 
-	private final Cache cache;
+	private Cache cache;
 
 	/**
-	 * Constructor
+	 * Initializes a new {@link CachingUserConfigurationStorage}
 	 * 
-	 * @param ctx -
-	 *            the context
-	 * @throws UserConfigurationException -
-	 *             if cache initialization fails
+	 * @throws UserConfigurationException
+	 *             If an error occurs
 	 */
 	public CachingUserConfigurationStorage() throws UserConfigurationException {
 		super();
 		WRITE_LOCK = new ReentrantLock();
 		this.delegateStorage = new RdbUserConfigurationStorage();
+		cacheAvailabilityListener = new CacheAvailabilityListener() {
+
+			public void handleAbsence() throws AbstractOXException {
+				releaseCache();
+			}
+
+			public void handleAvailability() throws AbstractOXException {
+				initCache();
+			}
+		};
+		initCache();
+	}
+
+	@Override
+	protected void startInternal() throws AbstractOXException {
+		final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+		if (null != reg && !reg.registerListener(cacheAvailabilityListener)) {
+			LOG.error("Cache availability listener could not be registered", new Throwable());
+		}
+	}
+
+	@Override
+	protected void stopInternal() throws AbstractOXException {
+		final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+		if (null != reg) {
+			reg.unregisterListener(cacheAvailabilityListener);
+		}
+		ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(CACHE_REGION_NAME);
+	}
+
+	private final CacheKey getKey(final int userId, final Context ctx) {
+		return cache.newCacheKey(ctx.getContextId(), userId);
+	}
+
+	/**
+	 * Initializes cache reference
+	 * 
+	 * @throws UserConfigurationException
+	 *             If an error occurs
+	 */
+	private void initCache() throws UserConfigurationException {
+		if (cache != null) {
+			return;
+		}
 		try {
 			cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
 		} catch (final CacheException e) {
@@ -97,20 +146,23 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 		}
 	}
 
-	@Override
-	protected void startInternal() throws AbstractOXException {
-		/*
-		 * Nothing to start
-		 */
-	}
-
-	@Override
-	protected void stopInternal() throws AbstractOXException {
-		ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(CACHE_REGION_NAME);
-	}
-
-	private final CacheKey getKey(final int userId, final Context ctx) {
-		return cache.newCacheKey(ctx.getContextId(), userId);
+	/**
+	 * Releases cache reference
+	 * 
+	 * @throws UserConfigurationException
+	 *             If an error occurs
+	 */
+	private void releaseCache() throws UserConfigurationException {
+		if (cache == null) {
+			return;
+		}
+		try {
+			cache.clear();
+		} catch (final CacheException e) {
+			throw new UserConfigurationException(UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e,
+					CACHE_REGION_NAME);
+		}
+		cache = null;
 	}
 
 	/*

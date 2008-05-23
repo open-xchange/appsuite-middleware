@@ -168,6 +168,7 @@ public final class UserConfigurationStorageInit implements Initialization {
 					+ " cannot be stopped since it has not been started before");
 			return;
 		}
+		UserConfigurationStorage.releaseInstance();
 		implementingClass = null;
 		started.set(false);
 	}

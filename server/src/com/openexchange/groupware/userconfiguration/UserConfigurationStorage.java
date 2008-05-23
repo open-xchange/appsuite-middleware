@@ -108,6 +108,17 @@ public abstract class UserConfigurationStorage {
 	}
 
 	/**
+	 * Releases the singleton instance of {@link UserConfigurationStorage}
+	 * 
+	 * @throws AbstractOXException
+	 *             If singleton cannot be configured
+	 */
+	static void releaseInstance() throws AbstractOXException {
+		UserConfigurationStorage.singleton.stop();
+		UserConfigurationStorage.singleton = null;
+	}
+
+	/**
 	 * Factory method for an instance of UserConfigurationStorage.
 	 * 
 	 * @return an instance implementing the
@@ -117,7 +128,7 @@ public abstract class UserConfigurationStorage {
 		return singleton;
 	}
 
-	public final void start() throws AbstractOXException {
+	private final void start() throws AbstractOXException {
 		if (started) {
 			return;
 		}
@@ -125,12 +136,11 @@ public abstract class UserConfigurationStorage {
 		started = true;
 	}
 
-	public final void stop() throws AbstractOXException {
+	private final void stop() throws AbstractOXException {
 		if (!started) {
 			return;
 		}
 		stopInternal();
-		singleton = null;
 		started = false;
 	}
 
