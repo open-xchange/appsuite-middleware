@@ -89,8 +89,6 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 
 	private static final String CACHE_REGION_NAME = "UserSettingMail";
 
-	private boolean useCache;
-
 	private Cache cache;
 
 	private Lock cacheWriteLock;
@@ -103,12 +101,21 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 		try {
 			cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
 			cacheWriteLock = new ReentrantLock();
-			useCache = true;
 		} catch (final CacheException e) {
 			final UserConfigurationException ue = new UserConfigurationException(
 					UserConfigurationCode.CACHE_INITIALIZATION_FAILED, e, CACHE_REGION_NAME);
 			LOG.error(ue.getLocalizedMessage(), ue);
 		}
+	}
+
+	private boolean useCache() {
+		try {
+			cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache(CACHE_REGION_NAME);
+		} catch (final CacheException e) {
+			LOG.error(e.getMessage(), e);
+			return false;
+		}
+		return (cache != null);
 	}
 
 	private static final String SQL_LOAD = "SELECT bits, send_addr, reply_to_addr, msg_format, display_msg_headers, auto_linebreak, std_trash, std_sent, std_drafts, std_spam, "
@@ -177,7 +184,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 				closeResources(rs, stmt, closeCon ? writeCon : null, false, ctx);
 			}
 			usm.setModifiedDuringSession(false);
-			if (useCache) {
+			if (useCache()) {
 				/*
 				 * Put clone into cache
 				 */
@@ -245,7 +252,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 				stmt.executeUpdate();
 				stmt.close();
 				stmt = null;
-				if (useCache) {
+				if (useCache()) {
 					/*
 					 * Remove from cache
 					 */
@@ -288,6 +295,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	public UserSettingMail loadUserSettingMail(final int user, final Context ctx, final Connection readConArg)
 			throws UserConfigurationException {
 		try {
+			final boolean useCache = useCache();
 			UserSettingMail usm = useCache ? (UserSettingMail) cache.get(cache.newCacheKey(ctx.getContextId(), user))
 					: null;
 			if (null != usm) {
@@ -554,7 +562,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	 */
 	@Override
 	public void clearStorage() throws UserConfigurationException {
-		if (useCache) {
+		if (useCache()) {
 			/*
 			 * Put clone into cache
 			 */
@@ -578,7 +586,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
 	 */
 	@Override
 	public void removeUserSettingMail(final int user, final Context ctx) throws UserConfigurationException {
-		if (useCache) {
+		if (useCache()) {
 			/*
 			 * Put clone into cache
 			 */
