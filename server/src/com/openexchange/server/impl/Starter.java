@@ -77,6 +77,10 @@ public class Starter implements Initialization {
 	 */
 	com.openexchange.configuration.SystemConfig.getInstance(),
 	/**
+     * Cache availability registry start-up
+     */
+    com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance(),
+	/**
 	 * Reads configdb.properties.
 	 */
 	com.openexchange.configuration.ConfigDB.getInstance(),
@@ -151,11 +155,7 @@ public class Starter implements Initialization {
 	/**
 	 * Downgrade registry start-up
 	 */
-	com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance(),
-	/**
-     * Cache availability registry start-up
-     */
-    com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance()
+	com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance()
 	};
 
 	/**
@@ -167,6 +167,10 @@ public class Starter implements Initialization {
 	 * Reads system.properties.
 	 */
 	com.openexchange.configuration.SystemConfig.getInstance(),
+	/**
+     * Cache availability registry start-up
+     */
+    com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance(),
 	/**
 	 * Reads configdb.properties.
 	 */
@@ -202,11 +206,7 @@ public class Starter implements Initialization {
     /**
      * Downgrade registry start-up
      */
-    com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance(),
-    /**
-     * Cache availability registry start-up
-     */
-    com.openexchange.cache.registry.CacheAvailabilityRegistryInit.getInstance()
+    com.openexchange.groupware.downgrade.DowngradeRegistryInit.getInstance()
     };
 
 	private static final Log LOG = LogFactory.getLog(Starter.class);
