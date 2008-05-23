@@ -290,6 +290,7 @@ public final class ServerActivator extends DeferredActivator {
 			ServerServiceRegistry.getInstance().clearRegistry();
 		} finally {
 			started.set(false);
+			adminBundleInstalled = null;
 		}
 	}
 
