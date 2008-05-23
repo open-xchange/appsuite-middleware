@@ -56,6 +56,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
+import com.openexchange.cache.registry.CacheAvailabilityListener;
+import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.groupware.AbstractOXException;
@@ -68,7 +70,7 @@ import com.openexchange.server.impl.OCLPermission;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OXFolderProperties implements Initialization {
+public final class OXFolderProperties implements Initialization, CacheAvailabilityListener {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(OXFolderProperties.class);
@@ -109,6 +111,10 @@ public final class OXFolderProperties implements Initialization {
 			return;
 		}
 		init();
+		final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+		if (reg != null) {
+			reg.registerDowngradeListener(this);
+		}
 		started.set(true);
 	}
 
@@ -117,10 +123,36 @@ public final class OXFolderProperties implements Initialization {
 			LOG.error("Folder properties cannot be stopped since they have not been started before", new Throwable());
 			return;
 		}
+		final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+		if (reg != null) {
+			reg.unregisterDowngradeListener(this);
+		}
 		reset();
 		FolderCacheManager.releaseInstance();
 		FolderQueryCacheManager.releaseInstance();
 		started.set(false);
+	}
+
+	public void handleAvailability() throws AbstractOXException {
+		final FolderCacheManager fcm = FolderCacheManager.getInstance();
+		if (null != fcm) {
+			fcm.initCache();
+		}
+		final FolderQueryCacheManager fqcm = FolderQueryCacheManager.getInstance();
+		if (null != fqcm) {
+			fqcm.initCache();
+		}
+	}
+
+	public void handleAbsence() throws AbstractOXException {
+		final FolderCacheManager fcm = FolderCacheManager.getInstance();
+		if (null != fcm) {
+			fcm.releaseCache();
+		}
+		final FolderQueryCacheManager fqcm = FolderQueryCacheManager.getInstance();
+		if (null != fqcm) {
+			fqcm.releaseCache();
+		}
 	}
 
 	private void reset() {
