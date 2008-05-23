@@ -51,8 +51,6 @@ package com.openexchange.groupware.ldap;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.ldap.LdapException.Code;
-import com.openexchange.groupware.ldap.LdapException.Detail;
 
 /**
  * This exception is used if problems occur in the user storage component.
@@ -69,6 +67,11 @@ public class UserException extends AbstractOXException {
      * Detailed information for this exception.
      */
     private final Detail detail;
+
+    public UserException(AbstractOXException cause) {
+    	super(cause);
+    	detail = Detail.ERROR;
+    }
 
     /**
      * Initializes a new exception using the information provides by the code.
