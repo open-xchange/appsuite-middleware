@@ -94,11 +94,6 @@ public final class SpellCheckServletActivator extends DeferredActivator {
 		return NEEDED_SERVICES;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.osgiservice.DeferredActivator#handleUnavailability(java.lang.Class)
-	 */
 	@Override
 	protected void handleUnavailability(final Class<?> clazz) {
 		/*
@@ -118,6 +113,32 @@ public final class SpellCheckServletActivator extends DeferredActivator {
 			}
 		}
 		getServiceRegistry().removeService(clazz);
+	}
+
+	@Override
+	protected void handleAvailability(final Class<?> clazz) {
+		/*
+		 * Register servlet on both absent HTTP service and spell check service
+		 */
+		getServiceRegistry().addService(clazz, getService(clazz));
+		final HttpService httpService = getServiceRegistry().getService(HttpService.class);
+		if (httpService == null) {
+			LOG.error("HTTP service is null. Spell check servlet cannot be registered");
+		} else {
+			try {
+				/*
+				 * Register spell check servlet
+				 */
+				httpService.registerServlet(SC_SRVLT_ALIAS, new SpellCheckServlet(), null, null);
+				if (LOG.isInfoEnabled()) {
+					LOG.info("Spell check servlet successfully registered");
+				}
+			} catch (final ServletException e) {
+				LOG.error(e.getMessage(), e);
+			} catch (final NamespaceException e) {
+				LOG.error(e.getMessage(), e);
+			}
+		}
 	}
 
 	/*

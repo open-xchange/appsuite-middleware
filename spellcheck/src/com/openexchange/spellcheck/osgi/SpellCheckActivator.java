@@ -97,11 +97,6 @@ public final class SpellCheckActivator extends DeferredActivator {
 		return NEEDED_SERVICES;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.server.osgiservice.DeferredActivator#handleUnavailability(java.lang.Class)
-	 */
 	@Override
 	protected void handleUnavailability(final Class<?> clazz) {
 		/*
@@ -111,6 +106,14 @@ public final class SpellCheckActivator extends DeferredActivator {
 			LOG.warn("Absent service: " + clazz.getName());
 		}
 		getServiceRegistry().removeService(clazz);
+	}
+
+	@Override
+	protected void handleAvailability(final Class<?> clazz) {
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Re-available service: " + clazz.getName());
+		}
+		getServiceRegistry().addService(clazz, getService(clazz));
 	}
 
 	/*
