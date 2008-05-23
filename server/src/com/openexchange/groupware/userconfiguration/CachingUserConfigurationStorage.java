@@ -174,6 +174,9 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 	@Override
 	public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx)
 			throws UserConfigurationException {
+		if (cache == null) {
+			return null;
+		}
 		final CacheKey key = getKey(userId, ctx);
 		UserConfiguration userConfig = (UserConfiguration) cache.get(key);
 		if (null == userConfig) {
@@ -199,6 +202,9 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 	 */
 	@Override
 	public void clearStorage() throws UserConfigurationException {
+		if (cache == null) {
+			return;
+		}
 		WRITE_LOCK.lock();
 		try {
 			cache.clear();
@@ -207,7 +213,6 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 		} finally {
 			WRITE_LOCK.unlock();
 		}
-
 	}
 
 	/*
@@ -218,6 +223,9 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
 	 */
 	@Override
 	public void removeUserConfiguration(final int userId, final Context ctx) throws UserConfigurationException {
+		if (cache == null) {
+			return;
+		}
 		WRITE_LOCK.lock();
 		try {
 			cache.remove(getKey(userId, ctx));
