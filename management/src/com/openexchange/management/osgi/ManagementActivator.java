@@ -49,46 +49,36 @@
 
 package com.openexchange.management.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
+import static com.openexchange.management.services.ManagementServiceRegistry.getServiceRegistry;
 
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.internal.ManagementAgentImpl;
 import com.openexchange.management.internal.ManagementInit;
-import com.openexchange.server.ServiceHolderListener;
-import com.openexchange.server.osgiservice.BundleServiceTracker;
+import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
- * {@link ManagementActivator}
+ * {@link ManagementActivator} - Activator for management bundle
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ManagementActivator implements BundleActivator {
+public final class ManagementActivator extends DeferredActivator {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(ManagementActivator.class);
 
 	private static final String BUNDLE_ID_ADMIN = "open_xchange_admin";
 
-	private BundleContext context;
-
-	private final List<ServiceTracker> serviceTrackerList = new ArrayList<ServiceTracker>();
+	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class };
 
 	private ServiceRegistration serviceRegistration;
-
-	private ConfigurationServiceHolder csh;
-
-	private ServiceHolderListener<ConfigurationService> listener;
 
 	/**
 	 * Initializes a new {@link ManagementActivator}
@@ -98,63 +88,85 @@ public final class ManagementActivator implements BundleActivator {
 	}
 
 	private static boolean isAdminBundleInstalled(final BundleContext context) {
-        for (final Bundle bundle : context.getBundles()) {
-            if (BUNDLE_ID_ADMIN.equals(bundle.getSymbolicName())) {
-                return true;
-            }
-        }
-        return false;
-    }
+		for (final Bundle bundle : context.getBundles()) {
+			if (BUNDLE_ID_ADMIN.equals(bundle.getSymbolicName())) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
-	public void start(final BundleContext context) throws Exception {
+	@Override
+	protected Class<?>[] getNeededServices() {
+		return NEEDED_SERVICES;
+	}
+
+	@Override
+	protected void handleAvailability(final Class<?> clazz) {
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Re-available service: " + clazz.getName());
+		}
+		getServiceRegistry().addService(clazz, getService(clazz));
+		/*
+		 * TODO: Should the management bundle be restarted due to re-available
+		 * configuration service?
+		 */
+		/**
+		 * <pre>
+		 * stopInternal();
+		 * startInternal();
+		 * </pre>
+		 */
+	}
+
+	@Override
+	protected void handleUnavailability(final Class<?> clazz) {
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Re-available service: " + clazz.getName());
+		}
+		/*
+		 * Just remove absent service from service registry but do not stop
+		 * management bundle
+		 */
+		getServiceRegistry().removeService(clazz);
+	}
+
+	@Override
+	protected void startBundle() throws Exception {
 		LOG.info("starting bundle: com.openexchange.management");
 		if (isAdminBundleInstalled(context)) {
-		    return;
+			LOG.info("Canceling start of com.openexchange.management since admin bundle is running");
+			return;
 		}
-		this.context = context;
-		try {
-			csh = ConfigurationServiceHolder.newInstance();
-			ManagementInit.getInstance().setConfigurationServiceHolder(csh);
-			/*
-			 * Init service trackers
-			 */
-			serviceTrackerList.add(new ServiceTracker(context, ConfigurationService.class.getName(),
-					new BundleServiceTracker<ConfigurationService>(context, csh, ConfigurationService.class)));
-			/*
-			 * Start management when configuration service is available
-			 */
-			listener = new ServiceHolderListener<ConfigurationService>() {
-
-				public void onServiceAvailable(final ConfigurationService service) throws AbstractOXException {
-					try {
-						stopInternal();
-						startInternal();
-					} catch (final AbstractOXException e) {
-						LOG.error(e.getLocalizedMessage(), e);
-						ManagementInit.getInstance().stop();
-					}
+		/*
+		 * Fill service registry
+		 */
+		{
+			final ServiceRegistry registry = getServiceRegistry();
+			registry.clearRegistry();
+			final Class<?>[] classes = getNeededServices();
+			for (int i = 0; i < classes.length; i++) {
+				final Object service = getService(classes[i]);
+				if (null != service) {
+					registry.addService(classes[i], service);
 				}
-
-				public void onServiceRelease() {
-				}
-			};
-			csh.addServiceHolderListener(listener);
-			/*
-			 * Open service trackers
-			 */
-			for (final ServiceTracker tracker : serviceTrackerList) {
-				tracker.open();
 			}
-		} catch (final Throwable t) {
-			LOG.error(t.getLocalizedMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
 		}
+		startInternal();
+	}
 
+	@Override
+	protected void stopBundle() throws Exception {
+		LOG.info("stopping bundle: com.openexchange.management");
+		if (isAdminBundleInstalled(context)) {
+			LOG.info("Canceling stop of com.openexchange.management since admin bundle is running");
+			return;
+		}
+		stopInternal();
+		/*
+		 * Clear service registry
+		 */
+		getServiceRegistry().clearRegistry();
 	}
 
 	private void startInternal() throws AbstractOXException {
@@ -175,32 +187,4 @@ public final class ManagementActivator implements BundleActivator {
 			ManagementInit.getInstance().stop();
 		}
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
-	public void stop(final BundleContext context) throws Exception {
-		LOG.info("stopping bundle: com.openexchange.management");
-        if (isAdminBundleInstalled(context)) {
-            return;
-        }
-		try {
-			/*
-			 * Close service trackers
-			 */
-			for (final ServiceTracker tracker : serviceTrackerList) {
-				tracker.close();
-			}
-			serviceTrackerList.clear();
-			csh.removeServiceHolderListenerByName(listener.getClass().getName());
-			csh = null;
-			stopInternal();
-		} catch (final Throwable t) {
-			LOG.error(t.getLocalizedMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		}
-	}
-
 }
