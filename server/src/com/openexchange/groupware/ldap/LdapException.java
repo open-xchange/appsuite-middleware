@@ -87,6 +87,16 @@ public class LdapException extends AbstractOXException {
     private final Detail detail;
 
     /**
+     * Initializes a new {@link LdapException}
+     * 
+     * @param cause The cause
+     */
+    public LdapException(final AbstractOXException cause) {
+    	super(cause);
+    	detail = Detail.ERROR;
+    }
+
+    /**
      * Initializes a new exception using the information provides by the code.
      * @param component the component.
      * @param code code for the exception.
