@@ -70,7 +70,7 @@ public final class ContextInit implements Initialization {
     /**
      * @return the singleton instance.
      */
-    public static final ContextInit getInstance() {
+    public static ContextInit getInstance() {
         return singleton;
     }
 
@@ -84,7 +84,7 @@ public final class ContextInit implements Initialization {
     /**
      * {@inheritDoc}
      */
-    public void stop() {
+    public void stop() throws ContextException {
         ContextStorage.stop();
     }
 }

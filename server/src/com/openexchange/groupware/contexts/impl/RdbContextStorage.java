@@ -271,7 +271,7 @@ public class RdbContextStorage extends ContextStorage {
             stmt = con.prepareStatement("SELECT cid FROM context");
             result = stmt.executeQuery();
             while (result.next()) {
-                retval.add(result.getInt(1));
+                retval.add(Integer.valueOf(result.getInt(1)));
             }
         } catch (SQLException e) {
             throw new ContextException(Code.SQL_ERROR, e, e.getMessage());
@@ -281,4 +281,12 @@ public class RdbContextStorage extends ContextStorage {
         }
         return retval;
     }
+
+	@Override
+	protected void shutDown() throws ContextException {
+	}
+
+	@Override
+	protected void startUp() throws ContextException {
+	}
 }

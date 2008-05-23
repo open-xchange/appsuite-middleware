@@ -58,6 +58,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
+import com.openexchange.cache.registry.CacheAvailabilityListener;
+import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
@@ -80,28 +82,49 @@ public class CachingContextStorage extends ContextStorage {
     private static final Log LOG = LogFactory.getLog(CachingContextStorage.class);
 
     /**
+     * Boolean flag for started status
+     */
+    private boolean started;
+
+    /**
      * Lock for the cache.
      */
-    private static final Lock CACHE_LOCK = new ReentrantLock();
+    private final Lock cacheLock;
 
     /**
      * Cache.
      */
-    private static Cache cache;
+    private Cache cache;
 
     /**
-     * Implementation of the context storage that does persistant storing.
+     * Cache availability listener
+     */
+    private final CacheAvailabilityListener listener;
+
+    /**
+     * Implementation of the context storage that does persistent storing.
      */
     private final ContextStorage persistantImpl;
 
     /**
      * Default constructor.
      * @param persistantImpl implementation of the ContextStorage that does
-     * persistant storing.
+     * Persistent storing.
      */
     public CachingContextStorage(final ContextStorage persistantImpl) {
         super();
+        cacheLock = new ReentrantLock();
         this.persistantImpl = persistantImpl;
+        listener = new CacheAvailabilityListener() {
+
+			public void handleAbsence() throws AbstractOXException {
+				releaseCache();
+			}
+
+			public void handleAvailability() throws AbstractOXException {
+				initCache();
+			}
+		};
     }
 
     /**
@@ -117,6 +140,9 @@ public class CachingContextStorage extends ContextStorage {
      */
     @Override
     public int getContextId(final String loginInfo) throws ContextException {
+    	if (null == cache) {
+    		return persistantImpl.getContextId(loginInfo);
+    	}
         Integer contextId = (Integer) cache.get(loginInfo);
         if (null == contextId) {
             if (LOG.isTraceEnabled()) {
@@ -142,6 +168,9 @@ public class CachingContextStorage extends ContextStorage {
     @Override
     protected ContextExtended loadContext(final int contextId)
         throws ContextException {
+    	if (cache == null) {
+    		return persistantImpl.loadContext(contextId);
+    	}
         final OXObjectFactory<ContextExtended> factory =
         new OXObjectFactory<ContextExtended>() {
             public Serializable getKey() {
@@ -160,7 +189,7 @@ public class CachingContextStorage extends ContextStorage {
                 return retval;
             }
             public Lock getCacheLock() {
-                return CACHE_LOCK;
+                return cacheLock;
             }
         };
         try {
@@ -181,36 +210,52 @@ public class CachingContextStorage extends ContextStorage {
         return persistantImpl.getAllContextIds();
     }
 
-    /**
-     * Initializes the context cache.
-     * @throws ContextException if the initialization fails.
-     */
-    public static void start() throws ContextException {
-        if (null != cache) {
+    @Override
+	protected void startUp() throws ContextException {
+        if (started) {
             LOG.error("Duplicate initialization of CachingContextStorage.");
             return;
         }
-        try {
-            cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache("Context");
-        } catch (CacheException e) {
-            throw new ContextException(Code.CACHE_INIT, e);
+        initCache();
+        final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+        if (null != reg) {
+        	reg.registerListener(listener);
         }
+        started = true;
     }
- 
-    /**
-     * Shuts this class down.
-     */
-    public static void stop() {
-        if (null == cache) {
+
+    @Override
+    protected void shutDown() {
+        if (!started) {
             LOG.error("Duplicate shutdown of CachingContextStorage.");
             return;
         }
-        try {
-            cache.clear();
-        } catch (CacheException e) {
-            LOG.error("Problem while clearing cache.", e);
+        final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
+        if (null != reg) {
+        	reg.unregisterListener(listener);
         }
-        cache = null;
+        releaseCache();
+        started = false;
+    }
+
+    private void initCache() throws ContextException {
+    	if (cache != null) {
+    		return;
+    	}
+    	try {
+            cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache("Context");
+        } catch (final CacheException e) {
+            throw new ContextException(Code.CACHE_INIT, e);
+        }
+    }
+
+    private void releaseCache() {
+    	 try {
+             cache.clear();
+         } catch (final CacheException e) {
+             LOG.error("Problem while clearing cache.", e);
+         }
+         cache = null;
     }
     
     /**
@@ -219,17 +264,17 @@ public class CachingContextStorage extends ContextStorage {
 	@Override
 	public void invalidateContext(final int contextId) throws ContextException {
 		if (cache == null) {
-			// Cache not initialized, yet.
+			// Cache not initialized.
 			return;
 		}
-		CACHE_LOCK.lock();
+		cacheLock.lock();
 		try {
 			cache.remove(Integer.valueOf(contextId));
 		} catch (CacheException e) {
 			throw new ContextException(ContextException.Code.CACHE_REMOVE, e,
                 String.valueOf(contextId));
 		} finally {
-			CACHE_LOCK.unlock();
+			cacheLock.unlock();
 		}
 	}
 
@@ -240,17 +285,17 @@ public class CachingContextStorage extends ContextStorage {
     public void invalidateLoginInfo(final String loginContextInfo)
         throws ContextException {
         if (null == cache) {
-            // Cache not initialized, yet.
+            // Cache not initialized.
             return;
         }
-        CACHE_LOCK.lock();
+        cacheLock.lock();
         try {
             cache.remove(loginContextInfo);
         } catch (CacheException e) {
             throw new ContextException(ContextException.Code.CACHE_REMOVE, e,
                 loginContextInfo);
         } finally {
-            CACHE_LOCK.unlock();
+            cacheLock.unlock();
         }
     }
 }

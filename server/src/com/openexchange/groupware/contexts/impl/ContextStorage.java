@@ -163,6 +163,20 @@ public abstract class ContextStorage {
     public abstract List<Integer> getAllContextIds() throws ContextException;
 
     /**
+     * Internal start-up routine invoked in {@link #start()}
+     * 
+     * @throws ContextException If an error occurs
+     */
+    protected abstract void startUp() throws ContextException;
+
+    /**
+     * Internal shut-down routine invoked in {@link #stop()}
+     * 
+     * @throws ContextException If an error occurs
+     */
+    protected abstract void shutDown() throws ContextException;
+
+    /**
      * Releases all resources associated with the implementation of this context
      * storage.
      */
@@ -189,20 +203,20 @@ public abstract class ContextStorage {
             LOG.error("Duplicate initialization of ContextStorage.");
             return;
         }
-        CachingContextStorage.start();
         impl = new CachingContextStorage(new RdbContextStorage());
+        impl.startUp();
     }
 
     /**
      * Shutdown.
      */
-    public static void stop() {
+    public static void stop() throws ContextException {
         if (null == impl) {
             LOG.error("Duplicate shutdown of ContextStorage.");
             return;
         }
+        impl.shutDown();
         impl = null;
-        CachingContextStorage.stop();
     }
 
     public static Context getStorageContext(final Session session)
