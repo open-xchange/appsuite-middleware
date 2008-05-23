@@ -109,8 +109,6 @@ public final class BundleTestConfigJump extends AbstractBundleTest {
 			 */
 			final JSONObject configJumpObject = readURL(getWebConversation(), loginTest.getHostName(), sessionId);
 
-			System.out.println(configJumpObject);
-
 			/*
 			 * Check for error
 			 */
