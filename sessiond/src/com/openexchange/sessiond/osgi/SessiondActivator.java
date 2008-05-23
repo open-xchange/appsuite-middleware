@@ -58,11 +58,13 @@ import org.osgi.framework.ServiceRegistration;
 
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.ServiceException;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.cache.SessionCache;
+import com.openexchange.sessiond.cache.SessionCacheConfiguration;
 import com.openexchange.sessiond.impl.SessionControlObject;
 import com.openexchange.sessiond.impl.SessionHandler;
 import com.openexchange.sessiond.impl.SessionImpl;
@@ -82,8 +84,6 @@ public final class SessiondActivator extends DeferredActivator {
 	private final AtomicBoolean started;
 
 	private ServiceRegistration sessiondServiceRegistration;
-
-	private boolean reconfigureCache;
 
 	/**
 	 * Initializes a new {@link SessiondActivator}
@@ -109,9 +109,11 @@ public final class SessiondActivator extends DeferredActivator {
 			LOG.warn("Absent service: " + clazz.getName());
 		}
 		if (CacheService.class.equals(clazz)) {
-			// TODO: free affected cache regions
-
-			reconfigureCache = true;
+			try {
+				SessionCacheConfiguration.getInstance().stop();
+			} catch (final AbstractOXException e) {
+				LOG.error(e.getMessage(), e);
+			}
 		}
 		getServiceRegistry().removeService(clazz);
 	}
@@ -123,9 +125,11 @@ public final class SessiondActivator extends DeferredActivator {
 		}
 		getServiceRegistry().addService(clazz, getService(clazz));
 		if (CacheService.class.equals(clazz)) {
-			// TODO: free affected cache regions
-
-			reconfigureCache = true;
+			try {
+				SessionCacheConfiguration.getInstance().start();
+			} catch (final AbstractOXException e) {
+				LOG.error(e.getMessage(), e);
+			}
 		}
 	}
 
@@ -154,10 +158,6 @@ public final class SessiondActivator extends DeferredActivator {
 				 * method again.
 				 */
 				LOG.info("A temporary absent service is available again");
-				if (reconfigureCache) {
-					// TODO: re-configure affected cache regions
-					reconfigureCache = false;
-				}
 				return;
 			}
 			if (LOG.isInfoEnabled()) {
