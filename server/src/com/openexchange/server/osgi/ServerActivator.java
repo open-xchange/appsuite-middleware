@@ -120,8 +120,8 @@ public final class ServerActivator extends DeferredActivator {
 	 */
 	public ServerActivator() {
 		super();
-		started = new AtomicBoolean();
-		starter = new Starter();
+		this.started = new AtomicBoolean();
+		this.starter = new Starter();
 	}
 
 	private final List<ServiceRegistration> registrationList = new ArrayList<ServiceRegistration>();
@@ -139,9 +139,9 @@ public final class ServerActivator extends DeferredActivator {
 	@Override
 	protected Class<?>[] getNeededServices() {
 		if (null == adminBundleInstalled) {
-			adminBundleInstalled = Boolean.valueOf(isAdminBundleInstalled(context));
+			this.adminBundleInstalled = Boolean.valueOf(isAdminBundleInstalled(context));
 		}
-		return adminBundleInstalled.booleanValue() ? NEEDED_SERVICES_ADMIN : NEEDED_SERVICES_SERVER;
+		return this.adminBundleInstalled.booleanValue() ? NEEDED_SERVICES_ADMIN : NEEDED_SERVICES_SERVER;
 	}
 
 	@Override
