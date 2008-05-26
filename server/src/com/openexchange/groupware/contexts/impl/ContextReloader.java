@@ -51,7 +51,6 @@ package com.openexchange.groupware.contexts.impl;
 
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
 import com.openexchange.cache.dynamic.impl.Refresher;
-import com.openexchange.caching.Cache;
 import com.openexchange.groupware.AbstractOXException;
 
 /**
@@ -70,8 +69,8 @@ final class ContextReloader extends Refresher<ContextExtended> implements Contex
      * @throws AbstractOXException if some problem occurs with refreshing.
      */
     public ContextReloader(final OXObjectFactory<ContextExtended> factory,
-        final Cache cache) throws AbstractOXException {
-        super(factory, cache);
+        final String regionName) throws AbstractOXException {
+        super(factory, regionName);
         this.delegate = refresh();
     }
 

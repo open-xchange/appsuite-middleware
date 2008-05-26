@@ -78,4 +78,12 @@ public class FilestoreException extends AbstractOXException {
         super(component, category, detailNumber, message, cause);
         setMessageArgs(messageArgs);
     }
+
+    /**
+     * Initializes a new {@link FilestoreException}
+     * @param cause The init cause
+     */
+    public FilestoreException(final AbstractOXException cause) {
+    	super(cause);
+    }
 }

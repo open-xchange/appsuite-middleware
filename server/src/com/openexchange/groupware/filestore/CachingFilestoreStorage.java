@@ -53,34 +53,20 @@ import java.io.Serializable;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.cache.dynamic.impl.CacheProxy;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
-import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheException;
-import com.openexchange.caching.CacheService;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.groupware.AbstractOXException;
 
 public class CachingFilestoreStorage extends FilestoreStorage {
 
-	private static final Log LOG = LogFactory.getLog(CachingFilestoreStorage.class);
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(CachingFilestoreStorage.class);
+
+	private static final String REGION_NAME = "Filestore";
 
 	private final FilestoreStorage delegate;
-	
-	private static Cache cache;
 
-    private static final Lock CACHE_LOCK;
-
-	static {
-		try {
-			cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache("Filestore");
-		} catch (final CacheException e) {
-			LOG.error(e);
-		}
-        CACHE_LOCK = new ReentrantLock();
-	}
+    private static final Lock CACHE_LOCK = new ReentrantLock();
 	
 	public CachingFilestoreStorage(final FilestoreStorage fs) {
 		this.delegate = fs;
@@ -89,13 +75,19 @@ public class CachingFilestoreStorage extends FilestoreStorage {
 	@Override
 	public Filestore getFilestore(final int id) throws FilestoreException {
         final FilestoreFactory factory = new FilestoreFactory(id,delegate);
-		if(cache == null) {
-			throw new IllegalStateException("Cache not initialised! Not caching");
+		try {
+			return CacheProxy.getCacheProxy(factory, REGION_NAME, Filestore.class);
+		} catch (final IllegalArgumentException e) {
+			/*
+			 * Should not occur
+			 */
+			LOG.error(e.getMessage(), e);
+			return delegate.getFilestore(id);
+		} catch (final FilestoreException e) {
+			throw e;
+		} catch (final AbstractOXException e) {
+			throw new FilestoreException(e);
 		}
-        if (null == cache.get(factory.getKey())) {
-            factory.load();
-        }
-		return CacheProxy.getCacheProxy(factory, cache, Filestore.class);
 	}
 	
 	private static final class FilestoreFactory implements

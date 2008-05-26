@@ -60,7 +60,9 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.cache.OXCachingException;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  *
@@ -84,18 +86,26 @@ public abstract class Refresher<T> {
     private final Serializable key;
 
     /**
-     * Cache.
+     * The cache region name.
      */
-    private final Cache cache;
+    private final String regionName;
 
     /**
      * Default constructor.
      */
-    protected Refresher(final OXObjectFactory<T> factory, final Cache cache) {
+    protected Refresher(final OXObjectFactory<T> factory, final String regionName) {
         super();
         this.factory = factory;
         this.key = factory.getKey();
-        this.cache = cache;
+        this.regionName = regionName;
+    }
+
+    private Cache getCache() throws CacheException {
+    	final CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
+    	if (null == service) {
+    		return null;
+    	}
+    	return service.getCache(regionName);
     }
 
     /**
@@ -104,7 +114,11 @@ public abstract class Refresher<T> {
      * @throws AbstractOXException if loading or putting into cache fails.
      */
     protected T refresh() throws AbstractOXException {
-        T retval = null;
+        final Cache cache = getCache();
+        if (null == cache) {
+    		return factory.load();
+        }
+    	T retval = null;
         final Lock lock = factory.getCacheLock();
         Condition cond = null;
         boolean load;

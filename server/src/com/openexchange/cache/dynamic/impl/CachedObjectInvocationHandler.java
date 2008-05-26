@@ -63,7 +63,9 @@ import com.openexchange.cache.OXCachingException;
 import com.openexchange.cache.dynamic.OXNoRefresh;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
+import com.openexchange.caching.CacheService;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 public class CachedObjectInvocationHandler<T> implements InvocationHandler {
 
@@ -75,16 +77,15 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
  
     private static final Method EQUALS;
 
-    private final Object key;
     private T cached;
     private final OXObjectFactory<T> factory;
-    private final Cache cache;
+    private final String regionName;
 
     public CachedObjectInvocationHandler(final OXObjectFactory<T> factory,
-        final Cache cache) {
-        key = factory.getKey();
+        final String regionName) throws AbstractOXException {
         this.factory = factory;
-        this.cache = cache;
+        this.regionName = regionName;
+        refresh();
     }
 
     /**
@@ -103,25 +104,40 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
         return method.invoke(cached, arguments);
     }
 
+    private Cache getCache() throws CacheException {
+    	final CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
+    	if (null == service) {
+    		return null;
+    	}
+    	return service.getCache(regionName);
+    }
+
     /**
      * Checks if the object was removed from the cache and must be reloaded from
      * the database.
      * @throws AbstractOXException if loading or putting into cache fails.
      */
     private void refresh() throws AbstractOXException {
+    	final Cache cache = getCache();
+    	if (null == cache) {
+    		if (null == cached) {
+    			cached = factory.load();
+    		}
+    		return;
+    	}
         final Lock lock = factory.getCacheLock();
         Condition cond = null;
         boolean load;
         lock.lock();
         try {
-            final Object tmp = cache.get((Serializable) key);
+            final Object tmp = cache.get(factory.getKey());
             if (null == tmp) {
                 // I am the thread to load the object. Put temporary condition
                 // into cache.
                 load = true;
                 cond = lock.newCondition();
                 try {
-                    cache.putSafe((Serializable) key, (Serializable) cond);
+                    cache.putSafe(factory.getKey(), (Serializable) cond);
                 } catch (final CacheException e) {
                     throw new OXCachingException(OXCachingException.Code
                         .FAILED_PUT, e);
@@ -132,7 +148,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
                 if (cond.await(1, TimeUnit.SECONDS)) {
                     // Other thread finished loading the object.
                     load = false;
-                    cached = (T) cache.get((Serializable) key);
+                    cached = (T) cache.get(factory.getKey());
                 } else {
                     // We have to load it, too.
                     LOG.warn("Found 2 threads loading cached objects after 1 "
@@ -156,7 +172,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
             lock.lock();
             try {
                 cond.signalAll();
-                cache.put((Serializable) key, (Serializable) cached);
+                cache.put(factory.getKey(), (Serializable) cached);
             } catch (CacheException e) {
                 throw new OXCachingException(OXCachingException.Code.FAILED_PUT,
                     e);

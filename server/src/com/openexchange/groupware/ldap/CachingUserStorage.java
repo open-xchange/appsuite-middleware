@@ -59,8 +59,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.cache.dynamic.impl.CacheProxy;
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
-import com.openexchange.cache.registry.CacheAvailabilityListener;
-import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheKey;
@@ -82,20 +80,12 @@ public class CachingUserStorage extends UserStorage {
 	 */
 	private static final Log LOG = LogFactory.getLog(CachingUserStorage.class);
 
+	private static final String REGION_NAME = "User";
+
 	/**
 	 * Proxy attribute for the object implementing the persistent methods.
 	 */
 	private UserStorage delegate;
-
-	/**
-	 * The cache availability listener
-	 */
-	private final CacheAvailabilityListener cacheAvailabilityListener;
-
-	/**
-	 * Cache.
-	 */
-	private Cache cache;
 
 	/**
 	 * Lock for the cache.
@@ -108,44 +98,6 @@ public class CachingUserStorage extends UserStorage {
 	public CachingUserStorage() {
 		super();
 		cacheLock = new ReentrantLock(true);
-		cacheAvailabilityListener = new CacheAvailabilityListener() {
-			public void handleAbsence() throws AbstractOXException {
-				releaseCache();
-			}
-			public void handleAvailability() throws AbstractOXException {
-				initCache();
-			}
-		};
-		initCache();
-	}
-
-	/**
-	 * Initializes cache reference
-	 */
-	private void initCache() {
-		if (cache != null) {
-			return;
-		}
-		try {
-			cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache("User");
-		} catch (CacheException e) {
-			throw new RuntimeException("Cannot create user cache.", e);
-		}
-	}
-
-	/**
-	 * Releases cache reference
-	 */
-	private void releaseCache() {
-		if (cache == null) {
-			return;
-		}
-		try {
-			cache.clear();
-		} catch (final CacheException e) {
-			throw new RuntimeException("Cannot clear user cache.", e);
-		}
-		cache = null;
 	}
 	
 	/**
@@ -153,12 +105,10 @@ public class CachingUserStorage extends UserStorage {
 	 */
 	@Override
 	public User getUser(final int uid, final Context context) throws LdapException {
-		if (null == cache) {
-			return getUserStorage().getUser(uid, context);
-		}
 		final OXObjectFactory<User> factory = new OXObjectFactory<User>() {
 			public Serializable getKey() {
-				return cache.newCacheKey(context.getContextId(), uid);
+				return ServerServiceRegistry.getInstance().getService(CacheService.class).newCacheKey(
+						context.getContextId(), uid);
 			}
 
 			public User load() throws LdapException {
@@ -169,25 +119,19 @@ public class CachingUserStorage extends UserStorage {
 				return cacheLock;
 			}
 		};
-		cacheLock.lock();
 		try {
-			if (null == cache.get(factory.getKey())) {
-				/*
-				 * Check existence through a load
-				 */
-				final User user = getUserStorage().getUser(uid, context);
-				if (null != user) {
-					try {
-						cache.putSafe(factory.getKey(), (Serializable) user);
-					} catch (final CacheException e) {
-						throw new LdapException(e);
-					}
-				}
-			}
-		} finally {
-			cacheLock.unlock();
+			return CacheProxy.getCacheProxy(factory, REGION_NAME, User.class);
+		} catch (final IllegalArgumentException e) {
+			/*
+			 * Should not occur
+			 */
+			LOG.error(e.getMessage(), e);
+			return getUserStorage().getUser(uid, context);
+		} catch (final LdapException e) {
+			throw e;
+		} catch (final AbstractOXException e) {
+			throw new LdapException(e);
 		}
-		return CacheProxy.getCacheProxy(factory, cache, User.class);
 	}
 
 	/**
@@ -196,8 +140,10 @@ public class CachingUserStorage extends UserStorage {
 	@Override
 	public void updateUser(final User user, final Context context) throws LdapException {
 		getUserStorage().updateUser(user, context);
-		if (null != cache) {
+		final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+		if (null != cacheService) {
 			try {
+				final Cache cache = cacheService.getCache(REGION_NAME);
 				cache.remove(cache.newCacheKey(context.getContextId(), user.getId()));
 			} catch (final CacheException e) {
 				throw new LdapException(EnumComponent.USER, Code.CACHE_PROBLEM, e);
@@ -210,29 +156,35 @@ public class CachingUserStorage extends UserStorage {
 	 */
 	@Override
 	public int getUserId(final String uid, final Context context) throws LdapException {
-		if (null == cache) {
+		final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+		if (null == cacheService) {
 			return getUserStorage().getUserId(uid, context);
 		}
-		final CacheKey key = cache.newCacheKey(context.getContextId(), uid);
-		int identifier = -1;
-		final Integer tmp = (Integer) cache.get(key);
-		if (null == tmp) {
-			if (LOG.isTraceEnabled()) {
-				LOG.trace("Cache MISS. Context: " + context.getContextId() + " User: " + uid);
+		try {
+			final Cache cache = cacheService.getCache(REGION_NAME);
+			final CacheKey key = cache.newCacheKey(context.getContextId(), uid);
+			int identifier = -1;
+			final Integer tmp = (Integer) cache.get(key);
+			if (null == tmp) {
+				if (LOG.isTraceEnabled()) {
+					LOG.trace("Cache MISS. Context: " + context.getContextId() + " User: " + uid);
+				}
+				identifier = getUserStorage().getUserId(uid, context);
+				try {
+					cache.put(key, Integer.valueOf(identifier));
+				} catch (CacheException e) {
+					throw new LdapException(EnumComponent.USER, Code.CACHE_PROBLEM, e);
+				}
+			} else {
+				if (LOG.isTraceEnabled()) {
+					LOG.trace("Cache HIT. Context: " + context.getContextId() + " User: " + uid);
+				}
+				identifier = tmp.intValue();
 			}
-			identifier = getUserStorage().getUserId(uid, context);
-			try {
-				cache.put(key, Integer.valueOf(identifier));
-			} catch (CacheException e) {
-				throw new LdapException(EnumComponent.USER, Code.CACHE_PROBLEM, e);
-			}
-		} else {
-			if (LOG.isTraceEnabled()) {
-				LOG.trace("Cache HIT. Context: " + context.getContextId() + " User: " + uid);
-			}
-			identifier = tmp.intValue();
+			return identifier;
+		} catch (final CacheException e) {
+			throw new LdapException(EnumComponent.USER, Code.CACHE_PROBLEM, e);
 		}
-		return identifier;
 	}
 
 	/**
@@ -269,31 +221,37 @@ public class CachingUserStorage extends UserStorage {
 	 */
 	@Override
 	public int resolveIMAPLogin(final String imapLogin, final Context context) throws UserException {
-		if (null == cache) {
+		final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+		if (null == cacheService) {
 			try {
 				return getUserStorage().resolveIMAPLogin(imapLogin, context);
 			} catch (LdapException e) {
 				throw new UserException(e);
 			}
 		}
-		final CacheKey key = cache.newCacheKey(context.getContextId(), imapLogin);
-		final int identifier;
-		final Integer tmp = (Integer) cache.get(key);
-		if (null == tmp) {
-			try {
-				identifier = getUserStorage().resolveIMAPLogin(imapLogin, context);
-			} catch (LdapException e) {
-				throw new UserException(e);
+		try {
+			final Cache cache = cacheService.getCache(REGION_NAME);
+			final CacheKey key = cache.newCacheKey(context.getContextId(), imapLogin);
+			final int identifier;
+			final Integer tmp = (Integer) cache.get(key);
+			if (null == tmp) {
+				try {
+					identifier = getUserStorage().resolveIMAPLogin(imapLogin, context);
+				} catch (LdapException e) {
+					throw new UserException(e);
+				}
+				try {
+					cache.put(key, Integer.valueOf(identifier));
+				} catch (CacheException e) {
+					throw new UserException(UserException.Code.CACHE_PROBLEM, e);
+				}
+			} else {
+				identifier = tmp.intValue();
 			}
-			try {
-				cache.put(key, Integer.valueOf(identifier));
-			} catch (CacheException e) {
-				throw new UserException(UserException.Code.CACHE_PROBLEM, e);
-			}
-		} else {
-			identifier = tmp.intValue();
+			return identifier;
+		} catch (final CacheException e) {
+			throw new UserException(UserException.Code.CACHE_PROBLEM, e);
 		}
-		return identifier;
 	}
 
 	/**
@@ -315,20 +273,12 @@ public class CachingUserStorage extends UserStorage {
 
 	@Override
 	protected void startInternal() throws UserException {
-		final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
-		if (null != reg && !reg.registerListener(cacheAvailabilityListener)) {
-			LOG.error("Cache availability listener could not be registered", new Throwable());
-		}
 	}
 
 	@Override
 	protected void stopInternal() throws UserException {
-		final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
-		if (null != reg) {
-			reg.unregisterListener(cacheAvailabilityListener);
-		}
 		try {
-			ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache("User");
+			ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(REGION_NAME);
 		} catch (final CacheException e) {
 			throw new UserException(e);
 		}

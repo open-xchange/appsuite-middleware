@@ -54,6 +54,7 @@ package com.openexchange.cache.dynamic.impl;
 import java.lang.reflect.Proxy;
 
 import com.openexchange.caching.Cache;
+import com.openexchange.groupware.AbstractOXException;
 
 /**
  * Creates a proxy object for cached objects. The proxy object insures that the
@@ -68,18 +69,20 @@ public final class CacheProxy {
      * @param <T> Class implementing all given interfaces.
      * @param factory Factory for generating keys and objects that will be
      * cached.
-     * @param cache The cache.
+     * @param regionName The cache's region name.
      * @param interfaces The proxy object will be generated for these
      * interfaces.
      * @return the proxy object.
+     * @throws AbstractOXException If loading object fails
+     * @throws IllegalArgumentException If proxy instance cannot be initialized
      */
     public static <T extends Object> T getCacheProxy(
-        final OXObjectFactory<T> factory, final Cache cache,
-        final Class<?>... interfaces) {
+        final OXObjectFactory<T> factory, final String regionName,
+        final Class<?>... interfaces) throws IllegalArgumentException, AbstractOXException {
         return (T) Proxy.newProxyInstance(
             CacheProxy.class.getClassLoader(),
             interfaces,
-            new CachedObjectInvocationHandler<T>(factory, cache)
+            new CachedObjectInvocationHandler<T>(factory, regionName)
         );
     }
 

@@ -58,8 +58,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.cache.dynamic.impl.OXObjectFactory;
-import com.openexchange.cache.registry.CacheAvailabilityListener;
-import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
@@ -80,6 +78,8 @@ public class CachingContextStorage extends ContextStorage {
      * Logger.
      */
     private static final Log LOG = LogFactory.getLog(CachingContextStorage.class);
+   
+    private static final String REGION_NAME = "Context";
 
     /**
      * Boolean flag for started status
@@ -90,16 +90,6 @@ public class CachingContextStorage extends ContextStorage {
      * Lock for the cache.
      */
     private final Lock cacheLock;
-
-    /**
-     * Cache.
-     */
-    private Cache cache;
-
-    /**
-     * Cache availability listener
-     */
-    private final CacheAvailabilityListener listener;
 
     /**
      * Implementation of the context storage that does persistent storing.
@@ -115,16 +105,6 @@ public class CachingContextStorage extends ContextStorage {
         super();
         cacheLock = new ReentrantLock();
         this.persistantImpl = persistantImpl;
-        listener = new CacheAvailabilityListener() {
-
-			public void handleAbsence() throws AbstractOXException {
-				releaseCache();
-			}
-
-			public void handleAvailability() throws AbstractOXException {
-				initCache();
-			}
-		};
     }
 
     /**
@@ -140,67 +120,73 @@ public class CachingContextStorage extends ContextStorage {
      */
     @Override
     public int getContextId(final String loginInfo) throws ContextException {
-    	if (null == cache) {
+    	final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+    	if (null == cacheService) {
     		return persistantImpl.getContextId(loginInfo);
     	}
-        Integer contextId = (Integer) cache.get(loginInfo);
-        if (null == contextId) {
-            if (LOG.isTraceEnabled()) {
-            	LOG.trace("Cache MISS. Login info: " + loginInfo);
-            }
-            contextId = Integer.valueOf(persistantImpl.getContextId(loginInfo));
-            if (NOT_FOUND != contextId.intValue()) {
-                try {
-                    cache.put(loginInfo, contextId);
-                } catch (CacheException e) {
-                    throw new ContextException(Code.CACHE_PUT, e);
-                }
-            }
-        } else if (LOG.isTraceEnabled()) {
-            LOG.trace("Cache HIT. Login info: " + loginInfo);
-        }
-        return contextId.intValue();
+    	try {
+			final Cache cache = cacheService.getCache(REGION_NAME);
+			Integer contextId = (Integer) cache.get(loginInfo);
+			if (null == contextId) {
+				if (LOG.isTraceEnabled()) {
+					LOG.trace("Cache MISS. Login info: " + loginInfo);
+				}
+				contextId = Integer.valueOf(persistantImpl.getContextId(loginInfo));
+				if (NOT_FOUND != contextId.intValue()) {
+					try {
+						cache.put(loginInfo, contextId);
+					} catch (CacheException e) {
+						throw new ContextException(Code.CACHE_PUT, e);
+					}
+				}
+			} else if (LOG.isTraceEnabled()) {
+				LOG.trace("Cache HIT. Login info: " + loginInfo);
+			}
+			return contextId.intValue();
+		} catch (final CacheException e) {
+			throw new ContextException(e);
+		}
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected ContextExtended loadContext(final int contextId)
-        throws ContextException {
-    	if (cache == null) {
-    		return persistantImpl.loadContext(contextId);
-    	}
-        final OXObjectFactory<ContextExtended> factory =
-        new OXObjectFactory<ContextExtended>() {
-            public Serializable getKey() {
-                return Integer.valueOf(contextId);
-            }
-            public ContextExtended load() throws AbstractOXException {
-                final ContextExtended retval = persistantImpl.loadContext(
-                    contextId);
-                final Updater updater = Updater.getInstance();
-                if (updater.isLocked(retval)) {
-                    retval.setUpdating(true);
-                } else if (updater.toUpdate(retval)) {
-                    updater.startUpdate(retval);
-                    retval.setUpdating(true);
-                }
-                return retval;
-            }
-            public Lock getCacheLock() {
-                return cacheLock;
-            }
-        };
-        try {
-            return new ContextReloader(factory, cache);
-        } catch (final AbstractOXException e) {
-            if (e instanceof ContextException) {
-                throw (ContextException) e;
-            }
-            throw new ContextException(e);
-        }
-    }
+	protected ContextExtended loadContext(final int contextId) throws ContextException {
+		final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+		if (cacheService == null) {
+			return persistantImpl.loadContext(contextId);
+		}
+		final OXObjectFactory<ContextExtended> factory = new OXObjectFactory<ContextExtended>() {
+			public Serializable getKey() {
+				return Integer.valueOf(contextId);
+			}
+
+			public ContextExtended load() throws AbstractOXException {
+				final ContextExtended retval = persistantImpl.loadContext(contextId);
+				final Updater updater = Updater.getInstance();
+				if (updater.isLocked(retval)) {
+					retval.setUpdating(true);
+				} else if (updater.toUpdate(retval)) {
+					updater.startUpdate(retval);
+					retval.setUpdating(true);
+				}
+				return retval;
+			}
+
+			public Lock getCacheLock() {
+				return cacheLock;
+			}
+		};
+		try {
+			return new ContextReloader(factory, REGION_NAME);
+		} catch (final AbstractOXException e) {
+			if (e instanceof ContextException) {
+				throw (ContextException) e;
+			}
+			throw new ContextException(e);
+		}
+	}
 
     /**
      * {@inheritDoc}
@@ -216,11 +202,6 @@ public class CachingContextStorage extends ContextStorage {
             LOG.error("Duplicate initialization of CachingContextStorage.");
             return;
         }
-        initCache();
-        final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
-        if (null != reg) {
-        	reg.registerListener(listener);
-        }
         started = true;
     }
 
@@ -230,32 +211,7 @@ public class CachingContextStorage extends ContextStorage {
             LOG.error("Duplicate shutdown of CachingContextStorage.");
             return;
         }
-        final CacheAvailabilityRegistry reg = CacheAvailabilityRegistry.getInstance();
-        if (null != reg) {
-        	reg.unregisterListener(listener);
-        }
-        releaseCache();
         started = false;
-    }
-
-    private void initCache() throws ContextException {
-    	if (cache != null) {
-    		return;
-    	}
-    	try {
-            cache = ServerServiceRegistry.getInstance().getService(CacheService.class).getCache("Context");
-        } catch (final CacheException e) {
-            throw new ContextException(Code.CACHE_INIT, e);
-        }
-    }
-
-    private void releaseCache() {
-    	 try {
-             cache.clear();
-         } catch (final CacheException e) {
-             LOG.error("Problem while clearing cache.", e);
-         }
-         cache = null;
     }
     
     /**
@@ -263,18 +219,23 @@ public class CachingContextStorage extends ContextStorage {
      */
 	@Override
 	public void invalidateContext(final int contextId) throws ContextException {
-		if (cache == null) {
+		final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+		if (cacheService == null) {
 			// Cache not initialized.
 			return;
 		}
-		cacheLock.lock();
 		try {
-			cache.remove(Integer.valueOf(contextId));
-		} catch (CacheException e) {
-			throw new ContextException(ContextException.Code.CACHE_REMOVE, e,
-                String.valueOf(contextId));
-		} finally {
-			cacheLock.unlock();
+			final Cache cache = cacheService.getCache(REGION_NAME);
+			cacheLock.lock();
+			try {
+				cache.remove(Integer.valueOf(contextId));
+			} catch (CacheException e) {
+				throw new ContextException(ContextException.Code.CACHE_REMOVE, e, String.valueOf(contextId));
+			} finally {
+				cacheLock.unlock();
+			}
+		} catch (final CacheException e) {
+			throw new ContextException(e);
 		}
 	}
 
@@ -282,20 +243,24 @@ public class CachingContextStorage extends ContextStorage {
      * {@inheritDoc}
      */
     @Override
-    public void invalidateLoginInfo(final String loginContextInfo)
-        throws ContextException {
-        if (null == cache) {
-            // Cache not initialized.
-            return;
-        }
-        cacheLock.lock();
-        try {
-            cache.remove(loginContextInfo);
-        } catch (CacheException e) {
-            throw new ContextException(ContextException.Code.CACHE_REMOVE, e,
-                loginContextInfo);
-        } finally {
-            cacheLock.unlock();
-        }
-    }
+    public void invalidateLoginInfo(final String loginContextInfo) throws ContextException {
+		final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+		if (null == cacheService) {
+			// Cache not initialized.
+			return;
+		}
+		try {
+			final Cache cache = cacheService.getCache(REGION_NAME);
+			cacheLock.lock();
+			try {
+				cache.remove(loginContextInfo);
+			} catch (CacheException e) {
+				throw new ContextException(ContextException.Code.CACHE_REMOVE, e, loginContextInfo);
+			} finally {
+				cacheLock.unlock();
+			}
+		} catch (final CacheException e) {
+			throw new ContextException(e);
+		}
+	}
 }
