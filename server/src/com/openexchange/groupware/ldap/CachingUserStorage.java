@@ -169,15 +169,23 @@ public class CachingUserStorage extends UserStorage {
 				return cacheLock;
 			}
 		};
-		if (null == cache.get(factory.getKey())) {
-			/*
-			 * Check existence through a load
-			 */
-			try {
-				cache.putSafe(factory.getKey(), (Serializable) getUserStorage().getUser(uid, context));
-			} catch (final CacheException e) {
-				throw new LdapException(e);
+		cacheLock.lock();
+		try {
+			if (null == cache.get(factory.getKey())) {
+				/*
+				 * Check existence through a load
+				 */
+				final User user = getUserStorage().getUser(uid, context);
+				if (null != user) {
+					try {
+						cache.putSafe(factory.getKey(), (Serializable) user);
+					} catch (final CacheException e) {
+						throw new LdapException(e);
+					}
+				}
 			}
+		} finally {
+			cacheLock.unlock();
 		}
 		return CacheProxy.getCacheProxy(factory, cache, User.class);
 	}
