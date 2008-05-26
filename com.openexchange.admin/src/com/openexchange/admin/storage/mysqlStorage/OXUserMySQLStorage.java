@@ -87,6 +87,10 @@ import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.SettingException;
+import com.openexchange.groupware.settings.impl.ConfigTree;
+import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -545,12 +549,23 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 
                 OXFolderAdminHelper.propagateUserModification(usrdata.getId(), changedfields, System.currentTimeMillis(), write_ox_con,write_ox_con, ctx.getId().intValue());
             }
-            
+
+            // if admin sets GUI configuration existing GUI configuration is overwritten
+            if (usrdata.isGuiPreferencesSet()) {
+                final SettingStorage settStor = SettingStorage.getInstance(ctx
+                    .getId().intValue(), usrdata.getId().intValue());
+                try {
+                    final Setting setting = ConfigTree.getSettingByPath("/gui");
+                    setting.setSingleValue(usrdata.getGuiPreferences());
+                    settStor.save(write_ox_con, setting);
+                } catch (final SettingException e) {
+                    log.error("Problem while storing GUI preferences.", e);
+                }
+            }
+
             // update last modified column
             changeLastModified(user_id, ctx, write_ox_con);
-            
-            
-            
+
             // fire up
             write_ox_con.commit();
         }catch (final DataTruncation dt){
@@ -1087,6 +1102,17 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
             } finally {
                 closePreparedStatement(stmt);
+            }
+
+            // Write GUI configuration to database.
+            final SettingStorage settStor = SettingStorage.getInstance(ctx
+                .getId().intValue(), internal_user_id);
+            try {
+                final Setting setting = ConfigTree.getSettingByPath("/gui");
+                setting.setSingleValue(usrdata.getGuiPreferences());
+                settStor.save(write_ox_con, setting);
+            } catch (final SettingException e) {
+                log.error("Problem while storing GUI preferences.", e);
             }
 
             // return the client the id to work with the user in the system
