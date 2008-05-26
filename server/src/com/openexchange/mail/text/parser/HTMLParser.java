@@ -186,21 +186,21 @@ public final class HTMLParser {
 						ignoreWhitespace = true;
 					} else if (event == XmlPullParser.IGNORABLE_WHITESPACE) {
 						// Ignore
-						if (LOG.isDebugEnabled()) {
-							LOG.debug("IGNORABLE_WHITESPACE: " + parser.getText());
+						if (LOG.isTraceEnabled()) {
+							LOG.trace("IGNORABLE_WHITESPACE: " + parser.getText());
 						}
 					} else if (event == XmlPullParser.PROCESSING_INSTRUCTION) {
 						// Ignore
-						if (LOG.isDebugEnabled()) {
-							LOG.debug("PROCESSING_INSTRUCTION: " + parser.getText());
+						if (LOG.isTraceEnabled()) {
+							LOG.trace("PROCESSING_INSTRUCTION: " + parser.getText());
 						}
 					} else if (event == XmlPullParser.START_DOCUMENT) {
 						/*
 						 * Cannot occur since initial nextToken() has already
 						 * been invoked
 						 */
-						if (LOG.isDebugEnabled()) {
-							LOG.debug("START_DOCUMENT: " + parser.getText());
+						if (LOG.isTraceEnabled()) {
+							LOG.trace("START_DOCUMENT: " + parser.getText());
 						}
 					} else if (event == XmlPullParser.START_TAG) {
 						final Map<String, String> attributes = new HashMap<String, String>();
