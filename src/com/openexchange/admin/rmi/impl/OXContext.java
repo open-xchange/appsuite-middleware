@@ -767,7 +767,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
 
         final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-        oxcox.downgrade(ctx);
+        try {
+            oxcox.downgrade(ctx);
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
     }
 
 	public String getAccessCombinationName(Context ctx, Credentials auth)
