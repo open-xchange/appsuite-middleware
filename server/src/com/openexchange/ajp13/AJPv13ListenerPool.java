@@ -67,8 +67,6 @@ public final class AJPv13ListenerPool {
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(AJPv13ListenerPool.class);
 
-	private static final int LISTENER_POOL_SIZE = AJPv13Config.getAJPListenerPoolSize();
-
 	/**
 	 * ...<br>
 	 * A ConcurrentLinkedQueue is an appropriate choice when many threads will
@@ -96,17 +94,17 @@ public final class AJPv13ListenerPool {
 		if (!initialized.get()) {
 			synchronized (initialized) {
 				if (!initialized.get()) {
-					AJPv13Server.ajpv13ListenerMonitor.setPoolSize(LISTENER_POOL_SIZE);
-					AJPv13Server.ajpv13ListenerMonitor.setNumIdle(LISTENER_POOL_SIZE);
-					for (int i = 0; i < LISTENER_POOL_SIZE; i++) {
+					AJPv13Server.ajpv13ListenerMonitor.setPoolSize(AJPv13Config.getAJPListenerPoolSize());
+					AJPv13Server.ajpv13ListenerMonitor.setNumIdle(AJPv13Config.getAJPListenerPoolSize());
+					for (int i = 0; i < AJPv13Config.getAJPListenerPoolSize(); i++) {
 						final AJPv13Listener l = new AJPv13Listener(listenerNum.incrementAndGet(), true);
 						AJPv13Watcher.addListener(l);
 						LISTENER_QUEUE.offer(l);
 					}
 					initialized.set(true);
 					if (LOG.isInfoEnabled()) {
-						LOG.info(new StringBuilder(100).append(LISTENER_POOL_SIZE).append(" AJPv13-Listeners created!")
-								.toString());
+						LOG.info(new StringBuilder(100).append(AJPv13Config.getAJPListenerPoolSize()).append(
+								" AJPv13-Listeners created!").toString());
 					}
 				}
 			}
@@ -233,7 +231,7 @@ public final class AJPv13ListenerPool {
 	public static boolean putBack(final AJPv13Listener listener, final boolean enforcedPut) {
 		RW_LOCK.acquireWrite();
 		try {
-			if (enforcedPut || (LISTENER_QUEUE.size() < LISTENER_POOL_SIZE)) {
+			if (enforcedPut || (LISTENER_QUEUE.size() < AJPv13Config.getAJPListenerPoolSize())) {
 				AJPv13Server.ajpv13ListenerMonitor.incrementPoolSize();
 				AJPv13Server.ajpv13ListenerMonitor.incrementNumIdle();
 				return LISTENER_QUEUE.offer(listener);
