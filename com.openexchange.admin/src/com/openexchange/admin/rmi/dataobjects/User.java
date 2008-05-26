@@ -533,6 +533,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
 
     private boolean defaultSenderAddressset = false;
 
+    private String guiPreferences;
+
+    private boolean guiPreferencesSet = false;
+
     /**
      * Instantiates a new empty user object
      */
@@ -4386,6 +4390,28 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
     }
 
     /**
+     * @return the guiPreferences
+     */
+    public final String getGuiPreferences() {
+        return guiPreferences;
+    }
+
+    /**
+     * @param guiPreferences the guiPreferences to set
+     */
+    public final void setGuiPreferences(final String guiPreferences) {
+        this.guiPreferencesSet = true;
+        this.guiPreferences = guiPreferences;
+    }
+
+    /**
+     * @return the guiPreferencesSet
+     */
+    public final boolean isGuiPreferencesSet() {
+        return guiPreferencesSet;
+    }
+
+    /**
      * At the moment {@link #setName}, {@link #setDisplay_name}, {@link #setPassword(String)},
      * {@link #setGiven_name(String)}, {@link #setSur_name(String)} and {@link #setPrimaryEmail(String)} 
      * are defined here
@@ -4485,6 +4511,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         result = prime * result + (fax_otherset ? 1231 : 1237);
         result = prime * result + ((given_name == null) ? 0 : given_name.hashCode());
         result = prime * result + (given_nameset ? 1231 : 1237);
+        result = prime * result + ((guiPreferences == null) ? 0 : guiPreferences.hashCode());
+        result = prime * result + (guiPreferencesSet ? 1231 : 1237);
         result = prime * result + ((gui_spam_filter_enabled == null) ? 0 : gui_spam_filter_enabled.hashCode());
         result = prime * result + (gui_spam_filter_enabledset ? 1231 : 1237);
         result = prime * result + ((id == null) ? 0 : id.hashCode());
@@ -4872,6 +4900,13 @@ public class User extends ExtendableDataObject implements NameAndIdObject {
         } else if (!given_name.equals(other.given_name))
             return false;
         if (given_nameset != other.given_nameset)
+            return false;
+        if (guiPreferences == null) {
+            if (other.guiPreferences != null)
+                return false;
+        } else if (!guiPreferences.equals(other.guiPreferences))
+            return false;
+        if (guiPreferencesSet != other.guiPreferencesSet)
             return false;
         if (gui_spam_filter_enabled == null) {
             if (other.gui_spam_filter_enabled != null)
