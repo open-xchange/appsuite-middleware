@@ -247,7 +247,7 @@ public final class OXFolderDowngradeSQL {
 	}
 
 	private static final String SQL_DEL_FLD_PERMS = "DELETE FROM " + RPL_PERM
-			+ " AS op WHERE op.cid = ? AND op.fuid IN " + RPL_IDS;
+			+ " WHERE cid = ? AND fuid IN " + RPL_IDS;
 
 	/**
 	 * Deletes specified folders' permissions from specified permission table.
