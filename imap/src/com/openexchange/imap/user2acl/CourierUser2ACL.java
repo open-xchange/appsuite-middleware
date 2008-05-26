@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.user2acl;
 
+import java.net.InetSocketAddress;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -121,8 +122,9 @@ public class CourierUser2ACL extends User2ACL {
 			return ALIAS_ANYONE;
 		}
 		final Object[] args = user2AclArgs.getArguments(IMAPServer.COURIER);
-		final int sessionUser = ((Integer) args[0]).intValue();
-		final String sharedOwner = getSharedFolderOwner((String) args[1], ((Character) args[2]).charValue());
+		final InetSocketAddress imapAddr = (InetSocketAddress) args[0];
+		final int sessionUser = ((Integer) args[1]).intValue();
+		final String sharedOwner = getSharedFolderOwner((String) args[2], ((Character) args[3]).charValue());
 		if (null == sharedOwner) {
 			/*
 			 * A non-shared folder
@@ -138,7 +140,7 @@ public class CourierUser2ACL extends User2ACL {
 		/*
 		 * A shared folder
 		 */
-		final int sharedOwnerID = getUserIDInternal(sharedOwner, ctx);
+		final int sharedOwnerID = getUserIDInternal(sharedOwner, ctx, imapAddr);
 		if (sharedOwnerID == userId) {
 			/*
 			 * Owner is equal to given user
@@ -162,8 +164,9 @@ public class CourierUser2ACL extends User2ACL {
 			return OCLPermission.ALL_GROUPS_AND_USERS;
 		}
 		final Object[] args = user2AclArgs.getArguments(IMAPServer.COURIER);
-		final int sessionUser = ((Integer) args[0]).intValue();
-		final String sharedOwner = getSharedFolderOwner((String) args[1], ((Character) args[2]).charValue());
+		final InetSocketAddress imapAddr = (InetSocketAddress) args[0];
+		final int sessionUser = ((Integer) args[1]).intValue();
+		final String sharedOwner = getSharedFolderOwner((String) args[2], ((Character) args[3]).charValue());
 		if (null == sharedOwner) {
 			/*
 			 * A non-shared folder
@@ -174,7 +177,7 @@ public class CourierUser2ACL extends User2ACL {
 				 */
 				return sessionUser;
 			}
-			return getUserIDInternal(pattern, ctx);
+			return getUserIDInternal(pattern, ctx, imapAddr);
 		}
 		/*
 		 * A shared folder
@@ -183,12 +186,15 @@ public class CourierUser2ACL extends User2ACL {
 			/*
 			 * Map alias "owner" to shared folder owner
 			 */
-			return getUserIDInternal(sharedOwner, ctx);
+			return getUserIDInternal(sharedOwner, ctx, imapAddr);
 		}
-		return getUserIDInternal(pattern, ctx);
+		return getUserIDInternal(pattern, ctx, imapAddr);
 	}
 
-	private final int getUserIDInternal(final String pattern, final Context ctx) throws AbstractOXException {
+	private final int getUserIDInternal(final String pattern, final Context ctx, final InetSocketAddress imapAddr)
+			throws AbstractOXException {
+		// TODO: Handle the possibility of multiple user IDs since multiple IMAP
+		// servers are supported
 		if (LoginType.USER.equals(IMAPConfig.getLoginType()) && CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
 			/*
 			 * Find user name by user's imap login

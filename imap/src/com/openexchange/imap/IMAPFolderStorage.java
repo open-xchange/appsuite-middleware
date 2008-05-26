@@ -587,7 +587,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 						final ACL[] removedACLs = getRemovedACLs(newACLs, initialACLs);
 						if (removedACLs.length > 0) {
 							final User2ACL user2ACL = User2ACL.getInstance(imapConfig);
-							final User2ACLArgs user2ACLArgs = IMAPFolderConverter.getUser2AclArgs(session, createMe);
+							final User2ACLArgs user2ACLArgs = IMAPFolderConverter.getUser2AclArgs(session, createMe,
+									imapConfig);
 							for (int i = 0; i < removedACLs.length; i++) {
 								if (isKnownEntity(removedACLs[i].getName(), user2ACL, ctx, user2ACLArgs)) {
 									createMe.removeACL(removedACLs[i].getName());
@@ -890,7 +891,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 						final ACL[] removedACLs = getRemovedACLs(newACLs, oldACLs);
 						if (removedACLs.length > 0) {
 							final User2ACL user2ACL = User2ACL.getInstance(imapConfig);
-							final User2ACLArgs user2ACLArgs = IMAPFolderConverter.getUser2AclArgs(session, updateMe);
+							final User2ACLArgs user2ACLArgs = IMAPFolderConverter.getUser2AclArgs(session, updateMe,
+									imapConfig);
 							for (int i = 0; i < removedACLs.length; i++) {
 								if (isKnownEntity(removedACLs[i].getName(), user2ACL, ctx, user2ACLArgs)) {
 									updateMe.removeACL(removedACLs[i].getName());
@@ -1348,7 +1350,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 	 *            The QUOTA resources
 	 * @return The QUOTA resource with the highest usage to limitation relation
 	 * 
-	 * <pre>
+	 *         <pre>
 	 * private static Resource getMaxUsageResource(final Quota.Resource[] resources) {
 	 * 	final Resource maxUsageResource;
 	 * 	{
@@ -1429,7 +1431,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		 * Ensure that owner still holds full rights
 		 */
 		final String ownerACLName = User2ACL.getInstance(imapConfig).getACLName(session.getUserId(), ctx,
-				IMAPFolderConverter.getUser2AclArgs(session, defaultFolder));
+				IMAPFolderConverter.getUser2AclArgs(session, defaultFolder, imapConfig));
 		for (int i = 0; i < newACLs.length; i++) {
 			if (newACLs[i].getName().equals(ownerACLName) && newACLs[i].getRights().contains(FULL_RIGHTS)) {
 				return true;
@@ -1628,7 +1630,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		final ACL[] acls = new ACL[perms.length];
 		for (int i = 0; i < perms.length; i++) {
 			acls[i] = ((ACLPermission) perms[i]).getPermissionACL(IMAPFolderConverter.getUser2AclArgs(session,
-					imapFolder), imapConfig, ctx);
+					imapFolder, imapConfig), imapConfig, ctx);
 		}
 		return acls;
 	}
@@ -1733,12 +1735,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 	 * marked with attribute <code>\NoInferiors</code> meaning it no longer
 	 * allows subfolders.
 	 * 
-	 * @param imapStore -
-	 *            the IMAP store (mailbox)
+	 * @param imapStore
+	 *            - the IMAP store (mailbox)
 	 * @return <code>true</code> if altNamespace is enabled; otherwise
 	 *         <code>false</code>
-	 * @throws MessagingException -
-	 *             if IMAP's NAMESPACE command fails
+	 * @throws MessagingException
+	 *             - if IMAP's NAMESPACE command fails
 	 */
 	private static boolean isAltNamespaceEnabled(final IMAPStore imapStore) throws MessagingException {
 		boolean altnamespace = false;

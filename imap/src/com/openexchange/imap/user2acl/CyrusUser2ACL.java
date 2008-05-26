@@ -49,6 +49,8 @@
 
 package com.openexchange.imap.user2acl;
 
+import java.net.InetSocketAddress;
+
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -88,8 +90,11 @@ public final class CyrusUser2ACL extends User2ACL {
 			throws AbstractOXException {
 		if (userId == OCLPermission.ALL_GROUPS_AND_USERS) {
 			return AUTH_ID_ANYONE;
-		} else if (LoginType.USER.equals(IMAPConfig.getLoginType())
-				&& CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
+		}
+		// TODO: Handle the possibility of multiple user IDs since multiple IMAP
+		// servers are supported
+		final InetSocketAddress imapAddr = (InetSocketAddress) user2AclArgs.getArguments(IMAPServer.CYRUS)[0];
+		if (LoginType.USER.equals(IMAPConfig.getLoginType()) && CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
 			return UserStorage.getInstance().getUser(userId, ctx).getImapLogin();
 		}
 		return UserStorage.getInstance().getUser(userId, ctx).getLoginInfo();
@@ -100,8 +105,9 @@ public final class CyrusUser2ACL extends User2ACL {
 			throws AbstractOXException {
 		if (AUTH_ID_ANYONE.equalsIgnoreCase(pattern)) {
 			return OCLPermission.ALL_GROUPS_AND_USERS;
-		} else if (LoginType.USER.equals(IMAPConfig.getLoginType())
-				&& CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
+		}
+		final InetSocketAddress imapAddr = (InetSocketAddress) user2AclArgs.getArguments(IMAPServer.CYRUS)[0];
+		if (LoginType.USER.equals(IMAPConfig.getLoginType()) && CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
 			/*
 			 * Find user name by user's imap login
 			 */
