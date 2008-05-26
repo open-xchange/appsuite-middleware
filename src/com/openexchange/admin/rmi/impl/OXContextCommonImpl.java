@@ -76,6 +76,14 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
     private final static Log log = LogFactory.getLog(OXContextCommonImpl.class);
     
     protected void createchecks(final Context ctx, final User admin_user, final OXToolStorageInterface tool) throws StorageException, ContextExistsException, InvalidDataException {
+        try {
+            if (!ctx.mandatoryCreateMembersSet()) {
+                throw new InvalidDataException("Mandatory fields in context not set: " + ctx.getUnsetMembers());               
+            }
+        } catch (EnforceableDataObjectException e) {
+            throw new InvalidDataException(e.getMessage());
+        }        
+
         if (tool.existsContext(ctx)) {
             throw new ContextExistsException("Context already exists!");
         }        
@@ -91,13 +99,6 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         } catch (EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
         }
-        try {
-            if (!ctx.mandatoryCreateMembersSet()) {
-                throw new InvalidDataException("Mandatory fields in context not set: " + ctx.getUnsetMembers());               
-            }
-        } catch (EnforceableDataObjectException e) {
-            throw new InvalidDataException(e.getMessage());
-        }        
         
         GenericChecks.checkValidMailAddress(admin_user.getPrimaryEmail());
     }
