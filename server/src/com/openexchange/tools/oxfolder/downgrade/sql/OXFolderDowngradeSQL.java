@@ -290,7 +290,7 @@ public final class OXFolderDowngradeSQL {
 		}
 	}
 
-	private static final String SQL_DEL_FLDS = "DELETE FROM " + RPL_FOLDER + " AS ot WHERE ot.cid = ? AND ot.fuid IN "
+	private static final String SQL_DEL_FLDS = "DELETE FROM " + RPL_FOLDER + " WHERE cid = ? AND fuid IN "
 			+ RPL_IDS;
 
 	/**
