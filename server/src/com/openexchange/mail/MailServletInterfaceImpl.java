@@ -797,8 +797,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		 */
 		if (draftMail.getReferencedMail() != null) {
 			if (draftMail.getReferencedMail().isDraft()) {
-				deleteMessages(draftMail.getReferencedMail().getFolder(), new long[] { draftMail.getReferencedMail()
-						.getMailId() }, true);
+				mailAccess.getMessageStorage().deleteMessages(draftMail.getReferencedMail().getFolder(),
+						new long[] { draftMail.getReferencedMail().getMailId() }, true);
 			}
 			draftMail.setMsgref(null);
 		}
