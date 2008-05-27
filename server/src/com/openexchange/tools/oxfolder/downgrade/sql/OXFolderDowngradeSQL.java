@@ -77,7 +77,8 @@ public final class OXFolderDowngradeSQL {
 	/**
 	 * {@link Permission} - Simple container for a permission.
 	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben
+	 *         Betten</a>
 	 * 
 	 */
 	private static final class Permission {
@@ -189,8 +190,6 @@ public final class OXFolderDowngradeSQL {
 
 	}
 
-	private static final String RPL_IDS = "#IDS#";
-
 	private static final String RPL_PERM = "#PERM#";
 
 	private static final String RPL_FOLDER = "#FOLDER#";
@@ -246,8 +245,7 @@ public final class OXFolderDowngradeSQL {
 
 	}
 
-	private static final String SQL_DEL_FLD_PERMS = "DELETE FROM " + RPL_PERM
-			+ " WHERE cid = ? AND fuid IN " + RPL_IDS;
+	private static final String SQL_DEL_FLD_PERMS = "DELETE FROM " + RPL_PERM + " WHERE cid = ? AND fuid = ?";
 
 	/**
 	 * Deletes specified folders' permissions from specified permission table.
@@ -265,33 +263,24 @@ public final class OXFolderDowngradeSQL {
 	 */
 	public static void deleteFolderPermissions(final int[] fuids, final int cid, final String permTable,
 			final Connection writeCon) throws SQLException {
-	    if (0 == fuids.length) {
-	        return;
-	    }
+		if (0 == fuids.length) {
+			return;
+		}
 		PreparedStatement stmt = null;
 		try {
-			final String ids;
-			{
-				final StringBuilder sb = new StringBuilder(32);
-				sb.append('(');
-				sb.append(fuids[0]);
-				for (int i = 1; i < fuids.length; i++) {
-					sb.append(',').append(fuids[i]);
-				}
-				sb.append(')');
-				ids = sb.toString();
+			stmt = writeCon.prepareStatement(SQL_DEL_FLD_PERMS.replaceFirst(RPL_PERM, permTable));
+			for (final int fuid : fuids) {
+				stmt.setInt(1, cid);
+				stmt.setInt(2, fuid);
+				stmt.addBatch();
 			}
-			stmt = writeCon.prepareStatement(SQL_DEL_FLD_PERMS.replaceFirst(RPL_PERM, permTable).replaceFirst(RPL_IDS,
-					ids));
-			stmt.setInt(1, cid);
-			stmt.executeUpdate();
+			stmt.executeBatch();
 		} finally {
 			closeSQLStuff(null, stmt);
 		}
 	}
 
-	private static final String SQL_DEL_FLDS = "DELETE FROM " + RPL_FOLDER + " WHERE cid = ? AND fuid IN "
-			+ RPL_IDS;
+	private static final String SQL_DEL_FLDS = "DELETE FROM " + RPL_FOLDER + " AS ot WHERE ot.cid = ? AND ot.fuid = ?";
 
 	/**
 	 * Deletes specified folders from specified folder table.
@@ -309,26 +298,18 @@ public final class OXFolderDowngradeSQL {
 	 */
 	public static void deleteFolders(final int[] fuids, final int cid, final String folderTable,
 			final Connection writeCon) throws SQLException {
-        if (0 == fuids.length) {
-            return;
-        }
+		if (0 == fuids.length) {
+			return;
+		}
 		PreparedStatement stmt = null;
 		try {
-			final String ids;
-			{
-				final StringBuilder sb = new StringBuilder(32);
-				sb.append('(');
-				sb.append(fuids[0]);
-				for (int i = 1; i < fuids.length; i++) {
-					sb.append(',').append(fuids[i]);
-				}
-				sb.append(')');
-				ids = sb.toString();
+			stmt = writeCon.prepareStatement(SQL_DEL_FLDS.replaceFirst(RPL_FOLDER, folderTable));
+			for (final int fuid : fuids) {
+				stmt.setInt(1, cid);
+				stmt.setInt(2, fuid);
+				stmt.addBatch();
 			}
-			stmt = writeCon.prepareStatement(SQL_DEL_FLDS.replaceFirst(RPL_FOLDER, folderTable).replaceFirst(RPL_IDS,
-					ids));
-			stmt.setInt(1, cid);
-			stmt.executeUpdate();
+			stmt.executeBatch();
 		} finally {
 			closeSQLStuff(null, stmt);
 		}
@@ -601,12 +582,12 @@ public final class OXFolderDowngradeSQL {
 		}
 	}
 
-	private static final String SQL_SEL_SHARED_PERMS = "SELECT ot.fuid FROM " + RPL_FOLDER
-			+ " AS ot JOIN " + RPL_PERM + " AS op USING(cid,fuid) WHERE ot.cid = ? AND ot.created_from = ?"
+	private static final String SQL_SEL_SHARED_PERMS = "SELECT ot.fuid FROM " + RPL_FOLDER + " AS ot JOIN " + RPL_PERM
+			+ " AS op USING(cid,fuid) WHERE ot.cid = ? AND ot.created_from = ?"
 			+ " AND ot.type = ? AND op.permission_id <> ?";
 
-	private static final String SQL_SEL_SHARED_PERMS_FOREIGN = "SELECT ot.fuid FROM " + RPL_FOLDER
-			+ " AS ot JOIN " + RPL_PERM + " AS op USING (cid,fuid) WHERE ot.cid = ? AND ot.created_from <> ?"
+	private static final String SQL_SEL_SHARED_PERMS_FOREIGN = "SELECT ot.fuid FROM " + RPL_FOLDER + " AS ot JOIN "
+			+ RPL_PERM + " AS op USING (cid,fuid) WHERE ot.cid = ? AND ot.created_from <> ?"
 			+ " AND ot.type = ? AND op.permission_id = ?";
 
 	private static final String SQL_DEL_SHARED_PERMS = "DELETE op FROM " + RPL_PERM + " AS op, " + RPL_FOLDER
@@ -641,7 +622,8 @@ public final class OXFolderDowngradeSQL {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			stmt = writeCon.prepareStatement(SQL_SEL_SHARED_PERMS.replaceFirst(RPL_FOLDER, folderTable).replaceFirst(RPL_PERM, permTable));
+			stmt = writeCon.prepareStatement(SQL_SEL_SHARED_PERMS.replaceFirst(RPL_FOLDER, folderTable).replaceFirst(
+					RPL_PERM, permTable));
 			stmt.setInt(1, cid);
 			stmt.setInt(2, entity);
 			stmt.setInt(3, FolderObject.PRIVATE);
@@ -666,7 +648,8 @@ public final class OXFolderDowngradeSQL {
 			stmt = null;
 		}
 		try {
-			stmt = writeCon.prepareStatement(SQL_SEL_SHARED_PERMS_FOREIGN.replaceFirst(RPL_FOLDER, folderTable).replaceFirst(RPL_PERM, permTable));
+			stmt = writeCon.prepareStatement(SQL_SEL_SHARED_PERMS_FOREIGN.replaceFirst(RPL_FOLDER, folderTable)
+					.replaceFirst(RPL_PERM, permTable));
 			stmt.setInt(1, cid);
 			stmt.setInt(2, entity);
 			stmt.setInt(3, FolderObject.PRIVATE);
