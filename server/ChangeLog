@@ -1,3 +1,8 @@
+* 2008-05-27 - ben.pahne@open-xchange.com
+
+ - Bugfix #10899: Changed contact sql column sizes with new updatetask
+ - Bugfix #9282: Changed contact sql column sizes with new updatetask
+
 * 2008-05-27 - thorben.betten@open-xchange.com
 
  - Bugfix #11299: Fixed downgrade actions on folder data
