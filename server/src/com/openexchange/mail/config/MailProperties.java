@@ -137,6 +137,8 @@ public final class MailProperties {
 
 	private boolean supportSubscription;
 
+	private String[] phishingHeaders;
+
 	/**
 	 * Initializes a new {@link MailProperties}
 	 */
@@ -399,13 +401,14 @@ public final class MailProperties {
 
 		{
 			final String watcherEnabledStr = configuration.getProperty("com.openexchange.mail.watcherEnabled",
-					STR_FALSE);
+					STR_FALSE).trim();
 			watcherEnabled = Boolean.parseBoolean(watcherEnabledStr);
 			logBuilder.append("\tWatcher Enabled: ").append(watcherEnabled).append('\n');
 		}
 
 		{
-			final String watcherTimeStr = configuration.getProperty("com.openexchange.mail.watcherTime", "60000");
+			final String watcherTimeStr = configuration.getProperty("com.openexchange.mail.watcherTime", "60000")
+					.trim();
 			try {
 				watcherTime = Integer.parseInt(watcherTimeStr);
 				logBuilder.append("\tWatcher Time: ").append(watcherTime).append('\n');
@@ -417,7 +420,8 @@ public final class MailProperties {
 		}
 
 		{
-			final String watcherFeqStr = configuration.getProperty("com.openexchange.mail.watcherFrequency", "10000");
+			final String watcherFeqStr = configuration.getProperty("com.openexchange.mail.watcherFrequency", "10000")
+					.trim();
 			try {
 				watcherFrequency = Integer.parseInt(watcherFeqStr);
 				logBuilder.append("\tWatcher Frequency: ").append(watcherFrequency).append('\n');
@@ -430,9 +434,18 @@ public final class MailProperties {
 
 		{
 			final String watcherShallCloseStr = configuration.getProperty("com.openexchange.mail.watcherShallClose",
-					STR_FALSE);
+					STR_FALSE).trim();
 			watcherShallClose = Boolean.parseBoolean(watcherShallCloseStr);
 			logBuilder.append("\tWatcher Shall Close: ").append(watcherShallClose).append('\n');
+		}
+
+		{
+			String phishingHdrsStr = configuration.getProperty("com.openexchange.mail.phishingHeader", "").trim();
+			if (null != phishingHdrsStr && phishingHdrsStr.length() > 0) {
+				phishingHeaders = phishingHdrsStr.split(" *, *");
+			} else {
+				phishingHeaders = null;
+			}
 		}
 
 		{
@@ -663,5 +676,19 @@ public final class MailProperties {
 	 */
 	public int getWatcherTime() {
 		return watcherTime;
+	}
+
+	/**
+	 * Gets the phishing headers
+	 * 
+	 * @return The phishing headers or <code>null</code> if none defined
+	 */
+	public String[] getPhishingHeaders() {
+		if (null == phishingHeaders) {
+			return null;
+		}
+		final String[] retval = new String[phishingHeaders.length];
+		System.arraycopy(phishingHeaders, 0, retval, 0, phishingHeaders.length);
+		return retval;
 	}
 }

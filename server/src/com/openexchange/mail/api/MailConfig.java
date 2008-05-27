@@ -539,6 +539,15 @@ public abstract class MailConfig {
 	public static int getWatcherTime() {
 		return MailProperties.getInstance().getWatcherTime();
 	}
+	
+	/**
+	 * Gets the phishing headers
+	 * 
+	 * @return The phishing headers or <code>null</code> if none defined
+	 */
+	public static String[] getPhishingHeaders() {
+		return MailProperties.getInstance().getPhishingHeaders();
+	}
 
 	/**
 	 * Gets the login
