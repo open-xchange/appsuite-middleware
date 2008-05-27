@@ -53,8 +53,10 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -71,7 +73,7 @@ import com.openexchange.mail.mime.utils.MIMEMessageUtility;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ParameterList implements Cloneable, Serializable {
+public final class ParameterList implements Cloneable, Serializable, Comparable<ParameterList> {
 
 	/**
 	 * Serial version UID
@@ -86,6 +88,7 @@ public final class ParameterList implements Cloneable, Serializable {
 	 */
 	private static final Pattern PATTERN_PARAM_LIST = Pattern
 			.compile("(?:\\s*;\\s*|\\s+)([\\p{ASCII}&&[^=\"\\s;]]+)(?:=((?:[^\"][\\S&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)|(?:\".+?\")))?");
+
 	// "(?:\\s*;\\s*|\\s+)([\\p{ASCII}&&[^=\"\\s;]]+)(?:=((?:[^\"][\\p{ASCII}&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)|(?:\"\\p{ASCII}+?\")))?"
 
 	private static final String CHARSET_UTF_8 = "utf-8";
@@ -110,6 +113,51 @@ public final class ParameterList implements Cloneable, Serializable {
 	public ParameterList(final String parameterList) {
 		this();
 		parseParameterList(parameterList.trim());
+	}
+
+	public int compareTo(final ParameterList other) {
+		if (this == other) {
+			return 0;
+		}
+		if (parameters == null) {
+			if (other.parameters != null) {
+				return -1;
+			}
+			return 0;
+		} else if (other.parameters == null) {
+			return 1;
+		}
+		return toString().compareToIgnoreCase(other.toString());
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((parameters == null) ? 0 : toString().hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final ParameterList other = (ParameterList) obj;
+		if (parameters == null) {
+			if (other.parameters != null) {
+				return false;
+			}
+		} else if (!toString().equalsIgnoreCase(other.toString())) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override
@@ -158,7 +206,7 @@ public final class ParameterList implements Cloneable, Serializable {
 			final String soleName = name.substring(0, pos);
 			String procName = name;
 			/*
-			 * Check if parameter is marked as encoded: name*
+			 * Check if parameter is marked as encoded: name
 			 */
 			if (procName.charAt(procName.length() - 1) == '*') { // encoded
 				procName = procName.substring(0, procName.length() - 1);
@@ -191,7 +239,7 @@ public final class ParameterList implements Cloneable, Serializable {
 				}
 			}
 			/*
-			 * Check for parameter continuation: name*1
+			 * Check for parameter continuation: name1
 			 */
 			if (pos != -1) {
 				int num = -1;
@@ -319,10 +367,17 @@ public final class ParameterList implements Cloneable, Serializable {
 
 	public void appendUnicodeString(final StringBuilder sb) {
 		final int size = parameters.size();
-		final Iterator<Parameter> iter = parameters.values().iterator();
-		for (int i = 0; i < size; i++) {
-			iter.next().appendUnicodeString(sb);
+		final List<String> names = new ArrayList<String>(size);
+		names.addAll(parameters.keySet());
+		Collections.sort(names);
+		for (final String name : names) {
+			parameters.get(name).appendUnicodeString(sb);
 		}
+
+		// final Iterator<Parameter> iter = parameters.values().iterator();
+		// for (int i = 0; i < size; i++) {
+		// iter.next().appendUnicodeString(sb);
+		// }
 	}
 
 	/**
@@ -333,10 +388,17 @@ public final class ParameterList implements Cloneable, Serializable {
 	public String toString() {
 		final StringBuilder sb = new StringBuilder(64);
 		final int size = parameters.size();
-		final Iterator<Parameter> iter = parameters.values().iterator();
-		for (int i = 0; i < size; i++) {
-			iter.next().appendUnicodeString(sb);
+		final List<String> names = new ArrayList<String>(size);
+		names.addAll(parameters.keySet());
+		Collections.sort(names);
+		for (final String name : names) {
+			parameters.get(name).appendUnicodeString(sb);
 		}
+
+		// final Iterator<Parameter> iter = parameters.values().iterator();
+		// for (int i = 0; i < size; i++) {
+		// iter.next().appendUnicodeString(sb);
+		// }
 		return sb.toString();
 	}
 
@@ -366,10 +428,11 @@ public final class ParameterList implements Cloneable, Serializable {
 	/**
 	 * {@link Parameter} - Inner class to represent a parameter
 	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben
+	 *         Betten</a>
 	 * 
 	 */
-	private static final class Parameter implements Cloneable, Serializable {
+	private static final class Parameter implements Cloneable, Serializable, Comparable<Parameter> {
 
 		private static final long serialVersionUID = 7978948703870567515L;
 
@@ -414,6 +477,83 @@ public final class ParameterList implements Cloneable, Serializable {
 			if ((null != value) && (value.length() > 0)) {
 				contiguousValues.add(value);
 			}
+		}
+
+		public int compareTo(final Parameter other) {
+			if (this == other) {
+				return 0;
+			}
+			if (name == null) {
+				if (other.name != null) {
+					return -1;
+				}
+				return 0;
+			} else if (other.name == null) {
+				return 1;
+			}
+			final int nameComp = name.compareToIgnoreCase(other.name);
+			if (nameComp != 0) {
+				return nameComp;
+			}
+			return getValue().compareToIgnoreCase(other.getValue());
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((charset == null) ? 0 : charset.hashCode());
+			result = prime * result + ((contiguousValues == null) ? 0 : getValue().hashCode());
+			result = prime * result + ((language == null) ? 0 : language.hashCode());
+			result = prime * result + ((name == null) ? 0 : name.hashCode());
+			result = prime * result + (rfc2231 ? 1231 : 1237);
+			return result;
+		}
+
+		@Override
+		public boolean equals(final Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			final Parameter other = (Parameter) obj;
+			if (charset == null) {
+				if (other.charset != null) {
+					return false;
+				}
+			} else if (!charset.equalsIgnoreCase(other.charset)) {
+				return false;
+			}
+			if (contiguousValues == null) {
+				if (other.contiguousValues != null) {
+					return false;
+				}
+			} else if (!getValue().equalsIgnoreCase(other.getValue())) {
+				return false;
+			}
+			if (language == null) {
+				if (other.language != null) {
+					return false;
+				}
+			} else if (!language.equals(other.language)) {
+				return false;
+			}
+			if (name == null) {
+				if (other.name != null) {
+					return false;
+				}
+			} else if (!name.equals(other.name)) {
+				return false;
+			}
+			if (rfc2231 != other.rfc2231) {
+				return false;
+			}
+			return true;
 		}
 
 		@Override
@@ -514,11 +654,13 @@ public final class ParameterList implements Cloneable, Serializable {
 			if (rfc2231) {
 				if (size == 1) {
 					sb.append("; ").append(name);
-					if (RFC2231Tools.isAscii(getValue())) {
-						sb.append('=').append(checkQuotation(getValue()));
-					} else {
-						sb.append("*=").append(
-								checkQuotation(RFC2231Tools.rfc2231Encode(getValue(), CHARSET_UTF_8, null, true)));
+					if (getNextValidPos(0, size) != -1) {
+						if (RFC2231Tools.isAscii(getValue())) {
+							sb.append('=').append(checkQuotation(getValue()));
+						} else {
+							sb.append("*=").append(
+									checkQuotation(RFC2231Tools.rfc2231Encode(getValue(), CHARSET_UTF_8, null, true)));
+						}
 					}
 				} else {
 					boolean needsEncoding = false;
@@ -528,20 +670,26 @@ public final class ParameterList implements Cloneable, Serializable {
 					/*
 					 * Append first
 					 */
-					sb.append("; ").append(name).append('*').append(1);
+					int startPos = getNextValidPos(0, size);
+					if (startPos == -1) {
+						sb.append("; ").append(name);
+						return;
+					}
+					int count = 1;
+					sb.append("; ").append(name).append('*').append(count++);
 					if (needsEncoding) {
 						sb.append("*=").append(
-								checkQuotation(RFC2231Tools.rfc2231Encode(contiguousValues.get(0), CHARSET_UTF_8, null,
-										true, true)));
+								checkQuotation(RFC2231Tools.rfc2231Encode(contiguousValues.get(startPos),
+										CHARSET_UTF_8, null, true, true)));
 					} else {
-						sb.append('=').append(checkQuotation(contiguousValues.get(0)));
+						sb.append('=').append(checkQuotation(contiguousValues.get(startPos)));
 					}
 					/*
 					 * Append remaining values
 					 */
-					for (int i = 1; i < size; i++) {
-						sb.append("; ").append(name).append('*').append(i + 1);
-						final String chunk = contiguousValues.get(i);
+					while ((startPos = getNextValidPos(startPos + 1, size)) != -1) {
+						sb.append("; ").append(name).append('*').append(count++);
+						final String chunk = contiguousValues.get(startPos);
 						if (RFC2231Tools.isAscii(chunk)) {
 							sb.append('=').append(checkQuotation(chunk));
 						} else {
@@ -563,6 +711,16 @@ public final class ParameterList implements Cloneable, Serializable {
 			}
 		}
 
+		private int getNextValidPos(final int fromPos, final int size) {
+			for (int i = fromPos; i < size; i++) {
+				final String val = contiguousValues.get(i);
+				if (val != null && val.length() > 0) {
+					return i;
+				}
+			}
+			return -1;
+		}
+
 		public String toUnicodeString() {
 			final int size = contiguousValues.size();
 			if (size == 0) {
@@ -572,11 +730,13 @@ public final class ParameterList implements Cloneable, Serializable {
 				final StringBuilder sb = new StringBuilder(64);
 				if (size == 1) {
 					sb.append("; ").append(name);
-					if (RFC2231Tools.isAscii(getValue())) {
-						sb.append('=').append(checkQuotation(getValue()));
-					} else {
-						sb.append("*=").append(
-								checkQuotation(RFC2231Tools.rfc2231Encode(getValue(), CHARSET_UTF_8, null, true)));
+					if (getNextValidPos(0, size) != -1) {
+						if (RFC2231Tools.isAscii(getValue())) {
+							sb.append('=').append(checkQuotation(getValue()));
+						} else {
+							sb.append("*=").append(
+									checkQuotation(RFC2231Tools.rfc2231Encode(getValue(), CHARSET_UTF_8, null, true)));
+						}
 					}
 				} else {
 					boolean needsEncoding = false;
@@ -586,7 +746,13 @@ public final class ParameterList implements Cloneable, Serializable {
 					/*
 					 * Append first
 					 */
-					sb.append("; ").append(name).append('*').append(1);
+					int startPos = getNextValidPos(0, size);
+					if (startPos == -1) {
+						sb.append("; ").append(name);
+						return sb.toString();
+					}
+					int count = 1;
+					sb.append("; ").append(name).append('*').append(count++);
 					if (needsEncoding) {
 						sb.append("*=").append(
 								checkQuotation(RFC2231Tools.rfc2231Encode(contiguousValues.get(0), CHARSET_UTF_8, null,
@@ -597,9 +763,9 @@ public final class ParameterList implements Cloneable, Serializable {
 					/*
 					 * Append remaining values
 					 */
-					for (int i = 1; i < size; i++) {
-						sb.append("; ").append(name).append('*').append(i + 1);
-						final String chunk = contiguousValues.get(i);
+					while ((startPos = getNextValidPos(startPos + 1, size)) != -1) {
+						sb.append("; ").append(name).append('*').append(count++);
+						final String chunk = contiguousValues.get(startPos);
 						if (RFC2231Tools.isAscii(chunk)) {
 							sb.append('=').append(checkQuotation(chunk));
 						} else {
@@ -621,5 +787,6 @@ public final class ParameterList implements Cloneable, Serializable {
 				return null;
 			}
 		}
+
 	}
 }

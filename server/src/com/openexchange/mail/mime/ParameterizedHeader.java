@@ -59,7 +59,7 @@ import java.util.Iterator;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public abstract class ParameterizedHeader implements Serializable {
+public abstract class ParameterizedHeader implements Serializable, Comparable<ParameterizedHeader> {
 
 	/**
 	 * Serial version UID
@@ -73,6 +73,51 @@ public abstract class ParameterizedHeader implements Serializable {
 	 */
 	protected ParameterizedHeader() {
 		super();
+	}
+
+	public int compareTo(final ParameterizedHeader other) {
+		if (this == other) {
+			return 0;
+		}
+		if (parameterList == null) {
+			if (other.parameterList != null) {
+				return -1;
+			}
+			return 0;
+		} else if (other.parameterList == null) {
+			return 1;
+		}
+		return parameterList.compareTo(other.parameterList);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((parameterList == null) ? 0 : parameterList.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!ParameterizedHeader.class.isInstance(obj)) {
+			return false;
+		}
+		final ParameterizedHeader other = (ParameterizedHeader) obj;
+		if (parameterList == null) {
+			if (other.parameterList != null) {
+				return false;
+			}
+		} else if (!parameterList.equals(other.parameterList)) {
+			return false;
+		}
+		return true;
 	}
 
 	/**

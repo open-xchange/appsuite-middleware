@@ -98,6 +98,50 @@ public final class ContentDisposition extends ParameterizedHeader {
 		parseContentDisp(contentDisp);
 	}
 
+	@Override
+	public int compareTo(final ParameterizedHeader other) {
+		if (this == other) {
+			return 0;
+		}
+		if (ContentDisposition.class.isInstance(other)) {
+			final int dispComp = getDisposition().compareToIgnoreCase(((ContentDisposition) other).getDisposition());
+			if (dispComp != 0) {
+				return dispComp;
+			}
+		}
+		return super.compareTo(other);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((disposition == null) ? 0 : disposition.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final ContentDisposition other = (ContentDisposition) obj;
+		if (disposition == null) {
+			if (other.disposition != null) {
+				return false;
+			}
+		} else if (!disposition.equals(other.disposition)) {
+			return false;
+		}
+		return true;
+	}
+
 	private void parseContentDisp(final String contentDisp) throws MailException {
 		parseContentDisp(contentDisp, true);
 	}
