@@ -317,7 +317,7 @@ public final class OXFolderDowngradeSQL {
 
 	private static final String SQL_SEL_PUBLIC_FLDS = "SELECT op.fuid FROM " + RPL_PERM + " AS op JOIN " + RPL_FOLDER
 			+ " AS ot ON op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? WHERE ot.module = ? "
-			+ "AND op.permission_id = ? GROUP BY op.fuid";
+			+ "AND op.permission_id = ? AND ot.type = ? GROUP BY op.fuid";
 
 	/**
 	 * Determines the module's public folders' IDs which hold a permission entry
@@ -350,6 +350,7 @@ public final class OXFolderDowngradeSQL {
 			stmt.setInt(2, cid);
 			stmt.setInt(3, module);
 			stmt.setInt(4, entity);
+			stmt.setInt(5, FolderObject.PUBLIC);
 			rs = stmt.executeQuery();
 			final SmartIntArray sia = new SmartIntArray(128);
 			while (rs.next()) {
