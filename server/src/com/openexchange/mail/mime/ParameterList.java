@@ -418,7 +418,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 		return quote;
 	}
 
-	private static String checkQuotation(final String str) {
+	static String checkQuotation(final String str) {
 		if (containsSpecial(str)) {
 			return new StringBuilder(2 + str.length()).append('"').append(str).append('"').toString();
 		}
@@ -434,19 +434,22 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 	 */
 	private static final class Parameter implements Cloneable, Serializable, Comparable<Parameter> {
 
+		private static final transient org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory
+				.getLog(Parameter.class);
+
 		private static final long serialVersionUID = 7978948703870567515L;
 
-		private boolean rfc2231;
+		boolean rfc2231;
 
-		private final String name;
+		final String name;
 
-		private ArrayList<String> contiguousValues;
+		ArrayList<String> contiguousValues;
 
-		private String charset;
+		String charset;
 
-		private String language;
+		String language;
 
-		private String value;
+		String value;
 
 		/**
 		 * Initializes a new rfc2231 parameter
@@ -568,7 +571,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 				clone.value = null;
 				return clone;
 			} catch (final CloneNotSupportedException e) {
-				LOG.error(e.getLocalizedMessage(), e);
+				LOG1.error(e.getLocalizedMessage(), e);
 				throw new RuntimeException("Clone failed even though 'Cloneable' interface is implemented");
 			}
 
@@ -707,7 +710,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 				/*
 				 * Cannot occur
 				 */
-				LOG.error(e.getLocalizedMessage(), e);
+				LOG1.error(e.getLocalizedMessage(), e);
 			}
 		}
 
@@ -783,7 +786,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 				/*
 				 * Cannot occur
 				 */
-				LOG.error(e.getLocalizedMessage(), e);
+				LOG1.error(e.getLocalizedMessage(), e);
 				return null;
 			}
 		}
