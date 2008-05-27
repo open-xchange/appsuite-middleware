@@ -315,9 +315,13 @@ public final class OXFolderDowngradeSQL {
 		}
 	}
 
-	private static final String SQL_SEL_PUBLIC_FLDS = "SELECT op.fuid FROM " + RPL_PERM + " AS op JOIN " + RPL_FOLDER
-			+ " AS ot ON op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? WHERE ot.module = ? "
+	private static final String SQL_SEL_PUBLIC_FLDS_ALL = "SELECT op.fuid FROM " + RPL_PERM + " AS op JOIN "
+			+ RPL_FOLDER + " AS ot ON op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? WHERE ot.module = ? "
 			+ "AND op.permission_id = ? AND ot.type = ? GROUP BY op.fuid";
+
+	private static final String SQL_SEL_PUBLIC_FLDS_WO_DEFAULT = "SELECT op.fuid FROM " + RPL_PERM + " AS op JOIN "
+			+ RPL_FOLDER + " AS ot ON op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? WHERE ot.module = ? "
+			+ "AND op.permission_id = ? AND ot.type = ? AND ot.default_flag = 0 GROUP BY op.fuid";
 
 	/**
 	 * Determines the module's public folders' IDs which hold a permission entry
@@ -335,17 +339,21 @@ public final class OXFolderDowngradeSQL {
 	 *            The permission table identifier
 	 * @param readCon
 	 *            A readable connection
+	 * @param all
+	 *            <code>true</code> to include all folder even default folders;
+	 *            otherwise <code>false</code>
 	 * @return The module's public folders' IDs
 	 * @throws SQLException
 	 *             If a SQL error occurs
 	 */
 	public static int[] getAffectedPublicFolders(final int entity, final int module, final int cid,
-			final String folderTable, final String permTable, final Connection readCon) throws SQLException {
+			final String folderTable, final String permTable, final Connection readCon, final boolean all)
+			throws SQLException {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			stmt = readCon.prepareStatement(SQL_SEL_PUBLIC_FLDS.replaceFirst(RPL_PERM, permTable).replaceFirst(
-					RPL_FOLDER, folderTable));
+			stmt = readCon.prepareStatement((all ? SQL_SEL_PUBLIC_FLDS_ALL : SQL_SEL_PUBLIC_FLDS_WO_DEFAULT)
+					.replaceFirst(RPL_PERM, permTable).replaceFirst(RPL_FOLDER, folderTable));
 			stmt.setInt(1, cid);
 			stmt.setInt(2, cid);
 			stmt.setInt(3, module);

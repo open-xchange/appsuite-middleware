@@ -192,7 +192,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 	 *             If a folder error occurs
 	 */
 	private static void deleteCalendarFolderData(final int entity, final DowngradeEvent event) throws OXException {
-		deleteModuleFolderData(entity, FolderObject.CALENDAR, event, true);
+		deleteModuleFolderData(entity, FolderObject.CALENDAR, event, true, true);
 	}
 
 	/**
@@ -213,14 +213,14 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 	 *             If a folder error occurs
 	 */
 	private static void deleteTaskFolderData(final int entity, final DowngradeEvent event) throws OXException {
-		deleteModuleFolderData(entity, FolderObject.TASK, event, true);
+		deleteModuleFolderData(entity, FolderObject.TASK, event, true, true);
 	}
 
 	/**
 	 * Delete infostore folder data:
 	 * <ul>
-	 * <li>Delete all public infostore folders' permissions assigned to
-	 * affected user; reassign to context admin if necessary</li>
+	 * <li>Delete all public infostore folders' permissions assigned to affected
+	 * user; reassign to context admin if necessary</li>
 	 * </ul>
 	 * <p>
 	 * Folder cache is updated, too
@@ -261,7 +261,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 		/*
 		 * Strip all user permission from other (public) infostore folders
 		 */
-		deleteModuleFolderData(entity, FolderObject.INFOSTORE, event, false);
+		deleteModuleFolderData(entity, FolderObject.INFOSTORE, event, false, false);
 	}
 
 	/**
@@ -276,11 +276,14 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 	 * @param checkPrivate
 	 *            <code>true</code> to also check module's private folders;
 	 *            otherwise <code>false</code>
+	 * @param allPublic
+	 *            <code>true</code> to modify all public folder of corresponding
+	 *            module even default folders; otherwise <code>false</code>
 	 * @throws OXException
 	 *             If deleting module's folder data fails
 	 */
 	private static void deleteModuleFolderData(final int entity, final int module, final DowngradeEvent event,
-			final boolean checkPrivate) throws OXException {
+			final boolean checkPrivate, final boolean allPublic) throws OXException {
 		final Set<Integer> ids = new HashSet<Integer>(128);
 		final int cid = event.getContext().getContextId();
 		final Connection writeCon = event.getWriteCon();
@@ -312,7 +315,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
 			 * Handle module's public folders
 			 */
 			fuids = OXFolderDowngradeSQL.getAffectedPublicFolders(entity, module, cid, TABLE_FOLDER_WORKING,
-					TABLE_PERMISSIONS_WORKING, writeCon);
+					TABLE_PERMISSIONS_WORKING, writeCon, allPublic);
 			for (final int fuid : fuids) {
 				OXFolderDowngradeSQL.handleAffectedPublicFolder(entity, fuid, cid, TABLE_PERMISSIONS_WORKING, writeCon);
 				ids.add(Integer.valueOf(fuid));
