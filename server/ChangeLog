@@ -1,3 +1,7 @@
+* 2008-05-27 - thorben.betten@open-xchange.com
+
+ - Bugfix #11299: Fixed downgrade actions on folder data
+
 * 2008-05-21 - thorben.betten@open-xchange.com
 
  - Bugfix #11292: Secure SMTP works with gmail
