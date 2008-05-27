@@ -80,6 +80,15 @@ public final class IMAPConfig extends MailConfig {
 	}
 
 	/**
+	 * Gets the spam handler name
+	 * 
+	 * @return The spam handler name
+	 */
+	public static String getSpamHandlerName() {
+		return IMAPProperties.getInstance().getSpamHandlerName();
+	}
+
+	/**
 	 * Gets the imapAuthEnc
 	 * 
 	 * @return the imapAuthEnc

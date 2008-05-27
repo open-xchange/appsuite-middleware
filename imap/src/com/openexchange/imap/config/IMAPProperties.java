@@ -59,6 +59,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
 import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.spamhandler.SpamHandler;
 
 /**
  * {@link IMAPProperties}
@@ -109,6 +110,8 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 
 	private final Map<String, Boolean> newACLExtMap;
 
+	private String spamHandlerName;
+
 	/**
 	 * Initializes a new {@link IMAPProperties}
 	 */
@@ -120,7 +123,8 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.config.AbstractProtocolProperties#loadProperties0()
+	 * @see
+	 * com.openexchange.mail.config.AbstractProtocolProperties#loadProperties0()
 	 */
 	@Override
 	protected void loadProperties0() throws MailConfigException {
@@ -234,6 +238,10 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 			}
 		}
 
+		spamHandlerName = configuration.getProperty("com.openexchange.imap.spamHandler",
+				SpamHandler.SPAM_HANDLER_FALLBACK).trim();
+		logBuilder.append("\tSpam Handler: ").append(spamHandlerName).append('\n');
+
 		logBuilder.append("Global IMAP properties successfully loaded!");
 		if (LOG.isInfoEnabled()) {
 			LOG.info(logBuilder.toString());
@@ -243,7 +251,8 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.config.AbstractProtocolProperties#resetFields()
+	 * @see
+	 * com.openexchange.mail.config.AbstractProtocolProperties#resetFields()
 	 */
 	@Override
 	protected void resetFields() {
@@ -258,6 +267,7 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 		user2AclImpl = null;
 		mboxEnabled = false;
 		blockSize = 0;
+		spamHandlerName = null;
 	}
 
 	/**
@@ -367,5 +377,14 @@ public final class IMAPProperties extends AbstractProtocolProperties {
 	 */
 	Map<String, Boolean> getNewACLExtMap() {
 		return newACLExtMap;
+	}
+
+	/**
+	 * Gets the spam handler name
+	 * 
+	 * @return The spam handler name
+	 */
+	String getSpamHandlerName() {
+		return spamHandlerName;
 	}
 }
