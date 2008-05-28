@@ -84,7 +84,7 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
- * {@link IMAPSort}
+ * {@link IMAPSort} - Perform the IMAP sort
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -94,7 +94,8 @@ public final class IMAPSort {
 	/**
 	 * {@link MailComparator}
 	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben
+	 *         Betten</a>
 	 * 
 	 */
 	private static final class MailComparator implements Comparator<Message> {
@@ -141,7 +142,7 @@ public final class IMAPSort {
 			fieldComparer = createFieldComparer(this.sortField, this.locale);
 		}
 
-		private static int compareAddrs(final Address[] addrs1, final Address[] addrs2, final Locale locale,
+		static int compareAddrs(final Address[] addrs1, final Address[] addrs2, final Locale locale,
 				final Collator collator) {
 			if (isEmptyAddrArray(addrs1) && !isEmptyAddrArray(addrs2)) {
 				return -1;
@@ -178,7 +179,7 @@ public final class IMAPSort {
 			}
 		}
 
-		private static Integer compareReferences(final Object o1, final Object o2) {
+		static Integer compareReferences(final Object o1, final Object o2) {
 			if ((o1 == null) && (o2 != null)) {
 				return Integer.valueOf(-1);
 			} else if ((o1 != null) && (o2 == null)) {
@@ -295,7 +296,7 @@ public final class IMAPSort {
 			}
 		}
 
-		private static Integer getColorFlag(final String[] userFlags) {
+		static Integer getColorFlag(final String[] userFlags) {
 			for (int i = 0; i < userFlags.length; i++) {
 				if (userFlags[i].startsWith(MailMessage.COLOR_LABEL_PREFIX)) {
 					return Integer.valueOf(userFlags[i].substring(3));
