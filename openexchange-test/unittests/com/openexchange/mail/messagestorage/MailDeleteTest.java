@@ -57,7 +57,7 @@ import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailListField;
+import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -117,7 +117,7 @@ public final class MailDeleteTest extends AbstractMailTest {
 				final int prevMessageCount = trash.getMessageCount();
 
 				MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
-						MailListField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID);
+						MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID);
 				final Set<Long> prevIds = new HashSet<Long>(prevMessageCount);
 				for (final MailMessage mail : trashed) {
 					prevIds.add(Long.valueOf(mail.getMailId()));
@@ -145,7 +145,7 @@ public final class MailDeleteTest extends AbstractMailTest {
 						+ uids.length == trash.getMessageCount());
 				
 				trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
-						MailListField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID);
+						MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID);
 				assertTrue("Size mismatch: " + trashed.length + " but should be " + trash.getMessageCount(), trashed.length == trash.getMessageCount());
 				final Set<Long> ids = new HashSet<Long>(trash.getMessageCount());
 				for (final MailMessage mail : trashed) {

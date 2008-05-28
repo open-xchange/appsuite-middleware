@@ -96,7 +96,7 @@ public final class MailMessageTest extends AbstractMailTest {
 				final MailFolder inboxFolder = mailConnection.getFolderStorage().getFolder("INBOX");
 
 				final MailMessage[] msgs = mailConnection.getMessageStorage().searchMessages(inboxFolder.getFullname(),
-						null, MailListField.RECEIVED_DATE, OrderDirection.DESC, null, COMMON_LIST_FIELDS);
+						null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, COMMON_LIST_FIELDS);
 				assertTrue("No messages returned!", msgs != null && msgs.length > 0);
 
 				if (msgs == null) {
@@ -189,7 +189,7 @@ public final class MailMessageTest extends AbstractMailTest {
 		MailMessage[] msgs = null;
 		try {
 			msgs = mailConnection.getMessageStorage().searchMessages(folder.getFullname(), null,
-					MailListField.RECEIVED_DATE, OrderDirection.DESC, null, COMMON_LIST_FIELDS);
+					MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, COMMON_LIST_FIELDS);
 		} catch (final MailException e) {
 			assertTrue("Error during fetching messages: " + e.getLocalizedMessage(), e.getCategory().equals(
 					Category.PERMISSION));

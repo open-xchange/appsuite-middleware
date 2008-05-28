@@ -58,8 +58,8 @@ import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.Quota;
 import com.openexchange.mail.api.MailAccess;
@@ -910,7 +910,7 @@ public final class MailFolderTest extends AbstractMailTest {
 				int numTrashedMails = mailAccess.getFolderStorage().getFolder(trashFullname).getMessageCount();
 				final Set<Long> ids = new HashSet<Long>(numTrashedMails);
 				MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
-						MailListField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
+						MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
 				for (int i = 0; i < trashed.length; i++) {
 					ids.add(Long.valueOf(trashed[i].getMailId()));
 				}
@@ -925,7 +925,7 @@ public final class MailFolderTest extends AbstractMailTest {
 
 				final Set<Long> newIds = new HashSet<Long>(expectedMsgCount);
 				trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
-						MailListField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
+						MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
 				assertTrue("Size mismatch: " + trashed.length + " but should be " + expectedMsgCount,
 						trashed.length == expectedMsgCount);
 				for (int i = 0; i < trashed.length; i++) {

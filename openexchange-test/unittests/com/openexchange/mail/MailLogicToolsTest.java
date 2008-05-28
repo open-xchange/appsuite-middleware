@@ -174,7 +174,7 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 				// ByteArrayInputStream(TEST_MAIL.getBytes("US-ASCII"));
 
 				final MailMessage[] mails = mailAccess.getMessageStorage().searchMessages("INBOX", null,
-						MailListField.RECEIVED_DATE, OrderDirection.DESC, null, COMMON_LIST_FIELDS);
+						MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, COMMON_LIST_FIELDS);
 				int count = 0;
 				for (int i = 0; i < mails.length; i++) {
 					if (mails[i].getContentType().isMimeType("multipart/mixed")) {
@@ -218,7 +218,7 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 				// ByteArrayInputStream(TEST_MAIL.getBytes("US-ASCII"));
 
 				final MailMessage[] mails = mailConnection.getMessageStorage().searchMessages("INBOX", null,
-						MailListField.RECEIVED_DATE, OrderDirection.DESC, null, COMMON_LIST_FIELDS);
+						MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, COMMON_LIST_FIELDS);
 				int count = 0;
 				for (int i = 0; i < mails.length; i++) {
 					if (mails[i].getMailId() != 11611L) {

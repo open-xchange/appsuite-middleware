@@ -57,8 +57,8 @@ import com.openexchange.mail.AbstractMailTest;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -233,7 +233,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
 
 				final int numTrashedMails = mailAccess.getFolderStorage().getFolder(trashFullname).getMessageCount();
 				MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
-						MailListField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
+						MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
 				assertTrue("Size mismatch: " + trashed.length + " but should be " + numTrashedMails,
 						trashed.length == numTrashedMails);
 				final Set<Long> oldIds = new HashSet<Long>(numTrashedMails);
@@ -255,7 +255,7 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
 				assertTrue("Mails not completely moved to trash", mailAccess.getFolderStorage()
 						.getFolder(trashFullname).getMessageCount() == expectedMsgCount);
 				trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL,
-						MailListField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
+						MailSortField.RECEIVED_DATE, OrderDirection.ASC, FIELDS_ID);
 				assertTrue("Size mismatch: " + trashed.length + " but should be " + expectedMsgCount,
 						trashed.length == expectedMsgCount);
 				final Set<Long> newIds = new HashSet<Long>(numTrashedMails);
