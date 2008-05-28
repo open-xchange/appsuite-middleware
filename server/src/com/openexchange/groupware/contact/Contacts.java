@@ -8793,7 +8793,7 @@ public class Contacts implements DeleteListener {
 			}
 
 			public String getValueAsString(final ContactObject co) {
-				return co.getCreationDate().toString();
+				return co.getCreationDate() == null ? null : co.getCreationDate().toString();
 			}
 
 			public String getReadableTitle() {
@@ -8854,7 +8854,7 @@ public class Contacts implements DeleteListener {
 			}
 
 			public String getValueAsString(final ContactObject co) {
-				return co.getLastModified().toString();
+				return co.getLastModified() == null ? null : co.getLastModified().toString();
 			}
 
 			public String getReadableTitle() {
@@ -8932,7 +8932,7 @@ public class Contacts implements DeleteListener {
 			}
 
 			public String getValueAsString(final ContactObject co) {
-				return co.getBirthday().toString();
+				return co.getBirthday() == null ? null : co.getBirthday().toString();
 			}
 
 			public String getReadableTitle() {
@@ -9010,7 +9010,7 @@ public class Contacts implements DeleteListener {
 			}
 
 			public String getValueAsString(final ContactObject co) {
-				return co.getAnniversary().toString();
+				return co.getAnniversary() == null ? null : co.getAnniversary().toString();
 			}
 
 			public String getReadableTitle() {
