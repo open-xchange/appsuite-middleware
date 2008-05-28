@@ -56,11 +56,11 @@ import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 
-public class Downgrade extends ContextAbstraction {
+public class DeleteInvisible extends ContextAbstraction {
 
     private final ContextHostingAbstraction ctxabs = new ContextHostingAbstraction();
     
-    public Downgrade(final String[] args2) {
+    public DeleteInvisible(final String[] args2) {
 
         final AdminParser parser = new AdminParser("downgradecontext");
 
@@ -93,7 +93,7 @@ public class Downgrade extends ContextAbstraction {
     }
 
     public static void main(final String args[]) {
-        new Downgrade(args);
+        new DeleteInvisible(args);
     }
 
     private void setOptions(final AdminParser parser) {
