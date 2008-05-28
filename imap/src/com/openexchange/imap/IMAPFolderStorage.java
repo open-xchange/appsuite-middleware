@@ -130,6 +130,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 
 	private final transient IMAPConfig imapConfig;
 
+	private Character separator;
+
 	/**
 	 * Initializes a new {@link IMAPFolderStorage}
 	 * 
@@ -154,6 +156,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 			throw new IMAPException(e);
 		}
 		this.imapConfig = imapAccess.getIMAPConfig();
+	}
+
+	private char getSeparator() throws MessagingException {
+		if (null == separator) {
+			separator = Character.valueOf(imapStore.getDefaultFolder().getSeparator());
+		}
+		return separator.charValue();
 	}
 
 	@Override
@@ -221,19 +230,19 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				 * Merge with namespace folders
 				 */
 				{
-					final List<Folder> personalNs = new ArrayList<Folder>(Arrays.asList(NamespaceFoldersCache
+					final List<String> personalNs = new ArrayList<String>(Arrays.asList(NamespaceFoldersCache
 							.getPersonalNamespaces(imapStore, true, session)));
-					mergeWithNamespaceFolders(subfolders, personalNs, subscribed);
+					mergeWithNamespaceFolders(subfolders, personalNs, subscribed, parent);
 				}
 				{
-					final List<Folder> otherNs = new ArrayList<Folder>(Arrays.asList(NamespaceFoldersCache
+					final List<String> otherNs = new ArrayList<String>(Arrays.asList(NamespaceFoldersCache
 							.getUserNamespaces(imapStore, true, session)));
-					mergeWithNamespaceFolders(subfolders, otherNs, subscribed);
+					mergeWithNamespaceFolders(subfolders, otherNs, subscribed, parent);
 				}
 				{
-					final List<Folder> sharedNs = new ArrayList<Folder>(Arrays.asList(NamespaceFoldersCache
+					final List<String> sharedNs = new ArrayList<String>(Arrays.asList(NamespaceFoldersCache
 							.getSharedNamespaces(imapStore, true, session)));
-					mergeWithNamespaceFolders(subfolders, sharedNs, subscribed);
+					mergeWithNamespaceFolders(subfolders, sharedNs, subscribed, parent);
 				}
 				/*
 				 * Output subfolders
@@ -292,10 +301,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		return list.toArray(new MailFolder[list.size()]);
 	}
 
-	private static void mergeWithNamespaceFolders(final List<Folder> subfolders, final List<Folder> namespaceFolders,
-			final boolean subscribed) {
-		NextNSFolder: for (final Iterator<Folder> iter = namespaceFolders.iterator(); iter.hasNext();) {
-			final String nsFullname = iter.next().getFullName();
+	private void mergeWithNamespaceFolders(final List<Folder> subfolders, final List<String> namespaceFolders,
+			final boolean subscribed, final IMAPFolder defaultFolder) throws MessagingException {
+		NextNSFolder: for (final Iterator<String> iter = namespaceFolders.iterator(); iter.hasNext();) {
+			final String nsFullname = iter.next();
 			if (nsFullname == null || nsFullname.length() == 0) {
 				iter.remove();
 				continue NextNSFolder;
@@ -310,14 +319,17 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 				}
 			}
 		}
+		final char sep = defaultFolder.getSeparator();
 		if (subscribed) {
-			for (final Iterator<Folder> iter = namespaceFolders.iterator(); iter.hasNext();) {
-				if (!iter.next().isSubscribed()) {
+			for (final Iterator<String> iter = namespaceFolders.iterator(); iter.hasNext();) {
+				if (!IMAPCommandsCollection.isSubscribed(iter.next(), sep, true, defaultFolder)) {
 					iter.remove();
 				}
 			}
 		}
-		subfolders.addAll(namespaceFolders);
+		for (final String fullname : namespaceFolders) {
+			subfolders.add(new NamespaceFolder(imapStore, fullname, sep));
+		}
 	}
 
 	/**
@@ -334,28 +346,28 @@ public final class IMAPFolderStorage extends MailFolderStorage implements Serial
 		 */
 		IMAPFolder retval = null;
 		{
-			final Folder[] personalFolders = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session);
+			final String[] personalFolders = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session);
 			for (int i = 0; i < personalFolders.length; i++) {
-				if (personalFolders[i].getFullName().equals(fullname)) {
-					retval = new NamespaceFolder(imapStore, fullname, personalFolders[i].getSeparator());
+				if (personalFolders[i].equals(fullname)) {
+					retval = new NamespaceFolder(imapStore, fullname, getSeparator());
 					break;
 				}
 			}
 		}
 		{
-			final Folder[] userFolders = NamespaceFoldersCache.getUserNamespaces(imapStore, true, session);
+			final String[] userFolders = NamespaceFoldersCache.getUserNamespaces(imapStore, true, session);
 			for (int i = 0; i < userFolders.length; i++) {
-				if (userFolders[i].getFullName().equals(fullname)) {
-					retval = new NamespaceFolder(imapStore, fullname, userFolders[i].getSeparator());
+				if (userFolders[i].equals(fullname)) {
+					retval = new NamespaceFolder(imapStore, fullname, getSeparator());
 					break;
 				}
 			}
 		}
 		{
-			final Folder[] sharedFolders = NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session);
+			final String[] sharedFolders = NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session);
 			for (int i = 0; i < sharedFolders.length; i++) {
-				if (sharedFolders[i].getFullName().equals(fullname)) {
-					retval = new NamespaceFolder(imapStore, fullname, sharedFolders[i].getSeparator());
+				if (sharedFolders[i].equals(fullname)) {
+					retval = new NamespaceFolder(imapStore, fullname, getSeparator());
 					break;
 				}
 			}

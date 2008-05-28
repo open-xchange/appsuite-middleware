@@ -95,6 +95,7 @@ import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
 import com.sun.mail.imap.protocol.Item;
+import com.sun.mail.imap.protocol.ListInfo;
 import com.sun.mail.imap.protocol.RFC822DATA;
 import com.sun.mail.imap.protocol.UID;
 
@@ -131,8 +132,8 @@ public final class IMAPCommandsCollection {
 
 	/**
 	 * Updates specified IMAP folder's internal <code>total</code> and
-	 * <code>recent</code> counters through executing an <code>EXAMINE</code>
-	 * or <code>SELECT</code> command dependent on IMAP folder's open mode.
+	 * <code>recent</code> counters through executing an <code>EXAMINE</code> or
+	 * <code>SELECT</code> command dependent on IMAP folder's open mode.
 	 * 
 	 * @param imapFolder
 	 *            The IMAP folder to update
@@ -145,8 +146,8 @@ public final class IMAPCommandsCollection {
 
 	/**
 	 * Updates specified IMAP folder's internal <code>total</code> and
-	 * <code>recent</code> counters through executing an <code>EXAMINE</code>
-	 * or <code>SELECT</code> command dependent on specified mode.
+	 * <code>recent</code> counters through executing an <code>EXAMINE</code> or
+	 * <code>SELECT</code> command dependent on specified mode.
 	 * 
 	 * @param imapFolder
 	 *            The IMAP folder to update
@@ -160,7 +161,9 @@ public final class IMAPCommandsCollection {
 			/*
 			 * (non-Javadoc)
 			 * 
-			 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
+			 * @see
+			 * com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun
+			 * .mail.imap.protocol.IMAPProtocol)
 			 */
 			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
 				/*
@@ -171,8 +174,8 @@ public final class IMAPCommandsCollection {
 				/*
 				 * Perform command
 				 */
-				final Response[] tmp = mode == Folder.READ_ONLY ? p.command("EXAMINE", args) : p.command("SELECT",
-						args);
+				final Response[] tmp = mode == Folder.READ_ONLY ? p.command("EXAMINE", args) : p
+						.command("SELECT", args);
 				final Response[] r = new Response[tmp.length - 1];
 				System.arraycopy(tmp, 0, r, 0, r.length);
 				/*
@@ -223,6 +226,65 @@ public final class IMAPCommandsCollection {
 		}
 	}
 
+	private static final String COMMAND_LSUB = "LSUB";
+
+	/**
+	 * Checks folder subscription for the folder denoted by specified fullname.
+	 * <p>
+	 * This method imitates the behavior from {@link IMAPFolder#isSubscribed()
+	 * isSubscribde()} that is a namespace folder's subscription status is
+	 * checked with specified separator character appended to fullname.
+	 * 
+	 * @param fullname
+	 *            The folder's fullname
+	 * @param separator
+	 *            The separator character
+	 * @param isNamespace
+	 *            <code>true</code> if denoted folder is a namespace folder;
+	 *            otherwise <code>false</code>
+	 * @param defaultFolder
+	 *            The IMAP store's default folder
+	 * @return <code>true</code> if folder is subscribed; otherwise
+	 *         <code>false</code>
+	 * @throws MessagingException
+	 *             If checking folder subscription fails
+	 */
+	public static boolean isSubscribed(final String fullname, final char separator, final boolean isNamespace,
+			final IMAPFolder defaultFolder) throws MessagingException {
+		final String lfolder = ((isNamespace || fullname.length() == 0) && separator != '\0') ? fullname + separator
+				: fullname;
+		return ((Boolean) (defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				final Response[] r = p.command(new StringBuilder().append(COMMAND_LSUB).append(" \"\" ").append(
+						prepareStringArgument(lfolder)).toString(), null);
+				final Response response = r[r.length - 1];
+				if (response.isOK()) {
+					for (int i = 0, len = r.length - 1; i < len; i++) {
+						if (!(r[i] instanceof IMAPResponse)) {
+							r[i] = null;
+							continue;
+						}
+						final IMAPResponse ir = (IMAPResponse) r[i];
+						if (ir.keyEquals(COMMAND_LSUB)) {
+							final ListInfo li = new ListInfo(ir);
+							if (li.name.equals(fullname)) {
+								return Boolean.valueOf(li.canOpen);
+							}
+						}
+						r[i] = null;
+					}
+				}
+				/*
+				 * Dispatch responses and thus update folder when handling
+				 * untagged responses of EXISTS and RECENT
+				 */
+				p.notifyResponseHandlers(r);
+				p.handleResult(response);
+				return Boolean.FALSE;
+			}
+		}))).booleanValue();
+	}
+
 	private final static String TEMPL_UID_STORE_FLAGS = "UID STORE %s %sFLAGS (%s)";
 
 	private static final String ALL_COLOR_LABELS = "cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10";
@@ -235,14 +297,14 @@ public final class IMAPCommandsCollection {
 	 * All known color labels:
 	 * <code>cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10</code>
 	 * 
-	 * @param imapFolder -
-	 *            the imap folder
-	 * @param msgUIDs -
-	 *            the message UIDs
+	 * @param imapFolder
+	 *            - the imap folder
+	 * @param msgUIDs
+	 *            - the message UIDs
 	 * @return <code>true</code> if everything went fine; otherwise
 	 *         <code>false</code>
-	 * @throws MessagingException -
-	 *             if an error occurs in underlying protocol
+	 * @throws MessagingException
+	 *             - if an error occurs in underlying protocol
 	 */
 	public static boolean clearAllColorLabels(final IMAPFolder imapFolder, final long[] msgUIDs)
 			throws MessagingException {
@@ -291,16 +353,16 @@ public final class IMAPCommandsCollection {
 	 * Applies the given color flag as an user flag to the messages
 	 * corresponding to given UIDS
 	 * 
-	 * @param imapFolder -
-	 *            the imap folder
-	 * @param msgUIDs -
-	 *            the message UIDs
-	 * @param colorLabelFlag -
-	 *            the color label
+	 * @param imapFolder
+	 *            - the imap folder
+	 * @param msgUIDs
+	 *            - the message UIDs
+	 * @param colorLabelFlag
+	 *            - the color label
 	 * @return <code>true</code> if everything went fine; otherwise
 	 *         <code>false</code>
-	 * @throws MessagingException -
-	 *             if an error occurs in underlying protocol
+	 * @throws MessagingException
+	 *             - if an error occurs in underlying protocol
 	 */
 	public static boolean setColorLabel(final IMAPFolder imapFolder, final long[] msgUIDs, final String colorLabelFlag)
 			throws MessagingException {
@@ -358,7 +420,9 @@ public final class IMAPCommandsCollection {
 				/*
 				 * (non-Javadoc)
 				 * 
-				 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
+				 * @see
+				 * com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com
+				 * .sun.mail.imap.protocol.IMAPProtocol)
 				 */
 				public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
 					final Response[] r = protocol.command(COMMAND_NOOP, null);
@@ -391,8 +455,8 @@ public final class IMAPCommandsCollection {
 	 * @param sortCrit
 	 *            The IMAP sort criteria
 	 * @param toSort
-	 *            The messages' sequence numbers to sort or <code>null</code>
-	 *            to sort all
+	 *            The messages' sequence numbers to sort or <code>null</code> to
+	 *            sort all
 	 * @return An array of <code>int</code> representing sorted messages'
 	 *         sequence numbers
 	 * @throws MessagingException
@@ -418,6 +482,8 @@ public final class IMAPCommandsCollection {
 	public static int[] getServerSortList(final IMAPFolder folder, final String sortCrit) throws MessagingException {
 		return getServerSortList(folder, sortCrit, RANGE_ALL);
 	}
+
+	private static final String COMMAND_SORT = "SORT";
 
 	/**
 	 * Executes the IMAP <i>SORT</i> command parameterized with given sort
@@ -464,7 +530,7 @@ public final class IMAPCommandsCollection {
 								continue;
 							}
 							final IMAPResponse ir = (IMAPResponse) r[i];
-							if (ir.keyEquals("SORT")) {
+							if (ir.keyEquals(COMMAND_SORT)) {
 								String num;
 								while ((num = ir.readAtomString()) != null) {
 									try {
@@ -478,9 +544,10 @@ public final class IMAPCommandsCollection {
 							r[i] = null;
 						}
 					} else {
-						throw new ProtocolException(new StringBuilder(String.format(PROTOCOL_ERROR_TEMPL, "SORT"))
-								.append(": ").append(getResponseType(response)).append(' ').append(response.getRest())
-								.toString());
+						throw new ProtocolException(
+								new StringBuilder(String.format(PROTOCOL_ERROR_TEMPL, COMMAND_SORT)).append(": ")
+										.append(getResponseType(response)).append(' ').append(response.getRest())
+										.toString());
 					}
 				} finally {
 					p.notifyResponseHandlers(r);
@@ -521,12 +588,14 @@ public final class IMAPCommandsCollection {
 			/*
 			 * (non-Javadoc)
 			 * 
-			 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
+			 * @see
+			 * com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun
+			 * .mail.imap.protocol.IMAPProtocol)
 			 */
 			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
 				final Response[] r = p.command(COMMAND_SEARCH_UNSEEN, null);
 				/*
-				 * Result is something like: * SEARCH 12 20 24
+				 * Result is something like: SEARCH 12 20 24
 				 */
 				int[] newMsgSeqNums = null;
 				final Response response = r[r.length - 1];
@@ -607,12 +676,12 @@ public final class IMAPCommandsCollection {
 	 * should be closed afterwards to force a message cache update.
 	 * 
 	 * 
-	 * @param imapFolder -
-	 *            the IMAP folder
+	 * @param imapFolder
+	 *            - the IMAP folder
 	 * @return <code>true</code> if everything went fine; otherwise
 	 *         <code>false</code>
-	 * @throws MessagingException -
-	 *             if an error occurs in underlying protocol
+	 * @throws MessagingException
+	 *             - if an error occurs in underlying protocol
 	 */
 	public static boolean fastExpunge(final IMAPFolder imapFolder) throws MessagingException {
 		return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
@@ -658,11 +727,11 @@ public final class IMAPCommandsCollection {
 	 * Performs a <i>UID EXPUNGE</i> on specified UIDs on first try. If <i>UID
 	 * EXPUNGE</i> fails the fallback action as proposed in RFC 3501 is done:
 	 * <ol>
-	 * <li>Remember all messages which are marked as \Deleted by now</li>
-	 * <li>Temporary remove the \Deleted flags from these messages </li>
-	 * <li>Set \Deleted flag on messages referenced by given UIDs and perform a
-	 * normal <i>EXPUNGE</i> on folder</li>
-	 * <li>Restore the \Deleted flags on remaining messages</li>
+	 * <li>Remember all messages which are marked as \Deleted by now</li> <li>
+	 * Temporary remove the \Deleted flags from these messages </li> <li>Set
+	 * \Deleted flag on messages referenced by given UIDs and perform a normal
+	 * <i>EXPUNGE</i> on folder</li> <li>Restore the \Deleted flags on remaining
+	 * messages</li>
 	 * </ol>
 	 * <b>NOTE</b>: The internal message cache of specified instance of
 	 * {@link IMAPFolder} is left in an inconsistent state cause its kept
@@ -734,7 +803,9 @@ public final class IMAPCommandsCollection {
 				/*
 				 * (non-Javadoc)
 				 * 
-				 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
+				 * @see
+				 * com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com
+				 * .sun.mail.imap.protocol.IMAPProtocol)
 				 */
 				public Object doCommand(final IMAPProtocol p) throws ProtocolException {
 					/*
@@ -946,21 +1017,21 @@ public final class IMAPCommandsCollection {
 
 	/**
 	 * <p>
-	 * Performs the <code>EXPUNGE</code> command on messages identified
-	 * through given <code>uids</code>
+	 * Performs the <code>EXPUNGE</code> command on messages identified through
+	 * given <code>uids</code>
 	 * <p>
-	 * <b>NOTE</b> folder's message cache is left in an inconsistent state
-	 * cause its kept message references are not marked as expunged. Therefore
-	 * the folder should be closed afterwards to force message cache update.
+	 * <b>NOTE</b> folder's message cache is left in an inconsistent state cause
+	 * its kept message references are not marked as expunged. Therefore the
+	 * folder should be closed afterwards to force message cache update.
 	 * 
-	 * @param imapFolder -
-	 *            the imap folder
-	 * @param uids -
-	 *            the message UIDs
+	 * @param imapFolder
+	 *            - the imap folder
+	 * @param uids
+	 *            - the message UIDs
 	 * @return <code>true</code> if everything went fine; otherwise
 	 *         <code>false</code>
-	 * @throws MessagingException -
-	 *             if an error occurs in underlying protocol
+	 * @throws MessagingException
+	 *             - if an error occurs in underlying protocol
 	 */
 	public static boolean uidExpunge(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
 		return ((Boolean) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
@@ -1018,7 +1089,7 @@ public final class IMAPCommandsCollection {
 	 * contains "\*", e.g.:
 	 * 
 	 * <pre>
-	 * * OK [PERMANENTFLAGS (\Answered \Flagged \Draft \Deleted \Seen \*)] 
+	 * * OK [PERMANENTFLAGS (\Answered \Flagged \Draft \Deleted \Seen \*)]
 	 * </pre>
 	 * 
 	 * @param imapFolder
@@ -1033,7 +1104,9 @@ public final class IMAPCommandsCollection {
 			/*
 			 * (non-Javadoc)
 			 * 
-			 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
+			 * @see
+			 * com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun
+			 * .mail.imap.protocol.IMAPProtocol)
 			 */
 			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
 				final String command = new StringBuilder("SELECT ").append(
@@ -1050,7 +1123,7 @@ public final class IMAPCommandsCollection {
 							final IMAPResponse ir = (IMAPResponse) r[i];
 							if (ir.isUnTagged() && ir.isOK()) {
 								/*
-								 * "* OK [PERMANENTFLAGS (\Deleted \*)]"
+								 * " OK [PERMANENTFLAGS (\Deleted \)]"
 								 */
 								ir.skipSpaces();
 								if (ATOM_PERMANENTFLAGS.equals(ir.readAtom('\0'))) {
@@ -1121,7 +1194,9 @@ public final class IMAPCommandsCollection {
 			/*
 			 * (non-Javadoc)
 			 * 
-			 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
+			 * @see
+			 * com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun
+			 * .mail.imap.protocol.IMAPProtocol)
 			 */
 			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
 				final Response[] r;
@@ -1207,7 +1282,9 @@ public final class IMAPCommandsCollection {
 			/*
 			 * (non-Javadoc)
 			 * 
-			 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
+			 * @see
+			 * com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun
+			 * .mail.imap.protocol.IMAPProtocol)
 			 */
 			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
 				final Response[] r = p.command(COMMAND_FETCH_ENV_UID, null);

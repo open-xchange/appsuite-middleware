@@ -558,20 +558,20 @@ public final class IMAPFolderConverter {
 		 * Check for namespace folder
 		 */
 		{
-			final Folder[] personalFolders = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session);
+			final String[] personalFolders = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session);
 			for (int i = 0; i < personalFolders.length; i++) {
-				if (personalFolders[i].getFullName().startsWith(fullname)) {
+				if (personalFolders[i].startsWith(fullname)) {
 					return true;
 				}
 			}
 		}
 		{
-			final Folder[] userFolders = NamespaceFoldersCache.getUserNamespaces(imapStore, true, session);
+			final String[] userFolders = NamespaceFoldersCache.getUserNamespaces(imapStore, true, session);
 			for (int i = 0; i < userFolders.length; i++) {
-				if (userFolders[i].getFullName().startsWith(fullname)) {
+				if (userFolders[i].startsWith(fullname)) {
 					return true;
 				}
-				final NamespaceFolder nsf = new NamespaceFolder(imapStore, userFolders[i].getFullName(), userFolders[i]
+				final NamespaceFolder nsf = new NamespaceFolder(imapStore, userFolders[i], imapStore.getDefaultFolder()
 						.getSeparator());
 				final Folder[] subFolders = nsf.list();
 				for (int j = 0; j < subFolders.length; j++) {
@@ -582,9 +582,9 @@ public final class IMAPFolderConverter {
 			}
 		}
 		{
-			final Folder[] sharedFolders = NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session);
+			final String[] sharedFolders = NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session);
 			for (int i = 0; i < sharedFolders.length; i++) {
-				if (sharedFolders[i].getFullName().startsWith(fullname)) {
+				if (sharedFolders[i].startsWith(fullname)) {
 					return true;
 				}
 			}

@@ -75,6 +75,8 @@ public final class NamespaceFoldersCache {
 
 	private static final Integer NS_SHARED = Integer.valueOf(3);
 
+	private static final String[] EMPTY_ARR = new String[0];
+
 	/**
 	 * No instance
 	 */
@@ -90,49 +92,67 @@ public final class NamespaceFoldersCache {
 	 *            The IMAP store on which <code>NAMESPACE</code> command is
 	 *            invoked
 	 * @param load
-	 *            Whether <code>NAMESPACE</code> command should be invoked if
-	 *            no cache entry present or not
+	 *            Whether <code>NAMESPACE</code> command should be invoked if no
+	 *            cache entry present or not
 	 * @param session
 	 *            The session providing the session-bound cache
 	 * @return The personal namespace folders
 	 * @throws MessagingException
 	 *             If <code>NAMESPACE</code> command fails
 	 */
-	public static Folder[] getPersonalNamespaces(final IMAPStore imapStore, final boolean load, final Session session)
+	public static String[] getPersonalNamespaces(final IMAPStore imapStore, final boolean load, final Session session)
 			throws MessagingException {
 		final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_PERSONAL);
 		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
 		mailCache.get(entry);
 		if (load && null == entry.getValue()) {
-			entry.setValue(imapStore.getPersonalNamespaces());
+			final Folder[] pns = imapStore.getPersonalNamespaces();
+			if (pns == null || pns.length == 0) {
+				entry.setValue(EMPTY_ARR);
+			} else {
+				final String[] fullnames = new String[pns.length];
+				for (int i = 0; i < pns.length; i++) {
+					fullnames[i] = pns[i].getFullName();
+				}
+				entry.setValue(fullnames);
+			}
 			mailCache.put(entry);
 		}
 		return entry.getValue();
 	}
 
 	/**
-	 * Gets cached user namespaces when invoking <code>NAMESPACE</code>
-	 * command on given IMAP store
+	 * Gets cached user namespaces when invoking <code>NAMESPACE</code> command
+	 * on given IMAP store
 	 * 
 	 * @param imapStore
 	 *            The IMAP store on which <code>NAMESPACE</code> command is
 	 *            invoked
 	 * @param load
-	 *            Whether <code>NAMESPACE</code> command should be invoked if
-	 *            no cache entry present or not
+	 *            Whether <code>NAMESPACE</code> command should be invoked if no
+	 *            cache entry present or not
 	 * @param session
 	 *            The session providing the session-bound cache
 	 * @return The user namespace folders
 	 * @throws MessagingException
 	 *             If <code>NAMESPACE</code> command fails
 	 */
-	public static Folder[] getUserNamespaces(final IMAPStore imapStore, final boolean load, final Session session)
+	public static String[] getUserNamespaces(final IMAPStore imapStore, final boolean load, final Session session)
 			throws MessagingException {
 		final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_USER);
 		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
 		mailCache.get(entry);
 		if (load && null == entry.getValue()) {
-			entry.setValue(imapStore.getUserNamespaces(null));
+			final Folder[] uns = imapStore.getUserNamespaces(null);
+			if (uns == null || uns.length == 0) {
+				entry.setValue(EMPTY_ARR);
+			} else {
+				final String[] fullnames = new String[uns.length];
+				for (int i = 0; i < uns.length; i++) {
+					fullnames[i] = uns[i].getFullName();
+				}
+				entry.setValue(fullnames);
+			}
 			mailCache.put(entry);
 		}
 		return entry.getValue();
@@ -146,31 +166,40 @@ public final class NamespaceFoldersCache {
 	 *            The IMAP store on which <code>NAMESPACE</code> command is
 	 *            invoked
 	 * @param load
-	 *            Whether <code>NAMESPACE</code> command should be invoked if
-	 *            no cache entry present or not
+	 *            Whether <code>NAMESPACE</code> command should be invoked if no
+	 *            cache entry present or not
 	 * @param session
 	 *            The session providing the session-bound cache
 	 * @return The shared namespace folders
 	 * @throws MessagingException
 	 *             If <code>NAMESPACE</code> command fails
 	 */
-	public static Folder[] getSharedNamespaces(final IMAPStore imapStore, final boolean load, final Session session)
+	public static String[] getSharedNamespaces(final IMAPStore imapStore, final boolean load, final Session session)
 			throws MessagingException {
 		final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_SHARED);
 		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
 		mailCache.get(entry);
 		if (load && null == entry.getValue()) {
-			entry.setValue(imapStore.getSharedNamespaces());
+			final Folder[] sns = imapStore.getSharedNamespaces();
+			if (sns == null || sns.length == 0) {
+				entry.setValue(EMPTY_ARR);
+			} else {
+				final String[] fullnames = new String[sns.length];
+				for (int i = 0; i < sns.length; i++) {
+					fullnames[i] = sns[i].getFullName();
+				}
+				entry.setValue(fullnames);
+			}
 			mailCache.put(entry);
 		}
 		return entry.getValue();
 	}
 
-	private static final class NamespaceFoldersCacheEntry implements SessionMailCacheEntry<Folder[]> {
+	private static final class NamespaceFoldersCacheEntry implements SessionMailCacheEntry<String[]> {
 
 		private Integer namespaceKey;
 
-		private Folder[] folders;
+		private String[] fullnames;
 
 		private CacheKey key;
 
@@ -178,10 +207,10 @@ public final class NamespaceFoldersCache {
 			this(namespaceKey, null);
 		}
 
-		public NamespaceFoldersCacheEntry(final Integer namespaceKey, final Folder[] folders) {
+		public NamespaceFoldersCacheEntry(final Integer namespaceKey, final String[] fullnames) {
 			super();
 			this.namespaceKey = namespaceKey;
-			this.folders = folders;
+			this.fullnames = fullnames;
 		}
 
 		private CacheKey getKeyInternal() {
@@ -196,12 +225,12 @@ public final class NamespaceFoldersCache {
 			return getKeyInternal();
 		}
 
-		public Folder[] getValue() {
-			return folders;
+		public String[] getValue() {
+			return fullnames;
 		}
 
-		public void setValue(final Folder[] value) {
-			this.folders = value;
+		public void setValue(final String[] value) {
+			this.fullnames = value;
 		}
 
 	}

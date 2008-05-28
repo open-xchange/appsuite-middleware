@@ -161,25 +161,25 @@ public class NamespaceFolder extends IMAPFolder {
 	@Override
 	public boolean delete(final boolean recurse) throws MessagingException {
 		// Not applicable on DefaultFolder
-		throw new MethodNotSupportedException("Cannot delete Default Folder");
+		throw new MethodNotSupportedException("Cannot delete Namespace Folder");
 	}
 
 	@Override
 	public boolean renameTo(final Folder f) throws MessagingException {
 		// Not applicable on DefaultFolder
-		throw new MethodNotSupportedException("Cannot rename Default Folder");
+		throw new MethodNotSupportedException("Cannot rename Namespace Folder");
 	}
 
 	@Override
 	public void appendMessages(final Message[] msgs) throws MessagingException {
 		// Not applicable on DefaultFolder
-		throw new MethodNotSupportedException("Cannot append to Default Folder");
+		throw new MethodNotSupportedException("Cannot append to Namespace Folder");
 	}
 
 	@Override
 	public Message[] expunge() throws MessagingException {
 		// Not applicable on DefaultFolder
-		throw new MethodNotSupportedException("Cannot expunge Default Folder");
+		throw new MethodNotSupportedException("Cannot expunge Namespace Folder");
 	}
 
 	@Override
