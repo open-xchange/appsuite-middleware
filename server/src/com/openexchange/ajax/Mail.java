@@ -342,6 +342,10 @@ public class Mail extends PermissionServlet implements UploadListener {
 			actionPutClear(req, resp);
 		} else if (actionStr.equalsIgnoreCase(ACTION_AUTOSAVE)) {
 			actionPutAutosave(req, resp);
+		} else if (actionStr.equalsIgnoreCase(ACTION_FORWARD)) {
+			actionPutForwardMultiple(req, resp);
+		} else if (actionStr.equalsIgnoreCase(ACTION_REPLY) || actionStr.equalsIgnoreCase(ACTION_REPLYALL)) {
+			actionPutReply(req, resp, (actionStr.equalsIgnoreCase(ACTION_REPLYALL)));
 		} else {
 			throw new Exception("Unknown value in parameter " + PARAMETER_ACTION + " through PUT command");
 		}
@@ -678,8 +682,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 					mailInterface = MailServletInterface.getInstance(session);
 					closeMailInterface = true;
 				}
-				data = MessageWriter.writeMailMessage(mailInterface.getForwardMessageForDisplay(folderPath,
-						new long[] { uid }), DisplayMode.MODIFYABLE, session, null);
+				data = MessageWriter.writeMailMessage(mailInterface.getForwardMessageForDisplay(
+						new String[] { folderPath }, new long[] { uid }), DisplayMode.MODIFYABLE, session, null);
 			} finally {
 				if (closeMailInterface && mailInterface != null) {
 					mailInterface.close(true);
@@ -1268,6 +1272,118 @@ public class Mail extends PermissionServlet implements UploadListener {
 			}
 		}
 		return tmp.toString();
+	}
+
+	public void actionPutForwardMultiple(final Session session, final JSONWriter writer, final JSONObject jsonObj,
+			final MailServletInterface mi) throws JSONException {
+		Response.write(actionPutForwardMultiple(session, jsonObj.getString(Response.DATA), ParamContainer.getInstance(
+				jsonObj, EnumComponent.MAIL), mi), writer);
+	}
+
+	private final void actionPutForwardMultiple(final HttpServletRequest req, final HttpServletResponse resp)
+			throws IOException, ServletException {
+		try {
+			Response.write(actionPutForwardMultiple(getSessionObject(req), getBody(req), ParamContainer.getInstance(
+					req, EnumComponent.MAIL, resp), null), resp.getWriter());
+		} catch (final JSONException e) {
+			sendErrorAsJS(resp, RESPONSE_ERROR);
+		}
+	}
+
+	private final Response actionPutForwardMultiple(final Session session, final String body,
+			final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) throws JSONException {
+		/*
+		 * Some variables
+		 */
+		final Response response = new Response();
+		Object data = JSONObject.NULL;
+		/*
+		 * Start response
+		 */
+		try {
+			/*
+			 * Read in parameters
+			 */
+			final JSONArray paths = new JSONArray(body);
+			final String[] folders = new String[paths.length()];
+			final long[] ids = new long[paths.length()];
+			for (int i = 0; i < folders.length; i++) {
+				final JSONObject folderAndID = paths.getJSONObject(i);
+				folders[i] = folderAndID.getString(PARAMETER_FOLDERID);
+				ids[i] = Long.parseLong(folderAndID.get(PARAMETER_ID).toString());
+			}
+			/*
+			 * Get forward message
+			 */
+			MailServletInterface mailInterface = mailInterfaceArg;
+			boolean closeMailInterface = false;
+			try {
+				if (mailInterface == null) {
+					mailInterface = MailServletInterface.getInstance(session);
+					closeMailInterface = true;
+				}
+				data = MessageWriter.writeMailMessage(mailInterface.getForwardMessageForDisplay(folders, ids),
+						DisplayMode.MODIFYABLE, session, null);
+			} finally {
+				if (closeMailInterface && mailInterface != null) {
+					mailInterface.close(true);
+				}
+			}
+		} catch (final MailException e) {
+			LOG.error(e.getMessage(), e);
+			response.setException(e);
+		} catch (final AbstractOXException e) {
+			LOG.error(e.getMessage(), e);
+			response.setException(e);
+		} catch (final Exception e) {
+			LOG.error("actionGetForward", e);
+			response.setException(getWrappingOXException(e));
+		}
+		/*
+		 * Close response and flush print writer
+		 */
+		response.setData(data);
+		response.setTimestamp(null);
+		return response;
+	}
+
+	public void actionPutReply(final Session session, final boolean replyAll, final JSONWriter writer,
+			final JSONObject jsonObj, final MailServletInterface mi) throws JSONException {
+		Response.write(actionPutReply(session, jsonObj.getString(Response.DATA), ParamContainer.getInstance(jsonObj,
+				EnumComponent.MAIL), replyAll, mi), writer);
+	}
+
+	private final void actionPutReply(final HttpServletRequest req, final HttpServletResponse resp,
+			final boolean replyAll) throws IOException, ServletException {
+		try {
+			Response.write(actionPutReply(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
+					EnumComponent.MAIL, resp), replyAll, null), resp.getWriter());
+		} catch (final JSONException e) {
+			sendErrorAsJS(resp, RESPONSE_ERROR);
+		}
+	}
+
+	private final Response actionPutReply(final Session session, final String body,
+			final ParamContainer paramContainer, final boolean replyAll, final MailServletInterface mailInterfaceArg)
+			throws JSONException {
+		/*
+		 * Create new parameter container from body data...
+		 */
+		final JSONArray paths = new JSONArray(body);
+		final int length = paths.length();
+		if (length != 1) {
+			throw new IllegalArgumentException("JSON array's length is not 1");
+		}
+		final Map<String, String> map = new HashMap<String, String>(2);
+		for (int i = 0; i < length; i++) {
+			final JSONObject folderAndID = paths.getJSONObject(i);
+			map.put(PARAMETER_FOLDERID, folderAndID.getString(PARAMETER_FOLDERID));
+			map.put(PARAMETER_ID, folderAndID.get(PARAMETER_ID).toString());
+		}
+		/*
+		 * ... and fake a GET request
+		 */
+		return actionGetReply(session, replyAll, ParamContainer.getInstance(map, EnumComponent.MAIL), mailInterfaceArg);
 	}
 
 	public void actionPutAutosave(final Session session, final JSONWriter writer, final JSONObject jsonObj,
@@ -2345,8 +2461,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest,
-	 *      javax.servlet.http.HttpServletResponse)
+	 * @see
+	 * javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest
+	 * , javax.servlet.http.HttpServletResponse)
 	 */
 	@Override
 	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
@@ -2447,7 +2564,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.groupware.upload.UploadListener#action(com.openexchange.groupware.upload.UploadEvent)
+	 * @see
+	 * com.openexchange.groupware.upload.UploadListener#action(com.openexchange
+	 * .groupware.upload.UploadEvent)
 	 */
 	public boolean action(final UploadEvent uploadEvent) throws OXException {
 		if (uploadEvent.getAffiliationId() != UploadEvent.MAIL_UPLOAD) {
@@ -2707,7 +2826,9 @@ public class Mail extends PermissionServlet implements UploadListener {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see com.openexchange.groupware.upload.UploadListener#action(com.openexchange.groupware.upload.UploadEvent)
+		 * @see
+		 * com.openexchange.groupware.upload.UploadListener#action(com.openexchange
+		 * .groupware.upload.UploadEvent)
 		 */
 		public boolean action(final UploadEvent uploadEvent) throws UploadServletException {
 			if (!doAction) {

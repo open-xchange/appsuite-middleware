@@ -50,6 +50,7 @@
 package com.openexchange.ajax.helper;
 
 import java.util.Date;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -174,7 +175,147 @@ public abstract class ParamContainer {
 		}
 	}
 
-	private static class HttpParamContainer extends ParamContainer {
+	private static final class MapParamContainer extends ParamContainer {
+
+		private final Map<String, String> map;
+
+		private final EnumComponent component;
+
+		private final ErrorInfo errorInfo;
+
+		public MapParamContainer(final Map<String, String> map, final EnumComponent component) {
+			super();
+			this.map = map;
+			this.component = component;
+			errorInfo = getErrorInfo(component);
+		}
+
+		@Override
+		public Date checkDateParam(final String paramName) throws AbstractOXException {
+			final String tmp = map.get(paramName);
+			if (tmp == null) {
+				throw new ParamContainerException(component, errorInfo.getMissingParamCategory(), errorInfo
+						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null, paramName);
+			}
+			try {
+				return new Date(Long.parseLong(tmp));
+			} catch (final NumberFormatException e) {
+				throw new ParamContainerException(component, errorInfo.getBadParamCategory(), errorInfo
+						.getBadParamNum(), errorInfo.getBadParamMsg(), null, tmp, paramName);
+			}
+		}
+
+		@Override
+		public int[] checkIntArrayParam(final String paramName) throws AbstractOXException {
+			String tmp = map.get(paramName);
+			if (tmp == null) {
+				throw new ParamContainerException(component, errorInfo.getMissingParamCategory(), errorInfo
+						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null, paramName);
+			}
+			final String[] sa = tmp.split(SPLIT_PAT);
+			tmp = null;
+			final int intArray[] = new int[sa.length];
+			for (int a = 0; a < sa.length; a++) {
+				try {
+					intArray[a] = Integer.parseInt(sa[a]);
+				} catch (final NumberFormatException e) {
+					throw new ParamContainerException(component, errorInfo.getBadParamCategory(), errorInfo
+							.getBadParamNum(), errorInfo.getBadParamMsg(), null, tmp, paramName);
+				}
+			}
+			return intArray;
+		}
+
+		@Override
+		public int checkIntParam(final String paramName) throws AbstractOXException {
+			final String tmp = map.get(paramName);
+			if (tmp == null) {
+				throw new ParamContainerException(component, errorInfo.getMissingParamCategory(), errorInfo
+						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null, paramName);
+			}
+			try {
+				return Integer.parseInt(tmp);
+			} catch (final NumberFormatException e) {
+				throw new ParamContainerException(component, errorInfo.getBadParamCategory(), errorInfo
+						.getBadParamNum(), errorInfo.getBadParamMsg(), null, tmp, paramName);
+			}
+		}
+
+		@Override
+		public String checkStringParam(final String paramName) throws AbstractOXException {
+			final String tmp = map.get(paramName);
+			if (tmp == null) {
+				throw new ParamContainerException(component, errorInfo.getMissingParamCategory(), errorInfo
+						.getMissingParamNum(), errorInfo.getMissingParamMsg(), null, paramName);
+			}
+			return tmp;
+		}
+
+		@Override
+		public Date getDateParam(final String paramName) throws AbstractOXException {
+			final String tmp = map.get(paramName);
+			if (tmp == null) {
+				return null;
+			}
+			try {
+				return new Date(Long.parseLong(tmp));
+			} catch (final NumberFormatException e) {
+				throw new ParamContainerException(component, errorInfo.getBadParamCategory(), errorInfo
+						.getBadParamNum(), errorInfo.getBadParamMsg(), null, tmp, paramName);
+			}
+		}
+
+		@Override
+		public String getHeader(final String hdrName) {
+			return null;
+		}
+
+		@Override
+		public int[] getIntArrayParam(final String paramName) throws AbstractOXException {
+			final String tmp = map.get(paramName);
+			if (tmp == null) {
+				return null;
+			}
+			final String[] sa = tmp.split(SPLIT_PAT);
+			final int intArray[] = new int[sa.length];
+			for (int a = 0; a < sa.length; a++) {
+				try {
+					intArray[a] = Integer.parseInt(sa[a]);
+				} catch (final NumberFormatException e) {
+					throw new ParamContainerException(component, errorInfo.getBadParamCategory(), errorInfo
+							.getBadParamNum(), errorInfo.getBadParamMsg(), null, tmp, paramName);
+				}
+			}
+			return intArray;
+		}
+
+		@Override
+		public int getIntParam(final String paramName) throws AbstractOXException {
+			final String tmp = map.get(paramName);
+			if (tmp == null) {
+				return NOT_FOUND;
+			}
+			try {
+				return Integer.parseInt(tmp);
+			} catch (final NumberFormatException e) {
+				throw new ParamContainerException(component, errorInfo.getBadParamCategory(), errorInfo
+						.getBadParamNum(), errorInfo.getBadParamMsg(), null, tmp, paramName);
+			}
+		}
+
+		@Override
+		public String getStringParam(final String paramName) {
+			return map.get(paramName);
+		}
+
+		@Override
+		public HttpServletResponse getHttpServletResponse() {
+			return null;
+		}
+
+	}
+
+	private static final class HttpParamContainer extends ParamContainer {
 
 		private final HttpServletRequest req;
 
@@ -321,7 +462,7 @@ public abstract class ParamContainer {
 		}
 	}
 
-	private static class JSONParamContainer extends ParamContainer {
+	private static final class JSONParamContainer extends ParamContainer {
 
 		private final JSONObject jo;
 
@@ -493,13 +634,17 @@ public abstract class ParamContainer {
 		return new JSONParamContainer(jo, component);
 	}
 
+	public static ParamContainer getInstance(final Map<String, String> map, final EnumComponent component) {
+		return new MapParamContainer(map, component);
+	}
+
 	/**
 	 * Gets a parameter as String
 	 * 
-	 * @param paramName -
-	 *            the parameter name
-	 * @return parameter value as <code>String</code> or <code>null</code>
-	 *         if not found
+	 * @param paramName
+	 *            - the parameter name
+	 * @return parameter value as <code>String</code> or <code>null</code> if
+	 *         not found
 	 * @throws AbstractOXException
 	 */
 	public abstract String getStringParam(String paramName) throws AbstractOXException;
@@ -507,8 +652,8 @@ public abstract class ParamContainer {
 	/**
 	 * Requires a parameter as <code>String</code>
 	 * 
-	 * @param paramName -
-	 *            the parameter name
+	 * @param paramName
+	 *            - the parameter name
 	 * @return parameter value as <code>String</code>
 	 * @throws AbstractOXException
 	 *             if parameter could not be found
@@ -518,8 +663,8 @@ public abstract class ParamContainer {
 	/**
 	 * Gets a parameter as <code>int</code>
 	 * 
-	 * @param paramName -
-	 *            the parameter name
+	 * @param paramName
+	 *            - the parameter name
 	 * @return parameter value as <code>int</code> or constant
 	 *         <code>NOT_FOUND</code> if not found
 	 * @throws AbstractOXException
@@ -529,8 +674,8 @@ public abstract class ParamContainer {
 	/**
 	 * Requires a paramater as <code>int</code>
 	 * 
-	 * @param paramName -
-	 *            the parameter name
+	 * @param paramName
+	 *            - the parameter name
 	 * @return parameter value as <code>int</code>
 	 * @throws AbstractOXException
 	 *             if parameter could not be found
@@ -540,8 +685,8 @@ public abstract class ParamContainer {
 	/**
 	 * Gets a parameter as an array of <code>int</code>
 	 * 
-	 * @param paramName -
-	 *            the parameter name
+	 * @param paramName
+	 *            - the parameter name
 	 * @return parameter value as an array of <code>int</code> or
 	 *         <code>null</code> if not found
 	 * @throws AbstractOXException
@@ -551,8 +696,8 @@ public abstract class ParamContainer {
 	/**
 	 * Requires a parameter as an array of <code>int</code>
 	 * 
-	 * @param paramName -
-	 *            the parameter name
+	 * @param paramName
+	 *            - the parameter name
 	 * @return parameter value as an array of <code>int</code>
 	 * @throws AbstractOXException
 	 *             if parameter could not be found
@@ -562,8 +707,8 @@ public abstract class ParamContainer {
 	/**
 	 * Gets a parameter as a <code>java.util.Date</code>
 	 * 
-	 * @param paramName -
-	 *            the parameter name
+	 * @param paramName
+	 *            - the parameter name
 	 * @return parameter value as an array of <code>java.util.Date</code> or
 	 *         <code>null</code> if not found
 	 * @throws AbstractOXException
@@ -573,8 +718,8 @@ public abstract class ParamContainer {
 	/**
 	 * Requires a parameter as a <code>java.util.Date</code>
 	 * 
-	 * @param paramName -
-	 *            the parameter name
+	 * @param paramName
+	 *            - the parameter name
 	 * @return parameter value as <code>java.util.Date</code>
 	 * @throws AbstractOXException
 	 *             if parameter could not be found
@@ -584,8 +729,8 @@ public abstract class ParamContainer {
 	/**
 	 * Gets a header
 	 * 
-	 * @param hdrName -
-	 *            the header name
+	 * @param hdrName
+	 *            - the header name
 	 * @return the header as <code>String</code> or <code>null</code> if not
 	 *         found
 	 */
@@ -594,8 +739,8 @@ public abstract class ParamContainer {
 	/**
 	 * Gets the <code>javax.servlet.http.HttpServletResponse</code> instance
 	 * 
-	 * @return the <code>javax.servlet.http.HttpServletResponse</code>
-	 *         instance if present; otherwise <code>null</code>
+	 * @return the <code>javax.servlet.http.HttpServletResponse</code> instance
+	 *         if present; otherwise <code>null</code>
 	 */
 	public abstract HttpServletResponse getHttpServletResponse();
 

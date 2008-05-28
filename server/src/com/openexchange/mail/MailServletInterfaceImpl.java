@@ -94,8 +94,6 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  */
 final class MailServletInterfaceImpl extends MailServletInterface {
 
-	private static final MailField[] FIELDS_FULL = new MailField[] { MailField.FULL };
-
 	private static final MailField[] FIELDS_ID_INFO = new MailField[] { MailField.ID, MailField.FOLDER_ID };
 
 	private static final String INBOX_ID = "INBOX";
@@ -336,12 +334,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	}
 
 	@Override
-	public MailMessage getForwardMessageForDisplay(final String folder, final long[] fowardMsgUIDs)
+	public MailMessage getForwardMessageForDisplay(final String[] folders, final long[] fowardMsgUIDs)
 			throws MailException {
+		if (null == folders || null == fowardMsgUIDs || folders.length != fowardMsgUIDs.length) {
+			throw new IllegalArgumentException("Illegal arguments");
+		}
 		initConnection();
-		final String fullname = prepareMailFolderParam(folder);
-		final MailMessage[] originalMails = mailAccess.getMessageStorage().getMessages(fullname, fowardMsgUIDs,
-				FIELDS_FULL);
+		final MailMessage[] originalMails = new MailMessage[folders.length];
+		for (int i = 0; i < folders.length; i++) {
+			originalMails[i] = mailAccess.getMessageStorage().getMessage(prepareMailFolderParam(folders[i]), fowardMsgUIDs[i], false);
+		}
 		return mailAccess.getLogicTools().getFowardMessage(originalMails);
 	}
 

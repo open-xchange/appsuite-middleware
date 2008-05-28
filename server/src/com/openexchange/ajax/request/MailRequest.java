@@ -59,6 +59,7 @@ import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.api.OXPermissionException;
@@ -112,10 +113,10 @@ public final class MailRequest {
 	/**
 	 * Constructor
 	 * 
-	 * @param session -
-	 *            the session reference keeping user-specific data
-	 * @param writer -
-	 *            the instance of <code>{@link OXJSONWriter}</code> to whom
+	 * @param session
+	 *            - the session reference keeping user-specific data
+	 * @param writer
+	 *            - the instance of <code>{@link OXJSONWriter}</code> to whom
 	 *            response data is written
 	 */
 	public MailRequest(final Session session, final Context ctx, final OXJSONWriter writer) {
@@ -128,13 +129,13 @@ public final class MailRequest {
 	/**
 	 * Performs the action associated with given <code>action</code> parameter
 	 * 
-	 * @param action -
-	 *            the action to perform
-	 * @param jsonObject -
-	 *            the instance of <code>{@link JSONObject}</code> keeping
+	 * @param action
+	 *            - the action to perform
+	 * @param jsonObject
+	 *            - the instance of <code>{@link JSONObject}</code> keeping
 	 *            request's data
-	 * @param mailInterface -
-	 *            the instance of <code>{@link MailServletInterface}</code> to
+	 * @param mailInterface
+	 *            - the instance of <code>{@link MailServletInterface}</code> to
 	 *            access mail module
 	 */
 	public void action(final String action, final JSONObject jsonObject, final MailServletInterface mailInterface)
@@ -149,10 +150,22 @@ public final class MailRequest {
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
 			MAIL_SERVLET.actionGetUpdates(session, writer, jsonObject, mailInterface);
 		} else if (action.regionMatches(true, 0, AJAXServlet.ACTION_REPLY, 0, 5)) {
-			MAIL_SERVLET.actionGetReply(session, writer, jsonObject, (action
-					.equalsIgnoreCase(AJAXServlet.ACTION_REPLYALL)), mailInterface);
+			if (jsonObject.has(Response.DATA) && !jsonObject.isNull(Response.DATA)) {
+				MAIL_SERVLET.actionPutReply(session, (action.equalsIgnoreCase(AJAXServlet.ACTION_REPLYALL)), writer,
+						jsonObject, mailInterface);
+			} else {
+				MAIL_SERVLET.actionGetReply(session, writer, jsonObject, (action
+						.equalsIgnoreCase(AJAXServlet.ACTION_REPLYALL)), mailInterface);
+			}
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_FORWARD)) {
-			MAIL_SERVLET.actionGetForward(session, writer, jsonObject, mailInterface);
+			if (jsonObject.has(Response.DATA) && !jsonObject.isNull(Response.DATA)) {
+				/*
+				 * Perform forward with multiple mails
+				 */
+				MAIL_SERVLET.actionPutForwardMultiple(session, writer, jsonObject, mailInterface);
+			} else {
+				MAIL_SERVLET.actionGetForward(session, writer, jsonObject, mailInterface);
+			}
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
 			MAIL_SERVLET.actionGetMessage(session, writer, jsonObject, mailInterface);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_MATTACH)) {
@@ -219,8 +232,8 @@ public final class MailRequest {
 	/**
 	 * Indicates if this MailRequest is collecting continuously
 	 * 
-	 * @return <code>true</code> if this MailRequest is collecting
-	 *         continuously; otherwise <code>false</code>
+	 * @return <code>true</code> if this MailRequest is collecting continuously;
+	 *         otherwise <code>false</code>
 	 */
 	public boolean isContinuousCollect() {
 		return contCollecting;
@@ -231,10 +244,10 @@ public final class MailRequest {
 	 * <code>{@link OXJSONWriter}</code> given through constructor
 	 * <code>{@link #MailRequest(Session, Context, OXJSONWriter)}</code>
 	 * 
-	 * @param mailInterface -
-	 *            the mail interface
-	 * @throws JSONException -
-	 *             if writing fails
+	 * @param mailInterface
+	 *            - the mail interface
+	 * @throws JSONException
+	 *             - if writing fails
 	 */
 	public void performMultiple(final MailServletInterface mailInterface) throws JSONException {
 		if (collectObj != null) {
