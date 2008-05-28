@@ -64,6 +64,7 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import javax.mail.Flags;
+import javax.mail.Folder;
 import javax.mail.FolderClosedException;
 import javax.mail.Header;
 import javax.mail.Message;
@@ -170,7 +171,7 @@ public final class IMAPCommandsCollection {
 				/*
 				 * Perform command
 				 */
-				final Response[] tmp = mode == IMAPFolder.READ_ONLY ? p.command("EXAMINE", args) : p.command("SELECT",
+				final Response[] tmp = mode == Folder.READ_ONLY ? p.command("EXAMINE", args) : p.command("SELECT",
 						args);
 				final Response[] r = new Response[tmp.length - 1];
 				System.arraycopy(tmp, 0, r, 0, r.length);
