@@ -292,7 +292,7 @@ public final class IMAPCommandsCollection {
 	/**
 	 * <p>
 	 * Clears all set color label (which are stored as user flags) from messages
-	 * which correpond to given UIDs
+	 * which correspond to given UIDs
 	 * <p>
 	 * All known color labels:
 	 * <code>cl_0 cl_1 cl_2 cl_3 cl_4 cl_5 cl_6 cl_7 cl_8 cl_9 cl_10</code>
