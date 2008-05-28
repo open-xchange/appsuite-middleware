@@ -461,7 +461,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		 */
 		MailMessage[] mails = mailAccess.getMessageStorage().searchMessages(fullname,
 				null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
-				MailListField.getField(sortCol), OrderDirection.getOrderDirection(order), searchTerm, FIELDS_ID_INFO);
+				MailSortField.getField(sortCol), OrderDirection.getOrderDirection(order), searchTerm, FIELDS_ID_INFO);
 		if ((mails == null) || (mails.length == 0)) {
 			return SearchIterator.EMPTY_ITERATOR;
 		}
@@ -545,7 +545,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		initConnection();
 		final String fullname = prepareMailFolderParam(folder);
 		return SearchIteratorAdapter.createArrayIterator(mailAccess.getMessageStorage().getUnreadMessages(fullname,
-				MailListField.getField(sortCol), OrderDirection.getOrderDirection(order),
+				MailSortField.getField(sortCol), OrderDirection.getOrderDirection(order),
 				MailField.toFields(MailListField.getFields(fields)), limit));
 	}
 

@@ -76,7 +76,7 @@ import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailListField;
+import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -104,7 +104,7 @@ public final class IMAPSort {
 
 		private final boolean descendingDir;
 
-		private final MailListField sortField;
+		private final MailSortField sortField;
 
 		private final Locale locale;
 
@@ -132,10 +132,10 @@ public final class IMAPSort {
 		private final FieldComparer fieldComparer;
 
 		public MailComparator(final boolean descendingDirection, final Locale locale) {
-			this(MailListField.SENT_DATE, descendingDirection, locale);
+			this(MailSortField.SENT_DATE, descendingDirection, locale);
 		}
 
-		public MailComparator(final MailListField sortField, final boolean descendingDirection, final Locale locale) {
+		public MailComparator(final MailSortField sortField, final boolean descendingDirection, final Locale locale) {
 			this.sortField = sortField;
 			this.descendingDir = descendingDirection;
 			this.locale = locale;
@@ -193,7 +193,7 @@ public final class IMAPSort {
 			return null;
 		}
 
-		private static FieldComparer createFieldComparer(final MailListField sortCol, final Locale locale) {
+		private static FieldComparer createFieldComparer(final MailSortField sortCol, final Locale locale) {
 			switch (sortCol) {
 			case SENT_DATE:
 				return new FieldComparer(locale) {
@@ -228,6 +228,14 @@ public final class IMAPSort {
 					public int compareFields(final Message msg1, final Message msg2) throws MessagingException {
 						return compareAddrs(msg1.getRecipients(Message.RecipientType.TO), msg2
 								.getRecipients(Message.RecipientType.TO), this.locale, getCollator());
+					}
+				};
+			case CC:
+				return new FieldComparer(locale) {
+					@Override
+					public int compareFields(final Message msg1, final Message msg2) throws MessagingException {
+						return compareAddrs(msg1.getRecipients(Message.RecipientType.CC), msg2
+								.getRecipients(Message.RecipientType.CC), this.locale, getCollator());
 					}
 				};
 			case SUBJECT:
@@ -342,7 +350,7 @@ public final class IMAPSort {
 	 *            The locale (needed for proper sorting by textual content)
 	 * @return
 	 */
-	public static Comparator<Message> getMessageComparator(final MailListField sortField,
+	public static Comparator<Message> getMessageComparator(final MailSortField sortField,
 			final OrderDirection orderDir, final Locale locale) {
 		return new MailComparator(sortField, orderDir == OrderDirection.DESC, locale);
 	}
@@ -370,11 +378,11 @@ public final class IMAPSort {
 	 *             If a messaging error occurs
 	 */
 	public static Message[] sortMessages(final IMAPFolder imapFolder, final int[] filter, final MailField[] fields,
-			final MailListField sortFieldArg, final OrderDirection orderDir, final Locale locale,
+			final MailSortField sortFieldArg, final OrderDirection orderDir, final Locale locale,
 			final Set<MailField> usedFields, final IMAPConfig imapConfig) throws MessagingException {
 		boolean applicationSort = true;
 		Message[] msgs = null;
-		final MailListField sortField = sortFieldArg == null ? MailListField.RECEIVED_DATE : sortFieldArg;
+		final MailSortField sortField = sortFieldArg == null ? MailSortField.RECEIVED_DATE : sortFieldArg;
 		final int size = filter == null ? imapFolder.getMessageCount() : filter.length;
 		/*
 		 * Perform an IMAP-based sort provided that SORT capability is supported
@@ -428,6 +436,11 @@ public final class IMAPSort {
 				 * in this case.
 				 */
 				throw e;
+			} catch (final IMAPException e) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn(e.getLocalizedMessage(), e);
+				}
+				applicationSort = true;
 			} catch (final MessagingException e) {
 				if (LOG.isWarnEnabled()) {
 					final IMAPException imapException = new IMAPException(IMAPException.Code.IMAP_SORT_FAILED, e, e
@@ -438,7 +451,7 @@ public final class IMAPSort {
 			}
 		}
 		if (applicationSort) {
-			final MailField sort = MailField.toField(sortField);
+			final MailField sort = MailField.toField(sortField.getListField());
 			final FetchProfile fetchProfile = getFetchProfile(fields, sort, IMAPConfig.isFastFetch());
 			usedFields.addAll(Arrays.asList(fields));
 			usedFields.add(sort);
@@ -494,7 +507,7 @@ public final class IMAPSort {
 	 * </ul>
 	 * <p>
 	 * Example:<br>
-	 * {@link MailListField#SENT_DATE} in descending order is turned to
+	 * {@link MailSortField#SENT_DATE} in descending order is turned to
 	 * <code>"REVERSE DATE"</code>.
 	 * 
 	 * @param sortField
@@ -503,11 +516,11 @@ public final class IMAPSort {
 	 *            The order direction
 	 * @return The sort criteria ready for being used inside IMAP's <i>SORT</i>
 	 *         command
-	 * @throws MessagingException
+	 * @throws IMAPException
 	 *             If an unsupported sort field is specified
 	 */
-	private static String getSortCritForIMAPCommand(final MailListField sortField, final boolean descendingDirection)
-			throws MessagingException {
+	private static String getSortCritForIMAPCommand(final MailSortField sortField, final boolean descendingDirection)
+			throws IMAPException {
 		final StringBuilder imapSortCritBuilder = new StringBuilder(16).append(descendingDirection ? "REVERSE " : "");
 		switch (sortField) {
 		case SENT_DATE:
@@ -532,7 +545,7 @@ public final class IMAPSort {
 			imapSortCritBuilder.append("SIZE");
 			break;
 		default:
-			throw new MessagingException("Field " + sortField + " NOT supported for IMAP-sided sorting");
+			throw new IMAPException(IMAPException.Code.UNSUPPORTED_SORT_FIELD, sortField.getKey());
 		}
 		return imapSortCritBuilder.toString();
 	}

@@ -54,7 +54,7 @@ import java.util.List;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailListField;
+import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -79,7 +79,8 @@ public abstract class MailMessageStorage {
 
 	/**
 	 * The empty return value; e.g. may be used to indicate no result on
-	 * {@link #searchMessages(String, IndexRange, MailListField, OrderDirection, SearchTerm, MailField[])}.
+	 * {@link #searchMessages(String, IndexRange, MailSortField, OrderDirection, SearchTerm, MailField[])}
+	 * .
 	 */
 	protected static final transient MailMessage[] EMPTY_RETVAL = new MailMessage[0];
 
@@ -95,8 +96,8 @@ public abstract class MailMessageStorage {
 	 * 
 	 * @param destFolder
 	 *            The destination folder
-	 * @param msgs -
-	 *            The messages to append (<b>must</b> be completely pre-filled
+	 * @param msgs
+	 *            - The messages to append (<b>must</b> be completely pre-filled
 	 *            incl. content references)
 	 * @return The corresponding mail IDs in destination folder
 	 * @throws MailException
@@ -145,9 +146,9 @@ public abstract class MailMessageStorage {
 	 * @param mailIds
 	 *            The mail IDs
 	 * @param hardDelete
-	 *            <code>true</code> to hard delete the messages, meaning not
-	 *            to create a backup copy of each message in default trash
-	 *            folder; otherwise <code>false</code>
+	 *            <code>true</code> to hard delete the messages, meaning not to
+	 *            create a backup copy of each message in default trash folder;
+	 *            otherwise <code>false</code>
 	 * @throws MailException
 	 *             If messages cannot be deleted.
 	 */
@@ -156,7 +157,7 @@ public abstract class MailMessageStorage {
 	/**
 	 * A convenience method that delivers all messages contained in given folder
 	 * through invoking
-	 * {@link #searchMessages(String, IndexRange, MailListField, OrderDirection, SearchTerm, MailField[])}
+	 * {@link #searchMessages(String, IndexRange, MailSortField, OrderDirection, SearchTerm, MailField[])}
 	 * without search arguments.
 	 * <p>
 	 * Note that sorting needs not to be supported by underlying mailing system.
@@ -181,7 +182,7 @@ public abstract class MailMessageStorage {
 	 * @throws MailException
 	 */
 	public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange,
-			final MailListField sortField, final OrderDirection order, final MailField[] fields) throws MailException {
+			final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws MailException {
 		return searchMessages(folder, indexRange, sortField, order, null, fields);
 	}
 
@@ -228,8 +229,8 @@ public abstract class MailMessageStorage {
 	 *            The value of header <code>Content-Id</code>
 	 * @return The image attachment wrapped by an {@link MailPart} instance
 	 * @throws MailException
-	 *             If no image can be found whose <code>Content-Id</code>
-	 *             header matches given <code>contentId</code>.
+	 *             If no image can be found whose <code>Content-Id</code> header
+	 *             matches given <code>contentId</code>.
 	 */
 	public MailPart getImageAttachment(final String folder, final long mailId, final String contentId)
 			throws MailException {
@@ -291,8 +292,7 @@ public abstract class MailMessageStorage {
 	 * The returned instances of {@link MailMessage} are pre-filled with
 	 * specified fields through argument <code>fields</code>.
 	 * <p>
-	 * If any mail ID is invalid, <code>null</code> is returned for that
-	 * entry.
+	 * If any mail ID is invalid, <code>null</code> is returned for that entry.
 	 * 
 	 * @param folder
 	 *            The folder fullname
@@ -360,7 +360,7 @@ public abstract class MailMessageStorage {
 	 * @throws MailException
 	 *             If unread messages cannot be returned.
 	 */
-	public MailMessage[] getUnreadMessages(final String folder, final MailListField sortField,
+	public MailMessage[] getUnreadMessages(final String folder, final MailSortField sortField,
 			final OrderDirection order, final MailField[] fields, final int limit) throws MailException {
 		return searchMessages(folder, IndexRange.NULL, sortField, order, TERM_FLAG_SEEN, fields);
 	}
@@ -468,8 +468,8 @@ public abstract class MailMessageStorage {
 	 * Searches mails located in given folder. If the search yields no results,
 	 * the constant {@link #EMPTY_RETVAL} may be returned. This method's purpose
 	 * is to return filtered mails' headers for a <b>fast</b> list view.
-	 * Therefore this method's <code>fields</code> parameter should only
-	 * contain instances of {@link MailField} which are marked as <b>[low cost]</b>.
+	 * Therefore this method's <code>fields</code> parameter should only contain
+	 * instances of {@link MailField} which are marked as <b>[low cost]</b>.
 	 * Otherwise pre-filling of returned messages may take a long time and does
 	 * no more fit to generate a fast list view.
 	 * <p>
@@ -496,7 +496,7 @@ public abstract class MailMessageStorage {
 	 * @throws MailException
 	 *             If mails cannot be returned
 	 */
-	public abstract MailMessage[] searchMessages(String folder, IndexRange indexRange, MailListField sortField,
+	public abstract MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField,
 			OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws MailException;
 
 	/**
@@ -540,18 +540,18 @@ public abstract class MailMessageStorage {
 	 * <li>DELETED - Clients set this flag to mark a message as deleted. The
 	 * expunge operation on a folder removes all messages in that folder that
 	 * are marked for deletion.</li>
-	 * <li>DRAFT - This flag is set by clients to indicate that the message is
-	 * a draft message.</li>
+	 * <li>DRAFT - This flag is set by clients to indicate that the message is a
+	 * draft message.</li>
 	 * <li>FLAGGED - No semantic is defined for this flag. Clients alter this
 	 * flag.</li>
 	 * <li>RECENT - Folder implementations set this flag to indicate that this
 	 * message is new to this folder, that is, it has arrived since the last
-	 * time this folder was opened. </li>
+	 * time this folder was opened.</li>
 	 * <li>SEEN - This flag is implicitly set by the implementation when the
 	 * this Message's content is returned to the client in some form.Clients can
 	 * alter this flag.</li>
 	 * <li>USER - A special flag that indicates that this folder supports user
-	 * defined flags. </li>
+	 * defined flags.</li>
 	 * </ul>
 	 * <p>
 	 * If mail folder in question supports user flags (storing individual
@@ -560,7 +560,8 @@ public abstract class MailMessageStorage {
 	 * <p>
 	 * Moreover this routine checks for any spam related actions; meaning the
 	 * {@link MailMessage#FLAG_SPAM} shall be enabled/disabled. Thus the
-	 * {@link SpamHandler#handleSpam(String, long[], boolean, MailAccess)}/{@link SpamHandler#handleHam(String, long[], boolean, MailAccess)}
+	 * {@link SpamHandler#handleSpam(String, long[], boolean, MailAccess)}/
+	 * {@link SpamHandler#handleHam(String, long[], boolean, MailAccess)}
 	 * methods needs to be executed.
 	 * 
 	 * @param folder

@@ -80,6 +80,7 @@ import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.tools.Collections.SmartIntArray;
@@ -581,7 +582,7 @@ public final class IMAPCommandsCollection {
 	 * @throws MessagingException
 	 */
 	public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields,
-			final MailListField sortField, final OrderDirection orderDir, final Locale locale)
+			final MailSortField sortField, final OrderDirection orderDir, final Locale locale)
 			throws MessagingException {
 		final IMAPFolder imapFolder = folder;
 		final Message[] val = (Message[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
@@ -652,7 +653,8 @@ public final class IMAPCommandsCollection {
 					final Set<MailField> set = new HashSet<MailField>(Arrays.asList(fields));
 					final boolean body = set.contains(MailField.BODY) || set.contains(MailField.FULL);
 					newMsgs = new FetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, getFetchProfile(fields, MailField
-							.toField(sortField), IMAPConfig.isFastFetch()), false, false, body).doCommand();
+							.toField(sortField.getListField()), IMAPConfig.isFastFetch()), false, false, body)
+							.doCommand();
 				} catch (final MessagingException e) {
 					throw new ProtocolException(e.getLocalizedMessage());
 				}

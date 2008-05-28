@@ -85,7 +85,7 @@ import com.openexchange.imap.threadsort.TreeNode;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailListField;
+import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -230,7 +230,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 
 	@Override
 	public MailMessage[] searchMessages(final String fullname, final IndexRange indexRange,
-			final MailListField sortField, final OrderDirection order, final SearchTerm<?> searchTerm,
+			final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm,
 			final MailField[] fields) throws MailException {
 		try {
 			imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_ONLY);
@@ -385,7 +385,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 	}
 
 	@Override
-	public MailMessage[] getUnreadMessages(final String fullname, final MailListField sortField,
+	public MailMessage[] getUnreadMessages(final String fullname, final MailSortField sortField,
 			final OrderDirection order, final MailField[] fields, final int limit) throws MailException {
 		try {
 			imapFolder = setAndOpenFolder(imapFolder, fullname, Folder.READ_ONLY);
