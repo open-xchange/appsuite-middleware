@@ -134,10 +134,11 @@ public final class IMAPException extends MIMEMailException {
 		 */
 		FOLDER_DOES_NOT_HOLD_FOLDERS("Folder %s does not allow subfolders.", Category.PERMISSION, 2012),
 		/**
-		 * Mail folder cannot be created/rename. Name must not contain character '%s'
+		 * Mail folder cannot be created/rename. Name must not contain character
+		 * '%s'
 		 */
-		INVALID_FOLDER_NAME("Mail folder cannot be created/renamed. Name must not contain character '%s'", Category.USER_INPUT,
-				2013),
+		INVALID_FOLDER_NAME("Mail folder cannot be created/renamed. Name must not contain character '%s'",
+				Category.USER_INPUT, 2013),
 		/**
 		 * A folder named %s already exists
 		 */
@@ -314,7 +315,11 @@ public final class IMAPException extends MIMEMailException {
 		 * of a move operation.
 		 */
 		NO_ROOT_MOVE("Mailbox' root folder must not be source or the destination fullname of a move operation.",
-				Category.CODE_ERROR, 2048);
+				Category.CODE_ERROR, 2048),
+		/**
+		 * Sort field %s is not supported via IMAP SORT command
+		 */
+		UNSUPPORTED_SORT_FIELD("Sort field %s is not supported via IMAP SORT command", Category.CODE_ERROR, 2049);
 
 		private final String message;
 
