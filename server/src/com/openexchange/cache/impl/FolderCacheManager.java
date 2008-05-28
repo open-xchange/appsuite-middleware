@@ -77,14 +77,17 @@ import com.openexchange.tools.oxfolder.OXFolderException.FolderCode;
 /**
  * The <code>FolderCacheManager</code> holds a JCS cache for
  * <code>FolderObject</code> instances. <b>NOTE:</b> Only cloned versions of
- * <code>FolderObject</code> instances are put into or received from cache.
- * That prevents the danger of further working on and therefore changing cached
+ * <code>FolderObject</code> instances are put into or received from cache. That
+ * prevents the danger of further working on and therefore changing cached
  * instances.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public class FolderCacheManager {
+
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(FolderCacheManager.class);
 
 	private static final Map<Integer, ReadWriteLock> contextLocks = new HashMap<Integer, ReadWriteLock>();
 
@@ -113,6 +116,18 @@ public class FolderCacheManager {
 		return OXFolderProperties.isEnableFolderCache();
 	}
 
+	/**
+	 * Gets the singleton instance of folder cache {@link FolderCacheManager
+	 * manager}.
+	 * 
+	 * @return The singleton instance of folder cache {@link FolderCacheManager
+	 *         manager}.
+	 * @throws FolderCacheNotEnabledException
+	 *             If folder cache is explicitly disabled through
+	 *             {@link OXFolderProperties#isEnableFolderCache() property}
+	 * @throws OXException
+	 *             If initialization fails
+	 */
 	public static FolderCacheManager getInstance() throws FolderCacheNotEnabledException, OXException {
 		if (!OXFolderProperties.isEnableFolderCache()) {
 			throw new FolderCacheNotEnabledException();
@@ -128,7 +143,11 @@ public class FolderCacheManager {
 		return instance;
 	}
 
-	public static void releaseInstance() throws OXException {
+	/**
+	 * Releases the singleton instance of folder cache
+	 * {@link FolderCacheManager manager}.
+	 */
+	public static void releaseInstance() {
 		if (!OXFolderProperties.isEnableFolderCache()) {
 			return;
 		}
@@ -140,7 +159,7 @@ public class FolderCacheManager {
 						ServerServiceRegistry.getInstance().getService(CacheService.class).freeCache(
 								FOLDER_CACHE_REGION_NAME);
 					} catch (final CacheException e) {
-						throw new OXException(e);
+						LOG.error(e.getMessage(), e);
 					}
 					initialized.set(false);
 				}
@@ -213,9 +232,9 @@ public class FolderCacheManager {
 
 	/**
 	 * <p>
-	 * Fetches <code>FolderObject</code> which matches given object id. If
-	 * none found or <code>fromCache</code> is not set the folder will be
-	 * loaded from underlying database store and automatically put into cache.
+	 * Fetches <code>FolderObject</code> which matches given object id. If none
+	 * found or <code>fromCache</code> is not set the folder will be loaded from
+	 * underlying database store and automatically put into cache.
 	 * </p>
 	 * <p>
 	 * <b>NOTE:</b> This method returns a clone of cached
@@ -306,8 +325,8 @@ public class FolderCacheManager {
 	 * referenced object will not affect cached version
 	 * </p>
 	 * 
-	 * @return matching <code>FolderObject</code> instance fetched from
-	 *         storage else <code>null</code>
+	 * @return matching <code>FolderObject</code> instance fetched from storage
+	 *         else <code>null</code>
 	 * @throws OXException
 	 *             If a caching error occurs
 	 */
@@ -336,8 +355,8 @@ public class FolderCacheManager {
 	 * @param ctx
 	 *            The context
 	 * @param readCon
-	 *            A readable connection or <code>null</code> to fetch a new
-	 *            one from connection pool
+	 *            A readable connection or <code>null</code> to fetch a new one
+	 *            from connection pool
 	 * @return The object referencing the actually cached entry
 	 * @throws OXException
 	 *             If folder object could not be loaded or a caching error
@@ -380,8 +399,8 @@ public class FolderCacheManager {
 
 	/**
 	 * <p>
-	 * Simply puts given <code>FolderObject</code> into cache if object's id
-	 * is different to zero.
+	 * Simply puts given <code>FolderObject</code> into cache if object's id is
+	 * different to zero.
 	 * </p>
 	 * <p>
 	 * <b>NOTE:</b> This method puts a clone of given <code>FolderObject</code>
@@ -402,10 +421,10 @@ public class FolderCacheManager {
 
 	/**
 	 * <p>
-	 * Simply puts given <code>FolderObject</code> into cache if object's id
-	 * is different to zero. If flag <code>overwrite</code> is set to
-	 * <code>false</code> then this method returns immediately if cache
-	 * already holds a matching entry.
+	 * Simply puts given <code>FolderObject</code> into cache if object's id is
+	 * different to zero. If flag <code>overwrite</code> is set to
+	 * <code>false</code> then this method returns immediately if cache already
+	 * holds a matching entry.
 	 * </p>
 	 * <p>
 	 * <b>NOTE:</b> This method puts a clone of given <code>FolderObject</code>
@@ -420,8 +439,8 @@ public class FolderCacheManager {
 	 * @param overwrite
 	 *            <code>true</code> to overwrite; otherwise <code>false</code>
 	 * @param elemAttribs
-	 *            the element's attributes. Set to <code>null</code> to use
-	 *            the default attributes
+	 *            the element's attributes. Set to <code>null</code> to use the
+	 *            default attributes
 	 * @throws OXException
 	 *             If a caching error occurs
 	 */
