@@ -680,8 +680,8 @@ public final class IMAPCommandsCollection {
 			final long start = System.currentTimeMillis();
 			IMAPCommandsCollection.uidExpunge(imapFolder, uids);
 			MailServletInterface.mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(128).append(uids.length).append(" messages expunged in ").append(
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(new StringBuilder(128).append(uids.length).append(" messages expunged in ").append(
 						(System.currentTimeMillis() - start)).append("msec").toString());
 			}
 		} catch (final FolderClosedException e) {

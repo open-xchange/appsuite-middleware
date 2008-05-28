@@ -420,8 +420,8 @@ public final class SMTPTransport extends MailTransport {
 				throw new SMTPException(SMTPException.Code.MISSING_RECIPIENTS);
 			}
 			smtpFiller.setSendHeaders(composedMail, smtpMessage);
-			if (LOG.isInfoEnabled()) {
-				LOG.info(new StringBuilder(128).append("SMTP mail prepared for transport in ").append(
+			if (LOG.isDebugEnabled()) {
+				LOG.debug(new StringBuilder(128).append("SMTP mail prepared for transport in ").append(
 						System.currentTimeMillis() - startPrep).append("msec").toString());
 			}
 			try {

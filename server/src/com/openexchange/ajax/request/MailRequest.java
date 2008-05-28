@@ -269,8 +269,8 @@ public final class MailRequest {
 			 */
 			throw new InternalError("Unknown collectable operation: " + collectObj.getOperation());
 		}
-		if (LOG.isInfoEnabled()) {
-			LOG.info(new StringBuilder(100).append("Multiple '").append(collectObj.getOperation().toString()).append(
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(new StringBuilder(100).append("Multiple '").append(collectObj.getOperation().toString()).append(
 					"' mail request successfully performed: ").append(System.currentTimeMillis() - start)
 					.append("msec").toString());
 		}
