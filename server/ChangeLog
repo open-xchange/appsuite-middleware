@@ -1,3 +1,9 @@
+* 2008-05-28 - thorben.betten@open-xchange.com
+
+ - Bugfix #11271: Proper handling when deleting a group to reassign
+   affected group permissions to context's admin rather than to special
+   group "all-groups-and-users"
+
 * 2008-05-27 - ben.pahne@open-xchange.com
 
  - Bugfix #10899: Changed contact sql column sizes with new updatetask

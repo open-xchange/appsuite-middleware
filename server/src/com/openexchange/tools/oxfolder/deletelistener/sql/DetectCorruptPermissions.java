@@ -56,7 +56,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.oxfolder.deletelistener.CorruptPermission;
 
 /**

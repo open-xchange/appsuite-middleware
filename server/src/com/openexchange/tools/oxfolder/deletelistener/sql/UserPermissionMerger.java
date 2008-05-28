@@ -50,8 +50,6 @@
 package com.openexchange.tools.oxfolder.deletelistener.sql;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.openexchange.tools.oxfolder.deletelistener.CorruptPermission;
@@ -108,7 +106,7 @@ public final class UserPermissionMerger {
 			 * assigned to admin.
 			 */
 			delete[0] = false;
-			final Permission merged = getMergedPermission(corruptPermission.permission_id, admin,
+			final Permission merged = MergerUtility.getMergedPermission(corruptPermission.permission_id, admin,
 					corruptPermission.fuid, corruptPermission.cid, con, delete);
 			if (delete[0]) {
 				MergerUtility.deletePermission(corruptPermission.permission_id, corruptPermission.fuid,
@@ -120,7 +118,8 @@ public final class UserPermissionMerger {
 									corruptPermission.fuid).append(" in context ").append(corruptPermission.cid)
 							.toString());
 				}
-				updatePermission(merged, admin, admin, corruptPermission.fuid, corruptPermission.cid, con);
+				MergerUtility
+						.updatePermission(merged, admin, admin, corruptPermission.fuid, corruptPermission.cid, con);
 				if (LOG.isInfoEnabled()) {
 					logBuilder.setLength(0);
 					LOG
@@ -128,125 +127,15 @@ public final class UserPermissionMerger {
 									.toString());
 				}
 			} else {
-				updatePermission(merged, corruptPermission.permission_id, admin, corruptPermission.fuid,
+				MergerUtility.updatePermission(merged, corruptPermission.permission_id, admin, corruptPermission.fuid,
 						corruptPermission.cid, con);
 				if (LOG.isInfoEnabled()) {
 					logBuilder.setLength(0);
-					LOG.info(logBuilder.append("Permission merged to context admin: ").append(merged.toString())
+					LOG.info(logBuilder.append("Permission re-assigned to context admin: ").append(merged.toString())
 							.toString());
 				}
 			}
 		}
 	}
 
-	private static final String SQL_REASSIGN_UPDATE_PERM = "UPDATE oxfolder_permissions "
-			+ "SET fp = ?, orp = ?, owp = ?, odp = ?, admin_flag = ?, permission_id = ?, group_flag = 0 "
-			+ "WHERE cid = ? AND permission_id = ? AND fuid = ?";
-
-	private static void updatePermission(final Permission mergedPerm, final int entity, final int setToEntity,
-			final int fuid, final int cid, final Connection writeCon) throws SQLException {
-		PreparedStatement stmt = null;
-		try {
-			stmt = writeCon.prepareStatement(SQL_REASSIGN_UPDATE_PERM);
-			stmt.setInt(1, mergedPerm.fp);
-			stmt.setInt(2, mergedPerm.orp);
-			stmt.setInt(3, mergedPerm.owp);
-			stmt.setInt(4, mergedPerm.odp);
-			stmt.setInt(5, mergedPerm.admin ? 1 : 0);
-			stmt.setInt(6, setToEntity);
-			stmt.setInt(7, cid);
-			stmt.setInt(8, entity);
-			stmt.setInt(9, fuid);
-			stmt.executeUpdate();
-		} finally {
-			if (null != stmt) {
-				try {
-					stmt.close();
-				} catch (final SQLException e) {
-					System.err.println("Warning: Statement could not be properly closed");
-					e.printStackTrace(System.err);
-				}
-			}
-		}
-	}
-
-	private static final String SQL_SEL_PERM = "SELECT fp, orp, owp, odp, admin_flag "
-			+ "FROM oxfolder_permissions WHERE cid = ? AND permission_id = ? AND fuid = ?";
-
-	private static Permission getMergedPermission(final int entity, final int fallbackEntity, final int fuid,
-			final int cid, final Connection readCon, final boolean[] delete) throws SQLException {
-		PreparedStatement stmt = null;
-		ResultSet rs = null;
-		try {
-			stmt = readCon.prepareStatement(SQL_SEL_PERM);
-			stmt.setInt(1, cid);
-			stmt.setInt(2, fallbackEntity);
-			stmt.setInt(3, fuid);
-			rs = stmt.executeQuery();
-			if (!rs.next()) {
-				/*
-				 * Merged permission is entity's permission since no permission
-				 * is defined for fallback entity
-				 */
-				rs.close();
-				stmt.close();
-				stmt = readCon.prepareStatement(SQL_SEL_PERM);
-				stmt.setInt(1, cid);
-				stmt.setInt(2, entity);
-				stmt.setInt(3, fuid);
-				rs = stmt.executeQuery();
-				if (!rs.next()) {
-					/*
-					 * Empty permission
-					 */
-					throw new SQLException(new StringBuilder(64).append("Entity ").append(entity).append(
-							" has no permission on folder ").append(fuid).append(" in context ").append(cid).toString());
-				}
-				delete[0] = false;
-				return new Permission(fallbackEntity, fuid, rs.getInt(1), rs.getInt(2), rs.getInt(3), rs.getInt(4), rs
-						.getInt(5) > 0);
-			}
-			final Permission fallbackPerm = new Permission(fallbackEntity, fuid, rs.getInt(1), rs.getInt(2), rs
-					.getInt(3), rs.getInt(4), rs.getInt(5) > 0);
-			rs.close();
-			stmt.close();
-			stmt = readCon.prepareStatement(SQL_SEL_PERM);
-			stmt.setInt(1, cid);
-			stmt.setInt(2, entity);
-			stmt.setInt(3, fuid);
-			rs = stmt.executeQuery();
-			if (!rs.next()) {
-				return fallbackPerm;
-			}
-			final Permission entityPerm = new Permission(entity, fuid, rs.getInt(1), rs.getInt(2), rs.getInt(3), rs
-					.getInt(4), rs.getInt(5) > 0);
-			/*
-			 * Merge
-			 */
-			final Permission mergedPerm = new Permission(fallbackEntity, fuid,
-					Math.max(fallbackPerm.fp, entityPerm.fp), Math.max(fallbackPerm.orp, entityPerm.orp), Math.max(
-							fallbackPerm.owp, entityPerm.owp), Math.max(fallbackPerm.odp, entityPerm.odp),
-					(fallbackPerm.admin || entityPerm.admin));
-			delete[0] = true;
-			return mergedPerm;
-		} finally {
-			if (null != rs) {
-				try {
-					rs.close();
-					rs = null;
-				} catch (final SQLException e) {
-					System.err.println("Warning: Result set could not be properly closed");
-					e.printStackTrace(System.err);
-				}
-			}
-			if (null != stmt) {
-				try {
-					stmt.close();
-				} catch (final SQLException e) {
-					System.err.println("Warning: Statement could not be properly closed");
-					e.printStackTrace(System.err);
-				}
-			}
-		}
-	}
 }

@@ -105,7 +105,8 @@ public final class OXFolderDeleteListenerHelper {
 
 	private static void checkUserPermissions(final int cid, final Connection writeCon) throws SQLException, Exception {
 		/*
-		 * Detect corrupt user permissions...
+		 * Detect corrupt user permissions, that is a permission entry holds a
+		 * reference to a user which no more exists in corresponding user table.
 		 */
 		CorruptPermission[] corruptPermissions = null;
 		try {
@@ -157,7 +158,9 @@ public final class OXFolderDeleteListenerHelper {
 
 	private static void checkGroupPermissions(final int cid, final Connection writeCon) throws SQLException, Exception {
 		/*
-		 * Detect corrupt group permissions...
+		 * Detect corrupt group permissions, that is a permission entry holds a
+		 * reference to a group which no more exists in corresponding group
+		 * table.
 		 */
 		CorruptPermission[] corruptPermissions = null;
 		try {
