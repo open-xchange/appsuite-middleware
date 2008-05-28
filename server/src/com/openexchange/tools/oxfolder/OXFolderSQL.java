@@ -1281,6 +1281,9 @@ public class OXFolderSQL {
 			final String permTable, final Connection writeConArg, final Context ctx) throws DBPoolingException,
 			SQLException {
 		final int size = deletePerms.size();
+		if (size == 0) {
+			return;
+		}
 		final Iterator<Integer> iter = deletePerms.iterator();
 		Connection wc = writeConArg;
 		boolean closeWrite = false;
@@ -1312,6 +1315,9 @@ public class OXFolderSQL {
 			final Connection readConArg, final Connection writeConArg, final Context ctx) throws DBPoolingException,
 			SQLException {
 		final int size = reassignPerms.size();
+		if (size == 0) {
+			return;
+		}
 		Connection wc = writeConArg;
 		boolean closeWrite = false;
 		Connection rc = readConArg;
