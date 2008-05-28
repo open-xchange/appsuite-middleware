@@ -115,6 +115,10 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 		if (reg != null) {
 			reg.registerListener(this);
 		}
+		if (enableFolderCache) {
+			FolderCacheManager.getInstance();
+		}
+		FolderQueryCacheManager.getInstance();
 		started.set(true);
 	}
 
@@ -127,9 +131,9 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 		if (reg != null) {
 			reg.unregisterListener(this);
 		}
-		reset();
 		FolderCacheManager.releaseInstance();
 		FolderQueryCacheManager.releaseInstance();
+		reset();
 		started.set(false);
 	}
 
