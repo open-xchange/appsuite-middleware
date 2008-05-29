@@ -85,8 +85,11 @@ public class PushHandler implements EventHandler {
 
 	private static final Log LOG = LogFactory.getLog(PushHandler.class);
 
+	/**
+	 * Initializes a new {@link PushHandler push handler}
+	 */
 	public PushHandler() {
-
+		super();
 	}
 
 	public void handleEvent(Event event) {
