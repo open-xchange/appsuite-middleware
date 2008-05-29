@@ -4,6 +4,7 @@ Bundle-Name: Generic ConfigJump
 Bundle-SymbolicName: com.openexchange.configjump.generic
 Bundle-Version: 6.5.0
 Bundle-Vendor: Open-Xchange Inc.
+Bundle-Activator: com.openexchange.configjump.generic.Activator
 Import-Package: com.openexchange.config,
  com.openexchange.configjump,
  org.apache.commons.logging;version="1.0.4",
