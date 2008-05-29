@@ -9,7 +9,6 @@ Bundle-Localization: plugin
 Import-Package: com.mysql.jdbc,
  com.openexchange.api2,
  com.openexchange.caching,
- com.openexchange.configuration,
  com.openexchange.database,
  com.openexchange.event,
  com.openexchange.groupware,
