@@ -47,45 +47,36 @@
  *
  */
 
-
-
 package com.openexchange.sessiond.impl;
 
 import java.util.TimerTask;
-
-import com.openexchange.session.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Sessiond
+ * {@link SessiondTimer} - The session timer
+ * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
-public class SessiondTimer extends TimerTask{
-	
+public class SessiondTimer extends TimerTask {
+
 	private static final Log LOG = LogFactory.getLog(SessiondTimer.class);
-	
+
+	/**
+	 * Initializes a new {@link SessiondTimer session timer}
+	 */
 	public SessiondTimer() {
-		
+		super();
 	}
-	
-    public void run() {
-        try {
-            SessionHandler.cleanUp();
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
-} 
 
-
-
-
-
-
-
-
-
-
+	@Override
+	public void run() {
+		try {
+			SessionHandler.cleanUp();
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+	}
+}
