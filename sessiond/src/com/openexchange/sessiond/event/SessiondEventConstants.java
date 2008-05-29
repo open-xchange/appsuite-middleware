@@ -47,50 +47,65 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.event;
 
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
 
 /**
- * {@link Sessiond} - The Sessiond
+ * {@link SessiondEventConstants} - Provides both constants for
+ * {@link EventConstants#EVENT_TOPIC event topic} and property names accessible
+ * by an {@link Event event}.
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
+public final class SessiondEventConstants {
 
-public class Sessiond {
-	
-	private static volatile Sessiond singleton;
-	
-	//private SessionHandler sessionHandler;
-	
-	private final SessiondConfigInterface config;
-	
-	public Sessiond(final SessiondConfigInterface config) {
-		this.config = config;
+	/**
+	 * Initializes a new {@link SessiondEventConstants}
+	 */
+	private SessiondEventConstants() {
+		super();
 	}
-	
-	public void start() {
-		//sessionHandler = new SessionHandler();
-		SessionHandler.init(config);		
+
+	/**
+	 * The topic on single session removal
+	 */
+	public static final String TOPIC_REMOVE_SESSION = "com/openexchange/sessiond/remove/session";
+
+	/**
+	 * The topic on session container removal
+	 */
+	public static final String TOPIC_REMOVE_CONTAINER = "com/openexchange/sessiond/remove/container";
+
+	/**
+	 * An array of {@link String string} including all known topics.
+	 * <p>
+	 * Needed on event handler registration to a bundle context.
+	 */
+	static final String[] TOPICS = { TOPIC_REMOVE_SESSION, TOPIC_REMOVE_CONTAINER };
+
+	/**
+	 * Gets an array of {@link String string} including all known topics.
+	 * <p>
+	 * Needed on event handler registration to a bundle context.
+	 * 
+	 * @return An array of {@link String string} including all known topics.
+	 */
+	public static String[] getAllTopics() {
+		final String[] retval = new String[TOPICS.length];
+		System.arraycopy(TOPICS, 0, retval, 0, TOPICS.length);
+		return retval;
 	}
-	
-    public static Sessiond getInstance(final SessiondConfigInterface config) {
-		if (singleton != null) {
-			return singleton;
-		}
-		return singleton = new Sessiond(config);
-	}
-    
-    public void close() {
-    	SessionHandler.close();
-    }
-} 
 
+	/**
+	 * The property for a single session kept in event's properties
+	 */
+	public static final String PROP_SESSION = "com.openexchange.sessiond.session";
 
-
-
-
-
-
-
-
-
+	/**
+	 * The property for a session container kept in event's properties
+	 */
+	public static final String PROP_CONTAINER = "com.openexchange.sessiond.container";
+}

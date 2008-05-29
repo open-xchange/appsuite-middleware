@@ -49,7 +49,10 @@
 
 package com.openexchange.sessiond.impl;
 
+import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -60,6 +63,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 
 import com.openexchange.caching.CacheException;
 import com.openexchange.caching.objects.CachedSession;
@@ -68,6 +73,7 @@ import com.openexchange.server.ServerTimer;
 import com.openexchange.server.ServiceException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.cache.SessionCache;
+import com.openexchange.sessiond.event.SessiondEventConstants;
 import com.openexchange.sessiond.exception.SessiondException;
 import com.openexchange.sessiond.exception.SessiondException.Code;
 
@@ -97,15 +103,21 @@ public class SessionHandler {
 
 	private static final Log LOG = LogFactory.getLog(SessionHandler.class);
 
-	private static AtomicInteger numberOfActiveSessions = new AtomicInteger();
+	private static final AtomicInteger numberOfActiveSessions = new AtomicInteger();
 
 	/**
 	 * Initializes a new {@link SessionHandler session-handler}
 	 */
-	public SessionHandler() {
+	private SessionHandler() {
 		super();
 	}
 
+	/**
+	 * Initializes the {@link SessionHandler session handler}
+	 * 
+	 * @param config
+	 *            The appropriate configuration
+	 */
 	public static void init(final SessiondConfigInterface config) {
 		SessionHandler.config = config;
 
@@ -137,9 +149,10 @@ public class SessionHandler {
 	}
 
 	private static void removeContainer() {
-		sessionList.removeLast();
+		final Map<String, SessionControlObject> sessions = sessionList.removeLast();
 		userList.removeLast();
 		randomList.removeLast();
+		postContainerRemoval(sessions);
 	}
 
 	protected static String addSession(final int userId, final String loginName, final String password,
@@ -238,9 +251,8 @@ public class SessionHandler {
 
 			if (sessions.containsKey(sessionid)) {
 				final SessionControlObject session = sessions.remove(sessionid);
-				// session.closingOperations();
 				numberOfActiveSessions.decrementAndGet();
-
+				postSessionRemoval(session.getSession());
 				return true;
 			}
 		}
@@ -277,15 +289,15 @@ public class SessionHandler {
 
 	protected static SessionControlObject getSession(final String sessionid, final boolean refresh) {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("getSession <" + sessionid + ">");
+			LOG.debug("getSession <" + sessionid + '>');
 		}
 
-		Map<String, SessionControlObject> sessions = null;
+		// Map<String, SessionControlObject> sessions = null;
 
 		// final Date timestamp = new Date();
 
 		for (int a = 0; a < numberOfSessionContainers; a++) {
-			sessions = sessionList.get(a);
+			final Map<String, SessionControlObject> sessions = sessionList.get(a);
 
 			if (sessions.containsKey(sessionid)) {
 				final SessionControlObject sessionControlObject = sessions.get(sessionid);
@@ -293,8 +305,11 @@ public class SessionHandler {
 				if (sessionControlObject != null && isValid(sessionControlObject)) {
 					sessionControlObject.updateTimestamp();
 
-					sessionList.get(0).put(sessionid, sessionControlObject);
 					if (a > 0) {
+						/*
+						 * Put into first container and remove from latter one
+						 */
+						sessionList.get(0).put(sessionid, sessionControlObject);
 						sessions.remove(sessionid);
 					}
 
@@ -321,7 +336,7 @@ public class SessionHandler {
 	 */
 	public static SessionControlObject getCachedSession(final String secret, final String localIP) {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("getCachedSession <" + secret + ">");
+			LOG.debug("getCachedSession <" + secret + '>');
 		}
 		try {
 			final CachedSession cachedSession = SessionCache.getInstance().removeCachedSession(secret);
@@ -366,9 +381,7 @@ public class SessionHandler {
 			final Map<String, SessionControlObject> hashMap = sessionList.getLast();
 			final Iterator<String> iterator = hashMap.keySet().iterator();
 			while (iterator.hasNext()) {
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("session timeout for id: " + iterator.next());
-				}
+				LOG.debug("session timeout for id: " + iterator.next());
 			}
 		}
 		prependContainer();
@@ -385,15 +398,12 @@ public class SessionHandler {
 	 * @return <code>true</code> if the session is still valid.
 	 */
 	protected static boolean isValid(final SessionControlObject session) {
-		if ((session.getTimestamp().getTime() + session.getLifetime()) < System.currentTimeMillis()) {
-			return false;
-		}
-
-		return true;
+		return ((session.getTimestamp().getTime() + session.getLifetime()) >= System.currentTimeMillis());
 	}
 
 	public static void close() {
 		numberOfSessionContainers = 4;
+		postContainersRemoval();
 		sessionList = new LinkedList<Map<String, SessionControlObject>>();
 		userList = new LinkedList<Map<String, String>>();
 		randomList = new LinkedList<Map<String, String>>();
@@ -411,5 +421,57 @@ public class SessionHandler {
 		for (int a = 0; a < amount; a++) {
 			numberOfActiveSessions.decrementAndGet();
 		}
+	}
+
+	private static void postSessionRemoval(final Session session) {
+		final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
+		if (eventAdmin != null) {
+			final Hashtable<Object, Object> dic = new Hashtable<Object, Object>();
+			dic.put(SessiondEventConstants.PROP_SESSION, session);
+			final Event event = new Event(SessiondEventConstants.TOPIC_REMOVE_SESSION, dic);
+			eventAdmin.postEvent(event);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Posted event for removed session");
+			}
+		}
+	}
+
+	private static void postContainerRemoval(final Map<String, SessionControlObject> sessions) {
+		final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
+		if (eventAdmin != null) {
+			final Hashtable<Object, Object> dic = new Hashtable<Object, Object>();
+			dic.put(SessiondEventConstants.PROP_CONTAINER, convert(sessions));
+			final Event event = new Event(SessiondEventConstants.TOPIC_REMOVE_CONTAINER, dic);
+			eventAdmin.postEvent(event);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Posted event for removed session container");
+			}
+		}
+	}
+
+	private static void postContainersRemoval() {
+		final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
+		if (eventAdmin != null) {
+			for (final Map<String, SessionControlObject> sessions : sessionList) {
+				final Hashtable<Object, Object> dic = new Hashtable<Object, Object>();
+				dic.put(SessiondEventConstants.PROP_CONTAINER, convert(sessions));
+				final Event event = new Event(SessiondEventConstants.TOPIC_REMOVE_CONTAINER, dic);
+				eventAdmin.postEvent(event);
+			}
+		}
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Posted events for removed session containers");
+		}
+	}
+
+	private static Map<String, Session> convert(final Map<String, SessionControlObject> sessions) {
+		final int size = sessions.size();
+		final Map<String, Session> retval = new HashMap<String, Session>(size);
+		final Iterator<Map.Entry<String, SessionControlObject>> iter = sessions.entrySet().iterator();
+		for (int i = 0; i < size; i++) {
+			final Map.Entry<String, SessionControlObject> entry = iter.next();
+			retval.put(entry.getKey(), entry.getValue().getSession());
+		}
+		return retval;
 	}
 }

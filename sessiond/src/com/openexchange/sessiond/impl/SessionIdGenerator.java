@@ -47,66 +47,68 @@
  *
  */
 
-
-
 package com.openexchange.sessiond.impl;
 
 import com.openexchange.sessiond.exception.SessiondException;
 
-
 /**
- * SessionIdGenerator
- * 
+ * {@link SessionIdGenerator} - The session ID generator
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
 
 public abstract class SessionIdGenerator {
-	
-	private static String implementingClassName = null;
-	
-    /**
-     * Proxy attribute for the class implementing this interface.
-     */
-    private static Class implementingClass;
-	
-    /**
-     * Creates a new instance implementing the group storage interface.
-     * @param context Context.
-     * @return an instance implementing the group storage interface.
-     * @throws LdapException if the instance can't be created.
-     */
-	public static SessionIdGenerator getInstance() throws SessiondException {
-        try {
-            return (SessionIdGenerator) getImplementingClass().getConstructor().newInstance();
-        } catch (Exception exc) {
-        	throw new SessiondException(SessiondException.Code.SESSIOND_EXCEPTION);
-        }
-	} 
 
-    /**
-     * Proxy method to get the implementing class.
-     * @return the class implementing this interface.
-     * @throws ClassNotFoundException if the class can't be loaded.
-     */
-    private synchronized static Class getImplementingClass() throws ClassNotFoundException {
-		if (implementingClassName == null) {
-			implementingClass = new DefaultSessionIdGenerator().getClass();
+	private static String implementingClassName = null;
+
+	/**
+	 * Proxy attribute for the class implementing this interface.
+	 */
+	private static Class<? extends SessionIdGenerator> implementingClass;
+
+	/**
+	 * Creates a new instance implementing the group storage interface.
+	 * 
+	 * @param context
+	 *            Context.
+	 * @return an instance implementing the group storage interface.
+	 * @throws LdapException
+	 *             if the instance can't be created.
+	 */
+	public static SessionIdGenerator getInstance() throws SessiondException {
+		try {
+			return getImplementingClass().getConstructor().newInstance();
+		} catch (final Exception exc) {
+			throw new SessiondException(SessiondException.Code.SESSIOND_EXCEPTION, exc, new Object[0]);
 		}
-		
-        if (null == implementingClass) {
-            implementingClass = Class.forName(implementingClassName);
-        }
-        return implementingClass;
-    }
-	
-	public void setImplementClassName(final String implementClassName) {
-		this.implementingClassName = implementClassName;
 	}
-	
+
+	/**
+	 * Proxy method to get the implementing class.
+	 * 
+	 * @return the class implementing this interface.
+	 * @throws ClassNotFoundException
+	 *             if the class can't be loaded.
+	 */
+	private synchronized static Class<? extends SessionIdGenerator> getImplementingClass()
+			throws ClassNotFoundException {
+		if (implementingClassName == null) {
+			implementingClass = DefaultSessionIdGenerator.class;
+		}
+
+		if (null == implementingClass) {
+			implementingClass = Class.forName(implementingClassName).asSubclass(SessionIdGenerator.class);
+		}
+		return implementingClass;
+	}
+
+	public static void setImplementClassName(final String implementClassName) {
+		implementingClassName = implementClassName;
+	}
+
 	public abstract String createSessionId(String userId, String data) throws SessiondException;
-	
+
 	public abstract String createSecretId(String userId, String data) throws SessiondException;
-	
+
 	public abstract String createRandomId() throws SessiondException;
-} 
+}

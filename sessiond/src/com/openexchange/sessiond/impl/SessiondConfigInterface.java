@@ -51,7 +51,6 @@
 
 package com.openexchange.sessiond.impl;
 
-import com.openexchange.session.*;
 
 /**
  * SessionConfig

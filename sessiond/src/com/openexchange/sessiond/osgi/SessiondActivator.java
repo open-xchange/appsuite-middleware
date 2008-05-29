@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.EventAdmin;
 
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
@@ -93,7 +94,8 @@ public final class SessiondActivator extends DeferredActivator {
 		started = new AtomicBoolean();
 	}
 
-	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, CacheService.class };
+	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class, CacheService.class,
+			EventAdmin.class };
 
 	@Override
 	protected Class<?>[] getNeededServices() {

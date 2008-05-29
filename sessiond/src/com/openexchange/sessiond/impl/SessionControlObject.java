@@ -54,46 +54,45 @@ import com.openexchange.session.*;
 import java.util.Date;
 
 /**
- * SessiondIdInterface
+ * {@link SessionControlObject} - The session control object
  * 
  * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
  */
-
 public class SessionControlObject {
 
-    private Date creationTime;
-    
-    private Date timestamp;
-    
-    private Session session;
-    
-    private int lifetime;
-    
-    public SessionControlObject(final Session session, final int lifetime) {
-        this.session = session;
-        this.lifetime = lifetime;
-        
-        creationTime = new Date();
-        timestamp = new Date();
-    }
-    
-    public Session getSession() {
-        return session;
-    }
-    
-    public Date getCreationTime() {
-        return creationTime;
-    }
-    
-    public Date getTimestamp() {
-        return timestamp;
-    }
-    
-    public int getLifetime() {
-        return lifetime;
-    }
-    
-    public void updateTimestamp() {
-        timestamp.setTime(System.currentTimeMillis());
-    }
-} 
+	private final Date creationTime;
+
+	private final Date timestamp;
+
+	private final Session session;
+
+	private final int lifetime;
+
+	public SessionControlObject(final Session session, final int lifetime) {
+		this.session = session;
+		this.lifetime = lifetime;
+
+		creationTime = new Date();
+		timestamp = new Date();
+	}
+
+	public Session getSession() {
+		return session;
+	}
+
+	public Date getCreationTime() {
+		return creationTime;
+	}
+
+	public Date getTimestamp() {
+		return timestamp;
+	}
+
+	public int getLifetime() {
+		return lifetime;
+	}
+
+	public void updateTimestamp() {
+		timestamp.setTime(System.currentTimeMillis());
+	}
+}

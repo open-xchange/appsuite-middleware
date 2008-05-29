@@ -47,50 +47,43 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.sessiond.event;
 
+import java.util.Map;
+
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.exception.SessiondException;
 
 /**
- * {@link Sessiond} - The Sessiond
+ * {@link SessiondEventListener} - The listener for sessiond events.
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
+public interface SessiondEventListener {
 
-public class Sessiond {
-	
-	private static volatile Sessiond singleton;
-	
-	//private SessionHandler sessionHandler;
-	
-	private final SessiondConfigInterface config;
-	
-	public Sessiond(final SessiondConfigInterface config) {
-		this.config = config;
-	}
-	
-	public void start() {
-		//sessionHandler = new SessionHandler();
-		SessionHandler.init(config);		
-	}
-	
-    public static Sessiond getInstance(final SessiondConfigInterface config) {
-		if (singleton != null) {
-			return singleton;
-		}
-		return singleton = new Sessiond(config);
-	}
-    
-    public void close() {
-    	SessionHandler.close();
-    }
-} 
+	/**
+	 * Handles the removal of specified session
+	 * 
+	 * @param session
+	 *            The removed session
+	 */
+	public void handleSessionRemoval(Session session);
 
+	/**
+	 * Handles the removal of specified session container
+	 * 
+	 * @param sessions
+	 *            The removed session container
+	 */
+	public void handleContainerRemoval(Map<String, Session> sessions);
 
+	/**
+	 * Handles the specified error
+	 * 
+	 * @param error
+	 *            The error
+	 */
+	public void handleError(SessiondException error);
 
-
-
-
-
-
-
-
+}
