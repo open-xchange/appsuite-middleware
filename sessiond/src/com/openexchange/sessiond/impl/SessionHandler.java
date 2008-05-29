@@ -99,8 +99,11 @@ public class SessionHandler {
 
 	private static AtomicInteger numberOfActiveSessions = new AtomicInteger();
 
+	/**
+	 * Initializes a new {@link SessionHandler session-handler}
+	 */
 	public SessionHandler() {
-
+		super();
 	}
 
 	public static void init(final SessiondConfigInterface config) {
