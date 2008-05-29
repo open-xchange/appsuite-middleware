@@ -246,6 +246,6 @@ public interface ContactFields extends CommonFields {
 
 	public static final String NUMBER_OF_LINKS = "number_of_links";
 	
-	public static final String NUMBER_OF_IMAGES = "number_of_image";
+	public static final String CONTAINS_IMAGE1 = "contains_image1";
 		
 }
