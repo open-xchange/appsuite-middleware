@@ -117,6 +117,24 @@ public class FolderCacheManager {
 	}
 
 	/**
+	 * Initializes the singleton instance of folder cache
+	 * {@link FolderCacheManager manager}.
+	 * 
+	 * @throws OXException
+	 *             If initialization fails
+	 */
+	public static void initInstance() throws OXException {
+		if (!initialized.get()) {
+			synchronized (initialized) {
+				if (instance == null) {
+					instance = new FolderCacheManager();
+					initialized.set(true);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Gets the singleton instance of folder cache {@link FolderCacheManager
 	 * manager}.
 	 * 

@@ -115,6 +115,17 @@ public final class FolderQueryCacheManager {
 	}
 
 	/**
+	 * Initializes the singleton instance of folder query cache
+	 * {@link FolderQueryCacheManager manager}
+	 * 
+	 * @throws OXException
+	 *             If initialization fails
+	 */
+	public static void initInstance() throws OXException {
+		getInstance();
+	}
+
+	/**
 	 * @return The singleton instance of {@link FolderQueryCacheManager}
 	 * @throws OXException
 	 *             if instance of {@link FolderQueryCacheManager} cannot be
@@ -193,8 +204,8 @@ public final class FolderQueryCacheManager {
 	}
 
 	/**
-	 * Gets a query result from cache if present, otherwise <code>null</code>
-	 * is returned
+	 * Gets a query result from cache if present, otherwise <code>null</code> is
+	 * returned
 	 * 
 	 * @return query result if present, otherwise <code>null</code>
 	 */
@@ -203,8 +214,8 @@ public final class FolderQueryCacheManager {
 	}
 
 	/**
-	 * Gets a query result from cache if present, otherwise <code>null</code>
-	 * is returned
+	 * Gets a query result from cache if present, otherwise <code>null</code> is
+	 * returned
 	 * 
 	 * @return query result if present, otherwise <code>null</code>
 	 */

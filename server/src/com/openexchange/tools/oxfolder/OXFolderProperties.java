@@ -116,9 +116,9 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 			reg.registerListener(this);
 		}
 		if (enableFolderCache) {
-			FolderCacheManager.getInstance();
+			FolderCacheManager.initInstance();
 		}
-		FolderQueryCacheManager.getInstance();
+		FolderQueryCacheManager.initInstance();
 		started.set(true);
 	}
 
