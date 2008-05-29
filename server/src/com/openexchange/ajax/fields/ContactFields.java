@@ -240,7 +240,7 @@ public interface ContactFields extends CommonFields {
 
 	public static final String DISTRIBUTIONLIST = "distribution_list";	
 	
-	public static final String DISTRIBUTIONLIST_FLAG = "distribution_list_flag";
+	public static final String MARK_AS_DISTRIBUTIONLIST = "mark_as_distributionlist";
 	
 	public static final String NUMBER_OF_DISTRIBUTIONLIST = "number_of_distribution_list";	
 

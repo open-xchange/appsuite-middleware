@@ -352,11 +352,11 @@ public class ContactParser extends CommonParser {
 		},
 		new JSONAttributeMapper() {
 			public boolean jsonObjectContains(final JSONObject jsonobject) {
-				return jsonobject.has(ContactFields.DISTRIBUTIONLIST_FLAG);
+				return jsonobject.has(ContactFields.MARK_AS_DISTRIBUTIONLIST);
 			}
 			public void setObject(final ContactObject contactobject,
 				final JSONObject jsonobject) throws Exception {
-				contactobject.setMarkAsDistributionlist(parseBoolean(jsonobject, ContactFields.DISTRIBUTIONLIST_FLAG));
+				contactobject.setMarkAsDistributionlist(parseBoolean(jsonobject, ContactFields.MARK_AS_DISTRIBUTIONLIST));
 			}
 		},
 		new JSONAttributeMapper() {
