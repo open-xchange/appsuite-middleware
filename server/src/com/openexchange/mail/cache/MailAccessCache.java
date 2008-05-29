@@ -51,7 +51,6 @@ package com.openexchange.mail.cache;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -88,11 +87,9 @@ public final class MailAccessCache {
 
 	private static final Lock LOCK_MOD = new ReentrantLock();
 
-	private static final AtomicBoolean initialized = new AtomicBoolean();
-
 	private static final Map<CacheKey, ReadWriteLock> contextLocks = new HashMap<CacheKey, ReadWriteLock>();
 
-	private static MailAccessCache singleton;
+	private static volatile MailAccessCache singleton;
 
 	/*
 	 * Field members
@@ -118,34 +115,52 @@ public final class MailAccessCache {
 	 * @return The appropriate lock
 	 */
 	private static ReadWriteLock getLock(final CacheKey key) {
-		ReadWriteLock l = contextLocks.get(key);
-		if (l == null) {
+		if (!contextLocks.containsKey(key)) {
 			LOCK_MOD.lock();
 			try {
-				if ((l = contextLocks.get(key)) == null) {
-					l = new ReentrantReadWriteLock();
-					contextLocks.put(key, l);
+				if (!contextLocks.containsKey(key)) {
+					contextLocks.put(key, new ReentrantReadWriteLock());
 				}
 			} finally {
 				LOCK_MOD.unlock();
 			}
 		}
-		return l;
+		return contextLocks.get(key);
 	}
 
 	/**
 	 * Gets the singleton instance
+	 * <p>
+	 * Singleton instance is created following the thread-safe
+	 * lazy-initialization pattern:
+	 * 
+	 * <pre>
+	 * // Works with acquire/release semantics for volatile
+	 * class Foo {
+	 * 	private volatile Helper helper = null;
+	 * 
+	 * 	public Helper getHelper() {
+	 * 		if (helper == null) {
+	 * 			synchronized (this) {
+	 * 				if (helper == null)
+	 * 					helper = new Helper();
+	 * 			}
+	 * 		}
+	 * 		return helper;
+	 * 	}
+	 * }
+	 * 
+	 * </pre>
 	 * 
 	 * @return The singleton instance
 	 * @throws CacheException
 	 *             If instance initialization fails
 	 */
 	public static MailAccessCache getInstance() throws CacheException {
-		if (!initialized.get()) {
-			synchronized (initialized) {
+		if (null == singleton) {
+			synchronized (MailAccessCache.class) {
 				if (null == singleton) {
 					singleton = new MailAccessCache();
-					initialized.set(true);
 				}
 			}
 		}
@@ -156,11 +171,10 @@ public final class MailAccessCache {
 	 * Releases the singleton instance
 	 */
 	public static void releaseInstance() {
-		if (initialized.get()) {
-			synchronized (initialized) {
+		if (null != singleton) {
+			synchronized (MailAccessCache.class) {
 				if (null != singleton) {
 					singleton = null;
-					initialized.set(false);
 				}
 			}
 		}
@@ -329,8 +343,8 @@ public final class MailAccessCache {
 	 * 
 	 * @param session
 	 *            The session
-	 * @return <code>true</code> if a user-bound mail access is already
-	 *         present in cache; otherwise <code>false</code>
+	 * @return <code>true</code> if a user-bound mail access is already present
+	 *         in cache; otherwise <code>false</code>
 	 * @throws CacheException
 	 *             If context loading fails
 	 */
