@@ -205,7 +205,7 @@ public class PushUDPActivator implements BundleActivator {
 			}
 			serviceTrackerList.clear();
 		} catch (final Throwable e) {
-			LOG.error("PushUDPActivator: start: ", e);
+			LOG.error("PushUDPActivator: stop: ", e);
 			throw e instanceof Exception ? (Exception) e : new Exception(e);
 		}
 	}
