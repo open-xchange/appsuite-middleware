@@ -59,7 +59,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
 
 import com.openexchange.database.Database;
 import com.openexchange.groupware.AbstractOXException;
@@ -67,14 +66,10 @@ import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrowsMultiple;
 import com.openexchange.groupware.AbstractOXException.Category;
-import com.openexchange.groupware.contact.Contacts.mapper;
-import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.exception.Classes;
 import com.openexchange.groupware.update.exception.UpdateExceptionFactory;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 /**
  * ContactsChangedFromUpdateTask
@@ -264,7 +259,7 @@ public final class ContactsFieldSizeUpdateTask implements UpdateTask {
                 ResultSet resultSet = metadata.getColumns(null, null, sqltable, null);
                 while (resultSet.next()) {
                 	String name = resultSet.getString("COLUMN_NAME");
-                	String type = resultSet.getString("TYPE_NAME");
+                	//String type = resultSet.getString("TYPE_NAME");
                 	int size = resultSet.getInt("COLUMN_SIZE");
 				
                 	if (null != columnRefer.get(name)){               		
