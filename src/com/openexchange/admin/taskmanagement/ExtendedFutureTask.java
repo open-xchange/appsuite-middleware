@@ -52,8 +52,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
-import javax.mail.MethodNotSupportedException;
-
 /**
  * A FutureTask extented by Progress
  * 
@@ -110,14 +108,14 @@ public class ExtendedFutureTask<V> extends FutureTask<V> {
      * Gets the progress percentage of the underlying job
      * 
      * @return The progress in percent
-     * @throws MethodNotSupportedException If the job doesn't support this feature
+     * @throws NoSuchMethodException If the job doesn't support this feature
      */
-    public int getProgressPercentage() throws MethodNotSupportedException {
+    public int getProgressPercentage() throws NoSuchMethodException {
         if (this.callable instanceof ProgressCallable) {
             final ProgressCallable<?> progcall = (ProgressCallable<?>) this.callable;
             return progcall.getProgressPercentage();
         } else {
-            throw new MethodNotSupportedException();
+            throw new NoSuchMethodException();
         }
         
     }
