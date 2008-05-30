@@ -1,3 +1,7 @@
+* 2008-05-30 - marcus.klein@open-xchange.com
+
+ - Bugfix #11325: Preferences tree must be initialized for admin daemon.
+
 * 2008-05-28 - thorben.betten@open-xchange.com
 
  - Bugfix #11271: Proper handling when deleting a group to reassign
