@@ -75,6 +75,7 @@ import com.openexchange.server.impl.DBPoolingException;
  * object types.
  * TODO Generate/Fetch a group of identifier instead of fetching every time only
  * one identifier.
+ * TODO move this class to some package for mysql storage.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class IDGenerator {
