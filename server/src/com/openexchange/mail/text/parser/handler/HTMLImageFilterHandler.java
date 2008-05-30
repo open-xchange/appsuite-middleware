@@ -70,14 +70,11 @@ import com.openexchange.mail.text.parser.HTMLHandler;
  * <p>
  * By now the following possible sources are handled:
  * <ol>
- * <li> <code>'&lt;img src=&quot;...&quot; /&gt;'</code> --&gt;
- * <code>'&lt;img src=&quot;&quot; /&gt;'</code> </li>
- * <li> <code>'&lt;input src=&quot;...&quot; /&gt;'</code> --&gt;
- * <code>'&lt;input src=&quot;&quot; /&gt;'</code> </li>
- * <li> <code>'&lt;sometag background=&quot;an-url&quot;&gt;'</code> --&gt;
- * <code>'&lt;sometag background=&quot;&quot;&gt;'</code> </li>
- * <li> Removed CSS: <code>background: url(an-url);</code> </li>
- * <li> Removed CSS: <code>background-image: url(an-url);</code> </li>
+ * <li> <code>'&lt;img src=&quot;...&quot; /&gt;'</code> --&gt; <code>'&lt;img src=&quot;&quot; /&gt;'</code></li>
+ * <li> <code>'&lt;input src=&quot;...&quot; /&gt;'</code> --&gt; <code>'&lt;input src=&quot;&quot; /&gt;'</code></li>
+ * <li> <code>'&lt;sometag background=&quot;an-url&quot;&gt;'</code> --&gt; <code>'&lt;sometag background=&quot;&quot;&gt;'</code></li>
+ * <li>Removed CSS: <code>background: url(an-url);</code></li>
+ * <li>Removed CSS: <code>background-image: url(an-url);</code></li>
  * </ol>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -152,7 +149,9 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleCDATA(java.lang.String)
+	 * @see
+	 * com.openexchange.mail.text.parser.HTMLHandler#handleCDATA(java.lang.String
+	 * )
 	 */
 	public void handleCDATA(final String text) {
 		htmlBuilder.append("<![CDATA[");
@@ -172,7 +171,9 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleComment(java.lang.String)
+	 * @see
+	 * com.openexchange.mail.text.parser.HTMLHandler#handleComment(java.lang
+	 * .String)
 	 */
 	public void handleComment(final String comment) {
 		htmlBuilder.append("<!--").append(comment).append("-->");
@@ -181,7 +182,9 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleDocDeclaration(java.lang.String)
+	 * @see
+	 * com.openexchange.mail.text.parser.HTMLHandler#handleDocDeclaration(java
+	 * .lang.String)
 	 */
 	public void handleDocDeclaration(final String docDecl) {
 		htmlBuilder.append("<!DOCTYPE").append(docDecl).append('>').append(CRLF).append(CRLF);
@@ -190,7 +193,9 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleEndTag(java.lang.String)
+	 * @see
+	 * com.openexchange.mail.text.parser.HTMLHandler#handleEndTag(java.lang.
+	 * String)
 	 */
 	public void handleEndTag(final String tag) {
 		if (isCss && STYLE.equals(tag)) {
@@ -202,9 +207,12 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleError(java.lang.String)
+	 * @see
+	 * com.openexchange.mail.text.parser.HTMLHandler#handleError(java.lang.String
+	 * )
 	 */
 	public void handleError(final String errorMsg) {
+		LOG.error(errorMsg);
 	}
 
 	private static final String CID = "cid:";
@@ -214,8 +222,9 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleSimpleTag(java.lang.String,
-	 *      java.util.Map)
+	 * @see
+	 * com.openexchange.mail.text.parser.HTMLHandler#handleSimpleTag(java.lang
+	 * .String, java.util.Map)
 	 */
 	public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
 		if (IMG.equals(tag) || INPUT.equals(tag)) {
@@ -227,10 +236,9 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 				 * Don't replace inline images
 				 */
 				attributes.put(SRC, BLANK);
+				imageURLFound = true;
 			}
-			imageURLFound = true;
 		} else if (attributes.containsKey(BACKGROUND)) {
-			final String val = attributes.get(BACKGROUND);
 			/*
 			 * Check for URL inside background attribute
 			 */
@@ -250,15 +258,15 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleStartTag(java.lang.String,
-	 *      java.util.Map)
+	 * @see
+	 * com.openexchange.mail.text.parser.HTMLHandler#handleStartTag(java.lang
+	 * .String, java.util.Map)
 	 */
 	public void handleStartTag(final String tag, final Map<String, String> attributes) {
 		if (STYLE.equals(tag)) {
 			isCss = true;
 		} else {
 			if (attributes.containsKey(BACKGROUND)) {
-				final String val = attributes.get(BACKGROUND);
 				/*
 				 * Check for URL inside background attribute
 				 */
@@ -310,8 +318,9 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleText(java.lang.String,
-	 *      boolean)
+	 * @see
+	 * com.openexchange.mail.text.parser.HTMLHandler#handleText(java.lang.String
+	 * , boolean)
 	 */
 	public void handleText(final String text, final boolean ignorable) {
 		if (isCss) {
@@ -333,8 +342,9 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.text.parser.HTMLHandler#handleXMLDeclaration(java.lang.String,
-	 *      java.lang.Boolean, java.lang.String)
+	 * @see
+	 * com.openexchange.mail.text.parser.HTMLHandler#handleXMLDeclaration(java
+	 * .lang.String, java.lang.Boolean, java.lang.String)
 	 */
 	public void handleXMLDeclaration(final String version, final Boolean standalone, final String encoding) {
 		if (null != version) {
