@@ -115,7 +115,11 @@ public class SessiondException extends AbstractOXException {
             AbstractOXException.Category.CODE_ERROR),
     	SESSIOND_CONFIG_EXCEPTION("Sessiond Config Exception", 3,
     	            AbstractOXException.Category.CODE_ERROR),
-    	MISSING_PROPERTY("Missing property '%s'", 4, AbstractOXException.Category.SETUP_ERROR);
+    	MISSING_PROPERTY("Missing property '%s'", 4, AbstractOXException.Category.SETUP_ERROR),
+    	/**
+    	 * Unknown event topic %s
+    	 */
+    	UNKNOWN_EVENT_TOPIC("Unknown event topic %s", 5, AbstractOXException.Category.CODE_ERROR);
 
 		/**
 		 * Message of the exception.
