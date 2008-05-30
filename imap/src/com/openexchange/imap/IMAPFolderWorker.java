@@ -65,6 +65,7 @@ import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailMessageStorage;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -160,7 +161,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 	 *            The fullname of the folder which has been modified
 	 */
 	public void notifyIMAPFolderModification(final String modifiedFullname) {
-		if (null == imapFolder || !modifiedFullname.equals(imapFolder.getFullName())) {
+		if ((null == imapFolder) || !modifiedFullname.equals(imapFolder.getFullName())) {
 			/*
 			 * Modified folder did not affect remembered IMAP folder
 			 */
@@ -183,7 +184,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 	 *            The fullnames of the folders which have been modified
 	 */
 	public void notifyIMAPFolderModification(final Set<String> modifiedFullnames) {
-		if (null == imapFolder || !modifiedFullnames.contains(imapFolder.getFullName())) {
+		if ((null == imapFolder) || !modifiedFullnames.contains(imapFolder.getFullName())) {
 			/*
 			 * Modified folders did not affect remembered IMAP folder
 			 */
@@ -202,7 +203,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 		} catch (final IllegalStateException e) {
 			LOG.warn(WARN_FLD_ALREADY_CLOSED, e);
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConfig);
+			throw MIMEMailException.handleMessagingException(e, imapConfig);
 		} finally {
 			resetIMAPFolder();
 		}
@@ -226,14 +227,14 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 	 * return ((imapFolder.getType() &amp; IMAPFolder.HOLDS_MESSAGES) == 1)
 	 * </pre>
 	 * 
-	 * @return <code>true</code> if field {@link #imapFolder} indicates to
-	 *         hold messages
+	 * @return <code>true</code> if field {@link #imapFolder} indicates to hold
+	 *         messages
 	 * @throws MessagingException
 	 *             If a messaging error occurs
 	 */
 	protected boolean holdsMessages() throws MessagingException {
 		if (holdsMessages == -1) {
-			holdsMessages = ((imapFolder.getType() & IMAPFolder.HOLDS_MESSAGES) == 0) ? 0 : 1;
+			holdsMessages = ((imapFolder.getType() & Folder.HOLDS_MESSAGES) == 0) ? 0 : 1;
 		}
 		return holdsMessages > 0;
 	}
@@ -293,7 +294,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 				 * This call also checks if folder is opened
 				 */
 				final int mode = imapFolder.getMode();
-				if (isIdenticalFolder && imapFolder.isOpen() && mode >= desiredMode) {
+				if (isIdenticalFolder && imapFolder.isOpen() && (mode >= desiredMode)) {
 					/*
 					 * Identical folder is already opened in an appropriate
 					 * mode.
@@ -333,7 +334,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 				} catch (final MessagingException e) { // No access
 					throw new IMAPException(IMAPException.Code.NO_ACCESS, imapFolder.getFullName());
 				}
-				if (desiredMode == Folder.READ_WRITE
+				if ((desiredMode == Folder.READ_WRITE)
 						&& ((imapFolder.getType() & Folder.HOLDS_MESSAGES) == 0)
 						&& STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(
 								MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_FALSE))
@@ -351,7 +352,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 				.getFolder(fullname));
 		if (!isDefaultFolder && !retval.exists()) {
 			throw new IMAPException(IMAPException.Code.FOLDER_NOT_FOUND, retval.getFullName());
-		} else if (desiredMode != Folder.READ_ONLY && desiredMode != Folder.READ_WRITE) {
+		} else if ((desiredMode != Folder.READ_ONLY) && (desiredMode != Folder.READ_WRITE)) {
 			throw new IMAPException(IMAPException.Code.UNKNOWN_FOLDER_MODE, Integer.valueOf(desiredMode));
 		}
 		try {
@@ -364,7 +365,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 		} catch (final MessagingException e) {
 			throw new IMAPException(IMAPException.Code.NO_ACCESS, retval.getFullName());
 		}
-		if (desiredMode == Folder.READ_WRITE
+		if ((desiredMode == Folder.READ_WRITE)
 				&& ((retval.getType() & Folder.HOLDS_MESSAGES) == 0)
 				&& STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(
 						MIMESessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_FALSE))

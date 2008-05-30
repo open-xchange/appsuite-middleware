@@ -57,7 +57,7 @@ import javax.mail.internet.MimeMessage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -117,7 +117,7 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
 	 */
 	public void fillMail(final SMTPMailMessage mail, final SMTPMessage smtpMessage) throws MessagingException,
 			MailException, IOException {
-		fillMail(mail, smtpMessage, null, null);
+		fillMail(mail, smtpMessage, ComposeType.NEW);
 	}
 
 	/**
@@ -138,35 +138,18 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
 	 */
 	public void fillMail(final SMTPMailMessage mail, final SMTPMessage smtpMessage, final ComposeType type)
 			throws MessagingException, MailException, IOException {
-		fillMail(mail, smtpMessage, type, null);
-	}
-
-	/**
-	 * Fills given instance of {@link SMTPMessage}
-	 * 
-	 * @param mail
-	 *            The source mail
-	 * @param smtpMessage
-	 *            The SMTP message to fill
-	 * @param type
-	 *            The compose type
-	 * @param originalMails
-	 *            The referenced mails (multiple allowed on forward/just one
-	 *            allowed on reply)
-	 * @throws MessagingException
-	 *             If a messaging error occurs
-	 * @throws MailException
-	 *             If a mail error occurs
-	 * @throws IOException
-	 *             If an I/O error occurs
-	 */
-	public void fillMail(final SMTPMailMessage mail, final SMTPMessage smtpMessage, final ComposeType type,
-			final MailMessage[] originalMails) throws MessagingException, MailException, IOException {
 		/*
 		 * Check for reply
 		 */
-		if (mail.getReferencedMailsSize() == 1 && ComposeType.REPLY.equals(type)) {
-			setReplyHeaders(mail.getReferencedMail(), smtpMessage);
+		if (ComposeType.REPLY.equals(type) && (mail.getMsgref() != null)) {
+			final MailAccess<?, ?> access = MailAccess.getInstance(session);
+			access.connect();
+			try {
+				setReplyHeaders(access.getMessageStorage().getMessage(mail.getMsgref().getFolder(),
+						mail.getMsgref().getUid(), false), smtpMessage);
+			} finally {
+				access.close(true);
+			}
 		}
 		/*
 		 * Set headers
@@ -179,7 +162,7 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
 		/*
 		 * Fill body
 		 */
-		fillMailBody(mail, smtpMessage, type, originalMails);
+		fillMailBody(mail, smtpMessage, type);
 	}
 
 	@Override
@@ -188,7 +171,7 @@ public final class SMTPMessageFiller extends MIMEMessageFiller {
 		/*
 		 * ENVELOPE-FROM
 		 */
-		if (SMTPConfig.isSmtpEnvelopeFrom()) {
+		if (SMTPConfig.isSmtpEnvelopeFrom() && (mimeMessage instanceof SMTPMessage)) {
 			/*
 			 * Set ENVELOPE-FROM in SMTP message to user's primary email address
 			 */

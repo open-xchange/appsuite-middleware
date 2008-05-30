@@ -50,7 +50,6 @@
 package com.openexchange.mail.api;
 
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.processing.MimeForward;
 import com.openexchange.mail.mime.processing.MimeReply;
@@ -101,18 +100,14 @@ public class MailLogicTools {
 	 *             If reply message cannot be generated
 	 */
 	public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll) throws MailException {
-		final MailMessage replyMail = MimeReply.getReplyMail(originalMail, replyAll, session);
-		if (originalMail.containsFolder() && (originalMail.getMailId() > 0)) {
-			replyMail.setMsgref(MailPath.getMailPath(originalMail.getFolder(), originalMail.getMailId()));
-		}
-		return replyMail;
+		return MimeReply.getReplyMail(originalMail, replyAll, session);
 	}
 
 	/**
 	 * Creates a forward message for the messages specified by
-	 * <code>originalMails</code>. If multiple messages are specified then
-	 * these messages are forwarded as <b>attachment</b> since no inline
-	 * forward is possible.
+	 * <code>originalMails</code>. If multiple messages are specified then these
+	 * messages are forwarded as <b>attachment</b> since no inline forward is
+	 * possible.
 	 * <p>
 	 * If mailing system deals with common RFC822 messages, this convenience
 	 * method only delegates its request to
@@ -127,14 +122,7 @@ public class MailLogicTools {
 	 *             If forward message cannot be generated
 	 */
 	public MailMessage getFowardMessage(final MailMessage[] originalMails) throws MailException {
-		final MailMessage forwardMail = MimeForward.getFowardMail(originalMails, session);
-		if ((originalMails.length == 1) && originalMails[0].containsFolder() && (originalMails[0].getMailId() > 0)) {
-			/*
-			 * Allow message reference on root level
-			 */
-			forwardMail.setMsgref(MailPath.getMailPath(originalMails[0].getFolder(), originalMails[0].getMailId()));
-		}
-		return forwardMail;
+		return MimeForward.getFowardMail(originalMails, session);
 	}
 
 }

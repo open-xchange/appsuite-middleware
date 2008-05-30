@@ -60,8 +60,8 @@ import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.UID;
 
 /**
- * {@link MessageUIDsIMAPCommand} - gets the corresponding message UIDs to given array
- * of <code>Message</code> as an array of <code>long</code>
+ * {@link MessageUIDsIMAPCommand} - gets the corresponding message UIDs to given
+ * array of <code>Message</code> as an array of <code>long</code>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -132,7 +132,8 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getDefaultValueOnEmptyFolder()
+	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
+	 * getDefaultValueOnEmptyFolder()
 	 */
 	@Override
 	protected long[] getDefaultValue() {
@@ -152,20 +153,24 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(com.sun.mail.iap.Response)
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(
+	 * com.sun.mail.iap.Response)
 	 */
 	@Override
 	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
 		if (!lastResponse.isOK()) {
-			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, "FETCH failed: "
-					+ lastResponse.getRest()));
+			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
+					"FETCH failed: " + lastResponse.getRest()));
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.sun.mail.iap.Response)
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.
+	 * sun.mail.iap.Response)
 	 */
 	@Override
 	protected void handleResponse(final Response response) throws MessagingException {
@@ -184,7 +189,8 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
 	 */
 	@Override
 	protected boolean performHandleResult() {
@@ -194,7 +200,8 @@ public final class MessageUIDsIMAPCommand extends AbstractIMAPCommand<long[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#performNotifyResponseHandlers()
+	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
+	 * performNotifyResponseHandlers()
 	 */
 	@Override
 	protected boolean performNotifyResponseHandlers() {

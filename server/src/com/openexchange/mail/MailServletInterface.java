@@ -99,8 +99,8 @@ public abstract class MailServletInterface {
 
 	/**
 	 * Returns all message counts in specified folder in an <code>int</code>
-	 * array as follows: <code>0</code>: Message Count, <code>1</code>:
-	 * New Message Count, <code>2</code>: Unread MessageCount, <code>3</code>:
+	 * array as follows: <code>0</code>: Message Count, <code>1</code>: New
+	 * Message Count, <code>2</code>: Unread MessageCount, <code>3</code>:
 	 * Deleted Message Count
 	 */
 	public abstract int[] getAllMessageCount(String folder) throws MailException;
@@ -157,11 +157,11 @@ public abstract class MailServletInterface {
 			throws MailException;
 
 	/**
-	 * Returns an instance of <code>SearchIterator</code> containing a
-	 * selection of messages located in given folder. <code>fromToIndices</code>
-	 * can define a range of messages that should be returned. Moreover
-	 * <code>searchCols</code> and <code>searchPatterns</code> defines a
-	 * search pattern to further confine returned messages.
+	 * Returns an instance of <code>SearchIterator</code> containing a selection
+	 * of messages located in given folder. <code>fromToIndices</code> can
+	 * define a range of messages that should be returned. Moreover
+	 * <code>searchCols</code> and <code>searchPatterns</code> defines a search
+	 * pattern to further confine returned messages.
 	 */
 	public abstract SearchIterator<?> getMessages(String folder, int[] fromToIndices, int sortCol, int order,
 			int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields)
@@ -176,8 +176,8 @@ public abstract class MailServletInterface {
 	/**
 	 * Returns a thread-view-sorted instance of <code>SearchIterator</code>
 	 * containing a selection of messages located in given folder.
-	 * <code>fromToIndices</code> can define a range of messages that should
-	 * be returned. Moreover <code>searchCols</code> and
+	 * <code>fromToIndices</code> can define a range of messages that should be
+	 * returned. Moreover <code>searchCols</code> and
 	 * <code>searchPatterns</code> defines a search pattern to further confine
 	 * returned messages.
 	 */
@@ -193,8 +193,8 @@ public abstract class MailServletInterface {
 
 	/**
 	 * Fetches the message identified through given uid from store located in
-	 * given folder. <code>seen</code> specifies whether to mark the message
-	 * as seen or not.
+	 * given folder. <code>seen</code> specifies whether to mark the message as
+	 * seen or not.
 	 * 
 	 */
 	public abstract MailMessage getMessage(String folder, long msgUID) throws MailException;
@@ -250,8 +250,8 @@ public abstract class MailServletInterface {
 	public abstract String sendMessage(ComposedMailMessage transportMail, ComposeType sendType) throws MailException;
 
 	/**
-	 * Creates an instance of <code>JSONMessageObject</code> which contains
-	 * the initial reply content of the message identifed through
+	 * Creates an instance of <code>JSONMessageObject</code> which contains the
+	 * initial reply content of the message identifed through
 	 * <code>replyMsgUID</code>. <code>replyToAll</code> defines whether to
 	 * reply to all involved entities or just to main sender. <b>NOTE:</b>This
 	 * method is intended to support Open-Xchange GUI's display onyl and does
@@ -261,13 +261,13 @@ public abstract class MailServletInterface {
 			throws MailException;
 
 	/**
-	 * Creates an instance of <code>JSONMessageObject</code> which contains
-	 * the initial forward content of the message identifed through
-	 * <code>fowardMsgUID</code>. <b>NOTE:</b>This method is intended to
-	 * support Open-Xchange GUI's display onyl and does not really send the
-	 * forward.
+	 * Creates an instance of <code>JSONMessageObject</code> which contains the
+	 * initial forward content of the message identifed through
+	 * <code>fowardMsgUID</code>. <b>NOTE:</b>This method is intended to support
+	 * Open-Xchange GUI's display onyl and does not really send the forward.
 	 */
-	public abstract MailMessage getForwardMessageForDisplay(String[] folders, long[] fowardMsgUIDs) throws MailException;
+	public abstract MailMessage getForwardMessageForDisplay(String[] folders, long[] fowardMsgUIDs)
+			throws MailException;
 
 	/**
 	 * Deletes the message located in given folder corresponding to given
@@ -333,8 +333,8 @@ public abstract class MailServletInterface {
 	/**
 	 * Closes the interface and releases all resources
 	 * 
-	 * @param putIntoCache -
-	 *            whether or not to put associated conenction into pool
+	 * @param putIntoCache
+	 *            - whether or not to put associated conenction into pool
 	 */
 	public abstract void close(boolean putIntoCache) throws MailException;
 

@@ -49,7 +49,13 @@
 
 package com.openexchange.mail.dataobjects.compose;
 
+import java.io.DataOutput;
+import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
+
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
@@ -64,18 +70,19 @@ import com.openexchange.session.Session;
  */
 public abstract class ComposedMailMessage extends MailMessage {
 
+	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(ComposedMailMessage.class);
+
 	/**
 	 * Serial version UID
 	 */
 	private static final long serialVersionUID = -6179506566418364076L;
 
-	private MailMessage[] referencedMails;
-
 	private final Session session;
 
 	private final Context ctx;
 
-	private MIMEMessageFiller filler;
+	private transient MIMEMessageFiller filler;
 
 	/**
 	 * Default constructor
@@ -84,6 +91,50 @@ public abstract class ComposedMailMessage extends MailMessage {
 		super();
 		this.session = session;
 		this.ctx = ctx;
+	}
+
+	/**
+	 * The readObject method is responsible for reading from the stream and
+	 * restoring the classes fields. It may call in.defaultReadObject to invoke
+	 * the default mechanism for restoring the object's non-static and
+	 * non-transient fields. The {@link ObjectInputStream#defaultReadObject()}
+	 * method uses information in the stream to assign the fields of the object
+	 * saved in the stream with the correspondingly named fields in the current
+	 * object. This handles the case when the class has evolved to add new
+	 * fields. The method does not need to concern itself with the state
+	 * belonging to its super classes or subclasses. State is saved by writing
+	 * the individual fields to the ObjectOutputStream using the writeObject
+	 * method or by using the methods for primitive data types supported by
+	 * {@link DataOutput}.
+	 * 
+	 * @param in
+	 *            The object input stream
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 * @throws ClassNotFoundException
+	 *             If a casting fails
+	 */
+	private void readObject(final java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+		throw new NotSerializableException(ComposedMailMessage.class.getName());
+	}
+
+	/**
+	 * The writeObject method is responsible for writing the state of the object
+	 * for its particular class so that the corresponding readObject method can
+	 * restore it. The default mechanism for saving the Object's fields can be
+	 * invoked by calling {@link ObjectOutputStream#defaultWriteObject()}. The
+	 * method does not need to concern itself with the state belonging to its
+	 * super classes or subclasses. State is saved by writing the individual
+	 * fields to the ObjectOutputStream using the writeObject method or by using
+	 * the methods for primitive data types supported by {@link DataOutput}.
+	 * 
+	 * @param out
+	 *            The object output stream
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 */
+	private void writeObject(final java.io.ObjectOutputStream out) throws IOException {
+		throw new NotSerializableException(ComposedMailMessage.class.getName());
 	}
 
 	/**
@@ -115,11 +166,27 @@ public abstract class ComposedMailMessage extends MailMessage {
 	}
 
 	/**
-	 * Releases this composed mail's referenced uploaded files
+	 * Cleans-up this composed mail's referenced uploaded files and frees
+	 * temporary stored files.
 	 */
-	public void release() {
+	public void cleanUp() {
 		if (null != filler) {
 			filler.deleteReferencedUploadFiles();
+		}
+		if (null != session) {
+			try {
+				final int count = getEnclosedCount();
+				for (int i = 0; i < count; i++) {
+					if (ReferencedMailPart.class.isInstance(getEnclosedMailPart(i))) {
+						final String fileId = ((ReferencedMailPart) (getEnclosedMailPart(i))).getFileID();
+						if (null != fileId) {
+							session.removeUploadedFile(fileId);
+						}
+					}
+				}
+			} catch (final MailException e) {
+				LOG.error(e.getMessage(), e);
+			}
 		}
 	}
 
@@ -134,68 +201,36 @@ public abstract class ComposedMailMessage extends MailMessage {
 	}
 
 	/**
-	 * Checks if this composed mail contains referenced mails
+	 * Gets the number of enclosed mail parts.
+	 * <p>
+	 * <b>Note</b>: The returned number does not include the text body part
+	 * applied with {@link #setBodyPart(TextBodyMailPart)}. To check for
+	 * contained parts:
 	 * 
-	 * @return <code>true</code> if this composed mail contains referenced
-	 *         mails; otherwise <code>false</code>
+	 * <pre>
+	 * composedMail.getEnclosedCount() &gt; 0
+	 * </pre>
+	 * 
+	 * @see #NO_ENCLOSED_PARTS
+	 * @return The number of enclosed mail parts or {@link #NO_ENCLOSED_PARTS}
+	 *         if not applicable
 	 */
-	public boolean containsReferencedMails() {
-		return referencedMails != null && referencedMails.length > 0;
-	}
+	@Override
+	public abstract int getEnclosedCount() throws MailException;
 
 	/**
-	 * Gets the number of referenced mails
+	 * Gets this composed mail's part located at given index.
+	 * <p>
+	 * <b>Note</b>: This method does not include the text body part applied with
+	 * {@link #setBodyPart(TextBodyMailPart)}.
 	 * 
-	 * @return The number of referenced mails
+	 * @param index
+	 *            The index of desired mail part or <code>null</code> if not
+	 *            applicable
+	 * @return The mail part
 	 */
-	public int getReferencedMailsSize() {
-		return referencedMails == null ? 0 : referencedMails.length;
-	}
-
-	/**
-	 * Gets the referenced mail of this composed mail
-	 * 
-	 * @return The referenced mail
-	 */
-	public MailMessage getReferencedMail() {
-		return referencedMails == null ? null : referencedMails[0];
-	}
-
-	/**
-	 * Gets the referenced mails of this composed mail
-	 * 
-	 * @return The referenced mails
-	 */
-	public MailMessage[] getReferencedMails() {
-		if (referencedMails == null) {
-			return null;
-		}
-		final MailMessage[] retval = new MailMessage[referencedMails.length];
-		System.arraycopy(referencedMails, 0, retval, 0, referencedMails.length);
-		return retval;
-	}
-
-	/**
-	 * Sets the referenced mail of this composed mail
-	 * 
-	 * @param referencedMail
-	 *            The referenced mail
-	 */
-	public void setReferencedMail(final MailMessage referencedMail) {
-		this.referencedMails = new MailMessage[1];
-		referencedMails[0] = referencedMail;
-	}
-
-	/**
-	 * Sets the referenced mails of this composed mail
-	 * 
-	 * @param referencedMails
-	 *            The referenced mails
-	 */
-	public void setReferencedMails(final MailMessage[] referencedMails) {
-		this.referencedMails = new MailMessage[referencedMails.length];
-		System.arraycopy(referencedMails, 0, this.referencedMails, 0, referencedMails.length);
-	}
+	@Override
+	public abstract MailPart getEnclosedMailPart(final int index) throws MailException;
 
 	/**
 	 * Sets this composed message's body part

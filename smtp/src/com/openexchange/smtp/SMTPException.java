@@ -196,7 +196,7 @@ public final class SMTPException extends MIMEMailException {
 	 * @param code
 	 *            The code
 	 */
-	public SMTPException(Code code) {
+	public SMTPException(final Code code) {
 		this(code, EMPTY_ARGS);
 	}
 

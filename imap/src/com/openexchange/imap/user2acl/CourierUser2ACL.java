@@ -56,7 +56,7 @@ import java.util.regex.Pattern;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailConfig.CredSrc;
 import com.openexchange.mail.api.MailConfig.LoginType;
 import com.openexchange.server.impl.OCLPermission;
@@ -151,7 +151,7 @@ public class CourierUser2ACL extends User2ACL {
 	}
 
 	private final String getACLNameInternal(final int userId, final Context ctx) throws AbstractOXException {
-		if (LoginType.USER.equals(IMAPConfig.getLoginType()) && CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
+		if (LoginType.USER.equals(MailConfig.getLoginType()) && CredSrc.USER_IMAPLOGIN.equals(MailConfig.getCredSrc())) {
 			return UserStorage.getInstance().getUser(userId, ctx).getImapLogin();
 		}
 		return UserStorage.getInstance().getUser(userId, ctx).getLoginInfo();
@@ -195,7 +195,7 @@ public class CourierUser2ACL extends User2ACL {
 			throws AbstractOXException {
 		// TODO: Handle the possibility of multiple user IDs since multiple IMAP
 		// servers are supported
-		if (LoginType.USER.equals(IMAPConfig.getLoginType()) && CredSrc.USER_IMAPLOGIN.equals(IMAPConfig.getCredSrc())) {
+		if (LoginType.USER.equals(MailConfig.getLoginType()) && CredSrc.USER_IMAPLOGIN.equals(MailConfig.getCredSrc())) {
 			/*
 			 * Find user name by user's imap login
 			 */

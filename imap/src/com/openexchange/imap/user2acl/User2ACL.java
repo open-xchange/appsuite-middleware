@@ -127,16 +127,16 @@ public abstract class User2ACL {
 	 * Determines the entity name of the user whose ID matches given
 	 * <code>userId</code> that is used in IMAP server's ACL list.
 	 * 
-	 * @param userId -
-	 *            the user ID
-	 * @param ctx -
-	 *            the context
-	 * @param user2AclArgs -
-	 *            the arguments container
+	 * @param userId
+	 *            - the user ID
+	 * @param ctx
+	 *            - the context
+	 * @param user2AclArgs
+	 *            - the arguments container
 	 * @return the IMAP login of the user whose ID matches given
 	 *         <code>userId</code>
-	 * @throws AbstractOXException -
-	 *             if user could not be found
+	 * @throws AbstractOXException
+	 *             - if user could not be found
 	 */
 	public abstract String getACLName(int userId, Context ctx, User2ACLArgs user2AclArgs) throws AbstractOXException;
 
@@ -144,15 +144,15 @@ public abstract class User2ACL {
 	 * Determines the user ID whose either ACL entity name or user name matches
 	 * given <code>pattern</code>.
 	 * 
-	 * @param pattern -
-	 *            the pattern for either IMAP login or user name
-	 * @param ctx -
-	 *            the context
-	 * @param user2AclArgs -
-	 *            the arguments container
+	 * @param pattern
+	 *            - the pattern for either IMAP login or user name
+	 * @param ctx
+	 *            - the context
+	 * @param user2AclArgs
+	 *            - the arguments container
 	 * @return the user ID whose IMAP login matches given <code>pattern</code>
-	 * @throws AbstractOXException -
-	 *             if user search fails
+	 * @throws AbstractOXException
+	 *             - if user search fails
 	 */
 	public abstract int getUserID(final String pattern, Context ctx, User2ACLArgs user2AclArgs)
 			throws AbstractOXException;

@@ -49,17 +49,15 @@
 
 package com.openexchange.mail.api;
 
-import java.util.List;
-
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.ImageMessageHandler;
@@ -423,15 +421,6 @@ public abstract class MailMessageStorage {
 		if (!draftMail.isDraft()) {
 			draftMail.setFlag(MailMessage.FLAG_DRAFT, true);
 		}
-		final List<String> tempIds;
-		if (draftMail.getMsgref() != null) {
-			/*
-			 * Load referenced mail parts from original message
-			 */
-			tempIds = ReferencedMailPart.loadReferencedParts(draftMail, draftMail.getSession());
-		} else {
-			tempIds = null;
-		}
 		final long uid;
 		try {
 			final MailMessage filledMail = MIMEMessageConverter.fillComposedMailMessage(draftMail);
@@ -441,20 +430,16 @@ public abstract class MailMessageStorage {
 			 */
 			uid = appendMessages(draftFullname, new MailMessage[] { filledMail })[0];
 		} finally {
-			draftMail.release();
-			if (null != tempIds) {
-				for (final String id : tempIds) {
-					draftMail.getSession().removeUploadedFile(id);
-				}
-			}
+			draftMail.cleanUp();
 		}
 		/*
 		 * Check for draft-edit operation: Delete old version
 		 */
-		if (draftMail.getReferencedMail() != null) {
-			if (draftMail.getReferencedMail().isDraft()) {
-				deleteMessages(draftMail.getReferencedMail().getFolder(), new long[] { draftMail.getReferencedMail()
-						.getMailId() }, true);
+		final MailPath msgref = draftMail.getMsgref();
+		if (msgref != null) {
+			final MailMessage refMail = getMessage(msgref.getFolder(), msgref.getUid(), false);
+			if (refMail.isDraft()) {
+				deleteMessages(refMail.getFolder(), new long[] { refMail.getMailId() }, true);
 			}
 			draftMail.setMsgref(null);
 		}

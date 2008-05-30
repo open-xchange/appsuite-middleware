@@ -68,7 +68,11 @@ public enum ComposeType {
 	/**
 	 * Reply
 	 */
-	REPLY(1);
+	REPLY(1),
+	/**
+	 * Draft-Edit
+	 */
+	DRAFT_EDIT(3);
 
 	private final int type;
 

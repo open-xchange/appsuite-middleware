@@ -65,6 +65,7 @@ import java.util.Map.Entry;
 import javax.activation.DataHandler;
 
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
@@ -248,6 +249,13 @@ public abstract class MailPart implements Serializable, Cloneable {
 	private String sequenceId;
 
 	private boolean b_sequenceId;
+
+	/**
+	 * The message reference (on reply or forward)
+	 */
+	private MailPath msgref;
+
+	private boolean b_msgref;
 
 	/**
 	 * Default constructor
@@ -754,6 +762,59 @@ public abstract class MailPart implements Serializable, Cloneable {
 	public void setSequenceId(final String sequenceId) {
 		this.sequenceId = sequenceId;
 		b_sequenceId = true;
+	}
+
+	/**
+	 * Gets the message reference
+	 * 
+	 * @return the message reference
+	 */
+	public MailPath getMsgref() {
+		if (b_msgref) {
+			return msgref;
+		}
+		final String xMsgref = removeHeader(MessageHeaders.HDR_X_OXMSGREF);
+		if (null != xMsgref) {
+			b_msgref = true;
+			try {
+				msgref = new MailPath(xMsgref);
+			} catch (final MailException e) {
+				LOG.error(e.getMessage(), e);
+				msgref = null;
+			}
+		}
+		return msgref;
+	}
+
+	/**
+	 * @return <code>true</code> if message reference is set; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean containsMsgref() {
+		if (b_msgref) {
+			return true;
+		}
+		return getHeader(MessageHeaders.HDR_X_OXMSGREF) != null;
+	}
+
+	/**
+	 * Removes the message reference
+	 */
+	public void removeMsgref() {
+		msgref = null;
+		b_msgref = false;
+		removeHeader(MessageHeaders.HDR_X_OXMSGREF);
+	}
+
+	/**
+	 * Sets the message reference
+	 * 
+	 * @param msgref
+	 *            the message reference to set
+	 */
+	public void setMsgref(final MailPath msgref) {
+		this.msgref = msgref;
+		b_msgref = true;
 	}
 
 	@Override

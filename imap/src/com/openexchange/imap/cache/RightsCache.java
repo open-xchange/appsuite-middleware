@@ -82,8 +82,8 @@ public final class RightsCache {
 	 * @param f
 	 *            The IMAP folder
 	 * @param load
-	 *            Whether <code>MYRIGHTS</code> command should be invoked if
-	 *            no cache entry present or not
+	 *            Whether <code>MYRIGHTS</code> command should be invoked if no
+	 *            cache entry present or not
 	 * @param session
 	 *            The session providing the session-bound cache
 	 * @return The cached rights or <code>null</code>
@@ -95,7 +95,7 @@ public final class RightsCache {
 		final RightsCacheEntry entry = new RightsCacheEntry(f.getFullName());
 		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
 		mailCache.get(entry);
-		if (load && null == entry.getValue()) {
+		if (load && (null == entry.getValue())) {
 			entry.setValue(f.myRights());
 			mailCache.put(entry);
 		}
@@ -103,8 +103,7 @@ public final class RightsCache {
 	}
 
 	/**
-	 * Removes cached <code>MYRIGHTS</code> command invoked on given IMAP
-	 * folder
+	 * Removes cached <code>MYRIGHTS</code> command invoked on given IMAP folder
 	 * 
 	 * @param f
 	 *            The IMAP folder
@@ -117,7 +116,7 @@ public final class RightsCache {
 
 	private static final class RightsCacheEntry implements SessionMailCacheEntry<Rights> {
 
-		private String fullname;
+		private final String fullname;
 
 		private Rights rights;
 
@@ -153,7 +152,8 @@ public final class RightsCache {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see com.openexchange.mail.cache.SessionBoundMailCacheEntry#getValue()
+		 * @see
+		 * com.openexchange.mail.cache.SessionBoundMailCacheEntry#getValue()
 		 */
 		public Rights getValue() {
 			return rights;
@@ -162,7 +162,9 @@ public final class RightsCache {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see com.openexchange.mail.cache.SessionBoundMailCacheEntry#setValue(java.lang.Object)
+		 * @see
+		 * com.openexchange.mail.cache.SessionBoundMailCacheEntry#setValue(java
+		 * .lang.Object)
 		 */
 		public void setValue(final Rights value) {
 			this.rights = value;

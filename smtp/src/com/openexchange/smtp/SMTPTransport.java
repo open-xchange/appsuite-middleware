@@ -59,9 +59,11 @@ import java.io.UnsupportedEncodingException;
 import java.security.Security;
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.mail.Address;
 import javax.mail.MessagingException;
@@ -83,8 +85,8 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
@@ -113,6 +115,8 @@ public final class SMTPTransport extends MailTransport {
 
 	private static final String CHARENC_ISO_8859_1 = "ISO-8859-1";
 
+	private final Queue<Runnable> pendingInvocations = new ConcurrentLinkedQueue<Runnable>();
+
 	private javax.mail.Session smtpSession;
 
 	private final Session session;
@@ -122,10 +126,6 @@ public final class SMTPTransport extends MailTransport {
 	private final UserSettingMail usm;
 
 	private SMTPConfig smtpConfig;
-
-	private SMTPMessageFiller smtpFiller;
-
-	private List<String> tempIds;
 
 	public SMTPTransport() {
 		super();
@@ -166,29 +166,33 @@ public final class SMTPTransport extends MailTransport {
 		}
 	}
 
-	private SMTPMessageFiller getMessageFiller() {
-		if (smtpFiller == null) {
-			smtpFiller = new SMTPMessageFiller(session, ctx, usm);
-		}
-		return smtpFiller;
-	}
-
 	private void clearUp() {
-		if (smtpFiller != null) {
-			smtpFiller.deleteReferencedUploadFiles();
-			smtpFiller = null;
-		}
-		if (tempIds != null) {
-			for (final String id : tempIds) {
-				session.removeUploadedFile(id);
-			}
-			tempIds = null;
-		}
+		doInvocations();
 	}
 
 	@Override
 	public void close() {
 		clearUp();
+	}
+
+	/**
+	 * Executes all tasks queued for execution
+	 */
+	private void doInvocations() {
+		for (final Iterator<Runnable> iter = pendingInvocations.iterator(); iter.hasNext();) {
+			iter.next().run();
+		}
+	}
+
+	/**
+	 * Executes the given task. This method returns as soon as the task is
+	 * scheduled, without waiting for it to be executed.
+	 * 
+	 * @param task
+	 *            The task to be executed.
+	 */
+	private void invokeLater(final Runnable task) {
+		pendingInvocations.offer(task);
 	}
 
 	private javax.mail.Session getSMTPSession() throws MailException {
@@ -260,7 +264,7 @@ public final class SMTPTransport extends MailTransport {
 			final String from;
 			if (fromAddr != null) {
 				from = fromAddr;
-			} else if (usm.getSendAddr() == null && userMail == null) {
+			} else if ((usm.getSendAddr() == null) && (userMail == null)) {
 				throw new SMTPException(SMTPException.Code.NO_SEND_ADDRESS_FOUND);
 			} else {
 				from = usm.getSendAddr() == null ? userMail : usm.getSendAddr();
@@ -348,7 +352,7 @@ public final class SMTPTransport extends MailTransport {
 				transport.close();
 			}
 		} catch (final MessagingException e) {
-			throw SMTPException.handleMessagingException(e);
+			throw MIMEMailException.handleMessagingException(e);
 		}
 	}
 
@@ -362,7 +366,7 @@ public final class SMTPTransport extends MailTransport {
 			 * Check recipients
 			 */
 			final Address[] allRecipients = smtpMessage.getAllRecipients();
-			if (allRecipients == null || allRecipients.length == 0) {
+			if ((allRecipients == null) || (allRecipients.length == 0)) {
 				throw new SMTPException(SMTPException.Code.MISSING_RECIPIENTS);
 			}
 			try {
@@ -383,11 +387,11 @@ public final class SMTPTransport extends MailTransport {
 					transport.close();
 				}
 			} catch (final MessagingException e) {
-				throw SMTPException.handleMessagingException(e);
+				throw MIMEMailException.handleMessagingException(e);
 			}
 			return MIMEMessageConverter.convertMessage(smtpMessage);
 		} catch (final MessagingException e) {
-			throw SMTPException.handleMessagingException(e);
+			throw MIMEMailException.handleMessagingException(e);
 		}
 	}
 
@@ -401,30 +405,23 @@ public final class SMTPTransport extends MailTransport {
 			 * Fill message dependent on send type
 			 */
 			final long startPrep = System.currentTimeMillis();
-			final SMTPMessageFiller smtpFiller = getMessageFiller();
-			if (composedMail.getReferencedMailsSize() == 1) {
-				tempIds = ReferencedMailPart.loadReferencedParts(composedMail, session);
-			}
-			if (ComposeType.FORWARD.equals(sendType)
-					&& (usm.isForwardAsAttachment() || composedMail.getReferencedMailsSize() > 1)) {
-				smtpFiller.fillMail((SMTPMailMessage) composedMail, smtpMessage, sendType, composedMail
-						.getReferencedMails());
-			} else {
-				smtpFiller.fillMail((SMTPMailMessage) composedMail, smtpMessage, sendType);
-			}
-			/*
-			 * Check recipients
-			 */
-			final Address[] allRecipients = smtpMessage.getAllRecipients();
-			if (allRecipients == null || allRecipients.length == 0) {
-				throw new SMTPException(SMTPException.Code.MISSING_RECIPIENTS);
-			}
-			smtpFiller.setSendHeaders(composedMail, smtpMessage);
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(new StringBuilder(128).append("SMTP mail prepared for transport in ").append(
-						System.currentTimeMillis() - startPrep).append("msec").toString());
-			}
+			final SMTPMessageFiller smtpFiller = new SMTPMessageFiller(session, ctx, usm);
+			composedMail.setFiller(smtpFiller);
 			try {
+				smtpFiller.fillMail((SMTPMailMessage) composedMail, smtpMessage, sendType);
+				/*
+				 * Check recipients
+				 */
+				final Address[] allRecipients = smtpMessage.getAllRecipients();
+				if ((allRecipients == null) || (allRecipients.length == 0)) {
+					throw new SMTPException(SMTPException.Code.MISSING_RECIPIENTS);
+				}
+				smtpFiller.setSendHeaders(composedMail, smtpMessage);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(new StringBuilder(128).append("SMTP mail prepared for transport in ").append(
+							System.currentTimeMillis() - startPrep).append("msec").toString());
+				}
+
 				final long start = System.currentTimeMillis();
 				final Transport transport = getSMTPSession().getTransport(SMTPProvider.PROTOCOL_SMTP.getName());
 				if (SMTPConfig.isSmtpAuth()) {
@@ -444,12 +441,12 @@ public final class SMTPTransport extends MailTransport {
 				} finally {
 					transport.close();
 				}
-			} catch (final MessagingException e) {
-				throw SMTPException.handleMessagingException(e);
+			} finally {
+				invokeLater(new MailCleanerTask(composedMail));
 			}
 			return MIMEMessageConverter.convertMessage(smtpMessage);
 		} catch (final MessagingException e) {
-			throw SMTPException.handleMessagingException(e);
+			throw MIMEMailException.handleMessagingException(e);
 		} catch (final IOException e) {
 			throw new SMTPException(SMTPException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}
@@ -475,5 +472,24 @@ public final class SMTPTransport extends MailTransport {
 
 	@Override
 	protected void startup() throws MailException {
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("SMTPTransport.startup()");
+		}
 	}
+
+	private static final class MailCleanerTask implements Runnable {
+
+		private final ComposedMailMessage composedMail;
+
+		public MailCleanerTask(final ComposedMailMessage composedMail) {
+			super();
+			this.composedMail = composedMail;
+		}
+
+		public void run() {
+			composedMail.cleanUp();
+		}
+
+	}
+
 }

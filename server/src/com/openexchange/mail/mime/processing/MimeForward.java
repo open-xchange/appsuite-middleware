@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.processing;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
@@ -93,6 +94,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MimeForward} - MIME message forward.
@@ -166,7 +168,7 @@ public final class MimeForward {
 	 * @throws MailException
 	 *             If forward mail cannot be composed
 	 */
-	public static MailMessage getFowardMail(final MimeMessage[] originalMsgs, final Session session)
+	private static MailMessage getFowardMail(final MimeMessage[] originalMsgs, final Session session)
 			throws MailException {
 		try {
 			/*
@@ -207,7 +209,7 @@ public final class MimeForward {
 			/*
 			 * Inline-Forward
 			 */
-			return asInlineForward(originalMsgs, session, ctx, usm, forwardMsg);
+			return asInlineForward(originalMsgs[0], session, ctx, usm, forwardMsg);
 		} catch (final MessagingException e) {
 			throw MIMEMailException.handleMessagingException(e);
 		} catch (final IOException e) {
@@ -217,10 +219,20 @@ public final class MimeForward {
 		}
 	}
 
-	private static MailMessage asInlineForward(final MimeMessage[] originalMsgs, final Session session,
-			final Context ctx, final UserSettingMail usm, final MimeMessage forwardMsg) throws MailException,
-			MessagingException, IOException {
-		final ContentType originalContentType = new ContentType(originalMsgs[0].getContentType());
+	private static MailMessage asInlineForward(final MimeMessage originalMsg, final Session session, final Context ctx,
+			final UserSettingMail usm, final MimeMessage forwardMsg) throws MailException, MessagingException,
+			IOException {
+		/*
+		 * Check for message reference
+		 */
+		final String msgRefStr = originalMsg.getHeader(MessageHeaders.HDR_X_OXMSGREF, null);
+		if (null != msgRefStr) {
+			/*
+			 * Remove temporary header
+			 */
+			originalMsg.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
+		}
+		final ContentType originalContentType = new ContentType(originalMsg.getContentType());
 		final MailMessage forwardMail;
 		if (originalContentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)) {
 			final Multipart multipart = new MimeMultipart();
@@ -229,8 +241,7 @@ public final class MimeForward {
 				 * Grab first seen text from original message
 				 */
 				final ContentType contentType = new ContentType();
-				final String firstSeenText = getFirstSeenText((Multipart) originalMsgs[0].getContent(), contentType,
-						usm);
+				final String firstSeenText = getFirstSeenText((Multipart) originalMsg.getContent(), contentType, usm);
 				if (contentType.getCharsetParameter() == null) {
 					contentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
 				}
@@ -239,7 +250,7 @@ public final class MimeForward {
 				 */
 				final MimeBodyPart textPart = new MimeBodyPart();
 				textPart.setText(generateForwardText(firstSeenText, UserStorage
-						.getStorageUser(session.getUserId(), ctx).getLocale(), originalMsgs[0], contentType
+						.getStorageUser(session.getUserId(), ctx).getLocale(), originalMsg, contentType
 						.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)), contentType.getCharsetParameter(), contentType
 						.getSubType());
 				textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -255,7 +266,7 @@ public final class MimeForward {
 			 * sequence IDs
 			 */
 			final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
-			new MailMessageParser().parseMailMessage(MIMEMessageConverter.convertMessage(originalMsgs[0]), handler);
+			new MailMessageParser().parseMailMessage(MIMEMessageConverter.convertMessage(originalMsg), handler);
 			final List<MailPart> parts = handler.getNonInlineParts();
 			for (final MailPart mailPart : parts) {
 				compositeMail.addAdditionalParts(mailPart);
@@ -269,10 +280,10 @@ public final class MimeForward {
 			if (originalContentType.getCharsetParameter() == null) {
 				originalContentType.setCharsetParameter(MailConfig.getDefaultMimeCharset());
 			}
-			forwardMsg.setText(generateForwardText(MessageUtility.readMimePart(originalMsgs[0], originalContentType),
-					UserStorage.getStorageUser(session.getUserId(), ctx).getLocale(), originalMsgs[0],
-					originalContentType.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)), originalContentType
-					.getCharsetParameter(), originalContentType.getSubType());
+			forwardMsg.setText(generateForwardText(MessageUtility.readMimePart(originalMsg, originalContentType),
+					UserStorage.getStorageUser(session.getUserId(), ctx).getLocale(), originalMsg, originalContentType
+							.isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)), originalContentType.getCharsetParameter(),
+					originalContentType.getSubType());
 			forwardMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
 			forwardMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, originalContentType.toString());
 			forwardMsg.saveChanges();
@@ -280,6 +291,9 @@ public final class MimeForward {
 		} else {
 			throw new IllegalStateException("Odd message for forward operation: Content-Type="
 					+ originalContentType.toString());
+		}
+		if (null != msgRefStr) {
+			forwardMail.setMsgref(new MailPath(msgRefStr));
 		}
 		return forwardMail;
 	}

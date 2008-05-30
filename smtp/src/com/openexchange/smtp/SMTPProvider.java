@@ -129,11 +129,6 @@ public final class SMTPProvider extends TransportProvider {
 	}
 
 	@Override
-	public ReferencedMailPart getNewReferencedPart(final String sequenceId) throws MailException {
-		return new SMTPReferencedPart(sequenceId);
-	}
-
-	@Override
 	public TextBodyMailPart getNewTextBodyPart(final String textBody) throws MailException {
 		return new SMTPBodyPart(textBody);
 	}

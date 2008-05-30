@@ -102,7 +102,7 @@ public final class User2ACLInit implements Initialization {
 		try {
 			if (null == implementingClass) {
 				final String classNameProp = IMAPConfig.getUser2AclImpl();
-				if (null == classNameProp || classNameProp.length() == 0) {
+				if ((null == classNameProp) || (classNameProp.length() == 0)) {
 					throw new User2ACLException(User2ACLException.Code.MISSING_SETTING, "User2ACLImpl");
 				}
 				if ("auto".equalsIgnoreCase(classNameProp)) {

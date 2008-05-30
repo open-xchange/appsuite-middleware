@@ -135,7 +135,7 @@ public class NamespaceFolder extends IMAPFolder {
 		String fullName = listInfo.name;
 		final char separator = listInfo.separator;
 		final int len = fullName.length();
-		if (separator != '\0' && len > 0 && fullName.charAt(len - 1) == separator) {
+		if ((separator != '\0') && (len > 0) && (fullName.charAt(len - 1) == separator)) {
 			fullName = fullName.substring(0, len - 1);
 		}
 		return fullName;

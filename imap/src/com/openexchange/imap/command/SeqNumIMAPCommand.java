@@ -68,7 +68,7 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SeqNumIMAPCommand.class);
-	
+
 	private static final long[] L1 = new long[0];
 
 	private final long[] uids;
@@ -90,7 +90,8 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
 		returnDefaultValue = (this.uids.length == 0);
 		length = this.uids.length;
 		args = length == 0 ? ARGS_EMPTY : (isSequential ? new String[] { new StringBuilder(64).append(this.uids[0])
-				.append(':').append(this.uids[this.uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(this.uids, true));
+				.append(':').append(this.uids[this.uids.length - 1]).toString() } : IMAPNumArgSplitter.splitUIDArg(
+				this.uids, true));
 		sia = new SmartIntArray(length);
 	}
 
@@ -133,7 +134,8 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getDefaultValueOnEmptyFolder()
+	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
+	 * getDefaultValueOnEmptyFolder()
 	 */
 	@Override
 	protected int[] getDefaultValue() {
@@ -153,7 +155,9 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(com.sun.mail.iap.Response)
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(
+	 * com.sun.mail.iap.Response)
 	 */
 	@Override
 	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
@@ -166,7 +170,9 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.sun.mail.iap.Response)
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.
+	 * sun.mail.iap.Response)
 	 */
 	@Override
 	protected void handleResponse(final Response response) throws MessagingException {
@@ -189,7 +195,8 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
 	 */
 	@Override
 	protected boolean performHandleResult() {
@@ -199,7 +206,8 @@ public final class SeqNumIMAPCommand extends AbstractIMAPCommand<int[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#performNotifyResponseHandlers()
+	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
+	 * performNotifyResponseHandlers()
 	 */
 	@Override
 	protected boolean performNotifyResponseHandlers() {

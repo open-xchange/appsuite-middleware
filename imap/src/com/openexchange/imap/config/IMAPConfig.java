@@ -282,7 +282,7 @@ public final class IMAPConfig extends MailConfig {
 					imapCaps.setNamespace(imapStore.hasCapability(IMAPCapabilities.CAP_NAMESPACE));
 					imapCaps.setIdle(imapStore.hasCapability(IMAPCapabilities.CAP_IDLE));
 					imapCaps.setChildren(imapStore.hasCapability(IMAPCapabilities.CAP_CHILDREN));
-					imapCaps.setHasSubscription(!IMAPConfig.isIgnoreSubscription());
+					imapCaps.setHasSubscription(!MailConfig.isIgnoreSubscription());
 					imapCapabilities = imapCaps;
 					capabilitiesLoaded.set(true);
 				} catch (final MessagingException e) {

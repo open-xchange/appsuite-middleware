@@ -104,18 +104,18 @@ public final class SMTPProperties extends AbstractProtocolProperties {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.config.AbstractProtocolProperties#loadProperties0()
+	 * @see
+	 * com.openexchange.mail.config.AbstractProtocolProperties#loadProperties0()
 	 */
 	@Override
 	protected void loadProperties0() throws MailConfigException {
 		final StringBuilder logBuilder = new StringBuilder(1024);
 		logBuilder.append("\nLoading global SMTP properties...\n");
 
-		final ConfigurationService configuration = getServiceRegistry().getService(
-				ConfigurationService.class);
+		final ConfigurationService configuration = getServiceRegistry().getService(ConfigurationService.class);
 		{
 			final String smtpLocalhostStr = configuration.getProperty("com.openexchange.smtp.smtpLocalhost").trim();
-			smtpLocalhost = smtpLocalhostStr == null || smtpLocalhostStr.length() == 0
+			smtpLocalhost = (smtpLocalhostStr == null) || (smtpLocalhostStr.length() == 0)
 					|| "null".equalsIgnoreCase(smtpLocalhostStr) ? null : smtpLocalhostStr;
 			logBuilder.append("\tSMTP Localhost: ").append(smtpLocalhost).append('\n');
 		}
@@ -184,7 +184,8 @@ public final class SMTPProperties extends AbstractProtocolProperties {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.mail.config.AbstractProtocolProperties#resetFields()
+	 * @see
+	 * com.openexchange.mail.config.AbstractProtocolProperties#resetFields()
 	 */
 	@Override
 	protected void resetFields() {

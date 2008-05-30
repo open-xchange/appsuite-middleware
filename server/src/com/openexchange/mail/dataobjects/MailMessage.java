@@ -349,13 +349,6 @@ public abstract class MailMessage extends MailPart {
 	private boolean b_priority;
 
 	/**
-	 * The message reference (on reply or forward)
-	 */
-	private String msgref;
-
-	private boolean b_msgref;
-
-	/**
 	 * The <code>Disposition-Notification-To</code> header
 	 */
 	private InternetAddress dispositionNotification;
@@ -1145,54 +1138,6 @@ public abstract class MailMessage extends MailPart {
 	public void setPriority(final int priority) {
 		this.priority = priority;
 		b_priority = true;
-	}
-
-	/**
-	 * Gets the message reference
-	 * 
-	 * @return the message reference
-	 */
-	public String getMsgref() {
-		if (b_msgref) {
-			return msgref;
-		}
-		final String xMsgref = removeHeader(MessageHeaders.HDR_X_OXMSGREF);
-		if (null != xMsgref) {
-			b_msgref = true;
-			msgref = xMsgref;
-		}
-		return msgref;
-	}
-
-	/**
-	 * @return <code>true</code> if message reference is set; otherwise
-	 *         <code>false</code>
-	 */
-	public boolean containsMsgref() {
-		if (b_msgref) {
-			return true;
-		}
-		return getHeader(MessageHeaders.HDR_X_OXMSGREF) != null;
-	}
-
-	/**
-	 * Removes the message reference
-	 */
-	public void removeMsgref() {
-		msgref = null;
-		b_msgref = false;
-		removeHeader(MessageHeaders.HDR_X_OXMSGREF);
-	}
-
-	/**
-	 * Sets the message reference
-	 * 
-	 * @param msgref
-	 *            the message reference to set
-	 */
-	public void setMsgref(final String msgref) {
-		this.msgref = msgref;
-		b_msgref = true;
 	}
 
 	/**

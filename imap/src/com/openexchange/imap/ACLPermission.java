@@ -166,7 +166,7 @@ public final class ACLPermission extends MailPermission {
 	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.server.OCLPermission#setAllObjectPermission(int,
-	 *      int, int)
+	 * int, int)
 	 */
 	@Override
 	public boolean setAllObjectPermission(final int pr, final int pw, final int pd) {
@@ -178,7 +178,7 @@ public final class ACLPermission extends MailPermission {
 	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.server.OCLPermission#setAllPermission(int, int,
-	 *      int, int)
+	 * int, int)
 	 */
 	@Override
 	public boolean setAllPermission(final int fp, final int opr, final int opw, final int opd) {
@@ -312,8 +312,8 @@ public final class ACLPermission extends MailPermission {
 	/**
 	 * Parses given rights into this permission object
 	 * 
-	 * @param rights -
-	 *            the rights
+	 * @param rights
+	 *            - the rights
 	 */
 	public void parseRights(final Rights rights) {
 		rights2Permission(rights, this);

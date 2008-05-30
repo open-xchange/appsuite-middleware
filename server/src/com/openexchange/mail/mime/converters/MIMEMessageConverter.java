@@ -86,6 +86,7 @@ import javax.mail.internet.MimePart;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -120,6 +121,16 @@ public final class MIMEMessageConverter {
 			.getLog(MIMEMessageConverter.class);
 
 	private static interface MailMessageFieldFiller {
+
+		public static final String[] NON_MATCHING_HEADERS = { MessageHeaders.HDR_FROM, MessageHeaders.HDR_TO,
+				MessageHeaders.HDR_CC, MessageHeaders.HDR_BCC, MessageHeaders.HDR_DISP_NOT_TO,
+				MessageHeaders.HDR_REPLY_TO, MessageHeaders.HDR_SUBJECT, MessageHeaders.HDR_DATE,
+				MessageHeaders.HDR_X_PRIORITY, MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_IN_REPLY_TO,
+				MessageHeaders.HDR_REFERENCES };
+
+		public static final org.apache.commons.logging.Log LOG1 = org.apache.commons.logging.LogFactory
+				.getLog(MailMessageFieldFiller.class);
+
 		/**
 		 * Fills a fields from source instance of {@link Message} in given
 		 * destination instance of {@link MailMessage}
@@ -289,7 +300,7 @@ public final class MIMEMessageConverter {
 			/*
 			 * Fill body
 			 */
-			filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW, null);
+			filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW);
 			mimeMessage.saveChanges();
 			return mimeMessage;
 		} catch (final MessagingException e) {
@@ -328,7 +339,7 @@ public final class MIMEMessageConverter {
 			/*
 			 * Fill body
 			 */
-			filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW, null);
+			filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW);
 			mimeMessage.saveChanges();
 			return convertMessage(mimeMessage);
 		} catch (final MessagingException e) {
@@ -378,7 +389,8 @@ public final class MIMEMessageConverter {
 			 */
 			/*
 			 * if (!contentType.containsCharsetParameter()) {
-			 * contentType.setCharsetParameter(MailConfig.getDefaultMimeCharset()); }
+			 * contentType.setCharsetParameter
+			 * (MailConfig.getDefaultMimeCharset()); }
 			 */
 			addPartHeaders(part, mailPart);
 			part.setDataHandler(new DataHandler(
@@ -458,8 +470,8 @@ public final class MIMEMessageConverter {
 	 * expected to be instances of {@link ExtendedMimeMessage}; meaning the
 	 * messages were created through a manual fetch.
 	 * <p>
-	 * Only the fields specified through parameter <code>fields</code> are
-	 * going to be set
+	 * Only the fields specified through parameter <code>fields</code> are going
+	 * to be set
 	 * 
 	 * @see #convertMessages(Message[], Folder, MailField[]) to convert common
 	 *      instances of {@link Message}
@@ -483,8 +495,8 @@ public final class MIMEMessageConverter {
 	 * expected to be instances of {@link ExtendedMimeMessage}; meaning the
 	 * messages were created through a manual fetch.
 	 * <p>
-	 * Only the fields specified through parameter <code>fields</code> are
-	 * going to be set
+	 * Only the fields specified through parameter <code>fields</code> are going
+	 * to be set
 	 * 
 	 * @see #convertMessages(Message[], Folder, MailField[])
 	 * 
@@ -524,8 +536,8 @@ public final class MIMEMessageConverter {
 	 * Converts given array of {@link Message} instances to an array of
 	 * {@link MailMessage} instances.
 	 * <p>
-	 * Only the fields specified through parameter <code>fields</code> are
-	 * going to be set
+	 * Only the fields specified through parameter <code>fields</code> are going
+	 * to be set
 	 * 
 	 * @param msgs
 	 *            The source messages
@@ -566,11 +578,6 @@ public final class MIMEMessageConverter {
 		}
 	}
 
-	private static final String[] NON_MATCHING_HEADERS = { MessageHeaders.HDR_FROM, MessageHeaders.HDR_TO,
-			MessageHeaders.HDR_CC, MessageHeaders.HDR_BCC, MessageHeaders.HDR_DISP_NOT_TO, MessageHeaders.HDR_REPLY_TO,
-			MessageHeaders.HDR_SUBJECT, MessageHeaders.HDR_DATE, MessageHeaders.HDR_X_PRIORITY,
-			MessageHeaders.HDR_MESSAGE_ID, MessageHeaders.HDR_IN_REPLY_TO, MessageHeaders.HDR_REFERENCES };
-
 	/**
 	 * Creates the field fillers and expects the messages to be instances of
 	 * {@link ExtendedMimeMessage}
@@ -597,8 +604,8 @@ public final class MIMEMessageConverter {
 							mailMessage.addFrom((InternetAddress[]) extMimeMessage.getFrom());
 						} catch (final AddressException e) {
 							final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_FROM, null);
-							if (LOG.isDebugEnabled()) {
-								LOG.debug("Unparseable internet address" + addrStr);
+							if (LOG1.isDebugEnabled()) {
+								LOG1.debug("Unparseable internet address" + addrStr);
 							}
 							mailMessage.addFrom(new PlainTextAddress(addrStr));
 						}
@@ -610,8 +617,8 @@ public final class MIMEMessageConverter {
 									.getRecipients(Message.RecipientType.TO));
 						} catch (final AddressException e) {
 							final String[] addrs = extMimeMessage.getHeader(MessageHeaders.HDR_TO);
-							if (LOG.isDebugEnabled()) {
-								LOG.debug("Unparseable internet addresses" + addrs);
+							if (LOG1.isDebugEnabled()) {
+								LOG1.debug("Unparseable internet addresses" + addrs);
 							}
 							mailMessage.addTo(PlainTextAddress.getAddresses(addrs));
 						}
@@ -620,8 +627,8 @@ public final class MIMEMessageConverter {
 									.getRecipients(Message.RecipientType.CC));
 						} catch (final AddressException e) {
 							final String[] addrs = extMimeMessage.getHeader(MessageHeaders.HDR_CC);
-							if (LOG.isDebugEnabled()) {
-								LOG.debug("Unparseable internet addresses" + addrs);
+							if (LOG1.isDebugEnabled()) {
+								LOG1.debug("Unparseable internet addresses" + addrs);
 							}
 							mailMessage.addCc(PlainTextAddress.getAddresses(addrs));
 						}
@@ -630,8 +637,8 @@ public final class MIMEMessageConverter {
 									.getRecipients(Message.RecipientType.BCC));
 						} catch (final AddressException e) {
 							final String[] addrs = extMimeMessage.getHeader(MessageHeaders.HDR_BCC);
-							if (LOG.isDebugEnabled()) {
-								LOG.debug("Unparseable internet addresses" + addrs);
+							if (LOG1.isDebugEnabled()) {
+								LOG1.debug("Unparseable internet addresses" + addrs);
 							}
 							mailMessage.addBcc(PlainTextAddress.getAddresses(addrs));
 						}
@@ -704,9 +711,9 @@ public final class MIMEMessageConverter {
 						{
 							final String[] inReplyTo = extMimeMessage.getHeader(MessageHeaders.HDR_IN_REPLY_TO);
 							if (null != inReplyTo) {
-								sb.append(inReplyTo[0].toString());
+								sb.append(inReplyTo[0]);
 								for (int j = 1; j < inReplyTo.length; j++) {
-									sb.append(", ").append(inReplyTo[j].toString());
+									sb.append(", ").append(inReplyTo[j]);
 								}
 								mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
 								sb.setLength(0);
@@ -718,9 +725,9 @@ public final class MIMEMessageConverter {
 						{
 							final String[] references = extMimeMessage.getHeader(MessageHeaders.HDR_REFERENCES);
 							if (null != references) {
-								sb.append(references[0].toString());
+								sb.append(references[0]);
 								for (int j = 1; j < references.length; j++) {
-									sb.append(", ").append(references[j].toString());
+									sb.append(", ").append(references[j]);
 								}
 								mailMessage.addHeader(MessageHeaders.HDR_REFERENCES, sb.toString());
 								sb.setLength(0);
@@ -761,7 +768,7 @@ public final class MIMEMessageConverter {
 							/*
 							 * Cannot occur
 							 */
-							LOG.error(e.getLocalizedMessage(), e);
+							LOG1.error(e.getLocalizedMessage(), e);
 						}
 						mailMessage.setHasAttachment(((ExtendedMimeMessage) msg).hasAttachment());
 					}
@@ -775,8 +782,8 @@ public final class MIMEMessageConverter {
 							mailMessage.addFrom((InternetAddress[]) extMimeMessage.getFrom());
 						} catch (final AddressException e) {
 							final String addrStr = extMimeMessage.getHeader(MessageHeaders.HDR_FROM, null);
-							if (LOG.isDebugEnabled()) {
-								LOG.debug(new StringBuilder(128).append(
+							if (LOG1.isDebugEnabled()) {
+								LOG1.debug(new StringBuilder(128).append(
 										"Internet address could not be properly parsed, ").append(
 										"using plain address' string representation instead: ").append(addrStr)
 										.toString(), e);
@@ -793,8 +800,8 @@ public final class MIMEMessageConverter {
 						try {
 							mailMessage.addTo((InternetAddress[]) extMimeMessage.getRecipients(RecipientType.TO));
 						} catch (final AddressException e) {
-							if (LOG.isDebugEnabled()) {
-								LOG.debug(new StringBuilder(128).append(
+							if (LOG1.isDebugEnabled()) {
+								LOG1.debug(new StringBuilder(128).append(
 										"Internet addresses could not be properly parsed, ").append(
 										"using plain addresses' string representation instead.").toString(), e);
 							}
@@ -811,8 +818,8 @@ public final class MIMEMessageConverter {
 						try {
 							mailMessage.addCc((InternetAddress[]) extMimeMessage.getRecipients(RecipientType.CC));
 						} catch (final AddressException e) {
-							if (LOG.isDebugEnabled()) {
-								LOG.debug(new StringBuilder(128).append(
+							if (LOG1.isDebugEnabled()) {
+								LOG1.debug(new StringBuilder(128).append(
 										"Internet addresses could not be properly parsed, ").append(
 										"using plain addresses' string representation instead.").toString(), e);
 							}
@@ -829,8 +836,8 @@ public final class MIMEMessageConverter {
 						try {
 							mailMessage.addBcc((InternetAddress[]) extMimeMessage.getRecipients(RecipientType.BCC));
 						} catch (final AddressException e) {
-							if (LOG.isDebugEnabled()) {
-								LOG.debug(new StringBuilder(128).append(
+							if (LOG1.isDebugEnabled()) {
+								LOG1.debug(new StringBuilder(128).append(
 										"Internet addresses could not be properly parsed, ").append(
 										"using plain addresses' string representation instead.").toString(), e);
 							}
@@ -1054,9 +1061,9 @@ public final class MIMEMessageConverter {
 						{
 							final String[] inReplyTo = msg.getHeader(MessageHeaders.HDR_IN_REPLY_TO);
 							if (null != inReplyTo) {
-								sb.append(inReplyTo[0].toString());
+								sb.append(inReplyTo[0]);
 								for (int j = 1; j < inReplyTo.length; j++) {
-									sb.append(", ").append(inReplyTo[j].toString());
+									sb.append(", ").append(inReplyTo[j]);
 								}
 								mailMessage.addHeader(MessageHeaders.HDR_REPLY_TO, sb.toString());
 								sb.setLength(0);
@@ -1068,9 +1075,9 @@ public final class MIMEMessageConverter {
 						{
 							final String[] references = msg.getHeader(MessageHeaders.HDR_REFERENCES);
 							if (null != references) {
-								sb.append(references[0].toString());
+								sb.append(references[0]);
 								for (int j = 1; j < references.length; j++) {
-									sb.append(", ").append(references[j].toString());
+									sb.append(", ").append(references[j]);
 								}
 								mailMessage.addHeader(MessageHeaders.HDR_REFERENCES, sb.toString());
 								sb.setLength(0);
@@ -1113,14 +1120,14 @@ public final class MIMEMessageConverter {
 							/*
 							 * Cannot occur
 							 */
-							LOG.error("Invalid content type: " + msg.getContentType(), e);
+							LOG1.error("Invalid content type: " + msg.getContentType(), e);
 							try {
 								ct = new ContentType(MIMETypes.MIME_DEFAULT);
 							} catch (final MailException e1) {
 								/*
 								 * Cannot occur
 								 */
-								LOG.error(e1.getLocalizedMessage(), e1);
+								LOG1.error(e1.getLocalizedMessage(), e1);
 								return;
 							}
 						}
@@ -1146,8 +1153,8 @@ public final class MIMEMessageConverter {
 							mailMessage.addFrom((InternetAddress[]) msg.getFrom());
 						} catch (final AddressException e) {
 							final String[] fromHdr = msg.getHeader(MessageHeaders.HDR_FROM);
-							if (LOG.isDebugEnabled()) {
-								LOG.debug("Unparseable addresse(s): " + Arrays.toString(fromHdr), e);
+							if (LOG1.isDebugEnabled()) {
+								LOG1.debug("Unparseable addresse(s): " + Arrays.toString(fromHdr), e);
 							}
 							mailMessage.addFrom(new PlainTextAddress(fromHdr[0]));
 						}
@@ -1161,8 +1168,8 @@ public final class MIMEMessageConverter {
 							mailMessage.addTo((InternetAddress[]) msg.getRecipients(RecipientType.TO));
 						} catch (final AddressException e) {
 							final String[] hdr = msg.getHeader(MessageHeaders.HDR_TO);
-							if (LOG.isDebugEnabled()) {
-								LOG.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
+							if (LOG1.isDebugEnabled()) {
+								LOG1.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
 							}
 							mailMessage.addTo(new PlainTextAddress(hdr[0]));
 						}
@@ -1176,8 +1183,8 @@ public final class MIMEMessageConverter {
 							mailMessage.addCc((InternetAddress[]) msg.getRecipients(RecipientType.CC));
 						} catch (final AddressException e) {
 							final String[] hdr = msg.getHeader(MessageHeaders.HDR_CC);
-							if (LOG.isDebugEnabled()) {
-								LOG.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
+							if (LOG1.isDebugEnabled()) {
+								LOG1.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
 							}
 							mailMessage.addCc(new PlainTextAddress(hdr[0]));
 						}
@@ -1191,8 +1198,8 @@ public final class MIMEMessageConverter {
 							mailMessage.addBcc((InternetAddress[]) msg.getRecipients(RecipientType.BCC));
 						} catch (final AddressException e) {
 							final String[] hdr = msg.getHeader(MessageHeaders.HDR_BCC);
-							if (LOG.isDebugEnabled()) {
-								LOG.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
+							if (LOG1.isDebugEnabled()) {
+								LOG1.debug("Unparseable addresse(s): " + Arrays.toString(hdr), e);
 							}
 							mailMessage.addBcc(new PlainTextAddress(hdr[0]));
 						}
@@ -1412,6 +1419,16 @@ public final class MIMEMessageConverter {
 					mail.setDispositionNotification(null);
 				}
 			}
+			{
+				final String msgrefStr = msg.getHeader(MessageHeaders.HDR_X_OXMSGREF, null);
+				if (msgrefStr != null) {
+					mail.setMsgref(new MailPath(msgrefStr));
+					msg.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
+					mail.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
+				} else {
+					mail.setMsgref(null);
+				}
+			}
 			String filename = decodeMultiEncodedHeader(msg.getFileName());
 			if (filename == null) {
 				filename = mail.getContentDisposition().getFilenameParameter();
@@ -1549,6 +1566,16 @@ public final class MIMEMessageConverter {
 					mailPart.setContentDisposition(tmp[0]);
 				}
 			}
+			{
+				final String[] msgrefStr = part.getHeader(MessageHeaders.HDR_X_OXMSGREF);
+				if (msgrefStr != null && msgrefStr.length > 0) {
+					mailPart.setMsgref(new MailPath(msgrefStr[0]));
+					part.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
+					mailPart.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
+				} else {
+					mailPart.setMsgref(null);
+				}
+			}
 			String filename = decodeMultiEncodedHeader(part.getFileName());
 			if (filename == null) {
 				filename = mailPart.getContentDisposition().getFilenameParameter();
@@ -1665,7 +1692,17 @@ public final class MIMEMessageConverter {
 
 	private static final String[] EMPTY_STRS = new String[0];
 
-	private static void parseFlags(final Flags flags, final MailMessage mailMessage) throws MailException {
+	/**
+	 * Parses specified {@link Flags flags} to given {@link MailMessage mail}
+	 * 
+	 * @param flags
+	 *            The flags to parse
+	 * @param mailMessage
+	 *            The mail to apply the flags to
+	 * @throws MailException
+	 *             If a mail error occurs
+	 */
+	static void parseFlags(final Flags flags, final MailMessage mailMessage) throws MailException {
 		int retval = 0;
 		if (flags.contains(Flags.Flag.ANSWERED)) {
 			retval |= MailMessage.FLAG_ANSWERED;

@@ -57,9 +57,9 @@ import com.openexchange.mail.cache.MailCacheConfiguration;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailPropertiesInit;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.text.HTMLProcessingInit;
 import com.openexchange.mail.text.parser.handler.HTMLFilterHandler;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.Initialization;
 
 /**
@@ -107,7 +107,7 @@ public final class MailInitialization implements Initialization, CacheAvailabili
 			reg.registerListener(this);
 			reg.registerListener(UserSettingMailStorage.getInstance());
 		}
-		
+
 		/*
 		 * TODO: Remove Simulate bundle availability
 		 */

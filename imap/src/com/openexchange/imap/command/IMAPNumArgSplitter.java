@@ -86,8 +86,8 @@ public final class IMAPNumArgSplitter {
 	 * array of command arguments which can then be used with an instance of
 	 * <code>{@link AbstractIMAPCommand}</code>
 	 * 
-	 * @param arr -
-	 *            <code>int</code> array of message sequence numbers
+	 * @param arr
+	 *            - <code>int</code> array of message sequence numbers
 	 * @return an appropriate array of command arguments
 	 */
 	public static String[] split(final int[] arr) {
@@ -104,8 +104,8 @@ public final class IMAPNumArgSplitter {
 	 * array of command arguments which can then be used with an instance of
 	 * <code>{@link AbstractIMAPCommand}</code>
 	 * 
-	 * @param arr -
-	 *            <code>long</code> array of message UIDs
+	 * @param arr
+	 *            - <code>long</code> array of message UIDs
 	 * @return an appropriate array of command arguments
 	 */
 	public static String[] split(final long[] arr) {
@@ -122,8 +122,8 @@ public final class IMAPNumArgSplitter {
 	 * array of command arguments which can then be used with an instance of
 	 * <code>{@link AbstractIMAPCommand}</code>
 	 * 
-	 * @param arr -
-	 *            <code>Message</code> array
+	 * @param arr
+	 *            - <code>Message</code> array
 	 * @return an appropriate array of command arguments
 	 */
 	public static String[] split(final Message[] arr) {
@@ -139,10 +139,10 @@ public final class IMAPNumArgSplitter {
 	 * command's number argument and then split into max. IMAP command length
 	 * pieces
 	 * 
-	 * @param arr -
-	 *            the array of sequence numbers
-	 * @param keepOrder -
-	 *            whether the values' ordering in array parameter
+	 * @param arr
+	 *            - the array of sequence numbers
+	 * @param keepOrder
+	 *            - whether the values' ordering in array parameter
 	 *            <code>arr</code> shall be kept or not; if ordering does not
 	 *            care a more compact number argument for IMAP command is going
 	 *            to be created by grouping sequential numbers e.g.
@@ -158,10 +158,10 @@ public final class IMAPNumArgSplitter {
 	 * command's number argument and then split into max. IMAP command length
 	 * pieces if desired.
 	 * 
-	 * @param arr -
-	 *            the array of sequence numbers
-	 * @param keepOrder -
-	 *            whether the values' ordering in array parameter
+	 * @param arr
+	 *            - the array of sequence numbers
+	 * @param keepOrder
+	 *            - whether the values' ordering in array parameter
 	 *            <code>arr</code> shall be kept or not; if ordering does not
 	 *            care a more compact number argument for IMAP command is going
 	 *            to be created by grouping sequential numbers e.g.
@@ -187,10 +187,10 @@ public final class IMAPNumArgSplitter {
 	 * command's number argument and then split into max. IMAP command length
 	 * pieces
 	 * 
-	 * @param arr -
-	 *            the array of sequence numbers
-	 * @param keepOrder -
-	 *            whether the values' ordering in array parameter
+	 * @param arr
+	 *            - the array of sequence numbers
+	 * @param keepOrder
+	 *            - whether the values' ordering in array parameter
 	 *            <code>arr</code> shall be kept or not; if ordering does not
 	 *            care a more compact number argument for IMAP command is going
 	 *            to be created by grouping sequential numbers e.g.
@@ -213,10 +213,10 @@ public final class IMAPNumArgSplitter {
 	 * command's number argument and then split into max. IMAP command length
 	 * pieces
 	 * 
-	 * @param arr -
-	 *            the array of sequence numbers
-	 * @param keepOrder -
-	 *            whether the values' ordering in array parameter
+	 * @param arr
+	 *            - the array of sequence numbers
+	 * @param keepOrder
+	 *            - whether the values' ordering in array parameter
 	 *            <code>arr</code> shall be kept or not; if ordering does not
 	 *            care a more compact number argument for IMAP command is going
 	 *            to be created by grouping sequential numbers e.g.
@@ -242,15 +242,14 @@ public final class IMAPNumArgSplitter {
 	 * beginning from 5 ending with 24. Non-contiguous numbers must be delimited
 	 * using a comma.
 	 * <p>
-	 * <b>NOTE:</b> This routine does not take care if the resulting argument
-	 * in addition to rest of IMAP command exceeds the max. length of 16384
-	 * bytes
+	 * <b>NOTE:</b> This routine does not take care if the resulting argument in
+	 * addition to rest of IMAP command exceeds the max. length of 16384 bytes
 	 * <p>
 	 * A resulting string can look like this:
 	 * <code>10031:10523,10525:11020,11022:11027,11030:11047,11050:11051,11053,11055:11558</code>
 	 * 
-	 * @param l -
-	 *            the list of numbers; either sequence numbers or UIDs
+	 * @param l
+	 *            - the list of numbers; either sequence numbers or UIDs
 	 * @return the number argument
 	 */
 	public static String getNumArg(final List<? extends Number> l) {
@@ -311,7 +310,7 @@ public final class IMAPNumArgSplitter {
 			int endPos = offset + maxLen;
 			if (endPos < len) {
 				char c = numArg.charAt(endPos);
-				while (c != ',' && endPos > -1) {
+				while ((c != ',') && (endPos > -1)) {
 					c = numArg.charAt(--endPos);
 				}
 			} else {

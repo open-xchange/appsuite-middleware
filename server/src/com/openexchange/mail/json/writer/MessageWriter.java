@@ -125,7 +125,7 @@ public final class MessageWriter {
 		if (mail.getFolder() != null && mail.getMailId() != 0) {
 			mailPath = new MailPath(mail.getFolder(), mail.getMailId());
 		} else if (mail.getMsgref() != null) {
-			mailPath = new MailPath(mail.getMsgref());
+			mailPath = mail.getMsgref();
 		} else {
 			mailPath = MailPath.NULL;
 		}

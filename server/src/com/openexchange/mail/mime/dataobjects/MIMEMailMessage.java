@@ -58,7 +58,6 @@ import javax.mail.internet.MimeMessage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 
 /**
  * {@link MIMEMailMessage} - A subclass of {@link MailMessage} to support MIME
@@ -94,7 +93,8 @@ public final class MIMEMailMessage extends MailMessage {
 	 */
 	public MIMEMailMessage(final MimeMessage msg) throws MailException {
 		super();
-		this.mailPart = MIMEMessageConverter.convertPart(msg);
+		// TODO: this.mailPart = MIMEMessageConverter.convertPart(msg);
+		this.mailPart = new MIMEMailPart(msg);
 	}
 
 	/**
@@ -110,7 +110,8 @@ public final class MIMEMailMessage extends MailMessage {
 	 *             If parsing MIME message fails
 	 */
 	public void setContent(final MimeMessage msg) throws MailException {
-		this.mailPart = msg == null ? new MIMEMailPart(null) : MIMEMessageConverter.convertPart(msg);
+		// TODO: this.mailPart = msg == null ? new MIMEMailPart(null) : MIMEMessageConverter.convertPart(msg);
+		this.mailPart = msg == null ? new MIMEMailPart(null) : new MIMEMailPart(msg);
 	}
 
 	/*

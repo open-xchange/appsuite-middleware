@@ -51,9 +51,9 @@ package com.openexchange.mail.dataobjects.compose;
 
 import static com.openexchange.mail.utils.MessageUtility.readStream;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -64,9 +64,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import javax.activation.DataHandler;
@@ -81,10 +79,9 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.mail.parser.MailMessageParser;
-import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.session.Session;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -111,6 +108,8 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 
 	private static final int MB = 1048576;
 
+	private final boolean isMail;
+
 	private transient DataSource dataSource;
 
 	private transient Object cachedContent;
@@ -122,16 +121,22 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 	private String fileId;
 
 	/**
-	 * Initializes a new {@link ReferencedMailPart}
+	 * Initializes a new {@link ReferencedMailPart}.
+	 * <p>
+	 * The referenced part's content is loaded dependent on its size. If size
+	 * exceeds defined {@link TransportConfig#getReferencedPartLimit() limit}
+	 * its content is temporary written to disc; otherwise its content is kept
+	 * inside an array of <code>byte</code>.
 	 * 
 	 * @param referencedPart
 	 *            The referenced part
 	 * @param session
-	 *            The session
+	 *            The session used to store a possible temporary disc file
 	 * @throws MailException
 	 *             If a mail error occurs
 	 */
 	public ReferencedMailPart(final MailPart referencedPart, final Session session) throws MailException {
+		isMail = MailMessage.class.isInstance(referencedPart);
 		try {
 			handleReferencedPart(referencedPart, session);
 		} catch (final IOException e) {
@@ -141,113 +146,42 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 	}
 
 	/**
-	 * Constructor
+	 * Handles referenced part dependent on its size. If size exceeds defined
+	 * {@link TransportConfig#getReferencedPartLimit() limit} its content is
+	 * temporary written to disc; otherwise its content is kept inside an array
+	 * of <code>byte</code>.
 	 * 
-	 * @param sequenceId
-	 *            The sequence ID
-	 */
-	public ReferencedMailPart(final String sequenceId) {
-		setSequenceId(sequenceId);
-	}
-
-	/**
-	 * Loads the referenced part<br>
-	 * This is a convenience method that invokes
-	 * {@link #loadReferencedPart(MailMessageParser, MailMessage, Session)} with
-	 * the first parameter set to <code>null</code>
-	 * 
-	 * @param referencedMail
-	 *            The original mail containing the referenced part
-	 * @throws MailException
-	 *             If referenced part cannot be loaded
-	 */
-	public String loadReferencedPart(final MailMessage referencedMail, final Session session) throws MailException {
-		return loadReferencedPart(null, referencedMail, session);
-	}
-
-	/**
-	 * Loads the referenced part
-	 * 
-	 * @param parserArg
-	 *            The parser used to filter part
-	 * @param referencedMail
-	 *            The original mail containing the referenced part
-	 * @throws MailException
-	 *             If referenced part cannot be loaded
-	 */
-	public String loadReferencedPart(final MailMessageParser parserArg, final MailMessage referencedMail,
-			final Session session) throws MailException {
-		if (null != data || null != file) {
-			if (LOG.isWarnEnabled()) {
-				LOG.warn("Content already present. Loading aborted.");
-			}
-			return null;
-		}
-		try {
-			MailMessageParser parser = parserArg;
-			if (parser == null) {
-				parser = new MailMessageParser();
-			} else {
-				parser.reset();
-			}
-			final MailPartHandler handler = new MailPartHandler(getSequenceId());
-			parser.parseMailMessage(referencedMail, handler);
-			if (handler.getMailPart() == null) {
-				throw new MailException(MailException.Code.PART_NOT_FOUND, getSequenceId(), Long.valueOf(referencedMail
-						.getMailId()), referencedMail.getFolder());
-			}
-			setHeaders(handler.getMailPart());
-			return handleReferencedPart(handler.getMailPart(), session);
-		} catch (final MailException e) {
-			throw new MailException(e);
-		} catch (final IOException e) {
-			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
-		}
-	}
-
-	/**
-	 * Convenience method that loads all referenced mail parts contained in
-	 * specified composed mail.
-	 * 
-	 * @param mail
-	 *            The composed mail
+	 * @param referencedPart
+	 *            The referenced mail part
 	 * @param session
-	 *            The session
-	 * @return A list of {@link String} containing the IDs of loaded referenced
-	 *         parts
+	 *            The session to manage a possible temporary disc file
+	 * @return A file ID if content is written to disc; otherwise
+	 *         <code>null</code> to indicate content is held inside.
 	 * @throws MailException
-	 *             If referenced parts cannot be loaded
+	 *             If a mail error occurs
+	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
-	public static final List<String> loadReferencedParts(final ComposedMailMessage mail, final Session session)
-			throws MailException {
-		/*
-		 * Load referenced parts
-		 */
-		final MailMessageParser parser = new MailMessageParser();
-		final int count = mail.getEnclosedCount();
-		final List<String> tempIds = new ArrayList<String>(4);
-		for (int i = 0; i < count; i++) {
-			final ComposedMailPart composedMailPart = (ComposedMailPart) mail.getEnclosedMailPart(i);
-			if (ComposedMailPart.ComposedPartType.REFERENCE.equals(composedMailPart.getType())) {
-				final String id = ((ReferencedMailPart) composedMailPart).loadReferencedPart(parser, mail
-						.getReferencedMail(), session);
-				parser.reset();
-				if (id != null) {
-					tempIds.add(id);
-				}
-			}
-		}
-		return tempIds;
-	}
-
 	private String handleReferencedPart(final MailPart referencedPart, final Session session) throws MailException,
 			IOException {
 		final long size = referencedPart.getSize();
 		if (size > 0 && size <= TransportConfig.getReferencedPartLimit()) {
-			copy2ByteArr(referencedPart.getInputStream());
+			if (isMail) {
+				final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
+				referencedPart.writeTo(out);
+				this.data = out.toByteArray();
+			} else {
+				copy2ByteArr(referencedPart.getInputStream());
+			}
 			return null;
 		}
-		copy2File(referencedPart, session);
+		if (isMail) {
+			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
+			referencedPart.writeTo(out);
+			copy2File(new UnsynchronizedByteArrayInputStream(out.toByteArray()), session);
+		} else {
+			copy2File(referencedPart.getInputStream(), session);
+		}
 		if (LOG.isInfoEnabled()) {
 			LOG.info(new StringBuilder("Referenced mail part exeeds ").append(
 					Float.valueOf(TransportConfig.getReferencedPartLimit() / MB).floatValue()).append(
@@ -256,20 +190,13 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 		return fileId;
 	}
 
-	private static final File UPLOAD_DIR = new File(ServerConfig.getProperty(ServerConfig.Property.UploadDirectory));
-
 	private static final String FILE_PREFIX = "openexchange";
 
-	private int copy2File(final MailPart referencedPart, final Session session) throws MailException, IOException {
+	private int copy2File(final InputStream in, final Session session) throws IOException {
 		int totalBytes = 0;
 		{
-			final BufferedInputStream in;
-			{
-				final InputStream inputStream = referencedPart.getInputStream();
-				in = inputStream instanceof BufferedInputStream ? (BufferedInputStream) inputStream
-						: new BufferedInputStream(inputStream);
-			}
-			final File tmpFile = File.createTempFile(FILE_PREFIX, null, UPLOAD_DIR);
+			final File tmpFile = File.createTempFile(FILE_PREFIX, null, new File(ServerConfig
+					.getProperty(ServerConfig.Property.UploadDirectory)));
 			tmpFile.deleteOnExit();
 			OutputStream out = null;
 			try {
@@ -298,10 +225,8 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 		return totalBytes;
 	}
 
-	private int copy2ByteArr(final InputStream inputStream) throws IOException {
-		final UnsynchronizedByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
-		final BufferedInputStream in = inputStream instanceof BufferedInputStream ? (BufferedInputStream) inputStream
-				: new BufferedInputStream(inputStream);
+	private int copy2ByteArr(final InputStream in) throws IOException {
+		final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
 		final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
 		int len;
 		int totalBytes = 0;
@@ -452,10 +377,27 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 
 	@Override
 	public void loadContent() {
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("ReferencedMailPart.loadContent()");
+		}
 	}
 
 	@Override
 	public void prepareForCaching() {
+		if (LOG.isTraceEnabled()) {
+			LOG.trace("ReferencedMailPart.prepareForCaching()");
+		}
+	}
+
+	/**
+	 * Gets this referenced part's file ID if its content has been written to
+	 * disc.
+	 * 
+	 * @return The file ID or <code>null</code> if content is kept inside rather
+	 *         than on disc.
+	 */
+	public String getFileID() {
+		return this.fileId;
 	}
 
 	private static final String ALG_MD5 = "MD5";

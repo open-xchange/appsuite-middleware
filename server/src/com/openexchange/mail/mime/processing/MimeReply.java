@@ -83,6 +83,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.CompositeMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -141,8 +142,19 @@ public final class MimeReply {
 	 */
 	public static MailMessage getReplyMail(final MailMessage originalMail, final boolean replyAll, final Session session)
 			throws MailException {
-		return getReplyMail((MimeMessage) MIMEMessageConverter.convertMailMessage(originalMail), replyAll, session,
-				MIMEDefaultSession.getDefaultSession());
+		final MimeMessage mimeMessage = (MimeMessage) MIMEMessageConverter.convertMailMessage(originalMail);
+		if (originalMail.getMailId() != -1 && originalMail.getFolder() != null) {
+			try {
+				/*
+				 * Temporary store message reference in MIME message's headers
+				 */
+				mimeMessage.setHeader(MessageHeaders.HDR_X_OXMSGREF, MailPath.getMailPath(originalMail.getFolder(),
+						originalMail.getMailId()));
+			} catch (final MessagingException e) {
+				throw MIMEMailException.handleMessagingException(e);
+			}
+		}
+		return getReplyMail(mimeMessage, replyAll, session, MIMEDefaultSession.getDefaultSession());
 	}
 
 	/**
@@ -163,7 +175,7 @@ public final class MimeReply {
 	 * @throws MailException
 	 *             If reply mail cannot be composed
 	 */
-	public static MailMessage getReplyMail(final MimeMessage originalMsg, final boolean replyAll,
+	private static MailMessage getReplyMail(final MimeMessage originalMsg, final boolean replyAll,
 			final Session session, final javax.mail.Session mailSession) throws MailException {
 		try {
 			final Context ctx = ContextStorage.getStorageContext(session.getContextId());
@@ -324,6 +336,16 @@ public final class MimeReply {
 				replyMsg.addRecipients(RecipientType.TO, recipientAddrs);
 			}
 			/*
+			 * Check for message reference
+			 */
+			final String msgRefStr = originalMsg.getHeader(MessageHeaders.HDR_X_OXMSGREF, null);
+			if (null != msgRefStr) {
+				/*
+				 * Remove temporary header
+				 */
+				originalMsg.removeHeader(MessageHeaders.HDR_X_OXMSGREF);
+			}
+			/*
 			 * Set mail text of reply message
 			 */
 			if (usm.isIgnoreOriginalMailTextOnReply()) {
@@ -335,6 +357,9 @@ public final class MimeReply {
 				replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst(
 						"#CS#", MailConfig.getDefaultMimeCharset()));
 				final MailMessage replyMail = MIMEMessageConverter.convertMessage(replyMsg);
+				if (null != msgRefStr) {
+					replyMail.setMsgref(new MailPath(msgRefStr));
+				}
 				return replyMail;
 			}
 			/*
@@ -391,6 +416,9 @@ public final class MimeReply {
 				replyMsg.saveChanges();
 				replyMail = MIMEMessageConverter.convertMessage(replyMsg);
 			}
+			if (null != msgRefStr) {
+				replyMail.setMsgref(new MailPath(msgRefStr));
+			}
 			return replyMail;
 		} catch (final MessagingException e) {
 			throw MIMEMailException.handleMessagingException(e);
@@ -418,8 +446,8 @@ public final class MimeReply {
 	/**
 	 * Filters given address array against given filter set. All addresses
 	 * currently contained in filter set are removed from specified
-	 * <code>addrs</code> and all adresses not contained in filter set are
-	 * added to filter set for future invocations
+	 * <code>addrs</code> and all adresses not contained in filter set are added
+	 * to filter set for future invocations
 	 * 
 	 * @param filter
 	 *            The current address filter

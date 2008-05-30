@@ -85,14 +85,16 @@ import com.openexchange.imap.threadsort.TreeNode;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
@@ -173,12 +175,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				LOG.debug(new StringBuilder(128).append("IMAP fetch for ").append(mailIds.length).append(
 						" messages took ").append((System.currentTimeMillis() - start)).append("msec").toString());
 			}
-			if (msgs == null || msgs.length == 0) {
+			if ((msgs == null) || (msgs.length == 0)) {
 				return EMPTY_RETVAL;
 			}
 			return MIMEMessageConverter.convertMessages(msgs, fields, body);
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConfig);
+			throw MIMEMailException.handleMessagingException(e, imapConfig);
 		}
 	}
 
@@ -224,7 +226,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			}
 			return mail;
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConfig);
+			throw MIMEMailException.handleMessagingException(e, imapConfig);
 		}
 	}
 
@@ -243,7 +245,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				 * Preselect message list according to given search pattern
 				 */
 				filter = IMAPSearch.searchMessages(imapFolder, searchTerm, imapConfig);
-				if (filter == null || filter.length == 0) {
+				if ((filter == null) || (filter.length == 0)) {
 					return EMPTY_RETVAL;
 				}
 			} else {
@@ -255,7 +257,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			if (indexRange != null) {
 				final int fromIndex = indexRange.start;
 				int toIndex = indexRange.end;
-				if (msgs == null || msgs.length == 0) {
+				if ((msgs == null) || (msgs.length == 0)) {
 					return EMPTY_RETVAL;
 				}
 				if ((fromIndex) > msgs.length) {
@@ -278,7 +280,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			return MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(new MailField[usedFields.size()]),
 					usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL));
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConfig);
+			throw MIMEMailException.handleMessagingException(e, imapConfig);
 		}
 	}
 
@@ -300,7 +302,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				 * Preselect message list according to given search pattern
 				 */
 				filter = IMAPSearch.searchMessages(imapFolder, searchTerm, imapConfig);
-				if (filter == null || filter.length == 0) {
+				if ((filter == null) || (filter.length == 0)) {
 					return EMPTY_RETVAL;
 				}
 			} else {
@@ -357,7 +359,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			if (indexRange != null) {
 				final int fromIndex = indexRange.start;
 				int toIndex = indexRange.end;
-				if (msgs == null || msgs.length == 0) {
+				if ((msgs == null) || (msgs.length == 0)) {
 					return EMPTY_RETVAL;
 				}
 				if ((fromIndex) > msgs.length) {
@@ -380,7 +382,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			return MIMEMessageConverter.convertMessages(msgs, usedFields.toArray(new MailField[usedFields.size()]),
 					body);
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConfig);
+			throw MIMEMailException.handleMessagingException(e, imapConfig);
 		}
 	}
 
@@ -396,7 +398,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			final Message[] msgs = IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, order,
 					UserStorage.getStorageUser(session.getUserId(), ctx).getLocale());
 			mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-			if (msgs == null || msgs.length == 0) {
+			if ((msgs == null) || (msgs.length == 0)) {
 				return EMPTY_RETVAL;
 			} else if (limit > 0) {
 				final int newLength = Math.min(limit, msgs.length);
@@ -406,7 +408,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			}
 			return MIMEMessageConverter.convertMessages(msgs, fields);
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConfig);
+			throw MIMEMailException.handleMessagingException(e, imapConfig);
 		}
 	}
 
@@ -465,7 +467,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			imapFolder.close(false);
 			resetIMAPFolder();
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConfig);
+			throw MIMEMailException.handleMessagingException(e, imapConfig);
 		}
 	}
 
@@ -545,9 +547,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 	private long[] copyOrMoveMessages(final String sourceFullname, final String destFullname, final long[] msgUIDs,
 			final boolean move, final boolean fast) throws MailException {
 		try {
-			if (sourceFullname == null || sourceFullname.length() == 0) {
+			if ((sourceFullname == null) || (sourceFullname.length() == 0)) {
 				throw new IMAPException(IMAPException.Code.MISSING_SOURCE_TARGET_FOLDER_ON_MOVE, "source");
-			} else if (destFullname == null || destFullname.length() == 0) {
+			} else if ((destFullname == null) || (destFullname.length() == 0)) {
 				throw new IMAPException(IMAPException.Code.MISSING_SOURCE_TARGET_FOLDER_ON_MOVE, "target");
 			} else if (sourceFullname.equals(destFullname) && move) {
 				throw new IMAPException(IMAPException.Code.NO_EQUAL_MOVE, sourceFullname);
@@ -665,7 +667,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			}
 			return result;
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConfig);
+			throw MIMEMailException.handleMessagingException(e, imapConfig);
 		}
 	}
 
@@ -678,7 +680,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			LOG.debug(sb.append(tmp.length).append(" messages copied in ").append((System.currentTimeMillis() - start))
 					.append("msec").toString());
 		}
-		if (!fast && (uids == null || noUIDsAssigned(uids, tmp.length))) {
+		if (!fast && ((uids == null) || noUIDsAssigned(uids, tmp.length))) {
 			/*
 			 * Invalid UIDs
 			 */
@@ -745,7 +747,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			 * ... and append them to folder
 			 */
 			final AppendUID[] appendUIDs = imapFolder.appendUIDMessages(msgs);
-			if (appendUIDs != null && appendUIDs.length > 0 && appendUIDs[0] != null) {
+			if ((appendUIDs != null) && (appendUIDs.length > 0) && (appendUIDs[0] != null)) {
 				/*
 				 * Assume a proper APPENDUID response code
 				 */
@@ -768,7 +770,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			}
 			return retval;
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConfig);
+			throw MIMEMailException.handleMessagingException(e, imapConfig);
 		}
 	}
 
@@ -872,7 +874,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				resetIMAPFolder();
 			}
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConfig);
+			throw MIMEMailException.handleMessagingException(e, imapConfig);
 		}
 	}
 
@@ -880,7 +882,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 	public void updateMessageColorLabel(final String fullname, final long[] msgUIDs, final int colorLabel)
 			throws MailException {
 		try {
-			if (!IMAPConfig.isUserFlagsEnabled()) {
+			if (!MailConfig.isUserFlagsEnabled()) {
 				/*
 				 * User flags are disabled
 				 */
@@ -928,7 +930,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			imapFolder.close(false);
 			resetIMAPFolder();
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConfig);
+			throw MIMEMailException.handleMessagingException(e, imapConfig);
 		}
 	}
 
@@ -942,22 +944,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			final MimeMessage mimeMessage = new MimeMessage(imapAccess.getSession());
 			mimeMessage.setFlag(Flags.Flag.DRAFT, true);
 			/*
-			 * Check for edit-draft operation
-			 */
-			final List<String> tempIds;
-			if (composedMail.getMsgref() != null) {
-				/*
-				 * Load referenced mail parts from original message
-				 */
-				tempIds = ReferencedMailPart.loadReferencedParts(composedMail, session);
-			} else {
-				tempIds = null;
-			}
-			/*
 			 * Fill message
 			 */
 			final long uid;
 			final MIMEMessageFiller filler = new MIMEMessageFiller(session, ctx);
+			composedMail.setFiller(filler);
 			try {
 				/*
 				 * Set headers
@@ -970,7 +961,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				/*
 				 * Fill body
 				 */
-				filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW, null);
+				filler.fillMailBody(composedMail, mimeMessage, ComposeType.NEW);
 				mimeMessage.saveChanges();
 				/*
 				 * Append message to draft folder
@@ -978,21 +969,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				uid = appendMessages(draftFullname, new MailMessage[] { MIMEMessageConverter
 						.convertMessage(mimeMessage) })[0];
 			} finally {
-				filler.deleteReferencedUploadFiles();
-				if (null != tempIds) {
-					for (final String id : tempIds) {
-						session.removeUploadedFile(id);
-					}
-				}
+				composedMail.cleanUp();
 			}
 			/*
 			 * Check for draft-edit operation: Delete old version
 			 */
-			final MailMessage refMail = composedMail.getReferencedMail();
-			if (refMail != null) {
+			final MailPath msgref = composedMail.getMsgref();
+			if (msgref != null) {
+				final MailMessage refMail = getMessage(msgref.getFolder(), msgref.getUid(), false);
 				if (refMail.isDraft()) {
-					deleteMessages(refMail.getFolder(), new long[] { composedMail.getReferencedMail().getMailId() },
-							true);
+					deleteMessages(refMail.getFolder(), new long[] { refMail.getMailId() }, true);
 				}
 				composedMail.setMsgref(null);
 			}
@@ -1001,7 +987,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			 */
 			return getMessage(draftFullname, uid, true);
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, imapConfig);
+			throw MIMEMailException.handleMessagingException(e, imapConfig);
 		} catch (final IOException e) {
 			throw new IMAPException(IMAPException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}

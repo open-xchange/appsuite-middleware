@@ -418,7 +418,7 @@ public final class IMAPException extends MIMEMailException {
 	 * @param code
 	 *            The code
 	 */
-	public IMAPException(Code code) {
+	public IMAPException(final Code code) {
 		this(code, EMPTY_ARGS);
 	}
 

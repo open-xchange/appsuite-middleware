@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.mime.filler;
 
-import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressList;
 import static com.openexchange.mail.text.HTMLProcessing.formatHrefLinks;
 import static com.openexchange.mail.text.HTMLProcessing.getConformHTML;
 import static com.openexchange.mail.text.HTMLProcessing.replaceHTMLSimpleQuotesForDisplay;
@@ -57,6 +56,7 @@ import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.util.Date;
@@ -77,6 +77,7 @@ import javax.mail.Part;
 import javax.mail.Message.RecipientType;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
@@ -113,6 +114,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -129,6 +131,12 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  * 
  */
 public class MIMEMessageFiller {
+
+	private static final String PREFIX_PART = "part";
+
+	private static final String EXT_EML = ".eml";
+
+	private static final int BUF_SIZE = 0x2000;
 
 	private static final String VERSION_1_0 = "1.0";
 
@@ -263,8 +271,8 @@ public class MIMEMessageFiller {
 	}
 
 	/**
-	 * Sets necessary headers in specified MIME message: <code>From</code>/<code>Sender</code>,
-	 * <code>To</code>, <code>Cc</code>, <code>Bcc</code>,
+	 * Sets necessary headers in specified MIME message: <code>From</code>/
+	 * <code>Sender</code>, <code>To</code>, <code>Cc</code>, <code>Bcc</code>,
 	 * <code>Reply-To</code>, <code>Subject</code>, etc.
 	 * 
 	 * @param mail
@@ -286,7 +294,6 @@ public class MIMEMessageFiller {
 					sender = new InternetAddress(usm.getSendAddr(), true);
 				} catch (final AddressException e) {
 					LOG.error("Default send address cannot be parsed", e);
-					sender = null;
 				}
 			}
 			final InternetAddress from = mail.getFrom()[0];
@@ -498,7 +505,7 @@ public class MIMEMessageFiller {
 		if (usm.getReplyToAddr() == null) {
 			ia = mail.getFrom();
 		} else {
-			ia = parseAddressList(usm.getReplyToAddr(), false);
+			ia = MIMEMessageUtility.parseAddressList(usm.getReplyToAddr(), false);
 		}
 		mimeMessage.setReplyTo(ia);
 		/*
@@ -527,10 +534,6 @@ public class MIMEMessageFiller {
 	 *            The MIME message to fill
 	 * @param type
 	 *            The compose type
-	 * @param originalMails
-	 *            The original mails (needed if type is
-	 *            {@link ComposeType#FORWARD} and user wants to compose forward
-	 *            mails non-inline)
 	 * @throws MessagingException
 	 *             If a messaging error occurs
 	 * @throws MailException
@@ -538,8 +541,8 @@ public class MIMEMessageFiller {
 	 * @throws IOException
 	 *             If an I/O error occurs
 	 */
-	public void fillMailBody(final ComposedMailMessage mail, final MimeMessage mimeMessage, final ComposeType type,
-			final MailMessage[] originalMails) throws MessagingException, MailException, IOException {
+	public void fillMailBody(final ComposedMailMessage mail, final MimeMessage mimeMessage, final ComposeType type)
+			throws MessagingException, MailException, IOException {
 		/*
 		 * Store some flags
 		 */
@@ -550,7 +553,7 @@ public class MIMEMessageFiller {
 		/*
 		 * A non-inline forward message
 		 */
-		final boolean isAttachmentForward = ((ComposeType.FORWARD.equals(type)) && (mail.getReferencedMailsSize() > 1 || usm
+		final boolean isAttachmentForward = ((ComposeType.FORWARD.equals(type)) && (mail.getEnclosedCount() > 1 || usm
 				.isForwardAsAttachment()));
 		/*
 		 * Initialize primary multipart
@@ -589,8 +592,7 @@ public class MIMEMessageFiller {
 		 */
 		if (hasAttachments || sendMultipartAlternative || isAttachmentForward || mail.isAppendVCard() || embeddedImages) {
 			/*
-			 * If any condition is true, we ought to create a multipart/*
-			 * message
+			 * If any condition is true, we ought to create a multipart/ message
 			 */
 			if (sendMultipartAlternative || embeddedImages) {
 				final Multipart alternativeMultipart = createMultipartAlternative(mail, embeddedImages);
@@ -621,9 +623,24 @@ public class MIMEMessageFiller {
 					primaryMultipart.addBodyPart(createHtmlBodyPart((String) mail.getContent()));
 				}
 			}
-			final int size = /* isAttachmentForward ? 0 : */mail.getEnclosedCount();
-			for (int i = 0; i < size; i++) {
-				addMessageBodyPart(primaryMultipart, mail.getEnclosedMailPart(i), false);
+			final int size = mail.getEnclosedCount();
+			if (isAttachmentForward) {
+				/*
+				 * Add referenced mail(s)
+				 */
+				final StringBuilder sb = new StringBuilder(32);
+				final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUF_SIZE);
+				final byte[] bbuf = new byte[BUF_SIZE];
+				for (int i = 0; i < size; i++) {
+					addNestedMessage(mail, primaryMultipart, sb, out, bbuf, i);
+				}
+			} else {
+				/*
+				 * Add referenced parts from ONE referenced mail
+				 */
+				for (int i = 0; i < size; i++) {
+					addMessageBodyPart(primaryMultipart, mail.getEnclosedMailPart(i), false);
+				}
 			}
 			/*
 			 * Append VCard
@@ -670,22 +687,26 @@ public class MIMEMessageFiller {
 			/*
 			 * Attach forwarded messages
 			 */
-			if (isAttachmentForward) {
-				if (primaryMultipart == null) {
-					primaryMultipart = new MimeMultipart();
-				}
-				final MailMessage[] refMails = mail.getReferencedMails();
-				final StringBuilder sb = new StringBuilder(32);
-				final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
-				for (final MailMessage refMail : refMails) {
-					out.reset();
-					sb.setLength(0);
-					refMail.writeTo(out);
-					addNestedMessage(primaryMultipart, new DataHandler(new MessageDataSource(out.toByteArray(),
-							MIMETypes.MIME_MESSAGE_RFC822)), sb.append(
-							refMail.getSubject().replaceAll("\\p{Blank}+", "_")).append(".eml").toString());
-				}
-			}
+			// if (isAttachmentForward) {
+			// if (primaryMultipart == null) {
+			// primaryMultipart = new MimeMultipart();
+			// }
+			// final int count = mail.getEnclosedCount();
+			// final MailMessage[] refMails = mail.getReferencedMails();
+			// final StringBuilder sb = new StringBuilder(32);
+			// final ByteArrayOutputStream out = new
+			// UnsynchronizedByteArrayOutputStream();
+			// for (final MailMessage refMail : refMails) {
+			// out.reset();
+			// sb.setLength(0);
+			// refMail.writeTo(out);
+			// addNestedMessage(primaryMultipart, new DataHandler(new
+			// MessageDataSource(out.toByteArray(),
+			// MIMETypes.MIME_MESSAGE_RFC822)), sb.append(
+			// refMail.getSubject().replaceAll("\\p{Blank}+",
+			// "_")).append(".eml").toString());
+			// }
+			// }
 			/*
 			 * Finally set multipart
 			 */
@@ -742,8 +763,8 @@ public class MIMEMessageFiller {
 		 * primaryMultipart = new MimeMultipart(); }
 		 * 
 		 * message/rfc822 final int nestedMsgSize =
-		 * msgObj.getNestedMsgs().size(); final Iterator<JSONMessageObject>
-		 * iter = msgObj.getNestedMsgs().iterator(); for (int i = 0; i <
+		 * msgObj.getNestedMsgs().size(); final Iterator<JSONMessageObject> iter
+		 * = msgObj.getNestedMsgs().iterator(); for (int i = 0; i <
 		 * nestedMsgSize; i++) { final JSONMessageObject nestedMsgObj =
 		 * iter.next(); final MimeMessage nestedMsg = new
 		 * MimeMessage(mailSession); fillMessage(nestedMsgObj, nestedMsg,
@@ -803,8 +824,8 @@ public class MIMEMessageFiller {
 	/**
 	 * Creates a <code>javax.mail.Multipart</code> instance of MIME type
 	 * multipart/alternative. If <code>embeddedImages</code> is
-	 * <code>true</code> a sub-multipart of MIME type multipart/related is
-	 * going to be appended as the "html" version
+	 * <code>true</code> a sub-multipart of MIME type multipart/related is going
+	 * to be appended as the "html" version
 	 */
 	protected final Multipart createMultipartAlternative(final ComposedMailMessage mail, final boolean embeddedImages)
 			throws MailException, MessagingException, IOException {
@@ -838,7 +859,7 @@ public class MIMEMessageFiller {
 			 * Traverse Content-IDs
 			 */
 			final List<String> cidList = MIMEMessageUtility.getContentIDs(mailBody);
-			NextImg: for (String cid : cidList) {
+			NextImg: for (final String cid : cidList) {
 				/*
 				 * Get & remove inline image (to prevent being sent twice)
 				 */
@@ -928,7 +949,40 @@ public class MIMEMessageFiller {
 		mp.addBodyPart(messageBodyPart);
 	}
 
-	protected final void addNestedMessage(final Multipart mp, final DataHandler dataHandler, final String filename)
+	protected void addNestedMessage(final ComposedMailMessage mail, Multipart primaryMultipart, final StringBuilder sb,
+			final ByteArrayOutputStream out, final byte[] bbuf, int i) throws MailException, IOException,
+			MessagingException {
+		final byte[] rfcBytes;
+		{
+			final InputStream in = mail.getEnclosedMailPart(i).getInputStream();
+			try {
+				int len;
+				while ((len = in.read(bbuf)) != -1) {
+					out.write(bbuf, 0, len);
+				}
+			} finally {
+				in.close();
+			}
+			rfcBytes = out.toByteArray();
+		}
+		out.reset();
+		final String filename;
+		{
+			String subject = new InternetHeaders(new UnsynchronizedByteArrayInputStream(rfcBytes)).getHeader(
+					MessageHeaders.HDR_SUBJECT, null);
+			if (null == subject || subject.length() == 0) {
+				filename = sb.append(PREFIX_PART).append(i + 1).append(EXT_EML).toString();
+			} else {
+				subject = MIMEMessageUtility.decodeMultiEncodedHeader(MimeUtility.unfold(subject));
+				filename = sb.append(subject.replaceAll("\\p{Blank}+", "_")).append(EXT_EML).toString();
+				sb.setLength(0);
+			}
+		}
+		addNestedMessage(primaryMultipart, new DataHandler(new MessageDataSource(rfcBytes,
+				MIMETypes.MIME_MESSAGE_RFC822)), filename);
+	}
+
+	private final void addNestedMessage(final Multipart mp, final DataHandler dataHandler, final String filename)
 			throws MessagingException {
 		/*
 		 * Create a body part for original message
@@ -1001,8 +1055,8 @@ public class MIMEMessageFiller {
 
 	/**
 	 * Processes referenced local images, inserts them as inlined html images
-	 * and adds their binary data to parental instance of
-	 * <code>{@link Multipart}</code>
+	 * and adds their binary data to parental instance of <code>
+	 * {@link Multipart}</code>
 	 * 
 	 * @param htmlContent
 	 *            The html content whose &lt;img&gt; tags must be replaced with

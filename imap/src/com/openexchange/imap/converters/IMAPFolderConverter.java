@@ -74,6 +74,7 @@ import com.openexchange.imap.user2acl.User2ACLArgs;
 import com.openexchange.imap.user2acl.User2ACLException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -130,8 +131,6 @@ public final class IMAPFolderConverter {
 			this.fullname = fullname;
 			this.separator = separator;
 		}
-
-		private static final Object[] EMPYT_ARGS = new Object[0];
 
 		public Object[] getArguments(final IMAPServer imapServer) throws AbstractOXException {
 			if (IMAPServer.CYRUS.equals(imapServer)) {
@@ -366,7 +365,7 @@ public final class IMAPFolderConverter {
 				mailFolder.setUnreadMessageCount(-1);
 				mailFolder.setDeletedMessageCount(-1);
 			}
-			mailFolder.setSubscribed(IMAPConfig.isSupportSubscription() ? imapFolder.isSubscribed() : true);
+			mailFolder.setSubscribed(MailConfig.isSupportSubscription() ? imapFolder.isSubscribed() : true);
 			if (imapConfig.isSupportsACLs()) {
 				if (mailFolder.isHoldsMessages() && mailFolder.exists()
 						&& (ownRights.contains(Rights.Right.READ) || ownRights.contains(Rights.Right.ADMINISTER))
@@ -386,7 +385,7 @@ public final class IMAPFolderConverter {
 			} else {
 				addOwnACL(session.getUserId(), mailFolder, ownRights);
 			}
-			if (IMAPConfig.isUserFlagsEnabled() && mailFolder.exists() && mailFolder.isHoldsMessages()
+			if (MailConfig.isUserFlagsEnabled() && mailFolder.exists() && mailFolder.isHoldsMessages()
 					&& ownRights.contains(Rights.Right.READ)
 					&& UserFlagsCache.supportsUserFlags(imapFolder, true, session)) {
 				mailFolder.setSupportsUserFlags(true);
@@ -395,7 +394,7 @@ public final class IMAPFolderConverter {
 			}
 			return mailFolder;
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e);
+			throw MIMEMailException.handleMessagingException(e);
 		} catch (final ContextException e) {
 			throw new IMAPException(e);
 		}
@@ -419,15 +418,15 @@ public final class IMAPFolderConverter {
 			}
 		});
 		if (checkSubscribed) {
-			mailFolder.setSubscribedSubfolders(li != null && li.length > 0);
+			mailFolder.setSubscribedSubfolders((li != null) && (li.length > 0));
 		} else {
-			mailFolder.setSubfolders(li != null && li.length > 0);
+			mailFolder.setSubfolders((li != null) && (li.length > 0));
 		}
 	}
 
 	private static boolean isDefaultFoldersChecked(final Session session) {
 		final Boolean b = (Boolean) session.getParameter(MailSessionParameterNames.PARAM_DEF_FLD_FLAG);
-		return b != null && b.booleanValue();
+		return (b != null) && b.booleanValue();
 	}
 
 	private static String getDefaultMailFolder(final int index, final Session session) {
@@ -548,8 +547,8 @@ public final class IMAPFolderConverter {
 
 	private static boolean isUnknownEntityError(final AbstractOXException e) {
 		return EnumComponent.USER.equals(e.getComponent())
-				&& (UserException.Code.USER_NOT_FOUND.getDetailNumber() == e.getDetailNumber() || LdapException.Code.USER_NOT_FOUND
-						.getDetailNumber() == e.getDetailNumber());
+				&& ((UserException.Code.USER_NOT_FOUND.getDetailNumber() == e.getDetailNumber()) || (LdapException.Code.USER_NOT_FOUND
+						.getDetailNumber() == e.getDetailNumber()));
 	}
 
 	private static boolean checkForNamespaceFolder(final String fullname, final IMAPStore imapStore,

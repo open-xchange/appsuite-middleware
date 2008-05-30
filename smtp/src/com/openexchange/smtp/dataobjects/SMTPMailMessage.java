@@ -49,10 +49,8 @@
 
 package com.openexchange.smtp.dataobjects;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.activation.DataHandler;
 
@@ -78,15 +76,15 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 
 	private long uid = -1L;
 
-	private transient List<MailPart> enclosedParts;
+	private final ArrayList<MailPart> enclosedParts;
 
 	/**
 	 * Initializes a new {@link SMTPMailMessage}.
 	 * <p>
 	 * Although content is expected to be HTML, the real message's content type
 	 * is defined through {@link #setContentType(String)} or
-	 * {@link #setContentType(com.openexchange.mail.mime.ContentType)}. The
-	 * HTML is then converted appropriately.
+	 * {@link #setContentType(com.openexchange.mail.mime.ContentType)}. The HTML
+	 * is then converted appropriately.
 	 * 
 	 * @param htmlMailBody
 	 *            The mail body as HTML content
@@ -102,22 +100,12 @@ public final class SMTPMailMessage extends ComposedMailMessage {
 	}
 
 	/**
-	 * Reconstitutes this object from a stream (i.e., deserialize it).
+	 * Initializes a new {@link SMTPMailMessage}
 	 * 
-	 * @param in
-	 *            The object input stream
-	 * @throws IOException
-	 *             If an I/O error occurs
-	 * @throws ClassNotFoundException
-	 *             If a class cast error occurs
-	 */
-	private void readObject(final java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
-		in.defaultReadObject();
-		enclosedParts = new ArrayList<MailPart>();
-	}
-
-	/**
-	 * Constructor
+	 * @param session
+	 *            The session providing needed user data
+	 * @param ctx
+	 *            The context
 	 */
 	public SMTPMailMessage(final Session session, final Context ctx) {
 		super(session, ctx);

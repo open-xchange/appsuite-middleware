@@ -103,7 +103,9 @@ public abstract class AbstractIMAPCommand<T> {
 		/*
 		 * (non-Javadoc)
 		 * 
-		 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
+		 * @see
+		 * com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail
+		 * .imap.protocol.IMAPProtocol)
 		 */
 		public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
 			if (abstractIMAPCommand.returnDefaultValue()) {
@@ -139,7 +141,7 @@ public abstract class AbstractIMAPCommand<T> {
 					throw pe;
 				}
 				try {
-					for (int index = 0; index < r.length && abstractIMAPCommand.addLoopCondition(); index++) {
+					for (int index = 0; (index < r.length) && abstractIMAPCommand.addLoopCondition(); index++) {
 						try {
 							abstractIMAPCommand.handleResponse(r[index]);
 						} catch (final MessagingException e) {
@@ -201,8 +203,8 @@ public abstract class AbstractIMAPCommand<T> {
 	/**
 	 * Gets the IMAP command to be executed
 	 * 
-	 * @param argsIndex -
-	 *            the args index
+	 * @param argsIndex
+	 *            - the args index
 	 * @return the IMAP command to be executed
 	 */
 	protected abstract String getCommand(final int argsIndex);
@@ -268,22 +270,21 @@ public abstract class AbstractIMAPCommand<T> {
 	/**
 	 * Handles the current response
 	 * 
-	 * @param response -
-	 *            the response
-	 * @throws MessagingException -
-	 *             if a message-related error occurs
+	 * @param response
+	 *            - the response
+	 * @throws MessagingException
+	 *             - if a message-related error occurs
 	 */
 	protected abstract void handleResponse(Response response) throws MessagingException;
 
 	/**
 	 * Handles the last response which indicates response status:
-	 * <code>OK</code>, <code>NO</code>, <code>BAD</code> or
-	 * <code>BYE</code>
+	 * <code>OK</code>, <code>NO</code>, <code>BAD</code> or <code>BYE</code>
 	 * 
-	 * @param lastResponse -
-	 *            the last response
-	 * @throws MessagingException -
-	 *             if a response-related error occurs
+	 * @param lastResponse
+	 *            - the last response
+	 * @throws MessagingException
+	 *             - if a response-related error occurs
 	 */
 	protected abstract void handleLastResponse(Response lastResponse) throws MessagingException;
 

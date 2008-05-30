@@ -124,7 +124,7 @@ public final class IMAPSearch {
 					LOG.debug(new StringBuilder(128).append("IMAP search took ").append(
 							(System.currentTimeMillis() - start)).append("msec").toString());
 				}
-				if (msgs.length < 50 && !searchTerm.isAscii()) {
+				if ((msgs.length < 50) && !searchTerm.isAscii()) {
 					/*
 					 * Search with respect to umlauts
 					 */

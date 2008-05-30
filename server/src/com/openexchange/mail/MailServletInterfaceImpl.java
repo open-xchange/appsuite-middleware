@@ -69,7 +69,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
@@ -336,13 +335,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	@Override
 	public MailMessage getForwardMessageForDisplay(final String[] folders, final long[] fowardMsgUIDs)
 			throws MailException {
-		if (null == folders || null == fowardMsgUIDs || folders.length != fowardMsgUIDs.length) {
+		if ((null == folders) || (null == fowardMsgUIDs) || (folders.length != fowardMsgUIDs.length)) {
 			throw new IllegalArgumentException("Illegal arguments");
 		}
 		initConnection();
 		final MailMessage[] originalMails = new MailMessage[folders.length];
 		for (int i = 0; i < folders.length; i++) {
-			originalMails[i] = mailAccess.getMessageStorage().getMessage(prepareMailFolderParam(folders[i]), fowardMsgUIDs[i], false);
+			originalMails[i] = mailAccess.getMessageStorage().getMessage(prepareMailFolderParam(folders[i]),
+					fowardMsgUIDs[i], false);
 		}
 		return mailAccess.getLogicTools().getFowardMessage(originalMails);
 	}
@@ -516,8 +516,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	 * 
 	 * @param fields
 	 *            The fields to check
-	 * @return <code>true</code> if specified fields only consist of mail ID
-	 *         and folder ID; otherwise <code>false</code>
+	 * @return <code>true</code> if specified fields only consist of mail ID and
+	 *         folder ID; otherwise <code>false</code>
 	 */
 	private static boolean onlyFolderAndID(final MailField[] fields) {
 		if (fields.length != 2) {
@@ -728,55 +728,41 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			return autosaveDraft(draftMail);
 		}
 		initConnection();
-		if (draftMail.getMsgref() != null) {
-			final MailPath path = new MailPath(draftMail.getMsgref());
-			draftMail.setReferencedMail(mailAccess.getMessageStorage().getMessage(path.getFolder(), path.getUid(),
-					false));
-		}
-		final String draftsFullname = prepareMailFolderParam(mailAccess.getFolderStorage().getDraftsFolder());
-		return mailAccess.getMessageStorage().saveDraft(draftsFullname, draftMail).getMailPath().toString();
+		return mailAccess.getMessageStorage().saveDraft(
+				(prepareMailFolderParam(mailAccess.getFolderStorage().getDraftsFolder())), draftMail).getMailPath()
+				.toString();
 	}
 
 	private String autosaveDraft(final ComposedMailMessage draftMail) throws MailException {
 		initConnection();
-		if (draftMail.getMsgref() != null) {
-			final MailPath path = new MailPath(draftMail.getMsgref());
-			draftMail.setReferencedMail(mailAccess.getMessageStorage().getMessage(path.getFolder(), path.getUid(),
-					false));
-		}
 		final String draftFullname = prepareMailFolderParam(mailAccess.getFolderStorage().getDraftsFolder());
 		/*
-		 * Autosave draft
+		 * Auto-save draft
 		 */
 		if (!draftMail.isDraft()) {
 			draftMail.setFlag(MailMessage.FLAG_DRAFT, true);
 		}
-		if (null != draftMail.getReferencedMail()) {
+		final MailPath msgref = draftMail.getMsgref();
+		final MailMessage origMail;
+		if (null != msgref) {
+			origMail = mailAccess.getMessageStorage().getMessage(msgref.getFolder(), msgref.getUid(), false);
 			/*
 			 * Check for attachments and add them
 			 */
 			final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
-			new MailMessageParser().parseMailMessage(draftMail.getReferencedMail(), handler);
+			new MailMessageParser().parseMailMessage(origMail, handler);
 			final List<MailPart> parts = handler.getNonInlineParts();
-			final TransportProvider tp = TransportProviderRegistry.getTransportProviderBySession(session);
-			for (final MailPart mailPart : parts) {
-				/*
-				 * Create and add a referenced part from original draft mail
-				 */
-				draftMail.addEnclosedPart(tp.getNewReferencedPart(mailPart.getSequenceId()));
+			if (!parts.isEmpty()) {
+				final TransportProvider tp = TransportProviderRegistry.getTransportProviderBySession(session);
+				for (final MailPart mailPart : parts) {
+					/*
+					 * Create and add a referenced part from original draft mail
+					 */
+					draftMail.addEnclosedPart(tp.getNewReferencedPart(mailPart, session));
+				}
 			}
-		}
-		/*
-		 * Load referenced mail parts from original message
-		 */
-		final List<String> tempIds;
-		if (draftMail.getMsgref() != null) {
-			/*
-			 * Load referenced mail parts from original message
-			 */
-			tempIds = ReferencedMailPart.loadReferencedParts(draftMail, draftMail.getSession());
 		} else {
-			tempIds = null;
+			origMail = null;
 		}
 		final long uid;
 		try {
@@ -787,20 +773,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 			 */
 			uid = mailAccess.getMessageStorage().appendMessages(draftFullname, new MailMessage[] { filledMail })[0];
 		} finally {
-			draftMail.release();
-			if (null != tempIds) {
-				for (final String id : tempIds) {
-					draftMail.getSession().removeUploadedFile(id);
-				}
-			}
+			draftMail.cleanUp();
 		}
 		/*
 		 * Check for draft-edit operation: Delete old version
 		 */
-		if (draftMail.getReferencedMail() != null) {
-			if (draftMail.getReferencedMail().isDraft()) {
-				mailAccess.getMessageStorage().deleteMessages(draftMail.getReferencedMail().getFolder(),
-						new long[] { draftMail.getReferencedMail().getMailId() }, true);
+		if (origMail != null) {
+			if (origMail.isDraft()) {
+				deleteMessages(origMail.getFolder(), new long[] { origMail.getMailId() }, true);
 			}
 			draftMail.setMsgref(null);
 		}
@@ -879,40 +859,46 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 		final MailTransport transport = MailTransport.getInstance(session);
 		final MailMessage sentMail;
 		try {
-			final MailPath[] paths;
-			if (composedMail.getMsgref() != null) {
-				paths = MailPath.getMailPaths(composedMail.getMsgref());
-				if (ComposeType.REPLY.equals(type) && (paths.length > 1)) {
-					/*
-					 * No reply on multiple messages
-					 */
-					throw new MailException(MailException.Code.NO_MULTIPLE_REPLY);
-				}
-				final MailMessage[] referencedMails = new MailMessage[paths.length];
-				for (int i = 0; i < paths.length; i++) {
-					referencedMails[i] = mailAccess.getMessageStorage().getMessage(paths[i].getFolder(),
-							paths[i].getUid(), false);
-				}
-				composedMail.setReferencedMails(referencedMails);
-			} else {
-				paths = null;
-			}
+			/*
+			 * Send mail
+			 */
 			sentMail = transport.sendMailMessage(composedMail, type);
-			if ((paths != null)) {
-				if (ComposeType.REPLY.equals(type)) {
+			/*
+			 * Check for a reply/forward
+			 */
+			if (ComposeType.REPLY.equals(type)) {
+				final MailPath path = composedMail.getMsgref();
+				if (null == path) {
+					LOG.warn("Missing msgref on reply. Corresponding mail cannot be marked as answered.",
+							new Throwable());
+				} else {
 					/*
 					 * Mark referenced mail as answered
 					 */
-					mailAccess.getMessageStorage().updateMessageFlags(paths[0].getFolder(),
-							new long[] { paths[0].getUid() }, MailMessage.FLAG_ANSWERED, true);
-				} else if (ComposeType.FORWARD.equals(type)) {
-					for (final MailPath mailPath : paths) {
-						/*
-						 * Mark referenced mails as forwarded
-						 */
-						mailAccess.getMessageStorage().updateMessageFlags(mailPath.getFolder(),
-								new long[] { mailPath.getUid() }, MailMessage.FLAG_FORWARDED, true);
+					mailAccess.getMessageStorage().updateMessageFlags(path.getFolder(), new long[] { path.getUid() },
+							MailMessage.FLAG_ANSWERED, true);
+				}
+			} else if (ComposeType.FORWARD.equals(type)) {
+				if (null == composedMail.getMsgref()) {
+					final int count = composedMail.getEnclosedCount();
+					for (int i = 0; i < count; i++) {
+						final MailPart part = composedMail.getEnclosedMailPart(i);
+						if ((part.getMsgref() != null) && MailMessage.class.isInstance(part)) {
+							/*
+							 * Mark referenced mail as forwarded
+							 */
+							final MailPath path = part.getMsgref();
+							mailAccess.getMessageStorage().updateMessageFlags(path.getFolder(),
+									new long[] { path.getUid() }, MailMessage.FLAG_FORWARDED, true);
+						}
 					}
+				} else {
+					/*
+					 * Mark referenced mail as forwarded
+					 */
+					final MailPath path = composedMail.getMsgref();
+					mailAccess.getMessageStorage().updateMessageFlags(path.getFolder(), new long[] { path.getUid() },
+							MailMessage.FLAG_FORWARDED, true);
 				}
 			}
 			if (UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx)

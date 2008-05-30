@@ -88,8 +88,8 @@ public final class ThreadSortUtil {
 	 * @return an array of <code>javax.mail.Message</code> objects only filled
 	 *         with message's sequence number
 	 */
-	public static ExtendedMimeMessage[] getMessagesFromThreadResponse(final String folderFullname, final char separator,
-			final String threadResponse) {
+	public static ExtendedMimeMessage[] getMessagesFromThreadResponse(final String folderFullname,
+			final char separator, final String threadResponse) {
 		final Matcher m = PATTERN_THREAD_RESP.matcher(threadResponse);
 		if (m.find()) {
 			final List<ExtendedMimeMessage> tmp = new ArrayList<ExtendedMimeMessage>();
@@ -109,7 +109,7 @@ public final class ThreadSortUtil {
 		 * Now parse the odd THREAD response string.
 		 */
 		List<TreeNode> pulledUp = null;
-		if (threadResponse.indexOf('(') != -1 && threadResponse.indexOf(')') != -1) {
+		if ((threadResponse.indexOf('(') != -1) && (threadResponse.indexOf(')') != -1)) {
 			ThreadParser tp = new ThreadParser();
 			try {
 				tp.parse(threadResponse.substring(threadResponse.indexOf('('), threadResponse.lastIndexOf(')') + 1));
@@ -137,11 +137,13 @@ public final class ThreadSortUtil {
 			/*
 			 * (non-Javadoc)
 			 * 
-			 * @see com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun.mail.imap.protocol.IMAPProtocol)
+			 * @see
+			 * com.sun.mail.imap.IMAPFolder$ProtocolCommand#doCommand(com.sun
+			 * .mail.imap.protocol.IMAPProtocol)
 			 */
-			public Object doCommand(IMAPProtocol p) throws ProtocolException {
-				Response[] r = p.command("THREAD REFERENCES UTF-8 " + data, null);
-				Response response = r[r.length - 1];
+			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+				final Response[] r = p.command("THREAD REFERENCES UTF-8 " + data, null);
+				final Response response = r[r.length - 1];
 				String retval = null;
 				try {
 					if (response.isOK()) { // command successful
@@ -149,7 +151,7 @@ public final class ThreadSortUtil {
 							if (!(r[i] instanceof IMAPResponse)) {
 								continue;
 							}
-							IMAPResponse ir = (IMAPResponse) r[i];
+							final IMAPResponse ir = (IMAPResponse) r[i];
 							if (ir.keyEquals(STR_THREAD)) {
 								retval = ir.toString();
 							}

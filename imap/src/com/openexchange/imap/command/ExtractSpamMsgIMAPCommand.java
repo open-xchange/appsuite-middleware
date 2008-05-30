@@ -146,7 +146,8 @@ public final class ExtractSpamMsgIMAPCommand extends AbstractIMAPCommand<Message
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getDefaultValueOnEmptyFolder()
+	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
+	 * getDefaultValueOnEmptyFolder()
 	 */
 	@Override
 	protected Message[] getDefaultValue() {
@@ -166,7 +167,9 @@ public final class ExtractSpamMsgIMAPCommand extends AbstractIMAPCommand<Message
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(com.sun.mail.iap.Response)
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(
+	 * com.sun.mail.iap.Response)
 	 */
 	@Override
 	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
@@ -179,7 +182,9 @@ public final class ExtractSpamMsgIMAPCommand extends AbstractIMAPCommand<Message
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.sun.mail.iap.Response)
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.
+	 * sun.mail.iap.Response)
 	 */
 	@Override
 	protected void handleResponse(final Response response) throws MessagingException {
@@ -224,7 +229,7 @@ public final class ExtractSpamMsgIMAPCommand extends AbstractIMAPCommand<Message
 		 */
 		int bodyIndex = -1;
 		final int itemCount = fetchResponse.getItemCount();
-		for (int j = 0; j < itemCount && bodyIndex == -1; j++) {
+		for (int j = 0; (j < itemCount) && (bodyIndex == -1); j++) {
 			if (fetchResponse.getItem(j) instanceof BODY) {
 				bodyIndex = j;
 			}
@@ -238,7 +243,8 @@ public final class ExtractSpamMsgIMAPCommand extends AbstractIMAPCommand<Message
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
 	 */
 	@Override
 	protected boolean performHandleResult() {
@@ -248,7 +254,8 @@ public final class ExtractSpamMsgIMAPCommand extends AbstractIMAPCommand<Message
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#performNotifyResponseHandlers()
+	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
+	 * performNotifyResponseHandlers()
 	 */
 	@Override
 	protected boolean performNotifyResponseHandlers() {

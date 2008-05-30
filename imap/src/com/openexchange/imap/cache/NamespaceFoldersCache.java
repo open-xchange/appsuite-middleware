@@ -105,9 +105,9 @@ public final class NamespaceFoldersCache {
 		final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_PERSONAL);
 		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
 		mailCache.get(entry);
-		if (load && null == entry.getValue()) {
+		if (load && (null == entry.getValue())) {
 			final Folder[] pns = imapStore.getPersonalNamespaces();
-			if (pns == null || pns.length == 0) {
+			if ((pns == null) || (pns.length == 0)) {
 				entry.setValue(EMPTY_ARR);
 			} else {
 				final String[] fullnames = new String[pns.length];
@@ -142,9 +142,9 @@ public final class NamespaceFoldersCache {
 		final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_USER);
 		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
 		mailCache.get(entry);
-		if (load && null == entry.getValue()) {
+		if (load && (null == entry.getValue())) {
 			final Folder[] uns = imapStore.getUserNamespaces(null);
-			if (uns == null || uns.length == 0) {
+			if ((uns == null) || (uns.length == 0)) {
 				entry.setValue(EMPTY_ARR);
 			} else {
 				final String[] fullnames = new String[uns.length];
@@ -179,9 +179,9 @@ public final class NamespaceFoldersCache {
 		final NamespaceFoldersCacheEntry entry = new NamespaceFoldersCacheEntry(NS_SHARED);
 		final SessionMailCache mailCache = SessionMailCache.getInstance(session);
 		mailCache.get(entry);
-		if (load && null == entry.getValue()) {
+		if (load && (null == entry.getValue())) {
 			final Folder[] sns = imapStore.getSharedNamespaces();
-			if (sns == null || sns.length == 0) {
+			if ((sns == null) || (sns.length == 0)) {
 				entry.setValue(EMPTY_ARR);
 			} else {
 				final String[] fullnames = new String[sns.length];
@@ -197,7 +197,7 @@ public final class NamespaceFoldersCache {
 
 	private static final class NamespaceFoldersCacheEntry implements SessionMailCacheEntry<String[]> {
 
-		private Integer namespaceKey;
+		private final Integer namespaceKey;
 
 		private String[] fullnames;
 

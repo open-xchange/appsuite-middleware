@@ -56,7 +56,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -75,7 +74,6 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeUtility;
 
 import com.openexchange.imap.IMAPException;
-import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
@@ -101,8 +99,8 @@ import com.sun.mail.imap.protocol.UID;
 /**
  * {@link FetchIMAPCommand} - performs a prefetch of messages in given folder
  * with only those fields set that need to be present for display and sorting. A
- * corresponding instance of <code>javax.mail.FetchProfile</code> is going to
- * be generated from given fields.
+ * corresponding instance of <code>javax.mail.FetchProfile</code> is going to be
+ * generated from given fields.
  * 
  * <p>
  * This method avoids calling JavaMail's fetch() methods which implicitly
@@ -173,20 +171,19 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	/**
 	 * Constructor
 	 * 
-	 * @param imapFolder -
-	 *            the IMAP folder
+	 * @param imapFolder
+	 *            - the IMAP folder
 	 * @param isRev1
 	 *            Whether IMAP server has <i>IMAP4rev1</i> capability or not
-	 * @param arr -
-	 *            the source array (either <code>long</code> UIDs,
-	 *            <code>int</code> SeqNums or instances of
-	 *            <code>Message</code>)
-	 * @param fp -
-	 *            the fetch profile
-	 * @param isSequential -
-	 *            whether the source array values are sequential
-	 * @param keepOrder -
-	 *            whether to keep or to ignore given order through parameter
+	 * @param arr
+	 *            - the source array (either <code>long</code> UIDs,
+	 *            <code>int</code> SeqNums or instances of <code>Message</code>)
+	 * @param fp
+	 *            - the fetch profile
+	 * @param isSequential
+	 *            - whether the source array values are sequential
+	 * @param keepOrder
+	 *            - whether to keep or to ignore given order through parameter
 	 *            <code>arr</code>; only has effect if parameter
 	 *            <code>arr</code> is of type <code>Message[]</code> or
 	 *            <code>int[]</code>
@@ -200,26 +197,25 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	/**
 	 * Constructor
 	 * 
-	 * @param imapFolder -
-	 *            the IMAP folder
+	 * @param imapFolder
+	 *            - the IMAP folder
 	 * @param isRev1
 	 *            Whether IMAP server has <i>IMAP4rev1</i> capability or not
-	 * @param arr -
-	 *            the source array (either <code>long</code> UIDs,
-	 *            <code>int</code> SeqNums or instances of
-	 *            <code>Message</code>)
-	 * @param fp -
-	 *            the fetch profile
-	 * @param isSequential -
-	 *            whether the source array values are sequential
-	 * @param keepOrder -
-	 *            whether to keep or to ignore given order through parameter
+	 * @param arr
+	 *            - the source array (either <code>long</code> UIDs,
+	 *            <code>int</code> SeqNums or instances of <code>Message</code>)
+	 * @param fp
+	 *            - the fetch profile
+	 * @param isSequential
+	 *            - whether the source array values are sequential
+	 * @param keepOrder
+	 *            - whether to keep or to ignore given order through parameter
 	 *            <code>arr</code>; only has effect if parameter
 	 *            <code>arr</code> is of type <code>Message[]</code> or
 	 *            <code>int[]</code>
 	 * @param loadBody
-	 *            <code>true</code> to load complete messages' bodies;
-	 *            otherwise <code>false</code>
+	 *            <code>true</code> to load complete messages' bodies; otherwise
+	 *            <code>false</code>
 	 * @throws MessagingException
 	 */
 	public FetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final Object arr, final FetchProfile fp,
@@ -234,10 +230,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	/**
 	 * Apply a new numeric argument to this IMAP <i>FETCH</i> command
 	 * 
-	 * @param arr -
-	 *            the source array (either <code>long</code> UIDs,
-	 *            <code>int</code> SeqNums or instances of
-	 *            <code>Message</code>)
+	 * @param arr
+	 *            - the source array (either <code>long</code> UIDs,
+	 *            <code>int</code> SeqNums or instances of <code>Message</code>)
 	 * @param isSequential
 	 *            whether the source array values are sequential
 	 * @param keepOrder
@@ -290,14 +285,14 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	/**
 	 * Constructor to fetch all messages of given folder
 	 * 
-	 * @param imapFolder -
-	 *            the IMAP folder
+	 * @param imapFolder
+	 *            - the IMAP folder
 	 * @param isRev1
 	 *            Whether IMAP server has <i>IMAP4rev1</i> capability or not
-	 * @param fp -
-	 *            the fetch profile
-	 * @param fetchLen -
-	 *            the total message count
+	 * @param fp
+	 *            - the fetch profile
+	 * @param fetchLen
+	 *            - the total message count
 	 * @throws MessagingException
 	 *             If a messaging error occurs
 	 */
@@ -309,17 +304,17 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	/**
 	 * Constructor to fetch all messages of given folder
 	 * 
-	 * @param imapFolder -
-	 *            the IMAP folder
+	 * @param imapFolder
+	 *            - the IMAP folder
 	 * @param isRev1
 	 *            Whether IMAP server has <i>IMAP4rev1</i> capability or not
-	 * @param fp -
-	 *            the fetch profile
-	 * @param fetchLen -
-	 *            the total message count
+	 * @param fp
+	 *            - the fetch profile
+	 * @param fetchLen
+	 *            - the total message count
 	 * @param loadBody
-	 *            <code>true</code> to load complete messages' bodies;
-	 *            otherwise <code>false</code>
+	 *            <code>true</code> to load complete messages' bodies; otherwise
+	 *            <code>false</code>
 	 * @throws MessagingException
 	 *             If a messaging error occurs
 	 */
@@ -403,7 +398,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getDefaultValueOnEmptyFolder()
+	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
+	 * getDefaultValueOnEmptyFolder()
 	 */
 	@Override
 	protected Message[] getDefaultValue() {
@@ -423,7 +419,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(com.sun.mail.iap.Response)
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(
+	 * com.sun.mail.iap.Response)
 	 */
 	@Override
 	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
@@ -436,7 +434,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.sun.mail.iap.Response)
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.
+	 * sun.mail.iap.Response)
 	 */
 	@Override
 	protected void handleResponse(final Response currentReponse) throws MessagingException {
@@ -515,7 +515,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
 	 */
 	@Override
 	protected boolean performHandleResult() {
@@ -525,7 +526,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#performNotifyResponseHandlers()
+	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
+	 * performNotifyResponseHandlers()
 	 */
 	@Override
 	protected boolean performNotifyResponseHandlers() {
@@ -550,37 +552,9 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
 		 * Discard the two extra fetch profile items contained in JavaMail's
 		 * ENVELOPE constant: RFC822.SIZE and INTERNALDATE
 		 */
-		// ENV_FIELDS.add(Integer.valueOf(MailListField.RECEIVED_DATE.getField()));
+		//ENV_FIELDS.add(Integer.valueOf(MailListField.RECEIVED_DATE.getField())
+		// );
 		// ENV_FIELDS.add(Integer.valueOf(MailListField.SIZE.getField()));
-	}
-
-	private static FetchProfile getFetchProfile(final int[] fields, final int sortField) {
-		final FetchProfile retval = new FetchProfile();
-		final Set<Integer> trimmedFields = new HashSet<Integer>();
-		for (int i = 0; i < fields.length; i++) {
-			trimmedFields.add(Integer.valueOf(fields[i]));
-		}
-		if (sortField > -1) {
-			trimmedFields.add(Integer.valueOf(sortField));
-		}
-		if (IMAPConfig.isFastFetch() && trimmedFields.removeAll(ENV_FIELDS)) {
-			/*
-			 * Some fields are contained in fetch profile item "ENVELOPE". Add
-			 * ENVELOPE since set of fields has changed.
-			 */
-			retval.add(FetchProfile.Item.ENVELOPE);
-		}
-		if (!trimmedFields.isEmpty()) {
-			/*
-			 * Iterate remained fields
-			 */
-			final int size = trimmedFields.size();
-			final Iterator<Integer> iter = trimmedFields.iterator();
-			for (int i = 0; i < size; i++) {
-				addFetchItem(retval, iter.next().intValue());
-			}
-		}
-		return retval;
 	}
 
 	private static void addFetchItem(final FetchProfile fp, final int field) {

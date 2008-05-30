@@ -92,8 +92,8 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MailMessageParser} - A callback parser to parse instances of
- * {@link MailMessage} by invoking the <code>handleXXX()</code> methods of
- * given {@link MailMessageHandler} object
+ * {@link MailMessage} by invoking the <code>handleXXX()</code> methods of given
+ * {@link MailMessageHandler} object
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
@@ -124,9 +124,15 @@ public final class MailMessageParser {
 		super();
 	}
 
-	public void reset() {
+	/**
+	 * Resets this parser and returns itself
+	 * 
+	 * @return The parser itself
+	 */
+	public MailMessageParser reset() {
 		stop = false;
 		multipartDetected = false;
+		return this;
 	}
 
 	public void parseMailMessage(final MailMessage mail, final MailMessageHandler handler) throws MailException {
@@ -550,8 +556,8 @@ public final class MailMessageParser {
 		/*
 		 * MSGREF
 		 */
-		if (mail.containsMsgref()) {
-			handler.handleMsgRef(mail.getMsgref());
+		if (mail.getMsgref() != null) {
+			handler.handleMsgRef(mail.getMsgref().toString());
 		}
 		/*
 		 * DISPOSITION-NOTIFICATION-TO
@@ -570,8 +576,8 @@ public final class MailMessageParser {
 
 	/**
 	 * Generates an appropriate filename from either specified
-	 * <code>rawFileName</code> if not <code>null</code> or generates a
-	 * filename composed with <code>"Part_" + sequenceId</code>
+	 * <code>rawFileName</code> if not <code>null</code> or generates a filename
+	 * composed with <code>"Part_" + sequenceId</code>
 	 * 
 	 * @param rawFileName
 	 *            The raw filename obtained from mail part

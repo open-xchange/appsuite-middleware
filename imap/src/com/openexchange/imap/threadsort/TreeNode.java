@@ -60,10 +60,10 @@ import java.util.List;
  */
 
 public class TreeNode {
-	
+
 	public final int msgNum;
 
-	private List<TreeNode> childs;
+	private final List<TreeNode> childs;
 
 	public TreeNode(final int msgNum) {
 		this.msgNum = msgNum;

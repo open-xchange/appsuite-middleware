@@ -65,6 +65,7 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
+import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMESessionPropertyNames;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
@@ -204,13 +205,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
 	@Override
 	protected void connectInternal() throws MailException {
-		if (imapStore != null && imapStore.isConnected()) {
+		if ((imapStore != null) && imapStore.isConnected()) {
 			connected = true;
 			return;
 		}
 		try {
 			final Properties imapProps = IMAPSessionProperties.getDefaultSessionProperties();
-			if (null != getMailProperties() && !getMailProperties().isEmpty()) {
+			if ((null != getMailProperties()) && !getMailProperties().isEmpty()) {
 				imapProps.putAll(getMailProperties());
 			}
 			/*
@@ -268,13 +269,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 			 */
 			decrement = true;
 		} catch (final MessagingException e) {
-			throw IMAPException.handleMessagingException(e, getMailConfig());
+			throw MIMEMailException.handleMessagingException(e, getMailConfig());
 		}
 	}
 
 	@Override
 	public IMAPFolderStorage getFolderStorage() throws MailException {
-		connected = (imapStore != null && imapStore.isConnected());
+		connected = ((imapStore != null) && imapStore.isConnected());
 		if (connected) {
 			if (null == folderStorage) {
 				folderStorage = new IMAPFolderStorage(imapStore, this, session);
@@ -286,7 +287,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
 	@Override
 	public IMAPMessageStorage getMessageStorage() throws MailException {
-		connected = (imapStore != null && imapStore.isConnected());
+		connected = ((imapStore != null) && imapStore.isConnected());
 		if (connected) {
 			if (null == messageStorage) {
 				messageStorage = new IMAPMessageStorage(imapStore, this, session);
@@ -298,7 +299,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
 	@Override
 	public MailLogicTools getLogicTools() throws MailException {
-		connected = (imapStore != null && imapStore.isConnected());
+		connected = ((imapStore != null) && imapStore.isConnected());
 		if (connected) {
 			if (null == logicTools) {
 				logicTools = new MailLogicTools(session);
@@ -313,7 +314,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 		if (!connected) {
 			return false;
 		}
-		return (connected = (imapStore != null && imapStore.isConnected()));
+		return (connected = ((imapStore != null) && imapStore.isConnected()));
 	}
 
 	@Override

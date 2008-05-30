@@ -95,16 +95,16 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 * Constructor using sequence numbers and performs a fast <code>COPY</code>
 	 * command; meaning optional <i>COPYUID</i> response is discarded.
 	 * 
-	 * @param imapFolder -
-	 *            the IMAP folder
-	 * @param startSeqNum -
-	 *            the starting sequence number of the messages that shall be
+	 * @param imapFolder
+	 *            - the IMAP folder
+	 * @param startSeqNum
+	 *            - the starting sequence number of the messages that shall be
 	 *            copied
-	 * @param endSeqNum -
-	 *            the ending sequence number of the messages that shall be
+	 * @param endSeqNum
+	 *            - the ending sequence number of the messages that shall be
 	 *            copied
-	 * @param destFolderName -
-	 *            the destination folder fullname
+	 * @param destFolderName
+	 *            - the destination folder fullname
 	 */
 	public CopyIMAPCommand(final IMAPFolder imapFolder, final int startSeqNum, final int endSeqNum,
 			final String destFolderName) {
@@ -122,14 +122,14 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 * Constructor using sequence numbers and performs a fast <code>COPY</code>
 	 * command; meaning optional <i>COPYUID</i> response is discarded.
 	 * 
-	 * @param imapFolder -
-	 *            the IMAP folder
-	 * @param seqNums -
-	 *            the sequence numbers of the messages that shall be copied
-	 * @param destFolderName -
-	 *            the destination folder fullname
-	 * @param isSequential -
-	 *            whether sequence numbers are sequential or not
+	 * @param imapFolder
+	 *            - the IMAP folder
+	 * @param seqNums
+	 *            - the sequence numbers of the messages that shall be copied
+	 * @param destFolderName
+	 *            - the destination folder fullname
+	 * @param isSequential
+	 *            - whether sequence numbers are sequential or not
 	 */
 	public CopyIMAPCommand(final IMAPFolder imapFolder, final int[] seqNums, final String destFolderName,
 			final boolean isSequential) {
@@ -146,16 +146,16 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 * Constructor using UIDs and consequently performs a <code>UID COPY</code>
 	 * command
 	 * 
-	 * @param imapFolder -
-	 *            the IMAP folder
-	 * @param uids -
-	 *            the UIDs of the messages that shall be copied
-	 * @param destFolderName -
-	 *            the destination folder fullname
-	 * @param isSequential -
-	 *            whether UIDs are sequential or not
-	 * @param fast -
-	 *            <code>true</code> to ignore corresponding UIDs of copied
+	 * @param imapFolder
+	 *            - the IMAP folder
+	 * @param uids
+	 *            - the UIDs of the messages that shall be copied
+	 * @param destFolderName
+	 *            - the destination folder fullname
+	 * @param isSequential
+	 *            - whether UIDs are sequential or not
+	 * @param fast
+	 *            - <code>true</code> to ignore corresponding UIDs of copied
 	 *            messages and return value is empty (array of length zero)
 	 */
 	public CopyIMAPCommand(final IMAPFolder imapFolder, final long[] uids, final String destFolderName,
@@ -187,10 +187,10 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	 * Constructor to copy all messages of given folder to given destination
 	 * folder by performing a <code>COPY 1:*</code> command
 	 * 
-	 * @param imapFolder -
-	 *            the IMAP folder
-	 * @param destFolderName -
-	 *            the destination folder
+	 * @param imapFolder
+	 *            - the IMAP folder
+	 * @param destFolderName
+	 *            - the destination folder
 	 */
 	public CopyIMAPCommand(final IMAPFolder imapFolder, final String destFolderName) {
 		super(imapFolder);
@@ -243,7 +243,8 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getDefaultValueOnEmptyFolder()
+	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
+	 * getDefaultValueOnEmptyFolder()
 	 */
 	@Override
 	protected long[] getDefaultValue() {
@@ -263,7 +264,9 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(com.sun.mail.iap.Response)
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(
+	 * com.sun.mail.iap.Response)
 	 */
 	@Override
 	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
@@ -278,7 +281,9 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.sun.mail.iap.Response)
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.
+	 * sun.mail.iap.Response)
 	 */
 	@Override
 	protected void handleResponse(final Response response) throws MessagingException {
@@ -294,6 +299,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 		 * <pre>
 		 * OK [COPYUID 1184051486 10031:10523,10525:11020,11022:11027,11030:11047,11050:11051,11053:11558 1024:2544] Completed
 		 * </pre>
+		 * 
 		 * <pre>
 		 * * 45 EXISTS..* 2 RECENT..A4 OK [COPYUID 1185853191 7,32 44:45] Completed
 		 * </pre>
@@ -337,7 +343,8 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
 	 */
 	@Override
 	protected boolean performHandleResult() {
@@ -347,7 +354,8 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#performNotifyResponseHandlers()
+	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
+	 * performNotifyResponseHandlers()
 	 */
 	@Override
 	protected boolean performNotifyResponseHandlers() {
@@ -381,7 +389,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 				/*
 				 * Determine index position in given UIDs...
 				 */
-				while (index < uids.length && uids[index] != srcArr[in]) {
+				while ((index < uids.length) && (uids[index] != srcArr[in])) {
 					index++;
 				}
 				/*

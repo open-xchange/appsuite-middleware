@@ -76,31 +76,31 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 
 	private final boolean silent;
 
-	private Boolean retval = Boolean.TRUE;
+	private final Boolean retval = Boolean.TRUE;
 
 	/**
 	 * Constructor to set flags in messages identified through given UIDs.
 	 * 
-	 * @param imapFolder -
-	 *            the imap folder
-	 * @param uids -
-	 *            the UIDs
-	 * @param flags -
-	 *            the flags
+	 * @param imapFolder
+	 *            - the imap folder
+	 * @param uids
+	 *            - the UIDs
+	 * @param flags
+	 *            - the flags
 	 * @param silent
 	 *            <code>true</code> to suppress returning the new value;
 	 *            otherwise <code>false</code>
-	 * @param enable -
-	 *            whether to enable or disable affected flags
-	 * @param isSequential -
-	 *            whether supplied UIDs are in sequential order or not
-	 * @throws MessagingException -
-	 *             if an unknown system flag is used
+	 * @param enable
+	 *            - whether to enable or disable affected flags
+	 * @param isSequential
+	 *            - whether supplied UIDs are in sequential order or not
+	 * @throws MessagingException
+	 *             - if an unknown system flag is used
 	 */
 	public FlagsIMAPCommand(final IMAPFolder imapFolder, final long[] uids, final Flags flags, final boolean enable,
 			final boolean silent, final boolean isSequential) throws MessagingException {
 		super(imapFolder);
-		if (uids == null || uids.length == 0) {
+		if ((uids == null) || (uids.length == 0)) {
 			returnDefaultValue = true;
 			args = ARGS_EMPTY;
 			flagsStr = null;
@@ -149,17 +149,17 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	/**
 	 * Constructor to set flags in all messages
 	 * 
-	 * @param imapFolder -
-	 *            the imap folder
-	 * @param flags -
-	 *            the flags
-	 * @param enable -
-	 *            whether to enable or disable affected flags
+	 * @param imapFolder
+	 *            - the imap folder
+	 * @param flags
+	 *            - the flags
+	 * @param enable
+	 *            - whether to enable or disable affected flags
 	 * @param silent
 	 *            <code>true</code> to suppress returning the new value;
 	 *            otherwise <code>false</code>
-	 * @throws MessagingException -
-	 *             if an unknown system flag is used
+	 * @throws MessagingException
+	 *             - if an unknown system flag is used
 	 */
 	public FlagsIMAPCommand(final IMAPFolder imapFolder, final Flags flags, final boolean enable, final boolean silent)
 			throws MessagingException {
@@ -189,21 +189,21 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	 * matches specified <code>startSeqNum</code> and ending at message whose
 	 * sequence number matches specified <code>endSeqNum</code>
 	 * 
-	 * @param imapFolder -
-	 *            the imap folder
+	 * @param imapFolder
+	 *            - the imap folder
 	 * @param startSeqNum
 	 *            The start sequence number
 	 * @param endSeqNum
 	 *            The end sequence number
-	 * @param flags -
-	 *            the flags
-	 * @param enable -
-	 *            whether to enable or disable affected flags
+	 * @param flags
+	 *            - the flags
+	 * @param enable
+	 *            - whether to enable or disable affected flags
 	 * @param silent
 	 *            <code>true</code> to suppress returning the new value;
 	 *            otherwise <code>false</code>
-	 * @throws MessagingException -
-	 *             if an unknown system flag is used
+	 * @throws MessagingException
+	 *             - if an unknown system flag is used
 	 */
 	public FlagsIMAPCommand(final IMAPFolder imapFolder, final int startSeqNum, final int endSeqNum, final Flags flags,
 			final boolean enable, final boolean silent) throws MessagingException {
@@ -307,7 +307,8 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getDefaultValueOnEmptyFolder()
+	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
+	 * getDefaultValueOnEmptyFolder()
 	 */
 	@Override
 	protected Boolean getDefaultValue() {
@@ -327,7 +328,9 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(com.sun.mail.iap.Response)
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(
+	 * com.sun.mail.iap.Response)
 	 */
 	@Override
 	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
@@ -340,7 +343,9 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.sun.mail.iap.Response)
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.
+	 * sun.mail.iap.Response)
 	 */
 	@Override
 	protected void handleResponse(final Response response) throws MessagingException {
@@ -349,7 +354,8 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
 	 */
 	@Override
 	protected boolean performHandleResult() {
@@ -359,7 +365,8 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#performNotifyResponseHandlers()
+	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
+	 * performNotifyResponseHandlers()
 	 */
 	@Override
 	protected boolean performNotifyResponseHandlers() {

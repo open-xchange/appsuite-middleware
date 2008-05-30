@@ -77,11 +77,16 @@ import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
+import com.openexchange.mail.MailPath;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.parser.MailMessageParser;
+import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.session.Session;
@@ -196,7 +201,7 @@ public final class MessageParser {
 			final Context ctx = ContextStorage.getStorageContext(session.getContextId());
 			transportMail = tp.getNewComposedMailMessage(session, ctx);
 			parse(jsonObj, transportMail, TimeZone.getTimeZone(UserStorage.getStorageUser(session.getUserId(), ctx)
-					.getTimeZone()), tp);
+					.getTimeZone()), tp, session);
 		} catch (final ContextException e) {
 			throw new MailException(e);
 		}
@@ -243,11 +248,11 @@ public final class MessageParser {
 	 */
 	public static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone,
 			final Session session) throws MailException {
-		parse(jsonObj, mail, timeZone, TransportProviderRegistry.getTransportProviderBySession(session));
+		parse(jsonObj, mail, timeZone, TransportProviderRegistry.getTransportProviderBySession(session), session);
 	}
 
 	private static void parse(final JSONObject jsonObj, final MailMessage mail, final TimeZone timeZone,
-			final TransportProvider provider) throws MailException {
+			final TransportProvider provider, final Session session) throws MailException {
 		try {
 			/*
 			 * System flags
@@ -356,7 +361,7 @@ public final class MessageParser {
 			 * Msg Ref
 			 */
 			if (jsonObj.has(MailJSONField.MSGREF.getKey()) && !jsonObj.isNull(MailJSONField.MSGREF.getKey())) {
-				mail.setMsgref(jsonObj.getString(MailJSONField.MSGREF.getKey()));
+				mail.setMsgref(new MailPath(jsonObj.getString(MailJSONField.MSGREF.getKey())));
 			}
 			/*
 			 * Subject, etc.
@@ -404,13 +409,7 @@ public final class MessageParser {
 					/*
 					 * Parse referenced parts
 					 */
-					final int len = ja.length();
-					if (len > 1 && transportMail.getMsgref() != null) {
-						for (int i = 1; i < len; i++) {
-							transportMail.addEnclosedPart(provider.getNewReferencedPart(ja.getJSONObject(i).getString(
-									MailListField.ID.getKey())));
-						}
-					}
+					parseReferencedParts(provider, session, transportMail, ja);
 				} else {
 					final TextBodyMailPart part = provider.getNewTextBodyPart("");
 					part.setContentType(MIMETypes.MIME_DEFAULT);
@@ -419,12 +418,73 @@ public final class MessageParser {
 				}
 			}
 			/*
-			 * TODO: Parse nested messages. Currently not used by webmail
+			 * TODO: Parse nested messages. Currently not used
 			 */
 		} catch (final JSONException e) {
 			throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
 		} catch (final AddressException e) {
 			throw MIMEMailException.handleMessagingException(e);
+		}
+	}
+
+	private static final String ROOT = "0";
+
+	private static void parseReferencedParts(final TransportProvider provider, final Session session,
+			final ComposedMailMessage transportMail, final JSONArray ja) throws MailException, JSONException {
+		final int len = ja.length();
+		if (len > 1) {
+			final MailAccess<?, ?> access = MailAccess.getInstance(session);
+			access.connect();
+			try {
+				final MailMessageParser parser = new MailMessageParser();
+				final MailPartHandler handler = new MailPartHandler(ROOT);
+				for (int i = 1; i < len; i++) {
+					final JSONObject attachment = ja.getJSONObject(i);
+					/*
+					 * Prefer MSGREF from attachment if present, otherwise get
+					 * MSGREF from superior mail
+					 */
+					final MailPath msgref;
+					final boolean isMail;
+					if (attachment.has(MailJSONField.MSGREF.getKey())
+							&& !attachment.isNull(MailJSONField.MSGREF.getKey())) {
+						msgref = new MailPath(attachment.get(MailJSONField.MSGREF.getKey()).toString());
+						isMail = true;
+					} else {
+						msgref = transportMail.getMsgref();
+						isMail = false;
+					}
+					final MailMessage referencedMail = access.getMessageStorage().getMessage(msgref.getFolder(),
+							msgref.getUid(), false);
+					/*
+					 * Decide how to retrieve part
+					 */
+					final String seqId = attachment.has(MailListField.ID.getKey())
+							&& !attachment.isNull(MailListField.ID.getKey()) ? attachment.getString(MailListField.ID
+							.getKey()) : null;
+					// TODO: How to uniquely detect that mail itself is
+					// referenced,
+					// not a part?
+					final ReferencedMailPart referencedMailPart;
+					if (isMail || null == seqId || ROOT.equals(seqId)) {
+						/*
+						 * The mail itself
+						 */
+						referencedMailPart = provider.getNewReferencedPart(referencedMail, session);
+					} else {
+						/*
+						 * A part of the mail
+						 */
+						handler.setSequenceId(attachment.getString(MailListField.ID.getKey()));
+						parser.reset().parseMailMessage(referencedMail, handler);
+						referencedMailPart = provider.getNewReferencedPart(handler.getMailPart(), session);
+					}
+					referencedMailPart.setMsgref(msgref);
+					transportMail.addEnclosedPart(referencedMailPart);
+				}
+			} finally {
+				access.close(true);
+			}
 		}
 	}
 

@@ -57,8 +57,9 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link MailListField} - An enumeration of mail list fields as defined in <a
- * href="http://www.open-xchange.com/wiki/index.php?title=HTTP_API#Module_.22mail.22">HTTP
- * API's mail section</a>
+ * href=
+ * "http://www.open-xchange.com/wiki/index.php?title=HTTP_API#Module_.22mail.22"
+ * >HTTP API's mail section</a>
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 

@@ -127,19 +127,20 @@ public final class User2ACLAutoDetector {
 	 * given the IMAP server's name
 	 * 
 	 * <p>
-	 * The IMAP server name can either be a machine name, such as "<code>java.sun.com</code>",
-	 * or a textual representation of its IP address.
+	 * The IMAP server name can either be a machine name, such as "
+	 * <code>java.sun.com</code>", or a textual representation of its IP
+	 * address.
 	 * 
-	 * @param imapServer -
-	 *            the IMAP server's name
-	 * @param imapPort -
-	 *            the IMAP server's port
+	 * @param imapServer
+	 *            - the IMAP server's name
+	 * @param imapPort
+	 *            - the IMAP server's port
 	 * @return the IMAP server's depending {@link User2ACL} implementation
-	 * @throws IOException -
-	 *             if an I/O error occurs
-	 * @throws User2ACLException -
-	 *             if a server greeting could not be mapped to a supported IMAP
-	 *             server
+	 * @throws IOException
+	 *             - if an I/O error occurs
+	 * @throws User2ACLException
+	 *             - if a server greeting could not be mapped to a supported
+	 *             IMAP server
 	 */
 	static User2ACL getUser2ACLImpl(final String imapServer, final int imapPort) throws IOException, User2ACLException {
 		final InetAddress key = InetAddress.getByName(imapServer);
@@ -229,7 +230,7 @@ public final class User2ACLAutoDetector {
 				 */
 				boolean eol = false;
 				int i = -1;
-				while (!eol && (i = in.read()) != -1) {
+				while (!eol && ((i = in.read()) != -1)) {
 					final char c = (char) i;
 					if ((c == '\n') || (c == '\r')) {
 						if (c == '\r') {
@@ -261,7 +262,7 @@ public final class User2ACLAutoDetector {
 						do {
 							final char c = (char) i;
 							if ((c == '\n') || (c == '\r')) {
-								if (c == '\n' && skipLF) {
+								if ((c == '\n') && skipLF) {
 									// Discard remaining LF
 									skipLF = false;
 									nextLine = true;
@@ -274,7 +275,7 @@ public final class User2ACLAutoDetector {
 							} else {
 								sb.append(c);
 							}
-						} while (!eol && (i = in.read()) != -1);
+						} while (!eol && ((i = in.read()) != -1));
 					}
 					if (nextLine) {
 						sb.append('\n');
@@ -348,7 +349,7 @@ public final class User2ACLAutoDetector {
 				 */
 				boolean eol = false;
 				int i = -1;
-				while (!eol && (i = in.read()) != -1) {
+				while (!eol && ((i = in.read()) != -1)) {
 					final char c = (char) i;
 					if ((c == '\n') || (c == '\r')) {
 						eol = true;

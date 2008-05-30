@@ -66,7 +66,7 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	private final String command;
 
 	private final String[] args;
-	
+
 	private final boolean performNotifyResponseHandlers;
 
 	/**
@@ -74,7 +74,8 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	 * 
 	 * @param imapFolder
 	 */
-	public SimpleIMAPCommand(final IMAPFolder imapFolder, final String command, final boolean performNotifyResponseHandlers) {
+	public SimpleIMAPCommand(final IMAPFolder imapFolder, final String command,
+			final boolean performNotifyResponseHandlers) {
 		super(imapFolder);
 		this.command = command;
 		args = ARGS_EMPTY;
@@ -86,7 +87,8 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	 * 
 	 * @param imapFolder
 	 */
-	public SimpleIMAPCommand(final IMAPFolder imapFolder, final String command, final long[] uids, final boolean performNotifyResponseHandlers) {
+	public SimpleIMAPCommand(final IMAPFolder imapFolder, final String command, final long[] uids,
+			final boolean performNotifyResponseHandlers) {
 		super(imapFolder);
 		if (uids == null) {
 			returnDefaultValue = true;
@@ -134,7 +136,8 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#getDefaultValueOnEmptyFolder()
+	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
+	 * getDefaultValueOnEmptyFolder()
 	 */
 	@Override
 	protected Boolean getDefaultValue() {
@@ -154,20 +157,24 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(com.sun.mail.iap.Response)
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#handleLastResponse(
+	 * com.sun.mail.iap.Response)
 	 */
 	@Override
 	protected void handleLastResponse(final Response lastResponse) throws MessagingException {
 		if (!lastResponse.isOK()) {
-			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, "Command \""
-					+ command + "\" failed: " + lastResponse.getRest()));
+			throw new MessagingException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR,
+					"Command \"" + command + "\" failed: " + lastResponse.getRest()));
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.sun.mail.iap.Response)
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#handleResponse(com.
+	 * sun.mail.iap.Response)
 	 */
 	@Override
 	protected void handleResponse(final Response response) throws MessagingException {
@@ -176,7 +183,8 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
+	 * @see
+	 * com.openexchange.imap.command.AbstractIMAPCommand#performHandleResult()
 	 */
 	@Override
 	protected boolean performHandleResult() {
@@ -186,7 +194,8 @@ public final class SimpleIMAPCommand extends AbstractIMAPCommand<Boolean> {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.imap.command.AbstractIMAPCommand#performNotifyResponseHandlers()
+	 * @seecom.openexchange.imap.command.AbstractIMAPCommand#
+	 * performNotifyResponseHandlers()
 	 */
 	@Override
 	protected boolean performNotifyResponseHandlers() {

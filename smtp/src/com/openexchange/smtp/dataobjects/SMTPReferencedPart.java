@@ -65,23 +65,17 @@ public final class SMTPReferencedPart extends ReferencedMailPart {
 	private static final long serialVersionUID = -1507249923428057041L;
 
 	/**
-	 * Constructor
+	 * Initializes a new {@link SMTPReferencedPart}
 	 * 
+	 * @param referencedPart
+	 *            The referenced {@link MailPart part}
+	 * @param session
+	 *            The {@link Session session} providing needed user data
 	 * @throws MailException
-	 *             If a mail error occurs
+	 *             If instantiation fails
 	 */
 	public SMTPReferencedPart(final MailPart referencedPart, final Session session) throws MailException {
 		super(referencedPart, session);
-	}
-
-	/**
-	 * Constructor
-	 * 
-	 * @param sequenceId
-	 *            The sequence ID
-	 */
-	public SMTPReferencedPart(final String sequenceId) {
-		super(sequenceId);
 	}
 
 }

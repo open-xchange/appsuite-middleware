@@ -78,7 +78,6 @@ import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -252,8 +251,8 @@ public final class IMAPCommandsCollection {
 	 */
 	public static boolean isSubscribed(final String fullname, final char separator, final boolean isNamespace,
 			final IMAPFolder defaultFolder) throws MessagingException {
-		final String lfolder = ((isNamespace || fullname.length() == 0) && separator != '\0') ? fullname + separator
-				: fullname;
+		final String lfolder = ((isNamespace || (fullname.length() == 0)) && (separator != '\0')) ? fullname
+				+ separator : fullname;
 		return ((Boolean) (defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 			public Object doCommand(final IMAPProtocol p) throws ProtocolException {
 				final Response[] r = p.command(new StringBuilder().append(COMMAND_LSUB).append(" \"\" ").append(
@@ -321,8 +320,8 @@ public final class IMAPCommandsCollection {
 					try {
 						if (response.isOK()) {
 							continue Next;
-						} else if (response.isBAD() && response.getRest() != null
-								&& response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1) {
+						} else if (response.isBAD() && (response.getRest() != null)
+								&& (response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1)) {
 							throw new ProtocolException(IMAPException.getFormattedMessage(
 									IMAPException.Code.PROTOCOL_ERROR, ERR_INVALID_SYSTEM_FLAG_DETECTED));
 						} else {
@@ -379,8 +378,8 @@ public final class IMAPCommandsCollection {
 					try {
 						if (response.isOK()) {
 							continue Next;
-						} else if (response.isBAD() && response.getRest() != null
-								&& response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1) {
+						} else if (response.isBAD() && (response.getRest() != null)
+								&& (response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1)) {
 							throw new ProtocolException(IMAPException.getFormattedMessage(
 									IMAPException.Code.PROTOCOL_ERROR, ERR_INVALID_SYSTEM_FLAG_DETECTED));
 						} else {
@@ -693,8 +692,8 @@ public final class IMAPCommandsCollection {
 				try {
 					if (response.isOK()) {
 						return Boolean.TRUE;
-					} else if (response.isBAD() && response.getRest() != null
-							&& response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1) {
+					} else if (response.isBAD() && (response.getRest() != null)
+							&& (response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1)) {
 						throw new ProtocolException(IMAPException.getFormattedMessage(
 								IMAPException.Code.PROTOCOL_ERROR, ERR_INVALID_SYSTEM_FLAG_DETECTED));
 					} else {
@@ -880,7 +879,7 @@ public final class IMAPCommandsCollection {
 							set.add(uid);
 							r[i] = null;
 						}
-						if (filter != null && filter.length > 0) {
+						if ((filter != null) && (filter.length > 0)) {
 							for (int i = 0; i < filter.length; i++) {
 								set.remove(Long.valueOf(filter[i]));
 							}
@@ -979,7 +978,7 @@ public final class IMAPCommandsCollection {
 				Response response = null;
 				int index = 0;
 				final long[] uids = new long[size];
-				for (int i = 0; i < args.length && index < size; i++) {
+				for (int i = 0; (i < args.length) && (index < size); i++) {
 					r = p.command(String.format(TEMPL_FETCH_UID, args[i]), null);
 					final int len = r.length - 1;
 					response = r[len];
@@ -1047,8 +1046,8 @@ public final class IMAPCommandsCollection {
 					try {
 						if (response.isOK()) {
 							continue Next;
-						} else if (response.isBAD() && response.getRest() != null
-								&& response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1) {
+						} else if (response.isBAD() && (response.getRest() != null)
+								&& (response.getRest().indexOf(STR_INVALID_SYSTEM_FLAG) != -1)) {
 							throw new ProtocolException(IMAPException.getFormattedMessage(
 									IMAPException.Code.PROTOCOL_ERROR, ERR_INVALID_SYSTEM_FLAG_DETECTED));
 						} else {
@@ -1189,7 +1188,7 @@ public final class IMAPCommandsCollection {
 	 * @throws MessagingException
 	 */
 	public static long findMarker(final String marker, final IMAPFolder imapFolder) throws MessagingException {
-		if (marker == null || marker.length() == 0) {
+		if ((marker == null) || (marker.length() == 0)) {
 			return -1L;
 		}
 		final Long retval = (Long) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
@@ -1223,7 +1222,7 @@ public final class IMAPCommandsCollection {
 								 * Remember index of header item
 								 */
 								final int count = fetchResponse.getItemCount();
-								for (int k = 0; k < count && index == -1; k++) {
+								for (int k = 0; (k < count) && (index == -1); k++) {
 									if (BODY.class.isInstance(fetchResponse.getItem(k))
 											|| RFC822DATA.class.isInstance(fetchResponse.getItem(k))) {
 										index = k;
@@ -1277,7 +1276,7 @@ public final class IMAPCommandsCollection {
 	 * @throws MessagingException
 	 */
 	public static long messageId2UID(final String messageId, final IMAPFolder imapFolder) throws MessagingException {
-		if (messageId == null || messageId.length() == 0) {
+		if ((messageId == null) || (messageId.length() == 0)) {
 			return -1L;
 		}
 		final Long retval = (Long) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
@@ -1305,7 +1304,7 @@ public final class IMAPCommandsCollection {
 								 * Remember index of ENVELOPE item
 								 */
 								final int count = fetchResponse.getItemCount();
-								for (int k = 0; k < count && index == -1; k++) {
+								for (int k = 0; (k < count) && (index == -1); k++) {
 									if (ENVELOPE.class.isInstance(fetchResponse.getItem(k))) {
 										index = k;
 									}

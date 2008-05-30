@@ -81,7 +81,7 @@ public final class ThreadParser {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(new StringBuilder("Start parse: ").append(threadList).toString());
 		}
-		if (threadList.charAt(0) >= '0' && threadList.charAt(0) <= '9') {
+		if ((threadList.charAt(0) >= '0') && (threadList.charAt(0) <= '9')) {
 			// Now in a thread the thread starts normally with a number.
 			final int message = getMessageID(threadList);
 			if (LOG.isDebugEnabled()) {
@@ -91,7 +91,7 @@ public final class ThreadParser {
 			recthreads.add(actual);
 			// Now thread ends or answers are there.
 			final int messageIDLength = String.valueOf(message).length();
-			if (threadList.length() > messageIDLength && threadList.charAt(messageIDLength) == ' ') {
+			if ((threadList.length() > messageIDLength) && (threadList.charAt(messageIDLength) == ' ')) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("Parsing child threads.");
 				}
@@ -154,7 +154,7 @@ public final class ThreadParser {
 		int pos = 0;
 		while (pos < threadList.length()) {
 			final char actual = threadList.charAt(pos);
-			if (actual < '0' || actual > '9') {
+			if ((actual < '0') || (actual > '9')) {
 				break;
 			}
 			pos++;
@@ -190,7 +190,7 @@ public final class ThreadParser {
 				LOG.debug(new StringBuilder("Char: ").append(actual).append(" Pos ").append(pos).toString());
 			}
 			pos++;
-		} while (openingBrackets > 0 && pos < threadList.length());
+		} while ((openingBrackets > 0) && (pos < threadList.length()));
 		pos--;
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(new StringBuilder("Found: ").append(pos).toString());

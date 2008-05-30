@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,7 +63,9 @@ import java.util.regex.Pattern;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class MailPath implements Cloneable {
+public final class MailPath implements Cloneable, Serializable {
+
+	private static final long serialVersionUID = -7426425247685367823L;
 
 	/**
 	 * Gets an appropriate instance of {@link Comparator} to sort instances of
@@ -104,7 +107,8 @@ public final class MailPath implements Cloneable {
 
 	/**
 	 * Returns the mail paths for given comma-separated mail IDs each conform to
-	 * pattern &lt;folder-path&gt;&lt;value-of-{@link #SEPERATOR}&gt;&lt;mail-ID&gt;
+	 * pattern &lt;folder-path&gt;&lt;value-of-{@link #SEPERATOR}
+	 * &gt;&lt;mail-ID&gt;
 	 * 
 	 * @param mailPaths
 	 *            The comma-separated mail IDs

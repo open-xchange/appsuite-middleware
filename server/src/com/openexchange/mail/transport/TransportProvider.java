@@ -52,6 +52,7 @@ package com.openexchange.mail.transport;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -128,8 +129,7 @@ public abstract class TransportProvider {
 	 * Sets the deprecated flag
 	 * 
 	 * @param deprecated
-	 *            <code>true</code> if deprecated; otherwise
-	 *            <code>false</code>
+	 *            <code>true</code> if deprecated; otherwise <code>false</code>
 	 */
 	void setDeprecated(final boolean deprecated) {
 		this.deprecated = deprecated;
@@ -260,16 +260,4 @@ public abstract class TransportProvider {
 	 */
 	public abstract ReferencedMailPart getNewReferencedPart(MailPart referencedPart, Session session)
 			throws MailException;
-
-	/**
-	 * Gets a new instance of {@link ReferencedMailPart}
-	 * 
-	 * @param sequenceId
-	 *            The sequence ID in referenced mail
-	 * @return A new instance of {@link ReferencedMailPart}
-	 * @throws MailException
-	 *             If a new instance of {@link ReferencedMailPart} cannot be
-	 *             created
-	 */
-	public abstract ReferencedMailPart getNewReferencedPart(String sequenceId) throws MailException;
 }
