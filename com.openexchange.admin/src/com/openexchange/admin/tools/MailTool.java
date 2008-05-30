@@ -67,7 +67,7 @@ import com.sun.mail.smtp.SMTPMessage;
 /**
  * This class is used for mail handling, especially for sending notification mails to
  * the admin user
- * 
+ * TODO no mails are sent with admin. Maybe this class can be removed.
  * @author d7
  *
  */
