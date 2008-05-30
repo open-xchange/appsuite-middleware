@@ -69,6 +69,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailJSONField;
+import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
@@ -224,7 +225,7 @@ public class NetsolGetResponse extends AbstractAJAXResponse {
 			 * Msg Ref
 			 */
 			if (jsonObj.has(MailJSONField.MSGREF.getKey()) && !jsonObj.isNull(MailJSONField.MSGREF.getKey())) {
-				mail.setMsgref(jsonObj.getString(MailJSONField.MSGREF.getKey()));
+				mail.setMsgref(new MailPath(jsonObj.getString(MailJSONField.MSGREF.getKey())));
 			}
 			/*
 			 * Subject, etc.

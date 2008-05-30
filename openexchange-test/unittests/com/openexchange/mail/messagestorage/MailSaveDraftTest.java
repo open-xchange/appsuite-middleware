@@ -119,8 +119,7 @@ public final class MailSaveDraftTest extends AbstractMailTest {
 				draftMail.addFrom(new InternetAddress("someone@somewhere.com", true));
 				draftMail.addTo(new InternetAddress("someone.else@another.com", true));
 				draftMail.addTo(new InternetAddress("Jane Doe <another.one@anywhere.org>", true));
-				draftMail.setReferencedMail(mail);
-				draftMail.setMsgref(new MailPath(mail.getFolder(), mail.getMailId()).toString());
+				draftMail.setMsgref(new MailPath(mail.getFolder(), mail.getMailId()));
 
 				mail = mailAccess.getMessageStorage().saveDraft(draftFullname, draftMail);
 				uid = mail.getMailId();
