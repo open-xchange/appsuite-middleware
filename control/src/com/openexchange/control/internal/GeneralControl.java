@@ -308,7 +308,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		}
 	}
 
-	private String resolvState(final int state) {
+	private static String resolvState(final int state) {
 		// TODO: add all states
 		switch (state) {
 		case Bundle.ACTIVE:
@@ -326,7 +326,7 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
 		}
 	}
 
-	protected void freshPackages(final BundleContext bundleContext) {
+	protected static void freshPackages(final BundleContext bundleContext) {
 		final ServiceReference serviceReference = bundleContext
 				.getServiceReference("org.osgi.service.packageadmin.PackageAdmin");
 		final PackageAdmin packageAdmin = (PackageAdmin) bundleContext.getService(serviceReference);
