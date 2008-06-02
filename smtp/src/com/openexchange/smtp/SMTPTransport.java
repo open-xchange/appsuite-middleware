@@ -127,7 +127,7 @@ public final class SMTPTransport extends MailTransport {
 
 	private SMTPConfig smtpConfig;
 
-	public SMTPTransport() {
+	protected SMTPTransport() {
 		super();
 		smtpSession = null;
 		session = null;

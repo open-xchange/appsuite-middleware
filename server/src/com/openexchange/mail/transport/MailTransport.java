@@ -49,8 +49,6 @@
 
 package com.openexchange.mail.transport;
 
-import java.lang.reflect.InvocationTargetException;
-
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -69,23 +67,28 @@ public abstract class MailTransport {
 	 * Triggers all implementation-specific startup actions; especially its
 	 * configuration initialization
 	 * 
+	 * @param transport
+	 *            A {@link MailTransport transport}
+	 * 
 	 * @throws MailException
+	 *             If implementation start-up fails
 	 */
-	static final void startupImpl(final Class<? extends MailTransport> clazz) throws MailException {
-		createNewInstance(clazz, null).startup();
+	static final void startupImpl(final MailTransport transport) throws MailException {
+		transport.startup();
 	}
 
 	/**
 	 * Triggers all implementation-specific shutdown actions; especially its
 	 * configuration shut-down
 	 * 
+	 * @param transport
+	 *            A {@link MailTransport transport}
 	 * @throws MailException
+	 *             If implementation shut-down fails
 	 */
-	static final void shutdownImpl(final Class<? extends MailTransport> clazz) throws MailException {
-		createNewInstance(clazz, null).shutdown();
+	static final void shutdownImpl(final MailTransport transport) throws MailException {
+		transport.shutdown();
 	}
-
-	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { Session.class };
 
 	/**
 	 * Gets the proper instance of {@link MailTransport} parameterized with
@@ -101,30 +104,7 @@ public abstract class MailTransport {
 		/*
 		 * Create a new mail transport through user's transport provider
 		 */
-		return createNewInstance(TransportProviderRegistry.getTransportProviderBySession(session)
-				.getMailTransportClass(), session);
-	}
-
-	private static final MailTransport createNewInstance(final Class<? extends MailTransport> clazz,
-			final Session session) throws MailException {
-		/*
-		 * Create a new mail transport
-		 */
-		try {
-			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { session });
-		} catch (final SecurityException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final NoSuchMethodException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalArgumentException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InstantiationException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalAccessException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InvocationTargetException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		}
+		return TransportProviderRegistry.getTransportProviderBySession(session).createNewMailTransport(session);
 	}
 
 	/**

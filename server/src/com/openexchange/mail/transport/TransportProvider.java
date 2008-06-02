@@ -52,7 +52,6 @@ package com.openexchange.mail.transport;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
-import com.openexchange.mail.MailPath;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -143,7 +142,7 @@ public abstract class TransportProvider {
 	 */
 	protected final void startUp() throws MailException {
 		getProtocolProperties().loadProperties();
-		MailTransport.startupImpl(getMailTransportClass());
+		MailTransport.startupImpl(createNewMailTransport(null));
 	}
 
 	/**
@@ -153,7 +152,7 @@ public abstract class TransportProvider {
 	 *             if shut-down fails
 	 */
 	protected final void shutDown() throws MailException {
-		MailTransport.shutdownImpl(getMailTransportClass());
+		MailTransport.shutdownImpl(createNewMailTransport(null));
 		getProtocolProperties().resetProperties();
 	}
 
@@ -180,11 +179,15 @@ public abstract class TransportProvider {
 	}
 
 	/**
-	 * Gets the class implementing {@link MailTransport}
+	 * Gets a newly created {@link MailTransport mail transport}
 	 * 
-	 * @return The class implementing {@link MailTransport}
+	 * @param session
+	 *            The session providing needed user data
+	 * @return A newly created {@link MailTransport mail transport}
+	 * @throws MailException
+	 *             If instantiation fails
 	 */
-	public abstract Class<? extends MailTransport> getMailTransportClass();
+	public abstract MailTransport createNewMailTransport(Session session) throws MailException;
 
 	/**
 	 * Gets the protocol properties

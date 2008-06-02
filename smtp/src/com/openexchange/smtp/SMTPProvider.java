@@ -102,8 +102,8 @@ public final class SMTPProvider extends TransportProvider {
 	}
 
 	@Override
-	public Class<? extends MailTransport> getMailTransportClass() {
-		return SMTPTransport.class;
+	public MailTransport createNewMailTransport(final Session session) throws MailException {
+		return new SMTPTransport(session);
 	}
 
 	@Override
