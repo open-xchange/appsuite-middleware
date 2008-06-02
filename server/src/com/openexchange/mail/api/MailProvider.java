@@ -53,6 +53,7 @@ import com.openexchange.mail.MailException;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.permission.MailPermission;
+import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 
@@ -124,8 +125,7 @@ public abstract class MailProvider {
 	 * Sets the deprecated flag
 	 * 
 	 * @param deprecated
-	 *            <code>true</code> if deprecated; otherwise
-	 *            <code>false</code>
+	 *            <code>true</code> if deprecated; otherwise <code>false</code>
 	 */
 	public void setDeprecated(final boolean deprecated) {
 		this.deprecated = deprecated;
@@ -139,7 +139,7 @@ public abstract class MailProvider {
 	 */
 	public void startUp() throws MailException {
 		getProtocolProperties().loadProperties();
-		MailAccess.startupImpl(getMailAccessClass());
+		MailAccess.startupImpl(createNewMailAccess(null));
 	}
 
 	/**
@@ -149,7 +149,7 @@ public abstract class MailProvider {
 	 *             if shut-down fails
 	 */
 	public void shutDown() throws MailException {
-		MailAccess.shutdownImpl(getMailAccessClass());
+		MailAccess.shutdownImpl(createNewMailAccess(null));
 		getProtocolProperties().resetProperties();
 	}
 
@@ -210,11 +210,13 @@ public abstract class MailProvider {
 	}
 
 	/**
-	 * Gets the class implementing {@link MailAccess}
+	 * Gets a newly created {@link MailAccess mail access}.
 	 * 
-	 * @return The class implementing {@link MailAccess}
+	 * @param session
+	 *            The session providing neeed user data
+	 * @return The newly created {@link MailAccess mail access}.
 	 */
-	public abstract Class<? extends MailAccess<?, ?>> getMailAccessClass();
+	public abstract MailAccess<?, ?> createNewMailAccess(Session session);
 
 	/**
 	 * Gets the protocol properties

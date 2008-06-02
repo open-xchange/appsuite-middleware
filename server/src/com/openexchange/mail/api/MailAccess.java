@@ -50,7 +50,6 @@
 package com.openexchange.mail.api;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
@@ -120,28 +119,26 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	/**
 	 * Triggers all implementation-specific startup actions
 	 * 
-	 * @param className
-	 *            The mail access class name
+	 * @param mailAccess
+	 *            An instance of {@link MailAccess}
 	 * @throws MailException
 	 *             If implementation-specific startup fails
 	 */
-	static void startupImpl(final Class<? extends MailAccess<?, ?>> clazz) throws MailException {
-		createNewMailAccess(clazz, null).startup();
+	static void startupImpl(final MailAccess<?, ?> mailAccess) throws MailException {
+		mailAccess.startup();
 	}
 
 	/**
 	 * Triggers all implementation-specific shutdown actions
 	 * 
-	 * @param className
-	 *            The mail access class name
+	 * @param mailAccess
+	 *            An instance of {@link MailAccess}
 	 * @throws MailException
 	 *             If implementation-specific shutdown fails
 	 */
-	static void shutdownImpl(final Class<? extends MailAccess<?, ?>> clazz) throws MailException {
-		createNewMailAccess(clazz, null).shutdown();
+	static void shutdownImpl(final MailAccess<?, ?> mailAccess) throws MailException {
+		mailAccess.shutdown();
 	}
-
-	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] { Session.class };
 
 	/**
 	 * Gets the proper instance of {@link MailAccess} parameterized with given
@@ -206,37 +203,7 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 		/*
 		 * Create a new mail access through user's mail provider
 		 */
-		return createNewMailAccess(MailProviderRegistry.getMailProviderBySession(session).getMailAccessClass(), session);
-	}
-
-	/**
-	 * Creates a new mail access instance by class name
-	 * 
-	 * @param clazz
-	 *            The mail access class
-	 * @param session
-	 *            The session providing needed user data
-	 * @return Newly created mail access instance
-	 * @throws MailException
-	 *             If mail access creation fails
-	 */
-	private static final MailAccess<?, ?> createNewMailAccess(final Class<? extends MailAccess<?, ?>> clazz,
-			final Session session) throws MailException {
-		try {
-			return clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(new Object[] { session });
-		} catch (final SecurityException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final NoSuchMethodException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalArgumentException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InstantiationException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalAccessException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InvocationTargetException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		}
+		return MailProviderRegistry.getMailProviderBySession(session).createNewMailAccess(session);
 	}
 
 	/**

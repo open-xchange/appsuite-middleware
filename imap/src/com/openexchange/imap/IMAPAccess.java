@@ -105,9 +105,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 	private boolean decrement;
 
 	/**
-	 * Default constructor
+	 * Initializes a new {@link IMAPAccess}
+	 * 
+	 * @param session
+	 *            The session providing needed user data
 	 */
-	public IMAPAccess(final Session session) {
+	protected IMAPAccess(final Session session) {
 		super(session);
 		setMailProperties((Properties) System.getProperties().clone());
 	}

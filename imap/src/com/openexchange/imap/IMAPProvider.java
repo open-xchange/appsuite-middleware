@@ -56,6 +56,7 @@ import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.permission.MailPermission;
+import com.openexchange.session.Session;
 
 /**
  * {@link IMAPProvider} - The provider for IMAP protocol
@@ -89,8 +90,8 @@ public final class IMAPProvider extends MailProvider {
 	}
 
 	@Override
-	public Class<? extends MailAccess<?, ?>> getMailAccessClass() {
-		return IMAPAccess.class;
+	public MailAccess<?, ?> createNewMailAccess(final Session session) {
+		return new IMAPAccess(session);
 	}
 
 	@Override
