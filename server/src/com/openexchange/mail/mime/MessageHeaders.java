@@ -162,4 +162,8 @@ public final class MessageHeaders {
 
 	public static final HeaderName X_OX_MARKER = HeaderName.valueOf(HDR_X_OX_MARKER);
 
+	public static final String HDR_RECEIVED = "Received";
+
+	public static final HeaderName RECEIVED = HeaderName.valueOf(HDR_RECEIVED);
+
 }
