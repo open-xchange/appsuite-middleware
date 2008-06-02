@@ -213,7 +213,7 @@ public abstract class MailProvider {
 	 * Gets a newly created {@link MailAccess mail access}.
 	 * 
 	 * @param session
-	 *            The session providing neeed user data
+	 *            The session providing needed user data
 	 * @return The newly created {@link MailAccess mail access}.
 	 */
 	public abstract MailAccess<?, ?> createNewMailAccess(Session session);
