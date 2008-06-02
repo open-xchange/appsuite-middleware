@@ -63,7 +63,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -550,16 +552,25 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 OXFolderAdminHelper.propagateUserModification(usrdata.getId(), changedfields, System.currentTimeMillis(), write_ox_con,write_ox_con, ctx.getId().intValue());
             }
 
-            // if admin sets GUI configuration existing GUI configuration is overwritten
-            if (usrdata.isGuiPreferencesSet()) {
-                final SettingStorage settStor = SettingStorage.getInstance(ctx
-                    .getId().intValue(), usrdata.getId().intValue());
-                try {
-                    final Setting setting = ConfigTree.getSettingByPath("/gui");
-                    setting.setSingleValue(usrdata.getGuiPreferences());
-                    settStor.save(write_ox_con, setting);
-                } catch (final SettingException e) {
-                    log.error("Problem while storing GUI preferences.", e);
+            // if administrator sets GUI configuration existing GUI configuration
+            // is overwritten
+            final SettingStorage settStor = SettingStorage.getInstance(ctx
+                .getId().intValue(), usrdata.getId().intValue());
+            final Map<String, String> guiPreferences = usrdata.getGuiPreferences();
+            final Iterator<Entry<String, String>> iter = guiPreferences.entrySet()
+                .iterator();
+            while (iter.hasNext()) {
+                final Entry<String, String> entry = iter.next();
+                final String key = entry.getKey();
+                final String value = entry.getValue();
+                if (null != key && null != value) {
+                    try {
+                        final Setting setting = ConfigTree.getSettingByPath(key);
+                        setting.setSingleValue(value);
+                        settStor.save(write_ox_con, setting);
+                    } catch (final SettingException e) {
+                        log.error("Problem while storing GUI preferences.", e);
+                    }
                 }
             }
 
@@ -1106,13 +1117,23 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             // Write GUI configuration to database.
             final SettingStorage settStor = SettingStorage.getInstance(ctx
-                .getId().intValue(), internal_user_id);
-            try {
-                final Setting setting = ConfigTree.getSettingByPath("/gui");
-                setting.setSingleValue(usrdata.getGuiPreferences());
-                settStor.save(write_ox_con, setting);
-            } catch (final SettingException e) {
-                log.error("Problem while storing GUI preferences.", e);
+                .getId().intValue(), usrdata.getId().intValue());
+            final Map<String, String> guiPreferences = usrdata.getGuiPreferences();
+            final Iterator<Entry<String, String>> iter = guiPreferences.entrySet()
+                .iterator();
+            while (iter.hasNext()) {
+                final Entry<String, String> entry = iter.next();
+                final String key = entry.getKey();
+                final String value = entry.getValue();
+                if (null != key && null != value) {
+                    try {
+                        final Setting setting = ConfigTree.getSettingByPath(key);
+                        setting.setSingleValue(value);
+                        settStor.save(write_ox_con, setting);
+                    } catch (final SettingException e) {
+                        log.error("Problem while storing GUI preferences.", e);
+                    }
+                }
             }
 
             // return the client the id to work with the user in the system
