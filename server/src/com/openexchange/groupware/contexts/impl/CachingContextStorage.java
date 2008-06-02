@@ -152,7 +152,7 @@ public class CachingContextStorage extends ContextStorage {
      * {@inheritDoc}
      */
     @Override
-	protected ContextExtended loadContext(final int contextId) throws ContextException {
+	public ContextExtended loadContext(final int contextId) throws ContextException {
 		final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
 		if (cacheService == null) {
 			return persistantImpl.loadContext(contextId);

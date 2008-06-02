@@ -213,7 +213,7 @@ public class RdbContextStorage extends ContextStorage {
      * {@inheritDoc}
      */
     @Override
-	protected ContextExtended loadContext(final int contextId) throws ContextException {
+	public ContextExtended loadContext(final int contextId) throws ContextException {
         Connection con = null;
         try {
             con = DBPool.pickup();

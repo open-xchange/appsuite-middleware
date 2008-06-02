@@ -126,7 +126,7 @@ public abstract class ContextStorage {
      * @return the context object.
      * @throws ContextException if loading the context fails.
      */
-    protected abstract ContextExtended loadContext(int contextId)
+    public abstract ContextExtended loadContext(int contextId)
         throws ContextException;
 
     /**
