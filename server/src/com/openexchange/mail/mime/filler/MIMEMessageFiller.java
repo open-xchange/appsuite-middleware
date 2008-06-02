@@ -103,6 +103,9 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.ComposedMailPart;
+import com.openexchange.mail.dataobjects.compose.ReferencedMailPart;
+import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
@@ -561,12 +564,13 @@ public class MIMEMessageFiller {
 		// TODO: final boolean hasNestedMessages =
 		// (msgObj.getNestedMsgs().size() > 0);
 		final boolean hasNestedMessages = false;
-		final boolean hasAttachments = mail.getEnclosedCount() > 0;
+		final int size = mail.getEnclosedCount();
+		final boolean hasAttachments = size > 0;
 		/*
 		 * A non-inline forward message
 		 */
-		final boolean isAttachmentForward = ((ComposeType.FORWARD.equals(type)) && (mail.getEnclosedCount() > 1 || usm
-				.isForwardAsAttachment()));
+		final boolean isAttachmentForward = ((ComposeType.FORWARD.equals(type)) && (usm.isForwardAsAttachment() || (size > 1 && hasOnlyReferencedMailAttachments(
+				mail, size))));
 		/*
 		 * Initialize primary multipart
 		 */
@@ -635,7 +639,6 @@ public class MIMEMessageFiller {
 					primaryMultipart.addBodyPart(createHtmlBodyPart((String) mail.getContent()));
 				}
 			}
-			final int size = mail.getEnclosedCount();
 			if (isAttachmentForward) {
 				/*
 				 * Add referenced mail(s)
@@ -644,7 +647,7 @@ public class MIMEMessageFiller {
 				final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUF_SIZE);
 				final byte[] bbuf = new byte[BUF_SIZE];
 				for (int i = 0; i < size; i++) {
-					addNestedMessage(mail, primaryMultipart, sb, out, bbuf, i);
+					addNestedMessage(mail.getEnclosedMailPart(i), primaryMultipart, sb, out, bbuf);
 				}
 			} else {
 				/*
@@ -910,7 +913,7 @@ public class MIMEMessageFiller {
 	}
 
 	protected final void addMessageBodyPart(final Multipart mp, final MailPart part, final boolean inline)
-			throws MessagingException, MailException {
+			throws MessagingException, MailException, IOException {
 		final MimeBodyPart messageBodyPart = new MimeBodyPart();
 		if (part.getContentType().isMimeType(MIMETypes.MIME_APPL_OCTET) && part.getFileName() != null) {
 			/*
@@ -921,7 +924,11 @@ public class MIMEMessageFiller {
 			part.getContentType().setPrimaryType(ct.substring(0, pos));
 			part.getContentType().setSubType(ct.substring(pos + 1));
 		} else if (part.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
-			addNestedMessage(mp, part.getDataHandler(), part.getFileName());
+			// TODO: Works correctly?
+			final StringBuilder sb = new StringBuilder(32);
+			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUF_SIZE);
+			final byte[] bbuf = new byte[BUF_SIZE];
+			addNestedMessage(part, mp, sb, out, bbuf);
 			return;
 		}
 		messageBodyPart.setDataHandler(part.getDataHandler());
@@ -961,12 +968,11 @@ public class MIMEMessageFiller {
 		mp.addBodyPart(messageBodyPart);
 	}
 
-	protected void addNestedMessage(final ComposedMailMessage mail, final Multipart primaryMultipart,
-			final StringBuilder sb, final ByteArrayOutputStream out, final byte[] bbuf, final int i)
-			throws MailException, IOException, MessagingException {
+	protected void addNestedMessage(final MailPart mailPart, final Multipart primaryMultipart, final StringBuilder sb,
+			final ByteArrayOutputStream out, final byte[] bbuf) throws MailException, IOException, MessagingException {
 		final byte[] rfcBytes;
 		{
-			final InputStream in = mail.getEnclosedMailPart(i).getInputStream();
+			final InputStream in = mailPart.getInputStream();
 			try {
 				int len;
 				while ((len = in.read(bbuf)) != -1) {
@@ -978,24 +984,27 @@ public class MIMEMessageFiller {
 			rfcBytes = out.toByteArray();
 		}
 		out.reset();
-		final String filename;
-		{
+		final String fn;
+		if (null == mailPart.getFileName()) {
 			String subject = new InternetHeaders(new UnsynchronizedByteArrayInputStream(rfcBytes)).getHeader(
 					MessageHeaders.HDR_SUBJECT, null);
 			if (null == subject || subject.length() == 0) {
-				filename = sb.append(PREFIX_PART).append(i + 1).append(EXT_EML).toString();
+				fn = sb.append(PREFIX_PART).append(EXT_EML).toString();
 			} else {
 				subject = MIMEMessageUtility.decodeMultiEncodedHeader(MimeUtility.unfold(subject));
-				filename = sb.append(subject.replaceAll("\\p{Blank}+", "_")).append(EXT_EML).toString();
+				fn = sb.append(subject.replaceAll("\\p{Blank}+", "_")).append(EXT_EML).toString();
 				sb.setLength(0);
 			}
+		} else {
+			fn = mailPart.getFileName();
 		}
 		addNestedMessage(primaryMultipart, new DataHandler(new MessageDataSource(rfcBytes,
-				MIMETypes.MIME_MESSAGE_RFC822)), filename);
+				MIMETypes.MIME_MESSAGE_RFC822)), fn, Part.INLINE.equalsIgnoreCase(mailPart.getContentDisposition()
+				.getDisposition()));
 	}
 
-	private final void addNestedMessage(final Multipart mp, final DataHandler dataHandler, final String filename)
-			throws MessagingException {
+	private final void addNestedMessage(final Multipart mp, final DataHandler dataHandler, final String filename,
+			final boolean inline) throws MessagingException {
 		/*
 		 * Create a body part for original message
 		 */
@@ -1011,7 +1020,7 @@ public class MIMEMessageFiller {
 		/*
 		 * Set content disposition
 		 */
-		origMsgPart.setDisposition(Part.INLINE);
+		origMsgPart.setDisposition(inline ? Part.INLINE : Part.ATTACHMENT);
 		if (null != filename) {
 			/*
 			 * Determine nested message's filename
@@ -1182,4 +1191,15 @@ public class MIMEMessageFiller {
 		return null;
 	}
 
+	private static final boolean hasOnlyReferencedMailAttachments(final ComposedMailMessage mail, final int size)
+			throws MailException {
+		for (int i = 0; i < size; i++) {
+			final MailPart part = mail.getEnclosedMailPart(i);
+			if (!ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType())
+					|| !((ReferencedMailPart) part).isMail()) {
+				return false;
+			}
+		}
+		return true;
+	}
 }

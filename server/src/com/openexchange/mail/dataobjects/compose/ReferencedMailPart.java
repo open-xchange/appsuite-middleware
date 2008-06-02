@@ -69,6 +69,7 @@ import java.util.Map;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.mail.Part;
 
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.groupware.upload.impl.AJAXUploadFile;
@@ -142,7 +143,6 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 		} catch (final IOException e) {
 			throw new MailException(MailException.Code.IO_ERROR, e, e.getLocalizedMessage());
 		}
-		setHeaders(referencedPart);
 	}
 
 	/**
@@ -170,8 +170,11 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 				final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
 				referencedPart.writeTo(out);
 				this.data = out.toByteArray();
+				setContentType(MIMETypes.MIME_MESSAGE_RFC822);
+				setContentDisposition(Part.INLINE);
 			} else {
 				copy2ByteArr(referencedPart.getInputStream());
+				setHeaders(referencedPart);
 			}
 			return null;
 		}
@@ -179,8 +182,12 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE * 2);
 			referencedPart.writeTo(out);
 			copy2File(new UnsynchronizedByteArrayInputStream(out.toByteArray()), session);
+			setContentType(MIMETypes.MIME_MESSAGE_RFC822);
+			setContentDisposition(Part.INLINE);
+			
 		} else {
 			copy2File(referencedPart.getInputStream(), session);
+			setHeaders(referencedPart);
 		}
 		if (LOG.isInfoEnabled()) {
 			LOG.info(new StringBuilder("Referenced mail part exeeds ").append(
@@ -398,6 +405,16 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 	 */
 	public String getFileID() {
 		return this.fileId;
+	}
+
+	/**
+	 * Checks if referenced part is a mail
+	 * 
+	 * @return <code>true</code> if referenced part is a mail; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isMail() {
+		return isMail;
 	}
 
 	private static final String ALG_MD5 = "MD5";
