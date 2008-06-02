@@ -363,6 +363,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 			if (orderBy > 0){
 				final String order = " ORDER BY co." + Contacts.mapping[orderBy].getDBFieldName() + ' ' + orderDir + limits;
 				cs.setOrder(order);
+			} else {
+				cs.setOrder(limits);
 			}
 
 			final String select = cs.iFgetColsString(cols).toString();
