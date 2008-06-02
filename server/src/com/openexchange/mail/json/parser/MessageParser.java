@@ -475,7 +475,7 @@ public final class MessageParser {
 						/*
 						 * A part of the mail
 						 */
-						handler.setSequenceId(attachment.getString(MailListField.ID.getKey()));
+						handler.setSequenceId(seqId);
 						parser.reset().parseMailMessage(referencedMail, handler);
 						referencedMailPart = provider.getNewReferencedPart(handler.getMailPart(), session);
 					}
