@@ -182,8 +182,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 	}
 
 	@Override
-	protected Class<? extends MailConfig> getMailConfigClass() {
-		return IMAPConfig.class;
+	protected MailConfig createNewMailConfig() {
+		return new IMAPConfig();
 	}
 
 	/**

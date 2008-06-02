@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.api;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -110,10 +109,10 @@ public abstract class MailConfig {
 		 * constant {@link #AUTO} will be returned. Otherwise {@link #FALSE}
 		 * will be returned.
 		 * 
-		 * @param capVal -
-		 *            the string value to parse
-		 * @return an instance of <code>BoolCapVal</code>: either
-		 *         {@link #TRUE}, {@link #FALSE}, or {@link #AUTO}
+		 * @param capVal
+		 *            - the string value to parse
+		 * @return an instance of <code>BoolCapVal</code>: either {@link #TRUE},
+		 *         {@link #FALSE}, or {@link #AUTO}
 		 */
 		public final static BoolCapVal parseBoolCapVal(final String capVal) {
 			if (TRUE.str.equalsIgnoreCase(capVal)) {
@@ -171,30 +170,17 @@ public abstract class MailConfig {
 	 * 
 	 * @param clazz
 	 *            The mail configuration type
+	 * @param instance
+	 *            A newly created {@link MailConfig mail configuration}
 	 * @param session
 	 *            The session providing needed user data
 	 * @return The user-specific mail configuration
 	 * @throws MailException
 	 *             If user-specific mail configuration cannot be determined
 	 */
-	public static final <C extends MailConfig> C getConfig(final Class<? extends C> clazz, final Session session)
-			throws MailException {
-		final C mailConfig;
-		try {
-			mailConfig = clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(INIT_ARGS);
-		} catch (final IllegalArgumentException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final SecurityException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InstantiationException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalAccessException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InvocationTargetException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final NoSuchMethodException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		}
+	public static final <C extends MailConfig> C getConfig(final Class<? extends C> clazz, final MailConfig instance,
+			final Session session) throws MailException {
+		final C mailConfig = clazz.cast(instance);
 		/*
 		 * Fetch user object to determine server URL
 		 */
@@ -313,12 +299,12 @@ public abstract class MailConfig {
 	 * info. Otherwise session-supplied user login info is directly taken as
 	 * return value.
 	 * 
-	 * @param session -
-	 *            the user's session
-	 * @param user -
-	 *            the user object
-	 * @param lookUp -
-	 *            determines whether to look up {@link User#getImapLogin()} or
+	 * @param session
+	 *            - the user's session
+	 * @param user
+	 *            - the user object
+	 * @param lookUp
+	 *            - determines whether to look up {@link User#getImapLogin()} or
 	 *            not
 	 * @return The session-associated user's login
 	 */
@@ -539,7 +525,7 @@ public abstract class MailConfig {
 	public static int getWatcherTime() {
 		return MailProperties.getInstance().getWatcherTime();
 	}
-	
+
 	/**
 	 * Gets the phishing headers
 	 * 
@@ -732,10 +718,10 @@ public abstract class MailConfig {
 	 * 
 	 * @param server
 	 *            The server string
-	 * @return An array of {@link String} with length <code>2</code>. The
-	 *         first element is the protocol and the second the server. If no
-	 *         protocol pattern could be found <code>null</code> is returned;
-	 *         meaning no protocol is present in specified server string.
+	 * @return An array of {@link String} with length <code>2</code>. The first
+	 *         element is the protocol and the second the server. If no protocol
+	 *         pattern could be found <code>null</code> is returned; meaning no
+	 *         protocol is present in specified server string.
 	 */
 	protected final static String[] parseProtocol(final String server) {
 		final int len = server.length();

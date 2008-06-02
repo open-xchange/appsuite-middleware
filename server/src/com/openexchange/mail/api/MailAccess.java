@@ -414,7 +414,8 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	 *             If creating a new mail configuration fails
 	 */
 	private final MailConfig createMailConfig() throws MailException {
-		return MailConfig.getConfig(getMailConfigClass(), session);
+		final MailConfig instance = createNewMailConfig();
+		return MailConfig.getConfig(instance.getClass(), instance, session);
 	}
 
 	/**
@@ -443,11 +444,11 @@ public abstract class MailAccess<F extends MailFolderStorage, M extends MailMess
 	}
 
 	/**
-	 * Gets the implementation-specific subclass of {@link MailConfig}
+	 * Gets a implementation-specific new instance of {@link MailConfig}
 	 * 
-	 * @return The implementation-specific subclass of {@link MailConfig}
+	 * @return A implementation-specific new instance of {@link MailConfig}
 	 */
-	protected abstract Class<? extends MailConfig> getMailConfigClass();
+	protected abstract MailConfig createNewMailConfig();
 
 	/**
 	 * Defines if mail server port has to be present in provided mail
