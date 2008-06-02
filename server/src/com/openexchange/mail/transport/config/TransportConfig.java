@@ -49,8 +49,6 @@
 
 package com.openexchange.mail.transport.config;
 
-import java.lang.reflect.InvocationTargetException;
-
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
@@ -89,23 +87,8 @@ public abstract class TransportConfig extends MailConfig {
 	 *             If user-specific transport configuration cannot be determined
 	 */
 	public static final <C extends TransportConfig> C getTransportConfig(final Class<? extends C> clazz,
-			final Session session) throws MailException {
-		final C transportConfig;
-		try {
-			transportConfig = clazz.getConstructor(CONSTRUCTOR_ARGS).newInstance(INIT_ARGS);
-		} catch (final IllegalArgumentException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final SecurityException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InstantiationException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final IllegalAccessException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final InvocationTargetException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		} catch (final NoSuchMethodException e) {
-			throw new MailException(MailException.Code.INSTANTIATION_PROBLEM, e, clazz.getName());
-		}
+			final TransportConfig instance, final Session session) throws MailException {
+		final C transportConfig = clazz.cast(instance);
 		/*
 		 * Fetch user object to determine server URL
 		 */

@@ -231,7 +231,7 @@ public final class SMTPTransport extends MailTransport {
 
 	private SMTPConfig getTransportConfig() throws MailException {
 		if (smtpConfig == null) {
-			smtpConfig = TransportConfig.getTransportConfig(SMTPConfig.class, session);
+			smtpConfig = TransportConfig.getTransportConfig(SMTPConfig.class, new SMTPConfig(), session);
 		}
 		return smtpConfig;
 	}
