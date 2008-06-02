@@ -60,11 +60,13 @@ import java.io.InputStream;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
+import javax.mail.Part;
 
 import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 
@@ -103,6 +105,10 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
 		setContentType(uploadFile.getContentType());
 		setFileName(uploadFile.getPreparedFileName());
 		setSize(uploadFile.getSize());
+		ContentDisposition cd = new ContentDisposition();
+		cd.setDisposition(Part.ATTACHMENT);
+		cd.setFilenameParameter(getFileName());
+		setContentDisposition(cd);
 	}
 
 	private DataSource getDataSource() {
