@@ -27,7 +27,8 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open Xchange Admin Hosting Plugin
-Requires:       open-xchange-admin
+Requires:       open-xchange-admin >= 6.5.0
+Requires:       open-xchange-admin-client >= 6.5.0
 %if 0%{?suse_version}
 %if 0%{?suse_version} <= 1010
 # SLES10
