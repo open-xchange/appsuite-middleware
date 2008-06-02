@@ -107,12 +107,16 @@ public class RdbSettingStorage extends SettingStorage {
     /**
      * Reference to the context.
      */
-    private final transient Session session;
+    private final Session session;
+
+    private final int ctxId;
+
+    private final int userId;
 
     /**
      * Context.
      */
-    private final transient Context ctx;
+    private final Context ctx;
 
     private final User user;
 
@@ -124,21 +128,34 @@ public class RdbSettingStorage extends SettingStorage {
      * @throws SettingException if the initialization of the setting tree fails.
      */
     RdbSettingStorage(final Session session) throws SettingException {
-        super();
-        this.session = session;
-        ctx = Tools.getContext(session.getContextId());
-        user = Tools.getUser(ctx, session.getUserId());
-        userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
+        this(session, session.getContextId(), session.getUserId());
     }
 
-    RdbSettingStorage(final int contextId, final int userId) throws SettingException {
+    RdbSettingStorage(final Session session, final int ctxId,
+        final int userId) throws SettingException {
         super();
-        this.session = null;
-        ctx = Tools.getContext(contextId);
+        this.session = session;
+        this.ctxId = ctxId;
+        this.userId = userId;
+        ctx = Tools.getContext(ctxId);
         user = Tools.getUser(ctx, userId);
         userConfig = Tools.getUserConfiguration(ctx, userId);
     }
 
+    /**
+     * Special constructor for admin daemon.
+     * @param ctxId 
+     * @param userId
+     */
+    RdbSettingStorage(final int ctxId, final int userId) {
+        super();
+        this.session = null;
+        this.ctxId = ctxId;
+        this.userId = userId;
+        this.ctx = null;
+        this.user = null;
+        this.userConfig = null;
+    }
     /**
      * {@inheritDoc}
      */
@@ -176,7 +193,6 @@ public class RdbSettingStorage extends SettingStorage {
                 LOG.warn(e.getMessage(), e);
             }
         } else {
-            final int userId = user.getId();
             final boolean update = settingExists(userId, setting);
             PreparedStatement stmt = null;
             try {
@@ -187,7 +203,7 @@ public class RdbSettingStorage extends SettingStorage {
                 }
                 int pos = 1;
                 stmt.setString(pos++, setting.getSingleValue().toString());
-                stmt.setInt(pos++, ctx.getContextId());
+                stmt.setInt(pos++, ctxId);
                 stmt.setInt(pos++, userId);
                 stmt.setInt(pos++, setting.getId());
                 stmt.executeUpdate();
@@ -223,8 +239,8 @@ public class RdbSettingStorage extends SettingStorage {
                 stmt = con.prepareStatement(
                     SELECT_VALUE);
                 int pos = 1;
-                stmt.setInt(pos++, ctx.getContextId());
-                stmt.setInt(pos++, user.getId());
+                stmt.setInt(pos++, ctxId);
+                stmt.setInt(pos++, userId);
                 stmt.setInt(pos++, setting.getId());
                 result = stmt.executeQuery();
                 if (result.next()) {
@@ -282,7 +298,7 @@ public class RdbSettingStorage extends SettingStorage {
         try {
             stmt = con.prepareStatement(SETTING_EXISTS);
             int pos = 1;
-            stmt.setInt(pos++, ctx.getContextId());
+            stmt.setInt(pos++, ctxId);
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, setting.getId());
             result = stmt.executeQuery();

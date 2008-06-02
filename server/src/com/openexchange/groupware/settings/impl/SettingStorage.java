@@ -111,10 +111,6 @@ public abstract class SettingStorage {
      */
     public static SettingStorage getInstance(final int contextId,
         final int userId) {
-        try {
-            return new RdbSettingStorage(contextId, userId);
-        } catch (SettingException e) {
-            throw new RuntimeException(e);
-        }
+        return new RdbSettingStorage(contextId, userId);
     }
 }
