@@ -1117,7 +1117,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
             // Write GUI configuration to database.
             final SettingStorage settStor = SettingStorage.getInstance(ctx
-                .getId().intValue(), usrdata.getId().intValue());
+                .getId().intValue(), internal_user_id);
             final Map<String, String> guiPreferences = usrdata.getGuiPreferences();
             final Iterator<Entry<String, String>> iter = guiPreferences.entrySet()
                 .iterator();
