@@ -1441,6 +1441,36 @@ public final class MIMEMessageConverter {
 			if (msg.getReceivedDate() != null) {
 				mail.setReceivedDate(msg.getReceivedDate());
 			} else {
+				/*
+				 * Check for "Received" header
+				 */
+				/*
+				 * TODO: Grab first or determine latest available date through
+				 * iterating headers?
+				 */
+				/**
+				 * <pre>
+				 * final String[] receivedHdrs = msg.getHeader(MessageHeaders.HDR_RECEIVED);
+				 * if (null != receivedHdrs) {
+				 * 	long lastReceived = Long.MIN_VALUE;
+				 * 	for (int i = 0; i &lt; receivedHdrs.length; i++) {
+				 * 		final String hdr = unfold(receivedHdrs[i]);
+				 * 		int pos;
+				 * 		if (hdr != null &amp;&amp; (pos = hdr.lastIndexOf(';')) != -1) {
+				 * 			try {
+				 * 				lastReceived = Math.max(lastReceived, com.openexchange.mail.utils.DateUtils.getDateRFC822(
+				 * 						hdr.substring(pos + 1).trim()).getTime());
+				 * 			} catch (final IllegalArgumentException e) {
+				 * 				continue;
+				 * 			}
+				 * 		}
+				 * 	}
+				 * 	mail.setReceivedDate(new java.util.Date(lastReceived));
+				 * } else {
+				 * 	mail.setReceivedDate(null);
+				 * }
+				 * </pre>
+				 */
 				mail.setReceivedDate(null);
 			}
 			if (msg.getSentDate() != null) {
