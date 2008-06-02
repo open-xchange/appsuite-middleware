@@ -1,3 +1,7 @@
+* 2008-06-02 - ben.pahne@open-xchange.com
+
+ - Bugfix #9842: In global addressbook moved contacts not deleteable
+
 * 2008-05-30 - marcus.klein@open-xchange.com
 
  - Bugfix #11325: Preferences tree must be initialized for admin daemon.
