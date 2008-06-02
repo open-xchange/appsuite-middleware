@@ -97,6 +97,7 @@ import com.openexchange.groupware.upload.ManagedUploadFile;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.mail.MailException;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -257,16 +258,27 @@ public class MIMEMessageFiller {
 		 * Set organization to context-admin's company field setting
 		 */
 		try {
-			/*
-			 * Get context's admin contact object
-			 */
-			final ContactObject c = new RdbContactSQLInterface(session).getObjectById(UserStorage.getInstance()
-					.getUser(ctx.getMailadmin(), ctx).getContactId(), FolderObject.SYSTEM_LDAP_FOLDER_ID);
-			if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
-				mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, c.getCompany());
+			final Object org = session.getParameter(MailSessionParameterNames.PARAM_ORGANIZATION_HDR);
+			if (null == org) {
+				/*
+				 * Get context's admin contact object
+				 */
+				final ContactObject c = new RdbContactSQLInterface(session).getObjectById(UserStorage.getInstance()
+						.getUser(ctx.getMailadmin(), ctx).getContactId(), FolderObject.SYSTEM_LDAP_FOLDER_ID);
+				if (null != c && c.getCompany() != null && c.getCompany().length() > 0) {
+					session.setParameter(MailSessionParameterNames.PARAM_ORGANIZATION_HDR, c.getCompany());
+					mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, c.getCompany());
+				} else {
+					session.setParameter(MessageHeaders.HDR_ORGANIZATION, "null");
+				}
+			} else if (!"null".equals(org.toString())) {
+				/*
+				 * Apply value from session parameter
+				 */
+				mimeMessage.setHeader(MessageHeaders.HDR_ORGANIZATION, org.toString());
 			}
-		} catch (final Throwable t) {
-			LOG.warn("Header \"Organization\" could not be set", t);
+		} catch (final Exception e) {
+			LOG.warn("Header \"Organization\" could not be set", e);
 		}
 	}
 
@@ -949,9 +961,9 @@ public class MIMEMessageFiller {
 		mp.addBodyPart(messageBodyPart);
 	}
 
-	protected void addNestedMessage(final ComposedMailMessage mail, Multipart primaryMultipart, final StringBuilder sb,
-			final ByteArrayOutputStream out, final byte[] bbuf, int i) throws MailException, IOException,
-			MessagingException {
+	protected void addNestedMessage(final ComposedMailMessage mail, final Multipart primaryMultipart,
+			final StringBuilder sb, final ByteArrayOutputStream out, final byte[] bbuf, final int i)
+			throws MailException, IOException, MessagingException {
 		final byte[] rfcBytes;
 		{
 			final InputStream in = mail.getEnclosedMailPart(i).getInputStream();
