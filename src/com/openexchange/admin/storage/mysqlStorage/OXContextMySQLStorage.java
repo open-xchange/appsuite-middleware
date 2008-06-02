@@ -824,7 +824,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 mapping.setInt(1, context_id);
                 rs2 = mapping.executeQuery();
                 while (rs2.next()) {
-                    cs.addLoginMapping(rs2.getString(1));
+                	String login_mapping = rs2.getString(1);                	
+                	// DO NOT RETURN THE CONTEXT ID AS A MAPPING!!
+                	// THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
+                	// SEE #11094 FOR DETAILS!
+                	if(!cs.getIdAsString().equals(login_mapping)){
+                		cs.addLoginMapping(login_mapping);
+                	}
                 }
                 rs2.close();
 
