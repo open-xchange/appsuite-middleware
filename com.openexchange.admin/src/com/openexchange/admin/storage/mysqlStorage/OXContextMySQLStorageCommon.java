@@ -145,11 +145,23 @@ public abstract class OXContextMySQLStorageCommon {
                     cs.setReadDatabase(new Database(read_pool, db_schema));
                     cs.setWriteDatabase(new Database(write_pool, db_schema));
                 }
-                cs.addLoginMapping(rs.getString(10));
+                //DO NOT RETURN THE CONTEXT ID AS A MAPPING!!
+            	// THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
+            	// SEE #11094 FOR DETAILS!
+                String login_mapping = rs.getString(10);   
+                if(!ctx.getIdAsString().equals(login_mapping)){
+                	cs.addLoginMapping(login_mapping);
+                }
             }
             // All other lines contain the same content except the mapping so we concentrate on the mapping here
             while (rs.next()) {
-                cs.addLoginMapping(rs.getString(10));
+            	String login_mapping = rs.getString(10);   	
+            	// DO NOT RETURN THE CONTEXT ID AS A MAPPING!!
+            	// THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
+            	// SEE #11094 FOR DETAILS!
+            	if(!ctx.getIdAsString().equals(login_mapping)){
+            		cs.addLoginMapping(login_mapping);
+            	}                
             }
 
             // ######################
