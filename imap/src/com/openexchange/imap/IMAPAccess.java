@@ -105,7 +105,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 	private boolean decrement;
 
 	/**
-	 * Initializes a new {@link IMAPAccess}
+	 * Initializes a new {@link IMAPAccess IMAP access}
 	 * 
 	 * @param session
 	 *            The session providing needed user data
