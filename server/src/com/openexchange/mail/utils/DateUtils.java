@@ -65,7 +65,13 @@ import java.util.regex.Pattern;
  */
 public final class DateUtils {
 
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(DateUtils.class);
+
 	private static final DateFormat DATEFORMAT_RFC822 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z",
+			Locale.ENGLISH);
+
+	private static final DateFormat DATEFORMAT_RFC822_RETRY = new SimpleDateFormat("dd MMM yyyy HH:mm:ss z",
 			Locale.ENGLISH);
 
 	private static final Pattern PATTERN_RFC822_FIX = Pattern.compile(",(?= 20[0-9][0-9])");
@@ -77,12 +83,21 @@ public final class DateUtils {
 	 * @param string
 	 *            The RFC822 date string
 	 * @return The corresponding instance of {@link Date}
+	 * @throws IllegalArgumentException
+	 *             If specified string cannot be parsed to date
 	 */
 	public static final Date getDateRFC822(final String string) {
 		final String s = PATTERN_RFC822_FIX.matcher(string).replaceFirst("");
 		try {
 			return DATEFORMAT_RFC822.parse(s);
 		} catch (final ParseException e) {
+			try {
+				return DATEFORMAT_RFC822_RETRY.parse(s);
+			} catch (final ParseException e1) {
+				if (LOG.isTraceEnabled()) {
+					LOG.trace(e1.getMessage(), e1);
+				}
+			}
 			throw new IllegalArgumentException(e.getMessage());
 		}
 	}
