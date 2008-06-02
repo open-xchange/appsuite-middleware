@@ -95,4 +95,9 @@ public final class MailSessionParameterNames {
 	 */
 	public static final String PARAM_TRANSPORT_PROVIDER = "com.openexchange.mail.mailtansport";
 
+	/**
+	 * Organization header field when composing new mails
+	 */
+	public static final String PARAM_ORGANIZATION_HDR = "com.openexchange.mail.organization";
+
 }
