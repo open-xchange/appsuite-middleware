@@ -1,3 +1,7 @@
+* 2008-06-02 - marcus.klein@open-xchange.com
+
+ - Bugfix #11327: Checking for possible null values in GUI configuration.
+
 * 2008-04-28 - choeger@open-xchange.com
 
   - Bugfix ID#11139 "No admin user found in context" on changeuser execution
