@@ -100,8 +100,8 @@ public final class UpdateTaskCollectionInit implements Initialization {
 				final ArrayList<UpdateTask> updateTaskList = new ArrayList<UpdateTask>();
 				BufferedReader reader = null;
 				try {
-					final Class[] parameterTypes = new Class[] {};
-					final Object[] initArgs = new Object[] {};
+					final Class<?>[] parameterTypes = new Class<?>[0];
+					final Object[] initArgs = new Object[0];
 					reader = new BufferedReader(new InputStreamReader(new FileInputStream(updateTasksFile)));
 					String line = null;
 					while ((line = reader.readLine()) != null) {
@@ -110,8 +110,8 @@ public final class UpdateTaskCollectionInit implements Initialization {
 							continue;
 						}
 						try {
-							updateTaskList.add((UpdateTask) Class.forName(l).getConstructor(parameterTypes)
-									.newInstance(initArgs));
+							updateTaskList.add(Class.forName(l).asSubclass(UpdateTask.class).getConstructor(
+									parameterTypes).newInstance(initArgs));
 						} catch (final ClassNotFoundException e) {
 							LOG.error(e.getMessage(), e);
 							continue;
