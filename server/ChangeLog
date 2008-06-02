@@ -1,3 +1,7 @@
+* 2008-06-02 - marcus.klein@open-xchange.com
+
+ - Bugfix #11324: Fixed special SettingStorage for administration daemon.
+
 * 2008-06-02 - ben.pahne@open-xchange.com
 
  - Bugfix #9842: In global addressbook moved contacts not deleteable
