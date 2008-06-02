@@ -55,8 +55,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 
@@ -71,8 +69,6 @@ public class UpdateTaskCollection {
 		super();
 	}
 
-	private static final Lock VERSION_LOCK = new ReentrantLock();
-
 	private static final AtomicInteger version = new AtomicInteger(-1);
 
 	private static ArrayList<UpdateTask> updateTaskList;
@@ -82,11 +78,11 @@ public class UpdateTaskCollection {
 	}
 
 	/**
-	 * Creates a list of <code>UpdateTask</code> instances that apply to
-	 * current database version
+	 * Creates a list of <code>UpdateTask</code> instances that apply to current
+	 * database version
 	 * 
-	 * @param dbVersion -
-	 *            current database version
+	 * @param dbVersion
+	 *            - current database version
 	 * @return list of <code>UpdateTask</code> instances
 	 */
 	public static final List<UpdateTask> getFilteredAndSortedUpdateTasks(final int dbVersion) {
@@ -118,21 +114,19 @@ public class UpdateTaskCollection {
 	 */
 	public static final int getHighestVersion() {
 		if (version.get() == -1) {
-			VERSION_LOCK.lock();
-			try {
+			synchronized (version) {
 				/*
 				 * Check again
 				 */
 				if (version.get() == -1) {
 					final int size = updateTaskList.size();
 					final Iterator<UpdateTask> iter = updateTaskList.iterator();
-					version.set(0);
+					int vers = 0;
 					for (int i = 0; i < size; i++) {
-						version.set(Math.max(version.get(), iter.next().addedWithVersion()));
+						vers = Math.max(vers, iter.next().addedWithVersion());
 					}
+					version.set(vers);
 				}
-			} finally {
-				VERSION_LOCK.unlock();
 			}
 		}
 		return version.get();
@@ -143,7 +137,8 @@ public class UpdateTaskCollection {
 	 * UpdateTaskComparator - sorts instances of <code>UpdateTask</code> by
 	 * their version in first order and by their priority in second order
 	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben
+	 *         Betten</a>
 	 * 
 	 */
 	private static final class UpdateTaskComparator implements Comparator<UpdateTask> {
