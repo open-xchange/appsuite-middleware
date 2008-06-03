@@ -72,6 +72,8 @@ public final class HTMLParser {
 
 	private static final String PROPERTY_XMLDECL_VERSION = "http://xmlpull.org/v1/doc/properties.html#xmldecl-version";
 
+	private static final String FEATURE_RELAXED = "http://xmlpull.org/v1/doc/features.html#relaxed";
+
 	private static final String FEATURE_PRESERVE_TEXT = "open-xchange.org/preserveText";
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
@@ -100,6 +102,7 @@ public final class HTMLParser {
 		try {
 			parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
 			parser.setFeature(FEATURE_PRESERVE_TEXT, true);
+			parser.setFeature(FEATURE_RELAXED, true);
 			parser.setInput(new StringReader(html));
 			int event = XmlPullParser.END_DOCUMENT;
 			int[] holderForStartAndLength = null;
