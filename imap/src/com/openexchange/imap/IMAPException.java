@@ -221,9 +221,9 @@ public final class IMAPException extends MIMEMailException {
 		IMAP_SORT_FAILED("IMAP sort failed due to following reason: %s Switching to application-based sorting",
 				Category.SUBSYSTEM_OR_SERVICE_DOWN, 2030),
 		/**
-		 * Unknow search field: %s
+		 * Unknown search field: %s
 		 */
-		UNKNOWN_SEARCH_FIELD("Unknow search field: %s", Category.CODE_ERROR, 2031),
+		UNKNOWN_SEARCH_FIELD("Unknown search field: %s", Category.CODE_ERROR, 2031),
 		/**
 		 * Message field %s cannot be handled
 		 */
