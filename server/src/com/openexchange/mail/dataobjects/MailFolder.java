@@ -52,11 +52,12 @@ package com.openexchange.mail.dataobjects;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.permission.DefaultMailPermission;
-import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.mail.permission.MailPermission;
 
 /**
  * MailFolder - a data container object for a mail folder
@@ -127,7 +128,7 @@ public class MailFolder implements Serializable {
 
 	private boolean b_separator;
 
-	private OCLPermission ownPermission;
+	private MailPermission ownPermission;
 
 	private boolean b_ownPermission;
 
@@ -143,7 +144,7 @@ public class MailFolder implements Serializable {
 
 	private boolean b_defaultFolder;
 
-	private List<OCLPermission> permissions;
+	private List<MailPermission> permissions;
 
 	private boolean b_permissions;
 
@@ -679,7 +680,7 @@ public class MailFolder implements Serializable {
 	 * @return the ownPermission or <code>null</code> if this mail folder
 	 *         denotes the root folder
 	 */
-	public OCLPermission getOwnPermission() {
+	public MailPermission getOwnPermission() {
 		return ownPermission;
 	}
 
@@ -709,7 +710,7 @@ public class MailFolder implements Serializable {
 	 * @param ownPermission
 	 *            the own permission to set
 	 */
-	public void setOwnPermission(final OCLPermission ownPermission) {
+	public void setOwnPermission(final MailPermission ownPermission) {
 		this.ownPermission = ownPermission;
 		b_ownPermission = true;
 	}
@@ -792,30 +793,46 @@ public class MailFolder implements Serializable {
 	 * @param permission
 	 *            The permission to add
 	 */
-	public void addPermission(final OCLPermission permission) {
+	public void addPermission(final MailPermission permission) {
 		if (null == permission) {
 			return;
 		} else if (null == permissions) {
-			permissions = new ArrayList<OCLPermission>();
+			permissions = new ArrayList<MailPermission>();
 			b_permissions = true;
 		}
 		permissions.add(permission);
 	}
 
 	/**
-	 * Adds permissions
+	 * Adds an array of permissions
 	 * 
 	 * @param permissions
-	 *            The permissions to add
+	 *            The array of permissions to add
 	 */
-	public void addPermissions(final OCLPermission[] permissions) {
+	public void addPermissions(final MailPermission[] permissions) {
 		if ((null == permissions) || (permissions.length == 0)) {
 			return;
 		} else if (null == this.permissions) {
-			this.permissions = new ArrayList<OCLPermission>(permissions.length);
+			this.permissions = new ArrayList<MailPermission>(permissions.length);
 			b_permissions = true;
 		}
 		this.permissions.addAll(Arrays.asList(permissions));
+	}
+
+	/**
+	 * Adds a collection of permissions
+	 * 
+	 * @param permissions
+	 *            The collection of permissions to add
+	 */
+	public void addPermissions(final Collection<? extends MailPermission> permissions) {
+		if ((null == permissions) || (permissions.isEmpty())) {
+			return;
+		} else if (null == this.permissions) {
+			this.permissions = new ArrayList<MailPermission>(permissions.size());
+			b_permissions = true;
+		}
+		this.permissions.addAll(permissions);
 	}
 
 	/**
@@ -834,16 +851,16 @@ public class MailFolder implements Serializable {
 		b_permissions = false;
 	}
 
-	private static final OCLPermission[] EMPTY_PERMS = new OCLPermission[0];
+	private static final MailPermission[] EMPTY_PERMS = new MailPermission[0];
 
 	/**
-	 * @return the permissions as array of {@link OCLPermission}
+	 * @return the permissions as array of {@link MailPermission}
 	 */
-	public OCLPermission[] getPermissions() {
+	public MailPermission[] getPermissions() {
 		if (null == permissions) {
 			return EMPTY_PERMS;
 		}
-		return permissions.toArray(new OCLPermission[permissions.size()]);
+		return permissions.toArray(new MailPermission[permissions.size()]);
 	}
 
 	@Override

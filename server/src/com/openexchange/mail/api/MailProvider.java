@@ -154,15 +154,15 @@ public abstract class MailProvider {
 	}
 
 	/**
-	 * Gets the implementation-specific class of {@link MailPermission}.
+	 * Gets a newly created {@link MailPermission mail permission}.
 	 * <p>
-	 * Returns {@link DefaultMailPermission} class if mailing system does not
-	 * support permission(s). Overwrite if needed.
+	 * Returns a {@link DefaultMailPermission default permission} instance if
+	 * mailing system does not support permission(s). Overwrite if needed.
 	 * 
-	 * @return The class of {@link MailPermission} implementation
+	 * @return A newly created {@link MailPermission mail permission}.
 	 */
-	public Class<? extends MailPermission> getMailPermissionClass() {
-		return DefaultMailPermission.class;
+	public MailPermission createNewMailPermission() {
+		return new DefaultMailPermission();
 	}
 
 	/**

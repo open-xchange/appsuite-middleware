@@ -51,10 +51,11 @@ package com.openexchange.mail.dataobjects;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import com.openexchange.mail.api.MailFolderStorage;
-import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.mail.permission.MailPermission;
 
 /**
  * {@link MailFolderDescription} - A simple object for updating or creating a
@@ -68,7 +69,7 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class MailFolderDescription {
 
-	private static final OCLPermission[] EMPTY_PERMS = new OCLPermission[0];
+	private static final MailPermission[] EMPTY_PERMS = new MailPermission[0];
 
 	private boolean b_exists;
 
@@ -92,7 +93,7 @@ public class MailFolderDescription {
 
 	private String parentFullname;
 
-	private List<OCLPermission> permissions;
+	private List<MailPermission> permissions;
 
 	private char separator;
 
@@ -111,30 +112,46 @@ public class MailFolderDescription {
 	 * @param permission
 	 *            The permission to add
 	 */
-	public void addPermission(final OCLPermission permission) {
+	public void addPermission(final MailPermission permission) {
 		if (null == permission) {
 			return;
 		} else if (null == permissions) {
-			permissions = new ArrayList<OCLPermission>();
+			permissions = new ArrayList<MailPermission>();
 			b_permissions = true;
 		}
 		permissions.add(permission);
 	}
 
 	/**
-	 * Adds permissions
+	 * Adds an array of permissions
 	 * 
 	 * @param permissions
-	 *            The permissions to add
+	 *            The array of permissions to add
 	 */
-	public void addPermissions(final OCLPermission[] permissions) {
+	public void addPermissions(final MailPermission[] permissions) {
 		if ((null == permissions) || (permissions.length == 0)) {
 			return;
 		} else if (null == this.permissions) {
-			this.permissions = new ArrayList<OCLPermission>(permissions.length);
+			this.permissions = new ArrayList<MailPermission>(permissions.length);
 			b_permissions = true;
 		}
 		this.permissions.addAll(Arrays.asList(permissions));
+	}
+
+	/**
+	 * Adds a collection of permissions
+	 * 
+	 * @param permissions
+	 *            The collection of permissions to add
+	 */
+	public void addPermissions(final Collection<? extends MailPermission> permissions) {
+		if ((null == permissions) || (permissions.isEmpty())) {
+			return;
+		} else if (null == this.permissions) {
+			this.permissions = new ArrayList<MailPermission>(permissions.size());
+			b_permissions = true;
+		}
+		this.permissions.addAll(permissions);
 	}
 
 	/**
@@ -248,13 +265,13 @@ public class MailFolderDescription {
 	/**
 	 * Gets the permissions
 	 * 
-	 * @return the permissions as array of {@link OCLPermission}
+	 * @return the permissions as array of {@link MailPermission}
 	 */
-	public OCLPermission[] getPermissions() {
+	public MailPermission[] getPermissions() {
 		if (null == permissions) {
 			return EMPTY_PERMS;
 		}
-		return permissions.toArray(new OCLPermission[permissions.size()]);
+		return permissions.toArray(new MailPermission[permissions.size()]);
 	}
 
 	/**

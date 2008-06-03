@@ -66,6 +66,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.permission.MailPermission;
@@ -120,13 +121,12 @@ public final class FolderParser {
 			}
 			if (jsonObj.has(FolderFields.PERMISSIONS) && !jsonObj.isNull(FolderFields.PERMISSIONS)) {
 				final JSONArray jsonArr = jsonObj.getJSONArray(FolderFields.PERMISSIONS);
-				final int arrayLength = jsonArr.length();
-				if (arrayLength > 0) {
-					final List<MailPermission> iPerms = new ArrayList<MailPermission>(arrayLength);
+				final int len = jsonArr.length();
+				if (len > 0) {
+					final List<MailPermission> mailPerms = new ArrayList<MailPermission>(len);
 					final UserStorage us = UserStorage.getInstance();
-					final Class<? extends MailPermission> clazz = MailProviderRegistry
-							.getMailProviderBySession(session).getMailPermissionClass();
-					for (int i = 0; i < arrayLength; i++) {
+					final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session);
+					for (int i = 0; i < len; i++) {
 						final JSONObject elem = jsonArr.getJSONObject(i);
 						if (!elem.has(FolderFields.ENTITY)) {
 							throw new MailException(MailException.Code.MISSING_PARAMETER, FolderFields.ENTITY);
@@ -143,7 +143,7 @@ public final class FolderParser {
 								throw new MailException(e1);
 							}
 						}
-						final MailPermission mailPerm = MailPermission.newInstance(clazz);
+						final MailPermission mailPerm = provider.createNewMailPermission();
 						mailPerm.setEntity(entity);
 						if (!elem.has(FolderFields.BITS)) {
 							throw new MailException(MailException.Code.MISSING_PARAMETER, FolderFields.BITS);
@@ -160,9 +160,9 @@ public final class FolderParser {
 							throw new MailException(MailException.Code.MISSING_PARAMETER, FolderFields.GROUP);
 						}
 						mailPerm.setGroupPermission(elem.getBoolean(FolderFields.GROUP));
-						iPerms.add(mailPerm);
+						mailPerms.add(mailPerm);
 					}
-					mailFolder.addPermissions(iPerms.toArray(new MailPermission[iPerms.size()]));
+					mailFolder.addPermissions(mailPerms);
 				}
 			}
 		} catch (final JSONException e) {

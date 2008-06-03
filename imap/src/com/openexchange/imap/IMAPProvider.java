@@ -95,8 +95,8 @@ public final class IMAPProvider extends MailProvider {
 	}
 
 	@Override
-	public Class<? extends MailPermission> getMailPermissionClass() {
-		return ACLPermission.class;
+	public MailPermission createNewMailPermission() {
+		return new ACLPermission();
 	}
 
 	@Override
