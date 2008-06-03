@@ -53,6 +53,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.MailException;
@@ -62,7 +63,7 @@ import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.session.Session;
 
 /**
- * {@link ComposedMailMessage} - Subclass of {@link MailPart} designed for
+ * {@link ComposedMailMessage} - Subclass of {@link MailMessage} designed for
  * composing a mail.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
