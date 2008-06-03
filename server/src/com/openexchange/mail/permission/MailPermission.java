@@ -80,16 +80,20 @@ public abstract class MailPermission extends OCLPermission {
 		super();
 	}
 
-	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[] {};
+	private static final Class<?>[] CONSTRUCTOR_ARGS = new Class[0];
 
 	/**
 	 * Gets a new mail permission instance
 	 * 
+	 * @param <P>
+	 *            The permission sub-type
+	 * @param clazz
+	 *            The permission class
 	 * @return A new mail permission instance
 	 * @throws MailException
 	 *             If instantiation fails
 	 */
-	public static MailPermission newInstance(final Class<? extends MailPermission> clazz) throws MailException {
+	public static <P extends MailPermission> P newInstance(final Class<? extends P> clazz) throws MailException {
 		/*
 		 * Create a new mail permission
 		 */
