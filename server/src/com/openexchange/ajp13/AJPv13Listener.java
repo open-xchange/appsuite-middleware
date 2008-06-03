@@ -119,8 +119,8 @@ public final class AJPv13Listener implements Runnable {
 
 	/**
 	 * Constructs a new <code>AJPv13Listener</code> instance with given
-	 * <code>num</code> argument. <code>pooled</code> determines whether
-	 * this listener is initially put into pool
+	 * <code>num</code> argument. <code>pooled</code> determines whether this
+	 * listener is initially put into pool
 	 */
 	public AJPv13Listener(final int num, final boolean pooled) {
 		this.num = num;
@@ -258,6 +258,9 @@ public final class AJPv13Listener implements Runnable {
 						ajpCon.processRequest();
 						ajpCon.createResponse();
 						if (!ajpCon.getAjpRequestHandler().isEndResponseSent()) {
+							LOG.error(
+									"Detected AJP cycle (request/response) without terminating END_RESPONSE package!",
+									new Throwable());
 							/*
 							 * Just for safety reason to ensure END_RESPONSE
 							 * package is going to be sent.
@@ -493,8 +496,8 @@ public final class AJPv13Listener implements Runnable {
 	}
 
 	/**
-	 * @return <code>true</code> if listener is currently processing,
-	 *         otherwise <code>false</code>
+	 * @return <code>true</code> if listener is currently processing, otherwise
+	 *         <code>false</code>
 	 */
 	public boolean isProcessing() {
 		return processing;
