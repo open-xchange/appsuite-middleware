@@ -98,7 +98,7 @@ public class KXmlParser implements XmlPullParser {
             new char[Runtime.getRuntime().freeMemory() >= 1048576 ? 8192 : 128];
     }
 
-    private final boolean isProp(final String n1, final boolean prop, final String n2) {
+    private static final boolean isProp(final String n1, final boolean prop, final String n2) {
         if (!n1.startsWith("http://xmlpull.org/v1/doc/")) {
 			return false;
 		}
