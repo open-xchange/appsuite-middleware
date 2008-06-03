@@ -377,6 +377,18 @@ public final class AJPv13RequestHandler {
 					if (LOG.isWarnEnabled()) {
 						final AJPv13Exception ajpExc = new AJPv13UnknownPrefixCodeException(prefixCode);
 						LOG.warn(ajpExc.getMessage(), ajpExc);
+						/*
+						 * Dump package
+						 */
+						final byte[] payload = getPayloadData(dataLength - 1, ajpCon.getInputStream(), true);
+						final byte[] clonedPackage = new byte[payload.length + 5];
+						clonedPackage[0] = 0x12;
+						clonedPackage[1] = 0x34;
+						clonedPackage[2] = (byte) (dataLength >> 8);
+						clonedPackage[3] = (byte) (dataLength & (255));
+						clonedPackage[4] = (byte) prefixCode;
+						System.arraycopy(payload, 0, clonedPackage, 5, payload.length);
+						LOG.warn("Corresponding AJP package:\n" + dumpBytes(clonedPackage));
 					}
 					return;
 				}
@@ -446,6 +458,7 @@ public final class AJPv13RequestHandler {
 				 */
 				ajpCon.getOutputStream().write(AJPv13Response.getEndResponseBytes());
 				ajpCon.getOutputStream().flush();
+				endResponseSent = true;
 				return;
 			}
 			ajpRequest.response(ajpCon.getOutputStream(), this);
@@ -490,8 +503,8 @@ public final class AJPv13RequestHandler {
 	 * @param payloadLength
 	 * @param in
 	 * @param strict
-	 *            if <code>true</code> only <code>payloadLength</code> bytes
-	 *            are read, otherwise all data is read
+	 *            if <code>true</code> only <code>payloadLength</code> bytes are
+	 *            read, otherwise all data is read
 	 * @return
 	 * @throws IOException
 	 */
@@ -814,8 +827,8 @@ public final class AJPv13RequestHandler {
 	/**
 	 * Checks if AJP's end response package has been sent to web server
 	 * 
-	 * @return <code>true</code> if AJP's end response package has been sent
-	 *         to web server; otherwise <code>false</code>
+	 * @return <code>true</code> if AJP's end response package has been sent to
+	 *         web server; otherwise <code>false</code>
 	 */
 	public boolean isEndResponseSent() {
 		return endResponseSent;
@@ -825,8 +838,8 @@ public final class AJPv13RequestHandler {
 	 * Sets the end response flag
 	 * 
 	 * @param endResponseSent
-	 *            <code>true</code> if AJP's end response package has been
-	 *            sent to web server; otherwise <code>false</code>
+	 *            <code>true</code> if AJP's end response package has been sent
+	 *            to web server; otherwise <code>false</code>
 	 */
 	public void setEndResponseSent(final boolean endResponseSent) {
 		this.endResponseSent = endResponseSent;
@@ -883,8 +896,8 @@ public final class AJPv13RequestHandler {
 	 * Checks if amount of received data is equal to value of header
 	 * 'Content-Length'
 	 * 
-	 * @return <code>true</code> if amount of received data is equal to value
-	 *         of header 'Content-Length'; otherwise <code>false</code>
+	 * @return <code>true</code> if amount of received data is equal to value of
+	 *         header 'Content-Length'; otherwise <code>false</code>
 	 */
 	public boolean isAllDataRead() {
 		/*
@@ -965,8 +978,8 @@ public final class AJPv13RequestHandler {
 	/**
 	 * Checks if the HTTP session has joined a previous HTTP session
 	 * 
-	 * @return <code>true</code> if the HTTP session has joined a previous
-	 *         HTTP session; otherwise <code>false</code>
+	 * @return <code>true</code> if the HTTP session has joined a previous HTTP
+	 *         session; otherwise <code>false</code>
 	 */
 	public boolean isHttpSessionJoined() {
 		return httpSessionJoined;
