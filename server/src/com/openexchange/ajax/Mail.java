@@ -490,6 +490,11 @@ public class Mail extends PermissionServlet implements UploadListener {
 			if (sort != null && !threadSort && order == null) {
 				throw new MailException(MailException.Code.MISSING_PARAM, PARAMETER_ORDER);
 			}
+			
+			// TODO: use this attributes to send only mail in the given range 
+			final int leftHandLimit = paramContainer.getIntParam(LEFT_HAND_LIMIT);
+			final int rigthHandLimit = paramContainer.getIntParam(RIGHT_HAND_LIMIT);
+			
 			/*
 			 * Get all mails
 			 */

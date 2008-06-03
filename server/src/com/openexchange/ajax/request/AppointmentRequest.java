@@ -618,6 +618,9 @@ public class AppointmentRequest {
 		
 		final boolean bRecurrenceMaster = DataParser.parseBoolean(jsonObj, RECURRENCE_MASTER);
 		
+		final int leftHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.LEFT_HAND_LIMIT);
+		final int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
+		
 		boolean showAppointmentInAllFolders = false;
 		
 		if (folderId == 0) {
