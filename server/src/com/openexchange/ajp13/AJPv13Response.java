@@ -80,7 +80,7 @@ public class AJPv13Response {
 	 * PrefixCode + CunkLength + TerminatingZeroByte)
 	 * 
 	 * <pre>
-	 * 'A' 'B' Data Length PrefixCode Chunk Length [chunk bytes] 00 
+	 * 'A' 'B' Data Length PrefixCode Chunk Length [chunk bytes] 00
 	 * </pre>
 	 */
 	public static final int MAX_SEND_BODY_CHUNK_SIZE = 8184; // 8192 - 8
@@ -161,10 +161,10 @@ public class AJPv13Response {
 	/**
 	 * Constructor for <code>END_RESPONSE</code>
 	 * 
-	 * @param prefixCode -
-	 *            the <code>END_RESPONSE</code> prefix code
-	 * @param closeConnection -
-	 *            whether or not to signal to close the connection
+	 * @param prefixCode
+	 *            - the <code>END_RESPONSE</code> prefix code
+	 * @param closeConnection
+	 *            - whether or not to signal to close the connection
 	 */
 	public AJPv13Response(final int prefixCode, final boolean closeConnection) {
 		super();
@@ -175,10 +175,10 @@ public class AJPv13Response {
 	/**
 	 * Constructor for <code>SEND_BODY_CHUNK</code>
 	 * 
-	 * @param prefixCode -
-	 *            the <code>SEND_BODY_CHUNK</code> prefix code
-	 * @param responseDataChunk -
-	 *            the data chunk as array of <code>byte</code>
+	 * @param prefixCode
+	 *            - the <code>SEND_BODY_CHUNK</code> prefix code
+	 * @param responseDataChunk
+	 *            - the data chunk as array of <code>byte</code>
 	 */
 	public AJPv13Response(final int prefixCode, final byte[] responseDataChunk) {
 		super();
@@ -190,10 +190,10 @@ public class AJPv13Response {
 	/**
 	 * Constructor for <code>SEND_HEADERS</code>
 	 * 
-	 * @param prefixCode -
-	 *            the <code>SEND_HEADERS</code> prefix code
-	 * @param resp -
-	 *            the <code>HttpServletResponse</code> object containing http
+	 * @param prefixCode
+	 *            - the <code>SEND_HEADERS</code> prefix code
+	 * @param resp
+	 *            - the <code>HttpServletResponse</code> object containing http
 	 *            header data
 	 */
 	public AJPv13Response(final int prefixCode, final HttpServletResponseWrapper resp) {
@@ -205,10 +205,10 @@ public class AJPv13Response {
 	/**
 	 * Constructor for <code>GET_BODY_CHUNK</code>
 	 * 
-	 * @param prefixCode -
-	 *            the <code>GET_BODY_CHUNK</code> prefix code
-	 * @param requestedLength -
-	 *            the requested body chunk's length
+	 * @param prefixCode
+	 *            - the <code>GET_BODY_CHUNK</code> prefix code
+	 * @param requestedLength
+	 *            - the requested body chunk's length
 	 */
 	public AJPv13Response(final int prefixCode, final int requestedLength) {
 		super();
@@ -312,8 +312,8 @@ public class AJPv13Response {
 	/**
 	 * Creates the <code>SEND_BODY_CHUNK</code> response bytes
 	 * 
-	 * @param responseDataChunk -
-	 *            the data chunk
+	 * @param responseDataChunk
+	 *            - the data chunk
 	 * @return an array of <code>byte</code> containing the
 	 *         <code>SEND_BODY_CHUNK</code> response bytes
 	 * @throws AJPv13Exception
@@ -342,8 +342,8 @@ public class AJPv13Response {
 	/**
 	 * Creates the <code>SEND_HEADERS</code> response bytes
 	 * 
-	 * @param servletResponse -
-	 *            the <code>HttpServletResponse</code> object containing http
+	 * @param servletResponse
+	 *            - the <code>HttpServletResponse</code> object containing http
 	 *            header data
 	 * @return an array of <code>byte</code> containing the
 	 *         <code>SEND_HEADERS</code> response bytes
@@ -390,6 +390,14 @@ public class AJPv13Response {
 		return byteArray.toByteArray();
 	}
 
+	/**
+	 * Creates the <code>END_RESPONSE</code> response bytes
+	 * 
+	 * @return an array of <code>byte</code> containing the
+	 *         <code>END_RESPONSE</code> response bytes
+	 * @throws AJPv13Exception
+	 *             If <code>END_RESPONSE</code> bytes cannot be written
+	 */
 	public static final byte[] getEndResponseBytes() throws AJPv13Exception {
 		return getEndResponseBytes(false);
 	}
@@ -397,11 +405,12 @@ public class AJPv13Response {
 	/**
 	 * Creates the <code>END_RESPONSE</code> response bytes
 	 * 
-	 * @param closeConnection -
-	 *            whether or not to signal connection closure
+	 * @param closeConnection
+	 *            - whether or not to signal connection closure
 	 * @return an array of <code>byte</code> containing the
 	 *         <code>END_RESPONSE</code> response bytes
 	 * @throws AJPv13Exception
+	 *             If <code>END_RESPONSE</code> bytes cannot be written
 	 */
 	public static final byte[] getEndResponseBytes(final boolean closeConnection) throws AJPv13Exception {
 		final int dataLength = 2; // prefix + boolean (1 byte)
@@ -427,8 +436,8 @@ public class AJPv13Response {
 	/**
 	 * Creates the <code>GET_BODY_CHUNK</code> response bytes
 	 * 
-	 * @param requestedLength -
-	 *            the requested chunk's size
+	 * @param requestedLength
+	 *            - the requested chunk's size
 	 * @return an array of <code>byte</code> containing the
 	 *         <code>GET_BODY_CHUNK</code> response bytes
 	 * @throws AJPv13Exception
@@ -449,8 +458,7 @@ public class AJPv13Response {
 	/**
 	 * Creates the CPong response bytes
 	 * 
-	 * @return an array of <code>byte</code> containing the CPong response
-	 *         bytes
+	 * @return an array of <code>byte</code> containing the CPong response bytes
 	 */
 	public static final byte[] getCPongBytes() {
 		final byte[] retval = new byte[cpongReplyBytes.length];
@@ -545,6 +553,7 @@ public class AJPv13Response {
 	 * </ol>
 	 * 
 	 * @throws AJPv13Exception
+	 *             If starting bytes cannot be written
 	 */
 	private static final void fillStartBytes(final int prefixCode, final int dataLength,
 			final ByteArrayOutputStream byteArray) throws AJPv13Exception {
