@@ -57,6 +57,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.openexchange.configuration.SystemConfig;
@@ -97,7 +98,7 @@ public final class UpdateTaskCollectionInit implements Initialization {
 			if (!updateTasksFile.exists() || !updateTasksFile.isFile()) {
 				LOG.error("Missing file " + propStr);
 			} else {
-				final ArrayList<UpdateTask> updateTaskList = new ArrayList<UpdateTask>();
+				final List<UpdateTask> updateTaskList = new ArrayList<UpdateTask>();
 				BufferedReader reader = null;
 				try {
 					final Class<?>[] parameterTypes = new Class<?>[0];

@@ -71,9 +71,9 @@ public class UpdateTaskCollection {
 
 	private static final AtomicInteger version = new AtomicInteger(-1);
 
-	private static ArrayList<UpdateTask> updateTaskList;
+	private static List<UpdateTask> updateTaskList;
 
-	static void setUpdateTaskList(final ArrayList<UpdateTask> updateTaskList) {
+	static void setUpdateTaskList(final List<UpdateTask> updateTaskList) {
 		UpdateTaskCollection.updateTaskList = updateTaskList;
 	}
 
@@ -86,7 +86,7 @@ public class UpdateTaskCollection {
 	 * @return list of <code>UpdateTask</code> instances
 	 */
 	public static final List<UpdateTask> getFilteredAndSortedUpdateTasks(final int dbVersion) {
-		final List<UpdateTask> retval = (List<UpdateTask>) updateTaskList.clone();
+		final List<UpdateTask> retval = new ArrayList<UpdateTask>(updateTaskList);
 		/*
 		 * Filter
 		 */
