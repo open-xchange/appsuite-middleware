@@ -101,8 +101,8 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 				final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
 				final String invalidName = "Foo" + inbox.getSeparator() + "Bar";
 				if (inbox.isHoldsFolders()) {
-					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-							invalidName).toString();
+					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(invalidName)
+							.toString();
 					parentFullname = INBOX;
 				} else {
 					fullname = invalidName;
@@ -116,9 +116,8 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 				mfd.setSubscribed(false);
 				mfd.setName(invalidName);
 
-				final Class<? extends MailPermission> clazz = MailProviderRegistry
-						.getMailProviderBySession(session).getMailPermissionClass();
-				final MailPermission p = MailPermission.newInstance(clazz);
+				final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+						.createNewMailPermission();
 				p.setEntity(getUser());
 				p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 						OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -132,12 +131,11 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 					me = e;
 				}
 				assertTrue("Folder created although an invalid name was specified", me != null);
-				
-				
+
 				String validName = "Foo&Bar";
 				if (inbox.isHoldsFolders()) {
-					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-							validName).toString();
+					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(validName)
+							.toString();
 					parentFullname = INBOX;
 				} else {
 					fullname = validName;
@@ -157,8 +155,8 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 
 				validName = "Foo 1 Bar";
 				if (inbox.isHoldsFolders()) {
-					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-							validName).toString();
+					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(validName)
+							.toString();
 					parentFullname = INBOX;
 				} else {
 					fullname = validName;
@@ -176,11 +174,10 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 					System.out.println("Temporary folder deleted: " + fullname);
 				}
 
-				
 				validName = "1 und 2";
 				if (inbox.isHoldsFolders()) {
-					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-							validName).toString();
+					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(validName)
+							.toString();
 					parentFullname = INBOX;
 				} else {
 					fullname = validName;
@@ -228,8 +225,8 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 				final MailFolder inbox = mailAccess.getFolderStorage().getFolder(INBOX);
 				String invalidName = "Foo" + inbox.getSeparator() + "Bar";
 				if (inbox.isHoldsFolders()) {
-					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-							invalidName).toString();
+					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(invalidName)
+							.toString();
 					parentFullname = INBOX;
 				} else {
 					fullname = invalidName;
@@ -243,9 +240,8 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 				mfd.setSubscribed(false);
 				mfd.setName(invalidName);
 
-				final Class<? extends MailPermission> clazz = MailProviderRegistry
-						.getMailProviderBySession(session).getMailPermissionClass();
-				final MailPermission p = MailPermission.newInstance(clazz);
+				final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+						.createNewMailPermission();
 				p.setEntity(getUser());
 				p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 						OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -260,12 +256,11 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 					fullname = null;
 				}
 				assertTrue("Folder created although an invalid name was specified", me != null);
-				
-				
+
 				invalidName = inbox.getSeparator() + "Foobar";
 				if (inbox.isHoldsFolders()) {
-					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-							invalidName).toString();
+					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(invalidName)
+							.toString();
 					parentFullname = INBOX;
 				} else {
 					fullname = invalidName;
@@ -285,11 +280,10 @@ public final class MailFolderSpecialCharsTest extends AbstractMailTest {
 				}
 				assertTrue("Folder created although an invalid name was specified", me != null);
 
-				
 				invalidName = "Foobar" + inbox.getSeparator();
 				if (inbox.isHoldsFolders()) {
-					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(
-							invalidName).toString();
+					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(invalidName)
+							.toString();
 					parentFullname = INBOX;
 				} else {
 					fullname = invalidName;

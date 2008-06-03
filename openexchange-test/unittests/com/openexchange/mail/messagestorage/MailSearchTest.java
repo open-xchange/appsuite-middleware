@@ -340,9 +340,8 @@ public final class MailSearchTest extends AbstractMailTest {
 				mfd.setSubscribed(false);
 				mfd.setName(name);
 
-				final Class<? extends MailPermission> clazz = MailProviderRegistry.getMailProviderBySession(session)
-						.getMailPermissionClass();
-				final MailPermission p = MailPermission.newInstance(clazz);
+				final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+						.createNewMailPermission();
 				p.setEntity(getUser());
 				p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 						OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -431,8 +430,7 @@ public final class MailSearchTest extends AbstractMailTest {
 					found = result[i].getMailId() == uid;
 				}
 				assertTrue("Message not found by Header \"In-Reply-To\" search term", found);
-				
-				
+
 				term = new BodyTerm("4. April 2008 um 19:17 geschrieben");
 				result = mailAccess.getMessageStorage().searchMessages(fullname, IndexRange.NULL, null, null, term,
 						FIELDS_ID);
@@ -441,8 +439,7 @@ public final class MailSearchTest extends AbstractMailTest {
 					found = result[i].getMailId() == uid;
 				}
 				assertTrue("Message not found by body search term", found);
-				
-				
+
 				final long size = mailAccess.getMessageStorage().getMessage(fullname, uid, false).getSize();
 				term = new SizeTerm(ComparisonType.GREATER_THAN, (int) (size - 10));
 				result = mailAccess.getMessageStorage().searchMessages(fullname, IndexRange.NULL, null, null, term,
@@ -452,7 +449,7 @@ public final class MailSearchTest extends AbstractMailTest {
 					found = result[i].getMailId() == uid;
 				}
 				assertTrue("Message not found by size search term", found);
-				
+
 				term = new SizeTerm(ComparisonType.LESS_THAN, (int) (size + 10));
 				result = mailAccess.getMessageStorage().searchMessages(fullname, IndexRange.NULL, null, null, term,
 						FIELDS_ID);
@@ -461,7 +458,7 @@ public final class MailSearchTest extends AbstractMailTest {
 					found = result[i].getMailId() == uid;
 				}
 				assertTrue("Message not found by size search term", found);
-				
+
 				term = new SizeTerm(ComparisonType.EQUALS, (int) (size));
 				result = mailAccess.getMessageStorage().searchMessages(fullname, IndexRange.NULL, null, null, term,
 						FIELDS_ID);
@@ -520,9 +517,8 @@ public final class MailSearchTest extends AbstractMailTest {
 				mfd.setSubscribed(false);
 				mfd.setName(name);
 
-				final Class<? extends MailPermission> clazz = MailProviderRegistry.getMailProviderBySession(session)
-						.getMailPermissionClass();
-				final MailPermission p = MailPermission.newInstance(clazz);
+				final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+						.createNewMailPermission();
 				p.setEntity(getUser());
 				p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 						OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -621,8 +617,7 @@ public final class MailSearchTest extends AbstractMailTest {
 					found = result[i].getMailId() == uid;
 				}
 				assertTrue("Message not found by Header \"In-Reply-To\" search term", found);
-				
-				
+
 				term = new BodyTerm("4. April 2008 um 19:17 geschrieben");
 				result = mailAccess.getMessageStorage().searchMessages(fullname, IndexRange.NULL, null, null, term,
 						FIELDS_ID);
@@ -631,8 +626,7 @@ public final class MailSearchTest extends AbstractMailTest {
 					found = result[i].getMailId() == uid;
 				}
 				assertTrue("Message not found by body search term", found);
-				
-				
+
 				final long size = mailAccess.getMessageStorage().getMessage(fullname, uid, false).getSize();
 				term = new SizeTerm(ComparisonType.GREATER_THAN, (int) (size - 10));
 				result = mailAccess.getMessageStorage().searchMessages(fullname, IndexRange.NULL, null, null, term,
@@ -642,7 +636,7 @@ public final class MailSearchTest extends AbstractMailTest {
 					found = result[i].getMailId() == uid;
 				}
 				assertTrue("Message not found by size search term", found);
-				
+
 				term = new SizeTerm(ComparisonType.LESS_THAN, (int) (size + 10));
 				result = mailAccess.getMessageStorage().searchMessages(fullname, IndexRange.NULL, null, null, term,
 						FIELDS_ID);
@@ -651,7 +645,7 @@ public final class MailSearchTest extends AbstractMailTest {
 					found = result[i].getMailId() == uid;
 				}
 				assertTrue("Message not found by size search term", found);
-				
+
 				term = new SizeTerm(ComparisonType.EQUALS, (int) (size));
 				result = mailAccess.getMessageStorage().searchMessages(fullname, IndexRange.NULL, null, null, term,
 						FIELDS_ID);

@@ -284,9 +284,8 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setSubscribed(false);
 					mfd.setName(TEMPORARY_FOLDER);
 
-					final Class<? extends MailPermission> clazz = MailProviderRegistry
-							.getMailProviderBySession(session).getMailPermissionClass();
-					final MailPermission p = MailPermission.newInstance(clazz);
+					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+							.createNewMailPermission();
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -437,9 +436,8 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setSubscribed(false);
 					mfd.setName(TEMPORARY_FOLDER);
 
-					final Class<? extends MailPermission> clazz = MailProviderRegistry
-							.getMailProviderBySession(session).getMailPermissionClass();
-					final MailPermission p = MailPermission.newInstance(clazz);
+					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+							.createNewMailPermission();
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -459,16 +457,16 @@ public final class MailFolderTest extends AbstractMailTest {
 				}
 
 				final MailFolderDescription mfd = new MailFolderDescription();
-				final Class<? extends MailPermission> clazz = MailProviderRegistry.getMailProviderBySession(session)
-						.getMailPermissionClass();
-				final MailPermission p1 = MailPermission.newInstance(clazz);
+				final MailPermission p1 = MailProviderRegistry.getMailProviderBySession(session)
+						.createNewMailPermission();
 				p1.setEntity(getUser());
 				p1.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 						OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
 				p1.setFolderAdmin(true);
 				p1.setGroupPermission(false);
 				mfd.addPermission(p1);
-				final MailPermission p2 = MailPermission.newInstance(clazz);
+				final MailPermission p2 = MailProviderRegistry.getMailProviderBySession(session)
+						.createNewMailPermission();
 				p2.setEntity(getSecondUser());
 				p2.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.ADMIN_PERMISSION,
 						OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
@@ -549,9 +547,8 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setSubscribed(false);
 					mfd.setName(TEMPORARY_FOLDER);
 
-					final Class<? extends MailPermission> clazz = MailProviderRegistry
-							.getMailProviderBySession(session).getMailPermissionClass();
-					final MailPermission p = MailPermission.newInstance(clazz);
+					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+							.createNewMailPermission();
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -677,9 +674,8 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setSubscribed(false);
 					mfd.setName(TEMPORARY_FOLDER);
 
-					final Class<? extends MailPermission> clazz = MailProviderRegistry
-							.getMailProviderBySession(session).getMailPermissionClass();
-					final MailPermission p = MailPermission.newInstance(clazz);
+					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+							.createNewMailPermission();
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -757,9 +753,8 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setSubscribed(false);
 					mfd.setName(name);
 
-					final Class<? extends MailPermission> clazz = MailProviderRegistry
-							.getMailProviderBySession(session).getMailPermissionClass();
-					final MailPermission p = MailPermission.newInstance(clazz);
+					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+							.createNewMailPermission();
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -887,9 +882,8 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setSubscribed(false);
 					mfd.setName(name);
 
-					final Class<? extends MailPermission> clazz = MailProviderRegistry
-							.getMailProviderBySession(session).getMailPermissionClass();
-					final MailPermission p = MailPermission.newInstance(clazz);
+					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+							.createNewMailPermission();
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -1015,9 +1009,8 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setSubscribed(false);
 					mfd.setName(name);
 
-					final Class<? extends MailPermission> clazz = MailProviderRegistry
-							.getMailProviderBySession(session).getMailPermissionClass();
-					final MailPermission p = MailPermission.newInstance(clazz);
+					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+							.createNewMailPermission();
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -1087,9 +1080,8 @@ public final class MailFolderTest extends AbstractMailTest {
 					mfd.setSubscribed(false);
 					mfd.setName(name);
 
-					final Class<? extends MailPermission> clazz = MailProviderRegistry
-							.getMailProviderBySession(session).getMailPermissionClass();
-					final MailPermission p = MailPermission.newInstance(clazz);
+					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+							.createNewMailPermission();
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -1128,9 +1120,8 @@ public final class MailFolderTest extends AbstractMailTest {
 						mfd.setSubscribed(false);
 						mfd.setName(name);
 
-						final Class<? extends MailPermission> clazz = MailProviderRegistry.getMailProviderBySession(
-								session).getMailPermissionClass();
-						final MailPermission p = MailPermission.newInstance(clazz);
+						final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+								.createNewMailPermission();
 						p.setEntity(getUser());
 						p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 								OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);

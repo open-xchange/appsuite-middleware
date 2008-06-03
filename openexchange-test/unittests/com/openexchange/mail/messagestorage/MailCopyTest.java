@@ -127,9 +127,8 @@ public final class MailCopyTest extends AbstractMailTest {
 					mfd.setSeparator(inbox.getSeparator());
 					mfd.setName("TemporaryFolder");
 
-					final Class<? extends MailPermission> clazz = MailProviderRegistry
-							.getMailProviderBySession(session).getMailPermissionClass();
-					final MailPermission p = MailPermission.newInstance(clazz);
+					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+							.createNewMailPermission();
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);

@@ -129,9 +129,8 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
 					mfd.setSubscribed(false);
 					mfd.setName(TEMPORARY_FOLDER);
 
-					final Class<? extends MailPermission> clazz = MailProviderRegistry
-							.getMailProviderBySession(session).getMailPermissionClass();
-					final MailPermission p = MailPermission.newInstance(clazz);
+					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+							.createNewMailPermission();
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
@@ -212,9 +211,8 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
 					mfd.setSubscribed(false);
 					mfd.setName(TEMPORARY_FOLDER);
 
-					final Class<? extends MailPermission> clazz = MailProviderRegistry
-							.getMailProviderBySession(session).getMailPermissionClass();
-					final MailPermission p = MailPermission.newInstance(clazz);
+					final MailPermission p = MailProviderRegistry.getMailProviderBySession(session)
+							.createNewMailPermission();
 					p.setEntity(getUser());
 					p.setAllPermission(OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 							OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION);
