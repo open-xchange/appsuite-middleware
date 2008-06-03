@@ -64,7 +64,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -77,6 +76,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.text.parser.HTMLParser;
+import com.openexchange.mail.text.parser.handler.HTMLFilterHandler;
 import com.openexchange.mail.text.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
@@ -163,8 +163,8 @@ public final class HTMLProcessing {
 	 *            The character encoding (only needed by HTML content; may be
 	 *            <code>null</code> on plain text)
 	 * @param isHtml
-	 *            <code>true</code> if content is of type
-	 *            <code>text/html</code>; otherwise <code>false</code>
+	 *            <code>true</code> if content is of type <code>text/html</code>
+	 *            ; otherwise <code>false</code>
 	 * @param secretCookieID
 	 *            The session's secret cookie identifier (used to compose valid
 	 *            URLs)
@@ -185,6 +185,12 @@ public final class HTMLProcessing {
 			final DisplayMode mode) {
 		String retval = isHtml ? getConformHTML(content, charset == null ? "UTF-8" : charset) : content;
 		if (isHtml) {
+			if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
+				/*
+				 * Filter according to white-list
+				 */
+				retval = filterWhitelist(retval);
+			}
 			if (DisplayMode.DISPLAY.equals(mode) && usm.isDisplayHtmlInlineContent()) {
 				if (!usm.isAllowHTMLImages()) {
 					retval = filterExternalImages(retval, modified);
@@ -223,6 +229,7 @@ public final class HTMLProcessing {
 	 * Searches for non-HTML links and convert them to valid HTML links
 	 * <p>
 	 * Example: <code>http://www.somewhere.com</code> is converted to
+	 * 
 	 * <code>&lt;a&nbsp;href=&quot;http://www.somewhere.com&quot;&gt;http://www.somewhere.com&lt;/a&gt;</code>
 	 * 
 	 * @param content
@@ -498,9 +505,7 @@ public final class HTMLProcessing {
 		return new BufferedInputStream(new FileInputStream(tidyMessagesFilename));
 	}
 
-	private static final AtomicBoolean TIDY_CONFIG = new AtomicBoolean();
-
-	private static Properties properties;
+	private static volatile Properties properties;
 
 	/**
 	 * Gets the configuration for JTidy either read from file if
@@ -510,10 +515,10 @@ public final class HTMLProcessing {
 	 * @return The configuration for JTidy
 	 */
 	private static Properties getTidyConfiguration() {
-		if (!TIDY_CONFIG.get()) {
-			synchronized (TIDY_CONFIG) {
+		if (null == properties) {
+			synchronized (HTMLProcessing.class) {
 				if (null == properties) {
-					properties = new Properties();
+					final Properties properties = new Properties();
 					final String tidyConfigFilename = SystemConfig.getProperty(SystemConfig.Property.TidyConfiguration);
 					boolean useDefaultConfig = true;
 					if (null != tidyConfigFilename) {
@@ -558,7 +563,7 @@ public final class HTMLProcessing {
 							LOG.error(e.getMessage(), e);
 						}
 					}
-					TIDY_CONFIG.set(true);
+					HTMLProcessing.properties = properties;
 				}
 			}
 		}
@@ -886,8 +891,8 @@ public final class HTMLProcessing {
 	/**
 	 * Determines the quote color for given <code>quotelevel</code>
 	 * 
-	 * @param quotelevel -
-	 *            the quote level
+	 * @param quotelevel
+	 *            - the quote level
 	 * @return the color for given <code>quotelevel</code>
 	 */
 	private static String getLevelColor(final int quotelevel) {
@@ -977,6 +982,19 @@ public final class HTMLProcessing {
 	}
 
 	/**
+	 * Filters specified HTML content according to white-list filter
+	 * 
+	 * @param htmlContent
+	 *            The HTML content
+	 * @return The filtered HTML content
+	 */
+	public static String filterWhitelist(final String htmlContent) {
+		final HTMLFilterHandler handler = new HTMLFilterHandler(htmlContent.length());
+		HTMLParser.parse(htmlContent, handler);
+		return handler.getHTML();
+	}
+
+	/**
 	 * Filters externally loaded images out of specified HTML content
 	 * 
 	 * @param htmlContent
@@ -984,7 +1002,7 @@ public final class HTMLProcessing {
 	 * @param modified
 	 *            A <code>boolean</code> array with length <code>1</code> to
 	 *            store modified status
-	 * @return The filtered HTML content
+	 * @return The HTML content stripped by external images
 	 */
 	public static String filterExternalImages(final String htmlContent, final boolean[] modified) {
 		final HTMLImageFilterHandler handler = new HTMLImageFilterHandler(htmlContent.length());
@@ -1013,8 +1031,8 @@ public final class HTMLProcessing {
 	 * <li>Inline images<br>
 	 * The source of inline images is in the message itself. Thus loading the
 	 * inline image is redirected to the appropriate message (image) attachment
-	 * identified through header <code>Content-Id</code>; e.g.:
-	 * <code>&lt;img src=&quot;cid:[cid-value]&quot; ... /&gt;</code>.</li>
+	 * identified through header <code>Content-Id</code>; e.g.: <code>&lt;img
+	 * src=&quot;cid:[cid-value]&quot; ... /&gt;</code>.</li>
 	 * </ul>
 	 * 
 	 * @param content
