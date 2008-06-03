@@ -59,7 +59,6 @@ import com.openexchange.imap.IMAPException;
 import com.openexchange.tools.Collections.SmartLongArray;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.protocol.IMAPResponse;
 
 /**
  * {@link CopyIMAPCommand} - Copies messages from given folder to given
@@ -289,10 +288,8 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 	protected void handleResponse(final Response response) throws MessagingException {
 		if (fast) {
 			return;
-		} else if (!(response instanceof IMAPResponse)) {
-			return;
 		}
-		final String resp = ((IMAPResponse) response).toString().toLowerCase();
+		final String resp = response.toString().toLowerCase();
 		/**
 		 * Parse response:
 		 * 
