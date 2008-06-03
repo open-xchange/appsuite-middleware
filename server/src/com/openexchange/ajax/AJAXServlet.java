@@ -282,6 +282,10 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	 */
 	public static final String PARAMETER_ORDER = "order";
 
+	public static final String LEFT_HAND_LIMIT = "left_hand_limit";
+	
+	public static final String RIGHT_HAND_LIMIT = "right_hand_limit";
+	
 	public static final String PARAMETER_HARDDELETE = "harddelete";
 
 	/**
