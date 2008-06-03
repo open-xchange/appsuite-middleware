@@ -51,6 +51,7 @@ package com.openexchange.spamhandler;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.session.Session;
 
 /**
  * {@link SpamHandler}
@@ -121,24 +122,31 @@ public abstract class SpamHandler {
 	 *            If <code>true</code> the mails identified by specified mail
 	 *            IDs are moved to spam folder; otherwise the mails remain in
 	 *            the source folder.
-	 * @param mailAccess
-	 *            The mail access
+	 * @param session
+	 *            The session providing needed user data
 	 * @throws MailException
 	 *             If handling spam fails
 	 */
-	public void handleSpam(final String fullname, final long[] mailIDs, final boolean move,
-			final MailAccess<?, ?> mailAccess) throws MailException {
+	public void handleSpam(final String fullname, final long[] mailIDs, final boolean move, final Session session)
+			throws MailException {
 		/*
 		 * Copy to confirmed spam folder
 		 */
-		final String confirmedSpamFullname = mailAccess.getFolderStorage().getConfirmedSpamFolder();
-		mailAccess.getMessageStorage().copyMessages(fullname, confirmedSpamFullname, mailIDs, true);
-		if (move) {
-			/*
-			 * Move to spam folder
-			 */
-			final String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
-			mailAccess.getMessageStorage().moveMessages(fullname, spamFullname, mailIDs, true);
+		final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+		mailAccess.connect();
+		try {
+
+			final String confirmedSpamFullname = mailAccess.getFolderStorage().getConfirmedSpamFolder();
+			mailAccess.getMessageStorage().copyMessages(fullname, confirmedSpamFullname, mailIDs, true);
+			if (move) {
+				/*
+				 * Move to spam folder
+				 */
+				final String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
+				mailAccess.getMessageStorage().moveMessages(fullname, spamFullname, mailIDs, true);
+			}
+		} finally {
+			mailAccess.close(true);
 		}
 	}
 
@@ -168,12 +176,12 @@ public abstract class SpamHandler {
 	 *            If <code>true</code> the mails identified by specified mail
 	 *            IDs are moved to INBOX folder; otherwise the mails remain in
 	 *            spam folder
-	 * @param mailAccess
-	 *            The mail access
+	 * @param session
+	 *            The session providing needed user data
 	 * @throws MailException
 	 *             If handling ham fails
 	 */
-	public abstract void handleHam(String spamFullname, long[] mailIDs, boolean move, MailAccess<?, ?> mailAccess)
+	public abstract void handleHam(String spamFullname, long[] mailIDs, boolean move, Session session)
 			throws MailException;
 
 }

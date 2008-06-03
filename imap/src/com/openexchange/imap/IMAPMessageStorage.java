@@ -1100,7 +1100,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				 */
 				try {
 					IMAPProvider.getInstance().getSpamHandler().handleSpam(imapFolder.getFullName(), msgUIDs, move,
-							imapAccess);
+							session);
 					/*
 					 * Close and reopen to force internal message cache update
 					 */
@@ -1122,8 +1122,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 			 * Handle ham.
 			 */
 			try {
-				IMAPProvider.getInstance().getSpamHandler().handleHam(imapFolder.getFullName(), msgUIDs, move,
-						imapAccess);
+				IMAPProvider.getInstance().getSpamHandler().handleHam(imapFolder.getFullName(), msgUIDs, move, session);
 				/*
 				 * Close and reopen to force internal message cache update
 				 */

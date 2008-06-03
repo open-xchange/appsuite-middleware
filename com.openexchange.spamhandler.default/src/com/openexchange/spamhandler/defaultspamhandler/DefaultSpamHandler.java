@@ -51,6 +51,7 @@ package com.openexchange.spamhandler.defaultspamhandler;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
 
 /**
@@ -91,22 +92,22 @@ public final class DefaultSpamHandler extends SpamHandler {
 		return NAME;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.spamhandler.SpamHandler#handleHam(java.lang.String,
-	 *      long[], boolean, com.openexchange.mail.api.MailAccess)
-	 */
 	@Override
-	public void handleHam(final String spamFullname, final long[] mailIDs, final boolean move,
-			final MailAccess<?, ?> mailAccess) throws MailException {
+	public void handleHam(final String spamFullname, final long[] mailIDs, final boolean move, final Session session)
+			throws MailException {
 		/*
 		 * Copy to confirmed ham
 		 */
-		final String confirmedHamFullname = mailAccess.getFolderStorage().getConfirmedHamFolder();
-		mailAccess.getMessageStorage().copyMessages(spamFullname, confirmedHamFullname, mailIDs, true);
-		if (move) {
-			mailAccess.getMessageStorage().moveMessages(spamFullname, FULLNAME_INBOX, mailIDs, true);
+		final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+		mailAccess.connect();
+		try {
+			final String confirmedHamFullname = mailAccess.getFolderStorage().getConfirmedHamFolder();
+			mailAccess.getMessageStorage().copyMessages(spamFullname, confirmedHamFullname, mailIDs, true);
+			if (move) {
+				mailAccess.getMessageStorage().moveMessages(spamFullname, FULLNAME_INBOX, mailIDs, true);
+			}
+		} finally {
+			mailAccess.close(true);
 		}
 	}
 

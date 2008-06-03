@@ -51,6 +51,7 @@ package com.openexchange.spamhandler;
 
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.session.Session;
 
 /**
  * {@link NoSpamHandler} - The special spam handler ignoring invocations to both
@@ -80,35 +81,18 @@ public final class NoSpamHandler extends SpamHandler {
 		super();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.spamhandler.SpamHandler#getSpamHandlerName()
-	 */
 	@Override
 	public String getSpamHandlerName() {
 		return SpamHandler.SPAM_HANDLER_FALLBACK;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.spamhandler.SpamHandler#handleHam(java.lang.String,
-	 *      long[], boolean, com.openexchange.mail.api.MailAccess)
-	 */
 	@Override
-	public void handleHam(String spamFullname, long[] mailIDs, boolean move, MailAccess<?, ?> mailAccess)
+	public void handleHam(final String spamFullname, final long[] mailIDs, final boolean move, final Session session)
 			throws MailException {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.openexchange.spamhandler.SpamHandler#handleSpam(java.lang.String,
-	 *      long[], boolean, com.openexchange.mail.api.MailAccess)
-	 */
 	@Override
-	public void handleSpam(final String fullname, final long[] mailIDs, final boolean move,
-			final MailAccess<?, ?> mailAccess) throws MailException {
+	public void handleSpam(final String fullname, final long[] mailIDs, final boolean move, final Session session)
+			throws MailException {
 	}
 }

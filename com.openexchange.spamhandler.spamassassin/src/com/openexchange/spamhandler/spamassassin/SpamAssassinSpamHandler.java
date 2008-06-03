@@ -61,6 +61,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
 
 /**
@@ -107,87 +108,95 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
 	 * (non-Javadoc)
 	 * 
 	 * @see com.openexchange.spamhandler.SpamHandler#handleHam(java.lang.String,
-	 *      long[], boolean, com.openexchange.mail.api.MailAccess)
+	 * long[], boolean, com.openexchange.mail.api.MailAccess)
 	 */
 	@Override
-	public void handleHam(final String spamFullname, final long[] mailIDs, final boolean move,
-			final MailAccess<?, ?> mailAccess) throws MailException {
-		/*
-		 * Mark as ham. In contrast to mark as spam this is a very time sucking
-		 * operation. In order to deal with the original messages that are
-		 * wrapped inside a SpamAssassin-created message it must be extracted.
-		 * Therefore we need to access message's content and cannot deal only
-		 * with UIDs
-		 */
-		final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(spamFullname, mailIDs, FIELDS_HEADER_CT);
-		/*
-		 * Separate the plain from the nested messages inside spam folder
-		 */
-		SmartLongArray plainIDs = new SmartLongArray(mailIDs.length);
-		SmartLongArray extractIDs = new SmartLongArray(mailIDs.length);
-		for (int i = 0; i < mails.length; i++) {
-			final String spamHdr = mails[i].getHeader(MessageHeaders.HDR_X_SPAM_FLAG);
-			final String spamChecker = mails[i].getHeader("X-Spam-Checker-Version");
-			final ContentType contentType = mails[i].getContentType();
-			if (spamHdr != null
-					&& "yes".regionMatches(true, 0, spamHdr, 0, 3)
-					&& contentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)
-					&& (spamChecker == null ? true
-							: spamChecker.toLowerCase(Locale.ENGLISH).indexOf("spamassassin") != -1)) {
-				extractIDs.append(mailIDs[i]);
-			} else {
-				plainIDs.append(mailIDs[i]);
-			}
-		}
-		final String confirmedHamFullname = mailAccess.getFolderStorage().getConfirmedHamFolder();
-		{
+	public void handleHam(final String spamFullname, final long[] mailIDs, final boolean move, final Session session)
+			throws MailException {
+		final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
+		mailAccess.connect();
+		try {
 			/*
-			 * Copy plain messages to confirmed ham and INBOX
+			 * Mark as ham. In contrast to mark as spam this is a very time
+			 * sucking operation. In order to deal with the original messages
+			 * that are wrapped inside a SpamAssassin-created message it must be
+			 * extracted. Therefore we need to access message's content and
+			 * cannot deal only with UIDs
 			 */
-			final long[] plainIDsArr = plainIDs.toArray();
-			plainIDs = null;
-			mailAccess.getMessageStorage().copyMessages(spamFullname, confirmedHamFullname, plainIDsArr, true);
-			if (move) {
-				mailAccess.getMessageStorage()
-						.moveMessages(spamFullname, SpamHandler.FULLNAME_INBOX, plainIDsArr, true);
-			}
-		}
-		/*
-		 * Handle spam assassin messages
-		 */
-		final long[] spamArr = extractIDs.toArray();
-		final List<MailMessage> nestedMails = new ArrayList<MailMessage>(spamArr.length);
-		extractIDs = null;
-		final long[] exc = new long[1];
-		for (int i = 0; i < spamArr.length; i++) {
-			final MailPart wrapped = mailAccess.getMessageStorage().getAttachment(spamFullname, spamArr[i], "2");
-			wrapped.loadContent();
-			MailMessage tmp = null;
-			if (null == wrapped) {
-				tmp = null;
-			} else if (wrapped instanceof MailMessage) {
-				tmp = (MailMessage) wrapped;
-			} else if (wrapped.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
-				tmp = (MailMessage) (wrapped.getContent());
-			}
-			if (null == tmp) {
-				/*
-				 * Handle like a plain spam message
-				 */
-				exc[0] = spamArr[i];
-				mailAccess.getMessageStorage().copyMessages(spamFullname, confirmedHamFullname, exc, true);
-				if (move) {
-					mailAccess.getMessageStorage().moveMessages(spamFullname, SpamHandler.FULLNAME_INBOX, exc, true);
+			final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(spamFullname, mailIDs,
+					FIELDS_HEADER_CT);
+			/*
+			 * Separate the plain from the nested messages inside spam folder
+			 */
+			SmartLongArray plainIDs = new SmartLongArray(mailIDs.length);
+			SmartLongArray extractIDs = new SmartLongArray(mailIDs.length);
+			for (int i = 0; i < mails.length; i++) {
+				final String spamHdr = mails[i].getHeader(MessageHeaders.HDR_X_SPAM_FLAG);
+				final String spamChecker = mails[i].getHeader("X-Spam-Checker-Version");
+				final ContentType contentType = mails[i].getContentType();
+				if (spamHdr != null
+						&& "yes".regionMatches(true, 0, spamHdr, 0, 3)
+						&& contentType.isMimeType(MIMETypes.MIME_MULTIPART_ALL)
+						&& (spamChecker == null ? true : spamChecker.toLowerCase(Locale.ENGLISH)
+								.indexOf("spamassassin") != -1)) {
+					extractIDs.append(mailIDs[i]);
+				} else {
+					plainIDs.append(mailIDs[i]);
 				}
-			} else {
-				nestedMails.add(tmp);
 			}
-		}
-		final long[] ids = mailAccess.getMessageStorage().appendMessages(confirmedHamFullname,
-				nestedMails.toArray(new MailMessage[nestedMails.size()]));
-		if (move) {
-			mailAccess.getMessageStorage().copyMessages(confirmedHamFullname, FULLNAME_INBOX, ids, true);
-			mailAccess.getMessageStorage().deleteMessages(spamFullname, spamArr, true);
+			final String confirmedHamFullname = mailAccess.getFolderStorage().getConfirmedHamFolder();
+			{
+				/*
+				 * Copy plain messages to confirmed ham and INBOX
+				 */
+				final long[] plainIDsArr = plainIDs.toArray();
+				plainIDs = null;
+				mailAccess.getMessageStorage().copyMessages(spamFullname, confirmedHamFullname, plainIDsArr, true);
+				if (move) {
+					mailAccess.getMessageStorage().moveMessages(spamFullname, SpamHandler.FULLNAME_INBOX, plainIDsArr,
+							true);
+				}
+			}
+			/*
+			 * Handle spam assassin messages
+			 */
+			final long[] spamArr = extractIDs.toArray();
+			final List<MailMessage> nestedMails = new ArrayList<MailMessage>(spamArr.length);
+			extractIDs = null;
+			final long[] exc = new long[1];
+			for (int i = 0; i < spamArr.length; i++) {
+				final MailPart wrapped = mailAccess.getMessageStorage().getAttachment(spamFullname, spamArr[i], "2");
+				wrapped.loadContent();
+				MailMessage tmp = null;
+				if (null == wrapped) {
+					tmp = null;
+				} else if (wrapped instanceof MailMessage) {
+					tmp = (MailMessage) wrapped;
+				} else if (wrapped.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+					tmp = (MailMessage) (wrapped.getContent());
+				}
+				if (null == tmp) {
+					/*
+					 * Handle like a plain spam message
+					 */
+					exc[0] = spamArr[i];
+					mailAccess.getMessageStorage().copyMessages(spamFullname, confirmedHamFullname, exc, true);
+					if (move) {
+						mailAccess.getMessageStorage()
+								.moveMessages(spamFullname, SpamHandler.FULLNAME_INBOX, exc, true);
+					}
+				} else {
+					nestedMails.add(tmp);
+				}
+			}
+			final long[] ids = mailAccess.getMessageStorage().appendMessages(confirmedHamFullname,
+					nestedMails.toArray(new MailMessage[nestedMails.size()]));
+			if (move) {
+				mailAccess.getMessageStorage().copyMessages(confirmedHamFullname, FULLNAME_INBOX, ids, true);
+				mailAccess.getMessageStorage().deleteMessages(spamFullname, spamArr, true);
+			}
+		} finally {
+			mailAccess.close(true);
 		}
 	}
 
@@ -196,7 +205,8 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
 	 * SmartLongArray - A tiny helper class to increase arrays of
 	 * <code>long</code> as dynamically lists
 	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben
+	 *         Betten</a>
 	 * 
 	 */
 	private static final class SmartLongArray {

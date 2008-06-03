@@ -204,7 +204,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 					 * Handle spam
 					 */
 					SpamHandlerRegistry.getSpamHandlerBySession(session).handleSpam(sourceFullname, msgUIDs, false,
-							mailAccess);
+							session);
 				}
 			} else {
 				if (locatedInSpamFolder) {
@@ -212,7 +212,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 					 * Handle ham.
 					 */
 					SpamHandlerRegistry.getSpamHandlerBySession(session).handleHam(sourceFullname, msgUIDs, false,
-							mailAccess);
+							session);
 				}
 			}
 		}
