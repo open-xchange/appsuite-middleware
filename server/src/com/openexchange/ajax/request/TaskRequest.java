@@ -361,6 +361,9 @@ public class TaskRequest {
 		final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
 		final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
 		
+		final int leftHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.LEFT_HAND_LIMIT);
+		final int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
+		
 		int[] internalColumns = new int[columns.length+1];
 		System.arraycopy(columns, 0, internalColumns, 0, columns.length);
 		internalColumns[columns.length] = DataObject.LAST_MODIFIED;
@@ -376,7 +379,11 @@ public class TaskRequest {
 			final TaskWriter taskwriter = new TaskWriter(timeZone);
 
 			final TasksSQLInterface taskssql = new TasksSQLInterfaceImpl(sessionObj);
-			it = taskssql.getTaskList(folderId, 0, -1, orderBy, orderDir, internalColumns);
+			if (leftHandLimit == 0) {
+				it = taskssql.getTaskList(folderId, leftHandLimit, -1, orderBy, orderDir, internalColumns);
+			} else {
+				it = taskssql.getTaskList(folderId, leftHandLimit, rightHandLimit, orderBy, orderDir, internalColumns);
+			}
 			
 			while (it.hasNext()) {
 				final Task taskobject = (Task)it.next();

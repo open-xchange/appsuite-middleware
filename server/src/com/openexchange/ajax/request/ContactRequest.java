@@ -67,7 +67,6 @@ import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXPermissionException;
-import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
 import com.openexchange.api2.RdbContactSQLInterface;
@@ -527,7 +526,10 @@ public class ContactRequest {
 		final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
 		final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);
 		final String orderDir = DataParser.parseString(jsonObj, AJAXServlet.PARAMETER_ORDER);
-
+		
+		final int leftHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.LEFT_HAND_LIMIT);
+		final int rightHandLimit = DataParser.parseInt(jsonObj, AJAXServlet.RIGHT_HAND_LIMIT);
+		
 		timestamp = new Date(0);
 
 		Date lastModified = null;
@@ -556,8 +558,13 @@ public class ContactRequest {
 			contactInterface.setSession(sessionObj);
 
 			final ContactWriter contactwriter = new ContactWriter(timeZone);
-			it = contactInterface.getContactsInFolder(folderId, 0, 50000, orderBy, orderDir,
-					internalColumns);
+			if (rightHandLimit == 0) {
+				it = contactInterface.getContactsInFolder(folderId, leftHandLimit, 50000, orderBy, orderDir,
+						internalColumns);
+			} else {
+				it = contactInterface.getContactsInFolder(folderId, leftHandLimit, rightHandLimit, orderBy, orderDir,
+						internalColumns);
+			}
 
 			while (it.hasNext()) {
 				final ContactObject contactObj = (ContactObject) it.next();

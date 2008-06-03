@@ -69,6 +69,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.Infostore;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.parser.InfostoreParser;
 import com.openexchange.ajax.parser.InfostoreParser.UnknownMetadataException;
 import com.openexchange.ajax.writer.InfostoreWriter;
@@ -388,7 +389,26 @@ public class InfostoreRequest extends CommonRequest {
 				return;
 			}
 			final int folderId = Integer.parseInt(req.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-			all(folderId, cols, sortedBy, dir);
+			
+			final String stringLeftHandLimit = req.getParameter(AJAXServlet.LEFT_HAND_LIMIT);
+			final String stringRightHandLimit = req.getParameter(AJAXServlet.RIGHT_HAND_LIMIT);
+
+			final int leftHandLimit;
+			final int rightHandLimit;
+			
+			if (stringLeftHandLimit == null) {
+				leftHandLimit = 0;
+			} else {
+				leftHandLimit = Integer.parseInt(AJAXServlet.LEFT_HAND_LIMIT);
+			}
+			
+			if (stringRightHandLimit == null) {
+				rightHandLimit = 0;
+			} else {
+				rightHandLimit = Integer.parseInt(AJAXServlet.RIGHT_HAND_LIMIT);
+			}
+			
+			all(folderId, cols, sortedBy, dir, leftHandLimit, rightHandLimit);
 		} else if (action.equals(AJAXServlet.ACTION_VERSIONS)) {
 			if (!checkRequired(req, action, AJAXServlet.PARAMETER_ID)) {
 				return;
@@ -550,7 +570,7 @@ public class InfostoreRequest extends CommonRequest {
 		}
 	}
 
-	protected void all(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir)
+	protected void all(final int folderId, final Metadata[] cols, final Metadata sortedBy, final int dir, final int leftHandLimit, final int rightHandLimit)
 			throws SearchIteratorException {
 		/**
 		 * System.out.println("ALL: "+System.currentTimeMillis());
