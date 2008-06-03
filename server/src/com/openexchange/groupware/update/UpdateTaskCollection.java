@@ -101,7 +101,7 @@ public class UpdateTaskCollection {
 		/*
 		 * Sort
 		 */
-		Collections.sort(retval, new UpdateTaskComparator());
+		Collections.sort(retval, UPDATE_TASK_COMPARATOR);
 		return retval;
 	}
 
@@ -133,22 +133,13 @@ public class UpdateTaskCollection {
 	}
 
 	/**
-	 * 
-	 * UpdateTaskComparator - sorts instances of <code>UpdateTask</code> by
-	 * their version in first order and by their priority in second order
-	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben
-	 *         Betten</a>
+	 * Sorts instances of <code>UpdateTask</code> by their version in first
+	 * order and by their priority in second order
 	 * 
 	 */
-	private static final class UpdateTaskComparator implements Comparator<UpdateTask> {
+	private static final Comparator<UpdateTask> UPDATE_TASK_COMPARATOR = new Comparator<UpdateTask>() {
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
-		 */
-		public int compare(final UpdateTask o1, final UpdateTask o2) {
+		public int compare(UpdateTask o1, UpdateTask o2) {
 			if (o1.addedWithVersion() > o2.addedWithVersion()) {
 				return 1;
 			} else if (o1.addedWithVersion() < o2.addedWithVersion()) {
@@ -160,7 +151,6 @@ public class UpdateTaskCollection {
 			}
 			return 0;
 		}
-
-	}
+	};
 
 }
