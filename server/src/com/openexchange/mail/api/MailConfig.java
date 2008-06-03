@@ -168,6 +168,8 @@ public abstract class MailConfig {
 	/**
 	 * Gets the user-specific mail configuration
 	 * 
+	 * @param <C>
+	 *            The return value type
 	 * @param clazz
 	 *            The mail configuration type
 	 * @param instance
