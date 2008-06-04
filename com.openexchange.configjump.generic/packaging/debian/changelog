@@ -1,3 +1,9 @@
+open-xchange-configjump-generic (6.5.0-2) unstable; urgency=low
+
+  * first build for Beta1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  4 Jun 2008 11:28:35 +0200
+
 open-xchange-configjump-generic (6.5.0-1) unstable; urgency=low
 
   * First internal beta.

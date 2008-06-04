@@ -1,3 +1,9 @@
+open-xchange-spamhandler-default (6.5.0-3) unstable; urgency=low
+
+  * first build for Beta1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  4 Jun 2008 11:28:25 +0200
+
 open-xchange-spamhandler-default (6.5.0-2) unstable; urgency=low
 
   * Seventh internal Beta.

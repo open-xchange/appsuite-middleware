@@ -1,3 +1,9 @@
+open-xchange-common (6.5.0-8) unstable; urgency=low
+
+  * first build for Beta1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  4 Jun 2008 11:28:15 +0200
+
 open-xchange-common (6.5.0-7) unstable; urgency=low
 
   * Seventh internal Beta.

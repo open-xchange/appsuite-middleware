@@ -1,3 +1,9 @@
+open-xchange-push-udp (6.5.0-6) unstable; urgency=low
+
+  * first build for Beta1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed,  4 Jun 2008 11:28:22 +0200
+
 open-xchange-push-udp (6.5.0-5) unstable; urgency=low
 
   * Seventh internal Beta.
