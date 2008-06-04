@@ -61,7 +61,7 @@ package org.w3c.tidy;
  * @author Dave Raggett <a href="mailto:dsr@w3.org">dsr@w3.org </a>
  * @author Andy Quick <a href="mailto:ac.quick@sympatico.ca">ac.quick@sympatico.ca </a> (translation to Java)
  * @author Fabrizio Giustina
- * @version $Revision: 1.1 $ ($Author: thorben $)
+ * @version $Revision: 1.2 $ ($Author: thorben $)
  */
 public class Node implements Cloneable
 {
@@ -817,11 +817,11 @@ public class Node implements Cloneable
             {
                 c = lexer.lexbuf[last.end - 1];
 
-                if (c == 160 || c == (byte) ' ')
+                if ((0xff & c) == 160 || c == (byte) ' ')
                 {
                     // take care with <td> &nbsp; </td>
                     // fix for [435920]
-                    if (c == 160 && (element.tag == tt.tagTd || element.tag == tt.tagTh))
+                    if ((0xff & c) == 160 && (element.tag == tt.tagTd || element.tag == tt.tagTh))
                     {
                         if (last.end > last.start + 1)
                         {
