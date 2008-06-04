@@ -90,8 +90,8 @@ public abstract class MailPart implements Serializable, Cloneable {
 
 	/**
 	 * The integer constant returned by {@link #getEnclosedCount()} if mail
-	 * part's content type does not match <code>multipart/*</code> and
-	 * therefore does not hold any enclosed parts.
+	 * part's content type does not match <code>multipart/*</code> and therefore
+	 * does not hold any enclosed parts.
 	 */
 	public static final int NO_ENCLOSED_PARTS = -1;
 
@@ -100,7 +100,8 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * <code>java.util.Iterator&lt;HeaderName, String&gt;</code> to
 	 * <code>java.util.Iterator&lt;String, String&gt;</code>
 	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben
+	 *         Betten</a>
 	 * 
 	 */
 	private static final class HeaderIterator implements Iterator<Map.Entry<String, String>> {
@@ -133,7 +134,8 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 * <code>java.util.Map.Entry&lt;HeaderName, String&gt;</code> to
 	 * <code>java.util.Map.Entry&lt;String, String&gt;</code>
 	 * 
-	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben
+	 *         Betten</a>
 	 * 
 	 */
 	private static final class HeaderEntry implements Map.Entry<String, String> {
@@ -236,15 +238,15 @@ public abstract class MailPart implements Serializable, Cloneable {
 	private boolean b_size;
 
 	/**
-	 * The <code>Content-ID</code> header used for inline images in HTML
-	 * content
+	 * The <code>Content-ID</code> header used for inline images in HTML content
 	 */
 	private String contentId;
 
 	private boolean b_contentId;
 
 	/**
-	 * The content's sequence ID inside message (something like <code>1.2</code>)
+	 * The content's sequence ID inside message (something like <code>1.2</code>
+	 * )
 	 */
 	private String sequenceId;
 
@@ -517,8 +519,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	}
 
 	/**
-	 * @return <code>true</code> if headers is set; otherwise
-	 *         <code>false</code>
+	 * @return <code>true</code> if headers is set; otherwise <code>false</code>
 	 */
 	public boolean containsHeaders() {
 		return b_headers;
@@ -969,20 +970,27 @@ public abstract class MailPart implements Serializable, Cloneable {
 	 *             If mail part's source cannot be returned
 	 */
 	public String getSource() throws MailException {
-		byte[] data;
-		{
-			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
-			writeTo(out);
-			data = out.toByteArray();
-		}
 		try {
-			return new String(data, US_ASCII);
+			return new String(getSourceBytes(), US_ASCII);
 		} catch (final UnsupportedEncodingException e) {
 			/*
 			 * Cannot occur
 			 */
 			throw new MailException(MailException.Code.ENCODING_ERROR, e, US_ASCII);
 		}
+	}
+
+	/**
+	 * Gets the mail part's source bytes
+	 * 
+	 * @return The mail part's source bytes
+	 * @throws MailException
+	 *             If mail part's source cannot be returned
+	 */
+	public byte[] getSourceBytes() throws MailException {
+		final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
+		writeTo(out);
+		return out.toByteArray();
 	}
 
 	/**
