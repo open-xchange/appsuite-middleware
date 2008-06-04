@@ -106,8 +106,13 @@ public final class SessionMailCache {
 			mailCache = null;
 		}
 		if (null == mailCache) {
-			mailCache = new SessionMailCache();
-			session.setParameter(MailSessionParameterNames.PARAM_MAIL_CACHE, mailCache);
+			synchronized (SessionMailCache.class) {
+				mailCache = (SessionMailCache) session.getParameter(MailSessionParameterNames.PARAM_MAIL_CACHE);
+				if (null == mailCache) {
+					mailCache = new SessionMailCache();
+					session.setParameter(MailSessionParameterNames.PARAM_MAIL_CACHE, mailCache);
+				}
+			}
 		}
 		return mailCache;
 	}
@@ -196,8 +201,8 @@ public final class SessionMailCache {
 	}
 
 	/**
-	 * Removes the entry acquired through {@link SessionMailCacheEntry#getKey()}.
-	 * If present it's applied to <code>entry</code> via
+	 * Removes the entry acquired through {@link SessionMailCacheEntry#getKey()}
+	 * . If present it's applied to <code>entry</code> via
 	 * {@link SessionMailCacheEntry#setValue(Object)}
 	 * 
 	 * @param entry
