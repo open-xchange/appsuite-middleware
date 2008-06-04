@@ -93,7 +93,6 @@ public final class FIFOQueue<T> {
 	 *            the max. size of this queue
 	 * @see #FIFOQueue(Class, int, boolean)
 	 */
-	@SuppressWarnings("unchecked")
 	public FIFOQueue(final Class<T> clazz, final int maxsize) {
 		this(clazz, maxsize, true);
 	}
