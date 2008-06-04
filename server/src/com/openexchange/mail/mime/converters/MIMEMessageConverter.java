@@ -222,7 +222,10 @@ public final class MIMEMessageConverter {
 					mimeMsg.setHeader(e.getKey(), e.getValue());
 				}
 			}
-			mimeMsg.setFrom(mail.getFrom()[0]);
+			{
+				final InternetAddress[] from = mail.getFrom();
+				mimeMsg.setFrom(from.length == 0 ? null : from[0]);
+			}
 			mimeMsg.setRecipients(Message.RecipientType.TO, mail.getTo());
 			mimeMsg.setRecipients(Message.RecipientType.CC, mail.getCc());
 			mimeMsg.setRecipients(Message.RecipientType.BCC, mail.getBcc());
