@@ -99,3 +99,94 @@ mv doc javadoc
 %files -n open-xchange-admin-plugin-hosting-doc
 %defattr(-,root,root)
 %doc javadoc
+%changelog
+* Tue Apr 29 2008 - choeger@open-xchange.com
+  - Bugfix ID#11194 getaccesscombinationnameforuser throws NoClassDefFoundError
+* Wed Mar 05 2008 - choeger@open-xchange.com
+  - Bugfix ID#10414 oxinstaller sets read db connection to the wrong server for master/slave setups
+* Tue Feb 12 2008 - dennis.sieben@open-xchange.com
+  - Bugfix ID#10894 AJP and general monitoring does not work anymore with showRuntimeStats
+* Tue Dec 11 2007 - choeger@open-xchange.com
+  - Bugfix ID#10223
+    [L3] file plugin/hosting.properties gets overwritten on package update
+* Mon Dec 10 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#10592 [HEAD] Filestorage leftovers for deleted contexts
+  - Bugfix ID#10603 [HEAD] double push back on db connection causes warning log
+* Fri Dec 07 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#10577 [HEAD ]admin does breake Database replication
+* Mon Oct 29 2007 - choeger@open-xchange.com
+  - Bugfix ID#9986 Admin should update schema automatically
+* Mon Oct 29 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#9974 [HEAD] context deletion not to use any server api calls
+* Thu Oct 25 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#9949 L3: Filestore directory layout not physically deleted when context
+    is removed, only contained files
+  - Bugfix ID#9948 No rollback when deleting a context
+* Wed Sep 26 2007 - choeger@open-xchange.com
+  - Bugfix ID#9614 initconfigdb "mysqladmin: connect to server at 'localhost'
+  failed" when database not local
+* Tue Sep 25 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#9569 showruntimestats shows "statistictools" as default usage
+* Mon Sep 10 2007 - choeger@open-xchange.com
+- Bugfix ID#8949 Unable to deinstall admin-plugin-hosting package when removing depending
+  package (the fix from 2007-08-20 does not really work)
+* Wed Sep 05 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#9254 showruntimestats gives NullPointerException
+* Wed Aug 22 2007 - choeger@open-xchange.com
+  - Bugfix ID#8989 generatempasswd no newline in output
+  - Bugfix ID#8991 initconfigdb, return code is always 0
+  - Bugfix ID#8853 'listcontexts' searchpattern only works for context id
+  - Bugfix ID#9026 listcontextsbyfilestore does not print a error when the given fs does not exist
+* Wed Aug 22 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#9023 createcontext name should be added to lmappings
+* Tue Aug 21 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#8543 rename of movedatabasecontext and movefilestorecontext
+  - Bugfix ID#9004 unregisterserver operation by name missing
+  - Bugfix ID#8993 clts should all be singular
+  - Bugfix ID#9007 Context login mappings not validated
+  - Bugfix ID#8994 oxinstaller --master-pass should not be needed if --disableauth is in use
+* Mon Aug 20 2007 - choeger@open-xchange.com
+  - Bugfix ID#8949 Unable to deinstall admin-plugin-hosting package when removing depending
+  package
+* Thu Aug 16 2007 - choeger@open-xchange.com
+  - Bugfix ID#8915 Classpath problems with CLTs
+* Thu Aug 16 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#8917 CLT 'showruntimestats' does not give any output
+* Tue Aug 14 2007 - choeger@open-xchange.com
+  - Bugfix ID#8822 'generatepassword' creates curious output
+* Thu Aug 09 2007 - choeger@open-xchange.com
+  - Bugfix ID#8623 oxinstaller: switch needed to turn on/of context authentication
+* Tue Aug 07 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#8629 movefilestorecontext StringIndexOutOfBoundsException
+  - Bugfix ID#8593 Operations by name not possible
+* Mon Aug 06 2007 - choeger@open-xchange.com
+  - Bugfix ID#8642 "listusers" command line tool output is limited to three digits
+    as a side effect of now dynamically determining the widest row, this is also fixed
+* Thu Aug 02 2007 - choeger@open-xchange.com
+  - Bugfix ID#8651 no access must be the default when not specifying access on commandline
+    using lowest set of access options as default (webmail)
+* Tue Jul 31 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#8597 [DEV] searchContextByFilestoreId,searchContextByFilestore and
+    searchContextByDatabase must only return contexts bound to specific SERVER_NAME
+* Mon Jul 30 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#8575 CLT createcontext: It should be possible to create a mapping between contextID
+  and context name during createcontext and not only on changecontext
+* Mon Jul 30 2007 - choeger@open-xchange.com
+  - Bugfix ID#8592 Misleading server response if "listuser" doesn't find any match
+* Thu Jul 26 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#8553 CLT: After running CLT no reasonable message on console appear for user
+* Wed Jul 25 2007 - choeger@open-xchange.com
+  - Bugfix ID#8550 generatempasswd not developed to be used by humans
+  made generatempasswd usable by humans... :-)
+* Wed Jul 11 2007 - manuel.kraft@open-xchange.com
+  -  Bugfix ID#8379 listcontext, lmapping not in csv output
+* Mon Jul 09 2007 - manuel.kraft@open-xchange.com
+  -  Bugfix ID#7302 changecontext is missing
+* Fri Jun 29 2007 - dennis.sieben@open-xchange.com
+  -  Bugfix ID#8171 need for a tool that does reset the jmx max values
+* Thu Jun 21 2007 - manuel.kraft@open-xchange.com
+  -  Bugfix ID#7675 LTs to manage users can not deal with modules
+* Tue Jun 12 2007 - dennis.sieben@open-xchange.com
+  -  Bugfix ID#7657 console clients check extension errors in the wrong place
+* Tue May 29 2007 - choeger@open-xchange.com
+  - Bugfix ID#7595 Groups member in several contexts are deleted on context delete
