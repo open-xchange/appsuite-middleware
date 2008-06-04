@@ -128,3 +128,159 @@ ln -sf ../etc/init.d/open-xchange-admin %{buildroot}/sbin/rcopen-xchange-admin
 %files -n open-xchange-admin-doc
 %defattr(-,root,root)
 %doc javadoc
+%changelog
+* Mon Jun 02 2008 - marcus.klein@open-xchange.com
+ - Bugfix #11327: Checking for possible null values in GUI configuration.
+* Mon Jun 02 2008 - manuel.kraft@open-xchange.com
+ - Bugfix #11094: no error message when cid is in remove lmappings remove list using changecontext
+* Mon Apr 28 2008 - choeger@open-xchange.com
+  - Bugfix ID#11139 "No admin user found in context" on changeuser execution
+  - Bugfix ID#11179 deleteuser doesn't delete user configuration
+  - Bugfix ID#11147 "Last modified from" should not be 0
+  - Bugfix ID#11185 No protocol identifier created when adding a user with --imap/smtpserver attribute
+* Mon Jan 21 2008 - dennis.sieben@open-xchange.com
+  - Bugfix ID#10805 One PreparedStatement isn't closed in OXToolMySQLStorage
+* Thu Dec 20 2007 - choeger@open-xchange.com
+  - Bugfix ID#10659 [HEAD] "Object was not returned" in database pool after context operations
+* Tue Dec 11 2007 - choeger@open-xchange.com
+  - Bugfix ID#10596 using read connections results into permanent problems in replication scenarios
+* Fri Dec 07 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#10577 [HEAD ]admin does breake Database replication
+  - Bugfix ID#10578 [HEAD] setDefaultSenderAddress does not work in changeUser
+* Tue Nov 13 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#10180 RuntimeExceptions aren't logged
+  - Bugfix ID#10188 Everytime a write connection is used it should be checked if a rollback is made there
+* Mon Nov 12 2007 - choeger@open-xchange.com
+  - Bugfix ID#9835 [L3] hanging or long taking command line tools
+* Thu Nov 08 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#10125 No rollback if filestore creation fails during createuser
+* Wed Nov 07 2007 - manuel.kraft@open-xchange.com
+  - Bugfix ID#10050 Database leftovers of deleted contexts
+* Tue Nov 06 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#10072 L3: display name of contact blocks creation of new user
+* Wed Oct 31 2007 - manuel.kraft@open-xchange.com
+   - Bugfix ID#10005 [HEAD] Connections to database not returned in admindaemon
+* Mon Oct 29 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#9983 Changing user by name isn't running any more
+* Tue Oct 23 2007 - manuel.kraft@open-xchange.com
+   - Bugfix ID#9938 [HEAD] cache does not get invalidated when users are added to or removed from groups
+* Tue Oct 23 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#9620 RMI Api documentation lacks proper language handling description
+* Thu Oct 18 2007 - manuel.kraft@open-xchange.com
+   - Bugfix ID#9860 Unable to delete Contact: Context 30 Contact 2 on delete context
+* Mon Oct 15 2007 - manuel.kraft@open-xchange.com
+  - Bugfix ID#9806 [HEAD] username can't be changed
+  - Bugfix ID#9805 [HEAD] No error message when username is going to be changed
+* Fri Oct 12 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#9786 L3: IMAP port is stripped from commandline
+* Thu Oct 11 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#9777 no adequate description of parameters
+* Wed Oct 10 2007 - choeger@open-xchange.com
+ - Bugfix ID#9767 [L3] changing admin password with disabled authentication does not work
+* Mon Oct 08 2007 - manuel.kraft@open-xchange.com
+ - Bugfix ID#9616 Deleted users are not removed from Global Addressbook in Outlook
+* Wed Sep 26 2007 - choeger@open-xchange.com
+  - Bugfix ID#9582 osgi/config.ini does not exist on upgrading the
+  open-xchange-admin
+* Thu Sep 20 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#9592 Language is not in the output of listuser --csv CLT
+* Tue Sep 11 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#9362 <addmembers> should be <userid>
+* Fri Sep 07 2007 - choeger@open-xchange.com
+ - Bugfix #9235 Crypt implementation should be able to handle UTF-8
+* Wed Sep 05 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#9254 showruntimestats gives NullPointerException
+* Fri Aug 31 2007 - choeger@open-xchange.com
+  - Bugfix ID#9156 Malformed path to HTMLEntities.properties
+* Wed Aug 22 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#9023 createcontext name should be added to lmappings
+  - Bugfix ID#9047 createuser not needed parameter --name
+  - Bugfix ID#9046 createuser text for --extendedoptions printed on sterr
+  - Bugfix ID#9034 createcontext null printed instead of cid in case of error
+  - Bugfix ID#8735 Some code clean open-xchange-admin
+* Tue Aug 21 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#8998 --nonl not consistent
+  - Bugfix ID#8985 createuser doesn't check --timezone format
+* Tue Aug 21 2007 - choeger@open-xchange.com
+  - Bugfix ID#8995 oxinstaller return value is always 0
+    ox_set_property now checks whether propfile exists
+* Mon Aug 20 2007 - manuel.kraft@open-xchange.com
+ - Bugfix ID#8875 No email validation for /opt/open-xchange/sbin/createcontext
+* Thu Aug 16 2007 - choeger@open-xchange.com
+  - Bugfix ID#8895 Misleading server response if "listuser --csv" doesn't find any match
+* Thu Aug 16 2007 - manuel.kraft@open-xchange.com
+ - Bugfix ID#8839 "Virtual" PIM folders are not updated when changing users displayname
+* Thu Aug 16 2007 - dennis.sieben@open-xchange.com
+ - Bugfix ID#8830 if user is deleted and plugin error occures, no message is shown.
+* Tue Aug 14 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#8802 no error message when display_name is changed
+  - Bugfix ID#8837 'createuser' command line tool shows wrong default settings for modularization
+* Tue Aug 07 2007 - choeger@open-xchange.com
+ - Bugfix ID#8679 new admin does not work with log4j
+* Tue Aug 07 2007 - dennis.sieben@open-xchange.com
+  - Bugfix ID#8593 Operations by name not possible
+  - Bugfix ID#8571 Problems with multiple unique displaynames for internal users
+  - Bugfix ID#8703 listcontext has incorrect data-mapping
+* Mon Aug 06 2007 - manuel.kraft@open-xchange.com
+ - Bugfix ID#8694: Users which are downgraded to "Basic" are still able to create public folders.
+* Thu Aug 02 2007 - choeger@open-xchange.com
+  - Bugfix ID#8666 imapLogin field get lost after changing module access
+  - Bugfix ID#8611 admindaemon must use groupware config files
+    now only system.properties, configdb.properties and cache.ccf is part of
+    open-xchange-admin. The rest is used from the groupware config files (see system.properties)
+* Thu Jul 26 2007 - dennis.sieben@open-xchange.com
+ - Bugfix ID#8553 CLT: After running CLT no reasonable message on console appear for user
+* Wed Jul 25 2007 - choeger@open-xchange.com
+ - Bugfix ID#8556 CLTs: <datevalue> not working in "createuser"
+   fixed parsing of dates and added dateformat format environment options,
+   see --environment commandline parameter for known options
+* Wed Jul 11 2007 - choeger@open-xchange.com
+ - Bugfix ID#8397 listgroup: "email" in csv output
+* Wed Jul 11 2007 - manuel.kraft@open-xchange.com
+ - Bugfix ID#8400 listresource: attribute available not in csv output
+* Mon Jul 09 2007 - choeger@open-xchange.com
+ - Bugfix ID#8336 Unable to change user using the changeuser script
+* Thu Jul 05 2007 - choeger@open-xchange.com
+ - Bugfix ID#7682 (user setup) deleted user is not automatically logged off (syntax error message is displayed)
+* Mon Jul 02 2007 - choeger@open-xchange.com
+ - Bugfix ID#8254 Cryptic error message when updatetask is started
+* Wed Jun 27 2007 - manuel.kraft@open-xchange.com
+  - Bugfix ID#8122 	RMI Authentication must be able to be switched off!
+* Wed Jun 20 2007 - choeger@open-xchange.com
+  - Bugfix ID#7310 createuser is not able to set imapLogin in user table
+* Tue Jun 19 2007 - choeger@open-xchange.com
+  - Bugfix ID#8076 German user created with english folders
+* Mon Jun 18 2007 - choeger@open-xchange.com
+ - Bugfix ID#7843 admin can only handle unix crypt in RMI auth
+ - Bugfix ID#7757 (spam) spam training in GUI is available if spam is disabled for user
+   added missing spam_trainer disable method
+* Mon Jun 18 2007 - manuel.kraft@open-xchange.com
+ - Bugfix #7833	  	Renaming a resource with the same mail address doesn't work
+* Fri Jun 15 2007 - manuel.kraft@open-xchange.com
+ - Bugfix #8019  	OXEE password of new created contexts is always secret
+* Wed Jun 13 2007 - choeger@open-xchange.com
+ - Bugfix ID#7972 Fresh install - admin cannot login
+ - Bugfix ID#7803 FQDN is replaced by a DHCP value after installation
+* Tue Jun 12 2007 - manuel.kraft@open-xchange.com
+ - Bugfix #7886:  	Translation of "Spam"
+* Tue Jun 12 2007 - dennis.sieben@open-xchange.com
+ - Bugfix #7816: User: Error when explicitly adding a new user to Group users
+* Mon Jun 11 2007 - dennis.sieben@open-xchange.com
+ - Bugfix #7855: (umin) changing password of user imap is no longer available for user
+* Tue Jun 05 2007 - choeger@open-xchange.com
+ - Implemented context admin authentication caching
+* Wed May 30 2007 - thorben.betten@open-xchange.com
+ - Bugfix #7615: Setting equal size to VARCHAR field 'fname' in both tables
+   'oxfolder_tree' and 'del_oxfolder_tree'
+* Fri May 25 2007 - choeger@open-xchange.com
+  - Bugfix ID#7568 alias can't be set without the need to set PRIMARY_MAIL or EMAIL1
+* Mon May 21 2007 - choeger@open-xchange.com
+  - Bugfix ID#7340 user create -> can add aliases which are not acceptable
+  - Bugfix ID#7342 can create a group with invalid email address
+* Fri May 18 2007 - manuel.kraft@open-xchange.com
+  -  Bugfix ID#7345 After update, login as admin not possible
+* Mon May 14 2007 - manuel.kraft@open-xchange.com
+  -  Fixed check for invalid locate data in users language in user.Change()
+* Fri May 11 2007 - manuel.kraft@open-xchange.com
+  -  Bugfix ID#7186 Fixed property in foldercache.properties that a user can edit his own personal data via groupware interface!
+  -	 Fixed invalid alias creation when client sends an alias array with "" data entries.
