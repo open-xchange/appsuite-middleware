@@ -141,6 +141,35 @@ public final class ElementAttributesImpl implements ElementAttributes, Serializa
 	}
 
 	/**
+	 * The readObject method is responsible for reading from the stream and
+	 * restoring the classes fields. It may call in.defaultReadObject to invoke
+	 * the default mechanism for restoring the object's non-static and
+	 * non-transient fields. The {@link ObjectInputStream#defaultReadObject()}
+	 * method uses information in the stream to assign the fields of the object
+	 * saved in the stream with the correspondingly named fields in the current
+	 * object. This handles the case when the class has evolved to add new
+	 * fields. The method does not need to concern itself with the state
+	 * belonging to its super classes or subclasses. State is saved by writing
+	 * the individual fields to the ObjectOutputStream using the writeObject
+	 * method or by using the methods for primitive data types supported by
+	 * {@link DataOutput}.
+	 * 
+	 * @param in
+	 *            The object input stream
+	 * @throws IOException
+	 *             If an I/O error occurs
+	 * @throws ClassNotFoundException
+	 *             If a casting fails
+	 */
+	private void readObject(final java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+		/*
+		 * Restore common fields
+		 */
+		in.defaultReadObject();
+		eventHandlers = null;
+	}
+
+	/**
 	 * Constructor for the element attributes object
 	 * 
 	 * @param attr
