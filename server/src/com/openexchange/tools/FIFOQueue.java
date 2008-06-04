@@ -56,9 +56,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * This class represents a fast (and optional thread-safe) implementation of a
- * FIFO (<code>first-in-first-out</code>) queue backed by an array of
- * generic objects. This class is only useful if programmer knows the size of
- * the queue in advance.
+ * FIFO (<code>first-in-first-out</code>) queue backed by an array of generic
+ * objects. This class is only useful if programmer knows the size of the queue
+ * in advance.
  * <p>
  * If this queue is created with enabled synchronization mechanism a
  * <code>{@link ReadWriteLock}</code> is used for mutually exclusive access
@@ -69,28 +69,27 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public final class FIFOQueue<T> {
 
-	private T[] array;
+	private final T[] array;
 
 	private int start, end;
 
 	private boolean full;
 
-	private ReadWriteLock rwLock;
+	private final ReadWriteLock rwLock;
 
-	private Lock r, w;
+	private final Lock r, w;
 
 	private final boolean isSynchronized;
 
 	/**
-	 * Constructor which invokes
-	 * <code>{@link #FIFOQueue(Class, int, boolean)}</code> with last
-	 * <code>boolean</code> parameter (<code>sync</code>) set to
-	 * <code>true</code>
+	 * Constructor which invokes <code>{@link #FIFOQueue(Class, int, boolean)}
+	 * </code> with last <code>boolean</code> parameter (<code>sync</code>) set
+	 * to <code>true</code>
 	 * 
-	 * @param clazz -
-	 *            the class whose instances are kept in FIFO queue
-	 * @param maxsize -
-	 *            the max. size of this queue
+	 * @param clazz
+	 *            - the class whose instances are kept in FIFO queue
+	 * @param maxsize
+	 *            - the max. size of this queue
 	 * @see #FIFOQueue(Class, int, boolean)
 	 */
 	public FIFOQueue(final Class<T> clazz, final int maxsize) {
@@ -100,12 +99,12 @@ public final class FIFOQueue<T> {
 	/**
 	 * Constructor
 	 * 
-	 * @param clazz -
-	 *            the class whose instances are kept in FIFO queue
-	 * @param maxsize -
-	 *            the max. size of this queue
-	 * @param isSynchronized -
-	 *            whether this queue is synchronized (mutually exclusive) for
+	 * @param clazz
+	 *            - the class whose instances are kept in FIFO queue
+	 * @param maxsize
+	 *            - the max. size of this queue
+	 * @param isSynchronized
+	 *            - whether this queue is synchronized (mutually exclusive) for
 	 *            multiple threads accessing this queue
 	 */
 	@SuppressWarnings("unchecked")
@@ -118,6 +117,10 @@ public final class FIFOQueue<T> {
 			rwLock = new ReentrantReadWriteLock();
 			r = rwLock.readLock();
 			w = rwLock.writeLock();
+		} else {
+			rwLock = null;
+			r = null;
+			w = null;
 		}
 	}
 
@@ -148,8 +151,7 @@ public final class FIFOQueue<T> {
 	/**
 	 * Tests if this queue is empty
 	 * 
-	 * @return <code>true</code> if queue is empty; otherwise
-	 *         <code>false</code>
+	 * @return <code>true</code> if queue is empty; otherwise <code>false</code>
 	 */
 	public boolean isEmpty() {
 		acquireReadLock();
@@ -163,8 +165,7 @@ public final class FIFOQueue<T> {
 	/**
 	 * Tests if this queue is full
 	 * 
-	 * @return <code>true</code> if queue is full; otherwise
-	 *         <code>false</code>
+	 * @return <code>true</code> if queue is full; otherwise <code>false</code>
 	 */
 	public boolean isFull() {
 		acquireReadLock();
@@ -198,8 +199,8 @@ public final class FIFOQueue<T> {
 	/**
 	 * Enqueues given object to queue's tail
 	 * 
-	 * @param obj -
-	 *            the object to enqueue
+	 * @param obj
+	 *            - the object to enqueue
 	 */
 	public void enqueue(final T obj) {
 		acquireWriteLock();
