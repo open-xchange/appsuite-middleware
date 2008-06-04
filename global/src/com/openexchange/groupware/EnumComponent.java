@@ -270,7 +270,11 @@ public enum EnumComponent implements Component {
 	/**
 	 * Consistency Tool
 	 */
-	CONSISTENCY("CSTY");
+	CONSISTENCY("CSTY"),
+	/**
+	 * Axis2 related errors
+	 */
+	AXIS2("AXIS2");
 
 	/**
 	 * The abbreviation for components.
