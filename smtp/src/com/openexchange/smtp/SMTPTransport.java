@@ -357,7 +357,7 @@ public final class SMTPTransport extends MailTransport {
 	}
 
 	@Override
-	public MailMessage sendRawMessage(final byte[] asciiBytes) throws MailException {
+	public MailMessage sendRawMessage(final byte[] asciiBytes, final Address[] allRecipients) throws MailException {
 		try {
 			clearUp();
 			final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession(), new UnsynchronizedByteArrayInputStream(
@@ -365,8 +365,8 @@ public final class SMTPTransport extends MailTransport {
 			/*
 			 * Check recipients
 			 */
-			final Address[] allRecipients = smtpMessage.getAllRecipients();
-			if ((allRecipients == null) || (allRecipients.length == 0)) {
+			final Address[] recipients = allRecipients == null ? smtpMessage.getAllRecipients() : allRecipients;
+			if ((recipients == null) || (recipients.length == 0)) {
 				throw new SMTPException(SMTPException.Code.MISSING_RECIPIENTS);
 			}
 			try {
@@ -381,7 +381,7 @@ public final class SMTPTransport extends MailTransport {
 				}
 				try {
 					smtpMessage.saveChanges();
-					transport.sendMessage(smtpMessage, allRecipients);
+					transport.sendMessage(smtpMessage, recipients);
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				} finally {
 					transport.close();
@@ -396,8 +396,8 @@ public final class SMTPTransport extends MailTransport {
 	}
 
 	@Override
-	public MailMessage sendMailMessage(final ComposedMailMessage composedMail, final ComposeType sendType)
-			throws MailException {
+	public MailMessage sendMailMessage(final ComposedMailMessage composedMail, final ComposeType sendType,
+			final Address[] allRecipients) throws MailException {
 		try {
 			clearUp();
 			final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession());
@@ -412,8 +412,8 @@ public final class SMTPTransport extends MailTransport {
 				/*
 				 * Check recipients
 				 */
-				final Address[] allRecipients = smtpMessage.getAllRecipients();
-				if ((allRecipients == null) || (allRecipients.length == 0)) {
+				final Address[] recipients = allRecipients == null ? smtpMessage.getAllRecipients() : allRecipients;
+				if ((recipients == null) || (recipients.length == 0)) {
 					throw new SMTPException(SMTPException.Code.MISSING_RECIPIENTS);
 				}
 				smtpFiller.setSendHeaders(composedMail, smtpMessage);
@@ -436,7 +436,7 @@ public final class SMTPTransport extends MailTransport {
 					/*
 					 * TODO: Do encryption here
 					 */
-					transport.sendMessage(smtpMessage, allRecipients);
+					transport.sendMessage(smtpMessage, recipients);
 					mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
 				} finally {
 					transport.close();

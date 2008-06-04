@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.transport;
 
+import javax.mail.Address;
+
 import com.openexchange.mail.MailException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -109,6 +111,10 @@ public abstract class MailTransport {
 
 	/**
 	 * Sends a mail message
+	 * <p>
+	 * This is a convenience method that invokes
+	 * {@link #sendMailMessage(ComposedMailMessage, ComposeType, Address[])}
+	 * with the latter parameter set to <code>null</code>.
 	 * 
 	 * @param transportMail
 	 *            The mail message to send (containing necessary header data and
@@ -119,8 +125,47 @@ public abstract class MailTransport {
 	 * @throws MailException
 	 *             If transport fails
 	 */
-	public abstract MailMessage sendMailMessage(ComposedMailMessage transportMail, ComposeType sendType)
-			throws MailException;
+	public MailMessage sendMailMessage(ComposedMailMessage transportMail, ComposeType sendType) throws MailException {
+		return sendMailMessage(transportMail, sendType, null);
+	}
+
+	/**
+	 * Sends a mail message
+	 * 
+	 * @param transportMail
+	 *            The mail message to send (containing necessary header data and
+	 *            body)
+	 * @param sendType
+	 *            The send type
+	 * @param allRecipients
+	 *            An array of {@link Address addresses} to send this message to;
+	 *            may be <code>null</code> to extract recipients from message
+	 *            headers TO, CC, BCC, and NEWSGROUPS.
+	 * @return The sent mail message
+	 * @throws MailException
+	 *             If transport fails
+	 */
+	public abstract MailMessage sendMailMessage(ComposedMailMessage transportMail, ComposeType sendType,
+			Address[] allRecipients) throws MailException;
+
+	/**
+	 * Sends specified message's raw ascii bytes. The given bytes are
+	 * interpreted dependent on implementation, but in most cases it's treated
+	 * as an rfc822 MIME message.
+	 * <p>
+	 * This is a convenience method that invokes
+	 * {@link #sendRawMessage(byte[], Address[])} with the latter parameter set
+	 * to <code>null</code>.
+	 * 
+	 * @param asciiBytes
+	 *            The raw ascii bytes
+	 * @return The sent mail message
+	 * @throws MailException
+	 *             If sending fails
+	 */
+	public MailMessage sendRawMessage(byte[] asciiBytes) throws MailException {
+		return sendRawMessage(asciiBytes, null);
+	}
 
 	/**
 	 * Sends specified message's raw ascii bytes. The given bytes are
@@ -129,11 +174,15 @@ public abstract class MailTransport {
 	 * 
 	 * @param asciiBytes
 	 *            The raw ascii bytes
+	 * @param allRecipients
+	 *            An array of {@link Address addresses} to send this message to;
+	 *            may be <code>null</code> to extract recipients from message
+	 *            headers TO, CC, BCC, and NEWSGROUPS.
 	 * @return The sent mail message
 	 * @throws MailException
 	 *             If sending fails
 	 */
-	public abstract MailMessage sendRawMessage(byte[] asciiBytes) throws MailException;
+	public abstract MailMessage sendRawMessage(byte[] asciiBytes, Address[] allRecipients) throws MailException;
 
 	/**
 	 * Sends a receipt acknowledgment for the specified message.
