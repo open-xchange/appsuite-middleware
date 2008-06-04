@@ -57,7 +57,7 @@ public class Bug7915Test extends AbstractRecurrenceTest {
 		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
-		final Date modified = appointmentObj.getLastModified();
+		final Date modified = loadAppointment.getLastModified();
 		
 		exceptionAppointmentObject.setObjectID(exceptionObjectId);
 		loadAppointment = loadAppointment(getWebConversation(), exceptionObjectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
