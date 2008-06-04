@@ -47,13 +47,9 @@
  *
  */
 
-
-
 package com.openexchange.tools.servlet;
 
 import java.io.IOException;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.servlet.ServletInputStream;
 
@@ -71,10 +67,10 @@ public final class OXServletInputStream extends ServletInputStream {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(OXServletInputStream.class);
-	
-	private final Lock MUTEX = new ReentrantLock();
 
 	private final AJPv13Connection ajpCon;
+
+	private final Thread ajpListenerThread;
 
 	private byte[] data;
 
@@ -97,11 +93,20 @@ public final class OXServletInputStream extends ServletInputStream {
 	}
 
 	/**
-	 * @param ajpCon -
-	 *            associated AJP connection
+	 * @param ajpCon
+	 *            - associated AJP connection
 	 */
 	public OXServletInputStream(final AJPv13Connection ajpCon) {
 		this.ajpCon = ajpCon;
+		ajpListenerThread = Thread.currentThread();
+	}
+
+	private void ensureAccess() throws IOException {
+		if (Thread.currentThread() != ajpListenerThread) {
+			throw new IOException(new StringBuilder(128).append("Illegal access to input stream through thread \"")
+					.append(Thread.currentThread().getName()).append("\" but should be \"").append(
+							ajpListenerThread.getName()).append('"').toString());
+		}
 	}
 
 	/**
@@ -109,50 +114,47 @@ public final class OXServletInputStream extends ServletInputStream {
 	 * <code>null</code> then value <code>-1</code> will be returned on
 	 * invocations of any read method
 	 * 
-	 * @param newData -
-	 *            the new data
+	 * @param newData
+	 *            The new data
 	 * @throws IOException
+	 *             If an I/O error occurs
 	 */
 	public void setData(final byte[] newData) throws IOException {
-		MUTEX.lock();
-		try {
-			if (isClosed) {
-				throw new IOException("InputStream is closed");
-			}
-			if (data != null && pos < data.length) {
-				/*
-				 * Copy rest of previous data
-				 */
-				final byte[] temp = new byte[data.length - pos];
-				System.arraycopy(data, pos, temp, 0, temp.length);
-				/*
-				 * Append new data
-				 */
-				if (newData == null) {
-					this.data = temp;
-				} else {
-					this.data = new byte[temp.length + newData.length];
-					System.arraycopy(temp, 0, data, 0, temp.length);
-					System.arraycopy(newData, 0, data, temp.length, newData.length);
-				}
-				pos = 0;
-			} else {
-				if (newData == null) {
-					/*
-					 * Data is set to null and dataSet is left to false
-					 */
-					data = null;
-					pos = 0;
-					return;
-				}
-				data = new byte[newData.length];
-				System.arraycopy(newData, 0, data, 0, newData.length);
-				pos = 0;
-			}
-			dataSet = true;
-		} finally {
-			MUTEX.unlock();
+		ensureAccess();
+		if (isClosed) {
+			throw new IOException("InputStream is closed");
 		}
+		if (data != null && pos < data.length) {
+			/*
+			 * Copy rest of previous data
+			 */
+			final byte[] temp = new byte[data.length - pos];
+			System.arraycopy(data, pos, temp, 0, temp.length);
+			/*
+			 * Append new data
+			 */
+			if (newData == null) {
+				this.data = temp;
+			} else {
+				this.data = new byte[temp.length + newData.length];
+				System.arraycopy(temp, 0, data, 0, temp.length);
+				System.arraycopy(newData, 0, data, temp.length, newData.length);
+			}
+			pos = 0;
+		} else {
+			if (newData == null) {
+				/*
+				 * Data is set to null and dataSet is left to false
+				 */
+				data = null;
+				pos = 0;
+				return;
+			}
+			data = new byte[newData.length];
+			System.arraycopy(newData, 0, data, 0, newData.length);
+			pos = 0;
+		}
+		dataSet = true;
 	}
 
 	/*
@@ -162,30 +164,26 @@ public final class OXServletInputStream extends ServletInputStream {
 	 */
 	@Override
 	public int read() throws IOException {
-		MUTEX.lock();
-		try {
-			if (isClosed) {
-				throw new IOException("OXServletInputStream.read(): InputStream is closed");
-			} else if (!dataSet) {
-				if (data == null || pos >= data.length) {
-					return -1;
-				}
-				throw new IOException(new StringBuilder("OXServletInputStream.read(): ").append(EXC_MSG).toString());
+		ensureAccess();
+		if (isClosed) {
+			throw new IOException("OXServletInputStream.read(): InputStream is closed");
+		} else if (!dataSet) {
+			if (data == null || pos >= data.length) {
+				return -1;
 			}
-			if (pos >= data.length) {
-				dataSet = false;
-				if (!requestMoreDataFromWebServer()) {
-					/*
-					 * Web server sent an empty data package to indicate no more
-					 * available data
-					 */
-					return -1;
-				}
-			}
-			return (data[pos++] & 0xff);
-		} finally {
-			MUTEX.unlock();
+			throw new IOException(new StringBuilder("OXServletInputStream.read(): ").append(EXC_MSG).toString());
 		}
+		if (pos >= data.length) {
+			dataSet = false;
+			if (!requestMoreDataFromWebServer()) {
+				/*
+				 * Web server sent an empty data package to indicate no more
+				 * available data
+				 */
+				return -1;
+			}
+		}
+		return (data[pos++] & 0xff);
 	}
 
 	/*
@@ -205,66 +203,62 @@ public final class OXServletInputStream extends ServletInputStream {
 	 */
 	@Override
 	public int read(final byte[] b, final int off, final int len) throws IOException {
-		MUTEX.lock();
-		try {
-			if (isClosed) {
-				throw new IOException("OXServletInputStream.read(byte[], int, int): InputStream is closed");
-			} else if (!dataSet) {
-				if (data == null || pos >= data.length) {
-					return -1;
-				}
-				throw new IOException(new StringBuilder("OXServletInputStream.read(byte[], int, int): ")
-						.append(EXC_MSG).toString());
-			} else if (b == null) {
-				throw new NullPointerException("OXServletInputStream.read(byte[], int, int): Byte array is null");
-			} else if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) > b.length) || ((off + len) < 0)) {
-				throw new IndexOutOfBoundsException("OXServletInputStream.read(byte[], int, int): Invalid arguments");
-			} else if (len == 0) {
-				return 0;
+		ensureAccess();
+		if (isClosed) {
+			throw new IOException("OXServletInputStream.read(byte[], int, int): InputStream is closed");
+		} else if (!dataSet) {
+			if (data == null || pos >= data.length) {
+				return -1;
 			}
-			final int numOfAvailableBytes = data.length - pos;
-			/*
-			 * Number of available bytes is greater than or equal to requested
-			 * length (len)
-			 */
-			if (numOfAvailableBytes >= len) {
-				System.arraycopy(data, pos, b, off, len);
-				pos += len;
+			throw new IOException(new StringBuilder("OXServletInputStream.read(byte[], int, int): ").append(EXC_MSG)
+					.toString());
+		} else if (b == null) {
+			throw new NullPointerException("OXServletInputStream.read(byte[], int, int): Byte array is null");
+		} else if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) > b.length) || ((off + len) < 0)) {
+			throw new IndexOutOfBoundsException("OXServletInputStream.read(byte[], int, int): Invalid arguments");
+		} else if (len == 0) {
+			return 0;
+		}
+		final int numOfAvailableBytes = data.length - pos;
+		/*
+		 * Number of available bytes is greater than or equal to requested
+		 * length (len)
+		 */
+		if (numOfAvailableBytes >= len) {
+			System.arraycopy(data, pos, b, off, len);
+			pos += len;
+			return len;
+		}
+		/*
+		 * Caller requests more than currently available bytes. First copy all
+		 * available bytes into byte array.
+		 */
+		if (numOfAvailableBytes > 0) {
+			System.arraycopy(data, pos, b, off, numOfAvailableBytes);
+			pos = data.length;
+		}
+		dataSet = false;
+		int remainingLen = len - numOfAvailableBytes;
+		int numOfFilledBytes = numOfAvailableBytes;
+		while (remainingLen > 0 && requestMoreDataFromWebServer()) {
+			if (data.length >= remainingLen) {
+				/*
+				 * New data size is equal to or greater than remaining len
+				 */
+				System.arraycopy(data, pos, b, off + numOfFilledBytes, remainingLen);
+				pos += remainingLen;
 				return len;
 			}
 			/*
-			 * Caller requests more than currently available bytes. First copy
-			 * all available bytes into byte array.
+			 * Copy data from web server into byte array
 			 */
-			if (numOfAvailableBytes > 0) {
-				System.arraycopy(data, pos, b, off, numOfAvailableBytes);
-				pos = data.length;
-			}
+			System.arraycopy(data, pos, b, off + numOfFilledBytes, data.length);
+			pos = data.length;
 			dataSet = false;
-			int remainingLen = len - numOfAvailableBytes;
-			int numOfFilledBytes = numOfAvailableBytes;
-			while (remainingLen > 0 && requestMoreDataFromWebServer()) {
-				if (data.length >= remainingLen) {
-					/*
-					 * New data size is equal to or greater than remaining len
-					 */
-					System.arraycopy(data, pos, b, off + numOfFilledBytes, remainingLen);
-					pos += remainingLen;
-					return len;
-				}
-				/*
-				 * Copy data from web server into byte array
-				 */
-				System.arraycopy(data, pos, b, off + numOfFilledBytes, data.length);
-				pos = data.length;
-				dataSet = false;
-				numOfFilledBytes += data.length;
-				remainingLen -= data.length;
-			}
-			return numOfFilledBytes == 0 ? -1 : numOfFilledBytes;
-		} finally {
-			MUTEX.unlock();
+			numOfFilledBytes += data.length;
+			remainingLen -= data.length;
 		}
+		return numOfFilledBytes == 0 ? -1 : numOfFilledBytes;
 	}
 
 	/*
@@ -274,23 +268,19 @@ public final class OXServletInputStream extends ServletInputStream {
 	 */
 	@Override
 	public long skip(final long n) throws IOException {
-		MUTEX.lock();
-		try {
-			if (!dataSet) {
-				if (data == null || pos >= data.length) {
-					return 0;
-				}
-				throw new IOException("OXServletInputStream.skip(long): No data found");
-			} else if (isClosed) {
-				throw new IOException("OXServletInputStream.skip(long): InputStream is closed");
-			} else if (n > Integer.MAX_VALUE) {
-				throw new IOException("OXServletInputStream.skip(long): Too many bytes to skip: " + n);
+		ensureAccess();
+		if (!dataSet) {
+			if (data == null || pos >= data.length) {
+				return 0;
 			}
-			final byte[] tmp = new byte[(int) n];
-			return (read(tmp, 0, tmp.length));
-		} finally {
-			MUTEX.unlock();
+			throw new IOException("OXServletInputStream.skip(long): No data found");
+		} else if (isClosed) {
+			throw new IOException("OXServletInputStream.skip(long): InputStream is closed");
+		} else if (n > Integer.MAX_VALUE) {
+			throw new IOException("OXServletInputStream.skip(long): Too many bytes to skip: " + n);
 		}
+		final byte[] tmp = new byte[(int) n];
+		return (read(tmp, 0, tmp.length));
 	}
 
 	/*
@@ -300,6 +290,7 @@ public final class OXServletInputStream extends ServletInputStream {
 	 */
 	@Override
 	public int available() throws IOException {
+		ensureAccess();
 		if (!dataSet) {
 			if (data == null || pos >= data.length) {
 				return 0;
