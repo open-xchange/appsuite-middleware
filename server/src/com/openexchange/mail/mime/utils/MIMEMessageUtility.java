@@ -112,8 +112,8 @@ public final class MIMEMessageUtility {
 	 * 
 	 * @param htmlContent
 	 *            The html content
-	 * @return <code>true</code> if given html content contains inlined
-	 *         images; otherwise <code>false</code>
+	 * @return <code>true</code> if given html content contains inlined images;
+	 *         otherwise <code>false</code>
 	 */
 	public static boolean hasEmbeddedImages(final String htmlContent) {
 		return PATTERN_EMBD_IMG.matcher(htmlContent).find() || PATTERN_EMBD_IMG_ALT.matcher(htmlContent).find();
@@ -125,8 +125,8 @@ public final class MIMEMessageUtility {
 	 * 
 	 * @param htmlContent
 	 *            The html content
-	 * @return an instance of <code>{@link List}</code> containing all
-	 *         occuring content IDs
+	 * @return an instance of <code>{@link List}</code> containing all occuring
+	 *         content IDs
 	 */
 	public static List<String> getContentIDs(final String htmlContent) {
 		final List<String> retval = new ArrayList<String>();
@@ -143,15 +143,14 @@ public final class MIMEMessageUtility {
 
 	/**
 	 * Compares (case insensitive) the given values of message header
-	 * "Content-ID". The leading/trailing character '<code>&lt;</code>'/'<code>&gt;</code>'
-	 * are ignored during comparison
+	 * "Content-ID". The leading/trailing character '<code>&lt;</code>'/'
+	 * <code>&gt;</code>' are ignored during comparison
 	 * 
 	 * @param contentId1Arg
 	 *            The first content ID
 	 * @param contentId2Arg
 	 *            The second content ID
-	 * @return <code>true</code> if both are equal; otherwise
-	 *         <code>false</code>
+	 * @return <code>true</code> if both are equal; otherwise <code>false</code>
 	 */
 	public static boolean equalsCID(final String contentId1Arg, final String contentId2Arg) {
 		if (null != contentId1Arg && null != contentId2Arg) {
@@ -341,7 +340,7 @@ public final class MIMEMessageUtility {
 		return found;
 	}
 
-	private static final Pattern ENC_PATTERN = Pattern.compile("(=\\?\\S+?\\?\\S+?\\?)(\\S+?)(\\?=)");
+	private static final Pattern ENC_PATTERN = Pattern.compile("(=\\?\\S+?\\?\\S+?\\?)(.+?)(\\?=)");
 
 	/**
 	 * Decodes a multi-mime-encoded header value using the algorithm specified
@@ -369,12 +368,16 @@ public final class MIMEMessageUtility {
 			do {
 				try {
 					sb.append(hdrVal.substring(lastMatch, m.start()));
-					sb.append(Matcher.quoteReplacement(MimeUtility.decodeText(m.group())));
+					sb.append(Matcher.quoteReplacement(MimeUtility.decodeWord(m.group())));
 					lastMatch = m.end();
 				} catch (final UnsupportedEncodingException e) {
-					LOG.error("Unsupported encoding in a message detected and monitored.", e);
-					sb.append(hdrVal.substring(lastMatch));
-					return sb.toString();
+					LOG.error("Unsupported character-encoding in encoded-word: " + m.group(), e);
+					sb.append(Matcher.quoteReplacement(m.group()));
+					lastMatch = m.end();
+				} catch (final ParseException e) {
+					LOG.error("String is not an encoded-word as per RFC 2047: " + m.group(), e);
+					sb.append(Matcher.quoteReplacement(m.group()));
+					lastMatch = m.end();
 				}
 			} while (m.find());
 			sb.append(hdrVal.substring(lastMatch));
@@ -385,13 +388,13 @@ public final class MIMEMessageUtility {
 
 	/**
 	 * Parse the given sequence of addresses into InternetAddress objects by
-	 * invoking <code>{@link InternetAddress#parse(String, boolean)}</code>.
-	 * If <code>strict</code> is false, simple email addresses separated by
-	 * spaces are also allowed. If <code>strict</code> is true, many (but not
-	 * all) of the RFC822 syntax rules are enforced. In particular, even if
-	 * <code>strict</code> is true, addresses composed of simple names (with
-	 * no "@domain" part) are allowed. Such "illegal" addresses are not uncommon
-	 * in real messages.
+	 * invoking <code>{@link InternetAddress#parse(String, boolean)}</code>. If
+	 * <code>strict</code> is false, simple email addresses separated by spaces
+	 * are also allowed. If <code>strict</code> is true, many (but not all) of
+	 * the RFC822 syntax rules are enforced. In particular, even if
+	 * <code>strict</code> is true, addresses composed of simple names (with no
+	 * "@domain" part) are allowed. Such "illegal" addresses are not uncommon in
+	 * real messages.
 	 * <p>
 	 * Non-strict parsing is typically used when parsing a list of mail
 	 * addresses entered by a human. Strict parsing is typically used when
@@ -400,14 +403,14 @@ public final class MIMEMessageUtility {
 	 * Additionally the personal parts are MIME encoded using default MIME
 	 * charset.
 	 * 
-	 * @param addresslist -
-	 *            comma separated address strings
-	 * @param strict -
-	 *            <code>true</code> to enforce RFC822 syntax; otherwise
+	 * @param addresslist
+	 *            - comma separated address strings
+	 * @param strict
+	 *            - <code>true</code> to enforce RFC822 syntax; otherwise
 	 *            <code>false</code>
 	 * @return array of <code>InternetAddress</code> objects
-	 * @throws AddressException -
-	 *             if parsing fails
+	 * @throws AddressException
+	 *             - if parsing fails
 	 */
 	public static InternetAddress[] parseAddressList(final String addresslist, final boolean strict)
 			throws AddressException {
