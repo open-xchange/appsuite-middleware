@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="lib" path="lib/axis2-adb-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-adb-codegen-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-ant-plugin-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-clustering-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-codegen-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-corba-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-fastinfoset-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-java2wsdl-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-jaxbri-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-jaxws-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-jaxws-api-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-jibx-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-json-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-jws-api-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-kernel-1.4.jar" sourcepath="/home/choeger/axis/axis2/axis2-1.4/modules/kernel/src"/>
+	<classpathentry kind="lib" path="lib/axis2-metadata-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-mtompolicy-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-saaj-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-saaj-api-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-spring-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/axis2-xmlbeans-1.4.jar"/>
+	<classpathentry kind="output" path="build"/>
+</classpath>
