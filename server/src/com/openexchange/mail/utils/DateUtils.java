@@ -89,10 +89,14 @@ public final class DateUtils {
 	public static final Date getDateRFC822(final String string) {
 		final String s = PATTERN_RFC822_FIX.matcher(string).replaceFirst("");
 		try {
-			return DATEFORMAT_RFC822.parse(s);
+			synchronized (DATEFORMAT_RFC822) {
+				return DATEFORMAT_RFC822.parse(s);
+			}
 		} catch (final ParseException e) {
 			try {
-				return DATEFORMAT_RFC822_RETRY.parse(s);
+				synchronized (DATEFORMAT_RFC822_RETRY) {
+					return DATEFORMAT_RFC822_RETRY.parse(s);
+				}
 			} catch (final ParseException e1) {
 				if (LOG.isTraceEnabled()) {
 					LOG.trace(e1.getMessage(), e1);
@@ -125,8 +129,10 @@ public final class DateUtils {
 	 * @return The corresponding RFC822 date string
 	 */
 	public static final String toStringRFC822(final Date d, final TimeZone tz) {
-		DATEFORMAT_RFC822.setTimeZone(tz);
-		return DATEFORMAT_RFC822.format(d);
+		synchronized (DATEFORMAT_RFC822) {
+			DATEFORMAT_RFC822.setTimeZone(tz);
+			return DATEFORMAT_RFC822.format(d);
+		}
 	}
 
 	/**
