@@ -56,9 +56,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
-import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.OXException;
-import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.event.EventException;
 import com.openexchange.groupware.Types;
@@ -72,8 +70,8 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderPermissionException;
 
 /**
  * EventClient
@@ -115,7 +113,7 @@ public class EventClient {
 	public void create(final AppointmentObject appointmentObj, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.INSERT, Types.APPOINTMENT, appointmentObj, null, folderObj, null);
 
-		final Hashtable ht = new Hashtable();
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/appointment/insert", ht);
@@ -198,7 +196,7 @@ public class EventClient {
 	public void create(final Task taskObj, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.INSERT, Types.TASK, taskObj, null, folderObj, null);
 
-		final Hashtable ht = new Hashtable();
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/task/insert", ht);
@@ -222,7 +220,7 @@ public class EventClient {
 	public void modify(final Task taskObj, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.TASK, taskObj, null, folderObj, null);
 
-		final Hashtable ht = new Hashtable();
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/task/update", ht);
@@ -246,7 +244,7 @@ public class EventClient {
 	public void delete(final Task taskObj, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.DELETE, Types.TASK, taskObj, null, folderObj, null);
 
-		final Hashtable ht = new Hashtable();
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/task/delete", ht);
@@ -282,7 +280,7 @@ public class EventClient {
 	public void create(final ContactObject contactObj, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.INSERT, Types.CONTACT, contactObj, null, folderObj, null);
 
-		final Hashtable ht = new Hashtable();
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/contact/insert", ht);
@@ -305,7 +303,7 @@ public class EventClient {
 	public void modify(final ContactObject contactObj, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.CONTACT, contactObj, null, folderObj, null);
 
-		final Hashtable ht = new Hashtable();
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/contact/update", ht);
@@ -328,7 +326,7 @@ public class EventClient {
 	public void delete(final ContactObject contactObj, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.DELETE, Types.CONTACT, contactObj, null, folderObj, null);
 
-		final Hashtable ht = new Hashtable();
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/contact/delete", ht);
@@ -341,7 +339,7 @@ public class EventClient {
 	public void move(final ContactObject contactObj, final FolderObject folderObj) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.MOVE, Types.CONTACT, contactObj, null, folderObj, null);
 
-		final Hashtable ht = new Hashtable();
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/contact/move", ht);
@@ -364,7 +362,7 @@ public class EventClient {
 	public void create(final FolderObject folderObj, final FolderObject parentFolder) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.INSERT, Types.FOLDER, folderObj, null, parentFolder, null);
 
-		final Hashtable ht = new Hashtable();
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/folder/insert", ht);
@@ -387,7 +385,7 @@ public class EventClient {
 	public void modify(final FolderObject folderObj, final FolderObject parentFolder) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.FOLDER, folderObj, null, parentFolder, null);
 
-		final Hashtable ht = new Hashtable();
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/folder/update", ht);
@@ -415,7 +413,7 @@ public class EventClient {
 	public void delete(final FolderObject folderObj, final FolderObject parentFolder) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.DELETE, Types.FOLDER, folderObj, null, parentFolder, null);
 
-		final Hashtable ht = new Hashtable();
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/folder/delete", ht);
@@ -438,7 +436,7 @@ public class EventClient {
 	public void create(final DocumentMetadata document, final FolderObject parentFolder) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.INSERT, Types.INFOSTORE, document, null, parentFolder, null);
 
-		final Hashtable ht = new Hashtable();
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/infostore/insert", ht);
@@ -461,7 +459,7 @@ public class EventClient {
 	public void modify(final DocumentMetadata document, final FolderObject parentFolder) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.UPDATE, Types.INFOSTORE, document, null, parentFolder, null);
 
-		final Hashtable ht = new Hashtable();
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/infostore/update", ht);
@@ -485,7 +483,7 @@ public class EventClient {
 	public void delete(final DocumentMetadata document, final FolderObject parentFolder) throws EventException {
 		final CommonEvent genericEvent = new CommonEventImpl(userId, contextId, CommonEvent.DELETE, Types.INFOSTORE, document, null, parentFolder, null);
 
-		final Hashtable ht = new Hashtable();
+		final Hashtable<String, CommonEvent> ht = new Hashtable<String, CommonEvent>();
 		ht.put(CommonEvent.EVENT_KEY, genericEvent);
 		
 		final Event event = new Event("com/openexchange/groupware/infostore/delete", ht);
