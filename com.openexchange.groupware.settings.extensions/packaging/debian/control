@@ -8,4 +8,6 @@ Standards-Version: 3.6.1
 Package: open-xchange-settings-extensions
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, j2re1.5|sun-java5-jre, open-xchange-common (>= 6.5.0), open-xchange-global (>=6.5.0), open-xchange-configread (>=6.5.0), open-xchange-server (>=6.5.0)
+Conflicts: open-xchange-themes
+Replaces: open-xchange-themes
 Description: The Open-Xchange Settings Extensions
