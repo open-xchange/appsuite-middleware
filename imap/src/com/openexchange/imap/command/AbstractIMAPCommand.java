@@ -67,14 +67,11 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
  */
 public abstract class AbstractIMAPCommand<T> {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(AbstractIMAPCommand.class);
-
 	private static final String ERR_01 = "No matching messages";
 
-	protected static final String[] ARGS_EMPTY = { "" };
+	static final String[] ARGS_EMPTY = { "" };
 
-	protected static final String[] ARGS_ALL = { "1:*" };
+	static final String[] ARGS_ALL = { "1:*" };
 
 	protected final IMAPFolder imapFolder;
 
@@ -93,6 +90,9 @@ public abstract class AbstractIMAPCommand<T> {
 	}
 
 	private static final class AbstractIMAPProtocolCommand implements IMAPFolder.ProtocolCommand {
+
+		private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+				.getLog(AbstractIMAPProtocolCommand.class);
 
 		private final AbstractIMAPCommand<?> abstractIMAPCommand;
 
