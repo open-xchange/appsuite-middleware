@@ -473,7 +473,7 @@ public class EventClient {
 
 	public void delete(final DocumentMetadata document) throws EventException, OXException, ContextException {
 		Context ctx = ContextStorage.getInstance().getContext(contextId);
-		FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
+		//FolderSQLInterface folderSql = new RdbFolderSQLInterface(session, ctx);
 		
 		final long folderId = document.getFolderId();
 		if (folderId > 0) {
@@ -518,7 +518,6 @@ public class EventClient {
 	}
 
     private FolderObject getFolder(int folderId, Context ctx) throws OXException {
-        OXFolderAccess folders = new OXFolderAccess(ctx);
-        return folders.getFolderObject(folderId);
+        return new OXFolderAccess(ctx).getFolderObject(folderId);
     }
 }
