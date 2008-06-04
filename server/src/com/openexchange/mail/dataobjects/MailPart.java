@@ -981,7 +981,7 @@ public abstract class MailPart implements Serializable, Cloneable {
 	}
 
 	/**
-	 * Gets the mail part's source bytes
+	 * Gets a newly allocated byte array containing the mail part's source bytes
 	 * 
 	 * @return The mail part's source bytes
 	 * @throws MailException
