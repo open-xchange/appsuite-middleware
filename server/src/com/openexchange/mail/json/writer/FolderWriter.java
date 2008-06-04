@@ -639,13 +639,13 @@ public final class FolderWriter {
 
 	private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
 
-	private static int createPermissionBits(final OCLPermission perm) throws OXException {
+	static int createPermissionBits(final OCLPermission perm) throws OXException {
 		return createPermissionBits(perm.getFolderPermission(), perm.getReadPermission(), perm.getWritePermission(),
 				perm.getDeletePermission(), perm.isFolderAdmin());
 	}
 
-	private static int createPermissionBits(final int fp, final int orp, final int owp, final int odp,
-			final boolean adminFlag) throws OXException {
+	static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag)
+			throws OXException {
 		final int[] perms = new int[5];
 		perms[0] = fp == Folder.MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : fp;
 		perms[1] = orp == Folder.MAX_PERMISSION ? OCLPermission.ADMIN_PERMISSION : orp;
