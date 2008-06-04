@@ -55,8 +55,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -80,12 +78,7 @@ public final class Tools {
 	/**
 	 * DateFormat for HTTP header.
 	 */
-	public static final DateFormat HEADER_DATEFORMAT;
-
-	/**
-	 * Lock for the HTTP header date format.
-	 */
-	private static final Lock DATEFORMAT_LOCK = new ReentrantLock(true);
+	private static final DateFormat HEADER_DATEFORMAT;
 
 	/**
 	 * Cache-Control HTTP header name.
@@ -166,28 +159,22 @@ public final class Tools {
 	 * @return the string with the formated date.
 	 */
 	public static String formatHeaderDate(final Date date) {
-		DATEFORMAT_LOCK.lock();
-		try {
+		synchronized (HEADER_DATEFORMAT) {
 			return HEADER_DATEFORMAT.format(date);
-		} finally {
-			DATEFORMAT_LOCK.unlock();
 		}
 	}
 
 	/**
 	 * Parses a date from a http date header
 	 * 
-	 * @param str -
-	 *            the http date header value
+	 * @param str
+	 *            - the http date header value
 	 * @return parsed <code>java.util.Date</code> object
 	 * @throws ParseException
 	 */
 	public static Date parseHeaderDate(final String str) throws ParseException {
-		DATEFORMAT_LOCK.lock();
-		try {
+		synchronized (HEADER_DATEFORMAT) {
 			return HEADER_DATEFORMAT.parse(str);
-		} finally {
-			DATEFORMAT_LOCK.unlock();
 		}
 	}
 
@@ -241,30 +228,31 @@ public final class Tools {
 		return message.toString();
 	}
 
-    /**
-     * Deletes all OX specific cookies.
-     * @param req http servlet request.
-     * @param resp http servlet response.
-     */
-    public static void deleteCookies(final HttpServletRequest req,
-        final HttpServletResponse resp) {
-        final Cookie[] cookies = req.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                final String cookieName = cookie.getName();
-                if (cookieName.startsWith(Login.cookiePrefix) ||
-                    cookieName.equals(AJPv13RequestHandler.JSESSIONID_COOKIE)) {
-                    final Cookie respCookie = new Cookie(cookie.getName(),
-                        cookie.getValue());
-                    respCookie.setPath("/");
-                    respCookie.setMaxAge(0);
-                    resp.addCookie(respCookie);
-                }
-            }
-        }
-    }
+	/**
+	 * Deletes all OX specific cookies.
+	 * 
+	 * @param req
+	 *            http servlet request.
+	 * @param resp
+	 *            http servlet response.
+	 */
+	public static void deleteCookies(final HttpServletRequest req, final HttpServletResponse resp) {
+		final Cookie[] cookies = req.getCookies();
+		if (cookies != null) {
+			for (Cookie cookie : cookies) {
+				final String cookieName = cookie.getName();
+				if (cookieName.startsWith(Login.cookiePrefix)
+						|| cookieName.equals(AJPv13RequestHandler.JSESSIONID_COOKIE)) {
+					final Cookie respCookie = new Cookie(cookie.getName(), cookie.getValue());
+					respCookie.setPath("/");
+					respCookie.setMaxAge(0);
+					resp.addCookie(respCookie);
+				}
+			}
+		}
+	}
 
-    static {
+	static {
 		HEADER_DATEFORMAT = new SimpleDateFormat(DATE_PATTERN, Locale.ENGLISH);
 		HEADER_DATEFORMAT.setTimeZone(TimeZone.getTimeZone("GMT"));
 		EXPIRES_DATE = HEADER_DATEFORMAT.format(new Date(799761600000L));
