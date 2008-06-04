@@ -17,7 +17,7 @@
 
 	<property name="version" value="${Bundle-Version}"/>
     <property name="bundle.name" value="${Bundle-SymbolicName}_${Bundle-Version}.jar"/>
-	<property name="composite.name" value="open-xchange-themes-${version}" />
+	<property name="composite.name" value="open-xchange-settings-extensions-${version}" />
 
     <!-- Install Constants -->
     <property name="bundlesdir" value="${prefix}/bundles"/>

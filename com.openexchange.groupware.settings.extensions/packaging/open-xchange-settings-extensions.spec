@@ -26,12 +26,12 @@ License:        GNU General Public License (GPL)
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
-Summary:        Open-Xchange Themes
+Summary:        Open-Xchange Settings Extensions
 Requires:       open-xchange-common open-xchange-global open-xchange-configread open-xchange-server
 #
 
 %description
-Open-Xchange Themes
+Open-Xchange Settings Extensions
 
 Authors:
 --------
