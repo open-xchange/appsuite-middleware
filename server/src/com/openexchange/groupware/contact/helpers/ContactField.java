@@ -293,7 +293,7 @@ public enum ContactField{
 
 	public static ContactField getByAjaxName(final String value){
 		for(final ContactField field: values()){
-			if(value == field.getAjaxName()){
+			if(value.equals(field.getAjaxName())){
 				return field;
 			}
 		}
