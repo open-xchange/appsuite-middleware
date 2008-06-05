@@ -53,6 +53,7 @@ import static com.openexchange.mail.text.CSSMatcher.checkCSS;
 import static com.openexchange.mail.text.CSSMatcher.checkCSSElements;
 import static com.openexchange.mail.text.CSSMatcher.containsCSSElement;
 import static com.openexchange.mail.text.HTMLProcessing.PATTERN_HREF;
+import static com.openexchange.mail.text.HTMLProcessing.htmlFormat;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -303,7 +304,8 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 					attrBuilder.append(' ').append(STYLE).append(VAL_START).append(checkedCSS).append('"');
 				}
 			} else {
-				attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(e.getValue()).append('"');
+				attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(htmlFormat(e.getValue(), false))
+						.append('"');
 			}
 		}
 		if (simple) {

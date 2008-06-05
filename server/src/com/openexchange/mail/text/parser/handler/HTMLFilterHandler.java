@@ -52,6 +52,7 @@ package com.openexchange.mail.text.parser.handler;
 import static com.openexchange.mail.text.CSSMatcher.checkCSS;
 import static com.openexchange.mail.text.CSSMatcher.checkCSSElements;
 import static com.openexchange.mail.text.CSSMatcher.containsCSSElement;
+import static com.openexchange.mail.text.HTMLProcessing.htmlFormat;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -404,14 +405,15 @@ public final class HTMLFilterHandler implements HTMLHandler {
 				}
 			} else {
 				if (null == attribs) {
-					attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(e.getValue()).append('"');
+					attrBuilder.append(' ').append(e.getKey()).append(VAL_START)
+							.append(htmlFormat(e.getValue(), false)).append('"');
 				} else {
 					final String nameLower = e.getKey().toLowerCase(Locale.ENGLISH);
 					if (attribs.containsKey(nameLower)) {
 						final Set<String> allowedValues = attribs.get(nameLower);
 						if (null == allowedValues || allowedValues.contains(e.getValue().toLowerCase(Locale.ENGLISH))) {
-							attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(e.getValue()).append(
-									'"');
+							attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(
+									htmlFormat(e.getValue(), false)).append('"');
 						}
 					}
 				}
