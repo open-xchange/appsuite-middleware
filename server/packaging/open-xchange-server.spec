@@ -47,7 +47,7 @@ Requires:  jre-icedtea
 Group:          Applications/Productivity
 Summary:	Open-Xchange server scripts and configuration
 Prereq:		/usr/sbin/useradd
-Requires:	open-xchange-authentication open-xchange-cache open-xchange-charset open-xchange-common open-xchange-configjump open-xchange-configread open-xchange-control open-xchange-global open-xchange-i18n open-xchange-mailstore open-xchange-jcharset open-xchange-management open-xchange-monitoring open-xchange-push-udp open-xchange-server open-xchange-sessiond open-xchange-smtp open-xchange-spamhandler open-xchange-spellcheck, mysql >= 5.0.0
+Requires:	open-xchange-authentication open-xchange-cache open-xchange-charset open-xchange-common open-xchange-configjump open-xchange-configread open-xchange-global open-xchange-i18n open-xchange-mailstore open-xchange-jcharset open-xchange-management open-xchange-monitoring open-xchange-push-udp open-xchange-server open-xchange-sessiond open-xchange-smtp open-xchange-spamhandler, mysql >= 5.0.0
 
 
 %description -n open-xchange
