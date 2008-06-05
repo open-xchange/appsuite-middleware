@@ -67,8 +67,8 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.exception.SessiondException;
 
 /**
- * {@link SessiondEventHandler} - A convenience SessionD event handler which
- * delegates incoming events to registered listeners.
+ * {@link SessiondEventHandler} - A convenience SessionD {@link EventHandler
+ * event handler} which delegates incoming events to registered listeners.
  * <p>
  * The corresponding code inside {@link BundleActivator#start(BundleContext)
  * activator.start()} should be like:
