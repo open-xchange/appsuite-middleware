@@ -54,6 +54,7 @@ package com.openexchange.api2;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -500,11 +501,17 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 			
 			cs.setContactSearchObject(searchobject);
 			
-			stmt = readcon.createStatement();
 			final String select = cs.iFgetColsString(cols).toString();
 			cs.setSelect(select);
-			rs = stmt.executeQuery(cs.getSqlCommand());
+			stmt = cs.getSqlCommand(readcon);
+			rs = ((PreparedStatement) stmt).executeQuery();
 			si = new ContactObjectIterator(rs, stmt, cols, false, readcon);
+			
+//			stmt = readcon.createStatement();
+//			final String select = cs.iFgetColsString(cols).toString();
+//			cs.setSelect(select);
+//			rs = stmt.executeQuery(cs.getSqlCommand());
+//			si = new ContactObjectIterator(rs, stmt, cols, false, readcon);
 		} catch (final DBPoolingException e){
 			error = true;
 			throw EXCEPTIONS.create(19,e);

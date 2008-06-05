@@ -52,13 +52,13 @@
 package com.openexchange.groupware.contact;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.session.Session;
@@ -77,6 +77,8 @@ public interface ContactSql {
 	public String getOrder();
 	
 	public String getSqlCommand();
+
+	public PreparedStatement getSqlCommand(Connection con) throws SQLException;
 
 	public String getSelect();
 
