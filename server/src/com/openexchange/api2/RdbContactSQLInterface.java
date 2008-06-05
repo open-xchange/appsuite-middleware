@@ -469,7 +469,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
-			final ContactSql cs = new ContactMySql(session, ctx);
+			final ContactSql cs = new ContactMySql(session, ctx, readcon);
 			
 			if (!(searchobject.isAllFolders() || searchobject.getEmailAutoComplete())){	
 				cs.setFolder(folderId);

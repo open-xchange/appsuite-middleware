@@ -52,16 +52,20 @@
 package com.openexchange.groupware.contact;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.database.Database;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -115,6 +119,9 @@ public class ContactMySql implements ContactSql {
 	private int userid;
 	private boolean internal_user_only;
 	private int objectID;
+
+	private Connection con;
+	private boolean closeCon;
 	
 	Context ctx;
 	Session so;
@@ -130,21 +137,44 @@ public class ContactMySql implements ContactSql {
 	public ContactMySql(Context ctx, int userId) {
 		this.ctx = ctx;
 		this.user = userId;
+		try {
+			this.con = Database.get(ctx, false);
+			closeCon = true;
+		} catch (DBPoolingException e) {
+			LOG.error(e.getMessage(), e);
+		}
 	}
 	
 	public ContactMySql(final Session so, final Context ct) {			
 		this.ctx = ct;
 		this.so = so;
 		this.user = so.getUserId();
+		try {
+			this.con = Database.get(ctx, false);
+			closeCon = true;
+		} catch (DBPoolingException e) {
+			LOG.error(e.getMessage(), e);
+		}
+	}
+
+	public ContactMySql(final Session so, final Context ct, final Connection con) {			
+		this.ctx = ct;
+		this.so = so;
+		this.user = so.getUserId();
+		this.con = con;
+		closeCon = false;
 	}
 	
 	public String getWhere() {
 
 		StringBuilder sb = new StringBuilder(" WHERE co.cid = "+ctx.getContextId()+" AND ");
+		final List<SQLInjector> injectors = new ArrayList<SQLInjector>();
+
 
 		// Can read only own objects in folder
 		if (can_read_only_own != 0) {
-			sb.append(" (co.created_from = ").append(can_read_only_own).append(") AND ");
+			sb.append(" (co.created_from = ?) AND ");
+			injectors.add(new IntSQLInjector(can_read_only_own));
 		}
 
 		// only internal user
@@ -380,9 +410,11 @@ public class ContactMySql implements ContactSql {
 				if (value.equals("%")){
 					sb.append(' ');
 				} else if (value.indexOf('%') != -1) {
-					sb.append('(').append("co.").append(field).append(" LIKE '").append(value).append("') ").append(search_habit).append(' ');
+					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
+					injectors.add(new StringSQLInjector(value));
 				} else {
-					sb.append('(').append("co.").append(field).append(" LIKE '%").append(value).append("%') ").append(search_habit).append(' ');
+					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
+					injectors.add(new StringSQLInjector(new StringBuilder(value.length() + 2).append('%').append(value).append('%').toString()));
 				}
 			}
 			if(cso.getSurname() != null && cso.getSurname().length() > 0){	
@@ -396,9 +428,11 @@ public class ContactMySql implements ContactSql {
 				if (value.equals("%")){
 					sb.append(' ');
 				} else if (value.indexOf('%') != -1) {
-					sb.append('(').append("co.").append(field).append(" LIKE '").append(value).append("') ").append(search_habit).append(' ');
+					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
+					injectors.add(new StringSQLInjector(value));
 				} else {
-					sb.append('(').append("co.").append(field).append(" LIKE '%").append(value).append("%') ").append(search_habit).append(' ');
+					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
+					injectors.add(new StringSQLInjector(new StringBuilder(value.length() + 2).append('%').append(value).append('%').toString()));
 				}
 			}
 			if(cso.getDisplayName() != null && cso.getDisplayName().length() > 0){			
@@ -412,9 +446,11 @@ public class ContactMySql implements ContactSql {
 				if (value.equals("%")){
 					sb.append(' ');
 				} else if (value.indexOf('%') != -1) {
-					sb.append('(').append("co.").append(field).append(" LIKE '").append(value).append("') ").append(search_habit).append(' ');
+					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
+					injectors.add(new StringSQLInjector(value));
 				} else {
-					sb.append('(').append("co.").append(field).append(" LIKE '%").append(value).append("%') ").append(search_habit).append(' ');
+					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
+					injectors.add(new StringSQLInjector(new StringBuilder(value.length() + 2).append('%').append(value).append('%').toString()));
 				}
 			}
 			if(cso.getEmail1() != null && cso.getEmail1().length() > 0){			
@@ -563,8 +599,39 @@ public class ContactMySql implements ContactSql {
 		}
 
 		sb.append(' ');
+		
+		String remove = null;
+		if (null == con) {
+			remove = sb.toString();
+		} else {
+			PreparedStatement ps = null;
+			try {
+				ps = con.prepareStatement(sb.toString());
+				final int size = injectors.size();
+				for (int i = 0; i < size; i++) {
+					injectors.get(i).inject(ps, i + 1);
+				}
+				final String tmp = ps.toString();
+				final int pos = tmp.indexOf(" WHERE");
+				remove = tmp.substring(pos);
+			} catch (final SQLException e) {
+				LOG.error(e.getMessage(), e);
+			} finally {
+				if (null != ps) {
+					try {
+						ps.close();
+					} catch (final SQLException e) {
+						LOG.error(e.getMessage(), e);
+					}
+				}
+				if (closeCon) {
+					Database.back(ctx, false, con);
+				}
+			}
+		}
+		
 
-		String remove = sb.toString();
+		//String remove = sb.toString();
 		if (remove.lastIndexOf("AND") != -1){
 			remove = remove.substring(0, remove.lastIndexOf("AND"));
 		}
@@ -1059,5 +1126,45 @@ public class ContactMySql implements ContactSql {
 		}
 		del.execute(tmp.toString());
 	}
-	
+
+	private static interface SQLInjector {
+		/**
+		 * Injects this injector's value into given prepared statement
+		 * 
+		 * @param ps The prepared statement
+		 * @param parameterIndex The parameter index; the first parameter is 1, the second is 2, ...
+		 * @throws SQLException If a database access error occurs
+		 */
+		public void inject(PreparedStatement ps, int parameterIndex) throws SQLException;
+	}
+
+	private static final class IntSQLInjector implements SQLInjector {
+		
+		private final int value;
+		
+		public IntSQLInjector(final int value) {
+			super();
+			this.value = value;
+		}
+
+		public void inject(PreparedStatement ps, int parameterIndex) throws SQLException {
+			ps.setInt(parameterIndex, value);
+		}
+		
+	}
+
+	private static final class StringSQLInjector implements SQLInjector {
+		
+		private final String value;
+		
+		public StringSQLInjector(final String value) {
+			super();
+			this.value = value;
+		}
+
+		public void inject(PreparedStatement ps, int parameterIndex) throws SQLException {
+			ps.setString(parameterIndex, value);
+		}
+		
+	}
 }
