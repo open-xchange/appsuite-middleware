@@ -1,3 +1,9 @@
+open-xchange-imap (6.5.0-7) unstable; urgency=low
+
+  * second build for Beta1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu,  5 Jun 2008 10:24:45 +0200
+
 open-xchange-imap (6.5.0-6) unstable; urgency=low
 
   * first build for Beta1
