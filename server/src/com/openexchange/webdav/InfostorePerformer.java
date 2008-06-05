@@ -51,7 +51,8 @@ package com.openexchange.webdav;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.EnumMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -72,8 +73,8 @@ import com.openexchange.groupware.infostore.webdav.InfostoreWebdavFactory;
 import com.openexchange.groupware.infostore.webdav.PropertyStoreImpl;
 import com.openexchange.groupware.tx.AlwaysWriteConnectionProvider;
 import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.sessiond.impl.SessionHolder;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.webdav.action.AbstractAction;
 import com.openexchange.webdav.action.OXWebdavMaxUploadSizeAction;
 import com.openexchange.webdav.action.OXWebdavPutAction;
@@ -132,12 +133,12 @@ public class InfostorePerformer implements SessionHolder {
 	}
 
 
-    private  InfostoreWebdavFactory factory;
-	private  Protocol protocol = new Protocol();
+    private final  InfostoreWebdavFactory factory;
+	private final  Protocol protocol = new Protocol();
 	
-	private Map<Action, WebdavAction> actions = new EnumMap<Action, WebdavAction>(Action.class);
+	private final Map<Action, WebdavAction> actions = new EnumMap<Action, WebdavAction>(Action.class);
 	
-	private ThreadLocal<ServerSession> session = new ThreadLocal<ServerSession>();
+	private final ThreadLocal<ServerSession> session = new ThreadLocal<ServerSession>();
 	
 	private InfostorePerformer(){
 		
@@ -180,10 +181,10 @@ public class InfostorePerformer implements SessionHolder {
 		get = prepare(new WebdavGetAction(), true, false, new WebdavExistsAction(), new WebdavIfAction(0,false,false));
 		head = prepare(new WebdavHeadAction(),true, true, new WebdavExistsAction(), new WebdavIfAction(0,false,false));
 		
-		OXWebdavPutAction oxWebdavPut = new OXWebdavPutAction();
+		final OXWebdavPutAction oxWebdavPut = new OXWebdavPutAction();
 		oxWebdavPut.setSessionHolder(this); 
 		
-		OXWebdavMaxUploadSizeAction oxWebdavMaxUploadSize = new OXWebdavMaxUploadSizeAction();
+		final OXWebdavMaxUploadSizeAction oxWebdavMaxUploadSize = new OXWebdavMaxUploadSizeAction();
 		oxWebdavMaxUploadSize.setSessionHolder(this);
 		
 		put = prepare(oxWebdavPut, false, true, new WebdavIfAction(0,true,false),oxWebdavMaxUploadSize);
@@ -209,7 +210,7 @@ public class InfostorePerformer implements SessionHolder {
 	}
 
     private void makeLockNullTolerant(){
-        for(Action action : new Action[]{Action.OPTIONS, Action.LOCK, Action.MKCOL, Action.PUT}) {
+        for(final Action action : new Action[]{Action.OPTIONS, Action.LOCK, Action.MKCOL, Action.PUT}) {
             WebdavAction webdavAction = actions.get(action);
             while(webdavAction != null) {
                 if(webdavAction instanceof WebdavExistsAction) {
@@ -225,13 +226,13 @@ public class InfostorePerformer implements SessionHolder {
     }
 
     private void loadRequestSpecificBehaviourRegistry() {
-		String beanPath = SystemConfig.getProperty(SystemConfig.Property.WebdavOverrides);
+		final String beanPath = SystemConfig.getProperty(SystemConfig.Property.WebdavOverrides);
 		if (beanPath != null && new File(beanPath).exists()) {
 			try {
-				XmlBeanFactory beanfactory = new XmlBeanFactory( new FileSystemResource( new File(beanPath) ) );
-				RequestSpecificBehaviourRegistry registry = (RequestSpecificBehaviourRegistry) beanfactory.getBean("registry");
+				final XmlBeanFactory beanfactory = new XmlBeanFactory( new FileSystemResource( new File(beanPath) ) );
+				final RequestSpecificBehaviourRegistry registry = (RequestSpecificBehaviourRegistry) beanfactory.getBean("registry");
 				registry.log();
-			} catch (Exception x) {
+			} catch (final Exception x) {
 				LOG.error("Can't load webdav overrides", x);
 			}
 		} else {
@@ -259,7 +260,7 @@ public class InfostorePerformer implements SessionHolder {
 		
 		AbstractAction a = ifMatch;
 		
-		for(AbstractAction  a2 : additionals) {
+		for(final AbstractAction  a2 : additionals) {
 			a.setNext(a2);
 			a = a2;
 		}
@@ -277,10 +278,10 @@ public class InfostorePerformer implements SessionHolder {
 		return session.get().getContext();
 	}
 	
-	public final void doIt(HttpServletRequest req, HttpServletResponse resp, Action action, ServerSession sess) throws ServletException, IOException {
+	public final void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action, final ServerSession sess) throws ServletException, IOException {
 		try {
-			WebdavRequest webdavRequest = new ServletWebdavRequest(factory, req);
-			WebdavResponse webdavResponse = new ServletWebdavResponse(resp);
+			final WebdavRequest webdavRequest = new ServletWebdavRequest(factory, req);
+			final WebdavResponse webdavResponse = new ServletWebdavResponse(resp);
 			
 			session.set(sess);
 			BehaviourLookup.getInstance().setRequest(webdavRequest);
@@ -288,9 +289,9 @@ public class InfostorePerformer implements SessionHolder {
 				LOG.debug("Executing "+action);
 			}
 			actions.get(action).perform(webdavRequest, webdavResponse);
-		} catch (WebdavException x) {
+		} catch (final WebdavException x) {
 			resp.setStatus(x.getStatus());
-		} catch (NullPointerException x) {
+		} catch (final NullPointerException x) {
 			x.printStackTrace();
 		} finally {
 			BehaviourLookup.getInstance().unsetRequest();

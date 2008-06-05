@@ -92,7 +92,7 @@ public class Appointment extends DataServlet {
 			JSONObject jsonObj;
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.error(e.getMessage(), e);
 	            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 	            writeResponse(response, httpServletResponse);
@@ -103,13 +103,13 @@ public class Appointment extends DataServlet {
 			final Object responseObj = appointmentRequest.action(action, jsonObj);
 			response.setTimestamp(appointmentRequest.getTimestamp());
 			response.setData(responseObj);
-		} catch (OXMandatoryFieldException e) {
+		} catch (final OXMandatoryFieldException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (OXConflictException e) {
+		} catch (final OXConflictException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			if (e.getCategory() == Category.USER_INPUT) {
 				LOG.debug(e.getMessage(), e);
 			} else {
@@ -117,18 +117,18 @@ public class Appointment extends DataServlet {
 			}
 			
 			response.setException(e);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (AjaxException e) {
+		} catch (final AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
 			LOG.error(oje.getMessage(), oje);
 			response.setException(oje);
-		} catch (OXJSONException e) {
+		} catch (final OXJSONException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final ContextException e) {
@@ -153,7 +153,7 @@ public class Appointment extends DataServlet {
 
 				try {
 					jsonObj = convertParameter2JSONObject(httpServletRequest);					
-				} catch (JSONException e) {
+				} catch (final JSONException e) {
 					LOG.error(e.getMessage(), e);
 		            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 		            writeResponse(response, httpServletResponse);
@@ -179,18 +179,18 @@ public class Appointment extends DataServlet {
 			} else {
 				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");
 			}
-		} catch (OXMandatoryFieldException e) {
+		} catch (final OXMandatoryFieldException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (OXConflictException e) {
+		} catch (final OXConflictException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
 			LOG.error(oje.getMessage(), oje);
 			response.setException(oje);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			if (e.getCategory() == Category.USER_INPUT) {
 				LOG.debug(e.getMessage(), e);
 			} else {
@@ -198,13 +198,13 @@ public class Appointment extends DataServlet {
 			}
 
 			response.setException(e);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (AjaxException e) {
+		} catch (final AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-        } catch (OXJSONException e) {
+        } catch (final OXJSONException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final ContextException e) {
@@ -219,7 +219,7 @@ public class Appointment extends DataServlet {
 	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
         try {
             return UserConfigurationStorage.getInstance().getUserConfiguration(sessionObj.getUserId(), ctx).hasCalendar();
-        } catch (UserConfigurationException e) {
+        } catch (final UserConfigurationException e) {
             LOG.error(e.getMessage(), e);
             return false;
         }

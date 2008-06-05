@@ -91,7 +91,7 @@ public class Group extends DataServlet {
 			
 			try {	
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.error(e.getMessage(), e);
 	            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 	            writeResponse(response, httpServletResponse);
@@ -103,24 +103,24 @@ public class Group extends DataServlet {
 			response.setTimestamp(groupRequest.getTimestamp());
 			response.setData(responseObj);
 			//response.setData(new JSONObject(sw.toString()));
-		} catch (OXMandatoryFieldException e) {
+		} catch (final OXMandatoryFieldException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (OXJSONException exc) {
+		} catch (final OXJSONException exc) {
             LOG.error(exc.getMessage(), exc);
             response.setException(exc);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-		} catch (LdapException e) {
+		} catch (final LdapException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (AjaxException e) {
+		} catch (final AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
         } catch (final ContextException e) {
@@ -131,6 +131,7 @@ public class Group extends DataServlet {
 		writeResponse(response, httpServletResponse);
 	}
 	
+	@Override
 	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		try {
@@ -142,7 +143,7 @@ public class Group extends DataServlet {
 			
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.error(e.getMessage(), e);
 	            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 	            writeResponse(response, httpServletResponse);
@@ -175,24 +176,24 @@ public class Group extends DataServlet {
 			} else {
 				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid json object");
 			}
-		} catch (OXMandatoryFieldException e) {
+		} catch (final OXMandatoryFieldException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (OXJSONException exc) {
+		} catch (final OXJSONException exc) {
             LOG.error(exc.getMessage(), exc);
             response.setException(exc);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-		} catch (LdapException e) {
+		} catch (final LdapException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (AjaxException e) {
+		} catch (final AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
         } catch (final ContextException e) {
@@ -203,6 +204,7 @@ public class Group extends DataServlet {
 		writeResponse(response, httpServletResponse);
 	}
 	
+	@Override
 	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
 		return true;
 	}

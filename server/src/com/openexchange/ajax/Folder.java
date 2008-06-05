@@ -1296,7 +1296,7 @@ public class Folder extends SessionServlet {
 					for (int a = 0; a < size2; a++) {
 						final MailFolder rootFolder = (MailFolder) it.next();
 						final JSONArray ja = new JSONArray();
-						for (MailFolderFieldWriter writer : mailFolderFieldWriters) {
+						for (final MailFolderFieldWriter writer : mailFolderFieldWriters) {
 							writer.writeField(ja, rootFolder, false, MailFolder.DEFAULT_FOLDER_NAME, 1,
 									MailFolder.DEFAULT_FOLDER_ID, FolderObject.SYSTEM_MODULE, false);
 						}
@@ -1389,7 +1389,7 @@ public class Folder extends SessionServlet {
 					final MailFolderFieldWriter[] writers = com.openexchange.mail.json.writer.FolderWriter
 							.getMailFolderFieldWriter(columns, mailInterface.getMailConfig());
 					final JSONObject jo = new JSONObject();
-					for (MailFolderFieldWriter writer : writers) {
+					for (final MailFolderFieldWriter writer : writers) {
 						writer.writeField(jo, f, true);
 					}
 					jsonWriter = new OXJSONWriter(jo);

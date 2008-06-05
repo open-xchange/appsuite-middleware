@@ -116,7 +116,7 @@ public class ConfigDBStorage {
 					Database.back(false, configDBReadCon);
 				}
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
 		}
 	}
@@ -159,7 +159,7 @@ public class ConfigDBStorage {
 					Database.back(false, configDBReadCon);
 				}
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
 		}
 	}

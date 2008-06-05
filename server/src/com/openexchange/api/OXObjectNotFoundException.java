@@ -61,11 +61,16 @@ import com.openexchange.groupware.EnumComponent;
 */
 public class OXObjectNotFoundException extends OXException
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2018682736170044200L;
 	private int id;
 
     /**
      * @deprecated use error code handling
      */
+	@Deprecated
 	public OXObjectNotFoundException() {
 		super();
 	}
@@ -73,28 +78,32 @@ public class OXObjectNotFoundException extends OXException
     /**
      * @deprecated use error code handling
      */
-	public OXObjectNotFoundException(String message) {
+	@Deprecated
+	public OXObjectNotFoundException(final String message) {
 		super(message);
 	}
 	
     /**
      * @deprecated use error code handling
      */
-	public OXObjectNotFoundException(String message, Exception exc) {
+	@Deprecated
+	public OXObjectNotFoundException(final String message, final Exception exc) {
 		super(message, exc);
 	}
 	
     /**
      * @deprecated use error code handling
      */
-	public OXObjectNotFoundException(Exception exc) {
+	@Deprecated
+	public OXObjectNotFoundException(final Exception exc) {
 		super(exc);
 	}
 	
     /**
      * @deprecated use error code handling
      */
-	public OXObjectNotFoundException(String message, int id) {
+	@Deprecated
+	public OXObjectNotFoundException(final String message, final int id) {
 		super(message);
 		this.id = id;
 	}
@@ -112,11 +121,11 @@ public class OXObjectNotFoundException extends OXException
     }
     
     
-    public OXObjectNotFoundException(final Code code, EnumComponent component, Object... messageArgs) {
+    public OXObjectNotFoundException(final Code code, final EnumComponent component, final Object... messageArgs) {
          this(code, component, null, messageArgs);         
     }    
     
-    public OXObjectNotFoundException(final Code code, EnumComponent component, Throwable throwable, Object... messageArgs) {
+    public OXObjectNotFoundException(final Code code, final EnumComponent component, final Throwable throwable, final Object... messageArgs) {
          super(component, code.category, code.detailNumber, code.message, throwable);
          super.setMessageArgs(messageArgs);
     }      

@@ -49,13 +49,16 @@
 
 package com.openexchange.ajax;
 
-import com.openexchange.api.OXConflictException;
-import com.openexchange.api.OXMandatoryFieldException;
 import java.util.Date;
 import java.util.Enumeration;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.openexchange.api.OXConflictException;
+import com.openexchange.api.OXMandatoryFieldException;
 
 /**
  * TODO Remove this class from inheritance tree because all its methods are
@@ -63,6 +66,11 @@ import org.json.JSONObject;
  */
 public abstract class DataServlet extends PermissionServlet {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5088332994969906626L;
+
 	private static final String _invalidParameter = "invalid parameter: ";
 	
 	private static final String _missingField = "missing field: ";

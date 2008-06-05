@@ -91,8 +91,13 @@ import com.openexchange.webdav.xml.XmlServlet;
 
 public final class tasks extends XmlServlet {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1750720959626156342L;
 	private static final Log LOG = LogFactory.getLog(tasks.class);
 	
+	@Override
 	protected void parsePropChilds(final HttpServletRequest req, final HttpServletResponse resp, final XmlPullParser parser) throws Exception {
 		final OutputStream os = resp.getOutputStream();
 		
@@ -161,25 +166,25 @@ public final class tasks extends XmlServlet {
 				}
 				
 				writeResponse(taskobject, HttpServletResponse.SC_OK, OK, client_id, os, xo);
-			} catch (OXMandatoryFieldException exc) {
+			} catch (final OXMandatoryFieldException exc) {
 				LOG.debug(_parsePropChilds, exc);
 				writeResponse(taskobject, HttpServletResponse.SC_CONFLICT, MANDATORY_FIELD_EXCEPTION, client_id, os, xo);
-			} catch (OXPermissionException exc) {
+			} catch (final OXPermissionException exc) {
 				LOG.debug(_parsePropChilds, exc);
 				writeResponse(taskobject, HttpServletResponse.SC_FORBIDDEN, PERMISSION_EXCEPTION, client_id, os, xo);
-			} catch (OXConflictException exc) {
+			} catch (final OXConflictException exc) {
 				LOG.debug(_parsePropChilds, exc);
 				writeResponse(taskobject, HttpServletResponse.SC_CONFLICT, CONFLICT_EXCEPTION, client_id, os, xo);
-			} catch (OXObjectNotFoundException exc) {
+			} catch (final OXObjectNotFoundException exc) {
 				LOG.debug(_parsePropChilds, exc);
 				writeResponse(taskobject, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION, client_id, os, xo);
-			} catch (OXConcurrentModificationException exc) {
+			} catch (final OXConcurrentModificationException exc) {
 				LOG.debug(_parsePropChilds, exc);
 				writeResponse(taskobject, HttpServletResponse.SC_CONFLICT, MODIFICATION_EXCEPTION, client_id, os, xo);
-			} catch (XmlPullParserException exc) {
+			} catch (final XmlPullParserException exc) {
 				LOG.debug(_parsePropChilds, exc);
 				writeResponse(taskobject, HttpServletResponse.SC_BAD_REQUEST, BAD_REQUEST_EXCEPTION, client_id, os, xo);
-			} catch (OXException exc) {
+			} catch (final OXException exc) {
 				if (exc.getCategory() == Category.USER_INPUT) {
 					LOG.debug(_parsePropChilds, exc);
 					writeResponse(taskobject, HttpServletResponse.SC_CONFLICT, USER_INPUT_EXCEPTION, client_id, os, xo);
@@ -187,7 +192,7 @@ public final class tasks extends XmlServlet {
 					LOG.error(_parsePropChilds, exc);
 					writeResponse(taskobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, SERVER_ERROR_EXCEPTION + exc.toString(), client_id, os, xo);
 				}
-			} catch (Exception exc) {
+			} catch (final Exception exc) {
 				LOG.error(_parsePropChilds, exc);
 				writeResponse(taskobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, SERVER_ERROR_EXCEPTION + exc.toString(), client_id, os, xo);
 			}

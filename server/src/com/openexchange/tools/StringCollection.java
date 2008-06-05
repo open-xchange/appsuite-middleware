@@ -51,13 +51,14 @@
 
 package com.openexchange.tools;
 
-import com.openexchange.groupware.calendar.CalendarCommonCollection;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Date;
+
+import com.openexchange.groupware.calendar.CalendarCommonCollection;
 
 
 /**
@@ -354,7 +355,7 @@ public class StringCollection {
     }
     
     public static int[] convertStringArray2IntArray(final String s[]) {
-        int[] i = new int[s.length];
+        final int[] i = new int[s.length];
         for (int a = 0; a < i.length; a++) {
             i[a] = Integer.parseInt(s[a]);
         }

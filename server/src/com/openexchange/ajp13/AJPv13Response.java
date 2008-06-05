@@ -473,7 +473,7 @@ public class AJPv13Response {
 		int retval = 0;
 		final StringBuilder sb = new StringBuilder(128);
 		final Set<Map.Entry<String, String[]>> set = servletResponse.getHeaderEntrySet();
-		for (Map.Entry<String, String[]> hdr : set) {
+		for (final Map.Entry<String, String[]> hdr : set) {
 			if (headerMap.containsKey(hdr.getKey())) {
 				/*
 				 * Header can be encoded as an integer

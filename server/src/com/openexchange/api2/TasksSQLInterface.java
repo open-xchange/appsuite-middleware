@@ -49,6 +49,8 @@
 
 package com.openexchange.api2;
 
+import java.util.Date;
+
 import com.openexchange.api.OXConflictException;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.api.OXObjectNotFoundException;
@@ -57,7 +59,6 @@ import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderNotFoundException;
-import java.util.Date;
 
 /**
  * TasksSQLInterface

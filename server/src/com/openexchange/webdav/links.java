@@ -60,6 +60,11 @@ import com.openexchange.tools.webdav.OXServlet;
 
 public final class links extends OXServlet {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3061969385960196356L;
+
 	protected String getServletUrl() {
 		return "/servlet/webdav.links";
 	}

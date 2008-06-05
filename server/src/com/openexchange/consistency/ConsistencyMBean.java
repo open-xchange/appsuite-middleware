@@ -1,9 +1,9 @@
 package com.openexchange.consistency;
 
-import com.openexchange.groupware.AbstractOXException;
-
 import java.util.List;
 import java.util.Map;
+
+import com.openexchange.groupware.AbstractOXException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

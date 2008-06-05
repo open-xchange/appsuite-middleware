@@ -48,18 +48,18 @@
  */
 package com.openexchange.consistency;
 
-import com.openexchange.server.Initialization;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.OXExceptionSource;
-import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.OXThrows;
-import com.openexchange.management.ManagementService;
+import javax.management.ObjectName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.management.ObjectName;
-import javax.management.MalformedObjectNameException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.OXExceptionSource;
+import com.openexchange.groupware.OXThrows;
+import com.openexchange.management.ManagementService;
+import com.openexchange.server.Initialization;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 
 /**
@@ -76,10 +76,10 @@ public class ConsistencyInit implements Initialization {
 
     @OXThrows(category = AbstractOXException.Category.INTERNAL_ERROR, desc = "", exceptionId = 1, msg = "Could not register Consistency MBean. Internal Error: %s")
     public void start() throws AbstractOXException {
-        ConsistencyMBean bean = new OsgiOXConsistency();
+        final ConsistencyMBean bean = new OsgiOXConsistency();
         try {
             registerBean(getName(), bean);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error(e.getLocalizedMessage(), e);
             throw EXCEPTIONS.createException(1, e, e.getLocalizedMessage());
         }
@@ -90,7 +90,7 @@ public class ConsistencyInit implements Initialization {
     public void stop() throws AbstractOXException {
         try {
             unregisterBean(getName());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error(e.getLocalizedMessage(), e);
             throw EXCEPTIONS.createException(2, e, e.getLocalizedMessage());
         }
@@ -101,8 +101,8 @@ public class ConsistencyInit implements Initialization {
     }
 
 
-    private void registerBean(ObjectName name, ConsistencyMBean bean) throws Exception {
-        ManagementService management = discoverManagementService();
+    private void registerBean(final ObjectName name, final ConsistencyMBean bean) throws Exception {
+        final ManagementService management = discoverManagementService();
         if(management == null) {
             LOG.error("Can not find JMX management service, skipping export of consistency mbean. The consistency tool will not be available on this server instance until the management service becomes available.");
             return;            
@@ -112,8 +112,8 @@ public class ConsistencyInit implements Initialization {
 
     }
 
-    private void unregisterBean(ObjectName name) throws Exception {
-        ManagementService management = discoverManagementService();
+    private void unregisterBean(final ObjectName name) throws Exception {
+        final ManagementService management = discoverManagementService();
         if(management == null) {
             LOG.info("It seems like the management service has gone away. Skipping unregistration of the consistency mbean.");
         }
@@ -122,7 +122,7 @@ public class ConsistencyInit implements Initialization {
     }
 
     private ManagementService discoverManagementService() {
-        ManagementService management =  ServerServiceRegistry.getInstance().getService(ManagementService.class);
+        final ManagementService management =  ServerServiceRegistry.getInstance().getService(ManagementService.class);
         return management;
     }
 }

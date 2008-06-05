@@ -104,7 +104,7 @@ public final class ConnectionDataStorage {
             } else {
                 throw new DBPoolingException(Code.NO_DBPOOL, Integer.valueOf(poolId));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);

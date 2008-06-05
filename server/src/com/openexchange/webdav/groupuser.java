@@ -162,7 +162,7 @@ public final class groupuser extends PermissionServlet {
 				if (eLastsync != null) {
 					try {
 						lastsync = new Date(Long.parseLong(eLastsync.getText()));
-					} catch (NumberFormatException exc) {
+					} catch (final NumberFormatException exc) {
 						LOG.debug("lastsync is not an integer", exc);
 					}
 				}
@@ -212,7 +212,7 @@ public final class groupuser extends PermissionServlet {
 			os.write(("</D:response>").getBytes());
 			os.write(("</D:multistatus>").getBytes());
 			os.flush();
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("doPropFind", exc);
 			doError(req, resp);
 		}
@@ -260,7 +260,7 @@ public final class groupuser extends PermissionServlet {
 				if (ps != null) {
 					try {
 						ps.close();
-					} catch(SQLException sqle) {
+					} catch(final SQLException sqle) {
 						LOG.warn("Error closing PreparedStatement");
 					}
 				}
@@ -345,7 +345,7 @@ public final class groupuser extends PermissionServlet {
 				if (ps != null) {
 					try {
 						ps.close();
-					} catch(SQLException sqle) {
+					} catch(final SQLException sqle) {
 						LOG.warn("Error closing PreparedStatement");
 					}
 				}
@@ -395,7 +395,7 @@ public final class groupuser extends PermissionServlet {
 			
 			resp.setStatus(code);
 			resp.setContentType("text/html");
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("doError", exc);
 		}
 	}

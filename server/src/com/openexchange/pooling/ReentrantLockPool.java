@@ -133,7 +133,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
     private final Condition idleAvailable = lock.newCondition();
 
-    private long[] useTimes = new long[1000];
+    private final long[] useTimes = new long[1000];
 
     private int useTimePointer;
 
@@ -178,7 +178,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         this.lifecycle = lifecycle;
         try {
             ensureMinIdle();
-        } catch (PoolingException e) {
+        } catch (final PoolingException e) {
             LOG.error("Problem while creating initial objects.", e);
         }
     }
@@ -352,7 +352,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                             } else {
                                 idleAvailable.await();
                             }
-                        } catch (InterruptedException e) {
+                        } catch (final InterruptedException e) {
                             LOG.error("Thread was interrupted.", e);
                         }
                         if (timedOut) {
@@ -377,7 +377,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                     final T pooled;
                     try {
                         pooled = lifecycle.create();
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
 //                        lock.lock();
 //                        try {
                             idleAvailable.signal();
@@ -552,7 +552,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
 
     public double getAvgUseTime() {
         double retval = 0;
-        for (long useTime : useTimes) {
+        for (final long useTime : useTimes) {
             retval += useTime;
         }
         return retval / useTimes.length;
@@ -569,7 +569,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
                 final Thread thread = new Thread(ReentrantLockPool.this);
                 thread.setName("PoolCleaner");
                 thread.start();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -620,7 +620,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         final T pooled;
         try {
             pooled = lifecycle.create();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new PoolingException("Cannot create pooled object.", e);
         }
         return back(pooled, false);
@@ -718,12 +718,12 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         } finally {
             lock.unlock();
         }
-        for (PooledData<T> metaData : removed) {
+        for (final PooledData<T> metaData : removed) {
             lifecycle.destroy(metaData.getPooled());
         }
         try {
             ensureMinIdle();
-        } catch (PoolingException e) {
+        } catch (final PoolingException e) {
             LOG.error("Problem creating the minimum number of connections.", e);
         }
         if (LOG.isTraceEnabled()) {
@@ -767,7 +767,7 @@ public class ReentrantLockPool<T> implements Pool<T>, Runnable {
         public Config clone() {
             try {
                 return (Config) super.clone();
-            } catch (CloneNotSupportedException e) {
+            } catch (final CloneNotSupportedException e) {
                 // Will not appear!
                 throw new Error("Assertion failed!", e);
             }

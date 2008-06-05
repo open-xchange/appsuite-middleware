@@ -68,7 +68,8 @@ public class OXMandatoryFieldException extends OXException {
 	/**
 	 * @deprecated
 	 */
-	public OXMandatoryFieldException(String message) {
+	@Deprecated
+	public OXMandatoryFieldException(final String message) {
 		super(message);
 	}
 

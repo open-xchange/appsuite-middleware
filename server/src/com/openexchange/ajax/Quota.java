@@ -51,7 +51,6 @@ package com.openexchange.ajax;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.io.StringWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -63,12 +62,12 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.QuotaRequest;
 import com.openexchange.ajax.request.ServletRequestAdapter;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.exceptions.LoggingLogic;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.AbstractOXException;
 
 public class Quota extends SessionServlet {
 
@@ -98,7 +97,7 @@ public class Quota extends SessionServlet {
         final ServerSession session;
         try {
             session = new ServerSessionAdapter(getSessionObject(req));
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             handle(res, e, action, JS_FRAGMENT_POPUP);
             return;
         }
@@ -126,12 +125,12 @@ public class Quota extends SessionServlet {
 
 
 		try {
-			Writer writer = res.getWriter();
+			final Writer writer = res.getWriter();
 			Response.write(resp, writer);
 
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.error("",t);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.error("",e);
 		}
 	}

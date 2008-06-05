@@ -63,6 +63,11 @@ import com.openexchange.session.Session;
 public abstract class PermissionServlet extends SessionServlet {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1496492688713194989L;
+
+	/**
 	 * Checks the session ID supplied as a query parameter in the request URI.
 	 * Intended usage:
 	 *
@@ -95,7 +100,7 @@ public abstract class PermissionServlet extends SessionServlet {
 			final Context ctx;
 			try {
 				ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-			} catch (ContextException exc) {
+			} catch (final ContextException exc) {
 				resp.sendError(HttpServletResponse.SC_CONFLICT, "Conflict");
 				return;
 			}

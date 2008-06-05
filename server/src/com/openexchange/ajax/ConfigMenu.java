@@ -122,9 +122,9 @@ public class ConfigMenu extends SessionServlet {
             setting = ConfigTree.getSettingByPath(path);
             stor.readValues(setting);
             response.setData(convert2JS(setting));
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             response.setException(e);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
@@ -134,7 +134,7 @@ public class ConfigMenu extends SessionServlet {
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
             Response.write(response, resp.getWriter());
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             log(RESPONSE_ERROR, e);
             sendError(resp);
         }
@@ -158,20 +158,20 @@ public class ConfigMenu extends SessionServlet {
                 } else {
                     try {
                         retval = new JSONObject(singleValue.toString());
-                    } catch (JSONException e) {
+                    } catch (final JSONException e) {
                         retval = singleValue;
                     }
                 }
             } else {
                 final JSONArray array = new JSONArray();
-                for (Object value : multiValue) {
+                for (final Object value : multiValue) {
                     array.put(value);
                 }
                 retval = array;
             }
         } else {
             final JSONObject json = new JSONObject();
-            for (Setting subSetting : setting.getElements()) {
+            for (final Setting subSetting : setting.getElements()) {
                 json.put(subSetting.getName(), convert2JS(subSetting));
             }
             retval = json;
@@ -220,10 +220,10 @@ public class ConfigMenu extends SessionServlet {
             final Setting setting = ConfigTree.getSettingByPath(path);
             setting.setSingleValue(value);
             saveSettingWithSubs(stor, setting);
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             log(e.getMessage(), e);
             response.setException(e);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
@@ -235,7 +235,7 @@ public class ConfigMenu extends SessionServlet {
             if (response.hasError()) {
                 Response.write(response, resp.getWriter());
             }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             log(RESPONSE_ERROR, e);
             sendError(resp);
         }
@@ -276,7 +276,7 @@ public class ConfigMenu extends SessionServlet {
                     // Catch single exceptions if GUI writes not writable
                     // fields.
                     saveSettingWithSubs(storage, sub);
-                } catch (SettingException e) {
+                } catch (final SettingException e) {
                     exc = e;
                 }
             }

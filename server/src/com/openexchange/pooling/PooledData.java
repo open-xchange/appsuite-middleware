@@ -73,7 +73,7 @@ public class PooledData<T> {
     /**
      * Time when this pooled object was created.
      */
-    private long createTime;
+    private final long createTime;
 
     private long timestamp;
 

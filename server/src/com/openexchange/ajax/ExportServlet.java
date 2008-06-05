@@ -61,7 +61,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.importexport.Format;
 import com.openexchange.groupware.importexport.SizedInputStream;
-import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -84,6 +83,7 @@ public class ExportServlet extends ImportExport {
 		super();
 	}
 	
+	@Override
 	@SuppressWarnings("unchecked")
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		try {
@@ -97,7 +97,7 @@ public class ExportServlet extends ImportExport {
 				resp.sendError(HttpServletResponse.SC_CONFLICT, "unknown format");
 			}
 
-            ServerSession session = new ServerSessionAdapter(getSessionObject(req));
+            final ServerSession session = new ServerSessionAdapter(getSessionObject(req));
             final SizedInputStream inputStream = importerExporter.exportData(session, format, folder, fieldsToBeExported, req.getParameterMap());
 			
 			final OutputStream outputStream = resp.getOutputStream();
@@ -110,7 +110,7 @@ public class ExportServlet extends ImportExport {
 				outputStream.write(b, 0, i);
 				outputStream.flush();
 			}		
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 			LOG.error("unknown exception: " , ex);
 		}		
 	}

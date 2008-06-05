@@ -100,7 +100,7 @@ public class Tasks extends DataServlet {
 			final JSONObject jsonObj;
 			try {			
 				 jsonObj = convertParameter2JSONObject(httpServletRequest);
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.error(e.getMessage(), e);
 	            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 	            writeResponse(response, httpServletResponse);
@@ -112,39 +112,39 @@ public class Tasks extends DataServlet {
 			final Object responseObj = taskRequest.action(action, jsonObj);
 			response.setTimestamp(taskRequest.getTimestamp());
 			response.setData(responseObj);
-		} catch (OXMandatoryFieldException e) {
+		} catch (final OXMandatoryFieldException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (OXConflictException e) {
+		} catch (final OXConflictException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-        } catch (OXJSONException e) {
+        } catch (final OXJSONException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-		} catch (OXFolderNotFoundException e) {
+		} catch (final OXFolderNotFoundException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (OXObjectNotFoundException e) {
+		} catch (final OXObjectNotFoundException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (OXPermissionException e) {
+		} catch (final OXPermissionException e) {
 			LOG.info(e.getMessage(), e);
 			response.setException(e);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (AjaxException e) {
+		} catch (final AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
         } catch (final ContextException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			if (e.getCategory() == Category.USER_INPUT) {
 				LOG.debug(e.getMessage(), e);
 			} else {
@@ -172,7 +172,7 @@ public class Tasks extends DataServlet {
 
 				try {
 					jsonObj = convertParameter2JSONObject(httpServletRequest);
-				} catch (JSONException e) {
+				} catch (final JSONException e) {
 					LOG.error(e.getMessage(), e);
 		            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 		            writeResponse(response, httpServletResponse);
@@ -199,24 +199,24 @@ public class Tasks extends DataServlet {
 			} else {
 				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");
 			}
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-        } catch (OXJSONException e) {
+        } catch (final OXJSONException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (AjaxException e) {
+		} catch (final AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
         } catch (final ContextException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			if (e.getCategory() == Category.USER_INPUT) {
 				LOG.debug(e.getMessage(), e);
 			} else {
@@ -232,7 +232,7 @@ public class Tasks extends DataServlet {
         try {
     		return UserConfigurationStorage.getInstance().getUserConfiguration(
                 sessionObj.getUserId(), ctx).hasTask();
-        } catch (UserConfigurationException e) {
+        } catch (final UserConfigurationException e) {
             LOG.error(e.getMessage(), e);
             return false;
         }

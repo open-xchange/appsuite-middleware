@@ -89,8 +89,9 @@ public final class Collections {
 	 */
 	public static <T> T findFirst(final Collection<T> collection, final Filter<T> filter) {
 		for(final T object : collection) {
-			if(filter.accept(object))
+			if(filter.accept(object)) {
 				return object;
+			}
 		}
 		return null;
 	}

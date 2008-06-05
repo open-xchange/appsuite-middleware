@@ -131,7 +131,7 @@ public final class Server {
             if (result.next()) {
                 retval = result.getInt(1);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);

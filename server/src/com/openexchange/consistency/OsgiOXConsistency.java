@@ -48,25 +48,25 @@
  */
 package com.openexchange.consistency;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.contexts.impl.ContextException;
-import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.openexchange.database.AssignmentStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.filestore.FilestoreException;
+import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.DBPoolProvider;
-import com.openexchange.groupware.filestore.FilestoreStorage;
-import com.openexchange.groupware.filestore.FilestoreException;
+import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
-import com.openexchange.database.AssignmentStorage;
-import com.openexchange.server.impl.DBPoolingException;
-
-import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Provides the integration of the consistency tool in the OSGi OX. 
@@ -76,28 +76,33 @@ public class OsgiOXConsistency extends Consistency {
     private DatabaseImpl database;
 
 
-    protected Context getContext(int contextId) throws ContextException {
+    @Override
+	protected Context getContext(final int contextId) throws ContextException {
         final ContextStorage ctxstor = ContextStorage.getInstance();
         return ctxstor.getContext(contextId);
     }
 
-    protected DatabaseImpl getDatabase() {
+    @Override
+	protected DatabaseImpl getDatabase() {
         if (database == null) {
             database = new DatabaseImpl(new DBPoolProvider());
         }
         return database;
     }
 
-    protected AttachmentBase getAttachments() {
+    @Override
+	protected AttachmentBase getAttachments() {
         return Attachments.getInstance();
     }
 
-    protected FileStorage getFileStorage(Context ctx) throws FileStorageException, FilestoreException {
+    @Override
+	protected FileStorage getFileStorage(final Context ctx) throws FileStorageException, FilestoreException {
         return FileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx,
 				new DBPoolProvider());
     }
 
-    protected List<Context> getContextsForFilestore(final int filestoreId) throws ContextException {
+    @Override
+	protected List<Context> getContextsForFilestore(final int filestoreId) throws ContextException {
         // Dear Santa.
         // For next christmas I would like to have blocks and closures
         // for Java.
@@ -105,19 +110,20 @@ public class OsgiOXConsistency extends Consistency {
         //   Francisco
 
         return filter(getAllContexts(), new Filter() {
-            public boolean accepts(Context ctx) {
+            public boolean accepts(final Context ctx) {
                 return ctx.getFilestoreId() == filestoreId;
             }
         });
     }
 
-    protected List<Context> getContextsForDatabase(final int databaseId) throws ContextException, DBPoolingException {
+    @Override
+	protected List<Context> getContextsForDatabase(final int databaseId) throws ContextException, DBPoolingException {
         return loadContexts(AssignmentStorage.getInstance().listContexts(databaseId));
     }
 
-    private List<Context> filter(List<Context> contexts, Filter filter) {
-        List<Context> filtered = new ArrayList<Context>();
-        for(Context ctx : contexts) {
+    private List<Context> filter(final List<Context> contexts, final Filter filter) {
+        final List<Context> filtered = new ArrayList<Context>();
+        for(final Context ctx : contexts) {
             if(filter.accepts(ctx)) {
                 filtered.add(ctx);    
             }
@@ -125,23 +131,25 @@ public class OsgiOXConsistency extends Consistency {
         return filtered;
     }
 
-    protected List<Context> getAllContexts() throws ContextException {
+    @Override
+	protected List<Context> getAllContexts() throws ContextException {
         final ContextStorage ctxstor = ContextStorage.getInstance();
         final List<Integer> list = ctxstor.getAllContextIds();
 
         return loadContexts(list);
     }
 
-    private List<Context> loadContexts(List<Integer> list) throws ContextException {
+    private List<Context> loadContexts(final List<Integer> list) throws ContextException {
         final ContextStorage ctxstor = ContextStorage.getInstance();
         final List<Context> contexts = new ArrayList<Context>(list.size());
-        for(int id : list) {
+        for(final int id : list) {
             contexts.add(ctxstor.getContext(id));
         }
         return contexts;
     }
 
-    protected User getAdmin(Context ctx) throws LdapException {
+    @Override
+	protected User getAdmin(final Context ctx) throws LdapException {
         return UserStorage.getStorageUser(ctx.getMailadmin(),ctx);
     }
 

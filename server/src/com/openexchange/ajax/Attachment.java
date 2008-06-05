@@ -77,13 +77,19 @@ import com.openexchange.ajax.exceptions.InfostoreException2Message;
 import com.openexchange.ajax.parser.AttachmentParser;
 import com.openexchange.ajax.request.AttachmentRequest;
 import com.openexchange.ajax.request.ServletRequestAdapter;
-import com.openexchange.ajax.request.SimpleRequest;
 import com.openexchange.api2.OXException;
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.OXExceptionSource;
 import com.openexchange.groupware.OXThrows;
-import com.openexchange.groupware.attach.*;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentConfig;
+import com.openexchange.groupware.attach.AttachmentException;
+import com.openexchange.groupware.attach.AttachmentExceptionFactory;
+import com.openexchange.groupware.attach.AttachmentField;
+import com.openexchange.groupware.attach.AttachmentMetadata;
+import com.openexchange.groupware.attach.Attachments;
+import com.openexchange.groupware.attach.Classes;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.ldap.User;
@@ -150,9 +156,9 @@ public class Attachment extends PermissionServlet {
 	@Override
 	protected boolean hasModulePermission(final Session session, final Context ctx) {
         try {
-            ServerSession sessionObj = new ServerSessionAdapter(session);
+            final ServerSession sessionObj = new ServerSessionAdapter(session);
             return AttachmentRequest.hasPermission(UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             LOG.error(e.getLocalizedMessage(), e);
             return false;
         }
@@ -171,7 +177,7 @@ public class Attachment extends PermissionServlet {
         final ServerSession session;
         try {
             session = new ServerSessionAdapter(getSessionObject(req));
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             handle(res, e, action, JS_FRAGMENT_POPUP);
             return;
         }
@@ -187,7 +193,7 @@ public class Attachment extends PermissionServlet {
 			try {
 				require(req, res,
 						PARAMETER_FOLDERID, PARAMETER_ATTACHEDID, PARAMETER_MODULE, PARAMETER_ID);
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				handle(res, e, action, JS_FRAGMENT_POPUP);
 				return;
 			}
@@ -199,7 +205,7 @@ public class Attachment extends PermissionServlet {
 				moduleId = requireNumber(req, res, action, contentType, PARAMETER_MODULE);
 				id = requireNumber(req, res, action, contentType, PARAMETER_ID);
 					
-			} catch (OXAborted x) {
+			} catch (final OXAborted x) {
 				return;
 			}
 			
@@ -220,12 +226,12 @@ public class Attachment extends PermissionServlet {
 
    
     @OXThrows(category = AbstractOXException.Category.CODE_ERROR, desc = "", exceptionId = 1, msg = "Invalid parameter sent in request. Parameter '%s' was '%s' which does not look like a number")
-    private int requireNumber(HttpServletRequest req, HttpServletResponse res, String action, String contentType, String parameter) { 
-        String value = req.getParameter(parameter);
+    private int requireNumber(final HttpServletRequest req, final HttpServletResponse res, final String action, final String contentType, final String parameter) { 
+        final String value = req.getParameter(parameter);
         try {
             return Integer.parseInt(value);
-        } catch(NumberFormatException  nfe) {
-            AttachmentException t = EXCEPTIONS.create(1, parameter, value);
+        } catch(final NumberFormatException  nfe) {
+            final AttachmentException t = EXCEPTIONS.create(1, parameter, value);
             handle(res, t, action, contentType == null ? JS_FRAGMENT_POPUP : null );
             throw new OXAborted();
         }
@@ -246,7 +252,7 @@ public class Attachment extends PermissionServlet {
         final ServerSession session;
         try {
             session = new ServerSessionAdapter(getSessionObject(req));
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             handle(res, e, action, JS_FRAGMENT_POPUP);
             return;
         }
@@ -280,7 +286,7 @@ public class Attachment extends PermissionServlet {
         final ServerSession session;
         try {
             session = new ServerSessionAdapter(getSessionObject(req));
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             handle(res, e, action, JS_FRAGMENT_POPUP);
             return;
         }
@@ -316,7 +322,7 @@ public class Attachment extends PermissionServlet {
 						}
 						json.reset();
 						json.parseJSONString(obj);
-						for (AttachmentField required : REQUIRED) {
+						for (final AttachmentField required : REQUIRED) {
 							if (!json.has(required.getName())) {
 								missingParameter(required.getName(), res, true, action);
 							}
@@ -340,18 +346,18 @@ public class Attachment extends PermissionServlet {
 					}
 				}
 			}
-		}catch (UploadException x) {
+		}catch (final UploadException x) {
 			final Response resp = new Response();
 			resp.setException(new AbstractOXException(x.getMessage())); // FIXME
 			try {
 				res.setContentType(MIME_TEXT_HTML_CHARSET_UTF8);
 				
 				throw new UploadServletException(res, substitute(JS_FRAGMENT, "json", resp.getJSON().toString(), "action","error"),x.getMessage(),x);
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.error("Giving up",e);
 			}
 			
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			if (LOG.isErrorEnabled()) {
 				LOG.error(e.getMessage(), e);
 			}
@@ -404,7 +410,7 @@ public class Attachment extends PermissionServlet {
 			os=null; // No need to close the IS anymore
 			
 			ATTACHMENT_BASE.commit();
-		} catch (Throwable t) {
+		} catch (final Throwable t) {
 			// This is a bit convoluted: In case the contentType is not
 			// overridden the returned file will be opened
 			// in a new window. To call the JS callback routine from a popup we
@@ -416,14 +422,14 @@ public class Attachment extends PermissionServlet {
 			if(documentData != null) {
 				try {
 					documentData.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOG.debug("", e);
 				}
 			}
 			if(os!=null){
 				try {
 					os.flush();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOG.debug("", e);
 				}
 				/*try {
@@ -433,17 +439,17 @@ public class Attachment extends PermissionServlet {
 			}
 			try {
 				ATTACHMENT_BASE.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 		}
 	}
 
 	
-	private void rollback(Throwable t, HttpServletResponse res, String action, String fragmentOverride) {
+	private void rollback(final Throwable t, final HttpServletResponse res, final String action, final String fragmentOverride) {
 		try {
 			ATTACHMENT_BASE.rollback();
-		} catch (TransactionException e) {
+		} catch (final TransactionException e) {
 			LOG.debug("", e);
 		}
 		if(t instanceof AbstractOXException) {
@@ -467,7 +473,7 @@ public class Attachment extends PermissionServlet {
 			
 			long timestamp = 0;
 			
-			for (AttachmentMetadata attachment : attachments) {
+			for (final AttachmentMetadata attachment : attachments) {
 			//while(attIter.hasNext()) {
 				//final AttachmentMetadata attachment = attIter.next();
 				final UploadFile uploadFile = ufIter.next();
@@ -486,26 +492,26 @@ public class Attachment extends PermissionServlet {
 			w = res.getWriter();
 			w.print(substitute(JS_FRAGMENT, "json", result.toString(),"action",ACTION_ATTACH));
 			ATTACHMENT_BASE.commit();
-		} catch (OXException t) {
+		} catch (final OXException t) {
 			try {
 				ATTACHMENT_BASE.rollback();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.error(e);
 			}
             handle(res,t,Response.ERROR, null);
 			return;
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			try {
 				ATTACHMENT_BASE.rollback();
-			} catch (TransactionException x) {
+			} catch (final TransactionException x) {
 				LOG.error(e);
 			}
 			handle(res,new OXException(e),Response.ERROR, null);
 			return;
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			try {
 				ATTACHMENT_BASE.rollback();
-			} catch (TransactionException x) {
+			} catch (final TransactionException x) {
 				LOG.error(e);
 			}
 			handle(res,new OXException(e),Response.ERROR, null);
@@ -513,7 +519,7 @@ public class Attachment extends PermissionServlet {
 		} finally {
 			try {
 				ATTACHMENT_BASE.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 		}
@@ -526,7 +532,7 @@ public class Attachment extends PermissionServlet {
 		final Iterator<UploadFile> ufIter = new ArrayList<UploadFile>(uploads).iterator();
 		
 		int index = 0;
-		for (AttachmentMetadata attachment : attList) {
+		for (final AttachmentMetadata attachment : attList) {
 		// while(attIter.hasNext()) {
 			// final AttachmentMetadata attachment = attIter.next();
 			if(attachment == null) {
@@ -567,9 +573,9 @@ public class Attachment extends PermissionServlet {
 			writer = new StringWriter();
 			Response.write(resp, writer);
 			res.getWriter().write(substitute((fragmentOverride != null) ? fragmentOverride : JS_FRAGMENT,"json",writer.toString(),"action",action));
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.error("",t);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.error("",e);
 		}
 	}
@@ -601,7 +607,7 @@ public class Attachment extends PermissionServlet {
 	}
 	
 	protected void require(final HttpServletRequest req, final HttpServletResponse res, final String... parameters) throws OXException {
-		for (String param : parameters) {
+		for (final String param : parameters) {
 			if (req.getParameter(param) == null) {
 				throw new OXException("Missing Parameter "+param);
 			}

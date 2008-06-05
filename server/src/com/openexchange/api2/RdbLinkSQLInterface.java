@@ -83,7 +83,7 @@ public class RdbLinkSQLInterface implements LinkSQLInterface {
 			ctx = ContextStorage.getStorageContext(sessionobject.getContextId());
 			readcon = DBPool.pickup(ctx);
 			lo = Links.getAllLinksFromObject(objectId,type,folder,user,group,sessionobject,readcon);
-		} catch (ContextException ct){
+		} catch (final ContextException ct){
 			new ContactException(ct);
 		}catch (final DBPoolingException e){
 			LOG.error("AN ERROR OCCURRED DURING saveLink", e);
@@ -105,7 +105,7 @@ public class RdbLinkSQLInterface implements LinkSQLInterface {
 			ctx = ContextStorage.getStorageContext(so.getContextId());
 			writecon = DBPool.pickupWriteable(ctx);
 			Links.performLinkStorage(l, user, group, so, writecon);
-		}catch (ContextException ct){
+		}catch (final ContextException ct){
 			new ContactException(ct);
 		}catch (final DBPoolingException e){
 			LOG.error("AN ERROR OCCURRED DURING saveLink", e);
@@ -130,7 +130,7 @@ public class RdbLinkSQLInterface implements LinkSQLInterface {
 			readcon = DBPool.pickup(ctx);
 			writecon = DBPool.pickupWriteable(ctx);
 			resp = Links.deleteLinkFromObject(id,type,folder,data,user,group,sessionobject,readcon,writecon);
-		}catch (ContextException ct){
+		}catch (final ContextException ct){
 			new ContactException(ct);
 		}catch (final DBPoolingException e){
 			LOG.error("AN ERROR OCCURRED DURING saveLink", e);

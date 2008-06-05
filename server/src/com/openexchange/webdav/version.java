@@ -68,6 +68,12 @@ import com.openexchange.server.impl.Version;
 
 public final class version extends HttpServlet {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7246795219288838650L;
+
+	@Override
 	public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
  
 		PrintWriter pw = null;
@@ -78,7 +84,7 @@ public final class version extends HttpServlet {
 			pw = resp.getWriter();
 			pw.println("WebDAV: " + Version.BUILDNUMBER);
             pw.flush();
-		} catch(Exception exc) {
+		} catch(final Exception exc) {
 			System.err.println("cannot get version informations: " + exc);
 			exc.printStackTrace();
 

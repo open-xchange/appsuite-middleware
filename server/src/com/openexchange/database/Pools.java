@@ -153,7 +153,7 @@ public final class Pools implements Runnable {
                         ConnectionDataStorage.loadPoolData(poolId);
                     try {
                         Class.forName(data.driverClass);
-                    } catch (ClassNotFoundException e) {
+                    } catch (final ClassNotFoundException e) {
                         throw new DBPoolingException(Code.NO_DRIVER, e);
                     }
                     retval = new ConnectionPool(data.url, data.props,
@@ -183,7 +183,7 @@ public final class Pools implements Runnable {
                     final Thread thread = new Thread(Pools.this);
                     thread.setName("PoolsCleaner");
                     thread.start();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
@@ -248,15 +248,15 @@ public final class Pools implements Runnable {
             if (null != management) {
                 management.unregisterMBean(objName);
             }
-        } catch (MalformedObjectNameException e) {
+        } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
-        } catch (NullPointerException e) {
+        } catch (final NullPointerException e) {
             LOG.error(e.getMessage(), e);
-        } catch (InstanceNotFoundException e) {
+        } catch (final InstanceNotFoundException e) {
             LOG.error(e.getMessage(), e);
-        } catch (MBeanRegistrationException e) {
+        } catch (final MBeanRegistrationException e) {
             LOG.error(e.getMessage(), e);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -275,13 +275,13 @@ public final class Pools implements Runnable {
             if (null != management) {
                 management.registerMBean(objName, pool);
             }
-        } catch (MalformedObjectNameException e) {
+        } catch (final MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
-        } catch (NullPointerException e) {
+        } catch (final NullPointerException e) {
             LOG.error(e.getMessage(), e);
-        } catch (JDOMException e) {
+        } catch (final JDOMException e) {
             LOG.error(e);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         }
     }
@@ -297,7 +297,7 @@ public final class Pools implements Runnable {
         }
         poolsLock.lock();
         try {
-            for (Map.Entry<Integer, ConnectionPool> entry : oxPools.entrySet()) {
+            for (final Map.Entry<Integer, ConnectionPool> entry : oxPools.entrySet()) {
                 registerMBean(createMBeanName(entry.getKey().intValue()),
                     entry.getValue());
             }
@@ -311,7 +311,7 @@ public final class Pools implements Runnable {
     	unregisterMBean("ConfigDB Write");
     	poolsLock.lock();
         try {
-            for (Map.Entry<Integer, ConnectionPool> entry : oxPools.entrySet()) {
+            for (final Map.Entry<Integer, ConnectionPool> entry : oxPools.entrySet()) {
                 unregisterMBean(createMBeanName(entry.getKey().intValue()));
             }
         } finally {
@@ -363,7 +363,7 @@ public final class Pools implements Runnable {
         // TODO write destroyPool method.
         poolsLock.lock();
         try {
-            for (Map.Entry<Integer, ConnectionPool> entry : oxPools.entrySet()) {
+            for (final Map.Entry<Integer, ConnectionPool> entry : oxPools.entrySet()) {
                 unregisterMBean(createMBeanName(entry.getKey().intValue()));
                 final ConnectionPool pool = entry.getValue();
                 pool.getCleanerTask().cancel();

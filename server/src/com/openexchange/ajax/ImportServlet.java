@@ -63,6 +63,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
+
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.helper.Send;
 import com.openexchange.ajax.writer.ImportExportWriter;
@@ -80,7 +81,6 @@ import com.openexchange.groupware.upload.impl.UploadFile;
 import com.openexchange.tools.servlet.OXJSONException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.session.Session;
 
 @OXExceptionSource(
     classId=ImportExportExceptionClasses.IMPORTSERVLET, 
@@ -165,7 +165,7 @@ public class ImportServlet extends ImportExport {
 					throw EXCEPTIONS.create(3);
 				}
 				//actual import
-                ServerSession session = new ServerSessionAdapter(getSessionObject(
+                final ServerSession session = new ServerSessionAdapter(getSessionObject(
                         req));
                 importResult = importerExporter.importData(session, format, new FileInputStream(upload), folders,
                     req.getParameterMap());
@@ -179,11 +179,11 @@ public class ImportServlet extends ImportExport {
             try {
                 writer.writeObjects(importResult);
                 resObj.setData(writer.getObject());
-            } catch (JSONException e){
+            } catch (final JSONException e){
                 throw new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR,
                     e);
             }
-        } catch (AbstractOXException e) {
+        } catch (final AbstractOXException e) {
             if (Category.USER_INPUT.equals(e.getCategory())) {
                 LOG.debug(e.getMessage(), e);
             } else {

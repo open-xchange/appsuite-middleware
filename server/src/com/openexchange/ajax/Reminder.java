@@ -83,8 +83,9 @@ public class Reminder extends DataServlet {
 	
 	private static final Log LOG = LogFactory.getLog(Reminder.class);
 	
+	@Override
 	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
-		Response response = new Response();
+		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			final Session sessionObj = getSessionObject(httpServletRequest);
@@ -92,7 +93,7 @@ public class Reminder extends DataServlet {
 			
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.error(e.getMessage(), e);
 	            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 	            writeResponse(response, httpServletResponse);
@@ -104,30 +105,30 @@ public class Reminder extends DataServlet {
 			final Object responseObj = reminderRequest.action(action, jsonObj);
 			response.setTimestamp(reminderRequest.getTimestamp());
 			response.setData(responseObj);
-		} catch (OXMandatoryFieldException e) {
+		} catch (final OXMandatoryFieldException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (OXConflictException e) {
+		} catch (final OXConflictException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (AjaxException e) {
+		} catch (final AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (OXJSONException exc) {
+		} catch (final OXJSONException exc) {
             LOG.error(exc.getMessage(), exc);
             response.setException(exc);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-		} catch (AbstractOXException exc) {
+		} catch (final AbstractOXException exc) {
             LOG.error(exc.getMessage(), exc);
             response.setException(exc);
 		}
@@ -135,6 +136,7 @@ public class Reminder extends DataServlet {
 		writeResponse(response, httpServletResponse);
 	}
 	
+	@Override
 	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		try {
@@ -146,7 +148,7 @@ public class Reminder extends DataServlet {
 			
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.error(e.getMessage(), e);
 	            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 	            writeResponse(response, httpServletResponse);
@@ -170,30 +172,30 @@ public class Reminder extends DataServlet {
 				final Object responseObj = reminderRequest.action(action, jsonObj);
 				response.setData(responseObj);
 			}
-		} catch (OXMandatoryFieldException e) {
+		} catch (final OXMandatoryFieldException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (OXConflictException e) {
+		} catch (final OXConflictException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (OXJSONException exc) {
+		} catch (final OXJSONException exc) {
             LOG.error(exc.getMessage(), exc);
             response.setException(exc);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (SearchIteratorException e) {
+		} catch (final SearchIteratorException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (AjaxException e) {
+		} catch (final AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (AbstractOXException exc) {
+		} catch (final AbstractOXException exc) {
             LOG.error(exc.getMessage(), exc);
             response.setException(exc);
 		}
@@ -201,6 +203,7 @@ public class Reminder extends DataServlet {
 		writeResponse(response, httpServletResponse);
 	}
 	
+	@Override
 	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
 		return true;
 	}

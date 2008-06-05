@@ -112,6 +112,11 @@ import com.openexchange.tools.servlet.UploadServletException;
  */
 public abstract class AJAXServlet extends HttpServlet implements UploadRegistry {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 718576864014891156L;
+
 	protected static final transient List<UploadListener> registeredUploadListeners = new ArrayList<UploadListener>();
 
 	private static final transient Log LOG = LogFactory.getLog(AJAXServlet.class);
@@ -411,9 +416,9 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			IOException {
 		try {
 			super.service(req, resp);
-		} catch (ServletException x) {
+		} catch (final ServletException x) {
 			throw x;
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			final ServletException se = new ServletException(e.getLocalizedMessage());
 			se.initCause(e);
 			throw se;
@@ -441,7 +446,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		}
 		try {
 			return Integer.parseInt(value_str);
-		} catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			return -1;
 		}
 	}
@@ -449,7 +454,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static long getLongParameter(final HttpServletRequest req, final String name) throws OXConflictException {
 		try {
 			return Long.parseLong(req.getParameter(name));
-		} catch (NumberFormatException ex) {
+		} catch (final NumberFormatException ex) {
 			throw new OXConflictException(new AjaxException(AjaxException.Code.InvalidParameter, ex, name));
 		}
 	}
@@ -457,7 +462,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static float getFloatParameter(final HttpServletRequest req, final String name) throws OXConflictException {
 		try {
 			return Float.parseFloat(req.getParameter(name));
-		} catch (NumberFormatException ex) {
+		} catch (final NumberFormatException ex) {
 			throw new OXConflictException(new AjaxException(AjaxException.Code.InvalidParameter, ex, name));
 		}
 	}
@@ -469,7 +474,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	public static Date getDateParameter(final HttpServletRequest req, final String name) throws OXConflictException {
 		try {
 			return new Date(Long.parseLong(req.getParameter(name)));
-		} catch (NumberFormatException ex) {
+		} catch (final NumberFormatException ex) {
 			throw new OXConflictException(new AjaxException(AjaxException.Code.InvalidParameter, ex, name));
 		}
 	}
@@ -688,7 +693,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			jw.value(errorMessage);
 			jw.endObject();
 			w.flush();
-		} catch (JSONException e1) {
+		} catch (final JSONException e1) {
 			throw new ServletException("Cannot create JSON object.", e1);
 		}
 	}
@@ -705,7 +710,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			jw.value(errorMessage);
 			jw.endObject();
 			w.flush();
-		} catch (JSONException e1) {
+		} catch (final JSONException e1) {
 			throw new ServletException("Cannot create JSON object.", e1);
 		}
 	}
@@ -713,6 +718,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	/**
 	 * @deprecated
 	 */
+	@Deprecated
 	protected static void sendErrorAsJSHTML(final HttpServletResponse res, final String error, final String action)
 			throws IOException {
 		res.setContentType("text/html");
@@ -723,7 +729,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 			obj.put(STR_ERROR, error);
 			obj.put(STR_ERROR_PARAMS, Collections.emptyList());
 			w.write(substitute(JS_FRAGMENT, "json", obj.toString(), "action", action));
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.error(e);
 		} finally {
 			close(w);
@@ -790,7 +796,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 	}
 
 	public static int[] intArrayCopy(final String s[]) {
-		int i[] = new int[s.length];
+		final int i[] = new int[s.length];
 
 		for (int a = 0; a < i.length; a++) {
 			i[a] = Integer.parseInt(s[a]);
@@ -950,7 +956,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 				final UploadListener uploadListener = iter.next();
 				try {
 					uploadListener.action(uploadEvent);
-				} catch (OXException e) {
+				} catch (final OXException e) {
 					LOG.error(errBuilder.append("ERROR: Upload method \"action()\" failed for UploadListener ").append(
 							uploadListener.getClass()), e);
 					errBuilder.setLength(0);
@@ -1001,7 +1007,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		if (html) {
 			res.setContentType("text/html; charset=UTF-8");
 		}
-		for (String param : parameters) {
+		for (final String param : parameters) {
 			if (req.getParameter(param) == null) {
 				missingParameter(param, res, html, action);
 				return false;
@@ -1028,7 +1034,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		httpServletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
 		try {
 			Response.write(response, httpServletResponse.getWriter());
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			log(RESPONSE_ERROR, e);
 			sendError(httpServletResponse);
 		}

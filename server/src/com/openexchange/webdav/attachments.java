@@ -94,6 +94,11 @@ import com.openexchange.webdav.xml.fields.DataFields;
 
 public final class attachments extends OXServlet {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7811800176537415542L;
+
 	public static final String LAST_MODIFIED = "last_modified";
 	
 	public static final String MODULE = "module";
@@ -226,12 +231,12 @@ public final class attachments extends OXServlet {
 			resp.setContentType(XmlServlet._contentType);
 			
 			xo.output(output_doc, resp.getOutputStream());
-		} catch (TransactionException exc) {
+		} catch (final TransactionException exc) {
 			doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
 			LOG.error("doPut", exc);
 			exc.printStarterTrace();
 			rollbackTransaction();
-		} catch (OXException exc) {
+		} catch (final OXException exc) {
 			if (exc.getCategory() == Category.PERMISSION) {
 				LOG.debug("doPut", exc);
 			} else {
@@ -240,7 +245,7 @@ public final class attachments extends OXServlet {
 			
 			doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
 			rollbackTransaction();
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, exc.toString());
 			LOG.error("doPut", exc);
 			rollbackTransaction();
@@ -274,7 +279,7 @@ public final class attachments extends OXServlet {
 			} else {
 				try {
 					module = Integer.parseInt(req.getHeader(MODULE));
-				} catch (NumberFormatException exc) {
+				} catch (final NumberFormatException exc) {
 					throw new OXConflictException(MODULE + "is not a integer", exc);
 				}
 			}
@@ -284,7 +289,7 @@ public final class attachments extends OXServlet {
 			} else {
 				try {
 					target_id = Integer.parseInt(req.getHeader(TARGET_ID));
-				} catch (NumberFormatException exc) {
+				} catch (final NumberFormatException exc) {
 					throw new OXConflictException(TARGET_ID + "is not a long", exc);
 				}
 			}
@@ -294,7 +299,7 @@ public final class attachments extends OXServlet {
 			} else {
 				try {
 					object_id = Integer.parseInt(req.getHeader(DataFields.OBJECT_ID));
-				} catch (NumberFormatException exc) {
+				} catch (final NumberFormatException exc) {
 					throw new OXConflictException(DataFields.OBJECT_ID + "is not a integer", exc);
 				}
 			}
@@ -302,7 +307,7 @@ public final class attachments extends OXServlet {
 			if (req.getHeader(TARGET_FOLDER_ID) != null) {
 				try {
 					folder_id = Integer.parseInt(req.getHeader(TARGET_FOLDER_ID));
-				} catch (NumberFormatException exc) {
+				} catch (final NumberFormatException exc) {
 					throw new OXConflictException(TARGET_FOLDER_ID + " is not an integer", exc);
 				}
 			}
@@ -322,10 +327,10 @@ public final class attachments extends OXServlet {
 				os.write(b, 0, i);
 				i = is.read(b);
 			}
-		} catch (OXConflictException exc) {
+		} catch (final OXConflictException exc) {
 			doError(req, resp, HttpServletResponse.SC_CONFLICT, exc.toString());
 			rollbackTransaction();
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error: " + exc.toString());
 			LOG.error("doGet", exc);
 			rollbackTransaction();
@@ -355,13 +360,13 @@ public final class attachments extends OXServlet {
 			attachmentBase.detachFromObject(folderId, targetId, module, new int[] { objectId }, ctx, UserStorage.getStorageUser(sessionObj.getUserId(), ctx), UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
 			attachmentBase.commit();
 			resp.setStatus(HttpServletResponse.SC_OK);
-		} catch (OXConflictException exc) {
+		} catch (final OXConflictException exc) {
 			doError(req, resp, HttpServletResponse.SC_CONFLICT, exc.toString());
 			LOG.error("doDelete", exc);
-		} catch (OXObjectNotFoundException exc) {
+		} catch (final OXObjectNotFoundException exc) {
 			doError(req, resp, HttpServletResponse.SC_NOT_FOUND, exc.toString());
 			rollbackTransaction();
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			doError(req, resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error: " + exc.toString());
 			LOG.error("doDelete", exc);
 			rollbackTransaction();
@@ -378,7 +383,7 @@ public final class attachments extends OXServlet {
 	private void finishTransaction() {
 		try {
 			attachmentBase.finish();
-		} catch (TransactionException exc) {
+		} catch (final TransactionException exc) {
 			LOG.error("finishTransaction", exc);
 		}
 	}
@@ -386,7 +391,7 @@ public final class attachments extends OXServlet {
 	private void rollbackTransaction() {
 		try {
 			attachmentBase.rollback();
-		} catch (TransactionException exc) {
+		} catch (final TransactionException exc) {
 			LOG.error("finishTransaction", exc);
 		}
 	}

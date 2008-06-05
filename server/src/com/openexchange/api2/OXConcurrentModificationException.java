@@ -77,7 +77,7 @@ public class OXConcurrentModificationException extends OXException {
                 
                 
 
-		private ConcurrentModificationCode(final String message, int detailNumber, final Category category) {
+		private ConcurrentModificationCode(final String message, final int detailNumber, final Category category) {
 			this.category = category;
                         this.detailNumber = detailNumber;
 			this.message = message;

@@ -104,6 +104,12 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public final class vcard extends PermissionServlet {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1043665340444383184L;
+
+
 	private final static int[] _contactFields = {
 		DataObject.OBJECT_ID,
 		DataObject.CREATED_BY,
@@ -209,6 +215,7 @@ public final class vcard extends PermissionServlet {
 		
 	}
 	
+	@Override
 	public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("GET");
@@ -368,15 +375,16 @@ public final class vcard extends PermissionServlet {
 					deleteEntry(context, principal_id, Integer.parseInt(s_object_id));
 				}
 			}
-		} catch (OXConflictException exc) {
+		} catch (final OXConflictException exc) {
 			LOG.debug("doGet", exc);
 			doError(resp, HttpServletResponse.SC_CONFLICT, exc.getMessage());
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("doGet", exc);
 			doError(resp);
 		}
 	}
 	
+	@Override
 	public void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("PUT");
@@ -515,7 +523,7 @@ public final class vcard extends PermissionServlet {
 						if (client_id != null && entries_db.containsKey(client_id)) {
 							try {
 								object_id = Integer.parseInt(entries_db.get(client_id).toString());
-							} catch (NumberFormatException exc) {
+							} catch (final NumberFormatException exc) {
 								if (LOG.isDebugEnabled()) {
 									LOG.debug("object id is not an integer");
 								}
@@ -551,7 +559,7 @@ public final class vcard extends PermissionServlet {
 						if (LOG.isDebugEnabled()) {
 							LOG.debug("STATUS: OK");
 						}
-					} catch (OXObjectNotFoundException exc) {
+					} catch (final OXObjectNotFoundException exc) {
 						LOG.debug("object was already deleted on server: " + object_id, exc);
 					}
 				}
@@ -563,26 +571,26 @@ public final class vcard extends PermissionServlet {
 			while (it.hasNext()) {
 				final String tmp = it.next().toString();
 				if (!entries.contains(tmp)) {
-					int object_id = Integer.parseInt(entries_db.get(tmp).toString());
+					final int object_id = Integer.parseInt(entries_db.get(tmp).toString());
 					
 					deleteEntry(context, principal_id, object_id);
 					
 					if (enabledelete) {
 						try {
 							contactInterface.deleteContactObject(object_id, contactfolder_id, timestamp);
-						} catch (OXObjectNotFoundException exc) {
+						} catch (final OXObjectNotFoundException exc) {
 							LOG.debug("object was already deleted on server: " + object_id, exc);
 						}
 					}
 				}
 			}
-		} catch (OXConflictException exc) {
+		} catch (final OXConflictException exc) {
 			LOG.debug("doPut", exc);
 			doError( resp, HttpServletResponse.SC_CONFLICT, exc.getMessage());
-		} catch (OXPermissionException exc) {
+		} catch (final OXPermissionException exc) {
 			LOG.debug("doPut", exc);
 			doError(resp, HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("doPut", exc);
 			doError(resp);
 		}
@@ -614,7 +622,7 @@ public final class vcard extends PermissionServlet {
 		if ( req.getParameter(CONTACTFOLDER) != null) {
 			try {
 				return Integer.parseInt(req.getParameter(CONTACTFOLDER));
-			} catch (NumberFormatException exc) {
+			} catch (final NumberFormatException exc) {
 				throw new OXConflictException(CONTACTFOLDER + " is not a number");
 			}
 		}

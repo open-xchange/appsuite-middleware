@@ -203,7 +203,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                         retval = false;
                     }
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 retval = false;
             } finally {
                 closeSQLStuff(result, stmt);
@@ -223,7 +223,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
             boolean retval = true;
             try {
                 retval = !data.getPooled().isClosed();
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 retval = false;
             }
             return retval;
@@ -234,7 +234,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
         public void destroy(final Connection obj) {
             try {
                 obj.close();
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 LOG.debug("Problem while closing connection.", e);
             }
         }
@@ -277,9 +277,9 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                         LOG.error(dbe.getMessage(), dbe);
                         retval = false;
                     }
-                } catch (RuntimeException e) {
+                } catch (final RuntimeException e) {
                     LOG.error(e.getMessage(), e);
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LOG.error(e.getMessage(), e);
                 }
                 if (data.getTimeDiff() > 2000) {
@@ -291,7 +291,7 @@ public class ConnectionPool extends ReentrantLockPool<Connection> implements
                     	LOG.warn(dbe.getMessage(), dbe);
                     }
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 retval = false;
             }
             return retval;

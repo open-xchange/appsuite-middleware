@@ -59,9 +59,9 @@ import org.apache.commons.logging.LogFactory;
 
 public class FileTemplate extends CompiledLineParserTemplate {
 	private static final Log LOG = LogFactory.getLog(CompiledLineParserTemplate.class);
-	private File file;
+	private final File file;
 	
-	public FileTemplate(File f) {
+	public FileTemplate(final File f) {
 		this.file = f;
 	}
 	
@@ -76,14 +76,14 @@ public class FileTemplate extends CompiledLineParserTemplate {
 				collect.append(line);
 			}
 			return collect.toString().toCharArray();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.debug(e);
 			return e.toString().toCharArray();
 		} finally {
 			if(reader != null) {
 				try {
 					reader.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOG.debug(e);
 				}
 			}

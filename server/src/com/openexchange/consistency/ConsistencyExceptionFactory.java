@@ -48,26 +48,28 @@
  */
 package com.openexchange.consistency;
 
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXExceptionFactory;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class ConsistencyExceptionFactory extends AbstractOXExceptionFactory<ConsistencyException> {
-    protected ConsistencyExceptionFactory(Class<?> clazz) {
+    protected ConsistencyExceptionFactory(final Class<?> clazz) {
         super(clazz);
     }
 
-    protected ConsistencyException buildException(EnumComponent component, AbstractOXException.Category category, int number, String message, Throwable cause, Object... msgArgs) {
+    @Override
+	protected ConsistencyException buildException(final EnumComponent component, final AbstractOXException.Category category, final int number, final String message, final Throwable cause, final Object... msgArgs) {
         if(component != EnumComponent.CONSISTENCY) {
 			throw new IllegalArgumentException("This factory can only build exceptions for the filestore consistency tool.");
 		}
 		return new ConsistencyException(category,number,message,cause,msgArgs);
     }
 
-    protected int getClassId() {
+    @Override
+	protected int getClassId() {
         return ConsistencyClasses.CONSISTENCY_EXCEPTION_FACTORY; 
     }
 }

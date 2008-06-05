@@ -74,75 +74,75 @@ public class Infostore extends OXServlet {
 	}
 	
 	@Override
-	protected void doCopy(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doCopy(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		doIt(req,resp,Action.COPY);
 	}
 
 	@Override
-	protected void doLock(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doLock(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		doIt(req,resp,Action.LOCK);
 	}
 
 	@Override
-	protected void doMkCol(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doMkCol(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		doIt(req,resp,Action.MKCOL);
 	}
 
 	@Override
-	protected void doMove(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doMove(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		doIt(req,resp,Action.MOVE);
 	}
 
 	@Override
-	protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		doIt(req,resp,Action.OPTIONS);
 	}
 
 	@Override
-	protected void doPropFind(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		doIt(req,resp,Action.PROPFIND);
 	}
 
 	@Override
-	protected void doPropPatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doPropPatch(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		doIt(req,resp,Action.PROPPATCH);
 	}
 
 	@Override
-	protected void doUnLock(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doUnLock(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		doIt(req,resp, Action.UNLOCK);
 	}
 	
 	@Override
-	protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doDelete(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		doIt(req,resp, Action.DELETE);
 	}
 
 	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		doIt(req,resp,Action.GET);
 	}
 
 	@Override
-	protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doHead(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		doIt(req,resp,Action.HEAD);
 	}
 
 	@Override
-	protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		doIt(req,resp, Action.PUT);
 	}
 
 	@Override
-	protected void doTrace(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doTrace(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
 		doIt(req,resp,Action.TRACE);
 	}
 
-	private void doIt(HttpServletRequest req, HttpServletResponse resp, Action action) throws ServletException, IOException {
+	private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action) throws ServletException, IOException {
         ServerSession session;
 		try {
 			session = new ServerSessionAdapter(getSession(req));
-		} catch (ContextException exc) {
+		} catch (final ContextException exc) {
 			resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			return;
 		}

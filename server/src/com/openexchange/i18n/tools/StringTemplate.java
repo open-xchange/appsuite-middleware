@@ -51,9 +51,9 @@ package com.openexchange.i18n.tools;
 
 public class StringTemplate extends CompiledLineParserTemplate {
 
-	private String s;
+	private final String s;
 
-	public StringTemplate(String s) {
+	public StringTemplate(final String s) {
 		this.s = s;
 	}
 	

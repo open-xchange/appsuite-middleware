@@ -145,17 +145,17 @@ public class ConfigJump extends SessionServlet {
                 }
             });
             response.setData(url);
-        } catch (ConfigJumpException e) {
+        } catch (final ConfigJumpException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             LOG.error(e.getMessage(), e);
             response.setException(e);
         }
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         try {
             Response.write(response, resp.getWriter());
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             log(RESPONSE_ERROR, e);
             sendError(resp);
         }

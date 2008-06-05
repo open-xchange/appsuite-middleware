@@ -63,7 +63,12 @@ import com.openexchange.tools.webdav.OXServlet;
 
 public abstract class PermissionServlet extends OXServlet {
 
-    public PermissionServlet() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 2572228529208334966L;
+
+	public PermissionServlet() {
         super.httpAuth = false;
     }
     
@@ -75,12 +80,12 @@ public abstract class PermissionServlet extends OXServlet {
         }
 		final Session sessionObj = getSession(req);
 		try{
-			Context ct = ContextStorage.getStorageContext(sessionObj.getContextId());
+			final Context ct = ContextStorage.getStorageContext(sessionObj.getContextId());
 			if (sessionObj != null && !hasModulePermission(sessionObj, ct)) {
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
 				return;
 			}
-		} catch (ContextException ce){
+		} catch (final ContextException ce){
 			return;
 		}
         super.service(req, resp);

@@ -66,13 +66,15 @@ public class OXException extends AbstractOXException {
 	/**
      * @deprecated use constructor with component, category and detailNumber.
 	 */
-    public OXException() {
+    @Deprecated
+	public OXException() {
 		super();
 	}
 
     /**
      * @deprecated use constructor with component, category and detailNumber.
      */
+	@Deprecated
 	public OXException(final String message) {
 		super(message);
 	}
@@ -89,6 +91,7 @@ public class OXException extends AbstractOXException {
     /**
      * @deprecated use constructor with component, category and detailNumber.
      */
+	@Deprecated
 	public OXException(final String message, final Throwable cause) {
 		super(message, cause);
 	}
@@ -96,6 +99,7 @@ public class OXException extends AbstractOXException {
     /**
      * @deprecated use constructor with component, category and detailNumber.
      */
+	@Deprecated
 	public OXException(final EnumComponent component, final String message,
         final Throwable cause) {
 		super(component, message, cause);
@@ -104,6 +108,7 @@ public class OXException extends AbstractOXException {
     /**
      * @deprecated use constructor with component, category and detailNumber.
      */
+	@Deprecated
 	public OXException(final Throwable cause) {
 		super(cause);
 	}
@@ -111,6 +116,7 @@ public class OXException extends AbstractOXException {
     /**
      * @deprecated use constructor with component, category and detailNumber.
      */
+	@Deprecated
 	public OXException(final EnumComponent component, final Exception exc) {
 		super(component, exc);
 	}

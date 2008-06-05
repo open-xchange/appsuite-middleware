@@ -209,7 +209,7 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
         }
         try {
             Class.forName(readDriverClass);
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             throw new ConfigurationException(Code.CLASS_NOT_FOUND, e,
                 readDriverClass);
         }
@@ -224,7 +224,7 @@ public final class ConfigDB extends AbstractConfig implements Initialization {
         }
         try {
             Class.forName(writeDriverClass);
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             throw new ConfigurationException(Code.CLASS_NOT_FOUND, e,
                 writeDriverClass);
         }

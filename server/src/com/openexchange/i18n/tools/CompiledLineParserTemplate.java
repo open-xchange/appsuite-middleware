@@ -69,7 +69,7 @@ public abstract class CompiledLineParserTemplate extends AbstractTemplate {
 		
 		boolean substitute = false;
 		
-		for(String chunk : chunks) {
+		for(final String chunk : chunks) {
 			
 			String substitution = chunk;
 			if(substitute) {

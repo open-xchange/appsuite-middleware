@@ -118,27 +118,27 @@ public abstract class TemplateListResourceBundle extends ResourceBundle{
 				is.close();
 				
 				final File[] templateFiles = templatePath.listFiles(new StartsWithFilter(uniqueName()));
-				for(File template : templateFiles){
+				for(final File template : templateFiles){
 					parseTemplate(template);
 				}
 				
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOG.error(e);
 			} finally {
 				if(is != null) {
 					try {
 						is.close();
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						LOG.debug(e);
 					}
 				}
 			}
 			
-			for(Object key : properties.keySet()) {
+			for(final Object key : properties.keySet()) {
 				keys.add((String)key);
 			}
 			
-			for(String key : templates.keySet()) {
+			for(final String key : templates.keySet()) {
 				if(!keys.contains(key)) {
 					keys.add(key);
 				}
@@ -166,13 +166,13 @@ public abstract class TemplateListResourceBundle extends ResourceBundle{
 				}
 			}
 			templates.put(key,new StringTemplate(templateText.toString()));
-		} catch (IOException x) {
+		} catch (final IOException x) {
 			LOG.error(x);
 		} finally {
 			if(r != null) {
 				try {
 					r.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOG.debug(e);
 				}
 			}
@@ -194,9 +194,9 @@ public abstract class TemplateListResourceBundle extends ResourceBundle{
 	
 	private static final class StartsWithFilter implements FilenameFilter{
 
-		private String name;
+		private final String name;
 
-		public StartsWithFilter(String name) {
+		public StartsWithFilter(final String name) {
 			this.name = name;
 		}
 

@@ -48,11 +48,11 @@
  */
 package com.openexchange.consistency;
 
+import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import javax.management.ObjectName;
-import javax.management.MalformedObjectNameException;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -67,7 +67,7 @@ public class JMXToolkit {
                 name = new ObjectName("com.openexchange.consistency.Consistency", "name", "FilestoreConsistency");
             }
             return name;
-        } catch (MalformedObjectNameException e) {
+        } catch (final MalformedObjectNameException e) {
             LOG.error(e); // Shouldn't happen. The name is nice and correct.
             return null;
         }

@@ -49,10 +49,10 @@
 
 package com.openexchange.authentication.service;
 
-import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.Authenticated;
-import com.openexchange.authentication.LoginInfo;
+import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginException;
+import com.openexchange.authentication.LoginInfo;
 import com.openexchange.server.ServiceException;
 
 /**

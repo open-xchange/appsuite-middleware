@@ -121,7 +121,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
 
     private boolean running = true;
 
-    private int timeBetweenIdleRun = 60000;
+    private final int timeBetweenIdleRun = 60000;
 
     private final PoolImplData<T> data = new PoolImplData<T>();
 
@@ -176,7 +176,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
         this.lifecycle = lifecycle;
         try {
             ensureMinIdle();
-        } catch (PoolingException e) {
+        } catch (final PoolingException e) {
             LOG.error("Problem while creating initial objects.", e);
         }
     }
@@ -300,7 +300,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
                             } else {
                                 data.wait();
                             }
-                        } catch (InterruptedException e) {
+                        } catch (final InterruptedException e) {
                             data.notifyAll();
                         }
                         if (maxWait > 0 && getWaitTime(startTime) > maxWait) {
@@ -321,7 +321,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
                     final T pooled;
                     try {
                         pooled = lifecycle.create();
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
 //                        lock.lock();
 //                        try {
                             data.notifyAll();
@@ -476,7 +476,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
                 final Thread thread = new Thread(SynchronizedPool.this);
                 thread.setName("PoolCleaner");
                 thread.start();
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 LOG.error(e.getMessage(), e);
             }
         }
@@ -507,7 +507,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
         final T pooled;
         try {
             pooled = lifecycle.create();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new PoolingException("Cannot create pooled object.", e);
         }
         back(pooled, false);
@@ -515,7 +515,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
 
     private void createStackTrace(final StringBuilder sb,
         final StackTraceElement[] trace) {
-        for (StackTraceElement e : trace) {
+        for (final StackTraceElement e : trace) {
             sb.append("\tat ");
             sb.append(e);
             sb.append('\n');
@@ -569,7 +569,7 @@ public class SynchronizedPool<T> implements Pool<T>, Runnable {
                     }
                 }
             }
-        } catch (PoolingException e) {
+        } catch (final PoolingException e) {
             LOG.error("Housekeeping problem.", e);
         }
         }

@@ -48,29 +48,36 @@
  */
 package com.openexchange.consistency;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
-import java.io.InputStream;
-import java.io.ByteArrayInputStream;
-
+import com.openexchange.api2.OXException;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.groupware.filestore.FilestoreException;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.filestore.FilestoreException;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tx.TransactionException;
+import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.FileStorageException;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.api2.OXException;
-import com.openexchange.server.impl.DBPoolingException;
 
 /**
  * Provides the Business Logic for the consistency tool. Concrete subclasses must provide integration
@@ -83,23 +90,23 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static final Log LOG = LogFactory.getLog(Consistency.class);
 
-    public List<String> listMissingFilesInContext(int contextId) throws AbstractOXException {
+    public List<String> listMissingFilesInContext(final int contextId) throws AbstractOXException {
         LOG.info("Listing missing files in context "+contextId);
-        DoNothingSolver doNothing = new DoNothingSolver();
-        RecordSolver recorder = new RecordSolver();
-        Context ctx = getContext(contextId);
+        final DoNothingSolver doNothing = new DoNothingSolver();
+        final RecordSolver recorder = new RecordSolver();
+        final Context ctx = getContext(contextId);
         checkOneContext(ctx,recorder,recorder,doNothing,getDatabase(),getAttachments(), getFileStorage(ctx));
         return recorder.getProblems();
     }
 
 
-    public Map<Integer, List<String>> listMissingFilesInFilestore(int filestoreId) throws AbstractOXException {
+    public Map<Integer, List<String>> listMissingFilesInFilestore(final int filestoreId) throws AbstractOXException {
         LOG.info("Listing missing files in filestore "+filestoreId);
         return listMissing(getContextsForFilestore(filestoreId));
     }
 
 
-    public Map<Integer, List<String>> listMissingFilesInDatabase(int databaseId) throws AbstractOXException {
+    public Map<Integer, List<String>> listMissingFilesInDatabase(final int databaseId) throws AbstractOXException {
         LOG.info("List missing files in database "+databaseId);
         return listMissing(getContextsForDatabase(databaseId));
     }
@@ -109,21 +116,21 @@ public abstract class Consistency implements ConsistencyMBean {
         return listMissing(getAllContexts());
     }
 
-    public List<String> listUnassignedFilesInContext(int contextId) throws AbstractOXException {
+    public List<String> listUnassignedFilesInContext(final int contextId) throws AbstractOXException {
         LOG.info("List all unassigned files in context "+contextId);
-        DoNothingSolver doNothing = new DoNothingSolver();
-        RecordSolver recorder = new RecordSolver();
-        Context ctx = getContext(contextId);
+        final DoNothingSolver doNothing = new DoNothingSolver();
+        final RecordSolver recorder = new RecordSolver();
+        final Context ctx = getContext(contextId);
         checkOneContext(ctx,doNothing,doNothing,recorder,getDatabase(),getAttachments(), getFileStorage(ctx));
         return recorder.getProblems();
     }
 
-    public Map<Integer, List<String>> listUnassignedFilesInFilestore(int filestoreId) throws AbstractOXException {
+    public Map<Integer, List<String>> listUnassignedFilesInFilestore(final int filestoreId) throws AbstractOXException {
         LOG.info("List all unassigned files in filestore "+filestoreId);
         return listUnassigned(getContextsForFilestore(filestoreId));
     }
 
-    public Map<Integer, List<String>> listUnassignedFilesInDatabase(int databaseId) throws AbstractOXException {
+    public Map<Integer, List<String>> listUnassignedFilesInDatabase(final int databaseId) throws AbstractOXException {
         LOG.info("List all unassigned files in database "+databaseId);
         return listUnassigned(getContextsForDatabase(databaseId));
     }
@@ -133,22 +140,22 @@ public abstract class Consistency implements ConsistencyMBean {
         return listUnassigned(getAllContexts());
     }
 
-    private Map<Integer, List<String>> listMissing(List<Context> contexts) throws AbstractOXException {
-        Map<Integer, List<String>> retval = new HashMap<Integer, List<String>>();
-        DoNothingSolver doNothing = new DoNothingSolver();
-        for(Context ctx : contexts) {
-            RecordSolver recorder = new RecordSolver();
+    private Map<Integer, List<String>> listMissing(final List<Context> contexts) throws AbstractOXException {
+        final Map<Integer, List<String>> retval = new HashMap<Integer, List<String>>();
+        final DoNothingSolver doNothing = new DoNothingSolver();
+        for(final Context ctx : contexts) {
+            final RecordSolver recorder = new RecordSolver();
             checkOneContext(ctx,recorder,recorder,doNothing,getDatabase(),getAttachments(), getFileStorage(ctx));
             retval.put(ctx.getContextId(), recorder.getProblems());
         }
         return retval;
     }
 
-    private Map<Integer, List<String>> listUnassigned(List<Context> contexts) throws AbstractOXException {
-        Map<Integer, List<String>> retval = new HashMap<Integer, List<String>>();
-        DoNothingSolver doNothing = new DoNothingSolver();
-        for(Context ctx : contexts) {
-            RecordSolver recorder = new RecordSolver();
+    private Map<Integer, List<String>> listUnassigned(final List<Context> contexts) throws AbstractOXException {
+        final Map<Integer, List<String>> retval = new HashMap<Integer, List<String>>();
+        final DoNothingSolver doNothing = new DoNothingSolver();
+        for(final Context ctx : contexts) {
+            final RecordSolver recorder = new RecordSolver();
             checkOneContext(ctx,doNothing,doNothing,recorder,getDatabase(),getAttachments(), getFileStorage(ctx));
             retval.put(ctx.getContextId(), recorder.getProblems());
         }
@@ -158,31 +165,31 @@ public abstract class Consistency implements ConsistencyMBean {
     //Repair
 
 
-    public void repairFilesInContext(int contextId, String resolverPolicy) throws AbstractOXException {
-        List<Context> repairMe = new ArrayList<Context>();
+    public void repairFilesInContext(final int contextId, final String resolverPolicy) throws AbstractOXException {
+        final List<Context> repairMe = new ArrayList<Context>();
         repairMe.add(getContext(contextId));
         repair(repairMe, resolverPolicy);
     }
 
-    public void repairFilesInFilestore(int filestoreId, String resolverPolicy) throws AbstractOXException {
+    public void repairFilesInFilestore(final int filestoreId, final String resolverPolicy) throws AbstractOXException {
         repair(getContextsForFilestore(filestoreId), resolverPolicy);
     }
 
-    public void repairFilesInDatabase(int databaseId, String resolverPolicy) throws AbstractOXException {
+    public void repairFilesInDatabase(final int databaseId, final String resolverPolicy) throws AbstractOXException {
         repair(getContextsForDatabase(databaseId), resolverPolicy);
     }
 
-    public void repairAllFiles(String resolverPolicy) throws AbstractOXException {
+    public void repairAllFiles(final String resolverPolicy) throws AbstractOXException {
         repair(getAllContexts(), resolverPolicy);
     }
 
-    private void repair(List<Context> contexts, String policy) throws AbstractOXException {
-        DatabaseImpl database = getDatabase();
-        AttachmentBase attachments = getAttachments();
-        for(Context ctx : contexts) {
-            FileStorage storage = getFileStorage(ctx);
+    private void repair(final List<Context> contexts, final String policy) throws AbstractOXException {
+        final DatabaseImpl database = getDatabase();
+        final AttachmentBase attachments = getAttachments();
+        for(final Context ctx : contexts) {
+            final FileStorage storage = getFileStorage(ctx);
 
-            ResolverPolicy resolvers = ResolverPolicy.parse(policy,database,attachments,storage,this);
+            final ResolverPolicy resolvers = ResolverPolicy.parse(policy,database,attachments,storage,this);
 
             checkOneContext(ctx,resolvers.dbsolver, resolvers.attachmentsolver, resolvers.filesolver, database,attachments, storage);
 
@@ -204,7 +211,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
 	private void outputSet(final SortedSet<String> set) {
 	    final Iterator<String> itstr = set.iterator();
-	    StringBuilder sb = new StringBuilder();
+	    final StringBuilder sb = new StringBuilder();
         while (itstr.hasNext()) {
 	        sb.append(itstr.next()).append("\n");
 	    }
@@ -227,7 +234,7 @@ public abstract class Consistency implements ConsistencyMBean {
 		return retval;
 	}
 
-	private void checkOneContext(final Context ctx, ProblemSolver dbSolver, ProblemSolver attachmentSolver, ProblemSolver fileSolver, DatabaseImpl database, AttachmentBase attach, FileStorage stor) throws AbstractOXException {
+	private void checkOneContext(final Context ctx, final ProblemSolver dbSolver, final ProblemSolver attachmentSolver, final ProblemSolver fileSolver, final DatabaseImpl database, final AttachmentBase attach, final FileStorage stor) throws AbstractOXException {
 
         // We believe in the worst case, so lets check the storage first, so
 		// that the state file is recreated
@@ -279,18 +286,18 @@ public abstract class Consistency implements ConsistencyMBean {
 				fileSolver.solve(ctx, filestoreset);
         	}
 
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			erroroutput(e);
 		}
 	}
 
-    private void recalculateUsage(FileStorage storage) {
+    private void recalculateUsage(final FileStorage storage) {
         try {
             if (storage instanceof QuotaFileStorage) {
                 output("Recalculating usage...");
                 ((QuotaFileStorage)storage).recalculateUsage();
             }
-        } catch (FileStorageException e) {
+        } catch (final FileStorageException e) {
             erroroutput(e);
         }
     }
@@ -307,26 +314,26 @@ public abstract class Consistency implements ConsistencyMBean {
 
 
     private static final class ResolverPolicy {
-        private ProblemSolver dbsolver;
-        private ProblemSolver attachmentsolver;
-        private ProblemSolver filesolver;
+        private final ProblemSolver dbsolver;
+        private final ProblemSolver attachmentsolver;
+        private final ProblemSolver filesolver;
 
-        public ResolverPolicy(ProblemSolver dbsolver, ProblemSolver attachmentsolver, ProblemSolver filesolver) {
+        public ResolverPolicy(final ProblemSolver dbsolver, final ProblemSolver attachmentsolver, final ProblemSolver filesolver) {
             this.dbsolver = dbsolver;
             this.attachmentsolver = attachmentsolver;
             this.filesolver = filesolver;
         }
 
-        public static ResolverPolicy parse(String list, DatabaseImpl database, AttachmentBase attach, FileStorage stor, Consistency consistency) {
-            String[] options = list.split("\\s*,\\s*");
+        public static ResolverPolicy parse(final String list, final DatabaseImpl database, final AttachmentBase attach, final FileStorage stor, final Consistency consistency) {
+            final String[] options = list.split("\\s*,\\s*");
             ProblemSolver dbsolver = new DoNothingSolver();
             ProblemSolver attachmentsolver = new DoNothingSolver();
             ProblemSolver filesolver = new DoNothingSolver();
 
-            for(String option : options) {
-                String[] tuple = option.split("\\s*:\\s*");
-                String condition = tuple[0];
-                String action = tuple[1];
+            for(final String option : options) {
+                final String[] tuple = option.split("\\s*:\\s*");
+                final String condition = tuple[0];
+                final String action = tuple[1];
                 if(condition.equals("missing_file_for_infoitem")) {
                     if(action.equals("create_dummy")) {
                         dbsolver = new CreateDummyFileForInfoitem(database, stor);
@@ -368,7 +375,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class DoNothingSolver implements ProblemSolver {
 
-        public void solve(Context ctx, Set<String> problems) throws OXException {
+        public void solve(final Context ctx, final Set<String> problems) throws OXException {
             // Ignore
         }
 
@@ -379,9 +386,9 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class RecordSolver implements ProblemSolver {
 
-        private List<String> memory = new ArrayList<String>();
+        private final List<String> memory = new ArrayList<String>();
 
-        public void solve(Context ctx, Set<String> problems) throws OXException {
+        public void solve(final Context ctx, final Set<String> problems) throws OXException {
             memory.addAll(problems);
         }
 
@@ -396,9 +403,9 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class CreateDummyFile {
 
-        private FileStorage storage;
+        private final FileStorage storage;
         
-        public CreateDummyFile(FileStorage storage) {
+        public CreateDummyFile(final FileStorage storage) {
             this.storage = storage;
         }
 
@@ -416,19 +423,19 @@ public abstract class Consistency implements ConsistencyMBean {
     }
 
     private static class CreateDummyFileForInfoitem extends CreateDummyFile implements ProblemSolver {
-        private DatabaseImpl database;
+        private final DatabaseImpl database;
 
-        public CreateDummyFileForInfoitem(DatabaseImpl database, FileStorage storage) {
+        public CreateDummyFileForInfoitem(final DatabaseImpl database, final FileStorage storage) {
             super(storage);
             this.database = database;
         }
 
-        public void solve(Context ctx, Set<String> problems) throws OXException {
+        public void solve(final Context ctx, final Set<String> problems) throws OXException {
             /*
 		    * Here we operate in two stages. First we create a dummy entry in the
 		    * filestore. Second we update the Entries in the database
 		    */
-            for (String old_identifier : problems) {
+            for (final String old_identifier : problems) {
                 try {
                     final String identifier = createDummyFile();
                     database.startTransaction();
@@ -441,20 +448,20 @@ public abstract class Consistency implements ConsistencyMBean {
                                 " in context " + ctx.getContextId() + " to new " +
                                 "dummy identifier " + identifier);
                     }
-                } catch (FileStorageException e) {
+                } catch (final FileStorageException e) {
                     LOG.error("", e);
-                } catch (OXException e) {
+                } catch (final OXException e) {
                     LOG.error("", e);
                     try {
                         database.rollback();
                         return;
-                    } catch (TransactionException e1) {
+                    } catch (final TransactionException e1) {
                         LOG.debug("", e1);
                     }
                 } finally {
                     try {
                         database.finish();
-                    } catch (TransactionException e) {
+                    } catch (final TransactionException e) {
                         LOG.debug("", e);
                     }
                 }
@@ -467,15 +474,15 @@ public abstract class Consistency implements ConsistencyMBean {
     }
 
     private static class CreateDummyFileForAttachment extends CreateDummyFile implements ProblemSolver {
-        private AttachmentBase attachments;
+        private final AttachmentBase attachments;
 
-        public CreateDummyFileForAttachment(AttachmentBase attachments, FileStorage storage) {
+        public CreateDummyFileForAttachment(final AttachmentBase attachments, final FileStorage storage) {
             super(storage);
             this.attachments = attachments;
         }
 
 
-        public void solve(Context ctx, Set<String> problems) throws OXException {
+        public void solve(final Context ctx, final Set<String> problems) throws OXException {
             /*
             * Here we operate in two stages. First we create a dummy entry in the
             * filestore. Second we update the Entries in the database
@@ -495,28 +502,28 @@ public abstract class Consistency implements ConsistencyMBean {
                         LOG.info("Created dummy entry for: " + old_identifier +
                                 ". New identifier is: " + identifier);
                     }
-                } catch (FileStorageException e) {
+                } catch (final FileStorageException e) {
                     LOG.error("", e);
-                } catch (TransactionException e) {
+                } catch (final TransactionException e) {
                     LOG.error("", e);
                     try {
                         attachments.rollback();
                         return;
-                    } catch (TransactionException e1) {
+                    } catch (final TransactionException e1) {
                         LOG.error("", e1);
                     }
-                } catch (OXException e) {
+                } catch (final OXException e) {
                     LOG.error("", e);
                     try {
                         attachments.rollback();
                         return;
-                    } catch (TransactionException e1) {
+                    } catch (final TransactionException e1) {
                         LOG.debug("", e1);
                     }
                 } finally {
                     try {
                         attachments.finish();
-                    } catch (TransactionException e) {
+                    } catch (final TransactionException e) {
                         LOG.debug("", e);
                     }
                 }
@@ -533,13 +540,13 @@ public abstract class Consistency implements ConsistencyMBean {
 
         private FileStorage storage = null;
 
-        public RemoveFile(FileStorage storage) {
+        public RemoveFile(final FileStorage storage) {
             this.storage = storage;
         }
 
-        public void solve(Context ctx, Set<String> problems) throws OXException {
+        public void solve(final Context ctx, final Set<String> problems) throws OXException {
             try {
-                for (String identifier : problems) {
+                for (final String identifier : problems) {
                     if (storage.deleteFile(identifier) == true && LOG.isInfoEnabled()) {
                         LOG.info("Deleted identifier: " + identifier);
                     }
@@ -548,7 +555,7 @@ public abstract class Consistency implements ConsistencyMBean {
 			 * that now new free file slots are available.
 			 */
                 storage.recreateStateFile();
-            } catch (FileStorageException e) {
+            } catch (final FileStorageException e) {
                 LOG.error("", e);
             }
         }
@@ -562,13 +569,13 @@ public abstract class Consistency implements ConsistencyMBean {
 
         private DatabaseImpl database = null;
 
-        public DeleteInfoitem(DatabaseImpl database) {
+        public DeleteInfoitem(final DatabaseImpl database) {
             this.database = database;
         }
 
-        public void solve(Context ctx, Set<String> problems) throws OXException {
+        public void solve(final Context ctx, final Set<String> problems) throws OXException {
             // Now we go through the set an delete each superfluous entry:
-            for (String identifier : problems) {
+            for (final String identifier : problems) {
                 try {
                     database.startTransaction();
                     database.setRequestTransactional(true);
@@ -582,18 +589,18 @@ public abstract class Consistency implements ConsistencyMBean {
                         LOG.info("Deleted entry " + identifier + " from " +
                                 "infostore_documents.");
                     }
-                } catch (OXException e) {
+                } catch (final OXException e) {
                     LOG.error("", e);
                     try {
                         database.rollback();
                         return;
-                    } catch (TransactionException e1) {
+                    } catch (final TransactionException e1) {
                         LOG.debug("", e1);
                     }
                 } finally {
                     try {
                         database.finish();
-                    } catch (TransactionException e) {
+                    } catch (final TransactionException e) {
                         LOG.debug("", e);
                     }
                 }
@@ -606,11 +613,11 @@ public abstract class Consistency implements ConsistencyMBean {
     }
 
     private static class DeleteAttachment implements ProblemSolver {
-        private AttachmentBase attachments;
-        public DeleteAttachment(AttachmentBase attachments) {
+        private final AttachmentBase attachments;
+        public DeleteAttachment(final AttachmentBase attachments) {
             this.attachments = attachments;
         }
-        public void solve(Context ctx, Set<String> problems) throws OXException {
+        public void solve(final Context ctx, final Set<String> problems) throws OXException {
             // Now we go through the set an delete each superfluous entry:
             final Iterator<String> it = problems.iterator();
             while (it.hasNext()) {
@@ -627,28 +634,28 @@ public abstract class Consistency implements ConsistencyMBean {
                     if (numbers[1] == 1 && LOG.isInfoEnabled()) {
                         LOG.info("Removed attachment database entry for: " + identifier);
                     }
-                } catch (TransactionException e) {
+                } catch (final TransactionException e) {
                     LOG.debug("", e);
                     try {
                         attachments.rollback();
                         return;
-                    } catch (TransactionException e1) {
+                    } catch (final TransactionException e1) {
                         LOG.debug("", e1);
                     }
                     return;
-                } catch (OXException e) {
+                } catch (final OXException e) {
                     LOG.error("", e);
                     try {
                         attachments.rollback();
                         return;
-                    } catch (TransactionException e1) {
+                    } catch (final TransactionException e1) {
                         LOG.debug("", e1);
                     }
                     return;
                 } finally {
                     try {
                         attachments.finish();
-                    } catch (TransactionException e) {
+                    } catch (final TransactionException e) {
                         LOG.debug("", e);
                     }
                 }
@@ -662,23 +669,23 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static class CreateInfoitem implements ProblemSolver {
 
-        private String description = "This file needs attention";
-        private String title = "Restoredfile";
-        private String fileName = "Restoredfile";
-        private String versioncomment = "";
-        private String categories = "";
+        private final String description = "This file needs attention";
+        private final String title = "Restoredfile";
+        private final String fileName = "Restoredfile";
+        private final String versioncomment = "";
+        private final String categories = "";
 
-        private DatabaseImpl database;
-        private FileStorage storage;
-        private Consistency consistency;
+        private final DatabaseImpl database;
+        private final FileStorage storage;
+        private final Consistency consistency;
 
-        private CreateInfoitem(DatabaseImpl database, FileStorage storage, Consistency consistency) {
+        private CreateInfoitem(final DatabaseImpl database, final FileStorage storage, final Consistency consistency) {
             this.database = database;
             this.storage = storage;
             this.consistency = consistency;
         }
 
-        public void solve(Context ctx, Set<String> problems) throws OXException {
+        public void solve(final Context ctx, final Set<String> problems) throws OXException {
             try {
                 final User user = consistency.getAdmin(ctx);
                 final DocumentMetadata document = new DocumentMetadataImpl();
@@ -688,7 +695,7 @@ public abstract class Consistency implements ConsistencyMBean {
                 document.setVersionComment(versioncomment);
                 document.setCategories(categories);
 
-                for (String identifier : problems) {
+                for (final String identifier : problems) {
                     try {
                         document.setFileSize(storage.getFileSize(identifier));
                         document.setFileMIMEType(storage.getMimeType(identifier));
@@ -700,32 +707,32 @@ public abstract class Consistency implements ConsistencyMBean {
                                     "created. The admin of this context has now " +
                                     "a new document");
                         }
-                    } catch (FileStorageException e) {
+                    } catch (final FileStorageException e) {
                         LOG.error("", e);
                         try {
                             database.rollback();
                             return;
-                        } catch (TransactionException e1) {
+                        } catch (final TransactionException e1) {
                             LOG.debug("", e1);
                         }
-                    } catch (OXException e) {
+                    } catch (final OXException e) {
                         LOG.error("", e);
                         try {
                             database.rollback();
                             return;
-                        } catch (TransactionException e1) {
+                        } catch (final TransactionException e1) {
                             LOG.debug("", e1);
                         }
                     } finally {
                         try {
                             database.finish();
-                        } catch (TransactionException e) {
+                        } catch (final TransactionException e) {
                             LOG.debug("", e);
                         }
                     }
                 }
 
-            } catch (LdapException e) {
+            } catch (final LdapException e) {
                 LOG.error("", e);
             }
         }

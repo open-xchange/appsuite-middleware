@@ -110,6 +110,11 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 public final class ical extends PermissionServlet {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8198514314235297665L;
+
 	private static final String _doPut = "doPut";
 	
 	private final static int[] _appointmentFields = {
@@ -317,7 +322,7 @@ public final class ical extends PermissionServlet {
 							}
 							
 						}
-					} catch (ConverterException exc) {
+					} catch (final ConverterException exc) {
 						LOG.error("ical.createVEVENT", exc);
 					}
 				}
@@ -345,7 +350,7 @@ public final class ical extends PermissionServlet {
 								entries_module.put(String.valueOf(object_id), String.valueOf(Types.TASK));
 							}
 						}
-					} catch (ConverterException exc) {
+					} catch (final ConverterException exc) {
 						LOG.error("ical.createVTODO", exc);
 					}
 				}
@@ -393,7 +398,7 @@ public final class ical extends PermissionServlet {
 					
 					writeCon.commit();
 				}
-			} catch (SQLException exc) {
+			} catch (final SQLException exc) {
 				writeCon.rollback();
 				throw exc;
 			} finally {
@@ -434,10 +439,10 @@ public final class ical extends PermissionServlet {
 					deleteEntry(context, principal_id, Integer.parseInt(s_object_id));
 				}
 			}
-		} catch (OXConflictException exc) {
+		} catch (final OXConflictException exc) {
 			LOG.debug("ical.doGet", exc);
 			doError(resp, HttpServletResponse.SC_CONFLICT, exc.getMessage());
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error("ical.doGet", exc);
 			doError(resp);
 		}
@@ -586,7 +591,7 @@ public final class ical extends PermissionServlet {
 							if (client_id != null && entries_db.containsKey(client_id)) {
 								try {
 									object_id = Integer.parseInt(entries_db.get(client_id).toString());
-								} catch (NumberFormatException exc) {
+								} catch (final NumberFormatException exc) {
 									if (LOG.isDebugEnabled()) {
 										LOG.debug("object id is not an int");
 									}
@@ -632,7 +637,7 @@ public final class ical extends PermissionServlet {
 							if (client_id != null && entries_db.containsKey(client_id)) {
 								try {
 									object_id = Integer.parseInt(entries_db.get(client_id).toString());
-								} catch (NumberFormatException exc) {
+								} catch (final NumberFormatException exc) {
 									LOG.debug("object id is not an int");
 								}
 								
@@ -673,7 +678,7 @@ public final class ical extends PermissionServlet {
 						} else {
 							LOG.warn("invalid versit object: " + vo.name);
 						}
-					} catch (OXObjectNotFoundException exc) {
+					} catch (final OXObjectNotFoundException exc) {
 						LOG.debug("object was already delete", exc);
 					}
 					
@@ -706,7 +711,7 @@ public final class ical extends PermissionServlet {
 							} else {
 								throw new OXConflictException("unknown module: " + i_module);
 							}
-						} catch (OXObjectNotFoundException exc) {
+						} catch (final OXObjectNotFoundException exc) {
 							LOG.debug("object was already delete", exc);
 						}
 					}
@@ -714,16 +719,16 @@ public final class ical extends PermissionServlet {
 			}
 			
 			resp.setStatus(HttpServletResponse.SC_OK);
-		} catch (OXMandatoryFieldException exc) {
+		} catch (final OXMandatoryFieldException exc) {
 			LOG.debug(_doPut, exc);
 			doError(resp, HttpServletResponse.SC_CONFLICT, exc.getMessage());
-		} catch (OXPermissionException exc) {
+		} catch (final OXPermissionException exc) {
 			LOG.debug(_doPut, exc);
 			doError(resp, HttpServletResponse.SC_FORBIDDEN, exc.getMessage());
-		} catch (OXConflictException exc) {
+		} catch (final OXConflictException exc) {
 			LOG.debug(_doPut, exc);
 			doError(resp, HttpServletResponse.SC_CONFLICT, exc.getMessage());
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			LOG.error(_doPut, exc);
 			doError(resp);
 		}
@@ -741,7 +746,7 @@ public final class ical extends PermissionServlet {
 			resp.setContentType("text/html");
 			final OutputStream os = resp.getOutputStream();
 			os.write(("<html><body>" + msg + "</body></html>").getBytes());
-		} catch (Exception exc) {
+		} catch (final Exception exc) {
 			log("Error while doError --> " + exc);
 			exc.printStackTrace();
 		}
@@ -763,7 +768,7 @@ public final class ical extends PermissionServlet {
 		if ( req.getParameter(CALENDARFOLDER) != null) {
 			try {
 				return Integer.parseInt(req.getParameter(CALENDARFOLDER));
-			} catch (NumberFormatException exc) {
+			} catch (final NumberFormatException exc) {
 				throw new OXConflictException(CALENDARFOLDER + " is not a number");
 			}
 		}
@@ -775,7 +780,7 @@ public final class ical extends PermissionServlet {
 		if ( req.getParameter(TASKFOLDER) != null) {
 			try {
 				return Integer.parseInt(req.getParameter(TASKFOLDER));
-			} catch (NumberFormatException exc) {
+			} catch (final NumberFormatException exc) {
 				throw new OXConflictException(TASKFOLDER + " is not a number");
 			}
 		}
@@ -809,7 +814,7 @@ public final class ical extends PermissionServlet {
 			
 			ps.executeUpdate();
 			writeCon.commit();
-		} catch (SQLException exc) {
+		} catch (final SQLException exc) {
 			if (writeCon != null) {
 				writeCon.rollback();
 			}

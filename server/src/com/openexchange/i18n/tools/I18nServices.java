@@ -86,7 +86,7 @@ public class I18nServices {
 		return 0;
 	}
 	
-	public I18nTools getService(Locale l){
+	public I18nTools getService(final Locale l){
 		if (null != services){
 			return services.get(l);
 		}

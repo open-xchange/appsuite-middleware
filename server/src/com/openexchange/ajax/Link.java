@@ -95,7 +95,7 @@ public class Link extends DataServlet {
 			
 			try {
 				jsonObj = convertParameter2JSONObject(httpServletRequest);
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.error(e.getMessage(), e);
 	            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 	            writeResponse(response, httpServletResponse);
@@ -108,24 +108,24 @@ public class Link extends DataServlet {
 			linkRequest.action(action, jsonObj);
 
 			response.setData(new JSONArray(sw.toString()));
-		} catch (OXConflictException e) {
+		} catch (final OXConflictException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (OXJSONException exc) {
+		} catch (final OXJSONException exc) {
             LOG.error(exc.getMessage(), exc);
             response.setException(exc);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-		} catch (AjaxException e) {
+		} catch (final AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (AbstractOXException e) {
+		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		}
@@ -136,7 +136,7 @@ public class Link extends DataServlet {
 	
 	@Override
 	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
-		Response response = new Response();
+		final Response response = new Response();
 
 		httpServletResponse.setContentType(CONTENTTYPE_JAVASCRIPT);
 		/*
@@ -161,7 +161,7 @@ public class Link extends DataServlet {
 				JSONObject jsonObj;
 				try {
 					jsonObj = convertParameter2JSONObject(httpServletRequest);
-				} catch (JSONException e) {
+				} catch (final JSONException e) {
 					LOG.error(e.getMessage(), e);
 		            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 		            writeResponse(response, httpServletResponse);
@@ -173,30 +173,30 @@ public class Link extends DataServlet {
 				linkRequest.action(action, jsonObj);
 				try {
 					response.setData(new JSONArray(sw.toString()));	
-				} catch (JSONException e) {
+				} catch (final JSONException e) {
 					response.setData(new JSONObject(sw.toString()));
 				}
 			} else {
 				httpServletResponse.sendError(HttpServletResponse.SC_BAD_REQUEST, "no data found");
 			}
-		} catch (OXJSONException exc) {
+		} catch (final OXJSONException exc) {
             LOG.error(exc.getMessage(), exc);
             response.setException(exc);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
             final OXJSONException oje = new OXJSONException(OXJSONException.Code
                 .JSON_WRITE_ERROR, e);
             LOG.error(oje.getMessage(), oje);
             response.setException(oje);
-		} catch (OXConflictException e) {
+		} catch (final OXConflictException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (OXException e) {
+		} catch (final OXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (AjaxException e) {
+		} catch (final AjaxException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
-		} catch (AbstractOXException e) {
+		} catch (final AbstractOXException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
 		}

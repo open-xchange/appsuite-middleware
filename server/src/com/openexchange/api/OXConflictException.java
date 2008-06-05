@@ -59,21 +59,29 @@ import com.openexchange.groupware.AbstractOXException;
 public class OXConflictException extends OXException
 {
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = -1574018963417603578L;
+
+	/**
      * @deprecated use error code handling
      */
+	@Deprecated
 	public OXConflictException() {
 		super();
 	}
     /**
      * @deprecated use error code handling
      */
-	public OXConflictException(String message) {
+	@Deprecated
+	public OXConflictException(final String message) {
 		super(message);
 	}
     /**
      * @deprecated use error code handling
      */
-	public OXConflictException(String message, Exception exc) {
+	@Deprecated
+	public OXConflictException(final String message, final Exception exc) {
 		super(message, exc);
 	}
 

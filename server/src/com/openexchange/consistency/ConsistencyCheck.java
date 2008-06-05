@@ -48,33 +48,34 @@
  */
 package com.openexchange.consistency;
 
-import com.openexchange.groupware.AbstractOXException;
-
-import javax.management.remote.JMXServiceURL;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXConnector;
-import javax.management.ObjectName;
-import javax.management.MBeanServerConnection;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.util.Map;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.io.IOException;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
+
+import com.openexchange.groupware.AbstractOXException;
 
 /**
  * CommandLineClient to run the consistency tool.
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class ConsistencyCheck {
-    public static void main(String[] args) {
-        SimpleLexer lexer = new SimpleLexer(args);
-        Configuration config = new Configuration();
+    public static void main(final String[] args) {
+        final SimpleLexer lexer = new SimpleLexer(args);
+        final Configuration config = new Configuration();
 
         lexer.noise("in");
         if(lexer.consume("host")) {
-            String hostname = lexer.getCurrent();
-            String[] hostAndPort = hostname.split(":");
+            final String hostname = lexer.getCurrent();
+            final String[] hostAndPort = hostname.split(":");
             config.setHost(hostAndPort[0]);
             if(hostAndPort.length > 1) {
                 config.setPort(Integer.parseInt(hostAndPort[1]));
@@ -161,19 +162,19 @@ public class ConsistencyCheck {
         try {
             config.run();
             System.out.println("Done");
-        } catch (Exception x) {
+        } catch (final Exception x) {
             x.printStackTrace();
         }
 
     }
 
 
-    private static boolean parseId(SimpleLexer lexer, Configuration config) {
+    private static boolean parseId(final SimpleLexer lexer, final Configuration config) {
         try {
             config.setSourceId(Integer.parseInt(lexer.getCurrent()));
             lexer.advance();
             return true;
-        } catch (NumberFormatException nfe) {
+        } catch (final NumberFormatException nfe) {
             return false;
         }
     }
@@ -183,12 +184,12 @@ public class ConsistencyCheck {
         return 6;
     }
 
-    private static int unknownAction(String condition, String action, String possibleActions) {
+    private static int unknownAction(final String condition, final String action, final String possibleActions) {
         System.err.println("Unknown action "+action+" for condition "+condition+". I know only "+possibleActions);
         return 5;
     }
 
-    private static int unknownCondition(String condition, String possibleConditions) {
+    private static int unknownCondition(final String condition, final String possibleConditions) {
         System.err.println("Unknown condition "+condition+" I know only about: "+possibleConditions);
         return 4;
     }
@@ -210,10 +211,10 @@ public class ConsistencyCheck {
 
 
     private static class SimpleLexer {
-        private String[] args;
+        private final String[] args;
         private int index;
 
-        public SimpleLexer(String[] args) {
+        public SimpleLexer(final String[] args) {
             this.args = args;
             this.index = 0;
         }
@@ -229,11 +230,11 @@ public class ConsistencyCheck {
             index++;
         }
 
-        public boolean lookahead(String expect) {
+        public boolean lookahead(final String expect) {
             return getCurrent().equals(expect);
         }
 
-        public boolean consume(String expect) {
+        public boolean consume(final String expect) {
             if(lookahead(expect)) {
                 advance();
                 return true;
@@ -242,12 +243,12 @@ public class ConsistencyCheck {
             }
         }
 
-        public boolean lookahead(Pattern p) {
+        public boolean lookahead(final Pattern p) {
             return p.matcher(getCurrent()).find();
         }
 
-        public Matcher consume(Pattern p) {
-            Matcher m = p.matcher(getCurrent());
+        public Matcher consume(final Pattern p) {
+            final Matcher m = p.matcher(getCurrent());
             if(m.find()) {
                 advance();
                 return m;
@@ -256,7 +257,7 @@ public class ConsistencyCheck {
             }
         }
 
-        public void noise(String token) {
+        public void noise(final String token) {
             consume(token);
         }
 
@@ -271,31 +272,31 @@ public class ConsistencyCheck {
         private String action;
         private String source;
         private int sourceId;
-        private Map<String, String> policies = new HashMap<String,String>();
+        private final Map<String, String> policies = new HashMap<String,String>();
         private ConsistencyMBean consistency;
         private JMXConnector jmxConnector;
 
-        public void setHost(String host) {
+        public void setHost(final String host) {
             this.host = host;
         }
 
-        public void setPort(int port) {
+        public void setPort(final int port) {
             this.port = port;
         }
 
-        public void setAction(String action) {
+        public void setAction(final String action) {
             this.action = action;
         }
 
-        public void setSource(String source) {
+        public void setSource(final String source) {
             this.source = source;
         }
 
-        public void setSourceId(int sourceId) {
+        public void setSourceId(final int sourceId) {
             this.sourceId = sourceId;
         }
 
-        public void addPolicy(String condition, String action) {
+        public void addPolicy(final String condition, final String action) {
             if(policies.containsKey(condition)) {
                 throw new IllegalArgumentException("Condition "+condition+" already has an action assigned to it.");
             }
@@ -356,8 +357,8 @@ public class ConsistencyCheck {
         }
 
         private String getPolicyString() {
-            StringBuilder sb = new StringBuilder();
-            for(String condition : policies.keySet()) {
+            final StringBuilder sb = new StringBuilder();
+            for(final String condition : policies.keySet()) {
                 sb.append(condition).append(":").append(policies.get(condition)).append(",");
             }
             sb.setLength(sb.length()-1);
@@ -369,7 +370,7 @@ public class ConsistencyCheck {
                 if(jmxConnector != null) {
                     jmxConnector.close();                     
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 //IGNORE
             }
         }
@@ -380,9 +381,9 @@ public class ConsistencyCheck {
 
             jmxConnector = JMXConnectorFactory.connect(url, null);
 
-            MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
+            final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
 
-            ObjectName name = JMXToolkit.getObjectName();
+            final ObjectName name = JMXToolkit.getObjectName();
 
             consistency = new MBeanConsistency(mbsc, name);
         }
@@ -409,11 +410,11 @@ public class ConsistencyCheck {
             print(result);
         }
 
-        private void print(Map<Integer, List<String>> result) {
-            for(int ctxId : result.keySet()) {
-                List<String> brokenFiles = result.get(ctxId);
+        private void print(final Map<Integer, List<String>> result) {
+            for(final int ctxId : result.keySet()) {
+                final List<String> brokenFiles = result.get(ctxId);
                 System.out.println("I found "+brokenFiles.size()+" problems in context "+ctxId);
-                for (String brokenFile : brokenFiles) {
+                for (final String brokenFile : brokenFiles) {
                     System.out.println("\t"+brokenFile);
                 }
             }

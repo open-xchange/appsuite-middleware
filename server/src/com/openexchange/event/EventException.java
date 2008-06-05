@@ -65,15 +65,15 @@ public class EventException extends Exception
 		super();
 	}
 	
-	public EventException(String message) {
+	public EventException(final String message) {
 		super(message);
 	}
 	
-	public EventException(String message, Exception exc) {
+	public EventException(final String message, final Exception exc) {
 		super(message, exc);
 	}
 	
-	public EventException(Exception exc) {
+	public EventException(final Exception exc) {
 		super(exc);
 	}
 }

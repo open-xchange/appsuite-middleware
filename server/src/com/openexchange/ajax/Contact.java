@@ -128,7 +128,7 @@ public class Contact extends DataServlet {
 				Context ctx = null;
 				try {
 					ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-				} catch (ContextException ct) {
+				} catch (final ContextException ct) {
 					new ContactException(ct);
 				}
 				
@@ -190,6 +190,7 @@ public class Contact extends DataServlet {
 		
 	}
 	
+	@Override
 	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
 		final Response response = new Response();
 		try {
@@ -364,6 +365,7 @@ public class Contact extends DataServlet {
 		
 	}
 	
+	@Override
 	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
 		return UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(),
 				ctx).hasContact();

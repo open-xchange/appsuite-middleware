@@ -58,7 +58,6 @@ import java.util.ResourceBundle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.i18n.I18nTools;
 
 /**
@@ -97,7 +96,7 @@ public class StringHelper {
 		}
 		try {
 			this.serverBundle = ResourceBundle.getBundle(resourceBundle, locale);
-		} catch (MissingResourceException x) {
+		} catch (final MissingResourceException x) {
 			LOG.debug("Cannot find bundle "+resourceBundle+" for Locale "+locale);
 			this.serverBundle = null;
 		}
@@ -123,7 +122,7 @@ public class StringHelper {
                 return key;
             }
             return tool.getLocalized(key);
-       	} catch (MissingResourceException x) {
+       	} catch (final MissingResourceException x) {
 			if (LOG.isInfoEnabled()) {
 				LOG.info("MissingResource for "+locale+". Using default for bundle ");
 			}

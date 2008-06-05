@@ -103,13 +103,13 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.session.Session;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.exceptions.LoggingLogic;
 import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
-import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 public class Infostore extends PermissionServlet {
 
@@ -144,13 +144,13 @@ public class Infostore extends PermissionServlet {
 
 	private static final LoggingLogic LL = LoggingLogic.getLoggingLogic(Infostore.class, LOG);
 
-	private long maxUploadSize = -1;
+	private final long maxUploadSize = -1;
 
 	// TODO: Better error handling
 
 	@Override
 	protected boolean hasModulePermission(final Session session, final Context ctx) {
-        ServerSession sessionObj = new ServerSessionAdapter(session, ctx);
+        final ServerSession sessionObj = new ServerSessionAdapter(session, ctx);
         return InfostoreRequest.hasPermission(UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), sessionObj.getContext()));
 	}
 
@@ -161,7 +161,7 @@ public class Infostore extends PermissionServlet {
         final ServerSession sessionObj;
         try {
             sessionObj = new ServerSessionAdapter(getSessionObject(req));
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             handleOXException(res, e, STR_ERROR, true, JS_FRAGMENT);
             return;
         }
@@ -183,7 +183,7 @@ public class Infostore extends PermissionServlet {
 				final StringWriter w = new StringWriter();
 				try {
 					Response.write(resp, w);
-				} catch (JSONException e) {
+				} catch (final JSONException e) {
 					// shouldn't happen
 					throw new ServletException(e);
 				}
@@ -193,7 +193,7 @@ public class Infostore extends PermissionServlet {
 			int id;
 			try {
 				id = Integer.valueOf(req.getParameter(PARAMETER_ID));
-			} catch (NumberFormatException x) {
+			} catch (final NumberFormatException x) {
 				handleOXException(res, new AbstractOXException("Invalid number"), STR_ERROR, true, JS_FRAGMENT);
 				return;
 			}
@@ -217,7 +217,7 @@ public class Infostore extends PermissionServlet {
 			Response.write(new Response((JSONObject) writer.getObject()), res.getWriter());
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
-		} catch (OXPermissionException e) {
+		} catch (final OXPermissionException e) {
 			LOG.error("Not possible, obviously: " + e.getLocalizedMessage(), e);
 		}
 	}
@@ -228,7 +228,7 @@ public class Infostore extends PermissionServlet {
 		final ServerSession sessionObj;
         try {
             sessionObj = new ServerSessionAdapter(getSessionObject(req));
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             handleOXException(res, e, STR_ERROR, true, JS_FRAGMENT);
             return;
         }
@@ -252,7 +252,7 @@ public class Infostore extends PermissionServlet {
 			}
 		} catch (final JSONException e) {
 			LOG.error(e.getLocalizedMessage(), e);
-		} catch (OXPermissionException e) {
+		} catch (final OXPermissionException e) {
 			LOG.error("Not possible, obviously: " + e.getLocalizedMessage(), e);
 		}
 	}
@@ -264,7 +264,7 @@ public class Infostore extends PermissionServlet {
 		final ServerSession sessionObj;
         try {
             sessionObj = new ServerSessionAdapter(getSessionObject(req));
-        } catch (ContextException e) {
+        } catch (final ContextException e) {
             handleOXException(res, e, STR_ERROR, true, JS_FRAGMENT);
             return;
         }
@@ -312,7 +312,7 @@ public class Infostore extends PermissionServlet {
 
 						try {
 							presentFields = PARSER.findPresentFields(obj);
-						} catch (UnknownMetadataException x) {
+						} catch (final UnknownMetadataException x) {
 							unknownColumn(res, "BODY", x.getColumnId(), true, action);
 							return;
 						}
@@ -331,9 +331,9 @@ public class Infostore extends PermissionServlet {
 					}
 				}
 			}
-		} catch (OXException x) {
+		} catch (final OXException x) {
 			handleOXException(res, x, action, true, null);
-		} catch (UploadException x) {
+		} catch (final UploadException x) {
 			final Response resp = new Response();
 			resp.setException(new AbstractOXException(x.getMessage())); // FIXME
 			try {
@@ -341,16 +341,16 @@ public class Infostore extends PermissionServlet {
 
 				throw new UploadServletException(res, substitute(JS_FRAGMENT, STR_JSON, resp.getJSON().toString(),
 						STR_ACTION, action), x.getMessage(), x);
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.error("Giving up", e);
 			}
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			handleOXException(res, e, action, true, null);
 		}
 	}
 
 	private void checkSize(final long size, final UserSettingMail userSettingMail) throws UploadException {
-		long maxSize = InfostoreConfigUtils.determineRelevantUploadSize(userSettingMail);
+		final long maxSize = InfostoreConfigUtils.determineRelevantUploadSize(userSettingMail);
 		if (maxSize == 0) {
 			return;
 		}
@@ -396,23 +396,23 @@ public class Infostore extends PermissionServlet {
 			infostore.commit();
 			searchEngine.commit();
 
-		} catch (OXException t) {
+		} catch (final OXException t) {
 			rollback(infostore, searchEngine, res, t, ACTION_NEW, true);
 			return;
-		} catch (FileNotFoundException e) {
+		} catch (final FileNotFoundException e) {
 			rollback(infostore, searchEngine, res, e, ACTION_NEW, true);
 			return;
 		} finally {
 			try {
 				infostore.finish();
 				searchEngine.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 			if (in != null) {
 				try {
 					in.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOG.debug("", e);
 				}
 			}
@@ -426,21 +426,21 @@ public class Infostore extends PermissionServlet {
 			w.print(substitute(JS_FRAGMENT, STR_JSON, obj.toString(), STR_ACTION, ACTION_NEW));
 
 			w.flush();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.debug("", e);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.debug("", e);
 		} finally {
 			close(w);
 		}
 	}
 
-	protected void update(final HttpServletResponse res, final int id, DocumentMetadata updated, final long timestamp,
+	protected void update(final HttpServletResponse res, final int id, final DocumentMetadata updated, final long timestamp,
 			final Metadata[] presentFields, final UploadFile upload, final Context ctx, final User user,
 			final UserConfiguration userConfig, final ServerSession sessionObj) {
 
 		boolean version = false;
-		for (Metadata m : presentFields) {
+		for (final Metadata m : presentFields) {
 			if (m.equals(Metadata.VERSION_LITERAL)) {
 				version = true;
 				break;
@@ -470,17 +470,17 @@ public class Infostore extends PermissionServlet {
 			infostore.commit();
 			searchEngine.commit();
 
-		} catch (OXException t) {
+		} catch (final OXException t) {
 			rollback(infostore, null, res, t, ACTION_UPDATE, true);
 			return;
-		} catch (FileNotFoundException e) {
+		} catch (final FileNotFoundException e) {
 			rollback(infostore, null, res, e, ACTION_UPDATE, true);
 			return;
 		} finally {
 			try {
 				infostore.finish();
 				searchEngine.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 
@@ -491,7 +491,7 @@ public class Infostore extends PermissionServlet {
 			w = res.getWriter();
 			w.write(substitute(JS_FRAGMENT, STR_JSON, "{}", STR_ACTION, ACTION_UPDATE));
 			close(w);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.warn(e);
 		}
 	}
@@ -516,7 +516,7 @@ public class Infostore extends PermissionServlet {
 
 			final SetSwitch set = new SetSwitch(metadata);
 			final GetSwitch get = new GetSwitch(updated);
-			for (Metadata field : presentFields) {
+			for (final Metadata field : presentFields) {
 				final Object value = field.doSwitch(get);
 				set.setValue(value);
 				field.doSwitch(set);
@@ -539,17 +539,17 @@ public class Infostore extends PermissionServlet {
 
 			infostore.commit();
 			searchEngine.commit();
-		} catch (OXException t) {
+		} catch (final OXException t) {
 			rollback(infostore, searchEngine, res, t, ACTION_COPY, true);
 			return;
-		} catch (FileNotFoundException e) {
+		} catch (final FileNotFoundException e) {
 			rollback(infostore, searchEngine, res, e, ACTION_COPY, true);
 			return;
 		} finally {
 			try {
 				infostore.finish();
 				searchEngine.finish();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.debug("", e);
 			}
 
@@ -562,9 +562,9 @@ public class Infostore extends PermissionServlet {
 			obj.put(Response.DATA, metadata.getId());
 			w.print(substitute(JS_FRAGMENT, STR_JSON, obj.toString(), STR_ACTION, ACTION_NEW));
 			w.flush();
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			LOG.debug("", e);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.debug("", e);
 		} finally {
 			close(w);
@@ -572,7 +572,7 @@ public class Infostore extends PermissionServlet {
 	}
 
 	protected void document(final HttpServletResponse res, final boolean ie, final boolean ie7, final int id,
-			final int version, String contentType, final Context ctx, final User user,
+			final int version, final String contentType, final Context ctx, final User user,
 			final UserConfiguration userConfig) throws IOException {
 		final InfostoreFacade infostore = getInfostore();
 		OutputStream os = null;
@@ -607,7 +607,7 @@ public class Infostore extends PermissionServlet {
 			}
 			os = null;
 
-		} catch (OXException x) {
+		} catch (final OXException x) {
 			LOG.debug(x.getMessage(), x);
 			handleOXException(res, x, STR_ERROR, true, JS_FRAGMENT);
 			return;
@@ -616,19 +616,19 @@ public class Infostore extends PermissionServlet {
 			if (os != null) {
 				try {
 					os.flush();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOG.debug("", e);
 				}
 				try {
 					os.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOG.debug("", e);
 				}
 			}
 			if (documentData != null) {
 				try {
 					documentData.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOG.debug("", e);
 				}
 			}
@@ -655,9 +655,9 @@ public class Infostore extends PermissionServlet {
 							substitute(fragmentOverride != null ? fragmentOverride : JS_FRAGMENT, STR_JSON, writer
 									.toString(), STR_ACTION, action));
 				}
-			} catch (JSONException e) {
+			} catch (final JSONException e) {
 				LOG.error("", t);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOG.error("", e);
 			}
 
@@ -670,7 +670,7 @@ public class Infostore extends PermissionServlet {
 
 	protected void sendErrorAsJS(final PrintWriter w, final String error, final String... errorParams) {
 		final StringBuilder commaSeperatedErrorParams = new StringBuilder();
-		for (String param : errorParams) {
+		for (final String param : errorParams) {
 			commaSeperatedErrorParams.append('"');
 			commaSeperatedErrorParams.append(param);
 			commaSeperatedErrorParams.append('"');
@@ -692,13 +692,13 @@ public class Infostore extends PermissionServlet {
 	// Helpers
 
 	protected int[] parseIDList(final JSONArray array) throws JSONException {
-		int[] ids = new int[array.length()];
+		final int[] ids = new int[array.length()];
 
 		for (int i = 0; i < array.length(); i++) {
 			final JSONObject tuple = array.getJSONObject(i);
 			try {
 				ids[i] = tuple.getInt(PARAMETER_ID);
-			} catch (JSONException x) {
+			} catch (final JSONException x) {
 				ids[i] = Integer.parseInt(tuple.getString(PARAMETER_ID));
 			}
 		}
@@ -722,14 +722,14 @@ public class Infostore extends PermissionServlet {
 		if (infostore != null) {
 			try {
 				infostore.rollback();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.error("", e);
 			}
 		}
 		if (searchEngine != null) {
 			try {
 				searchEngine.rollback();
-			} catch (TransactionException e) {
+			} catch (final TransactionException e) {
 				LOG.error("", e);
 			}
 		}
@@ -737,7 +737,7 @@ public class Infostore extends PermissionServlet {
 			try {
 				sendErrorAsJSHTML(res, t.toString(), action);
 				LOG.error("Got non OXException", t);
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				LOG.error(e);
 			}
 		}

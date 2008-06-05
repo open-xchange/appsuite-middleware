@@ -70,7 +70,7 @@ public final class Arrays {
      */
     public static boolean contains(final int[] array, final int search) {
         boolean found = false;
-        for (int test : array) {
+        for (final int test : array) {
             if (test == search) {
                 found = true;
                 break;

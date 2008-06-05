@@ -49,24 +49,29 @@
 package com.openexchange.consistency;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.groupware.EnumComponent;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class ConsistencyException extends OXException{
 
-	public ConsistencyException(Category category, int id, String message, Throwable cause, Object...msgParams){
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7267166737371982709L;
+
+	public ConsistencyException(final Category category, final int id, final String message, final Throwable cause, final Object...msgParams){
 		super(EnumComponent.CONSISTENCY, category, id, message,cause);
 		setMessageArgs(msgParams);
 	}
 
-	public ConsistencyException(Category category, String message, int id, Object...msgParams){
+	public ConsistencyException(final Category category, final String message, final int id, final Object...msgParams){
 		this(category,id,message, null,msgParams);
 	}
 
-	public ConsistencyException(AbstractOXException e1) {
+	public ConsistencyException(final AbstractOXException e1) {
 		super(e1);
 	}
 

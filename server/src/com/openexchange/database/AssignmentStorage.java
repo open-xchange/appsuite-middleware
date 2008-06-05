@@ -69,7 +69,6 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.impl.DBPoolingException.Code;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * Reads assignments from the database, maybe stores them in a cache for faster
@@ -133,7 +132,7 @@ public final class AssignmentStorage {
 					retval = loadAssignment(contextId);
 					try {
 						cache.putSafe(key, retval);
-					} catch (CacheException e) {
+					} catch (final CacheException e) {
 						LOG.error("Cannot put database assignment into cache.", e);
 					}
 				}
@@ -162,7 +161,7 @@ public final class AssignmentStorage {
 				throw new DBPoolingException(Code.RESOLVE_FAILED, Integer.valueOf(contextId), Integer.valueOf(Server
 						.getServerId()));
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
 		} finally {
 			closeSQLStuff(result, stmt);
@@ -187,7 +186,7 @@ public final class AssignmentStorage {
 			while (result.next()) {
 				retval.add(Integer.valueOf(result.getInt(1)));
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw new DBPoolingException(Code.SQL_ERROR, e, e.getMessage());
 		} finally {
 			closeSQLStuff(result, stmt);
@@ -208,7 +207,7 @@ public final class AssignmentStorage {
 		if (null != cache) {
 			try {
 				cache.remove(cache.newCacheKey(contextId, Integer.valueOf(Server.getServerId())));
-			} catch (CacheException e) {
+			} catch (final CacheException e) {
 				LOG.error(e.getMessage(), e);
 			}
 		}
@@ -240,7 +239,7 @@ public final class AssignmentStorage {
 		this.cacheService = service;
 		try {
 			this.cache = service.getCache(CACHE_NAME);
-		} catch (CacheException e) {
+		} catch (final CacheException e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}
@@ -250,7 +249,7 @@ public final class AssignmentStorage {
 		if (null != cache) {
 			try {
 				cache.clear();
-			} catch (CacheException e) {
+			} catch (final CacheException e) {
 				LOG.error(e.getMessage(), e);
 			}
 			cache = null;
