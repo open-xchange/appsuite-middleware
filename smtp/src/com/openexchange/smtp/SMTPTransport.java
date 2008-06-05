@@ -115,9 +115,9 @@ public final class SMTPTransport extends MailTransport {
 
 	private static final String CHARENC_ISO_8859_1 = "ISO-8859-1";
 
-	private final Queue<Runnable> pendingInvocations = new ConcurrentLinkedQueue<Runnable>();
+	private final Queue<Runnable> pendingInvocations;
 
-	private javax.mail.Session smtpSession;
+	private volatile javax.mail.Session smtpSession;
 
 	private final Session session;
 
@@ -125,7 +125,7 @@ public final class SMTPTransport extends MailTransport {
 
 	private final UserSettingMail usm;
 
-	private SMTPConfig smtpConfig;
+	private volatile SMTPConfig smtpConfig;
 
 	protected SMTPTransport() {
 		super();
@@ -133,6 +133,7 @@ public final class SMTPTransport extends MailTransport {
 		session = null;
 		ctx = null;
 		usm = null;
+		pendingInvocations = new ConcurrentLinkedQueue<Runnable>();
 	}
 
 	private static final String PROPERTY_SECURITY_PROVIDER = "ssl.SocketFactory.provider";
@@ -149,6 +150,7 @@ public final class SMTPTransport extends MailTransport {
 	 */
 	public SMTPTransport(final Session session) throws MailException {
 		super();
+		pendingInvocations = new ConcurrentLinkedQueue<Runnable>();
 		this.session = session;
 		if (session == null) {
 			/*
@@ -179,8 +181,11 @@ public final class SMTPTransport extends MailTransport {
 	 * Executes all tasks queued for execution
 	 */
 	private void doInvocations() {
-		for (final Iterator<Runnable> iter = pendingInvocations.iterator(); iter.hasNext();) {
-			iter.next().run();
+		while (!pendingInvocations.isEmpty()) {
+			final Runnable task = pendingInvocations.poll();
+			if (null != task) {
+				task.run();
+			}
 		}
 	}
 
@@ -197,41 +202,50 @@ public final class SMTPTransport extends MailTransport {
 
 	private javax.mail.Session getSMTPSession() throws MailException {
 		if (null == smtpSession) {
-			final Properties smtpProps = SMTPSessionProperties.getDefaultSessionProperties();
-			final SMTPConfig smtpConfig = getTransportConfig();
-			/*
-			 * Check if a secure SMTP connection should be established
-			 */
-			if (smtpConfig.isSecure()) {
-				smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS, CLASSNAME_SECURITY_FACTORY);
-				smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_PORT, String.valueOf(smtpConfig
-						.getPort()));
-				smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK, "false");
-				smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_STARTTLS_ENABLE, "true");
-				/*
-				 * Specify protocols
-				 */
-				smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SSL_PROTOCOLS, "SSLv3 TLSv1");
-				smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SSL, "true");
+			synchronized (this) {
+				if (null == smtpSession) {
+					final Properties smtpProps = SMTPSessionProperties.getDefaultSessionProperties();
+					final SMTPConfig smtpConfig = getTransportConfig();
+					/*
+					 * Check if a secure SMTP connection should be established
+					 */
+					if (smtpConfig.isSecure()) {
+						smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_CLASS,
+								CLASSNAME_SECURITY_FACTORY);
+						smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_PORT, String
+								.valueOf(smtpConfig.getPort()));
+						smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SOCKET_FACTORY_FALLBACK, "false");
+						smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_STARTTLS_ENABLE, "true");
+						/*
+						 * Specify protocols
+						 */
+						smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SSL_PROTOCOLS, "SSLv3 TLSv1");
+						smtpProps.put(MIMESessionPropertyNames.PROP_MAIL_SMTP_SSL, "true");
 
-				/*
-				 * Needed for JavaMail >= 1.4
-				 */
-				Security.setProperty(PROPERTY_SECURITY_PROVIDER, CLASSNAME_SECURITY_FACTORY);
+						/*
+						 * Needed for JavaMail >= 1.4
+						 */
+						Security.setProperty(PROPERTY_SECURITY_PROVIDER, CLASSNAME_SECURITY_FACTORY);
+					}
+					/*
+					 * Apply host & port to SMTP session
+					 */
+					smtpProps.put(MIMESessionPropertyNames.PROP_SMTPHOST, smtpConfig.getServer());
+					smtpProps.put(MIMESessionPropertyNames.PROP_SMTPPORT, String.valueOf(smtpConfig.getPort()));
+					smtpSession = javax.mail.Session.getInstance(smtpProps, null);
+				}
 			}
-			/*
-			 * Apply host & port to SMTP session
-			 */
-			smtpProps.put(MIMESessionPropertyNames.PROP_SMTPHOST, smtpConfig.getServer());
-			smtpProps.put(MIMESessionPropertyNames.PROP_SMTPPORT, String.valueOf(smtpConfig.getPort()));
-			smtpSession = javax.mail.Session.getInstance(smtpProps, null);
 		}
 		return smtpSession;
 	}
 
 	private SMTPConfig getTransportConfig() throws MailException {
 		if (smtpConfig == null) {
-			smtpConfig = TransportConfig.getTransportConfig(SMTPConfig.class, new SMTPConfig(), session);
+			synchronized (this) {
+				if (smtpConfig == null) {
+					smtpConfig = TransportConfig.getTransportConfig(SMTPConfig.class, new SMTPConfig(), session);
+				}
+			}
 		}
 		return smtpConfig;
 	}
