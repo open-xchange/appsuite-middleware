@@ -137,7 +137,11 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
 		/*
 		 * Add previous charset provider
 		 */
-		collectionCharsetProvider = new CollectionCharsetProvider((CharsetProvider) extendedProviderField.get(null));
+		if (null == backupCharsetProvider) {
+		    collectionCharsetProvider = new CollectionCharsetProvider();
+		} else {
+		    collectionCharsetProvider = new CollectionCharsetProvider((CharsetProvider) extendedProviderField.get(null));
+		}
 		/*
 		 * Reinitialize field
 		 */

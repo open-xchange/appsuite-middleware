@@ -1,3 +1,7 @@
+* 2008-06-05 - marcus.klein@open-xchange.com
+
+ - Bugfix #11348: Extended charset provider may be null.
+
 * 2008-06-05 - thorben.betten@open-xchange.com
 
  - Bugfix #11346: Fixed adding of direct links which got messed by tidy's
