@@ -268,14 +268,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 	}
 
 	@Override
-	public SearchIterator<?> getAllMessages(final String folder, final int sortCol, final int order, final int[] fields)
-			throws MailException {
-		return getMessages(folder, null, sortCol, order, null, null, false, fields);
+	public SearchIterator<?> getAllMessages(final String folder, final int sortCol, final int order,
+			final int[] fields, final int[] fromToIndices) throws MailException {
+		return getMessages(folder, fromToIndices, sortCol, order, null, null, false, fields);
 	}
 
 	@Override
-	public SearchIterator<?> getAllThreadedMessages(final String folder, final int[] fields) throws MailException {
-		return getThreadedMessages(folder, null, null, null, false, fields);
+	public SearchIterator<?> getAllThreadedMessages(final String folder, final int[] fields, final int[] fromToIndices)
+			throws MailException {
+		return getThreadedMessages(folder, fromToIndices, null, null, false, fields);
 	}
 
 	@Override

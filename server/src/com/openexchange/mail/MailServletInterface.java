@@ -153,8 +153,8 @@ public abstract class MailServletInterface {
 	 * Returns an instance of <code>SearchIterator</code> containing all
 	 * messages located in given folder.
 	 */
-	public abstract SearchIterator<?> getAllMessages(String folder, int sortCol, int order, int[] fields)
-			throws MailException;
+	public abstract SearchIterator<?> getAllMessages(String folder, int sortCol, int order, int[] fields,
+			int[] fromToIndices) throws MailException;
 
 	/**
 	 * Returns an instance of <code>SearchIterator</code> containing a selection
@@ -171,7 +171,8 @@ public abstract class MailServletInterface {
 	 * Returns a thread-view-sorted instance of <code>SearchIterator</code>
 	 * containing all messages located in given folder.
 	 */
-	public abstract SearchIterator<?> getAllThreadedMessages(String folder, int[] fields) throws MailException;
+	public abstract SearchIterator<?> getAllThreadedMessages(String folder, int[] fields, int[] fromToIndices)
+			throws MailException;
 
 	/**
 	 * Returns a thread-view-sorted instance of <code>SearchIterator</code>
