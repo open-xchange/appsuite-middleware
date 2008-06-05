@@ -597,6 +597,10 @@ public final class HTMLProcessing {
 		tidy.setTidyMark(false);
 		tidy.setXmlOut(true);
 		tidy.setNumEntities(true);
+		tidy.setDropEmptyParas(false);
+		tidy.setDropFontTags(false);
+		tidy.setDropProprietaryAttributes(false);
+		tidy.setTrimEmptyElements(false);
 		/*
 		 * Suppress tidy outputs
 		 */
@@ -634,6 +638,10 @@ public final class HTMLProcessing {
 			tidy.setTidyMark(false);
 			tidy.setXmlOut(true);
 			tidy.setNumEntities(true);
+			tidy.setDropEmptyParas(false);
+			tidy.setDropFontTags(false);
+			tidy.setDropProprietaryAttributes(false);
+			tidy.setTrimEmptyElements(false);
 			/*
 			 * Suppress tidy outputs
 			 */
