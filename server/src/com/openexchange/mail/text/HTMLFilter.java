@@ -156,8 +156,8 @@ public final class HTMLFilter {
 		 *            <code>true</code> to write a simple tag; otherwise
 		 *            <code>false</code>
 		 * @param attribs
-		 *            The allowed tag's attributes or <code>null</code> to
-		 *            refer to default allowed attributes
+		 *            The allowed tag's attributes or <code>null</code> to refer
+		 *            to default allowed attributes
 		 */
 		private void addStartTag(final HTML.Tag tag, final MutableAttributeSet a, final boolean simple,
 				final Set<String> attribs) {
@@ -194,7 +194,7 @@ public final class HTMLFilter {
 			if (null != doctype) {
 				htmlBuilder.insert(0, doctype);
 			}
-			return prettyPrint(htmlBuilder.toString(), "UTF-8");
+			return prettyPrint(htmlBuilder.toString());
 		}
 
 		@Override
@@ -448,7 +448,7 @@ public final class HTMLFilter {
 	 * @param blacklist
 	 *            The black list's string representation; e.g.
 	 * 
-	 * <pre>
+	 *            <pre>
 	 * a[name|href|target|title|onclick],img[src|alt|title|hspace|vspace|width|height|align|name],...
 	 * </pre>
 	 * 
@@ -495,7 +495,7 @@ public final class HTMLFilter {
 	 * @param whitelist
 	 *            The white list's string representation; e.g.
 	 * 
-	 * <pre>
+	 *            <pre>
 	 * a[name|href|target|title|onclick],img[src|alt|title|hspace|vspace|width|height|align|name],...
 	 * </pre>
 	 * 

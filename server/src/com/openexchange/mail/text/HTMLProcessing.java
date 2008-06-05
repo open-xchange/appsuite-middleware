@@ -91,6 +91,8 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class HTMLProcessing {
 
+	private static final String CHARSET_US_ASCII = "US-ASCII";
+
 	/**
 	 * Performs all the formatting for text content for a proper display
 	 * according to specified user's mail settings.
@@ -183,7 +185,7 @@ public final class HTMLProcessing {
 	public static String formatContentForDisplay(final String content, final String charset, final boolean isHtml,
 			final String secretCookieID, final MailPath mailPath, final UserSettingMail usm, final boolean[] modified,
 			final DisplayMode mode) {
-		String retval = isHtml ? getConformHTML(content, charset == null ? "UTF-8" : charset) : content;
+		String retval = isHtml ? getConformHTML(content, charset == null ? CHARSET_US_ASCII : charset) : content;
 		if (isHtml) {
 			if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
 				/*
@@ -352,9 +354,9 @@ public final class HTMLProcessing {
 			if (LOG.isWarnEnabled()) {
 				LOG.warn("Missing charset. Using fallback \"US-ASCII\" instead.");
 			}
-			cs = "US-ASCII";
+			cs = CHARSET_US_ASCII;
 		}
-		htmlContent = validate(htmlContentArg, cs);
+		htmlContent = validate(htmlContentArg);
 		/*
 		 * Check for meta tag in validated html content which indicates
 		 * documents content type. Add if missing.
@@ -578,11 +580,9 @@ public final class HTMLProcessing {
 	 * 
 	 * @param htmlContent
 	 *            The HTML content
-	 * @param charset
-	 *            The character set encoding used for output
 	 * @return The validated HTML content
 	 */
-	public static String validate(final String htmlContent, final String charset) {
+	public static String validate(final String htmlContent) {
 		/*
 		 * Obtain a new Tidy instance
 		 */
@@ -593,7 +593,10 @@ public final class HTMLProcessing {
 		tidy.setXHTML(true);
 		tidy.setConfigurationFromProps(getTidyConfiguration());
 		tidy.setForceOutput(true);
-		tidy.setOutputEncoding(charset);
+		tidy.setOutputEncoding(CHARSET_US_ASCII);
+		tidy.setTidyMark(false);
+		tidy.setXmlOut(true);
+		tidy.setNumEntities(true);
 		/*
 		 * Suppress tidy outputs
 		 */
@@ -613,11 +616,9 @@ public final class HTMLProcessing {
 	 * 
 	 * @param htmlContent
 	 *            The HTML content
-	 * @param charset
-	 *            The character set encoding
 	 * @return Pretty printed HTML content
 	 */
-	public static String prettyPrint(final String htmlContent, final String charset) {
+	public static String prettyPrint(final String htmlContent) {
 		try {
 			/*
 			 * Obtain a new Tidy instance
@@ -629,7 +630,10 @@ public final class HTMLProcessing {
 			tidy.setXHTML(true);
 			tidy.setConfigurationFromProps(getTidyConfiguration());
 			tidy.setForceOutput(true);
-			tidy.setOutputEncoding(charset);
+			tidy.setOutputEncoding(CHARSET_US_ASCII);
+			tidy.setTidyMark(false);
+			tidy.setXmlOut(true);
+			tidy.setNumEntities(true);
 			/*
 			 * Suppress tidy outputs
 			 */
@@ -640,8 +644,8 @@ public final class HTMLProcessing {
 			 * Pretty print document
 			 */
 			final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(htmlContent.length());
-			tidy.parseDOM(new UnsynchronizedByteArrayInputStream(htmlContent.getBytes(charset)), out);
-			return new String(out.toByteArray(), charset);
+			tidy.parseDOM(new UnsynchronizedByteArrayInputStream(htmlContent.getBytes(CHARSET_US_ASCII)), out);
+			return new String(out.toByteArray(), CHARSET_US_ASCII);
 		} catch (final UnsupportedEncodingException e) {
 			LOG.error(e.getMessage(), e);
 			return htmlContent;
