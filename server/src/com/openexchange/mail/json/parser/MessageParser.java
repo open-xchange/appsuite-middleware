@@ -438,7 +438,7 @@ public final class MessageParser {
 			try {
 				final MailMessageParser parser = new MailMessageParser();
 				final MailPartHandler handler = new MailPartHandler(ROOT);
-				for (int i = 1; i < len; i++) {
+				NextAttachment: for (int i = 1; i < len; i++) {
 					final JSONObject attachment = ja.getJSONObject(i);
 					/*
 					 * Prefer MSGREF from attachment if present, otherwise get
@@ -453,6 +453,13 @@ public final class MessageParser {
 					} else {
 						msgref = transportMail.getMsgref();
 						isMail = false;
+					}
+					if (null == msgref) {
+						/*
+						 * Huh...? Not possible to load referenced parts without
+						 * a referenced mail
+						 */
+						continue NextAttachment;
 					}
 					final MailMessage referencedMail = access.getMessageStorage().getMessage(msgref.getFolder(),
 							msgref.getUid(), false);
