@@ -60,7 +60,7 @@ import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 
 /**
- * {@link AbstractIMAPCommand}
+ * {@link AbstractIMAPCommand} - Abstract class for an IMAP command.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
