@@ -62,7 +62,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
 /**
- * AJPv13Config
+ * {@link AJPv13Config} - The AJPv13 configuration
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -74,16 +74,14 @@ public final class AJPv13Config implements Initialization {
 
 	private static final String AJP_PROP_FILE = "AJPPROPERTIES";
 
-	private static AJPv13Config instance = new AJPv13Config();
-
-	private static AtomicBoolean started = new AtomicBoolean();
+	private static final AJPv13Config instance = new AJPv13Config();
 
 	public static AJPv13Config getInstance() {
 		return instance;
 	}
 
 	// fields
-	private AtomicBoolean initialized = new AtomicBoolean();
+	private final AtomicBoolean started = new AtomicBoolean();
 
 	private int serverThreadSize = 20;
 
@@ -126,27 +124,22 @@ public final class AJPv13Config implements Initialization {
 	private boolean logForwardRequest;
 
 	public void start() throws AbstractOXException {
-		if (started.get()) {
+		if (!started.compareAndSet(false, true)) {
 			LOG.error(this.getClass().getName() + " already started");
 			return;
 		}
 		init();
-		started.set(true);
 	}
 
 	public void stop() throws AbstractOXException {
-		if (!started.get()) {
+		if (!started.compareAndSet(true, false)) {
 			LOG.error(this.getClass().getName() + " cannot be stopped since it has no been started before");
 			return;
 		}
 		reset();
-		started.set(false);
 	}
 
 	private void reset() {
-		if (!initialized.get()) {
-			return;
-		}
 		serverThreadSize = 20;
 		listenerPoolSize = 20;
 		listenerReadTimeout = 60000;
@@ -167,16 +160,9 @@ public final class AJPv13Config implements Initialization {
 		servletConfigs = null;
 		ajpBindAddr = null;
 		logForwardRequest = false;
-		/*
-		 * Switch flag
-		 */
-		initialized.set(false);
 	}
 
 	private void init() throws AJPv13Exception {
-		if (initialized.get()) {
-			return;
-		}
 		final Properties ajpProperties = new Properties();
 		final String ajpPropFile = SystemConfig.getProperty(AJP_PROP_FILE);
 		if (ajpPropFile != null) {
@@ -323,10 +309,6 @@ public final class AJPv13Config implements Initialization {
 				 */
 				logForwardRequest = trueStr.equalsIgnoreCase(ajpProperties.getProperty("AJP_LOG_FORWARD_REQUEST",
 						falseStr).trim());
-				/*
-				 * Switch flag
-				 */
-				initialized.set(true);
 				/*
 				 * Log info
 				 */
