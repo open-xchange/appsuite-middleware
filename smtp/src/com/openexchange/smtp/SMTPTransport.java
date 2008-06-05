@@ -59,7 +59,6 @@ import java.io.UnsupportedEncodingException;
 import java.security.Security;
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Queue;
