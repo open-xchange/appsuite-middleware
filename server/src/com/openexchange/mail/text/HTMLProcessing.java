@@ -586,6 +586,16 @@ public final class HTMLProcessing {
 		/*
 		 * Obtain a new Tidy instance
 		 */
+		final Tidy tidy = createNewTidyInstance();
+		/*
+		 * Run tidy, providing an input and output stream
+		 */
+		final StringWriter writer = new StringWriter(htmlContent.length());
+		tidy.parse(new StringReader(htmlContent), writer);
+		return writer.toString();
+	}
+
+	private static Tidy createNewTidyInstance() {
 		final Tidy tidy = new Tidy();
 		/*
 		 * Set desired configuration options using tidy setters
@@ -607,12 +617,7 @@ public final class HTMLProcessing {
 		tidy.setShowErrors(0);
 		tidy.setShowWarnings(false);
 		tidy.setErrout(TIDY_DUMMY_PRINT_WRITER);
-		/*
-		 * Run tidy, providing an input and output stream
-		 */
-		final StringWriter writer = new StringWriter(htmlContent.length());
-		tidy.parse(new StringReader(htmlContent), writer);
-		return writer.toString();
+		return tidy;
 	}
 
 	/**
@@ -624,30 +629,7 @@ public final class HTMLProcessing {
 	 */
 	public static String prettyPrint(final String htmlContent) {
 		try {
-			/*
-			 * Obtain a new Tidy instance
-			 */
-			final Tidy tidy = new Tidy();
-			/*
-			 * Set desired configuration options using tidy setters
-			 */
-			tidy.setXHTML(true);
-			tidy.setConfigurationFromProps(getTidyConfiguration());
-			tidy.setForceOutput(true);
-			tidy.setOutputEncoding(CHARSET_US_ASCII);
-			tidy.setTidyMark(false);
-			tidy.setXmlOut(true);
-			tidy.setNumEntities(true);
-			tidy.setDropEmptyParas(false);
-			tidy.setDropFontTags(false);
-			tidy.setDropProprietaryAttributes(false);
-			tidy.setTrimEmptyElements(false);
-			/*
-			 * Suppress tidy outputs
-			 */
-			tidy.setShowErrors(0);
-			tidy.setShowWarnings(false);
-			tidy.setErrout(TIDY_DUMMY_PRINT_WRITER);
+			final Tidy tidy = createNewTidyInstance();
 			/*
 			 * Pretty print document
 			 */
