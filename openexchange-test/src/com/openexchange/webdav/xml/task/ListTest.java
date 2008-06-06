@@ -19,6 +19,9 @@ public class ListTest extends TaskTest {
 		insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		
+		// prevent master/slave problem
+		Thread.sleep(1000);
+		
 		Task[] taskArray = listTask(webCon, taskFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
 		assertTrue("check response", taskArray.length >= 2);
@@ -34,6 +37,9 @@ public class ListTest extends TaskTest {
 		int[][] objectIdAndFolderId = { { objectId1, taskFolderId }, { objectId2, taskFolderId } };
 		
 		deleteTask(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
+		
+		// prevent master/slave problem
+		Thread.sleep(1000);
 		
 		Task[] taskArray = listTask(webCon, taskFolderId, modified, false, true, PROTOCOL + hostName, login, password);
 		
@@ -89,6 +95,9 @@ public class ListTest extends TaskTest {
 		
 		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		
+		// prevent master/slave problem
+		Thread.sleep(1000);
+		
 		Task[] taskArray = listTask(webCon, taskFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
 		assertEquals("wrong response array length", 1, taskArray.length);
@@ -105,7 +114,8 @@ public class ListTest extends TaskTest {
 		Task taskObj = createTask("testListWithAllFieldsOnUpdate");
 		int objectId = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		
-		Date modified = new Date();
+		Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, getHostName(), getLogin(), getPassword());
+		Date modified = loadTask.getLastModified();
 		
 		taskObj = new Task();
 		taskObj.setTitle("testListWithAllFieldsOnUpdate");
@@ -135,7 +145,7 @@ public class ListTest extends TaskTest {
 		
 		assertEquals("wrong response array length", 1, taskArray.length);
 		
-		Task loadTask = taskArray[0];
+		loadTask = taskArray[0];
 		
 		taskObj.setObjectID(objectId);
 		taskObj.setStartDate(startTime);
