@@ -155,8 +155,8 @@ public abstract class MailMessageStorage {
 	/**
 	 * A convenience method that delivers all messages contained in given folder
 	 * through invoking
-	 * {@link #searchMessages(String, IndexRange, MailSortField, OrderDirection, SearchTerm, MailField[])}
-	 * without search arguments.
+	 * {@link #searchMessages(String, IndexRange, MailSortField, OrderDirection, SearchTerm, MailField[])
+	 * searchMessages()} without search arguments.
 	 * <p>
 	 * Note that sorting needs not to be supported by underlying mailing system.
 	 * This can be done n application side, too
@@ -168,7 +168,10 @@ public abstract class MailMessageStorage {
 	 *            The folder fullname
 	 * @param indexRange
 	 *            The indices range specifying the desired sub-list in sorted
-	 *            list; may be <code>null</code> to obtain complete list
+	 *            list; may be <code>null</code> to obtain complete list. Range
+	 *            begins at the specified start index and extends to the message
+	 *            at index <code>end - 1</code>. Thus the length of the range is
+	 *            <code>end - start</code>.
 	 * @param sortField
 	 *            The sort field
 	 * @param order
@@ -319,7 +322,10 @@ public abstract class MailMessageStorage {
 	 *            The folder fullname
 	 * @param indexRange
 	 *            The indices range specifying the desired sub-list in sorted
-	 *            list; may be <code>null</code> to obtain complete list
+	 *            list; may be <code>null</code> to obtain complete list. Range
+	 *            begins at the specified start index and extends to the message
+	 *            at index <code>end - 1</code>. Thus the length of the range is
+	 *            <code>end - start</code>.
 	 * @param searchTerm
 	 *            The search term
 	 * @param fields
@@ -466,8 +472,11 @@ public abstract class MailMessageStorage {
 	 * @param folder
 	 *            The folder fullname
 	 * @param indexRange
-	 *            The indices range specifying the desired sub-list in sorted
-	 *            list; may be <code>null</code> to obtain complete list
+	 *            The index range specifying the desired sub-list in sorted
+	 *            list; may be <code>null</code> to obtain complete list. Range
+	 *            begins at the specified start index and extends to the message
+	 *            at index <code>end - 1</code>. Thus the length of the range is
+	 *            <code>end - start</code>.
 	 * @param sortField
 	 *            The sort field
 	 * @param order
