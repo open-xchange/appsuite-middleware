@@ -76,6 +76,10 @@ public class CommonAllRequest implements AJAXRequest {
 
     private final boolean failOnError;
 
+    private int leftHandLimit = -1;
+
+    private int rightHandLimit = -1;
+
     /**
      * Default constructor.
      */
@@ -141,6 +145,10 @@ public class CommonAllRequest implements AJAXRequest {
             params.add(new Parameter(AJAXServlet.PARAMETER_ORDER, OrderFields
                 .write(order)));
         }
+        if (validateLimit()) {
+	        params.add(new Parameter(AJAXServlet.LEFT_HAND_LIMIT, leftHandLimit));
+	        params.add(new Parameter(AJAXServlet.RIGHT_HAND_LIMIT, rightHandLimit));
+        }
         return params.toArray(new Parameter[params.size()]);
     }
 
@@ -164,4 +172,33 @@ public class CommonAllRequest implements AJAXRequest {
     protected boolean isFailOnError() {
         return failOnError;
     }
+
+	/**
+	 * Sets the leftHandLimit
+	 *
+	 * @param leftHandLimit the leftHandLimit to set
+	 */
+	public void setLeftHandLimit(int leftHandLimit) {
+		this.leftHandLimit = leftHandLimit;
+	}
+
+	/**
+	 * Sets the rightHandLimit
+	 *
+	 * @param rightHandLimit the rightHandLimit to set
+	 */
+	public void setRightHandLimit(int rightHandLimit) {
+		this.rightHandLimit = rightHandLimit;
+	}
+
+	private boolean validateLimit() {
+		if ((rightHandLimit != -1 || leftHandLimit != -1)) {
+			if (rightHandLimit < leftHandLimit) {
+				throw new IllegalArgumentException("right-hand index is less than left-hand index");
+			}
+			return true;
+		}
+		return false;
+	}
+
 }

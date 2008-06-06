@@ -115,4 +115,49 @@ public final class AllTest extends AbstractMailTest {
 		clearFolder(getSentFolder());
 		clearFolder(getTrashFolder());
 	}
+
+	/**
+	 * Tests the <code>action=all</code> request on INBOX folder
+	 * 
+	 * @throws Throwable
+	 */
+	public void testAllLimit() throws Throwable {
+		/*
+		 * Clean everything
+		 */
+		clearFolder(getInboxFolder());
+		clearFolder(getSentFolder());
+		clearFolder(getTrashFolder());
+		/*
+		 * Create JSON mail object
+		 */
+		final String mailObject_25kb = createSelfAddressed25KBMailObject().toString();
+		/*
+		 * Insert <numOfMails> mails through a send request
+		 */
+		final int numOfMails = 25;
+		LOG.info("Sending " + numOfMails + " mails to fill emptied INBOX");
+		for (int i = 0; i < numOfMails; i++) {
+			Executor.execute(getSession(), new SendRequest(mailObject_25kb));
+			LOG.info("Sent " + (i + 1) + ". mail of " + numOfMails);
+		}
+		/*
+		 * Perform all request
+		 */
+		final int left = 0;
+		final int right = 10;
+		final AllRequest allRequest = new AllRequest(getInboxFolder(), COLUMNS_DEFAULT_LIST, 0, null);
+		allRequest.setLeftHandLimit(left);
+		allRequest.setRightHandLimit(right);
+		final CommonAllResponse allR = (CommonAllResponse) Executor.execute(getSession(), allRequest);
+		final Object[][] array = allR.getArray();
+		assertTrue("All request failed", array != null && array.length == (right - left)
+				&& array[0].length == COLUMNS_DEFAULT_LIST.length);
+		/*
+		 * Clean everything
+		 */
+		clearFolder(getInboxFolder());
+		clearFolder(getSentFolder());
+		clearFolder(getTrashFolder());
+	}
 }
