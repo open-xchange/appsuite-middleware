@@ -499,7 +499,8 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 				searchobject.setEmailAutoCompleteFolder(user_private_folder.getObjectID());
 			}
 			
-			final String order = " ORDER BY co." + Contacts.mapping[orderBy].getDBFieldName() + ' ' + orderDir +  ' ';
+			final String order = new StringBuilder(32).append(" ORDER BY co.").append(
+					Contacts.mapping[orderBy].getDBFieldName()).append(' ').append(orderDir).append(' ').toString();
 			cs.setOrder(order);
 			
 			cs.setContactSearchObject(searchobject);
@@ -603,7 +604,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			final ContactSql cs = new ContactMySql(session, ctx);
 			cs.setFolder(folderId);
 			cs.setSearchHabit(" OR ");
-			final String order = " ORDER BY co." + Contacts.mapping[orderBy].getDBFieldName() + ' ' + orderDir +  ' ';
+			final String order = new StringBuilder(32).append(" ORDER BY co.").append(Contacts.mapping[orderBy].getDBFieldName()).append(' ').append(orderDir).append(' ').toString();
 			cs.setOrder(order);
 			
 			final EffectivePermission oclPerm = new OXFolderAccess(readcon, ctx).getFolderPermission(folderId, userId, userConfiguration);
@@ -1023,7 +1024,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 			}
 			
 			if ((contactFolder.getType() != FolderObject.PRIVATE) && pflag){
-				LOG.debug(new StringBuilder("Here is a contact in a non PRIVATE folder with a set private flag -> (cid="+ctx.getContextId()+" fid="+fid+" oid="+oid+')'));
+				LOG.debug(new StringBuilder("Here is a contact in a non PRIVATE folder with a set private flag -> (cid=").append(ctx.getContextId()).append(" fid=").append(fid).append(" oid=").append(oid).append(')'));
 			} else if ((contactFolder.getType() == FolderObject.PRIVATE) && pflag && created_from != userId){
 				throw EXCEPTIONS.createOXPermissionException(42,Integer.valueOf(fuid), Integer.valueOf(ctx.getContextId()), Integer.valueOf(userId));
 				//throw new OXConflictException("NOT ALLOWED TO DELETE FOLDER OBJECTS CONTACT CUZ IT IS PRIVATE (cid="+sessionobject.getContext().getContextId()+" fid="+fid+" oid="+oid+')');
