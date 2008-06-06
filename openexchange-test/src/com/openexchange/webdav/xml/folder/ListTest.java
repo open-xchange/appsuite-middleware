@@ -18,15 +18,16 @@ public class ListTest extends FolderTest {
 	}
 	
 	public void testPropFindWithModified() throws Exception {
-		Date modified = new Date();
-		
 		FolderObject folderObj = createFolderObject(userId, "testPropFindWithModified1", FolderObject.CONTACT, false);
-		insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
+		final int objectId1 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 		folderObj = createFolderObject(userId, "testPropFindWithModified2", FolderObject.TASK, false);
-		insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
+		final int objectId2 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 		
 		// prevent master/slave problem
 		Thread.sleep(1000);
+		
+		final FolderObject loadFolder = loadFolder(webCon, objectId2, getHostName(), getLogin(), getPassword());
+		final Date modified = loadFolder.getLastModified();
 		
 		FolderObject[] folderArray = listFolder(webCon, modified, true, false, PROTOCOL + hostName, login, password);
 		
@@ -34,19 +35,20 @@ public class ListTest extends FolderTest {
 	}
 	
 	public void testPropFindWithDeleted() throws Exception {
-		Date modified = new Date();
-		
 		FolderObject folderObj = createFolderObject(userId, "testPropFindWithDeleted1", FolderObject.CALENDAR, false);
 		int objectId1 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 		folderObj = createFolderObject(userId, "testPropFindWithDeleted2", FolderObject.CONTACT, false);
 		int objectId2 = insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 		
+		// prevent master/slave problem
+		Thread.sleep(1000);
+		
+		final FolderObject loadFolder = loadFolder(webCon, objectId2, getHostName(), getLogin(), getPassword());
+		final Date modified = loadFolder.getLastModified();
+		
 		int[] id = { objectId1, objectId2 };
 		
 		int[] failed = deleteFolder(webCon, id, PROTOCOL + hostName, login, password);
-		
-		// prevent master/slave problem
-		Thread.sleep(1000);
 		
 		FolderObject[] folderArray = listFolder(webCon, modified, false, true, PROTOCOL + hostName, login, password);
 		

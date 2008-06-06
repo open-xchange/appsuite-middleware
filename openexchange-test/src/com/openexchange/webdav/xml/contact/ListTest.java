@@ -14,14 +14,15 @@ public class ListTest extends ContactTest {
 	}
 
 	public void testPropFindWithModified() throws Exception {
-		Date modified = new Date();
-		
 		ContactObject contactObj = createContactObject("testPropFindWithModified");
 		int objectId1 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		int objectId2 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
 		// prevent master/slave problem
 		Thread.sleep(1000);
+		
+		ContactObject loadContact = loadContact(getWebConversation(), objectId2, contactFolderId, getHostName(), getLogin(), getPassword());
+		final Date modified = loadContact.getLastModified();
 		
 		ContactObject[] contactArray = listContact(webCon, contactFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
@@ -31,13 +32,14 @@ public class ListTest extends ContactTest {
 	}
 	
 	public void testPropFindWithDelete() throws Exception {
-		Date modified = new Date();
-		
 		ContactObject contactObj = createContactObject("testPropFindWithModified");
 		int objectId1 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		int objectId2 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
 		int[][] objectIdAndFolderId = { { objectId1, contactFolderId }, { objectId2, contactFolderId } };
+		
+		ContactObject loadContact = loadContact(getWebConversation(), objectId2, contactFolderId, getHostName(), getLogin(), getPassword());
+		final Date modified = loadContact.getLastModified();
 		
 		deleteContact(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
 		
