@@ -167,7 +167,7 @@ public abstract class MailMessageStorage {
 	 * @param folder
 	 *            The folder fullname
 	 * @param indexRange
-	 *            The indices range specifying the desired sub-list in sorted
+	 *            The index range specifying the desired sub-list in sorted
 	 *            list; may be <code>null</code> to obtain complete list. Range
 	 *            begins at the specified start index and extends to the message
 	 *            at index <code>end - 1</code>. Thus the length of the range is
@@ -321,7 +321,7 @@ public abstract class MailMessageStorage {
 	 * @param folder
 	 *            The folder fullname
 	 * @param indexRange
-	 *            The indices range specifying the desired sub-list in sorted
+	 *            The index range specifying the desired sub-list in sorted
 	 *            list; may be <code>null</code> to obtain complete list. Range
 	 *            begins at the specified start index and extends to the message
 	 *            at index <code>end - 1</code>. Thus the length of the range is
