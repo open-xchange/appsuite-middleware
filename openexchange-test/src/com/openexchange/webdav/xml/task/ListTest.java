@@ -13,11 +13,12 @@ public class ListTest extends TaskTest {
 	}
 	
 	public void testPropFindWithModified() throws Exception {
-		Date modified = new Date();
-		
 		Task taskObj = createTask("testPropFindWithModified");
-		insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
-		insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+		final int objectId1 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+		final int objectId2 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+		
+		Task loadTask = loadTask(getWebConversation(), objectId2, taskFolderId, getHostName(), getHostName(), getPassword());
+		final Date modified = loadTask.getLastModified();
 		
 		// prevent master/slave problem
 		Thread.sleep(1000);
@@ -28,11 +29,12 @@ public class ListTest extends TaskTest {
 	}
 	
 	public void testPropFindWithDelete() throws Exception {
-		Date modified = new Date();
-		
 		Task taskObj = createTask("testPropFindWithModified");
 		int objectId1 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		int objectId2 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+		
+		Task loadTask = loadTask(getWebConversation(), objectId2, taskFolderId, getHostName(), getHostName(), getPassword());
+		final Date modified = loadTask.getLastModified();
 		
 		int[][] objectIdAndFolderId = { { objectId1, taskFolderId }, { objectId2, taskFolderId } };
 		
@@ -69,8 +71,6 @@ public class ListTest extends TaskTest {
 	}
 	
 	public void testListWithAllFields() throws Exception {
-		Date modified = new Date();
-		
 		Task taskObj = new Task();
 		taskObj.setTitle("testListWithAllFields");
 		taskObj.setStartDate(startTime);
@@ -98,11 +98,14 @@ public class ListTest extends TaskTest {
 		// prevent master/slave problem
 		Thread.sleep(1000);
 		
+		Task loadTask = loadTask(getWebConversation(), objectId, taskFolderId, getHostName(), getLogin(), getPassword());
+		final Date modified = loadTask.getLastModified();
+		
 		Task[] taskArray = listTask(webCon, taskFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
 		assertEquals("wrong response array length", 1, taskArray.length);
 		
-		Task loadTask = taskArray[0];
+		loadTask = taskArray[0];
 		
 		taskObj.setObjectID(objectId);
 		taskObj.setStartDate(startTime);
