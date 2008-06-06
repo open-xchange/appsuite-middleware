@@ -364,10 +364,10 @@ public final class HTMLFilterHandler implements HTMLHandler {
 			skipLevel++;
 			return;
 		}
-		if (depth > 0) {
-			depth++;
-		}
 		if (htmlMap.containsKey(tag)) {
+		    if (depth > 0) {
+	            depth++;
+	        }
 			if (BODY.equals(tag)) {
 				body = true;
 			} else if (STYLE.equals(tag)) {
