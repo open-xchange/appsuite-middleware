@@ -58,6 +58,112 @@ public enum Tree {
     /** A string containing GUI-specific settings (currently, it is a huge JSON object). */
     GUI("/gui"),
 
+    /** [inside GUI] "infostore/split" or "infostore/list" */
+    InfostoreView("/gui/infostore/view"),
+    
+    /** [inside GUI] "true" or "false" */
+    MailNewMailOptionsBccEnabled("/gui/mail/newmail_options/bcc"),
+    
+    /** [inside GUI] "true" or "false" */
+    MailNewMailOptionsFromEnabled("/gui/mail/newmail_options/from"),
+    
+    /** [inside GUI] "true" or "false" */
+    MailNewMailOptionsCcEnabled("/gui/mail/newmail_options/cc"),
+    
+    /** [inside GUI] "true" or "false" */
+    MailNewMailOptionsOptionsEnabled("/gui/mail/newmail_options/options"),
+    
+    /** [inside GUI] "true" or "false" */
+    MailAllowHtmlMails("/gui/mail/htmlmessage"),
+    
+    /** [inside GUI] json array */
+    //TODO: [{"position":"below","signature_text":"wefwefwe","signature_name":"efwefwef","signature_default":true}],
+    //MailSignatures("/gui/mail/signatures"),
+    
+    /** [inside GUI] "mail/list/unthreaded" or ? */
+    MailViewSpam("/gui/mail/view_spam"),
+    
+    /** [inside GUI] "mail/hsplit/unthreaded" or ? */
+    MailView("/gui/mail/view"),
+    
+    /** [inside GUI] "true" or "false" */
+    MailAutoComplete("/gui/mail/autocomplete"),
+    
+    /** [inside GUI] "TEXT/PLAIN" or "TEXT/HTML" or "ALTERNATIVE" */
+    MailFormatMessages("/gui/mail/formatmessage"),
+    
+    /** [inside GUI] "true" or "false" */
+    MailFullHeader("/gui/mail/fullmailheader"),
+
+    /** [inside GUI] "true" or "false" */
+    MailNotifyOnReadAcknowledgment("/gui/mail/notifyacknoledge"),
+    
+    //TODO: Portal settings
+    
+    /** [inside GUI] string array */
+    PrivateCategories("/gui/private_categories"),
+    
+    /** [inside GUI] "true" or "false" */
+    EnableConfirmationPopup("/gui/global/confirmpopup"),
+    
+    /** [inside GUI] "1" (means "Yes") or "0" (means "No") or "2" (means "Ask") */
+    SaveConfigOnLogout("/gui/global/save"),
+    
+    /** [inside GUI] */
+    AutoRefresh("/gui/global/autorefresh"),
+    
+    /** [inside GUI] */
+    PanelRows("/gui/menu/menuiteration"),
+    
+    /** [inside GUI] */
+    ThemeID("/gui/theme/id"),
+    
+    /** [inside GUI] */
+    ThemeName("/gui/theme/name"),
+    
+    /** [inside GUI] */
+    ThemePath("/gui/theme/path"),
+    
+    //TODO: effects
+    
+    /** [inside GUI] */
+    TasksReminderInterval("/gui/tasks/interval"),
+    
+    /** [inside GUI] "asc" or ? */
+    TasksGridSort("/gui/tasks/gridsort"),
+    
+    /** [inside GUI] "tasks/split" or "tasks/list" */
+    TasksView("/gui/tasks/view"),
+    
+    //TODO: FolderTreeState
+    
+    /** [inside GUI] "asc" or ? */
+    ContactsGridSort("/gui/contacts/gridsort"),
+    
+    /** [inside GUI] "auto" or ? */
+    ContactsCardsPerColumn("/gui/contacts/cardsToViewPerColumn"),
+    
+    /** [inside GUI] "contacts/cards" or ? */
+    ContactsView("/gui/contacts/view"),
+    
+    /** [inside GUI] */
+    CalendarEndWorkingTime("/gui/calendar/endtime"),
+    
+    /** [inside GUI] "true" or "false" */
+    CalendarShowAppointmetsOfAllFolders("/gui/calendar/allfolders"),
+    
+    /** [inside GUI] */
+    CalendarStartWorkingTime("/gui/calendar/starttime"),
+    
+    /** [inside GUI] */
+    CalendarInterval("/gui/calendar/interval"),
+    
+    /** [inside GUI] "calendar/calendar/day" or ? */
+    CalendarView("/gui/calendar/view"),
+    
+    //TODO: more gui settings
+    
+    
     /** A string containing GUI-specific settings. This is a JSON object that must be kept small for performance. */
     FastGUI("/fastgui"),
     
