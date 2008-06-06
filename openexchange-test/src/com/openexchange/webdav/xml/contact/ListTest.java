@@ -1,10 +1,11 @@
 package com.openexchange.webdav.xml.contact;
 
+import java.util.Date;
+
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.ContactTest;
 import com.openexchange.webdav.xml.XmlServlet;
-import java.util.Date;
 
 public class ListTest extends ContactTest {
 	
@@ -18,6 +19,9 @@ public class ListTest extends ContactTest {
 		ContactObject contactObj = createContactObject("testPropFindWithModified");
 		int objectId1 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		int objectId2 = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		
+		// prevent master/slave problem
+		Thread.sleep(1000);
 		
 		ContactObject[] contactArray = listContact(webCon, contactFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
@@ -36,6 +40,9 @@ public class ListTest extends ContactTest {
 		int[][] objectIdAndFolderId = { { objectId1, contactFolderId }, { objectId2, contactFolderId } };
 		
 		deleteContact(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
+		
+		// prevent master/slave problem
+		Thread.sleep(1000);
 		
 		ContactObject[] appointmentArray = listContact(webCon, contactFolderId, modified, false, true, PROTOCOL + hostName, login, password);
 		

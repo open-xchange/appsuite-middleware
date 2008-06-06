@@ -25,6 +25,9 @@ public class ListTest extends FolderTest {
 		folderObj = createFolderObject(userId, "testPropFindWithModified2", FolderObject.TASK, false);
 		insertFolder(webCon, folderObj, PROTOCOL + hostName, login, password);
 		
+		// prevent master/slave problem
+		Thread.sleep(1000);
+		
 		FolderObject[] folderArray = listFolder(webCon, modified, true, false, PROTOCOL + hostName, login, password);
 		
 		assertTrue("expected response size is < 2", folderArray.length >= 2);
@@ -41,6 +44,9 @@ public class ListTest extends FolderTest {
 		int[] id = { objectId1, objectId2 };
 		
 		int[] failed = deleteFolder(webCon, id, PROTOCOL + hostName, login, password);
+		
+		// prevent master/slave problem
+		Thread.sleep(1000);
 		
 		FolderObject[] folderArray = listFolder(webCon, modified, false, true, PROTOCOL + hostName, login, password);
 		
