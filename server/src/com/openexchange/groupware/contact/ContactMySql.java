@@ -330,7 +330,6 @@ public class ContactMySql implements ContactSql {
 						if (!value.equals("*")) {
 							value = value.replace('*', '%');
 							value = value.replace('?', '_');
-							value = value.replaceAll("'", "\\\\'");
 
 							if (value.indexOf(',') != -1) {
 								final StringTokenizer sr = new StringTokenizer(value, ",");
@@ -353,7 +352,6 @@ public class ContactMySql implements ContactSql {
 						if (!value.equals("*")) {
 							value = value.replace('*', '%');
 							value = value.replace('?', '_');
-							value = value.replaceAll("'", "\\\\'");
 
 							if (value.indexOf('%') != -1) {
 								sb.append("( co.").append(field).append(" LIKE ? ").append(search_habit).append(' ');
@@ -440,7 +438,6 @@ public class ContactMySql implements ContactSql {
 				String value = cso.getGivenName();
 				value = value.replace('*', '%');
 				value = value.replace('?', '_');
-				value = value.replaceAll("'", "\\\\'");
 
 				if (value.equals("%")){
 					sb.append(' ');
@@ -458,7 +455,6 @@ public class ContactMySql implements ContactSql {
 				String value = cso.getSurname();
 				value = value.replace('*', '%');
 				value = value.replace('?', '_');
-				value = value.replaceAll("'", "\\\\'");
 
 				if (value.equals("%")){
 					sb.append(' ');
@@ -476,7 +472,6 @@ public class ContactMySql implements ContactSql {
 				String value = cso.getDisplayName();
 				value = value.replace('*', '%');
 				value = value.replace('?', '_');
-				value = value.replaceAll("'", "\\\\'");
 
 				if (value.equals("%")){
 					sb.append(' ');
@@ -494,7 +489,6 @@ public class ContactMySql implements ContactSql {
 				String value = cso.getEmail1();
 				value = value.replace('*', '%');
 				value = value.replace('?', '_');
-				value = value.replaceAll("'", "\\\\'");
 
 				if (value.equals("%")){
 					sb.append(' ');
@@ -512,7 +506,6 @@ public class ContactMySql implements ContactSql {
 				String value = cso.getEmail2();
 				value = value.replace('*', '%');
 				value = value.replace('?', '_');
-				value = value.replaceAll("'", "\\\\'");
 
 				if (value.equals("%")){
 					sb.append(' ');
@@ -530,7 +523,6 @@ public class ContactMySql implements ContactSql {
 				String value = cso.getEmail3();
 				value = value.replace('*', '%');
 				value = value.replace('?', '_');
-				value = value.replaceAll("'", "\\\\'");
 
 				if (value.equals("%")){
 					sb.append(' ');
@@ -549,7 +541,6 @@ public class ContactMySql implements ContactSql {
 				if (!value.equals("*")) {
 					value = value.replace('*', '%');
 					value = value.replace('?', '_');
-					value = value.replaceAll("'", "\\\\'");
 
 					if (value.indexOf(',') != -1) {
 						final StringTokenizer sr = new StringTokenizer(value, ",");
@@ -572,7 +563,6 @@ public class ContactMySql implements ContactSql {
 				String value = cso.getCompany();
 				value = value.replace('*', '%');
 				value = value.replace('?', '_');
-				value = value.replaceAll("'", "\\\\'");
 
 				if (value.equals("%")){
 					sb.append(' ');
