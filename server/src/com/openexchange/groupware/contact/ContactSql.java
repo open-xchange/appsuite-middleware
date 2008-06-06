@@ -71,22 +71,18 @@ import com.openexchange.tools.iterator.SearchIteratorException;
  */
 
 public interface ContactSql {
-
-	public String getWhere();
 	
 	public String getOrder();
 	
-	public String getSqlCommand();
+	//public String getSqlCommand();
 
-	public PreparedStatement getSqlCommand(Connection con) throws SQLException;
+	public PreparedStatement getSqlStatement(Connection con) throws SQLException;
 
 	public String getSelect();
 
 	public void setSelect(final String select);
 
 	public void setOrder(final String order);
-
-	public void setWhere(final String where);
 
 	public void setFolder(final int folder);
 
@@ -143,7 +139,7 @@ public interface ContactSql {
 	public String iFupdateDistributionListEntriesByIds();
 	public String iFwriteDistributionListArrayInsert();
 	public String iFfillDistributionListArray(int id, int cid);
-	public StringBuilder iFgetContactById(StringBuilder sb);
+	public StringBuilder iFgetContactById(String fieldList);
 	public StringBuilder iFperformContactStorageUpdate(StringBuilder update, long lmd, int id, int cid);
 	public StringBuilder iFperformContactStorageInsert(StringBuilder insert_fields, StringBuilder insert_values, int user, long lmd, int cid, int id);
 	public StringBuilder iFgetColsString(int[] cols);	

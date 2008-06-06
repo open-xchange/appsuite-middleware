@@ -1,3 +1,7 @@
+* 2008-06-06 - thorben.betten@open-xchange.com
+
+ - Bugfix #11156: Fixed SQL injection vulnerability through contact search
+
 * 2008-06-05 - choeger@open-xchange.com
 
  - Bugfix ID#11347: rpm packages for SLES10 and RHEL5 have broken dependencies

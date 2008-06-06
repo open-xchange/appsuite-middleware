@@ -65,7 +65,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.OXException;
-import com.openexchange.database.Database;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -80,7 +79,7 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.date.FormatDate;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.oxfolder.OXFolderTools;
+import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
  ContactMySql
@@ -99,7 +98,7 @@ public class ContactMySql implements ContactSql {
 			+ "co.field10," + "co.intfield03,"
 			+ "co.field79 FROM prg_contacts AS co ";
 
-	private String where = "";
+	private String where;
 	private String order = "";
 	private int user;
 	private int can_read_only_own;
@@ -121,556 +120,64 @@ public class ContactMySql implements ContactSql {
 	private int objectID;
 
 	private final List<SQLInjector> injectors = new ArrayList<SQLInjector>();
-	private Connection con;
-	private boolean closeCon;
 	
-	Context ctx;
-	Session so;
+	private Context ctx;
+	private Session so;
 	
+	/**
+	 * Initializes a new {@link ContactMySql}
+	 * 
+	 * @param so
+	 *            The session
+	 * @throws ContextException
+	 *             If context cannot be resolved
+	 */
 	public ContactMySql(final Session so) throws ContextException {
-		if (so != null){			
+		if (so != null) {
 			this.ctx = ContextStorage.getStorageContext(so.getContextId());
 			this.so = so;
 			this.user = so.getUserId();
 		}
 	}
 
+	/**
+	 * Initializes a new {@link ContactMySql}
+	 * 
+	 * @param ctx
+	 *            The context
+	 * @param userId
+	 *            The user ID
+	 */
 	public ContactMySql(Context ctx, int userId) {
 		this.ctx = ctx;
 		this.user = userId;
-		try {
-			this.con = Database.get(ctx, false);
-			closeCon = true;
-		} catch (DBPoolingException e) {
-			LOG.error(e.getMessage(), e);
-		}
 	}
-	
-	public ContactMySql(final Session so, final Context ct) {			
-		this.ctx = ct;
+
+	/**
+	 * Initializes a new {@link ContactMySql}
+	 * 
+	 * @param so
+	 *            The session
+	 * @param ctx
+	 *            The context
+	 */
+	public ContactMySql(final Session so, final Context ctx) {
+		this.ctx = ctx;
 		this.so = so;
 		this.user = so.getUserId();
-		try {
-			this.con = Database.get(ctx, false);
-			closeCon = true;
-		} catch (DBPoolingException e) {
-			LOG.error(e.getMessage(), e);
-		}
-	}
-
-	public ContactMySql(final Session so, final Context ct, final Connection con) {			
-		this.ctx = ct;
-		this.so = so;
-		this.user = so.getUserId();
-		this.con = con;
-		closeCon = false;
-	}
-	
-	public String getWhere() {
-
-		StringBuilder sb = new StringBuilder(" WHERE co.cid = "+ctx.getContextId()+" AND ");
-
-
-		// Can read only own objects in folder
-		if (can_read_only_own != 0) {
-			sb.append(" (co.created_from = ?) AND ");
-			injectors.add(new IntSQLInjector(can_read_only_own));
-		}
-
-		// only internal user
-		if (internal_user_only){
-			sb.append(" (co.userid is not null) AND (fid = ").append(FolderObject.SYSTEM_LDAP_FOLDER_ID).append(") AND ");
-		}
-		
-		// get a user by id
-		if (userid > 0){
-			sb.append(" (co.userid = ").append(userid).append(") AND ");
-		}
-		
-		// range search in time for field changed_from
-		if (changed_since > 0) {
-			sb.append(" (co.changing_date >= ").append(changed_since).append(") AND ");
-		}
-
-		// range search in time for field created_from
-		if (created_since > 0) {
-			sb.append(" (co.creating_date >= ").append(created_since).append(") AND ");
-		}
-
-		// range search in time for field created_from and changed_from
-		if (created_since > 0) {
-			sb.append(" (co.creating_date >= ").append(both_since
-			).append(" OR (co.changed_from >= ").append(both_since
-			).append(")) AND ");
-		}
-
-		// get an object by id
-		if (objectID > 0){
-				sb.append(" (co.intfield01 = ").append(objectID).append(") AND ");
-		}
-		
-		// get a bunch of objects by id
-		if (object_id_array != null &&  object_id_array.length > 0){
-			sb.append(" ( ");
-			for (int i=0;i<object_id_array.length;i++){
-				final int oidx = object_id_array[i][0];
-				final int fidx = object_id_array[i][1];
-				sb.append(" (co.intfield01 = ").append(oidx).append(" AND co.fid = ").append(fidx).append(") ");
-				if (i < (object_id_array.length-1)){
-					sb.append(" OR ");
-				}
-			}
-			sb.append(" ) AND ");
-		}
-			
-		// Only contacts with a given startcharacter
-		if (start_character != null) {
-			String field = null;
-			if (start_character_field == null){
-				field = ContactConfig.getProperty("contact_first_letter_field");
-			}else{
-				field = start_character_field;
-			}
-			final String p = start_character;
-
-			if (p.trim().equals(".") || p.trim().equals("#")) {
-				sb.append(" (((").append(field).append(" < '0%') OR (").append(field).append(" > 'z%')) AND (").append(field).append(" NOT LIKE 'z%')) AND ");
-			} else if (
-					p.trim().equals("0") || 
-					p.trim().equals("1") || 
-					p.trim().equals("2") || 
-					p.trim().equals("3") || 
-					p.trim().equals("4") || 
-					p.trim().equals("5") || 
-					p.trim().equals("6") || 
-					p.trim().equals("7") || 
-					p.trim().equals("8") ||					
-					p.trim().equals("9")){
-				sb.append(" (((").append(field).append(" > '0%') AND (").append(field).append(" < 'a%')) AND (").append(field).append(" NOT LIKE 'a%')) AND ");
-			} else if (!p.trim().equals(".") && !p.trim().equals("all")) {
-				sb.append(" (UPPER(").append(field).append(") LIKE UPPER('").append(p).append("%')) AND ");
-			}
-		}
-
-
-		if (cso != null){
-			
-			if (cso.getEmailAutoComplete()){
-			//	String mumu = null;
-				search_habit = " OR ";
-			}
-			
-			sb.append(" ( ");
-			
-			/*********************** * search all fields * ***********************/ 
-			
-			if (cso.getPattern() != null && cso.getPattern().length() > 0){
-				cso.setDisplayName(cso.getPattern());
-			}
-			
-			if(cso.getDynamicSearchField() != null && cso.getDynamicSearchField().length > 0){			
-				final int[] fields = cso.getDynamicSearchField();
-				final String[] values = cso.getDynamicSearchFieldValue();
-				
-				for (int i=0;i<fields.length;i++){
-					if ( (fields[i] == ContactObject.ANNIVERSARY) || (fields[i] == ContactObject.BIRTHDAY)){
-						String field = "";
-						if (fields[i] == ContactObject.ANNIVERSARY){
-							field = Contacts.mapping[ContactObject.ANNIVERSARY].getDBFieldName();
-						}else if (fields[i] == ContactObject.BIRTHDAY){
-							field = Contacts.mapping[ContactObject.BIRTHDAY].getDBFieldName();
-						}
-						final String value = values[i];
-						sb.append(" ( co.").append(field).append(" LIKE ").append(value).append(") ").append(search_habit).append(' ');						
-					} else	if ( fields[i] == ContactObject.NUMBER_OF_DISTRIBUTIONLIST || fields[i] == ContactObject.NUMBER_OF_LINKS ) {
-						String field = "";
-						if (fields[i] == ContactObject.NUMBER_OF_DISTRIBUTIONLIST){
-							field = Contacts.mapping[ContactObject.NUMBER_OF_DISTRIBUTIONLIST].getDBFieldName();
-						}else if (fields[i] == ContactObject.NUMBER_OF_LINKS){
-							field = Contacts.mapping[ContactObject.NUMBER_OF_LINKS].getDBFieldName();
-						}
-						final String value = values[i];						
-						sb.append('(').append("co.").append(field).append(" = ").append(value).append(") ").append(search_habit).append(' ');						
-					} else	if ( fields[i] == ContactObject.CATEGORIES ){	
-						final String field = Contacts.mapping[ContactObject.CATEGORIES].getDBFieldName();
-						String value = values[i];
-						
-						if (!value.equals("*")) {
-							value = value.replace('*', '%');
-							value = value.replace('?', '_');
-							value = value.replaceAll("'", "\\\\'");
-
-							if (value.indexOf(',') != -1) {
-								final StringTokenizer sr = new StringTokenizer(value, ",");
-								sb.append('(');
-
-								while (sr.hasMoreElements()) {
-									final String t = sr.nextToken().trim();
-									sb.append(" ( co.").append(field).append(" LIKE '%").append(t.toUpperCase()).append("%'  OR ");
-								}
-								final String x = sb.toString();
-								sb = new StringBuilder(x.substring(0, x.length() - 3));
-								sb.append(") ").append(search_habit).append(' ');						
-							}
-						}
-					} else {
-						final String field = Contacts.mapping[fields[i]].getDBFieldName();
-						String value = values[i];
-						
-						if (!value.equals("*")) {
-							value = value.replace('*', '%');
-							value = value.replace('?', '_');
-							value = value.replaceAll("'", "\\\\'");
-
-							if (value.indexOf('%') != -1) {
-								sb.append("( co.").append(field).append(" LIKE '").append(value).append("' ").append(search_habit).append(' ');
-							} else {
-								sb.append("( co.").append(field).append(" LIKE '%").append(value).append("%' ").append(search_habit).append(' ');
-							}
-						}
-					}
-				}
-			}
-
-			/*********************** * search ranges * ***********************/
-			
-			final String language = UserStorage.getStorageUser(so.getUserId(), ctx).getLocale().getLanguage();
-			
-			if(cso.getAnniversaryRange() != null && cso.getAnniversaryRange().length > 0){
-				final Date[] d = cso.getAnniversaryRange();
-				try {
-					final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()).formatDateForPostgres(d[0], false);
-					final String b = new FormatDate(language.toLowerCase(), language.toUpperCase()).formatDateForPostgres(d[0], false);
-					sb.append(getRangeSearch(Contacts.mapping[ContactObject.ANNIVERSARY].getDBFieldName(),a,b,search_habit));
-				} catch (Exception e) {
-					LOG.error("Could not Format Anniversary Date for Range Search! ",e);
-				}
-			}
-			if(cso.getBirthdayRange() != null && cso.getBirthdayRange().length > 0){			
-				final Date[] d = cso.getBirthdayRange();
-				try {
-					final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()).formatDateForPostgres(d[0], false);
-					final String b = new FormatDate(language.toLowerCase(), language.toUpperCase()).formatDateForPostgres(d[0], false);
-					sb.append(getRangeSearch(Contacts.mapping[ContactObject.BIRTHDAY].getDBFieldName(),a,b,search_habit));
-				} catch (Exception e) {
-					LOG.error("Could not Format Birthday Date for Range Search! ",e);
-				}
-			}
-			if(cso.getBusinessPostalCodeRange() != null && cso.getBusinessPostalCodeRange().length > 0){			
-				final String[] x = cso.getBusinessPostalCodeRange();
-				sb.append(getRangeSearch(Contacts.mapping[ContactObject.POSTAL_CODE_BUSINESS].getDBFieldName(),x[0],x[1],search_habit));
-			}
-			if(cso.getCreationDateRange() != null && cso.getCreationDateRange().length > 0){			
-				final Date[] d = cso.getCreationDateRange();
-				try {
-					final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()).formatDateForPostgres(d[0], false);
-					final String b = new FormatDate(language.toLowerCase(), language.toUpperCase()).formatDateForPostgres(d[0], false);
-					sb.append(getRangeSearch(Contacts.mapping[ContactObject.CREATION_DATE].getDBFieldName(),a,b,search_habit));
-				} catch (Exception e) {
-					LOG.error("Could not Format Creating_Date Date for Range Search! ",e);
-				}
-			}
-			if(cso.getLastModifiedRange() != null && cso.getLastModifiedRange().length > 0){			
-				final Date[] d = cso.getLastModifiedRange();
-				try {
-					final String a = new FormatDate(language.toLowerCase(), language.toUpperCase()).formatDateForPostgres(d[0], false);
-					final String b = new FormatDate(language.toLowerCase(), language.toUpperCase()).formatDateForPostgres(d[0], false);
-					sb.append(getRangeSearch(Contacts.mapping[ContactObject.LAST_MODIFIED].getDBFieldName(),a,b,search_habit));
-				} catch (Exception e) {
-					LOG.error("Could not Format LastModified Date for Range Search! ",e);
-				}
-			}
-			if(cso.getNumberOfEmployeesRange() != null && cso.getNumberOfEmployeesRange().length > 0){			
-				final String[] x = cso.getNumberOfEmployeesRange();
-				sb.append(getRangeSearch(Contacts.mapping[ContactObject.NUMBER_OF_EMPLOYEE].getDBFieldName(),x[0],x[1],search_habit));
-			}
-			if(cso.getOtherPostalCodeRange() != null && cso.getOtherPostalCodeRange().length > 0){			
-				final String[] x = cso.getOtherPostalCodeRange();
-				sb.append(getRangeSearch(Contacts.mapping[ContactObject.POSTAL_CODE_OTHER].getDBFieldName(),x[0],x[1],search_habit));
-			}
-			if(cso.getPrivatePostalCodeRange() != null && cso.getPrivatePostalCodeRange().length > 0){			
-				final String[] x = cso.getPrivatePostalCodeRange();
-				sb.append(getRangeSearch(Contacts.mapping[ContactObject.POSTAL_CODE_HOME].getDBFieldName(),x[0],x[1],search_habit));
-			}
-			if(cso.getSalesVolumeRange() != null && cso.getSalesVolumeRange().length > 0){			
-				final String[] x = cso.getSalesVolumeRange();
-				sb.append(getRangeSearch(Contacts.mapping[ContactObject.SALES_VOLUME].getDBFieldName(),x[0],x[1],search_habit));
-			}
-
-			/*********************** * search single field * ***********************/ 
-			
-			if(cso.getGivenName() != null && cso.getGivenName().length() > 0){	
-				final String field = Contacts.mapping[ContactObject.GIVEN_NAME].getDBFieldName();
-
-				String value = cso.getGivenName();
-				value = value.replace('*', '%');
-				value = value.replace('?', '_');
-				value = value.replaceAll("'", "\\\\'");
-
-				if (value.equals("%")){
-					sb.append(' ');
-				} else if (value.indexOf('%') != -1) {
-					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector(value));
-				} else {
-					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector(new StringBuilder(value.length() + 2).append('%').append(value).append('%').toString()));
-				}
-			}
-			if(cso.getSurname() != null && cso.getSurname().length() > 0){	
-				final String field = Contacts.mapping[ContactObject.SUR_NAME].getDBFieldName();
-
-				String value = cso.getSurname();
-				value = value.replace('*', '%');
-				value = value.replace('?', '_');
-				value = value.replaceAll("'", "\\\\'");
-
-				if (value.equals("%")){
-					sb.append(' ');
-				} else if (value.indexOf('%') != -1) {
-					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector(value));
-				} else {
-					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector(new StringBuilder(value.length() + 2).append('%').append(value).append('%').toString()));
-				}
-			}
-			if(cso.getDisplayName() != null && cso.getDisplayName().length() > 0){			
-				final String field = Contacts.mapping[ContactObject.DISPLAY_NAME].getDBFieldName();
-
-				String value = cso.getDisplayName();
-				value = value.replace('*', '%');
-				value = value.replace('?', '_');
-				value = value.replaceAll("'", "\\\\'");
-
-				if (value.equals("%")){
-					sb.append(' ');
-				} else if (value.indexOf('%') != -1) {
-					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector(value));
-				} else {
-					sb.append('(').append("co.").append(field).append(" LIKE ?) ").append(search_habit).append(' ');
-					injectors.add(new StringSQLInjector(new StringBuilder(value.length() + 2).append('%').append(value).append('%').toString()));
-				}
-			}
-			if(cso.getEmail1() != null && cso.getEmail1().length() > 0){			
-				final String field = Contacts.mapping[ContactObject.EMAIL1].getDBFieldName();
-
-				String value = cso.getEmail1();
-				value = value.replace('*', '%');
-				value = value.replace('?', '_');
-				value = value.replaceAll("'", "\\\\'");
-
-				if (value.equals("%")){
-					sb.append(' ');
-				} else if (value.indexOf('%') != -1) {
-					sb.append('(').append("co.").append(field).append(" LIKE '").append(value).append("') ").append(search_habit).append(' ');
-				} else {
-					sb.append('(').append("co.").append(field).append(" LIKE '%").append(value).append("%') ").append(search_habit).append(' ');
-				}
-			}
-			if(cso.getEmail2() != null && cso.getEmail2().length() > 0){			
-				final String field = Contacts.mapping[ContactObject.EMAIL2].getDBFieldName();
-
-				String value = cso.getEmail2();
-				value = value.replace('*', '%');
-				value = value.replace('?', '_');
-				value = value.replaceAll("'", "\\\\'");
-
-				if (value.equals("%")){
-					sb.append(' ');
-				} else if (value.indexOf('%') != -1) {
-					sb.append('(').append("co.").append(field).append(" LIKE '").append(value).append("') ").append(search_habit).append(' ');
-				} else {
-					sb.append('(').append("co.").append(field).append(" LIKE '%").append(value).append("%') ").append(search_habit).append(' ');
-				}
-			}
-			if(cso.getEmail3() != null && cso.getEmail3().length() > 0){			
-				final String field = Contacts.mapping[ContactObject.EMAIL3].getDBFieldName();
-
-				String value = cso.getEmail3();
-				value = value.replace('*', '%');
-				value = value.replace('?', '_');
-				value = value.replaceAll("'", "\\\\'");
-
-				if (value.equals("%")){
-					sb.append(' ');
-				} else if (value.indexOf('%') != -1) {
-					sb.append('(').append("co.").append(field).append(" LIKE '").append(value).append("') ").append(search_habit).append(' ');
-				} else {
-					sb.append('(').append("co.").append(field).append(" LIKE '%").append(value).append("%') ").append(search_habit).append(' ');
-				}
-			}
-			if(cso.getCatgories() != null && cso.getCatgories().length() > 0){			
-				final String field = Contacts.mapping[ContactObject.CATEGORIES].getDBFieldName();
-				String value = cso.getCatgories();
-
-				if (!value.equals("*")) {
-					value = value.replace('*', '%');
-					value = value.replace('?', '_');
-					value = value.replaceAll("'", "\\\\'");
-
-					if (value.indexOf(',') != -1) {
-						final StringTokenizer sr = new StringTokenizer(value, ",");
-						sb.append('(');
-
-						while (sr.hasMoreElements()) {
-							final String t = sr.nextToken().trim();
-							sb.append("( co.").append(field).append(" LIKE '%").append(t).append("%') OR ");
-						}
-						final String x = sb.toString();
-						sb = new StringBuilder(x.substring(0, x.length() - 3));
-						sb.append(") ").append(search_habit).append(' ');						
-					}
-				}
-			}	
-			if(cso.getCompany() != null && cso.getCompany().length() > 0){			
-				final String field = Contacts.mapping[ContactObject.COMPANY].getDBFieldName();
-
-				String value = cso.getCompany();
-				value = value.replace('*', '%');
-				value = value.replace('?', '_');
-				value = value.replaceAll("'", "\\\\'");
-
-				if (value.equals("%")){
-					sb.append(' ');
-				} else if (value.indexOf('%') != -1) {
-					sb.append("( co.").append(field).append(" LIKE '").append(value).append("' ) ").append(search_habit).append(' ');	
-				} else {
-					sb.append("( co.").append(field).append(" LIKE '%").append(value).append("%' ) ").append(search_habit).append(' ');
-				}
-			}
-			if (cso.getIgnoreOwn() > 0) {
-				sb.append("( co.intfield01 != ").append(cso.getIgnoreOwn()).append(") ").append(search_habit).append(' ');
-			}
-			
-			final String tmpp = sb.toString().trim();
-			if (tmpp.lastIndexOf('(') == (tmpp.length()-1)) {
-				sb = new StringBuilder(tmpp.substring(0,tmpp.length() -2)+' ');
-			} else {
-				if (sb.toString().lastIndexOf(search_habit) != -1){
-					sb = new StringBuilder(sb.substring(0, sb.lastIndexOf(search_habit)));
-				}
-				sb.append(") AND ");
-			}
-			
-			
-			
-			/*********************** * search in all folder or subfolder * ***********************/ 
-			
-			if (cso.getEmailAutoComplete()){
-				folder = -1;
-				sb.append(' ').append("(fid = ").append(FolderObject.SYSTEM_LDAP_FOLDER_ID).append(" or fid =").append(cso.getEmailAutoCompleteFolder()).append(")  AND ("+Contacts.mapping[ContactObject.EMAIL1].getDBFieldName()+" is not null OR "+Contacts.mapping[ContactObject.EMAIL2].getDBFieldName()+" is not null OR "+Contacts.mapping[ContactObject.EMAIL3].getDBFieldName()+" is not null) AND ");
-			} else if (cso.isAllFolders()){
-				folder = -1;
-				sb.append(' ').append(cso.getAllFolderSQLINString()).append(" AND ");
-
-				/**
-				 * TODO
-				 *  Search In Subfolder
-				 */ 
-				
-				/*
-			} else if (cso.isSubfolderSearch()){
-
-				Connection readcon = null;
-				try{
-					readcon = DBPool.pickup(ctx);
-					sb.append(" ( fid in ( ");
-					sb.append(OXFolderTools.getSubfolderList(cso.getFolder(), user, memberingroup, ctx, readcon));
-					sb.append(") AND ");
-				}catch (Exception e){
-					LOG.error("An Error occurred during readconnection fetch: ",e);			
-				} finally {
-					if (readcon != null) {
-						DBPool.closeReaderSilent(ctx, readcon);
-					}
-				}
-				*/
-			} else if (cso.getFolder() != -1){
-				sb.append(" (co.fid = ").append(cso.getFolder()).append(") AND ");
-			}
-			
-		}
-		
-		// Normal Folder
-		if (folder != 0 && folder != -1) {
-			sb.append(" (co.fid = ").append(folder).append(") AND ");
-		}
-
-		sb.append(' ');
-		
-		String remove = null;
-		if (null == con) {
-			remove = sb.toString();
-		} else {
-			PreparedStatement ps = null;
-			try {
-				ps = con.prepareStatement(sb.toString());
-				final int size = injectors.size();
-				for (int i = 0; i < size; i++) {
-					injectors.get(i).inject(ps, i + 1);
-				}
-				final String tmp = ps.toString();
-				final int pos = tmp.indexOf(" WHERE");
-				remove = tmp.substring(pos);
-			} catch (final SQLException e) {
-				LOG.error(e.getMessage(), e);
-			} finally {
-				if (null != ps) {
-					try {
-						ps.close();
-					} catch (final SQLException e) {
-						LOG.error(e.getMessage(), e);
-					}
-				}
-				if (closeCon) {
-					Database.back(ctx, false, con);
-				}
-			}
-		}
-		
-
-		//String remove = sb.toString();
-		if (remove.lastIndexOf("AND") != -1){
-			remove = remove.substring(0, remove.lastIndexOf("AND"));
-		}
-		/*
-		 *  Private Flag 
-		 */
-		where = remove + " AND ((co.pflag = 1 and co.created_from = " + user	+ ") OR (co.pflag is null))";
-
-		return where;
 	}
 	
 	public String getOrder() {
 		return order;
 	}
-	
-	public String getSqlCommand() {
-		final StringBuilder sb = new StringBuilder();
-		sb.append(getSelect());
-		final String where = getWhere();
-		if (all_folders != null && all_folders.length() > 1){
-			sb.append(all_folders);
-		}
-		sb.append(where);
-		sb.append(getOrder());
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(new StringBuilder("ContactSQL Query: ").append(sb.toString()));
-		}
-		//System.out.println(new StringBuilder("ContactSQL Query: "+sb.toString()));
-		return sb.toString();
-	}
 
-	public PreparedStatement getSqlCommand(final Connection con) throws SQLException {
+	public PreparedStatement getSqlStatement(final Connection con) throws SQLException {
 		final StringBuilder sb = new StringBuilder();
 		sb.append(getSelect());
-		final String where = getWhere0();
 		if (all_folders != null && all_folders.length() > 1){
 			sb.append(all_folders);
 		}
-		sb.append(where);
+		sb.append(getWhere());
 		sb.append(getOrder());
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(new StringBuilder("ContactSQL Query: ").append(sb.toString()));
@@ -683,7 +190,11 @@ public class ContactMySql implements ContactSql {
 		return ps;
 	}
 
-	public String getWhere0() {
+	private String getWhere() {
+		
+		if (null != where) {
+			return where;
+		}
 
 		StringBuilder sb = new StringBuilder(" WHERE co.cid = "+ctx.getContextId()+" AND ");
 
@@ -1140,9 +651,8 @@ public class ContactMySql implements ContactSql {
 		/*
 		 *  Private Flag 
 		 */
-		return /*where =*/ remove + " AND ((co.pflag = 1 and co.created_from = " + user	+ ") OR (co.pflag is null))";
-
-		//return where;
+		where = remove + " AND ((co.pflag = 1 and co.created_from = " + user	+ ") OR (co.pflag is null))";
+		return where;
 	}
 
 	public String getSelect() {
@@ -1155,10 +665,6 @@ public class ContactMySql implements ContactSql {
 
 	public void setOrder(final String order) {
 		this.order = order;
-	}
-
-	public void setWhere(final String where) {
-		this.where = where;
 	}
 
 	public void setFolder(final int folder) {
@@ -1255,51 +761,56 @@ public class ContactMySql implements ContactSql {
 		return sb.toString();
 	}
 
-	public StringBuilder buildAllFolderSearchString(final int user, final int[] group, final Session so, final Connection readcon) throws SQLException, DBPoolingException, OXException, SearchIteratorException{
-		
-		SearchIterator si;
-		try{
-			si = OXFolderTools.getAllVisibleFoldersIteratorOfModule(user, group, UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx).getAccessibleModules(), FolderObject.CONTACT, ctx);
-		} catch (OXException e){
+	public StringBuilder buildAllFolderSearchString(final int user, final int[] group, final Session so,
+			final Connection readcon) throws SQLException, DBPoolingException, OXException, SearchIteratorException {
+
+		SearchIterator<FolderObject> si;
+		try {
+			si = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(user, group, UserConfigurationStorage
+					.getInstance().getUserConfigurationSafe(so.getUserId(), ctx).getAccessibleModules(),
+					FolderObject.CONTACT, ctx);
+		} catch (OXException e) {
 			throw e;
 		}
-			
-        EffectivePermission oclp = null;
-        FolderObject fo = null;
 
-        final StringBuilder read_all = new StringBuilder();
-        final StringBuilder read_own = new StringBuilder();
-        
-        StringBuilder tmp;
-        
-        while (si.hasNext()) {
-            fo  = (FolderObject)si.next();
-            oclp = fo.getEffectiveUserPermission(user, UserConfigurationStorage.getInstance().getUserConfigurationSafe(so.getUserId(), ctx));            
-           
-            if (!oclp.canReadAllObjects() && oclp.canReadOwnObjects()){
-            	tmp = new StringBuilder(Integer.toString(fo.getObjectID())).append(',');
-            	read_own.append(tmp);  
-            } else if (oclp.canReadAllObjects()){
-            	tmp = new StringBuilder(Integer.toString(fo.getObjectID())).append(',');
-            	read_all.append(tmp);  
-            }
-        }
-                
-        final StringBuilder result = new StringBuilder("");
-        
-        if (read_all.length() > 0 && read_own.length() > 0){
-        	read_all.deleteCharAt(read_all.lastIndexOf(","));
-        	read_own.deleteCharAt(read_own.lastIndexOf(","));
-        	result.append(new StringBuilder("((co.fid IN ("+read_all+")) OR (co.fid IN ("+read_own+") and co.created_from = "+user+" ))"));
-        } else if (read_all.length() < 1&& read_own.length() > 0){
-        	read_own.deleteCharAt(read_own.lastIndexOf(","));
-        	result.append(new StringBuilder("(co.fid IN ("+read_own+") AND co.created_from = "+user+" )"));
-        } else if (read_all.length() > 0&& read_own.length() < 1){
-        	read_all.deleteCharAt(read_all.lastIndexOf(","));
-        	result.append(new StringBuilder("(co.fid IN ("+read_all+")) "));
-        } else {
-        	result.append("(co.fid IN (-1)) ");
-        }
+		EffectivePermission oclp = null;
+		FolderObject fo = null;
+
+		final StringBuilder read_all = new StringBuilder();
+		final StringBuilder read_own = new StringBuilder();
+
+		StringBuilder tmp;
+
+		while (si.hasNext()) {
+			fo = si.next();
+			oclp = fo.getEffectiveUserPermission(user, UserConfigurationStorage.getInstance().getUserConfigurationSafe(
+					so.getUserId(), ctx));
+
+			if (!oclp.canReadAllObjects() && oclp.canReadOwnObjects()) {
+				tmp = new StringBuilder(Integer.toString(fo.getObjectID())).append(',');
+				read_own.append(tmp);
+			} else if (oclp.canReadAllObjects()) {
+				tmp = new StringBuilder(Integer.toString(fo.getObjectID())).append(',');
+				read_all.append(tmp);
+			}
+		}
+
+		final StringBuilder result = new StringBuilder("");
+
+		if (read_all.length() > 0 && read_own.length() > 0) {
+			read_all.deleteCharAt(read_all.lastIndexOf(","));
+			read_own.deleteCharAt(read_own.lastIndexOf(","));
+			result.append(new StringBuilder("((co.fid IN (" + read_all + ")) OR (co.fid IN (" + read_own
+					+ ") and co.created_from = " + user + " ))"));
+		} else if (read_all.length() < 1 && read_own.length() > 0) {
+			read_own.deleteCharAt(read_own.lastIndexOf(","));
+			result.append(new StringBuilder("(co.fid IN (" + read_own + ") AND co.created_from = " + user + " )"));
+		} else if (read_all.length() > 0 && read_own.length() < 1) {
+			read_all.deleteCharAt(read_all.lastIndexOf(","));
+			result.append(new StringBuilder("(co.fid IN (" + read_all + ")) "));
+		} else {
+			result.append("(co.fid IN (-1)) ");
+		}
 
 		return result;
 	}
@@ -1387,9 +898,8 @@ public class ContactMySql implements ContactSql {
 		return updater;
 	}
 	
-	public StringBuilder iFgetContactById(StringBuilder sb){
-		sb = new StringBuilder("SELECT ").append(sb);
-		sb.deleteCharAt(sb.length()-1);
+	public StringBuilder iFgetContactById(String fieldList){
+		final StringBuilder sb = new StringBuilder("SELECT ").append(fieldList);
 		sb.append(" from prg_contacts AS co ");
 		return sb;
 	}

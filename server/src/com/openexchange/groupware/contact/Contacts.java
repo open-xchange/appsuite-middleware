@@ -836,8 +836,8 @@ public class Contacts implements DeleteListener {
 				csql.setSearchHabit(" AND ");
 
 				try {
-					stmt = readcon.createStatement();
-					rs = stmt.executeQuery(csql.getSqlCommand());
+					stmt = cs.getSqlStatement(readcon);
+					rs = ((PreparedStatement) stmt).executeQuery();
 					if (rs.next()) {
 						throw EXCEPTIONS.create(67, Integer.valueOf(ctx.getContextId()), Integer.valueOf(co
 								.getObjectID()));
@@ -1076,15 +1076,16 @@ public class Contacts implements DeleteListener {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < 650; i++) {
 			if (mapping[i] != null) {
+				sb.append(',');
 				sb.append("co.");
 				sb.append(mapping[i].getDBFieldName());
-				sb.append(',');
 			}
 		}
-		sb = contactSQL.iFgetContactById(sb);
+		sb.deleteCharAt(0);
+		sb = contactSQL.iFgetContactById(sb.toString());
 		contactSQL.setSelect(sb.toString());
 		contactSQL.setInternalUser(userid);
-		co = fillContactObject(contactSQL.getSqlCommand(), user, memberInGroups, ctx, uc, readCon);
+		co = fillContactObject(contactSQL, user, memberInGroups, ctx, uc, readCon);
 
 		return co;
 	}
@@ -1114,22 +1115,23 @@ public class Contacts implements DeleteListener {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < 650; i++) {
 			if (mapping[i] != null) {
+				sb.append(',');
 				sb.append("co.");
 				sb.append(mapping[i].getDBFieldName());
-				sb.append(',');
 			}
 		}
-		sb = contactSQL.iFgetContactById(sb);
+		sb.deleteCharAt(0);
+		sb = contactSQL.iFgetContactById(sb.toString());
 		contactSQL.setSelect(sb.toString());
 		contactSQL.setObjectID(objectId);
-		co = fillContactObject(contactSQL.getSqlCommand(), userId, memberInGroups, ctx, uc, readCon);
+		co = fillContactObject(contactSQL, userId, memberInGroups, ctx, uc, readCon);
 
 		return co;
 	}
 
 	@OXThrowsMultiple(category = { Category.CODE_ERROR, Category.CODE_ERROR }, desc = { "25", "26" }, exceptionId = {
 			25, 26 }, msg = { "Contact not found! Context %1$d", "Unable to load contact: Context %1$d" })
-	public static ContactObject fillContactObject(final String sql_string, final int user, final int[] group,
+	private static ContactObject fillContactObject(final ContactSql contactSQL, final int user, final int[] group,
 			final Context ctx, final UserConfiguration uc, final Connection readCon) throws OXException {
 
 		final ContactObject co = new ContactObject();
@@ -1137,8 +1139,8 @@ public class Contacts implements DeleteListener {
 		ResultSet rs = null;
 
 		try {
-			stmt = readCon.createStatement();
-			rs = stmt.executeQuery(sql_string);
+			stmt = contactSQL.getSqlStatement(readCon);
+			rs = ((PreparedStatement) stmt).executeQuery();
 
 			if (rs.next()) {
 				int cnt = 1;
@@ -2089,8 +2091,8 @@ public class Contacts implements DeleteListener {
 			cs.setObjectID(objectId);
 
 			readCon = DBPool.pickup(ctx);
-			st = readCon.createStatement();
-			rs = st.executeQuery(cs.getSqlCommand());
+			st = cs.getSqlStatement(readCon);
+			rs = ((PreparedStatement) st).executeQuery();
 
 			int fid = -1;
 			int created_from = -1;
@@ -2151,8 +2153,8 @@ public class Contacts implements DeleteListener {
 			cs.setObjectID(objectId);
 
 			readCon = DBPool.pickup(ctx);
-			st = readCon.createStatement();
-			rs = st.executeQuery(cs.getSqlCommand());
+			st = cs.getSqlStatement(readCon);
+			rs = ((PreparedStatement) st).executeQuery();
 
 			int fid = -1;
 			int created_from = -1;
@@ -2253,8 +2255,8 @@ public class Contacts implements DeleteListener {
 			cs.setObjectID(objectId);
 
 			readCon = DBPool.pickup(ctx);
-			st = readCon.createStatement();
-			rs = st.executeQuery(cs.getSqlCommand());
+			st = cs.getSqlStatement(readCon);
+			rs = ((PreparedStatement) st).executeQuery();
 
 			int fid = -1;
 			int created_from = -1;
@@ -2444,7 +2446,7 @@ public class Contacts implements DeleteListener {
 		ResultSet rs = null;
 
 		try {
-			read = readcon.createStatement();
+			//read = readcon.createStatement();
 			del = writecon.createStatement();
 
 			try {
@@ -2471,8 +2473,9 @@ public class Contacts implements DeleteListener {
 			final ContactSql cs = new ContactMySql(so);
 			cs.setFolder(fid);
 			cs.setSelect(cs.iFgetRightsSelectString());
-
-			rs = read.executeQuery(cs.getSqlCommand());
+			
+			read = cs.getSqlStatement(readcon);
+			rs = ((PreparedStatement) read).executeQuery();
 
 			final EventClient ec = new EventClient(so);
 

@@ -106,7 +106,7 @@ public interface ContactInterface {
 	 * @return A SearchIterator contains Task objects
 	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
 	 */	 
-	public SearchIterator getContactsInFolder(int folderId, int from, int to, int orderBy, String orderDir, int[] cols) throws OXException;
+	public SearchIterator<ContactObject> getContactsInFolder(int folderId, int from, int to, int orderBy, String orderDir, int[] cols) throws OXException;
 
 	/**
 	 * Lists all contacts that match the given search
@@ -117,7 +117,7 @@ public interface ContactInterface {
 	 * @return A SearchIterator contains ContactObject
 	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
 	 */	
-	public SearchIterator getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, String orderDir, int[] cols) throws OXException;
+	public SearchIterator<ContactObject> getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, String orderDir, int[] cols) throws OXException;
 	
 	/**
 	 * Lists all contacts where the firstname, lastname or the displayname match the given searchpattern
@@ -130,7 +130,7 @@ public interface ContactInterface {
 	 * @return A SearchIterator contains ContactObject
 	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
 	 */	
-	public SearchIterator searchContacts(String searchpattern, boolean startletter, int folderId, int orderBy, String orderDir, int[] cols) throws OXException;
+	public SearchIterator<ContactObject> searchContacts(String searchpattern, boolean startletter, int folderId, int orderBy, String orderDir, int[] cols) throws OXException;
 	
 	
 	/**
@@ -162,7 +162,7 @@ public interface ContactInterface {
 	 * @return A SearchIterator contains AppointmentObject
 	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
 	 */	 
-	public SearchIterator getModifiedContactsInFolder(int folderId, int[] cols, Date since) throws OXException;
+	public SearchIterator<ContactObject> getModifiedContactsInFolder(int folderId, int[] cols, Date since) throws OXException;
 	
 	/**
 	 * Lists all deleted objects in a folder
@@ -173,7 +173,7 @@ public interface ContactInterface {
 	 * @return A SearchIterator contains AppointmentObject
 	 * @throws OXException, OXPermissionException, OXFolderObjectNotFoundException
 	 */	
-	public SearchIterator getDeletedContactsInFolder(int folderId, int[] cols, Date since) throws OXException;
+	public SearchIterator<ContactObject> getDeletedContactsInFolder(int folderId, int[] cols, Date since) throws OXException;
 	
 	public void deleteContactObject(final int oid, final int fuid, final Date client_date) throws OXObjectNotFoundException, OXConflictException, OXException;
 	
@@ -188,7 +188,7 @@ public interface ContactInterface {
 	 * @return A SearchIterator contains ContactObjects
 	 * @throws OXException
 	 */	
-	public SearchIterator getObjectsById(int[][] objectIdAndInFolder, int cols[]) throws OXException, Exception;
+	public SearchIterator<ContactObject> getObjectsById(int[][] objectIdAndInFolder, int cols[]) throws OXException, Exception;
 	
 	public int getFolderId();
 	

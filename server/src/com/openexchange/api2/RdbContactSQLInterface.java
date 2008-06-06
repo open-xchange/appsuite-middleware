@@ -80,7 +80,6 @@ import com.openexchange.groupware.contact.Classes;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactException;
 import com.openexchange.groupware.contact.ContactExceptionFactory;
-import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactMySql;
 import com.openexchange.groupware.contact.ContactSql;
 import com.openexchange.groupware.contact.Contacts;
@@ -108,7 +107,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 		component=EnumComponent.CONTACT
 	)
 	
-public class RdbContactSQLInterface implements ContactSQLInterface, ContactInterface {
+public class RdbContactSQLInterface implements ContactSQLInterface {
 
 	private static final String ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D = "Unable to load objects. Context %1$d User %2$d";
 	private final int userId;
@@ -258,8 +257,9 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 			Statement stmt = null;
 			ResultSet rs = null;
 			try {
-				stmt = readCon.createStatement();
-				rs = stmt.executeQuery(contactSQL.getSqlCommand());
+				stmt = contactSQL.getSqlStatement(readCon);
+				rs = ((PreparedStatement) stmt).executeQuery();
+
 				if (rs.next()) {
 					retval = rs.getInt(1);
 				}
@@ -298,7 +298,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 							"An error occurred during the load of folder objects. Context %1$d Folder %2$d User %3$d"
 						}
 	)
-	public SearchIterator<?> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
+	public SearchIterator<ContactObject> getContactsInFolder(final int folderId, final int from, final int to, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
 		boolean error = false;
 		String orderDir = orderMechanism;
 		int orderBy = order_field;
@@ -330,7 +330,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 			//throw new OXException("getContactsInFolder() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
 		}
 		
-		SearchIterator<?> si = null;
+		SearchIterator<ContactObject> si = null;
 		ResultSet rs = null;
 		Statement stmt = null;
 		try {
@@ -352,7 +352,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 				}
 			}
 			
-			stmt = readCon.createStatement();
+			//stmt = readCon.createStatement();
 
 			
 			final int dest = to - from;
@@ -368,9 +368,10 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 				cs.setOrder(limits);
 			}
 
-			final String select = cs.iFgetColsString(cols).toString();
-			cs.setSelect(select);
-			rs = stmt.executeQuery(cs.getSqlCommand());
+			cs.setSelect(cs.iFgetColsString(cols).toString());
+			
+			stmt = cs.getSqlStatement(readCon);
+			rs = ((PreparedStatement) stmt).executeQuery();
 
 			si = new ContactObjectIterator(rs, stmt, cols, false, readCon);
             //return new PrefetchIterator(new ContactObjectIterator(rs, stmt, cols, false, readCon));
@@ -407,7 +408,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 			}
 		}			
 		
-		return new PrefetchIterator(si);
+		return new PrefetchIterator<ContactObject>(si);
 	}
 	
 	@OXThrowsMultiple(
@@ -430,7 +431,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 							ContactException.INIT_CONNECTION_FROM_DBPOOL
 						}
 	)
-	public SearchIterator<?> getContactsByExtendedSearch(final ContactSearchObject searchobject,  final int order_field, final String orderMechanism, final int[] cols) throws OXException {
+	public SearchIterator<ContactObject> getContactsByExtendedSearch(final ContactSearchObject searchobject,  final int order_field, final String orderMechanism, final int[] cols) throws OXException {
 		boolean error = false;
 		String orderDir = orderMechanism;
 		int orderBy = order_field;
@@ -466,11 +467,11 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 			}
 		}
 		
-		SearchIterator si = null;
+		SearchIterator<ContactObject> si = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
-			final ContactSql cs = new ContactMySql(session, ctx, readcon);
+			final ContactSql cs = new ContactMySql(session, ctx);
 			
 			if (!(searchobject.isAllFolders() || searchobject.getEmailAutoComplete())){	
 				cs.setFolder(folderId);
@@ -500,18 +501,11 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 			cs.setOrder(order);
 			
 			cs.setContactSearchObject(searchobject);
-			
-			final String select = cs.iFgetColsString(cols).toString();
-			cs.setSelect(select);
-			stmt = cs.getSqlCommand(readcon);
+
+			cs.setSelect(cs.iFgetColsString(cols).toString());
+			stmt = cs.getSqlStatement(readcon);
 			rs = ((PreparedStatement) stmt).executeQuery();
 			si = new ContactObjectIterator(rs, stmt, cols, false, readcon);
-			
-//			stmt = readcon.createStatement();
-//			final String select = cs.iFgetColsString(cols).toString();
-//			cs.setSelect(select);
-//			rs = stmt.executeQuery(cs.getSqlCommand());
-//			si = new ContactObjectIterator(rs, stmt, cols, false, readcon);
 		} catch (final DBPoolingException e){
 			error = true;
 			throw EXCEPTIONS.create(19,e);
@@ -547,7 +541,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 			}
 		}	
 
-		return new PrefetchIterator(si);
+		return new PrefetchIterator<ContactObject>(si);
 	}
 	
 	@OXThrowsMultiple(
@@ -568,7 +562,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 							"An error occurred during the load of folder objects by a simple search. Context %1$d Folder %2$d User %3$d"
 						}
 	)
-	public SearchIterator searchContacts(final String searchpattern, final boolean startletter, final int folderId, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
+	public SearchIterator<ContactObject> searchContacts(final String searchpattern, final boolean startletter, final int folderId, final int order_field, final String orderMechanism, final int[] cols) throws OXException {
 		boolean error = false;
 		String orderDir = orderMechanism;
 		int orderBy = order_field;
@@ -582,9 +576,6 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 		try{
 			readcon = DBPool.pickup(ctx);
 		} catch (final DBPoolingException e) {
-			if (readcon != null) {
-				DBPool.closeReaderSilent(ctx, readcon);
-			}
 			throw EXCEPTIONS.create(20,e);
 			//throw new OXException("UNABLE TO GET READ CONNECTION", e);
 		}
@@ -603,7 +594,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 			//throw new OXException("getContactsInFolder() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
 		}	
 
-		SearchIterator si = null;
+		SearchIterator<ContactObject> si = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
@@ -641,11 +632,10 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 			}
 			
 			cs.setContactSearchObject(cso);
-			
-			stmt = readcon.createStatement();
-			final String select = cs.iFgetColsString(cols).toString();
-			cs.setSelect(select);
-			rs = stmt.executeQuery(cs.getSqlCommand());
+
+			cs.setSelect(cs.iFgetColsString(cols).toString());
+			stmt = cs.getSqlStatement(readcon);
+			rs = ((PreparedStatement) stmt).executeQuery();
 			si = new ContactObjectIterator(rs, stmt, cols, false, readcon);
 		} catch (final SearchIteratorException e){
 			error = true;
@@ -679,7 +669,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 			}
 		}	
 		
-		return new PrefetchIterator(si);		
+		return new PrefetchIterator<ContactObject>(si);		
 	}
 	
 	@OXThrowsMultiple(
@@ -791,7 +781,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 							"An error occurred during the load of modified objects from a folder. Context %1$d Folder %2$d User %3$d"
 						}
 	)
-	public SearchIterator getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
+	public SearchIterator<ContactObject> getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
 		boolean error = false;
 		Connection readCon = null;	
 		try{
@@ -815,7 +805,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 			//throw new OXException("getModifiedContactsInFolder() called with a non-Contact-Folder! (cid="+sessionobject.getContext().getContextId()+" fid="+folderId+')');
 		}
 		
-		SearchIterator si = null;
+		SearchIterator<ContactObject> si = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
@@ -841,12 +831,14 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 				cs.setFolder(folderId);
 			}
 			
-			stmt = readCon.createStatement();
+			//stmt = readCon.createStatement();
 
 			cs.getAllChangedSince(since.getTime());
-			final String select = cs.iFgetColsString(cols).toString();
-			cs.setSelect(select);
-			rs = stmt.executeQuery(cs.getSqlCommand());
+			cs.setSelect(cs.iFgetColsString(cols).toString());
+			
+			stmt = cs.getSqlStatement(readCon);
+			rs = ((PreparedStatement) stmt).executeQuery();
+			
 			si = new ContactObjectIterator(rs, stmt, cols, false, readCon);
 		} catch (final SearchIteratorException e){
 			error = true;
@@ -879,7 +871,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 				}
 			}
 		}	
-		return new PrefetchIterator(si);
+		return new PrefetchIterator<ContactObject>(si);
 	}
 
 	@OXThrowsMultiple(
@@ -894,9 +886,9 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 							"An error occurred during the load of deleted objects from a folder. Context %1$d Folder %2$d User %3$d"
 						}
 	)
-	public SearchIterator getDeletedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
+	public SearchIterator<ContactObject> getDeletedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
 		boolean error = false;
-		SearchIterator si = null;
+		SearchIterator<ContactObject> si = null;
 		Connection readcon = null;
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -906,13 +898,15 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 			final ContactSql cs = new ContactMySql(session, ctx);
 			cs.setFolder(folderId);
 
-			stmt = readcon.createStatement();
+			//stmt = readcon.createStatement();
 
 			cs.getAllChangedSince(since.getTime());
-			final String select = cs.iFgetColsStringFromDeleteTable(cols).toString();
-			cs.setSelect(select);
+			cs.setSelect(cs.iFgetColsStringFromDeleteTable(cols).toString());
 			cs.setOrder(" ORDER BY co.field02 ");
-			rs = stmt.executeQuery(cs.getSqlCommand());
+			
+			stmt = cs.getSqlStatement(readcon);
+			rs = ((PreparedStatement) stmt).executeQuery();
+			
 			si = new ContactObjectIterator(rs, stmt, cols, false, readcon);
 		} catch (final SearchIteratorException e) {
 			error = true;
@@ -945,7 +939,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 				}
 			}
 		}	
-		return new PrefetchIterator(si);
+		return new PrefetchIterator<ContactObject>(si);
 	}
 
 	@OXThrowsMultiple(
@@ -1115,10 +1109,10 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 							"The contact you requested is not valid."
 						}
 	)
-	public SearchIterator getObjectsById(final int[][] object_id, final int[] cols) throws OXException {
+	public SearchIterator<ContactObject> getObjectsById(final int[][] object_id, final int[] cols) throws OXException {
 		boolean error = false;
 		Connection readcon = null;
-		SearchIterator si = null;
+		SearchIterator<ContactObject> si = null;
 		Statement stmt = null;
 		ResultSet rs = null;
 		try{
@@ -1126,16 +1120,15 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 	
 			final ContactSql contactSQL = new ContactMySql(session, ctx);
 			contactSQL.setSelect(contactSQL.iFgetColsString(cols).toString());			
-			contactSQL.setObjectArray(object_id);			
+			contactSQL.setObjectArray(object_id);
 			
-			stmt = readcon.createStatement();
-			rs = stmt.executeQuery(contactSQL.getSqlCommand());
+			stmt = contactSQL.getSqlStatement(readcon);
+			rs = ((PreparedStatement) stmt).executeQuery();
 			
 			if (object_id.length == 1 && !rs.first()){
 				throw EXCEPTIONS.createOXObjectNotFoundException(59);
-			} else {
-				rs.beforeFirst();
 			}
+			rs.beforeFirst();
 			
 			si = new ContactObjectIterator(rs,stmt,cols,true,readcon);
 		} catch (final DBPoolingException e) {
@@ -1168,7 +1161,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 				}
 			}
 		}	
-		return new PrefetchIterator(si);
+		return new PrefetchIterator<ContactObject>(si);
 	}
 	
 	public static boolean performSecurityReadCheck(final int fid, final int created_from, final int user, final int[] group, final Session so, final Connection readcon, final Context ctx) {
@@ -1229,7 +1222,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
 		return co;
 	}
 
-	private class ContactObjectIterator implements SearchIterator {
+	private class ContactObjectIterator implements SearchIterator<ContactObject> {
 
         private ContactObject nexto; 
         private ContactObject pre;
@@ -1254,7 +1247,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
     							ERR_UNABLE_TO_LOAD_OBJECTS_CONTEXT_1$D_USER_2$D
     						}
     	)
-		private ContactObjectIterator(final ResultSet rs,final Statement stmt, final int[] cols, final boolean securecheck, final Connection readcon) throws SearchIteratorException {
+		public ContactObjectIterator(final ResultSet rs,final Statement stmt, final int[] cols, final boolean securecheck, final Connection readcon) throws SearchIteratorException {
     		this.warnings =  new ArrayList<AbstractOXException>(2);
     		this.rs = rs;
 			this.stmt = stmt;
@@ -1324,7 +1317,7 @@ public class RdbContactSQLInterface implements ContactSQLInterface, ContactInter
     							"Unable to get next Object. Context %1$d User %2$d"
     						}
     	)
-		public Object next() throws OXException, SearchIteratorException {
+		public ContactObject next() throws OXException, SearchIteratorException {
 		    try {
 				if (rs.next()) {
 					try{
