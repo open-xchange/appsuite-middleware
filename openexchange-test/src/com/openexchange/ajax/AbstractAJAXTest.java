@@ -25,6 +25,7 @@ import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractUploadParser;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.test.AjaxInit;
@@ -49,8 +50,6 @@ public abstract class AbstractAJAXTest extends TestCase {
 	protected static final String jsonTagTimestamp = "timestamp";
 	
 	protected static final String jsonTagError = "error";
-	
-	private static Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\((.*?)\\);");
 	
 	private static final Map<String, String> testArgsMap = new HashMap<String, String>();
 	
@@ -293,7 +292,7 @@ public abstract class AbstractAJAXTest extends TestCase {
 	}
 
     public static JSONObject extractFromCallback(String html) throws JSONException {
-		Matcher matcher = CALLBACK_ARG_PATTERN.matcher(html);
+		Matcher matcher = AbstractUploadParser.CALLBACK_ARG_PATTERN.matcher(html);
 		if(matcher.find()){
 			return new JSONObject(matcher.group(1));
 		}
