@@ -269,11 +269,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				/*
 				 * Reset end index if out of range
 				 */
-				if (toIndex > msgs.length) {
+				if (toIndex >= msgs.length) {
 					toIndex = msgs.length;
 				}
 				final Message[] tmp = msgs;
-				final int retvalLength = toIndex - fromIndex + 1;
+				final int retvalLength = toIndex - fromIndex;
 				msgs = new Message[retvalLength];
 				System.arraycopy(tmp, fromIndex, msgs, 0, retvalLength);
 			}
@@ -371,11 +371,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker {
 				/*
 				 * Reset end index if out of range
 				 */
-				if (toIndex > msgs.length) {
+				if (toIndex >= msgs.length) {
 					toIndex = msgs.length;
 				}
 				final Message[] tmp = msgs;
-				final int retvalLength = toIndex - fromIndex + 1;
+				final int retvalLength = toIndex - fromIndex;
 				msgs = new ExtendedMimeMessage[retvalLength];
 				System.arraycopy(tmp, fromIndex, msgs, 0, retvalLength);
 			}
