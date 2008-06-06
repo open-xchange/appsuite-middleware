@@ -55,47 +55,169 @@ package com.openexchange.ajax.config.actions;
  */
 public enum Tree {
 
-    AvailableModules("/availableModules"),
-
-    ContextID("/context_id"),
-
-    CurrentTime("/currentTime"),
-
-    FastGUI("/fastgui"),
-
+    /** A string containing GUI-specific settings (currently, it is a huge JSON object). */
     GUI("/gui"),
 
-    Identifier("/identifier"),
+    /** A string containing GUI-specific settings. This is a JSON object that must be kept small for performance. */
+    FastGUI("/fastgui"),
+    
+    /** the unique identifier of the context (read-only, added 2008-01-28). */
+    ContextID("/context_id"),
 
+    /** the unique identifier of the user (read-only). */
+    Identifier("/identifier"),
+    
+    /** the unique identifier of the contact data of the user (read-only). */
+    ContactID("/contact_id"),
+    
+    /** the configured language of the user. */
     Language("/language"),
 
-    MaxUploadIdleTimeout("/maxUploadIdleTimeout"),
-
+    /** the configured timezone of the user. */
     TimeZone("/timezone"),
 
-    PrivateAppointmentFolder("/folder/calendar"),
+    /** send a mail notification for appointments */
+    CalendarNotification("/calendarnotification"),
+    
+    /** send a mail notification for tasks */
+    TaskNotification("/tasknotification"),
+    
+    /** Selectable times for GUI reload */
+    ReloadTimes("/reloadTimes"),
+    
+    /** Version string of the server. */
+    ServerVersion("/serverVersion"),
+    
+    /** User timezone specific long of the current server time. */
+    CurrentTime("/currentTime"),
+    
+    /** Timeout after that idle uploads are deleted. */
+    MaxUploadIdleTimeout("/maxUploadIdleTimeout"),
 
-    PrivateContactFolder("/folder/contacts"),
-
+    /** the standard task folder (read-only) */
     PrivateTaskFolder("/folder/tasks"),
 
-    MailFilter("/modules/mailfilter"),
+    /** the standard calendar folder (read-only) */
+    PrivateAppointmentFolder("/folder/calendar"),
     
-    DefaultAddress("/modules/mail/defaultaddress"),
+    /** the standard contacts folder (read-only) */
+    PrivateContactFolder("/folder/contacts"),
+    
+    /** the private infostore folder (read-only) */
+    PrivateInfostoreFolder("/folder/infostore"),
+    
+    /** If external participants without email should be shown. */
+    ShowWithoutEmail("/participants/showWithoutEmail"),
+    
+    /** Enables participant selection dialog for appointments and tasks. (read-only, added 2008-04-30/SP4) */
+    ShowParticipantDialog("/participants/showDialog"),
 
+    /** all email addresses of the user including the primary address (read-only, added 2008-02-25) */
     MailAddresses("/modules//mail/addresses"),
 
-    SendAddress("/modules//mail/sendaddress"),
+    /** (added 2008-02-25) */
+    AppendMailText("/modules/mail/appendmailtext"),
     
+    /** Alters default setting whether external images contained in HTML content are allowed or not (added 2008-05-27) */
+    AllowHtmlImages("/modules/mail/allowhtmlimages"),
+    
+    /** color quoted lines (added 2008-02-25) */
+    ColorQuoted("/modules/mail/colorquoted"),
+    
+    /** primary email address of the user (read-only, added 2008-02-25) */
+    DefaultAddress("/modules/mail/defaultaddress"),
+    
+    /** delete emails or move to trash (added 2008-02-25) */
+    DeleteMail("/modules/mail/deletemail"),
+    
+    /** display emoticons as graphics (added 2008-02-25) */
+    Emoticons("/modules/mail/emoticons"),
+    
+    /** identifier of the folder with the mail drafts (read-only, added 2008-02-25) */
+    DraftsFolder("/modules/mail/defaultFolder/drafts"),
+    
+    /** identifier of the folder that gets all incoming mails (read-only, added 2008-02-25) */
     InboxFolder("/modules/mail/defaultFolder/inbox"),
     
+    /** identifier of the folder with the sent mails (read-only, added 2008-02-25) */
     SentFolder("/modules/mail/defaultFolder/sent"),
     
+    /** identifier of the folder with the spam mails (read-only, added 2008-02-25) */
+    SpamFolder("/modules/mail/defaultFolder/spam"),
+    
+    /** identifier of the folder with the deleted mails (read-only, added 2008-02-25) */
     TrashFolder("/modules/mail/defaultFolder/trash"),
+    
+    /** forward messages as inline or attachment (added 2008-02-25) */
+    ForwardMessage("/modules/mail/forwardmessage"),
+    
+    /** activate inlining of HTML attachments (added 2008-02-25) */
+    InlineAttachments("/modules/mail/forwardmessage/inlineattachments"),
+    
+    /** (added 2008-02-25) */
+    LineWrap("/modules/mail/linewrap"),
+    
+    /** if mail module is enabled or not (added 2008-02-25) */
+    MailEnabled("/modules/mail/module"),
+    
+    /** one email address out of the addresses list that are email sent with (added 2008-02-25) */
+    SendAddress("/modules//mail/sendaddress"),
+    
+    /** Spam Button should be displayed in GUI or not (added 2008-02-25) */
+    SpamButton("/modules/mail/spambutton"),
+    
+    /** attach vcard when sending mails (added 2008-02-25) */
+    AppendVcard("/modules/mail/vcard"),
+    
+    /** header(s) identifying phishing headers (added 2008-05-27) */
+    PhishingHeaders("/modules/mail/phishingheaders"),
+    
+    /** */
+    CalendarEnabled("/modules/calendar/module"),
+    
+    /** */
+    CalendarConflict("/modules/calendar/calendar_conflict"),
+    
+    /** */
+    CalendarFreeBusy("/modules/calendar/calendar_freebusy"),
 
+    /** */
+    CalendarTeamview("/modules/calendar/calendar_teamview"),
+    
+    /** */
+    ContactsEnabled("/modules/contacts/module"),
+    
+    /** */
+    TasksEnabled("/modules/tasks/module"),
+    
+    /** */
+    DelegateTasks("/modules/tasks/delegate_tasks"),
+    
+    /** */
+    InfostoreEnabled("/modules/infostore/module"),
+    
+    /** */
+    ICal("/modules/interfaces/ical"),
+    
+    /** */
+    VCard("/modules/interfaces/vcard"),
+    
+    /** */
+    SyncML("/modules/interfaces/syncml"),
+    
+    /** */
+    PublicFolders("/modules/folder/public_folders"),
+    
+    /** */
+    ReadCreateSharedFolders("/modules/folder/read_create_shared_folders"),
+    
+    /** Extras link in the configuration (read only, added 2008-04-29) */
     Extras("/modules/com.openexchange.extras/module"),
+    
+    AvailableModules("/availableModules"),
 
-    ShowParticipantDialog("/participants/showDialog");
+    MailFilter("/modules/mailfilter"),
+    ;
 
     private final String path;
 
