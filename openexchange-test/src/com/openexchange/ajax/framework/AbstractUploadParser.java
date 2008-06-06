@@ -63,7 +63,7 @@ import com.openexchange.ajax.container.Response;
  */
 public abstract class AbstractUploadParser<T extends AbstractAJAXResponse> extends AbstractAJAXParser<T> {
 
-    private static final Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\((\\{.*?\\})\\);");
+    public static final Pattern CALLBACK_ARG_PATTERN = Pattern.compile("callback\\s*\\((\\{.*?\\})\\);");
 
     /**
      * @param failOnError
