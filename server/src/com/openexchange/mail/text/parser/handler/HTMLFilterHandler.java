@@ -78,12 +78,16 @@ import com.openexchange.mail.text.parser.HTMLHandler;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link HTMLFilterHandler}
+ * {@link HTMLFilterHandler} - The HTML white-list filter
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
 public final class HTMLFilterHandler implements HTMLHandler {
+
+	private static final String COMMENT_END = "-->";
+
+	private static final String COMMENT_START = "<!--";
 
 	private static final String WARN_USING_DEFAULT_WHITE_LIST = "Using default white list";
 
@@ -318,7 +322,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 	}
 
 	public void handleComment(final String comment) {
-		htmlBuilder.append("<!--").append(comment).append("-->");
+		htmlBuilder.append(COMMENT_START).append(comment).append(COMMENT_END);
 	}
 
 	public void handleDocDeclaration(final String docDecl) {
