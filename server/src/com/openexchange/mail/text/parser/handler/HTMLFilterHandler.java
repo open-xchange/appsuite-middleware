@@ -685,9 +685,6 @@ public final class HTMLFilterHandler implements HTMLHandler {
 			final Map<String, Set<String>> attribMap = new HashMap<String, Set<String>>();
 			while (attribMatcher.find()) {
 				final String values = attribMatcher.group(2);
-				final String tag = m.group(1);
-				final String attrList = m.group(2);
-				final String attr = attribMatcher.group(1);
 				if (null == values) {
 					attribMap.put(attribMatcher.group(1).toLowerCase(Locale.ENGLISH), null);
 				} else if (values.length() == 0) {
