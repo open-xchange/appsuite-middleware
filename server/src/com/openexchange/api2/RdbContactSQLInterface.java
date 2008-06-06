@@ -361,8 +361,10 @@ public class RdbContactSQLInterface implements ContactSQLInterface {
 				limits = " LIMIT "	+ from + ',' + dest + ' ';
 			}
 			
-			if (orderBy > 0){
-				final String order = " ORDER BY co." + Contacts.mapping[orderBy].getDBFieldName() + ' ' + orderDir + limits;
+			if (orderBy > 0) {
+				final String order = new StringBuilder(32).append(" ORDER BY co.").append(
+						Contacts.mapping[orderBy].getDBFieldName()).append(' ').append(orderDir).append(limits)
+						.toString();
 				cs.setOrder(order);
 			} else {
 				cs.setOrder(limits);
