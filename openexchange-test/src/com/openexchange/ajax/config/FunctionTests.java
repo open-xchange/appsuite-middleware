@@ -111,7 +111,7 @@ public class FunctionTests extends AbstractAJAXSession {
             + sTime.getTime());
         final long difference = Math.abs(localTime - sTime.getTime());
         LOG.info("Time difference: " + difference);
-        assertTrue("Too big time difference: ", difference < MAX_DIFFERENCE);
+        assertTrue("Too big time difference: " + difference, difference < MAX_DIFFERENCE);
     }
 
     /**
