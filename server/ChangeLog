@@ -1,3 +1,8 @@
+* 2008-06-06 - marcus.klein@open-xchange.com
+
+ - Bugfix #11357: Sending lastModified and creationTime in contacts with correct
+   timezone.
+
 * 2008-06-06 - thorben.betten@open-xchange.com
 
  - Bugfix #11156: Fixed SQL injection vulnerability through contact search

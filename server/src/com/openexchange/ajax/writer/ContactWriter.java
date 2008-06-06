@@ -245,13 +245,13 @@ public class ContactWriter extends CommonWriter {
 				writeValue(contactobject.getCreatedBy(), jsonArray);
 				break;
 			case ContactObject.CREATION_DATE:
-				writeValue(contactobject.getCreationDate().getTime(), jsonArray);
+				writeValue(contactobject.getCreationDate(), timeZone, jsonArray);
 				break;
 			case ContactObject.MODIFIED_BY:
 				writeValue(contactobject.getModifiedBy(), jsonArray);
 				break;
 			case ContactObject.LAST_MODIFIED:
-				writeValue(contactobject.getLastModified().getTime(), jsonArray);
+				writeValue(contactobject.getLastModified(), timeZone, jsonArray);
 				break;
 			case ContactObject.FOLDER_ID:
 				writeValue(contactobject.getParentFolderID(), jsonArray);
