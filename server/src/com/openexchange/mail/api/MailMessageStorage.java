@@ -334,6 +334,7 @@ public abstract class MailMessageStorage {
 	 * @return The thread-sorted messages or <code>null</code> if SORT is not
 	 *         supported by mail server
 	 * @throws MailException
+	 *             If messages cannot be returned
 	 */
 	public MailMessage[] getThreadSortedMessages(final String folder, final IndexRange indexRange,
 			final SearchTerm<?> searchTerm, final MailField[] fields) throws MailException {

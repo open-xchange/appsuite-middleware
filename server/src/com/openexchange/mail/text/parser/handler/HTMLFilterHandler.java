@@ -125,10 +125,18 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
 	private final StringBuilder attrBuilder;
 
+	/**
+	 * Used to track all subsequent elements of a tag that ought to be removed
+	 * completely
+	 */
 	private int skipLevel;
 
 	private boolean body;
 
+	/**
+	 * Used to track all subsequent elements of a tag from which only its tag
+	 * elements ought to be removed
+	 */
 	private int depth;
 
 	private boolean[] depthInfo;
@@ -365,9 +373,9 @@ public final class HTMLFilterHandler implements HTMLHandler {
 			return;
 		}
 		if (htmlMap.containsKey(tag)) {
-		    if (depth > 0) {
-	            depth++;
-	        }
+			if (depth > 0) {
+				depth++;
+			}
 			if (BODY.equals(tag)) {
 				body = true;
 			} else if (STYLE.equals(tag)) {
