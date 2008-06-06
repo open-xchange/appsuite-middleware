@@ -96,7 +96,11 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
 	private static final String HEAD = "head";
 
+	private static final String BODY = "body";
+
 	private static final String META = "meta";
+
+	private static final String SCRIPT = "script";
 
 	private static final String HTTP_EQUIV = "http-equiv";
 
@@ -117,7 +121,13 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
 	private final StringBuilder attrBuilder;
 
-	private int level;
+	private int skipLevel;
+
+	private boolean body;
+
+	private int depth;
+
+	private boolean[] depthInfo;
 
 	private boolean isCss;
 
@@ -180,6 +190,34 @@ public final class HTMLFilterHandler implements HTMLHandler {
 		htmlMap = shtmlMap;
 		styleMap = sstyleMap;
 		checkHTMLMap();
+	}
+
+	/**
+	 * Marks current <code>depth</code> position as <code>true</code> and
+	 * increments <code>depth</code> counter
+	 */
+	private void mark() {
+		if (null == depthInfo) {
+			depthInfo = new boolean[8];
+		} else if (depthInfo.length <= depth) {
+			final boolean[] tmp = depthInfo;
+			depthInfo = new boolean[depthInfo.length * 2];
+			System.arraycopy(tmp, 0, depthInfo, 0, tmp.length);
+		}
+		depthInfo[depth++] = true;
+	}
+
+	/**
+	 * Decrements <code>depth</code> counter and then marks its position as
+	 * <code>false</code>
+	 * 
+	 * @return <code>true</code> if position's previous mark was set; otherwise
+	 *         <code>false</code>
+	 */
+	private boolean getAndUnmark() {
+		final boolean retval = depthInfo[--depth];
+		depthInfo[depth] = false;
+		return retval;
 	}
 
 	/**
@@ -288,13 +326,19 @@ public final class HTMLFilterHandler implements HTMLHandler {
 	}
 
 	public void handleEndTag(final String tag) {
-		if (level == 0) {
-			if (isCss && STYLE.equals(tag)) {
+		if (skipLevel == 0) {
+			if (body && BODY.equals(tag)) {
+				body = false;
+			} else if (isCss && STYLE.equals(tag)) {
 				isCss = false;
 			}
-			htmlBuilder.append("</").append(tag).append('>');
+			if (depth == 0) {
+				htmlBuilder.append("</").append(tag).append('>');
+			} else if (!getAndUnmark()) {
+				htmlBuilder.append("</").append(tag).append('>');
+			}
 		} else {
-			level--;
+			skipLevel--;
 		}
 	}
 
@@ -303,7 +347,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 	}
 
 	public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
-		if (level > 0) {
+		if (skipLevel > 0) {
 			return;
 		}
 		if (htmlMap.containsKey(tag)) {
@@ -312,22 +356,39 @@ public final class HTMLFilterHandler implements HTMLHandler {
 	}
 
 	public void handleStartTag(final String tag, final Map<String, String> attributes) {
-		if (level > 0) {
-			level++;
+		if (skipLevel > 0) {
+			skipLevel++;
 			return;
 		}
+		if (depth > 0) {
+			depth++;
+		}
 		if (htmlMap.containsKey(tag)) {
-			if (STYLE.equals(tag)) {
+			if (BODY.equals(tag)) {
+				body = true;
+			} else if (STYLE.equals(tag)) {
 				isCss = true;
 			}
 			addStartTag(tag, attributes, false, htmlMap.get(tag));
 		} else {
-			level++;
+			if (SCRIPT.equals(tag) || !body) {
+				/*
+				 * Remove whole tag incl. subsequent content and tags
+				 */
+				skipLevel++;
+			} else {
+				/*
+				 * Just remove tag definition:
+				 * "<tag>text<subtag>text</subtag></tag>" would be
+				 * "text<subtag>text</subtag>"
+				 */
+				mark();
+			}
 		}
 	}
 
 	public void handleCDATA(final String text) {
-		if (level == 0) {
+		if (skipLevel == 0) {
 			htmlBuilder.append("<![CDATA[");
 			if (isCss) {
 				/*
@@ -344,7 +405,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 	}
 
 	public void handleText(final String text, final boolean ignorable) {
-		if (level == 0) {
+		if (skipLevel == 0) {
 			if (isCss) {
 				if (ignorable) {
 					htmlBuilder.append(text);
