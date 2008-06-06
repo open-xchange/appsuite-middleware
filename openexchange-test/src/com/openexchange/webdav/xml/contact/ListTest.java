@@ -77,19 +77,20 @@ public class ListTest extends ContactTest {
 	
 	public void testListWithAllFields() throws Exception {
 		ContactObject contactObj = createCompleteContactObject();
-		
-		Date modified = new Date();
-		
+
 		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
-		
+
 		// prevent master/slave problem
 		Thread.sleep(1000);
+		
+		ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
+		final Date modified = loadContact.getLastModified();		
 		
 		ContactObject[] appointmentArray = listContact(webCon, contactFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
 		assertTrue("wrong response array length", appointmentArray.length >= 1);
 		
-		ContactObject loadContact = appointmentArray[0];
+		loadContact = appointmentArray[0];
 		contactObj.setObjectID(objectId);
 		
 		compareObject(contactObj, loadContact);
