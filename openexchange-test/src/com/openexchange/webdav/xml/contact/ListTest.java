@@ -82,6 +82,9 @@ public class ListTest extends ContactTest {
 		
 		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
 		
+		// prevent master/slave problem
+		Thread.sleep(1000);
+		
 		ContactObject[] appointmentArray = listContact(webCon, contactFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
 		assertTrue("wrong response array length", appointmentArray.length >= 1);
