@@ -100,6 +100,11 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
 	private static final String HTTP_EQUIV = "http-equiv";
 
+	private static final Set<String> NUM_ATTRIBS = new HashSet<String>(0);
+
+	// A decimal digit: [0-9]
+	private static final Pattern PAT_NUMERIC = Pattern.compile("\\p{Digit}+");
+
 	private static Map<String, Map<String, Set<String>>> shtmlMap;
 
 	private static Map<String, Set<String>> sstyleMap;
@@ -414,6 +419,14 @@ public final class HTMLFilterHandler implements HTMLHandler {
 						if (null == allowedValues || allowedValues.contains(e.getValue().toLowerCase(Locale.ENGLISH))) {
 							attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(
 									htmlFormat(e.getValue(), false)).append('"');
+						} else if (NUM_ATTRIBS == allowedValues) {
+							/*
+							 * Only numeric attribute value allowed
+							 */
+							if (PAT_NUMERIC.matcher(e.getValue().trim()).matches()) {
+								attrBuilder.append(' ').append(e.getKey()).append(VAL_START).append(e.getValue())
+										.append('"');
+							}
 						}
 					}
 				}
@@ -447,6 +460,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 							+ "\n"
 							+ "html.tag.a=\",href,name,tabindex,target,type,\"\n"
 							+ "html.tag.area=\",alt,coords,href,nohref[nohref],shape[:rect:circle:poly:default:],tabindex,target,\"\n"
+							+ "html.tag.b=\"\"\n"
 							+ "html.tag.basefont=\",color,face,size,\"\n"
 							+ "html.tag.bdo=\",dir[:ltr:rtl:]\"\n"
 							+ "html.tag.blockquote=\",type,\"\n"
@@ -653,7 +667,8 @@ public final class HTMLFilterHandler implements HTMLHandler {
 	private static final Pattern PATTERN_TAG_LINE = Pattern.compile(
 			"html\\.tag\\.(\\p{Alnum}+)\\s*=\\s*\"(\\p{Print}*)\"", Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern PATTERN_ATTRIBUTE = Pattern.compile("([\\p{Alnum}-_]+)(?:\\[(\\p{Print}+?)\\])?");
+	private static final Pattern PATTERN_ATTRIBUTE = Pattern
+			.compile("([\\p{Alnum}-_]+)(?:\\[([\\p{Print}&&[^\\]]]*)\\])?");
 
 	/**
 	 * Parses specified HTML map
@@ -670,8 +685,13 @@ public final class HTMLFilterHandler implements HTMLHandler {
 			final Map<String, Set<String>> attribMap = new HashMap<String, Set<String>>();
 			while (attribMatcher.find()) {
 				final String values = attribMatcher.group(2);
+				final String tag = m.group(1);
+				final String attrList = m.group(2);
+				final String attr = attribMatcher.group(1);
 				if (null == values) {
 					attribMap.put(attribMatcher.group(1).toLowerCase(Locale.ENGLISH), null);
+				} else if (values.length() == 0) {
+					attribMap.put(attribMatcher.group(1).toLowerCase(Locale.ENGLISH), NUM_ATTRIBS);
 				} else {
 					final Set<String> valueSet = new HashSet<String>();
 					final String[] valArr = values.charAt(0) == ':' ? values.substring(1).split("\\s*:\\s*") : values
@@ -688,7 +708,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 	}
 
 	private static final Pattern PATTERN_STYLE_LINE = Pattern.compile(
-			"html\\.style\\.([\\p{Alnum}-_]+)\\s*=\\s*\"(\\p{Print}*)\"", Pattern.CASE_INSENSITIVE);
+			"html\\.style\\.([\\p{Alnum}-_]+)\\s*=\\s*\"([\\p{Print}&&[^\"]]*)\"", Pattern.CASE_INSENSITIVE);
 
 	private static final Pattern PATTERN_VALUE = Pattern.compile("([\\p{Alnum}*-_ &&[^,]]+)");
 
@@ -726,7 +746,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 	}
 
 	private static final Pattern PATTERN_COMBI_LINE = Pattern.compile(
-			"html\\.style\\.combimap\\.([\\p{Alnum}-_]+)\\s*=\\s*\"(\\p{Print}+)\"", Pattern.CASE_INSENSITIVE);
+			"html\\.style\\.combimap\\.([\\p{Alnum}-_]+)\\s*=\\s*\"([\\p{Print}&&[^\"]]+)\"", Pattern.CASE_INSENSITIVE);
 
 	/**
 	 * Parses specified combination map for CSS elements
