@@ -371,7 +371,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 			}
 			addStartTag(tag, attributes, false, htmlMap.get(tag));
 		} else {
-			if (SCRIPT.equals(tag) || !body) {
+			if (!body || SCRIPT.equals(tag)) {
 				/*
 				 * Remove whole tag incl. subsequent content and tags
 				 */
