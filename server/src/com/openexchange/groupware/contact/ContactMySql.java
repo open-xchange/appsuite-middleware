@@ -1297,7 +1297,7 @@ public class ContactMySql implements ContactSql {
 	}
 
 	/**
-	 * Checks id specified {@link StringBuilder string builder} ends with given
+	 * Checks if specified {@link StringBuilder string builder} ends with given
 	 * suffix
 	 * 
 	 * @param stringBuilder
