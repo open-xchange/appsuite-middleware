@@ -698,7 +698,12 @@ public class ContactMySql implements ContactSql {
 	}
 
 	public void setObjectArray(final int[][] object_id) {
-		this.object_id_array = object_id;
+		this.object_id_array = new int[object_id.length][];
+		for (int i = 0; i < object_id.length; i++) {
+			this.object_id_array[i] = new int[object_id[i].length];
+			System.arraycopy(object_id[i], 0, this.object_id_array[i], 0, object_id[i].length);
+		}
+		//this.object_id_array = object_id;
 	}
 
 	public void getInternalUsers() {
