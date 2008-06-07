@@ -200,6 +200,7 @@ public class ContactMySql implements ContactSql {
 		for (int i = 0; i < size; i++) {
 			injectors.get(i).inject(ps, i + 1);
 		}
+		injectors.clear();
 		return ps;
 	}
 
