@@ -342,7 +342,7 @@ public class ContactMySql implements ContactSql {
 							value = value.replace('?', '_');
 
 							if (value.indexOf(',') != -1) {
-								final String[] tokens = value.split("\\s*,\\s*");
+								final String[] tokens = value.trim().split("\\s*,\\s*");
 								sb.append('(');
 								
 								sb.append(" ( co.").append(field).append(" LIKE ? )");
@@ -573,7 +573,7 @@ public class ContactMySql implements ContactSql {
 					value = value.replace('?', '_');
 
 					if (value.indexOf(',') != -1) {
-						final String[] tokens = value.split("\\s*,\\s*");
+						final String[] tokens = value.trim().split("\\s*,\\s*");
 						sb.append('(');
 
 						sb.append("( co.").append(field).append(" LIKE ? )");
