@@ -80,7 +80,10 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
- * {@link ContactMySql} - The MySQL implementation of {@link ContactSql}
+ * {@link ContactMySql} - The MySQL implementation of {@link ContactSql}.
+ * <p>
+ * This implementation is <b>not</b> designed for multi-threaded access and
+ * therefore is not thread-safe.
  * 
  * @author <a href="mailto:ben.pahne@comfire.de">Benjamin Frederic Pahne</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -703,7 +706,7 @@ public class ContactMySql implements ContactSql {
 			this.object_id_array[i] = new int[object_id[i].length];
 			System.arraycopy(object_id[i], 0, this.object_id_array[i], 0, object_id[i].length);
 		}
-		//this.object_id_array = object_id;
+		// this.object_id_array = object_id;
 	}
 
 	public void getInternalUsers() {
