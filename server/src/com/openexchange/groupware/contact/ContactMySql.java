@@ -343,14 +343,14 @@ public class ContactMySql implements ContactSql {
 							if (value.indexOf(',') != -1) {
 								final String[] tokens = value.trim().split("\\s*,\\s*");
 								sb.append('(');
-								
+
 								sb.append(" ( co.").append(field).append(" LIKE ? )");
 								injectors.add(new StringSQLInjector("%", tokens[0].toUpperCase(), "%"));
 								for (int j = 1; j < tokens.length; j++) {
 									sb.append(" OR").append(" ( co.").append(field).append(" LIKE ? )");
 									injectors.add(new StringSQLInjector("%", tokens[j].toUpperCase(), "%"));
 								}
-								
+
 								sb.append(") ").append(search_habit).append(' ');
 							}
 						}
@@ -607,26 +607,28 @@ public class ContactMySql implements ContactSql {
 				sb.append("( co.intfield01 != ").append(cso.getIgnoreOwn()).append(") ").append(search_habit).append(
 						' ');
 			}
-			
+
 			if (sb.charAt(sb.length() - 1) == '(') {
 				sb.delete(sb.length() - 2, sb.length());
 			} else {
-				final int pos = sb.lastIndexOf(search_habit);
+				final int pos = endsWith(sb, search_habit, true);
 				if (pos != -1) {
 					sb.delete(pos, sb.length());
 				}
 				sb.append(") AND ");
 			}
 
-//			final String tmpp = sb.toString().trim();
-//			if (tmpp.lastIndexOf('(') == (tmpp.length() - 1)) {
-//				sb = new StringBuilder(tmpp.substring(0, tmpp.length() - 2)).append(' ');
-//			} else {
-//				if (sb.toString().lastIndexOf(search_habit) != -1) {
-//					sb = new StringBuilder(sb.substring(0, sb.lastIndexOf(search_habit)));
-//				}
-//				sb.append(") AND ");
-//			}
+			// final String tmpp = sb.toString().trim();
+			// if (tmpp.lastIndexOf('(') == (tmpp.length() - 1)) {
+			// sb = new StringBuilder(tmpp.substring(0, tmpp.length() -
+			// 2)).append(' ');
+			// } else {
+			// if (sb.toString().lastIndexOf(search_habit) != -1) {
+			// sb = new StringBuilder(sb.substring(0,
+			// sb.lastIndexOf(search_habit)));
+			// }
+			// sb.append(") AND ");
+			// }
 
 			/*********************** * search in all folder or subfolder * ***********************/
 
@@ -670,15 +672,17 @@ public class ContactMySql implements ContactSql {
 
 		sb.append(' ');
 
-		String remove = sb.toString();
-		if (remove.lastIndexOf("AND") != -1) {
-			remove = remove.substring(0, remove.lastIndexOf("AND"));
+		// Remove ending " AND "
+		final int pos = endsWith(sb, "AND", true);
+		if (pos != -1) {
+			sb.delete(pos, sb.length());
 		}
+
 		/*
 		 * Private Flag
 		 */
-		where = new StringBuilder(remove).append(" AND ((co.pflag = 1 and co.created_from = ").append(user).append(
-				") OR (co.pflag is null))").toString();
+		where = sb.append(" AND ((co.pflag = 1 and co.created_from = ").append(user).append(") OR (co.pflag is null))")
+				.toString();
 		return where;
 	}
 
@@ -1292,4 +1296,36 @@ public class ContactMySql implements ContactSql {
 
 	}
 
+	/**
+	 * Checks id specified {@link StringBuilder string builder} ends with given
+	 * suffix
+	 * 
+	 * @param stringBuilder
+	 *            The string builder to check
+	 * @param suffix
+	 *            The suffix
+	 * @param ignoreTrailingWhitespaces
+	 *            <code>true</code> to ignore trailing whitespace characters
+	 *            following after suffix location; otherwise <code>false</code>
+	 * @return The suffix' index position if the character sequence represented
+	 *         by the argument is a suffix of the character sequence represented
+	 *         by specified string builder; <code>-1</code> otherwise.
+	 */
+	private static int endsWith(final StringBuilder stringBuilder, final String suffix,
+			final boolean ignoreTrailingWhitespaces) {
+		final int pos = stringBuilder.lastIndexOf(suffix);
+		if (pos == -1) {
+			return -1;
+		}
+		final int len = stringBuilder.length();
+		if (ignoreTrailingWhitespaces) {
+			for (int i = pos + suffix.length(); i < len; i++) {
+				if (!Character.isWhitespace(stringBuilder.charAt(i))) {
+					return -1;
+				}
+			}
+			return pos;
+		}
+		return (pos + suffix.length() == len ? pos : -1);
+	}
 }
