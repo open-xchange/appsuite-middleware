@@ -62,11 +62,9 @@ import org.jdom.Element;
 import org.jdom.output.XMLOutputter;
 
 import com.openexchange.api.OXObjectNotFoundException;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.RdbContactSQLInterface;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.CalendarSql;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.ContactObject;
 import com.openexchange.groupware.container.DataObject;
@@ -200,7 +198,7 @@ public class ContactWriter extends CommonWriter {
                 ContactObject.NUMBER_OF_ATTACHMENTS
 	};
 	
-	private ContactSQLInterface contactsql = null;
+	private ContactSQLInterface contactsql;
 	
 	protected final static int[] deleteFields = {
 		DataObject.OBJECT_ID,
@@ -237,7 +235,7 @@ public class ContactWriter extends CommonWriter {
 		XMLOutputter xo = new XMLOutputter();
 		
 		if (bModified) {
-			SearchIterator it = null;
+			SearchIterator<ContactObject> it = null;
 			try {
 				it = contactsql.getModifiedContactsInFolder(folder_id, changeFields, lastsync);
 				writeIterator(it, false, xo, os);
@@ -249,7 +247,7 @@ public class ContactWriter extends CommonWriter {
 		}
 		
 		if (bDeleted) {
-			SearchIterator it = null;
+			SearchIterator<ContactObject> it = null;
 			try {
 				it = contactsql.getDeletedContactsInFolder(folder_id, deleteFields, lastsync);
 				writeIterator(it, true, xo, os);
@@ -261,7 +259,7 @@ public class ContactWriter extends CommonWriter {
 		}
 		
 		if (bList) {
-			SearchIterator it = null;
+			SearchIterator<ContactObject> it = null;
 			try {
 				it = contactsql.getContactsInFolder(folder_id, 0, 50000, 0, null, deleteFields);
 				writeList(it, xo, os);
@@ -273,9 +271,9 @@ public class ContactWriter extends CommonWriter {
 		}
 	}
 	
-	public void writeIterator(SearchIterator it, boolean delete, XMLOutputter xo, OutputStream os) throws Exception {
+	public void writeIterator(SearchIterator<ContactObject> it, boolean delete, XMLOutputter xo, OutputStream os) throws Exception {
 		while (it.hasNext()) {
-			writeObject((ContactObject)it.next(), delete, xo, os);
+			writeObject(it.next(), delete, xo, os);
 		}
 	}
 	

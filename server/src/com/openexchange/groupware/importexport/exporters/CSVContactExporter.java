@@ -270,7 +270,7 @@ public class CSVContactExporter implements Exporter {
 			s1.retainAll(s2);
 			cols = transformSetToIntArray( s1 );
 		}
-		SearchIterator conIter;
+		SearchIterator<ContactObject> conIter;
 		try {
 			conIter = contactSql.getContactsInFolder(folderId, 0, contactSql.getNumberOfContacts(folderId), 0, "ASC", cols);
 		} catch (final OXException e) {
@@ -282,7 +282,7 @@ public class CSVContactExporter implements Exporter {
 		while(conIter.hasNext()){
 			ContactObject current;
 			try {
-				current = (ContactObject) conIter.next();
+				current = conIter.next();
 				ret.append( convertToLine( convertToList(current, cols) ) );
 			} catch (final SearchIteratorException e) {
 				LOG.error("Could not retrieve contact from folder " + folder + " using a FolderIterator, exception was: ", e);
