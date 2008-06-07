@@ -57,7 +57,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -210,7 +209,8 @@ public class ContactMySql implements ContactSql {
 			return where;
 		}
 
-		StringBuilder sb = new StringBuilder(" WHERE co.cid = ").append(ctx.getContextId()).append(" AND ");
+		final StringBuilder sb = new StringBuilder(256);
+		sb.append(" WHERE co.cid = ").append(ctx.getContextId()).append(" AND ");
 
 		// Can read only own objects in folder
 		if (can_read_only_own != 0) {
@@ -342,16 +342,16 @@ public class ContactMySql implements ContactSql {
 							value = value.replace('?', '_');
 
 							if (value.indexOf(',') != -1) {
-								final StringTokenizer sr = new StringTokenizer(value, ",");
+								final String[] tokens = value.split("\\s*,\\s*");
 								sb.append('(');
-
-								while (sr.hasMoreElements()) {
-									final String t = sr.nextToken().trim();
-									sb.append(" ( co.").append(field).append(" LIKE ? OR ");
-									injectors.add(new StringSQLInjector("%", t.toUpperCase(), "%"));
+								
+								sb.append(" ( co.").append(field).append(" LIKE ? )");
+								injectors.add(new StringSQLInjector("%", tokens[0].toUpperCase(), "%"));
+								for (int j = 1; j < tokens.length; j++) {
+									sb.append(" OR").append(" ( co.").append(field).append(" LIKE ? )");
+									injectors.add(new StringSQLInjector("%", tokens[j].toUpperCase(), "%"));
 								}
-								final String x = sb.toString();
-								sb = new StringBuilder(x.substring(0, x.length() - 3));
+								
 								sb.append(") ").append(search_habit).append(' ');
 							}
 						}
@@ -364,10 +364,10 @@ public class ContactMySql implements ContactSql {
 							value = value.replace('?', '_');
 
 							if (value.indexOf('%') != -1) {
-								sb.append("( co.").append(field).append(" LIKE ? ").append(search_habit).append(' ');
+								sb.append("( co.").append(field).append(" LIKE ? ) ").append(search_habit).append(' ');
 								injectors.add(new StringSQLInjector(value));
 							} else {
-								sb.append("( co.").append(field).append(" LIKE ? ").append(search_habit).append(' ');
+								sb.append("( co.").append(field).append(" LIKE ? ) ").append(search_habit).append(' ');
 								injectors.add(new StringSQLInjector("%", value, "%"));
 							}
 						}
@@ -573,16 +573,16 @@ public class ContactMySql implements ContactSql {
 					value = value.replace('?', '_');
 
 					if (value.indexOf(',') != -1) {
-						final StringTokenizer sr = new StringTokenizer(value, ",");
+						final String[] tokens = value.split("\\s*,\\s*");
 						sb.append('(');
 
-						while (sr.hasMoreElements()) {
-							final String t = sr.nextToken().trim();
-							sb.append("( co.").append(field).append(" LIKE ?) OR ");
-							injectors.add(new StringSQLInjector("%", t, "%"));
+						sb.append("( co.").append(field).append(" LIKE ? )");
+						injectors.add(new StringSQLInjector("%", tokens[0], "%"));
+						for (int i = 1; i < tokens.length; i++) {
+							sb.append(" OR ").append("( co.").append(field).append(" LIKE ? )");
+							injectors.add(new StringSQLInjector("%", tokens[i], "%"));
 						}
-						final String x = sb.toString();
-						sb = new StringBuilder(x.substring(0, x.length() - 3));
+
 						sb.append(") ").append(search_habit).append(' ');
 					}
 				}
@@ -608,16 +608,26 @@ public class ContactMySql implements ContactSql {
 				sb.append("( co.intfield01 != ").append(cso.getIgnoreOwn()).append(") ").append(search_habit).append(
 						' ');
 			}
-
-			final String tmpp = sb.toString().trim();
-			if (tmpp.lastIndexOf('(') == (tmpp.length() - 1)) {
-				sb = new StringBuilder(tmpp.substring(0, tmpp.length() - 2)).append(' ');
+			
+			if (sb.charAt(sb.length() - 1) == '(') {
+				sb.delete(sb.length() - 2, sb.length());
 			} else {
-				if (sb.toString().lastIndexOf(search_habit) != -1) {
-					sb = new StringBuilder(sb.substring(0, sb.lastIndexOf(search_habit)));
+				final int pos = sb.lastIndexOf(search_habit);
+				if (pos != -1) {
+					sb.delete(pos, sb.length());
 				}
 				sb.append(") AND ");
 			}
+
+//			final String tmpp = sb.toString().trim();
+//			if (tmpp.lastIndexOf('(') == (tmpp.length() - 1)) {
+//				sb = new StringBuilder(tmpp.substring(0, tmpp.length() - 2)).append(' ');
+//			} else {
+//				if (sb.toString().lastIndexOf(search_habit) != -1) {
+//					sb = new StringBuilder(sb.substring(0, sb.lastIndexOf(search_habit)));
+//				}
+//				sb.append(") AND ");
+//			}
 
 			/*********************** * search in all folder or subfolder * ***********************/
 
