@@ -3,6 +3,8 @@ package com.openexchange.groupware.ldap;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.openexchange.resource.Resource;
+
 public class MockResourceLookup {
 	
 	private Map<Integer,Resource> resources = new HashMap<Integer,Resource>();

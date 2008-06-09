@@ -25,6 +25,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VersitObject;
+import com.openexchange.resource.Resource;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.test.TestInit;
 import com.openexchange.session.Session;

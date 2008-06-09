@@ -25,12 +25,12 @@ public class ResourceTest extends AbstractAJAXTest {
 	private static final String RESOURCE_URL = "/ajax/resource";
 	
 	public void testSearch() throws Exception {
-		com.openexchange.groupware.ldap.Resource resources[] = searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
+		com.openexchange.resource.Resource resources[] = searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
 		assertTrue("resource array size is not > 0", resources.length > 0);
 	}
 	
 	public void testList() throws Exception {
-		com.openexchange.groupware.ldap.Resource resources[] = searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
+		com.openexchange.resource.Resource resources[] = searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
 		assertTrue("resource array size is not > 0", resources.length > 0);
 		
 		int[] id = new int[resources.length];
@@ -43,12 +43,12 @@ public class ResourceTest extends AbstractAJAXTest {
 	}
 	
 	public void testGet() throws Exception {
-		com.openexchange.groupware.ldap.Resource resources[] = searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
+		com.openexchange.resource.Resource resources[] = searchResource(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
 		assertTrue("resource array size is not > 0", resources.length > 0);
-		com.openexchange.groupware.ldap.Resource r = loadResource(getWebConversation(), resources[0].getIdentifier(), PROTOCOL + getHostName(), getSessionId());
+		com.openexchange.resource.Resource r = loadResource(getWebConversation(), resources[0].getIdentifier(), PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public static com.openexchange.groupware.ldap.Resource[] searchResource(WebConversation webCon, String searchpattern, String host, String session) throws Exception {
+	public static com.openexchange.resource.Resource[] searchResource(WebConversation webCon, String searchpattern, String host, String session) throws Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -73,10 +73,10 @@ public class ResourceTest extends AbstractAJAXTest {
 		assertNotNull("timestamp is null", response.getTimestamp());
 		
 		JSONArray jsonArray = (JSONArray)response.getData();
-		com.openexchange.groupware.ldap.Resource[] r = new com.openexchange.groupware.ldap.Resource[jsonArray.length()];
+		com.openexchange.resource.Resource[] r = new com.openexchange.resource.Resource[jsonArray.length()];
 		for (int a = 0; a < r.length; a++) {
 			JSONObject jObj = jsonArray.getJSONObject(a);
-			r[a] = new com.openexchange.groupware.ldap.Resource();
+			r[a] = new com.openexchange.resource.Resource();
 			r[a].setIdentifier(jObj.getInt(ParticipantsFields.ID));
 			if (jObj.has(ParticipantsFields.DISPLAY_NAME)) {
 				r[a].setDisplayName(jObj.getString(ParticipantsFields.DISPLAY_NAME));
@@ -86,7 +86,7 @@ public class ResourceTest extends AbstractAJAXTest {
 		return r;
 	}
 	
-	public static com.openexchange.groupware.ldap.Resource[] listResource(WebConversation webCon, int[] id, String host, String session) throws Exception {
+	public static com.openexchange.resource.Resource[] listResource(WebConversation webCon, int[] id, String host, String session) throws Exception {
 		host = appendPrefix(host);
 		
         final URLParameter parameter = new URLParameter();
@@ -115,10 +115,10 @@ public class ResourceTest extends AbstractAJAXTest {
 		assertNotNull("timestamp", response.getTimestamp());
 		
 		JSONArray jsonArray = (JSONArray)response.getData();
-		com.openexchange.groupware.ldap.Resource[] r = new com.openexchange.groupware.ldap.Resource[jsonArray.length()];
+		com.openexchange.resource.Resource[] r = new com.openexchange.resource.Resource[jsonArray.length()];
 		for (int a = 0; a < r.length; a++) {
 			JSONObject jObj = jsonArray.getJSONObject(a);
-			r[a] = new com.openexchange.groupware.ldap.Resource();
+			r[a] = new com.openexchange.resource.Resource();
 			r[a].setIdentifier(jObj.getInt(ParticipantsFields.ID));
 			if (jObj.has(ParticipantsFields.DISPLAY_NAME)) {
 				r[a].setDisplayName(jObj.getString(ParticipantsFields.DISPLAY_NAME));
@@ -128,7 +128,7 @@ public class ResourceTest extends AbstractAJAXTest {
 		return r;
 	}
 	
-	public static com.openexchange.groupware.ldap.Resource loadResource(WebConversation webCon, int groupId, String host, String session) throws Exception {
+	public static com.openexchange.resource.Resource loadResource(WebConversation webCon, int groupId, String host, String session) throws Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -151,7 +151,7 @@ public class ResourceTest extends AbstractAJAXTest {
 		
 		JSONObject jsonObj = (JSONObject)response.getData();
 		
-		com.openexchange.groupware.ldap.Resource r = new com.openexchange.groupware.ldap.Resource();
+		com.openexchange.resource.Resource r = new com.openexchange.resource.Resource();
 		assertTrue("id is not in json object", jsonObj.has(ParticipantsFields.ID));
 		r.setIdentifier(jsonObj.getInt(ParticipantsFields.ID));
 		

@@ -44,7 +44,7 @@
 
 package com.openexchange.webdav.xml.parser;
 
-import com.openexchange.groupware.ldap.Resource;
+import com.openexchange.resource.Resource;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.DataFields;
 import org.jdom.Element;
