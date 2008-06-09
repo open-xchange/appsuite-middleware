@@ -26,7 +26,7 @@ public class ListTest extends FolderTest {
 		// prevent master/slave problem
 		Thread.sleep(1000);
 		
-		final FolderObject loadFolder = loadFolder(webCon, objectId2, getHostName(), getLogin(), getPassword());
+		final FolderObject loadFolder = loadFolder(webCon, objectId1, getHostName(), getLogin(), getPassword());
 		final Date modified = loadFolder.getLastModified();
 		
 		FolderObject[] folderArray = listFolder(webCon, modified, true, false, PROTOCOL + hostName, login, password);
