@@ -228,7 +228,8 @@ public class CalendarParser extends CommonParser {
 		if (isExternal) {
 			p = new ExternalUserParticipant();
 			final String displayName = parser.getAttributeValue(XmlServlet.NAMESPACE, "displayname");
-			final String mail = getValue(parser);
+			final String mail = parser.getAttributeValue(XmlServlet.NAMESPACE, "mail");
+			getValue(parser);
 			
 			p.setDisplayName(displayName);
 			p.setEmailAddress(mail);
