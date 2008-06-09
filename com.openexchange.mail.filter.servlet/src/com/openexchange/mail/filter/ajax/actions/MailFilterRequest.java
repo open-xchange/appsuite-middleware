@@ -267,7 +267,7 @@ public class MailFilterRequest {
 				columns = StringCollection.convertStringArray2IntArray(sColumns);
 			}
 
-			forUser = DataParser.checkString(request, "for_user");
+			forUser = DataParser.parseString(request, "for_user");
 			flag = DataParser.parseString(request, "flag");
 
 			if (forUser == null) {
