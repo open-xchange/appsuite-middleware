@@ -115,7 +115,7 @@ public abstract class ResourceStorage {
 	public abstract ResourceGroup[] getGroups(Context context) throws LdapException;
 
 	/**
-	 * Reads a resource from the underlying persistant storage and returns it in
+	 * Reads a resource from the underlying persistent storage and returns it in
 	 * a data object.
 	 * 
 	 * @param resourceId
@@ -124,7 +124,7 @@ public abstract class ResourceStorage {
 	 *            The context.
 	 * @return The data object of the resource.
 	 * @throws LdapException
-	 *             if the resource can't be found or an exception appears while
+	 *             If the resource can't be found or an exception appears while
 	 *             reading it.
 	 */
 	public abstract Resource getResource(int resourceId, Context context) throws LdapException;
@@ -139,7 +139,7 @@ public abstract class ResourceStorage {
 	 * @return a string array with resource group identifiers. If no identifiers
 	 *         match an empty array will be returned.
 	 * @throws LdapException
-	 *             if an exception occurs while reading from the underlying
+	 *             If an exception occurs while reading from the underlying
 	 *             persistent storage.
 	 */
 	public abstract ResourceGroup[] searchGroups(String pattern, Context context) throws LdapException;
@@ -155,10 +155,24 @@ public abstract class ResourceStorage {
 	 * @return a string array with the resource identifiers. If no identifiers
 	 *         match, an empty array will be returned.
 	 * @throws LdapException
-	 *             if an exception occurs while reading from the underlying
+	 *             If an exception occurs while reading from the underlying
 	 *             persistent storage.
 	 */
 	public abstract Resource[] searchResources(String pattern, Context context) throws LdapException;
+
+	/**
+	 * Searches all resources whose email address matches the given pattern.
+	 * 
+	 * @param pattern
+	 *            The email address pattern to search for
+	 * @param context
+	 *            The context
+	 * @return An array of {@link Resource resources} whose email address
+	 *         matches the given pattern.
+	 * @throws LdapException
+	 *             If searching for resources fails
+	 */
+	public abstract Resource[] searchResourcesByMail(String pattern, Context context) throws LdapException;
 
 	/**
 	 * This method returns resources that have been modified since the given
@@ -170,7 +184,7 @@ public abstract class ResourceStorage {
 	 *            The context.
 	 * @return an array of resources.
 	 * @throws LdapException
-	 *             if an error occurs.
+	 *             If an error occurs.
 	 */
 	public abstract Resource[] listModified(Date modifiedSince, Context context) throws LdapException;
 
@@ -184,12 +198,13 @@ public abstract class ResourceStorage {
 	 * @param resource
 	 *            The resource to insert.
 	 * @throws ResourceException
-	 *             if resource insertion fails.
+	 *             If resource insertion fails.
 	 */
 	public abstract void insertResource(Context ctx, Connection con, Resource resource) throws ResourceException;
 
 	/**
-	 * This method updates a resource in storage.
+	 * This method updates the resource in storage referenced by
+	 * {@link Resource#getIdentifier() resource identifier}.
 	 * 
 	 * @param ctx
 	 *            The context.
@@ -198,7 +213,40 @@ public abstract class ResourceStorage {
 	 * @param resource
 	 *            The resource to update.
 	 * @throws ResourceException
-	 *             if resource update fails.
+	 *             If resource update fails.
 	 */
 	public abstract void updateResource(Context ctx, Connection con, Resource resource) throws ResourceException;
+
+	/**
+	 * A convenience method that invokes
+	 * {@link #deleteResourceById(Context, Connection, int)} with the latter
+	 * parameter filled with {@link Resource#getIdentifier()}
+	 * 
+	 * @param ctx
+	 *            The context
+	 * @param con
+	 *            A writable database connection.
+	 * @param resource
+	 *            The resource to delete
+	 * @throws ResourceException
+	 *             If resource deletion fails.
+	 */
+	public void deleteResource(final Context ctx, final Connection con, final Resource resource) throws ResourceException {
+		deleteResourceById(ctx, con, resource.getIdentifier());
+	}
+
+	/**
+	 * This method deletes the resource in storage referenced by specified
+	 * <code>resourceId</code>.
+	 * 
+	 * @param ctx
+	 *            The context
+	 * @param con
+	 *            A writable database connection.
+	 * @param resourceId
+	 *            The ID of the resource to delete
+	 * @throws ResourceException
+	 *             If resource deletion fails.
+	 */
+	public abstract void deleteResourceById(Context ctx, Connection con, int resourceId) throws ResourceException;
 }

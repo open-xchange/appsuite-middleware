@@ -356,6 +356,37 @@ public class RdbResourceStorage extends ResourceStorage {
 		return resources.toArray(new Resource[resources.size()]);
 	}
 
+	private static final String SQL_SELECT_RESOURCE4 = "SELECT id,identifier,displayName,mail,available,description,lastModified "
+			+ "FROM resource WHERE cid = ? AND mail LIKE ?";
+
+	@Override
+	public Resource[] searchResourcesByMail(final String pattern, final Context context) throws LdapException {
+		Connection con = null;
+		try {
+			con = DBPool.pickup(context);
+		} catch (final Exception e) {
+			throw new LdapException(EnumComponent.RESOURCE, Code.NO_CONNECTION, e);
+		}
+		final List<Resource> resources = new ArrayList<Resource>();
+		PreparedStatement stmt = null;
+		ResultSet result = null;
+		try {
+			stmt = con.prepareStatement(SQL_SELECT_RESOURCE4);
+			stmt.setLong(1, context.getContextId());
+			stmt.setString(2, LdapUtility.prepareSearchPattern(pattern));
+			result = stmt.executeQuery();
+			while (result.next()) {
+				resources.add(createResourceFromEntry(result));
+			}
+		} catch (final SQLException e) {
+			throw new LdapException(EnumComponent.RESOURCE, Code.SQL_ERROR, e, e.getMessage());
+		} finally {
+			closeSQLStuff(result, stmt);
+			DBPool.closeReaderSilent(context, con);
+		}
+		return resources.toArray(new Resource[resources.size()]);
+	}
+
 	private static final String SQL_SELECT_RESOURCE = "SELECT id,identifier,displayName,mail,available,description,lastModified "
 			+ "FROM resource WHERE cid = ? AND lastModified >= ?";
 
@@ -450,8 +481,10 @@ public class RdbResourceStorage extends ResourceStorage {
 			} else {
 				stmt.setString(pos++, resource.getDescription()); // description
 			}
-			stmt.setLong(pos++, System.currentTimeMillis());// lastModified
+			final long lastModified = System.currentTimeMillis();
+			stmt.setLong(pos++, lastModified);// lastModified
 			stmt.executeUpdate();
+			resource.setLastModified(lastModified);
 		} catch (final SQLException e) {
 			throw new ResourceException(ResourceException.Code.SQL_ERROR, e);
 		} finally {
@@ -482,9 +515,30 @@ public class RdbResourceStorage extends ResourceStorage {
 			} else {
 				stmt.setString(pos++, resource.getDescription()); // description
 			}
-			stmt.setLong(pos++, System.currentTimeMillis());// lastModified
+			final long lastModified = System.currentTimeMillis();
+			stmt.setLong(pos++, lastModified);// lastModified
 			stmt.setInt(pos++, ctx.getContextId()); // cid
 			stmt.setInt(pos++, resource.getIdentifier()); // id
+			stmt.executeUpdate();
+			resource.setLastModified(lastModified);
+		} catch (final SQLException e) {
+			throw new ResourceException(ResourceException.Code.SQL_ERROR, e);
+		} finally {
+			DBUtils.closeSQLStuff(null, stmt);
+		}
+	}
+
+	private static final String SQL_DELETE_RESOURCE = "DELETE FROM resource WHERE cid = ? AND id = ?";
+
+	@Override
+	public void deleteResourceById(final Context ctx, final Connection con, final int resourceId)
+			throws ResourceException {
+		PreparedStatement stmt = null;
+		try {
+			stmt = con.prepareStatement(SQL_DELETE_RESOURCE);
+			int pos = 1;
+			stmt.setInt(pos++, ctx.getContextId()); // cid
+			stmt.setInt(pos++, resourceId); // id
 			stmt.executeUpdate();
 		} catch (final SQLException e) {
 			throw new ResourceException(ResourceException.Code.SQL_ERROR, e);

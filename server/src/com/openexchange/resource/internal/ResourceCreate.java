@@ -55,6 +55,7 @@ import java.sql.SQLException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceException;
@@ -92,7 +93,7 @@ public final class ResourceCreate {
 	 * @throws ResourceException
 	 *             If initialization fails
 	 */
-	ResourceCreate(final User user, final Context ctx, final Resource resource) throws ResourceException {
+	public ResourceCreate(final User user, final Context ctx, final Resource resource) throws ResourceException {
 		super();
 		this.user = user;
 		this.ctx = ctx;
@@ -101,12 +102,20 @@ public final class ResourceCreate {
 	}
 
 	/**
-	 * This method glues all operations together. That includes all checks and
-	 * the operations to be done.
+	 * Performs the insert.
+	 * <ol>
+	 * <li>At first all necessary checks are performed: data completeness, data
+	 * validation, permission, and check for duplicate resources.</li>
+	 * <li>Then the transaction-bounded insert into storage takes place</li>
+	 * <li>At last, the insert is propagated to system (cache invalidation,
+	 * etc.)</li>
+	 * </ol>
+	 * 
 	 * 
 	 * @throws ResourceException
+	 *             If insert fails
 	 */
-	void perform() throws ResourceException {
+	public void perform() throws ResourceException {
 		check();
 		insert();
 		propagate();
@@ -123,11 +132,19 @@ public final class ResourceCreate {
 			throw new ResourceException(ResourceException.Code.NULL);
 		}
 		/*
-		 * Check mandatory fields: identifier, displayName, and lastModified
+		 * Check mandatory fields: identifier, displayName, and mail
 		 */
-		if (isEmpty(resource.getSimpleName()) || isEmpty(resource.getDisplayName())
-				|| null == resource.getLastModified()) {
+		if (isEmpty(resource.getSimpleName()) || isEmpty(resource.getDisplayName()) || isEmpty(resource.getMail())) {
 			throw new ResourceException(ResourceException.Code.MANDATORY_FIELD);
+		}
+		/*
+		 * Check for invalid values
+		 */
+		if (!ResourceTools.validateResourceIdentifier(resource.getSimpleName())) {
+			throw new ResourceException(ResourceException.Code.INVALID_RESOURCE_IDENTIFIER, resource.getSimpleName());
+		}
+		if (!ResourceTools.validateResourceEmail(resource.getMail())) {
+			throw new ResourceException(ResourceException.Code.INVALID_RESOURCE_MAIL, resource.getMail());
 		}
 		/*
 		 * Check permission: By now caller must be context's admin
@@ -135,6 +152,20 @@ public final class ResourceCreate {
 		if (ctx.getMailadmin() != user.getId()) {
 			throw new ResourceException(ResourceException.Code.PERMISSION, Integer.valueOf(user.getId()), Integer
 					.valueOf(ctx.getContextId()));
+		}
+		/*
+		 * Check if another resource with the same textual identifier or email
+		 * address exists in storage
+		 */
+		try {
+			if (storage.searchResources(resource.getSimpleName(), ctx).length > 0) {
+				throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT, resource.getSimpleName());
+			}
+			if (storage.searchResourcesByMail(resource.getMail(), ctx).length > 0) {
+				throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT_MAIL, resource.getMail());
+			}
+		} catch (final LdapException e) {
+			throw new ResourceException(e);
 		}
 
 	}
@@ -188,7 +219,7 @@ public final class ResourceCreate {
 	 */
 	public void insert(final Connection con) throws ResourceException {
 		try {
-			final int id = IDGenerator.getId(ctx.getContextId(), Types.RESOURCE, con);
+			final int id = IDGenerator.getId(ctx.getContextId(), Types.PRINCIPAL, con);
 			resource.setIdentifier(id);
 			storage.insertResource(ctx, con, resource);
 		} catch (final SQLException e) {

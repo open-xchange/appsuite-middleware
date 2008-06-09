@@ -208,6 +208,14 @@ public class Starter implements Initialization {
 	 */
 	com.openexchange.groupware.ldap.UserStorageInit.getInstance(),
 	/**
+	 * Group storage init
+	 */
+	com.openexchange.group.internal.GroupInit.getInstance(),
+	/**
+	 * Resource storage init
+	 */
+	com.openexchange.resource.internal.ResourceStorageInit.getInstance(),
+	/**
 	 * User configuration init
 	 */
 	com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),

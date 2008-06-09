@@ -63,15 +63,15 @@ import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link ResourceUpdate} - Performs update of a {@link Resource resource}.
+ * {@link ResourceDelete} - Performs update of a {@link Resource resource}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ResourceUpdate {
+public final class ResourceDelete {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(ResourceUpdate.class);
+			.getLog(ResourceDelete.class);
 
 	private final User user;
 
@@ -82,7 +82,7 @@ public final class ResourceUpdate {
 	private final ResourceStorage storage;
 
 	/**
-	 * Initializes a new {@link ResourceUpdate}
+	 * Initializes a new {@link ResourceDelete}
 	 * 
 	 * @param ctx
 	 *            The context
@@ -91,7 +91,7 @@ public final class ResourceUpdate {
 	 * @throws ResourceException
 	 *             If initialization fails
 	 */
-	public ResourceUpdate(final User user, final Context ctx, final Resource resource) throws ResourceException {
+	public ResourceDelete(final User user, final Context ctx, final Resource resource) throws ResourceException {
 		super();
 		this.user = user;
 		this.ctx = ctx;
@@ -100,22 +100,22 @@ public final class ResourceUpdate {
 	}
 
 	/**
-	 * Performs the update.
+	 * Performs the delete.
 	 * <ol>
 	 * <li>At first all necessary checks are performed: data completeness, data
 	 * validation, permission, and check for duplicate resources.</li>
-	 * <li>Then the transaction-bounded update in storage takes place</li>
-	 * <li>At last, the update is propagated to system (cache invalidation,
+	 * <li>Then the transaction-bounded delete in storage takes place</li>
+	 * <li>At last, the delete is propagated to system (cache invalidation,
 	 * etc.)</li>
 	 * </ol>
 	 * 
 	 * 
 	 * @throws ResourceException
-	 *             If update fails
+	 *             If delete fails
 	 */
 	public void perform() throws ResourceException {
 		check();
-		update();
+		delete();
 		propagate();
 	}
 
@@ -132,18 +132,8 @@ public final class ResourceUpdate {
 		/*
 		 * Check mandatory fields: identifier, displayName, and lastModified
 		 */
-		if (-1 == resource.getIdentifier() || isEmpty(resource.getSimpleName()) || isEmpty(resource.getDisplayName())
-				|| isEmpty(resource.getMail())) {
+		if (-1 == resource.getIdentifier()) {
 			throw new ResourceException(ResourceException.Code.MANDATORY_FIELD);
-		}
-		/*
-		 * Check for invalid values
-		 */
-		if (!ResourceTools.validateResourceIdentifier(resource.getSimpleName())) {
-			throw new ResourceException(ResourceException.Code.INVALID_RESOURCE_IDENTIFIER, resource.getSimpleName());
-		}
-		if (!ResourceTools.validateResourceEmail(resource.getMail())) {
-			throw new ResourceException(ResourceException.Code.INVALID_RESOURCE_MAIL, resource.getMail());
 		}
 		/*
 		 * Check permission: By now caller must be context's admin
@@ -153,29 +143,21 @@ public final class ResourceUpdate {
 					.valueOf(ctx.getContextId()));
 		}
 		/*
-		 * Load referenced resource to check existence and check if another
-		 * resource with the same textual identifier or email address exists in
-		 * storage
+		 * Load referenced resource to check existence
 		 */
 		try {
 			storage.getResource(resource.getIdentifier(), ctx);
-			if (storage.searchResources(resource.getSimpleName(), ctx).length > 0) {
-				throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT, resource.getSimpleName());
-			}
-			if (storage.searchResourcesByMail(resource.getMail(), ctx).length > 0) {
-				throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT_MAIL, resource.getMail());
-			}
 		} catch (final LdapException e) {
 			throw new ResourceException(e);
 		}
 	}
 
 	/**
-	 * Updates all data for the resource in database.
+	 * Deletes all data for the resource in database.
 	 * 
 	 * @throws ResourceException
 	 */
-	private void update() throws ResourceException {
+	private void delete() throws ResourceException {
 		final Connection con;
 		try {
 			con = DBPool.pickupWriteable(ctx);
@@ -210,7 +192,7 @@ public final class ResourceUpdate {
 	}
 
 	/**
-	 * This method calls the plain update methods.
+	 * This method calls the plain delete methods.
 	 * 
 	 * @param con
 	 *            writable database connection in transaction or not.
@@ -218,19 +200,7 @@ public final class ResourceUpdate {
 	 *             if some problem occurs.
 	 */
 	public void update(final Connection con) throws ResourceException {
-		storage.updateResource(ctx, con, resource);
+		storage.deleteResource(ctx, con, resource);
 	}
 
-	private static boolean isEmpty(final String s) {
-		if (null == s || s.length() == 0) {
-			return true;
-		}
-		final char[] chars = s.toCharArray();
-		for (final char c : chars) {
-			if (!Character.isWhitespace(c)) {
-				return false;
-			}
-		}
-		return true;
-	}
 }

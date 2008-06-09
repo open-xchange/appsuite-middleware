@@ -162,9 +162,9 @@ public class ResourceException extends AbstractOXException {
 		 */
 		RESOURCE_NOT_FOUND("Cannot find resource with identifier %d.", Category.CODE_ERROR, Detail.ERROR, 5),
 		/**
-		 * Found resources with same identifier %d.
+		 * Found resource(s) with same identifier %s.
 		 */
-		RESOURCE_CONFLICT("Found resources with same identifier %d.", Category.CODE_ERROR, Detail.ERROR, 6),
+		RESOURCE_CONFLICT("Found resource(s) with same identifier %s.", Category.CODE_ERROR, Detail.ERROR, 6),
 		/**
 		 * No resource given.
 		 */
@@ -176,7 +176,19 @@ public class ResourceException extends AbstractOXException {
 		/**
 		 * User %s is not allowed to create a resource in context %s
 		 */
-		PERMISSION("User %s is not allowed to create a resource in context %s", Category.PERMISSION, Detail.ERROR, 9);
+		PERMISSION("User %s is not allowed to create a resource in context %s", Category.PERMISSION, Detail.ERROR, 9),
+		/**
+		 * Found resource(s) with same email address %s.
+		 */
+		RESOURCE_CONFLICT_MAIL("Found resource(s) with same email address %s.", Category.CODE_ERROR, Detail.ERROR, 10),
+		/**
+		 * Invalid resource identifier: %s
+		 */
+		INVALID_RESOURCE_IDENTIFIER("Invalid resource identifier: %s", Category.USER_INPUT, Detail.ERROR, 11),
+		/**
+		 * Invalid resource email address: %s
+		 */
+		INVALID_RESOURCE_MAIL("Invalid resource email address: %s", Category.USER_INPUT, Detail.ERROR, 11);
 
 		/**
 		 * Message of the exception.
