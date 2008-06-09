@@ -17,7 +17,7 @@ public class ListTest extends TaskTest {
 		final int objectId1 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		final int objectId2 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		
-		Task loadTask = loadTask(getWebConversation(), objectId2, taskFolderId, getHostName(), getHostName(), getPassword());
+		Task loadTask = loadTask(getWebConversation(), objectId1, taskFolderId, getHostName(), getHostName(), getPassword());
 		final Date modified = loadTask.getLastModified();
 		
 		// prevent master/slave problem
@@ -33,7 +33,7 @@ public class ListTest extends TaskTest {
 		int objectId1 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		int objectId2 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		
-		Task loadTask = loadTask(getWebConversation(), objectId2, taskFolderId, getHostName(), getHostName(), getPassword());
+		Task loadTask = loadTask(getWebConversation(), objectId1, taskFolderId, getHostName(), getHostName(), getPassword());
 		final Date modified = loadTask.getLastModified();
 		
 		int[][] objectIdAndFolderId = { { objectId1, taskFolderId }, { objectId2, taskFolderId } };
