@@ -619,7 +619,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      *      int[])
      */
     @Override
-    @SuppressWarnings("unused")
     public boolean existsUser(final Context ctx, final int[] user_ids) throws StorageException {
         boolean ret = false;
         Connection con = null;
