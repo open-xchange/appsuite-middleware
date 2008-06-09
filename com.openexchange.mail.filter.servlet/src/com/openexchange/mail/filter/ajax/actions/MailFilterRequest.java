@@ -209,9 +209,15 @@ public class MailFilterRequest {
 		String forUser;
 		String flag;
 		try {
-			final String[] sColumns = DataParser
-					.checkString(request, AJAXServlet.PARAMETER_COLUMNS).split(",");
-			final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+			int[] columns = { Rule.ID, Rule.RULENAME, Rule.ACTIVE, Rule.FLAGS, Rule.POSITION };
+			final String tmpColumns = DataParser
+			.parseString(request, AJAXServlet.PARAMETER_COLUMNS);
+			
+			if (tmpColumns != null) {
+				final String[] sColumns = tmpColumns.split(",");
+				columns = StringCollection.convertStringArray2IntArray(sColumns);
+			}
+
 			forUser = DataParser.parseString(request, "for_user");
 			flag = DataParser.parseString(request, "flag");
 
@@ -250,10 +256,16 @@ public class MailFilterRequest {
 			final MailFilterService mailFilterService) throws AbstractOXException {
 		String forUser;
 		String flag;
+		
 		try {
-			final String[] sColumns = DataParser
-					.checkString(request, AJAXServlet.PARAMETER_COLUMNS).split(",");
-			final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
+			int[] columns = { Rule.ID, Rule.RULENAME, Rule.ACTIVE, Rule.FLAGS, Rule.POSITION };
+			final String tmpColumns = DataParser
+			.parseString(request, AJAXServlet.PARAMETER_COLUMNS);
+			
+			if (tmpColumns != null) {
+				final String[] sColumns = tmpColumns.split(",");
+				columns = StringCollection.convertStringArray2IntArray(sColumns);
+			}
 
 			forUser = DataParser.checkString(request, "for_user");
 			flag = DataParser.parseString(request, "flag");
