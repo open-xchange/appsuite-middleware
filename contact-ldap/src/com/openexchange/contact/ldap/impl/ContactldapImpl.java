@@ -146,7 +146,7 @@ public class ContactldapImpl implements ContactInterface {
 			exceptionId=0,
 			msg=SETUP_ERROR_LDAP_FOLDER
 	)
-	public SearchIterator<?> getContactsInFolder(int folderId, int from, int to, int orderBy, String orderDir, int[] cols) throws OXException {
+	public SearchIterator<ContactObject> getContactsInFolder(int folderId, int from, int to, int orderBy, String orderDir, int[] cols) throws OXException {
         
 		/* Check Read Rights */
 		checkReadRights(session);
@@ -262,7 +262,7 @@ public class ContactldapImpl implements ContactInterface {
 			exceptionId=2,
 			msg=SETUP_ERROR_LDAP_FOLDER
 	)
-	public SearchIterator<?> getObjectsById(int[][] objectIdAndInFolder, int[] cols) throws OXException, Exception {
+	public SearchIterator<ContactObject> getObjectsById(int[][] objectIdAndInFolder, int[] cols) throws OXException, Exception {
 		
 		/* Check Read Rights */
 		checkReadRights(session);
@@ -308,7 +308,7 @@ public class ContactldapImpl implements ContactInterface {
 			exceptionId=3,
 			msg=NOT_SUPPORTED_LDAP
 	)
-	public SearchIterator<?> getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, String orderDir, int[] cols) throws OXException {
+	public SearchIterator<ContactObject> getContactsByExtendedSearch(ContactSearchObject searchobject, int orderBy, String orderDir, int[] cols) throws OXException {
     	throw EXCEPTIONS.create(3, server.getFolderId(), session.getContextId());
 	}
 
@@ -318,7 +318,7 @@ public class ContactldapImpl implements ContactInterface {
 			exceptionId=4,
 			msg=NOT_SUPPORTED_LDAP
 	)
-	public SearchIterator<?> getDeletedContactsInFolder(int folderId, int[] cols, Date since) throws OXException {
+	public SearchIterator<ContactObject> getDeletedContactsInFolder(int folderId, int[] cols, Date since) throws OXException {
     	throw EXCEPTIONS.create(4, server.getFolderId(), session.getContextId());
 	}
 
@@ -328,7 +328,7 @@ public class ContactldapImpl implements ContactInterface {
 			exceptionId=5,
 			msg=SETUP_ERROR_LDAP_FOLDER
 	)
-	public SearchIterator<?> getModifiedContactsInFolder(int folderId, int[] cols, Date since) throws OXException {
+	public SearchIterator<ContactObject> getModifiedContactsInFolder(int folderId, int[] cols, Date since) throws OXException {
 
 		/* Check Read Rights */
 		checkReadRights(session);
@@ -376,7 +376,7 @@ public class ContactldapImpl implements ContactInterface {
 			exceptionId=6,
 			msg=SETUP_ERROR_LDAP_FOLDER
 	)
-	public SearchIterator<?> searchContacts(String searchpattern, boolean startletter, int folderId, int orderBy, String orderDir, int[] cols) throws OXException {
+	public SearchIterator<ContactObject> searchContacts(String searchpattern, boolean startletter, int folderId, int orderBy, String orderDir, int[] cols) throws OXException {
 
 		/* Check Read Rights */
 		checkReadRights(session);
