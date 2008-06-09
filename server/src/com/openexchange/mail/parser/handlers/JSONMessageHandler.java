@@ -578,6 +578,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 					throw new MailException(MailException.Code.JSON_ERROR, e, e.getLocalizedMessage());
 				}
 			}
+			textAppended = true;
 		}
 		return true;
 
