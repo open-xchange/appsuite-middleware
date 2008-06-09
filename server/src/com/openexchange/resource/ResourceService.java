@@ -75,4 +75,17 @@ public interface ResourceService {
 	 */
 	void create(User user, Context ctx, Resource resource) throws ResourceException;
 
+	/**
+	 * Updates a resource.
+	 * 
+	 * @param user
+	 *            The user in whose name the update takes place
+	 * @param ctx
+	 *            The context.
+	 * @param resource
+	 *            The resource to update.
+	 * @throws ResourceException
+	 *             If resource update fails
+	 */
+	void update(User user, Context ctx, Resource resource) throws ResourceException;
 }

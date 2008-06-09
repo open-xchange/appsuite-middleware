@@ -57,9 +57,9 @@ import com.openexchange.resource.ResourceService;
 
 /**
  * {@link ResourceServiceImpl}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * 
  */
 public final class ResourceServiceImpl implements ResourceService {
 
@@ -70,8 +70,12 @@ public final class ResourceServiceImpl implements ResourceService {
 		super();
 	}
 
-	public void create(User user, Context ctx, Resource resource) throws ResourceException {
+	public void create(final User user, final Context ctx, final Resource resource) throws ResourceException {
 		new ResourceCreate(user, ctx, resource).perform();
+	}
+
+	public void update(final User user, final Context ctx, final Resource resource) throws ResourceException {
+		new ResourceUpdate(user, ctx, resource).perform();
 	}
 
 }
