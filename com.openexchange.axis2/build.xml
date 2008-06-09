@@ -1,0 +1,182 @@
+<project name="com.openexchange.axis2" default="install" basedir=".">
+
+    <!-- Customizable values -->
+    <property name="destdir" value=""/>
+    <property name="prefix" value="/opt/open-xchange"/>
+
+    <!-- Bundle dependencies -->
+    <property name="commonBundle" value="com.openexchange.common"/>
+
+    <!-- Constants -->
+    <property name="tmp.dir" value="tmp"/>
+
+    <property file="META-INF/MANIFEST.MF"/>
+    <property file="build.properties"/>
+
+	<property name="version" value="${Bundle-Version}"/>
+    <property name="bundle.name" value="${Bundle-SymbolicName}.jar"/>
+    <property name="composite.name" value="open-xchange-axis2-${version}"/>
+
+    <!-- Install Constants -->
+    <property name="bundlesdir" value="${prefix}/bundles"/>
+    <property name="confdir"  value="${prefix}/etc/groupware/"/>
+    <property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d"/>
+	<property name="axis2dir" value="${bundlesdir}/${Bundle-SymbolicName}/"/>
+	
+    <!-- JAR names for classpath -->
+    <property name="osgijar" value="org.eclipse.osgi_3.3.0.v20070530.jar" />
+    <property name="osgiservicesjar" value="org.eclipse.osgi.services_3.1.200.v20070605.jar"/>
+	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
+	<property name="servletjar" value="javax.servlet_2.4.0.v200706111738.jar" />
+    <property name="globaljar" value="com.openexchange.global.jar" />
+	<property name="configjar" value="com.openexchange.configread.jar" />
+	<property name="serverjar" value="com.openexchange.server.jar" />
+
+	<property name="mailjar" value="mail-1.4.1.jar" />
+	<property name="httpclientjar" value="commons-httpclient-3.1.jar" />
+	<property name="fileuploadjar" value="commons-fileupload-1.2.1.jar" />
+
+	<!-- Classpath -->
+    <path id="project.classpath">
+        <pathelement location="${bundlesdir}/${osgijar}"/>
+        <pathelement location="${bundlesdir}/${osgiservicesjar}"/>
+		<pathelement location="${bundlesdir}/${commonsloggingjar}" />
+		<pathelement location="${bundlesdir}/${servletjar}" />
+        <pathelement location="${bundlesdir}/${globaljar}"/>
+		<pathelement location="${bundlesdir}/${configjar}"/>
+		<pathelement location="${bundlesdir}/${serverjar}"/>
+    	
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${mailjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${fileuploadjar}"/>
+        <pathelement location="${bundlesdir}/${commonBundle}/lib/${httpclientjar}"/>
+        <pathelement location="lib/axis2-adb-1.4.jar"/>
+        <pathelement location="lib/axis2-adb-codegen-1.4.jar"/>
+        <pathelement location="lib/axis2-ant-plugin-1.4.jar"/>
+        <pathelement location="lib/axis2-clustering-1.4.jar"/>
+        <pathelement location="lib/axis2-codegen-1.4.jar"/>
+        <pathelement location="lib/axis2-corba-1.4.jar"/>
+        <pathelement location="lib/axis2-fastinfoset-1.4.jar"/>
+        <pathelement location="lib/axis2-java2wsdl-1.4.jar"/>
+        <pathelement location="lib/axis2-jaxbri-1.4.jar"/>
+        <pathelement location="lib/axis2-jaxws-1.4.jar"/>
+        <pathelement location="lib/axis2-jaxws-api-1.4.jar"/>
+        <pathelement location="lib/axis2-jibx-1.4.jar"/>
+        <pathelement location="lib/axis2-json-1.4.jar"/>
+        <pathelement location="lib/axis2-jws-api-1.4.jar"/>
+        <pathelement location="lib/axis2-kernel-1.4.jar"/>
+        <pathelement location="lib/axis2-metadata-1.4.jar"/>
+        <pathelement location="lib/axis2-mtompolicy-1.4.jar"/>
+        <pathelement location="lib/axis2-saaj-1.4.jar"/>
+        <pathelement location="lib/axis2-saaj-api-1.4.jar"/>
+        <pathelement location="lib/axis2-spring-1.4.jar"/>
+        <pathelement location="lib/axis2-xmlbeans-1.4.jar"/>
+    </path>
+
+	<fileset dir="lib" id="jarfiles">
+        <include name="*"/>
+        <exclude name="CVS"/>
+    </fileset>
+
+    <fileset dir="." id="metainf">
+        <include name="META-INF/**"/>
+        <exclude name="CVS"/>
+    </fileset>
+
+    <filterset id="pathsubst">
+        <filter token="axis2conf" value="${axis2dir}/conf/axis2.xml"/>
+        <filter token="axis2dir"  value="${axis2dir}"/>
+    </filterset>
+
+    <!-- Compile -->
+    <target name="prepare">
+        <mkdir dir="${output..}"/>
+        <mkdir dir="${tmp.dir}"/>
+    </target>
+
+    <target name="compile" depends="prepare">
+        <javac srcdir="${source..}" destdir="${output..}" debug="true"
+            encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+            <classpath refid="project.classpath"/>
+        </javac>
+    </target>
+
+    <target name="jar" depends="prepare,compile">
+        <jar jarfile="${tmp.dir}/${bundle.name}"
+            manifest="META-INF/MANIFEST.MF">
+            <fileset dir="${output..}"/>
+        </jar>
+    </target>
+
+    <!-- Install targets -->
+    <target name="install" depends="installJar,installConfig,installAxis2Resources"/>
+
+    <target name="installConfig" depends="replacer">
+        <mkdir dir="${destdir}/${bundle.d}"/>
+        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
+            message="${bundlesdir}/${Bundle-SymbolicName}${line.separator}"/>
+        <copy todir="${destdir}/${axis2dir}">
+            <fileset refid="metainf"/>
+        </copy>
+    	<copy todir="${destdir}/${confdir}" overwrite="true">
+            <fileset dir="conf" excludes="*.in"/>
+        </copy>
+	</target>
+
+    <target name="installAxis2Resources">
+    	<mkdir dir="${destdir}/${axis2dir}/conf"/>
+    	<mkdir dir="${destdir}/${axis2dir}/modules"/>
+    	<mkdir dir="${destdir}/${axis2dir}/services"/>
+        <copy todir="${destdir}/${axis2dir}/modules">
+        	<fileset dir="axis2-resources/modules"/>
+        </copy>
+    	<copy todir="${destdir}/${axis2dir}/conf" file="axis2-resources/conf/axis2.xml" overwrite="true"/>
+    </target>
+
+	<target name="installJar" depends="jar">
+        <mkdir dir="${destdir}/${axis2dir}"/>
+        <copy todir="${destdir}/${axis2dir}">
+            <fileset dir="${tmp.dir}">
+                <include name="${bundle.name}"/>
+            </fileset>
+        </copy>
+		<property name="axis2libs" value="${destdir}/${axis2dir}/lib"/>
+    	<mkdir dir="${axis2libs}"/>
+        <copy todir="${axis2libs}">
+            <fileset refid="jarfiles"/>
+        </copy>
+    </target>
+
+    <!-- Dist -->
+    <target name="dist" depends="clean">
+		<property name="dist-package" value="dist-package"/>
+    	<delete dir="${dist-package}"/>
+        <mkdir dir="${dist-package}/${composite.name}"/>
+        <copy todir="${dist-package}/${composite.name}">
+            <fileset dir=".">
+                <exclude name="**${dist-package}/**"/>
+                <exclude name="**debian/**"/>
+                <exclude name="**CVS/**"/>
+                <exclude name="Todo"/>
+            </fileset>
+        </copy>
+        <tar destfile="../${composite.name}.tar.gz"
+	        basedir="${dist-package}"
+    	    includes="${composite.name}/"
+         	compression="gzip"/>    	<!-- dpkg-source does not like anything else -->
+    	<delete dir="${dist-package}"/>
+    </target>
+
+    <target name="replacer">
+        <copy todir="." overwrite="true">
+            <mapper type="glob" from="*.in" to="*"/>
+            <fileset dir="."/>
+            <filterset refid="pathsubst"/>
+        </copy>
+    </target>
+
+    <target name="clean">
+        <delete dir="${tmp.dir}"/>
+        <delete dir="${output..}"/>
+    </target>
+
+</project>

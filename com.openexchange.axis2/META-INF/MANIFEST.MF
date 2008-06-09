@@ -24,6 +24,7 @@ Import-Package: com.openexchange.config,
  org.osgi.service.http,
  org.osgi.util.tracker;version="1.3.3"
 Bundle-ClassPath: .,
+ com.openexchange.axis2.jar,
  lib/axis2-adb-1.4.jar,
  lib/axis2-adb-codegen-1.4.jar,
  lib/axis2-ant-plugin-1.4.jar,
@@ -54,4 +55,6 @@ Bundle-ClassPath: .,
  lib/neethi-2.0.4.jar,
  lib/wstx-asl-3.2.4.jar,
  lib/woden-api-1.0M8.jar,
- lib/annogen-0.1.0.jar
+ lib/xml-apis-1.3.04.jar,
+ lib/annogen-0.1.0.jar,
+ lib/xercesImpl-2.8.1.jar

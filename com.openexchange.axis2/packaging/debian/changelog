@@ -1,0 +1,5 @@
+open-xchange-axis2 (6.5.0-1) unstable; urgency=low
+
+  * Initial release.
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon,  9 Jun 2008 10:51:30 +0200
