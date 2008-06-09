@@ -123,7 +123,7 @@ public class ResourceException extends AbstractOXException {
 	 *            arguments that will be formatted into the message.
 	 */
 	public ResourceException(final Code code, final Throwable cause, final Object... messageArgs) {
-		super(EnumComponent.GROUP, code.category, code.detailNumber, code.message, cause);
+		super(EnumComponent.RESOURCE, code.category, code.detailNumber, code.message, cause);
 		this.detail = code.detail;
 		setMessageArgs(messageArgs);
 	}
