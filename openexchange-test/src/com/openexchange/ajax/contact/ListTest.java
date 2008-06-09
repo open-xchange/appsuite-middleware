@@ -24,6 +24,9 @@ public class ListTest extends ContactTest {
 		int id2 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 		int id3 = insertContact(getWebConversation(), contactObj, PROTOCOL + getHostName(), getSessionId());
 		
+		// prevent problems with master/slave
+		Thread.sleep(1000);
+		
 		final int[][] objectIdAndFolderId = { { id1, contactFolderId }, { id2, contactFolderId }, { id3, contactFolderId } };
 		
 		final int cols[] = new int[]{ ContactObject.OBJECT_ID, ContactObject.SUR_NAME, ContactObject.DISPLAY_NAME } ;
@@ -35,7 +38,7 @@ public class ListTest extends ContactTest {
 	
 	public void testListWithAllFields() throws Exception {
 		ContactObject contactObject = createCompleteContactObject();
-		
+
 		int objectId = insertContact(getWebConversation(), contactObject, PROTOCOL + getHostName(), getSessionId());
 		
 		final int[][] objectIdAndFolderId = { { objectId, contactFolderId } };
