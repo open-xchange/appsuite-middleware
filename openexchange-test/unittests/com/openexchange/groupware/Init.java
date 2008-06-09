@@ -129,6 +129,10 @@ public final class Init {
 	 */
 	com.openexchange.groupware.userconfiguration.UserConfigurationStorageInit.getInstance(),
 	/**
+	 * Resource storage init
+	 */
+	com.openexchange.resource.internal.ResourceStorageInit.getInstance(),
+	/**
 	 * Notification Configuration
 	 */
 	com.openexchange.groupware.notify.NotificationConfig.getInstance(),
