@@ -89,9 +89,6 @@ public class FilestoreDataMover implements Callable<Void> {
      * 
      */
     public FilestoreDataMover(final String src, final String dst, final Context ctx, final Filestore dstStore) throws IOException {
-        if (!new File(src).exists()) {
-            throw new IOException("Source does not exist");
-        }
         this.src = src;
         this.dst = dst;
         this.ctx = ctx;
@@ -135,13 +132,13 @@ public class FilestoreDataMover implements Callable<Void> {
      * @throws ProgrammErrorException
      */
     public void copy() throws StorageException, IOException, InterruptedException, ProgrammErrorException {
-        // if context store does not yet exist, which might be possible,
-        // just change the configdb
-        final ArrayOutput output = new ShellExecutor().executeprocargs(new String[] { "rsync", "-a", this.src + "/", this.dst });
-        if (0 != output.exitstatus) {
-            throw new ProgrammErrorException("Wrong exit status. Exit status was: " + output.exitstatus + " Stderr was: \n" + output.errOutput.toString() + '\n' + "and stdout was: \n" + output.stdOutput.toString());
+        if (new File(this.src).exists()) {
+            final ArrayOutput output = new ShellExecutor().executeprocargs(new String[] { "rsync", "-a", this.src, this.dst + '/'});
+            if (0 != output.exitstatus) {
+                throw new ProgrammErrorException("Wrong exit status. Exit status was: " + output.exitstatus + " Stderr was: \n" + output.errOutput.toString() + '\n' + "and stdout was: \n" + output.stdOutput.toString());
+            }
+            FileUtils.deleteDirectory(new File(this.src));
         }
-        FileUtils.deleteDirectory(new File(this.src));
 
         final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
         ctx.setFilestoreId(dstStore.getId());
