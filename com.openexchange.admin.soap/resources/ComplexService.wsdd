@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deployment xmlns="http://xml.apache.org/axis2/wsdd/"
+	xmlns:java="http://xml.apache.org/axis2/wsdd/providers/java">
+	<globalConfiguration>
+		<parameter name="sendXsiTypes" value="true" />
+		<parameter name="sendMultiRefs" value="true" />
+		<parameter name="sendXMLDeclaration" value="true" />
+		<parameter name="axis.sendMinimizedElements" value="true" />
+		<requestFlow>
+			<handler type="java:org.apache.axis2.handlers.JWSHandler">
+				<parameter name="scope" value="session" />
+			</handler>
+			<handler type="java:org.apache.axis2.handlers.JWSHandler">
+				<parameter name="scope" value="request" />
+				<parameter name="extension" value=".jwr" />
+			</handler>
+		</requestFlow>
+	</globalConfiguration>
+	<handler name="LocalResponder"
+		type="java:org.apache.axis2.transport.local.LocalResponder" />
+	<handler name="URLMapper"
+		type="java:org.apache.axis2.handlers.http.URLMapper" />
+	<handler name="Authenticate"
+		type="java:org.apache.axis2.handlers.SimpleAuthenticationHandler" />
+	<!-- define the logging handler configuration -->
+	<handler name="track"
+		type="java:net.lyceu.vds.controler.SOAPLogHandler">
+		<parameter name="filename"
+			value="/var/log/tomcat4/vdscontroler-access.log" />
+	</handler>
+	<service name="ComplexService" provider="java:RPC">
+		<requestFlow>
+			<handler type="track" />
+		</requestFlow>
+		<parameter name="allowedMethods" value="*" />
+		<parameter name="className"
+			value="localhost.ComplexService" />
+	</service>
+	<service name="Version" provider="java:RPC">
+		<requestFlow>
+			<handler type="track" />
+		</requestFlow>
+		<parameter name="allowedMethods" value="getVersion" />
+		<parameter name="className" value="org.apache.axis2.Version" />
+	</service>
+	<transport name="http">
+		<requestFlow>
+			<handler type="URLMapper" />
+			<handler
+				type="java:org.apache.axis2.handlers.http.HTTPAuthHandler" />
+		</requestFlow>
+	</transport>
+	<transport name="local">
+		<responseFlow>
+			<handler type="LocalResponder" />
+		</responseFlow>
+	</transport>
+</deployment>
