@@ -1,0 +1,169 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2006 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.group.internal;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupException;
+import com.openexchange.group.GroupStorage;
+import com.openexchange.group.GroupException.Code;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.tools.sql.DBUtils;
+
+/**
+ * This class contains the glue code to join all several operations to be done
+ * if a group is created.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ */
+public final class Create {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(Create.class);
+
+    /**
+     * Context.
+     */
+    private final Context ctx;
+
+    /**
+     * Group to insert.
+     */
+    private final Group group;
+
+    /**
+     * Storage API for groups.
+     */
+    private final GroupStorage storage = GroupStorage.getInstance();
+
+    /**
+     * Default constructor.
+     */
+    public Create(final Context ctx, final Group group) {
+        super();
+        this.ctx = ctx;
+        this.group = group;
+    }
+
+    /**
+     * This method glues all operations together. That includes all checks and
+     * the operations to be done.
+     * @throws GroupException
+     */
+    void perform() throws GroupException {
+        check();
+        insert();
+        // TODO
+    }
+
+    /**
+     * This method performs all necessary checks before creating a group.
+     * @throws GroupException if a problem was detected during checks.
+     */
+    private void check() throws GroupException {
+        if (null == group) {
+            throw new GroupException(Code.NULL);
+        }
+    }
+
+    /**
+     * Inserts all data for the group into the database.
+     * @throws GroupException
+     */
+    private void insert() throws GroupException {
+        final Connection con;
+        try {
+            con = DBPool.pickupWriteable(ctx);
+        } catch (final DBPoolingException e) {
+            throw new GroupException(Code.NO_CONNECTION, e);
+        }
+        try {
+            con.setAutoCommit(false);
+            insert(con);
+            con.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw new GroupException(Code.SQL_ERROR, e);
+        } finally {
+            try {
+                con.setAutoCommit(true);
+            } catch (SQLException e) {
+                LOG.error("Problem setting autocommit to true.", e);
+            }
+            DBPool.closeWriterSilent(ctx, con);
+        }
+    }
+
+    /**
+     * This method calls the plain insert methods.
+     * @param con writable database connection in transaction or not.
+     * @throws GroupException if some problem occurs.
+     */
+    public void insert(final Connection con) throws GroupException {
+        try {
+            final int id = IDGenerator.getId(ctx.getContextId(),
+                Types.PRINCIPAL, con);
+            group.setIdentifier(id);
+            storage.insertGroup(ctx, con, group);
+        } catch (final SQLException e) {
+            throw new GroupException(Code.SQL_ERROR, e);
+        }            
+    }
+}

@@ -47,43 +47,59 @@
  *
  */
 
+package com.openexchange.group.internal;
 
+import java.util.Date;
 
-package com.openexchange.ajax.writer;
-
-import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.group.Group;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.i18n.Groups;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.tools.LocaleTools;
 
 /**
- * GroupWriter
- *
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * Tool methods for groups.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
+public final class GroupTools {
 
-public class GroupWriter extends DataWriter {
-	
-	public GroupWriter() {
-		
-	}
-	
-	public void writeGroup(final Group g, JSONObject jsonObj) throws JSONException {
-		writeParameter(ParticipantsFields.ID, g.getIdentifier(), jsonObj);
-		writeParameter(ParticipantsFields.DISPLAY_NAME, g.getDisplayName(), jsonObj);
-		
-		writeMembers(g, jsonObj);
-	}
-	
-	protected void writeMembers(final Group g, final JSONObject jsonObj) throws JSONException {
-		final JSONArray jsonArray = new JSONArray();
-		final int members[] = g.getMember();
-		for (int a = 0; a < members.length; a++) {
-			jsonArray.put(members[a]);
-		}
+    /**
+     * Cloneable object for group 0.
+     */
+    static final Group GROUP_ZERO;
 
-		jsonObj.put("members", jsonArray);
-	}
+    /**
+     * Prevent instantiation
+     */
+    private GroupTools() {
+        super();
+    }
+
+    public static Group getGroupZero(final Context ctx)
+        throws LdapException, UserException {
+        final Group retval;
+        try {
+            retval = (Group) GROUP_ZERO.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new UserException(UserException.Code.NOT_CLONEABLE, e,
+                Group.class.getName());
+        }
+        final UserStorage ustor = UserStorage.getInstance();
+        retval.setMember(ustor.listAllUser(ctx));
+        retval.setLastModified(new Date());
+        final User admin = ustor.getUser(ctx.getMailadmin(), ctx);
+        final StringHelper helper = new StringHelper(LocaleTools.getLocale(admin
+            .getPreferredLanguage()));
+        retval.setDisplayName(helper.getString(Groups.ZERO_DISPLAYNAME));
+        return retval;
+    }
+
+    static {
+        GROUP_ZERO = new Group();
+        GROUP_ZERO.setIdentifier(0);
+    }
 }

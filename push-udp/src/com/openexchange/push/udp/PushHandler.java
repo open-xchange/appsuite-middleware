@@ -59,6 +59,8 @@ import org.osgi.service.event.EventHandler;
 
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.event.CommonEvent;
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.ContactObject;
@@ -66,8 +68,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.Group;
-import com.openexchange.groupware.ldap.GroupStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.impl.OCLPermission;
 

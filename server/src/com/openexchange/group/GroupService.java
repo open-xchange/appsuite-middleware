@@ -47,43 +47,22 @@
  *
  */
 
+package com.openexchange.group;
 
-
-package com.openexchange.ajax.writer;
-
-import com.openexchange.ajax.fields.ParticipantsFields;
-import com.openexchange.group.Group;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.openexchange.groupware.contexts.Context;
 
 /**
- * GroupWriter
- *
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * This service defines the API to the groups component.
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
+public interface GroupService {
 
-public class GroupWriter extends DataWriter {
-	
-	public GroupWriter() {
-		
-	}
-	
-	public void writeGroup(final Group g, JSONObject jsonObj) throws JSONException {
-		writeParameter(ParticipantsFields.ID, g.getIdentifier(), jsonObj);
-		writeParameter(ParticipantsFields.DISPLAY_NAME, g.getDisplayName(), jsonObj);
-		
-		writeMembers(g, jsonObj);
-	}
-	
-	protected void writeMembers(final Group g, final JSONObject jsonObj) throws JSONException {
-		final JSONArray jsonArray = new JSONArray();
-		final int members[] = g.getMember();
-		for (int a = 0; a < members.length; a++) {
-			jsonArray.put(members[a]);
-		}
+    /**
+     * Creates a group.
+     * @param ctx Context.
+     * @param group group to create.
+     * @throws GroupException if some problem occurs.
+     */
+    void create(Context ctx, Group group) throws GroupException;
 
-		jsonObj.put("members", jsonArray);
-	}
 }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.ldap;
+package com.openexchange.group.internal;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 
@@ -59,18 +59,25 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupException;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.LdapUtility;
 import com.openexchange.groupware.ldap.LdapException.Code;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * This class implements the group storage using a relational database.
  */
 public class RdbGroupStorage extends GroupStorage {
 
-    private static final String SELECT_GROUPS = "SELECT " + IDENTIFIER + ','
-        + DISPLAYNAME + ',' + LAST_MODIFIED + " FROM groups WHERE cid=?";
+    private static final String SELECT_GROUPS = "SELECT id,displayName,"
+        + "lastModified FROM groups WHERE cid=?";
 
     /**
      * Default constructor.
@@ -83,11 +90,65 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
+    public void insertGroup(final Context ctx, final Connection con,
+        final Group group) throws GroupException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("INSERT INTO groups (cid,id,identifier,"
+                + "displayName,lastModified,gidNumber) VALUES (?,?,?,?,?,?)");
+            int pos = 1;
+            stmt.setInt(pos++, ctx.getContextId());
+            stmt.setInt(pos++, group.getIdentifier());
+            stmt.setString(pos++, group.getSimpleName());
+            stmt.setString(pos++, group.getDisplayName());
+            stmt.setLong(pos++, System.currentTimeMillis());
+            stmt.setInt(pos++, 65534);
+            stmt.execute();
+        } catch (final SQLException e) {
+            throw new GroupException(GroupException.Code.SQL_ERROR, e);
+        } finally {
+            DBUtils.closeSQLStuff(null, stmt);
+        }
+        insertGroupMember(ctx, con, group);
+    }
+
+    /**
+     * Inserts groups members.
+     * @param ctx Context.
+     * @param con writable database connection.
+     * @param group group.
+     * @throws GroupException if some problem occurs.
+     */
+    private void insertGroupMember(final Context ctx, final Connection con,
+        final Group group) throws GroupException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("INSERT INTO groups_member (cid,id,"
+                + "member) VALUES (?,?,?)");
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, group.getIdentifier());
+            final int[] members = group.getMember();
+            for (int member : members) {
+                stmt.setInt(3, member);
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (final SQLException e) {
+            throw new GroupException(GroupException.Code.SQL_ERROR, e);
+        } finally {
+            DBUtils.closeSQLStuff(null, stmt);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
 	public Group getGroup(final int gid, final Context context) throws LdapException {
         Connection con;
         try {
             con = DBPool.pickup(context);
-        } catch (Exception e) {
+        } catch (final DBPoolingException e) {
             throw new LdapException(EnumComponent.GROUP, Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
@@ -174,7 +235,7 @@ public class RdbGroupStorage extends GroupStorage {
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
-        final String sql = SELECT_GROUPS + " AND " + DISPLAYNAME + " LIKE ?";
+        final String sql = SELECT_GROUPS + " AND displayName LIKE ?";
         final List<Group> groups = new ArrayList<Group>();
         try {
             stmt = con.prepareStatement(sql);
@@ -243,8 +304,7 @@ public class RdbGroupStorage extends GroupStorage {
 
     private int[] selectMember(final Connection con, final Context ctx,
         final int groupId) throws SQLException {
-        final String getMember = "SELECT " + MEMBER
-            + " FROM groups_member WHERE cid=? AND id=?";
+        final String getMember = "SELECT member FROM groups_member WHERE cid=? AND id=?";
         PreparedStatement stmt = null;
         ResultSet result = null;
         final List<Integer> tmp = new ArrayList<Integer>();

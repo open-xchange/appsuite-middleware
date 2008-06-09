@@ -73,11 +73,6 @@ public final class Names {
     public static final String CONTACTSTORAGE_IMPL = "ContactStorageImpl";
 
     /**
-     * Implementation for the user storage.
-     */
-    public static final String GROUPSTORAGE_IMPL = "GroupStorageImpl";
-
-    /**
      * Implementation for the mail configuration storage.
      */
     public static final String MAILCONFIGURATION_IMPL = "MailConfigurationImpl";
@@ -471,41 +466,6 @@ public final class Names {
     public static final String USER_ATTRIBUTE_UID =
         "UserAttributeUid";
 
-    /**
-     * Name of the property containing the attribute name that contains the
-     * commonName of the group.
-     */
-    public static final String GROUP_ATTRIBUTE_COMMONNAME =
-        "GroupAttributeCommonName";
-
-    /**
-     * Name of the property containing the attribute name that contains the
-     * displayName of the group.
-     */
-    public static final String GROUP_ATTRIBUTE_DISPLAYNAME =
-        "GroupAttributeDisplayName";
-
-    /**
-     * Name of the property containing the attribute name that contains the
-     * displayName of the group.
-     */
-    public static final String GROUP_ATTRIBUTE_IDENTIFIER =
-        "GroupAttributeIdentifier";
-
-    /**
-     * Name of the property containing the attribute name that contains the
-     * member of the group.
-     */
-    public static final String GROUP_ATTRIBUTE_MEMBER =
-        "GroupAttributeMember";
-
-    /**
-     * Name of the property containing the attribute name that contains the
-     * last modification date of the group.
-     */
-    public static final String GROUP_ATTRIBUTE_LASTMODIFIED =
-        "GroupAttributeLastModified";
-    
    public static final String INETORGPERSON_ATTRIBUTE_BUSINESSCATEGORY_NAME =
       "inetOrgPersonAttributebusinessCategoryName";
 

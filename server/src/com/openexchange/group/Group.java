@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.groupware.ldap;
+package com.openexchange.group;
 
 import java.util.Date;
 
@@ -168,5 +168,19 @@ public class Group implements Cloneable {
             System.arraycopy(member, 0, retval.member, 0, member.length);
         }
         return retval;
+    }
+
+    /**
+     * @return the simpleName
+     */
+    public final String getSimpleName() {
+        return simpleName;
+    }
+
+    /**
+     * @param simpleName the simpleName to set
+     */
+    public final void setSimpleName(final String simpleName) {
+        this.simpleName = simpleName;
     }
 }

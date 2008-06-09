@@ -62,6 +62,7 @@ import java.util.List;
 
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException.Code;
@@ -294,9 +295,8 @@ public class RdbUserStorage extends UserStorage {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            final String sql = "SELECT " + GroupStorage.IDENTIFIER
-                + " FROM groups_member WHERE cid=? AND "
-                + GroupStorage.MEMBER + "=?";
+            final String sql = "SELECT id FROM groups_member WHERE cid=? AND "
+                + "member=?";
             stmt = con.prepareStatement(sql);
             stmt.setLong(1, context.getContextId());
             stmt.setInt(2, user.getId());

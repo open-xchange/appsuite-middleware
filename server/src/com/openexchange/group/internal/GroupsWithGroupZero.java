@@ -47,8 +47,9 @@
  *
  */
 
-package com.openexchange.groupware.ldap;
+package com.openexchange.group.internal;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -56,7 +57,12 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupException;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.UserException;
 
 /**
  * Implementation of the group storage that adds group with identifier 0 to all
@@ -153,4 +159,12 @@ public final class GroupsWithGroupZero extends GroupStorage {
         return groups.toArray(new Group[groups.size()]);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void insertGroup(final Context ctx, final Connection con,
+        final Group group) throws GroupException {
+        delegate.insertGroup(ctx, con, group);
+    }
 }

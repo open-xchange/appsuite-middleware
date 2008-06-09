@@ -72,10 +72,10 @@ import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
 
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.Group;
-import com.openexchange.groupware.ldap.GroupStorage;
 import com.openexchange.groupware.ldap.Resource;
 import com.openexchange.groupware.ldap.ResourceStorage;
 import com.openexchange.groupware.ldap.User;

@@ -47,54 +47,31 @@
  *
  */
 
-package com.openexchange.groupware.ldap;
+package com.openexchange.group.internal;
 
-import java.util.Date;
-
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupException;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.i18n.Groups;
-import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.tools.LocaleTools;
 
 /**
- * Tool methods for groups.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class GroupTools {
+public final class ServiceImpl implements GroupService {
 
     /**
-     * Cloneable object for group 0.
+     * Default constructor.
      */
-    static final Group GROUP_ZERO;
-
-    /**
-     * Prevent instantiation
-     */
-    private GroupTools() {
+    public ServiceImpl() {
         super();
     }
 
-    public static Group getGroupZero(final Context ctx)
-        throws LdapException, UserException {
-        final Group retval;
-        try {
-            retval = (Group) GROUP_ZERO.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new UserException(UserException.Code.NOT_CLONEABLE, e,
-                Group.class.getName());
-        }
-        final UserStorage ustor = UserStorage.getInstance();
-        retval.setMember(ustor.listAllUser(ctx));
-        retval.setLastModified(new Date());
-        final User admin = ustor.getUser(ctx.getMailadmin(), ctx);
-        final StringHelper helper = new StringHelper(LocaleTools.getLocale(admin
-            .getPreferredLanguage()));
-        retval.setDisplayName(helper.getString(Groups.ZERO_DISPLAYNAME));
-        return retval;
-    }
-
-    static {
-        GROUP_ZERO = new Group();
-        GROUP_ZERO.setIdentifier(0);
+    /**
+     * {@inheritDoc}
+     */
+    public void create(final Context ctx, final Group group) throws GroupException {
+        final Create create = new Create(ctx, group);
+        create.perform();
     }
 }

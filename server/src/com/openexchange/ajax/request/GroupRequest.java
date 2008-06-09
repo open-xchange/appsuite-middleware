@@ -61,8 +61,8 @@ import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.writer.GroupWriter;
 import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.GroupStorage;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -111,7 +111,7 @@ public class GroupRequest {
 		
 		for (int a = 0; a < jsonArray.length(); a++) {
 			final JSONObject jData = jsonArray.getJSONObject(a);
-			final com.openexchange.groupware.ldap.Group g = groupStorage.getGroup(DataParser.checkInt(jData,
+			final com.openexchange.group.Group g = groupStorage.getGroup(DataParser.checkInt(jData,
 					DataFields.ID), ctx);
 
 			final GroupWriter groupWriter = new GroupWriter();
@@ -135,7 +135,7 @@ public class GroupRequest {
 		timestamp = new Date(0);
 		
 		final GroupStorage groupStorage = GroupStorage.getInstance(true);
-		final com.openexchange.groupware.ldap.Group g = groupStorage.getGroup(id, ctx);
+		final com.openexchange.group.Group g = groupStorage.getGroup(id, ctx);
 		
 		final GroupWriter groupWriter = new GroupWriter();
 		final JSONObject jsonGroupObj = new JSONObject();
@@ -162,7 +162,7 @@ public class GroupRequest {
 		
 		try {
 			final GroupStorage groupStorage = GroupStorage.getInstance(true);
-			com.openexchange.groupware.ldap.Group[] groups = null;
+			com.openexchange.group.Group[] groups = null;
 			
 			if ("*".equals(searchpattern)) {
 				groups = groupStorage.getGroups(ctx);

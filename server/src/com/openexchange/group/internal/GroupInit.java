@@ -47,43 +47,68 @@
  *
  */
 
+package com.openexchange.group.internal;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 
-package com.openexchange.ajax.writer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.ajax.fields.ParticipantsFields;
-import com.openexchange.group.Group;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.openexchange.group.GroupStorage;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.server.Initialization;
 
 /**
- * GroupWriter
  *
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
+public final class GroupInit implements Initialization {
 
-public class GroupWriter extends DataWriter {
-	
-	public GroupWriter() {
-		
-	}
-	
-	public void writeGroup(final Group g, JSONObject jsonObj) throws JSONException {
-		writeParameter(ParticipantsFields.ID, g.getIdentifier(), jsonObj);
-		writeParameter(ParticipantsFields.DISPLAY_NAME, g.getDisplayName(), jsonObj);
-		
-		writeMembers(g, jsonObj);
-	}
-	
-	protected void writeMembers(final Group g, final JSONObject jsonObj) throws JSONException {
-		final JSONArray jsonArray = new JSONArray();
-		final int members[] = g.getMember();
-		for (int a = 0; a < members.length; a++) {
-			jsonArray.put(members[a]);
-		}
+    private static final Log LOG = LogFactory.getLog(GroupInit.class);
 
-		jsonObj.put("members", jsonArray);
-	}
+    /**
+     * Singleton instance.
+     */
+    private static final GroupInit SINGLETON = new GroupInit();
+
+    private static final AtomicBoolean initialized = new AtomicBoolean();
+
+    /**
+     * Prevent instantiation.
+     */
+    public GroupInit() {
+        super();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void start() throws AbstractOXException {
+        if (initialized.get()) {
+            LOG.debug("GroupStorage duplicate initialization.");
+        }
+        GroupStorage.setInstance(new RdbGroupStorage());
+        GroupStorage.setInstanceWithZero(new GroupsWithGroupZero(GroupStorage
+            .getInstance()));
+        initialized.set(true);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void stop() throws AbstractOXException {
+        if (!initialized.get()) {
+            LOG.debug("GroupStorage duplicate shutdown.");
+        }
+        GroupStorage.setInstanceWithZero(null);
+        GroupStorage.setInstance(null);
+        initialized.set(false);
+    }
+
+    /**
+     * @return the singleton instance.
+     */
+    public static GroupInit getInstance() {
+        return SINGLETON;
+    }
 }

@@ -47,50 +47,23 @@
  *
  */
 
+package com.openexchange.group;
 
-
-package com.openexchange.groupware.ldap;
-
+import java.sql.Connection;
 import java.util.Date;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapException;
 
 /**
- * This is the central interface class to the store of groups.
+ * This class defines the storage API for groups. This is a low level API for
+ * reading and writing groups into some storage - normally databases.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public abstract class GroupStorage {
 
-    /**
-     * Attribute name of the group displayName.
-     */
-    public static final String DISPLAYNAME;
-
-    /**
-     * Attribute name of the group identifier.
-     */
-    public static final String IDENTIFIER;
-
-    /**
-     * Attribute name of the group identifier.
-     */
-    public static final String COMMONNAME;
-
-    /**
-     * Attribute name of the group member attribute.
-     */
-    public static final String MEMBER;
-
-    /**
-     * Attribute name containing the last modification timestamp.
-     */
-    public static final String LAST_MODIFIED;
-    
-    private static final AtomicBoolean initialized = new AtomicBoolean();
-    
     private static GroupStorage instance;
-    
+
     private static GroupStorage instanceWithZero;
 
     /**
@@ -99,6 +72,16 @@ public abstract class GroupStorage {
     protected GroupStorage() {
         super();
     }
+
+    /**
+     * This method inserts a group and its members into the storage.
+     * @param ctx Context.
+     * @param con writable database connection.
+     * @param group group to insert.
+     * @throws GroupException if some problem occurs.
+     */
+    public abstract void insertGroup(Context ctx, Connection con, Group group)
+        throws GroupException;
 
     /**
      * Reads a group from the persistent storage.
@@ -146,10 +129,8 @@ public abstract class GroupStorage {
     /**
      * Creates a new instance implementing the group storage interface.
      * @return an instance implementing the group storage interface.
-     * @throws LdapException if the instance can't be created.
      */
-    public static GroupStorage getInstance()
-        throws LdapException {
+    public static GroupStorage getInstance() {
         return getInstance(false);
     }
 
@@ -159,40 +140,20 @@ public abstract class GroupStorage {
      * @param group0 <code>true</code> if group with identifier 0 should be
      * handled.
      * @return an instance implementing the group storage interface.
-     * @throws LdapException if the instance can't be created.
      */
-    public static GroupStorage getInstance(final boolean group0) throws LdapException {
-		if (!initialized.get()) {
-			synchronized (GroupStorage.class) {
-				if (!initialized.get()) {
-					final String className = LdapUtility.findProperty(Names.GROUPSTORAGE_IMPL);
-					instance = LdapUtility.getInstance(LdapUtility.getImplementation(className,
-							GroupStorage.class));
-					instanceWithZero = new GroupsWithGroupZero(instance);
-					initialized.set(true);
-				}
-			}
-		}
-		if (group0) {
-			return instanceWithZero;
-		}
-		return instance;
+    public static GroupStorage getInstance(final boolean group0) {
+        return group0 ? getInstanceWithZero() : instance;
 	}
 
-    static {
-        try {
-            DISPLAYNAME = LdapUtility.findProperty(Names
-                .GROUP_ATTRIBUTE_DISPLAYNAME);
-            IDENTIFIER = LdapUtility.findProperty(Names.
-                GROUP_ATTRIBUTE_IDENTIFIER);
-            COMMONNAME = LdapUtility.findProperty(Names
-                .GROUP_ATTRIBUTE_COMMONNAME);
-            MEMBER = LdapUtility.findProperty(Names
-                .GROUP_ATTRIBUTE_MEMBER);
-            LAST_MODIFIED = LdapUtility.findProperty(Names
-                .GROUP_ATTRIBUTE_LASTMODIFIED);
-        } catch (LdapException e) {
-            throw new RuntimeException(e);
-        }
+    public static void setInstance(final GroupStorage instance) {
+        GroupStorage.instance = instance;
+    }
+
+    public static void setInstanceWithZero(final GroupStorage instanceWithZero) {
+        GroupStorage.instanceWithZero = instanceWithZero;
+    }
+
+    public static GroupStorage getInstanceWithZero() {
+        return instanceWithZero;
     }
 }
