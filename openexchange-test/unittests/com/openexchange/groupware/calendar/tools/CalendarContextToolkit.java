@@ -48,6 +48,8 @@
  */
 package com.openexchange.groupware.calendar.tools;
 
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.contexts.impl.ContextException;

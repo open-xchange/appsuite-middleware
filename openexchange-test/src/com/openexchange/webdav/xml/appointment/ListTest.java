@@ -1,8 +1,8 @@
 package com.openexchange.webdav.xml.appointment;
 
+import com.openexchange.group.Group;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.ldap.Group;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;

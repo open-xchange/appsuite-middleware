@@ -3,6 +3,7 @@ package com.openexchange.groupware.ldap;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.openexchange.group.Group;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.ldap.LdapException.Code;
 

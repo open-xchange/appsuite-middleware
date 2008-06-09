@@ -44,7 +44,7 @@
 
 package com.openexchange.webdav.xml.parser;
 
-import com.openexchange.groupware.ldap.Group;
+import com.openexchange.group.Group;
 import com.openexchange.webdav.xml.XmlServlet;
 import com.openexchange.webdav.xml.fields.DataFields;
 import java.util.List;

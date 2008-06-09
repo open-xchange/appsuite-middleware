@@ -14,7 +14,7 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
-import com.openexchange.groupware.ldap.Group;
+import com.openexchange.group.Group;
 import com.openexchange.tools.URLParameter;
 
 public class GroupTest extends AbstractAJAXTest {
@@ -26,7 +26,7 @@ public class GroupTest extends AbstractAJAXTest {
 	private static final String GROUP_URL = "/ajax/group";
 	
 	public void testSearch() throws Exception {
-		com.openexchange.groupware.ldap.Group groups[] = searchGroup(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
+		com.openexchange.group.Group groups[] = searchGroup(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
 		assertTrue("group array size > 0", groups.length > 0);
 	}
 
@@ -37,7 +37,7 @@ public class GroupTest extends AbstractAJAXTest {
 	}
 	
 	public void testList() throws Exception {
-		com.openexchange.groupware.ldap.Group groups[] = searchGroup(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
+		com.openexchange.group.Group groups[] = searchGroup(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
 		assertTrue("group array size > 0", groups.length > 0);
 		
 		int[] id = new int[groups.length];
@@ -50,17 +50,17 @@ public class GroupTest extends AbstractAJAXTest {
 	}
 	
 	public void testSearchGroupUsers() throws Exception {
-		com.openexchange.groupware.ldap.Group groups[] = searchGroup(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
+		com.openexchange.group.Group groups[] = searchGroup(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
 		assertTrue("group array size > 0", groups.length > 0);
 	}
 	
 	public void testGet() throws Exception {
-		com.openexchange.groupware.ldap.Group groups[] = searchGroup(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
+		com.openexchange.group.Group groups[] = searchGroup(getWebConversation(), "*", PROTOCOL + getHostName(), getSessionId());
 		assertTrue("group array size > 0", groups.length > 0);
-		com.openexchange.groupware.ldap.Group g = loadGroup(getWebConversation(), groups[0].getIdentifier(), PROTOCOL + getHostName(), getSessionId());
+		com.openexchange.group.Group g = loadGroup(getWebConversation(), groups[0].getIdentifier(), PROTOCOL + getHostName(), getSessionId());
 	}
 	
-	public static com.openexchange.groupware.ldap.Group[] searchGroup(WebConversation webCon, String searchpattern, String host, String session) throws Exception {
+	public static com.openexchange.group.Group[] searchGroup(WebConversation webCon, String searchpattern, String host, String session) throws Exception {
 		host = appendPrefix(host);
 		
         final URLParameter parameter = new URLParameter();
@@ -85,10 +85,10 @@ public class GroupTest extends AbstractAJAXTest {
 		assertNotNull("timestamp", response.getTimestamp());
 		
 		JSONArray jsonArray = (JSONArray)response.getData();
-		com.openexchange.groupware.ldap.Group[] g = new com.openexchange.groupware.ldap.Group[jsonArray.length()];
+		com.openexchange.group.Group[] g = new com.openexchange.group.Group[jsonArray.length()];
 		for (int a = 0; a < g.length; a++) {
 			JSONObject jObj = jsonArray.getJSONObject(a);
-			g[a] = new com.openexchange.groupware.ldap.Group();
+			g[a] = new com.openexchange.group.Group();
 			g[a].setIdentifier(jObj.getInt(ParticipantsFields.ID));
 			if (jObj.has(ParticipantsFields.DISPLAY_NAME)) {
 				g[a].setDisplayName(jObj.getString(ParticipantsFields.DISPLAY_NAME));
@@ -98,7 +98,7 @@ public class GroupTest extends AbstractAJAXTest {
 		return g;
 	}
 	
-	public static com.openexchange.groupware.ldap.Group[] listGroup(WebConversation webCon, int[] id, String host, String session) throws Exception {
+	public static com.openexchange.group.Group[] listGroup(WebConversation webCon, int[] id, String host, String session) throws Exception {
 		host = appendPrefix(host);
 		
         final URLParameter parameter = new URLParameter();
@@ -127,10 +127,10 @@ public class GroupTest extends AbstractAJAXTest {
 		assertNotNull("timestamp", response.getTimestamp());
 		
 		JSONArray jsonArray = (JSONArray)response.getData();
-		com.openexchange.groupware.ldap.Group[] g = new com.openexchange.groupware.ldap.Group[jsonArray.length()];
+		com.openexchange.group.Group[] g = new com.openexchange.group.Group[jsonArray.length()];
 		for (int a = 0; a < g.length; a++) {
 			JSONObject jObj = jsonArray.getJSONObject(a);
-			g[a] = new com.openexchange.groupware.ldap.Group();
+			g[a] = new com.openexchange.group.Group();
 			g[a].setIdentifier(jObj.getInt(ParticipantsFields.ID));
 			if (jObj.has(ParticipantsFields.DISPLAY_NAME)) {
 				g[a].setDisplayName(jObj.getString(ParticipantsFields.DISPLAY_NAME));
@@ -140,7 +140,7 @@ public class GroupTest extends AbstractAJAXTest {
 		return g;
 	}
 	
-	public static com.openexchange.groupware.ldap.Group loadGroup(WebConversation webCon, int groupId, String host, String session) throws Exception {
+	public static com.openexchange.group.Group loadGroup(WebConversation webCon, int groupId, String host, String session) throws Exception {
 		host = appendPrefix(host);
 		
         final URLParameter parameter = new URLParameter();
@@ -163,7 +163,7 @@ public class GroupTest extends AbstractAJAXTest {
 		
 		JSONObject jsonObj = (JSONObject)response.getData();
 		
-		com.openexchange.groupware.ldap.Group g = new com.openexchange.groupware.ldap.Group();
+		com.openexchange.group.Group g = new com.openexchange.group.Group();
 		assertTrue("check id", jsonObj.has(ParticipantsFields.ID));
 		g.setIdentifier(jsonObj.getInt(ParticipantsFields.ID));
 

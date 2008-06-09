@@ -1,9 +1,9 @@
 package com.openexchange.webdav.xml;
 
 import com.meterware.httpunit.WebConversation;
+import com.openexchange.group.Group;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.groupware.ldap.Group;
 import com.openexchange.groupware.ldap.Resource;
 import com.openexchange.groupware.ldap.ResourceGroup;
 import com.openexchange.webdav.xml.parser.ResponseParser;

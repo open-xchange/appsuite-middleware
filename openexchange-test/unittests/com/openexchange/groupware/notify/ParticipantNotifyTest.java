@@ -1,6 +1,7 @@
 package com.openexchange.groupware.notify;
 
 import com.openexchange.api2.OXException;
+import com.openexchange.group.Group;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.*;

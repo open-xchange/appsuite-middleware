@@ -1,8 +1,8 @@
 package com.openexchange.webdav.xml.task;
 
+import com.openexchange.group.Group;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.ldap.Group;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.GroupUserTest;

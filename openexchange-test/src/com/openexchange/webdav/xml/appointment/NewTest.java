@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
+import com.openexchange.group.Group;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.impl.AttachmentImpl;
@@ -16,7 +17,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.ldap.Group;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;

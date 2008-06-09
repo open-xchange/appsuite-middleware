@@ -1,10 +1,10 @@
 package com.openexchange.webdav.xml.appointment;
 
+import com.openexchange.group.Group;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.ldap.Group;
 import com.openexchange.groupware.ldap.Resource;
 import com.openexchange.test.TestException;
 import com.openexchange.webdav.xml.AppointmentTest;
