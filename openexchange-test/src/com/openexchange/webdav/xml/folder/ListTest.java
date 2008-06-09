@@ -43,7 +43,7 @@ public class ListTest extends FolderTest {
 		// prevent master/slave problem
 		Thread.sleep(1000);
 		
-		final FolderObject loadFolder = loadFolder(webCon, objectId2, getHostName(), getLogin(), getPassword());
+		final FolderObject loadFolder = loadFolder(webCon, objectId1, getHostName(), getLogin(), getPassword());
 		final Date modified = loadFolder.getLastModified();
 		
 		int[] id = { objectId1, objectId2 };
