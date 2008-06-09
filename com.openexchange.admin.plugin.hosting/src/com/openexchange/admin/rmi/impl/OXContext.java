@@ -590,7 +590,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 final Filestore srcfilestore = oxu.getFilestore(srcStore_id);
                 final StringBuilder src = builduppath(ctxdir, new URI(srcfilestore.getUrl()));
                 final Filestore fulldstfilestore = oxu.getFilestore(dst_filestore.getId());
-                final StringBuilder dst = builduppath(ctxdir, new URI(fulldstfilestore.getUrl()));
+                final String dst = new URI(fulldstfilestore.getUrl()).getPath();
                 
                 final OXContextException contextException = new OXContextException("Unable to move filestore");
                 if (src == null) {
