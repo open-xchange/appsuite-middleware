@@ -260,6 +260,9 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
             final RuntimeException exc = (RuntimeException) e;
             printServerException(id, ctxid, exc, parser);
             sysexit(1);
+        } else {
+            printServerException(id, ctxid, e, parser);
+            sysexit(1);
         }
     }
 }
