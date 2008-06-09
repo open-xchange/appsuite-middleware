@@ -49,6 +49,7 @@
 package com.openexchange.groupware.calendar.tools;
 
 import com.openexchange.group.Group;
+import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -110,7 +111,7 @@ public class CalendarContextToolkit {
         try {
             gStorage = GroupStorage.getInstance();
             return gStorage.searchGroups(group, ctx)[0].getIdentifier();
-        } catch (LdapException e) {
+        } catch (final GroupException e) {
             e.printStackTrace();
             return -1;
         }
