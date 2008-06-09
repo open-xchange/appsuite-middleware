@@ -47,30 +47,31 @@
  *
  */
 
+package com.openexchange.resource.internal;
 
-
-package com.openexchange.ajax.writer;
-
-import com.openexchange.ajax.fields.ParticipantsFields;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.openexchange.resource.ResourceException;
+import com.openexchange.resource.ResourceService;
 
 /**
- * ResourceWriter
+ * {@link ResourceServiceImpl}
  *
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *
  */
+public final class ResourceServiceImpl implements ResourceService {
 
-public class ResourceWriter extends DataWriter {
-	
-	public ResourceWriter() {
+	/**
+	 * Initializes a new {@link ResourceServiceImpl}
+	 */
+	public ResourceServiceImpl() {
+		super();
+	}
 
+	public void create(User user, Context ctx, Resource resource) throws ResourceException {
+		new ResourceCreate(user, ctx, resource).perform();
 	}
-	
-	public void writeResource(final Resource r, final JSONObject jsonObj) throws JSONException {
-		writeParameter(ParticipantsFields.ID, r.getIdentifier(), jsonObj);
-		writeParameter(ParticipantsFields.DISPLAY_NAME, r.getDisplayName(), jsonObj);
-	}
+
 }

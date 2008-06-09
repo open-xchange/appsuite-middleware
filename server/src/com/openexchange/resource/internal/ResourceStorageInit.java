@@ -47,30 +47,56 @@
  *
  */
 
+package com.openexchange.resource.internal;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 
-package com.openexchange.ajax.writer;
-
-import com.openexchange.ajax.fields.ParticipantsFields;
-import com.openexchange.resource.Resource;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.resource.ResourceStorage;
+import com.openexchange.server.Initialization;
 
 /**
- * ResourceWriter
- *
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * {@link ResourceStorageInit} - The {@link Initialization initialization} for resource
+ * storage.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
+public final class ResourceStorageInit implements Initialization {
 
-public class ResourceWriter extends DataWriter {
-	
-	public ResourceWriter() {
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(ResourceStorageInit.class);
 
+	private static final ResourceStorageInit SINGLETON = new ResourceStorageInit();
+
+	private static final AtomicBoolean initialized = new AtomicBoolean();
+
+	/**
+	 * @return The singleton instance.
+	 */
+	public static ResourceStorageInit getInstance() {
+		return SINGLETON;
 	}
-	
-	public void writeResource(final Resource r, final JSONObject jsonObj) throws JSONException {
-		writeParameter(ParticipantsFields.ID, r.getIdentifier(), jsonObj);
-		writeParameter(ParticipantsFields.DISPLAY_NAME, r.getDisplayName(), jsonObj);
+
+	/**
+	 * Initializes a new {@link ResourceStorageInit}
+	 */
+	private ResourceStorageInit() {
+		super();
 	}
+
+	public void start() throws AbstractOXException {
+		if (!initialized.compareAndSet(false, true)) {
+			LOG.warn("Duplicate resource storage start-up");
+		}
+		ResourceStorage.setInstance(new RdbResourceStorage());
+	}
+
+	public void stop() throws AbstractOXException {
+		if (!initialized.compareAndSet(true, false)) {
+			LOG.warn("Duplicate resource storage shut-down");
+		}
+		ResourceStorage.releaseInstance();
+	}
+
 }

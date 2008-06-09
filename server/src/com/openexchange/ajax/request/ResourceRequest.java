@@ -65,9 +65,9 @@ import com.openexchange.ajax.writer.ResourceWriter;
 import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.ResourceStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.resource.ResourceStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -119,7 +119,7 @@ public class ResourceRequest {
 		for (int a = 0; a < jsonArray.length(); a++) {
 			JSONObject jData = jsonArray.getJSONObject(a);
 			final int id = DataParser.checkInt(jData, DataFields.ID);
-			com.openexchange.groupware.ldap.Resource r = null;
+			com.openexchange.resource.Resource r = null;
 			
 			try {
 				r = resourceStorage.getResource(id, ctx);
@@ -134,7 +134,7 @@ public class ResourceRequest {
 				
 				final User u = userStorage.getUser(id, ctx);
 				
-				r = new com.openexchange.groupware.ldap.Resource();
+				r = new com.openexchange.resource.Resource();
 				r.setIdentifier(u.getId());
 				r.setDisplayName(u.getDisplayName());
 				r.setLastModified(new Date(0));
@@ -160,7 +160,7 @@ public class ResourceRequest {
 		
 		final ResourceStorage resourceStorage = ResourceStorage.getInstance();
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
-		com.openexchange.groupware.ldap.Resource r = null;
+		com.openexchange.resource.Resource r = null;
 		try {
 			r = resourceStorage.getResource(id, ctx);
 		} catch (LdapException exc) {
@@ -176,7 +176,7 @@ public class ResourceRequest {
 			
 			final User u = userStorage.getUser(id, ctx);
 			
-			r = new com.openexchange.groupware.ldap.Resource();
+			r = new com.openexchange.resource.Resource();
 			r.setIdentifier(u.getId());
 			r.setDisplayName(u.getDisplayName());
 			r.setLastModified(new Date(0));
@@ -207,7 +207,7 @@ public class ResourceRequest {
 			}
 
 			final ResourceStorage resourceStorage = ResourceStorage.getInstance();
-			final com.openexchange.groupware.ldap.Resource[] resources = resourceStorage.searchResources(searchpattern,
+			final com.openexchange.resource.Resource[] resources = resourceStorage.searchResources(searchpattern,
 					ctx);
 
 			final ResourceWriter resourceWriter = new ResourceWriter();
