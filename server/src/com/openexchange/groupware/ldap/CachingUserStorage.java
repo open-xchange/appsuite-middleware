@@ -140,15 +140,11 @@ public class CachingUserStorage extends UserStorage {
 	@Override
 	public void updateUser(final User user, final Context context) throws LdapException {
 		getUserStorage().updateUser(user, context);
-		final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-		if (null != cacheService) {
-			try {
-				final Cache cache = cacheService.getCache(REGION_NAME);
-				cache.remove(cache.newCacheKey(context.getContextId(), user.getId()));
-			} catch (final CacheException e) {
-				throw new LdapException(EnumComponent.USER, Code.CACHE_PROBLEM, e);
-			}
-		}
+		try {
+            invalidateUser(context, user.getId());
+        } catch (final UserException e) {
+            throw new LdapException(e);
+        }
 	}
 
 	/**
@@ -201,6 +197,7 @@ public class CachingUserStorage extends UserStorage {
 	 */
 	@Override
 	public User searchUser(final String email, final Context context) throws LdapException {
+        // Caching doesn't make any sense here.
 		return getUserStorage().searchUser(email, context);
 	}
 
@@ -255,6 +252,23 @@ public class CachingUserStorage extends UserStorage {
 	}
 
 	/**
+     * {@inheritDoc}
+     */
+    @Override
+    public void invalidateUser(Context ctx, int userId) throws UserException {
+        final CacheService cacheService = ServerServiceRegistry.getInstance()
+            .getService(CacheService.class);
+        if (null != cacheService) {
+            try {
+                final Cache cache = cacheService.getCache(REGION_NAME);
+                cache.remove(cache.newCacheKey(ctx.getContextId(), userId));
+            } catch (final CacheException e) {
+                throw new UserException(UserException.Code.CACHE_PROBLEM, e);
+            }
+        }
+    }
+
+    /**
 	 * Creates a the instance implementing the user storage interface with
 	 * persistent storing.
 	 * 

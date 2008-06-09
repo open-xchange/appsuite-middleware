@@ -68,6 +68,8 @@ import com.openexchange.charset.AliasCharsetProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.client.ConfigJump;
+import com.openexchange.group.GroupService;
+import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -272,6 +274,7 @@ public final class ServerActivator extends DeferredActivator {
 		registrationList
 				.add(context.registerService(CharsetProvider.class.getName(), new AliasCharsetProvider(), null));
 		registrationList.add(context.registerService(HttpService.class.getName(), new HttpServiceImpl(), null));
+		registrationList.add(context.registerService(GroupService.class.getName(), new GroupServiceImpl(), null));
 	}
 
 	@Override

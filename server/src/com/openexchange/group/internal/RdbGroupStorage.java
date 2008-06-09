@@ -76,8 +76,8 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class RdbGroupStorage extends GroupStorage {
 
-    private static final String SELECT_GROUPS = "SELECT id,displayName,"
-        + "lastModified FROM groups WHERE cid=?";
+    private static final String SELECT_GROUPS = "SELECT id,identifier,"
+        + "displayName,lastModified FROM groups WHERE cid=?";
 
     /**
      * Default constructor.
@@ -101,7 +101,7 @@ public class RdbGroupStorage extends GroupStorage {
             stmt.setInt(pos++, group.getIdentifier());
             stmt.setString(pos++, group.getSimpleName());
             stmt.setString(pos++, group.getDisplayName());
-            stmt.setLong(pos++, System.currentTimeMillis());
+            stmt.setLong(pos++, group.getLastModified().getTime());
             stmt.setInt(pos++, 65534);
             stmt.execute();
         } catch (final SQLException e) {
@@ -163,6 +163,7 @@ public class RdbGroupStorage extends GroupStorage {
                 group = new Group();
                 int pos = 1;
                 group.setIdentifier(result.getInt(pos++));
+                group.setSimpleName(result.getString(pos++));
                 group.setDisplayName(result.getString(pos++));
                 group.setLastModified(new Date(result.getLong(pos++)));
             } else {
@@ -205,6 +206,7 @@ public class RdbGroupStorage extends GroupStorage {
                 final Group group = new Group();
                 int pos = 1;
                 group.setIdentifier(result.getInt(pos++));
+                group.setSimpleName(result.getString(pos++));
                 group.setDisplayName(result.getString(pos++));
                 group.setLastModified(new Date(result.getLong(pos++)));
                 group.setMember(selectMember(con, context,
@@ -226,26 +228,29 @@ public class RdbGroupStorage extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-	public Group[] searchGroups(final String pattern, final Context context) throws LdapException {
+	public Group[] searchGroups(final String pattern, final Context context) throws GroupException {
         Connection con = null;
         try {
             con = DBPool.pickup(context);
         } catch (Exception e) {
-            throw new LdapException(EnumComponent.GROUP, Code.NO_CONNECTION, e);
+            throw new GroupException(GroupException.Code.NO_CONNECTION, e);
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
-        final String sql = SELECT_GROUPS + " AND displayName LIKE ?";
+        final String sql = SELECT_GROUPS + " AND (displayName LIKE ? OR identifier LIKE ?)";
         final List<Group> groups = new ArrayList<Group>();
         try {
             stmt = con.prepareStatement(sql);
             stmt.setLong(1, context.getContextId());
-            stmt.setString(2, LdapUtility.prepareSearchPattern(pattern));
+            final String sqlPattern = LdapUtility.prepareSearchPattern(pattern);
+            stmt.setString(2, sqlPattern);
+            stmt.setString(3, sqlPattern);
             result = stmt.executeQuery();
             while (result.next()) {
                 final Group group = new Group();
                 int pos = 1;
                 group.setIdentifier(result.getInt(pos++));
+                group.setSimpleName(result.getString(pos++));
                 group.setDisplayName(result.getString(pos++));
                 group.setLastModified(new Date(result.getLong(pos++)));
                 group.setMember(selectMember(con, context,
@@ -253,7 +258,7 @@ public class RdbGroupStorage extends GroupStorage {
                 groups.add(group);
             }
         } catch (SQLException e) {
-            throw new LdapException(EnumComponent.GROUP, Code.SQL_ERROR, e,
+            throw new GroupException(GroupException.Code.SQL_ERROR, e,
                 e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
@@ -285,6 +290,7 @@ public class RdbGroupStorage extends GroupStorage {
                 final Group group = new Group();
                 int pos = 1;
                 group.setIdentifier(result.getInt(pos++));
+                group.setSimpleName(result.getString(pos++));
                 group.setDisplayName(result.getString(pos++));
                 group.setLastModified(new Date(result.getLong(pos++)));
                 group.setMember(selectMember(con, context,

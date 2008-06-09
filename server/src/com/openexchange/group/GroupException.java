@@ -218,7 +218,33 @@ public class GroupException extends AbstractOXException {
         /**
          * No group given.
          */
-        NULL("No group given.", Category.CODE_ERROR, Detail.ERROR, 18);
+        NULL("No group given.", Category.CODE_ERROR, Detail.ERROR, 18),
+        /**
+         * The mandatory field %s is not defined.
+         */
+        MANDATORY_MISSING("The mandatory field %s is not defined.", Category
+            .USER_INPUT, Detail.ERROR, 19),
+        /**
+         * The simple name contains this not allowed characters: "%s".
+         */
+        NOT_ALLOWED_SIMPLE_NAME("The simple name contains this not allowed "
+            + "characters: \"%s\".", Category.USER_INPUT, Detail.ERROR, 20),
+        /**
+         * Another group with same identifier name exists. ID: %d
+         */
+        DUPLICATE("Another group with same identifier name exists. ID: %d",
+            Category.USER_INPUT, Detail.ERROR, 21),
+        /**
+         * Group contains a not existing member %d.
+         */
+        NOT_EXISTING_MEMBER("Group contains a not existing member %d.", Category
+            .USER_INPUT, Detail.ERROR, 22),
+        /**
+         * Group contains invalid data: "%1$s".
+         */
+        INVALID_DATA("Group contains invalid data: \"%1$s\".", Category
+            .USER_INPUT, Detail.ERROR, 23);
+
 
         /**
          * Message of the exception.

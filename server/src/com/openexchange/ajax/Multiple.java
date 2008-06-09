@@ -79,6 +79,7 @@ import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api.OXPermissionException;
 import com.openexchange.api2.OXConcurrentModificationException;
 import com.openexchange.api2.OXException;
+import com.openexchange.group.GroupException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
@@ -360,6 +361,12 @@ public class Multiple extends SessionServlet {
 						jsonWriter.value("");
 					}
 					Response.writeException(e, jsonWriter);
+                } catch (final GroupException e) {
+                    LOG.error(e.getMessage(), e);
+                    if (jsonWriter.isExpectingValue()) {
+                        jsonWriter.value("");
+                    }
+                    Response.writeException(e, jsonWriter);
 				} catch (final SearchIteratorException e) {
 					LOG.error(e.getMessage(), e);
 					if (jsonWriter.isExpectingValue()) {

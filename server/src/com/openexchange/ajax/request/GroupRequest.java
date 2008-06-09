@@ -61,6 +61,7 @@ import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.writer.GroupWriter;
 import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
@@ -87,7 +88,7 @@ public class GroupRequest {
 		return timestamp;
 	}
 	
-	public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, LdapException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
+	public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException, LdapException, GroupException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
 			return actionList(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
@@ -146,7 +147,7 @@ public class GroupRequest {
 		return jsonGroupObj;
 	}
 	
-	public JSONArray actionSearch(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException, SearchIteratorException, AjaxException {
+	public JSONArray actionSearch(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException, GroupException, SearchIteratorException, AjaxException {
 		final JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
 		
 		String searchpattern = null;

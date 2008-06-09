@@ -81,7 +81,7 @@ public final class GroupsWithGroupZero extends GroupStorage {
      * @param ctx Context.
      * @param delegate underlying group storage.
      */
-    GroupsWithGroupZero(final GroupStorage delegate) {
+    public GroupsWithGroupZero(final GroupStorage delegate) {
         super();
         this.delegate = delegate;
     }
@@ -141,14 +141,16 @@ public final class GroupsWithGroupZero extends GroupStorage {
      * {@inheritDoc}
      */
     @Override
-    public Group[] searchGroups(final String pattern, final Context ctx) throws LdapException {
+    public Group[] searchGroups(final String pattern, final Context ctx) throws GroupException {
         final Pattern pat = Pattern.compile(pattern.replace("*", ".*"), Pattern
             .CASE_INSENSITIVE);
         final Group zero;
         try {
             zero = GroupTools.getGroupZero(ctx);
-        } catch (UserException e) {
-            throw new LdapException(e);
+        } catch (final UserException e) {
+            throw new GroupException(e);
+        } catch (final LdapException e) {
+            throw new GroupException(e);
         }
         final Matcher match = pat.matcher(zero.getDisplayName());
         final List<Group> groups = new ArrayList<Group>();

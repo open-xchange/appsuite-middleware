@@ -62,6 +62,9 @@ import com.openexchange.group.GroupException.Code;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.UserException;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.sql.DBUtils;
@@ -108,9 +111,17 @@ public final class Create {
      * @throws GroupException
      */
     void perform() throws GroupException {
+        allowed();
         check();
         insert();
-        // TODO
+        propagate();
+    }
+
+    /**
+     * Check if the user is allowed to create groups.
+     */
+    private void allowed() {
+        // FIXME Currently it is not defined who is able to create groups.
     }
 
     /**
@@ -121,6 +132,11 @@ public final class Create {
         if (null == group) {
             throw new GroupException(Code.NULL);
         }
+        Logic.checkMandatoryForCreate(group);
+        Logic.validateSimpleName(group);
+        Logic.checkData(group);
+        Logic.checkForDuplicate(storage, ctx, group);
+        Logic.doMembersExist(ctx, group);
     }
 
     /**
@@ -165,5 +181,26 @@ public final class Create {
         } catch (final SQLException e) {
             throw new GroupException(Code.SQL_ERROR, e);
         }            
+    }
+
+    /**
+     * Inform the rest of the system about the new group.
+     * @throws GroupException 
+     */
+    private void propagate() throws GroupException {
+        invalidateUser();
+    }
+
+    private void invalidateUser() throws GroupException {
+        try {
+            final UserStorage storage = UserStorage.getInstance();
+            for (final int member : group.getMember()) {
+                storage.invalidateUser(ctx, member);
+            }
+        } catch (final LdapException e) {
+            throw new GroupException(e);
+        } catch (final UserException e) {
+            throw new GroupException(e);
+        }
     }
 }

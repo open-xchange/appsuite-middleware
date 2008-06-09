@@ -60,7 +60,12 @@ public class Group implements Cloneable {
     /**
      * Unique numeric identifier of this group.
      */
-    private int identifier;
+    private int identifier = -1;
+
+    /**
+     * For remembering if the identifier was set.
+     */
+    private boolean identifierSet;
 
     /**
      * This name of the group has some restrictions for the character that can
@@ -69,10 +74,19 @@ public class Group implements Cloneable {
     private String simpleName;
 
     /**
-     * Member of this group.
-     * TODO should be int[]
+     * For remembering if the simpleName was set.
      */
-    private int[] member;
+    private boolean simpleNameSet;
+
+    /**
+     * Member of this group.
+     */
+    private int[] member = new int[0];
+
+    /**
+     * For remembering if the member were set.
+     */
+    private boolean memberSet;
 
     /**
      * Display name of this group.
@@ -80,9 +94,19 @@ public class Group implements Cloneable {
     private String displayName;
 
     /**
-     * Timestamp of the last modification of the group.
+     * For remembering if the displayName was set.
+     */
+    private boolean displayNameSet;
+
+    /**
+     * Time stamp of the last modification of the group.
      */
     private Date lastModified;
+
+    /**
+     * For remembering if the lastModified was set.
+     */
+    private boolean lastModifiedSet;
 
     /**
      * Default constructor.
@@ -97,6 +121,7 @@ public class Group implements Cloneable {
      */
     public void setDisplayName(final String displayName) {
         this.displayName = displayName;
+        displayNameSet = true;
     }
 
     /**
@@ -113,6 +138,7 @@ public class Group implements Cloneable {
      */
     public void setIdentifier(final int identifier) {
         this.identifier = identifier;
+        identifierSet = true;
     }
 
     /**
@@ -129,6 +155,7 @@ public class Group implements Cloneable {
      */
     public void setMember(final int[] member) {
         this.member = member;
+        memberSet = true;
     }
 
     /**
@@ -152,6 +179,7 @@ public class Group implements Cloneable {
      */
     public void setLastModified(final Date lastModified) {
         this.lastModified = lastModified;
+        lastModifiedSet = true;
     }
 
     /**
@@ -182,5 +210,41 @@ public class Group implements Cloneable {
      */
     public final void setSimpleName(final String simpleName) {
         this.simpleName = simpleName;
+        simpleNameSet = true;
+    }
+
+    /**
+     * @return the identifierSet
+     */
+    public final boolean isIdentifierSet() {
+        return identifierSet;
+    }
+
+    /**
+     * @return the simpleNameSet
+     */
+    public final boolean isSimpleNameSet() {
+        return simpleNameSet;
+    }
+
+    /**
+     * @return the memberSet
+     */
+    public final boolean isMemberSet() {
+        return memberSet;
+    }
+
+    /**
+     * @return the displayNameSet
+     */
+    public final boolean isDisplayNameSet() {
+        return displayNameSet;
+    }
+
+    /**
+     * @return the lastModifiedSet
+     */
+    public final boolean isLastModifiedSet() {
+        return lastModifiedSet;
     }
 }

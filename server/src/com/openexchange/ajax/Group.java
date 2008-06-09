@@ -64,6 +64,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.GroupRequest;
 import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.group.GroupException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -117,6 +118,9 @@ public class Group extends DataServlet {
 		} catch (final LdapException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
+        } catch (final GroupException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
 		} catch (final SearchIteratorException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
@@ -190,6 +194,9 @@ public class Group extends DataServlet {
 		} catch (final LdapException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);
+        } catch (final GroupException e) {
+            LOG.error(e.getMessage(), e);
+            response.setException(e);
 		} catch (final SearchIteratorException e) {
 			LOG.error(e.getMessage(), e);
 			response.setException(e);

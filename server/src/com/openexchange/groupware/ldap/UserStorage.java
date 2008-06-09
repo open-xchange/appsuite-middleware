@@ -259,6 +259,16 @@ public abstract class UserStorage {
     public abstract int[] listModifiedUser(Date modifiedSince, Context context)
         throws LdapException;
 
+    /**
+     * Removes a user from the cache if caching is used.
+     * @param ctx Context.
+     * @param userId unique identifier of the user.
+     * @throws UserException if removing gives an exception.
+     */
+    public void invalidateUser(Context ctx, int userId) throws UserException {
+        // Only for caching.
+    }
+
     public boolean authenticate(final User user, final String password)
         throws UserException {
         boolean retval = false;

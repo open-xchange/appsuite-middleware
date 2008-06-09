@@ -80,7 +80,7 @@ public final class GroupTools {
     }
 
     public static Group getGroupZero(final Context ctx)
-        throws LdapException, UserException {
+        throws UserException, LdapException {
         final Group retval;
         try {
             retval = (Group) GROUP_ZERO.clone();

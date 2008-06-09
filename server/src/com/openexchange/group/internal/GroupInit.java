@@ -59,7 +59,7 @@ import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.server.Initialization;
 
 /**
- *
+ * This is something like a bundle activator.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class GroupInit implements Initialization {

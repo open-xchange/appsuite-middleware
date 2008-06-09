@@ -103,9 +103,9 @@ public abstract class GroupStorage {
      * group.
      * @param The context.
      * @return an array of groups that match the search pattern.
-     * @throws LdapException if an error occurs while searching for groups.
+     * @throws GroupException TODO
      */
-    public abstract Group[] searchGroups(String pattern, Context context) throws LdapException;
+    public abstract Group[] searchGroups(String pattern, Context context) throws GroupException;
 
     /**
      * This method returns groups that have been modified since the given
