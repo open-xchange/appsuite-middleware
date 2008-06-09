@@ -53,6 +53,7 @@ import com.openexchange.group.Group;
 import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 
 /**
  *
@@ -70,8 +71,18 @@ public final class GroupServiceImpl implements GroupService {
     /**
      * {@inheritDoc}
      */
-    public void create(final Context ctx, final Group group) throws GroupException {
-        final Create create = new Create(ctx, group);
+    public void create(final Context ctx, final User user, final Group group)
+        throws GroupException {
+        final Create create = new Create(ctx, user, group);
         create.perform();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void update(final Context ctx, final User user, final Group group)
+        throws GroupException {
+        final Update update = new Update(ctx, user, group);
+        update.perform();
     }
 }

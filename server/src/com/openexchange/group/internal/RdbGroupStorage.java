@@ -121,6 +121,9 @@ public class RdbGroupStorage extends GroupStorage {
      */
     private void insertGroupMember(final Context ctx, final Connection con,
         final Group group) throws GroupException {
+        if (0 == group.getMember().length) {
+            return;
+        }
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT INTO groups_member (cid,id,"

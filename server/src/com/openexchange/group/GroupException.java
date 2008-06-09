@@ -243,7 +243,12 @@ public class GroupException extends AbstractOXException {
          * Group contains invalid data: "%1$s".
          */
         INVALID_DATA("Group contains invalid data: \"%1$s\".", Category
-            .USER_INPUT, Detail.ERROR, 23);
+            .USER_INPUT, Detail.ERROR, 23),
+        /**
+         * You are not allowed to create groups.
+         */
+        NO_CREATE_PERMISSION("You are not allowed to create groups.", Category
+            .PERMISSION, Detail.ERROR, 24);
 
 
         /**

@@ -106,6 +106,37 @@ public final class Logic {
         // generated.
     }
 
+    /**
+     * 
+     * @param group
+     * @throws GroupException
+     */
+    final static void checkMandatoryForUpdate(final Group group)
+        throws GroupException {
+        if (!group.isIdentifierSet()) {
+            throw new GroupException(Code.MANDATORY_MISSING, "identifier");
+        }
+        if (group.isSimpleNameSet()) {
+            final String tmp = group.getSimpleName();
+            if (null == tmp || tmp.length() == 0) {
+                throw new GroupException(Code.MANDATORY_MISSING, "simpleName");
+            }
+        }
+        if (group.isDisplayNameSet()) {
+            final String tmp = group.getDisplayName();
+            if (null == tmp || tmp.length() == 0) {
+                throw new GroupException(Code.MANDATORY_MISSING, "displayName");
+            }
+        }
+        // lastModified is set here, to be able to simply store it in the
+        // storage class. This allows storing a given lastModified.
+        if (!group.isLastModifiedSet()) {
+            group.setLastModified(new Date());
+        }
+        // Unique identifier will be set in transaction when the identifier gets
+        // generated.
+    }
+
     private static final String allowedSimpleNameChars = "[$@%\\.+a-zA-Z0-9_-]";
 
     /**
@@ -116,6 +147,9 @@ public final class Logic {
      */
     final static void validateSimpleName(final Group group)
         throws GroupException {
+        if (!group.isSimpleNameSet()) {
+            return;
+        }
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@
         final String groupName = group.getSimpleName();
@@ -131,12 +165,13 @@ public final class Logic {
      * @throws GroupException if some string contains problematic data.
      */
     final static void checkData(final Group group) throws GroupException {
-        if (group.isDisplayNameSet()) {
-            final String result = Check.containsInvalidChars(group
-                .getDisplayName());
-            if (null != result) {
-                throw new GroupException(Code.INVALID_DATA, result);
-            }
+        if (!group.isDisplayNameSet()) {
+            return;
+        }
+        final String result = Check.containsInvalidChars(group
+            .getDisplayName());
+        if (null != result) {
+            throw new GroupException(Code.INVALID_DATA, result);
         }
     }
 
@@ -150,6 +185,9 @@ public final class Logic {
     final static void checkForDuplicate(final GroupStorage storage,
         final Context ctx, final Group group)
         throws GroupException {
+        if (!group.isSimpleNameSet()) {
+            return;
+        }
         final Group[] others = storage.searchGroups(group.getSimpleName(), ctx);
         for (final Group other : others) {
             if (group.getSimpleName().equals(other.getSimpleName())
@@ -169,6 +207,9 @@ public final class Logic {
      */
     final static void doMembersExist(final Context ctx, final Group group)
         throws GroupException {
+        if (!group.isMemberSet()) {
+            return;
+        }
         try {
             final UserStorage storage = UserStorage.getInstance();
             final Set<Integer> set = new HashSet<Integer>();

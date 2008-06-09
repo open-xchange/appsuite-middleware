@@ -47,32 +47,92 @@
  *
  */
 
-package com.openexchange.group;
+package com.openexchange.group.internal;
 
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupException;
+import com.openexchange.group.GroupStorage;
+import com.openexchange.group.GroupException.Code;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 
 /**
- * This service defines the API to the groups component.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface GroupService {
+final class Update {
 
     /**
-     * Creates a group.
-     * @param ctx Context.
-     * @param user User for permission checks.
-     * @param group group to create.
-     * @throws GroupException if some problem occurs.
+     * Context.
      */
-    void create(Context ctx, User user, Group group) throws GroupException;
+    private final Context ctx;
+    
+    /**
+     * User.
+     */
+    private final User user;
+    
+    /**
+     * Group object with changed information.
+     */
+    private final Group changed;
 
     /**
-     * Updates a group.
-     * @param ctx Context.
-     * @param user User for permission checks.
-     * @param group group to update.
-     * @throws GroupException if some problem occurs.
+     * Storage API for groups.
      */
-    void update(Context ctx, User user, Group group) throws GroupException;
+    private final GroupStorage storage = GroupStorage.getInstance();
+
+    /**
+     * Default constructor.
+     */
+    Update(final Context ctx, final User user, final Group group) {
+        super();
+        this.ctx = ctx;
+        this.user = user;
+        this.changed = group;
+    }
+
+    void perform() throws GroupException {
+        allowed();
+        check();
+        prepare();
+        update();
+        propagate();
+    }
+
+    private void allowed() throws GroupException {
+        if (ctx.getMailadmin() != user.getId()) {
+            throw new GroupException(Code.NO_CREATE_PERMISSION);
+        }
+    }
+
+    private void check() throws GroupException {
+        if (null == changed) {
+            throw new GroupException(Code.NULL);
+        }
+        Logic.checkMandatoryForUpdate(changed);
+        Logic.validateSimpleName(changed);
+        Logic.checkData(changed);
+        Logic.checkForDuplicate(storage, ctx, changed);
+        Logic.doMembersExist(ctx, changed);
+    }
+
+    private void prepare() {
+        prepareMember();
+    }
+
+    private void prepareMember() {
+        // FIXME continue here
+    }
+
+    private void update() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    private void propagate() {
+        // TODO Auto-generated method stub
+        
+    }
+
 }

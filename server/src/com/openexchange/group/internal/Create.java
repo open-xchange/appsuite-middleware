@@ -63,6 +63,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.DBPool;
@@ -87,6 +88,11 @@ public final class Create {
     private final Context ctx;
 
     /**
+     * User for permission checks.
+     */
+    private final User user;
+
+    /**
      * Group to insert.
      */
     private final Group group;
@@ -98,10 +104,12 @@ public final class Create {
 
     /**
      * Default constructor.
+     * @param user 
      */
-    public Create(final Context ctx, final Group group) {
+    public Create(final Context ctx, final User user, final Group group) {
         super();
         this.ctx = ctx;
+        this.user = user;
         this.group = group;
     }
 
@@ -119,9 +127,12 @@ public final class Create {
 
     /**
      * Check if the user is allowed to create groups.
+     * @throws GroupException if the user is not allowed to create groups.
      */
-    private void allowed() {
-        // FIXME Currently it is not defined who is able to create groups.
+    private void allowed() throws GroupException {
+        if (ctx.getMailadmin() != user.getId()) {
+            throw new GroupException(Code.NO_CREATE_PERMISSION);
+        }
     }
 
     /**
