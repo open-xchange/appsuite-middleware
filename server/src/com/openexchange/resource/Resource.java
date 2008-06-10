@@ -240,4 +240,12 @@ public final class Resource {
 	public final void setSimpleName(final String simpleName) {
 		this.simpleName = simpleName;
 	}
+
+	@Override
+	public String toString() {
+		return new StringBuilder(64).append(super.toString()).append(" ID=").append(identifier).append(
+				", identifier=\"").append(simpleName).append("\", displayName=\"").append(displayName).append(
+				"\", mail=\"").append(mail).append("\", available=").append(available).append(", description=\"")
+				.append(description).append("\", lastModified=").append(lastModified).toString();
+	}
 }
