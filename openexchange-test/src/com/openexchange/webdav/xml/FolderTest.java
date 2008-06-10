@@ -207,7 +207,7 @@ public class FolderTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int[] deleteFolder(WebConversation webCon, int[] id, String host, String login, String password) throws Exception, OXException {
-		return deleteFolder(webCon, id, new Date(), host, login, password);
+		return deleteFolder(webCon, id, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password);
 	}
 	
 	public static int[] deleteFolder(WebConversation webCon, int[] id, Date lastModified, String host, String login, String password) throws Exception, OXException {
