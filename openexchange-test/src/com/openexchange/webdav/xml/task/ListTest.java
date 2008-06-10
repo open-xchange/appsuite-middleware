@@ -16,12 +16,12 @@ public class ListTest extends TaskTest {
 		Task taskObj = createTask("testPropFindWithModified");
 		final int objectId1 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		final int objectId2 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
+
+		// prevent master/slave problem
+		Thread.sleep(1000);
 		
 		Task loadTask = loadTask(getWebConversation(), objectId1, taskFolderId, getHostName(), getHostName(), getPassword());
 		final Date modified = loadTask.getLastModified();
-		
-		// prevent master/slave problem
-		Thread.sleep(1000);
 		
 		Task[] taskArray = listTask(webCon, taskFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
@@ -33,15 +33,15 @@ public class ListTest extends TaskTest {
 		int objectId1 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		int objectId2 = insertTask(webCon, taskObj, PROTOCOL + hostName, login, password);
 		
+		// prevent master/slave problem
+		Thread.sleep(1000);
+		
 		Task loadTask = loadTask(getWebConversation(), objectId1, taskFolderId, getHostName(), getHostName(), getPassword());
 		final Date modified = loadTask.getLastModified();
 		
 		int[][] objectIdAndFolderId = { { objectId1, taskFolderId }, { objectId2, taskFolderId } };
 		
 		deleteTask(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
-		
-		// prevent master/slave problem
-		Thread.sleep(1000);
 		
 		Task[] taskArray = listTask(webCon, taskFolderId, modified, false, true, PROTOCOL + hostName, login, password);
 		

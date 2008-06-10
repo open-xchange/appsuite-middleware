@@ -21,7 +21,7 @@ public class ListTest extends ContactTest {
 		// prevent master/slave problem
 		Thread.sleep(1000);
 		
-		ContactObject loadContact = loadContact(getWebConversation(), objectId2, contactFolderId, getHostName(), getLogin(), getPassword());
+		ContactObject loadContact = loadContact(getWebConversation(), objectId1, contactFolderId, getHostName(), getLogin(), getPassword());
 		final Date modified = loadContact.getLastModified();
 		
 		ContactObject[] contactArray = listContact(webCon, contactFolderId, modified, true, false, PROTOCOL + hostName, login, password);
@@ -38,7 +38,7 @@ public class ListTest extends ContactTest {
 		
 		int[][] objectIdAndFolderId = { { objectId1, contactFolderId }, { objectId2, contactFolderId } };
 		
-		ContactObject loadContact = loadContact(getWebConversation(), objectId2, contactFolderId, getHostName(), getLogin(), getPassword());
+		ContactObject loadContact = loadContact(getWebConversation(), objectId1, contactFolderId, getHostName(), getLogin(), getPassword());
 		final Date modified = loadContact.getLastModified();
 		
 		deleteContact(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password);
