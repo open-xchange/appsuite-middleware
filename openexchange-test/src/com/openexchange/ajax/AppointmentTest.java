@@ -246,7 +246,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 	public static int updateAppointment(WebConversation webCon,
 			AppointmentObject appointmentObj, int objectId, int inFolder,
 			TimeZone userTimeZone, String host, String session) throws Exception {
-		return updateAppointment(webCon, appointmentObj, objectId, inFolder, new Date(), userTimeZone, host, session);		
+		return updateAppointment(webCon, appointmentObj, objectId, inFolder, new Date(System.currentTimeMillis()+APPEND_MODIFIED), userTimeZone, host, session);		
 	}
 
 	public static int updateAppointment(WebConversation webCon,
@@ -300,7 +300,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 	public static void deleteAppointment(WebConversation webCon, int id,
 			int inFolder, String host, String session) throws Exception {
 		
-		deleteAppointment(webCon, id, inFolder, new Date(), host, session);
+		deleteAppointment(webCon, id, inFolder, new Date(System.currentTimeMillis()+APPEND_MODIFIED), host, session);
 	}
 	public static void deleteAppointment(WebConversation webCon, int id,
 			int inFolder, Date modified, String host, String session) throws Exception {
@@ -313,7 +313,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 			int inFolder, int recurrencePosition, String host, String session)
 			throws Exception {
 		
-		deleteAppointment(webCon, id, inFolder, recurrencePosition, new Date(), host, session);
+		deleteAppointment(webCon, id, inFolder, recurrencePosition, new Date(System.currentTimeMillis()+APPEND_MODIFIED), host, session);
 	}
 	public static void deleteAppointment(WebConversation webCon, int id,
 			int inFolder, int recurrencePosition, Date modified, String host, String session)
@@ -363,7 +363,13 @@ public class AppointmentTest extends AbstractAJAXTest {
 	throws Exception {
 		return listAppointment(webCon, inFolder, cols, start, end, userTimeZone, showAll, false, host, session);
 	}
+
 	public static AppointmentObject[] listAppointment(WebConversation webCon, int inFolder, int[] cols, Date start, Date end, TimeZone userTimeZone, boolean showAll, boolean recurrenceMaster, String host, String session)
+		throws Exception {
+		return listAppointment(webCon, inFolder, cols, start, end, userTimeZone, showAll, recurrenceMaster, -1, -1, host, session);
+	}
+
+	public static AppointmentObject[] listAppointment(WebConversation webCon, int inFolder, int[] cols, Date start, Date end, TimeZone userTimeZone, boolean showAll, boolean recurrenceMaster, int leftHandLimit, int rightHandLimit, String host, String session)
 		throws Exception {
 		host = appendPrefix(host);
 		
@@ -380,6 +386,14 @@ public class AppointmentTest extends AbstractAJAXTest {
 		
 		if (!showAll) {
 			parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
+		}
+		
+		if (leftHandLimit > -1) {
+			parameter.setParameter(AJAXServlet.LEFT_HAND_LIMIT, leftHandLimit);
+		}
+
+		if (rightHandLimit > -1) {
+			parameter.setParameter(AJAXServlet.RIGHT_HAND_LIMIT, rightHandLimit);
 		}
 		
 		WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL
