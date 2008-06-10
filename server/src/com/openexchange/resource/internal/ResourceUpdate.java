@@ -159,10 +159,16 @@ public final class ResourceUpdate {
 		 */
 		try {
 			storage.getResource(resource.getIdentifier(), ctx);
-			if (storage.searchResources(resource.getSimpleName(), ctx).length > 0) {
+			Resource[] resources = storage.searchResources(resource.getSimpleName(), ctx);
+			if (resources.length > 1) {
+				throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT, resource.getSimpleName());
+			} else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
 				throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT, resource.getSimpleName());
 			}
-			if (storage.searchResourcesByMail(resource.getMail(), ctx).length > 0) {
+			resources = storage.searchResourcesByMail(resource.getMail(), ctx);
+			if (resources.length > 1) {
+				throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT_MAIL, resource.getMail());
+			} else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
 				throw new ResourceException(ResourceException.Code.RESOURCE_CONFLICT_MAIL, resource.getMail());
 			}
 		} catch (final LdapException e) {
