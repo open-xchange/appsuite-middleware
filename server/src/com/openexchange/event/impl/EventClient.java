@@ -319,7 +319,7 @@ public class EventClient {
 		final int folderId = contactObj.getParentFolderID();
 		if (folderId > 0) {
 			FolderObject folderObj = getFolder(folderId, ctx);
-			modify(contactObj, folderObj);
+			delete(contactObj, folderObj);
 		}
 	}
 	
