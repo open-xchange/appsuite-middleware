@@ -57,4 +57,5 @@ Bundle-ClassPath: .,
  lib/woden-api-1.0M8.jar,
  lib/xml-apis-1.3.04.jar,
  lib/annogen-0.1.0.jar,
- lib/xercesImpl-2.8.1.jar
+ lib/xercesImpl-2.8.1.jar,
+ lib/xalan-2.7.0.jar
