@@ -82,7 +82,9 @@ public class DeleteTest extends AppointmentTest {
 		AppointmentObject loadAppointment = loadAppointment(webCon, objectId, appointmentFolderId, PROTOCOL + hostName, login, password);
 		compareObject(appointmentObj, loadAppointment);
 		
-		deleteAppointment(webCon, objectId, appointmentFolderId, new Date(), new Date(c.getTimeInMillis() + changeExceptionPosition * dayInMillis), PROTOCOL + getHostName(), getLogin(), getPassword());
+		final Date modified = loadAppointment.getLastModified();
+		
+		deleteAppointment(webCon, objectId, appointmentFolderId, modified, new Date(c.getTimeInMillis() + changeExceptionPosition * dayInMillis), PROTOCOL + getHostName(), getLogin(), getPassword());
 		
 		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		assertEqualsAndNotNull("delete exception is not equals", loadAppointment.getDeleteException(), new Date[] { new Date(c.getTimeInMillis() + changeExceptionPosition * dayInMillis) } );
