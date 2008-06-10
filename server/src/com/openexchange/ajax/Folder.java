@@ -589,29 +589,31 @@ public class Folder extends SessionServlet {
 					}
 				} else if (parentId == FolderObject.SYSTEM_SHARED_FOLDER_ID) {
 					final Map<String, Integer> displayNames = new HashMap<String, Integer>();
-					final UserStorage us = UserStorage.getInstance();
-					final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getSubfolders(
-							FolderObject.SYSTEM_SHARED_FOLDER_ID, null)).asQueue();
-					/*
-					 * Gather all display names
-					 */
-					final int size = q.size();
-					final Iterator<FolderObject> iter = q.iterator();
-					for (int i = 0; i < size; i++) {
-						final FolderObject sharedFolder = iter.next();
-						String creatorDisplayName;
-						try {
-							creatorDisplayName = us.getUser(sharedFolder.getCreatedBy(), ctx).getDisplayName();
-						} catch (final LdapException e) {
-							if (sharedFolder.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
-								throw new AbstractOXException(e);
+					{
+						final UserStorage us = UserStorage.getInstance();
+						final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getSubfolders(
+								FolderObject.SYSTEM_SHARED_FOLDER_ID, null)).asQueue();
+						/*
+						 * Gather all display names
+						 */
+						final int size = q.size();
+						final Iterator<FolderObject> iter = q.iterator();
+						for (int i = 0; i < size; i++) {
+							final FolderObject sharedFolder = iter.next();
+							String creatorDisplayName;
+							try {
+								creatorDisplayName = us.getUser(sharedFolder.getCreatedBy(), ctx).getDisplayName();
+							} catch (final LdapException e) {
+								if (sharedFolder.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
+									throw new AbstractOXException(e);
+								}
+								creatorDisplayName = strHelper.getString(Groups.ZERO_DISPLAYNAME);
 							}
-							creatorDisplayName = strHelper.getString(Groups.ZERO_DISPLAYNAME);
+							if (displayNames.containsKey(creatorDisplayName)) {
+								continue;
+							}
+							displayNames.put(creatorDisplayName, Integer.valueOf(sharedFolder.getCreatedBy()));
 						}
-						if (displayNames.containsKey(creatorDisplayName)) {
-							continue;
-						}
-						displayNames.put(creatorDisplayName, Integer.valueOf(sharedFolder.getCreatedBy()));
 					}
 					/*
 					 * Sort display names and write corresponding virtual owner
