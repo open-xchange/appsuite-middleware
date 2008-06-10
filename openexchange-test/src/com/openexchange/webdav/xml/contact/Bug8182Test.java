@@ -1,10 +1,9 @@
 package com.openexchange.webdav.xml.contact;
 
-import com.openexchange.groupware.container.ContactObject;
-import com.openexchange.test.TestException;
-import com.openexchange.webdav.xml.ContactTest;
-import com.openexchange.webdav.xml.XmlServlet;
 import java.util.Date;
+
+import com.openexchange.groupware.container.ContactObject;
+import com.openexchange.webdav.xml.ContactTest;
 
 public class Bug8182Test extends ContactTest {
 	
@@ -13,11 +12,15 @@ public class Bug8182Test extends ContactTest {
 	}
 
 	public void testBug8182() throws Exception {
-		Date modified = new Date();
-		
 		ContactObject contactObj = createContactObject("testPropFindWithModified");
 		int objectId = insertContact(webCon, contactObj, PROTOCOL + hostName, login, password);
+		final ContactObject loadContact = loadContact(getWebConversation(), objectId, contactFolderId, getHostName(), getLogin(), getPassword());
+		final Date modified = loadContact.getLastModified();
+		
 		deleteContact(getWebConversation(), objectId, contactFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		
+		// prevent master/slave problem
+		Thread.sleep(1000);
 		
 		ContactObject[] contactArray = listContact(webCon, contactFolderId, modified, true, false, PROTOCOL + hostName, login, password);
 		
