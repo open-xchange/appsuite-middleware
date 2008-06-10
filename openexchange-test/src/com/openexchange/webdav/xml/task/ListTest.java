@@ -20,7 +20,7 @@ public class ListTest extends TaskTest {
 		// prevent master/slave problem
 		Thread.sleep(1000);
 		
-		Task loadTask = loadTask(getWebConversation(), objectId1, taskFolderId, getHostName(), getHostName(), getPassword());
+		Task loadTask = loadTask(getWebConversation(), objectId1, taskFolderId, getHostName(), getLogin(), getPassword());
 		final Date modified = loadTask.getLastModified();
 		
 		Task[] taskArray = listTask(webCon, taskFolderId, modified, true, false, PROTOCOL + hostName, login, password);
@@ -36,7 +36,7 @@ public class ListTest extends TaskTest {
 		// prevent master/slave problem
 		Thread.sleep(1000);
 		
-		Task loadTask = loadTask(getWebConversation(), objectId1, taskFolderId, getHostName(), getHostName(), getPassword());
+		Task loadTask = loadTask(getWebConversation(), objectId1, taskFolderId, getHostName(), getLogin(), getPassword());
 		final Date modified = loadTask.getLastModified();
 		
 		int[][] objectIdAndFolderId = { { objectId1, taskFolderId }, { objectId2, taskFolderId } };
