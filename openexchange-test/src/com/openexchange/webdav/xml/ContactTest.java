@@ -355,7 +355,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void updateContact(WebConversation webCon, ContactObject contactObj, int objectId, int inFolder, String host, String login, String password) throws OXException, Exception {
-		updateContact(webCon, contactObj, objectId, inFolder, new Date(), host, login, password);
+		updateContact(webCon, contactObj, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password);
 	}
 	
 	public static void updateContact(WebConversation webCon, ContactObject contactObj, int objectId, int inFolder, Date lastModified, String host, String login, String password) throws OXException, Exception {
@@ -416,7 +416,7 @@ public class ContactTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void deleteContact(WebConversation webCon, int objectId, int inFolder, String host, String login, String password) throws OXException, Exception {
-		deleteContact(webCon, objectId, inFolder, new Date(), host, login, password);
+		deleteContact(webCon, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password);
 	}
 	
 	public static void deleteContact(WebConversation webCon, int objectId, int inFolder, Date lastModified, String host, String login, String password) throws OXException, Exception {
