@@ -259,9 +259,9 @@ public final class ResourceUpdateTest extends TestCase {
 			resource.setSimpleName("foobarfoobar");
 			new ResourceUpdate(user, ctx, resource).perform();
 
-			fail("Creation succeeded with non-admin caller");
+			fail("Update succeeded with non-admin caller");
 		} catch (final ResourceException e) {
-			System.out.println("Creation failed with non-admin caller: " + e.getMessage());
+			System.out.println("Update failed with non-admin caller: " + e.getMessage());
 		} finally {
 			deleteResource(id, ctx.getContextId());
 		}
@@ -277,9 +277,9 @@ public final class ResourceUpdateTest extends TestCase {
 			resource.setSimpleName(null);
 			new ResourceUpdate(user, ctx, resource).perform();
 
-			fail("Creation succeeded with missing mandatory field");
+			fail("Update succeeded with missing mandatory field");
 		} catch (final ResourceException e) {
-			System.out.println("Creation failed with missing mandatory field: " + e.getMessage());
+			System.out.println("Update failed with missing mandatory field: " + e.getMessage());
 		} finally {
 			deleteResource(id, ctx.getContextId());
 		}
