@@ -214,7 +214,7 @@ public final class ResourceUpdateTest extends TestCase {
 
 	}
 
-	public void testResourceCreationFail001() {
+	public void testResourceFail001() {
 		int id = -1;
 		try {
 			final Resource resource = createDummyResource(admin, ctx);
@@ -232,7 +232,7 @@ public final class ResourceUpdateTest extends TestCase {
 
 	}
 
-	public void testResourceCreationFail002() {
+	public void testResourceFail002() {
 		int id = -1;
 		try {
 			final Resource resource = createDummyResource(admin, ctx);
