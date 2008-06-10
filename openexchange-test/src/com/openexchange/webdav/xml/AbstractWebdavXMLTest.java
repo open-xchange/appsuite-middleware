@@ -282,8 +282,12 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 	}
 	
 	protected static void assertExceptionMessage(String message, int expectedStatus) throws Exception {
+		assertExceptionMessage(message, String.valueOf(expectedStatus));
+	}
+	
+	protected static void assertExceptionMessage(String message, String expectedStatus) throws Exception {
 		System.out.println("message: "+ message);
-		int status = Integer.parseInt(message.substring(1, 5));
-		assertEquals("message status is not correct", expectedStatus, status);
+		String statusCode = message.substring(1, message.indexOf("]"));
+		assertEquals("Status code is not correct", expectedStatus, statusCode);
 	}
 }
