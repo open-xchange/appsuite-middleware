@@ -71,6 +71,8 @@ public abstract class AbstractAJAXTest extends TestCase {
 	
 	private Properties ajaxProps = null;
 	
+	protected static final int APPEND_MODIFIED = 1000000;
+	
 	public AbstractAJAXTest(String name) {
 		super(name);
 
