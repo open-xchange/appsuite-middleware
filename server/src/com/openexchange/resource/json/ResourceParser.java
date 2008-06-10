@@ -79,7 +79,7 @@ public final class ResourceParser {
 	 * @throws JSONException
 	 *             If reading from JSON object fails
 	 */
-	public static Resource writeResource(final JSONObject jsonResource) throws JSONException {
+	public static Resource parseResource(final JSONObject jsonResource) throws JSONException {
 		final Resource retval = new Resource();
 		if (jsonResource.has(ResourceFields.ID) && !jsonResource.isNull(ResourceFields.ID)) {
 			retval.setIdentifier(jsonResource.getInt(ResourceFields.ID));

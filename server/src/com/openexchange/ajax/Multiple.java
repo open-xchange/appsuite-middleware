@@ -457,31 +457,7 @@ public class Multiple extends SessionServlet {
 					if (null != resourceRequest.getTimestamp()) {
 						jsonWriter.key(Response.TIMESTAMP).value(resourceRequest.getTimestamp().getTime());
 					}
-				} catch (final OXMandatoryFieldException e) {
-					LOG.error(e.getMessage(), e);
-					if (jsonWriter.isExpectingValue()) {
-						jsonWriter.value("");
-					}
-					Response.writeException(e, jsonWriter);
-				} catch (final LdapException e) {
-					LOG.error(e.getMessage(), e);
-					if (jsonWriter.isExpectingValue()) {
-						jsonWriter.value("");
-					}
-					Response.writeException(e, jsonWriter);
-				} catch (final SearchIteratorException e) {
-					LOG.error(e.getMessage(), e);
-					if (jsonWriter.isExpectingValue()) {
-						jsonWriter.value("");
-					}
-					Response.writeException(e, jsonWriter);
-				} catch (final AjaxException e) {
-					LOG.error(e.getMessage(), e);
-					if (jsonWriter.isExpectingValue()) {
-						jsonWriter.value("");
-					}
-					Response.writeException(e, jsonWriter);
-				} catch (final OXJSONException exc) {
+				} catch (final AbstractOXException exc) {
 					LOG.error(exc.getMessage(), exc);
 					if (jsonWriter.isExpectingValue()) {
 						jsonWriter.value("");

@@ -55,116 +55,97 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.request.ResourceRequest;
-import com.openexchange.api.OXMandatoryFieldException;
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 
 public class Resource extends DataServlet {
-	
+
+	private static final transient org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(Resource.class);
+
 	/**
 	 * For serialization.
 	 */
 	private static final long serialVersionUID = -8381608654367561643L;
-	private static final Log LOG = LogFactory.getLog(Resource.class);
-	
+
 	@Override
-	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
+	protected void doGet(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
+			throws ServletException, IOException {
 		final Response response = new Response();
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			final Session sessionObj = getSessionObject(httpServletRequest);
 			JSONObject jsonObj = null;
 			try {
-				jsonObj = convertParameter2JSONObject(httpServletRequest);	
+				jsonObj = convertParameter2JSONObject(httpServletRequest);
 			} catch (final JSONException e) {
 				LOG.error(e.getMessage(), e);
-	            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
-	            writeResponse(response, httpServletResponse);
-	            return;
+				response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+				writeResponse(response, httpServletResponse);
+				return;
 			}
 
 			final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-			final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, ctx); 
+			final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, ctx);
 			final Object responseObj = resourceRequest.action(action, jsonObj);
 			response.setTimestamp(resourceRequest.getTimestamp());
 			response.setData(responseObj);
-		} catch (final OXJSONException exc) {
-            LOG.error(exc.getMessage(), exc);
-            response.setException(exc);
-		} catch (final JSONException e) {
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code
-                .JSON_WRITE_ERROR, e);
-            LOG.error(oje.getMessage(), oje);
-            response.setException(oje);
-		} catch (final OXMandatoryFieldException e) {
-			LOG.error(_doGet, e);
-            response.setException(e);
-		} catch (final AjaxException e) {
-			LOG.error(_doGet, e);
-            response.setException(e);
-		} catch (final LdapException e) {
-			LOG.error(_doGet, e);
-            response.setException(e);
-		} catch (final SearchIteratorException e) {
-			LOG.error(_doGet, e);
-            response.setException(e);
 		} catch (final AbstractOXException e) {
 			LOG.error(_doGet, e);
-            response.setException(e);
+			response.setException(e);
+		} catch (final JSONException e) {
+			final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+			LOG.error(oje.getMessage(), oje);
+			response.setException(oje);
 		}
-		
+
 		writeResponse(response, httpServletResponse);
 	}
-	
+
 	@Override
-	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse) throws ServletException, IOException {
+	protected void doPut(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse)
+			throws ServletException, IOException {
 		final Response response = new Response();
 
 		try {
 			final String action = parseMandatoryStringParameter(httpServletRequest, PARAMETER_ACTION);
 			final Session sessionObj = getSessionObject(httpServletRequest);
- 			
+
 			final String data = getBody(httpServletRequest);
 			if (data.charAt(0) == '[') {
 				JSONArray jData = null;
-                try {
-                    jData = new JSONArray(data);
-                } catch (final JSONException e) {
-                    final OXJSONException exc = new OXJSONException(
-                        OXJSONException.Code.JSON_READ_ERROR, e, data);
-                    response.setException(exc);
-                    writeResponse(response, httpServletResponse);
-                    LOG.error(exc.getMessage(), exc);
-                    return;
-                }
+				try {
+					jData = new JSONArray(data);
+				} catch (final JSONException e) {
+					final OXJSONException exc = new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e, data);
+					response.setException(exc);
+					writeResponse(response, httpServletResponse);
+					LOG.error(exc.getMessage(), exc);
+					return;
+				}
 				JSONObject jsonObj = null;
 				try {
 					jsonObj = convertParameter2JSONObject(httpServletRequest);
 				} catch (final JSONException e) {
 					LOG.error(_doGet, e);
-		            response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
-		            writeResponse(response, httpServletResponse);
-		            return;
+					response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
+					writeResponse(response, httpServletResponse);
+					return;
 				}
 
 				jsonObj.put(PARAMETER_DATA, jData);
-				
+
 				final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
-				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, ctx); 
+				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, ctx);
 				final Object responseObj = resourceRequest.action(action, jsonObj);
 				response.setTimestamp(resourceRequest.getTimestamp());
 				response.setData(responseObj);
@@ -176,47 +157,31 @@ public class Resource extends DataServlet {
 					jsonObj = convertParameter2JSONObject(httpServletRequest);
 				} catch (final JSONException e) {
 					LOG.error(_doGet, e);
-		            response.setException(new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e));
-		            writeResponse(response, httpServletResponse);
-		            return;
+					response.setException(new OXJSONException(OXJSONException.Code.JSON_READ_ERROR, e));
+					writeResponse(response, httpServletResponse);
+					return;
 				}
 
 				jsonObj.put(PARAMETER_DATA, jData);
-				
+
 				final Context ctx = ContextStorage.getStorageContext(sessionObj.getContextId());
 				final ResourceRequest resourceRequest = new ResourceRequest(sessionObj, ctx);
 				final Object responseObj = resourceRequest.action(action, jsonObj);
 				response.setTimestamp(resourceRequest.getTimestamp());
 				response.setData(responseObj);
 			}
-		} catch (final OXJSONException exc) {
-            LOG.error(exc.getMessage(), exc);
-            response.setException(exc);
-		} catch (final JSONException e) {
-            final OXJSONException oje = new OXJSONException(OXJSONException.Code
-                .JSON_WRITE_ERROR, e);
-            LOG.error(oje.getMessage(), oje);
-            response.setException(oje);
-		} catch (final OXMandatoryFieldException e) {
-			LOG.error(_doPut, e);
-            response.setException(e);
-		} catch (final LdapException e) {
-			LOG.error(_doPut, e);
-            response.setException(e);
-		} catch (final SearchIteratorException e) {
-			LOG.error(_doPut, e);
-            response.setException(e);
-		} catch (final AjaxException e) {
-			LOG.error(_doPut, e);
-            response.setException(e);
 		} catch (final AbstractOXException e) {
 			LOG.error(_doGet, e);
-            response.setException(e);
+			response.setException(e);
+		} catch (final JSONException e) {
+			final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
+			LOG.error(oje.getMessage(), oje);
+			response.setException(oje);
 		}
-		
+
 		writeResponse(response, httpServletResponse);
 	}
-	
+
 	@Override
 	protected boolean hasModulePermission(final Session sessionObj, final Context ctx) {
 		return true;

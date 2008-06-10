@@ -51,8 +51,6 @@ package com.openexchange.ajax.request;
 
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,59 +60,104 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.api2.OXConcurrentModificationException;
+import com.openexchange.api2.OXConcurrentModificationException.ConcurrentModificationCode;
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.ResourceStorage;
+import com.openexchange.resource.internal.ResourceCreate;
+import com.openexchange.resource.internal.ResourceDelete;
+import com.openexchange.resource.internal.ResourceUpdate;
 import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
-import com.openexchange.tools.servlet.OXJSONException;
 
+/**
+ * {@link ResourceRequest} - Executes a resource request
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
+ */
 public class ResourceRequest {
 
-	private final Session sessionObj;
+	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
+			.getLog(ResourceRequest.class);
+
+	private final Session session;
 
 	private final Context ctx;
 
 	private Date timestamp;
 
-	private static final Log LOG = LogFactory.getLog(ResourceRequest.class);
-
-	public ResourceRequest(final Session sessionObj, final Context ctx) {
-		this.sessionObj = sessionObj;
+	/**
+	 * Initializes a new {@link ResourceRequest}
+	 * 
+	 * @param session
+	 *            The session providing needed user data
+	 * @param ctx
+	 *            The context
+	 */
+	public ResourceRequest(final Session session, final Context ctx) {
+		this.session = session;
 		this.ctx = ctx;
 	}
 
+	/**
+	 * Gets the determined latest timestamp from ALL, LIST, or GET request.
+	 * 
+	 * @return The determined latest timestamp if appropriate; otherwise
+	 *         <code>null</code>
+	 */
 	public Date getTimestamp() {
 		return timestamp;
 	}
 
-	public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException,
-			LdapException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
+	/**
+	 * Performs the action indicated through given parameter <code>action</code>
+	 * .
+	 * 
+	 * @param action
+	 *            The action to perform
+	 * @param jsonObject
+	 *            The JSON data object (containing "data", "timestamp", etc.)
+	 * @return An appropriate object corresponding to request to be filled into
+	 *         {@link Response response} with {@link Response#setData(Object)
+	 *         setData()}
+	 * @throws AbstractOXException
+	 *             If action cannot be performed
+	 * @throws JSONException
+	 *             If a JSON error occurs
+	 */
+	public Object action(final String action, final JSONObject jsonObject) throws AbstractOXException, JSONException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
 			return actionList(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
 			return actionGet(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_SEARCH)) {
 			return actionSearch(jsonObject);
+		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_ALL)) {
+			return actionAll();
+		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_NEW)) {
+			return actionNew(jsonObject);
+		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
+			return actionUpdate(jsonObject);
+		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_DELETE)) {
+			return actionDelete(jsonObject);
 		} else {
 			throw new AjaxException(AjaxException.Code.UnknownAction, action);
 		}
 	}
 
-	public JSONArray actionList(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
-			LdapException, OXJSONException, AjaxException {
+	private JSONArray actionList(final JSONObject jsonObj) throws AbstractOXException, JSONException {
 		final JSONArray jsonResponseArray = new JSONArray();
-		final JSONArray jsonArray = DataParser.checkJSONArray(jsonObj, Response.DATA);
 
 		UserStorage userStorage = null;
 		final ResourceStorage resourceStorage = ResourceStorage.getInstance();
 
+		final JSONArray jsonArray = DataParser.checkJSONArray(jsonObj, AJAXServlet.PARAMETER_DATA);
 		final int len = jsonArray.length();
 		if (len > 0) {
 			long lastModified = Long.MIN_VALUE;
@@ -156,8 +199,7 @@ public class ResourceRequest {
 		return jsonResponseArray;
 	}
 
-	public JSONObject actionGet(final JSONObject jsonObj) throws LdapException, OXMandatoryFieldException,
-			JSONException, OXJSONException, AjaxException {
+	private JSONObject actionGet(final JSONObject jsonObj) throws AbstractOXException, JSONException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		com.openexchange.resource.Resource r = null;
 		try {
@@ -179,17 +221,19 @@ public class ResourceRequest {
 		return com.openexchange.resource.json.ResourceWriter.writeResource(r);
 	}
 
-	public JSONArray actionSearch(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
-			LdapException, AjaxException {
+	private JSONArray actionSearch(final JSONObject jsonObj) throws AbstractOXException, JSONException {
 		final JSONArray jsonResponseArray = new JSONArray();
 
 		final String searchpattern;
-		final JSONObject jData = DataParser.checkJSONObject(jsonObj, Response.DATA);
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
 		if (jData.has(SearchFields.PATTERN) && !jData.isNull(SearchFields.PATTERN)) {
 			searchpattern = jData.getString(SearchFields.PATTERN);
 		} else {
-			throw new OXMandatoryFieldException(EnumComponent.RESOURCE, Category.CODE_ERROR, 9999, null,
-					SearchFields.PATTERN);
+			if (LOG.isWarnEnabled()) {
+				LOG.warn(new StringBuilder(64).append("Missing field \"").append(SearchFields.PATTERN).append(
+						"\" in JSON data. Searching for all as fallback"));
+			}
+			return actionAll();
 		}
 
 		final ResourceStorage resourceStorage = ResourceStorage.getInstance();
@@ -209,5 +253,97 @@ public class ResourceRequest {
 
 		return jsonResponseArray;
 
+	}
+
+	private JSONArray actionAll() throws JSONException, LdapException {
+		final JSONArray jsonResponseArray = new JSONArray();
+
+		final ResourceStorage resourceStorage = ResourceStorage.getInstance();
+		final com.openexchange.resource.Resource[] resources = resourceStorage.getAllResources(ctx);
+		if (resources.length > 0) {
+			long lastModified = Long.MIN_VALUE;
+			for (final com.openexchange.resource.Resource resource : resources) {
+				if (lastModified < resource.getLastModified().getTime()) {
+					lastModified = resource.getLastModified().getTime();
+				}
+				jsonResponseArray.put(com.openexchange.resource.json.ResourceWriter.writeResource(resource));
+			}
+			timestamp = new Date(lastModified);
+		} else {
+			timestamp = new Date(0);
+		}
+
+		return jsonResponseArray;
+
+	}
+
+	private Integer actionNew(final JSONObject jsonObj) throws AbstractOXException, JSONException {
+		/*
+		 * Check for "data"
+		 */
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+		/*
+		 * Parse resource out of JSON object
+		 */
+		final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser
+				.parseResource(jData);
+		/*
+		 * Create new resource
+		 */
+		new ResourceCreate(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource).perform();
+		/*
+		 * Return its ID
+		 */
+		return Integer.valueOf(resource.getIdentifier());
+	}
+
+	private JSONObject actionUpdate(final JSONObject jsonObj) throws AbstractOXException, JSONException {
+		final ResourceStorage resourceStorage = ResourceStorage.getInstance();
+		/*
+		 * Check for "data"
+		 */
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+		final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser
+				.parseResource(jData);
+		if (jsonObj.has(AJAXServlet.PARAMETER_TIMESTAMP)
+				&& !jsonObj.isNull(AJAXServlet.PARAMETER_TIMESTAMP)
+				&& jsonObj.getLong(AJAXServlet.PARAMETER_TIMESTAMP) < resourceStorage.getResource(
+						resource.getIdentifier(), ctx).getLastModified().getTime()) {
+			throw new OXConcurrentModificationException(EnumComponent.RESOURCE,
+					ConcurrentModificationCode.CONCURRENT_MODIFICATION, new Object[0]);
+		}
+		/*
+		 * Update resource
+		 */
+		new ResourceUpdate(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource).perform();
+		/*
+		 * Write updated resource
+		 */
+		return com.openexchange.resource.json.ResourceWriter.writeResource(resource);
+	}
+
+	private Object actionDelete(final JSONObject jsonObj) throws AbstractOXException, JSONException {
+		final ResourceStorage resourceStorage = ResourceStorage.getInstance();
+		/*
+		 * Check for "data"
+		 */
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, AJAXServlet.PARAMETER_DATA);
+		final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser
+				.parseResource(jData);
+		if (jsonObj.has(AJAXServlet.PARAMETER_TIMESTAMP)
+				&& !jsonObj.isNull(AJAXServlet.PARAMETER_TIMESTAMP)
+				&& jsonObj.getLong(AJAXServlet.PARAMETER_TIMESTAMP) < resourceStorage.getResource(
+						resource.getIdentifier(), ctx).getLastModified().getTime()) {
+			throw new OXConcurrentModificationException(EnumComponent.RESOURCE,
+					ConcurrentModificationCode.CONCURRENT_MODIFICATION, new Object[0]);
+		}
+		/*
+		 * Delete resource
+		 */
+		new ResourceDelete(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource).perform();
+		/*
+		 * Write JSON null
+		 */
+		return JSONObject.NULL;
 	}
 }
