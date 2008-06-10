@@ -24,6 +24,8 @@ import com.openexchange.webdav.xml.request.PropFindMethod;
 
 public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
 	
+	protected static final int APPEND_MODIFIED = 1000000;
+	
 	public AbstractWebdavXMLTest(String name) {
 		super(name);
 	}
