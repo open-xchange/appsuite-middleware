@@ -226,15 +226,17 @@ public class CalendarParser extends CommonParser {
 		}
 		
 		if (isExternal) {
-			p = new ExternalUserParticipant();
-			final String displayName = parser.getAttributeValue(XmlServlet.NAMESPACE, "displayname");
 			final String mail = parser.getAttributeValue(XmlServlet.NAMESPACE, "mail");
-			getValue(parser);
-			
+			final String displayName = parser.getAttributeValue(XmlServlet.NAMESPACE, "displayname");
+
+			p = new ExternalUserParticipant(mail);
 			p.setDisplayName(displayName);
-			p.setEmailAddress(mail);
+			
+			// set parse token to next value
+			getValue(parser);
 		} else {
-			UserParticipant userparticipant = new UserParticipant();
+			final int userId = getValueAsInt(parser);
+			UserParticipant userparticipant = new UserParticipant(userId);
 			
 			if (confirm != null) {
 				if ("accept".equals(confirm)) {
@@ -249,8 +251,7 @@ public class CalendarParser extends CommonParser {
 					throw new OXConflictException("unknown value in confirm attribute: " + confirm);
 				}
 			}
-			
-			userparticipant.setIdentifier(getValueAsInt(parser));
+
 			participants.add(userparticipant);
 			p = userparticipant;
 		}
