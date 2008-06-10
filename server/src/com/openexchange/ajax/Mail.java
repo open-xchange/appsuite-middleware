@@ -346,6 +346,8 @@ public class Mail extends PermissionServlet implements UploadListener {
 			actionPutForwardMultiple(req, resp);
 		} else if (actionStr.equalsIgnoreCase(ACTION_REPLY) || actionStr.equalsIgnoreCase(ACTION_REPLYALL)) {
 			actionPutReply(req, resp, (actionStr.equalsIgnoreCase(ACTION_REPLYALL)));
+		} else if (actionStr.equalsIgnoreCase(ACTION_GET)) {
+			actionPutGet(req, resp);
 		} else {
 			throw new Exception("Unknown value in parameter " + PARAMETER_ACTION + " through PUT command");
 		}
@@ -1396,6 +1398,71 @@ public class Mail extends PermissionServlet implements UploadListener {
 		 * ... and fake a GET request
 		 */
 		return actionGetReply(session, replyAll, ParamContainer.getInstance(map, EnumComponent.MAIL), mailInterfaceArg);
+	}
+
+	public void actionPutGet(final Session session, final JSONWriter writer, final JSONObject jsonObj,
+			final MailServletInterface mi) throws JSONException {
+		Response.write(actionPutGet(session, jsonObj.getString(Response.DATA), ParamContainer.getInstance(jsonObj,
+				EnumComponent.MAIL), mi), writer);
+	}
+
+	private final void actionPutGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException,
+			ServletException {
+		try {
+			Response.write(actionPutGet(getSessionObject(req), getBody(req), ParamContainer.getInstance(req,
+					EnumComponent.MAIL, resp), null), resp.getWriter());
+		} catch (final JSONException e) {
+			sendErrorAsJS(resp, RESPONSE_ERROR);
+		}
+	}
+
+	private final Response actionPutGet(final Session session, final String body, final ParamContainer paramContainer,
+			final MailServletInterface mailInterfaceArg) throws JSONException {
+		/*
+		 * Create new parameter container from body data...
+		 */
+		final JSONArray paths = new JSONArray(body);
+		final int length = paths.length();
+		if (length != 1) {
+			throw new IllegalArgumentException("JSON array's length is not 1");
+		}
+		final Map<String, String> map = new HashMap<String, String>(2);
+		for (int i = 0; i < length; i++) {
+			final JSONObject folderAndID = paths.getJSONObject(i);
+			map.put(PARAMETER_FOLDERID, folderAndID.getString(PARAMETER_FOLDERID));
+			map.put(PARAMETER_ID, folderAndID.get(PARAMETER_ID).toString());
+		}
+		try {
+			String tmp = paramContainer.getStringParam(PARAMETER_SHOW_SRC);
+			if (STR_1.equals(tmp) || Boolean.parseBoolean(tmp)) { // showMessageSource
+				map.put(PARAMETER_SHOW_SRC, tmp);
+			}
+			tmp = paramContainer.getStringParam(PARAMETER_EDIT_DRAFT);
+			if (STR_1.equals(tmp) || Boolean.parseBoolean(tmp)) { // editDraft
+				map.put(PARAMETER_EDIT_DRAFT, tmp);
+			}
+			tmp = paramContainer.getStringParam(PARAMETER_SHOW_HEADER);
+			if (STR_1.equals(tmp) || Boolean.parseBoolean(tmp)) { // showMessageHeaders
+				map.put(PARAMETER_SHOW_HEADER, tmp);
+			}
+			tmp = paramContainer.getStringParam(PARAMETER_SAVE);
+			if (tmp != null && tmp.length() > 0 && Integer.parseInt(tmp) > 0) { // saveToDisk
+				map.put(PARAMETER_SAVE, tmp);
+			}
+			tmp = paramContainer.getStringParam(PARAMETER_VIEW);
+			if (tmp != null) { // view
+				map.put(PARAMETER_VIEW, tmp);
+			}
+			tmp = null;
+		} catch (final AbstractOXException e) {
+			final Response response = new Response();
+			response.setException(e);
+			return response;
+		}
+		/*
+		 * ... and fake a GET request
+		 */
+		return actionGetMessage(session, ParamContainer.getInstance(map, EnumComponent.MAIL), mailInterfaceArg);
 	}
 
 	public void actionPutAutosave(final Session session, final JSONWriter writer, final JSONObject jsonObj,
