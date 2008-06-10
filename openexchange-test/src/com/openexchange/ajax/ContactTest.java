@@ -556,7 +556,7 @@ public class ContactTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE);
 		parameter.setParameter(DataFields.ID, String.valueOf(objectId));
 		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(inFolder));
-		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, new Date());
+		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, new Date(System.currentTimeMillis()+1000000));
 		
 		WebRequest req = null;
 		WebResponse resp = null;
@@ -603,7 +603,7 @@ public class ContactTest extends AbstractAJAXTest {
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE);
-		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, new Date());
+		parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, new Date(System.currentTimeMillis()+1000000));
 		
 		JSONObject jsonObj = new JSONObject();
 		jsonObj.put(DataFields.ID, id);
@@ -623,6 +623,10 @@ public class ContactTest extends AbstractAJAXTest {
 	}
 	
 	public static ContactObject[] listContact(WebConversation webCon, int inFolder, int[] cols, String host, String session) throws Exception {
+		 return listContact(webCon, inFolder, cols, -1, -1, host, session);
+	}
+
+	public static ContactObject[] listContact(WebConversation webCon, int inFolder, int[] cols, int leftHandLimit, int rightHandLimit, String host, String session) throws Exception {
 		host = appendPrefix(host);
 		
 		final URLParameter parameter = new URLParameter();
@@ -630,6 +634,14 @@ public class ContactTest extends AbstractAJAXTest {
 		parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
 		parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
 		parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
+		
+		if (leftHandLimit > -1) {
+			parameter.setParameter(AJAXServlet.LEFT_HAND_LIMIT, leftHandLimit);
+		}
+
+		if (rightHandLimit > -1) {
+			parameter.setParameter(AJAXServlet.RIGHT_HAND_LIMIT, rightHandLimit);
+		}
 		
 		//System.out.println(host + CONTACT_URL + parameter.getURLParameters());
 		
