@@ -1,5 +1,20 @@
 package com.openexchange.webdav.xml;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.input.SAXBuilder;
+import org.jdom.output.XMLOutputter;
+
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -9,6 +24,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.AppointmentObject;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -17,19 +33,6 @@ import com.openexchange.webdav.xml.fields.DataFields;
 import com.openexchange.webdav.xml.parser.ResponseParser;
 import com.openexchange.webdav.xml.request.PropFindMethod;
 import com.openexchange.webdav.xml.types.Response;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.input.SAXBuilder;
-import org.jdom.output.XMLOutputter;
 
 public class AppointmentTest extends AbstractWebdavXMLTest {
 	
@@ -176,7 +179,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static int updateAppointment(WebConversation webCon, AppointmentObject appointmentObj, int objectId, int inFolder, String host, String login, String password) throws OXException, Exception {
-		return updateAppointment(webCon, appointmentObj, objectId, inFolder, new Date(), host, login, password);
+		return updateAppointment(webCon, appointmentObj, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password);
 	}
 
 	public static int updateAppointment(WebConversation webCon, AppointmentObject appointmentObj, int objectId, int inFolder, Date lastModified, String host, String login, String password) throws OXException, Exception {
@@ -284,7 +287,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 	}
 
 	public static void deleteAppointment(WebConversation webCon, int objectId, int inFolder, String host, String login, String password) throws OXException, Exception {
-		deleteAppointment(webCon, objectId, inFolder, new Date(), host, login, password);
+		deleteAppointment(webCon, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password);
 	}
 	
 	public static void deleteAppointment(WebConversation webCon, int objectId, int inFolder, Date lastModified, String host, String login, String password) throws OXException, Exception {
@@ -599,6 +602,10 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
 		StringBuffer sb = new StringBuffer();
 		sb.append("T" + p.getType());
 		sb.append("ID" + p.getIdentifier());
+		if (p instanceof ExternalUserParticipant) {
+			final ExternalUserParticipant externalUserParticipant = (ExternalUserParticipant)p;
+			sb.append("MAIL" + externalUserParticipant.getEmailAddress());
+		}
 		
 		return sb.toString();
 	}
