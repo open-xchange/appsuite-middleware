@@ -23,7 +23,6 @@ import com.openexchange.webdav.xml.AppointmentTest;
 import com.openexchange.webdav.xml.AttachmentTest;
 import com.openexchange.webdav.xml.FolderTest;
 import com.openexchange.webdav.xml.GroupUserTest;
-import com.openexchange.webdav.xml.XmlServlet;
 
 public class NewTest extends AppointmentTest {
 	
@@ -139,21 +138,17 @@ public class NewTest extends AppointmentTest {
 		int[][] objectIdAndFolderId = { {objectId, appointmentFolderId } };
 		deleteAppointment(webCon, objectIdAndFolderId, PROTOCOL + hostName, login, password );
 	}
-	
-	/**
-     * FIXME the mail addresses are somehow not parsed in server and cause exceptions
-	 */
-    public void notestNewAppointmentWithExternalParticipants() throws Exception {
+
+    public void testNewAppointmentWithExternalUserParticipants() throws Exception {
 		AppointmentObject appointmentObj = createAppointmentObject("testNewAppointmentWithExternalParticipants");
 		appointmentObj.setIgnoreConflicts(true);
 		
 		int userParticipantId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword());
 		assertTrue("user participant not found", userParticipantId != -1);
 		
-		Participant[] participant = new Participant[3];
+		Participant[] participant = new Participant[2];
 		participant[0] = new UserParticipant(userId);
 		participant[1] = new ExternalUserParticipant("externaluser@example.org");
-		participant[2] = new ExternalGroupParticipant("externalgroup@example.org");
 		
 		appointmentObj.setParticipants(participant);
 		
@@ -325,7 +320,7 @@ public class NewTest extends AppointmentTest {
 			deleteAppointment(getWebConversation(), objectId, parentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 			fail("conflict exception expected!");
 		} catch (TestException exc) {
-			assertExceptionMessage(exc.getMessage(), XmlServlet.USER_INPUT_STATUS);
+			assertExceptionMessage(exc.getMessage(), "APP-0070");
 		}
 		
 		FolderTest.deleteFolder(getWebConversation(), new int[] { parentFolderId }, getHostName(), getLogin(), getPassword());
@@ -359,7 +354,11 @@ public class NewTest extends AppointmentTest {
 		
 		appointmentObj.setIgnoreConflicts(true);
 		int objectId = insertAppointment(getWebConversation(), appointmentObj, PROTOCOL + getHostName(), getLogin(), getPassword());
-		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, new Date(), recurrenceDatePosition, getHostName(), getLogin(), getPassword());
+		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		
+		Date modified = loadAppointment.getLastModified();
+		
+		deleteAppointment(getWebConversation(), objectId, appointmentFolderId, modified, recurrenceDatePosition, getHostName(), getLogin(), getPassword());
 		
 		appointmentObj.setObjectID(objectId);
 		appointmentObj.setUntil(until);
@@ -368,10 +367,10 @@ public class NewTest extends AppointmentTest {
 		// prevent master/slave problem
 		Thread.sleep(1000);
 		
-		AppointmentObject loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
+		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, PROTOCOL + getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
 		
-		final Date modified = loadAppointment.getLastModified();
+		modified = loadAppointment.getLastModified();
 		
 		loadAppointment = loadAppointment(getWebConversation(), objectId, appointmentFolderId, modified, getHostName(), getLogin(), getPassword());
 		compareObject(appointmentObj, loadAppointment);
@@ -407,6 +406,6 @@ public class NewTest extends AppointmentTest {
 			}
 		}
 		
-		assertTrue("task not found" , found);
+		assertTrue("appointment not found" , found);
 	}
 }
