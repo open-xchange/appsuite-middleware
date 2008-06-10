@@ -319,7 +319,7 @@ public final class ResourceCreateTest extends TestCase {
 		resource.setSimpleName(null);
 		int id = -1;
 		try {
-			final ResourceCreate resourceCreate = new ResourceCreate(user, ctx, resource);
+			final ResourceCreate resourceCreate = new ResourceCreate(admin, ctx, resource);
 			resourceCreate.perform();
 			id = resource.getIdentifier();
 

@@ -275,7 +275,7 @@ public final class ResourceUpdateTest extends TestCase {
 			id = resource.getIdentifier();
 			
 			resource.setSimpleName(null);
-			new ResourceUpdate(user, ctx, resource).perform();
+			new ResourceUpdate(admin, ctx, resource).perform();
 
 			fail("Update succeeded with missing mandatory field");
 		} catch (final ResourceException e) {
