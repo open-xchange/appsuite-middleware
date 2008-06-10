@@ -160,8 +160,6 @@ public class Mail extends PermissionServlet implements UploadListener {
 
 	private static final String MIME_MULTIPART = "multipart/";
 
-	private static final String PARAMETER_PATTERN = "pattern";
-
 	private static final String PARAMETER_COL = "col";
 
 	private static final String MIME_TEXT_HTML_CHARSET_UTF_8 = "text/html; charset=UTF-8";
@@ -1674,7 +1672,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 				for (int i = 0; i < length; i++) {
 					final JSONObject tmp = ja.getJSONObject(i);
 					searchCols[i] = tmp.getInt(PARAMETER_COL);
-					searchPats[i] = tmp.getString(PARAMETER_PATTERN);
+					searchPats[i] = tmp.getString(PARAMETER_SEARCHPATTERN);
 				}
 				/*
 				 * Search mails
