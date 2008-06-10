@@ -608,12 +608,13 @@ public class ContactMySql implements ContactSql {
 						' ');
 			}
 
-			if (sb.charAt(sb.length() - 1) == '(') {
-				sb.delete(sb.length() - 2, sb.length());
+			final int pos = endsWith(sb, "(", true);
+			if (pos != -1) {
+				sb.delete(pos, sb.length());
 			} else {
-				final int pos = endsWith(sb, search_habit, true);
-				if (pos != -1) {
-					sb.delete(pos, sb.length());
+				final int pos2 = endsWith(sb, search_habit, true);
+				if (pos2 != -1) {
+					sb.delete(pos2, sb.length());
 				}
 				sb.append(") AND ");
 			}
