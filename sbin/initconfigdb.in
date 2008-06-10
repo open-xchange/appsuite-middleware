@@ -194,6 +194,7 @@ if [ -n "$CREATEADMIN" ]; then
     cat<<EOF | mysql || die
 drop database if exists \`${CONFIGDB_DBNAME}\`;
 GRANT ALL PRIVILEGES ON *.* TO '$CONFIGDB_USER'@'%' IDENTIFIED BY '$CONFIGDB_PASS' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO '$CONFIGDB_USER'@'localhost' IDENTIFIED BY '$CONFIGDB_PASS' WITH GRANT OPTION;
 create database \`${CONFIGDB_DBNAME}\`;
 EOF
     mysqladmin flush-privileges || die
