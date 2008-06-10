@@ -446,7 +446,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 * 
 	 * @see com.openexchange.api2.FolderSQLInterface#getNonTreeVisiblePublicCalendarFolders()
 	 */
-	public SearchIterator<?> getNonTreeVisiblePublicCalendarFolders() throws OXException {
+	public SearchIterator<FolderObject> getNonTreeVisiblePublicCalendarFolders() throws OXException {
 		try {
 			if (!userConfiguration.hasCalendar()) {
 				throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, getUserName(sessionObj, user),
@@ -472,7 +472,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 * 
 	 * @see com.openexchange.api2.FolderSQLInterface#getNonTreeVisiblePublicTaskFolders()
 	 */
-	public SearchIterator<?> getNonTreeVisiblePublicTaskFolders() throws OXException {
+	public SearchIterator<FolderObject> getNonTreeVisiblePublicTaskFolders() throws OXException {
 		try {
 			if (!userConfiguration.hasTask()) {
 				throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, getUserName(sessionObj, user),
@@ -496,7 +496,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 * 
 	 * @see com.openexchange.api2.FolderSQLInterface#getNonTreeVisiblePublicContactFolders()
 	 */
-	public SearchIterator<?> getNonTreeVisiblePublicContactFolders() throws OXException {
+	public SearchIterator<FolderObject> getNonTreeVisiblePublicContactFolders() throws OXException {
 		try {
 			if (!userConfiguration.hasContact()) {
 				throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, getUserName(sessionObj, user),
@@ -520,7 +520,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 * 
 	 * @see com.openexchange.api2.FolderSQLInterface#getNonTreeVisiblePublicInfostoreFolders()
 	 */
-	public SearchIterator<?> getNonTreeVisiblePublicInfostoreFolders() throws OXException {
+	public SearchIterator<FolderObject> getNonTreeVisiblePublicInfostoreFolders() throws OXException {
 		try {
 			if (!userConfiguration.hasInfostore()) {
 				throw new OXFolderException(FolderCode.NO_MODULE_ACCESS, getUserName(sessionObj, user),
@@ -544,7 +544,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 * 
 	 * @see com.openexchange.api2.FolderSQLInterface#getRootFolderForUser()
 	 */
-	public SearchIterator<?> getRootFolderForUser() throws OXException {
+	public SearchIterator<FolderObject> getRootFolderForUser() throws OXException {
 		try {
 			return OXFolderIteratorSQL.getUserRootFoldersIterator(userId, groups, userConfiguration, ctx);
 		} catch (final SearchIteratorException e) {
@@ -584,7 +584,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 * @see com.openexchange.api2.FolderSQLInterface#getSubfolders(int,
 	 *      java.sql.Timestamp)
 	 */
-	public SearchIterator<?> getSubfolders(final int parentId, final Timestamp since) throws OXException {
+	public SearchIterator<FolderObject> getSubfolders(final int parentId, final Timestamp since) throws OXException {
 		try {
 			if (parentId == FolderObject.SYSTEM_SHARED_FOLDER_ID && !userConfiguration.hasFullSharedFolderAccess()) {
 				throw new OXFolderPermissionException(FolderCode.NO_SHARED_FOLDER_ACCESS,
@@ -611,7 +611,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 * @see com.openexchange.api2.FolderSQLInterface#getSharedFoldersFrom(int,
 	 *      java.sql.Timestamp)
 	 */
-	public SearchIterator<?> getSharedFoldersFrom(final int owner, final Timestamp since) throws OXException {
+	public SearchIterator<FolderObject> getSharedFoldersFrom(final int owner, final Timestamp since) throws OXException {
 		try {
 			if (!userConfiguration.hasFullSharedFolderAccess()) {
 				throw new OXFolderPermissionException(FolderCode.NO_SHARED_FOLDER_ACCESS,
@@ -629,7 +629,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 * 
 	 * @see com.openexchange.api2.FolderSQLInterface#getPathToRoot(int)
 	 */
-	public SearchIterator<?> getPathToRoot(final int folderId) throws OXException {
+	public SearchIterator<FolderObject> getPathToRoot(final int folderId) throws OXException {
 		try {
 			return OXFolderIteratorSQL.getFoldersOnPathToRoot(folderId, userId, userConfiguration, UserStorage
 					.getStorageUser(sessionObj.getUserId(), ctx).getLocale(), ctx);
@@ -645,7 +645,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 * 
 	 * @see com.openexchange.api2.FolderSQLInterface#getDeletedFolders(java.util.Date)
 	 */
-	public SearchIterator<?> getDeletedFolders(final Date since) throws OXException {
+	public SearchIterator<FolderObject> getDeletedFolders(final Date since) throws OXException {
 		try {
 			return OXFolderIteratorSQL.getDeletedFoldersSince(since, userId, groups, userConfiguration
 					.getAccessibleModules(), ctx);
@@ -659,7 +659,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 * 
 	 * @see com.openexchange.api2.FolderSQLInterface#getModifiedUserFolders(java.util.Date)
 	 */
-	public SearchIterator<?> getModifiedUserFolders(final Date since) throws OXException {
+	public SearchIterator<FolderObject> getModifiedUserFolders(final Date since) throws OXException {
 		try {
 			return OXFolderIteratorSQL.getModifiedFoldersSince(since == null ? new Date(0) : since, userId, groups,
 					userConfiguration.getAccessibleModules(), false, ctx);
@@ -673,7 +673,7 @@ public class RdbFolderSQLInterface implements FolderSQLInterface {
 	 * 
 	 * @see com.openexchange.api2.FolderSQLInterface#getAllModifiedFolders(java.util.Date)
 	 */
-	public SearchIterator<?> getAllModifiedFolders(final Date since) throws OXException {
+	public SearchIterator<FolderObject> getAllModifiedFolders(final Date since) throws OXException {
 		try {
 			return OXFolderIteratorSQL.getAllModifiedFoldersSince(since == null ? new Date(0) : since, ctx);
 		} catch (final SearchIteratorException e) {

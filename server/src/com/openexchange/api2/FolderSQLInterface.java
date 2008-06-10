@@ -66,27 +66,27 @@ public interface FolderSQLInterface {
 	 * @return an instance of <tt>SearchIterator</tt> containing all
 	 *         user-visible root folders
 	 */
-	public SearchIterator getRootFolderForUser() throws OXException;
+	public SearchIterator<FolderObject> getRootFolderForUser() throws OXException;
 
 	/**
 	 * @return an instance of <tt>SearchIterator</tt> containing all
 	 *         user-visible subfolders of parent folder whose ID matches given
 	 *         <tt>parentId</tt>
 	 */
-	public SearchIterator getSubfolders(int parentId, Timestamp since) throws OXException;
+	public SearchIterator<FolderObject> getSubfolders(int parentId, Timestamp since) throws OXException;
 
 	/**
 	 * @return an instance of <tt>SearchIterator</tt> containing all
 	 *         user-visible ancestor folders of folder whose ID matches
 	 *         <tt>folderId</tt> and which are located on path to root folder.
 	 */
-	public SearchIterator getPathToRoot(int folderId) throws OXException;
+	public SearchIterator<FolderObject> getPathToRoot(int folderId) throws OXException;
 
 	/**
 	 * @return an instance of <tt>SearchIterator</tt> containing all
 	 *         user-visible shared folders
 	 */
-	public SearchIterator getSharedFoldersFrom(int owner, Timestamp since) throws OXException;
+	public SearchIterator<FolderObject> getSharedFoldersFrom(int owner, Timestamp since) throws OXException;
 
 	/**
 	 * @return an instance of <tt>SearchIterator</tt> containing all
@@ -94,7 +94,7 @@ public interface FolderSQLInterface {
 	 *         shown in a hierarchical tree-view cause any ancestore is not
 	 *         visible to user
 	 */
-	public SearchIterator getNonTreeVisiblePublicCalendarFolders() throws OXException;
+	public SearchIterator<FolderObject> getNonTreeVisiblePublicCalendarFolders() throws OXException;
 
 	/**
 	 * @return an instance of <tt>SearchIterator</tt> containing all
@@ -102,7 +102,7 @@ public interface FolderSQLInterface {
 	 *         a hierarchical tree-view cause any ancestore is not visible to
 	 *         user
 	 */
-	public SearchIterator getNonTreeVisiblePublicTaskFolders() throws OXException;
+	public SearchIterator<FolderObject> getNonTreeVisiblePublicTaskFolders() throws OXException;
 
 	/**
 	 * @return an instance of <tt>SearchIterator</tt> containing all
@@ -110,7 +110,7 @@ public interface FolderSQLInterface {
 	 *         in a hierarchical tree-view cause any ancestore is not visible to
 	 *         user
 	 */
-	public SearchIterator getNonTreeVisiblePublicContactFolders() throws OXException;
+	public SearchIterator<FolderObject> getNonTreeVisiblePublicContactFolders() throws OXException;
 
 	/**
 	 * @return an instance of <tt>SearchIterator</tt> containing all
@@ -118,27 +118,27 @@ public interface FolderSQLInterface {
 	 *         shown in a hierarchical tree-view cause any ancestore is not
 	 *         visible to user
 	 */
-	public SearchIterator getNonTreeVisiblePublicInfostoreFolders() throws OXException;
+	public SearchIterator<FolderObject> getNonTreeVisiblePublicInfostoreFolders() throws OXException;
 
 	/**
 	 * @return an instance of <tt>SearchIterator</tt> containing all
 	 *         user-visible folders that have been modified (created or edited)
 	 *         since given timestamp
 	 */
-	public SearchIterator getModifiedUserFolders(Date since) throws OXException;
+	public SearchIterator<FolderObject> getModifiedUserFolders(Date since) throws OXException;
 
 	/**
 	 * @return an instance of <tt>SearchIterator</tt> containing all folders
 	 *         that have been modified (created or edited) since given timestamp
 	 *         regardless of user's permissions
 	 */
-	public SearchIterator getAllModifiedFolders(Date since) throws OXException;
+	public SearchIterator<FolderObject> getAllModifiedFolders(Date since) throws OXException;
 
 	/**
 	 * @return an instance of <tt>SearchIterator</tt> containing all
 	 *         user-visible folders that have been deleted since given timestamp
 	 */
-	public SearchIterator getDeletedFolders(Date since) throws OXException;
+	public SearchIterator<FolderObject> getDeletedFolders(Date since) throws OXException;
 
 	/**
 	 * @return an instance of <tt>FolderObject</tt> which matches to given
