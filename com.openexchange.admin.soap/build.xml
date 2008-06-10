@@ -11,10 +11,11 @@
 	<property name="composite.name" value="${service.name}-${version}" />
 
 	
-    <property name="commonBundle" value="com.openexchange.common"/>
     <property name="bundlesdir"   value="${prefix}/bundles"/>
     <property name="commonBundle" value="com.openexchange.common"/>
+    <property name="axis2Bundle"  value="com.openexchange.axis2"/>
     <property name="libdir"       value="${prefix}/lib"/>
+	<property name="axis2dir"     value="${bundlesdir}/${axis2Bundle}"/>
 
     <!-- required osgi bundles -->
 	<property name="commonsloggingbundle" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
@@ -79,48 +80,13 @@
         includes="${composite.name}/"
         compression="gzip"/>
     	<delete dir="${dist-package}"/>
-		<antcall target="dist-plugins"></antcall>
     </target>
 
     <target name="install" depends="jar">
-        <mkdir dir="${destdir}/var/log/open-xchange"/>
-        <mkdir dir="${destdir}/${prefix}/libexec"/>
-        <mkdir dir="${destdir}/${prefix}/sbin"/>
-        <mkdir dir="${destdir}/${prefix}/${oxconfdir}"/>
-		<chmod perm="700" dir="${destdir}/var/log/open-xchange"/>
-    	<copy todir="${destdir}/${prefix}/${oxconfdir}" overwrite="true">
-            <fileset dir="etc" excludes="**/*.in,**/database-changes/**"/>
+        <mkdir dir="${destdir}/${axis2dir}/services"/>
+    	<copy todir="${destdir}/${axis2dir}/services" overwrite="true">
+            <fileset file="jar/${service.name}.aar"/>
         </copy>
-	    <!-- grrr, unable to exclude a directory, so remove it manually -->
-    	<delete dir="${destdir}/${prefix}/${oxconfdir}/etc/mysql/database-changes"/>
-		<chmod perm="600" file="${destdir}/${prefix}/${oxconfdir}/${masterauthfile}"/>
-        <copy todir="${destdir}/${prefix}/sbin" overwrite="true">
-            <fileset dir="sbin" excludes="*.in" followsymlinks="true"/>
-        </copy>
-    	<chmod perm="755">
-            <fileset dir="${destdir}/${prefix}/sbin" includes="*"/>
-        </chmod>
-    	<mkdir dir="${destdir}/etc/init.d"/>
-		<!-- copy all dist specific files from below system/ to $prefix/ -->
-    	<copy todir="${destdir}/" overwrite="true">
-			<fileset dir="system"/>
-			<mapper type="glob" from="*.${distribution}" to="*"/>
-		</copy>
-    	<chmod perm="755" file="${destdir}/etc/init.d/open-xchange-admin"/>
-		<!-- add here all dist specific install tasks -->
-    	<!-- <antcall target="install-debian"/> -->
-		<!-- EXAMPLE -->
-    	<!-- <antcall target="install-suse"/> -->
-    	<!-- <antcall target="install-redhat"/> -->
-        
-    	<mkdir dir="${destdir}/${bundle.d}"/>
-        <echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini"
-            message="${bundlesdir}/${bundle.name}${line.separator}"/>
-
-    	<antcall target="install-jar"></antcall>
-
-    	<antcall target="install-plugins"></antcall>
-		<antcall target="install-console"></antcall>
     </target>
 	
 </project>

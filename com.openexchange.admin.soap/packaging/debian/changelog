@@ -1,0 +1,5 @@
+open-xchange-admin-soap (6.5.0-1) unstable; urgency=low
+
+  * Initial release.
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 10 Jun 2008 15:07:40 +0200
