@@ -72,6 +72,7 @@ import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.AppointmentParser;
 import com.openexchange.ajax.parser.CalendarParser;
 import com.openexchange.ajax.parser.DataParser;
@@ -764,8 +765,8 @@ public class AppointmentRequest {
 			searchObj.setFolder(DataParser.parseInt(jData, AJAXServlet.PARAMETER_INFOLDER));
 		}
 		
-		if (jData.has("pattern")) {
-			searchObj.setPattern(DataParser.parseString(jData, "pattern"));
+		if (jData.has(SearchFields.PATTERN)) {
+			searchObj.setPattern(DataParser.parseString(jData, SearchFields.PATTERN));
 		}
 		
 		final int orderBy = DataParser.parseInt(jsonObj, AJAXServlet.PARAMETER_SORT);

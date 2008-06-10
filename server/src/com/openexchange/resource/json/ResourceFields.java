@@ -47,41 +47,39 @@
  *
  */
 
-package com.openexchange.ajax.writer;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.fields.ParticipantsFields;
-import com.openexchange.resource.Resource;
+package com.openexchange.resource.json;
 
 /**
- * ResourceWriter
+ * {@link ResourceFields}
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-
-public class ResourceWriter extends DataWriter {
-
-	/**
-	 * Initializes a new {@link ResourceWriter}
-	 */
-	public ResourceWriter() {
-		super();
-	}
+public final class ResourceFields {
 
 	/**
-	 * Writes specified resource's ID and display name to given JSON object
-	 * 
-	 * @param resource
-	 *            The resource
-	 * @param jsonObj
-	 *            The JSON object to write to
-	 * @throws JSONException
-	 *             If writing to JSON object fails
+	 * The ID: "id"
 	 */
-	public void writeResource(final Resource resource, final JSONObject jsonObj) throws JSONException {
-		writeParameter(ParticipantsFields.ID, resource.getIdentifier(), jsonObj);
-		writeParameter(ParticipantsFields.DISPLAY_NAME, resource.getDisplayName(), jsonObj);
-	}
+	public static final String ID = "id";
+
+	/**
+	 * The name: "name"
+	 */
+	public static final String NAME = "name";
+
+	/**
+	 * The display name: "display_name"
+	 */
+	public static final String DISPLAY_NAME = "display_name";
+
+	/**
+	 * The description: "description"
+	 */
+	public static final String DESCRIPTION = "description";
+
+	/**
+	 * The email address: "mailaddress"
+	 */
+	public static final String MAIL = "mailaddress";
+
 }

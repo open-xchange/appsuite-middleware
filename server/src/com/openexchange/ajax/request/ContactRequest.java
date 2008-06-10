@@ -62,6 +62,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.writer.ContactWriter;
@@ -664,8 +665,8 @@ public class ContactRequest {
 				searchObj.setAllFolders(true);
 			}
 
-			if (jData.has("pattern")) {
-				searchObj.setPattern(DataParser.parseString(jData, "pattern"));
+			if (jData.has(SearchFields.PATTERN)) {
+				searchObj.setPattern(DataParser.parseString(jData, SearchFields.PATTERN));
 			}
 			if (jData.has("startletter")) {
 				startletter = DataParser.parseBoolean(jData, "startletter");

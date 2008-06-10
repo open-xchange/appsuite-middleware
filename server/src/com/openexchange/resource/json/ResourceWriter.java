@@ -47,41 +47,48 @@
  *
  */
 
-package com.openexchange.ajax.writer;
+package com.openexchange.resource.json;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.resource.Resource;
 
 /**
- * ResourceWriter
+ * {@link ResourceWriter} - Writes a {@link Resource resource} to a JSON object
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-
-public class ResourceWriter extends DataWriter {
+public final class ResourceWriter {
 
 	/**
 	 * Initializes a new {@link ResourceWriter}
 	 */
-	public ResourceWriter() {
+	private ResourceWriter() {
 		super();
 	}
 
 	/**
-	 * Writes specified resource's ID and display name to given JSON object
+	 * Writes specified {@link Resource resource} to a JSON object
 	 * 
 	 * @param resource
-	 *            The resource
-	 * @param jsonObj
-	 *            The JSON object to write to
+	 *            The resource to write
+	 * @return The written JSON object
 	 * @throws JSONException
 	 *             If writing to JSON object fails
 	 */
-	public void writeResource(final Resource resource, final JSONObject jsonObj) throws JSONException {
-		writeParameter(ParticipantsFields.ID, resource.getIdentifier(), jsonObj);
-		writeParameter(ParticipantsFields.DISPLAY_NAME, resource.getDisplayName(), jsonObj);
+	public static JSONObject writeResource(final Resource resource) throws JSONException {
+		final JSONObject retval = new JSONObject();
+		retval.put(ResourceFields.ID, resource.getIdentifier() == -1 ? JSONObject.NULL : Integer.valueOf(resource
+				.getIdentifier()));
+		retval.put(ResourceFields.NAME, resource.getSimpleName() == null ? JSONObject.NULL : resource.getSimpleName());
+		retval.put(ResourceFields.DISPLAY_NAME, resource.getDisplayName() == null ? JSONObject.NULL : resource
+				.getDisplayName());
+		retval.put(ResourceFields.MAIL, resource.getMail() == null ? JSONObject.NULL : resource.getMail());
+		retval.put(ResourceFields.DESCRIPTION, resource.getDescription() == null ? JSONObject.NULL : resource
+				.getDescription());
+		return retval;
 	}
+
 }

@@ -69,6 +69,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.Infostore;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.parser.InfostoreParser;
 import com.openexchange.ajax.parser.InfostoreParser.UnknownMetadataException;
@@ -426,7 +427,7 @@ public class InfostoreRequest extends CommonRequest {
 
 		} else if (action.equals(AJAXServlet.ACTION_SEARCH)) {
 			final JSONObject queryObject = (JSONObject) req.getBody();
-			final String query = queryObject.getString("pattern");
+			final String query = queryObject.getString(SearchFields.PATTERN);
 
 			int folderId = SearchEngine.NO_FOLDER;
 			final String folderS = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);

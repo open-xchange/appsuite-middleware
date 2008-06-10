@@ -66,6 +66,11 @@ import com.openexchange.groupware.ldap.LdapException;
  */
 public abstract class ResourceStorage {
 
+	/**
+	 * The search pattern to return all resources: "*"
+	 */
+	protected static final String SEARCH_PATTERN_ALL = "*";
+
 	private static volatile ResourceStorage instance;
 
 	/**
@@ -143,6 +148,20 @@ public abstract class ResourceStorage {
 	 *             persistent storage.
 	 */
 	public abstract ResourceGroup[] searchGroups(String pattern, Context context) throws LdapException;
+
+	/**
+	 * Gets all resources located in specified context
+	 * 
+	 * @param context
+	 *            The context
+	 * @return All resources located in specified context
+	 * @throws LdapException
+	 *             If an exception occurs while reading from the underlying
+	 *             persistent storage.
+	 */
+	public Resource[] getAllResources(Context context) throws LdapException {
+		return searchResources(SEARCH_PATTERN_ALL, context);
+	}
 
 	/**
 	 * Searches all resources that identifier matches the given pattern.
@@ -231,7 +250,8 @@ public abstract class ResourceStorage {
 	 * @throws ResourceException
 	 *             If resource deletion fails.
 	 */
-	public void deleteResource(final Context ctx, final Connection con, final Resource resource) throws ResourceException {
+	public void deleteResource(final Context ctx, final Connection con, final Resource resource)
+			throws ResourceException {
 		deleteResourceById(ctx, con, resource.getIdentifier());
 	}
 

@@ -63,6 +63,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.fields.TaskFields;
 import com.openexchange.ajax.parser.CalendarParser;
 import com.openexchange.ajax.parser.DataParser;
@@ -472,8 +473,8 @@ public class TaskRequest {
 
 		}
 		
-		if (jData.has("pattern")) {
-			searchObj.setPattern(DataParser.parseString(jData, "pattern"));
+		if (jData.has(SearchFields.PATTERN)) {
+			searchObj.setPattern(DataParser.parseString(jData, SearchFields.PATTERN));
 		}
 		
 		searchObj.setTitle(DataParser.parseString(jData, TaskFields.TITLE));

@@ -58,6 +58,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.ParticipantsFields;
+import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.writer.GroupWriter;
 import com.openexchange.api.OXMandatoryFieldException;
@@ -152,8 +153,8 @@ public class GroupRequest {
 		
 		String searchpattern = null;
 		
-		if (jData.has("pattern")) {
-			searchpattern = DataParser.parseString(jData, "pattern");
+		if (jData.has(SearchFields.PATTERN)) {
+			searchpattern = DataParser.parseString(jData, SearchFields.PATTERN);
 		}
 		
 		timestamp = new Date(0);

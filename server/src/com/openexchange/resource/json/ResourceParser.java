@@ -47,41 +47,56 @@
  *
  */
 
-package com.openexchange.ajax.writer;
+package com.openexchange.resource.json;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.openexchange.ajax.fields.ParticipantsFields;
 import com.openexchange.resource.Resource;
 
 /**
- * ResourceWriter
+ * {@link ResourceParser} - Parses a {@link Resource resource} out of a JSON
+ * object
  * 
- * @author <a href="mailto:sebastian.kauss@netline-is.de">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * 
  */
-
-public class ResourceWriter extends DataWriter {
+public final class ResourceParser {
 
 	/**
-	 * Initializes a new {@link ResourceWriter}
+	 * Initializes a new {@link ResourceParser}
 	 */
-	public ResourceWriter() {
+	private ResourceParser() {
 		super();
 	}
 
 	/**
-	 * Writes specified resource's ID and display name to given JSON object
+	 * Parses a {@link Resource resource} out of given JSON object
 	 * 
-	 * @param resource
-	 *            The resource
-	 * @param jsonObj
-	 *            The JSON object to write to
+	 * @param jsonResource
+	 *            The JSON object containing the resource's data
+	 * @return The parsed {@link Resource resource}
 	 * @throws JSONException
-	 *             If writing to JSON object fails
+	 *             If reading from JSON object fails
 	 */
-	public void writeResource(final Resource resource, final JSONObject jsonObj) throws JSONException {
-		writeParameter(ParticipantsFields.ID, resource.getIdentifier(), jsonObj);
-		writeParameter(ParticipantsFields.DISPLAY_NAME, resource.getDisplayName(), jsonObj);
+	public static Resource writeResource(final JSONObject jsonResource) throws JSONException {
+		final Resource retval = new Resource();
+		if (jsonResource.has(ResourceFields.ID) && !jsonResource.isNull(ResourceFields.ID)) {
+			retval.setIdentifier(jsonResource.getInt(ResourceFields.ID));
+		}
+		if (jsonResource.has(ResourceFields.NAME) && !jsonResource.isNull(ResourceFields.NAME)) {
+			retval.setSimpleName(jsonResource.getString(ResourceFields.NAME));
+		}
+		if (jsonResource.has(ResourceFields.DISPLAY_NAME) && !jsonResource.isNull(ResourceFields.DISPLAY_NAME)) {
+			retval.setDisplayName(jsonResource.getString(ResourceFields.DISPLAY_NAME));
+		}
+		if (jsonResource.has(ResourceFields.MAIL) && !jsonResource.isNull(ResourceFields.MAIL)) {
+			retval.setMail(jsonResource.getString(ResourceFields.MAIL));
+		}
+		if (jsonResource.has(ResourceFields.DESCRIPTION) && !jsonResource.isNull(ResourceFields.DESCRIPTION)) {
+			retval.setDescription(jsonResource.getString(ResourceFields.DESCRIPTION));
+		}
+		return retval;
 	}
+
 }

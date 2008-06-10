@@ -58,42 +58,44 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.DataFields;
-import com.openexchange.ajax.fields.ParticipantsFields;
+import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.ajax.writer.ResourceWriter;
 import com.openexchange.api.OXMandatoryFieldException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.AbstractOXException.Category;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.ResourceStorage;
 import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.servlet.AjaxException;
 import com.openexchange.tools.servlet.OXJSONException;
 
 public class ResourceRequest {
-	
+
 	private final Session sessionObj;
-	
+
 	private final Context ctx;
-	
+
 	private Date timestamp;
-	
+
 	private static final Log LOG = LogFactory.getLog(ResourceRequest.class);
-	
-	public ResourceRequest(Session sessionObj, final Context ctx) {
+
+	public ResourceRequest(final Session sessionObj, final Context ctx) {
 		this.sessionObj = sessionObj;
 		this.ctx = ctx;
 	}
-	
+
 	public Date getTimestamp() {
 		return timestamp;
 	}
-	
-	public Object action(String action, JSONObject jsonObject) throws OXMandatoryFieldException, LdapException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
+
+	public Object action(final String action, final JSONObject jsonObject) throws OXMandatoryFieldException,
+			LdapException, JSONException, SearchIteratorException, AjaxException, OXJSONException {
 		if (action.equalsIgnoreCase(AJAXServlet.ACTION_LIST)) {
 			return actionList(jsonObject);
 		} else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
@@ -104,127 +106,108 @@ public class ResourceRequest {
 			throw new AjaxException(AjaxException.Code.UnknownAction, action);
 		}
 	}
-	
-	public JSONArray actionList(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, LdapException, OXJSONException, AjaxException {
-		timestamp = new Date(0);
-		
-		Date lastModified = null;
-		
+
+	public JSONArray actionList(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
+			LdapException, OXJSONException, AjaxException {
 		final JSONArray jsonResponseArray = new JSONArray();
-		final JSONArray jsonArray = DataParser.checkJSONArray(jsonObj, "data");
-		
+		final JSONArray jsonArray = DataParser.checkJSONArray(jsonObj, Response.DATA);
+
 		UserStorage userStorage = null;
 		final ResourceStorage resourceStorage = ResourceStorage.getInstance();
-		
-		for (int a = 0; a < jsonArray.length(); a++) {
-			JSONObject jData = jsonArray.getJSONObject(a);
-			final int id = DataParser.checkInt(jData, DataFields.ID);
-			com.openexchange.resource.Resource r = null;
-			
-			try {
-				r = resourceStorage.getResource(id, ctx);
-			} catch (LdapException exc) {
-				LOG.debug("resource not found try to find id in user table", exc);
-			}
-			
-			if (r == null) {
-				if (userStorage == null) {
-					userStorage = UserStorage.getInstance();
+
+		final int len = jsonArray.length();
+		if (len > 0) {
+			long lastModified = Long.MIN_VALUE;
+			for (int a = 0; a < len; a++) {
+				final JSONObject jData = jsonArray.getJSONObject(a);
+				final int id = DataParser.checkInt(jData, DataFields.ID);
+				com.openexchange.resource.Resource r = null;
+
+				try {
+					r = resourceStorage.getResource(id, ctx);
+				} catch (final LdapException exc) {
+					LOG.debug("resource not found try to find id in user table", exc);
 				}
-				
-				final User u = userStorage.getUser(id, ctx);
-				
-				r = new com.openexchange.resource.Resource();
-				r.setIdentifier(u.getId());
-				r.setDisplayName(u.getDisplayName());
-				r.setLastModified(new Date(0));
+
+				if (r == null) {
+					if (userStorage == null) {
+						userStorage = UserStorage.getInstance();
+					}
+
+					final User u = userStorage.getUser(id, ctx);
+
+					r = new com.openexchange.resource.Resource();
+					r.setIdentifier(u.getId());
+					r.setDisplayName(u.getDisplayName());
+					r.setLastModified(new Date(0));
+				}
+
+				if (lastModified < r.getLastModified().getTime()) {
+					lastModified = r.getLastModified().getTime();
+				}
+
+				jsonResponseArray.put(com.openexchange.resource.json.ResourceWriter.writeResource(r));
 			}
-			
-			final ResourceWriter resourceWriter = new ResourceWriter();
-			final JSONObject jsonResourceObj = new JSONObject();
-			resourceWriter.writeResource(r, jsonResourceObj);
-			jsonResponseArray.put(jsonResourceObj);
-			
-			lastModified = r.getLastModified();
-			
-			if (timestamp.getTime() < lastModified.getTime()) {
-				timestamp = lastModified;
-			}
+			timestamp = new Date(lastModified);
+		} else {
+			timestamp = new Date(0);
 		}
-		
+
 		return jsonResponseArray;
 	}
-	
-	public JSONObject actionGet(JSONObject jsonObj) throws LdapException, OXMandatoryFieldException, JSONException, OXJSONException, AjaxException {
-		timestamp = new Date(0);
-		
-		final ResourceStorage resourceStorage = ResourceStorage.getInstance();
+
+	public JSONObject actionGet(final JSONObject jsonObj) throws LdapException, OXMandatoryFieldException,
+			JSONException, OXJSONException, AjaxException {
 		final int id = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
 		com.openexchange.resource.Resource r = null;
 		try {
-			r = resourceStorage.getResource(id, ctx);
-		} catch (LdapException exc) {
+			r = ResourceStorage.getInstance().getResource(id, ctx);
+		} catch (final LdapException exc) {
 			LOG.debug("resource not found try to find id in user table", exc);
 		}
-		
-		UserStorage userStorage = null;
-		
+
 		if (r == null) {
-			if (userStorage == null) {
-				userStorage = UserStorage.getInstance();
-			}
-			
-			final User u = userStorage.getUser(id, ctx);
-			
+			final User u = UserStorage.getInstance().getUser(id, ctx);
+
 			r = new com.openexchange.resource.Resource();
 			r.setIdentifier(u.getId());
 			r.setDisplayName(u.getDisplayName());
 			r.setLastModified(new Date(0));
 		}
-		
-		final ResourceWriter resourceWriter = new ResourceWriter();
-		final JSONObject jsonResourceObj = new JSONObject();
-		resourceWriter.writeResource(r, jsonResourceObj);
-		
+
 		timestamp = r.getLastModified();
-		
-		return jsonResourceObj;
+		return com.openexchange.resource.json.ResourceWriter.writeResource(r);
 	}
-	
-	public JSONArray actionSearch(JSONObject jsonObj) throws OXMandatoryFieldException, JSONException, SearchIteratorException, LdapException, AjaxException {
-		timestamp = new Date(0);
-		
-		SearchIterator it = null;
-		
+
+	public JSONArray actionSearch(final JSONObject jsonObj) throws OXMandatoryFieldException, JSONException,
+			LdapException, AjaxException {
 		final JSONArray jsonResponseArray = new JSONArray();
-		
-		try {
-			final JSONObject jData = DataParser.checkJSONObject(jsonObj, "data");
-			String searchpattern = null;
 
-			if (jData.has("pattern")) {
-				searchpattern = jData.getString("pattern");
-			}
-
-			final ResourceStorage resourceStorage = ResourceStorage.getInstance();
-			final com.openexchange.resource.Resource[] resources = resourceStorage.searchResources(searchpattern,
-					ctx);
-
-			final ResourceWriter resourceWriter = new ResourceWriter();
-
-			for (int a = 0; a < resources.length; a++) {
-				final JSONObject jsonResourceObj = new JSONObject();
-				resourceWriter.writeParameter(ParticipantsFields.DISPLAY_NAME, resources[a].getDisplayName(),
-						jsonResourceObj);
-				resourceWriter.writeParameter(ParticipantsFields.ID, resources[a].getIdentifier(), jsonResourceObj);
-				jsonResponseArray.put(jsonResourceObj);
-			}
-
-			return jsonResponseArray;
-		} finally {
-			if (it != null) {
-				it.close();
-			}
+		final String searchpattern;
+		final JSONObject jData = DataParser.checkJSONObject(jsonObj, Response.DATA);
+		if (jData.has(SearchFields.PATTERN) && !jData.isNull(SearchFields.PATTERN)) {
+			searchpattern = jData.getString(SearchFields.PATTERN);
+		} else {
+			throw new OXMandatoryFieldException(EnumComponent.RESOURCE, Category.CODE_ERROR, 9999, null,
+					SearchFields.PATTERN);
 		}
+
+		final ResourceStorage resourceStorage = ResourceStorage.getInstance();
+		final com.openexchange.resource.Resource[] resources = resourceStorage.searchResources(searchpattern, ctx);
+		if (resources.length > 0) {
+			long lastModified = Long.MIN_VALUE;
+			for (final com.openexchange.resource.Resource resource : resources) {
+				if (lastModified < resource.getLastModified().getTime()) {
+					lastModified = resource.getLastModified().getTime();
+				}
+				jsonResponseArray.put(com.openexchange.resource.json.ResourceWriter.writeResource(resource));
+			}
+			timestamp = new Date(lastModified);
+		} else {
+			timestamp = new Date(0);
+		}
+
+		return jsonResponseArray;
+
 	}
 }
