@@ -54,14 +54,18 @@ import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.folderModule2S
 import static com.openexchange.tools.oxfolder.OXFolderManagerImpl.getUserName;
 
 import java.io.IOException;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -167,8 +171,9 @@ public class Folder extends SessionServlet {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest,
-	 *      javax.servlet.http.HttpServletResponse)
+	 * @see
+	 * javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest
+	 * , javax.servlet.http.HttpServletResponse)
 	 */
 	@Override
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -185,8 +190,9 @@ public class Folder extends SessionServlet {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest,
-	 *      javax.servlet.http.HttpServletResponse)
+	 * @see
+	 * javax.servlet.http.HttpServlet#doPut(javax.servlet.http.HttpServletRequest
+	 * , javax.servlet.http.HttpServletResponse)
 	 */
 	@Override
 	protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
@@ -270,8 +276,9 @@ public class Folder extends SessionServlet {
 
 	private final void actionGetRoot(final HttpServletRequest req, final HttpServletResponse resp)
 			throws JSONException, IOException {
-		Response.write(actionGetRoot(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER, resp)),
-				resp.getWriter());
+		Response.write(
+				actionGetRoot(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER, resp)), resp
+						.getWriter());
 	}
 
 	/**
@@ -324,8 +331,8 @@ public class Folder extends SessionServlet {
 							OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
 					rootFolder.setPermissionsAsArray(new OCLPermission[] { (OCLPermission) perm.clone() });
 				} else if (rootFolder.getObjectID() == FolderObject.SYSTEM_SHARED_FOLDER_ID
-						&& !UserConfigurationStorage.getInstance()
-								.getUserConfigurationSafe(session.getUserId(), ctx).hasFullSharedFolderAccess()) {
+						&& !UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)
+								.hasFullSharedFolderAccess()) {
 					/*
 					 * User does not hold READ_CREATE_SHARED_FOLDERS in user
 					 * configuration; mark system shared folder to have no
@@ -382,8 +389,8 @@ public class Folder extends SessionServlet {
 	private final void actionGetSubfolders(final HttpServletRequest req, final HttpServletResponse resp)
 			throws IOException, ServletException {
 		try {
-			Response.write(actionGetSubfolders(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER,
-					resp)), resp.getWriter());
+			Response.write(actionGetSubfolders(getSessionObject(req), ParamContainer.getInstance(req,
+					EnumComponent.FOLDER, resp)), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		}
@@ -403,8 +410,8 @@ public class Folder extends SessionServlet {
 		jsonWriter.array();
 		try {
 			final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-			final StringHelper strHelper = new StringHelper(UserStorage.getStorageUser(session.getUserId(), ctx)
-					.getLocale());
+			final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
+			final StringHelper strHelper = new StringHelper(locale);
 			/*
 			 * Read in parameters
 			 */
@@ -562,7 +569,7 @@ public class Folder extends SessionServlet {
 					 * Append virtual root folder for non-tree visible infostore
 					 * folders
 					 */
-					SearchIterator<?> it = null;
+					SearchIterator<FolderObject> it = null;
 					try {
 						it = foldersqlinterface.getNonTreeVisiblePublicInfostoreFolders();
 						if (it.hasNext()) {
@@ -581,17 +588,17 @@ public class Folder extends SessionServlet {
 						}
 					}
 				} else if (parentId == FolderObject.SYSTEM_SHARED_FOLDER_ID) {
-					final Set<String> displayNames = new HashSet<String>();
-					UserStorage us = null;
+					final Map<String, Integer> displayNames = new HashMap<String, Integer>();
+					final UserStorage us = UserStorage.getInstance();
 					final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getSubfolders(
 							FolderObject.SYSTEM_SHARED_FOLDER_ID, null)).asQueue();
+					/*
+					 * Gather all display names
+					 */
 					final int size = q.size();
 					final Iterator<FolderObject> iter = q.iterator();
 					for (int i = 0; i < size; i++) {
 						final FolderObject sharedFolder = iter.next();
-						if (us == null) {
-							us = UserStorage.getInstance();
-						}
 						String creatorDisplayName;
 						try {
 							creatorDisplayName = us.getUser(sharedFolder.getCreatedBy(), ctx).getDisplayName();
@@ -601,12 +608,21 @@ public class Folder extends SessionServlet {
 							}
 							creatorDisplayName = strHelper.getString(Groups.ZERO_DISPLAYNAME);
 						}
-						if (displayNames.contains(creatorDisplayName)) {
+						if (displayNames.containsKey(creatorDisplayName)) {
 							continue;
 						}
-						displayNames.add(creatorDisplayName);
+						displayNames.put(creatorDisplayName, Integer.valueOf(sharedFolder.getCreatedBy()));
+					}
+					/*
+					 * Sort display names and write corresponding virtual owner
+					 * folder
+					 */
+					final List<String> sortedDisplayNames = new ArrayList<String>(displayNames.size());
+					sortedDisplayNames.addAll(displayNames.keySet());
+					Collections.sort(sortedDisplayNames, new DisplayNameComparator(locale));
+					for (final String displayName : sortedDisplayNames) {
 						final FolderObject virtualOwnerFolder = FolderObject.createVirtualSharedFolderObject(
-								sharedFolder.getCreatedBy(), creatorDisplayName);
+								displayNames.get(displayName).intValue(), displayName);
 						jsonWriter.array();
 						try {
 							for (int j = 0; j < writers.length; j++) {
@@ -626,8 +642,8 @@ public class Folder extends SessionServlet {
 						/*
 						 * Append mail inbox to system 'private' folder
 						 */
-						if (UserConfigurationStorage.getInstance()
-								.getUserConfigurationSafe(session.getUserId(), ctx).hasWebMail()
+						if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)
+								.hasWebMail()
 								&& !ignoreMailfolder) {
 							MailServletInterface mailInterface = null;
 							SearchIterator<?> it = null;
@@ -699,8 +715,8 @@ public class Folder extends SessionServlet {
 						}
 					}
 					if (isSystemPrivateFolder) {
-						if (UserConfigurationStorage.getInstance()
-								.getUserConfigurationSafe(session.getUserId(), ctx).hasInfostore()) {
+						if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)
+								.hasInfostore()) {
 							/*
 							 * Append linked 'MyInfostore'
 							 */
@@ -715,7 +731,7 @@ public class Folder extends SessionServlet {
 						 * Append virtual root folder for non-tree visible
 						 * infostore folders
 						 */
-						SearchIterator<?> it = null;
+						SearchIterator<FolderObject> it = null;
 						try {
 							if ((it = foldersqlinterface.getNonTreeVisiblePublicCalendarFolders()).hasNext()) {
 								final FolderObject virtualListFolder = FolderObject.createVirtualFolderObject(
@@ -932,9 +948,8 @@ public class Folder extends SessionServlet {
 	private final void actionGetPath(final HttpServletRequest req, final HttpServletResponse resp) throws IOException,
 			ServletException {
 		try {
-			Response.write(
-					actionGetPath(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER, resp)), resp
-							.getWriter());
+			Response.write(actionGetPath(getSessionObject(req), ParamContainer.getInstance(req, EnumComponent.FOLDER,
+					resp)), resp.getWriter());
 		} catch (final JSONException e) {
 			sendErrorAsJS(resp, RESPONSE_ERROR);
 		}
@@ -1061,8 +1076,8 @@ public class Folder extends SessionServlet {
 						privateFolder = FolderObject.loadFolderObjectFromDB(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, ctx);
 					}
 					folderWriter.writeOXFolderFieldsAsArray(columns, privateFolder, FolderObject.getFolderString(
-							FolderObject.SYSTEM_PRIVATE_FOLDER_ID, UserStorage.getStorageUser(session.getUserId(),
-									ctx).getLocale()), -1);
+							FolderObject.SYSTEM_PRIVATE_FOLDER_ID, UserStorage.getStorageUser(session.getUserId(), ctx)
+									.getLocale()), -1);
 				} finally {
 					if (it != null) {
 						it.close();
@@ -1109,8 +1124,8 @@ public class Folder extends SessionServlet {
 	 */
 	public void actionGetUpdatedFolders(final Session session, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		Response
-				.write(actionGetUpdatedFolders(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)), w);
+		Response.write(actionGetUpdatedFolders(session, ParamContainer.getInstance(requestObj, EnumComponent.FOLDER)),
+				w);
 	}
 
 	private final void actionGetUpdatedFolders(final HttpServletRequest req, final HttpServletResponse resp)
@@ -1200,8 +1215,7 @@ public class Folder extends SessionServlet {
 			 * Check virtual list folders
 			 */
 			if (checkVirtualListFolders) {
-				if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)
-						.hasTask()
+				if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx).hasTask()
 						&& !foldersqlinterface.getNonTreeVisiblePublicTaskFolders().hasNext()) {
 					final FolderObject virtualTasks = new FolderObject(FolderObject.VIRTUAL_LIST_TASK_FOLDER_ID);
 					virtualTasks.setLastModified(DATE_0);
@@ -1423,8 +1437,8 @@ public class Folder extends SessionServlet {
 
 	public void actionPutUpdateFolder(final Session session, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		Response.write(actionPutUpdateFolder(session, requestObj.getString(Response.DATA), ParamContainer
-				.getInstance(requestObj, EnumComponent.FOLDER)), w);
+		Response.write(actionPutUpdateFolder(session, requestObj.getString(Response.DATA), ParamContainer.getInstance(
+				requestObj, EnumComponent.FOLDER)), w);
 	}
 
 	private final void actionPutUpdateFolder(final HttpServletRequest req, final HttpServletResponse resp)
@@ -1459,8 +1473,8 @@ public class Folder extends SessionServlet {
 				timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
 				final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
 				FolderObject fo = new FolderObject(updateFolderId);
-				new FolderParser(UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-						session.getUserId(), ctx)).parse(fo, jsonObj);
+				new FolderParser(UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
+						ctx)).parse(fo, jsonObj);
 				fo = foldersqlinterface.saveFolderObject(fo, timestamp);
 				retval = String.valueOf(fo.getObjectID());
 				lastModifiedDate = fo.getLastModified();
@@ -1504,8 +1518,8 @@ public class Folder extends SessionServlet {
 
 	public void actionPutInsertFolder(final Session session, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		Response.write(actionPutInsertFolder(session, requestObj.getString(Response.DATA), ParamContainer
-				.getInstance(requestObj, EnumComponent.FOLDER)), w);
+		Response.write(actionPutInsertFolder(session, requestObj.getString(Response.DATA), ParamContainer.getInstance(
+				requestObj, EnumComponent.FOLDER)), w);
 	}
 
 	private final void actionPutInsertFolder(final HttpServletRequest req, final HttpServletResponse resp)
@@ -1539,8 +1553,8 @@ public class Folder extends SessionServlet {
 				final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(session, ctx);
 				FolderObject fo = new FolderObject();
 				fo.setParentFolderID(parentFolderId);
-				new FolderParser(UserConfigurationStorage.getInstance().getUserConfigurationSafe(
-						session.getUserId(), ctx)).parse(fo, jsonObj);
+				new FolderParser(UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(),
+						ctx)).parse(fo, jsonObj);
 				fo = foldersqlinterface.saveFolderObject(fo, null);
 				retval = String.valueOf(fo.getObjectID());
 				lastModifiedDate = fo.getLastModified();
@@ -1580,8 +1594,8 @@ public class Folder extends SessionServlet {
 
 	public void actionPutDeleteFolder(final Session session, final JSONWriter w, final JSONObject requestObj)
 			throws JSONException {
-		Response.write(actionPutDeleteFolder(session, requestObj.getString(Response.DATA), ParamContainer
-				.getInstance(requestObj, EnumComponent.FOLDER)), w);
+		Response.write(actionPutDeleteFolder(session, requestObj.getString(Response.DATA), ParamContainer.getInstance(
+				requestObj, EnumComponent.FOLDER)), w);
 	}
 
 	private final void actionPutDeleteFolder(final HttpServletRequest req, final HttpServletResponse resp)
@@ -1644,8 +1658,8 @@ public class Folder extends SessionServlet {
 						foldersqlinterface.deleteFolderObject(delFolderObj, timestamp);
 						lastModified = Math.max(lastModified, delFolderObj.getLastModified().getTime());
 					} else {
-						if (UserConfigurationStorage.getInstance()
-								.getUserConfigurationSafe(session.getUserId(), ctx).hasWebMail()) {
+						if (UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx)
+								.hasWebMail()) {
 							if (mailInterface == null) {
 								mailInterface = MailServletInterface.getInstance(session);
 							}
@@ -1750,4 +1764,27 @@ public class Folder extends SessionServlet {
 		}
 	}
 
+	/**
+	 * {@link DisplayNameComparator} - Sorts display names with respect to a
+	 * certain locale
+	 * 
+	 * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben
+	 *         Betten</a>
+	 * 
+	 */
+	private static final class DisplayNameComparator implements Comparator<String> {
+
+		private final Collator collator;
+
+		public DisplayNameComparator(final Locale locale) {
+			super();
+			collator = Collator.getInstance(locale);
+			collator.setStrength(Collator.SECONDARY);
+		}
+
+		public int compare(final String displayName1, final String displayName2) {
+			return collator.compare(displayName1, displayName2);
+		}
+
+	}
 }
