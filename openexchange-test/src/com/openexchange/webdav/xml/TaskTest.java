@@ -171,7 +171,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void updateTask(WebConversation webCon, Task taskObj, int objectId, int inFolder, String host, String login, String password) throws Exception {
-		updateTask(webCon, taskObj, objectId, inFolder, new Date(), host, login, password);
+		updateTask(webCon, taskObj, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password);
 	}
 	
 	public static void updateTask(WebConversation webCon, Task taskObj, int objectId, int inFolder, Date lastModified, String host, String login, String password) throws Exception {
@@ -229,7 +229,7 @@ public class TaskTest extends AbstractWebdavXMLTest {
 	}
 	
 	public static void deleteTask(WebConversation webCon, int objectId, int inFolder, String host, String login, String password) throws Exception {
-		deleteTask(webCon, objectId, inFolder, new Date(), host, login, password);
+		deleteTask(webCon, objectId, inFolder, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, login, password);
 	}
 	
 	public static void deleteTask(WebConversation webCon, int objectId, int inFolder, Date lastModified, String host, String login, String password) throws Exception {
