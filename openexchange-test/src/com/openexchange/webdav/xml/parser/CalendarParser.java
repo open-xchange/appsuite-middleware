@@ -192,11 +192,11 @@ public abstract class CalendarParser extends CommonParser {
 		
 		String external = e.getAttributeValue("external", XmlServlet.NS);
 		if (external != null && "true".equals(external)) {
-			participant = new ExternalUserParticipant();
-			participant.setEmailAddress(getValue(e));
+			final String mail = e.getAttributeValue("mail", XmlServlet.NS);
+			participant = new ExternalUserParticipant(mail);
 		} else {
-			UserParticipant userparticipant = new UserParticipant();
-			userparticipant.setIdentifier(getValueAsInt(e));
+			final int userId = getValueAsInt(e);
+			UserParticipant userparticipant = new UserParticipant(userId);
 			participant = userparticipant;
 			String confirm = e.getAttributeValue("confirm", XmlServlet.NS);
 			
@@ -224,19 +224,19 @@ public abstract class CalendarParser extends CommonParser {
 		
 		String external = e.getAttributeValue("external", XmlServlet.NS);
 		if (external != null && "true".equals(external)) {
-			participant = new ExternalGroupParticipant();
-			participant.setEmailAddress(getValue(e));
+			final String mail = e.getAttributeValue("mail", XmlServlet.NS);
+			participant = new ExternalGroupParticipant(mail);
 		} else {
-			participant = new GroupParticipant();
-			participant.setIdentifier(getValueAsInt(e));
+			final int groupId = getValueAsInt(e);
+			participant = new GroupParticipant(groupId);
 		}
 		
 		participants.add(participant);
 	}
 	
 	private void parseElementResource(Element e, Participants participants) throws Exception {
-		Participant p = new ResourceParticipant();
-		p.setIdentifier(getValueAsInt(e));
+		final int resourceId = getValueAsInt(e);
+		Participant p = new ResourceParticipant(resourceId);
 		participants.add(p);
 	}
 }
