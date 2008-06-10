@@ -255,7 +255,7 @@ public class ResourceRequest {
 
 	}
 
-	private JSONArray actionAll() throws JSONException, LdapException {
+	private JSONArray actionAll() throws LdapException {
 		final JSONArray jsonResponseArray = new JSONArray();
 
 		final ResourceStorage resourceStorage = ResourceStorage.getInstance();
@@ -266,7 +266,7 @@ public class ResourceRequest {
 				if (lastModified < resource.getLastModified().getTime()) {
 					lastModified = resource.getLastModified().getTime();
 				}
-				jsonResponseArray.put(com.openexchange.resource.json.ResourceWriter.writeResource(resource));
+				jsonResponseArray.put(resource.getIdentifier());
 			}
 			timestamp = new Date(lastModified);
 		} else {
