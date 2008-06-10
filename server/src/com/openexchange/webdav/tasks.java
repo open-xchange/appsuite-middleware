@@ -168,13 +168,13 @@ public final class tasks extends XmlServlet {
 				writeResponse(taskobject, HttpServletResponse.SC_OK, OK, client_id, os, xo);
 			} catch (final OXMandatoryFieldException exc) {
 				LOG.debug(_parsePropChilds, exc);
-				writeResponse(taskobject, HttpServletResponse.SC_CONFLICT, MANDATORY_FIELD_EXCEPTION, client_id, os, xo);
+				writeResponse(taskobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc, MANDATORY_FIELD_EXCEPTION), client_id, os, xo);
 			} catch (final OXPermissionException exc) {
 				LOG.debug(_parsePropChilds, exc);
-				writeResponse(taskobject, HttpServletResponse.SC_FORBIDDEN, PERMISSION_EXCEPTION, client_id, os, xo);
+				writeResponse(taskobject, HttpServletResponse.SC_FORBIDDEN, getErrorMessage(exc, PERMISSION_EXCEPTION), client_id, os, xo);
 			} catch (final OXConflictException exc) {
 				LOG.debug(_parsePropChilds, exc);
-				writeResponse(taskobject, HttpServletResponse.SC_CONFLICT, CONFLICT_EXCEPTION, client_id, os, xo);
+				writeResponse(taskobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc, CONFLICT_EXCEPTION), client_id, os, xo);
 			} catch (final OXObjectNotFoundException exc) {
 				LOG.debug(_parsePropChilds, exc);
 				writeResponse(taskobject, HttpServletResponse.SC_NOT_FOUND, OBJECT_NOT_FOUND_EXCEPTION, client_id, os, xo);
@@ -187,14 +187,14 @@ public final class tasks extends XmlServlet {
 			} catch (final OXException exc) {
 				if (exc.getCategory() == Category.USER_INPUT) {
 					LOG.debug(_parsePropChilds, exc);
-					writeResponse(taskobject, HttpServletResponse.SC_CONFLICT, USER_INPUT_EXCEPTION, client_id, os, xo);
+					writeResponse(taskobject, HttpServletResponse.SC_CONFLICT, getErrorMessage(exc, USER_INPUT_EXCEPTION), client_id, os, xo);
 				} else {
 					LOG.error(_parsePropChilds, exc);
-					writeResponse(taskobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, SERVER_ERROR_EXCEPTION + exc.toString(), client_id, os, xo);
+					writeResponse(taskobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(exc, SERVER_ERROR_EXCEPTION) + exc.toString(), client_id, os, xo);
 				}
 			} catch (final Exception exc) {
 				LOG.error(_parsePropChilds, exc);
-				writeResponse(taskobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, SERVER_ERROR_EXCEPTION + exc.toString(), client_id, os, xo);
+				writeResponse(taskobject, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, getErrorMessage(SERVER_ERROR_EXCEPTION, "undefinied error") + exc.toString(), client_id, os, xo);
 			}
 		} else {
 			parser.next();
