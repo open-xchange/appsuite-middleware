@@ -164,7 +164,7 @@ public abstract class DataServlet extends PermissionServlet {
 
 	protected static JSONObject convertParameter2JSONObject(final HttpServletRequest httpServletRequest) throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
-		final Enumeration e = httpServletRequest.getParameterNames();
+		final Enumeration<?> e = httpServletRequest.getParameterNames();
 		final StringBuilder sb = new StringBuilder();
 		while (e.hasMoreElements()) {
 			final String name = e.nextElement().toString();
