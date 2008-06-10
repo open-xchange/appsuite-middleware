@@ -70,14 +70,14 @@ public abstract class PermissionServlet extends SessionServlet {
 	/**
 	 * Checks the session ID supplied as a query parameter in the request URI.
 	 * Intended usage:
-	 *
+	 * 
 	 * <pre>
 	 * if (isInvalidSession(req, w))
 	 * 	return;
 	 * </pre>
-	 *
+	 * 
 	 * at the beginning of {@link #doGet}, {@link #doPost} etc.
-	 *
+	 * 
 	 * @param req
 	 *            The HttpServletRequest object containing the session ID as URI
 	 *            parameter.
@@ -89,10 +89,12 @@ public abstract class PermissionServlet extends SessionServlet {
 	 *         valid.
 	 * @throws IOException
 	 */
-	
+
 	@Override
-	protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        // FIXME this needs a major rewrite. Executing everything before checking permissions isn't useful.
+	protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,
+			IOException {
+		// FIXME this needs a major rewrite. Executing everything before
+		// checking permissions isn't useful.
 		super.service(req, resp);
 
 		final Session sessionObj = getSessionObject(req);
@@ -104,13 +106,24 @@ public abstract class PermissionServlet extends SessionServlet {
 				resp.sendError(HttpServletResponse.SC_CONFLICT, "Conflict");
 				return;
 			}
-			
+
 			if (!hasModulePermission(sessionObj, ctx)) {
 				resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No Permission");
 				return;
 			}
 		}
 	}
-	
-	protected abstract boolean hasModulePermission(final Session sessionObj, final Context ctx);
+
+	/**
+	 * Indicates if incoming request is allowed to being performed due to
+	 * permission settings
+	 * 
+	 * @param session
+	 *            The session providing needed user data
+	 * @param ctx
+	 *            The associated context
+	 * @return <code>true</code> if request is allowed to being performed due to
+	 *         permission settings; otherwise <code>false</code>
+	 */
+	protected abstract boolean hasModulePermission(final Session session, final Context ctx);
 }
