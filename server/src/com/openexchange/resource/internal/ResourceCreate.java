@@ -93,7 +93,7 @@ public final class ResourceCreate {
 	 * @throws ResourceException
 	 *             If initialization fails
 	 */
-	public ResourceCreate(final User user, final Context ctx, final Resource resource) throws ResourceException {
+	ResourceCreate(final User user, final Context ctx, final Resource resource) throws ResourceException {
 		super();
 		this.user = user;
 		this.ctx = ctx;
@@ -115,7 +115,7 @@ public final class ResourceCreate {
 	 * @throws ResourceException
 	 *             If insert fails
 	 */
-	public void perform() throws ResourceException {
+	void perform() throws ResourceException {
 		check();
 		insert();
 		propagate();
@@ -217,7 +217,7 @@ public final class ResourceCreate {
 	 * @throws ResourceException
 	 *             if some problem occurs.
 	 */
-	public void insert(final Connection con) throws ResourceException {
+	void insert(final Connection con) throws ResourceException {
 		try {
 			final int id = IDGenerator.getId(ctx.getContextId(), Types.PRINCIPAL, con);
 			resource.setIdentifier(id);

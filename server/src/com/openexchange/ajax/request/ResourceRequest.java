@@ -71,6 +71,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.ResourceStorage;
 import com.openexchange.resource.internal.ResourceCreate;
 import com.openexchange.resource.internal.ResourceDelete;
+import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.resource.internal.ResourceUpdate;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
@@ -255,6 +256,13 @@ public class ResourceRequest {
 
 	}
 
+	/**
+	 * Performs an all request
+	 * 
+	 * @return A JSON array of all available resources' IDs
+	 * @throws LdapException
+	 *             If all resources cannot be retrieved from resource storage
+	 */
 	private JSONArray actionAll() throws LdapException {
 		final JSONArray jsonResponseArray = new JSONArray();
 
@@ -277,6 +285,17 @@ public class ResourceRequest {
 
 	}
 
+	/**
+	 * Performs a create request
+	 * 
+	 * @param jsonObj
+	 *            The JSON data object (containing "data", "timestamp", etc.)
+	 * @return The newly created resource's ID
+	 * @throws AbstractOXException
+	 *             If creation fails
+	 * @throws JSONException
+	 *             If a JsSON error occurs
+	 */
 	private Integer actionNew(final JSONObject jsonObj) throws AbstractOXException, JSONException {
 		/*
 		 * Check for "data"
@@ -288,15 +307,26 @@ public class ResourceRequest {
 		final com.openexchange.resource.Resource resource = com.openexchange.resource.json.ResourceParser
 				.parseResource(jData);
 		/*
-		 * Create new resource
+		 * TODO: Change to obtain service via registry: Create new resource
 		 */
-		new ResourceCreate(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource).perform();
+		new ResourceServiceImpl().create(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource);
 		/*
 		 * Return its ID
 		 */
 		return Integer.valueOf(resource.getIdentifier());
 	}
 
+	/**
+	 * Performs an update request
+	 * 
+	 * @param jsonObj
+	 *            The JSON data object (containing "data", "timestamp", etc.)
+	 * @return The modified resource's JSON representation
+	 * @throws AbstractOXException
+	 *             If update fails
+	 * @throws JSONException
+	 *             If a JsSON error occurs
+	 */
 	private JSONObject actionUpdate(final JSONObject jsonObj) throws AbstractOXException, JSONException {
 		final ResourceStorage resourceStorage = ResourceStorage.getInstance();
 		/*
@@ -313,15 +343,27 @@ public class ResourceRequest {
 					ConcurrentModificationCode.CONCURRENT_MODIFICATION, new Object[0]);
 		}
 		/*
-		 * Update resource
+		 * TODO: Change to obtain service via registry: Update resource
 		 */
-		new ResourceUpdate(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource).perform();
+		new ResourceServiceImpl().update(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource);
 		/*
 		 * Write updated resource
 		 */
 		return com.openexchange.resource.json.ResourceWriter.writeResource(resource);
 	}
 
+	/**
+	 * Performs a delete request
+	 * 
+	 * @param jsonObj
+	 *            The JSON data object (containing "data", "timestamp", etc.)
+	 * @return The constant {@link JSONObject#NULL NULL} since nothing is
+	 *         intended to be returned to requester
+	 * @throws AbstractOXException
+	 *             If deletion fails
+	 * @throws JSONException
+	 *             If a JsSON error occurs
+	 */
 	private Object actionDelete(final JSONObject jsonObj) throws AbstractOXException, JSONException {
 		final ResourceStorage resourceStorage = ResourceStorage.getInstance();
 		/*
@@ -338,9 +380,9 @@ public class ResourceRequest {
 					ConcurrentModificationCode.CONCURRENT_MODIFICATION, new Object[0]);
 		}
 		/*
-		 * Delete resource
+		 * TODO: Change to obtain service via registry: Delete resource
 		 */
-		new ResourceDelete(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource).perform();
+		new ResourceServiceImpl().delete(UserStorage.getStorageUser(session.getUserId(), ctx), ctx, resource);
 		/*
 		 * Write JSON null
 		 */

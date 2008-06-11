@@ -91,7 +91,7 @@ public final class ResourceUpdate {
 	 * @throws ResourceException
 	 *             If initialization fails
 	 */
-	public ResourceUpdate(final User user, final Context ctx, final Resource resource) throws ResourceException {
+	ResourceUpdate(final User user, final Context ctx, final Resource resource) throws ResourceException {
 		super();
 		this.user = user;
 		this.ctx = ctx;
@@ -113,7 +113,7 @@ public final class ResourceUpdate {
 	 * @throws ResourceException
 	 *             If update fails
 	 */
-	public void perform() throws ResourceException {
+	void perform() throws ResourceException {
 		check();
 		update();
 		propagate();
@@ -223,7 +223,7 @@ public final class ResourceUpdate {
 	 * @throws ResourceException
 	 *             if some problem occurs.
 	 */
-	public void update(final Connection con) throws ResourceException {
+	void update(final Connection con) throws ResourceException {
 		storage.updateResource(ctx, con, resource);
 	}
 

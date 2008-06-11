@@ -78,4 +78,8 @@ public final class ResourceServiceImpl implements ResourceService {
 		new ResourceUpdate(user, ctx, resource).perform();
 	}
 
+	public void delete(final User user, final Context ctx, final Resource resource) throws ResourceException {
+		new ResourceDelete(user, ctx, resource).perform();
+	}
+
 }

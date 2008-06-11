@@ -91,7 +91,7 @@ public final class ResourceDelete {
 	 * @throws ResourceException
 	 *             If initialization fails
 	 */
-	public ResourceDelete(final User user, final Context ctx, final Resource resource) throws ResourceException {
+	ResourceDelete(final User user, final Context ctx, final Resource resource) throws ResourceException {
 		super();
 		this.user = user;
 		this.ctx = ctx;
@@ -113,7 +113,7 @@ public final class ResourceDelete {
 	 * @throws ResourceException
 	 *             If delete fails
 	 */
-	public void perform() throws ResourceException {
+	void perform() throws ResourceException {
 		check();
 		delete();
 		propagate();
@@ -199,7 +199,7 @@ public final class ResourceDelete {
 	 * @throws ResourceException
 	 *             if some problem occurs.
 	 */
-	public void update(final Connection con) throws ResourceException {
+	void update(final Connection con) throws ResourceException {
 		storage.deleteResource(ctx, con, resource);
 	}
 

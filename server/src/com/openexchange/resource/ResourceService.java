@@ -73,7 +73,7 @@ public interface ResourceService {
 	 * @throws ResourceException
 	 *             If resource insertion fails
 	 */
-	void create(User user, Context ctx, Resource resource) throws ResourceException;
+	public void create(User user, Context ctx, Resource resource) throws ResourceException;
 
 	/**
 	 * Updates a resource.
@@ -87,5 +87,19 @@ public interface ResourceService {
 	 * @throws ResourceException
 	 *             If resource update fails
 	 */
-	void update(User user, Context ctx, Resource resource) throws ResourceException;
+	public void update(User user, Context ctx, Resource resource) throws ResourceException;
+
+	/**
+	 * Deletes a resource.
+	 * 
+	 * @param user
+	 *            The user in whose name the deletion takes place
+	 * @param ctx
+	 *            The context.
+	 * @param resource
+	 *            The resource to delete.
+	 * @throws ResourceException
+	 *             If resource deletion fails
+	 */
+	public void delete(User user, Context ctx, Resource resource) throws ResourceException;
 }
