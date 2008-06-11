@@ -60,7 +60,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  */
 public final class ResourceServletServiceRegistry {
 
-	private static final ServiceRegistry INSTANCE = new ServiceRegistry();
+	private static final ServiceRegistry INSTANCE = new ServiceRegistry(2);
 
 	/**
 	 * Gets the singleton instance
