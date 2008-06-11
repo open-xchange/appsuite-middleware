@@ -305,7 +305,11 @@ public class MailException extends AbstractOXException {
 		 * No transport provider could be found for protocol/URL "%s"
 		 */
 		UNKNOWN_TRANSPORT_PROTOCOL("No transport provider could be found for protocol/URL \"%s\"",
-				Category.SETUP_ERROR, 53);
+				Category.SETUP_ERROR, 53),
+		/**
+		 * Missing mail folder fullname
+		 */
+		MISSING_FULLNAME("Missing mail folder fullname", Category.CODE_ERROR, 54);
 
 		private final String message;
 
