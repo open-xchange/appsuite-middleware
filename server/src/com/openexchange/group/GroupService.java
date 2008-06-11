@@ -75,4 +75,13 @@ public interface GroupService {
      * @throws GroupException if some problem occurs.
      */
     void update(Context ctx, User user, Group group) throws GroupException;
+
+    /**
+     * Deletes a group.
+     * @param ctx Context.
+     * @param user User for permission checks.
+     * @param groupId unique identifier of the group to delete.
+     * @throws GroupException if some problem occurs.
+     */
+    void delete(Context ctx, User user, int groupId) throws GroupException; 
 }

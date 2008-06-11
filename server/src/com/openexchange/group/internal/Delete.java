@@ -49,9 +49,8 @@
 
 package com.openexchange.group.internal;
 
-import com.openexchange.group.Group;
 import com.openexchange.group.GroupException;
-import com.openexchange.group.GroupService;
+import com.openexchange.group.GroupException.Code;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 
@@ -59,36 +58,47 @@ import com.openexchange.groupware.ldap.User;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class GroupServiceImpl implements GroupService {
+public final class Delete {
 
     /**
-     * Default constructor.
+     * 
      */
-    public GroupServiceImpl() {
+    private final Context ctx;
+
+    /**
+     * 
+     */
+    private final User user;
+
+    /**
+     * 
+     */
+    private final int groupId;
+
+    /**
+     * @param groupId 
+     * @param user 
+     * @param ctx 
+     * 
+     */
+    Delete(final Context ctx, final User user, final int groupId) {
         super();
+        this.ctx = ctx;
+        this.user = user;
+        this.groupId = groupId;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void create(final Context ctx, final User user, final Group group)
-        throws GroupException {
-        final Create create = new Create(ctx, user, group);
-        create.perform();
+    void perform() throws GroupException {
+        allowed();
+        // TODO check();
+        // TODO prepare();
+        // TODO update();
+        // TODO propagate();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void update(final Context ctx, final User user, final Group group)
-        throws GroupException {
-        final Update update = new Update(ctx, user, group);
-        update.perform();
-    }
-
-    public void delete(final Context ctx, final User user, final int groupId)
-        throws GroupException {
-        final Delete delete = new Delete(ctx, user, groupId);
-        delete.perform();
+    private void allowed() throws GroupException {
+        if (ctx.getMailadmin() != user.getId()) {
+            throw new GroupException(Code.NO_CREATE_PERMISSION);
+        }
     }
 }

@@ -151,6 +151,8 @@ final class Update {
         if (null == changed) {
             throw new GroupException(Code.NULL);
         }
+        // Does the group exist?
+        getOrig();
         Logic.checkMandatoryForUpdate(changed);
         Logic.validateSimpleName(changed);
         Logic.checkData(changed);
@@ -264,5 +266,6 @@ final class Update {
             tmp[i++] = iter.next().intValue();
         }
         GroupTools.invalidateUser(ctx, tmp);
+        // Update OXFolder
     }
 }
