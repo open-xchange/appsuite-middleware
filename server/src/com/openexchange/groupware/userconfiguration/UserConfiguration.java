@@ -720,6 +720,8 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	}
 
 	/**
+	 * Checks if this user configuration allows to delegate tasks
+	 * 
 	 * @return <code>true</code> if user can delegate tasks; otherwise
 	 *         <code>false</code>
 	 */
@@ -748,6 +750,8 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	}
 
 	/**
+	 * Gets the user ID
+	 * 
 	 * @return The user ID
 	 */
 	public int getUserId() {
@@ -755,6 +759,8 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	}
 
 	/**
+	 * Gets the group IDs
+	 * 
 	 * @return The group IDs
 	 */
 	public int[] getGroups() {
@@ -767,31 +773,20 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	}
 
 	/**
+	 * Gets the context
+	 * 
 	 * @return The context
 	 */
 	public Context getContext() {
 		return ctx;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
 	@Override
 	public String toString() {
 		return new StringBuilder().append("UserConfiguration_").append(userId).append('@').append(
 				Integer.toBinaryString(permissionBits)).toString();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.openexchange.groupware.delete.DeleteListener#deletePerformed(com.
-	 * openexchange.groupware.delete.DeleteEvent, java.sql.Connection,
-	 * java.sql.Connection)
-	 */
 	public void deletePerformed(final DeleteEvent delEvent, final Connection readConArg, final Connection writeConArg)
 			throws DeleteFailedException {
 		if (delEvent.getType() == DeleteEvent.TYPE_USER) {
