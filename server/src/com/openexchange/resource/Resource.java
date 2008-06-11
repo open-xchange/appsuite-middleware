@@ -175,6 +175,52 @@ public final class Resource {
 	}
 
 	/**
+	 * Performs an equality check which ignores the last-modified timestamp
+	 * 
+	 * @param other
+	 *            The other resource to compare with
+	 * @return <code>true</code> if this resource is equal to other resource;
+	 *         otherwise <code>false</code>
+	 */
+	public boolean equalsWithoutLastModified(final Resource other) {
+		if (available != other.available) {
+			return false;
+		}
+		if (description == null) {
+			if (other.description != null) {
+				return false;
+			}
+		} else if (!description.equals(other.description)) {
+			return false;
+		}
+		if (displayName == null) {
+			if (other.displayName != null) {
+				return false;
+			}
+		} else if (!displayName.equals(other.displayName)) {
+			return false;
+		}
+		if (identifier != other.identifier) {
+			return false;
+		}
+		if (mail == null) {
+			if (other.mail != null) {
+				return false;
+			}
+		} else if (!mail.equals(other.mail)) {
+			return false;
+		}
+		if (simpleName == null) {
+			if (other.simpleName != null) {
+				return false;
+			}
+		} else if (!simpleName.equals(other.simpleName)) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
 	 * Setter for identifier.
 	 * 
 	 * @param identifier

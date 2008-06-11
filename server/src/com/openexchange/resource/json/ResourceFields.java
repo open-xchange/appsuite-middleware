@@ -82,4 +82,9 @@ public final class ResourceFields {
 	 */
 	public static final String MAIL = "mailaddress";
 
+	/**
+	 * The availability: "availability"
+	 */
+	public static final String AVAILABILITY = "availability";
+
 }

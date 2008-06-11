@@ -93,6 +93,9 @@ public final class ResourceParser {
 		if (jsonResource.has(ResourceFields.MAIL) && !jsonResource.isNull(ResourceFields.MAIL)) {
 			retval.setMail(jsonResource.getString(ResourceFields.MAIL));
 		}
+		if (jsonResource.has(ResourceFields.AVAILABILITY) && !jsonResource.isNull(ResourceFields.AVAILABILITY)) {
+			retval.setAvailable(jsonResource.getBoolean(ResourceFields.AVAILABILITY));
+		}
 		if (jsonResource.has(ResourceFields.DESCRIPTION) && !jsonResource.isNull(ResourceFields.DESCRIPTION)) {
 			retval.setDescription(jsonResource.getString(ResourceFields.DESCRIPTION));
 		}

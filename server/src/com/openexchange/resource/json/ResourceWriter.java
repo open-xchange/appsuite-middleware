@@ -86,6 +86,7 @@ public final class ResourceWriter {
 		retval.put(ResourceFields.DISPLAY_NAME, resource.getDisplayName() == null ? JSONObject.NULL : resource
 				.getDisplayName());
 		retval.put(ResourceFields.MAIL, resource.getMail() == null ? JSONObject.NULL : resource.getMail());
+		retval.put(ResourceFields.AVAILABILITY, resource.isAvailable());
 		retval.put(ResourceFields.DESCRIPTION, resource.getDescription() == null ? JSONObject.NULL : resource
 				.getDescription());
 		return retval;
