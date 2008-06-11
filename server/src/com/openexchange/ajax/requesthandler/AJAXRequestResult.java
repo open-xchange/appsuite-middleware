@@ -75,6 +75,44 @@ public final class AJAXRequestResult {
 		this(resultObject, null);
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((resultObject == null) ? 0 : resultObject.hashCode());
+		result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final AJAXRequestResult other = (AJAXRequestResult) obj;
+		if (resultObject == null) {
+			if (other.resultObject != null) {
+				return false;
+			}
+		} else if (!resultObject.equals(other.resultObject)) {
+			return false;
+		}
+		if (timestamp == null) {
+			if (other.timestamp != null) {
+				return false;
+			}
+		} else if (!timestamp.equals(other.timestamp)) {
+			return false;
+		}
+		return true;
+	}
+
 	/**
 	 * Initializes a new {@link AJAXRequestResult}
 	 * 
@@ -108,4 +146,9 @@ public final class AJAXRequestResult {
 		return timestamp;
 	}
 
+	@Override
+	public String toString() {
+		return new StringBuilder(34).append(super.toString()).append(" resultObject=").append(resultObject).append(
+				", timestamp=").append(timestamp).toString();
+	}
 }
