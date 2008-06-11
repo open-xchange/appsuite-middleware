@@ -546,7 +546,7 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	/**
 	 * Detects if user configuration allows team view
 	 * 
-	 * @return <code>true</code> if team view is allowed;otherwise
+	 * @return <code>true</code> if team view is allowed; otherwise
 	 *         <code>false</code>
 	 */
 	public boolean hasTeamView() {
@@ -556,7 +556,7 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	/**
 	 * Detects if user configuration allows free busy
 	 * 
-	 * @return <code>true</code> if free busy is allowed;otherwise
+	 * @return <code>true</code> if free busy is allowed; otherwise
 	 *         <code>false</code>
 	 */
 	public boolean hasFreeBusy() {
@@ -566,7 +566,7 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	/**
 	 * Detects if user configuration allows conflict handling
 	 * 
-	 * @return <code>true</code> if conflict handling is allowed;otherwise
+	 * @return <code>true</code> if conflict handling is allowed; otherwise
 	 *         <code>false</code>
 	 */
 	public boolean hasConflictHandling() {
@@ -586,7 +586,7 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	/**
 	 * Detects if user configuration allows portal page in GUI
 	 * 
-	 * @return <code>true</code> if portal page is allowed;otherwise
+	 * @return <code>true</code> if portal page is allowed; otherwise
 	 *         <code>false</code>
 	 */
 	public boolean hasPortal() {
