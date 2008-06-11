@@ -92,37 +92,36 @@ public final class ServerRequestHandlerRegistry {
 	}
 
 	/**
-	 * Removes a request handler bound to given registration name from this
-	 * registry
+	 * Removes a request handler bound to given module name from this registry
 	 * 
-	 * @param registrationName
-	 *            The registration name
+	 * @param moduleName
+	 *            The module name
 	 */
-	public void removeService(final String registrationName) {
-		requestHandlers.remove(registrationName);
+	public void removeService(final String moduleName) {
+		requestHandlers.remove(moduleName);
 	}
 
 	/**
-	 * Adds a request handler bound to given registration name to this registry
+	 * Adds a request handler bound to given module name to this registry
 	 * 
-	 * @param registrationName
-	 *            The registration name
+	 * @param moduleName
+	 *            The module name
 	 * @param requestHandler
 	 *            The request handler
 	 */
-	public void addService(final String registrationName, final AJAXRequestHandler requestHandler) {
-		requestHandlers.put(registrationName, requestHandler);
+	public void addService(final String moduleName, final AJAXRequestHandler requestHandler) {
+		requestHandlers.put(moduleName, requestHandler);
 	}
 
 	/**
-	 * Gets the request handler by given registration name
+	 * Gets the request handler by given module name
 	 * 
-	 * @param registrationName
-	 *            The registration name
+	 * @param moduleName
+	 *            The module name
 	 * @return The request handle if present; otherwise <code>null</code>
 	 */
-	public AJAXRequestHandler getService(final String registrationName) {
-		return requestHandlers.get(registrationName);
+	public AJAXRequestHandler getService(final String moduleName) {
+		return requestHandlers.get(moduleName);
 	}
 
 	@Override
