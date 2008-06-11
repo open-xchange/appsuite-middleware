@@ -136,7 +136,7 @@ public class Resource extends DataServlet {
 				try {
 					jsonObj = convertParameter2JSONObject(httpServletRequest);
 				} catch (final JSONException e) {
-					LOG.error(_doGet, e);
+					LOG.error(_doPut, e);
 					response.setException(new OXJSONException(OXJSONException.Code.JSON_BUILD_ERROR, e));
 					writeResponse(response, httpServletResponse);
 					return;
@@ -171,7 +171,7 @@ public class Resource extends DataServlet {
 				response.setData(responseObj);
 			}
 		} catch (final AbstractOXException e) {
-			LOG.error(_doGet, e);
+			LOG.error(_doPut, e);
 			response.setException(e);
 		} catch (final JSONException e) {
 			final OXJSONException oje = new OXJSONException(OXJSONException.Code.JSON_WRITE_ERROR, e);
