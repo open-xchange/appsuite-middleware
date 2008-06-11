@@ -229,11 +229,13 @@ public final class ResourceServletActivator extends DeferredActivator {
 					LOG.info("Resource servlet successfully unregistered");
 				}
 			}
-			/*
-			 * Unregister service
-			 */
-			serviceRegistration.unregister();
-			serviceRegistration = null;
+			if (serviceRegistration != null) {
+				/*
+				 * Unregister service
+				 */
+				serviceRegistration.unregister();
+				serviceRegistration = null;
+			}
 			/*
 			 * Clear service registry
 			 */
