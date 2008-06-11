@@ -64,6 +64,8 @@ public final class AJAXRequestResult {
 
 	private final Date timestamp;
 
+	private final int hashCode;
+
 	/**
 	 * Initializes a new {@link AJAXRequestResult} with time stamp left to
 	 * <code>null</code>
@@ -75,13 +77,33 @@ public final class AJAXRequestResult {
 		this(resultObject, null);
 	}
 
-	@Override
-	public int hashCode() {
+	/**
+	 * Initializes a new {@link AJAXRequestResult}
+	 * 
+	 * @param resultObject
+	 *            The result object
+	 * @param timestmap
+	 *            The server's last-modified time stamp (corresponding to either
+	 *            a GET, ALL, or LIST request)
+	 */
+	public AJAXRequestResult(final Object resultObject, final Date timestmap) {
+		super();
+		this.resultObject = resultObject;
+		this.timestamp = timestmap;
+		this.hashCode = _hashCode();
+	}
+
+	private int _hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((resultObject == null) ? 0 : resultObject.hashCode());
 		result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
 		return result;
+	}
+
+	@Override
+	public int hashCode() {
+		return hashCode;
 	}
 
 	@Override
@@ -111,21 +133,6 @@ public final class AJAXRequestResult {
 			return false;
 		}
 		return true;
-	}
-
-	/**
-	 * Initializes a new {@link AJAXRequestResult}
-	 * 
-	 * @param resultObject
-	 *            The result object
-	 * @param timestmap
-	 *            The server's last-modified time stamp (corresponding to either
-	 *            a GET, ALL, or LIST request)
-	 */
-	public AJAXRequestResult(final Object resultObject, final Date timestmap) {
-		super();
-		this.resultObject = resultObject;
-		this.timestamp = timestmap;
 	}
 
 	/**
