@@ -125,7 +125,7 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 
 	private int[] accessibleModules;
 
-	private boolean accessibleModulesComputed;
+	private volatile boolean accessibleModulesComputed;
 
 	/**
 	 * Initializes a new {@link UserConfiguration}
@@ -248,8 +248,8 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	/**
 	 * Sets this user configuration's bit pattern
 	 * 
-	 * @param permissionBits -
-	 *            the bit pattern
+	 * @param permissionBits
+	 *            - the bit pattern
 	 */
 	public void setPermissionBits(final int permissionBits) {
 		this.permissionBits = permissionBits;
@@ -575,11 +575,12 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 
 	/**
 	 * Calculates if the user configuration allows the participant dialog.
+	 * 
 	 * @return <code>true</code> if the participant dialog should be shown.
 	 */
 	public boolean hasParticipantsDialog() {
-	    return (hasCalendar() || hasTask()) && hasInfostore()
-            && hasFullPublicFolderAccess() && hasFullSharedFolderAccess();
+		return (hasCalendar() || hasTask()) && hasInfostore() && hasFullPublicFolderAccess()
+				&& hasFullSharedFolderAccess();
 	}
 
 	/**
@@ -617,46 +618,51 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 		if (accessibleModulesComputed) {
 			return cloneAccessibleModules();
 		}
-		final SmartIntArray array = new SmartIntArray(7);
-		if (hasTask()) {
-			array.append(FolderObject.TASK);
+		synchronized (this) {
+			if (accessibleModulesComputed) {
+				return cloneAccessibleModules();
+			}
+			final SmartIntArray array = new SmartIntArray(7);
+			if (hasTask()) {
+				array.append(FolderObject.TASK);
+			}
+			if (hasCalendar()) {
+				array.append(FolderObject.CALENDAR);
+			}
+			if (hasContact()) {
+				array.append(FolderObject.CONTACT);
+			}
+			if (hasProject()) {
+				array.append(FolderObject.PROJECT);
+			}
+			if (hasInfostore()) {
+				array.append(FolderObject.INFOSTORE);
+			}
+			if (hasWebMail()) {
+				array.append(FolderObject.MAIL);
+			}
+			array.append(FolderObject.SYSTEM_MODULE);
+			array.append(FolderObject.UNBOUND);
+			accessibleModules = array.toArray();
+			Arrays.sort(accessibleModules);
+			accessibleModulesComputed = true;
+			return cloneAccessibleModules();
 		}
-		if (hasCalendar()) {
-			array.append(FolderObject.CALENDAR);
-		}
-		if (hasContact()) {
-			array.append(FolderObject.CONTACT);
-		}
-		if (hasProject()) {
-			array.append(FolderObject.PROJECT);
-		}
-		if (hasInfostore()) {
-			array.append(FolderObject.INFOSTORE);
-		}
-		if (hasWebMail()) {
-			array.append(FolderObject.MAIL);
-		}
-		array.append(FolderObject.SYSTEM_MODULE);
-		array.append(FolderObject.UNBOUND);
-		accessibleModulesComputed = true;
-		accessibleModules = array.toArray();
-		Arrays.sort(accessibleModules);
-		return cloneAccessibleModules();
 	}
 
 	/**
 	 * Checks if user has access to given module
 	 * 
 	 * @param module
-	 *            The module carrying a value defined in constants
-	 *            <code>{@link FolderObject#TASK}</code>,
-	 *            <code>{@link FolderObject#CALENDAR}</code>,
-	 *            <code>{@link FolderObject#CONTACT}</code>,
-	 *            <code>{@link FolderObject#UNBOUND}</code>,
-	 *            <code>{@link FolderObject#SYSTEM_MODULE}</code>,
-	 *            <code>{@link FolderObject#PROJECT}</code>,
-	 *            <code>{@link FolderObject#MAIL}</code>,
-	 *            <code>{@link FolderObject#INFOSTORE}</code>
+	 *            The module carrying a value defined in constants <code>
+	 *            {@link FolderObject#TASK}</code>, <code>
+	 *            {@link FolderObject#CALENDAR}</code>, <code>
+	 *            {@link FolderObject#CONTACT}</code>, <code>
+	 *            {@link FolderObject#UNBOUND}</code>, <code>
+	 *            {@link FolderObject#SYSTEM_MODULE}</code>, <code>
+	 *            {@link FolderObject#PROJECT}</code>, <code>
+	 *            {@link FolderObject#MAIL}</code>, <code>
+	 *            {@link FolderObject#INFOSTORE}</code>
 	 * @return <code>true</code> if user configuration permits access to given
 	 *         module; otherwise <code>false</code>
 	 */
@@ -675,8 +681,8 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	 * create or edit public folders. Existing public folders are visible in any
 	 * case.
 	 * 
-	 * @return <code>true</code> full public folder access is granted;
-	 *         otherwise <code>false</code>
+	 * @return <code>true</code> full public folder access is granted; otherwise
+	 *         <code>false</code>
 	 */
 	public boolean hasFullPublicFolderAccess() {
 		return hasPermission(EDIT_PUBLIC_FOLDERS);
@@ -697,8 +703,8 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	 * permissions are not removed if user loses this right, but the display of
 	 * shared folders is suppressed.
 	 * 
-	 * @return <code>true</code> full shared folder access is granted;
-	 *         otherwise <code>false</code>
+	 * @return <code>true</code> full shared folder access is granted; otherwise
+	 *         <code>false</code>
 	 */
 	public boolean hasFullSharedFolderAccess() {
 		return hasPermission(READ_CREATE_SHARED_FOLDERS);
@@ -781,8 +787,10 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.openexchange.groupware.delete.DeleteListener#deletePerformed(com.openexchange.groupware.delete.DeleteEvent,
-	 *      java.sql.Connection, java.sql.Connection)
+	 * @see
+	 * com.openexchange.groupware.delete.DeleteListener#deletePerformed(com.
+	 * openexchange.groupware.delete.DeleteEvent, java.sql.Connection,
+	 * java.sql.Connection)
 	 */
 	public void deletePerformed(final DeleteEvent delEvent, final Connection readConArg, final Connection writeConArg)
 			throws DeleteFailedException {
