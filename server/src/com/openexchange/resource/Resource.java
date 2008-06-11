@@ -104,6 +104,76 @@ public final class Resource {
 		super();
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (available ? 1231 : 1237);
+		result = prime * result + ((description == null) ? 0 : description.hashCode());
+		result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
+		result = prime * result + identifier;
+		result = prime * result + ((lastModified == null) ? 0 : lastModified.hashCode());
+		result = prime * result + ((mail == null) ? 0 : mail.hashCode());
+		result = prime * result + ((simpleName == null) ? 0 : simpleName.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final Resource other = (Resource) obj;
+		if (available != other.available) {
+			return false;
+		}
+		if (description == null) {
+			if (other.description != null) {
+				return false;
+			}
+		} else if (!description.equals(other.description)) {
+			return false;
+		}
+		if (displayName == null) {
+			if (other.displayName != null) {
+				return false;
+			}
+		} else if (!displayName.equals(other.displayName)) {
+			return false;
+		}
+		if (identifier != other.identifier) {
+			return false;
+		}
+		if (lastModified == null) {
+			if (other.lastModified != null) {
+				return false;
+			}
+		} else if (!lastModified.equals(other.lastModified)) {
+			return false;
+		}
+		if (mail == null) {
+			if (other.mail != null) {
+				return false;
+			}
+		} else if (!mail.equals(other.mail)) {
+			return false;
+		}
+		if (simpleName == null) {
+			if (other.simpleName != null) {
+				return false;
+			}
+		} else if (!simpleName.equals(other.simpleName)) {
+			return false;
+		}
+		return true;
+	}
+
 	/**
 	 * Setter for identifier.
 	 * 
