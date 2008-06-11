@@ -251,7 +251,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 	 * @return The properly opened IMAP folder
 	 * @throws MessagingException
 	 *             If a messaging error occurs
-	 * @throws IMAPException
+	 * @throws MailException
 	 *             If user does not hold sufficient rights to open the IMAP
 	 *             folder in desired mode
 	 */
@@ -274,13 +274,16 @@ public abstract class IMAPFolderWorker extends MailMessageStorage implements Ser
 	 * @return The properly opened IMAP folder
 	 * @throws MessagingException
 	 *             If a messaging error occurs
-	 * @throws IMAPException
+	 * @throws MailException
 	 *             If user does not hold sufficient rights to open the IMAP
 	 *             folder in desired mode
 	 */
 	protected final IMAPFolder setAndOpenFolder(final IMAPFolder imapFolder, final String fullname,
 			final int desiredMode) throws MessagingException, MailException {
-		final boolean isDefaultFolder = fullname.equals(DEFAULT_FOLDER_ID);
+		if (null == fullname) {
+			throw new MailException(MailException.Code.MISSING_FULLNAME);
+		}
+		final boolean isDefaultFolder = DEFAULT_FOLDER_ID.equals(fullname);
 		final boolean isIdenticalFolder;
 		if (isDefaultFolder) {
 			isIdenticalFolder = (imapFolder == null ? false : imapFolder instanceof DefaultFolder);
