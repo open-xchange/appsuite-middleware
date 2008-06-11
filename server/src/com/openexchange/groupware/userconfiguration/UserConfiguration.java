@@ -50,8 +50,6 @@
 package com.openexchange.groupware.userconfiguration;
 
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
@@ -59,10 +57,6 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.Collections.SmartIntArray;
 
 /**
@@ -70,7 +64,7 @@ import com.openexchange.tools.Collections.SmartIntArray;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UserConfiguration implements Serializable, DeleteListener, Cloneable {
+public final class UserConfiguration implements Serializable, Cloneable {
 
 	private static final long serialVersionUID = -8277899698366715803L;
 
@@ -126,16 +120,6 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 	private int[] accessibleModules;
 
 	private volatile boolean accessibleModulesComputed;
-
-	/**
-	 * Initializes a new {@link UserConfiguration}
-	 */
-	public UserConfiguration() {
-		super();
-		userId = -1;
-		ctx = null;
-		groups = null;
-	}
 
 	/**
 	 * Initializes a new {@link UserConfiguration}
@@ -787,22 +771,4 @@ public final class UserConfiguration implements Serializable, DeleteListener, Cl
 				Integer.toBinaryString(permissionBits)).toString();
 	}
 
-	public void deletePerformed(final DeleteEvent delEvent, final Connection readConArg, final Connection writeConArg)
-			throws DeleteFailedException {
-		if (delEvent.getType() == DeleteEvent.TYPE_USER) {
-			try {
-				/*
-				 * Delete user configuration
-				 */
-				RdbUserConfigurationStorage.deleteUserConfiguration(delEvent.getId(), writeConArg, delEvent
-						.getContext());
-			} catch (final SQLException e) {
-				LOG.error(e.getMessage(), e);
-				throw new DeleteFailedException(DeleteFailedException.Code.SQL_ERROR, e, e.getLocalizedMessage());
-			} catch (final DBPoolingException e) {
-				LOG.error(e.getMessage(), e);
-				throw new DeleteFailedException(e);
-			}
-		}
-	}
 }
