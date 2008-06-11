@@ -49,10 +49,25 @@
 
 package com.openexchange.group.internal;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.group.Group;
 import com.openexchange.group.GroupException;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.group.GroupException.Code;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedException;
+import com.openexchange.groupware.delete.DeleteRegistry;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  *
@@ -61,19 +76,34 @@ import com.openexchange.groupware.ldap.User;
 public final class Delete {
 
     /**
-     * 
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(Delete.class);
+
+    /**
+     * Context.
      */
     private final Context ctx;
 
     /**
-     * 
+     * User for checking permissions.
      */
     private final User user;
 
     /**
-     * 
+     * Unique identifier of the group to delete.
      */
     private final int groupId;
+
+    /**
+     * Storage API for groups.
+     */
+    private final GroupStorage storage = GroupStorage.getInstance();
+
+    /**
+     * cache field for the group.
+     */
+    private transient Group orig;
 
     /**
      * @param groupId 
@@ -88,11 +118,21 @@ public final class Delete {
         this.groupId = groupId;
     }
 
+    Group getOrig() throws GroupException {
+        if (null == orig) {
+            try {
+                storage.getGroup(groupId, ctx);
+            } catch (final LdapException e) {
+                throw new GroupException(e);
+            }
+        }
+        return orig;
+    }
+
     void perform() throws GroupException {
         allowed();
-        // TODO check();
-        // TODO prepare();
-        // TODO update();
+        check();
+        delete();
         // TODO propagate();
     }
 
@@ -100,5 +140,54 @@ public final class Delete {
         if (ctx.getMailadmin() != user.getId()) {
             throw new GroupException(Code.NO_CREATE_PERMISSION);
         }
+    }
+
+    private void check() throws GroupException {
+        // Does the group exist?
+        getOrig();
+    }
+
+    /**
+     * Deletes all data for the group in the database. This includes deleting
+     * everything that references the group.
+     * @throws GroupException
+     */
+    private void delete() throws GroupException {
+        final Connection con;
+        try {
+            con = DBPool.pickupWriteable(ctx);
+        } catch (final DBPoolingException e) {
+            throw new GroupException(Code.NO_CONNECTION, e);
+        }
+        try {
+            con.setAutoCommit(false);
+            update(con);
+            con.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw new GroupException(Code.SQL_ERROR, e);
+        } catch (final GroupException e) {
+            DBUtils.rollback(con);
+            throw e;
+        } finally {
+            try {
+                con.setAutoCommit(true);
+            } catch (SQLException e) {
+                LOG.error("Problem setting autocommit to true.", e);
+            }
+            DBPool.closeWriterSilent(ctx, con);
+        }
+    }
+
+    private void update(final Connection con) throws GroupException {
+        // Delete all references to that group.
+        final DeleteEvent event = new DeleteEvent(getOrig(), groupId,
+            DeleteEvent.TYPE_GROUP, ctx);
+        try {
+            DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
+        } catch (final DeleteFailedException e) {
+            throw new GroupException(e);
+        }
+        // Delete the group.
     }
 }

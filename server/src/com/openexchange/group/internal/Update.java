@@ -218,6 +218,9 @@ final class Update {
         } catch (final SQLException e) {
             DBUtils.rollback(con);
             throw new GroupException(Code.SQL_ERROR, e);
+        } catch (final GroupException e) {
+            DBUtils.rollback(con);
+            throw e;
         } finally {
             try {
                 con.setAutoCommit(true);
