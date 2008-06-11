@@ -69,10 +69,7 @@ import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.ResourceStorage;
-import com.openexchange.resource.internal.ResourceCreate;
-import com.openexchange.resource.internal.ResourceDelete;
 import com.openexchange.resource.internal.ResourceServiceImpl;
-import com.openexchange.resource.internal.ResourceUpdate;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxException;
 
