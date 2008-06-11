@@ -47,75 +47,42 @@
  *
  */
 
-package com.openexchange.resource.internal;
+package com.openexchange.ajax.requesthandler;
 
-import java.util.Date;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.LdapException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceException;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.resource.storage.ResourceStorage;
+import com.openexchange.session.Session;
 
 /**
- * {@link ResourceServiceImpl}
+ * {@link AJAXRequestHandler} - Handles an AJAX request
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * 
  */
-public final class ResourceServiceImpl implements ResourceService {
+public interface AJAXRequestHandler {
 
 	/**
-	 * Initializes a new {@link ResourceServiceImpl}
+	 * Performs the action indicated through given parameter <code>action</code>
+	 * .
+	 * 
+	 * @param action
+	 *            The action to perform
+	 * @param jsonObject
+	 *            The JSON data object (containing "data", "timestamp", etc.)
+	 * @param session
+	 *            The session providing needed user data
+	 * @param ctx
+	 *            The context
+	 * @return An appropriate result corresponding to request
+	 * @throws AbstractOXException
+	 *             If action cannot be performed
+	 * @throws JSONException
+	 *             If a JSON error occurs
 	 */
-	public ResourceServiceImpl() {
-		super();
-	}
-
-	public void create(final User user, final Context ctx, final Resource resource) throws ResourceException {
-		new ResourceCreate(user, ctx, resource).perform();
-	}
-
-	public void update(final User user, final Context ctx, final Resource resource) throws ResourceException {
-		new ResourceUpdate(user, ctx, resource).perform();
-	}
-
-	public void delete(final User user, final Context ctx, final Resource resource) throws ResourceException {
-		new ResourceDelete(user, ctx, resource).perform();
-	}
-
-	public Resource getResource(final int resourceId, final Context context) throws ResourceException {
-		try {
-			return ResourceStorage.getInstance().getResource(resourceId, context);
-		} catch (final LdapException e) {
-			throw new ResourceException(e);
-		}
-	}
-
-	public Resource[] listModified(final Date modifiedSince, final Context context) throws ResourceException {
-		try {
-			return ResourceStorage.getInstance().listModified(modifiedSince, context);
-		} catch (final LdapException e) {
-			throw new ResourceException(e);
-		}
-	}
-
-	public Resource[] searchResources(final String pattern, final Context context) throws ResourceException {
-		try {
-			return ResourceStorage.getInstance().searchResources(pattern, context);
-		} catch (final LdapException e) {
-			throw new ResourceException(e);
-		}
-	}
-
-	public Resource[] searchResourcesByMail(final String pattern, final Context context) throws ResourceException {
-		try {
-			return ResourceStorage.getInstance().searchResourcesByMail(pattern, context);
-		} catch (final LdapException e) {
-			throw new ResourceException(e);
-		}
-	}
+	public AJAXRequestResult performAction(String action, JSONObject jsonObject, Session session, Context ctx)
+			throws AbstractOXException, JSONException;
 
 }

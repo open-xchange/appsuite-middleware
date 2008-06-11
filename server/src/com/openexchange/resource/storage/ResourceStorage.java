@@ -47,13 +47,16 @@
  *
  */
 
-package com.openexchange.resource;
+package com.openexchange.resource.storage;
 
 import java.sql.Connection;
 import java.util.Date;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapException;
+import com.openexchange.resource.Resource;
+import com.openexchange.resource.ResourceException;
+import com.openexchange.resource.ResourceGroup;
 
 /**
  * {@link ResourceStorage} - This class provides abstract methods to read

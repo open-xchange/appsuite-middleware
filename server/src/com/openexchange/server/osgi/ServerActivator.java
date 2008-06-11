@@ -61,6 +61,7 @@ import org.osgi.service.event.EventAdmin;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 
+import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
@@ -84,6 +85,7 @@ import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.spamhandler.SpamHandler;
@@ -232,6 +234,10 @@ public final class ServerActivator extends DeferredActivator {
 		serviceTrackerList.add(new ServiceTracker(context, SpamHandler.class.getName(), new SpamHandlerServiceTracker(
 				context)));
 
+		// AJAX request handler
+		serviceTrackerList.add(new ServiceTracker(context, AJAXRequestHandler.class.getName(),
+				new AJAXRequestHandlerCustomizer(context)));
+
 		// contacts
 		serviceTrackerList.add(new ServiceTracker(context, ContactInterface.class.getName(),
 				new ContactServiceListener(context)));
@@ -298,6 +304,7 @@ public final class ServerActivator extends DeferredActivator {
 				tracker.close();
 			}
 			serviceTrackerList.clear();
+			ServerRequestHandlerRegistry.getInstance().clearRegistry();
 			// Stop all inside the server.
 			starter.stop();
 			/*

@@ -52,7 +52,7 @@ package com.openexchange.resource.internal;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.resource.ResourceStorage;
+import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.Initialization;
 
 /**

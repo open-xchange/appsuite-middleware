@@ -49,6 +49,8 @@
 
 package com.openexchange.resource;
 
+import java.util.Date;
+
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 
@@ -60,6 +62,64 @@ import com.openexchange.groupware.ldap.User;
  * 
  */
 public interface ResourceService {
+
+	/**
+	 * Gets the resource identified by specified ID located in given context.
+	 * 
+	 * @param resourceId
+	 *            The unique identifier of the resource to return.
+	 * @param context
+	 *            The context.
+	 * @return The data object of the resource.
+	 * @throws ResourceException
+	 *             If the resource can't be found or an exception appears while
+	 *             reading it.
+	 */
+	public Resource getResource(int resourceId, Context context) throws ResourceException;
+
+	/**
+	 * Searches all resources which identifier matches the given pattern.
+	 * 
+	 * @param pattern
+	 *            The identifier of all returned resources will match this
+	 *            pattern.
+	 * @param context
+	 *            The context.
+	 * @return a string array with the resource identifiers. If no identifiers
+	 *         match, an empty array will be returned.
+	 * @throws ResourceException
+	 *             If an exception occurs while reading from the underlying
+	 *             persistent storage.
+	 */
+	public Resource[] searchResources(String pattern, Context context) throws ResourceException;
+
+	/**
+	 * Searches all resources which email address matches the given pattern.
+	 * 
+	 * @param pattern
+	 *            The email address pattern to search for
+	 * @param context
+	 *            The context
+	 * @return An array of {@link Resource resources} whose email address
+	 *         matches the given pattern.
+	 * @throws ResourceException
+	 *             If searching for resources fails
+	 */
+	public abstract Resource[] searchResourcesByMail(String pattern, Context context) throws ResourceException;
+
+	/**
+	 * This method returns resources that have been modified since the given
+	 * timestamp.
+	 * 
+	 * @param modifiedSince
+	 *            timestamp after that the resources have been modified.
+	 * @param context
+	 *            The context.
+	 * @return an array of resources.
+	 * @throws ResourceException
+	 *             If an error occurs.
+	 */
+	public abstract Resource[] listModified(Date modifiedSince, Context context) throws ResourceException;
 
 	/**
 	 * Creates a resource.

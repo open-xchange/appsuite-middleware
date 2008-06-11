@@ -54,6 +54,7 @@ import com.openexchange.groupware.EnumComponent;
 
 /**
  * Exception for problems in servlets.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AjaxException extends AbstractOXException {
@@ -64,87 +65,96 @@ public class AjaxException extends AbstractOXException {
 	private static final long serialVersionUID = -171563644613142249L;
 
 	/**
-     * Initializes a new exception using the information provided by the code.
-     * @param code code for the exception.
-     * @param cause the cause of the exception.
-     * @param messageArgs arguments that will be formatted into the message.
-     */
-    public AjaxException(final Code code, final Object... messageArgs) {
-        this(code, null, messageArgs);
-    }
+	 * Initializes a new exception using the information provided by the code.
+	 * 
+	 * @param code
+	 *            code for the exception.
+	 * @param cause
+	 *            the cause of the exception.
+	 * @param messageArgs
+	 *            arguments that will be formatted into the message.
+	 */
+	public AjaxException(final Code code, final Object... messageArgs) {
+		this(code, null, messageArgs);
+	}
 
-    /**
-     * Initializes a new exception using the information provided by the code.
-     * @param code code for the exception.
-     * @param cause the cause of the exception.
-     * @param messageArgs arguments that will be formatted into the message.
-     */
-    public AjaxException(final Code code, final Throwable cause,
-        final Object... messageArgs) {
-        super(EnumComponent.SERVLET, code.category, code.number,
-            null == code.message ? cause.getMessage() : code.message, cause);
-        setMessageArgs(messageArgs);
-    }
+	/**
+	 * Initializes a new exception using the information provided by the code.
+	 * 
+	 * @param code
+	 *            code for the exception.
+	 * @param cause
+	 *            the cause of the exception.
+	 * @param messageArgs
+	 *            arguments that will be formatted into the message.
+	 */
+	public AjaxException(final Code code, final Throwable cause, final Object... messageArgs) {
+		super(EnumComponent.SERVLET, code.category, code.number, null == code.message ? cause.getMessage()
+				: code.message, cause);
+		setMessageArgs(messageArgs);
+	}
 
-    /**
-     * Error codes for servlet exceptions.
-     * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
-     */
-    public enum Code {
-        /**
-         * Unknown AJAX action: %s.
-         */
-        UnknownAction("Unknown AJAX action: %s.",
-            Category.CODE_ERROR, 1),
-        /**
-         * Missing the following field: %s
-         */    
-        MISSING_PARAMETER("Missing the following request parameter: %s",
-        	Category.CODE_ERROR, 2),
-        /**
-         * Missing upload image.
-         */
-        NoUploadImage("Missing upload image.",
-            Category.CODE_ERROR, 3),
-        /**
-         * Invalid parameter: %s
-         */
-        InvalidParameter("Invalid parameter: %s",
-            Category.CODE_ERROR, 4),
-        /**
-         * I/O error while writing to Writer object: %s
-         */
-        IOError("I/O error while writing to Writer object: %s", Category
-            .INTERNAL_ERROR, 5);
-        	
+	/**
+	 * Error codes for servlet exceptions.
+	 * 
+	 * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+	 */
+	public enum Code {
+		/**
+		 * Unknown AJAX action: %s.
+		 */
+		UnknownAction("Unknown AJAX action: %s.", Category.CODE_ERROR, 1),
+		/**
+		 * Missing the following field: %s
+		 */
+		MISSING_PARAMETER("Missing the following request parameter: %s", Category.CODE_ERROR, 2),
+		/**
+		 * Missing upload image.
+		 */
+		NoUploadImage("Missing upload image.", Category.CODE_ERROR, 3),
+		/**
+		 * Invalid parameter: %s
+		 */
+		InvalidParameter("Invalid parameter: %s", Category.CODE_ERROR, 4),
+		/**
+		 * I/O error while writing to Writer object: %s
+		 */
+		IOError("I/O error while writing to Writer object: %s", Category.INTERNAL_ERROR, 5),
+		/**
+		 * Missing AJAX request handler for module %s
+		 */
+		MISSING_REQUEST_HANDLER("Missing AJAX request handler for module %s", Category.CODE_ERROR, 6);
 
-        /**
-         * Message of the exception.
-         */
-        private final String message;
+		/**
+		 * Message of the exception.
+		 */
+		private final String message;
 
-        /**
-         * Category of the exception.
-         */
-        private final Category category;
+		/**
+		 * Category of the exception.
+		 */
+		private final Category category;
 
-        /**
-         * Detail number of the exception.
-         */
-        private final int number;
+		/**
+		 * Detail number of the exception.
+		 */
+		private final int number;
 
-        /**
-         * Default constructor.
-         * @param message message.
-         * @param category category.
-         * @param detailNumber detail number.
-         */
-        private Code(final String message, final Category category,
-            final int detailNumber) {
-            this.message = message;
-            this.category = category;
-            this.number = detailNumber;
-        }
+		/**
+		 * Default constructor.
+		 * 
+		 * @param message
+		 *            message.
+		 * @param category
+		 *            category.
+		 * @param detailNumber
+		 *            detail number.
+		 */
+		private Code(final String message, final Category category, final int detailNumber) {
+			this.message = message;
+			this.category = category;
+			this.number = detailNumber;
+		}
 
 		public Category getCategory() {
 			return category;
@@ -157,5 +167,5 @@ public class AjaxException extends AbstractOXException {
 		public int getNumber() {
 			return number;
 		}
-    }	
+	}
 }
