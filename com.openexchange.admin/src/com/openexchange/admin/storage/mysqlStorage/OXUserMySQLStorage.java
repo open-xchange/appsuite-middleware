@@ -713,8 +713,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             NoSuchAlgorithmException, UnsupportedEncodingException {
         String passwd = null;
         if (user.getPasswordMech() == null) {
-            // TODO: configurable in AdminDaemon.properties
-            user.setPasswordMech(User.PASSWORDMECH.CRYPT);
+            final String pwmech = this.cache.getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA"); 
+            if( pwmech.equalsIgnoreCase("crypt") ) {
+                user.setPasswordMech(User.PASSWORDMECH.CRYPT);
+            } else if( pwmech.equalsIgnoreCase("sha") ) {
+                user.setPasswordMech(User.PASSWORDMECH.SHA);
+            } else {
+                log.warn("WARNING: unknown password mechanism " + pwmech + " using SHA");
+                user.setPasswordMech(User.PASSWORDMECH.SHA);
+            }
         }
         if (user.getPasswordMech() == User.PASSWORDMECH.CRYPT) {
             passwd = UnixCrypt.crypt(user.getPassword());

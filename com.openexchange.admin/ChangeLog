@@ -1,6 +1,7 @@
 * 2008-06-11 - choeger@open-xchange.com
 
  - Bugfix ID#11344 listuser fails with NoClassDefFoundError
+ - Bugfix ID#11405 unable to set the password mechanism on commandline
 
 * 2008-06-02 - manuel.kraft@open-xchange.com
 
