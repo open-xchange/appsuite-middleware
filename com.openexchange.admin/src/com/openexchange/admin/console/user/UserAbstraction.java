@@ -428,7 +428,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         allowedparametertypes.add(JAVA_LANG_BOOLEAN);
         allowedparametertypes.add(JAVA_UTIL_DATE);
         allowedparametertypes.add(JAVA_UTIL_TIME_ZONE);
-//        allowedparametertypes.add(PASSWORDMECH_CLASS);
+        allowedparametertypes.add(PASSWORDMECH_CLASS);
         
         // First we get all the getters of the user data class
         for (final Method method : theMethods) {
@@ -713,9 +713,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 } else if (methodandnames.getReturntype().equals(JAVA_UTIL_DATE)) {
                     final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "datevalue", methodandnames.getName(), true, false, true);
                     optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
-//                } else if (methodandnames.getReturntype().equals(PASSWORDMECH_CLASS)) {
-//                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "CRYPT/SHA", methodandnames.getName(), true, false, true);
-//                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
+                } else if (methodandnames.getReturntype().equals(PASSWORDMECH_CLASS)) {
+                    final Option option = setLongOpt(parser, methodandnames.getName().toLowerCase(), "CRYPT/SHA", methodandnames.getName(), true, false, true);
+                    optionsandmethods.add(new OptionAndMethod(methodandnames.getMethod(), option, methodandnames.getReturntype()));
                 }
             }            
         }
@@ -771,19 +771,19 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 if (null != value) {
                     optionAndMethod.getMethod().invoke(usr, value);
                 }
-//            } else if (optionAndMethod.getReturntype().equals(PASSWORDMECH_CLASS)) {
-//                final String value = (String)parser.getOptionValue(optionAndMethod.getOption());
-//                PASSWORDMECH pwmech = null;
-//                if (value.equalsIgnoreCase("sha")) {
-//                    pwmech = PASSWORDMECH.SHA;
-//                } else if (value.equalsIgnoreCase("crypt")) {
-//                    pwmech = PASSWORDMECH.CRYPT;
-//                } else {
-//                    throw new IllegalArgumentException("Argument for passwordmech is wrong.");
-//                }
-//                if (null != value) {
-//                    optionAndMethod.getMethod().invoke(usr, pwmech);
-//                }
+            } else if (optionAndMethod.getReturntype().equals(PASSWORDMECH_CLASS)) {
+                final String value = (String)parser.getOptionValue(optionAndMethod.getOption());
+                if( null != value ) {
+                    User.PASSWORDMECH pwmech = null;
+                    if (value.equalsIgnoreCase("sha")) {
+                        pwmech = User.PASSWORDMECH.SHA;
+                    } else if (value.equalsIgnoreCase("crypt")) {
+                        pwmech = User.PASSWORDMECH.CRYPT;
+                    } else {
+                        throw new IllegalArgumentException("Argument for passwordmech is wrong.");
+                    }
+                    optionAndMethod.getMethod().invoke(usr, pwmech);
+                }
             }
         }
     }
