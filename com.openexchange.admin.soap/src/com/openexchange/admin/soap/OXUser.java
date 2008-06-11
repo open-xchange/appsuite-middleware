@@ -48,13 +48,8 @@
  */
 package com.openexchange.admin.soap;
 
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
+import java.rmi.ConnectException;
 import java.rmi.RemoteException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -68,137 +63,145 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class OXUser implements OXUserInterface {
-    
-    private static final Log log = LogFactory.getLog(OXUser.class);    
-    
-    private final OXUserInterface oxUsr;
-    
-    private final String RMI_HOSTNAME = "rmi://localhost:1099/";
-    
-    public OXUser() throws MalformedURLException, RemoteException, NotBoundException {
-        super();
-        oxUsr = (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);
+public class OXUser extends OXSOAPRMIMapper implements OXUserInterface {
+
+    public OXUser() throws RemoteException {
+        super(OXUserInterface.class);
     }
 
-	public void change(Context ctx, User usrdata, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, NoSuchContextException,
-			InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-		
-		oxUsr.change(ctx, usrdata, auth);
-		
-	}
+    public void change(Context ctx, User usrdata, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        reconnect();
+        try {
+            ((OXUserInterface)rmistub).change(ctx, usrdata, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+    }
 
-	public void changeModuleAccess(Context ctx, User user,
-			UserModuleAccess moduleAccess, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, NoSuchContextException,
-			InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-		
-		oxUsr.changeModuleAccess(ctx, user, moduleAccess, auth);
-	}
+    public void changeModuleAccess(Context ctx, User user, UserModuleAccess moduleAccess, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        reconnect();
+        try {
+            ((OXUserInterface)rmistub).changeModuleAccess(ctx, user, moduleAccess, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+    }
 
-	public void changeModuleAccess(Context ctx, User user,
-			String access_combination_name, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, NoSuchContextException,
-			InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-		
-		oxUsr.changeModuleAccess(ctx, user, access_combination_name, auth);
-		
-	}
+    public void changeModuleAccess(Context ctx, User user, String access_combination_name, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        reconnect();
+        try {
+            ((OXUserInterface)rmistub).changeModuleAccess(ctx, user, access_combination_name, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+    }
 
-	public User create(Context ctx, User usrdata, UserModuleAccess access,
-			Credentials auth) throws RemoteException, StorageException,
-			InvalidCredentialsException, NoSuchContextException,
-			InvalidDataException, DatabaseUpdateException {
-		
-		return oxUsr.create(ctx, usrdata, access, auth);
-	}
+    public User create(Context ctx, User usrdata, UserModuleAccess access, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        reconnect();
+        try {
+            return ((OXUserInterface)rmistub).create(ctx, usrdata, access, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public User create(Context ctx, User usrdata,
-			String access_combination_name, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, NoSuchContextException,
-			InvalidDataException, DatabaseUpdateException {
-		
-		return oxUsr.create(ctx, usrdata, access_combination_name, auth);
-	}
+    public User create(Context ctx, User usrdata, String access_combination_name, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        reconnect();
+        try {
+            return ((OXUserInterface)rmistub).create(ctx, usrdata, access_combination_name, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public User create(Context ctx, User usrdata, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, NoSuchContextException,
-			InvalidDataException, DatabaseUpdateException {
-		
-		return oxUsr.create(ctx, usrdata, auth);
-	}
+    public User create(Context ctx, User usrdata, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        reconnect();
+        try {
+            return ((OXUserInterface)rmistub).create(ctx, usrdata, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public void delete(Context ctx, User[] users, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, NoSuchContextException,
-			InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-		
-		oxUsr.delete(ctx, users, auth);
-	}
+    public void delete(Context ctx, User[] users, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        reconnect();
+        try {
+            ((OXUserInterface)rmistub).delete(ctx, users, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+    }
 
-	public void delete(Context ctx, User user, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, NoSuchContextException,
-			InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-		
-		oxUsr.delete(ctx, user, auth);
-	}
+    public void delete(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        reconnect();
+        try {
+            ((OXUserInterface)rmistub).delete(ctx, user, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+    }
 
-	public String getAccessCombinationName(Context ctx, User user,
-			Credentials auth) throws RemoteException, StorageException,
-			InvalidCredentialsException, NoSuchContextException,
-			InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-		
-		return oxUsr.getAccessCombinationName(ctx, user, auth);
-	}
+    public String getAccessCombinationName(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        reconnect();
+        try {
+            return ((OXUserInterface)rmistub).getAccessCombinationName(ctx, user, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public User[] getData(Context ctx, User[] users, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, NoSuchContextException,
-			InvalidDataException, NoSuchUserException, DatabaseUpdateException {
-		
-		return oxUsr.getData(ctx, users, auth);
-	}
+    public User[] getData(Context ctx, User[] users, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
+        reconnect();
+        try {
+            return ((OXUserInterface)rmistub).getData(ctx, users, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public User getData(Context ctx, User user, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, NoSuchContextException,
-			InvalidDataException, NoSuchUserException, DatabaseUpdateException {
-		
-		return oxUsr.getData(ctx, user, auth);
-	}
+    public User getData(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
+        reconnect();
+        try {
+            return ((OXUserInterface)rmistub).getData(ctx, user, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public UserModuleAccess getModuleAccess(Context ctx, User user,
-			Credentials auth) throws RemoteException, StorageException,
-			InvalidCredentialsException, NoSuchContextException,
-			InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-		
-		return oxUsr.getModuleAccess(ctx, user, auth);
-	}
+    public UserModuleAccess getModuleAccess(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        reconnect();
+        try {
+            return ((OXUserInterface)rmistub).getModuleAccess(ctx, user, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public User[] list(Context ctx, String search_pattern, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, NoSuchContextException,
-			InvalidDataException, DatabaseUpdateException {
-		
-		return oxUsr.list(ctx, search_pattern, auth);
-	}
+    public User[] list(Context ctx, String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        reconnect();
+        try {
+            return ((OXUserInterface)rmistub).list(ctx, search_pattern, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public User[] listAll(Context ctx, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, NoSuchContextException,
-			InvalidDataException, DatabaseUpdateException {
-		
-		return oxUsr.listAll(ctx, auth);
-	}
+    public User[] listAll(Context ctx, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        reconnect();
+        try {
+            return ((OXUserInterface)rmistub).listAll(ctx, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	
-
-    
 }

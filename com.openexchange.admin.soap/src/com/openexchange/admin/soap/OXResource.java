@@ -48,13 +48,8 @@
  */
 package com.openexchange.admin.soap;
 
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
+import java.rmi.ConnectException;
 import java.rmi.RemoteException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.rmi.OXResourceInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -67,49 +62,88 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class OXResource implements OXResourceInterface {
-    
-    private static final Log log = LogFactory.getLog(OXResource.class);    
-    
-    private final OXResourceInterface oxRes;
-    
-    private final String RMI_HOSTNAME = "rmi://localhost:1099/";
-    
-    public OXResource() throws MalformedURLException, RemoteException, NotBoundException {
-        super();
-        oxRes = (OXResourceInterface) Naming.lookup(RMI_HOSTNAME + OXResourceInterface.RMI_NAME);
+public class OXResource extends OXSOAPRMIMapper implements OXResourceInterface {
+
+    public OXResource() throws RemoteException {
+        super(OXResourceInterface.class);
     }
 
     public void change(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        oxRes.change(ctx, res, auth);
+        reconnect();
+        try {
+            ((OXResourceInterface)rmistub).change(ctx, res, auth);
+        } catch( ConnectException e) {
+            reconnect(true);
+        }
     }
-    
+
     public Resource create(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
-       return oxRes.create(ctx, res, auth);
+        reconnect();
+        try {
+            return ((OXResourceInterface)rmistub).create(ctx, res, auth);
+        } catch( ConnectException e) {
+            reconnect(true);
+        }
+        return null;
     }
-    
+
     public void delete(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        oxRes.delete(ctx, res, auth);
+        reconnect();
+        try {
+            ((OXResourceInterface)rmistub).delete(ctx, res, auth);
+        } catch( ConnectException e) {
+            reconnect(true);
+        }
     }
-    
+
     public Resource getData(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        return oxRes.getData(ctx, res, auth);
+        reconnect();
+        try {
+            return ((OXResourceInterface)rmistub).getData(ctx, res, auth);
+        } catch( ConnectException e) {
+            reconnect(true);
+        }
+        return null;
     }
-    
+
     public Resource[] getData(final Context ctx, final Resource[] resources, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
-        return oxRes.getData(ctx, resources, auth);
+        reconnect();
+        try {
+            return ((OXResourceInterface)rmistub).getData(ctx, resources, auth);
+        } catch( ConnectException e) {
+            reconnect(true);
+        }
+        return null;
     }
-    
+
     public Resource[] list(final Context ctx, final String pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
-        return oxRes.list(ctx, pattern, auth);
+        reconnect();
+        try {
+            return ((OXResourceInterface)rmistub).list(ctx, pattern, auth);
+        } catch( ConnectException e) {
+            reconnect(true);
+        }
+        return null;
     }
-    
+
     public Resource[] listAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
-        return list(ctx, "*", auth);
+        reconnect();
+        try {
+            return list(ctx, "*", auth);
+        } catch( ConnectException e) {
+            reconnect(true);
+        }
+        return null;
     }
 
     public Resource get(Context ctx, Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        return oxRes.getData(ctx, res, auth);
+        reconnect();
+        try {
+            return ((OXResourceInterface)rmistub).getData(ctx, res, auth);
+        } catch( ConnectException e) {
+            reconnect(true);
+        }
+        return null;
     }
 
 }

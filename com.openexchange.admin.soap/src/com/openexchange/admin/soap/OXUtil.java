@@ -48,13 +48,8 @@
  */
 package com.openexchange.admin.soap;
 
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
+import java.rmi.ConnectException;
 import java.rmi.RemoteException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -66,142 +61,184 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class OXUtil implements OXUtilInterface {
-    
-    private static final Log log = LogFactory.getLog(OXUtil.class);    
-    
-    private final OXUtilInterface oxUtl;
-    
-    private final String RMI_HOSTNAME = "rmi://localhost:1099/";
-    
-    public OXUtil() throws MalformedURLException, RemoteException, NotBoundException {
-        super();
-        oxUtl = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
+public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
+
+    public OXUtil() throws RemoteException {
+        super(OXUtilInterface.class);
     }
 
-	public void changeDatabase(Database db, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, InvalidDataException {
-		
-		oxUtl.changeDatabase(db, auth);
-	}
+    public void changeDatabase(Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        reconnect();
+        try {
+            ((OXUtilInterface)rmistub).changeDatabase(db, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+    }
 
-	public void changeFilestore(Filestore fstore, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, InvalidDataException {
-		
-		oxUtl.changeFilestore(fstore, auth);
-	}
+    public void changeFilestore(Filestore fstore, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        reconnect();
+        try {
+            ((OXUtilInterface)rmistub).changeFilestore(fstore, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+    }
 
-	public MaintenanceReason createMaintenanceReason(MaintenanceReason reason,
-			Credentials auth) throws RemoteException, StorageException,
-			InvalidCredentialsException, InvalidDataException {
-		
-		return oxUtl.createMaintenanceReason(reason, auth);
-	}
+    public MaintenanceReason createMaintenanceReason(MaintenanceReason reason, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        reconnect();
+        try {
+            return ((OXUtilInterface)rmistub).createMaintenanceReason(reason, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public void deleteMaintenanceReason(MaintenanceReason[] reasons,
-			Credentials auth) throws RemoteException, StorageException,
-			InvalidCredentialsException, InvalidDataException {
-		 oxUtl.deleteMaintenanceReason(reasons, auth);
-		
-	}
+    public void deleteMaintenanceReason(MaintenanceReason[] reasons, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        reconnect();
+        try {
+            ((OXUtilInterface)rmistub).deleteMaintenanceReason(reasons, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+    }
 
-	public Database[] listAllDatabase(Credentials auth) throws RemoteException,
-			StorageException, InvalidCredentialsException, InvalidDataException {
-		
-		return oxUtl.listAllDatabase(auth);
-	}
+    public Database[] listAllDatabase(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        reconnect();
+        try {
+            return ((OXUtilInterface)rmistub).listAllDatabase(auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public Filestore[] listAllFilestore(Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, InvalidDataException {
-		
-		return oxUtl.listAllFilestore(auth);
-	}
+    public Filestore[] listAllFilestore(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        reconnect();
+        try {
+            return ((OXUtilInterface)rmistub).listAllFilestore(auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public MaintenanceReason[] listAllMaintenanceReason(Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, InvalidDataException {
-		
-		return oxUtl.listAllMaintenanceReason(auth);
-	}
+    public MaintenanceReason[] listAllMaintenanceReason(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        reconnect();
+        try {
+            return ((OXUtilInterface)rmistub).listAllMaintenanceReason(auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public Server[] listAllServer(Credentials auth) throws RemoteException,
-			StorageException, InvalidCredentialsException, InvalidDataException {
-		
-		return oxUtl.listAllServer(auth);
-	}
+    public Server[] listAllServer(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        reconnect();
+        try {
+            return ((OXUtilInterface)rmistub).listAllServer(auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public Database[] listDatabase(String search_pattern, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, InvalidDataException {
-		
-		return oxUtl.listDatabase(search_pattern, auth);
-	}
+    public Database[] listDatabase(String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        reconnect();
+        try {
+            return ((OXUtilInterface)rmistub).listDatabase(search_pattern, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public Filestore[] listFilestore(String search_pattern, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, InvalidDataException {
-		
-		return oxUtl.listFilestore(search_pattern, auth);
-	}
+    public Filestore[] listFilestore(String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        reconnect();
+        try {
+            return ((OXUtilInterface)rmistub).listFilestore(search_pattern, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public MaintenanceReason[] listMaintenanceReason(String search_pattern,
-			Credentials auth) throws RemoteException, StorageException,
-			InvalidCredentialsException, InvalidDataException {
-		
-		return oxUtl.listMaintenanceReason(search_pattern, auth);
-	}
+    public MaintenanceReason[] listMaintenanceReason(String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        reconnect();
+        try {
+            return ((OXUtilInterface)rmistub).listMaintenanceReason(search_pattern, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public Server[] listServer(String search_pattern, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, InvalidDataException {
-		
-		return oxUtl.listServer(search_pattern, auth);
-	}
+    public Server[] listServer(String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        reconnect();
+        try {
+            return ((OXUtilInterface)rmistub).listServer(search_pattern, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public Database registerDatabase(Database db, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, InvalidDataException {
-		
-		return oxUtl.registerDatabase(db, auth);
-	}
+    public Database registerDatabase(Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        reconnect();
+        try {
+            return ((OXUtilInterface)rmistub).registerDatabase(db, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public Filestore registerFilestore(Filestore fstore, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, InvalidDataException {
-		
-		return oxUtl.registerFilestore(fstore, auth);
-	}
+    public Filestore registerFilestore(Filestore fstore, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        reconnect();
+        try {
+            return ((OXUtilInterface)rmistub).registerFilestore(fstore, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public Server registerServer(Server srv, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, InvalidDataException {
-		
-		return oxUtl.registerServer(srv, auth);
-	}
+    public Server registerServer(Server srv, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        reconnect();
+        try {
+            return ((OXUtilInterface)rmistub).registerServer(srv, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+        return null;
+    }
 
-	public void unregisterDatabase(Database dbhandle, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, InvalidDataException {
-		
-		oxUtl.unregisterDatabase(dbhandle, auth);
-	}
+    public void unregisterDatabase(Database dbhandle, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        reconnect();
+        try {
+            ((OXUtilInterface)rmistub).unregisterDatabase(dbhandle, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+    }
 
-	public void unregisterFilestore(Filestore store, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, InvalidDataException {
-		
-		oxUtl.unregisterFilestore(store, auth);
-	}
+    public void unregisterFilestore(Filestore store, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        reconnect();
+        try {
+            ((OXUtilInterface)rmistub).unregisterFilestore(store, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+    }
 
-	public void unregisterServer(Server serv, Credentials auth)
-			throws RemoteException, StorageException,
-			InvalidCredentialsException, InvalidDataException {
-		oxUtl.unregisterServer(serv, auth);
-		
-	}
+    public void unregisterServer(Server serv, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        reconnect();
+        try {
+            ((OXUtilInterface)rmistub).unregisterServer(serv, auth);
+        } catch (ConnectException e) {
+            reconnect(true);
+        }
+    }
 
-    
 }
