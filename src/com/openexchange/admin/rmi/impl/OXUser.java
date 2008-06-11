@@ -1123,10 +1123,16 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         }
 
-        if (newuser.getPassword() != null && newuser.getPassword().trim().length() == 0) {
+        boolean pwchange = newuser.getPassword() != null;
+        
+        if (pwchange && newuser.getPassword().trim().length() == 0) {
             throw new InvalidDataException("Empty password is not allowed");
         }
-        
+
+        if( newuser.getPasswordMech() != null && !pwchange ) {
+            throw new InvalidDataException("When changing password mechanism, the password string must also be supplied");
+        }
+            
         if (!tool.isContextAdmin(ctx, newuser.getId())) {
             // checks below throw InvalidDataException
             checkValidEmailsInUserObject(newuser);
