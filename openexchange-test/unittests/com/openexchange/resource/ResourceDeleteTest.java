@@ -64,6 +64,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.internal.ResourceCreate;
 import com.openexchange.resource.internal.ResourceDelete;
+import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.test.AjaxInit;

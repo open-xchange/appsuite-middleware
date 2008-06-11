@@ -60,7 +60,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
-import com.openexchange.resource.ResourceStorage;
+import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
 

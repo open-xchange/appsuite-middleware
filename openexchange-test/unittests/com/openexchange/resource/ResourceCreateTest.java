@@ -282,6 +282,10 @@ public final class ResourceCreateTest extends TestCase {
 	}
 
 	public void testResourceFail006() {
+		if (user.getId() == admin.getId()) {
+			System.out.println("Logged in with context's admin. Skipping test with non-admin user");
+			return;
+		}
 		final Resource resource = new Resource();
 		resource.setAvailable(true);
 		resource.setDescription("My test resource");
