@@ -62,10 +62,7 @@ import com.openexchange.group.GroupException.Code;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
 import com.openexchange.tools.sql.DBUtils;
@@ -168,6 +165,9 @@ public final class Create {
         } catch (final SQLException e) {
             DBUtils.rollback(con);
             throw new GroupException(Code.SQL_ERROR, e);
+        } catch (final GroupException e) {
+            DBUtils.rollback(con);
+            throw e;
         } finally {
             try {
                 con.setAutoCommit(true);
@@ -189,6 +189,7 @@ public final class Create {
                 Types.PRINCIPAL, con);
             group.setIdentifier(id);
             storage.insertGroup(ctx, con, group);
+            storage.insertMember(ctx, con, group, group.getMember());
         } catch (final SQLException e) {
             throw new GroupException(Code.SQL_ERROR, e);
         }            
@@ -199,19 +200,6 @@ public final class Create {
      * @throws GroupException 
      */
     private void propagate() throws GroupException {
-        invalidateUser();
-    }
-
-    private void invalidateUser() throws GroupException {
-        try {
-            final UserStorage storage = UserStorage.getInstance();
-            for (final int member : group.getMember()) {
-                storage.invalidateUser(ctx, member);
-            }
-        } catch (final LdapException e) {
-            throw new GroupException(e);
-        } catch (final UserException e) {
-            throw new GroupException(e);
-        }
+        GroupTools.invalidateUser(ctx, group.getMember());
     }
 }

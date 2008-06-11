@@ -50,6 +50,7 @@
 package com.openexchange.group.internal;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.getIN;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -69,7 +70,6 @@ import com.openexchange.groupware.ldap.LdapUtility;
 import com.openexchange.groupware.ldap.LdapException.Code;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.DBPoolingException;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * This class implements the group storage using a relational database.
@@ -107,21 +107,41 @@ public class RdbGroupStorage extends GroupStorage {
         } catch (final SQLException e) {
             throw new GroupException(GroupException.Code.SQL_ERROR, e);
         } finally {
-            DBUtils.closeSQLStuff(null, stmt);
+            closeSQLStuff(null, stmt);
         }
-        insertGroupMember(ctx, con, group);
     }
 
     /**
-     * Inserts groups members.
-     * @param ctx Context.
-     * @param con writable database connection.
-     * @param group group.
-     * @throws GroupException if some problem occurs.
+     * {@inheritDoc}
      */
-    private void insertGroupMember(final Context ctx, final Connection con,
-        final Group group) throws GroupException {
-        if (0 == group.getMember().length) {
+    @Override
+    public void updateGroup(Context ctx, Connection con, Group group)
+        throws GroupException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE groups SET identifier=?,"
+                + "displayName=?,lastModified=? WHERE cid=? and id=?");
+            int pos = 1;
+            stmt.setString(pos++, group.getSimpleName());
+            stmt.setString(pos++, group.getDisplayName());
+            stmt.setLong(pos++, group.getLastModified().getTime());
+            stmt.setInt(pos++, ctx.getContextId());
+            stmt.setInt(pos++, group.getIdentifier());
+            stmt.execute();
+        } catch (final SQLException e) {
+            throw new GroupException(GroupException.Code.SQL_ERROR, e);
+        } finally {
+            closeSQLStuff(null, stmt);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void insertMember(final Context ctx, final Connection con,
+        final Group group, final int[] members) throws GroupException {
+        if (0 == members.length) {
             return;
         }
         PreparedStatement stmt = null;
@@ -130,7 +150,6 @@ public class RdbGroupStorage extends GroupStorage {
                 + "member) VALUES (?,?,?)");
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, group.getIdentifier());
-            final int[] members = group.getMember();
             for (int member : members) {
                 stmt.setInt(3, member);
                 stmt.addBatch();
@@ -139,10 +158,35 @@ public class RdbGroupStorage extends GroupStorage {
         } catch (final SQLException e) {
             throw new GroupException(GroupException.Code.SQL_ERROR, e);
         } finally {
-            DBUtils.closeSQLStuff(null, stmt);
+            closeSQLStuff(null, stmt);
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void deleteMember(final Context ctx, final Connection con,
+        final Group group, final int[] members) throws GroupException {
+        if (0 == members.length) {
+            return;
+        }
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(getIN("DELETE FROM groups_member "
+                + "WHERE cid=? AND id=? AND member IN (", members.length));
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, group.getIdentifier());
+            for (int member : members) {
+                stmt.setInt(3, member);
+            }
+            stmt.execute();
+        } catch (final SQLException e) {
+            throw new GroupException(GroupException.Code.SQL_ERROR, e);
+        } finally {
+            closeSQLStuff(null, stmt);
+        }
+    }
     /**
      * {@inheritDoc}
      */

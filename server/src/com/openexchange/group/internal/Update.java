@@ -49,18 +49,36 @@
 
 package com.openexchange.group.internal;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupException;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.group.GroupException.Code;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
- *
+ * This class integrates all operations to be done if a group is updated.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 final class Update {
+
+    /**
+     * Logger.
+     */
+    private static final Log LOG = LogFactory.getLog(Update.class);
 
     /**
      * Context.
@@ -82,6 +100,18 @@ final class Update {
      */
     private final GroupStorage storage = GroupStorage.getInstance();
 
+    private Group orig;
+
+    /**
+     * Added members.
+     */
+    private final Set<Integer> addedMembers = new HashSet<Integer>();
+
+    /**
+     * Removed members.
+     */
+    private final Set<Integer> removedMembers = new HashSet<Integer>();
+
     /**
      * Default constructor.
      */
@@ -90,6 +120,17 @@ final class Update {
         this.ctx = ctx;
         this.user = user;
         this.changed = group;
+    }
+
+    Group getOrig() throws GroupException {
+        if (null == orig) {
+            try {
+                storage.getGroup(changed.getIdentifier(), ctx);
+            } catch (final LdapException e) {
+                throw new GroupException(e);
+            }
+        }
+        return orig;
     }
 
     void perform() throws GroupException {
@@ -117,22 +158,111 @@ final class Update {
         Logic.doMembersExist(ctx, changed);
     }
 
-    private void prepare() {
+    private void prepare() throws GroupException {
+        prepareFields();
         prepareMember();
     }
 
-    private void prepareMember() {
-        // FIXME continue here
+    private void prepareFields() throws GroupException {
+        if (!changed.isDisplayNameSet()) {
+            changed.setDisplayName(getOrig().getDisplayName());
+        }
+        if (!changed.isSimpleNameSet()) {
+            changed.setSimpleName(getOrig().getSimpleName());
+        }
     }
 
-    private void update() {
-        // TODO Auto-generated method stub
-        
+    /**
+     * Remember if the method prepareMember has already been executed.
+     */
+    private boolean memberPrepared = false;
+
+    private void prepareMember() throws GroupException {
+        if (memberPrepared) {
+            return;
+        }
+        if (changed.isMemberSet()) {
+            for (final int member : changed.getMember()) {
+                addedMembers.add(Integer.valueOf(member));
+            }
+            for (final int member : getOrig().getMember()) {
+                addedMembers.remove(Integer.valueOf(member));
+                removedMembers.add(Integer.valueOf(member));
+            }
+            for (final int member : changed.getMember()) {
+                removedMembers.remove(Integer.valueOf(member));
+            }
+        } else {
+            changed.setMember(getOrig().getMember());
+        }
+        memberPrepared = true;
     }
 
-    private void propagate() {
-        // TODO Auto-generated method stub
-        
+    /**
+     * Updates all data for the group in the database.
+     * @throws GroupException
+     */
+    private void update() throws GroupException {
+        final Connection con;
+        try {
+            con = DBPool.pickupWriteable(ctx);
+        } catch (final DBPoolingException e) {
+            throw new GroupException(Code.NO_CONNECTION, e);
+        }
+        try {
+            con.setAutoCommit(false);
+            update(con);
+            con.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw new GroupException(Code.SQL_ERROR, e);
+        } finally {
+            try {
+                con.setAutoCommit(true);
+            } catch (SQLException e) {
+                LOG.error("Problem setting autocommit to true.", e);
+            }
+            DBPool.closeWriterSilent(ctx, con);
+        }
     }
 
+    /**
+     * This method calls the plain update methods.
+     * @param con writable database connection in transaction or not.
+     * @throws GroupException if some problem occurs.
+     */
+    public void update(final Connection con) throws GroupException {
+        storage.updateGroup(ctx, con, changed);
+        int[] tmp = new int[addedMembers.size()];
+        Iterator<Integer> iter = addedMembers.iterator();
+        for (int i = 0; iter.hasNext(); i++) {
+            tmp[i] = iter.next().intValue();
+        }
+        storage.insertMember(ctx, con, changed, tmp);
+        tmp = new int[removedMembers.size()];
+        iter = removedMembers.iterator();
+        for (int i = 0; iter.hasNext(); i++) {
+            tmp[i] = iter.next().intValue();
+        }
+        storage.deleteMember(ctx, con, changed, tmp);
+    }
+
+
+    /**
+     * Inform the rest of the system about the new group.
+     * @throws GroupException 
+     */
+    private void propagate() throws GroupException {
+        int[] tmp = new int[addedMembers.size() + removedMembers.size()];
+        Iterator<Integer> iter = addedMembers.iterator();
+        int i = 0;
+        while (iter.hasNext()) {
+            tmp[i++] = iter.next().intValue();
+        }
+        iter = removedMembers.iterator();
+        while (iter.hasNext()) {
+            tmp[i++] = iter.next().intValue();
+        }
+        GroupTools.invalidateUser(ctx, tmp);
+    }
 }

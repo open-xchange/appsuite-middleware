@@ -74,7 +74,7 @@ public abstract class GroupStorage {
     }
 
     /**
-     * This method inserts a group and its members into the storage.
+     * This method inserts a group without its members into the storage.
      * @param ctx Context.
      * @param con writable database connection.
      * @param group group to insert.
@@ -82,6 +82,22 @@ public abstract class GroupStorage {
      */
     public abstract void insertGroup(Context ctx, Connection con, Group group)
         throws GroupException;
+
+    /**
+     * This method updates group field in the storage.
+     * @param ctx Context.
+     * @param con writable database connection.
+     * @param group group with fields to update.
+     * @throws GroupException if updating does not finish successfully.
+     */
+    public abstract void updateGroup(Context ctx, Connection con, Group group)
+        throws GroupException;
+
+    public abstract void insertMember(Context ctx, Connection con, Group group,
+        int[] members) throws GroupException;
+
+    public abstract void deleteMember(Context ctx, Connection con, Group group,
+        int[] members) throws GroupException;
 
     /**
      * Reads a group from the persistent storage.

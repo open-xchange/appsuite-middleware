@@ -52,6 +52,7 @@ package com.openexchange.group.internal;
 import java.util.Date;
 
 import com.openexchange.group.Group;
+import com.openexchange.group.GroupException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.ldap.LdapException;
@@ -101,5 +102,19 @@ public final class GroupTools {
     static {
         GROUP_ZERO = new Group();
         GROUP_ZERO.setIdentifier(0);
+    }
+
+    static final void invalidateUser(final Context ctx, final int[] userIds)
+        throws GroupException {
+        try {
+            final UserStorage storage = UserStorage.getInstance();
+            for (final int member : userIds) {
+                storage.invalidateUser(ctx, member);
+            }
+        } catch (final LdapException e) {
+            throw new GroupException(e);
+        } catch (final UserException e) {
+            throw new GroupException(e);
+        }
     }
 }
