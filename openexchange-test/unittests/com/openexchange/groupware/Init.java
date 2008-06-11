@@ -26,6 +26,8 @@ import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.push.udp.EventAdminService;
+import com.openexchange.resource.ResourceService;
+import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -175,6 +177,7 @@ public final class Init {
 		startAndInjectMonitoringBundle();
 		startAndInjectSessiondBundle();
 		startAndInjectPushUDPBundle();
+		startAndInjectResourceService();
 	}
 
 	private static void startAndInjectI18NBundle() throws FileNotFoundException {
@@ -222,6 +225,10 @@ public final class Init {
 				DefaultSpamHandler.getInstance());
 		SpamHandlerRegistry.registerSpamHandler(SpamAssassinSpamHandler.getInstance().getSpamHandlerName(),
 				SpamAssassinSpamHandler.getInstance());
+	}
+
+	private static void startAndInjectResourceService() {
+		ServerServiceRegistry.getInstance().addService(ResourceService.class, new ResourceServiceImpl());
 	}
 
 	private static void startAndInjectSessiondBundle() throws Exception {

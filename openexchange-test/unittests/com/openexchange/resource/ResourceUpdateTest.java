@@ -63,6 +63,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.internal.ResourceCreate;
 import com.openexchange.resource.internal.ResourceUpdate;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.test.AjaxInit;
 
 import junit.framework.TestCase;
@@ -162,7 +163,7 @@ public final class ResourceUpdateTest extends TestCase {
 			resource.setSimpleName("Foobar-12334");
 			resource.setDisplayName("The Foobar Display Name");
 			resource.setAvailable(false);
-			new ResourceUpdate(admin, ctx, resource).perform();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource);
 			/*
 			 * Load via storage API
 			 */
@@ -185,7 +186,7 @@ public final class ResourceUpdateTest extends TestCase {
 			resource.setDisplayName("The Foobar Display Name qwertz");
 			resource.setMail("foobar@somewhere.org");
 			resource.setAvailable(true);
-			new ResourceUpdate(admin, ctx, resource).perform();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource);
 			/*
 			 * Load via storage API
 			 */
@@ -219,9 +220,9 @@ public final class ResourceUpdateTest extends TestCase {
 		try {
 			final Resource resource = createDummyResource(admin, ctx);
 			id = resource.getIdentifier();
-			
+
 			resource.setSimpleName("öäüß");
-			new ResourceUpdate(admin, ctx, resource).perform();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource);
 
 			fail("Update succeeded with invalid string identifier");
 		} catch (final ResourceException e) {
@@ -237,9 +238,9 @@ public final class ResourceUpdateTest extends TestCase {
 		try {
 			final Resource resource = createDummyResource(admin, ctx);
 			id = resource.getIdentifier();
-			
+
 			resource.setMail("mytestresourcesomewhere.com");
-			new ResourceUpdate(admin, ctx, resource).perform();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource);
 
 			fail("Update succeeded with invalid email address");
 		} catch (final ResourceException e) {
@@ -255,9 +256,9 @@ public final class ResourceUpdateTest extends TestCase {
 		try {
 			final Resource resource = createDummyResource(admin, ctx);
 			id = resource.getIdentifier();
-			
+
 			resource.setSimpleName("foobarfoobar");
-			new ResourceUpdate(user, ctx, resource).perform();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(user, ctx, resource);
 
 			fail("Update succeeded with non-admin caller");
 		} catch (final ResourceException e) {
@@ -273,9 +274,9 @@ public final class ResourceUpdateTest extends TestCase {
 		try {
 			final Resource resource = createDummyResource(admin, ctx);
 			id = resource.getIdentifier();
-			
+
 			resource.setSimpleName(null);
-			new ResourceUpdate(admin, ctx, resource).perform();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).update(admin, ctx, resource);
 
 			fail("Update succeeded with missing mandatory field");
 		} catch (final ResourceException e) {
@@ -293,7 +294,7 @@ public final class ResourceUpdateTest extends TestCase {
 		resource.setDisplayName("MyTestResource");
 		resource.setMail("mytestresource@somewhere.com");
 		resource.setSimpleName("M-T-R");
-		new ResourceCreate(admin, ctx, resource).perform();
+		ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
 		return resource;
 	}
 

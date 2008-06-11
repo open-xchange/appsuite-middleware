@@ -65,6 +65,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.resource.internal.ResourceCreate;
 import com.openexchange.resource.internal.ResourceDelete;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.test.AjaxInit;
 
 /**
@@ -156,7 +157,7 @@ public final class ResourceDeleteTest extends TestCase {
 					.getLastModified() != null
 					&& resource.getLastModified().getTime() < System.currentTimeMillis());
 
-			new ResourceDelete(admin, ctx, resource).perform();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).delete(admin, ctx, resource);
 
 			LdapException expected = null;
 			try {
@@ -183,7 +184,7 @@ public final class ResourceDeleteTest extends TestCase {
 			final Resource resource = createDummyResource(admin, ctx);
 			id = resource.getIdentifier();
 
-			new ResourceDelete(user, ctx, resource).perform();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).delete(user, ctx, resource);
 
 			fail("Delete succeeded with non-admin caller");
 		} catch (final ResourceException e) {
@@ -201,7 +202,7 @@ public final class ResourceDeleteTest extends TestCase {
 			id = resource.getIdentifier();
 
 			resource.setIdentifier(-1);
-			new ResourceDelete(admin, ctx, resource).perform();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).delete(admin, ctx, resource);
 
 			fail("Delete succeeded with missing mandatory field");
 		} catch (final ResourceException e) {
@@ -219,7 +220,7 @@ public final class ResourceDeleteTest extends TestCase {
 		resource.setDisplayName("MyTestResource");
 		resource.setMail("mytestresource@somewhere.com");
 		resource.setSimpleName("M-T-R");
-		new ResourceCreate(admin, ctx, resource).perform();
+		ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
 		return resource;
 	}
 

@@ -53,17 +53,17 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import junit.framework.TestCase;
+
 import com.openexchange.database.Database;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.resource.internal.ResourceCreate;
 import com.openexchange.server.impl.DBPoolingException;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.test.AjaxInit;
-
-import junit.framework.TestCase;
 
 /**
  * {@link ResourceCreateTest}
@@ -152,8 +152,7 @@ public final class ResourceCreateTest extends TestCase {
 		resource.setSimpleName("M-T-R");
 		int id = -1;
 		try {
-			final ResourceCreate resourceCreate = new ResourceCreate(admin, ctx, resource);
-			resourceCreate.perform();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
 			id = resource.getIdentifier();
 
 			assertTrue("Invalid ID detected: " + id + ". ID has not been properly set through creation", id != -1);
@@ -181,8 +180,7 @@ public final class ResourceCreateTest extends TestCase {
 		resource.setSimpleName("M-T-Röäü");
 		int id = -1;
 		try {
-			final ResourceCreate resourceCreate = new ResourceCreate(admin, ctx, resource);
-			resourceCreate.perform();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
 			id = resource.getIdentifier();
 
 			fail("Creation succeeded with invalid string identifier");
@@ -203,8 +201,7 @@ public final class ResourceCreateTest extends TestCase {
 		resource.setSimpleName("M-T-R");
 		int id = -1;
 		try {
-			final ResourceCreate resourceCreate = new ResourceCreate(admin, ctx, resource);
-			resourceCreate.perform();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
 			id = resource.getIdentifier();
 
 			fail("Creation succeeded with invalid email address");
@@ -233,14 +230,12 @@ public final class ResourceCreateTest extends TestCase {
 
 		int id = -1;
 		try {
-			ResourceCreate resourceCreate = new ResourceCreate(admin, ctx, resource);
-			resourceCreate.perform();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
 			id = resource.getIdentifier();
 
 			assertTrue("Invalid identifier detected: " + id, id != -1);
 
-			resourceCreate = new ResourceCreate(admin, ctx, duplicate);
-			resourceCreate.perform();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, duplicate);
 
 			fail("Creation succeeded with duplicate identifier");
 
@@ -269,14 +264,12 @@ public final class ResourceCreateTest extends TestCase {
 
 		int id = -1;
 		try {
-			ResourceCreate resourceCreate = new ResourceCreate(admin, ctx, resource);
-			resourceCreate.perform();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
 			id = resource.getIdentifier();
 
 			assertTrue("Invalid identifier detected: " + id, id != -1);
 
-			resourceCreate = new ResourceCreate(admin, ctx, duplicate);
-			resourceCreate.perform();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, duplicate);
 
 			fail("Creation succeeded with duplicate email address");
 
@@ -297,8 +290,7 @@ public final class ResourceCreateTest extends TestCase {
 		resource.setSimpleName("M-T-R");
 		int id = -1;
 		try {
-			final ResourceCreate resourceCreate = new ResourceCreate(user, ctx, resource);
-			resourceCreate.perform();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(user, ctx, resource);
 			id = resource.getIdentifier();
 
 			fail("Creation succeeded with non-admin caller");
@@ -319,8 +311,7 @@ public final class ResourceCreateTest extends TestCase {
 		resource.setSimpleName(null);
 		int id = -1;
 		try {
-			final ResourceCreate resourceCreate = new ResourceCreate(admin, ctx, resource);
-			resourceCreate.perform();
+			ServerServiceRegistry.getInstance().getService(ResourceService.class).create(admin, ctx, resource);
 			id = resource.getIdentifier();
 
 			fail("Creation succeeded with missing mandatory field");
@@ -329,7 +320,6 @@ public final class ResourceCreateTest extends TestCase {
 		} finally {
 			deleteResource(id, ctx.getContextId());
 		}
-
 	}
 
 	private static final String SQL_DELETE = "DELETE FROM resource WHERE cid = ? AND id = ?";
