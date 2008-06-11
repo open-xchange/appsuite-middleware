@@ -118,7 +118,7 @@ public final class ServerRequestHandlerRegistry {
 	 * 
 	 * @param moduleName
 	 *            The module name
-	 * @return The request handle if present; otherwise <code>null</code>
+	 * @return The request handler if present; otherwise <code>null</code>
 	 */
 	public AJAXRequestHandler getService(final String moduleName) {
 		return requestHandlers.get(moduleName);
