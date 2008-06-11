@@ -76,6 +76,7 @@ postFix() {
       local pfile=/opt/open-xchange/etc/admindaemon/AdminDaemon.properties
       ox_exists_property ACCESS_COMBINATIONS_FILE $pfile || {
 	  v_setprop ACCESS_COMBINATIONS_FILE '$PWD/etc/admindaemon/ModuleAccessDefinitions.properties' $pfile
+      }
       ox_exists_property DEFAULT_PASSWORD_MECHANISM $pfile || {
 	  v_setprop DEFAULT_PASSWORD_MECHANISM SHA $pfile
       }
