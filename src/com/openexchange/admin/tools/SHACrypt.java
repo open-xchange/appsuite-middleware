@@ -65,7 +65,7 @@ public class SHACrypt {
         md.update(salt);
 
         final byte[] pwhash = md.digest();
-        final String ret = (new sun.misc.BASE64Encoder().encode(pwhash));
+        final String ret = com.openexchange.tools.encoding.Base64.encode(pwhash);
 
         return ret;
     }
