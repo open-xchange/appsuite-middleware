@@ -232,11 +232,11 @@ public abstract class DataParser {
 		final String tmp = parseString(jsonObj, name);
 		
 		if (tmp == null) {
-			throw new AjaxException(AjaxException.Code.NoField, name);
+			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
 		}
 
 		if (tmp != null && tmp.length() == 0) {
-			throw new AjaxException(AjaxException.Code.NoField, name);
+			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
 		}
 		return tmp;
 	}
@@ -244,7 +244,7 @@ public abstract class DataParser {
 	public static int checkInt(final JSONObject jsonObj, final String name) throws OXMandatoryFieldException, OXJSONException, JSONException, AjaxException {
 		final String tmp = checkString(jsonObj, name);
 		if (tmp != null && tmp.length() == 0) {
-			throw new AjaxException(AjaxException.Code.NoField, name);
+			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
 		}
 		
         try {
@@ -257,7 +257,7 @@ public abstract class DataParser {
 	public static boolean checkBoolean(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, AjaxException {
 		final String tmp = jsonObj.getString(name);
 		if (tmp != null && tmp.length() == 0) {
-			throw new AjaxException(AjaxException.Code.NoField, name);
+			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
 		}
 		return Boolean.parseBoolean(tmp);
 	}
@@ -265,7 +265,7 @@ public abstract class DataParser {
 	public static float checkFloat(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, OXJSONException, AjaxException {
 		final String tmp = jsonObj.getString(name);
 		if (tmp != null && tmp.length() == 0) {
-			throw new AjaxException(AjaxException.Code.NoField, name);
+			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
 		}
 		
 		try {
@@ -278,7 +278,7 @@ public abstract class DataParser {
 	public static Date checkDate(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, OXJSONException, AjaxException {
 		final String tmp = parseString(jsonObj, name);
 		if (tmp == null) {
-			throw new AjaxException(AjaxException.Code.NoField, name);
+			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
 		}
 		
 		try {
@@ -291,7 +291,7 @@ public abstract class DataParser {
 	public static Date checkTime(final JSONObject jsonObj, final String name, final TimeZone timeZone) throws JSONException, OXMandatoryFieldException, OXJSONException, AjaxException {
 		final String tmp = parseString(jsonObj, name);
 		if (tmp == null) {
-			throw new AjaxException(AjaxException.Code.NoField, name);
+			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
 		}
 		try {
 			final Date d = new Date(Long.parseLong(tmp));
@@ -306,7 +306,7 @@ public abstract class DataParser {
 	public static JSONObject checkJSONObject(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, AjaxException {
 		final JSONObject tmp = jsonObj.getJSONObject(name);
 		if (tmp == null) {
-			throw new AjaxException(AjaxException.Code.NoField, name);
+			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
 		}
 		return tmp;
 	}
@@ -314,7 +314,7 @@ public abstract class DataParser {
 	public static JSONArray checkJSONArray(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, AjaxException {
 		final JSONArray tmp = jsonObj.getJSONArray(name);
 		if (tmp == null) {
-			throw new AjaxException(AjaxException.Code.NoField, name);
+			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
 		}
 		return tmp;
 	}
@@ -384,7 +384,7 @@ public abstract class DataParser {
 	public static int[] checkJSONIntArray(final JSONObject jsonObj, final String name) throws JSONException, OXMandatoryFieldException, OXJSONException, AjaxException {
 		final int[] i = parseJSONIntArray(jsonObj, name);
 		if (i == null) {
-			throw new AjaxException(AjaxException.Code.NoField, name);
+			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, name);
 		}
 		
 		return i;

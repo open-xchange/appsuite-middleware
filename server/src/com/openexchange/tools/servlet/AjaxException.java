@@ -47,13 +47,10 @@
  *
  */
 
-
-
 package com.openexchange.tools.servlet;
 
 import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.EnumComponent;
-import com.openexchange.groupware.AbstractOXException.Category;
 
 /**
  * Exception for problems in servlets.
@@ -102,7 +99,7 @@ public class AjaxException extends AbstractOXException {
         /**
          * Missing the following field: %s
          */    
-        NoField("Missing the following field: %s",
+        MISSING_PARAMETER("Missing the following request parameter: %s",
         	Category.CODE_ERROR, 2),
         /**
          * Missing upload image.
@@ -118,11 +115,7 @@ public class AjaxException extends AbstractOXException {
          * I/O error while writing to Writer object: %s
          */
         IOError("I/O error while writing to Writer object: %s", Category
-            .INTERNAL_ERROR, 5),
-        /**
-         * Missing parameter: %s
-         */
-        MissingParameter("Missing parameter: %s", Category.CODE_ERROR, 6);
+            .INTERNAL_ERROR, 5);
         	
 
         /**

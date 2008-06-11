@@ -185,13 +185,13 @@ public class Multiple extends SessionServlet {
 		if (jsonObj.has(MODULE)) {
 			module = DataParser.checkString(jsonObj, MODULE);
 		} else {
-			throw new AjaxException(AjaxException.Code.NoField, MODULE);
+			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, MODULE);
 		}
 
 		if (jsonObj.has(PARAMETER_ACTION)) {
 			action = DataParser.checkString(jsonObj, PARAMETER_ACTION);
 		} else {
-			throw new AjaxException(AjaxException.Code.NoField, PARAMETER_ACTION);
+			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION);
 		}
 
 		final OXJSONWriter jWriter = new OXJSONWriter(respArr);

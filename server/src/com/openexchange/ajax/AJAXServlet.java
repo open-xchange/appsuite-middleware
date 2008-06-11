@@ -664,7 +664,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 		if (action != null) {
 			return action;
 		}
-		throw new OXConflictException(new AjaxException(AjaxException.Code.MissingParameter, PARAMETER_ACTION));
+		throw new OXConflictException(new AjaxException(AjaxException.Code.MISSING_PARAMETER, PARAMETER_ACTION));
 	}
 
 	/**

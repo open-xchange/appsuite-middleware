@@ -229,7 +229,7 @@ public class AppointmentRequest {
 		appointmentParser.parse(appointmentObj, jData);
 		
 		if (!appointmentObj.containsParentFolderID()) {
-			throw new AjaxException(AjaxException.Code.NoField, AJAXServlet.PARAMETER_FOLDERID);
+			throw new AjaxException(AjaxException.Code.MISSING_PARAMETER, AJAXServlet.PARAMETER_FOLDERID);
 		}
 		
 		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessionObj);
